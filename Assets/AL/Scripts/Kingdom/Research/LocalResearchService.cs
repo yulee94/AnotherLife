@@ -1,0 +1,91 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using AL.Core;
+using AL.Core.Interfaces;
+using AL.Data.Runtime;
+using UnityEngine;
+
+namespace AL.Services.Local
+{
+    public class LocalResearchService : IResearchService
+    {
+        private readonly ISaveGameService _saveGameService;
+        private readonly IResourceService _resourceService;
+
+        public LocalResearchService(ISaveGameService saveGameService, IResourceService resourceService)
+        {
+            _saveGameService = saveGameService;
+            _resourceService = resourceService;
+        }
+
+        private List<ResearchState> Researches => _saveGameService.CurrentSave?.Researches;
+
+        public ResearchState GetResearchState(string researchId)
+        {
+            if (Researches == null) return null;
+            var state = Researches.FirstOrDefault(r => r.ResearchId == researchId);
+            if (state == null)
+            {
+                state = new ResearchState { ResearchId = researchId, Level = 0 };
+                Researches.Add(state);
+            }
+            return state;
+        }
+
+        public IEnumerable<ResearchState> GetAllResearchStates()
+        {
+            return Researches ?? Enumerable.Empty<ResearchState>();
+        }
+
+        public void StartResearch(string researchId)
+        {
+            var state = GetResearchState(researchId);
+            if (state.IsResearching) return;
+
+            long cost = (state.Level + 1) * 200; // Gold cost
+            if (_resourceService.ConsumeResource(ResourceType.Gold, cost))
+            {
+                state.IsResearching = true;
+                state.CompleteTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ((state.Level + 1) * 15);
+                Debug.Log($"Started research for {researchId}. Completes in {(state.Level + 1) * 15}s");
+            }
+        }
+
+        public void CompleteResearch(string researchId)
+        {
+            var state = GetResearchState(researchId);
+            if (!state.IsResearching) return;
+
+            if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= state.CompleteTimestamp)
+            {
+                state.Level++;
+                state.IsResearching = false;
+
+                // Trigger Quest Update
+                ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.ResearchTech, 1);
+
+                _saveGameService.Save();
+                Debug.Log($"Research {researchId} completed. Level: {state.Level}");
+            }
+        }
+
+        public float GetStatBonus(StatType statType)
+        {
+            // Simple mapping for prototype
+            // Attack -> "Steel Forging"
+            // Defense -> "Plate Armor"
+
+            string techId = statType switch {
+                StatType.Attack => "Steel Forging",
+                StatType.Defense => "Plate Armor",
+                _ => null
+            };
+
+            if (techId == null) return 0f;
+
+            var state = GetResearchState(techId);
+            return state.Level * 0.05f; // 5% bonus per level
+        }
+    }
+}
