@@ -182,6 +182,7 @@ namespace AL.ChampionMode.AI
             ApplyFaceMarkPose(model.transform, faceMark);
             ApplyWeaponPose(model.transform, weaponStyle);
             ApplyBotColors(model, realmId, realmColor, index);
+            model.GetComponent<ProceduralChampionMotion>()?.Rebind();
         }
 
         private static void ApplyFaceMarkPose(Transform root, string faceMark)

@@ -20,6 +20,8 @@ namespace AL.ChampionMode.Customization
             EnsureArmor(root);
             EnsureWeapons(root);
             EnsureAnchors(root);
+            var motion = champion.GetComponent<ProceduralChampionMotion>() ?? champion.AddComponent<ProceduralChampionMotion>();
+            motion.Rebind();
         }
 
         private static void EnsureSkin(Transform root)
@@ -354,6 +356,184 @@ namespace AL.ChampionMode.Customization
             }
 
             renderer.material = material;
+        }
+    }
+
+    public sealed class ProceduralChampionMotion : MonoBehaviour
+    {
+        private struct MotionPart
+        {
+            public Transform Transform;
+            public Vector3 BasePosition;
+            public Quaternion BaseRotation;
+        }
+
+        private MotionPart _chest;
+        private MotionPart _head;
+        private MotionPart _neck;
+        private MotionPart _leftShoulder;
+        private MotionPart _rightShoulder;
+        private MotionPart _leftGlove;
+        private MotionPart _rightGlove;
+        private MotionPart _weaponMain;
+        private MotionPart _weaponOff;
+        private MotionPart[] _capeParts = System.Array.Empty<MotionPart>();
+        private MotionPart[] _hairParts = System.Array.Empty<MotionPart>();
+        private MotionPart[] _robeParts = System.Array.Empty<MotionPart>();
+        private Vector3 _lastWorldPosition;
+        private float _moveAmount;
+        private float _seed;
+        private bool _isBound;
+
+        public void Rebind()
+        {
+            _chest = Bind("ChestArmor");
+            _head = Bind("Skin_Head");
+            _neck = Bind("Skin_Neck");
+            _leftShoulder = Bind("Shoulder_L");
+            _rightShoulder = Bind("Shoulder_R");
+            _leftGlove = Bind("Glove_L");
+            _rightGlove = Bind("Glove_R");
+            _weaponMain = Bind("Weapon_Main");
+            _weaponOff = Bind("Weapon_Off");
+            _capeParts = BindExact("Cape", "Cape_LeftFold", "Cape_RightFold", "Cape_InnerShadow", "Cape_LeftEdge", "Cape_RightEdge", "Cape_Seam_Center", "Cape_Hem", "Cape_Rune_L", "Cape_Rune_R");
+            _hairParts = BindContaining("Hair_Long", "Hair_Braid", "Hair_Topknot_Tail");
+            _robeParts = BindContaining("RobePanel", "RobeBackPanel", "RobeSleeve");
+            _lastWorldPosition = transform.position;
+            _seed = Mathf.Abs(GetInstanceID() * 0.173f) % 10f;
+            _isBound = true;
+        }
+
+        private void LateUpdate()
+        {
+            if (!_isBound)
+            {
+                Rebind();
+            }
+
+            float deltaTime = Mathf.Max(Time.deltaTime, 0.0001f);
+            Vector3 delta = transform.position - _lastWorldPosition;
+            delta.y = 0f;
+            _lastWorldPosition = transform.position;
+
+            float targetMove = Mathf.Clamp01(delta.magnitude / deltaTime / 4.2f);
+            _moveAmount = Mathf.Lerp(_moveAmount, targetMove, deltaTime * 5.5f);
+
+            float time = Time.time + _seed;
+            float idle = Mathf.Sin(time * 1.22f);
+            float breath = Mathf.Sin(time * 1.72f) * (0.008f + _moveAmount * 0.004f);
+            float stride = Mathf.Sin(time * Mathf.Lerp(1.65f, 8.2f, _moveAmount));
+            float counterStride = Mathf.Sin(time * Mathf.Lerp(1.65f, 8.2f, _moveAmount) + Mathf.PI);
+            float sway = Mathf.Sin(time * 0.86f + _seed) * 0.45f;
+
+            Apply(_chest, new Vector3(0f, breath, 0f), new Vector3(-_moveAmount * 3.5f, 0f, sway + stride * _moveAmount * 2.2f));
+            Apply(_neck, new Vector3(0f, breath * 0.65f, 0f), new Vector3(idle * 0.5f, 0f, sway * 0.35f));
+            Apply(_head, new Vector3(0f, breath * 1.4f, 0f), new Vector3(idle * 1.1f, sway * 2.4f, sway * 0.45f));
+
+            Apply(_leftShoulder, Vector3.zero, new Vector3(counterStride * _moveAmount * 9.0f, 0f, -4f - _moveAmount * 3.0f));
+            Apply(_rightShoulder, Vector3.zero, new Vector3(stride * _moveAmount * 9.0f, 0f, 4f + _moveAmount * 3.0f));
+            Apply(_leftGlove, new Vector3(0f, counterStride * _moveAmount * 0.025f, 0f), new Vector3(counterStride * _moveAmount * 12.0f, 0f, -2.0f));
+            Apply(_rightGlove, new Vector3(0f, stride * _moveAmount * 0.025f, 0f), new Vector3(stride * _moveAmount * 12.0f, 0f, 2.0f));
+
+            Apply(_weaponMain, new Vector3(0f, stride * _moveAmount * 0.030f + breath * 0.5f, 0f), new Vector3(stride * _moveAmount * 5.0f, 0f, idle * 1.0f + _moveAmount * 2.5f));
+            Apply(_weaponOff, new Vector3(0f, counterStride * _moveAmount * 0.026f + breath * 0.4f, 0f), new Vector3(counterStride * _moveAmount * 5.0f, 0f, -idle * 1.0f - _moveAmount * 2.5f));
+
+            ApplyGroup(_capeParts, new Vector3(0f, breath * 0.7f, -0.020f - _moveAmount * 0.050f), new Vector3(5.0f + _moveAmount * 8.0f + idle * 1.8f, 0f, stride * _moveAmount * 2.2f));
+            ApplyGroup(_hairParts, new Vector3(0f, breath * 0.45f, -_moveAmount * 0.012f), new Vector3(idle * 1.4f + _moveAmount * 2.0f, 0f, sway * 0.8f));
+            ApplyGroup(_robeParts, new Vector3(0f, breath * 0.5f, -_moveAmount * 0.026f), new Vector3(2.0f + _moveAmount * 5.5f, 0f, stride * _moveAmount * 1.4f));
+        }
+
+        private MotionPart Bind(string partName)
+        {
+            Transform part = FindPart(partName);
+            return new MotionPart
+            {
+                Transform = part,
+                BasePosition = part != null ? part.localPosition : Vector3.zero,
+                BaseRotation = part != null ? part.localRotation : Quaternion.identity
+            };
+        }
+
+        private MotionPart[] BindContaining(params string[] names)
+        {
+            var parts = new System.Collections.Generic.List<MotionPart>();
+            foreach (Transform child in GetComponentsInChildren<Transform>(true))
+            {
+                for (int i = 0; i < names.Length; i++)
+                {
+                    if (child.name.Contains(names[i]))
+                    {
+                        parts.Add(new MotionPart
+                        {
+                            Transform = child,
+                            BasePosition = child.localPosition,
+                            BaseRotation = child.localRotation
+                        });
+                        break;
+                    }
+                }
+            }
+
+            return parts.ToArray();
+        }
+
+        private MotionPart[] BindExact(params string[] names)
+        {
+            var parts = new System.Collections.Generic.List<MotionPart>();
+            for (int i = 0; i < names.Length; i++)
+            {
+                Transform part = FindPart(names[i]);
+                if (part == null)
+                {
+                    continue;
+                }
+
+                parts.Add(new MotionPart
+                {
+                    Transform = part,
+                    BasePosition = part.localPosition,
+                    BaseRotation = part.localRotation
+                });
+            }
+
+            return parts.ToArray();
+        }
+
+        private Transform FindPart(string partName)
+        {
+            foreach (Transform child in GetComponentsInChildren<Transform>(true))
+            {
+                if (child.name == partName)
+                {
+                    return child;
+                }
+            }
+
+            return null;
+        }
+
+        private static void Apply(MotionPart part, Vector3 positionOffset, Vector3 eulerOffset)
+        {
+            if (part.Transform == null)
+            {
+                return;
+            }
+
+            part.Transform.localPosition = part.BasePosition + positionOffset;
+            part.Transform.localRotation = part.BaseRotation * Quaternion.Euler(eulerOffset);
+        }
+
+        private static void ApplyGroup(MotionPart[] parts, Vector3 positionOffset, Vector3 eulerOffset)
+        {
+            if (parts == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                Apply(parts[i], positionOffset, eulerOffset);
+            }
         }
     }
 }
