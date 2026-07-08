@@ -143,9 +143,21 @@ namespace AL.UI.Kingdom
 
         private void RunTestBattle()
         {
+            RealmId attackerRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+            if (attackerRealm == RealmId.None)
+            {
+                attackerRealm = RealmId.Crownlands;
+            }
+
             var request = new BattleRequest
             {
-                Type = BattleType.PvE,
+                Type = BattleType.Warzone,
+                RandomSeed = 20260708,
+                AttackerRealm = attackerRealm,
+                DefenderRealm = RealmId.Umbral,
+                AttackerMorale = 1.08f,
+                DefenderMorale = 0.96f,
+                TerrainId = "border_forest_road",
                 AttackerTroops = new List<TroopStack>
                 {
                     new TroopStack { Type = TroopType.Infantry, Count = 80 },
@@ -163,8 +175,10 @@ namespace AL.UI.Kingdom
             _battleText.text =
                 "Battle Report\n" +
                 $"{report.Summary}\n" +
-                $"Attacker losses: {FormatLosses(report.AttackerLosses)}\n" +
-                $"Defender losses: {FormatLosses(report.DefenderLosses)}";
+                $"Rounds: {report.Rounds}  Seed: {request.RandomSeed}\n" +
+                $"Attacker losses: {FormatDetailedLosses(report.AttackerDetailedLosses)}\n" +
+                $"Defender losses: {FormatDetailedLosses(report.DefenderDetailedLosses)}\n" +
+                $"Loot: {FormatLoot(report.Loot)}";
             SetMessage(report.IsWinner ? "Victory report generated." : "Defeat report generated.");
         }
 
@@ -466,6 +480,51 @@ namespace AL.UI.Kingdom
                 }
 
                 builder.Append(loss.Type).Append(" ").Append(loss.Count);
+            }
+
+            return builder.Length == 0 ? "none" : builder.ToString();
+        }
+
+        private static string FormatDetailedLosses(IEnumerable<TroopLossReport> losses)
+        {
+            if (losses == null)
+            {
+                return "none";
+            }
+
+            var builder = new StringBuilder();
+            foreach (var loss in losses)
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append("; ");
+                }
+
+                builder.Append(loss.Type)
+                    .Append(" K").Append(loss.Killed)
+                    .Append(" W").Append(loss.Wounded)
+                    .Append(" S").Append(loss.Survived);
+            }
+
+            return builder.Length == 0 ? "none" : builder.ToString();
+        }
+
+        private static string FormatLoot(IEnumerable<ResourceData> loot)
+        {
+            if (loot == null)
+            {
+                return "none";
+            }
+
+            var builder = new StringBuilder();
+            foreach (var item in loot)
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append(", ");
+                }
+
+                builder.Append(item.Type).Append(" ").Append(item.Amount);
             }
 
             return builder.Length == 0 ? "none" : builder.ToString();
