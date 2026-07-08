@@ -8,6 +8,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -42,6 +43,8 @@ namespace AL.ChampionMode
         private Image _bossHealthFill;
         private Image _bossBreakFill;
         private Image _bossStateStrip;
+        private Image _damageFlashImage;
+        private readonly Image[] _lowHealthEdges = new Image[4];
         private GameObject _defeatPanelObject;
         private Text _appearanceSummaryText;
         private readonly Image[] _appearanceSwatches = new Image[5];
@@ -51,6 +54,8 @@ namespace AL.ChampionMode
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private float _encounterStartTime;
+        private float _lastHealthRatio = 1f;
+        private Coroutine _damageFlashRoutine;
         private bool _guardBreakObserved;
         private bool _enrageObserved;
         private bool _encounterClearShown;
@@ -71,6 +76,8 @@ namespace AL.ChampionMode
             {
                 return;
             }
+
+            RefreshLowHealthFeedback();
 
             _skillHudTimer += Time.deltaTime;
             if (_skillHudTimer >= 0.25f)
@@ -409,6 +416,8 @@ namespace AL.ChampionMode
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
                        Resources.GetBuiltinResource<Font>("Arial.ttf");
 
+            CreateDamageFeedbackLayer(canvasObject.transform);
+
             var playerPanel = CreateHudPanel(canvasObject.transform, "PlayerFrame", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -28f), new Vector2(430f, 154f), new Color(0.035f, 0.045f, 0.060f, 0.84f));
             CreateText(playerPanel.transform, font, "CHAMPION STATUS", 18, new Vector2(18f, -16f), new Vector2(250f, 24f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             _healthText = CreateText(playerPanel.transform, font, "HP 1000 / 1000", 18, new Vector2(18f, -48f), new Vector2(220f, 24f), TextAnchor.UpperLeft);
@@ -521,12 +530,19 @@ namespace AL.ChampionMode
 
         private void UpdateHealthText(float current, float max)
         {
+            float healthRatio = max > 0f ? Mathf.Clamp01(current / max) : 0f;
             if (_healthText != null)
             {
                 _healthText.text = $"HP {Mathf.CeilToInt(current)} / {Mathf.CeilToInt(max)}";
             }
 
-            SetFillAmount(_healthFill, max > 0f ? current / max : 0f);
+            if (healthRatio < _lastHealthRatio - 0.002f)
+            {
+                PlayDamageFlash(_lastHealthRatio - healthRatio);
+            }
+
+            _lastHealthRatio = healthRatio;
+            SetFillAmount(_healthFill, healthRatio);
         }
 
         private void UpdateManaText(float current, float max)
@@ -875,6 +891,81 @@ namespace AL.ChampionMode
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(_playerController, moveInput);
         }
 
+        private void CreateDamageFeedbackLayer(Transform parent)
+        {
+            _damageFlashImage = CreateUiImage(parent, "DamageFlash", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero, new Color(1f, 0.04f, 0.02f, 0f));
+            _lowHealthEdges[0] = CreateUiImage(parent, "LowHealthTop", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, 28f), new Color(1f, 0.04f, 0.02f, 0f));
+            _lowHealthEdges[1] = CreateUiImage(parent, "LowHealthBottom", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, 34f), new Color(1f, 0.04f, 0.02f, 0f));
+            _lowHealthEdges[2] = CreateUiImage(parent, "LowHealthLeft", new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(28f, 0f), new Color(1f, 0.04f, 0.02f, 0f));
+            _lowHealthEdges[3] = CreateUiImage(parent, "LowHealthRight", new Vector2(1f, 0f), new Vector2(1f, 1f), new Vector2(1f, 0.5f), Vector2.zero, new Vector2(28f, 0f), new Color(1f, 0.04f, 0.02f, 0f));
+        }
+
+        private void PlayDamageFlash(float healthDelta)
+        {
+            if (_damageFlashImage == null)
+            {
+                return;
+            }
+
+            if (_damageFlashRoutine != null)
+            {
+                StopCoroutine(_damageFlashRoutine);
+            }
+
+            float peakAlpha = Mathf.Clamp(0.16f + healthDelta * 0.9f, 0.16f, 0.42f);
+            _damageFlashRoutine = StartCoroutine(DamageFlashRoutine(peakAlpha));
+        }
+
+        private IEnumerator DamageFlashRoutine(float peakAlpha)
+        {
+            float elapsed = 0f;
+            const float duration = 0.32f;
+            while (elapsed < duration)
+            {
+                float t = Mathf.Clamp01(elapsed / duration);
+                SetImageAlpha(_damageFlashImage, peakAlpha * Mathf.Pow(1f - t, 2f));
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            SetImageAlpha(_damageFlashImage, 0f);
+            _damageFlashRoutine = null;
+        }
+
+        private void RefreshLowHealthFeedback()
+        {
+            if (_lowHealthEdges[0] == null)
+            {
+                return;
+            }
+
+            if (_encounterFailed || _playerCombat == null || _playerCombat.MaxHealth <= 0f)
+            {
+                SetLowHealthEdgeAlpha(0f);
+                return;
+            }
+
+            float ratio = Mathf.Clamp01(_playerCombat.CurrentHealth / _playerCombat.MaxHealth);
+            const float threshold = 0.30f;
+            if (ratio > threshold)
+            {
+                SetLowHealthEdgeAlpha(0f);
+                return;
+            }
+
+            float danger = 1f - ratio / threshold;
+            float pulse = (Mathf.Sin(Time.unscaledTime * 6.2f) + 1f) * 0.5f;
+            SetLowHealthEdgeAlpha(Mathf.Lerp(0.08f, 0.24f, pulse) * danger);
+        }
+
+        private void SetLowHealthEdgeAlpha(float alpha)
+        {
+            foreach (var edge in _lowHealthEdges)
+            {
+                SetImageAlpha(edge, alpha);
+            }
+        }
+
         private void CreateDefeatPanel(Transform parent, Font font)
         {
             var panel = CreateHudPanel(parent, "DefeatRetryPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 220f), new Color(0.035f, 0.018f, 0.018f, 0.92f));
@@ -898,6 +989,17 @@ namespace AL.ChampionMode
             outline.effectColor = new Color(0.25f, 0.34f, 0.44f, 0.45f);
             outline.effectDistance = new Vector2(1.3f, -1.3f);
             SetRect(panelObject.GetComponent<RectTransform>(), anchorMin, anchorMax, pivot, anchoredPosition, sizeDelta);
+            return image;
+        }
+
+        private static Image CreateUiImage(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Color color)
+        {
+            var imageObject = new GameObject(name);
+            imageObject.transform.SetParent(parent, false);
+            var image = imageObject.AddComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            SetRect(imageObject.GetComponent<RectTransform>(), anchorMin, anchorMax, pivot, anchoredPosition, sizeDelta);
             return image;
         }
 
@@ -972,6 +1074,18 @@ namespace AL.ChampionMode
             {
                 image.fillAmount = Mathf.Clamp01(amount);
             }
+        }
+
+        private static void SetImageAlpha(Image image, float alpha)
+        {
+            if (image == null)
+            {
+                return;
+            }
+
+            var color = image.color;
+            color.a = Mathf.Clamp01(alpha);
+            image.color = color;
         }
 
         private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)

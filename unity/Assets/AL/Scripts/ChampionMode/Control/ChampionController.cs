@@ -181,6 +181,7 @@ namespace AL.ChampionMode.Control
                     CreateHitVFX(hitCollider.transform.position);
                     SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
                     SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
+                    SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
                     RuntimeCombatAudio.PlayImpact();
 
                     Destroy(hitCollider.gameObject);

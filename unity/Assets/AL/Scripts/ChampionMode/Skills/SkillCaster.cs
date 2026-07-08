@@ -187,6 +187,7 @@ namespace AL.ChampionMode.Skills
         {
             Collider[] hitColliders = Physics.OverlapSphere(center, radius);
             int destroyedDummies = 0;
+            bool hitAnyTarget = false;
             var damagedBots = new HashSet<int>();
             var damagedBosses = new HashSet<int>();
 
@@ -199,6 +200,7 @@ namespace AL.ChampionMode.Skills
 
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
                 {
+                    hitAnyTarget = true;
                     SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
                     RuntimeCombatAudio.PlayImpact();
                     Object.Destroy(hitCollider.gameObject);
@@ -209,6 +211,7 @@ namespace AL.ChampionMode.Skills
                 var boss = hitCollider.GetComponentInParent<BossDummyAI>();
                 if (boss != null && damagedBosses.Add(boss.GetInstanceID()))
                 {
+                    hitAnyTarget = true;
                     boss.TakeDamage(power);
                     continue;
                 }
@@ -216,6 +219,7 @@ namespace AL.ChampionMode.Skills
                 var bot = hitCollider.GetComponentInParent<BotChampionAI>();
                 if (bot != null && bot.IsAlive && bot.RealmId != attackerRealm && damagedBots.Add(bot.GetInstanceID()))
                 {
+                    hitAnyTarget = true;
                     float botDamage = power * Mathf.Max(0f, botDamageMultiplier);
                     bot.TakeDamage(botDamage, attackerRealm);
                     SkillEffectFactory.SpawnFloatingCombatText(bot.transform.position + Vector3.up * 1.85f, Mathf.CeilToInt(botDamage).ToString(), new Color(1f, 0.62f, 0.22f), 0.24f, 0.82f);
@@ -227,6 +231,12 @@ namespace AL.ChampionMode.Skills
             {
                 _controller ??= GetComponent<ChampionController>();
                 _controller?.CheckVictory(destroyedDummies);
+            }
+
+            if (hitAnyTarget)
+            {
+                bool heavyImpact = power >= 200f;
+                SkillEffectFactory.RequestHitPause(heavyImpact ? 0.060f : 0.040f, heavyImpact ? 0.08f : 0.12f);
             }
         }
 
