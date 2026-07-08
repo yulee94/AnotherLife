@@ -1135,6 +1135,7 @@ namespace AL.ChampionMode.Customization
 
                 string objectName = renderer.gameObject.name.ToLowerInvariant();
                 bool isSkinShadow = objectName.Contains("skin_shadow");
+                bool isArmorShadow = objectName.Contains("armor_shadow") || objectName.Contains("battlewear");
                 bool isLip = objectName.Contains("lowerlip");
                 bool isHair = objectName.Contains("hair") || objectName.Contains("brow");
                 bool isSkin = objectName.Contains("skin") || objectName.Contains("ear");
@@ -1204,30 +1205,32 @@ namespace AL.ChampionMode.Customization
                     ? Color.Lerp(Color.white, eye, 0.18f)
                     : isSkinShadow
                     ? Color.Lerp(skin, Color.black, 0.38f)
-                    : isLip
-                        ? Color.Lerp(skin, new Color(0.58f, 0.32f, 0.30f), 0.24f)
-                        : isParchment
-                            ? Color.Lerp(new Color(0.82f, 0.76f, 0.58f), accent, 0.12f)
-                            : isBrightMetal
-                                ? Color.Lerp(Color.white, primary, 0.16f)
-                                : isHair
-                                    ? hair
-                                    : isSkin
-                                        ? skin
-                                        : isEye
-                                            ? eye
-                                            : isAccent
-                                                ? accent
-                                                : isFabric
-                                                    ? Color.Lerp(primary, accent, 0.45f)
-                                                    : isLeather
-                                                        ? Color.Lerp(primary, new Color(0.16f, 0.10f, 0.06f), 0.64f)
-                                                        : isMetal
-                                                            ? Color.Lerp(primary, Color.white, 0.22f)
-                                                            : primary;
+                    : isArmorShadow
+                        ? Color.Lerp(primary, Color.black, 0.46f)
+                        : isLip
+                            ? Color.Lerp(skin, new Color(0.58f, 0.32f, 0.30f), 0.24f)
+                            : isParchment
+                                ? Color.Lerp(new Color(0.82f, 0.76f, 0.58f), accent, 0.12f)
+                                : isBrightMetal
+                                    ? Color.Lerp(Color.white, primary, 0.16f)
+                                    : isHair
+                                        ? hair
+                                        : isSkin
+                                            ? skin
+                                            : isEye
+                                                ? eye
+                                                : isAccent
+                                                    ? accent
+                                                    : isFabric
+                                                        ? Color.Lerp(primary, accent, 0.45f)
+                                                        : isLeather
+                                                            ? Color.Lerp(primary, new Color(0.16f, 0.10f, 0.06f), 0.64f)
+                                                            : isMetal
+                                                                ? Color.Lerp(primary, Color.white, 0.22f)
+                                                                : primary;
 
-                float metallic = isBrightMetal ? 0.58f : isMetal ? 0.46f : isAccent ? 0.26f : isLeather ? 0.06f : 0f;
-                float smoothness = isBrightMetal ? 0.78f : isEyeGlint ? 0.88f : isEye || isAccent ? 0.72f : isMetal ? 0.60f : isSkin ? 0.30f : isHair ? 0.36f : 0.46f;
+                float metallic = isArmorShadow ? 0.30f : isBrightMetal ? 0.58f : isMetal ? 0.46f : isAccent ? 0.26f : isLeather ? 0.06f : 0f;
+                float smoothness = isArmorShadow ? 0.38f : isBrightMetal ? 0.78f : isEyeGlint ? 0.88f : isEye || isAccent ? 0.72f : isMetal ? 0.60f : isSkin ? 0.30f : isHair ? 0.36f : 0.46f;
                 float emissionStrength = isEye
                     ? isEyeGlint ? 0.42f : 0.22f
                     : objectName.Contains("orb") || objectName.Contains("crystal") || objectName.Contains("backattachment_core") || objectName.Contains("gem") || objectName.Contains("rune") || objectName.Contains("coreline") || objectName.Contains("impactcore") || objectName.Contains("orbitstone") || objectName.Contains("commandseal")
