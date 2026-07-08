@@ -1,3 +1,6 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
@@ -8,6 +11,8 @@ namespace AL.ChampionMode.Customization
     public class ChampionCustomizationController : MonoBehaviour
     {
         private Renderer[] _renderers;
+        private CharacterCustomizationCatalogData _catalog;
+        private bool _catalogLoadStarted;
 
         private static readonly string[] BodyPresets =
         {
@@ -88,11 +93,16 @@ namespace AL.ChampionMode.Customization
         {
             ProceduralChampionModelBuilder.EnsureModel(gameObject);
             RefreshRendererCache();
+            TryApplySharedCatalog();
         }
 
         private void Start()
         {
             ApplySavedCustomization();
+            if (_catalog == null && !_catalogLoadStarted)
+            {
+                StartCoroutine(ApplySharedCatalogAsync());
+            }
         }
 
         public void ApplySavedCustomization()
@@ -131,7 +141,7 @@ namespace AL.ChampionMode.Customization
             }
 
             Color current = new Color(state.PrimaryR, state.PrimaryG, state.PrimaryB);
-            Color next = NextColor(current, PrimaryPalette);
+            Color next = NextColor(current, GetPrimaryPalette());
             state.PrimaryR = next.r;
             state.PrimaryG = next.g;
             state.PrimaryB = next.b;
@@ -147,7 +157,7 @@ namespace AL.ChampionMode.Customization
             }
 
             Color current = new Color(state.HairR, state.HairG, state.HairB);
-            Color next = NextColor(current, HairPalette);
+            Color next = NextColor(current, GetHairPalette());
             state.HairR = next.r;
             state.HairG = next.g;
             state.HairB = next.b;
@@ -163,7 +173,7 @@ namespace AL.ChampionMode.Customization
             }
 
             Color current = new Color(state.SkinR, state.SkinG, state.SkinB);
-            Color next = NextColor(current, SkinPalette);
+            Color next = NextColor(current, GetSkinPalette());
             state.SkinR = next.r;
             state.SkinG = next.g;
             state.SkinB = next.b;
@@ -179,7 +189,7 @@ namespace AL.ChampionMode.Customization
             }
 
             Color current = new Color(state.EyeR, state.EyeG, state.EyeB);
-            Color next = NextColor(current, EyePalette);
+            Color next = NextColor(current, GetEyePalette());
             state.EyeR = next.r;
             state.EyeG = next.g;
             state.EyeB = next.b;
@@ -195,7 +205,7 @@ namespace AL.ChampionMode.Customization
             }
 
             Color current = new Color(state.AccentR, state.AccentG, state.AccentB);
-            Color next = NextColor(current, AccentPalette);
+            Color next = NextColor(current, GetAccentPalette());
             state.AccentR = next.r;
             state.AccentG = next.g;
             state.AccentB = next.b;
@@ -210,7 +220,7 @@ namespace AL.ChampionMode.Customization
                 return;
             }
 
-            state.BodyPresetId = NextId(state.BodyPresetId, BodyPresets, "average");
+            state.BodyPresetId = NextId(state.BodyPresetId, GetBodyPresetIds(), "average");
             SaveAndApply();
         }
 
@@ -222,7 +232,7 @@ namespace AL.ChampionMode.Customization
                 return;
             }
 
-            state.HairStyleId = NextId(state.HairStyleId, HairStyles, "short");
+            state.HairStyleId = NextId(state.HairStyleId, GetHairStyleIds(), "short");
             SaveAndApply();
         }
 
@@ -234,7 +244,7 @@ namespace AL.ChampionMode.Customization
                 return;
             }
 
-            state.ArmorStyleId = NextId(state.ArmorStyleId, ArmorStyles, "realm_basic");
+            state.ArmorStyleId = NextId(state.ArmorStyleId, GetArmorStyleIds(), "realm_basic");
             SaveAndApply();
         }
 
@@ -246,7 +256,7 @@ namespace AL.ChampionMode.Customization
                 return;
             }
 
-            state.FaceMarkId = NextId(state.FaceMarkId, FaceMarks, "none");
+            state.FaceMarkId = NextId(state.FaceMarkId, GetFaceMarkIds(), "none");
             SaveAndApply();
         }
 
@@ -258,7 +268,7 @@ namespace AL.ChampionMode.Customization
                 return;
             }
 
-            state.WeaponStyleId = NextId(state.WeaponStyleId, WeaponStyles, "sword");
+            state.WeaponStyleId = NextId(state.WeaponStyleId, GetWeaponStyleIds(), "sword");
             SaveAndApply();
         }
 
@@ -270,7 +280,7 @@ namespace AL.ChampionMode.Customization
                 return;
             }
 
-            state.OffhandStyleId = NextId(state.OffhandStyleId, OffhandStyles, "shield");
+            state.OffhandStyleId = NextId(state.OffhandStyleId, GetOffhandStyleIds(), "shield");
             SaveAndApply();
         }
 
@@ -304,6 +314,42 @@ namespace AL.ChampionMode.Customization
             ApplySavedCustomization();
         }
 
+        private void TryApplySharedCatalog()
+        {
+            if (CharacterCustomizationCatalog.TryLoad(out var catalog))
+            {
+                ApplyCatalog(catalog);
+            }
+        }
+
+        private IEnumerator ApplySharedCatalogAsync()
+        {
+            _catalogLoadStarted = true;
+            bool applied = false;
+            yield return CharacterCustomizationCatalog.LoadAsync(catalog =>
+            {
+                if (catalog == null)
+                {
+                    return;
+                }
+
+                ApplyCatalog(catalog);
+                applied = true;
+            });
+
+            _catalogLoadStarted = false;
+            if (applied)
+            {
+                ApplySavedCustomization();
+                Debug.Log("[ChampionCustomizationController] Applied shared customization catalog from StreamingAssets.");
+            }
+        }
+
+        private void ApplyCatalog(CharacterCustomizationCatalogData catalog)
+        {
+            _catalog = catalog;
+        }
+
         private ChampionCustomizationState GetState()
         {
             var save = ServiceLocator.Get<ISaveGameService>().CurrentSave;
@@ -312,39 +358,22 @@ namespace AL.ChampionMode.Customization
 
         private void NormalizeState(ChampionCustomizationState state)
         {
-            if (!ContainsId(state.BodyPresetId, BodyPresets))
-            {
-                state.BodyPresetId = "average";
-            }
-
-            if (!ContainsId(state.HairStyleId, HairStyles))
-            {
-                state.HairStyleId = "short";
-            }
-
-            if (!ContainsId(state.ArmorStyleId, ArmorStyles))
-            {
-                state.ArmorStyleId = "realm_basic";
-            }
-
-            if (!ContainsId(state.FaceMarkId, FaceMarks))
-            {
-                state.FaceMarkId = "none";
-            }
-
-            if (!ContainsId(state.WeaponStyleId, WeaponStyles))
-            {
-                state.WeaponStyleId = "sword";
-            }
-
-            if (!ContainsId(state.OffhandStyleId, OffhandStyles))
-            {
-                state.OffhandStyleId = "shield";
-            }
+            state.BodyPresetId = NormalizeId(state.BodyPresetId, GetBodyPresetIds(), "average");
+            state.HairStyleId = NormalizeId(state.HairStyleId, GetHairStyleIds(), "short");
+            state.ArmorStyleId = NormalizeId(state.ArmorStyleId, GetArmorStyleIds(), "realm_basic");
+            state.FaceMarkId = NormalizeId(state.FaceMarkId, GetFaceMarkIds(), "none");
+            state.WeaponStyleId = NormalizeId(state.WeaponStyleId, GetWeaponStyleIds(), "sword");
+            state.OffhandStyleId = NormalizeId(state.OffhandStyleId, GetOffhandStyleIds(), "shield");
         }
 
         private void ApplyBodyPreset(string presetId)
         {
+            if (TryGetCatalogBodyScale(presetId, out var catalogScale))
+            {
+                transform.localScale = catalogScale;
+                return;
+            }
+
             transform.localScale = presetId switch
             {
                 "slim" => new Vector3(0.86f, 1.06f, 0.86f),
@@ -353,6 +382,32 @@ namespace AL.ChampionMode.Customization
                 "stout" => new Vector3(1.08f, 0.92f, 1.08f),
                 _ => Vector3.one
             };
+        }
+
+        private bool TryGetCatalogBodyScale(string presetId, out Vector3 scale)
+        {
+            scale = Vector3.one;
+            var presets = _catalog?.bodyPresets;
+            if (presets == null)
+            {
+                return false;
+            }
+
+            foreach (var preset in presets)
+            {
+                if (preset == null || preset.id != presetId || preset.scale == null || preset.scale.Length < 3)
+                {
+                    continue;
+                }
+
+                scale = new Vector3(
+                    Mathf.Max(0.1f, preset.scale[0]),
+                    Mathf.Max(0.1f, preset.scale[1]),
+                    Mathf.Max(0.1f, preset.scale[2]));
+                return true;
+            }
+
+            return false;
         }
 
         private void ApplyHairStyle(string hairStyleId)
@@ -558,8 +613,140 @@ namespace AL.ChampionMode.Customization
             _renderers = GetComponentsInChildren<Renderer>(true);
         }
 
+        private string[] GetBodyPresetIds()
+        {
+            return ExtractIds(_catalog?.bodyPresets, BodyPresets);
+        }
+
+        private string[] GetHairStyleIds()
+        {
+            return ExtractIds(_catalog?.hairStyles, HairStyles);
+        }
+
+        private string[] GetArmorStyleIds()
+        {
+            return ExtractIds(_catalog?.armorStyles, ArmorStyles);
+        }
+
+        private string[] GetFaceMarkIds()
+        {
+            return ExtractIds(_catalog?.faceMarks, FaceMarks);
+        }
+
+        private string[] GetWeaponStyleIds()
+        {
+            return ExtractIds(_catalog?.weaponStyles, WeaponStyles);
+        }
+
+        private string[] GetOffhandStyleIds()
+        {
+            return ExtractIds(_catalog?.offhandStyles, OffhandStyles);
+        }
+
+        private Color[] GetPrimaryPalette()
+        {
+            return ExtractColors(_catalog?.primaryColors, PrimaryPalette);
+        }
+
+        private Color[] GetHairPalette()
+        {
+            return ExtractColors(_catalog?.hairColors, HairPalette);
+        }
+
+        private Color[] GetSkinPalette()
+        {
+            return ExtractColors(_catalog?.skinColors, SkinPalette);
+        }
+
+        private Color[] GetEyePalette()
+        {
+            return ExtractColors(_catalog?.eyeColors, EyePalette);
+        }
+
+        private Color[] GetAccentPalette()
+        {
+            return ExtractColors(_catalog?.accentColors, AccentPalette);
+        }
+
+        private static string NormalizeId(string current, string[] ids, string fallback)
+        {
+            if (ContainsId(current, ids))
+            {
+                return current;
+            }
+
+            return ContainsId(fallback, ids) ? fallback : FirstIdOrFallback(ids, fallback);
+        }
+
+        private static string[] ExtractIds(BodyPresetData[] options, string[] fallback)
+        {
+            if (options == null || options.Length == 0)
+            {
+                return fallback;
+            }
+
+            var ids = new List<string>(options.Length);
+            foreach (var option in options)
+            {
+                if (option != null && !string.IsNullOrWhiteSpace(option.id))
+                {
+                    ids.Add(option.id);
+                }
+            }
+
+            return ids.Count > 0 ? ids.ToArray() : fallback;
+        }
+
+        private static string[] ExtractIds(StyleOptionData[] options, string[] fallback)
+        {
+            if (options == null || options.Length == 0)
+            {
+                return fallback;
+            }
+
+            var ids = new List<string>(options.Length);
+            foreach (var option in options)
+            {
+                if (option != null && !string.IsNullOrWhiteSpace(option.id))
+                {
+                    ids.Add(option.id);
+                }
+            }
+
+            return ids.Count > 0 ? ids.ToArray() : fallback;
+        }
+
+        private static Color[] ExtractColors(ColorOptionData[] options, Color[] fallback)
+        {
+            if (options == null || options.Length == 0)
+            {
+                return fallback;
+            }
+
+            var colors = new List<Color>(options.Length);
+            foreach (var option in options)
+            {
+                if (option == null || option.rgb == null || option.rgb.Length < 3)
+                {
+                    continue;
+                }
+
+                colors.Add(new Color(
+                    Mathf.Clamp01(option.rgb[0]),
+                    Mathf.Clamp01(option.rgb[1]),
+                    Mathf.Clamp01(option.rgb[2])));
+            }
+
+            return colors.Count > 0 ? colors.ToArray() : fallback;
+        }
+
         private static Color NextColor(Color current, Color[] palette)
         {
+            if (palette == null || palette.Length == 0)
+            {
+                return current;
+            }
+
             int currentIndex = 0;
             float bestDistance = float.MaxValue;
             for (int i = 0; i < palette.Length; i++)
@@ -577,6 +764,11 @@ namespace AL.ChampionMode.Customization
 
         private static string NextId(string current, string[] ids, string fallback)
         {
+            if (ids == null || ids.Length == 0)
+            {
+                return fallback;
+            }
+
             if (string.IsNullOrWhiteSpace(current))
             {
                 return fallback;
@@ -595,9 +787,14 @@ namespace AL.ChampionMode.Customization
             return ids[(index + 1) % ids.Length];
         }
 
+        private static string FirstIdOrFallback(string[] ids, string fallback)
+        {
+            return ids != null && ids.Length > 0 ? ids[0] : fallback;
+        }
+
         private static bool ContainsId(string current, string[] ids)
         {
-            if (string.IsNullOrWhiteSpace(current))
+            if (ids == null || ids.Length == 0 || string.IsNullOrWhiteSpace(current))
             {
                 return false;
             }

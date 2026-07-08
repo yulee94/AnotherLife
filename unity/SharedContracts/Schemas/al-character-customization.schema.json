@@ -3,7 +3,7 @@
   "$id": "https://another-life.local/schemas/al-character-customization.schema.json",
   "title": "Another Life Character Customization Catalog",
   "type": "object",
-  "required": ["version", "game", "characterSlots", "bodyPresets", "hairStyles", "armorStyles", "skinColors", "eyeColors", "accentColors", "faceMarks", "weaponStyles", "offhandStyles", "realms", "qualityTargets"],
+  "required": ["version", "game", "characterSlots", "bodyPresets", "hairStyles", "armorStyles", "primaryColors", "hairColors", "skinColors", "eyeColors", "accentColors", "faceMarks", "weaponStyles", "offhandStyles", "realms", "qualityTargets"],
   "properties": {
     "version": {
       "type": "string"
@@ -36,6 +36,20 @@
       "type": "array",
       "items": {
         "$ref": "#/$defs/styleOption"
+      },
+      "minItems": 1
+    },
+    "primaryColors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/colorOption"
+      },
+      "minItems": 1
+    },
+    "hairColors": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/colorOption"
       },
       "minItems": 1
     },
