@@ -67,6 +67,8 @@ namespace AL.ChampionMode
         private readonly Text[] _skillButtonTexts = new Text[4];
         private readonly Text[] _skillCooldownTexts = new Text[4];
         private readonly Image[] _skillCooldownFills = new Image[4];
+        private readonly Image[] _skillReadyGlows = new Image[4];
+        private readonly Image[] _skillManaPips = new Image[4];
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private float _encounterStartTime;
@@ -1350,8 +1352,10 @@ namespace AL.ChampionMode
             Color slotColor = GetSkillSlotColor(slotIndex);
             var button = CreateHudButton(parent, font, BuildSkillButtonLabel(slotIndex), anchoredPosition, new Vector2(154f, 58f), () => _playerController.RequestSkill(slotIndex), 14, new Color(0.06f, 0.09f, 0.13f, 0.96f));
             CreateHudPanel(button.transform, "SkillAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(154f, 5f), slotColor);
+            _skillReadyGlows[slotIndex] = CreateUiImage(button.transform, "SkillReadyGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(25f, -30f), new Vector2(42f, 42f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.16f));
             CreateSkillIconTile(button.transform, slotIndex, slotColor);
             _skillCooldownFills[slotIndex] = CreateCooldownOverlay(button.transform);
+            _skillManaPips[slotIndex] = CreateUiImage(button.transform, "SkillManaPip", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(48f, 7f), new Vector2(92f, 3f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.72f));
             _skillButtonTexts[slotIndex] = button.GetComponentInChildren<Text>();
             if (_skillButtonTexts[slotIndex] != null)
             {
@@ -1419,7 +1423,28 @@ namespace AL.ChampionMode
                         _skillCooldownFills[i].fillAmount = remaining <= 0.05f ? 0f : Mathf.Clamp01(remaining / duration);
                         _skillCooldownFills[i].color = remaining <= 0.05f ? new Color(0f, 0f, 0f, 0f) : new Color(0f, 0f, 0f, 0.56f);
                     }
+
+                    UpdateSkillReadinessVisual(i, remaining <= 0.05f);
                 }
+            }
+        }
+
+        private void UpdateSkillReadinessVisual(int slotIndex, bool isReady)
+        {
+            Color slotColor = GetSkillSlotColor(slotIndex);
+            float pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 5.4f + slotIndex * 0.72f) * 0.5f;
+            if (_skillReadyGlows[slotIndex] != null)
+            {
+                float alpha = isReady ? 0.18f + pulse * 0.18f : 0.035f;
+                _skillReadyGlows[slotIndex].color = new Color(slotColor.r, slotColor.g, slotColor.b, alpha);
+                _skillReadyGlows[slotIndex].rectTransform.localScale = Vector3.one * (isReady ? 1.0f + pulse * 0.08f : 0.92f);
+            }
+
+            if (_skillManaPips[slotIndex] != null)
+            {
+                _skillManaPips[slotIndex].color = isReady
+                    ? new Color(slotColor.r, slotColor.g, slotColor.b, 0.78f + pulse * 0.16f)
+                    : new Color(0.32f, 0.38f, 0.44f, 0.42f);
             }
         }
 
