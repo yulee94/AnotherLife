@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -39,6 +40,12 @@ namespace AL.UI.Kingdom
         private Image _messageStatusRule;
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
+        private GameObject _championDeploymentOverlayObject;
+        private Image _championDeploymentBackdrop;
+        private Image _championDeploymentAccent;
+        private Image _championDeploymentProgressFill;
+        private Text _championDeploymentTitleText;
+        private Text _championDeploymentMetaText;
         private KingdomVisualizer _kingdomVisualizer;
         private Color _messageAccentBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.92f);
         private Color _messagePanelBaseColor = new Color(0.020f, 0.027f, 0.037f, 0.92f);
@@ -47,6 +54,7 @@ namespace AL.UI.Kingdom
         private float _completionTimer;
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
+        private bool _championDeploymentInProgress;
         private readonly List<Image> _messageSignalBars = new List<Image>();
 
         private readonly string[] _buildingIds =
@@ -255,7 +263,7 @@ namespace AL.UI.Kingdom
             CreateDeckButton(commandDeck.transform, font, "Wishgate", new Vector2(-222f, -674f), EarnWishgate);
             CreateDeckButton(commandDeck.transform, font, "Claim Wish", new Vector2(-18f, -674f), ChooseWishReward);
             CreateDeckButton(commandDeck.transform, font, "War Drill", new Vector2(-222f, -722f), RunTestBattle);
-            CreateDeckButton(commandDeck.transform, font, "Champion", new Vector2(-18f, -722f), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateDeckButton(commandDeck.transform, font, "Champion", new Vector2(-18f, -722f), BeginChampionDeployment);
             CreateDeckButton(commandDeck.transform, font, "Reset Save", new Vector2(-18f, -812f), ResetSave, new Color(0.34f, 0.12f, 0.12f, 1f));
 
             var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-24f, -24f), ToggleDashboard, new Vector2(170f, 42f), new Color(0.075f, 0.095f, 0.122f, 0.96f));
@@ -432,6 +440,111 @@ namespace AL.UI.Kingdom
             save.Load();
             SetMessage("Save reset. Choose a realm again from the boot flow.");
             SceneManager.LoadScene("Boot");
+        }
+
+        private void BeginChampionDeployment()
+        {
+            if (_championDeploymentInProgress)
+            {
+                return;
+            }
+
+            StartCoroutine(ChampionDeploymentRoutine());
+        }
+
+        private IEnumerator ChampionDeploymentRoutine()
+        {
+            _championDeploymentInProgress = true;
+            SetMessage("CHAMPION DEPLOYMENT: Arena gate opening. Transferring command focus to the 3D combat front.");
+            ShowChampionDeploymentOverlay();
+
+            const float duration = 0.78f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                UpdateChampionDeploymentOverlay(Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
+
+            SceneManager.LoadScene(_arenaSceneName);
+        }
+
+        private void ShowChampionDeploymentOverlay()
+        {
+            EnsureChampionDeploymentOverlay();
+            _championDeploymentOverlayObject.SetActive(true);
+            UpdateChampionDeploymentOverlay(0f);
+        }
+
+        private void EnsureChampionDeploymentOverlay()
+        {
+            if (_championDeploymentOverlayObject != null)
+            {
+                return;
+            }
+
+            var canvas = CreateCanvas("ChampionDeploymentCanvas");
+            canvas.sortingOrder = 5200;
+            _championDeploymentOverlayObject = canvas.gameObject;
+
+            var font = GetDefaultFont();
+            _championDeploymentBackdrop = CreatePanel(canvas.transform, "DeploymentBackdrop", Vector2.zero, Vector2.zero, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), new Color(0f, 0f, 0f, 0f)).GetComponent<Image>();
+            _championDeploymentBackdrop.raycastTarget = true;
+
+            var panel = CreatePanel(canvas.transform, "DeploymentPanel", Vector2.zero, new Vector2(820f, 238f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Color(0.020f, 0.027f, 0.038f, 0.98f));
+            var outline = panel.AddComponent<Outline>();
+            outline.effectColor = new Color(0.42f, 0.68f, 1f, 0.36f);
+            outline.effectDistance = new Vector2(1.2f, -1.2f);
+            var shadow = panel.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.58f);
+            shadow.effectDistance = new Vector2(0f, -7f);
+
+            _championDeploymentAccent = CreatePanel(panel.transform, "DeploymentAccent", new Vector2(0f, 0f), new Vector2(8f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.42f, 0.68f, 1f, 0.92f)).GetComponent<Image>();
+            CreatePanel(panel.transform, "DeploymentTopTrace", new Vector2(0f, -1f), new Vector2(-44f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.22f));
+            CreatePanel(panel.transform, "DeploymentGateLeft", new Vector2(86f, -98f), new Vector2(10f, 96f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Color(0.42f, 0.68f, 1f, 0.76f));
+            CreatePanel(panel.transform, "DeploymentGateRight", new Vector2(136f, -98f), new Vector2(10f, 96f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Color(0.94f, 0.40f, 0.22f, 0.72f));
+            CreatePanel(panel.transform, "DeploymentGateCore", new Vector2(111f, -98f), new Vector2(56f, 10f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Color(1f, 0.84f, 0.52f, 0.42f));
+
+            _championDeploymentTitleText = CreateText(panel.transform, "DeploymentTitle", font, 28, TextAnchor.UpperLeft, new Vector2(178f, -38f), new Vector2(594f, 42f));
+            _championDeploymentTitleText.text = "CHAMPION DEPLOYMENT";
+            _championDeploymentTitleText.color = new Color(1f, 0.88f, 0.62f);
+            _championDeploymentMetaText = CreateText(panel.transform, "DeploymentMeta", font, 17, TextAnchor.UpperLeft, new Vector2(180f, -92f), new Vector2(588f, 54f));
+            _championDeploymentMetaText.color = new Color(0.82f, 0.90f, 0.98f);
+
+            CreatePanel(panel.transform, "DeploymentProgressTrack", new Vector2(180f, -168f), new Vector2(558f, 7f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.07f, 0.10f, 0.14f, 0.96f));
+            _championDeploymentProgressFill = CreatePanel(panel.transform, "DeploymentProgressFill", new Vector2(180f, -168f), new Vector2(0f, 7f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.42f, 0.68f, 1f, 0.94f)).GetComponent<Image>();
+
+            _championDeploymentOverlayObject.SetActive(false);
+        }
+
+        private void UpdateChampionDeploymentOverlay(float progress)
+        {
+            float eased = Mathf.SmoothStep(0f, 1f, progress);
+            float pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 8.5f) * 0.5f;
+            Color realmAccent = GetCurrentRealmAccent();
+
+            if (_championDeploymentBackdrop != null)
+            {
+                _championDeploymentBackdrop.color = new Color(0f, 0f, 0f, Mathf.Lerp(0.12f, 0.74f, eased));
+            }
+
+            if (_championDeploymentAccent != null)
+            {
+                _championDeploymentAccent.color = Color.Lerp(realmAccent, new Color(0.42f, 0.68f, 1f, 1f), 0.35f);
+                _championDeploymentAccent.color = WithAlpha(_championDeploymentAccent.color, Mathf.Lerp(0.70f, 1f, pulse));
+            }
+
+            if (_championDeploymentProgressFill != null)
+            {
+                _championDeploymentProgressFill.color = Color.Lerp(realmAccent, new Color(0.42f, 0.68f, 1f), 0.45f);
+                _championDeploymentProgressFill.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(0f, 558f, eased), 7f);
+            }
+
+            if (_championDeploymentMetaText != null)
+            {
+                _championDeploymentMetaText.text = $"{GetCurrentRealmLabel()} // ARENA GATE SYNC {Mathf.RoundToInt(eased * 100f)}%";
+            }
         }
 
         private void Refresh()
@@ -1110,6 +1223,25 @@ namespace AL.UI.Kingdom
         {
             color.a = alpha;
             return color;
+        }
+
+        private Color GetCurrentRealmAccent()
+        {
+            RealmId realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+            return realmId switch
+            {
+                RealmId.Stonehold => new Color(0.72f, 0.58f, 0.40f, 1f),
+                RealmId.Eldergrove => new Color(0.28f, 0.78f, 0.44f, 1f),
+                RealmId.Crownlands => new Color(0.34f, 0.58f, 1f, 1f),
+                RealmId.Umbral => new Color(0.68f, 0.26f, 0.92f, 1f),
+                _ => new Color(0.42f, 0.68f, 1f, 1f)
+            };
+        }
+
+        private string GetCurrentRealmLabel()
+        {
+            var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
+            return realm == null ? "ANOTHERLIFE COMMAND" : realm.RealmName.ToUpperInvariant();
         }
 
         private static string GetNextWarmasterPieceId(WarmasterState state)
