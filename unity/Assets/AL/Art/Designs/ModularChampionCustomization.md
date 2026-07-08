@@ -64,11 +64,14 @@ The player controls one main Champion/Lord in 3D Champion Mode. The base model s
 
 ## Runtime Forge Presets
 
-The Champion Forge includes three adult-facing identity presets that live in the shared customization catalog and write into the same saved customization state as manual edits:
+The Champion Forge includes six adult-facing identity presets that live in the shared customization catalog and write into the same saved customization state as manual edits:
 
 - Vanguard: broad body, warmaster/heavy plate language, sword and shield, scar detail, gold/steel material mood, cape and helmet enabled.
 - Arcanist: tall body, arcane robes, long hair, rune mark, staff and tome, blue emissive accents, cape enabled, helmet disabled.
 - Nightblade: slim body, assassin leathers, topknot, tattoo mark, bow and dagger, dark leather/crimson accent mood, cape and helmet disabled.
+- Dreadknight: massive body, warmaster plate, ash mask, hammer and shield, blackened steel material mood, blood ember eyes/accent, cape and helmet enabled.
+- Oracle: statuesque body, arcane robes, braid, realm mark, staff and orb, ivory cloth, luminous green eyes/accent, cape enabled, helmet disabled.
+- Duelist: lean precision body, light scout armor, sword and dagger, duelist scar, copper hair, burnished gold accent, cape and helmet disabled.
 
 These presets are starting points only. Players can still fine tune every exposed color, body, hair, face mark, armor, weapon, offhand, cape, and helmet option after selecting one.
 

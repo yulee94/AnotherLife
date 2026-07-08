@@ -16,7 +16,7 @@ namespace AL.ChampionMode.Customization
 
         private static readonly string[] BodyPresets =
         {
-            "average", "slim", "broad", "tall", "stout"
+            "average", "slim", "broad", "tall", "stout", "duelist", "statuesque", "massive", "compact"
         };
 
         private static readonly string[] HairStyles =
@@ -414,6 +414,15 @@ namespace AL.ChampionMode.Customization
                     case "nightblade":
                         ApplyNightbladePreset(state);
                         break;
+                    case "dreadknight":
+                        ApplyDreadknightPreset(state);
+                        break;
+                    case "oracle":
+                        ApplyOraclePreset(state);
+                        break;
+                    case "duelist":
+                        ApplyDuelistPreset(state);
+                        break;
                     default:
                         return false;
                 }
@@ -525,6 +534,63 @@ namespace AL.ChampionMode.Customization
                 new Color(0.78f, 0.12f, 0.18f));
         }
 
+        private static void ApplyDreadknightPreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "massive";
+            state.HairStyleId = "mohawk";
+            state.ArmorStyleId = "warmaster_plate";
+            state.FaceMarkId = "ash_mask";
+            state.WeaponStyleId = "hammer";
+            state.OffhandStyleId = "shield";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = true;
+            ApplyPresetColors(
+                state,
+                new Color(0.055f, 0.060f, 0.070f),
+                new Color(0.16f, 0.16f, 0.18f),
+                new Color(0.46f, 0.34f, 0.32f),
+                new Color(0.95f, 0.18f, 0.08f),
+                new Color(0.94f, 0.12f, 0.08f));
+        }
+
+        private static void ApplyOraclePreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "statuesque";
+            state.HairStyleId = "braid";
+            state.ArmorStyleId = "arcane_robes";
+            state.FaceMarkId = "realm_mark";
+            state.WeaponStyleId = "staff";
+            state.OffhandStyleId = "orb";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = false;
+            ApplyPresetColors(
+                state,
+                new Color(0.82f, 0.78f, 0.66f),
+                new Color(0.88f, 0.84f, 0.72f),
+                new Color(0.78f, 0.62f, 0.52f),
+                new Color(0.58f, 1.00f, 0.82f),
+                new Color(0.38f, 1.00f, 0.74f));
+        }
+
+        private static void ApplyDuelistPreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "duelist";
+            state.HairStyleId = "short";
+            state.ArmorStyleId = "light_scout";
+            state.FaceMarkId = "duelist_scar";
+            state.WeaponStyleId = "sword";
+            state.OffhandStyleId = "dagger";
+            state.CapeEnabled = false;
+            state.HelmetEnabled = false;
+            ApplyPresetColors(
+                state,
+                new Color(0.18f, 0.21f, 0.24f),
+                new Color(0.42f, 0.24f, 0.11f),
+                new Color(0.66f, 0.48f, 0.36f),
+                new Color(0.95f, 0.64f, 0.20f),
+                new Color(0.92f, 0.54f, 0.16f));
+        }
+
         private static void ApplyPresetColors(
             ChampionCustomizationState state,
             Color primary,
@@ -601,6 +667,21 @@ namespace AL.ChampionMode.Customization
 
         private static string GetProfileLabel(ChampionCustomizationState state)
         {
+            if (state.FaceMarkId == "ash_mask" && state.WeaponStyleId == "hammer")
+            {
+                return "Dreadknight";
+            }
+
+            if (state.WeaponStyleId == "staff" && state.OffhandStyleId == "orb")
+            {
+                return "Oracle";
+            }
+
+            if (state.BodyPresetId == "duelist" || (state.WeaponStyleId == "sword" && state.OffhandStyleId == "dagger"))
+            {
+                return "Duelist";
+            }
+
             if (state.ArmorStyleId == "arcane_robes" || state.WeaponStyleId == "staff" || state.OffhandStyleId == "tome" || state.OffhandStyleId == "orb")
             {
                 return "Arcanist";
@@ -691,6 +772,10 @@ namespace AL.ChampionMode.Customization
                 "broad" => new Vector3(1.16f, 1.00f, 1.06f),
                 "tall" => new Vector3(0.96f, 1.18f, 0.96f),
                 "stout" => new Vector3(1.08f, 0.92f, 1.08f),
+                "duelist" => new Vector3(0.94f, 1.08f, 0.92f),
+                "statuesque" => new Vector3(1.02f, 1.24f, 0.98f),
+                "massive" => new Vector3(1.24f, 1.04f, 1.14f),
+                "compact" => new Vector3(1.02f, 0.86f, 1.02f),
                 _ => Vector3.one
             };
         }
