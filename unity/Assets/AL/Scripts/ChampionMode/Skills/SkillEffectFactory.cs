@@ -17,6 +17,8 @@ namespace AL.ChampionMode.Skills
         private const int MaxPooledTrails = 6;
         private const int MaxActiveSkillShapes = 58;
         private const int MaxPooledSkillShapesPerKey = 12;
+        private const int MaxActiveAftermathShapes = 38;
+        private const int MaxPooledAftermathShapesPerKey = 10;
         private const int MaxActiveGuardShells = 8;
         private const int MaxPooledGuardShells = 4;
         private const int MaxActiveFloatingTexts = 24;
@@ -209,6 +211,7 @@ namespace AL.ChampionMode.Skills
             SpawnGroundRing("VFX_Runtime_RealmSlash_Crest", groundPosition, GetRealmColor(realmId, 0.28f), 1.15f, 0.38f);
             SpawnBurst("VFX_Runtime_RealmSlash_Sparks", groundPosition + Vector3.up * 0.85f + safeForward * 0.62f, Color.Lerp(color, Color.white, 0.34f), color, 0.62f);
             SpawnImpactDebris(groundPosition + safeForward * 0.82f, safeForward, color, 5, 0.36f);
+            SpawnImpactAftermath(groundPosition + safeForward * 0.62f, realmId, 1.15f, 0.92f, false);
             return slash;
         }
 
@@ -294,6 +297,7 @@ namespace AL.ChampionMode.Skills
             SpawnRadialCracks(groundPosition, safeRadius, color, 10, 0.58f);
             SpawnImpactDebris(groundPosition, Vector3.forward, color, 9, 0.58f);
             SpawnAerialShardRain(groundPosition, realmId, safeRadius, 7, 0.62f);
+            SpawnImpactAftermath(groundPosition, realmId, safeRadius, 1.25f, false);
             RequestWeatherFlash(realmId, 0.54f);
             return SpawnGroundRing("VFX_Runtime_WarzoneBurst_Wave", groundPosition, color, safeRadius, 0.58f);
         }
@@ -348,6 +352,7 @@ namespace AL.ChampionMode.Skills
                 0.44f);
             SpawnAerialShardRain(groundPosition, realmId, safeRadius * 1.08f, 10, 0.74f);
             SpawnRadialCracks(groundPosition, safeRadius * 1.05f, coreColor, 12, 0.74f);
+            SpawnImpactAftermath(groundPosition, realmId, safeRadius * 1.15f, 1.85f, true);
             RequestWeatherFlash(realmId, 0.92f);
             return impact;
         }
@@ -667,6 +672,77 @@ namespace AL.ChampionMode.Skills
                     new Vector3(0.075f, 0.075f, 0.82f + i % 3 * 0.16f),
                     color,
                     lifetime * (0.74f + i % 5 * 0.04f));
+            }
+        }
+
+        private static void SpawnImpactAftermath(Vector3 groundPosition, RealmId realmId, float radius, float lifetime, bool heavy)
+        {
+            Vector3 center = Grounded(groundPosition);
+            float safeRadius = Mathf.Clamp(radius, 0.9f, 5.8f);
+            float safeLifetime = Mathf.Max(0.45f, lifetime);
+            Color realmGlow = GetRealmColor(realmId, heavy ? 0.34f : 0.24f);
+            Color soot = new Color(0.018f, 0.016f, 0.014f, heavy ? 0.48f : 0.32f);
+
+            SpawnPrimitiveEffect(
+                "shape:impact-aftermath-scorch",
+                "VFX_Runtime_ImpactAftermath_Scorch",
+                PrimitiveType.Cylinder,
+                MaxActiveAftermathShapes,
+                MaxPooledAftermathShapesPerKey,
+                center + Vector3.up * 0.014f,
+                Quaternion.identity,
+                new Vector3(safeRadius * 0.46f, 0.010f, safeRadius * 0.46f),
+                Color.Lerp(soot, realmGlow, heavy ? 0.30f : 0.22f),
+                safeLifetime);
+
+            SpawnPrimitiveEffect(
+                "shape:impact-aftermath-rim",
+                "VFX_Runtime_ImpactAftermath_RimResidue",
+                PrimitiveType.Cylinder,
+                MaxActiveAftermathShapes,
+                MaxPooledAftermathShapesPerKey,
+                center + Vector3.up * 0.020f,
+                Quaternion.identity,
+                new Vector3(safeRadius * 0.70f, 0.007f, safeRadius * 0.70f),
+                new Color(realmGlow.r, realmGlow.g, realmGlow.b, heavy ? 0.20f : 0.14f),
+                safeLifetime * 0.82f);
+
+            int strokeCount = heavy ? 8 : 5;
+            for (int i = 0; i < strokeCount; i++)
+            {
+                float angle = i * 360f / strokeCount + (heavy ? 11f : 24f);
+                Vector3 direction = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+                float distance = safeRadius * (0.16f + (i % 3) * 0.07f);
+                SpawnPrimitiveEffect(
+                    "shape:impact-aftermath-stroke",
+                    "VFX_Runtime_ImpactAftermath_Stroke",
+                    PrimitiveType.Cube,
+                    MaxActiveAftermathShapes,
+                    MaxPooledAftermathShapesPerKey,
+                    center + direction * distance + Vector3.up * 0.032f,
+                    Quaternion.LookRotation(direction),
+                    new Vector3(0.060f, 0.020f, safeRadius * (heavy ? 0.42f : 0.30f)),
+                    Color.Lerp(soot, realmGlow, i % 2 == 0 ? 0.18f : 0.34f),
+                    safeLifetime * (0.72f + i % 3 * 0.05f));
+            }
+
+            int emberCount = heavy ? 7 : 4;
+            for (int i = 0; i < emberCount; i++)
+            {
+                float angle = i * 360f / emberCount + 17f;
+                Vector3 direction = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+                float distance = safeRadius * (0.30f + (i % 4) * 0.08f);
+                SpawnPrimitiveEffect(
+                    "shape:impact-aftermath-ember",
+                    "VFX_Runtime_ImpactAftermath_Ember",
+                    PrimitiveType.Cube,
+                    MaxActiveAftermathShapes,
+                    MaxPooledAftermathShapesPerKey,
+                    center + direction * distance + Vector3.up * (0.10f + i % 3 * 0.035f),
+                    Quaternion.LookRotation(direction + Vector3.up * 0.25f) * Quaternion.Euler(18f, 0f, 34f),
+                    new Vector3(0.045f, 0.030f, 0.18f + i % 2 * 0.05f),
+                    Color.Lerp(realmGlow, Color.white, 0.18f),
+                    safeLifetime * (0.46f + i % 3 * 0.05f));
             }
         }
 
