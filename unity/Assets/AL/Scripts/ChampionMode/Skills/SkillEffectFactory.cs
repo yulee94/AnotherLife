@@ -50,7 +50,7 @@ namespace AL.ChampionMode.Skills
 
         public static GameObject SpawnRealmImpact(Vector3 position, RealmId realmId)
         {
-            return realmId switch
+            var impact = realmId switch
             {
                 RealmId.Stonehold => SpawnForgeBurst(position),
                 RealmId.Eldergrove => SpawnHealingBloom(position),
@@ -58,6 +58,8 @@ namespace AL.ChampionMode.Skills
                 RealmId.Umbral => SpawnCurseMark(position),
                 _ => SpawnForgeBurst(position)
             };
+            SpawnCinematicImpactAccent(position, realmId, 1.15f, Vector3.forward, false);
+            return impact;
         }
 
         public static GameObject SpawnSkillCastRing(Vector3 position, RealmId realmId, float radius, float lifetime)
@@ -212,6 +214,7 @@ namespace AL.ChampionMode.Skills
             SpawnBurst("VFX_Runtime_RealmSlash_Sparks", groundPosition + Vector3.up * 0.85f + safeForward * 0.62f, Color.Lerp(color, Color.white, 0.34f), color, 0.62f);
             SpawnImpactDebris(groundPosition + safeForward * 0.82f, safeForward, color, 5, 0.36f);
             SpawnImpactAftermath(groundPosition + safeForward * 0.62f, realmId, 1.15f, 0.92f, false);
+            SpawnCinematicImpactAccent(groundPosition + safeForward * 0.62f, realmId, 1.05f, safeForward, false);
             return slash;
         }
 
@@ -298,6 +301,7 @@ namespace AL.ChampionMode.Skills
             SpawnImpactDebris(groundPosition, Vector3.forward, color, 9, 0.58f);
             SpawnAerialShardRain(groundPosition, realmId, safeRadius, 7, 0.62f);
             SpawnImpactAftermath(groundPosition, realmId, safeRadius, 1.25f, false);
+            SpawnCinematicImpactAccent(groundPosition, realmId, safeRadius, Vector3.forward, true);
             RequestWeatherFlash(realmId, 0.54f);
             return SpawnGroundRing("VFX_Runtime_WarzoneBurst_Wave", groundPosition, color, safeRadius, 0.58f);
         }
@@ -353,6 +357,7 @@ namespace AL.ChampionMode.Skills
             SpawnAerialShardRain(groundPosition, realmId, safeRadius * 1.08f, 10, 0.74f);
             SpawnRadialCracks(groundPosition, safeRadius * 1.05f, coreColor, 12, 0.74f);
             SpawnImpactAftermath(groundPosition, realmId, safeRadius * 1.15f, 1.85f, true);
+            SpawnCinematicImpactAccent(groundPosition, realmId, safeRadius * 1.08f, Vector3.forward, true);
             RequestWeatherFlash(realmId, 0.92f);
             return impact;
         }
@@ -447,6 +452,7 @@ namespace AL.ChampionMode.Skills
             SpawnGroundRing("VFX_Runtime_BossSlam_ImpactRing", center, hotColor, safeRadius * 0.72f, 0.44f);
             SpawnImpactDebris(center, Vector3.forward, hotColor, 12, 0.62f);
             var shockwave = SpawnWarzoneShockwave(center, realmId, safeRadius);
+            SpawnCinematicImpactAccent(center, realmId, safeRadius * 1.08f, Vector3.forward, true);
             RequestWeatherFlash(realmId, 0.72f);
             return shockwave;
         }
@@ -577,6 +583,78 @@ namespace AL.ChampionMode.Skills
             AnimatePrimitive(effect, color, lifetime, localScale * 0.88f, localScale * 1.08f);
             RuntimeVfxPool.ReleaseAfter(key, effect, lifetime, maxPoolSize);
             return effect;
+        }
+
+        private static void SpawnCinematicImpactAccent(Vector3 groundPosition, RealmId realmId, float radius, Vector3 forward, bool heavy)
+        {
+            Vector3 center = Grounded(groundPosition);
+            Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
+            safeForward.y = 0f;
+            if (safeForward.sqrMagnitude <= 0.01f)
+            {
+                safeForward = Vector3.forward;
+            }
+            else
+            {
+                safeForward.Normalize();
+            }
+
+            float safeRadius = Mathf.Clamp(radius, 0.9f, heavy ? 5.8f : 3.4f);
+            float lifetime = heavy ? 0.72f : 0.46f;
+            Color color = GetRealmColor(realmId, heavy ? 0.52f : 0.38f);
+            Color edgeColor = Color.Lerp(color, Color.white, heavy ? 0.42f : 0.28f);
+
+            SpawnPrimitiveEffect(
+                "shape:cinematic-impact-column",
+                "VFX_Runtime_CinematicImpact_Column",
+                PrimitiveType.Cylinder,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                center + Vector3.up * (heavy ? 0.72f : 0.46f),
+                Quaternion.identity,
+                new Vector3(safeRadius * (heavy ? 0.075f : 0.055f), heavy ? 1.15f : 0.72f, safeRadius * (heavy ? 0.075f : 0.055f)),
+                edgeColor,
+                lifetime);
+
+            int spokeCount = heavy ? 8 : 5;
+            for (int i = 0; i < spokeCount; i++)
+            {
+                float angle = i * 360f / spokeCount + (heavy ? 12f : 25f);
+                Vector3 direction = Quaternion.Euler(0f, angle, 0f) * safeForward;
+                SpawnPrimitiveEffect(
+                    "shape:cinematic-impact-spoke",
+                    "VFX_Runtime_CinematicImpact_Spoke",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    center + direction * (safeRadius * 0.38f) + Vector3.up * 0.095f,
+                    Quaternion.LookRotation(direction),
+                    new Vector3(heavy ? 0.065f : 0.045f, heavy ? 0.034f : 0.026f, safeRadius * (heavy ? 0.92f : 0.62f)),
+                    Color.Lerp(color, Color.white, i % 2 == 0 ? 0.18f : 0.34f),
+                    lifetime * (0.82f + i % 3 * 0.05f));
+            }
+
+            if (!heavy)
+            {
+                return;
+            }
+
+            Vector3 side = Vector3.Cross(Vector3.up, safeForward).normalized;
+            for (int i = -1; i <= 1; i += 2)
+            {
+                Vector3 finDirection = (safeForward + side * (0.26f * i)).normalized;
+                SpawnPrimitiveEffect(
+                    "shape:cinematic-impact-fin",
+                    "VFX_Runtime_CinematicImpact_Fin",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    center + side * (safeRadius * 0.24f * i) + Vector3.up * 0.64f,
+                    Quaternion.LookRotation(finDirection) * Quaternion.Euler(18f, 0f, i * 12f),
+                    new Vector3(0.080f, 0.82f, 0.20f),
+                    Color.Lerp(edgeColor, Color.white, 0.12f),
+                    lifetime * 0.78f);
+            }
         }
 
         private static void SpawnRadialCracks(Vector3 groundPosition, float radius, Color color, int count, float lifetime)
