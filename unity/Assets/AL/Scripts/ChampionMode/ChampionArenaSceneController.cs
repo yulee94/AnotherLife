@@ -133,6 +133,7 @@ namespace AL.ChampionMode
             camera.fieldOfView = 42f;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.025f, 0.03f, 0.04f);
+            cameraObject.AddComponent<AudioListener>();
             var cameraFollow = cameraObject.AddComponent<CameraFollow>();
             cameraFollow.Configure(player.transform, 8.6f, 2.65f, 25f, 0f);
 
@@ -665,6 +666,7 @@ namespace AL.ChampionMode
             {
                 _encounterClearShown = true;
                 SkillEffectFactory.SpawnFloatingCombatText(_playerController.transform.position + Vector3.up * 2.6f, "CLEAR " + grade, _encounterResultText.color, 0.36f, 1.4f);
+                RuntimeCombatAudio.PlayClear();
             }
         }
 

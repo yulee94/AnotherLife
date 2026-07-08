@@ -155,21 +155,25 @@ namespace AL.ChampionMode.Skills
                     SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
                     SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.85f, "+" + Mathf.CeilToInt(_powers[slotIndex]), new Color(0.48f, 1f, 0.62f), 0.28f, 0.95f);
                     SkillEffectFactory.ShakeCamera(0.06f, 0.08f);
+                    RuntimeCombatAudio.PlayHeal();
                     break;
                 case 2:
                     DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
                     SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, _ranges[slotIndex]);
                     SkillEffectFactory.ShakeCamera(0.18f, 0.14f);
+                    RuntimeCombatAudio.PlaySkillCast();
                     break;
                 case 3:
                     DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
                     SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, _ranges[slotIndex]);
                     SkillEffectFactory.ShakeCamera(0.24f, 0.18f);
+                    RuntimeCombatAudio.PlayHeavySkill();
                     break;
                 default:
                     DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
                     SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId);
                     SkillEffectFactory.ShakeCamera(0.12f, 0.10f);
+                    RuntimeCombatAudio.PlaySkillCast();
                     break;
             }
         }
@@ -196,6 +200,7 @@ namespace AL.ChampionMode.Skills
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
                 {
                     SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
+                    RuntimeCombatAudio.PlayImpact();
                     Object.Destroy(hitCollider.gameObject);
                     destroyedDummies++;
                     continue;
@@ -214,6 +219,7 @@ namespace AL.ChampionMode.Skills
                     float botDamage = power * Mathf.Max(0f, botDamageMultiplier);
                     bot.TakeDamage(botDamage, attackerRealm);
                     SkillEffectFactory.SpawnFloatingCombatText(bot.transform.position + Vector3.up * 1.85f, Mathf.CeilToInt(botDamage).ToString(), new Color(1f, 0.62f, 0.22f), 0.24f, 0.82f);
+                    RuntimeCombatAudio.PlayImpact();
                 }
             }
 

@@ -140,6 +140,7 @@ namespace AL.ChampionMode.AI
             if (_player != null)
             {
                 SkillEffectFactory.SpawnBossTelegraph(_player.position, _attackRange, 1.5f);
+                RuntimeCombatAudio.PlayWarning();
             }
             yield return new WaitForSeconds(1.5f);
 
@@ -208,6 +209,7 @@ namespace AL.ChampionMode.AI
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 2.8f, Mathf.CeilToInt(finalAmount).ToString(), _isBroken ? new Color(0.40f, 1f, 0.95f) : new Color(1f, 0.62f, 0.22f), _isBroken ? 0.34f : 0.28f, 0.92f);
             SkillEffectFactory.ShakeCamera(_isBroken ? 0.20f : 0.12f, _isBroken ? 0.16f : 0.10f);
             PlayHitReaction(_isBroken ? 1.08f : 1.04f);
+            RuntimeCombatAudio.PlayImpact();
             Debug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
 
             if (_currentHealth <= 0f)
@@ -249,6 +251,7 @@ namespace AL.ChampionMode.AI
             SkillEffectFactory.SpawnBossTelegraph(transform.position, 2.25f, _brokenDuration);
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "BREAK", new Color(0.40f, 1f, 0.95f), 0.38f, 1.1f);
             SkillEffectFactory.ShakeCamera(0.28f, 0.20f);
+            RuntimeCombatAudio.PlayBreak();
 
             yield return new WaitForSeconds(_brokenDuration);
 
@@ -286,6 +289,7 @@ namespace AL.ChampionMode.AI
             SkillEffectFactory.SpawnCurseMark(transform.position + Vector3.up);
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "ENRAGE", new Color(1f, 0.20f, 0.12f), 0.36f, 1.2f);
             SkillEffectFactory.ShakeCamera(0.22f, 0.18f);
+            RuntimeCombatAudio.PlayWarning();
         }
 
         private void Die()
