@@ -2020,7 +2020,14 @@ namespace AL.ChampionMode
         private void CreateSkillButton(Transform parent, Font font, int slotIndex, Vector2 anchoredPosition)
         {
             Color slotColor = GetSkillSlotColor(slotIndex);
-            var button = CreateHudButton(parent, font, BuildSkillButtonLabel(slotIndex), anchoredPosition, new Vector2(154f, 58f), () => _playerController.RequestSkill(slotIndex), 14, new Color(0.06f, 0.09f, 0.13f, 0.96f));
+            ChampionActionButtonFeedback feedback = null;
+            var button = CreateHudButton(parent, font, BuildSkillButtonLabel(slotIndex), anchoredPosition, new Vector2(154f, 58f), () =>
+            {
+                feedback?.Pulse();
+                _playerController.RequestSkill(slotIndex);
+            }, 14, new Color(0.06f, 0.09f, 0.13f, 0.96f));
+            feedback = button.gameObject.AddComponent<ChampionActionButtonFeedback>();
+            feedback.Configure(button.GetComponent<RectTransform>(), button.GetComponent<Image>(), button.GetComponentInChildren<Text>(), slotColor);
             CreateHudPanel(button.transform, "SkillAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(154f, 5f), slotColor);
             _skillReadyGlows[slotIndex] = CreateUiImage(button.transform, "SkillReadyGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(25f, -30f), new Vector2(42f, 42f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.16f));
             CreateSkillIconTile(button.transform, slotIndex, slotColor);
