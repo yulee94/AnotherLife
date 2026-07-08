@@ -1,0 +1,70 @@
+{
+  "version": "0.1.0",
+  "game": "Another Life",
+  "characterSlots": [
+    "BodyPreset",
+    "Head",
+    "Hair",
+    "Eyes",
+    "Skin",
+    "ArmorChest",
+    "Gloves",
+    "Boots",
+    "Cape",
+    "WeaponMain",
+    "WeaponOff",
+    "BackAttachment",
+    "PetAnchor",
+    "MountAnchor"
+  ],
+  "bodyPresets": [
+    { "id": "average", "displayName": "Average", "scale": [1.0, 1.0, 1.0] },
+    { "id": "slim", "displayName": "Slim", "scale": [0.86, 1.06, 0.86] },
+    { "id": "broad", "displayName": "Broad", "scale": [1.16, 1.0, 1.06] },
+    { "id": "tall", "displayName": "Tall", "scale": [0.96, 1.18, 0.96] },
+    { "id": "stout", "displayName": "Stout", "scale": [1.08, 0.92, 1.08] }
+  ],
+  "hairStyles": [
+    { "id": "short", "displayName": "Short" },
+    { "id": "long", "displayName": "Long" },
+    { "id": "braid", "displayName": "Braid" }
+  ],
+  "armorStyles": [
+    { "id": "realm_basic", "displayName": "Realm Basic" },
+    { "id": "light_scout", "displayName": "Light Scout" },
+    { "id": "heavy_plate", "displayName": "Heavy Plate" },
+    { "id": "warmaster_plate", "displayName": "Warmaster Plate" }
+  ],
+  "realms": [
+    {
+      "id": "Stonehold",
+      "displayName": "Stonehold Dwarves",
+      "materialKeys": ["stone", "dark_iron", "copper", "forge_glow"],
+      "customizationFocus": ["beards", "braids", "rune_plates", "heavy_armor", "siege_tools"]
+    },
+    {
+      "id": "Eldergrove",
+      "displayName": "Eldergrove Elves",
+      "materialKeys": ["leaf_cloth", "pale_gold", "luminous_wood", "lake_crystal"],
+      "customizationFocus": ["long_hair", "ears", "vine_trim", "feather_capes", "nature_marks"]
+    },
+    {
+      "id": "Crownlands",
+      "displayName": "Crownlands Humans",
+      "materialKeys": ["polished_steel", "royal_blue", "gold_trim", "leather"],
+      "customizationFocus": ["tabards", "heraldry", "balanced_plate", "trade_gear", "royal_capes"]
+    },
+    {
+      "id": "Umbral",
+      "displayName": "Umbral Dark Elves",
+      "materialKeys": ["obsidian", "ash_cloth", "red_glass", "shadow_metal"],
+      "customizationFocus": ["masks", "spikes", "curse_tattoos", "glowing_cracks", "assassin_cloaks"]
+    }
+  ],
+  "qualityTargets": {
+    "heroTriangles": "8000-18000",
+    "mediumTriangles": "3000-6000",
+    "lowTriangles": "800-1500",
+    "farRepresentation": "realm marker or silhouette"
+  }
+}

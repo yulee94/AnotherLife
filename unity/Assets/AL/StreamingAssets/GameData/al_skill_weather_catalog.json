@@ -1,0 +1,57 @@
+{
+  "version": "0.1.0",
+  "skillEffects": [
+    {
+      "key": "stonehold_forge_burst",
+      "realm": "Stonehold",
+      "use": "melee impact and defensive Warmaster skills",
+      "colors": ["slate", "iron", "copper", "forge_orange"]
+    },
+    {
+      "key": "eldergrove_healing_bloom",
+      "realm": "Eldergrove",
+      "use": "healing, protection, ranger support",
+      "colors": ["leaf_green", "pale_gold", "white", "lake_blue"]
+    },
+    {
+      "key": "crownlands_royal_strike",
+      "realm": "Crownlands",
+      "use": "balanced attack, heroic buffs, banner effects",
+      "colors": ["royal_blue", "gold", "white", "red_accent"]
+    },
+    {
+      "key": "umbral_curse_mark",
+      "realm": "Umbral",
+      "use": "curse, debuff, stealth, poison, anti-heal",
+      "colors": ["black", "violet", "crimson", "ember_red"]
+    }
+  ],
+  "weatherProfiles": [
+    {
+      "key": "mountain_snow_wind",
+      "realm": "Stonehold",
+      "particles": ["snow", "wind_streak", "cold_fog"]
+    },
+    {
+      "key": "eldergrove_sunrain",
+      "realm": "Eldergrove",
+      "particles": ["rain", "glowing_pollen", "soft_mist"]
+    },
+    {
+      "key": "crownlands_clear_storm",
+      "realm": "Crownlands",
+      "particles": ["light_rain", "cloud_flash", "banner_wind"]
+    },
+    {
+      "key": "umbral_ashfall",
+      "realm": "Umbral",
+      "particles": ["ash", "ember", "smoke_wisp"]
+    },
+    {
+      "key": "warzone_battle_fog",
+      "realm": "Shared",
+      "particles": ["dust", "smoke", "distant_marker_haze"]
+    }
+  ]
+}
+

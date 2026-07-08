@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-character-customization.schema.json",
+  "title": "Another Life Character Customization Catalog",
+  "type": "object",
+  "required": ["version", "game", "characterSlots", "bodyPresets", "hairStyles", "armorStyles", "realms", "qualityTargets"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "game": {
+      "type": "string"
+    },
+    "characterSlots": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "bodyPresets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/bodyPreset"
+      },
+      "minItems": 1
+    },
+    "hairStyles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/styleOption"
+      },
+      "minItems": 1
+    },
+    "armorStyles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/styleOption"
+      },
+      "minItems": 1
+    },
+    "realms": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/realmCustomization"
+      },
+      "minItems": 1
+    },
+    "qualityTargets": {
+      "$ref": "#/$defs/qualityTargets"
+    }
+  },
+  "$defs": {
+    "bodyPreset": {
+      "type": "object",
+      "required": ["id", "displayName", "scale"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "scale": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        }
+      },
+      "additionalProperties": false
+    },
+    "styleOption": {
+      "type": "object",
+      "required": ["id", "displayName"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "realmCustomization": {
+      "type": "object",
+      "required": ["id", "displayName", "materialKeys", "customizationFocus"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "materialKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "customizationFocus": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "qualityTargets": {
+      "type": "object",
+      "required": ["heroTriangles", "mediumTriangles", "lowTriangles", "farRepresentation"],
+      "properties": {
+        "heroTriangles": {
+          "type": "string"
+        },
+        "mediumTriangles": {
+          "type": "string"
+        },
+        "lowTriangles": {
+          "type": "string"
+        },
+        "farRepresentation": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
