@@ -102,7 +102,7 @@ namespace AL.Kingdom
             buildingRoot.transform.position = worldPosition;
 
             var baseObject = CreatePrimitive(buildingRoot.transform, "Base", PrimitiveType.Cube, new Vector3(0f, height * 0.5f, 0f), new Vector3(TileSize * 0.88f, height, TileSize * 0.88f), bodyColor);
-            baseObject.AddComponent<KingdomBuildingSelectable>().Configure(state.BuildingId, state.Level, bodyColor, accentColor);
+            baseObject.AddComponent<KingdomBuildingSelectable>().Configure(state.BuildingId, state.Level, bodyColor, accentColor, state.IsUpgrading, GetUpgradeRemainingSeconds(state));
             CreatePrimitive(buildingRoot.transform, "Trim", PrimitiveType.Cube, new Vector3(0f, height + 0.04f, 0f), new Vector3(TileSize * 0.98f, 0.10f, TileSize * 0.98f), accentColor);
 
             if (state.BuildingId.Contains("Hall") || state.BuildingId.Contains("Barracks"))
@@ -120,6 +120,11 @@ namespace AL.Kingdom
             else
             {
                 CreatePrimitive(buildingRoot.transform, "Roof", PrimitiveType.Cube, new Vector3(0f, height + 0.18f, 0f), new Vector3(TileSize * 0.68f, 0.22f, TileSize * 0.68f), Color.Lerp(bodyColor, accentColor, 0.35f), new Vector3(0f, 45f, 0f));
+            }
+
+            if (state.IsUpgrading)
+            {
+                CreateUpgradeIndicator(buildingRoot.transform, height, accentColor, GetUpgradeRemainingSeconds(state));
             }
 
             CreateLevelBadge(buildingRoot.transform, state, height, accentColor);
@@ -145,17 +150,35 @@ namespace AL.Kingdom
 
         private void CreateLevelBadge(Transform parent, BuildingState state, float height, Color accentColor)
         {
+            int remainingSeconds = GetUpgradeRemainingSeconds(state);
             var labelObject = new GameObject("LevelLabel");
             labelObject.transform.SetParent(parent, false);
             labelObject.transform.localPosition = new Vector3(0f, height + 0.78f, -0.18f);
             labelObject.transform.localRotation = Quaternion.Euler(55f, 0f, 0f);
             var label = labelObject.AddComponent<TextMesh>();
-            label.text = $"{GetShortBuildingName(state.BuildingId)}\nLv {state.Level}";
+            label.text = state.IsUpgrading
+                ? $"{GetShortBuildingName(state.BuildingId)}\nUP {remainingSeconds}s"
+                : $"{GetShortBuildingName(state.BuildingId)}\nLv {state.Level}";
             label.anchor = TextAnchor.MiddleCenter;
             label.alignment = TextAlignment.Center;
             label.fontSize = 48;
             label.characterSize = 0.055f;
             label.color = Color.Lerp(accentColor, Color.white, 0.34f);
+        }
+
+        private void CreateUpgradeIndicator(Transform parent, float height, Color accentColor, int remainingSeconds)
+        {
+            Color progressColor = Color.Lerp(accentColor, new Color(1f, 0.84f, 0.32f), 0.45f);
+            CreatePrimitive(parent, "UpgradeBaseRing", PrimitiveType.Cylinder, new Vector3(0f, 0.055f, 0f), new Vector3(0.72f, 0.035f, 0.72f), new Color(progressColor.r, progressColor.g, progressColor.b, 0.86f));
+            CreatePrimitive(parent, "UpgradeBeam", PrimitiveType.Cylinder, new Vector3(0f, height + 0.34f, 0f), new Vector3(0.08f, 0.36f, 0.08f), progressColor);
+
+            int tickCount = Mathf.Clamp(remainingSeconds <= 0 ? 4 : 4 + remainingSeconds / 5, 4, 8);
+            for (int i = 0; i < tickCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / tickCount;
+                Vector3 local = new Vector3(Mathf.Cos(angle) * 0.56f, 0.14f, Mathf.Sin(angle) * 0.56f);
+                CreatePrimitive(parent, "UpgradeTick", PrimitiveType.Cube, local, new Vector3(0.08f, 0.08f, 0.20f), progressColor, new Vector3(0f, -angle * Mathf.Rad2Deg, 0f));
+            }
         }
 
         private GameObject CreatePrimitive(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Color color, Vector3? localEulerAngles = null)
@@ -243,9 +266,21 @@ namespace AL.Kingdom
                 .Replace("ManaShrine", "Mana");
         }
 
-        internal static void RaiseBuildingSelected(string buildingId, int level)
+        internal static void RaiseBuildingSelected(string buildingId, int level, bool isUpgrading, int remainingSeconds)
         {
-            OnBuildingSelected?.Invoke($"Selected {GetShortBuildingName(buildingId)} Lv {level}. Use upgrades, research, and troops to grow this district.");
+            string status = isUpgrading ? $"upgrading, {remainingSeconds}s remaining" : "ready for orders";
+            OnBuildingSelected?.Invoke($"Selected {GetShortBuildingName(buildingId)} Lv {level}: {status}. Use upgrades, research, and troops to grow this district.");
+        }
+
+        private static int GetUpgradeRemainingSeconds(BuildingState state)
+        {
+            if (state == null || !state.IsUpgrading)
+            {
+                return 0;
+            }
+
+            long now = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            return Mathf.Max(0, (int)(state.UpgradeCompleteTimestamp - now));
         }
 
         private void ClearExistingBuildingVisuals()
@@ -262,15 +297,19 @@ namespace AL.Kingdom
     {
         private string _buildingId;
         private int _level;
+        private bool _isUpgrading;
+        private int _remainingSeconds;
         private Color _baseColor;
         private Color _accentColor;
         private Renderer _renderer;
         private float _highlightTimer;
 
-        public void Configure(string buildingId, int level, Color baseColor, Color accentColor)
+        public void Configure(string buildingId, int level, Color baseColor, Color accentColor, bool isUpgrading, int remainingSeconds)
         {
             _buildingId = buildingId;
             _level = level;
+            _isUpgrading = isUpgrading;
+            _remainingSeconds = remainingSeconds;
             _baseColor = baseColor;
             _accentColor = accentColor;
             _renderer = GetComponent<Renderer>();
@@ -284,14 +323,23 @@ namespace AL.Kingdom
             }
 
             _highlightTimer = 0.42f;
-            CityLayoutEngine.RaiseBuildingSelected(_buildingId, _level);
+            CityLayoutEngine.RaiseBuildingSelected(_buildingId, _level, _isUpgrading, _remainingSeconds);
         }
 
         private void Update()
         {
             if (_highlightTimer <= 0f)
             {
-                SetColor(_baseColor);
+                if (_isUpgrading)
+                {
+                    float upgradePulse = Mathf.PingPong(Time.time * 2.8f, 1f);
+                    SetColor(Color.Lerp(_baseColor, _accentColor, 0.18f + upgradePulse * 0.22f));
+                }
+                else
+                {
+                    SetColor(_baseColor);
+                }
+
                 return;
             }
 
