@@ -19,13 +19,36 @@ namespace AL.ChampionMode
         private ChampionCustomizationController _playerCustomization;
         private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
+        private Transform _bossTransform;
         private Text _healthText;
+        private float _warzoneCreditTimer;
 
         private void Start()
         {
             Bootloader.InitializeIfMissing();
             BuildArena();
             BuildHud();
+        }
+
+        private void Update()
+        {
+            if (_playerController == null || _bossTransform == null)
+            {
+                return;
+            }
+
+            _warzoneCreditTimer += Time.deltaTime;
+            if (_warzoneCreditTimer < 5f)
+            {
+                return;
+            }
+
+            _warzoneCreditTimer = 0f;
+            float distance = Vector3.Distance(_playerController.transform.position, _bossTransform.position);
+            if (distance <= 12f)
+            {
+                ServiceLocator.Get<AL.Core.Interfaces.IWarzoneCreditService>().AddCredits(1);
+            }
         }
 
         private void BuildArena()
@@ -69,6 +92,7 @@ namespace AL.ChampionMode
             boss.transform.localScale = new Vector3(2.4f, 2.4f, 2.4f);
             boss.GetComponent<Renderer>().material.color = new Color(0.75f, 0.08f, 0.08f);
             boss.AddComponent<BossDummyAI>();
+            _bossTransform = boss.transform;
 
             SpawnBotChampions();
 

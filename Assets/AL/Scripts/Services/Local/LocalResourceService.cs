@@ -77,6 +77,26 @@ namespace AL.Services.Local
             AddProducedResource(ResourceType.Wood, 5 * lumberMillLevel * deltaSeconds);
             AddProducedResource(ResourceType.Stone, 2 * quarryLevel * deltaSeconds);
             AddProducedResource(ResourceType.Gold, 1 * goldMineLevel * deltaSeconds);
+
+            AddTerritoryIncome(deltaSeconds);
+        }
+
+        private void AddTerritoryIncome(double deltaSeconds)
+        {
+            ITerritoryService territoryService;
+            try
+            {
+                territoryService = ServiceLocator.Get<ITerritoryService>();
+            }
+            catch (Exception)
+            {
+                return;
+            }
+
+            AddProducedResource(ResourceType.Food, territoryService.CalculatePassiveIncome(ResourceType.Food) * deltaSeconds / 60.0);
+            AddProducedResource(ResourceType.Wood, territoryService.CalculatePassiveIncome(ResourceType.Wood) * deltaSeconds / 60.0);
+            AddProducedResource(ResourceType.Stone, territoryService.CalculatePassiveIncome(ResourceType.Stone) * deltaSeconds / 60.0);
+            AddProducedResource(ResourceType.Gold, territoryService.CalculatePassiveIncome(ResourceType.Gold) * deltaSeconds / 60.0);
         }
 
         private void AddProducedResource(ResourceType type, double amount)

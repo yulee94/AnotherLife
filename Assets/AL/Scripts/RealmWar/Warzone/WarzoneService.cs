@@ -51,8 +51,10 @@ namespace AL.RealmWar.Warzone
 
         public long CalculatePassiveIncome(ResourceType type)
         {
-            // Simple logic for the vertical slice
-            return GetTerritories().Where(t => t.BonusType == type).Sum(t => t.BonusAmount);
+            var selectedRealm = _saveGameService.CurrentSave?.SelectedRealm ?? RealmId.None;
+            return GetTerritories()
+                .Where(t => t.OwnerRealm == selectedRealm && t.BonusType == type)
+                .Sum(t => t.BonusAmount);
         }
 
         private void EnsureTerritories()
