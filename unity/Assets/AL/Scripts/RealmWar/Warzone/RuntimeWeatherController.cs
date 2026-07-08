@@ -18,6 +18,9 @@ namespace AL.RealmWar.Warzone
         private Light _lightningLight;
         private Coroutine _lightningRoutine;
         private Coroutine _combatFlashRoutine;
+        private float _combatSurgeTimer;
+        private float _combatSurgeDuration = 0.6f;
+        private float _combatSurgeStrength;
         private float _nextLightningTime;
         private float _baseDirectionalIntensity;
 
@@ -30,6 +33,7 @@ namespace AL.RealmWar.Warzone
 
         private void Update()
         {
+            TickCombatSurge();
             AnimateWind();
             AnimateAtmosphere();
             TickLightning();
@@ -82,6 +86,7 @@ namespace AL.RealmWar.Warzone
             }
 
             _combatFlashRoutine = StartCoroutine(CombatFlashRoutine(color, intensity, duration));
+            TriggerAtmosphereSurge(color, intensity);
         }
 
         private void ApplyProfile()
@@ -318,7 +323,9 @@ namespace AL.RealmWar.Warzone
             }
 
             float pulse = Mathf.Sin(Time.time * Mathf.Max(0.01f, _profile.WindPulseFrequency)) * _profile.WindPulseAmplitude;
-            _windZone.windMain = Mathf.Max(0f, _profile.WindMain + pulse);
+            float combatSurge = GetCombatSurge01();
+            _windZone.windMain = Mathf.Max(0f, _profile.WindMain + pulse + combatSurge * 2.8f);
+            _windZone.windTurbulence = Mathf.Max(0f, _profile.WindTurbulence + combatSurge * 1.6f);
         }
 
         private void AnimateAtmosphere()
@@ -329,21 +336,100 @@ namespace AL.RealmWar.Warzone
             }
 
             float pulse = Mathf.Sin(Time.time * Mathf.Max(0.01f, _profile.WindPulseFrequency * 0.72f));
+            float combatSurge = GetCombatSurge01();
             if (_groundMistParticles != null)
             {
                 var emission = _groundMistParticles.emission;
-                emission.rateOverTimeMultiplier = 1f + Mathf.Clamp(pulse * 0.10f, -0.08f, 0.12f);
+                emission.rateOverTimeMultiplier = 1f + Mathf.Clamp(pulse * 0.10f, -0.08f, 0.12f) + combatSurge * 0.46f;
             }
 
             if (_horizonHazeParticles != null)
             {
                 var emission = _horizonHazeParticles.emission;
-                emission.rateOverTimeMultiplier = 1f + Mathf.Clamp(-pulse * 0.08f, -0.06f, 0.10f);
+                emission.rateOverTimeMultiplier = 1f + Mathf.Clamp(-pulse * 0.08f, -0.06f, 0.10f) + combatSurge * 0.24f;
             }
 
             if (_directionalLight != null && _baseDirectionalIntensity > 0f)
             {
-                _directionalLight.intensity = Mathf.Max(0f, _baseDirectionalIntensity * (1f + pulse * 0.025f));
+                _directionalLight.intensity = Mathf.Max(0f, _baseDirectionalIntensity * (1f + pulse * 0.025f + combatSurge * 0.045f));
+            }
+        }
+
+        private void TickCombatSurge()
+        {
+            if (_combatSurgeTimer <= 0f)
+            {
+                _combatSurgeStrength = 0f;
+                return;
+            }
+
+            _combatSurgeTimer -= Time.deltaTime;
+            if (_combatSurgeTimer <= 0f)
+            {
+                _combatSurgeTimer = 0f;
+                _combatSurgeStrength = 0f;
+            }
+        }
+
+        private float GetCombatSurge01()
+        {
+            if (_combatSurgeTimer <= 0f || _combatSurgeDuration <= 0f)
+            {
+                return 0f;
+            }
+
+            float remaining = Mathf.Clamp01(_combatSurgeTimer / _combatSurgeDuration);
+            return Mathf.Clamp01(_combatSurgeStrength) * Mathf.SmoothStep(0f, 1f, remaining);
+        }
+
+        private void TriggerAtmosphereSurge(Color color, float intensity)
+        {
+            float strength = Mathf.Clamp01(intensity / 4.2f);
+            _combatSurgeStrength = Mathf.Max(_combatSurgeStrength, strength);
+            _combatSurgeDuration = Mathf.Lerp(0.45f, 0.92f, strength);
+            _combatSurgeTimer = _combatSurgeDuration;
+            EmitCombatWeatherBurst(color, strength);
+        }
+
+        private void EmitCombatWeatherBurst(Color color, float strength)
+        {
+            if (_profile == null)
+            {
+                return;
+            }
+
+            Color surgeColor = Color.Lerp(_profile.ParticleStartColor, color, 0.52f);
+            surgeColor.a = Mathf.Clamp01(Mathf.Max(surgeColor.a, 0.34f) * Mathf.Lerp(0.75f, 1.25f, strength));
+            int mistCount = Mathf.Clamp(Mathf.RoundToInt(_profile.MaxParticles * Mathf.Lerp(0.035f, 0.13f, strength)), 6, 46);
+            int streakCount = Mathf.Clamp(Mathf.RoundToInt(_profile.MaxParticles * Mathf.Lerp(0.020f, 0.08f, strength)), 4, 34);
+
+            EmitWeatherParticles(_groundMistParticles, mistCount, surgeColor, Mathf.Max(0.9f, _profile.ParticleSize * 13f), Mathf.Lerp(0.85f, 1.45f, strength), 2.2f + strength * 2.4f, true);
+            EmitWeatherParticles(_particles, streakCount, Color.Lerp(surgeColor, Color.white, 0.16f), Mathf.Max(0.04f, _profile.ParticleSize * 1.35f), Mathf.Lerp(0.72f, 1.20f, strength), 3.0f + strength * 3.0f, false);
+        }
+
+        private void EmitWeatherParticles(ParticleSystem particles, int count, Color color, float size, float lifetime, float speed, bool groundMist)
+        {
+            if (particles == null || count <= 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 disk = Random.insideUnitCircle * Mathf.Max(1f, _profile.Radius * (groundMist ? 0.24f : 0.36f));
+                Vector3 velocity = new Vector3(
+                    Random.Range(-1f, 1f),
+                    groundMist ? Random.Range(0.02f, 0.22f) : Random.Range(-0.28f, -0.08f),
+                    Random.Range(-1f, 1f)).normalized * speed;
+                var emitParams = new ParticleSystem.EmitParams
+                {
+                    position = new Vector3(disk.x, groundMist ? 0f : Random.Range(-2.0f, 2.4f), disk.y),
+                    velocity = velocity,
+                    startColor = color,
+                    startSize = size * Random.Range(0.72f, 1.18f),
+                    startLifetime = lifetime * Random.Range(0.72f, 1.12f)
+                };
+                particles.Emit(emitParams, 1);
             }
         }
 
