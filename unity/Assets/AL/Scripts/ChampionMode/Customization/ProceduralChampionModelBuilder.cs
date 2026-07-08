@@ -20,6 +20,7 @@ namespace AL.ChampionMode.Customization
             EnsureArmor(root);
             EnsureWeapons(root);
             EnsureHeroDetailLayer(root);
+            EnsurePrestigeSilhouetteLayer(root);
             EnsureAnchors(root);
             var motion = champion.GetComponent<ProceduralChampionMotion>() ?? champion.AddComponent<ProceduralChampionMotion>();
             motion.Rebind();
@@ -334,6 +335,60 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Tome_Rune", PrimitiveType.Cube, new Vector3(-0.70f, 0.10f, 0.292f), new Vector3(0.12f, 0.028f, 0.020f), new Vector3(0f, 0f, -10f), arcane, 0.08f, 0.78f, 0.28f);
         }
 
+        private static void EnsurePrestigeSilhouetteLayer(Transform root)
+        {
+            var shadowSteel = new Color(0.075f, 0.085f, 0.105f);
+            var edgeMetal = new Color(0.70f, 0.72f, 0.72f);
+            var accent = new Color(0.86f, 0.66f, 0.22f);
+            var leather = new Color(0.18f, 0.11f, 0.07f);
+            var cloth = new Color(0.08f, 0.10f, 0.16f);
+            var arcane = new Color(0.35f, 0.72f, 1.00f);
+
+            EnsurePart(root, "Prestige_Mantle_L", PrimitiveType.Cube, new Vector3(-0.43f, 0.50f, -0.02f), new Vector3(0.36f, 0.09f, 0.36f), new Vector3(0f, 0f, -12f), shadowSteel, 0.38f, 0.58f);
+            EnsurePart(root, "Prestige_Mantle_R", PrimitiveType.Cube, new Vector3(0.43f, 0.50f, -0.02f), new Vector3(0.36f, 0.09f, 0.36f), new Vector3(0f, 0f, 12f), shadowSteel, 0.38f, 0.58f);
+            EnsurePart(root, "Prestige_Mantle_Trim_L", PrimitiveType.Cube, new Vector3(-0.47f, 0.55f, 0.10f), new Vector3(0.30f, 0.032f, 0.050f), new Vector3(0f, 0f, -12f), accent, 0.32f, 0.70f, 0.08f);
+            EnsurePart(root, "Prestige_Mantle_Trim_R", PrimitiveType.Cube, new Vector3(0.47f, 0.55f, 0.10f), new Vector3(0.30f, 0.032f, 0.050f), new Vector3(0f, 0f, 12f), accent, 0.32f, 0.70f, 0.08f);
+            EnsurePart(root, "Prestige_Mantle_Rivet_L", PrimitiveType.Sphere, new Vector3(-0.33f, 0.54f, 0.19f), new Vector3(0.040f, 0.040f, 0.024f), Vector3.zero, accent, 0.30f, 0.72f, 0.08f);
+            EnsurePart(root, "Prestige_Mantle_Rivet_R", PrimitiveType.Sphere, new Vector3(0.33f, 0.54f, 0.19f), new Vector3(0.040f, 0.040f, 0.024f), Vector3.zero, accent, 0.30f, 0.72f, 0.08f);
+
+            EnsurePart(root, "Prestige_Sash_Diagonal", PrimitiveType.Cube, new Vector3(-0.03f, 0.04f, 0.382f), new Vector3(0.080f, 0.88f, 0.034f), new Vector3(0f, 0f, -28f), cloth, 0.02f, 0.50f);
+            EnsurePart(root, "Prestige_Sash_Edge", PrimitiveType.Cube, new Vector3(0.07f, 0.04f, 0.407f), new Vector3(0.030f, 0.82f, 0.026f), new Vector3(0f, 0f, -28f), accent, 0.16f, 0.68f, 0.08f);
+            EnsurePart(root, "Prestige_SashPlate", PrimitiveType.Sphere, new Vector3(0.22f, -0.18f, 0.405f), new Vector3(0.090f, 0.090f, 0.030f), Vector3.zero, accent, 0.28f, 0.76f, 0.16f);
+            EnsurePart(root, "Prestige_FieldMedal_L", PrimitiveType.Sphere, new Vector3(-0.23f, 0.34f, 0.396f), new Vector3(0.045f, 0.045f, 0.022f), Vector3.zero, accent, 0.28f, 0.72f, 0.10f);
+            EnsurePart(root, "Prestige_FieldMedal_R", PrimitiveType.Sphere, new Vector3(-0.13f, 0.30f, 0.398f), new Vector3(0.035f, 0.035f, 0.020f), Vector3.zero, edgeMetal, 0.36f, 0.72f, 0.04f);
+            EnsurePart(root, "Prestige_BattleChain_L", PrimitiveType.Cube, new Vector3(-0.17f, 0.42f, 0.360f), new Vector3(0.24f, 0.026f, 0.026f), new Vector3(0f, 0f, -18f), accent, 0.34f, 0.70f, 0.08f);
+            EnsurePart(root, "Prestige_BattleChain_R", PrimitiveType.Cube, new Vector3(0.17f, 0.42f, 0.360f), new Vector3(0.24f, 0.026f, 0.026f), new Vector3(0f, 0f, 18f), accent, 0.34f, 0.70f, 0.08f);
+            EnsurePart(root, "Prestige_WaistWrap", PrimitiveType.Cube, new Vector3(0f, -0.33f, 0.285f), new Vector3(0.72f, 0.075f, 0.040f), Vector3.zero, cloth, 0.02f, 0.48f);
+            EnsurePart(root, "Prestige_WaistWrap_Tail_L", PrimitiveType.Cube, new Vector3(-0.27f, -0.48f, 0.290f), new Vector3(0.070f, 0.34f, 0.034f), new Vector3(0f, 0f, 8f), cloth, 0.02f, 0.48f);
+            EnsurePart(root, "Prestige_WaistWrap_Tail_R", PrimitiveType.Cube, new Vector3(0.27f, -0.48f, 0.290f), new Vector3(0.070f, 0.34f, 0.034f), new Vector3(0f, 0f, -8f), cloth, 0.02f, 0.48f);
+
+            EnsurePart(root, "Cape_Tassel_L", PrimitiveType.Cube, new Vector3(-0.42f, -0.63f, -0.61f), new Vector3(0.045f, 0.26f, 0.030f), new Vector3(8f, 0f, -6f), accent, 0.08f, 0.66f, 0.06f);
+            EnsurePart(root, "Cape_Tassel_R", PrimitiveType.Cube, new Vector3(0.42f, -0.63f, -0.61f), new Vector3(0.045f, 0.26f, 0.030f), new Vector3(8f, 0f, 6f), accent, 0.08f, 0.66f, 0.06f);
+            EnsurePart(root, "Cape_Tassel_Weight_L", PrimitiveType.Sphere, new Vector3(-0.42f, -0.80f, -0.62f), new Vector3(0.050f, 0.050f, 0.030f), Vector3.zero, edgeMetal, 0.34f, 0.70f, 0.05f);
+            EnsurePart(root, "Cape_Tassel_Weight_R", PrimitiveType.Sphere, new Vector3(0.42f, -0.80f, -0.62f), new Vector3(0.050f, 0.050f, 0.030f), Vector3.zero, edgeMetal, 0.34f, 0.70f, 0.05f);
+
+            EnsurePart(root, "Back_Harness", PrimitiveType.Cube, new Vector3(0f, 0.12f, -0.37f), new Vector3(0.62f, 0.070f, 0.052f), new Vector3(0f, 0f, 0f), leather, 0.06f, 0.46f);
+            EnsurePart(root, "Back_HarnessStrap_L", PrimitiveType.Cube, new Vector3(-0.20f, 0.08f, -0.38f), new Vector3(0.055f, 0.62f, 0.044f), new Vector3(0f, 0f, -18f), leather, 0.06f, 0.46f);
+            EnsurePart(root, "Back_HarnessStrap_R", PrimitiveType.Cube, new Vector3(0.20f, 0.08f, -0.38f), new Vector3(0.055f, 0.62f, 0.044f), new Vector3(0f, 0f, 18f), leather, 0.06f, 0.46f);
+            EnsurePart(root, "Back_HarnessRing_L", PrimitiveType.Sphere, new Vector3(-0.32f, 0.20f, -0.42f), new Vector3(0.055f, 0.055f, 0.030f), Vector3.zero, accent, 0.30f, 0.72f, 0.08f);
+            EnsurePart(root, "Back_HarnessRing_R", PrimitiveType.Sphere, new Vector3(0.32f, 0.20f, -0.42f), new Vector3(0.055f, 0.055f, 0.030f), Vector3.zero, accent, 0.30f, 0.72f, 0.08f);
+
+            EnsurePart(root, "Back_Scabbard", PrimitiveType.Cube, new Vector3(-0.34f, -0.10f, -0.54f), new Vector3(0.070f, 0.86f, 0.060f), new Vector3(0f, 0f, -32f), leather, 0.08f, 0.48f);
+            EnsurePart(root, "Back_Scabbard_Cap_Top", PrimitiveType.Cube, new Vector3(-0.54f, 0.28f, -0.56f), new Vector3(0.12f, 0.045f, 0.050f), new Vector3(0f, 0f, -32f), edgeMetal, 0.44f, 0.72f, 0.05f);
+            EnsurePart(root, "Back_Scabbard_Cap_Bottom", PrimitiveType.Cube, new Vector3(-0.14f, -0.46f, -0.56f), new Vector3(0.12f, 0.045f, 0.050f), new Vector3(0f, 0f, -32f), edgeMetal, 0.44f, 0.72f, 0.05f);
+            EnsurePart(root, "Back_Scabbard_Rune", PrimitiveType.Cube, new Vector3(-0.36f, -0.08f, -0.60f), new Vector3(0.030f, 0.22f, 0.022f), new Vector3(0f, 0f, -32f), accent, 0.16f, 0.78f, 0.22f);
+            EnsurePart(root, "Back_Quiver", PrimitiveType.Cube, new Vector3(0.34f, -0.06f, -0.54f), new Vector3(0.20f, 0.76f, 0.13f), new Vector3(0f, 0f, 16f), leather, 0.06f, 0.48f);
+            EnsurePart(root, "Back_Quiver_Rim", PrimitiveType.Cube, new Vector3(0.22f, 0.32f, -0.44f), new Vector3(0.25f, 0.050f, 0.050f), new Vector3(0f, 0f, 16f), accent, 0.20f, 0.66f, 0.08f);
+            EnsurePart(root, "Back_QuiverArrow_0", PrimitiveType.Cube, new Vector3(0.18f, 0.55f, -0.42f), new Vector3(0.022f, 0.44f, 0.018f), new Vector3(0f, 0f, 12f), edgeMetal, 0.18f, 0.62f, 0.03f);
+            EnsurePart(root, "Back_QuiverArrow_1", PrimitiveType.Cube, new Vector3(0.30f, 0.58f, -0.42f), new Vector3(0.022f, 0.46f, 0.018f), new Vector3(0f, 0f, 18f), edgeMetal, 0.18f, 0.62f, 0.03f);
+            EnsurePart(root, "Back_QuiverArrow_2", PrimitiveType.Cube, new Vector3(0.42f, 0.52f, -0.42f), new Vector3(0.022f, 0.40f, 0.018f), new Vector3(0f, 0f, 22f), edgeMetal, 0.18f, 0.62f, 0.03f);
+            EnsurePart(root, "Back_RelicFrame", PrimitiveType.Cube, new Vector3(0f, 0.30f, -0.58f), new Vector3(0.32f, 0.42f, 0.052f), Vector3.zero, edgeMetal, 0.44f, 0.72f, 0.05f);
+            EnsurePart(root, "Back_RelicCore", PrimitiveType.Sphere, new Vector3(0f, 0.30f, -0.64f), new Vector3(0.13f, 0.13f, 0.060f), Vector3.zero, arcane, 0f, 0.86f, 0.58f);
+            EnsurePart(root, "Back_RelicHalo", PrimitiveType.Cylinder, new Vector3(0f, 0.30f, -0.66f), new Vector3(0.23f, 0.016f, 0.23f), new Vector3(90f, 0f, 0f), accent, 0.16f, 0.78f, 0.22f);
+            EnsurePart(root, "Back_HammerHook", PrimitiveType.Cube, new Vector3(0.36f, -0.12f, -0.52f), new Vector3(0.17f, 0.38f, 0.055f), new Vector3(0f, 0f, -18f), edgeMetal, 0.46f, 0.70f, 0.04f);
+            EnsurePart(root, "Back_HammerHook_Rivet", PrimitiveType.Sphere, new Vector3(0.30f, 0.08f, -0.57f), new Vector3(0.050f, 0.050f, 0.030f), Vector3.zero, accent, 0.30f, 0.72f, 0.08f);
+        }
+
         private static void EnsureAnchors(Transform root)
         {
             EnsureAnchor(root, "VFX_ChestAnchor", new Vector3(0f, 0.48f, 0.38f));
@@ -470,6 +525,8 @@ namespace AL.ChampionMode.Customization
         private MotionPart[] _capeParts = System.Array.Empty<MotionPart>();
         private MotionPart[] _hairParts = System.Array.Empty<MotionPart>();
         private MotionPart[] _robeParts = System.Array.Empty<MotionPart>();
+        private MotionPart[] _detailParts = System.Array.Empty<MotionPart>();
+        private MotionPart[] _backGearParts = System.Array.Empty<MotionPart>();
         private Vector3 _lastWorldPosition;
         private float _moveAmount;
         private float _seed;
@@ -486,9 +543,11 @@ namespace AL.ChampionMode.Customization
             _rightGlove = Bind("Glove_R");
             _weaponMain = Bind("Weapon_Main");
             _weaponOff = Bind("Weapon_Off");
-            _capeParts = BindExact("Cape", "Cape_LeftFold", "Cape_RightFold", "Cape_InnerShadow", "Cape_LeftEdge", "Cape_RightEdge", "Cape_Seam_Center", "Cape_Hem", "Cape_Rune_L", "Cape_Rune_R", "Cape_Chain_L", "Cape_Chain_R", "Cape_Pin_L", "Cape_Pin_R");
+            _capeParts = BindExact("Cape", "Cape_LeftFold", "Cape_RightFold", "Cape_InnerShadow", "Cape_LeftEdge", "Cape_RightEdge", "Cape_Seam_Center", "Cape_Hem", "Cape_Rune_L", "Cape_Rune_R", "Cape_Chain_L", "Cape_Chain_R", "Cape_Pin_L", "Cape_Pin_R", "Cape_Tassel_L", "Cape_Tassel_R", "Cape_Tassel_Weight_L", "Cape_Tassel_Weight_R");
             _hairParts = BindContaining("Hair_Long", "Hair_Braid", "Hair_Topknot_Tail");
             _robeParts = BindContaining("RobePanel", "RobeBackPanel", "RobeSleeve");
+            _detailParts = BindContaining("Prestige_Sash", "Prestige_BattleChain", "Prestige_WaistWrap", "Prestige_FieldMedal", "Back_Harness");
+            _backGearParts = BindContaining("Back_Scabbard", "Back_Quiver", "Back_Relic", "Back_HammerHook");
             _lastWorldPosition = transform.position;
             _seed = Mathf.Abs(GetInstanceID() * 0.173f) % 10f;
             _isBound = true;
@@ -531,6 +590,8 @@ namespace AL.ChampionMode.Customization
             ApplyGroup(_capeParts, new Vector3(0f, breath * 0.7f, -0.020f - _moveAmount * 0.050f), new Vector3(5.0f + _moveAmount * 8.0f + idle * 1.8f, 0f, stride * _moveAmount * 2.2f));
             ApplyGroup(_hairParts, new Vector3(0f, breath * 0.45f, -_moveAmount * 0.012f), new Vector3(idle * 1.4f + _moveAmount * 2.0f, 0f, sway * 0.8f));
             ApplyGroup(_robeParts, new Vector3(0f, breath * 0.5f, -_moveAmount * 0.026f), new Vector3(2.0f + _moveAmount * 5.5f, 0f, stride * _moveAmount * 1.4f));
+            ApplyGroup(_detailParts, new Vector3(0f, breath * 0.35f, 0f), new Vector3(idle * 0.4f, 0f, sway * 0.25f));
+            ApplyGroup(_backGearParts, new Vector3(0f, breath * 0.35f, -_moveAmount * 0.016f), new Vector3(2.0f + _moveAmount * 3.8f, 0f, stride * _moveAmount * 1.2f));
         }
 
         private MotionPart Bind(string partName)
@@ -744,8 +805,11 @@ namespace AL.ChampionMode.Customization
             if (name.Contains("orb") ||
                 name.Contains("crystal") ||
                 name.Contains("backattachment_core") ||
+                name.Contains("reliccore") ||
+                name.Contains("relichalo") ||
                 name.Contains("gem") ||
                 name.Contains("rune") ||
+                name.Contains("scabbard_rune") ||
                 name.Contains("coreline") ||
                 name.Contains("impactcore") ||
                 name.Contains("orbitstone") ||
@@ -754,7 +818,7 @@ namespace AL.ChampionMode.Customization
             {
                 strength = 0.54f;
                 speed = 1.45f;
-                scalePulse = name.Contains("orb") || name.Contains("crystal") || name.Contains("gem") || name.Contains("impactcore") || name.Contains("orbitstone");
+                scalePulse = name.Contains("orb") || name.Contains("crystal") || name.Contains("reliccore") || name.Contains("gem") || name.Contains("impactcore") || name.Contains("orbitstone");
                 return true;
             }
 
@@ -762,6 +826,12 @@ namespace AL.ChampionMode.Customization
                 name.Contains("etching") ||
                 name.Contains("crest") ||
                 name.Contains("trim") ||
+                name.Contains("sashplate") ||
+                name.Contains("fieldmedal") ||
+                name.Contains("harnessring") ||
+                name.Contains("quiver_rim") ||
+                name.Contains("hammerhook_rivet") ||
+                name.Contains("tassel_weight") ||
                 name.Contains("cape_pin") ||
                 name.Contains("cape_chain") ||
                 name.Contains("backattachment_wing") ||

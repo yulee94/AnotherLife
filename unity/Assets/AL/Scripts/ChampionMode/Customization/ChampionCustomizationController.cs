@@ -958,6 +958,12 @@ namespace AL.ChampionMode.Customization
             SetPartActive("ThighStrap", !isRobe);
             SetPartActive("BootStrap", !isRobe);
             SetPartActive("Cape_Rune", isRobe || isWarmaster);
+            SetPartActive("Prestige_Mantle", isHeavy || isWarmaster);
+            SetPartActive("Prestige_Sash", !isRobe);
+            SetPartActive("Prestige_FieldMedal", !isRobe && !isAssassin);
+            SetPartActive("Prestige_BattleChain", !isRobe);
+            SetPartActive("Prestige_WaistWrap", true);
+            SetPartActive("Back_Harness", true);
 
             SetPartScale("ChestArmor", isRobe ? new Vector3(0.78f, 0.82f, 0.28f) : isAssassin ? new Vector3(0.84f, 0.64f, 0.26f) : isHeavy ? new Vector3(1.05f, 0.82f, 0.38f) : new Vector3(0.92f, 0.74f, 0.32f));
             SetPartScale("Armor_Bevel_Top", isHeavy ? new Vector3(0.58f, 0.048f, 0.040f) : new Vector3(0.50f, 0.040f, 0.036f));
@@ -1076,6 +1082,11 @@ namespace AL.ChampionMode.Customization
             SetExactPartActive("Bow_ArrowShaft", isBow);
             SetExactPartActive("Bow_ArrowHead", isBow);
             SetExactPartActive("Bow_Fletching", isBow);
+            SetPartActive("Back_Scabbard", isSword);
+            SetPartActive("Back_Quiver", isBow);
+            SetPartActive("Back_QuiverArrow", isBow);
+            SetPartActive("Back_Relic", isStaff);
+            SetPartActive("Back_HammerHook", isAxe || isHammer);
 
             switch (weaponStyleId)
             {
@@ -1140,7 +1151,11 @@ namespace AL.ChampionMode.Customization
                 bool isHair = objectName.Contains("hair") || objectName.Contains("brow");
                 bool isSkin = objectName.Contains("skin") || objectName.Contains("ear");
                 bool isEye = objectName.Contains("eye");
-                bool isBrightMetal = objectName.Contains("blade") || objectName.Contains("edge");
+                bool isBrightMetal = objectName.Contains("blade") ||
+                                     objectName.Contains("edge") ||
+                                     objectName.Contains("arrowhead") ||
+                                     objectName.Contains("arrowshaft") ||
+                                     objectName.Contains("quiverarrow");
                 bool isEyeGlint = objectName.Contains("eye_glint");
                 bool isParchment = objectName.Contains("tome_page");
                 bool isAccent = objectName.Contains("facemark") ||
@@ -1151,10 +1166,18 @@ namespace AL.ChampionMode.Customization
                                 objectName.Contains("commandseal") ||
                                 objectName.Contains("coreline") ||
                                 objectName.Contains("impactcore") ||
+                                objectName.Contains("reliccore") ||
                                 objectName.Contains("orbitstone") ||
                                 objectName.Contains("fletching") ||
                                 objectName.Contains("chain") ||
                                 objectName.Contains("pin") ||
+                                objectName.Contains("sashplate") ||
+                                objectName.Contains("fieldmedal") ||
+                                objectName.Contains("harnessring") ||
+                                objectName.Contains("scabbard_rune") ||
+                                objectName.Contains("quiver_rim") ||
+                                objectName.Contains("hammerhook_rivet") ||
+                                objectName.Contains("mantle_trim") ||
                                 objectName.Contains("knuckle") ||
                                 objectName.Contains("trim") ||
                                 objectName.Contains("etching") ||
@@ -1174,12 +1197,19 @@ namespace AL.ChampionMode.Customization
                                 objectName.Contains("cloth") ||
                                 objectName.Contains("mask") ||
                                 objectName.Contains("robe") ||
+                                objectName.Contains("mantle") ||
+                                objectName.Contains("sash") ||
+                                objectName.Contains("waistwrap") ||
+                                objectName.Contains("tassel") ||
                                 objectName.Contains("undersuit") ||
                                 objectName.Contains("hood") ||
                                 objectName.Contains("tome");
                 bool isLeather = objectName.Contains("belt") ||
                                   objectName.Contains("boot") ||
                                   objectName.Contains("pouch") ||
+                                  objectName.Contains("harness") ||
+                                  objectName.Contains("scabbard") ||
+                                  objectName.Contains("quiver") ||
                                   objectName.Contains("tread") ||
                                   objectName.Contains("heel") ||
                                   objectName.Contains("strap") ||
@@ -1196,6 +1226,8 @@ namespace AL.ChampionMode.Customization
                                objectName.Contains("weapon") ||
                                objectName.Contains("shield") ||
                                objectName.Contains("sidecap") ||
+                               objectName.Contains("relicframe") ||
+                               objectName.Contains("hammerhook") ||
                                objectName.Contains("boss") ||
                                objectName.Contains("scar") ||
                                objectName.Contains("knee") ||
@@ -1233,7 +1265,7 @@ namespace AL.ChampionMode.Customization
                 float smoothness = isArmorShadow ? 0.38f : isBrightMetal ? 0.78f : isEyeGlint ? 0.88f : isEye || isAccent ? 0.72f : isMetal ? 0.60f : isSkin ? 0.30f : isHair ? 0.36f : 0.46f;
                 float emissionStrength = isEye
                     ? isEyeGlint ? 0.42f : 0.22f
-                    : objectName.Contains("orb") || objectName.Contains("crystal") || objectName.Contains("backattachment_core") || objectName.Contains("gem") || objectName.Contains("rune") || objectName.Contains("coreline") || objectName.Contains("impactcore") || objectName.Contains("orbitstone") || objectName.Contains("commandseal")
+                    : objectName.Contains("orb") || objectName.Contains("crystal") || objectName.Contains("backattachment_core") || objectName.Contains("reliccore") || objectName.Contains("gem") || objectName.Contains("rune") || objectName.Contains("coreline") || objectName.Contains("impactcore") || objectName.Contains("orbitstone") || objectName.Contains("commandseal")
                         ? 0.46f
                         : objectName.Contains("arcane_focus")
                             ? 0.34f
