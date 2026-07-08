@@ -166,7 +166,7 @@ namespace AL.ChampionMode.Control
 
         private void CreateHitVFX(Vector3 position)
         {
-            SkillEffectFactory.SpawnForgeBurst(position);
+            SkillEffectFactory.SpawnRealmImpact(position, GetCurrentRealmId());
         }
 
         private void CheckVictory()
@@ -207,12 +207,13 @@ namespace AL.ChampionMode.Control
         private void UseSkill(int index)
         {
             Debug.Log($"[Champion] Using Skill {index + 1}");
-            CreateHitVFX(transform.position + transform.forward * 1.5f + Vector3.up);
+            SkillEffectFactory.SpawnRealmImpact(transform.position + transform.forward * 1.5f + Vector3.up, GetCurrentRealmId());
         }
 
         private IEnumerator Dodge()
         {
             _isDodging = true;
+            SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, GetCurrentRealmId());
             Vector3 dodgeDir = transform.forward;
             float timer = 0f;
             float duration = 0.2f;
@@ -256,6 +257,19 @@ namespace AL.ChampionMode.Control
         public void SetBlocking(bool isBlocking)
         {
             _isBlocking = isBlocking;
+        }
+
+        private RealmId GetCurrentRealmId()
+        {
+            try
+            {
+                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
+            }
+            catch (System.Exception)
+            {
+                return RealmId.Crownlands;
+            }
         }
     }
 }

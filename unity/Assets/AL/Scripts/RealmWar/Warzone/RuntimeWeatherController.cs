@@ -1,3 +1,4 @@
+using AL.Core;
 using UnityEngine;
 
 namespace AL.RealmWar.Warzone
@@ -24,18 +25,43 @@ namespace AL.RealmWar.Warzone
             _radius = radius;
             _fallSpeed = fallSpeed;
 
-            var particles = GetComponent<ParticleSystem>();
-            if (particles != null)
-            {
-                Destroy(particles);
-            }
+            ConfigureParticleSystem(GetOrCreateParticleSystem());
+        }
 
-            BuildParticleWeather();
+        public void ConfigureForRealm(RealmId realmId)
+        {
+            switch (realmId)
+            {
+                case RealmId.Stonehold:
+                    Configure(new Color(0.82f, 0.92f, 1.0f, 0.42f), 180, 24f, 2.2f);
+                    break;
+                case RealmId.Eldergrove:
+                    Configure(new Color(0.45f, 0.95f, 0.68f, 0.34f), 150, 22f, 1.35f);
+                    break;
+                case RealmId.Crownlands:
+                    Configure(new Color(0.55f, 0.62f, 0.82f, 0.30f), 120, 22f, 1.55f);
+                    break;
+                case RealmId.Umbral:
+                    Configure(new Color(0.24f, 0.18f, 0.20f, 0.52f), 220, 20f, 0.95f);
+                    break;
+                default:
+                    Configure(new Color(0.45f, 0.42f, 0.38f, 0.35f), 120, 22f, 1.1f);
+                    break;
+            }
         }
 
         private void BuildParticleWeather()
         {
-            var particles = gameObject.AddComponent<ParticleSystem>();
+            ConfigureParticleSystem(GetOrCreateParticleSystem());
+        }
+
+        private ParticleSystem GetOrCreateParticleSystem()
+        {
+            return GetComponent<ParticleSystem>() ?? gameObject.AddComponent<ParticleSystem>();
+        }
+
+        private void ConfigureParticleSystem(ParticleSystem particles)
+        {
             var main = particles.main;
             main.loop = true;
             main.startLifetime = 6f;
@@ -59,4 +85,3 @@ namespace AL.RealmWar.Warzone
         }
     }
 }
-

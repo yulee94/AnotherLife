@@ -3,6 +3,7 @@ using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Core.Interfaces;
 using AL.RealmWar.Warzone;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -125,8 +126,20 @@ namespace AL.ChampionMode
         {
             var weatherObject = new GameObject("Warzone_BattleFog_Weather");
             weatherObject.transform.position = new Vector3(0f, 6f, 0f);
-            weatherObject.AddComponent<RuntimeWeatherController>()
-                .Configure(new Color(0.45f, 0.42f, 0.38f, 0.35f), 120, 22f, 1.1f);
+            weatherObject.AddComponent<RuntimeWeatherController>().ConfigureForRealm(GetCurrentRealmId());
+        }
+
+        private RealmId GetCurrentRealmId()
+        {
+            try
+            {
+                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
+            }
+            catch (System.Exception)
+            {
+                return RealmId.Crownlands;
+            }
         }
 
         private void BuildHud()

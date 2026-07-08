@@ -64,6 +64,10 @@ module DesignContracts =
             key: string
             realm: string
             particles: string array
+            color: float array
+            maxParticles: int
+            radius: float
+            fallSpeed: float
         }
 
     [<CLIMutable>]

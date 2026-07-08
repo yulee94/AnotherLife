@@ -46,7 +46,7 @@
     },
     "weatherProfile": {
       "type": "object",
-      "required": ["key", "realm", "particles"],
+      "required": ["key", "realm", "particles", "color", "maxParticles", "radius", "fallSpeed"],
       "properties": {
         "key": {
           "type": "string"
@@ -59,6 +59,26 @@
           "items": {
             "type": "string"
           }
+        },
+        "color": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 4,
+          "maxItems": 4
+        },
+        "maxParticles": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "radius": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "fallSpeed": {
+          "type": "number",
+          "minimum": 0
         }
       },
       "additionalProperties": false
@@ -66,4 +86,3 @@
   },
   "additionalProperties": false
 }
-
