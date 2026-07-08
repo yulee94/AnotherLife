@@ -2,11 +2,13 @@
 
 Project path:
 
-`C:\Users\MY\AndroidStudioProjects\AnotherLifeUnity`
+`C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`
 
-Requested GitHub target:
+GitHub target:
 
 `https://github.com/yulee94/AnotherLife`
+
+Use this one project only. The old `AnotherLifeUnity` duplicate project and temporary Codex worktrees were removed to keep the C drive and GitHub view simple.
 
 ## What Is In This Project
 
@@ -29,7 +31,7 @@ Requested GitHub target:
 
 ## Generate Starter Design Assets In Unity
 
-1. Open this folder in Unity Hub.
+1. Open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub.
 2. Let Unity import the project.
 3. In the Unity top menu, choose `Another Life > Generate Design Assets`.
 4. Generated prototype assets will be created under `Assets/AL/Art/Generated`.
@@ -55,4 +57,3 @@ Recommended flow:
 2. Validate those files with `SharedContracts/Schemas/*.schema.json`.
 3. In a Fable/F# tool, reference or copy `SharedContracts/Fable/AnotherLife.Contracts.fs`.
 4. Keep cross-tool data fields as plain strings and arrays so Unity, Fable, and backend tools can all read the same catalogs.
-

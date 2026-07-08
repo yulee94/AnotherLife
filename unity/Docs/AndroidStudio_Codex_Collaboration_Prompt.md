@@ -8,11 +8,14 @@ You are co-developing Another Life with Codex through GitHub.
 Repository:
 https://github.com/yulee94/AnotherLife
 
+Local project:
+Use `C:\Users\MY\AndroidStudioProjects\AnotherLife` as the only active checkout. Unity Hub should open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`. Do not recreate or work from `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, or timestamped duplicate repositories.
+
 Primary rule:
 Do not overwrite or revert Codex work. Before changing code, fetch the latest main branch and inspect open pull requests. If a file is being changed by an open Codex PR, avoid that file unless the change is required for your narrative work.
 
 Branch rule:
-Use `main` as the only default branch. The old `master` branch was consolidated into `main` and removed from GitHub so the repository front page always shows the current project.
+Use `main` as the only active branch unless you are opening a short-lived PR branch. The old `master`, completed `codex/*`, and completed `narrative/*` branches were consolidated into `main` and removed from GitHub so the repository front page always shows the current project.
 
 Android Studio ownership:
 - NPC data, NPC affinity/reputation content, advisor content, and persona content.

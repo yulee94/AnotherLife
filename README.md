@@ -16,14 +16,15 @@ Another Life is a high-fantasy kingdom war game prototype that combines an Andro
 
 ## Local Project Layout
 
-Use one canonical checkout for day-to-day work:
+Use exactly one canonical local project for day-to-day work:
 
 - GitHub repository checkout: `C:\Users\MY\AndroidStudioProjects\AnotherLife`
 - Android Studio project: open `C:\Users\MY\AndroidStudioProjects\AnotherLife`
 - Unity Hub project: open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`
-- Codex scratch worktrees, when needed, live under `C:\Users\MY\AndroidStudioProjects\_CodexWorktrees`
 
-Avoid creating or pushing duplicate timestamped repositories such as `AnotherLife-YYYY-MM-DD_*` unless you are intentionally making a backup. The root GitHub repository is `yulee94/AnotherLife`, and `main` is the branch collaborators should review first.
+Do not use `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, or timestamped repositories such as `AnotherLife-YYYY-MM-DD_*` as active projects. Those were cleanup/temporary folders and should not be recreated unless you are intentionally making an offline backup.
+
+The root GitHub repository is `yulee94/AnotherLife`, and `main` is the only active branch collaborators should review first.
 
 ## Quick Start
 
@@ -35,7 +36,7 @@ Avoid creating or pushing duplicate timestamped repositories such as `AnotherLif
 
 ### Unity Hub
 
-1. Open the `unity/` folder in Unity Hub.
+1. Open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub.
 2. Let Unity import the project.
 3. Use the `Another Life > Generate Design Assets` editor menu to create starter modular character, skill VFX, weather, and material assets.
 4. Run the test/champion scene to enter the 3D Champion Arena prototype.
@@ -77,7 +78,7 @@ If a merge conflict happens in a shared file, preserve both systems whenever pos
 
 ## Branches
 
-The repository uses `main` as the single default branch. The old `master` branch was consolidated into `main` and removed from GitHub so co-developers always see the current project from the repository front page.
+The repository uses `main` as the single active branch. The old `master`, completed `codex/*`, and completed `narrative/*` branches were consolidated into `main` and removed from GitHub so co-developers always see the current project from the repository front page.
 
 ## PR Workflow
 
