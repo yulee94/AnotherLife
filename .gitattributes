@@ -1,0 +1,4 @@
+# Shared Git attribute macros used by nested Android and Unity project folders.
+[attr]lfs               filter=lfs diff=lfs merge=lfs -text
+[attr]unity-json        eol=lf linguist-language=json
+[attr]unity-yaml        merge=unityyamlmerge eol=lf linguist-language=yaml
