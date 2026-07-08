@@ -69,6 +69,12 @@ namespace AL.Services.Local
             AddChapter(RealmId.Eldergrove, "C3_EG", "The Forest's Tear", "A mystical gem is born from the tree's purest sap.");
             AddChapter(RealmId.Crownlands, "C3_CL", "The Sovereign's Jewel", "The discovery of a divine gem buried beneath the royal cathedral.");
             AddChapter(RealmId.Umbral, "C3_UM", "The Void Shard", "Retrieving a crystal from the heart of the volcanic rifts.");
+
+            // Chapters 7-9: Ancient Legacies
+            AddChapter(RealmId.Stonehold, "C7_SH", "The First King's Anvil", "Locating the legendary weapon of the founder.");
+            AddChapter(RealmId.Eldergrove, "C7_EG", "Whisper of the Glade", "Restoring the original bow of the Forest Sentinels.");
+            AddChapter(RealmId.Crownlands, "C7_CL", "The Golden Aegis", "Recovering the shield that stood during the First War.");
+            AddChapter(RealmId.Umbral, "C7_UM", "Void's Edge", "Forging the blade from the remains of the First Rift.");
         }
 
         private void AddChapter(RealmId realmId, string id, string title, string summary)

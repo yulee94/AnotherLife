@@ -32,7 +32,9 @@ namespace AL.Utilities
                 "Assets/AL/ScriptableObjects/Dialogues",
                 "Assets/AL/ScriptableObjects/Quests",
                 "Assets/AL/ScriptableObjects/Narrative/Bosses",
-                "Assets/AL/ScriptableObjects/Narrative/Loot"
+                "Assets/AL/ScriptableObjects/Narrative/Loot",
+                "Assets/AL/ScriptableObjects/Narrative/Artifacts",
+                "Assets/AL/ScriptableObjects/Narrative/Factions"
             };
 
             foreach (var folder in folders)
@@ -65,7 +67,13 @@ namespace AL.Utilities
             CreateBossTemplate("aurelius", "Aurelius", "Gold Dragon of Crownlands. High Magic damage, blinding effects.", 4500, 200, 120);
             CreateBossTemplate("nox", "Nox", "Void Dragon of Umbral. Stealth phases, health lifesteal.", 3500, 250, 80);
 
-            // 5. Generate Outer Warzone Bosses
+            // 5. Generate Ruin Bosses (Task 14 Expansion)
+            CreateBossTemplate("ruin_stone", "The Granite Warden", "Ancient automaton guarding the First King's Anvil.", 12000, 400, 600);
+            CreateBossTemplate("ruin_elf", "The Spectral Stag", "Ghostly protector of the Whisper Glade.", 10000, 500, 300);
+            CreateBossTemplate("ruin_human", "The Fallen Paladin", "Corrupted guardian of the Golden Aegis.", 11000, 600, 450);
+            CreateBossTemplate("ruin_dark", "The Abyssal Shade", "Manifestation of the First Rift.", 9000, 800, 200);
+
+            // 6. Generate Outer Warzone Bosses
             CreateBossTemplate("cinders", "The Behemoth of Cinders", "Massive volcanic colossus. Incomparably hard. Deals massive fire AoE.", 50000, 1500, 1000);
             CreateBossTemplate("abyssal", "The Abyssal Horror", "Eldritch monstrosity from the depths. Incomparably hard. Drains mana and sanity.", 60000, 1200, 800);
 
