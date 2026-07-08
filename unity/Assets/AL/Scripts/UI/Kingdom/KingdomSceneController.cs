@@ -3,6 +3,7 @@ using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.Kingdom;
 using AL.Kingdom.Visuals;
 using System.Collections.Generic;
 using UnityEngine;
@@ -51,6 +52,16 @@ namespace AL.UI.Kingdom
             "warmaster_mount_armor",
             "warmaster_class_relic"
         };
+
+        private void OnEnable()
+        {
+            CityLayoutEngine.OnBuildingSelected += HandleBuildingSelected;
+        }
+
+        private void OnDisable()
+        {
+            CityLayoutEngine.OnBuildingSelected -= HandleBuildingSelected;
+        }
 
         private void Start()
         {
@@ -446,6 +457,11 @@ namespace AL.UI.Kingdom
         private void SetMessage(string message)
         {
             _messageText.text = message;
+        }
+
+        private void HandleBuildingSelected(string message)
+        {
+            SetMessage(message);
         }
 
         private void ToggleDashboard()
