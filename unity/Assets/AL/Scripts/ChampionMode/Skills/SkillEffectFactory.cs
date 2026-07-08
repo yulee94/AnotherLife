@@ -1,4 +1,5 @@
 using AL.Core;
+using AL.RealmWar.Warzone;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -14,13 +15,14 @@ namespace AL.ChampionMode.Skills
         private const int MaxPooledRingsPerKey = 8;
         private const int MaxActiveTrails = 12;
         private const int MaxPooledTrails = 6;
-        private const int MaxActiveSkillShapes = 34;
-        private const int MaxPooledSkillShapesPerKey = 8;
+        private const int MaxActiveSkillShapes = 58;
+        private const int MaxPooledSkillShapesPerKey = 12;
         private const int MaxActiveGuardShells = 8;
         private const int MaxPooledGuardShells = 4;
         private const int MaxActiveFloatingTexts = 24;
 
         private static int _activeFloatingTexts;
+        private static RuntimeWeatherController _cachedWeather;
 
         public static GameObject SpawnForgeBurst(Vector3 position)
         {
@@ -63,6 +65,7 @@ namespace AL.ChampionMode.Skills
             float safeRadius = Mathf.Max(0.9f, radius);
             SpawnGroundRing("VFX_Runtime_SkillCastRing", groundPosition, color, safeRadius, Mathf.Max(0.15f, lifetime));
             SpawnGroundRing("VFX_Runtime_SkillCastRing_Inner", groundPosition, Color.Lerp(color, Color.white, 0.28f), safeRadius * 0.56f, Mathf.Max(0.12f, lifetime * 0.85f));
+            SpawnCastSigilTicks(groundPosition, realmId, safeRadius, lifetime);
             return SpawnSkillCastCharge(groundPosition, realmId, safeRadius, lifetime);
         }
 
@@ -151,6 +154,7 @@ namespace AL.ChampionMode.Skills
 
             SpawnGroundRing("VFX_Runtime_RealmSlash_Crest", groundPosition, GetRealmColor(realmId, 0.28f), 1.15f, 0.38f);
             SpawnBurst("VFX_Runtime_RealmSlash_Sparks", groundPosition + Vector3.up * 0.85f + safeForward * 0.62f, Color.Lerp(color, Color.white, 0.34f), color, 0.62f);
+            SpawnImpactDebris(groundPosition + safeForward * 0.82f, safeForward, color, 5, 0.36f);
             return slash;
         }
 
@@ -202,6 +206,9 @@ namespace AL.ChampionMode.Skills
             SpawnGroundRing("VFX_Runtime_WarzoneBurst_Inner", groundPosition, color, safeRadius * 0.45f, 0.42f);
             SpawnGroundRing("VFX_Runtime_WarzoneBurst_Outer", groundPosition, GetRealmColor(realmId, 0.20f), safeRadius * 1.18f, 0.68f);
             SpawnRadialCracks(groundPosition, safeRadius, color, 10, 0.58f);
+            SpawnImpactDebris(groundPosition, Vector3.forward, color, 9, 0.58f);
+            SpawnAerialShardRain(groundPosition, realmId, safeRadius, 7, 0.62f);
+            RequestWeatherFlash(realmId, 0.54f);
             return SpawnGroundRing("VFX_Runtime_WarzoneBurst_Wave", groundPosition, color, safeRadius, 0.58f);
         }
 
@@ -242,7 +249,20 @@ namespace AL.ChampionMode.Skills
                 new Vector3(0.30f, 1.88f, 0.13f),
                 Color.Lerp(coreColor, Color.white, 0.24f),
                 0.52f);
+            SpawnPrimitiveEffect(
+                "shape:warmaster-breaker-cleaver-cross",
+                "VFX_Runtime_WarmasterBreaker_CleaverCross",
+                PrimitiveType.Cube,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                groundPosition + Vector3.up * 1.08f,
+                Quaternion.Euler(0f, -45f, -10f),
+                new Vector3(0.22f, 1.56f, 0.11f),
+                Color.Lerp(coreColor, Color.white, 0.36f),
+                0.44f);
+            SpawnAerialShardRain(groundPosition, realmId, safeRadius * 1.08f, 10, 0.74f);
             SpawnRadialCracks(groundPosition, safeRadius * 1.05f, coreColor, 12, 0.74f);
+            RequestWeatherFlash(realmId, 0.92f);
             return impact;
         }
 
@@ -334,7 +354,10 @@ namespace AL.ChampionMode.Skills
             Color hotColor = new Color(1f, 0.22f, 0.08f, 0.72f);
             SpawnBurst("VFX_Runtime_BossSlam_ImpactCore", center + Vector3.up * 0.75f, hotColor, new Color(0.42f, 0.08f, 0.04f, 0.62f), 1.35f);
             SpawnGroundRing("VFX_Runtime_BossSlam_ImpactRing", center, hotColor, safeRadius * 0.72f, 0.44f);
-            return SpawnWarzoneShockwave(center, realmId, safeRadius);
+            SpawnImpactDebris(center, Vector3.forward, hotColor, 12, 0.62f);
+            var shockwave = SpawnWarzoneShockwave(center, realmId, safeRadius);
+            RequestWeatherFlash(realmId, 0.72f);
+            return shockwave;
         }
 
         public static void ShakeCamera(float strength, float duration)
@@ -486,6 +509,100 @@ namespace AL.ChampionMode.Skills
                     Color.Lerp(color, Color.white, i % 2 == 0 ? 0.08f : 0.22f),
                     lifetime);
             }
+        }
+
+        private static void SpawnCastSigilTicks(Vector3 groundPosition, RealmId realmId, float radius, float lifetime)
+        {
+            int count = radius >= 3f ? 10 : 8;
+            Color color = Color.Lerp(GetRealmColor(realmId, 0.45f), Color.white, 0.22f);
+            float safeLifetime = Mathf.Max(0.16f, lifetime);
+            for (int i = 0; i < count; i++)
+            {
+                float angle = i * 360f / count;
+                Vector3 radial = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+                Vector3 tangent = Vector3.Cross(Vector3.up, radial).normalized;
+                SpawnPrimitiveEffect(
+                    "shape:skill-cast-sigil-tick",
+                    "VFX_Runtime_SkillCast_SigilTick",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    groundPosition + radial * radius + Vector3.up * 0.085f,
+                    Quaternion.LookRotation(tangent),
+                    new Vector3(0.34f, 0.035f, 0.055f),
+                    color,
+                    safeLifetime * (0.84f + (i % 3) * 0.04f));
+            }
+        }
+
+        private static void SpawnImpactDebris(Vector3 groundPosition, Vector3 forward, Color color, int count, float lifetime)
+        {
+            int safeCount = Mathf.Clamp(count, 3, 14);
+            Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
+            for (int i = 0; i < safeCount; i++)
+            {
+                float spread = -42f + 84f * (i / (float)Mathf.Max(1, safeCount - 1));
+                Vector3 direction = Quaternion.Euler(0f, spread, 0f) * safeForward;
+                float distance = 0.36f + (i % 4) * 0.22f;
+                float height = 0.18f + (i % 3) * 0.10f;
+                SpawnPrimitiveEffect(
+                    "shape:impact-debris-spark",
+                    "VFX_Runtime_Impact_Debris",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    Grounded(groundPosition + direction * distance) + Vector3.up * height,
+                    Quaternion.LookRotation(direction) * Quaternion.Euler(16f + i * 3f, 0f, 28f),
+                    new Vector3(0.10f + i % 2 * 0.04f, 0.035f, 0.32f + i % 3 * 0.08f),
+                    Color.Lerp(color, Color.white, i % 2 == 0 ? 0.12f : 0.32f),
+                    lifetime * (0.72f + i % 4 * 0.06f));
+            }
+        }
+
+        private static void SpawnAerialShardRain(Vector3 groundPosition, RealmId realmId, float radius, int count, float lifetime)
+        {
+            int safeCount = Mathf.Clamp(count, 4, 12);
+            float safeRadius = Mathf.Max(1.2f, radius);
+            Color color = Color.Lerp(GetRealmColor(realmId, 0.62f), Color.white, 0.18f);
+            for (int i = 0; i < safeCount; i++)
+            {
+                float angle = i * 360f / safeCount + 18f;
+                float lane = 0.28f + (i % 4) * 0.16f;
+                Vector3 offset = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * (safeRadius * lane);
+                Vector3 fallDirection = (Quaternion.Euler(0f, angle + 26f, 0f) * Vector3.forward + Vector3.down * 1.8f).normalized;
+                SpawnPrimitiveEffect(
+                    "shape:aerial-shard-rain",
+                    "VFX_Runtime_AerialShardRain",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    groundPosition + offset + Vector3.up * (2.1f + i % 3 * 0.28f),
+                    Quaternion.LookRotation(fallDirection),
+                    new Vector3(0.075f, 0.075f, 0.82f + i % 3 * 0.16f),
+                    color,
+                    lifetime * (0.74f + i % 5 * 0.04f));
+            }
+        }
+
+        private static void RequestWeatherFlash(RealmId realmId, float strength)
+        {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
+            if (_cachedWeather == null)
+            {
+                _cachedWeather = Object.FindObjectOfType<RuntimeWeatherController>();
+            }
+
+            if (_cachedWeather == null)
+            {
+                return;
+            }
+
+            Color flashColor = Color.Lerp(GetRealmColor(realmId, 1f), Color.white, 0.24f);
+            _cachedWeather.TriggerCombatFlash(flashColor, Mathf.Lerp(0.75f, 3.6f, Mathf.Clamp01(strength)), Mathf.Lerp(0.045f, 0.105f, Mathf.Clamp01(strength)));
         }
 
         private static void AnimatePrimitive(GameObject effect, Color color, float lifetime, Vector3 startScale, Vector3 endScale)

@@ -17,6 +17,7 @@ namespace AL.RealmWar.Warzone
         private WindZone _windZone;
         private Light _lightningLight;
         private Coroutine _lightningRoutine;
+        private Coroutine _combatFlashRoutine;
         private float _nextLightningTime;
         private float _baseDirectionalIntensity;
 
@@ -66,6 +67,21 @@ namespace AL.RealmWar.Warzone
             _profile.MaxParticles = Mathf.Max(8, Mathf.RoundToInt(_profile.MaxParticles * safeMultiplier));
             _profile.EmissionRateMultiplier = Mathf.Max(0.02f, _profile.EmissionRateMultiplier * safeMultiplier);
             ApplyProfile();
+        }
+
+        public void TriggerCombatFlash(Color color, float intensity, float duration)
+        {
+            if (!gameObject.activeInHierarchy)
+            {
+                return;
+            }
+
+            if (_combatFlashRoutine != null)
+            {
+                StopCoroutine(_combatFlashRoutine);
+            }
+
+            _combatFlashRoutine = StartCoroutine(CombatFlashRoutine(color, intensity, duration));
         }
 
         private void ApplyProfile()
@@ -361,6 +377,34 @@ namespace AL.RealmWar.Warzone
 
             _lightningRoutine = null;
             ScheduleNextLightning();
+        }
+
+        private IEnumerator CombatFlashRoutine(Color color, float intensity, float duration)
+        {
+            var flash = GetOrCreateLightningLight();
+            float safeDuration = Mathf.Clamp(duration, 0.025f, 0.16f);
+            float safeIntensity = Mathf.Clamp(intensity, 0.2f, 4.2f);
+            Color previousColor = flash.color;
+
+            flash.color = color;
+            flash.intensity = safeIntensity;
+            flash.enabled = true;
+
+            if (_directionalLight != null)
+            {
+                _directionalLight.intensity = Mathf.Max(_directionalLight.intensity, _baseDirectionalIntensity + safeIntensity * 0.12f);
+            }
+
+            yield return new WaitForSeconds(safeDuration);
+
+            if (flash != null && _lightningRoutine == null)
+            {
+                flash.intensity = 0f;
+                flash.color = previousColor;
+                flash.enabled = false;
+            }
+
+            _combatFlashRoutine = null;
         }
 
         private Light GetOrCreateLightningLight()
