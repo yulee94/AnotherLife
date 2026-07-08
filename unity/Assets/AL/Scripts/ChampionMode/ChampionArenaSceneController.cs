@@ -1001,11 +1001,13 @@ namespace AL.ChampionMode
             SetFillAmount(_bossBreakFill, breakPercent);
             if (_combatFeedText != null && _appearanceFeedTimer <= 0f)
             {
-                _combatFeedText.text = _boss.IsBroken
-                    ? "Guard broken. Commit burst skills before the boss recovers."
-                    : _boss.IsEnraged
-                        ? "Enrage active. Dodge first, punish after the telegraph."
-                        : "Pressure the guard bar, hold mana for the break window.";
+                _combatFeedText.text = _boss.IsTelegraphing
+                    ? "Slam windup active. Leave the marked zone, then punish the recovery."
+                    : _boss.IsBroken
+                        ? "Guard broken. Commit burst skills before the boss recovers."
+                        : _boss.IsEnraged
+                            ? "Enrage active. Dodge first, punish after the telegraph."
+                            : "Pressure the guard bar, hold mana for the break window.";
             }
         }
 
@@ -1065,9 +1067,14 @@ namespace AL.ChampionMode
             float healthRatio = _boss.MaxHealth > 0f ? Mathf.Clamp01(_boss.CurrentHealth / _boss.MaxHealth) : 0f;
             float guardRatio = _boss.MaxBreak > 0f ? Mathf.Clamp01(_boss.CurrentBreak / _boss.MaxBreak) : 0f;
             float distance = _playerController != null ? Vector3.Distance(_playerController.transform.position, _bossTransform.position) : 8f;
-            float pulse = (Mathf.Sin(Time.unscaledTime * (_boss.IsEnraged ? 7.8f : 4.8f)) + 1f) * 0.5f;
+            bool isTelegraphing = _boss.IsTelegraphing;
+            float pulse = (Mathf.Sin(Time.unscaledTime * (isTelegraphing ? 10.2f : _boss.IsEnraged ? 7.8f : 4.8f)) + 1f) * 0.5f;
             float scale = Mathf.Clamp(1.09f - distance * 0.018f, 0.78f, 1.08f);
-            if (_boss.IsEnraged)
+            if (isTelegraphing)
+            {
+                scale += 0.035f + pulse * 0.075f;
+            }
+            else if (_boss.IsEnraged)
             {
                 scale += pulse * 0.055f;
             }
@@ -1078,7 +1085,7 @@ namespace AL.ChampionMode
 
             _targetLockRect.localScale = Vector3.one * scale;
             Color accent = GetTargetLockAccent();
-            SetImageColor(_targetLockGlow, WithAlpha(accent, _boss.IsEnraged ? 0.18f + pulse * 0.12f : 0.09f + pulse * 0.06f));
+            SetImageColor(_targetLockGlow, WithAlpha(accent, isTelegraphing ? 0.24f + pulse * 0.16f : _boss.IsEnraged ? 0.18f + pulse * 0.12f : 0.09f + pulse * 0.06f));
             SetImageColor(_targetLockCore, Color.Lerp(accent, Color.white, 0.20f + pulse * 0.20f));
             SetImageColor(_targetLockHealthFill, new Color(0.92f, 0.12f, 0.08f, 0.88f));
             SetImageColor(_targetLockBreakFill, _boss.IsBroken ? new Color(0.50f, 1f, 0.92f, 0.95f) : new Color(0.28f, 0.90f, 1f, 0.82f));
@@ -1111,13 +1118,15 @@ namespace AL.ChampionMode
 
             if (_targetLockText != null)
             {
-                _targetLockText.text = _boss.IsEnraged ? "ENRAGE LOCK" : _boss.IsBroken ? "BREAK WINDOW" : "TARGET LOCK";
+                _targetLockText.text = isTelegraphing ? "DODGE SLAM" : _boss.IsEnraged ? "ENRAGE LOCK" : _boss.IsBroken ? "BREAK WINDOW" : "TARGET LOCK";
                 _targetLockText.color = Color.Lerp(accent, Color.white, 0.24f);
             }
 
             if (_targetLockMetaText != null)
             {
-                _targetLockMetaText.text = $"HP {Mathf.CeilToInt(healthRatio * 100f)} / GUARD {Mathf.CeilToInt(guardRatio * 100f)}";
+                _targetLockMetaText.text = isTelegraphing
+                    ? $"SLAM {Mathf.CeilToInt(_boss.TelegraphProgress * 100f)} / EVADE"
+                    : $"HP {Mathf.CeilToInt(healthRatio * 100f)} / GUARD {Mathf.CeilToInt(guardRatio * 100f)}";
                 _targetLockMetaText.color = new Color(0.86f, 0.92f, 0.98f, 0.88f);
             }
         }
@@ -1738,6 +1747,11 @@ namespace AL.ChampionMode
             if (_boss == null)
             {
                 return new Color(1f, 0.58f, 0.18f, 0.82f);
+            }
+
+            if (_boss.IsTelegraphing)
+            {
+                return new Color(1f, 0.14f, 0.04f, 0.96f);
             }
 
             if (_boss.IsEnraged)
