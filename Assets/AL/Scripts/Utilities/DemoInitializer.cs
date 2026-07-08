@@ -44,6 +44,7 @@ namespace AL.Utilities
                 // Add basic components for the 3D mode
                 player.AddComponent<AL.ChampionMode.Control.ChampionController>();
                 player.AddComponent<AL.ChampionMode.Control.ChampionCombat>();
+                player.AddComponent<AutoCombatController>();
                 AddCustomizationParts(player);
                 player.AddComponent<ChampionCustomizationController>();
 
@@ -58,6 +59,10 @@ namespace AL.Utilities
             {
                 AddCustomizationParts(player);
                 player.AddComponent<ChampionCustomizationController>();
+            }
+            if (player.GetComponent<AutoCombatController>() == null)
+            {
+                player.AddComponent<AutoCombatController>();
             }
 
             // 2. Setup Camera
@@ -154,8 +159,20 @@ namespace AL.Utilities
                 SetStatus("Toggled Champion cape.");
             });
 
-            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -280), RunTestBattle);
-            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -335), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "Assist Mode", new Vector2(20, -280), () =>
+            {
+                FindObjectOfType<AutoCombatController>()?.SetMode(AutoMode.SemiAuto);
+                SetStatus("Assist mode enabled. Manual input interrupts it.");
+            });
+
+            CreateButton(canvasObj.transform, "Auto Mode", new Vector2(20, -335), () =>
+            {
+                FindObjectOfType<AutoCombatController>()?.SetMode(AutoMode.FullAuto);
+                SetStatus("Auto mode enabled. Manual input interrupts it.");
+            });
+
+            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -390), RunTestBattle);
+            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -445), SpawnArenaTargets);
 
             // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));

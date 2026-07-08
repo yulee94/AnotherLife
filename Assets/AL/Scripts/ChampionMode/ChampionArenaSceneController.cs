@@ -17,6 +17,7 @@ namespace AL.ChampionMode
 
         private ChampionController _playerController;
         private ChampionCustomizationController _playerCustomization;
+        private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
         private Text _healthText;
 
@@ -52,6 +53,7 @@ namespace AL.ChampionMode
             _playerCombat = player.AddComponent<ChampionCombat>();
             AddCustomizationParts(player);
             _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _autoCombatController = player.AddComponent<AutoCombatController>();
 
             var cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -128,6 +130,9 @@ namespace AL.ChampionMode
             CreateButton(canvasObject.transform, font, "Color", new Vector2(-155, -115), () => _playerCustomization.CyclePrimaryColor());
             CreateButton(canvasObject.transform, font, "Hair", new Vector2(-155, -175), () => _playerCustomization.CycleHairColor());
             CreateButton(canvasObject.transform, font, "Cape", new Vector2(-155, -235), () => _playerCustomization.ToggleCape());
+            CreateButton(canvasObject.transform, font, "Manual", new Vector2(-155, -305), () => _autoCombatController.SetMode(AutoMode.Manual));
+            CreateButton(canvasObject.transform, font, "Assist", new Vector2(-155, -365), () => _autoCombatController.SetMode(AutoMode.SemiAuto));
+            CreateButton(canvasObject.transform, font, "Auto", new Vector2(-155, -425), () => _autoCombatController.SetMode(AutoMode.FullAuto));
 
             CreateMoveButton(canvasObject.transform, font, "Up", new Vector2(125, 150), new Vector2(0, 1));
             CreateMoveButton(canvasObject.transform, font, "Left", new Vector2(60, 85), new Vector2(-1, 0));
