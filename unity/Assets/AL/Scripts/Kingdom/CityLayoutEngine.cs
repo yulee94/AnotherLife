@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using AL.Core;
 using AL.Data.Definitions;
@@ -11,6 +12,8 @@ namespace AL.Kingdom
         [Header("Grid Settings")]
         public float TileSize = 1.0f;
         public Vector2Int GridSize = new Vector2Int(20, 20);
+
+        public static event System.Action<string> OnBuildingSelected;
 
         private Dictionary<Vector2Int, BuildingState> _occupiedTiles = new Dictionary<Vector2Int, BuildingState>();
         private Transform _visualRoot;
@@ -98,7 +101,8 @@ namespace AL.Kingdom
             buildingRoot.transform.SetParent(root, false);
             buildingRoot.transform.position = worldPosition;
 
-            CreatePrimitive(buildingRoot.transform, "Base", PrimitiveType.Cube, new Vector3(0f, height * 0.5f, 0f), new Vector3(TileSize * 0.88f, height, TileSize * 0.88f), bodyColor);
+            var baseObject = CreatePrimitive(buildingRoot.transform, "Base", PrimitiveType.Cube, new Vector3(0f, height * 0.5f, 0f), new Vector3(TileSize * 0.88f, height, TileSize * 0.88f), bodyColor);
+            baseObject.AddComponent<KingdomBuildingSelectable>().Configure(state.BuildingId, state.Level, bodyColor, accentColor);
             CreatePrimitive(buildingRoot.transform, "Trim", PrimitiveType.Cube, new Vector3(0f, height + 0.04f, 0f), new Vector3(TileSize * 0.98f, 0.10f, TileSize * 0.98f), accentColor);
 
             if (state.BuildingId.Contains("Hall") || state.BuildingId.Contains("Barracks"))
@@ -239,12 +243,73 @@ namespace AL.Kingdom
                 .Replace("ManaShrine", "Mana");
         }
 
+        internal static void RaiseBuildingSelected(string buildingId, int level)
+        {
+            OnBuildingSelected?.Invoke($"Selected {GetShortBuildingName(buildingId)} Lv {level}. Use upgrades, research, and troops to grow this district.");
+        }
+
         private void ClearExistingBuildingVisuals()
         {
             Transform root = EnsureVisualRoot();
             for (int i = root.childCount - 1; i >= 0; i--)
             {
                 Destroy(root.GetChild(i).gameObject);
+            }
+        }
+    }
+
+    public class KingdomBuildingSelectable : MonoBehaviour
+    {
+        private string _buildingId;
+        private int _level;
+        private Color _baseColor;
+        private Color _accentColor;
+        private Renderer _renderer;
+        private float _highlightTimer;
+
+        public void Configure(string buildingId, int level, Color baseColor, Color accentColor)
+        {
+            _buildingId = buildingId;
+            _level = level;
+            _baseColor = baseColor;
+            _accentColor = accentColor;
+            _renderer = GetComponent<Renderer>();
+        }
+
+        private void OnMouseDown()
+        {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
+            _highlightTimer = 0.42f;
+            CityLayoutEngine.RaiseBuildingSelected(_buildingId, _level);
+        }
+
+        private void Update()
+        {
+            if (_highlightTimer <= 0f)
+            {
+                SetColor(_baseColor);
+                return;
+            }
+
+            _highlightTimer -= Time.deltaTime;
+            float pulse = Mathf.PingPong(Time.time * 7f, 1f);
+            SetColor(Color.Lerp(_baseColor, _accentColor, 0.45f + pulse * 0.35f));
+        }
+
+        private void SetColor(Color color)
+        {
+            if (_renderer == null)
+            {
+                _renderer = GetComponent<Renderer>();
+            }
+
+            if (_renderer != null)
+            {
+                _renderer.material.color = color;
             }
         }
     }
