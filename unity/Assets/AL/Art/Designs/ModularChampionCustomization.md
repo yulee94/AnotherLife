@@ -79,7 +79,7 @@ Use one character shader with these color controls where possible:
 
 ## First Prototype Model
 
-The included editor generator creates a modular placeholder Champion prefab using primitives. It is not the final production model, but it establishes:
+The included editor generator creates and overwrites a modular placeholder Champion prefab using the same runtime `ProceduralChampionModelBuilder` used by Champion Mode. It is not the final production model, but it establishes:
 
 - correct part names,
 - transform hierarchy,
@@ -88,6 +88,8 @@ The included editor generator creates a modular placeholder Champion prefab usin
 - VFX anchor placement,
 - mount and pet anchors.
 
+The current premium placeholder includes close-read face planes, eye glints, layered hair variants, plated chest etching, rivets, robe focus detail, assassin mask support, heavier shoulder/forearm silhouette parts, cape folds/runes, and weapon/offhand trims so customization changes read clearly in the inspection showcase.
+
 Run it in Unity from:
 
 `Another Life > Generate Design Assets`
@@ -95,4 +97,3 @@ Run it in Unity from:
 Generated assets should appear under:
 
 `Assets/AL/Art/Generated/`
-

@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using AL.ChampionMode.Customization;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -18,16 +19,16 @@ namespace AL.Utilities
         {
             EnsureFolders();
 
-            var stonehold = CreateMaterial("MAT_Stonehold_DarkIron", new Color(0.32f, 0.30f, 0.28f), 0.55f);
-            var forge = CreateMaterial("MAT_Stonehold_ForgeGlow", new Color(1.0f, 0.42f, 0.12f), 0.15f);
-            var crownlands = CreateMaterial("MAT_Crownlands_RoyalBlue", new Color(0.18f, 0.32f, 0.86f), 0.35f);
-            var skin = CreateMaterial("MAT_Champion_Skin_Neutral", new Color(0.72f, 0.52f, 0.39f), 0.2f);
-            var hair = CreateMaterial("MAT_Champion_Hair_Dark", new Color(0.08f, 0.06f, 0.04f), 0.15f);
+            CreateMaterial("MAT_Stonehold_DarkIron", new Color(0.32f, 0.30f, 0.28f), 0.55f);
+            CreateMaterial("MAT_Stonehold_ForgeGlow", new Color(1.0f, 0.42f, 0.12f), 0.15f);
+            CreateMaterial("MAT_Crownlands_RoyalBlue", new Color(0.18f, 0.32f, 0.86f), 0.35f);
+            CreateMaterial("MAT_Champion_Skin_Neutral", new Color(0.72f, 0.52f, 0.39f), 0.2f);
+            CreateMaterial("MAT_Champion_Hair_Dark", new Color(0.08f, 0.06f, 0.04f), 0.15f);
 
             CreateMaterial("MAT_Eldergrove_LeafGold", new Color(0.28f, 0.72f, 0.34f), 0.25f);
             CreateMaterial("MAT_Umbral_Obsidian", new Color(0.08f, 0.05f, 0.10f), 0.65f);
 
-            CreateChampionPrefab(skin, hair, crownlands, stonehold, forge);
+            CreateChampionPrefab();
             CreateSkillVfxPrefab("VFX_Stonehold_ForgeBurst", new Color(1.0f, 0.44f, 0.08f), new Color(0.35f, 0.32f, 0.30f), 0.65f);
             CreateSkillVfxPrefab("VFX_Eldergrove_HealingBloom", new Color(0.35f, 1.0f, 0.45f), new Color(0.95f, 0.88f, 0.38f), 1.1f);
             CreateSkillVfxPrefab("VFX_Crownlands_RoyalStrike", new Color(0.2f, 0.42f, 1.0f), new Color(1.0f, 0.78f, 0.18f), 0.75f);
@@ -98,62 +99,15 @@ namespace AL.Utilities
             return material;
         }
 
-        private static void CreateChampionPrefab(Material skin, Material hair, Material cloth, Material armor, Material glow)
+        private static void CreateChampionPrefab()
         {
             var path = CharacterPrefabFolder + "/AL_ModularChampion_Base.prefab";
-            if (File.Exists(path))
-            {
-                return;
-            }
 
             var root = new GameObject("AL_ModularChampion_Base");
-            CreatePart(root.transform, "BodyPreset_Average", PrimitiveType.Capsule, new Vector3(0f, 1.05f, 0f), new Vector3(0.62f, 1.18f, 0.42f), cloth);
-            CreatePart(root.transform, "Head", PrimitiveType.Sphere, new Vector3(0f, 1.95f, 0f), new Vector3(0.38f, 0.42f, 0.34f), skin);
-            CreatePart(root.transform, "Hair", PrimitiveType.Sphere, new Vector3(0f, 2.13f, -0.03f), new Vector3(0.42f, 0.20f, 0.36f), hair);
-            CreatePart(root.transform, "ArmorChest", PrimitiveType.Cube, new Vector3(0f, 1.32f, 0f), new Vector3(0.78f, 0.62f, 0.36f), armor);
-            CreatePart(root.transform, "Gloves_L", PrimitiveType.Sphere, new Vector3(-0.52f, 1.02f, 0.05f), new Vector3(0.18f, 0.18f, 0.18f), armor);
-            CreatePart(root.transform, "Gloves_R", PrimitiveType.Sphere, new Vector3(0.52f, 1.02f, 0.05f), new Vector3(0.18f, 0.18f, 0.18f), armor);
-            CreatePart(root.transform, "Boots_L", PrimitiveType.Cube, new Vector3(-0.18f, 0.18f, 0.05f), new Vector3(0.24f, 0.34f, 0.34f), armor);
-            CreatePart(root.transform, "Boots_R", PrimitiveType.Cube, new Vector3(0.18f, 0.18f, 0.05f), new Vector3(0.24f, 0.34f, 0.34f), armor);
-            CreatePart(root.transform, "Cape", PrimitiveType.Cube, new Vector3(0f, 1.18f, -0.28f), new Vector3(0.7f, 1.18f, 0.06f), cloth);
-            CreatePart(root.transform, "WeaponMain_Sword", PrimitiveType.Cube, new Vector3(0.76f, 1.12f, 0.18f), new Vector3(0.08f, 1.25f, 0.08f), glow);
-            CreatePart(root.transform, "WeaponOff_Shield", PrimitiveType.Cylinder, new Vector3(-0.68f, 1.18f, 0.20f), new Vector3(0.42f, 0.08f, 0.42f), armor);
-
-            CreateAnchor(root.transform, "VFX_ChestAnchor", new Vector3(0f, 1.45f, 0.08f));
-            CreateAnchor(root.transform, "VFX_Hand_L", new Vector3(-0.55f, 1.08f, 0.14f));
-            CreateAnchor(root.transform, "VFX_Hand_R", new Vector3(0.55f, 1.08f, 0.14f));
-            CreateAnchor(root.transform, "PetAnchor", new Vector3(-0.95f, 0.52f, -0.55f));
-            CreateAnchor(root.transform, "MountAnchor", new Vector3(0f, 0.92f, -0.25f));
+            ProceduralChampionModelBuilder.EnsureModel(root);
 
             PrefabUtility.SaveAsPrefabAsset(root, path);
             Object.DestroyImmediate(root);
-        }
-
-        private static GameObject CreatePart(Transform parent, string name, PrimitiveType type, Vector3 position, Vector3 scale, Material material)
-        {
-            var part = GameObject.CreatePrimitive(type);
-            part.name = name;
-            part.transform.SetParent(parent);
-            part.transform.localPosition = position;
-            part.transform.localRotation = Quaternion.identity;
-            part.transform.localScale = scale;
-
-            var renderer = part.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.sharedMaterial = material;
-            }
-
-            return part;
-        }
-
-        private static void CreateAnchor(Transform parent, string name, Vector3 position)
-        {
-            var anchor = new GameObject(name);
-            anchor.transform.SetParent(parent);
-            anchor.transform.localPosition = position;
-            anchor.transform.localRotation = Quaternion.identity;
-            anchor.transform.localScale = Vector3.one;
         }
 
         private static void CreateSkillVfxPrefab(string name, Color startColor, Color endColor, float startSize)
@@ -234,4 +188,3 @@ namespace AL.Utilities
     }
 }
 #endif
-
