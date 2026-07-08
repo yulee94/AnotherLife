@@ -168,8 +168,10 @@ namespace AL.ChampionMode.Control
             // 2. Hit Detection
             Vector3 hitCenter = transform.position + transform.forward * 1.5f + Vector3.up;
             Collider[] hitColliders = Physics.OverlapSphere(hitCenter, _attackRange);
+            RealmId realmId = GetCurrentRealmId();
 
             bool hitAnything = false;
+            bool hitBoss = false;
             foreach (var hitCollider in hitColliders)
             {
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
@@ -187,16 +189,27 @@ namespace AL.ChampionMode.Control
                     Destroy(hitCollider.gameObject);
                     CheckVictory(1);
                 }
-                else if (hitCollider.gameObject.name.StartsWith("BossDummy"))
+                else
                 {
-                    hitAnything = true;
-                    var boss = hitCollider.GetComponent<AL.ChampionMode.AI.BossDummyAI>();
-                    boss?.TakeDamage(125f);
-                    RuntimeCombatAudio.PlayImpact();
+                    var boss = hitCollider.GetComponentInParent<AL.ChampionMode.AI.BossDummyAI>();
+                    if (boss != null && !hitBoss)
+                    {
+                        hitBoss = true;
+                        hitAnything = true;
+                        boss.TakeDamage(125f);
+                        RuntimeCombatAudio.PlayImpact();
+                    }
                 }
             }
 
-            if (!hitAnything) Debug.Log("[Combat] Attack Missed.");
+            if (!hitAnything)
+            {
+                Debug.Log("[Combat] Attack Missed.");
+                Vector3 whiffCenter = transform.position + transform.forward * 1.35f;
+                SkillEffectFactory.SpawnBasicAttackWhiff(whiffCenter, transform.forward, realmId);
+                SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.55f + transform.forward * 0.65f, "MISS", new Color(0.68f, 0.76f, 0.86f), 0.20f, 0.55f);
+                SkillEffectFactory.ShakeCamera(0.035f, 0.055f);
+            }
 
             yield return new WaitForSeconds(_attackCooldown);
             _isAttacking = false;

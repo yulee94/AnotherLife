@@ -69,6 +69,60 @@ namespace AL.ChampionMode.Skills
             return SpawnSkillCastCharge(groundPosition, realmId, safeRadius, lifetime);
         }
 
+        public static GameObject SpawnSkillTargetPreview(Vector3 casterPosition, Vector3 targetGroundPosition, Vector3 forward, RealmId realmId, float radius, float lifetime)
+        {
+            Vector3 start = Grounded(casterPosition);
+            Vector3 target = Grounded(targetGroundPosition);
+            Vector3 direction = forward.sqrMagnitude > 0.01f ? forward.normalized : target - start;
+            direction.y = 0f;
+            if (direction.sqrMagnitude <= 0.01f)
+            {
+                direction = Vector3.forward;
+            }
+            else
+            {
+                direction.Normalize();
+            }
+
+            float distance = Mathf.Max(1f, Vector3.Distance(start, target));
+            float safeRadius = Mathf.Clamp(radius, 1.1f, 4.8f);
+            float safeLifetime = Mathf.Max(0.14f, lifetime);
+            Color color = GetRealmColor(realmId, 0.30f);
+            Color edgeColor = Color.Lerp(color, Color.white, 0.34f);
+
+            var marker = SpawnGroundRing("VFX_Runtime_SkillTargetPreview_Marker", target, color, safeRadius * 0.58f, safeLifetime);
+            SpawnGroundRing("VFX_Runtime_SkillTargetPreview_Edge", target, edgeColor, safeRadius * 0.82f, safeLifetime * 0.90f);
+            SpawnPrimitiveEffect(
+                "shape:skill-target-preview-lane",
+                "VFX_Runtime_SkillTargetPreview_Lane",
+                PrimitiveType.Cube,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                start + direction * (distance * 0.5f) + Vector3.up * 0.07f,
+                Quaternion.LookRotation(direction),
+                new Vector3(0.07f, 0.030f, distance),
+                Color.Lerp(color, Color.white, 0.12f),
+                safeLifetime * 0.78f);
+
+            for (int i = -1; i <= 1; i += 2)
+            {
+                Vector3 side = Vector3.Cross(Vector3.up, direction).normalized * (safeRadius * 0.34f * i);
+                SpawnPrimitiveEffect(
+                    "shape:skill-target-preview-chevron",
+                    "VFX_Runtime_SkillTargetPreview_Chevron",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    target - direction * (safeRadius * 0.30f) + side + Vector3.up * 0.085f,
+                    Quaternion.LookRotation(direction) * Quaternion.Euler(0f, i * 24f, 0f),
+                    new Vector3(0.08f, 0.035f, safeRadius * 0.42f),
+                    edgeColor,
+                    safeLifetime);
+            }
+
+            return marker;
+        }
+
         public static GameObject SpawnSkillCastCharge(Vector3 groundPosition, RealmId realmId, float radius, float lifetime)
         {
             Color color = GetRealmColor(realmId, 0.46f);
@@ -155,6 +209,38 @@ namespace AL.ChampionMode.Skills
             SpawnGroundRing("VFX_Runtime_RealmSlash_Crest", groundPosition, GetRealmColor(realmId, 0.28f), 1.15f, 0.38f);
             SpawnBurst("VFX_Runtime_RealmSlash_Sparks", groundPosition + Vector3.up * 0.85f + safeForward * 0.62f, Color.Lerp(color, Color.white, 0.34f), color, 0.62f);
             SpawnImpactDebris(groundPosition + safeForward * 0.82f, safeForward, color, 5, 0.36f);
+            return slash;
+        }
+
+        public static GameObject SpawnBasicAttackWhiff(Vector3 groundPosition, Vector3 forward, RealmId realmId)
+        {
+            groundPosition = Grounded(groundPosition);
+            Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
+            Color color = GetRealmColor(realmId, 0.34f);
+            Quaternion rotation = Quaternion.LookRotation(safeForward) * Quaternion.Euler(0f, 0f, -18f);
+            var slash = SpawnPrimitiveEffect(
+                "shape:basic-attack-whiff",
+                "VFX_Runtime_BasicAttack_Whiff",
+                PrimitiveType.Cube,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                groundPosition + Vector3.up * 0.86f + safeForward * 0.25f,
+                rotation,
+                new Vector3(1.05f, 0.045f, 0.16f),
+                color,
+                0.18f);
+
+            SpawnPrimitiveEffect(
+                "shape:basic-attack-whiff-edge",
+                "VFX_Runtime_BasicAttack_WhiffEdge",
+                PrimitiveType.Cube,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                groundPosition + Vector3.up * 0.90f + safeForward * 0.36f,
+                rotation,
+                new Vector3(0.82f, 0.030f, 0.080f),
+                Color.Lerp(color, Color.white, 0.42f),
+                0.14f);
             return slash;
         }
 
