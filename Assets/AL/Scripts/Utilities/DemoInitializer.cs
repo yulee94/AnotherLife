@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.ChampionMode.AI;
+using AL.ChampionMode.Customization;
 using AL.Data.Runtime;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -43,6 +44,8 @@ namespace AL.Utilities
                 // Add basic components for the 3D mode
                 player.AddComponent<AL.ChampionMode.Control.ChampionController>();
                 player.AddComponent<AL.ChampionMode.Control.ChampionCombat>();
+                AddCustomizationParts(player);
+                player.AddComponent<ChampionCustomizationController>();
 
                 // Add a material color to player
                 player.GetComponent<Renderer>().material.color = Color.blue;
@@ -51,6 +54,11 @@ namespace AL.Utilities
             }
 
             player.tag = "Player";
+            if (player.GetComponent<ChampionCustomizationController>() == null)
+            {
+                AddCustomizationParts(player);
+                player.AddComponent<ChampionCustomizationController>();
+            }
 
             // 2. Setup Camera
             Camera mainCam = Camera.main;
@@ -128,8 +136,26 @@ namespace AL.Utilities
                 SetStatus($"Warzone Credits: {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}");
             });
 
-            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -115), RunTestBattle);
-            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -170), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "Hero Color", new Vector2(20, -115), () =>
+            {
+                FindObjectOfType<ChampionCustomizationController>()?.CyclePrimaryColor();
+                SetStatus("Cycled Champion primary color.");
+            });
+
+            CreateButton(canvasObj.transform, "Hero Hair", new Vector2(20, -170), () =>
+            {
+                FindObjectOfType<ChampionCustomizationController>()?.CycleHairColor();
+                SetStatus("Cycled Champion hair color.");
+            });
+
+            CreateButton(canvasObj.transform, "Toggle Cape", new Vector2(20, -225), () =>
+            {
+                FindObjectOfType<ChampionCustomizationController>()?.ToggleCape();
+                SetStatus("Toggled Champion cape.");
+            });
+
+            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -280), RunTestBattle);
+            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -335), SpawnArenaTargets);
 
             // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));
@@ -233,6 +259,27 @@ namespace AL.Utilities
 
             var report = ServiceLocator.Get<IBattleSimulator>().Simulate(request);
             SetStatus(report.Summary);
+        }
+
+        private void AddCustomizationParts(GameObject player)
+        {
+            if (player.transform.Find("Hair") == null)
+            {
+                var hair = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                hair.name = "Hair";
+                hair.transform.SetParent(player.transform, false);
+                hair.transform.localPosition = new Vector3(0f, 0.95f, -0.04f);
+                hair.transform.localScale = new Vector3(0.55f, 0.22f, 0.45f);
+            }
+
+            if (player.transform.Find("Cape") == null)
+            {
+                var cape = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cape.name = "Cape";
+                cape.transform.SetParent(player.transform, false);
+                cape.transform.localPosition = new Vector3(0f, 0.1f, -0.48f);
+                cape.transform.localScale = new Vector3(0.75f, 1.15f, 0.08f);
+            }
         }
 
         private Text CreateText(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, int fontSize, Color color)

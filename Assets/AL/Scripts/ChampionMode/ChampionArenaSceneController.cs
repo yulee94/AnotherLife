@@ -1,5 +1,6 @@
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.Customization;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.RealmWar.Warzone;
@@ -15,6 +16,7 @@ namespace AL.ChampionMode
         [SerializeField] private string _kingdomSceneName = "Kingdom";
 
         private ChampionController _playerController;
+        private ChampionCustomizationController _playerCustomization;
         private ChampionCombat _playerCombat;
         private Text _healthText;
 
@@ -48,6 +50,8 @@ namespace AL.ChampionMode
             player.GetComponent<Renderer>().material.color = new Color(0.20f, 0.40f, 1.0f);
             _playerController = player.AddComponent<ChampionController>();
             _playerCombat = player.AddComponent<ChampionCombat>();
+            AddCustomizationParts(player);
+            _playerCustomization = player.AddComponent<ChampionCustomizationController>();
 
             var cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
@@ -121,6 +125,9 @@ namespace AL.ChampionMode
             CreateButton(canvasObject.transform, font, "Dodge", new Vector2(-155, 85), () => _playerController.RequestDodge());
             CreateButton(canvasObject.transform, font, "Skill 1", new Vector2(-155, 25), () => _playerController.RequestSkill(0));
             CreateButton(canvasObject.transform, font, "Kingdom", new Vector2(-155, -45), () => SceneManager.LoadScene(_kingdomSceneName));
+            CreateButton(canvasObject.transform, font, "Color", new Vector2(-155, -115), () => _playerCustomization.CyclePrimaryColor());
+            CreateButton(canvasObject.transform, font, "Hair", new Vector2(-155, -175), () => _playerCustomization.CycleHairColor());
+            CreateButton(canvasObject.transform, font, "Cape", new Vector2(-155, -235), () => _playerCustomization.ToggleCape());
 
             CreateMoveButton(canvasObject.transform, font, "Up", new Vector2(125, 150), new Vector2(0, 1));
             CreateMoveButton(canvasObject.transform, font, "Left", new Vector2(60, 85), new Vector2(-1, 0));
@@ -192,6 +199,21 @@ namespace AL.ChampionMode
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta;
             return text;
+        }
+
+        private static void AddCustomizationParts(GameObject player)
+        {
+            var hair = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            hair.name = "Hair";
+            hair.transform.SetParent(player.transform, false);
+            hair.transform.localPosition = new Vector3(0f, 0.95f, -0.04f);
+            hair.transform.localScale = new Vector3(0.55f, 0.22f, 0.45f);
+
+            var cape = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            cape.name = "Cape";
+            cape.transform.SetParent(player.transform, false);
+            cape.transform.localPosition = new Vector3(0f, 0.1f, -0.48f);
+            cape.transform.localScale = new Vector3(0.75f, 1.15f, 0.08f);
         }
     }
 }

@@ -89,6 +89,7 @@ namespace AL.Services.Local
             save.Researches ??= new List<ResearchState>();
             save.Quests ??= new List<QuestState>();
             save.Warmaster ??= new WarmasterState();
+            save.ChampionCustomization ??= new ChampionCustomizationState();
 
             EnsureResource(save, ResourceType.Food, 1000);
             EnsureResource(save, ResourceType.Wood, 1000);
