@@ -41,6 +41,8 @@ namespace AL.ChampionMode.AI
         private float _currentBreak;
         private float _healthPercent = 1.0f;
         private float _fightStartTime;
+        private Vector3 _baseScale;
+        private Coroutine _hitReactRoutine;
 
         public float CurrentHealth => _currentHealth;
         public float MaxHealth => _maxHealth;
@@ -57,6 +59,7 @@ namespace AL.ChampionMode.AI
             _currentHealth = _maxHealth;
             _currentBreak = _breakBarMax;
             _fightStartTime = Time.time;
+            _baseScale = transform.localScale;
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null) _player = playerObj.transform;
 
@@ -151,6 +154,9 @@ namespace AL.ChampionMode.AI
             {
                 var combat = _player.GetComponent<AL.ChampionMode.Control.ChampionCombat>();
                 combat?.TakeDamage(80f);
+                SkillEffectFactory.SpawnWarzoneShockwave(_player.position, GetCurrentRealmId(), 2.35f);
+                SkillEffectFactory.SpawnFloatingCombatText(_player.position + Vector3.up * 1.65f, "-80", new Color(1f, 0.32f, 0.20f), 0.28f, 0.85f);
+                SkillEffectFactory.ShakeCamera(0.24f, 0.16f);
             }
 
             yield return new WaitForSeconds(_attackCooldown);
@@ -199,6 +205,9 @@ namespace AL.ChampionMode.AI
             ApplyBreakDamage(amount);
             UpdateHealth(_currentHealth, _maxHealth);
             SkillEffectFactory.SpawnForgeBurst(transform.position + Vector3.up);
+            SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 2.8f, Mathf.CeilToInt(finalAmount).ToString(), _isBroken ? new Color(0.40f, 1f, 0.95f) : new Color(1f, 0.62f, 0.22f), _isBroken ? 0.34f : 0.28f, 0.92f);
+            SkillEffectFactory.ShakeCamera(_isBroken ? 0.20f : 0.12f, _isBroken ? 0.16f : 0.10f);
+            PlayHitReaction(_isBroken ? 1.08f : 1.04f);
             Debug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
 
             if (_currentHealth <= 0f)
@@ -238,6 +247,8 @@ namespace AL.ChampionMode.AI
             _isAttacking = false;
             Debug.Log("BOSS: BREAK! Damage window opened.");
             SkillEffectFactory.SpawnBossTelegraph(transform.position, 2.25f, _brokenDuration);
+            SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "BREAK", new Color(0.40f, 1f, 0.95f), 0.38f, 1.1f);
+            SkillEffectFactory.ShakeCamera(0.28f, 0.20f);
 
             yield return new WaitForSeconds(_brokenDuration);
 
@@ -273,12 +284,16 @@ namespace AL.ChampionMode.AI
             _attackCooldown *= 0.5f;
             _attackRange += 0.5f;
             SkillEffectFactory.SpawnCurseMark(transform.position + Vector3.up);
+            SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "ENRAGE", new Color(1f, 0.20f, 0.12f), 0.36f, 1.2f);
+            SkillEffectFactory.ShakeCamera(0.22f, 0.18f);
         }
 
         private void Die()
         {
             _isDead = true;
             Debug.Log("BOSS: Defeated.");
+            SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "DEFEATED", new Color(0.85f, 1f, 0.62f), 0.38f, 1.25f);
+            SkillEffectFactory.ShakeCamera(0.26f, 0.22f);
 
             try
             {
@@ -315,6 +330,47 @@ namespace AL.ChampionMode.AI
             catch (Exception)
             {
                 // Services are optional in isolated tests.
+            }
+        }
+
+        private void PlayHitReaction(float scaleMultiplier)
+        {
+            if (_hitReactRoutine != null)
+            {
+                StopCoroutine(_hitReactRoutine);
+            }
+
+            _hitReactRoutine = StartCoroutine(HitReactRoutine(scaleMultiplier));
+        }
+
+        private IEnumerator HitReactRoutine(float scaleMultiplier)
+        {
+            float elapsed = 0f;
+            const float duration = 0.12f;
+            Vector3 targetScale = new Vector3(_baseScale.x * scaleMultiplier, _baseScale.y * 0.96f, _baseScale.z * scaleMultiplier);
+
+            while (elapsed < duration)
+            {
+                float t = elapsed / duration;
+                transform.localScale = Vector3.Lerp(targetScale, _baseScale, t);
+                elapsed += Time.deltaTime;
+                yield return null;
+            }
+
+            transform.localScale = _baseScale;
+            _hitReactRoutine = null;
+        }
+
+        private RealmId GetCurrentRealmId()
+        {
+            try
+            {
+                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
+            }
+            catch (Exception)
+            {
+                return RealmId.Crownlands;
             }
         }
     }

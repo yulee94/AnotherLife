@@ -1,4 +1,5 @@
 using AL.ChampionMode.AI;
+using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
@@ -119,6 +120,8 @@ namespace AL.ChampionMode
             camera.fieldOfView = 42f;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.025f, 0.03f, 0.04f);
+            var cameraFollow = cameraObject.AddComponent<CameraFollow>();
+            cameraFollow.Configure(player.transform, 8.6f, 2.65f, 25f, 0f);
 
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";

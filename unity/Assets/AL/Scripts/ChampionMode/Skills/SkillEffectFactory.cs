@@ -1,5 +1,6 @@
 using AL.Core;
 using UnityEngine;
+using ChampionCameraFollow = AL.ChampionMode.Camera.CameraFollow;
 
 namespace AL.ChampionMode.Skills
 {
@@ -15,6 +16,9 @@ namespace AL.ChampionMode.Skills
         private const int MaxPooledSkillShapesPerKey = 8;
         private const int MaxActiveGuardShells = 8;
         private const int MaxPooledGuardShells = 4;
+        private const int MaxActiveFloatingTexts = 24;
+
+        private static int _activeFloatingTexts;
 
         public static GameObject SpawnForgeBurst(Vector3 position)
         {
@@ -161,6 +165,35 @@ namespace AL.ChampionMode.Skills
         public static GameObject SpawnBossTelegraph(Vector3 position, float radius, float lifetime)
         {
             return SpawnGroundRing("VFX_Runtime_BossTelegraph", position, new Color(1f, 0.08f, 0.02f, 0.45f), radius, lifetime);
+        }
+
+        public static void ShakeCamera(float strength, float duration)
+        {
+            var cameraFollow = Object.FindObjectOfType<ChampionCameraFollow>();
+            cameraFollow?.AddShake(strength, duration);
+        }
+
+        public static GameObject SpawnFloatingCombatText(Vector3 position, string text, Color color, float size = 0.24f, float lifetime = 0.95f)
+        {
+            if (string.IsNullOrWhiteSpace(text) || _activeFloatingTexts >= MaxActiveFloatingTexts)
+            {
+                return null;
+            }
+
+            var textObject = new GameObject("VFX_Runtime_FloatingCombatText");
+            textObject.transform.position = position;
+            var mesh = textObject.AddComponent<TextMesh>();
+            mesh.text = text;
+            mesh.anchor = TextAnchor.MiddleCenter;
+            mesh.alignment = TextAlignment.Center;
+            mesh.fontSize = 64;
+            mesh.characterSize = Mathf.Max(0.05f, size);
+            mesh.color = color;
+
+            var feedback = textObject.AddComponent<FloatingCombatText>();
+            feedback.Configure(color, Mathf.Max(0.15f, lifetime));
+            _activeFloatingTexts++;
+            return textObject;
         }
 
         private static GameObject SpawnBurst(string name, Vector3 position, Color startColor, Color endColor, float size)
@@ -336,6 +369,70 @@ namespace AL.ChampionMode.Skills
             material.EnableKeyword("_ALPHABLEND_ON");
             material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
             material.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Transparent;
+        }
+
+        private static void ReleaseFloatingCombatText()
+        {
+            _activeFloatingTexts = Mathf.Max(0, _activeFloatingTexts - 1);
+        }
+
+        private sealed class FloatingCombatText : MonoBehaviour
+        {
+            private Color _baseColor;
+            private TextMesh _text;
+            private float _elapsed;
+            private float _lifetime;
+            private bool _released;
+
+            public void Configure(Color baseColor, float lifetime)
+            {
+                _baseColor = baseColor;
+                _lifetime = lifetime;
+                _text = GetComponent<TextMesh>();
+            }
+
+            private void Update()
+            {
+                float deltaTime = Time.unscaledDeltaTime;
+                _elapsed += deltaTime;
+                transform.position += Vector3.up * (0.92f * deltaTime);
+
+                var camera = UnityEngine.Camera.main;
+                if (camera != null)
+                {
+                    transform.rotation = Quaternion.LookRotation(transform.position - camera.transform.position);
+                }
+
+                if (_text != null)
+                {
+                    float t = Mathf.Clamp01(_elapsed / Mathf.Max(0.01f, _lifetime));
+                    Color faded = _baseColor;
+                    faded.a = Mathf.Lerp(_baseColor.a, 0f, t);
+                    _text.color = faded;
+                }
+
+                if (_elapsed >= _lifetime)
+                {
+                    Release();
+                    Destroy(gameObject);
+                }
+            }
+
+            private void OnDestroy()
+            {
+                Release();
+            }
+
+            private void Release()
+            {
+                if (_released)
+                {
+                    return;
+                }
+
+                _released = true;
+                ReleaseFloatingCombatText();
+            }
         }
     }
 }
