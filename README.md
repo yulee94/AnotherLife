@@ -51,10 +51,16 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 - Realm selection and realm-specific resource identity.
 - Kingdom simulation foundations for buildings, research, resources, troops, territory, and warzone credits.
 - Android Studio-owned narrative expansion with chapters, quests, NPC affinity/reputation, factions, persona data, artifacts, and story hooks.
-- Champion arena with movement, combat, auto modes, skill casting, boss dummy encounters, RvR bot crowds, world objective markers, runtime weather, and modular character customization.
+- Champion arena with movement, combat, auto modes, catalog-driven skill buttons, boss dummy encounters with live HP/break/enrage HUD, RvR bot crowds, world objective markers, runtime weather, and modular character customization.
 - Boss loot service and owned-equipment save support.
 - Generated design assets for character blockouts, skill effects, and weather.
 - Shared JSON schemas and Fable contracts for customization and skill/weather catalogs.
+
+## Current Runtime Snapshot
+
+- Champion arena HUD shows shared-catalog skill names, mana costs, boss HP, boss break state, enrage state, and boss defeat state.
+- Skill/weather catalogs live in `unity/Assets/AL/StreamingAssets/GameData/` and are mirrored by schemas/Fable contracts in `unity/SharedContracts/`.
+- Narrative, NPC, quest, dialogue, chapter, and story content remain Android Studio-owned so Unity runtime work and narrative expansion can move in parallel.
 
 ## Collaboration Rules
 
