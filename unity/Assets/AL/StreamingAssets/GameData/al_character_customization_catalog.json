@@ -1,5 +1,5 @@
 {
-  "version": "0.4.0",
+  "version": "0.4.1",
   "game": "Another Life",
   "characterSlots": [
     "BodyPreset",
@@ -86,7 +86,10 @@
     { "id": "warpaint", "displayName": "Warpaint" },
     { "id": "realm_mark", "displayName": "Realm Mark" },
     { "id": "rune", "displayName": "Rune" },
-    { "id": "tattoo", "displayName": "Tattoo" }
+    { "id": "tattoo", "displayName": "Tattoo" },
+    { "id": "beard", "displayName": "Beard" },
+    { "id": "duelist_scar", "displayName": "Duelist Scar" },
+    { "id": "ash_mask", "displayName": "Ash Mask" }
   ],
   "weaponStyles": [
     { "id": "sword", "displayName": "Sword" },
