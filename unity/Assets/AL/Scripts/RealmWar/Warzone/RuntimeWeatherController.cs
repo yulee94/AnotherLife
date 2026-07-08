@@ -55,6 +55,15 @@ namespace AL.RealmWar.Warzone
             Configure(WeatherProfileData.CreateForRealm(realmId));
         }
 
+        public void ApplyParticleBudgetMultiplier(float multiplier)
+        {
+            _profile ??= WeatherProfileData.CreateDefault();
+            float safeMultiplier = Mathf.Clamp(multiplier, 0.15f, 1.25f);
+            _profile.MaxParticles = Mathf.Max(8, Mathf.RoundToInt(_profile.MaxParticles * safeMultiplier));
+            _profile.EmissionRateMultiplier = Mathf.Max(0.02f, _profile.EmissionRateMultiplier * safeMultiplier);
+            ApplyProfile();
+        }
+
         private void ApplyProfile()
         {
             _profile ??= WeatherProfileData.CreateDefault();

@@ -31,10 +31,12 @@ namespace AL.ChampionMode
         private Text _skillText;
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
+        private RuntimePlatformQualityController _qualityController;
 
         private void Start()
         {
             Bootloader.InitializeIfMissing();
+            ApplyRuntimeQuality();
             BuildArena();
             BuildHud();
         }
@@ -70,6 +72,15 @@ namespace AL.ChampionMode
             {
                 ServiceLocator.Get<AL.Core.Interfaces.IWarzoneCreditService>().AddCredits(1);
             }
+        }
+
+        private void ApplyRuntimeQuality()
+        {
+            var qualityObject = new GameObject("RuntimePlatformQuality");
+            _qualityController = qualityObject.AddComponent<RuntimePlatformQualityController>();
+            _qualityController.Apply();
+            _dummyCount = _qualityController.GetDummyBudget(_dummyCount);
+            _botChampionCount = _qualityController.GetBotChampionBudget(_botChampionCount);
         }
 
         private void BuildArena()
@@ -142,14 +153,20 @@ namespace AL.ChampionMode
         {
             var weatherObject = new GameObject("Warzone_BattleFog_Weather");
             weatherObject.transform.position = new Vector3(0f, 6f, 0f);
-            weatherObject.AddComponent<RuntimeWeatherController>().ConfigureForRealm(GetCurrentRealmId());
+            var weather = weatherObject.AddComponent<RuntimeWeatherController>();
+            weather.ConfigureForRealm(GetCurrentRealmId());
+            if (_qualityController != null)
+            {
+                weather.ApplyParticleBudgetMultiplier(_qualityController.GetWeatherParticleMultiplier());
+            }
         }
 
         private void CreateWorldObjectiveMarkers()
         {
             var markerObject = new GameObject("WorldObjectiveMarkers");
             markerObject.transform.position = Vector3.zero;
-            markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(GetCurrentRealmId(), 8);
+            int markerBudget = _qualityController != null ? _qualityController.GetWorldMarkerBudget(8) : 8;
+            markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(GetCurrentRealmId(), markerBudget);
         }
 
         private RealmId GetCurrentRealmId()
