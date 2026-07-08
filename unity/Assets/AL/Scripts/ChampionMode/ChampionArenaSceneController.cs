@@ -9,6 +9,7 @@ using AL.Core.Interfaces;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -230,11 +231,18 @@ namespace AL.ChampionMode
         private void BuildArenaEnvironment()
         {
             var environment = new GameObject("ChampionArena_ObsidianCitadel").transform;
+            var atmospherePulse = environment.gameObject.AddComponent<ArenaAtmospherePulse>();
+            Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
+            Color riftRed = new Color(1f, 0.18f, 0.08f);
+            Color coldBlue = new Color(0.24f, 0.56f, 1f);
 
             CreateArenaPrimitive(environment, "Arena_Foundation", PrimitiveType.Cylinder, new Vector3(0f, -0.16f, 0f), new Vector3(12.8f, 0.18f, 12.8f), Vector3.zero, new Color(0.055f, 0.062f, 0.074f), false, 0.08f, 0.38f);
             CreateArenaPrimitive(environment, "Arena_CombatStone", PrimitiveType.Cylinder, new Vector3(0f, -0.04f, 0f), new Vector3(10.2f, 0.08f, 10.2f), Vector3.zero, new Color(0.10f, 0.112f, 0.128f), false, 0.06f, 0.44f);
-            CreateArenaPrimitive(environment, "Boss_Dais", PrimitiveType.Cylinder, new Vector3(0f, 0.04f, 8.6f), new Vector3(3.4f, 0.16f, 3.4f), Vector3.zero, new Color(0.15f, 0.105f, 0.105f), false, 0.1f, 0.5f);
-            CreateArenaPrimitive(environment, "Player_StartSigil", PrimitiveType.Cylinder, new Vector3(0f, 0.02f, -7.4f), new Vector3(1.8f, 0.025f, 1.8f), Vector3.zero, new Color(0.08f, 0.22f, 0.38f), true, 0f, 0.7f);
+            var bossDais = CreateArenaPrimitive(environment, "Boss_Dais", PrimitiveType.Cylinder, new Vector3(0f, 0.04f, 8.6f), new Vector3(3.4f, 0.16f, 3.4f), Vector3.zero, new Color(0.15f, 0.105f, 0.105f), false, 0.1f, 0.5f);
+            var playerSigil = CreateArenaPrimitive(environment, "Player_StartSigil", PrimitiveType.Cylinder, new Vector3(0f, 0.02f, -7.4f), new Vector3(1.8f, 0.025f, 1.8f), Vector3.zero, new Color(0.08f, 0.22f, 0.38f), true, 0f, 0.7f);
+            atmospherePulse.RegisterRenderer(bossDais, riftRed, 0.3f, 0.36f);
+            atmospherePulse.RegisterRenderer(playerSigil, realmAccent, 1.2f, 0.42f);
+            CreateArenaGroundDetails(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
 
             for (int i = 0; i < 18; i++)
             {
@@ -249,13 +257,83 @@ namespace AL.ChampionMode
                 float angle = i * Mathf.PI * 2f / 8f + Mathf.PI / 8f;
                 Vector3 basePosition = new Vector3(Mathf.Cos(angle) * 10.4f, 1.1f, Mathf.Sin(angle) * 10.4f);
                 var pillar = CreateArenaPrimitive(environment, "RunedPillar_" + i, PrimitiveType.Cylinder, basePosition, new Vector3(0.38f, 1.8f, 0.38f), Vector3.zero, new Color(0.12f, 0.13f, 0.15f), true, 0.08f, 0.36f);
-                CreateArenaPrimitive(pillar.transform, "PillarEmber", PrimitiveType.Sphere, new Vector3(0f, 0.62f, 0f), new Vector3(0.42f, 0.10f, 0.42f), Vector3.zero, i % 2 == 0 ? new Color(0.95f, 0.28f, 0.08f) : new Color(0.20f, 0.58f, 1f), true, 0f, 0.82f);
-                CreatePointLight("Pillar Light " + i, basePosition + Vector3.up * 1.3f, i % 2 == 0 ? new Color(1f, 0.22f, 0.08f) : new Color(0.2f, 0.55f, 1f), 1.1f, 5f);
+                Color emberColor = i % 2 == 0 ? new Color(0.95f, 0.28f, 0.08f) : new Color(0.20f, 0.58f, 1f);
+                var ember = CreateArenaPrimitive(pillar.transform, "PillarEmber", PrimitiveType.Sphere, new Vector3(0f, 0.62f, 0f), new Vector3(0.42f, 0.10f, 0.42f), Vector3.zero, emberColor, true, 0f, 0.82f);
+                var pillarLight = CreatePointLight("Pillar Light " + i, basePosition + Vector3.up * 1.3f, emberColor, 1.1f, 5f);
+                atmospherePulse.RegisterRenderer(ember, emberColor, i * 0.63f, 0.62f);
+                atmospherePulse.RegisterLight(pillarLight, i * 0.47f, 0.16f);
             }
 
             for (int i = -2; i <= 2; i++)
             {
-                CreateArenaPrimitive(environment, "CombatLane_" + (i + 2), PrimitiveType.Cube, new Vector3(i * 1.15f, 0.035f, 0.4f), new Vector3(0.045f, 0.035f, 15.8f), Vector3.zero, new Color(0.12f, 0.25f, 0.36f), true, 0f, 0.72f);
+                var lane = CreateArenaPrimitive(environment, "CombatLane_" + (i + 2), PrimitiveType.Cube, new Vector3(i * 1.15f, 0.035f, 0.4f), new Vector3(0.045f, 0.035f, 15.8f), Vector3.zero, new Color(0.12f, 0.25f, 0.36f), true, 0f, 0.72f);
+                atmospherePulse.RegisterRenderer(lane, i == 0 ? realmAccent : coldBlue, i * 0.38f, 0.28f);
+            }
+
+            CreateArenaBoundaryDetails(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
+            CreateArenaBraziers(environment, atmospherePulse, realmAccent, riftRed);
+        }
+
+        private void CreateArenaGroundDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
+        {
+            for (int i = 0; i < 28; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 28f;
+                float radius = i % 2 == 0 ? 4.85f : 5.28f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * radius, 0.042f, Mathf.Sin(angle) * radius);
+                Vector3 euler = new Vector3(0f, -angle * Mathf.Rad2Deg, 0f);
+                Color color = i % 3 == 0 ? realmAccent : Color.Lerp(coldBlue, riftRed, i / 27f);
+                var rune = CreateArenaPrimitive(environment, "Floor_RuneStroke_" + i, PrimitiveType.Cube, position, new Vector3(0.72f, 0.022f, 0.040f), euler, color, true, 0f, 0.78f);
+                atmospherePulse.RegisterRenderer(rune, color, i * 0.24f, 0.34f);
+            }
+
+            for (int i = 0; i < 10; i++)
+            {
+                float x = -4.5f + i;
+                Color color = Color.Lerp(coldBlue, realmAccent, i / 9f);
+                var crossLine = CreateArenaPrimitive(environment, "Tactical_Crossline_" + i, PrimitiveType.Cube, new Vector3(x, 0.038f, -0.25f), new Vector3(0.028f, 0.020f, 9.2f), Vector3.zero, color, true, 0f, 0.70f);
+                atmospherePulse.RegisterRenderer(crossLine, color, i * 0.19f, 0.18f);
+            }
+        }
+
+        private void CreateArenaBoundaryDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
+        {
+            for (int i = 0; i < 24; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 24f;
+                float yaw = -angle * Mathf.Rad2Deg;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * 12.35f, 1.58f, Mathf.Sin(angle) * 12.35f);
+                Color color = i % 2 == 0 ? new Color(0.10f, 0.11f, 0.13f) : new Color(0.075f, 0.085f, 0.105f);
+                CreateArenaPrimitive(environment, "Obsidian_Spine_" + i, PrimitiveType.Cube, position, new Vector3(0.22f, 1.85f, 0.22f), new Vector3(0f, yaw, i % 2 == 0 ? 12f : -12f), color, true, 0.10f, 0.34f);
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 8f + Mathf.PI / 8f;
+                float yaw = -angle * Mathf.Rad2Deg;
+                Vector3 basePosition = new Vector3(Mathf.Cos(angle) * 12.1f, 0f, Mathf.Sin(angle) * 12.1f);
+                Color bannerColor = i % 3 == 0 ? realmAccent : i % 3 == 1 ? riftRed : coldBlue;
+                CreateArenaPrimitive(environment, "Citadel_BannerPole_" + i, PrimitiveType.Cube, basePosition + Vector3.up * 1.88f, new Vector3(0.09f, 3.1f, 0.09f), new Vector3(0f, yaw, 0f), new Color(0.16f, 0.13f, 0.10f), true, 0.30f, 0.48f);
+                var banner = CreateArenaPrimitive(environment, "Citadel_WarBanner_" + i, PrimitiveType.Cube, basePosition + new Vector3(Mathf.Cos(angle) * -0.28f, 2.34f, Mathf.Sin(angle) * -0.28f), new Vector3(0.70f, 0.88f, 0.045f), new Vector3(0f, yaw, 0f), bannerColor, true, 0.02f, 0.42f);
+                var bannerMark = CreateArenaPrimitive(environment, "Citadel_BannerMark_" + i, PrimitiveType.Cube, basePosition + new Vector3(Mathf.Cos(angle) * -0.31f, 2.34f, Mathf.Sin(angle) * -0.31f), new Vector3(0.46f, 0.055f, 0.052f), new Vector3(0f, yaw, 0f), Color.Lerp(bannerColor, Color.white, 0.36f), true, 0f, 0.72f);
+                atmospherePulse.RegisterRenderer(banner, bannerColor, i * 0.36f, 0.16f);
+                atmospherePulse.RegisterRenderer(bannerMark, Color.Lerp(bannerColor, Color.white, 0.25f), i * 0.51f, 0.22f);
+            }
+        }
+
+        private void CreateArenaBraziers(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 6f + Mathf.PI / 6f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * 7.6f, 0f, Mathf.Sin(angle) * 7.6f);
+                Color flameColor = i % 2 == 0 ? riftRed : realmAccent;
+                CreateArenaPrimitive(environment, "WarBrazier_Base_" + i, PrimitiveType.Cylinder, position + Vector3.up * 0.22f, new Vector3(0.46f, 0.24f, 0.46f), Vector3.zero, new Color(0.12f, 0.10f, 0.085f), true, 0.28f, 0.52f);
+                CreateArenaPrimitive(environment, "WarBrazier_Crown_" + i, PrimitiveType.Cylinder, position + Vector3.up * 0.58f, new Vector3(0.58f, 0.12f, 0.58f), Vector3.zero, new Color(0.18f, 0.14f, 0.10f), true, 0.34f, 0.58f);
+                var flame = CreateArenaPrimitive(environment, "WarBrazier_Flame_" + i, PrimitiveType.Sphere, position + Vector3.up * 0.82f, new Vector3(0.28f, 0.42f, 0.28f), Vector3.zero, flameColor, true, 0f, 0.88f);
+                var light = CreatePointLight("WarBrazier Light " + i, position + Vector3.up * 1.18f, flameColor, 1.18f, 5.4f);
+                atmospherePulse.RegisterRenderer(flame, flameColor, i * 0.58f, 0.72f);
+                atmospherePulse.RegisterLight(light, i * 0.41f, 0.18f);
             }
         }
 
@@ -421,6 +499,23 @@ namespace AL.ChampionMode
             catch (System.Exception)
             {
                 return RealmId.Crownlands;
+            }
+        }
+
+        private static Color GetRealmAccentColor(RealmId realmId)
+        {
+            switch (realmId)
+            {
+                case RealmId.Stonehold:
+                    return new Color(0.84f, 0.68f, 0.42f);
+                case RealmId.Eldergrove:
+                    return new Color(0.34f, 1f, 0.56f);
+                case RealmId.Crownlands:
+                    return new Color(0.32f, 0.56f, 1f);
+                case RealmId.Umbral:
+                    return new Color(0.82f, 0.22f, 1f);
+                default:
+                    return new Color(0.72f, 0.78f, 0.84f);
             }
         }
 
@@ -1424,5 +1519,95 @@ namespace AL.ChampionMode
             return text;
         }
 
+    }
+
+    internal sealed class ArenaAtmospherePulse : MonoBehaviour
+    {
+        private struct PulsedMaterial
+        {
+            public Material Material;
+            public Color Color;
+            public float Phase;
+            public float Intensity;
+        }
+
+        private struct PulsedLight
+        {
+            public Light Light;
+            public float BaseIntensity;
+            public float Phase;
+            public float Amplitude;
+        }
+
+        private readonly List<PulsedMaterial> _materials = new List<PulsedMaterial>();
+        private readonly List<PulsedLight> _lights = new List<PulsedLight>();
+
+        public void RegisterRenderer(GameObject target, Color color, float phase, float intensity)
+        {
+            if (target == null)
+            {
+                return;
+            }
+
+            var renderer = target.GetComponent<Renderer>();
+            if (renderer == null || renderer.material == null || !renderer.material.HasProperty("_EmissionColor"))
+            {
+                return;
+            }
+
+            renderer.material.EnableKeyword("_EMISSION");
+            _materials.Add(new PulsedMaterial
+            {
+                Material = renderer.material,
+                Color = color,
+                Phase = phase,
+                Intensity = Mathf.Max(0f, intensity)
+            });
+        }
+
+        public void RegisterLight(Light light, float phase, float amplitude)
+        {
+            if (light == null)
+            {
+                return;
+            }
+
+            _lights.Add(new PulsedLight
+            {
+                Light = light,
+                BaseIntensity = light.intensity,
+                Phase = phase,
+                Amplitude = Mathf.Clamp(amplitude, 0f, 0.45f)
+            });
+        }
+
+        private void Update()
+        {
+            float time = Time.time * 1.18f;
+
+            for (int i = 0; i < _materials.Count; i++)
+            {
+                var entry = _materials[i];
+                if (entry.Material == null)
+                {
+                    continue;
+                }
+
+                float pulse = 0.70f + Mathf.Sin(time + entry.Phase) * 0.30f;
+                entry.Material.SetColor("_EmissionColor", entry.Color * entry.Intensity * Mathf.Max(0f, pulse));
+            }
+
+            for (int i = 0; i < _lights.Count; i++)
+            {
+                var entry = _lights[i];
+                if (entry.Light == null)
+                {
+                    continue;
+                }
+
+                float pulse = Mathf.Sin(time * 0.82f + entry.Phase);
+                entry.Light.intensity = Mathf.Max(0f, entry.BaseIntensity * (1f + pulse * entry.Amplitude));
+            }
+        }
     }
 }
