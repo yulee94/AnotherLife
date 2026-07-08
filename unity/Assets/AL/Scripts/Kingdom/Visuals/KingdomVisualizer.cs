@@ -303,11 +303,17 @@ namespace AL.Kingdom.Visuals
                 root.transform.SetParent(outposts.transform, false);
                 root.transform.position = position;
 
-                CreateTerritoryPrimitive(root.transform, "OutpostControlRing", PrimitiveType.Cylinder, new Vector3(0f, 0.035f, 0f), territory.IsFortress ? new Vector3(0.66f, 0.03f, 0.66f) : new Vector3(0.52f, 0.025f, 0.52f), routeColor, 0.02f, 0.42f, territory.OwnerRealm == RealmId.None ? null : routeColor * 0.10f);
+                var controlRing = CreateTerritoryPrimitive(root.transform, "OutpostControlRing", PrimitiveType.Cylinder, new Vector3(0f, 0.035f, 0f), territory.IsFortress ? new Vector3(0.66f, 0.03f, 0.66f) : new Vector3(0.52f, 0.025f, 0.52f), routeColor, 0.02f, 0.42f, territory.OwnerRealm == RealmId.None ? null : routeColor * 0.10f);
+                if (territory.OwnerRealm != RealmId.None || territory.IsFortress)
+                {
+                    controlRing.AddComponent<KingdomTacticalPulse>().Configure(routeColor, Color.Lerp(routeColor, Color.white, 0.22f), territory.IsFortress ? 1.08f : 0.78f);
+                }
+
                 var baseObject = CreateTerritoryPrimitive(root.transform, "OutpostBase", PrimitiveType.Cylinder, new Vector3(0f, 0.08f, 0f), territory.IsFortress ? new Vector3(0.46f, 0.12f, 0.46f) : new Vector3(0.34f, 0.08f, 0.34f), Color.Lerp(ownerColor, Color.black, 0.20f), 0.04f, 0.40f);
                 var towerObject = CreateTerritoryPrimitive(root.transform, "OutpostTower", territory.IsFortress ? PrimitiveType.Cylinder : PrimitiveType.Cube, new Vector3(0f, territory.IsFortress ? 0.42f : 0.30f, 0f), territory.IsFortress ? new Vector3(0.22f, 0.46f, 0.22f) : new Vector3(0.30f, 0.32f, 0.30f), ownerColor, 0.05f, 0.52f, territory.OwnerRealm == RealmId.None ? null : ownerColor * 0.12f);
                 baseObject.AddComponent<KingdomTerritorySelectable>().Configure(territory.Name, territory.OwnerRealm, territory.BonusType, territory.BonusAmount, territory.IsFortress, Color.Lerp(ownerColor, Color.black, 0.20f), ownerColor);
                 towerObject.AddComponent<KingdomTerritorySelectable>().Configure(territory.Name, territory.OwnerRealm, territory.BonusType, territory.BonusAmount, territory.IsFortress, ownerColor, Color.Lerp(ownerColor, Color.white, 0.25f));
+                CreateOutpostGarrisonMarkers(root.transform, ownerColor, routeColor, territory.IsFortress, territory.OwnerRealm == RealmId.None);
                 CreateTerritoryPrimitive(root.transform, "OutpostFlag", PrimitiveType.Cube, new Vector3(0.24f, territory.IsFortress ? 0.78f : 0.58f, 0f), new Vector3(0.30f, 0.13f, 0.035f), Color.Lerp(ownerColor, Color.white, 0.25f), 0.02f, 0.44f, territory.OwnerRealm == RealmId.None ? null : ownerColor * 0.08f);
                 CreatePointLight(root.transform, "OutpostStatusLight", new Vector3(0f, territory.IsFortress ? 1.12f : 0.88f, -0.08f), Color.Lerp(ownerColor, Color.white, 0.18f), territory.IsFortress ? 0.50f : 0.34f, territory.IsFortress ? 2.4f : 1.8f);
 
@@ -325,6 +331,30 @@ namespace AL.Kingdom.Visuals
 
                 index++;
             }
+        }
+
+        private static void CreateOutpostGarrisonMarkers(Transform root, Color ownerColor, Color routeColor, bool isFortress, bool isNeutral)
+        {
+            int markerCount = isFortress ? 4 : 3;
+            float radius = isFortress ? 0.62f : 0.48f;
+            Color markerColor = isNeutral
+                ? Color.Lerp(routeColor, new Color(0.72f, 0.78f, 0.84f), 0.35f)
+                : Color.Lerp(ownerColor, Color.white, 0.18f);
+
+            for (int i = 0; i < markerCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / markerCount + Mathf.PI * 0.16f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * radius, 0.19f, Mathf.Sin(angle) * radius);
+                var marker = CreateTerritoryPrimitive(root, "OutpostGarrisonPip", PrimitiveType.Cylinder, position, new Vector3(0.052f, isFortress ? 0.14f : 0.10f, 0.052f), markerColor, 0.04f, 0.58f, isNeutral ? null : markerColor * 0.13f);
+                if (!isNeutral)
+                {
+                    marker.AddComponent<KingdomTacticalPulse>().Configure(markerColor, Color.Lerp(markerColor, Color.white, 0.35f), 0.72f + i * 0.08f);
+                }
+            }
+
+            Color chevronColor = isNeutral ? Color.Lerp(routeColor, Color.white, 0.12f) : Color.Lerp(ownerColor, Color.white, 0.24f);
+            CreateSurfaceStrip(root, "OutpostChevronA", new Vector3(-0.15f, 0.075f, -0.58f), new Vector3(0.28f, 0.022f, 0.055f), chevronColor, new Vector3(0f, 22f, 0f));
+            CreateSurfaceStrip(root, "OutpostChevronB", new Vector3(0.15f, 0.075f, -0.58f), new Vector3(0.28f, 0.022f, 0.055f), chevronColor, new Vector3(0f, -22f, 0f));
         }
 
         private static GameObject CreateTerritoryPrimitive(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Color color, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
@@ -423,9 +453,23 @@ namespace AL.Kingdom.Visuals
         internal static void RaiseTerritorySelected(string name, RealmId owner, ResourceType bonusType, long bonusAmount, bool isFortress)
         {
             string territoryName = string.IsNullOrWhiteSpace(name) ? "Outpost" : name;
-            string ownerLabel = owner == RealmId.None ? "Neutral" : owner.ToString();
-            string kind = isFortress ? "Fortress" : "Outpost";
-            OnTerritorySelected?.Invoke($"{kind}: {territoryName}. Owner {ownerLabel}. Bonus +{bonusAmount} {bonusType}.");
+            string ownerLabel = owner == RealmId.None ? "NEUTRAL" : owner.ToString().ToUpperInvariant();
+            string kind = isFortress ? "FORTRESS" : "OUTPOST";
+            OnTerritorySelected?.Invoke($"{kind} LOCK: {territoryName} | {ownerLabel} CONTROL | Yield +{bonusAmount} {bonusType}. {GetTerritoryRecommendation(owner, isFortress)}");
+        }
+
+        private static string GetTerritoryRecommendation(RealmId owner, bool isFortress)
+        {
+            if (owner == RealmId.None)
+            {
+                return isFortress
+                    ? "High-value neutral fortress; capture only after building troop depth."
+                    : "Prime capture target when your army can absorb border losses.";
+            }
+
+            return isFortress
+                ? "Fortress is a strategic anchor; keep troop production ahead of rivals."
+                : "Owned route is contributing income; defend it before pushing deeper.";
         }
 
         private static void CreateFramePiece(Transform parent, string name, Vector3 position, Vector3 scale, Color color)
@@ -505,7 +549,9 @@ namespace AL.Kingdom.Visuals
         private Color _baseColor;
         private Color _accentColor;
         private Renderer _renderer;
+        private Vector3 _baseScale;
         private float _highlightTimer;
+        private bool _hovered;
 
         public void Configure(string name, RealmId owner, ResourceType bonusType, long bonusAmount, bool isFortress, Color baseColor, Color accentColor)
         {
@@ -517,6 +563,7 @@ namespace AL.Kingdom.Visuals
             _baseColor = baseColor;
             _accentColor = accentColor;
             _renderer = GetComponent<Renderer>();
+            _baseScale = transform.localScale;
         }
 
         private void OnMouseDown()
@@ -527,20 +574,33 @@ namespace AL.Kingdom.Visuals
             }
 
             _highlightTimer = 0.48f;
+            SpawnSelectionPulse();
             KingdomVisualizer.RaiseTerritorySelected(_name, _owner, _bonusType, _bonusAmount, _isFortress);
+        }
+
+        private void OnMouseEnter()
+        {
+            _hovered = true;
+        }
+
+        private void OnMouseExit()
+        {
+            _hovered = false;
         }
 
         private void Update()
         {
             if (_highlightTimer <= 0f)
             {
-                SetColor(_baseColor);
+                SetColor(_hovered ? Color.Lerp(_baseColor, _accentColor, 0.28f) : _baseColor);
+                SetScale(_hovered ? 1.045f : 1f);
                 return;
             }
 
             _highlightTimer -= Time.deltaTime;
             float pulse = Mathf.PingPong(Time.time * 7.5f, 1f);
             SetColor(Color.Lerp(_baseColor, _accentColor, 0.40f + pulse * 0.38f));
+            SetScale(1.060f + pulse * 0.050f);
         }
 
         private void SetColor(Color color)
@@ -554,6 +614,38 @@ namespace AL.Kingdom.Visuals
             {
                 _renderer.material.color = color;
             }
+        }
+
+        private void SetScale(float multiplier)
+        {
+            if (_baseScale == Vector3.zero)
+            {
+                _baseScale = transform.localScale;
+            }
+
+            transform.localScale = _baseScale * multiplier;
+        }
+
+        private void SpawnSelectionPulse()
+        {
+            if (transform.parent == null)
+            {
+                return;
+            }
+
+            var pulse = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pulse.name = "OutpostSelectionPulse";
+            pulse.transform.SetParent(transform.parent, false);
+            pulse.transform.localPosition = new Vector3(0f, 0.115f, 0f);
+            float ringScale = _isFortress ? 0.92f : 0.72f;
+            pulse.transform.localScale = new Vector3(ringScale, 0.016f, ringScale);
+            var collider = pulse.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+
+            pulse.AddComponent<AL.Kingdom.KingdomSelectionPulse>().Configure(_accentColor, 0.62f, _isFortress ? 1.34f : 1.42f);
         }
     }
 }
