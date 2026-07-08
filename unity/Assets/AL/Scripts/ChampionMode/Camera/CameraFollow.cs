@@ -8,6 +8,7 @@ namespace AL.ChampionMode.Camera
         [SerializeField] private Transform _target;
         [SerializeField] private float _distance = 5.0f;
         [SerializeField] private float _heightOffset = 1.5f;
+        [SerializeField] private float _followSmoothTime = 0.08f;
 
         [Header("Mouse Settings")]
         [SerializeField] private float _mouseSensitivity = 3f;
@@ -16,6 +17,26 @@ namespace AL.ChampionMode.Camera
 
         private float _yaw = 0f;
         private float _pitch = 0f;
+        private float _shakeTime;
+        private float _shakeDuration;
+        private float _shakeStrength;
+        private Vector3 _positionVelocity;
+
+        public void Configure(Transform target, float distance, float heightOffset, float pitch, float yaw)
+        {
+            _target = target;
+            _distance = Mathf.Max(1.5f, distance);
+            _heightOffset = heightOffset;
+            _pitch = Mathf.Clamp(pitch, _minPitch, _maxPitch);
+            _yaw = yaw;
+        }
+
+        public void AddShake(float strength, float duration)
+        {
+            _shakeStrength = Mathf.Max(_shakeStrength, Mathf.Max(0f, strength));
+            _shakeDuration = Mathf.Max(_shakeDuration, Mathf.Max(0.01f, duration));
+            _shakeTime = _shakeDuration;
+        }
 
         private void Start()
         {
@@ -58,9 +79,16 @@ namespace AL.ChampionMode.Camera
                 Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0);
                 Vector3 negDistance = new Vector3(0.0f, 0.0f, -_distance);
                 Vector3 position = (rotation * negDistance) + _target.position + new Vector3(0, _heightOffset, 0);
+                Vector3 shakeOffset = Vector3.zero;
+                if (_shakeTime > 0f)
+                {
+                    float shakePercent = _shakeTime / Mathf.Max(0.01f, _shakeDuration);
+                    shakeOffset = Random.insideUnitSphere * (_shakeStrength * shakePercent);
+                    _shakeTime = Mathf.Max(0f, _shakeTime - Time.unscaledDeltaTime);
+                }
 
                 transform.rotation = rotation;
-                transform.position = position;
+                transform.position = Vector3.SmoothDamp(transform.position, position, ref _positionVelocity, _followSmoothTime) + shakeOffset;
             }
             else
             {

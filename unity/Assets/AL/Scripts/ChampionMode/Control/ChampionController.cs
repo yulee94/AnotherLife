@@ -55,6 +55,8 @@ namespace AL.ChampionMode.Control
 
         private void Start()
         {
+            RefreshCameraTransform();
+
             // Record initial enemy count for victory check
             _initialEnemyCount = GameObject.FindObjectsOfType<GameObject>()
                 .Count(obj => obj.name.StartsWith("Dummy_"));
@@ -72,6 +74,7 @@ namespace AL.ChampionMode.Control
         private void HandleMovement()
         {
             if (_isAttacking) return;
+            RefreshCameraTransform();
 
             float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : Input.GetAxis("Horizontal");
             float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : Input.GetAxis("Vertical");
@@ -152,6 +155,8 @@ namespace AL.ChampionMode.Control
 
                     // Visual Feedback
                     CreateHitVFX(hitCollider.transform.position);
+                    SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
+                    SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
 
                     Destroy(hitCollider.gameObject);
                     CheckVictory(1);
@@ -214,6 +219,14 @@ namespace AL.ChampionMode.Control
         {
             Debug.Log($"[Champion] Using Skill {index + 1}");
             _skillCaster?.TryCastSkill(index);
+        }
+
+        private void RefreshCameraTransform()
+        {
+            if (_cameraTransform == null && UnityEngine.Camera.main != null)
+            {
+                _cameraTransform = UnityEngine.Camera.main.transform;
+            }
         }
 
         private IEnumerator Dodge()
