@@ -1128,9 +1128,19 @@ namespace AL.UI.Kingdom
 
         private static void CreateSectionHeader(Transform parent, Font font, string label, Vector2 anchoredPosition)
         {
-            var header = CreateText(parent, label + "_Header", font, 16, TextAnchor.UpperLeft, anchoredPosition, new Vector2(360f, 28f));
+            Color accent = GetCommandSectionAccent(label);
+            var band = CreatePanel(parent, label + "_SectionBand", new Vector2(anchoredPosition.x - 6f, anchoredPosition.y + 7f), new Vector2(392f, 30f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), WithAlpha(Color.Lerp(new Color(0.016f, 0.023f, 0.034f, 1f), accent, 0.12f), 0.58f));
+            CreatePanel(band.transform, label + "_SectionAccent", new Vector2(0f, 0f), new Vector2(4f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), WithAlpha(accent, 0.58f));
+            CreatePanel(band.transform, label + "_SectionTopRule", new Vector2(0f, -1f), new Vector2(-22f, 1.4f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), WithAlpha(Color.Lerp(accent, Color.white, 0.22f), 0.20f));
+
+            for (int i = 0; i < 3; i++)
+            {
+                CreatePanel(band.transform, label + "_SectionPip_" + (i + 1), new Vector2(336f + i * 16f, -10f), new Vector2(8f, 8f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), WithAlpha(accent, 0.20f + i * 0.12f));
+            }
+
+            var header = CreateText(band.transform, label + "_Header", font, 15, TextAnchor.MiddleLeft, new Vector2(14f, -4f), new Vector2(292f, 22f));
             header.text = label;
-            header.color = new Color(0.58f, 0.68f, 0.78f);
+            header.color = Color.Lerp(new Color(0.64f, 0.74f, 0.84f, 1f), accent, 0.16f);
         }
 
         private static Button CreateDeckButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action, Color? fillColor = null)
@@ -1168,9 +1178,13 @@ namespace AL.UI.Kingdom
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta ?? new Vector2(240, 48);
 
-            var accent = CreatePanel(buttonObject.transform, "ButtonAccent", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.54f)).GetComponent<Image>();
-            var topTrace = CreatePanel(buttonObject.transform, "ButtonTopTrace", new Vector2(0f, -1f), new Vector2(-18f, 1.5f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.90f, 0.66f, 0.13f)).GetComponent<Image>();
             Color iconColor = GetCommandIconColor(label, baseColor);
+            CreatePanel(buttonObject.transform, "ButtonInnerWash", new Vector2(4f, -4f), new Vector2(-8f, -8f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), WithAlpha(iconColor, 0.035f));
+            var accent = CreatePanel(buttonObject.transform, "ButtonAccent", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), WithAlpha(iconColor, 0.54f)).GetComponent<Image>();
+            var topTrace = CreatePanel(buttonObject.transform, "ButtonTopTrace", new Vector2(0f, -1f), new Vector2(-18f, 1.5f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.90f, 0.66f, 0.13f)).GetComponent<Image>();
+            CreatePanel(buttonObject.transform, "ButtonBottomTrace", new Vector2(0f, 1f), new Vector2(-22f, 1.2f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), WithAlpha(iconColor, 0.10f));
+            var actionNotch = CreatePanel(buttonObject.transform, "ButtonActionNotch", new Vector2(-9f, -11f), new Vector2(14f, 18f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), WithAlpha(iconColor, 0.18f)).GetComponent<Image>();
+            CreatePanel(actionNotch.transform, "ButtonActionNotchCore", new Vector2(-4f, -4f), new Vector2(5f, 10f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), WithAlpha(Color.Lerp(iconColor, Color.white, 0.32f), 0.28f));
             var iconFrame = CreateCommandButtonIcon(buttonObject.transform, label, iconColor);
 
             int fontSize = rect.sizeDelta.x <= 190f ? 17 : 20;
@@ -1182,8 +1196,8 @@ namespace AL.UI.Kingdom
             textRect.anchorMax = Vector2.one;
             textRect.pivot = new Vector2(0.5f, 0.5f);
             textRect.offsetMin = new Vector2(rect.sizeDelta.x <= 190f ? 42f : 46f, 0f);
-            textRect.offsetMax = new Vector2(-8f, 0f);
-            buttonObject.AddComponent<KingdomCommandButtonFeedback>().Configure(image, text, accent, topTrace, iconFrame, iconColor);
+            textRect.offsetMax = new Vector2(-22f, 0f);
+            buttonObject.AddComponent<KingdomCommandButtonFeedback>().Configure(image, text, accent, topTrace, iconFrame, actionNotch, iconColor);
             return button;
         }
 
@@ -1249,6 +1263,32 @@ namespace AL.UI.Kingdom
                 CommandIconKind.Danger => new Color(0.94f, 0.28f, 0.20f, 0.92f),
                 _ => Color.Lerp(baseColor, new Color(1f, 0.88f, 0.54f, 0.92f), 0.44f)
             };
+        }
+
+        private static Color GetCommandSectionAccent(string label)
+        {
+            string lower = label?.ToLowerInvariant() ?? string.Empty;
+            if (lower.Contains("build"))
+            {
+                return new Color(0.88f, 0.62f, 0.28f, 1f);
+            }
+
+            if (lower.Contains("force"))
+            {
+                return new Color(0.40f, 0.72f, 1f, 1f);
+            }
+
+            if (lower.Contains("progress"))
+            {
+                return new Color(0.72f, 0.60f, 1f, 1f);
+            }
+
+            if (lower.Contains("realm"))
+            {
+                return new Color(0.72f, 0.88f, 0.42f, 1f);
+            }
+
+            return new Color(0.42f, 0.62f, 0.78f, 1f);
         }
 
         private static CommandIconKind GetCommandIconKind(string label)
@@ -1614,19 +1654,21 @@ namespace AL.UI.Kingdom
         private Image _accent;
         private Image _topTrace;
         private Image _iconFrame;
+        private Image _actionNotch;
         private Text _label;
         private Color _baseColor;
         private Color _accentColor;
         private Color _accentBaseColor;
         private Color _topTraceBaseColor;
         private Color _iconFrameBaseColor;
+        private Color _actionNotchBaseColor;
         private float _hoverAmount;
         private float _pressAmount;
         private float _impactAmount;
         private bool _hovered;
         private bool _pressed;
 
-        public void Configure(Image background, Text label, Image accent, Image topTrace, Image iconFrame, Color accentColor)
+        public void Configure(Image background, Text label, Image accent, Image topTrace, Image iconFrame, Image actionNotch, Color accentColor)
         {
             _rectTransform = GetComponent<RectTransform>();
             _background = background;
@@ -1634,11 +1676,13 @@ namespace AL.UI.Kingdom
             _accent = accent;
             _topTrace = topTrace;
             _iconFrame = iconFrame;
+            _actionNotch = actionNotch;
             _accentColor = accentColor;
             _baseColor = background != null ? background.color : new Color(0.105f, 0.138f, 0.178f, 1f);
             _accentBaseColor = accent != null ? accent.color : WithAlpha(accentColor, 0.54f);
             _topTraceBaseColor = topTrace != null ? topTrace.color : new Color(1f, 0.90f, 0.66f, 0.13f);
             _iconFrameBaseColor = iconFrame != null ? iconFrame.color : new Color(0.006f, 0.010f, 0.016f, 0.82f);
+            _actionNotchBaseColor = actionNotch != null ? actionNotch.color : WithAlpha(accentColor, 0.18f);
         }
 
         private void Update()
@@ -1674,6 +1718,12 @@ namespace AL.UI.Kingdom
             {
                 _iconFrame.color = Color.Lerp(_iconFrameBaseColor, WithAlpha(_accentColor, 0.38f), 0.38f + state * 0.32f);
                 _iconFrame.rectTransform.localScale = Vector3.one * (1f + state * 0.055f + _impactAmount * 0.040f);
+            }
+
+            if (_actionNotch != null)
+            {
+                _actionNotch.color = Color.Lerp(_actionNotchBaseColor, WithAlpha(Color.Lerp(_accentColor, Color.white, 0.22f), 0.54f), state * 0.78f + pulse * 0.10f);
+                _actionNotch.rectTransform.localScale = new Vector3(1f + state * 0.12f, 1f + state * 0.05f, 1f);
             }
 
             if (_label != null)
