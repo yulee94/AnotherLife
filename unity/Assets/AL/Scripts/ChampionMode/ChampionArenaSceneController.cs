@@ -67,6 +67,13 @@ namespace AL.ChampionMode
         private Text _clearTitleText;
         private Text _clearSummaryText;
         private Text _clearDetailText;
+        private Text _clearGradeText;
+        private Text _clearCreditText;
+        private Text _clearLootText;
+        private Image _clearBackdropImage;
+        private Image _clearGradeHalo;
+        private Image _clearProgressFill;
+        private readonly Image[] _clearSignalBars = new Image[4];
         private GameObject _introPanelObject;
         private Image _introTopLetterbox;
         private Image _introBottomLetterbox;
@@ -99,6 +106,8 @@ namespace AL.ChampionMode
         private GameObject _inspectionShowcaseRoot;
         private GameObject _introStageCueRoot;
         private RuntimePlatformQualityController _qualityController;
+        private BossLootResult _lastBossLootResult;
+        private Coroutine _clearPresentationRoutine;
 
         private void Start()
         {
@@ -163,6 +172,11 @@ namespace AL.ChampionMode
             }
         }
 
+        private void HandleBossLootRolled(BossLootResult result)
+        {
+            _lastBossLootResult = result;
+        }
+
         private void ApplyRuntimeQuality()
         {
             var qualityObject = new GameObject("RuntimePlatformQuality");
@@ -211,6 +225,7 @@ namespace AL.ChampionMode
             ApplyMaterial(boss, new Color(0.20f, 0.03f, 0.05f), 0.2f, 0.42f);
             DressBossVisual(boss);
             _boss = boss.AddComponent<BossDummyAI>();
+            _boss.LootRolled += HandleBossLootRolled;
             _bossTransform = boss.transform;
             CreateIntroCinematicCues(player.transform, boss.transform, realmAccent);
             _encounterStartTime = Time.time;
@@ -924,14 +939,17 @@ namespace AL.ChampionMode
 
         private void OnDestroy()
         {
-            if (_playerCombat == null)
+            if (_boss != null)
             {
-                return;
+                _boss.LootRolled -= HandleBossLootRolled;
             }
 
-            _playerCombat.OnHealthChanged -= UpdateHealthText;
-            _playerCombat.OnManaChanged -= UpdateManaText;
-            _playerCombat.OnDeath -= HandlePlayerDeath;
+            if (_playerCombat != null)
+            {
+                _playerCombat.OnHealthChanged -= UpdateHealthText;
+                _playerCombat.OnManaChanged -= UpdateManaText;
+                _playerCombat.OnDeath -= HandlePlayerDeath;
+            }
         }
 
         private static void EnsureEventSystem()
@@ -1343,6 +1361,12 @@ namespace AL.ChampionMode
             if (_clearPanelObject != null)
             {
                 _clearPanelObject.SetActive(true);
+                _clearPanelObject.transform.localScale = Vector3.one * 0.96f;
+            }
+
+            if (_clearBackdropImage != null)
+            {
+                _clearBackdropImage.gameObject.SetActive(true);
             }
 
             Color gradeColor = grade == "S"
@@ -1355,6 +1379,17 @@ namespace AL.ChampionMode
             {
                 _clearTitleText.text = "ENCOUNTER CLEAR " + grade;
                 _clearTitleText.color = gradeColor;
+            }
+
+            if (_clearGradeText != null)
+            {
+                _clearGradeText.text = grade;
+                _clearGradeText.color = gradeColor;
+            }
+
+            if (_clearGradeHalo != null)
+            {
+                _clearGradeHalo.color = WithAlpha(Color.Lerp(new Color(0.020f, 0.038f, 0.036f), gradeColor, 0.26f), 0.96f);
             }
 
             if (_clearSummaryText != null)
@@ -1371,6 +1406,177 @@ namespace AL.ChampionMode
             {
                 _combatFeedText.text = "Encounter cleared. Review the result, inspect your build, retry, or return to Kingdom.";
             }
+
+            RefreshClearRewardText();
+            PlayClearPresentation(gradeColor);
+            SpawnClearShowcaseVfx(gradeColor);
+        }
+
+        private void RefreshClearRewardText()
+        {
+            if (_clearCreditText != null)
+            {
+                _clearCreditText.text = _lastBossLootResult == null
+                    ? "WARZONE CREDITS SYNCED"
+                    : $"WARZONE CREDITS +{_lastBossLootResult.WarzoneCreditsAwarded}";
+            }
+
+            if (_clearLootText != null)
+            {
+                _clearLootText.text = BuildLootSummary();
+            }
+        }
+
+        private string BuildLootSummary()
+        {
+            if (_lastBossLootResult == null)
+            {
+                return "LOOT Awaiting vault sync";
+            }
+
+            if (_lastBossLootResult.Drops == null || _lastBossLootResult.Drops.Count == 0)
+            {
+                return "LOOT No equipment drop this clear";
+            }
+
+            BossLootDrop drop = _lastBossLootResult.Drops[0];
+            string displayName = string.IsNullOrWhiteSpace(drop.DisplayName) ? "Unidentified relic" : drop.DisplayName;
+            string overflow = _lastBossLootResult.Drops.Count > 1 ? $" +{_lastBossLootResult.Drops.Count - 1} more" : string.Empty;
+            string stats = BuildDropStatLine(drop);
+            return string.IsNullOrWhiteSpace(stats)
+                ? $"LOOT {displayName}{overflow}"
+                : $"LOOT {displayName}{overflow} // {stats}";
+        }
+
+        private static string BuildDropStatLine(BossLootDrop drop)
+        {
+            if (drop == null)
+            {
+                return string.Empty;
+            }
+
+            string stats = drop.Slot.ToString();
+            if (drop.AttackBonus > 0)
+            {
+                stats += $"  ATK +{drop.AttackBonus}";
+            }
+
+            if (drop.DefenseBonus > 0)
+            {
+                stats += $"  DEF +{drop.DefenseBonus}";
+            }
+
+            if (drop.HealthBonus > 0)
+            {
+                stats += $"  HP +{drop.HealthBonus}";
+            }
+
+            return stats;
+        }
+
+        private void PlayClearPresentation(Color gradeColor)
+        {
+            if (_clearPresentationRoutine != null)
+            {
+                StopCoroutine(_clearPresentationRoutine);
+            }
+
+            _clearPresentationRoutine = StartCoroutine(ClearPresentationRoutine(gradeColor));
+        }
+
+        private IEnumerator ClearPresentationRoutine(Color gradeColor)
+        {
+            if (_playerController != null)
+            {
+                Vector3 lookPoint = _playerController.transform.position + Vector3.up * 1.32f;
+                _cameraFollow?.SetCinematicShot(lookPoint + new Vector3(-2.6f, 2.35f, -5.15f), lookPoint, 36f, 0.08f);
+            }
+
+            const float duration = 1.05f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                float t = Mathf.Clamp01(elapsed / duration);
+                float eased = Mathf.SmoothStep(0f, 1f, t);
+                float pulse = (Mathf.Sin(Time.unscaledTime * 8.4f) + 1f) * 0.5f;
+                SetImageAlpha(_clearBackdropImage, Mathf.Lerp(0f, 0.62f, eased));
+
+                if (_clearPanelObject != null)
+                {
+                    _clearPanelObject.transform.localScale = Vector3.one * Mathf.Lerp(0.96f, 1f, eased);
+                }
+
+                if (_clearGradeHalo != null)
+                {
+                    _clearGradeHalo.color = WithAlpha(Color.Lerp(new Color(0.018f, 0.036f, 0.032f), gradeColor, 0.26f + pulse * 0.16f), 0.96f);
+                }
+
+                if (_clearProgressFill != null)
+                {
+                    _clearProgressFill.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(0f, 672f, eased), 7f);
+                    _clearProgressFill.color = WithAlpha(Color.Lerp(gradeColor, Color.white, 0.10f + pulse * 0.16f), 0.94f);
+                }
+
+                for (int i = 0; i < _clearSignalBars.Length; i++)
+                {
+                    if (_clearSignalBars[i] == null)
+                    {
+                        continue;
+                    }
+
+                    float barPulse = Mathf.PingPong(Time.unscaledTime * 2.8f + i * 0.22f, 1f);
+                    _clearSignalBars[i].color = WithAlpha(Color.Lerp(gradeColor, Color.white, 0.18f), Mathf.Lerp(0.34f, 0.86f, barPulse) * eased);
+                    _clearSignalBars[i].rectTransform.localScale = new Vector3(1f, 0.84f + barPulse * 0.22f, 1f);
+                }
+
+                elapsed += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
+            SetImageAlpha(_clearBackdropImage, 0.62f);
+            if (_clearPanelObject != null)
+            {
+                _clearPanelObject.transform.localScale = Vector3.one;
+            }
+
+            if (_clearProgressFill != null)
+            {
+                _clearProgressFill.rectTransform.sizeDelta = new Vector2(672f, 7f);
+            }
+
+            yield return new WaitForSecondsRealtime(0.36f);
+            _cameraFollow?.ClearCinematicShot();
+            _clearPresentationRoutine = null;
+        }
+
+        private void SpawnClearShowcaseVfx(Color gradeColor)
+        {
+            if (_playerController == null)
+            {
+                return;
+            }
+
+            Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
+            var root = new GameObject("ChampionClearShowcaseVfx");
+            root.transform.position = _playerController.transform.position + Vector3.up * 0.035f;
+            CreateArenaPrimitive(root.transform, "Clear_OuterHalo", PrimitiveType.Cylinder, Vector3.zero, new Vector3(3.35f, 0.018f, 3.35f), Vector3.zero, gradeColor, true, 0f, 0.90f);
+            CreateArenaPrimitive(root.transform, "Clear_InnerHalo", PrimitiveType.Cylinder, Vector3.up * 0.024f, new Vector3(1.78f, 0.014f, 1.78f), Vector3.zero, realmAccent, true, 0f, 0.86f);
+            CreateArenaPrimitive(root.transform, "Clear_LightBlade", PrimitiveType.Cube, new Vector3(0f, 1.42f, 0f), new Vector3(0.10f, 2.72f, 0.10f), Vector3.zero, Color.Lerp(gradeColor, Color.white, 0.28f), true, 0f, 0.92f);
+
+            for (int i = 0; i < 8; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 8f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * 1.64f, 0.064f, Mathf.Sin(angle) * 1.64f);
+                Vector3 rotation = new Vector3(0f, -angle * Mathf.Rad2Deg, 0f);
+                Color notchColor = i % 2 == 0 ? gradeColor : realmAccent;
+                CreateArenaPrimitive(root.transform, "Clear_Notch_" + i, PrimitiveType.Cube, position, new Vector3(0.44f, 0.020f, 0.060f), rotation, notchColor, true, 0f, 0.84f);
+            }
+
+            var keyLight = CreatePointLight("Champion Clear Key Light", root.transform.position + new Vector3(0f, 2.4f, -0.8f), Color.Lerp(gradeColor, Color.white, 0.22f), 2.8f, 6.8f);
+            keyLight.transform.SetParent(root.transform, true);
+            var footLight = CreatePointLight("Champion Clear Foot Light", root.transform.position + new Vector3(0f, 0.48f, 0.2f), realmAccent, 1.55f, 4.4f);
+            footLight.transform.SetParent(root.transform, true);
+            root.AddComponent<ChampionClearShowcaseVfx>().Configure(gradeColor);
         }
 
         private string GetClearRecapLine(string grade)
@@ -2040,20 +2246,48 @@ namespace AL.ChampionMode
 
         private void CreateClearPanel(Transform parent, Font font)
         {
-            var panel = CreateHudPanel(parent, "EncounterClearPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(620f, 250f), new Color(0.018f, 0.034f, 0.026f, 0.93f));
+            _clearBackdropImage = CreateUiImage(parent, "EncounterClearBackdrop", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero, new Color(0f, 0f, 0f, 0f));
+            _clearBackdropImage.raycastTarget = true;
+            _clearBackdropImage.gameObject.SetActive(false);
+
+            var panel = CreateHudPanel(parent, "EncounterClearPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760f, 374f), new Color(0.014f, 0.026f, 0.025f, 0.96f));
             _clearPanelObject = panel.gameObject;
 
-            CreateHudPanel(_clearPanelObject.transform, "ClearAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(620f, 6f), new Color(0.62f, 1f, 0.40f, 0.90f));
-            _clearTitleText = CreateText(_clearPanelObject.transform, font, "ENCOUNTER CLEAR", 28, new Vector2(0f, -28f), new Vector2(620f, 40f), TextAnchor.MiddleCenter, new Color(0.72f, 1f, 0.54f));
-            _clearSummaryText = CreateText(_clearPanelObject.transform, font, "Time 00:00   Guard broken   Enrage avoided", 16, new Vector2(48f, -78f), new Vector2(524f, 28f), TextAnchor.MiddleCenter, new Color(0.90f, 0.94f, 0.92f));
-            _clearDetailText = CreateText(_clearPanelObject.transform, font, "Review the result, inspect your build, or retry for a better grade.", 15, new Vector2(54f, -112f), new Vector2(512f, 48f), TextAnchor.MiddleCenter, new Color(0.84f, 0.88f, 0.86f));
-            CreateHudButton(_clearPanelObject.transform, font, "Retry", new Vector2(70f, -184f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.12f, 0.20f, 0.13f, 0.96f));
-            CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(240f, -184f), new Vector2(140f, 42f), () =>
+            CreateHudPanel(_clearPanelObject.transform, "ClearTopAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(760f, 6f), new Color(0.76f, 1f, 0.46f, 0.90f));
+            CreateHudPanel(_clearPanelObject.transform, "ClearLeftAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -6f), new Vector2(6f, 368f), new Color(0.34f, 0.72f, 1f, 0.60f));
+            _clearGradeHalo = CreateHudPanel(_clearPanelObject.transform, "ClearGradePlate", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -62f), new Vector2(136f, 150f), new Color(0.045f, 0.082f, 0.064f, 0.94f));
+            CreateText(_clearPanelObject.transform, font, "GRADE", 13, new Vector2(44f, -78f), new Vector2(136f, 22f), TextAnchor.MiddleCenter, new Color(0.70f, 0.84f, 0.88f));
+            _clearGradeText = CreateText(_clearPanelObject.transform, font, "S", 76, new Vector2(44f, -98f), new Vector2(136f, 88f), TextAnchor.MiddleCenter, new Color(1f, 0.86f, 0.36f));
+            CreateText(_clearPanelObject.transform, font, "CHAMPION RESULT", 13, new Vector2(210f, -22f), new Vector2(180f, 22f), TextAnchor.UpperLeft, new Color(0.70f, 0.82f, 0.92f));
+            _clearTitleText = CreateText(_clearPanelObject.transform, font, "ENCOUNTER CLEAR", 32, new Vector2(208f, -48f), new Vector2(420f, 44f), TextAnchor.UpperLeft, new Color(0.72f, 1f, 0.54f));
+            _clearSummaryText = CreateText(_clearPanelObject.transform, font, "Time 00:00   Guard broken   Enrage avoided", 15, new Vector2(210f, -96f), new Vector2(494f, 26f), TextAnchor.UpperLeft, new Color(0.90f, 0.94f, 0.92f));
+            _clearDetailText = CreateText(_clearPanelObject.transform, font, "Review the result, inspect your build, or retry for a better grade.", 15, new Vector2(210f, -130f), new Vector2(494f, 52f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.86f));
+
+            for (int i = 0; i < _clearSignalBars.Length; i++)
+            {
+                _clearSignalBars[i] = CreateUiImage(_clearPanelObject.transform, "ClearSignalBar_" + i, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(648f + i * 18f, -28f), new Vector2(10f, 36f + i * 8f), new Color(0.62f, 1f, 0.40f, 0.42f));
+            }
+
+            var rewardPanel = CreateHudPanel(_clearPanelObject.transform, "ClearRewardPanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -224f), new Vector2(672f, 76f), new Color(0.020f, 0.038f, 0.042f, 0.94f));
+            CreateHudPanel(rewardPanel.transform, "ClearRewardAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(672f, 4f), new Color(1f, 0.74f, 0.34f, 0.66f));
+            _clearCreditText = CreateText(rewardPanel.transform, font, "WARZONE CREDITS +500", 15, new Vector2(20f, -16f), new Vector2(250f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.82f, 0.48f));
+            _clearLootText = CreateText(rewardPanel.transform, font, "LOOT Ember Crown Shard", 14, new Vector2(288f, -16f), new Vector2(354f, 42f), TextAnchor.UpperLeft, new Color(0.84f, 0.92f, 1f));
+
+            CreateUiImage(_clearPanelObject.transform, "ClearProgressTrack", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(672f, 7f), new Color(0.045f, 0.060f, 0.066f, 0.92f));
+            _clearProgressFill = CreateUiImage(_clearPanelObject.transform, "ClearProgressFill", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(0f, 7f), new Color(0.62f, 1f, 0.40f, 0.94f));
+
+            CreateHudButton(_clearPanelObject.transform, font, "Retry", new Vector2(154f, -330f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.12f, 0.20f, 0.13f, 0.96f));
+            CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(310f, -330f), new Vector2(140f, 42f), () =>
             {
                 _clearPanelObject.SetActive(false);
+                if (_clearBackdropImage != null)
+                {
+                    _clearBackdropImage.gameObject.SetActive(false);
+                }
+
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            CreateHudButton(_clearPanelObject.transform, font, "Kingdom", new Vector2(410f, -184f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
+            CreateHudButton(_clearPanelObject.transform, font, "Kingdom", new Vector2(466f, -330f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
             _clearPanelObject.SetActive(false);
         }
 
@@ -2237,6 +2471,97 @@ namespace AL.ChampionMode
             return text;
         }
 
+    }
+
+    internal sealed class ChampionClearShowcaseVfx : MonoBehaviour
+    {
+        private const float Lifetime = 3.2f;
+        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Color> _emissionColors = new List<Color>();
+        private readonly List<Light> _lights = new List<Light>();
+        private readonly List<float> _lightIntensities = new List<float>();
+        private Color _accent = Color.white;
+        private float _age;
+
+        public void Configure(Color accent)
+        {
+            _accent = accent;
+            _materials.Clear();
+            _emissionColors.Clear();
+            _lights.Clear();
+            _lightIntensities.Clear();
+
+            var renderers = GetComponentsInChildren<Renderer>();
+            foreach (var renderer in renderers)
+            {
+                if (renderer == null || renderer.material == null)
+                {
+                    continue;
+                }
+
+                var material = renderer.material;
+                _materials.Add(material);
+                if (material.HasProperty("_EmissionColor"))
+                {
+                    material.EnableKeyword("_EMISSION");
+                    _emissionColors.Add(material.GetColor("_EmissionColor"));
+                }
+                else
+                {
+                    _emissionColors.Add(accent);
+                }
+            }
+
+            var lights = GetComponentsInChildren<Light>();
+            foreach (var light in lights)
+            {
+                if (light == null)
+                {
+                    continue;
+                }
+
+                _lights.Add(light);
+                _lightIntensities.Add(light.intensity);
+            }
+        }
+
+        private void Update()
+        {
+            _age += Time.deltaTime;
+            float normalized = Mathf.Clamp01(_age / Lifetime);
+            float pulse = (Mathf.Sin(Time.time * 8.2f) + 1f) * 0.5f;
+            transform.localScale = Vector3.one * Mathf.Lerp(1f, 1.14f, normalized);
+
+            for (int i = 0; i < _materials.Count; i++)
+            {
+                var material = _materials[i];
+                if (material == null || !material.HasProperty("_EmissionColor"))
+                {
+                    continue;
+                }
+
+                Color baseEmission = i < _emissionColors.Count ? _emissionColors[i] : _accent;
+                float strength = Mathf.Lerp(1.22f, 0.18f, normalized) * (0.86f + pulse * 0.28f);
+                material.SetColor("_EmissionColor", Color.Lerp(baseEmission, _accent, pulse * 0.34f) * strength);
+            }
+
+            for (int i = 0; i < _lights.Count; i++)
+            {
+                var light = _lights[i];
+                if (light == null)
+                {
+                    continue;
+                }
+
+                float baseIntensity = i < _lightIntensities.Count ? _lightIntensities[i] : light.intensity;
+                light.intensity = Mathf.Lerp(baseIntensity, 0f, normalized) * (0.86f + pulse * 0.22f);
+            }
+
+            if (_age >= Lifetime)
+            {
+                Destroy(gameObject);
+            }
+        }
     }
 
     internal sealed class ChampionInspectionShowcase : MonoBehaviour

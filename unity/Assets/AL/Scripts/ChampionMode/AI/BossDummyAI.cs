@@ -50,6 +50,8 @@ namespace AL.ChampionMode.AI
         private Coroutine _hitReactRoutine;
         private BossVisualFeedback _visualFeedback;
 
+        public event Action<BossLootResult> LootRolled;
+
         public float CurrentHealth => _currentHealth;
         public float MaxHealth => _maxHealth;
         public float CurrentBreak => _currentBreak;
@@ -354,12 +356,14 @@ namespace AL.ChampionMode.AI
 
             try
             {
-                ServiceLocator.Get<IBossLootService>().RollLoot(CreateLootRequest());
+                BossLootResult lootResult = ServiceLocator.Get<IBossLootService>().RollLoot(CreateLootRequest());
+                LootRolled?.Invoke(lootResult);
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"Boss loot service unavailable. Falling back to simple reward. {ex.Message}");
                 GrantFallbackLoot();
+                LootRolled?.Invoke(CreateFallbackLootResult());
             }
 
             Destroy(gameObject);
@@ -375,6 +379,25 @@ namespace AL.ChampionMode.AI
                 RandomSeed = unchecked(_bossId.GetHashCode() ^ Mathf.RoundToInt(Time.time * 1000f)),
                 LootTable = _possibleLoot ?? new List<EquipmentDefinition>()
             };
+        }
+
+        private BossLootResult CreateFallbackLootResult()
+        {
+            var result = new BossLootResult
+            {
+                BossId = _bossId,
+                BossName = _bossName,
+                WarzoneCreditsAwarded = _warzoneCreditReward
+            };
+            result.Drops.Add(new BossLootDrop
+            {
+                EquipmentId = "ember_crown_shard",
+                DisplayName = "Ember Crown Shard",
+                Slot = EquipmentSlot.Trinket,
+                AnnounceWorldDrop = true,
+                Quantity = 1
+            });
+            return result;
         }
 
         private void GrantFallbackLoot()
