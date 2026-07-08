@@ -15,6 +15,7 @@ namespace AL.ChampionMode
     public class ChampionArenaSceneController : MonoBehaviour
     {
         [SerializeField] private int _dummyCount = 16;
+        [SerializeField] private int _botChampionCount = 40;
         [SerializeField] private string _kingdomSceneName = "Kingdom";
 
         private ChampionController _playerController;
@@ -22,6 +23,7 @@ namespace AL.ChampionMode
         private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
         private SkillCaster _playerSkillCaster;
+        private RvrBotSpawner _rvrBotSpawner;
         private Transform _bossTransform;
         private Text _healthText;
         private Text _manaText;
@@ -129,15 +131,9 @@ namespace AL.ChampionMode
 
         private void SpawnBotChampions()
         {
-            for (int i = 0; i < 12; i++)
-            {
-                var bot = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                bot.name = "BotChampion_" + i;
-                float angle = i * Mathf.PI * 2f / 12f;
-                bot.transform.position = new Vector3(Mathf.Cos(angle) * 14f, 1.1f, Mathf.Sin(angle) * 14f);
-                bot.GetComponent<Renderer>().material.color = Color.Lerp(new Color(0.55f, 0.12f, 0.72f), new Color(0.92f, 0.18f, 0.18f), i / 11f);
-                bot.AddComponent<BotChampionAI>();
-            }
+            var spawnerObject = new GameObject("RvrBotSpawner");
+            _rvrBotSpawner = spawnerObject.AddComponent<RvrBotSpawner>();
+            _rvrBotSpawner.Configure(_playerController.transform, _bossTransform, GetCurrentRealmId(), _botChampionCount);
         }
 
         private void CreateWeather()
