@@ -148,7 +148,7 @@ namespace AL.ChampionMode.AI
             string armorStyle = Pick(index / 2, "realm_basic", "light_scout", "heavy_plate", "arcane_robes", "assassin_leathers");
             string weaponStyle = Pick(index / 3, "sword", "axe", "staff", "bow", "hammer");
             string offhandStyle = Pick(index / 4, "shield", "orb", "dagger", "tome", "none");
-            string faceMark = Pick(index / 5, "none", "scar", "warpaint", "realm_mark", "rune", "tattoo");
+            string faceMark = Pick(index / 5, "none", "scar", "warpaint", "realm_mark", "rune", "tattoo", "beard", "duelist_scar", "ash_mask");
 
             SetExactPartActive(model.transform, "Hair_Short", hairStyle == "short");
             SetExactPartActive(model.transform, "Hair_Long", hairStyle == "long");
@@ -168,7 +168,10 @@ namespace AL.ChampionMode.AI
             SetPartActive(model.transform, "Knee", !isRobe);
             SetPartScale(model.transform, "ChestArmor", isRobe ? new Vector3(0.78f, 0.82f, 0.28f) : isAssassin ? new Vector3(0.84f, 0.64f, 0.26f) : isHeavy ? new Vector3(1.05f, 0.82f, 0.38f) : new Vector3(0.92f, 0.74f, 0.32f));
 
-            SetExactPartActive(model.transform, "FaceMark", faceMark != "none");
+            SetExactPartActive(model.transform, "FaceMark", false);
+            SetExactPartActive(model.transform, "FaceMark_Secondary", false);
+            SetExactPartActive(model.transform, "FaceMark_Tertiary", false);
+            SetPartActive(model.transform, "FacialHair", false);
             SetExactPartActive(model.transform, "Weapon_Head", weaponStyle == "axe" || weaponStyle == "hammer");
             SetExactPartActive(model.transform, "Bow_String", weaponStyle == "bow");
             SetExactPartActive(model.transform, "Shield_Off", offhandStyle == "shield");
@@ -186,19 +189,44 @@ namespace AL.ChampionMode.AI
             switch (faceMark)
             {
                 case "scar":
+                    SetExactPartActive(root, "FaceMark", true);
                     SetPartTransform(root, "FaceMark", new Vector3(-0.08f, 0.62f, 0.49f), new Vector3(0.035f, 0.28f, 0.025f), new Vector3(0f, 0f, 24f));
                     break;
                 case "warpaint":
+                    SetExactPartActive(root, "FaceMark", true);
                     SetPartTransform(root, "FaceMark", new Vector3(0f, 0.68f, 0.49f), new Vector3(0.13f, 0.13f, 0.025f), new Vector3(0f, 0f, 45f));
                     break;
                 case "rune":
+                    SetExactPartActive(root, "FaceMark", true);
                     SetPartTransform(root, "FaceMark", new Vector3(0.08f, 0.66f, 0.49f), new Vector3(0.12f, 0.12f, 0.025f), Vector3.zero);
                     break;
                 case "tattoo":
+                    SetExactPartActive(root, "FaceMark", true);
                     SetPartTransform(root, "FaceMark", new Vector3(0f, 0.58f, 0.49f), new Vector3(0.30f, 0.030f, 0.025f), new Vector3(0f, 0f, -18f));
                     break;
+                case "beard":
+                    SetPartActive(root, "FacialHair", true);
+                    break;
+                case "duelist_scar":
+                    SetExactPartActive(root, "FaceMark", true);
+                    SetExactPartActive(root, "FaceMark_Secondary", true);
+                    SetPartTransform(root, "FaceMark", new Vector3(-0.10f, 0.68f, 0.494f), new Vector3(0.030f, 0.24f, 0.023f), new Vector3(0f, 0f, -20f));
+                    SetPartTransform(root, "FaceMark_Secondary", new Vector3(0.14f, 0.61f, 0.494f), new Vector3(0.028f, 0.18f, 0.023f), new Vector3(0f, 0f, 24f));
+                    break;
+                case "ash_mask":
+                    SetExactPartActive(root, "FaceMark", true);
+                    SetExactPartActive(root, "FaceMark_Secondary", true);
+                    SetExactPartActive(root, "FaceMark_Tertiary", true);
+                    SetPartTransform(root, "FaceMark", new Vector3(0f, 0.59f, 0.496f), new Vector3(0.36f, 0.050f, 0.024f), Vector3.zero);
+                    SetPartTransform(root, "FaceMark_Secondary", new Vector3(-0.13f, 0.71f, 0.496f), new Vector3(0.14f, 0.024f, 0.024f), new Vector3(0f, 0f, -8f));
+                    SetPartTransform(root, "FaceMark_Tertiary", new Vector3(0.13f, 0.71f, 0.496f), new Vector3(0.14f, 0.024f, 0.024f), new Vector3(0f, 0f, 8f));
+                    break;
                 default:
-                    SetPartTransform(root, "FaceMark", new Vector3(0f, 0.61f, 0.49f), new Vector3(0.24f, 0.035f, 0.025f), Vector3.zero);
+                    if (faceMark != "none")
+                    {
+                        SetExactPartActive(root, "FaceMark", true);
+                        SetPartTransform(root, "FaceMark", new Vector3(0f, 0.61f, 0.49f), new Vector3(0.24f, 0.035f, 0.025f), Vector3.zero);
+                    }
                     break;
             }
         }

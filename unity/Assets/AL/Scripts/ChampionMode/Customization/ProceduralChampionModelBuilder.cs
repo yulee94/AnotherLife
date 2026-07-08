@@ -49,6 +49,12 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Skin_EyeSocket_R", PrimitiveType.Cube, new Vector3(0.12f, 0.72f, 0.475f), new Vector3(0.14f, 0.028f, 0.020f), Vector3.zero, Color.Lerp(shadowSkin, Color.black, 0.16f), 0f, 0.22f);
             EnsurePart(root, "Eye_Glint_L", PrimitiveType.Sphere, new Vector3(-0.105f, 0.714f, 0.478f), new Vector3(0.024f, 0.018f, 0.012f), Vector3.zero, Color.white, 0f, 0.88f, 0.22f);
             EnsurePart(root, "Eye_Glint_R", PrimitiveType.Sphere, new Vector3(0.135f, 0.714f, 0.478f), new Vector3(0.024f, 0.018f, 0.012f), Vector3.zero, Color.white, 0f, 0.88f, 0.22f);
+            EnsurePart(root, "FaceMark_Secondary", PrimitiveType.Cube, new Vector3(0.0f, 0.64f, 0.492f), new Vector3(0.18f, 0.026f, 0.024f), Vector3.zero, new Color(0.85f, 0.62f, 0.18f), 0f, 0.62f, 0.16f);
+            EnsurePart(root, "FaceMark_Tertiary", PrimitiveType.Cube, new Vector3(0.0f, 0.58f, 0.494f), new Vector3(0.16f, 0.024f, 0.024f), Vector3.zero, new Color(0.85f, 0.62f, 0.18f), 0f, 0.62f, 0.16f);
+            EnsurePart(root, "FacialHair_Mustache", PrimitiveType.Cube, new Vector3(0f, 0.57f, 0.50f), new Vector3(0.28f, 0.040f, 0.030f), Vector3.zero, new Color(0.08f, 0.06f, 0.04f), 0f, 0.36f);
+            EnsurePart(root, "FacialHair_Chin", PrimitiveType.Cube, new Vector3(0f, 0.45f, 0.42f), new Vector3(0.24f, 0.11f, 0.055f), Vector3.zero, new Color(0.08f, 0.06f, 0.04f), 0f, 0.34f);
+            EnsurePart(root, "FacialHair_Jaw_L", PrimitiveType.Cube, new Vector3(-0.18f, 0.50f, 0.42f), new Vector3(0.075f, 0.18f, 0.050f), new Vector3(0f, 0f, -10f), new Color(0.08f, 0.06f, 0.04f), 0f, 0.34f);
+            EnsurePart(root, "FacialHair_Jaw_R", PrimitiveType.Cube, new Vector3(0.18f, 0.50f, 0.42f), new Vector3(0.075f, 0.18f, 0.050f), new Vector3(0f, 0f, 10f), new Color(0.08f, 0.06f, 0.04f), 0f, 0.34f);
         }
 
         private static void EnsureHair(Transform root)

@@ -31,7 +31,7 @@ namespace AL.ChampionMode.Customization
 
         private static readonly string[] FaceMarks =
         {
-            "none", "scar", "warpaint", "realm_mark", "rune", "tattoo"
+            "none", "scar", "warpaint", "realm_mark", "rune", "tattoo", "beard", "duelist_scar", "ash_mask"
         };
 
         private static readonly string[] WeaponStyles =
@@ -810,9 +810,12 @@ namespace AL.ChampionMode.Customization
 
         private void ApplyFaceMark(string faceMarkId)
         {
-            bool isVisible = faceMarkId != "none";
-            SetExactPartActive("FaceMark", isVisible);
-            if (!isVisible)
+            SetExactPartActive("FaceMark", false);
+            SetExactPartActive("FaceMark_Secondary", false);
+            SetExactPartActive("FaceMark_Tertiary", false);
+            SetPartActive("FacialHair", false);
+
+            if (faceMarkId == "none")
             {
                 return;
             }
@@ -820,18 +823,44 @@ namespace AL.ChampionMode.Customization
             switch (faceMarkId)
             {
                 case "scar":
+                    SetExactPartActive("FaceMark", true);
                     SetPartTransform("FaceMark", new Vector3(-0.08f, 0.62f, 0.49f), new Vector3(0.035f, 0.28f, 0.025f), new Vector3(0f, 0f, 24f));
                     break;
                 case "realm_mark":
+                    SetExactPartActive("FaceMark", true);
                     SetPartTransform("FaceMark", new Vector3(0f, 0.68f, 0.49f), new Vector3(0.13f, 0.13f, 0.025f), new Vector3(0f, 0f, 45f));
                     break;
                 case "rune":
+                    SetExactPartActive("FaceMark", true);
                     SetPartTransform("FaceMark", new Vector3(0.08f, 0.66f, 0.49f), new Vector3(0.12f, 0.12f, 0.025f), new Vector3(0f, 0f, 0f));
                     break;
                 case "tattoo":
+                    SetExactPartActive("FaceMark", true);
                     SetPartTransform("FaceMark", new Vector3(0f, 0.58f, 0.49f), new Vector3(0.30f, 0.030f, 0.025f), new Vector3(0f, 0f, -18f));
                     break;
+                case "beard":
+                    SetPartActive("FacialHair", true);
+                    SetPartTransform("FacialHair_Mustache", new Vector3(0f, 0.57f, 0.50f), new Vector3(0.28f, 0.040f, 0.030f), Vector3.zero);
+                    SetPartTransform("FacialHair_Chin", new Vector3(0f, 0.45f, 0.42f), new Vector3(0.24f, 0.11f, 0.055f), Vector3.zero);
+                    SetPartTransform("FacialHair_Jaw_L", new Vector3(-0.18f, 0.50f, 0.42f), new Vector3(0.075f, 0.18f, 0.050f), new Vector3(0f, 0f, -10f));
+                    SetPartTransform("FacialHair_Jaw_R", new Vector3(0.18f, 0.50f, 0.42f), new Vector3(0.075f, 0.18f, 0.050f), new Vector3(0f, 0f, 10f));
+                    break;
+                case "duelist_scar":
+                    SetExactPartActive("FaceMark", true);
+                    SetExactPartActive("FaceMark_Secondary", true);
+                    SetPartTransform("FaceMark", new Vector3(-0.10f, 0.68f, 0.494f), new Vector3(0.030f, 0.24f, 0.023f), new Vector3(0f, 0f, -20f));
+                    SetPartTransform("FaceMark_Secondary", new Vector3(0.14f, 0.61f, 0.494f), new Vector3(0.028f, 0.18f, 0.023f), new Vector3(0f, 0f, 24f));
+                    break;
+                case "ash_mask":
+                    SetExactPartActive("FaceMark", true);
+                    SetExactPartActive("FaceMark_Secondary", true);
+                    SetExactPartActive("FaceMark_Tertiary", true);
+                    SetPartTransform("FaceMark", new Vector3(0f, 0.59f, 0.496f), new Vector3(0.36f, 0.050f, 0.024f), Vector3.zero);
+                    SetPartTransform("FaceMark_Secondary", new Vector3(-0.13f, 0.71f, 0.496f), new Vector3(0.14f, 0.024f, 0.024f), new Vector3(0f, 0f, -8f));
+                    SetPartTransform("FaceMark_Tertiary", new Vector3(0.13f, 0.71f, 0.496f), new Vector3(0.14f, 0.024f, 0.024f), new Vector3(0f, 0f, 8f));
+                    break;
                 default:
+                    SetExactPartActive("FaceMark", true);
                     SetPartTransform("FaceMark", new Vector3(0f, 0.61f, 0.49f), new Vector3(0.24f, 0.035f, 0.025f), Vector3.zero);
                     break;
             }
