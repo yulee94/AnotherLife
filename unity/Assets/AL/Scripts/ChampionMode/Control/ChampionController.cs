@@ -30,6 +30,7 @@ namespace AL.ChampionMode.Control
         private bool _isBlocking;
         private bool _isDodging;
         private bool _isAttacking;
+        private bool _controlsLocked;
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
@@ -65,6 +66,12 @@ namespace AL.ChampionMode.Control
         private void Update()
         {
             if (_controller == null || _isDodging) return;
+
+            if (_controlsLocked)
+            {
+                HandleGravity();
+                return;
+            }
 
             HandleMovement();
             HandleGravity();
@@ -112,6 +119,11 @@ namespace AL.ChampionMode.Control
 
         private void HandleActions()
         {
+            if (_controlsLocked)
+            {
+                return;
+            }
+
             if (Input.GetKeyDown(KeyCode.Space)) StartCoroutine(Dodge());
             _isBlocking = Input.GetKey(KeyCode.LeftShift);
 
@@ -128,6 +140,11 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator PerformAttack()
         {
+            if (_controlsLocked)
+            {
+                yield break;
+            }
+
             _isAttacking = true;
             Debug.Log("<color=orange>[Combat] Attacking!</color>");
             RuntimeCombatAudio.PlayBasicAttack();
@@ -135,11 +152,17 @@ namespace AL.ChampionMode.Control
             // 1. Lunge Forward
             Vector3 lungeDir = transform.forward;
             float lungeTimer = 0f;
-            while (lungeTimer < 0.1f)
+            while (lungeTimer < 0.1f && !_controlsLocked)
             {
                 _controller.Move(lungeDir * _attackLungeForce * Time.deltaTime * 10f);
                 lungeTimer += Time.deltaTime;
                 yield return null;
+            }
+
+            if (_controlsLocked)
+            {
+                _isAttacking = false;
+                yield break;
             }
 
             // 2. Hit Detection
@@ -234,6 +257,11 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator Dodge()
         {
+            if (_controlsLocked)
+            {
+                yield break;
+            }
+
             _isDodging = true;
             _skillCaster?.CancelCurrentSkill();
             SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, GetCurrentRealmId());
@@ -242,7 +270,7 @@ namespace AL.ChampionMode.Control
             float timer = 0f;
             float duration = 0.2f;
 
-            while (timer < duration)
+            while (timer < duration && !_controlsLocked)
             {
                 _controller.Move(dodgeDir * (_dodgeDistance / duration) * Time.deltaTime);
                 timer += Time.deltaTime;
@@ -254,12 +282,18 @@ namespace AL.ChampionMode.Control
 
         public void SetExternalMoveInput(Vector2 input)
         {
+            if (_controlsLocked)
+            {
+                _externalMoveInput = Vector2.zero;
+                return;
+            }
+
             _externalMoveInput = Vector2.ClampMagnitude(input, 1f);
         }
 
         public void RequestBasicAttack()
         {
-            if (!_isAttacking)
+            if (!_controlsLocked && !_isAttacking)
             {
                 StartCoroutine(PerformAttack());
             }
@@ -267,7 +301,7 @@ namespace AL.ChampionMode.Control
 
         public void RequestDodge()
         {
-            if (!_isDodging)
+            if (!_controlsLocked && !_isDodging)
             {
                 StartCoroutine(Dodge());
             }
@@ -275,12 +309,39 @@ namespace AL.ChampionMode.Control
 
         public void RequestSkill(int index)
         {
+            if (_controlsLocked)
+            {
+                return;
+            }
+
             UseSkill(index);
         }
 
         public void SetBlocking(bool isBlocking)
         {
+            if (_controlsLocked)
+            {
+                _isBlocking = false;
+                return;
+            }
+
             _isBlocking = isBlocking;
+        }
+
+        public void SetControlLocked(bool isLocked)
+        {
+            _controlsLocked = isLocked;
+            _externalMoveInput = Vector2.zero;
+            _isBlocking = false;
+            _velocity = Vector3.zero;
+
+            if (isLocked)
+            {
+                StopAllCoroutines();
+                _isAttacking = false;
+                _isDodging = false;
+                _skillCaster?.CancelCurrentSkill();
+            }
         }
 
         private RealmId GetCurrentRealmId()

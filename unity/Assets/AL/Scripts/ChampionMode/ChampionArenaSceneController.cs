@@ -42,6 +42,7 @@ namespace AL.ChampionMode
         private Image _bossHealthFill;
         private Image _bossBreakFill;
         private Image _bossStateStrip;
+        private GameObject _defeatPanelObject;
         private Text _appearanceSummaryText;
         private readonly Image[] _appearanceSwatches = new Image[5];
         private readonly Text[] _skillButtonTexts = new Text[4];
@@ -53,6 +54,7 @@ namespace AL.ChampionMode
         private bool _guardBreakObserved;
         private bool _enrageObserved;
         private bool _encounterClearShown;
+        private bool _encounterFailed;
         private RuntimePlatformQualityController _qualityController;
 
         private void Start()
@@ -78,6 +80,11 @@ namespace AL.ChampionMode
                 RefreshBossText();
                 RefreshAppearanceText();
                 RefreshEncounterText();
+            }
+
+            if (_encounterFailed)
+            {
+                return;
             }
 
             if (_bossTransform == null)
@@ -149,6 +156,7 @@ namespace AL.ChampionMode
             _guardBreakObserved = false;
             _enrageObserved = false;
             _encounterClearShown = false;
+            _encounterFailed = false;
 
             SpawnBotChampions();
 
@@ -473,16 +481,30 @@ namespace AL.ChampionMode
             var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -296f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
             _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
             CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            CreateDefeatPanel(canvasObject.transform, font);
             if (_playerCombat != null)
             {
                 _playerCombat.OnHealthChanged += UpdateHealthText;
                 _playerCombat.OnManaChanged += UpdateManaText;
+                _playerCombat.OnDeath += HandlePlayerDeath;
             }
 
             RefreshSkillText();
             RefreshBossText();
             RefreshAppearanceText();
             RefreshEncounterText();
+        }
+
+        private void OnDestroy()
+        {
+            if (_playerCombat == null)
+            {
+                return;
+            }
+
+            _playerCombat.OnHealthChanged -= UpdateHealthText;
+            _playerCombat.OnManaChanged -= UpdateManaText;
+            _playerCombat.OnDeath -= HandlePlayerDeath;
         }
 
         private static void EnsureEventSystem()
@@ -536,6 +558,18 @@ namespace AL.ChampionMode
         {
             if (_bossText == null)
             {
+                return;
+            }
+
+            if (_encounterFailed)
+            {
+                _bossText.color = new Color(1f, 0.38f, 0.28f);
+                _bossText.text = "Champion fallen\nEncounter failed";
+                if (_bossStateStrip != null)
+                {
+                    _bossStateStrip.color = new Color(1f, 0.18f, 0.08f, 0.92f);
+                }
+
                 return;
             }
 
@@ -647,6 +681,13 @@ namespace AL.ChampionMode
                 return;
             }
 
+            if (_encounterFailed)
+            {
+                _encounterResultText.color = new Color(1f, 0.34f, 0.24f);
+                _encounterResultText.text = $"FALLEN\n{FormatEncounterTime(elapsed)}";
+                return;
+            }
+
             if (!bossDefeated)
             {
                 _encounterResultText.color = _enrageObserved ? new Color(1f, 0.58f, 0.32f) : new Color(0.84f, 0.88f, 0.92f);
@@ -668,6 +709,43 @@ namespace AL.ChampionMode
                 SkillEffectFactory.SpawnFloatingCombatText(_playerController.transform.position + Vector3.up * 2.6f, "CLEAR " + grade, _encounterResultText.color, 0.36f, 1.4f);
                 RuntimeCombatAudio.PlayClear();
             }
+        }
+
+        private void HandlePlayerDeath()
+        {
+            if (_encounterFailed)
+            {
+                return;
+            }
+
+            _encounterFailed = true;
+            _playerController?.SetControlLocked(true);
+            _autoCombatController?.SetMode(AutoMode.Manual);
+
+            if (_defeatPanelObject != null)
+            {
+                _defeatPanelObject.SetActive(true);
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = "Champion down. Retry the encounter, refine your build, or return to Kingdom.";
+            }
+
+            if (_playerController != null)
+            {
+                SkillEffectFactory.SpawnFloatingCombatText(_playerController.transform.position + Vector3.up * 2.6f, "FALLEN", new Color(1f, 0.28f, 0.18f), 0.38f, 1.35f);
+                SkillEffectFactory.ShakeCamera(0.20f, 0.22f);
+            }
+
+            RuntimeCombatAudio.PlayWarning();
+            RefreshBossText();
+            RefreshEncounterText();
+        }
+
+        private static void RetryEncounter()
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
 
         private string GetEncounterGrade(float elapsed)
@@ -795,6 +873,19 @@ namespace AL.ChampionMode
         {
             var button = CreateHudButton(parent, font, label, anchoredPosition, new Vector2(56f, 42f), null, 13);
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(_playerController, moveInput);
+        }
+
+        private void CreateDefeatPanel(Transform parent, Font font)
+        {
+            var panel = CreateHudPanel(parent, "DefeatRetryPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 220f), new Color(0.035f, 0.018f, 0.018f, 0.92f));
+            _defeatPanelObject = panel.gameObject;
+
+            CreateHudPanel(_defeatPanelObject.transform, "DefeatAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(540f, 6f), new Color(1f, 0.22f, 0.10f, 0.90f));
+            CreateText(_defeatPanelObject.transform, font, "CHAMPION FALLEN", 28, new Vector2(0f, -30f), new Vector2(540f, 40f), TextAnchor.MiddleCenter, new Color(1f, 0.42f, 0.28f));
+            CreateText(_defeatPanelObject.transform, font, "The encounter is lost. Retry immediately or return to Kingdom after adjusting your build.", 15, new Vector2(54f, -78f), new Vector2(432f, 46f), TextAnchor.MiddleCenter, new Color(0.90f, 0.92f, 0.94f));
+            CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(96f, -148f), new Vector2(154f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
+            CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(290f, -148f), new Vector2(154f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
+            _defeatPanelObject.SetActive(false);
         }
 
         private static Image CreateHudPanel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Color color)

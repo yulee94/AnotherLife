@@ -12,11 +12,13 @@ namespace AL.ChampionMode.Control
         [SerializeField] private float _currentHealth;
         [SerializeField] private float _currentMana;
         [SerializeField] private float _attackPower = 50f;
+        private bool _isDead;
 
         public float CurrentHealth => _currentHealth;
         public float MaxHealth => _maxHealth;
         public float CurrentMana => _currentMana;
         public float MaxMana => _maxMana;
+        public bool IsDead => _isDead;
 
         public event Action<float, float> OnHealthChanged;
         public event Action<float, float> OnManaChanged;
@@ -24,6 +26,7 @@ namespace AL.ChampionMode.Control
 
         private void Start()
         {
+            _isDead = false;
             _currentHealth = _maxHealth;
             _currentMana = _maxMana;
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
@@ -42,6 +45,11 @@ namespace AL.ChampionMode.Control
 
         public void TakeDamage(float amount)
         {
+            if (_isDead || amount <= 0f)
+            {
+                return;
+            }
+
             _currentHealth = Mathf.Max(0, _currentHealth - amount);
             OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
 
@@ -92,6 +100,12 @@ namespace AL.ChampionMode.Control
 
         private void Die()
         {
+            if (_isDead)
+            {
+                return;
+            }
+
+            _isDead = true;
             Debug.Log("Champion has fallen!");
             OnDeath?.Invoke();
         }
