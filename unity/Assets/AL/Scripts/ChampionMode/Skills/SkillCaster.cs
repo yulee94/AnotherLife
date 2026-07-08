@@ -50,9 +50,30 @@ namespace AL.ChampionMode.Skills
         private ChampionController _controller;
         private Coroutine _castRoutine;
         private int _activeSlot = -1;
+        private float _activeCastStartTime;
+        private float _activeCastDuration;
         private float _lastDeniedFeedbackTime = -999f;
 
         public bool IsCasting => _castRoutine != null;
+        public int ActiveSlot => _activeSlot;
+        public string ActiveSkillName => IsValidSlot(_activeSlot) ? _skillNames[_activeSlot] : string.Empty;
+        public float ActiveCastProgress
+        {
+            get
+            {
+                if (!IsCasting)
+                {
+                    return 0f;
+                }
+
+                if (_activeCastDuration <= 0.001f)
+                {
+                    return 1f;
+                }
+
+                return Mathf.Clamp01((Time.time - _activeCastStartTime) / _activeCastDuration);
+            }
+        }
 
         private void Awake()
         {
@@ -105,7 +126,7 @@ namespace AL.ChampionMode.Skills
 
             StopCoroutine(_castRoutine);
             _castRoutine = null;
-            _activeSlot = -1;
+            ClearActiveCast();
             Debug.Log("Skill cast cancelled.");
         }
 
@@ -147,6 +168,8 @@ namespace AL.ChampionMode.Skills
         private IEnumerator CastRoutine(int slotIndex)
         {
             Debug.Log($"Casting {_skillNames[slotIndex]}.");
+            _activeCastStartTime = Time.time;
+            _activeCastDuration = Mathf.Max(0f, _castTimes[slotIndex]);
             var realmId = GetCurrentRealmId();
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 previewCenter = GetSkillGroundCenter(slotIndex, forward);
@@ -161,7 +184,14 @@ namespace AL.ChampionMode.Skills
             ResolveSkill(slotIndex);
             _nextReadyTimes[slotIndex] = Time.time + _cooldowns[slotIndex];
             _castRoutine = null;
+            ClearActiveCast();
+        }
+
+        private void ClearActiveCast()
+        {
             _activeSlot = -1;
+            _activeCastStartTime = 0f;
+            _activeCastDuration = 0f;
         }
 
         private void ResolveSkill(int slotIndex)
