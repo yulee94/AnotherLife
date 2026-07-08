@@ -101,25 +101,44 @@ namespace AL.Kingdom
             buildingRoot.transform.SetParent(root, false);
             buildingRoot.transform.position = worldPosition;
 
+            CreateDistrictFootprint(buildingRoot.transform, state, bodyColor, accentColor);
             var baseObject = CreatePrimitive(buildingRoot.transform, "Base", PrimitiveType.Cube, new Vector3(0f, height * 0.5f, 0f), new Vector3(TileSize * 0.88f, height, TileSize * 0.88f), bodyColor);
             baseObject.AddComponent<KingdomBuildingSelectable>().Configure(state.BuildingId, state.Level, bodyColor, accentColor, state.IsUpgrading, GetUpgradeRemainingSeconds(state));
-            CreatePrimitive(buildingRoot.transform, "Trim", PrimitiveType.Cube, new Vector3(0f, height + 0.04f, 0f), new Vector3(TileSize * 0.98f, 0.10f, TileSize * 0.98f), accentColor);
+            CreatePrimitive(buildingRoot.transform, "Trim", PrimitiveType.Cube, new Vector3(0f, height + 0.04f, 0f), new Vector3(TileSize * 0.98f, 0.10f, TileSize * 0.98f), accentColor, null, 0.04f, 0.58f, accentColor * 0.06f);
+            CreateWindowDetails(buildingRoot.transform, height, accentColor, state.BuildingId);
+            CreateBuildingBanners(buildingRoot.transform, height, accentColor, state.BuildingId);
 
-            if (state.BuildingId.Contains("Hall") || state.BuildingId.Contains("Barracks"))
+            if (state.BuildingId.Contains("Hall"))
             {
-                CreatePrimitive(buildingRoot.transform, "Spire", PrimitiveType.Cylinder, new Vector3(0f, height + 0.42f, 0f), new Vector3(0.22f, 0.38f, 0.22f), Color.Lerp(accentColor, Color.white, 0.10f));
+                CreateTownHallDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Farm") || state.BuildingId.Contains("Lumber"))
+            else if (state.BuildingId.Contains("Barracks"))
             {
-                CreatePrimitive(buildingRoot.transform, "Canopy", PrimitiveType.Sphere, new Vector3(0.06f, height + 0.22f, 0.02f), new Vector3(0.46f, 0.25f, 0.46f), Color.Lerp(bodyColor, accentColor, 0.22f));
+                CreateBarracksDetails(buildingRoot.transform, height, bodyColor, accentColor);
+            }
+            else if (state.BuildingId.Contains("Farm"))
+            {
+                CreateFarmDetails(buildingRoot.transform, height, bodyColor, accentColor);
+            }
+            else if (state.BuildingId.Contains("Lumber"))
+            {
+                CreateLumberDetails(buildingRoot.transform, height, bodyColor, accentColor);
+            }
+            else if (state.BuildingId.Contains("Mana"))
+            {
+                CreateManaShrineDetails(buildingRoot.transform, height, bodyColor, accentColor);
+            }
+            else if (state.BuildingId.Contains("Gold"))
+            {
+                CreateGoldMineDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
             else if (state.BuildingId.Contains("Mine") || state.BuildingId.Contains("Quarry"))
             {
-                CreatePrimitive(buildingRoot.transform, "CraneArm", PrimitiveType.Cube, new Vector3(0.12f, height + 0.18f, 0f), new Vector3(0.72f, 0.08f, 0.08f), Color.Lerp(bodyColor, Color.white, 0.18f), new Vector3(0f, 0f, 14f));
+                CreateMineDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
             else
             {
-                CreatePrimitive(buildingRoot.transform, "Roof", PrimitiveType.Cube, new Vector3(0f, height + 0.18f, 0f), new Vector3(TileSize * 0.68f, 0.22f, TileSize * 0.68f), Color.Lerp(bodyColor, accentColor, 0.35f), new Vector3(0f, 45f, 0f));
+                CreatePrimitive(buildingRoot.transform, "Roof", PrimitiveType.Cube, new Vector3(0f, height + 0.18f, 0f), new Vector3(TileSize * 0.68f, 0.22f, TileSize * 0.68f), Color.Lerp(bodyColor, accentColor, 0.35f), new Vector3(0f, 45f, 0f), 0.02f, 0.46f);
             }
 
             if (state.IsUpgrading)
@@ -144,13 +163,139 @@ namespace AL.Kingdom
             Vector3 midpoint = (start + end) * 0.5f;
             Vector3 direction = end - start;
             float length = direction.magnitude;
-            var road = CreatePrimitive(root, "CityRoad", PrimitiveType.Cube, midpoint, new Vector3(0.10f, 0.035f, length), new Color(0.09f, 0.075f, 0.055f, 0.95f));
-            road.transform.rotation = Quaternion.LookRotation(direction.normalized);
+            Vector3 flatDirection = new Vector3(direction.x, 0f, direction.z).normalized;
+            Vector3 right = Vector3.Cross(Vector3.up, flatDirection);
+            Color roadColor = new Color(0.10f, 0.083f, 0.060f, 1f);
+            Color edgeColor = Color.Lerp(GetRealmAccent(_activeRealmId), Color.black, 0.40f);
+
+            var road = CreatePrimitive(root, "CityRoad", PrimitiveType.Cube, midpoint, new Vector3(0.16f, 0.038f, length), roadColor, null, 0.02f, 0.42f);
+            road.transform.rotation = Quaternion.LookRotation(flatDirection);
+
+            var leftEdge = CreatePrimitive(root, "CityRoadEdge", PrimitiveType.Cube, midpoint + right * 0.105f + Vector3.up * 0.010f, new Vector3(0.030f, 0.028f, length), edgeColor, null, 0.03f, 0.52f, edgeColor * 0.04f);
+            leftEdge.transform.rotation = road.transform.rotation;
+            var rightEdge = CreatePrimitive(root, "CityRoadEdge", PrimitiveType.Cube, midpoint - right * 0.105f + Vector3.up * 0.010f, new Vector3(0.030f, 0.028f, length), edgeColor, null, 0.03f, 0.52f, edgeColor * 0.04f);
+            rightEdge.transform.rotation = road.transform.rotation;
+        }
+
+        private void CreateDistrictFootprint(Transform parent, BuildingState state, Color bodyColor, Color accentColor)
+        {
+            Color plateColor = Color.Lerp(bodyColor, Color.black, 0.34f);
+            CreatePrimitive(parent, "DistrictPlate", PrimitiveType.Cube, new Vector3(0f, 0.035f, 0f), new Vector3(TileSize * 1.24f, 0.055f, TileSize * 1.24f), plateColor, new Vector3(0f, 45f, 0f), 0.02f, 0.40f);
+            CreatePrimitive(parent, "DistrictInlay", PrimitiveType.Cube, new Vector3(0f, 0.070f, 0f), new Vector3(TileSize * 0.98f, 0.030f, TileSize * 0.98f), Color.Lerp(bodyColor, accentColor, 0.18f), new Vector3(0f, 45f, 0f), 0.02f, 0.48f, accentColor * 0.025f);
+
+            if (state.IsUpgrading)
+            {
+                CreatePrimitive(parent, "UpgradeWorksiteGlow", PrimitiveType.Cylinder, new Vector3(0f, 0.095f, 0f), new Vector3(TileSize * 0.52f, 0.020f, TileSize * 0.52f), Color.Lerp(accentColor, new Color(1f, 0.82f, 0.32f), 0.50f), null, 0.02f, 0.60f, accentColor * 0.15f);
+            }
+        }
+
+        private void CreateWindowDetails(Transform parent, float height, Color accentColor, string buildingId)
+        {
+            Color glass = buildingId.Contains("Mana")
+                ? new Color(0.34f, 0.56f, 0.94f)
+                : Color.Lerp(accentColor, Color.white, 0.26f);
+            int rows = Mathf.Clamp(Mathf.RoundToInt(height * 1.4f), 1, 3);
+
+            for (int row = 0; row < rows; row++)
+            {
+                float y = 0.34f + row * 0.36f;
+                CreatePrimitive(parent, "WindowNorth", PrimitiveType.Cube, new Vector3(-0.22f, y, -0.452f), new Vector3(0.13f, 0.10f, 0.018f), glass, null, 0f, 0.62f, glass * 0.08f);
+                CreatePrimitive(parent, "WindowNorth", PrimitiveType.Cube, new Vector3(0.22f, y, -0.452f), new Vector3(0.13f, 0.10f, 0.018f), glass, null, 0f, 0.62f, glass * 0.08f);
+                CreatePrimitive(parent, "WindowEast", PrimitiveType.Cube, new Vector3(0.452f, y, 0f), new Vector3(0.018f, 0.10f, 0.15f), glass, null, 0f, 0.62f, glass * 0.08f);
+            }
+        }
+
+        private void CreateBuildingBanners(Transform parent, float height, Color accentColor, string buildingId)
+        {
+            if (buildingId.Contains("Farm") || buildingId.Contains("Lumber"))
+            {
+                return;
+            }
+
+            Color banner = Color.Lerp(accentColor, Color.black, 0.08f);
+            CreatePrimitive(parent, "BannerLeft", PrimitiveType.Cube, new Vector3(-0.50f, height * 0.58f, -0.12f), new Vector3(0.035f, 0.36f, 0.12f), banner, null, 0.01f, 0.40f, banner * 0.05f);
+            CreatePrimitive(parent, "BannerRight", PrimitiveType.Cube, new Vector3(0.50f, height * 0.58f, -0.12f), new Vector3(0.035f, 0.36f, 0.12f), banner, null, 0.01f, 0.40f, banner * 0.05f);
+        }
+
+        private void CreateTownHallDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            CreatePrimitive(parent, "UpperKeep", PrimitiveType.Cube, new Vector3(0f, height + 0.24f, 0f), new Vector3(0.58f, 0.36f, 0.58f), Color.Lerp(bodyColor, accentColor, 0.20f), null, 0.04f, 0.50f);
+            CreatePrimitive(parent, "CommandCrown", PrimitiveType.Cube, new Vector3(0f, height + 0.52f, 0f), new Vector3(0.72f, 0.12f, 0.72f), accentColor, new Vector3(0f, 45f, 0f), 0.06f, 0.62f, accentColor * 0.08f);
+            CreatePrimitive(parent, "Spire", PrimitiveType.Cylinder, new Vector3(0f, height + 0.90f, 0f), new Vector3(0.16f, 0.42f, 0.16f), Color.Lerp(accentColor, Color.white, 0.12f), null, 0.08f, 0.70f, accentColor * 0.18f);
+            CreatePointLight(parent, "HallCommandLight", new Vector3(0f, height + 1.20f, -0.12f), Color.Lerp(accentColor, Color.white, 0.14f), 0.38f, 1.80f);
+        }
+
+        private void CreateBarracksDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            CreatePrimitive(parent, "ArmoryRoof", PrimitiveType.Cube, new Vector3(0f, height + 0.20f, 0f), new Vector3(0.84f, 0.20f, 0.54f), Color.Lerp(bodyColor, accentColor, 0.24f), new Vector3(0f, 45f, 0f), 0.03f, 0.48f);
+            CreatePrimitive(parent, "TrainingYard", PrimitiveType.Cube, new Vector3(0.64f, 0.105f, 0.28f), new Vector3(0.56f, 0.045f, 0.42f), Color.Lerp(bodyColor, Color.black, 0.24f), null, 0.02f, 0.32f);
+            CreatePrimitive(parent, "WeaponRack", PrimitiveType.Cube, new Vector3(0.64f, 0.38f, 0.28f), new Vector3(0.08f, 0.48f, 0.08f), Color.Lerp(accentColor, Color.white, 0.18f), new Vector3(0f, 0f, 18f), 0.04f, 0.48f, accentColor * 0.05f);
+            CreatePrimitive(parent, "WeaponRackCross", PrimitiveType.Cube, new Vector3(0.64f, 0.52f, 0.28f), new Vector3(0.42f, 0.05f, 0.05f), Color.Lerp(accentColor, Color.white, 0.18f), new Vector3(0f, 0f, 18f), 0.04f, 0.48f);
+        }
+
+        private void CreateFarmDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            Color field = new Color(0.34f, 0.48f, 0.18f);
+            for (int i = 0; i < 3; i++)
+            {
+                CreatePrimitive(parent, "FieldRow", PrimitiveType.Cube, new Vector3(-0.66f + i * 0.16f, 0.10f, 0.46f), new Vector3(0.08f, 0.050f, 0.62f), Color.Lerp(field, accentColor, i * 0.06f), new Vector3(0f, 0f, 0f), 0.01f, 0.32f);
+            }
+
+            CreatePrimitive(parent, "Granary", PrimitiveType.Cylinder, new Vector3(0.52f, 0.40f, 0.34f), new Vector3(0.18f, 0.34f, 0.18f), Color.Lerp(bodyColor, Color.white, 0.10f), null, 0.02f, 0.38f);
+            CreatePrimitive(parent, "GranaryCap", PrimitiveType.Cube, new Vector3(0.52f, 0.78f, 0.34f), new Vector3(0.34f, 0.10f, 0.34f), Color.Lerp(bodyColor, accentColor, 0.22f), new Vector3(0f, 45f, 0f), 0.02f, 0.40f);
+            CreatePrimitive(parent, "Canopy", PrimitiveType.Sphere, new Vector3(0.06f, height + 0.22f, 0.02f), new Vector3(0.42f, 0.23f, 0.42f), Color.Lerp(bodyColor, accentColor, 0.22f), null, 0.01f, 0.36f);
+        }
+
+        private void CreateLumberDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            CreatePrimitive(parent, "MillRoof", PrimitiveType.Cube, new Vector3(0f, height + 0.18f, 0f), new Vector3(0.74f, 0.22f, 0.74f), Color.Lerp(bodyColor, accentColor, 0.28f), new Vector3(0f, 45f, 0f), 0.02f, 0.42f);
+            for (int i = 0; i < 3; i++)
+            {
+                CreatePrimitive(parent, "LogStack", PrimitiveType.Cylinder, new Vector3(-0.62f + i * 0.16f, 0.20f, 0.42f), new Vector3(0.08f, 0.30f, 0.08f), new Color(0.34f, 0.22f, 0.12f), new Vector3(90f, 0f, 0f), 0.01f, 0.38f);
+            }
+
+            CreatePrimitive(parent, "SawFrame", PrimitiveType.Cube, new Vector3(0.54f, 0.46f, -0.26f), new Vector3(0.08f, 0.50f, 0.08f), Color.Lerp(accentColor, Color.white, 0.08f), null, 0.03f, 0.45f);
+            CreatePrimitive(parent, "SawBlade", PrimitiveType.Cylinder, new Vector3(0.54f, 0.58f, -0.26f), new Vector3(0.20f, 0.035f, 0.20f), Color.Lerp(Color.gray, Color.white, 0.22f), new Vector3(90f, 0f, 0f), 0.16f, 0.70f);
+        }
+
+        private void CreateManaShrineDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            Color crystal = new Color(0.36f, 0.68f, 1f);
+            CreatePrimitive(parent, "ShrineCrown", PrimitiveType.Cylinder, new Vector3(0f, height + 0.18f, 0f), new Vector3(0.42f, 0.12f, 0.42f), Color.Lerp(bodyColor, accentColor, 0.36f), null, 0.04f, 0.60f, accentColor * 0.08f);
+            CreatePrimitive(parent, "ManaCrystal", PrimitiveType.Cube, new Vector3(0f, height + 0.58f, 0f), new Vector3(0.24f, 0.52f, 0.24f), crystal, new Vector3(0f, 45f, 0f), 0.02f, 0.84f, crystal * 0.35f);
+            for (int i = 0; i < 3; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 3f;
+                CreatePrimitive(parent, "ManaPylon", PrimitiveType.Cylinder, new Vector3(Mathf.Cos(angle) * 0.52f, height + 0.30f, Mathf.Sin(angle) * 0.52f), new Vector3(0.06f, 0.28f, 0.06f), Color.Lerp(accentColor, crystal, 0.34f), null, 0.04f, 0.64f, crystal * 0.12f);
+            }
+
+            CreatePointLight(parent, "ManaShrineLight", new Vector3(0f, height + 0.92f, -0.10f), crystal, 0.58f, 2.10f);
+        }
+
+        private void CreateGoldMineDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            Color gold = new Color(1f, 0.68f, 0.20f);
+            CreatePrimitive(parent, "VaultRoof", PrimitiveType.Cube, new Vector3(0f, height + 0.18f, 0f), new Vector3(0.78f, 0.20f, 0.78f), Color.Lerp(bodyColor, gold, 0.28f), new Vector3(0f, 45f, 0f), 0.08f, 0.66f, gold * 0.08f);
+            CreatePrimitive(parent, "VaultDoor", PrimitiveType.Cube, new Vector3(0f, 0.46f, -0.465f), new Vector3(0.32f, 0.42f, 0.026f), Color.Lerp(gold, Color.black, 0.10f), null, 0.12f, 0.70f, gold * 0.08f);
+            CreatePrimitive(parent, "GoldOreLeft", PrimitiveType.Sphere, new Vector3(-0.48f, 0.20f, 0.42f), new Vector3(0.16f, 0.11f, 0.16f), gold, null, 0.08f, 0.62f, gold * 0.12f);
+            CreatePrimitive(parent, "GoldOreRight", PrimitiveType.Sphere, new Vector3(0.48f, 0.20f, 0.42f), new Vector3(0.16f, 0.11f, 0.16f), gold, null, 0.08f, 0.62f, gold * 0.12f);
+            CreatePointLight(parent, "GoldMineLight", new Vector3(0f, height + 0.65f, -0.16f), gold, 0.30f, 1.45f);
+        }
+
+        private void CreateMineDetails(Transform parent, float height, Color bodyColor, Color accentColor)
+        {
+            CreatePrimitive(parent, "CranePost", PrimitiveType.Cube, new Vector3(-0.28f, height + 0.18f, 0f), new Vector3(0.08f, 0.58f, 0.08f), Color.Lerp(bodyColor, Color.white, 0.10f), null, 0.03f, 0.44f);
+            CreatePrimitive(parent, "CraneArm", PrimitiveType.Cube, new Vector3(0.12f, height + 0.48f, 0f), new Vector3(0.74f, 0.08f, 0.08f), Color.Lerp(bodyColor, Color.white, 0.18f), new Vector3(0f, 0f, 10f), 0.04f, 0.52f);
+            CreatePrimitive(parent, "OrePile", PrimitiveType.Sphere, new Vector3(0.48f, 0.20f, 0.44f), new Vector3(0.22f, 0.13f, 0.20f), Color.Lerp(bodyColor, accentColor, 0.22f), null, 0.03f, 0.48f, accentColor * 0.05f);
+            CreatePrimitive(parent, "MineShaft", PrimitiveType.Cube, new Vector3(-0.50f, 0.32f, -0.34f), new Vector3(0.30f, 0.36f, 0.12f), Color.Lerp(bodyColor, Color.black, 0.30f), null, 0.02f, 0.36f);
         }
 
         private void CreateLevelBadge(Transform parent, BuildingState state, float height, Color accentColor)
         {
             int remainingSeconds = GetUpgradeRemainingSeconds(state);
+            Color plateColor = Color.Lerp(accentColor, Color.black, 0.26f);
+            CreatePrimitive(parent, "LevelPlate", PrimitiveType.Cube, new Vector3(0f, height + 0.78f, -0.205f), new Vector3(0.96f, 0.38f, 0.035f), plateColor, new Vector3(55f, 0f, 0f), 0.03f, 0.56f, accentColor * 0.08f);
+            CreatePrimitive(parent, "LevelPlatePin", PrimitiveType.Cube, new Vector3(0f, height + 0.54f, -0.15f), new Vector3(0.08f, 0.20f, 0.030f), Color.Lerp(plateColor, Color.white, 0.16f), new Vector3(55f, 0f, 0f), 0.04f, 0.54f);
             var labelObject = new GameObject("LevelLabel");
             labelObject.transform.SetParent(parent, false);
             labelObject.transform.localPosition = new Vector3(0f, height + 0.78f, -0.18f);
@@ -163,25 +308,26 @@ namespace AL.Kingdom
             label.alignment = TextAlignment.Center;
             label.fontSize = 48;
             label.characterSize = 0.055f;
-            label.color = Color.Lerp(accentColor, Color.white, 0.34f);
+            label.color = Color.Lerp(accentColor, Color.white, 0.50f);
         }
 
         private void CreateUpgradeIndicator(Transform parent, float height, Color accentColor, int remainingSeconds)
         {
             Color progressColor = Color.Lerp(accentColor, new Color(1f, 0.84f, 0.32f), 0.45f);
-            CreatePrimitive(parent, "UpgradeBaseRing", PrimitiveType.Cylinder, new Vector3(0f, 0.055f, 0f), new Vector3(0.72f, 0.035f, 0.72f), new Color(progressColor.r, progressColor.g, progressColor.b, 0.86f));
-            CreatePrimitive(parent, "UpgradeBeam", PrimitiveType.Cylinder, new Vector3(0f, height + 0.34f, 0f), new Vector3(0.08f, 0.36f, 0.08f), progressColor);
+            CreatePrimitive(parent, "UpgradeBaseRing", PrimitiveType.Cylinder, new Vector3(0f, 0.055f, 0f), new Vector3(0.72f, 0.035f, 0.72f), progressColor, null, 0.03f, 0.66f, progressColor * 0.18f);
+            CreatePrimitive(parent, "UpgradeBeam", PrimitiveType.Cylinder, new Vector3(0f, height + 0.34f, 0f), new Vector3(0.08f, 0.36f, 0.08f), progressColor, null, 0.04f, 0.74f, progressColor * 0.26f);
+            CreatePointLight(parent, "UpgradeWorkLight", new Vector3(0f, height + 0.76f, -0.12f), progressColor, 0.45f, 1.75f);
 
             int tickCount = Mathf.Clamp(remainingSeconds <= 0 ? 4 : 4 + remainingSeconds / 5, 4, 8);
             for (int i = 0; i < tickCount; i++)
             {
                 float angle = i * Mathf.PI * 2f / tickCount;
                 Vector3 local = new Vector3(Mathf.Cos(angle) * 0.56f, 0.14f, Mathf.Sin(angle) * 0.56f);
-                CreatePrimitive(parent, "UpgradeTick", PrimitiveType.Cube, local, new Vector3(0.08f, 0.08f, 0.20f), progressColor, new Vector3(0f, -angle * Mathf.Rad2Deg, 0f));
+                CreatePrimitive(parent, "UpgradeTick", PrimitiveType.Cube, local, new Vector3(0.08f, 0.08f, 0.20f), progressColor, new Vector3(0f, -angle * Mathf.Rad2Deg, 0f), 0.03f, 0.66f, progressColor * 0.12f);
             }
         }
 
-        private GameObject CreatePrimitive(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Color color, Vector3? localEulerAngles = null)
+        private GameObject CreatePrimitive(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Color color, Vector3? localEulerAngles = null, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
         {
             var obj = GameObject.CreatePrimitive(primitive);
             obj.name = name;
@@ -192,10 +338,48 @@ namespace AL.Kingdom
             var renderer = obj.GetComponent<Renderer>();
             if (renderer != null)
             {
-                renderer.material.color = color;
+                ApplyMaterial(renderer, color, metallic, smoothness, emission);
             }
 
             return obj;
+        }
+
+        private void CreatePointLight(Transform parent, string name, Vector3 localPosition, Color color, float intensity, float range)
+        {
+            var lightObject = new GameObject(name);
+            lightObject.transform.SetParent(parent, false);
+            lightObject.transform.localPosition = localPosition;
+            var light = lightObject.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = color;
+            light.intensity = intensity;
+            light.range = range;
+        }
+
+        private static void ApplyMaterial(Renderer renderer, Color color, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
+        {
+            if (renderer == null)
+            {
+                return;
+            }
+
+            Material material = renderer.material;
+            material.color = color;
+            if (material.HasProperty("_Metallic"))
+            {
+                material.SetFloat("_Metallic", metallic);
+            }
+
+            if (material.HasProperty("_Glossiness"))
+            {
+                material.SetFloat("_Glossiness", smoothness);
+            }
+
+            if (emission.HasValue && material.HasProperty("_EmissionColor"))
+            {
+                material.EnableKeyword("_EMISSION");
+                material.SetColor("_EmissionColor", emission.Value);
+            }
         }
 
         private Transform EnsureVisualRoot()
