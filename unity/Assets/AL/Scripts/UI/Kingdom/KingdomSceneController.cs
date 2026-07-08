@@ -62,6 +62,12 @@ namespace AL.UI.Kingdom
         private readonly Image[] _readinessChipGlows = new Image[4];
         private readonly Color[] _readinessChipAccents = new Color[4];
         private readonly float[] _readinessChipUrgencies = new float[4];
+        private readonly Text[] _resourceChipTexts = new Text[8];
+        private readonly Image[] _resourceChipPanels = new Image[8];
+        private readonly Image[] _resourceChipRails = new Image[8];
+        private readonly Image[] _resourceChipGlows = new Image[8];
+        private readonly Color[] _resourceChipAccents = new Color[8];
+        private readonly float[] _resourceChipWeights = new float[8];
 
         private readonly string[] _buildingIds =
         {
@@ -115,6 +121,7 @@ namespace AL.UI.Kingdom
         {
             UpdateCommandMessagePulse();
             UpdateStrategicReadinessPulse();
+            UpdateResourceTickerPulse();
 
             _completionTimer += Time.deltaTime;
             if (_completionTimer < 1f)
@@ -200,8 +207,10 @@ namespace AL.UI.Kingdom
             CreatePanel(topBar.transform, "TopBarRule", new Vector2(0f, -1f), new Vector2(-36f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.88f, 0.58f, 0.20f));
             _realmText = CreateText(topBar.transform, "RealmText", font, 28, TextAnchor.UpperLeft, new Vector2(20f, -14f), new Vector2(1080f, 34f));
             _realmText.color = new Color(1f, 0.92f, 0.76f);
-            _resourceText = CreateText(topBar.transform, "ResourceText", font, 18, TextAnchor.UpperLeft, new Vector2(20f, -56f), new Vector2(676f, 42f));
-            _resourceText.color = new Color(0.82f, 0.88f, 0.94f);
+            _resourceText = CreateText(topBar.transform, "ResourceText", font, 11, TextAnchor.UpperLeft, new Vector2(20f, -47f), new Vector2(676f, 14f));
+            _resourceText.text = "TREASURY";
+            _resourceText.color = new Color(0.58f, 0.68f, 0.78f);
+            CreateResourceTicker(topBar.transform, font);
             CreateStrategicReadinessConsole(topBar.transform, font);
 
             _buildingText = CreatePanelText(_dashboardRoot.transform, "DistrictPanel", "BuildingText", font, 18, TextAnchor.UpperLeft, new Vector2(32f, -150f), new Vector2(520f, 292f));
@@ -567,15 +576,9 @@ namespace AL.UI.Kingdom
             var resources = ServiceLocator.Get<IResourceService>();
             var selectedRealmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
             ResourceType rareResourceType = ResourceRules.GetRareResourceForRealm(selectedRealmId);
-            _resourceText.text =
-                $"Food {resources.GetResourceCount(ResourceType.Food)}   |   " +
-                $"Wood {resources.GetResourceCount(ResourceType.Wood)}   |   " +
-                $"Stone {resources.GetResourceCount(ResourceType.Stone)}   |   " +
-                $"Gold {resources.GetResourceCount(ResourceType.Gold)}\n" +
-                $"Mana {resources.GetResourceCount(ResourceType.ManaStone)}   |   " +
-                $"Ore {resources.GetResourceCount(ResourceType.Ore)}   |   " +
-                $"{rareResourceType} {resources.GetResourceCount(rareResourceType)}   |   " +
-                $"Warzone {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}";
+            int warzoneCredits = ServiceLocator.Get<IWarzoneCreditService>().GetCredits();
+            _resourceText.text = "TREASURY / " + FormatResourceLabel(rareResourceType) + " ROUTE";
+            RefreshResourceTicker(resources, rareResourceType, warzoneCredits);
             RefreshStrategicReadiness();
 
             var buildings = ServiceLocator.Get<IBuildingService>();
@@ -643,6 +646,40 @@ namespace AL.UI.Kingdom
                 }
             }
             _territoryText.text = territories.ToString();
+        }
+
+        private void RefreshResourceTicker(IResourceService resources, ResourceType rareResourceType, int warzoneCredits)
+        {
+            if (_resourceChipTexts[0] == null)
+            {
+                return;
+            }
+
+            SetResourceChip(0, "FOOD", resources.GetResourceCount(ResourceType.Food), new Color(0.56f, 0.86f, 0.48f, 1f), 0.36f);
+            SetResourceChip(1, "WOOD", resources.GetResourceCount(ResourceType.Wood), new Color(0.74f, 0.58f, 0.36f, 1f), 0.34f);
+            SetResourceChip(2, "STONE", resources.GetResourceCount(ResourceType.Stone), new Color(0.62f, 0.72f, 0.80f, 1f), 0.32f);
+            SetResourceChip(3, "GOLD", resources.GetResourceCount(ResourceType.Gold), new Color(0.96f, 0.76f, 0.34f, 1f), 0.42f);
+            SetResourceChip(4, "MANA", resources.GetResourceCount(ResourceType.ManaStone), new Color(0.48f, 0.78f, 1f, 1f), 0.48f);
+            SetResourceChip(5, "ORE", resources.GetResourceCount(ResourceType.Ore), new Color(0.52f, 0.60f, 0.70f, 1f), 0.34f);
+            SetResourceChip(6, FormatResourceLabel(rareResourceType), resources.GetResourceCount(rareResourceType), GetCurrentRealmAccent(), 0.60f);
+            SetResourceChip(7, "WAR", warzoneCredits, warzoneCredits >= WarmasterPieceCost ? new Color(0.96f, 0.72f, 0.32f, 1f) : new Color(0.84f, 0.36f, 0.32f, 1f), warzoneCredits >= WarmasterPieceCost ? 0.74f : 0.58f);
+        }
+
+        private void SetResourceChip(int index, string label, long value, Color accent, float weight)
+        {
+            if (index < 0 || index >= _resourceChipTexts.Length || _resourceChipTexts[index] == null)
+            {
+                return;
+            }
+
+            weight = Mathf.Clamp01(weight);
+            _resourceChipAccents[index] = accent;
+            _resourceChipWeights[index] = weight;
+            _resourceChipTexts[index].text = label + "\n" + FormatCompactNumber(value);
+            _resourceChipTexts[index].color = Color.Lerp(new Color(0.84f, 0.90f, 0.96f, 1f), accent, 0.18f + weight * 0.10f);
+            SetImageColor(_resourceChipPanels[index], WithAlpha(Color.Lerp(new Color(0.014f, 0.020f, 0.030f, 1f), accent, 0.10f + weight * 0.06f), 0.90f));
+            SetImageColor(_resourceChipRails[index], WithAlpha(accent, 0.48f + weight * 0.26f));
+            SetImageColor(_resourceChipGlows[index], WithAlpha(accent, 0.04f + weight * 0.08f));
         }
 
         private void RefreshStrategicReadiness()
@@ -875,6 +912,28 @@ namespace AL.UI.Kingdom
             }
         }
 
+        private void UpdateResourceTickerPulse()
+        {
+            if (_resourceChipTexts[0] == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _resourceChipTexts.Length; i++)
+            {
+                float weight = Mathf.Clamp01(_resourceChipWeights[i]);
+                Color accent = _resourceChipAccents[i];
+                if (accent.a <= 0f)
+                {
+                    accent = new Color(0.42f, 0.62f, 0.78f, 1f);
+                }
+
+                float pulse = (Mathf.Sin(Time.unscaledTime * (1.8f + i * 0.11f) + i * 0.41f) + 1f) * 0.5f;
+                SetImageColor(_resourceChipRails[i], WithAlpha(Color.Lerp(accent, Color.white, pulse * 0.14f), 0.38f + weight * 0.30f + pulse * 0.08f));
+                SetImageColor(_resourceChipGlows[i], WithAlpha(accent, 0.025f + pulse * (0.040f + weight * 0.060f)));
+            }
+        }
+
         private void ResetMessagePulseVisuals()
         {
             SetImageColor(_messageAccent, _messageAccentBaseColor);
@@ -954,6 +1013,44 @@ namespace AL.UI.Kingdom
             rect.anchorMax = Vector2.zero;
             rect.pivot = Vector2.zero;
             return text;
+        }
+
+        private void CreateResourceTicker(Transform parent, Font font)
+        {
+            for (int i = 0; i < _resourceChipTexts.Length; i++)
+            {
+                CreateResourceChip(parent, font, i, new Vector2(20f + i * 83f, -64f));
+            }
+        }
+
+        private void CreateResourceChip(Transform parent, Font font, int index, Vector2 anchoredPosition)
+        {
+            var chip = CreatePanel(
+                parent,
+                "ResourceChip_" + (index + 1),
+                anchoredPosition,
+                new Vector2(76f, 30f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Color(0.014f, 0.020f, 0.030f, 0.90f));
+            _resourceChipPanels[index] = chip.GetComponent<Image>();
+            _resourceChipRails[index] = CreatePanel(chip.transform, "ResourceRail", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.42f, 0.62f, 0.78f, 0.50f)).GetComponent<Image>();
+            _resourceChipGlows[index] = CreatePanel(chip.transform, "ResourceGlow", new Vector2(0f, 0f), new Vector2(-8f, 2f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Color(0.42f, 0.62f, 0.78f, 0.06f)).GetComponent<Image>();
+
+            var text = CreateText(chip.transform, "ResourceText", font, 10, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(70f, 28f));
+            text.text = "--\n0";
+            text.color = new Color(0.84f, 0.90f, 0.96f);
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 8;
+            text.resizeTextMaxSize = 10;
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.offsetMin = new Vector2(5f, 1f);
+            rect.offsetMax = new Vector2(-4f, -1f);
+            _resourceChipTexts[index] = text;
         }
 
         private void CreateStrategicReadinessConsole(Transform parent, Font font)
@@ -1216,9 +1313,9 @@ namespace AL.UI.Kingdom
             return state != null && state.IsResearching ? 1 : 0;
         }
 
-        private static string FormatCompactNumber(int value)
+        private static string FormatCompactNumber(long value)
         {
-            int absoluteValue = Math.Abs(value);
+            long absoluteValue = Math.Abs(value);
             if (absoluteValue >= 1000000)
             {
                 return (value / 1000000f).ToString("0.#") + "M";
@@ -1230,6 +1327,24 @@ namespace AL.UI.Kingdom
             }
 
             return value.ToString();
+        }
+
+        private static string FormatResourceLabel(ResourceType type)
+        {
+            return type switch
+            {
+                ResourceType.Food => "FOOD",
+                ResourceType.Wood => "WOOD",
+                ResourceType.Stone => "STONE",
+                ResourceType.Gold => "GOLD",
+                ResourceType.ManaStone => "MANA",
+                ResourceType.Ore => "ORE",
+                ResourceType.DeepOre => "D.ORE",
+                ResourceType.WorldSap => "SAP",
+                ResourceType.RoyalSigil => "SIGIL",
+                ResourceType.DarkCrystal => "CRYS",
+                _ => type.ToString().ToUpperInvariant()
+            };
         }
 
         private static string FormatResearch(string label, ResearchState state)
