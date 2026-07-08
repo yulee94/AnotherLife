@@ -19,7 +19,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Replace the single debug capsule champion with a layered procedural hero model: hidden root capsule renderer, facial structure, close-up mouth/cheek shadows, hair variants, plated armor pieces, robe/cape seams, hand/finger and boot details, style-specific weapons, offhands, emissive trims/gems/runes, and PBR material tuning.
 - Replace the visible boss cylinder with a layered encounter silhouette: hidden root renderer, mantle, torso plates, core, faceplate, horns, shoulders, claws, back shards, orbit shards, aura ring, and boss-owned glow lights.
 - Add baseline combat feedback: configurable follow camera, impact shake, floating combat text, boss hit reactions, break/enrage callouts, and stronger skill-impact response.
-- Improve skill VFX polish with cast charge columns, layered slash edges and afterimages, guard plates, wider shockwave rings, radial ground cracks, particle noise/size curves, emissive primitive rendering, and pooled primitive scale/fade animation.
+- Improve skill VFX polish with cast charge columns, sigil ticks, layered slash edges and afterimages, guard plates, wider shockwave rings, radial ground cracks, impact debris, aerial shard rain, particle noise/size curves, weather-linked combat flashes, emissive primitive rendering, and pooled primitive scale/fade animation.
 - Polish the runtime HUD with bordered panels, a contained combat feed, boss state strip, hotbar accent bars, radial cooldown overlays, and tighter movement-pad labels.
 - Improve runtime weather mood with layered falling particles, ground mist, horizon haze, wind-driven emission pulses, and subtle directional-light gusts.
 - Upgrade the appearance rack into a lightweight character creator surface with current build summary, live color swatches, randomize/reset, helmet/cape toggles, and saved-state feedback.
@@ -30,7 +30,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Upgrade boss slam telegraphs from generic warning rings to truthful impact zones with direction lines, edge ticks, impact bursts, and evade feedback when the player exits the marked area before damage resolves.
 - Add combat impact feedback with short hit pauses, red damage flash, and low-health edge pulse so successful hits and incoming danger feel more physical without blocking mobile controls.
 - Add a short runtime encounter intro that locks controls, frames the boss objective, counts down, and starts the timer on engage so the arena opens like a real combat mode instead of a debug sandbox.
-- Add appearance inspection mode from the customization rack: close camera framing, combat input lock, manual mode, and safe resume so players can examine detailed character changes without leaving Champion Mode.
+- Add appearance inspection mode from the customization rack: close camera framing, combat input lock, manual mode, safe resume, and a lit presentation showcase so players can examine detailed character changes without leaving Champion Mode.
 - Add an encounter clear recap panel with grade, time, guard/enrage summary, build feedback, retry, Kingdom return, and inspection actions so wins resolve like a complete MMO encounter loop.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
@@ -38,7 +38,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 ## Next Quality Bar
 
 - Replace procedural blockout geometry with real mesh/texture assets for the player champion, boss, floor, pillars, and skill icons once the part names and customization contract stop moving.
-- Add hit pause, richer telegraph decals, and animation-driven skill-impact timing after the UI/arena layout is stable.
+- Replace procedural telegraph and skill primitives with authored decal meshes/materials once the current targeting language is stable.
 - Add a proper character creator scene once the combat first impression feels worth keeping.
 - Add difficulty retry options after combat tuning is stable, such as practice mode, normal rematch, and harder rematch modifiers.
 
