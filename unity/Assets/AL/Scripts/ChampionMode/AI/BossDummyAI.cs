@@ -39,10 +39,13 @@ namespace AL.ChampionMode.AI
         private bool _phase40;
         private bool _phase15;
         private bool _enraged;
+        private bool _isTelegraphing;
         private float _currentHealth;
         private float _currentBreak;
         private float _healthPercent = 1.0f;
         private float _fightStartTime;
+        private float _telegraphStartTime;
+        private float _activeTelegraphDuration;
         private Vector3 _baseScale;
         private Coroutine _hitReactRoutine;
         private BossVisualFeedback _visualFeedback;
@@ -55,6 +58,19 @@ namespace AL.ChampionMode.AI
         public bool IsBroken => _isBroken;
         public bool IsEnraged => _enraged;
         public bool IsDead => _isDead;
+        public bool IsTelegraphing => _isTelegraphing;
+        public float TelegraphProgress
+        {
+            get
+            {
+                if (!_isTelegraphing || _activeTelegraphDuration <= 0.001f)
+                {
+                    return 0f;
+                }
+
+                return Mathf.Clamp01((Time.time - _telegraphStartTime) / _activeTelegraphDuration);
+            }
+        }
 
         private void Start()
         {
@@ -146,6 +162,7 @@ namespace AL.ChampionMode.AI
             float impactRadius = _enraged ? _attackRange * 1.12f : _attackRange;
             SkillEffectFactory.SpawnBossSlamTelegraph(impactCenter, transform.position, impactRadius, _telegraphDuration, _enraged);
             RuntimeCombatAudio.PlayWarning();
+            StartTelegraphReadout();
 
             float windup = 0f;
             while (windup < _telegraphDuration)
@@ -153,6 +170,7 @@ namespace AL.ChampionMode.AI
                 if (_isDead || _isBroken)
                 {
                     _isAttacking = false;
+                    ClearTelegraphReadout();
                     yield break;
                 }
 
@@ -164,9 +182,11 @@ namespace AL.ChampionMode.AI
             if (_isDead || _isBroken)
             {
                 _isAttacking = false;
+                ClearTelegraphReadout();
                 yield break;
             }
 
+            ClearTelegraphReadout();
             Debug.Log("BOSS: SLAM!");
             SkillEffectFactory.SpawnBossSlamImpact(impactCenter, impactRadius, GetCurrentRealmId());
             RuntimeCombatAudio.PlayHeavySkill();
@@ -273,6 +293,7 @@ namespace AL.ChampionMode.AI
         {
             _isBroken = true;
             _isAttacking = false;
+            ClearTelegraphReadout();
             _visualFeedback?.SetBroken(true);
             Debug.Log("BOSS: BREAK! Damage window opened.");
             SkillEffectFactory.SpawnBossTelegraph(transform.position, 2.25f, _brokenDuration);
@@ -325,6 +346,7 @@ namespace AL.ChampionMode.AI
         private void Die()
         {
             _isDead = true;
+            ClearTelegraphReadout();
             Debug.Log("BOSS: Defeated.");
             _visualFeedback?.PulseDefeated();
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "DEFEATED", new Color(0.85f, 1f, 0.62f), 0.38f, 1.25f);
@@ -388,6 +410,20 @@ namespace AL.ChampionMode.AI
             }
 
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction.normalized), Time.deltaTime * speed);
+        }
+
+        private void StartTelegraphReadout()
+        {
+            _isTelegraphing = true;
+            _telegraphStartTime = Time.time;
+            _activeTelegraphDuration = Mathf.Max(0.001f, _telegraphDuration);
+        }
+
+        private void ClearTelegraphReadout()
+        {
+            _isTelegraphing = false;
+            _telegraphStartTime = 0f;
+            _activeTelegraphDuration = 0f;
         }
 
         private static Vector3 Grounded(Vector3 position)
