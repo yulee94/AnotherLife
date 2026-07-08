@@ -505,26 +505,102 @@ namespace AL.ChampionMode
             Color darkGlass = new Color(0.035f, 0.052f, 0.072f, 0.70f);
             Color blackSteel = new Color(0.028f, 0.030f, 0.036f);
             Color warmEdge = Color.Lerp(realmAccent, new Color(1f, 0.82f, 0.44f), 0.22f);
+            Color coldEdge = Color.Lerp(realmAccent, new Color(0.24f, 0.56f, 1f), 0.46f);
 
             CreateArenaPrimitive(showcase.transform, "Inspection_StageBase", PrimitiveType.Cylinder, new Vector3(0f, -1.12f, 0f), new Vector3(1.46f, 0.035f, 1.46f), Vector3.zero, blackSteel, true, 0.22f, 0.68f);
             CreateArenaPrimitive(showcase.transform, "Inspection_StageGlow", PrimitiveType.Cylinder, new Vector3(0f, -1.07f, 0f), new Vector3(1.18f, 0.018f, 1.18f), Vector3.zero, realmAccent, true, 0.04f, 0.86f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_InnerGlassDisk", PrimitiveType.Cylinder, new Vector3(0f, -1.035f, 0f), new Vector3(0.92f, 0.012f, 0.92f), Vector3.zero, darkGlass, true, 0.04f, 0.92f);
             CreateArenaPrimitive(showcase.transform, "Inspection_FootRimFront", PrimitiveType.Cube, new Vector3(0f, -0.96f, 0.88f), new Vector3(1.34f, 0.030f, 0.045f), Vector3.zero, warmEdge, true, 0.08f, 0.78f);
             CreateArenaPrimitive(showcase.transform, "Inspection_FootRimBack", PrimitiveType.Cube, new Vector3(0f, -0.96f, -0.88f), new Vector3(1.34f, 0.030f, 0.045f), Vector3.zero, warmEdge, true, 0.08f, 0.78f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_FootRimLeft", PrimitiveType.Cube, new Vector3(-0.88f, -0.96f, 0f), new Vector3(0.045f, 0.030f, 1.34f), Vector3.zero, warmEdge, true, 0.08f, 0.78f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_FootRimRight", PrimitiveType.Cube, new Vector3(0.88f, -0.96f, 0f), new Vector3(0.045f, 0.030f, 1.34f), Vector3.zero, warmEdge, true, 0.08f, 0.78f);
+
+            var orbit = new GameObject("Inspection_TurntableOrbit");
+            orbit.transform.SetParent(showcase.transform, false);
+            orbit.transform.localPosition = new Vector3(0f, -1.005f, 0f);
+            for (int i = 0; i < 12; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 12f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * 1.04f, 0f, Mathf.Sin(angle) * 1.04f);
+                Vector3 euler = new Vector3(0f, -angle * Mathf.Rad2Deg, 0f);
+                CreateArenaPrimitive(orbit.transform, "Inspection_OrbitNotch_" + i, PrimitiveType.Cube, position, new Vector3(0.30f, 0.016f, 0.036f), euler, i % 2 == 0 ? warmEdge : coldEdge, true, 0.02f, 0.86f);
+            }
 
             CreateArenaPrimitive(showcase.transform, "Inspection_MirrorLeft", PrimitiveType.Cube, new Vector3(-1.08f, -0.12f, -0.10f), new Vector3(0.040f, 1.42f, 0.62f), new Vector3(0f, 18f, 0f), darkGlass, true, 0.02f, 0.90f);
             CreateArenaPrimitive(showcase.transform, "Inspection_MirrorRight", PrimitiveType.Cube, new Vector3(1.08f, -0.12f, -0.10f), new Vector3(0.040f, 1.42f, 0.62f), new Vector3(0f, -18f, 0f), darkGlass, true, 0.02f, 0.90f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_MirrorFrameLeft", PrimitiveType.Cube, new Vector3(-1.105f, -0.12f, -0.10f), new Vector3(0.028f, 1.58f, 0.72f), new Vector3(0f, 18f, 0f), coldEdge, true, 0.08f, 0.82f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_MirrorFrameRight", PrimitiveType.Cube, new Vector3(1.105f, -0.12f, -0.10f), new Vector3(0.028f, 1.58f, 0.72f), new Vector3(0f, -18f, 0f), coldEdge, true, 0.08f, 0.82f);
             CreateArenaPrimitive(showcase.transform, "Inspection_BackLightSpine", PrimitiveType.Cube, new Vector3(0f, 0.10f, -0.96f), new Vector3(0.080f, 1.54f, 0.065f), Vector3.zero, realmAccent, true, 0.08f, 0.84f);
             CreateArenaPrimitive(showcase.transform, "Inspection_BackCrossbar", PrimitiveType.Cube, new Vector3(0f, 0.72f, -0.96f), new Vector3(0.94f, 0.050f, 0.055f), Vector3.zero, warmEdge, true, 0.10f, 0.80f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_BackGlowPanel_L", PrimitiveType.Cube, new Vector3(-0.34f, 0.06f, -1.02f), new Vector3(0.040f, 1.18f, 0.052f), new Vector3(0f, 0f, -10f), coldEdge, true, 0.02f, 0.82f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_BackGlowPanel_R", PrimitiveType.Cube, new Vector3(0.34f, 0.06f, -1.02f), new Vector3(0.040f, 1.18f, 0.052f), new Vector3(0f, 0f, 10f), coldEdge, true, 0.02f, 0.82f);
+
+            for (int i = 0; i < 5; i++)
+            {
+                float offset = -0.48f + i * 0.24f;
+                CreateArenaPrimitive(showcase.transform, "Inspection_FloorTrace_" + i, PrimitiveType.Cube, new Vector3(offset, -0.985f, 0.42f), new Vector3(0.045f, 0.014f, 0.48f), new Vector3(0f, i % 2 == 0 ? 18f : -18f, 0f), i % 2 == 0 ? realmAccent : warmEdge, true, 0.02f, 0.82f);
+            }
 
             var keyLight = CreatePointLight("Inspection Key Light", player.position + new Vector3(0.0f, 2.35f, 1.55f), Color.Lerp(realmAccent, Color.white, 0.28f), 1.95f, 4.8f);
             keyLight.transform.SetParent(showcase.transform, true);
             var rimLight = CreatePointLight("Inspection Rim Light", player.position + new Vector3(0.0f, 1.85f, -1.35f), Color.Lerp(realmAccent, new Color(0.24f, 0.56f, 1f), 0.35f), 1.35f, 4.2f);
             rimLight.transform.SetParent(showcase.transform, true);
+            var footLight = CreatePointLight("Inspection Foot Light", player.position + new Vector3(0f, 0.35f, 0.35f), warmEdge, 0.82f, 2.4f);
+            footLight.transform.SetParent(showcase.transform, true);
+
+            CreateInspectionMotes(showcase.transform, realmAccent, warmEdge);
 
             var pulse = showcase.AddComponent<ChampionInspectionShowcase>();
             pulse.Configure(realmAccent, warmEdge);
             showcase.SetActive(false);
             return showcase;
+        }
+
+        private static void CreateInspectionMotes(Transform parent, Color accent, Color edge)
+        {
+            var motesObject = new GameObject("Inspection_DetailMotes");
+            motesObject.transform.SetParent(parent, false);
+            motesObject.transform.localPosition = new Vector3(0f, 0.20f, 0f);
+            var particles = motesObject.AddComponent<ParticleSystem>();
+
+            var main = particles.main;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.startLifetime = new ParticleSystem.MinMaxCurve(2.4f, 4.6f);
+            main.startSpeed = new ParticleSystem.MinMaxCurve(0.10f, 0.28f);
+            main.startSize = new ParticleSystem.MinMaxCurve(0.018f, 0.046f);
+            main.startColor = new ParticleSystem.MinMaxGradient(new Color(accent.r, accent.g, accent.b, 0.46f), new Color(edge.r, edge.g, edge.b, 0.24f));
+            main.maxParticles = 72;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = particles.emission;
+            emission.rateOverTime = 18f;
+
+            var shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(2.6f, 1.7f, 2.2f);
+
+            var velocity = particles.velocityOverLifetime;
+            velocity.enabled = true;
+            velocity.x = new ParticleSystem.MinMaxCurve(-0.08f, 0.08f);
+            velocity.y = new ParticleSystem.MinMaxCurve(0.02f, 0.18f);
+            velocity.z = new ParticleSystem.MinMaxCurve(-0.08f, 0.08f);
+
+            var noise = particles.noise;
+            noise.enabled = true;
+            noise.strength = 0.14f;
+            noise.frequency = 0.10f;
+            noise.scrollSpeed = 0.22f;
+
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null)
+            {
+                renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                renderer.sortMode = ParticleSystemSortMode.Distance;
+                renderer.sortingOrder = 2;
+            }
+
+            particles.Play();
         }
 
         private void CreateWorldObjectiveMarkers()
@@ -1802,9 +1878,12 @@ namespace AL.ChampionMode
     {
         private readonly List<Material> _materials = new List<Material>();
         private readonly List<Light> _lights = new List<Light>();
+        private readonly List<float> _lightBaseIntensities = new List<float>();
+        private readonly List<ParticleSystem> _particles = new List<ParticleSystem>();
         private Color _accent;
         private Color _edge;
         private Vector3 _baseLocalPosition;
+        private Transform _turntableOrbit;
 
         public void Configure(Color accent, Color edge)
         {
@@ -1837,20 +1916,39 @@ namespace AL.ChampionMode
             }
 
             _lights.Clear();
+            _lightBaseIntensities.Clear();
             foreach (var light in GetComponentsInChildren<Light>(true))
             {
                 if (light != null)
                 {
                     _lights.Add(light);
+                    _lightBaseIntensities.Add(light.intensity);
                 }
             }
+
+            _particles.Clear();
+            foreach (var particles in GetComponentsInChildren<ParticleSystem>(true))
+            {
+                if (particles != null)
+                {
+                    _particles.Add(particles);
+                }
+            }
+
+            _turntableOrbit = transform.Find("Inspection_TurntableOrbit");
         }
 
         private void Update()
         {
             float time = Time.unscaledTime;
             float pulse = 0.62f + Mathf.Sin(time * 1.45f) * 0.18f;
+            float slowBreath = 0.50f + Mathf.Sin(time * 0.70f) * 0.50f;
             transform.localPosition = _baseLocalPosition + Vector3.up * (Mathf.Sin(time * 0.92f) * 0.018f);
+
+            if (_turntableOrbit != null)
+            {
+                _turntableOrbit.localRotation = Quaternion.Euler(0f, time * 18f, 0f);
+            }
 
             for (int i = 0; i < _materials.Count; i++)
             {
@@ -1872,7 +1970,20 @@ namespace AL.ChampionMode
                     continue;
                 }
 
-                light.intensity = Mathf.Max(0f, (i == 0 ? 1.95f : 1.35f) * (0.92f + Mathf.Sin(time * 1.12f + i) * 0.08f));
+                float baseIntensity = i < _lightBaseIntensities.Count ? _lightBaseIntensities[i] : light.intensity;
+                light.intensity = Mathf.Max(0f, baseIntensity * (0.90f + Mathf.Sin(time * 1.12f + i) * 0.08f + slowBreath * 0.08f));
+            }
+
+            for (int i = 0; i < _particles.Count; i++)
+            {
+                var particles = _particles[i];
+                if (particles == null)
+                {
+                    continue;
+                }
+
+                var emission = particles.emission;
+                emission.rateOverTimeMultiplier = Mathf.Lerp(0.78f, 1.20f, slowBreath);
             }
         }
     }
