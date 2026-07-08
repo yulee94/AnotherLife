@@ -1198,9 +1198,52 @@ namespace AL.ChampionMode
             Color slotColor = GetSkillSlotColor(slotIndex);
             var button = CreateHudButton(parent, font, BuildSkillButtonLabel(slotIndex), anchoredPosition, new Vector2(154f, 58f), () => _playerController.RequestSkill(slotIndex), 14, new Color(0.06f, 0.09f, 0.13f, 0.96f));
             CreateHudPanel(button.transform, "SkillAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(154f, 5f), slotColor);
+            CreateSkillIconTile(button.transform, slotIndex, slotColor);
             _skillCooldownFills[slotIndex] = CreateCooldownOverlay(button.transform);
             _skillButtonTexts[slotIndex] = button.GetComponentInChildren<Text>();
-            _skillCooldownTexts[slotIndex] = CreateText(button.transform, font, "Ready", 12, new Vector2(8f, -37f), new Vector2(138f, 18f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
+            if (_skillButtonTexts[slotIndex] != null)
+            {
+                _skillButtonTexts[slotIndex].alignment = TextAnchor.MiddleLeft;
+                var labelRect = _skillButtonTexts[slotIndex].GetComponent<RectTransform>();
+                labelRect.offsetMin = new Vector2(48f, 20f);
+                labelRect.offsetMax = new Vector2(-8f, -6f);
+            }
+
+            _skillCooldownTexts[slotIndex] = CreateText(button.transform, font, "Ready", 12, new Vector2(48f, -37f), new Vector2(98f, 18f), TextAnchor.MiddleLeft, new Color(0.78f, 0.86f, 1f));
+        }
+
+        private static void CreateSkillIconTile(Transform parent, int slotIndex, Color slotColor)
+        {
+            Color frameColor = new Color(0.015f, 0.020f, 0.028f, 0.96f);
+            Color innerColor = Color.Lerp(slotColor, Color.white, 0.10f);
+            var frame = CreateHudPanel(parent, "SkillIconFrame", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(8f, -13f), new Vector2(34f, 34f), frameColor);
+            CreateHudPanel(frame.transform, "SkillIconCore", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(24f, 24f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.26f));
+
+            switch (slotIndex)
+            {
+                case 0:
+                    CreateSkillIconStroke(frame.transform, "SlashMain", new Vector2(17f, -17f), new Vector2(25f, 4f), -34f, innerColor);
+                    CreateSkillIconStroke(frame.transform, "SlashEdge", new Vector2(17f, -17f), new Vector2(15f, 2f), -34f, Color.Lerp(innerColor, Color.white, 0.42f));
+                    break;
+                case 1:
+                    CreateSkillIconStroke(frame.transform, "GuardTop", new Vector2(17f, -11f), new Vector2(18f, 4f), 0f, innerColor);
+                    CreateSkillIconStroke(frame.transform, "GuardCenter", new Vector2(17f, -19f), new Vector2(12f, 12f), 0f, Color.Lerp(innerColor, Color.white, 0.22f));
+                    break;
+                case 2:
+                    CreateSkillIconStroke(frame.transform, "BurstHorizontal", new Vector2(17f, -17f), new Vector2(24f, 4f), 0f, innerColor);
+                    CreateSkillIconStroke(frame.transform, "BurstVertical", new Vector2(17f, -17f), new Vector2(4f, 24f), 0f, Color.Lerp(innerColor, Color.white, 0.34f));
+                    break;
+                default:
+                    CreateSkillIconStroke(frame.transform, "BreakerLeft", new Vector2(13f, -17f), new Vector2(22f, 4f), -54f, innerColor);
+                    CreateSkillIconStroke(frame.transform, "BreakerRight", new Vector2(21f, -17f), new Vector2(22f, 4f), 54f, Color.Lerp(innerColor, Color.white, 0.28f));
+                    break;
+            }
+        }
+
+        private static void CreateSkillIconStroke(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, float rotationDegrees, Color color)
+        {
+            var stroke = CreateHudPanel(parent, name, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), anchoredPosition, sizeDelta, color);
+            stroke.transform.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
         }
 
         private void RefreshSkillButtonLabels()
