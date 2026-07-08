@@ -304,6 +304,7 @@ namespace AL.ChampionMode
 
             CreateArenaBoundaryDetails(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
             CreateArenaBraziers(environment, atmospherePulse, realmAccent, riftRed);
+            CreateArenaDepthArchitecture(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
         }
 
         private void CreateArenaGroundDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
@@ -325,6 +326,21 @@ namespace AL.ChampionMode
                 Color color = Color.Lerp(coldBlue, realmAccent, i / 9f);
                 var crossLine = CreateArenaPrimitive(environment, "Tactical_Crossline_" + i, PrimitiveType.Cube, new Vector3(x, 0.038f, -0.25f), new Vector3(0.028f, 0.020f, 9.2f), Vector3.zero, color, true, 0f, 0.70f);
                 atmospherePulse.RegisterRenderer(crossLine, color, i * 0.19f, 0.18f);
+            }
+
+            for (int i = 0; i < 18; i++)
+            {
+                float angle = i * 0.77f + 0.31f;
+                float radius = 2.2f + i % 6 * 0.62f;
+                float zBias = i % 2 == 0 ? 1.15f : -0.65f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * radius * 0.86f, 0.055f, Mathf.Sin(angle) * radius + zBias);
+                Vector3 euler = new Vector3(0f, -angle * Mathf.Rad2Deg + (i % 3 - 1) * 18f, 0f);
+                Color color = i % 4 == 0 ? Color.Lerp(riftRed, Color.black, 0.20f) : Color.Lerp(new Color(0.035f, 0.042f, 0.052f), coldBlue, 0.10f);
+                var fracture = CreateArenaPrimitive(environment, "Arena_FracturePlate_" + i, PrimitiveType.Cube, position, new Vector3(0.62f + i % 3 * 0.18f, 0.018f, 0.030f), euler, color, true, 0.02f, i % 4 == 0 ? 0.76f : 0.40f);
+                if (i % 4 == 0)
+                {
+                    atmospherePulse.RegisterRenderer(fracture, riftRed, i * 0.28f, 0.18f);
+                }
             }
         }
 
@@ -366,6 +382,63 @@ namespace AL.ChampionMode
                 var light = CreatePointLight("WarBrazier Light " + i, position + Vector3.up * 1.18f, flameColor, 1.18f, 5.4f);
                 atmospherePulse.RegisterRenderer(flame, flameColor, i * 0.58f, 0.72f);
                 atmospherePulse.RegisterLight(light, i * 0.41f, 0.18f);
+            }
+        }
+
+        private void CreateArenaDepthArchitecture(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
+        {
+            Color deepStone = new Color(0.040f, 0.046f, 0.058f);
+            Color shadowStone = new Color(0.028f, 0.032f, 0.042f);
+            Color trim = Color.Lerp(realmAccent, new Color(0.92f, 0.76f, 0.42f), 0.16f);
+
+            for (int i = 0; i < 5; i++)
+            {
+                float width = 8.8f - i * 0.74f;
+                float height = 0.09f + i * 0.018f;
+                Vector3 position = new Vector3(0f, 0.065f + i * 0.072f, 10.45f + i * 0.42f);
+                CreateArenaPrimitive(environment, "BossDais_Tier_" + i, PrimitiveType.Cube, position, new Vector3(width, height, 0.34f), Vector3.zero, Color.Lerp(deepStone, riftRed, i * 0.035f), true, 0.10f, 0.46f);
+                var tierEdge = CreateArenaPrimitive(environment, "BossDais_TierEdge_" + i, PrimitiveType.Cube, position + new Vector3(0f, height * 0.65f, -0.19f), new Vector3(width * 0.92f, 0.026f, 0.040f), Vector3.zero, i % 2 == 0 ? trim : riftRed, true, 0.06f, 0.76f);
+                atmospherePulse.RegisterRenderer(tierEdge, i % 2 == 0 ? trim : riftRed, i * 0.31f, 0.20f);
+            }
+
+            CreateArenaPrimitive(environment, "RiftGate_LeftPillar", PrimitiveType.Cube, new Vector3(-3.75f, 2.10f, 12.85f), new Vector3(0.54f, 4.10f, 0.46f), new Vector3(0f, -4f, 0f), deepStone, true, 0.16f, 0.42f);
+            CreateArenaPrimitive(environment, "RiftGate_RightPillar", PrimitiveType.Cube, new Vector3(3.75f, 2.10f, 12.85f), new Vector3(0.54f, 4.10f, 0.46f), new Vector3(0f, 4f, 0f), deepStone, true, 0.16f, 0.42f);
+            CreateArenaPrimitive(environment, "RiftGate_LeftButtress", PrimitiveType.Cube, new Vector3(-4.55f, 1.42f, 12.58f), new Vector3(0.48f, 2.72f, 0.40f), new Vector3(0f, -9f, -8f), shadowStone, true, 0.12f, 0.36f);
+            CreateArenaPrimitive(environment, "RiftGate_RightButtress", PrimitiveType.Cube, new Vector3(4.55f, 1.42f, 12.58f), new Vector3(0.48f, 2.72f, 0.40f), new Vector3(0f, 9f, 8f), shadowStone, true, 0.12f, 0.36f);
+            CreateArenaPrimitive(environment, "RiftGate_Crown", PrimitiveType.Cube, new Vector3(0f, 4.28f, 12.80f), new Vector3(7.95f, 0.48f, 0.52f), Vector3.zero, deepStone, true, 0.16f, 0.44f);
+            CreateArenaPrimitive(environment, "RiftGate_CrownLip", PrimitiveType.Cube, new Vector3(0f, 4.60f, 12.56f), new Vector3(6.50f, 0.16f, 0.28f), Vector3.zero, trim, true, 0.16f, 0.74f);
+
+            var riftCore = CreateArenaPrimitive(environment, "RiftGate_Core", PrimitiveType.Cube, new Vector3(0f, 2.42f, 12.46f), new Vector3(0.18f, 2.78f, 0.050f), Vector3.zero, riftRed, true, 0f, 0.92f);
+            var riftHalo = CreateArenaPrimitive(environment, "RiftGate_Halo", PrimitiveType.Cylinder, new Vector3(0f, 2.42f, 12.42f), new Vector3(1.34f, 0.018f, 1.34f), new Vector3(90f, 0f, 0f), Color.Lerp(riftRed, coldBlue, 0.18f), true, 0f, 0.90f);
+            CreateArenaPrimitive(environment, "RiftGate_HaloVoid", PrimitiveType.Cylinder, new Vector3(0f, 2.42f, 12.38f), new Vector3(0.82f, 0.020f, 0.82f), new Vector3(90f, 0f, 0f), shadowStone, true, 0.04f, 0.46f);
+            var riftLight = CreatePointLight("Rift Gate Backlight", new Vector3(0f, 2.75f, 12.05f), Color.Lerp(riftRed, Color.white, 0.08f), 2.25f, 8.4f);
+            atmospherePulse.RegisterRenderer(riftCore, riftRed, 0.12f, 0.74f);
+            atmospherePulse.RegisterRenderer(riftHalo, Color.Lerp(riftRed, coldBlue, 0.18f), 0.48f, 0.38f);
+            atmospherePulse.RegisterLight(riftLight, 0.22f, 0.32f);
+
+            for (int i = 0; i < 6; i++)
+            {
+                float x = -2.55f + i * 1.02f;
+                Color channelColor = i % 2 == 0 ? riftRed : coldBlue;
+                var channel = CreateArenaPrimitive(environment, "RiftGate_Channel_" + i, PrimitiveType.Cube, new Vector3(x, 2.14f + i % 2 * 0.22f, 12.38f), new Vector3(0.065f, 1.72f, 0.048f), new Vector3(0f, 0f, i % 2 == 0 ? -7f : 7f), channelColor, true, 0f, 0.84f);
+                atmospherePulse.RegisterRenderer(channel, channelColor, i * 0.36f, 0.26f);
+            }
+
+            CreateArenaPrimitive(environment, "ForegroundParapet_Left", PrimitiveType.Cube, new Vector3(-5.15f, 0.42f, -10.82f), new Vector3(4.15f, 0.54f, 0.36f), new Vector3(0f, 8f, 0f), shadowStone, true, 0.12f, 0.40f);
+            CreateArenaPrimitive(environment, "ForegroundParapet_Right", PrimitiveType.Cube, new Vector3(5.15f, 0.42f, -10.82f), new Vector3(4.15f, 0.54f, 0.36f), new Vector3(0f, -8f, 0f), shadowStone, true, 0.12f, 0.40f);
+            var leftRail = CreateArenaPrimitive(environment, "ForegroundParapet_LeftRail", PrimitiveType.Cube, new Vector3(-5.15f, 0.76f, -10.92f), new Vector3(4.00f, 0.070f, 0.070f), new Vector3(0f, 8f, 0f), trim, true, 0.14f, 0.72f);
+            var rightRail = CreateArenaPrimitive(environment, "ForegroundParapet_RightRail", PrimitiveType.Cube, new Vector3(5.15f, 0.76f, -10.92f), new Vector3(4.00f, 0.070f, 0.070f), new Vector3(0f, -8f, 0f), trim, true, 0.14f, 0.72f);
+            atmospherePulse.RegisterRenderer(leftRail, trim, 0.30f, 0.16f);
+            atmospherePulse.RegisterRenderer(rightRail, trim, 0.62f, 0.16f);
+
+            for (int i = 0; i < 4; i++)
+            {
+                float sign = i < 2 ? -1f : 1f;
+                float offset = i % 2 == 0 ? 3.55f : 6.62f;
+                Vector3 position = new Vector3(sign * offset, 1.25f, -10.35f);
+                CreateArenaPrimitive(environment, "ForegroundWatchpost_" + i, PrimitiveType.Cylinder, position, new Vector3(0.30f, 1.02f, 0.30f), Vector3.zero, deepStone, true, 0.12f, 0.44f);
+                var beacon = CreateArenaPrimitive(environment, "ForegroundWatchpostBeacon_" + i, PrimitiveType.Sphere, position + Vector3.up * 0.82f, new Vector3(0.22f, 0.12f, 0.22f), Vector3.zero, i % 2 == 0 ? coldBlue : realmAccent, true, 0f, 0.86f);
+                atmospherePulse.RegisterRenderer(beacon, i % 2 == 0 ? coldBlue : realmAccent, i * 0.44f, 0.30f);
             }
         }
 
