@@ -92,6 +92,9 @@ namespace AL.Services.Local
             AddChapter(RealmId.Crownlands, "C12_CL", "Empire of Light", "Establishing a holy covenant between earth and sky.");
             AddChapter(RealmId.Umbral, "C12_UM", "The Void Throne", "Claiming the sky for the shadows of the rift.");
 
+            // Otherworld Omen Foreshadowing
+            AddChapter(RealmId.None, "C_OMEN", "The Otherworld Omen", "Strange signals from beyond the celestial rift suggest we are not alone.");
+
             InitializeSkillSoulQuests();
         }
 

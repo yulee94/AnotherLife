@@ -118,6 +118,26 @@ namespace AL.Services.Local
                 IsConflictHint = true,
                 AssociatedRealmId = RealmId.Umbral
             });
+
+            // Chapter 10-12 Heavens Ascended Dialogues
+            AddNode(new DialogueNode {
+                Id = "c10_intro",
+                CharacterName = "High Celestial Lyra",
+                Text = "Mortal of the lower realms, the gates of the Sky Castle have not opened in an age. Why do you seek the light?",
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "To save my people.", NextNodeId = "end" },
+                    new DialogueChoice { Text = "To claim your power.", NextNodeId = "end" }
+                }
+            });
+
+            AddNode(new DialogueNode {
+                Id = "c12_victory",
+                CharacterName = "High Celestial Lyra",
+                Text = "You have proven your worth. The Throne of the Skies is yours. But beware, for signals from the Otherworld grow stronger.",
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "I am ready for what comes next.", NextNodeId = "end" }
+                }
+            });
         }
 
         private void AddNode(DialogueNode node) => _dialogueCache[node.Id] = node;

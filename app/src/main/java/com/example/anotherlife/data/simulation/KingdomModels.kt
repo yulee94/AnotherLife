@@ -63,7 +63,9 @@ class KingdomState {
         Quest("Q1", "Building the Future", "Upgrade any building to Level 2.", target = 1),
         Quest("Q2", "Expansion Force", "Train 100 total troops.", target = 100),
         Quest("Q3", "Technological Edge", "Complete 2 research projects.", target = 2),
-        Quest("Q4", "Proven in Battle", "Win 3 battle simulations.", target = 3)
+        Quest("Q4", "Proven in Battle", "Win 3 battle simulations.", target = 3),
+        Quest("OMEN_1", "The First Signal", "Investigate strange celestial vibrations at the Sky Castle.", target = 1),
+        Quest("OMEN_2", "Dimensional Rift", "Stabilize the portal to the Otherworld.", target = 1)
     )
 }
 
