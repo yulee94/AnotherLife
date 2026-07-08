@@ -1,4 +1,5 @@
 using AL.Core;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ChampionCameraFollow = AL.ChampionMode.Camera.CameraFollow;
@@ -245,6 +246,11 @@ namespace AL.ChampionMode.Skills
         {
             var cameraFollow = Object.FindObjectOfType<ChampionCameraFollow>();
             cameraFollow?.AddShake(strength, duration);
+        }
+
+        public static void RequestHitPause(float duration = 0.045f, float timeScale = 0.12f)
+        {
+            RuntimeCombatFeedback.RequestHitPause(duration, timeScale);
         }
 
         public static GameObject SpawnFloatingCombatText(Vector3 position, string text, Color color, float size = 0.24f, float lifetime = 0.95f)
@@ -583,6 +589,71 @@ namespace AL.ChampionMode.Skills
                 _released = true;
                 ReleaseFloatingCombatText();
             }
+        }
+    }
+
+    public static class RuntimeCombatFeedback
+    {
+        private static RuntimeFeedbackHost _host;
+        private static Coroutine _hitPauseRoutine;
+        private static float _restoreTimeScale = 1f;
+        private static float _restoreFixedDeltaTime = 0.02f;
+
+        public static void RequestHitPause(float duration, float timeScale)
+        {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
+            var host = GetOrCreateHost();
+            if (host == null)
+            {
+                return;
+            }
+
+            if (_hitPauseRoutine == null)
+            {
+                _restoreTimeScale = Time.timeScale;
+                _restoreFixedDeltaTime = Time.fixedDeltaTime;
+            }
+            else
+            {
+                host.StopCoroutine(_hitPauseRoutine);
+            }
+
+            _hitPauseRoutine = host.StartCoroutine(HitPauseRoutine(duration, timeScale));
+        }
+
+        private static IEnumerator HitPauseRoutine(float duration, float timeScale)
+        {
+            float safeDuration = Mathf.Clamp(duration, 0.015f, 0.12f);
+            float safeTimeScale = Mathf.Clamp(timeScale, 0.04f, 1f);
+            Time.timeScale = safeTimeScale;
+            Time.fixedDeltaTime = Mathf.Max(0.001f, _restoreFixedDeltaTime * safeTimeScale);
+
+            yield return new WaitForSecondsRealtime(safeDuration);
+
+            Time.timeScale = _restoreTimeScale;
+            Time.fixedDeltaTime = _restoreFixedDeltaTime;
+            _hitPauseRoutine = null;
+        }
+
+        private static RuntimeFeedbackHost GetOrCreateHost()
+        {
+            if (_host != null)
+            {
+                return _host;
+            }
+
+            var hostObject = new GameObject("ChampionRuntimeCombatFeedback");
+            Object.DontDestroyOnLoad(hostObject);
+            _host = hostObject.AddComponent<RuntimeFeedbackHost>();
+            return _host;
+        }
+
+        private sealed class RuntimeFeedbackHost : MonoBehaviour
+        {
         }
     }
 
