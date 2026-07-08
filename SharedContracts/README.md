@@ -29,6 +29,7 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 
 - `TroopInventoryData`
 - `ChampionCustomizationState`
+- `TerritorySnapshot`
 - `PrototypeProgressionSnapshot`
 
 These are intended for external tools, Fable dashboards, balance editors, or web-based character editors. They mirror the shape of Unity save data while keeping enum values as strings for easier cross-platform decoding.

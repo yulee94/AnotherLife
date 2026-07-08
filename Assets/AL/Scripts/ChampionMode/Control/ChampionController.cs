@@ -150,6 +150,12 @@ namespace AL.ChampionMode.Control
                     Destroy(hitCollider.gameObject);
                     CheckVictory();
                 }
+                else if (hitCollider.gameObject.name.StartsWith("BossDummy"))
+                {
+                    hitAnything = true;
+                    var boss = hitCollider.GetComponent<AL.ChampionMode.AI.BossDummyAI>();
+                    boss?.TakeDamage(125f);
+                }
             }
 
             if (!hitAnything) Debug.Log("[Combat] Attack Missed.");

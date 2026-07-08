@@ -81,10 +81,22 @@ module DesignContracts =
         }
 
     [<CLIMutable>]
+    type TerritorySnapshot =
+        {
+            id: string
+            name: string
+            ownerRealm: string
+            bonusType: string
+            bonusAmount: int64
+            isFortress: bool
+        }
+
+    [<CLIMutable>]
     type PrototypeProgressionSnapshot =
         {
             selectedRealm: string
             troops: TroopInventoryData array
+            territories: TerritorySnapshot array
             warzoneCredits: int
             warmasterSetId: string option
             championCustomization: ChampionCustomizationState
