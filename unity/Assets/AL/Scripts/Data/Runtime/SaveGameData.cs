@@ -44,12 +44,24 @@ namespace AL.Data.Runtime
         public string BodyPresetId = "average";
         public string HairStyleId = "short";
         public string ArmorStyleId = "realm_basic";
+        public string FaceMarkId = "none";
+        public string WeaponStyleId = "sword";
+        public string OffhandStyleId = "shield";
         public float PrimaryR = 0.2f;
         public float PrimaryG = 0.4f;
         public float PrimaryB = 1.0f;
         public float HairR = 0.08f;
         public float HairG = 0.06f;
         public float HairB = 0.04f;
+        public float SkinR = 0.72f;
+        public float SkinG = 0.56f;
+        public float SkinB = 0.42f;
+        public float EyeR = 0.25f;
+        public float EyeG = 0.58f;
+        public float EyeB = 0.92f;
+        public float AccentR = 0.85f;
+        public float AccentG = 0.62f;
+        public float AccentB = 0.18f;
         public bool CapeEnabled = true;
         public bool HelmetEnabled;
     }

@@ -193,8 +193,14 @@ namespace AL.ChampionMode
             CreateButton(canvasObject.transform, font, "Body", new Vector2(-310, 170), () => _playerCustomization.CycleBodyPreset());
             CreateButton(canvasObject.transform, font, "Armor", new Vector2(-310, 110), () => _playerCustomization.CycleArmorStyle());
             CreateButton(canvasObject.transform, font, "Helmet", new Vector2(-310, 50), () => _playerCustomization.ToggleHelmet());
-            CreateButton(canvasObject.transform, font, "Cape", new Vector2(-455, 110), () => _playerCustomization.ToggleCape());
-            CreateButton(canvasObject.transform, font, "Kingdom", new Vector2(-455, 50), () => SceneManager.LoadScene(_kingdomSceneName));
+            CreateButton(canvasObject.transform, font, "Skin", new Vector2(-455, 350), () => _playerCustomization.CycleSkinColor());
+            CreateButton(canvasObject.transform, font, "Eyes", new Vector2(-455, 290), () => _playerCustomization.CycleEyeColor());
+            CreateButton(canvasObject.transform, font, "Accent", new Vector2(-455, 230), () => _playerCustomization.CycleAccentColor());
+            CreateButton(canvasObject.transform, font, "Face", new Vector2(-455, 170), () => _playerCustomization.CycleFaceMark());
+            CreateButton(canvasObject.transform, font, "Weapon", new Vector2(-455, 110), () => _playerCustomization.CycleWeaponStyle());
+            CreateButton(canvasObject.transform, font, "Offhand", new Vector2(-455, 50), () => _playerCustomization.CycleOffhandStyle());
+            CreateButton(canvasObject.transform, font, "Cape", new Vector2(-600, 110), () => _playerCustomization.ToggleCape());
+            CreateButton(canvasObject.transform, font, "Kingdom", new Vector2(-600, 50), () => SceneManager.LoadScene(_kingdomSceneName));
 
             CreateMoveButton(canvasObject.transform, font, "Up", new Vector2(95, 150), new Vector2(0, 1));
             CreateMoveButton(canvasObject.transform, font, "Left", new Vector2(30, 90), new Vector2(-1, 0));
