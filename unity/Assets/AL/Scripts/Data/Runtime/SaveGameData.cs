@@ -14,6 +14,8 @@ namespace AL.Data.Runtime
         public List<AL.Core.Interfaces.ResearchState> Researches = new List<AL.Core.Interfaces.ResearchState>();
         public List<AL.Core.Interfaces.QuestState> Quests = new List<AL.Core.Interfaces.QuestState>();
         public List<NpcAffinityData> Reputation = new List<NpcAffinityData>();
+        public List<FactionRepData> FactionReputations = new List<FactionRepData>();
+        public PersonaData LordPersona = new PersonaData();
         public List<AL.Core.Interfaces.TerritoryData> Territories = new List<AL.Core.Interfaces.TerritoryData>();
         public List<RealmGemState> RealmGems = new List<RealmGemState>();
         public WishgateState Wishgate = new WishgateState();
@@ -93,5 +95,21 @@ namespace AL.Data.Runtime
     {
         public string NpcId;
         public float Affinity;
+    }
+
+    [Serializable]
+    public class FactionRepData
+    {
+        public string FactionId;
+        public int Reputation;
+    }
+
+    [Serializable]
+    public class PersonaData
+    {
+        public int Warlord;
+        public int Diplomat;
+        public int Sage;
+        public int Rogue;
     }
 }

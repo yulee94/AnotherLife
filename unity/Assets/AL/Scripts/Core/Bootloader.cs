@@ -58,6 +58,8 @@ namespace AL.Core
                 var questService = new LocalQuestService(saveGame, resourceService, warzoneCredits);
                 var storyService = new LocalStoryService(saveGame, gameData);
                 var reputationService = new ReputationService(saveGame);
+                var factionService = new FactionService(saveGame);
+                var personaService = new PersonaService(saveGame);
                 var notificationService = new LocalNotificationService();
                 var realmGemService = new LocalRealmGemService(saveGame);
                 var worldAtlasService = new AL.RealmWar.World.LocalWorldAtlasService(storyService);
@@ -67,6 +69,8 @@ namespace AL.Core
                 ServiceLocator.Register<IWarmasterService>(warmaster);
                 ServiceLocator.Register<ITerritoryService>(territoryService);
                 ServiceLocator.Register<IReputationService>(reputationService);
+                ServiceLocator.Register<IFactionService>(factionService);
+                ServiceLocator.Register<IPersonaService>(personaService);
                 ServiceLocator.Register<IQuestService>(questService);
                 ServiceLocator.Register<IStoryService>(storyService);
                 ServiceLocator.Register<INotificationService>(notificationService);

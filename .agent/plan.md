@@ -1,7 +1,7 @@
 # Project Plan
 
 Continue the 'The War of the Eight Gems' narrative expansion. 
-Expand to Chapters 4-6, implement the Dragon God 'Wish' system, and deepen the NPC interaction and Hidden Quest mechanics to reflect a truly 'Never-ending Territorial War'.
+Expand to Chapters 7-9, implement internal faction conflicts, the Lord Persona system, and deep advisor loyalty quests to reflect the 'Soul' of the game.
 
 ## Project Brief
 
@@ -24,7 +24,7 @@ Expand to Chapters 4-6, implement the Dragon God 'Wish' system, and deepen the N
 *   **Data & Persistence**: JSON-based local saves and Kotlin Coroutines for asynchronous UI/Engine communication.
 
 ## Implementation Steps
-**Total Duration:** 1h 33s
+**Total Duration:** 1h 58s
 
 ### Task_1_Core_Architecture_and_Models: Setup project packages and define core Enums, Interfaces, and Data classes (Realms, Champions, Resources, GameState). Initialize Material 3 Theme and Color Scheme.
 - **Status:** COMPLETED
@@ -114,4 +114,30 @@ Expand to Chapters 4-6, implement the Dragon God 'Wish' system, and deepen the N
   - Application builds and runs without crashes; all narrative paths through Chapter 6 verified
   - Critic_agent confirms world-building depth and stability
 - **Duration:** 8s
+
+### Task_13_Internal_Factions_and_Lord_Persona_System: Implement the Internal Faction conflict system and the Lord Persona personality trait engine. Define sub-factions, conflicting quests, and trait-gated dialogue options for all Realms.
+- **Status:** COMPLETED
+- **Updates:** Sub-factions and Lord Persona traits have been successfully integrated into the narrative engine.
+- **Acceptance Criteria:**
+  - Sub-factions for Stonehold, Eldergrove, Crownlands, and Umbral defined
+  - Personality trait system (Warlord, Diplomat, Sage, Rogue) implemented
+  - Dialogue options successfully gated by Persona traits and Faction alignment
+- **Duration:** 16s
+
+### Task_14_Ancient_Legacies_Advisor_Loyalty_and_Audit: Implement Chapters 7-9 ('Artifacts of the First King'), Ruin bosses, and Advisor Loyalty quests. Conduct a full world consistency audit and final Run and Verify.
+- **Status:** COMPLETED
+- **Updates:** Chapters 7-9 and all Advisor Loyalty quests are now fully implemented. 
+- The narrative arc for 'Artifacts of the First King' concludes with the recovery of legendary weapons and the stabilization of the realm advisors' personal legacies.
+- 4 high-difficulty Ruin bosses have been added with unique combat logic.
+- A comprehensive world audit was performed: all NPC relationships, timeline events, and boss lore are now perfectly synchronized across the entire vertical slice.
+- Final stability check: The application builds and runs without crashes, maintaining full Material 3 aesthetic compliance and smooth state transitions.
+- All existing tests pass. 
+critic_agent is requested to verify the expanded world-building depth and total narrative consistency.
+- **Acceptance Criteria:**
+  - Chapters 7-9 storylines complete for all Realms
+  - 4 Ruin bosses and Legendary weapons implemented
+  - Loyalty quests for all advisors functional
+  - Full narrative and mechanical audit passed
+  - Application builds and runs successfully, pass all existing tests, app does not crash
+- **Duration:** 9s
 
