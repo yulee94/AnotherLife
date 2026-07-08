@@ -205,11 +205,59 @@ namespace AL.ChampionMode
 
         private void DressBossVisual(GameObject boss)
         {
-            CreateArenaPrimitive(boss.transform, "Boss_ChestCore", PrimitiveType.Sphere, new Vector3(0f, 0.24f, 0.52f), new Vector3(0.22f, 0.22f, 0.08f), Vector3.zero, new Color(1f, 0.12f, 0.06f), true, 0f, 0.9f);
-            CreateArenaPrimitive(boss.transform, "Boss_Crown", PrimitiveType.Cube, new Vector3(0f, 0.86f, 0f), new Vector3(0.58f, 0.10f, 0.58f), new Vector3(0f, 45f, 0f), new Color(0.46f, 0.34f, 0.16f), true, 0.18f, 0.58f);
-            CreateArenaPrimitive(boss.transform, "Boss_LeftShoulder", PrimitiveType.Sphere, new Vector3(-0.58f, 0.28f, 0f), new Vector3(0.25f, 0.18f, 0.25f), Vector3.zero, new Color(0.34f, 0.035f, 0.05f), true, 0.12f, 0.42f);
-            CreateArenaPrimitive(boss.transform, "Boss_RightShoulder", PrimitiveType.Sphere, new Vector3(0.58f, 0.28f, 0f), new Vector3(0.25f, 0.18f, 0.25f), Vector3.zero, new Color(0.34f, 0.035f, 0.05f), true, 0.12f, 0.42f);
-            CreateArenaPrimitive(boss.transform, "Boss_BackBlade", PrimitiveType.Cube, new Vector3(0f, 0.05f, -0.60f), new Vector3(0.10f, 0.80f, 0.10f), new Vector3(0f, 0f, 22f), new Color(0.70f, 0.56f, 0.24f), true, 0.14f, 0.56f);
+            var rootRenderer = boss.GetComponent<Renderer>();
+            if (rootRenderer != null)
+            {
+                rootRenderer.enabled = false;
+            }
+
+            var obsidian = new Color(0.055f, 0.045f, 0.052f);
+            var bloodPlate = new Color(0.26f, 0.025f, 0.038f);
+            var hotCore = new Color(1f, 0.13f, 0.055f);
+            var brass = new Color(0.70f, 0.56f, 0.24f);
+            var coldEdge = new Color(0.24f, 0.42f, 0.62f);
+
+            CreateArenaPrimitive(boss.transform, "Boss_AuraRing", PrimitiveType.Cylinder, new Vector3(0f, -0.98f, 0f), new Vector3(1.24f, 0.015f, 1.24f), Vector3.zero, new Color(0.95f, 0.05f, 0.025f), true, 0f, 0.82f);
+            CreateArenaPrimitive(boss.transform, "Boss_LowerMantle", PrimitiveType.Cylinder, new Vector3(0f, -0.35f, 0f), new Vector3(0.70f, 0.36f, 0.70f), Vector3.zero, obsidian, true, 0.16f, 0.36f);
+            CreateArenaPrimitive(boss.transform, "Boss_Torso", PrimitiveType.Cylinder, new Vector3(0f, 0.16f, 0f), new Vector3(0.54f, 0.64f, 0.50f), Vector3.zero, bloodPlate, true, 0.28f, 0.46f);
+            CreateArenaPrimitive(boss.transform, "Boss_RibPlate", PrimitiveType.Cube, new Vector3(0f, 0.20f, 0.38f), new Vector3(0.58f, 0.54f, 0.09f), Vector3.zero, Color.Lerp(bloodPlate, Color.black, 0.18f), true, 0.30f, 0.52f);
+            CreateArenaPrimitive(boss.transform, "Boss_ChestCore", PrimitiveType.Sphere, new Vector3(0f, 0.24f, 0.50f), new Vector3(0.22f, 0.22f, 0.09f), Vector3.zero, hotCore, true, 0f, 0.92f);
+            CreateArenaPrimitive(boss.transform, "Boss_CoreClamp_H", PrimitiveType.Cube, new Vector3(0f, 0.24f, 0.57f), new Vector3(0.48f, 0.045f, 0.04f), Vector3.zero, brass, true, 0.24f, 0.64f);
+            CreateArenaPrimitive(boss.transform, "Boss_CoreClamp_V", PrimitiveType.Cube, new Vector3(0f, 0.24f, 0.58f), new Vector3(0.050f, 0.46f, 0.04f), Vector3.zero, brass, true, 0.24f, 0.64f);
+
+            CreateArenaPrimitive(boss.transform, "Boss_Head", PrimitiveType.Sphere, new Vector3(0f, 0.78f, 0.04f), new Vector3(0.34f, 0.30f, 0.30f), Vector3.zero, obsidian, true, 0.18f, 0.44f);
+            CreateArenaPrimitive(boss.transform, "Boss_Faceplate", PrimitiveType.Cube, new Vector3(0f, 0.76f, 0.32f), new Vector3(0.33f, 0.22f, 0.055f), Vector3.zero, Color.Lerp(obsidian, coldEdge, 0.24f), true, 0.38f, 0.58f);
+            CreateArenaPrimitive(boss.transform, "Boss_Eye_L", PrimitiveType.Sphere, new Vector3(-0.09f, 0.80f, 0.37f), new Vector3(0.055f, 0.030f, 0.030f), Vector3.zero, hotCore, true, 0f, 0.9f);
+            CreateArenaPrimitive(boss.transform, "Boss_Eye_R", PrimitiveType.Sphere, new Vector3(0.09f, 0.80f, 0.37f), new Vector3(0.055f, 0.030f, 0.030f), Vector3.zero, hotCore, true, 0f, 0.9f);
+            CreateArenaPrimitive(boss.transform, "Boss_Crown", PrimitiveType.Cube, new Vector3(0f, 0.98f, 0f), new Vector3(0.54f, 0.08f, 0.48f), new Vector3(0f, 45f, 0f), brass, true, 0.26f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_CrownSpire", PrimitiveType.Cube, new Vector3(0f, 1.13f, -0.02f), new Vector3(0.12f, 0.28f, 0.10f), new Vector3(0f, 45f, 0f), brass, true, 0.26f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_Horn_L", PrimitiveType.Cube, new Vector3(-0.28f, 1.00f, 0.02f), new Vector3(0.34f, 0.08f, 0.08f), new Vector3(0f, 0f, 24f), brass, true, 0.24f, 0.58f);
+            CreateArenaPrimitive(boss.transform, "Boss_Horn_R", PrimitiveType.Cube, new Vector3(0.28f, 1.00f, 0.02f), new Vector3(0.34f, 0.08f, 0.08f), new Vector3(0f, 0f, -24f), brass, true, 0.24f, 0.58f);
+
+            CreateArenaPrimitive(boss.transform, "Boss_LeftShoulder", PrimitiveType.Sphere, new Vector3(-0.58f, 0.31f, 0f), new Vector3(0.27f, 0.20f, 0.27f), Vector3.zero, bloodPlate, true, 0.18f, 0.44f);
+            CreateArenaPrimitive(boss.transform, "Boss_RightShoulder", PrimitiveType.Sphere, new Vector3(0.58f, 0.31f, 0f), new Vector3(0.27f, 0.20f, 0.27f), Vector3.zero, bloodPlate, true, 0.18f, 0.44f);
+            CreateArenaPrimitive(boss.transform, "Boss_LeftPauldronEdge", PrimitiveType.Cube, new Vector3(-0.76f, 0.36f, 0.01f), new Vector3(0.28f, 0.08f, 0.08f), new Vector3(0f, 0f, -18f), brass, true, 0.26f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_RightPauldronEdge", PrimitiveType.Cube, new Vector3(0.76f, 0.36f, 0.01f), new Vector3(0.28f, 0.08f, 0.08f), new Vector3(0f, 0f, 18f), brass, true, 0.26f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_Arm_L", PrimitiveType.Cube, new Vector3(-0.66f, -0.05f, 0.06f), new Vector3(0.16f, 0.56f, 0.16f), new Vector3(0f, 0f, -10f), obsidian, true, 0.18f, 0.42f);
+            CreateArenaPrimitive(boss.transform, "Boss_Arm_R", PrimitiveType.Cube, new Vector3(0.66f, -0.05f, 0.06f), new Vector3(0.16f, 0.56f, 0.16f), new Vector3(0f, 0f, 10f), obsidian, true, 0.18f, 0.42f);
+            CreateArenaPrimitive(boss.transform, "Boss_Claw_L", PrimitiveType.Cube, new Vector3(-0.76f, -0.44f, 0.13f), new Vector3(0.20f, 0.06f, 0.18f), new Vector3(0f, 0f, -14f), brass, true, 0.26f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_Claw_R", PrimitiveType.Cube, new Vector3(0.76f, -0.44f, 0.13f), new Vector3(0.20f, 0.06f, 0.18f), new Vector3(0f, 0f, 14f), brass, true, 0.26f, 0.62f);
+
+            CreateArenaPrimitive(boss.transform, "Boss_BackBlade", PrimitiveType.Cube, new Vector3(0f, 0.12f, -0.62f), new Vector3(0.10f, 0.92f, 0.10f), new Vector3(0f, 0f, 22f), brass, true, 0.18f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_BackShard_L", PrimitiveType.Cube, new Vector3(-0.30f, 0.18f, -0.60f), new Vector3(0.08f, 0.70f, 0.08f), new Vector3(0f, 0f, -18f), coldEdge, true, 0.12f, 0.74f);
+            CreateArenaPrimitive(boss.transform, "Boss_BackShard_R", PrimitiveType.Cube, new Vector3(0.30f, 0.18f, -0.60f), new Vector3(0.08f, 0.70f, 0.08f), new Vector3(0f, 0f, 18f), coldEdge, true, 0.12f, 0.74f);
+
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 6f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * 0.72f, 0.58f + Mathf.Sin(i * 1.7f) * 0.08f, Mathf.Sin(angle) * 0.72f);
+                CreateArenaPrimitive(boss.transform, "Boss_OrbitShard_" + i, PrimitiveType.Cube, position, new Vector3(0.06f, 0.28f, 0.06f), new Vector3(0f, -angle * Mathf.Rad2Deg, 18f), i % 2 == 0 ? hotCore : coldEdge, true, 0.04f, 0.78f);
+            }
+
+            var coreLight = CreatePointLight("Boss Core Glow", boss.transform.position + new Vector3(0f, 1.8f, 0.65f), hotCore, 2.1f, 4.8f);
+            coreLight.transform.SetParent(boss.transform, true);
+            var crownLight = CreatePointLight("Boss Crown Edge Glow", boss.transform.position + new Vector3(0f, 2.55f, -0.15f), coldEdge, 1.15f, 4.2f);
+            crownLight.transform.SetParent(boss.transform, true);
         }
 
         private void DressTrainingShade(GameObject dummy, float angle)
@@ -268,7 +316,7 @@ namespace AL.ChampionMode
             renderer.material = material;
         }
 
-        private static void CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
+        private static Light CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
         {
             var lightObject = new GameObject(name);
             lightObject.transform.position = position;
@@ -277,6 +325,7 @@ namespace AL.ChampionMode
             light.color = color;
             light.intensity = intensity;
             light.range = range;
+            return light;
         }
 
         private void SpawnBotChampions()
