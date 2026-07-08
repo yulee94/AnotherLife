@@ -79,6 +79,7 @@ namespace AL.Kingdom.Visuals
 
             _layoutEngine.AutoPlaceBuildings(realmId, buildings);
             CreateTerritoryOutposts();
+            CreateAmbientBoardLife(realmId);
             _lastVisualHash = BuildVisualHash();
             _hasVisualHash = true;
         }
@@ -333,6 +334,77 @@ namespace AL.Kingdom.Visuals
             }
         }
 
+        private void CreateAmbientBoardLife(RealmId realmId)
+        {
+            var ambient = GameObject.Find("Kingdom_AmbientBoardLife") ?? new GameObject("Kingdom_AmbientBoardLife");
+            ClearChildren(ambient.transform);
+
+            Color accent = GetRealmAccent(realmId);
+            Color supply = Color.Lerp(accent, new Color(1f, 0.82f, 0.46f), 0.32f);
+            Color patrol = Color.Lerp(accent, new Color(0.52f, 0.72f, 1f), 0.28f);
+            Color shadow = Color.Lerp(GetTerrainColor(realmId), Color.black, 0.46f);
+
+            Vector3[] tradeLoop =
+            {
+                new Vector3(-6.45f, 0.18f, -0.30f),
+                new Vector3(-2.10f, 0.18f, -0.12f),
+                new Vector3(-0.40f, 0.18f, 0.36f),
+                new Vector3(2.35f, 0.18f, 0.18f),
+                new Vector3(6.45f, 0.18f, 0.32f),
+                new Vector3(2.20f, 0.18f, -0.42f),
+                new Vector3(-0.35f, 0.18f, -0.56f),
+                new Vector3(-2.65f, 0.18f, -0.42f)
+            };
+
+            Vector3[] northSouth =
+            {
+                new Vector3(0f, 0.19f, -6.35f),
+                new Vector3(-0.35f, 0.19f, -2.20f),
+                new Vector3(0.18f, 0.19f, 0.52f),
+                new Vector3(0.36f, 0.19f, 6.35f)
+            };
+
+            Vector3[] patrolLoop =
+            {
+                new Vector3(-4.95f, 0.20f, 4.25f),
+                new Vector3(-1.60f, 0.20f, 3.25f),
+                new Vector3(2.05f, 0.20f, 3.15f),
+                new Vector3(5.10f, 0.20f, 1.45f),
+                new Vector3(4.62f, 0.20f, -2.10f),
+                new Vector3(1.18f, 0.20f, -3.45f),
+                new Vector3(-3.10f, 0.20f, -3.16f),
+                new Vector3(-5.26f, 0.20f, -0.86f)
+            };
+
+            for (int i = 0; i < 5; i++)
+            {
+                CreateAmbientToken(ambient.transform, "SupplyRunner_" + i, tradeLoop, 0.55f + i * 0.035f, i / 5f, supply, shadow, false);
+            }
+
+            for (int i = 0; i < 3; i++)
+            {
+                CreateAmbientToken(ambient.transform, "CommandCourier_" + i, northSouth, 0.48f + i * 0.04f, i / 3f, Color.Lerp(accent, Color.white, 0.26f), shadow, true);
+            }
+
+            for (int i = 0; i < 4; i++)
+            {
+                CreateAmbientToken(ambient.transform, "GatePatrol_" + i, patrolLoop, 0.38f + i * 0.025f, i / 4f, patrol, shadow, false);
+            }
+        }
+
+        private static void CreateAmbientToken(Transform parent, string name, Vector3[] path, float speed, float offset, Color color, Color shadow, bool tallBanner)
+        {
+            var token = new GameObject(name);
+            token.transform.SetParent(parent, false);
+
+            CreateTerritoryPrimitive(token.transform, "TokenShadow", PrimitiveType.Cylinder, new Vector3(0f, -0.045f, 0f), new Vector3(0.16f, 0.010f, 0.16f), shadow, 0f, 0.18f);
+            CreateTerritoryPrimitive(token.transform, "TokenBody", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.075f, tallBanner ? 0.18f : 0.13f, 0.075f), color, 0.03f, 0.48f, color * 0.08f);
+            CreateTerritoryPrimitive(token.transform, "TokenHead", PrimitiveType.Sphere, new Vector3(0f, tallBanner ? 0.22f : 0.16f, 0f), new Vector3(0.070f, 0.052f, 0.070f), Color.Lerp(color, Color.white, 0.20f), 0.02f, 0.42f);
+            CreateTerritoryPrimitive(token.transform, "TokenSignal", PrimitiveType.Cube, new Vector3(0.070f, tallBanner ? 0.28f : 0.21f, -0.014f), new Vector3(0.030f, tallBanner ? 0.22f : 0.15f, 0.020f), Color.Lerp(color, Color.white, 0.36f), 0.02f, 0.55f, color * 0.10f);
+
+            token.AddComponent<KingdomAmbientPathWalker>().Configure(path, speed, offset, 0.032f, color);
+        }
+
         private static void CreateOutpostGarrisonMarkers(Transform root, Color ownerColor, Color routeColor, bool isFortress, bool isNeutral)
         {
             int markerCount = isFortress ? 4 : 3;
@@ -536,6 +608,135 @@ namespace AL.Kingdom.Visuals
             {
                 _renderer.material.SetColor("_EmissionColor", Color.Lerp(_baseColor, _pulseColor, pulse) * 0.18f);
             }
+        }
+    }
+
+    public class KingdomAmbientPathWalker : MonoBehaviour
+    {
+        private Vector3[] _path;
+        private float _speed = 0.5f;
+        private float _progress;
+        private float _bobHeight = 0.03f;
+        private float _pathLength;
+        private Color _accentColor;
+        private Renderer[] _renderers;
+
+        public void Configure(Vector3[] path, float speed, float offset, float bobHeight, Color accentColor)
+        {
+            _path = path;
+            _speed = Mathf.Max(0.05f, speed);
+            _progress = Mathf.Repeat(offset, 1f);
+            _bobHeight = Mathf.Max(0f, bobHeight);
+            _accentColor = accentColor;
+            _renderers = GetComponentsInChildren<Renderer>(true);
+            _pathLength = CalculatePathLength(path);
+            UpdateTransform(true);
+        }
+
+        private void Update()
+        {
+            if (_path == null || _path.Length < 2)
+            {
+                return;
+            }
+
+            float length = Mathf.Max(0.1f, _pathLength);
+            _progress = Mathf.Repeat(_progress + Time.deltaTime * _speed / length, 1f);
+            UpdateTransform(false);
+            UpdatePulse();
+        }
+
+        private void UpdateTransform(bool immediate)
+        {
+            Vector3 position = EvaluateLoop(_path, _progress, out Vector3 direction);
+            position.y += Mathf.Sin(Time.time * 3.6f + _progress * Mathf.PI * 2f) * _bobHeight;
+            transform.localPosition = position;
+
+            if (direction.sqrMagnitude > 0.001f)
+            {
+                Quaternion rotation = Quaternion.LookRotation(direction.normalized, Vector3.up);
+                transform.localRotation = immediate ? rotation : Quaternion.Slerp(transform.localRotation, rotation, Time.deltaTime * 7.5f);
+            }
+        }
+
+        private void UpdatePulse()
+        {
+            if (_renderers == null || _renderers.Length == 0)
+            {
+                _renderers = GetComponentsInChildren<Renderer>(true);
+            }
+
+            float pulse = 0.55f + Mathf.Sin(Time.time * 4.1f + _progress * Mathf.PI * 2f) * 0.18f;
+            for (int i = 0; i < _renderers.Length; i++)
+            {
+                var renderer = _renderers[i];
+                if (renderer == null || renderer.gameObject.name.Contains("Shadow"))
+                {
+                    continue;
+                }
+
+                if (renderer.material.HasProperty("_EmissionColor"))
+                {
+                    renderer.material.SetColor("_EmissionColor", _accentColor * Mathf.Max(0f, pulse * 0.12f));
+                }
+            }
+        }
+
+        private static float CalculatePathLength(Vector3[] path)
+        {
+            if (path == null || path.Length < 2)
+            {
+                return 0f;
+            }
+
+            float length = 0f;
+            for (int i = 0; i < path.Length; i++)
+            {
+                Vector3 current = path[i];
+                Vector3 next = path[(i + 1) % path.Length];
+                length += Vector3.Distance(current, next);
+            }
+
+            return length;
+        }
+
+        private static Vector3 EvaluateLoop(Vector3[] path, float progress, out Vector3 direction)
+        {
+            direction = Vector3.forward;
+            if (path == null || path.Length == 0)
+            {
+                return Vector3.zero;
+            }
+
+            if (path.Length == 1)
+            {
+                return path[0];
+            }
+
+            float totalLength = Mathf.Max(0.1f, CalculatePathLength(path));
+            float distance = Mathf.Repeat(progress, 1f) * totalLength;
+            for (int i = 0; i < path.Length; i++)
+            {
+                Vector3 start = path[i];
+                Vector3 end = path[(i + 1) % path.Length];
+                float segmentLength = Vector3.Distance(start, end);
+                if (segmentLength <= 0.001f)
+                {
+                    continue;
+                }
+
+                if (distance <= segmentLength)
+                {
+                    float t = distance / segmentLength;
+                    direction = end - start;
+                    return Vector3.Lerp(start, end, t);
+                }
+
+                distance -= segmentLength;
+            }
+
+            direction = path[0] - path[path.Length - 1];
+            return path[0];
         }
     }
 
