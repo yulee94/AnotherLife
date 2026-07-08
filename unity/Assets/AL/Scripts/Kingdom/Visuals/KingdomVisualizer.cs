@@ -80,6 +80,7 @@ namespace AL.Kingdom.Visuals
             _layoutEngine.AutoPlaceBuildings(realmId, buildings);
             CreateTerritoryOutposts();
             CreateAmbientBoardLife(realmId);
+            CreateBoardAtmosphere(realmId);
             _lastVisualHash = BuildVisualHash();
             _hasVisualHash = true;
         }
@@ -392,6 +393,65 @@ namespace AL.Kingdom.Visuals
             }
         }
 
+        private void CreateBoardAtmosphere(RealmId realmId)
+        {
+            var atmosphere = GameObject.Find("Kingdom_BoardAtmosphere") ?? new GameObject("Kingdom_BoardAtmosphere");
+            ClearChildren(atmosphere.transform);
+
+            Color accent = GetRealmAccent(realmId);
+            Color terrain = GetTerrainColor(realmId);
+            Color fog = GetRealmFogColor(realmId);
+            Color particleStart = GetRealmWeatherParticleStart(realmId);
+            Color particleEnd = GetRealmWeatherParticleEnd(realmId);
+            Color shadow = new Color(0.012f, 0.016f, 0.022f, realmId == RealmId.Crownlands ? 0.15f : 0.19f);
+            Color mist = Color.Lerp(fog, accent, 0.18f);
+            mist.a = realmId == RealmId.Umbral ? 0.20f : 0.16f;
+
+            CreateAtmosphereBand(atmosphere.transform, "CloudShadow_WestFront", new Vector3(-6.8f, 0.162f, -3.7f), new Vector3(7.4f, 0.024f, 1.14f), shadow, new Vector3(0f, 24f, 0f), new Vector3(14.2f, 0f, 2.8f), 0.024f, 0.10f, 0.23f, 0.16f);
+            CreateAtmosphereBand(atmosphere.transform, "CloudShadow_EastFront", new Vector3(5.9f, 0.166f, 2.9f), new Vector3(6.4f, 0.022f, 0.92f), shadow, new Vector3(0f, -18f, 0f), new Vector3(-12.6f, 0f, -2.2f), 0.019f, 0.42f, 0.08f, 0.19f);
+            CreateAtmosphereBand(atmosphere.transform, "CloudShadow_CitadelSweep", new Vector3(-1.4f, 0.170f, 5.6f), new Vector3(8.8f, 0.020f, 0.72f), Color.Lerp(shadow, terrain, 0.28f), new Vector3(0f, 8f, 0f), new Vector3(5.8f, 0f, -11.4f), 0.015f, 0.70f, 0.06f, 0.15f);
+
+            CreateAtmosphereBand(atmosphere.transform, "LowMist_NorthWall", new Vector3(-2.4f, 0.245f, 7.75f), new Vector3(7.8f, 0.032f, 0.40f), mist, new Vector3(0f, -9f, 0f), new Vector3(5.6f, 0f, -0.40f), 0.018f, 0.10f, 0.08f, mist.a);
+            CreateAtmosphereBand(atmosphere.transform, "LowMist_SouthGate", new Vector3(3.1f, 0.250f, -7.55f), new Vector3(6.9f, 0.032f, 0.44f), Color.Lerp(mist, Color.white, 0.06f), new Vector3(0f, 12f, 0f), new Vector3(-6.1f, 0f, 0.44f), 0.016f, 0.34f, 0.07f, mist.a * 0.92f);
+            CreateAtmosphereBand(atmosphere.transform, "RiverHaze_GoldTrace", new Vector3(2.15f, 0.205f, 0.64f), new Vector3(5.1f, 0.024f, 0.24f), Color.Lerp(accent, Color.white, 0.15f), new Vector3(0f, 27f, 0f), new Vector3(1.2f, 0f, -1.7f), 0.030f, 0.64f, 0.025f, 0.09f);
+
+            ParticleSystem weatherParticles = CreateAtmosphereParticleSystem(
+                atmosphere.transform,
+                "RealmWeather_Motes",
+                new Vector3(0f, 1.88f, 0f),
+                particleStart,
+                particleEnd,
+                new Vector3(17.6f, 2.6f, 17.6f),
+                Mathf.Lerp(54f, 96f, realmId == RealmId.Umbral ? 1f : 0.45f),
+                realmId == RealmId.Stonehold ? 0.070f : 0.045f,
+                realmId == RealmId.Umbral ? 0.80f : 0.54f,
+                false);
+
+            ParticleSystem groundMist = CreateAtmosphereParticleSystem(
+                atmosphere.transform,
+                "RealmWeather_GroundMist",
+                new Vector3(0f, 0.38f, 0f),
+                Color.Lerp(fog, terrain, 0.16f),
+                Color.Lerp(fog, accent, 0.12f),
+                new Vector3(18.2f, 0.45f, 18.2f),
+                46f,
+                0.82f,
+                0.13f,
+                true);
+
+            var lightObject = new GameObject("Atmosphere_BreathingKey");
+            lightObject.transform.SetParent(atmosphere.transform, false);
+            lightObject.transform.localPosition = new Vector3(-2.6f, 3.4f, -1.8f);
+            lightObject.transform.localRotation = Quaternion.Euler(58f, -32f, 0f);
+            var light = lightObject.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = Color.Lerp(accent, Color.white, 0.16f);
+            light.intensity = realmId == RealmId.Umbral ? 0.72f : 0.52f;
+            light.range = 8.4f;
+
+            atmosphere.AddComponent<KingdomBoardAtmosphere>().Configure(realmId, light, weatherParticles, groundMist, accent);
+        }
+
         private static void CreateAmbientToken(Transform parent, string name, Vector3[] path, float speed, float offset, Color color, Color shadow, bool tallBanner)
         {
             var token = new GameObject(name);
@@ -403,6 +463,87 @@ namespace AL.Kingdom.Visuals
             CreateTerritoryPrimitive(token.transform, "TokenSignal", PrimitiveType.Cube, new Vector3(0.070f, tallBanner ? 0.28f : 0.21f, -0.014f), new Vector3(0.030f, tallBanner ? 0.22f : 0.15f, 0.020f), Color.Lerp(color, Color.white, 0.36f), 0.02f, 0.55f, color * 0.10f);
 
             token.AddComponent<KingdomAmbientPathWalker>().Configure(path, speed, offset, 0.032f, color);
+        }
+
+        private static void CreateAtmosphereBand(Transform parent, string name, Vector3 localPosition, Vector3 localScale, Color color, Vector3 localEulerAngles, Vector3 travel, float speed, float phase, float minAlpha, float maxAlpha)
+        {
+            var band = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            band.name = name;
+            band.transform.SetParent(parent, false);
+            band.transform.localPosition = localPosition;
+            band.transform.localRotation = Quaternion.Euler(localEulerAngles);
+            band.transform.localScale = localScale;
+
+            var collider = band.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+
+            color.a = maxAlpha;
+            var renderer = band.GetComponent<Renderer>();
+            ApplyTransparentMaterial(renderer, color, 0f, 0.18f, null);
+            band.AddComponent<KingdomAtmosphereBand>().Configure(localPosition, travel, speed, phase, color, minAlpha, maxAlpha, renderer);
+        }
+
+        private static ParticleSystem CreateAtmosphereParticleSystem(Transform parent, string name, Vector3 localPosition, Color startColor, Color endColor, Vector3 shapeScale, float emissionRate, float particleSize, float driftSpeed, bool groundLayer)
+        {
+            var particleObject = new GameObject(name);
+            particleObject.transform.SetParent(parent, false);
+            particleObject.transform.localPosition = localPosition;
+            var particles = particleObject.AddComponent<ParticleSystem>();
+
+            var main = particles.main;
+            main.loop = true;
+            main.playOnAwake = true;
+            main.startLifetime = groundLayer
+                ? new ParticleSystem.MinMaxCurve(5.5f, 9.0f)
+                : new ParticleSystem.MinMaxCurve(3.8f, 7.2f);
+            main.startSpeed = groundLayer
+                ? new ParticleSystem.MinMaxCurve(0.04f, 0.16f)
+                : new ParticleSystem.MinMaxCurve(0.18f, Mathf.Max(0.22f, driftSpeed));
+            main.startSize = groundLayer
+                ? new ParticleSystem.MinMaxCurve(particleSize * 0.75f, particleSize * 1.42f)
+                : new ParticleSystem.MinMaxCurve(particleSize * 0.70f, particleSize * 1.36f);
+            main.startColor = new ParticleSystem.MinMaxGradient(startColor, endColor);
+            main.maxParticles = groundLayer ? 72 : 128;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = particles.emission;
+            emission.rateOverTime = Mathf.Max(2f, emissionRate);
+
+            var shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = shapeScale;
+
+            var velocity = particles.velocityOverLifetime;
+            velocity.enabled = true;
+            velocity.x = groundLayer
+                ? new ParticleSystem.MinMaxCurve(-0.12f, 0.12f)
+                : new ParticleSystem.MinMaxCurve(-driftSpeed, driftSpeed);
+            velocity.y = groundLayer
+                ? new ParticleSystem.MinMaxCurve(-0.02f, 0.055f)
+                : new ParticleSystem.MinMaxCurve(-0.18f, -0.04f);
+            velocity.z = groundLayer
+                ? new ParticleSystem.MinMaxCurve(-0.10f, 0.10f)
+                : new ParticleSystem.MinMaxCurve(-driftSpeed * 0.45f, driftSpeed * 0.45f);
+
+            var noise = particles.noise;
+            noise.enabled = true;
+            noise.strength = groundLayer ? 0.18f : 0.34f;
+            noise.frequency = groundLayer ? 0.035f : 0.075f;
+            noise.scrollSpeed = groundLayer ? 0.08f : 0.22f;
+
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null)
+            {
+                renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                renderer.sortMode = ParticleSystemSortMode.Distance;
+                renderer.sortingOrder = groundLayer ? -2 : 1;
+            }
+
+            particles.Play();
+            return particles;
         }
 
         private static void CreateOutpostGarrisonMarkers(Transform root, Color ownerColor, Color routeColor, bool isFortress, bool isNeutral)
@@ -454,6 +595,41 @@ namespace AL.Kingdom.Visuals
             strip.transform.localScale = localScale;
             strip.transform.localRotation = Quaternion.Euler(localEulerAngles ?? Vector3.zero);
             ApplyMaterial(strip.GetComponent<Renderer>(), color, 0.02f, 0.32f);
+        }
+
+        private static void ApplyTransparentMaterial(Renderer renderer, Color color, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
+        {
+            ApplyMaterial(renderer, color, metallic, smoothness, emission);
+            if (renderer == null)
+            {
+                return;
+            }
+
+            Material material = renderer.material;
+            if (material.HasProperty("_Mode"))
+            {
+                material.SetFloat("_Mode", 3f);
+            }
+
+            if (material.HasProperty("_SrcBlend"))
+            {
+                material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+            }
+
+            if (material.HasProperty("_DstBlend"))
+            {
+                material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+            }
+
+            if (material.HasProperty("_ZWrite"))
+            {
+                material.SetInt("_ZWrite", 0);
+            }
+
+            material.DisableKeyword("_ALPHATEST_ON");
+            material.EnableKeyword("_ALPHABLEND_ON");
+            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            material.renderQueue = 3000;
         }
 
         private static void CreateRouteSegment(Transform parent, string name, Vector3 start, Vector3 end, float width, Color color, float y = 0.070f)
@@ -566,12 +742,140 @@ namespace AL.Kingdom.Visuals
             };
         }
 
+        private static Color GetRealmFogColor(RealmId realmId)
+        {
+            return realmId switch
+            {
+                RealmId.Stonehold => new Color(0.56f, 0.66f, 0.74f, 0.22f),
+                RealmId.Eldergrove => new Color(0.20f, 0.44f, 0.29f, 0.18f),
+                RealmId.Crownlands => new Color(0.29f, 0.33f, 0.43f, 0.16f),
+                RealmId.Umbral => new Color(0.15f, 0.07f, 0.10f, 0.24f),
+                _ => new Color(0.26f, 0.30f, 0.34f, 0.18f)
+            };
+        }
+
+        private static Color GetRealmWeatherParticleStart(RealmId realmId)
+        {
+            return realmId switch
+            {
+                RealmId.Stonehold => new Color(0.82f, 0.93f, 1f, 0.52f),
+                RealmId.Eldergrove => new Color(0.46f, 0.98f, 0.66f, 0.38f),
+                RealmId.Crownlands => new Color(0.56f, 0.64f, 0.86f, 0.34f),
+                RealmId.Umbral => new Color(0.30f, 0.17f, 0.17f, 0.56f),
+                _ => new Color(0.62f, 0.68f, 0.74f, 0.32f)
+            };
+        }
+
+        private static Color GetRealmWeatherParticleEnd(RealmId realmId)
+        {
+            return realmId switch
+            {
+                RealmId.Stonehold => new Color(0.96f, 0.99f, 1f, 0.18f),
+                RealmId.Eldergrove => new Color(1f, 0.90f, 0.42f, 0.18f),
+                RealmId.Crownlands => new Color(0.94f, 0.78f, 0.40f, 0.12f),
+                RealmId.Umbral => new Color(0.96f, 0.16f, 0.08f, 0.18f),
+                _ => new Color(0.78f, 0.84f, 0.90f, 0.12f)
+            };
+        }
+
         private static void ClearChildren(Transform parent)
         {
             for (int i = parent.childCount - 1; i >= 0; i--)
             {
                 Destroy(parent.GetChild(i).gameObject);
             }
+        }
+    }
+
+    public class KingdomAtmosphereBand : MonoBehaviour
+    {
+        private Vector3 _basePosition;
+        private Vector3 _travel;
+        private float _speed = 0.02f;
+        private float _phase;
+        private float _minAlpha;
+        private float _maxAlpha;
+        private Color _baseColor;
+        private Renderer _renderer;
+
+        public void Configure(Vector3 basePosition, Vector3 travel, float speed, float phase, Color baseColor, float minAlpha, float maxAlpha, Renderer renderer)
+        {
+            _basePosition = basePosition;
+            _travel = travel;
+            _speed = Mathf.Max(0.001f, speed);
+            _phase = phase;
+            _baseColor = baseColor;
+            _minAlpha = Mathf.Clamp01(minAlpha);
+            _maxAlpha = Mathf.Clamp01(maxAlpha);
+            _renderer = renderer;
+        }
+
+        private void Update()
+        {
+            float sweep = Mathf.PingPong(Time.time * _speed + _phase, 1f);
+            float fade = 0.5f + Mathf.Sin((Time.time * _speed * 5.2f + _phase) * Mathf.PI * 2f) * 0.5f;
+            transform.localPosition = _basePosition + _travel * (sweep - 0.5f);
+
+            if (_renderer == null)
+            {
+                _renderer = GetComponent<Renderer>();
+            }
+
+            if (_renderer == null)
+            {
+                return;
+            }
+
+            Color color = _baseColor;
+            color.a = Mathf.Lerp(_minAlpha, _maxAlpha, fade);
+            _renderer.material.color = color;
+        }
+    }
+
+    public class KingdomBoardAtmosphere : MonoBehaviour
+    {
+        private RealmId _realmId;
+        private Light _breathingLight;
+        private ParticleSystem _weatherParticles;
+        private ParticleSystem _groundMist;
+        private Color _accentColor;
+        private float _baseLightIntensity;
+
+        public void Configure(RealmId realmId, Light breathingLight, ParticleSystem weatherParticles, ParticleSystem groundMist, Color accentColor)
+        {
+            _realmId = realmId;
+            _breathingLight = breathingLight;
+            _weatherParticles = weatherParticles;
+            _groundMist = groundMist;
+            _accentColor = accentColor;
+            _baseLightIntensity = breathingLight != null ? breathingLight.intensity : 0f;
+        }
+
+        private void Update()
+        {
+            float time = Time.time;
+            float breath = 0.5f + Mathf.Sin(time * 0.72f) * 0.5f;
+            float front = 0.5f + Mathf.Sin(time * 0.31f + (int)_realmId) * 0.5f;
+
+            if (_breathingLight != null)
+            {
+                _breathingLight.intensity = _baseLightIntensity * Mathf.Lerp(0.78f, 1.26f, breath);
+                _breathingLight.color = Color.Lerp(_accentColor, Color.white, 0.10f + front * 0.10f);
+            }
+
+            SetEmissionMultiplier(_weatherParticles, Mathf.Lerp(0.84f, 1.24f, front));
+            SetEmissionMultiplier(_groundMist, Mathf.Lerp(0.72f, 1.12f, breath));
+        }
+
+        private static void SetEmissionMultiplier(ParticleSystem particles, float multiplier)
+        {
+            if (particles == null)
+            {
+                return;
+            }
+
+            var emission = particles.emission;
+            emission.rateOverTimeMultiplier = Mathf.Max(0.05f, multiplier);
         }
     }
 
