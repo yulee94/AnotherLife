@@ -974,13 +974,36 @@ namespace AL.UI.Kingdom
 
         private static Text CreatePanelText(Transform parent, string panelName, string textName, Font font, int size, TextAnchor alignment, Vector2 anchoredPosition, Vector2 panelSize)
         {
-            var panel = CreatePanel(parent, panelName, anchoredPosition, panelSize, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.026f, 0.034f, 0.045f, 0.84f));
-            CreatePanel(panel.transform, panelName + "_Accent", new Vector2(0f, 0f), new Vector2(4f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.36f, 0.55f, 0.70f, 0.46f));
-            CreatePanel(panel.transform, panelName + "_TopRule", new Vector2(0f, -1f), new Vector2(-30f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.13f));
-            var text = CreateText(panel.transform, textName, font, size, alignment, new Vector2(18f, -16f), new Vector2(panelSize.x - 36f, panelSize.y - 30f));
+            Color accent = GetStatusPanelAccent(panelName);
+            var panel = CreatePanel(parent, panelName, anchoredPosition, panelSize, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), WithAlpha(Color.Lerp(new Color(0.024f, 0.032f, 0.043f, 1f), accent, 0.05f), 0.86f));
+            CreatePanel(panel.transform, panelName + "_Wash", new Vector2(8f, -8f), new Vector2(-16f, -18f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), WithAlpha(accent, 0.035f));
+            CreatePanel(panel.transform, panelName + "_Accent", new Vector2(0f, 0f), new Vector2(4f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), WithAlpha(accent, 0.50f));
+            CreatePanel(panel.transform, panelName + "_TopRule", new Vector2(0f, -1f), new Vector2(-30f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), WithAlpha(Color.Lerp(accent, Color.white, 0.30f), 0.16f));
+            CreatePanel(panel.transform, panelName + "_BottomRule", new Vector2(0f, 6f), new Vector2(-34f, 2f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), WithAlpha(accent, 0.13f));
+            CreateStatusPanelCorners(panel.transform, panelName, accent);
+            CreateStatusPanelPips(panel.transform, panelName, accent);
+
+            var text = CreateText(panel.transform, textName, font, size, alignment, new Vector2(18f, -18f), new Vector2(panelSize.x - 36f, panelSize.y - 44f));
             text.color = new Color(0.86f, 0.91f, 0.96f);
             text.verticalOverflow = VerticalWrapMode.Truncate;
             return text;
+        }
+
+        private static void CreateStatusPanelCorners(Transform parent, string panelName, Color accent)
+        {
+            Color cornerColor = WithAlpha(Color.Lerp(accent, Color.white, 0.24f), 0.22f);
+            CreatePanel(parent, panelName + "_CornerTL_H", new Vector2(10f, -10f), new Vector2(30f, 2f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), cornerColor);
+            CreatePanel(parent, panelName + "_CornerTL_V", new Vector2(10f, -10f), new Vector2(2f, 18f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), cornerColor);
+            CreatePanel(parent, panelName + "_CornerTR_H", new Vector2(-10f, -10f), new Vector2(30f, 2f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), cornerColor);
+            CreatePanel(parent, panelName + "_CornerTR_V", new Vector2(-10f, -10f), new Vector2(2f, 18f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), cornerColor);
+        }
+
+        private static void CreateStatusPanelPips(Transform parent, string panelName, Color accent)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                CreatePanel(parent, panelName + "_StatusPip_" + (i + 1), new Vector2(-24f - i * 13f, 13f), new Vector2(7f, 7f), new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0.5f), WithAlpha(accent, 0.12f + i * 0.055f));
+            }
         }
 
         private static Text CreateText(Transform parent, string name, Font font, int size, TextAnchor alignment, Vector2 anchoredPosition, Vector2 sizeDelta)
@@ -1286,6 +1309,42 @@ namespace AL.UI.Kingdom
             if (lower.Contains("realm"))
             {
                 return new Color(0.72f, 0.88f, 0.42f, 1f);
+            }
+
+            return new Color(0.42f, 0.62f, 0.78f, 1f);
+        }
+
+        private static Color GetStatusPanelAccent(string panelName)
+        {
+            string lower = panelName?.ToLowerInvariant() ?? string.Empty;
+            if (lower.Contains("district"))
+            {
+                return new Color(0.88f, 0.62f, 0.28f, 1f);
+            }
+
+            if (lower.Contains("force"))
+            {
+                return new Color(0.40f, 0.72f, 1f, 1f);
+            }
+
+            if (lower.Contains("research"))
+            {
+                return new Color(0.72f, 0.60f, 1f, 1f);
+            }
+
+            if (lower.Contains("quest"))
+            {
+                return new Color(0.74f, 0.88f, 0.54f, 1f);
+            }
+
+            if (lower.Contains("territory"))
+            {
+                return new Color(0.72f, 0.88f, 0.42f, 1f);
+            }
+
+            if (lower.Contains("battle"))
+            {
+                return new Color(0.92f, 0.38f, 0.28f, 1f);
             }
 
             return new Color(0.42f, 0.62f, 0.78f, 1f);
