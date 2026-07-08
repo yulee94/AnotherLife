@@ -392,6 +392,33 @@ namespace AL.ChampionMode.Customization
             SaveAndApply();
         }
 
+        public bool ApplyAppearancePreset(string presetId)
+        {
+            var state = GetState();
+            if (state == null || string.IsNullOrWhiteSpace(presetId))
+            {
+                return false;
+            }
+
+            switch (presetId)
+            {
+                case "vanguard":
+                    ApplyVanguardPreset(state);
+                    break;
+                case "arcanist":
+                    ApplyArcanistPreset(state);
+                    break;
+                case "nightblade":
+                    ApplyNightbladePreset(state);
+                    break;
+                default:
+                    return false;
+            }
+
+            SaveAndApply();
+            return true;
+        }
+
         public string GetAppearanceSummary()
         {
             var state = GetState();
@@ -402,8 +429,8 @@ namespace AL.ChampionMode.Customization
 
             NormalizeState(state);
             return
-                $"{FormatId(state.BodyPresetId)} / {FormatId(state.ArmorStyleId)}\n" +
-                $"{FormatId(state.HairStyleId)} hair / {FormatId(state.FaceMarkId)} mark\n" +
+                $"{GetProfileLabel(state)} | {FormatId(state.BodyPresetId)}\n" +
+                $"{FormatId(state.ArmorStyleId)} / {FormatId(state.HairStyleId)} / {FormatId(state.FaceMarkId)}\n" +
                 $"{FormatId(state.WeaponStyleId)} + {FormatId(state.OffhandStyleId)} / C:{(state.CapeEnabled ? "On" : "Off")} H:{(state.HelmetEnabled ? "On" : "Off")}";
         }
 
@@ -435,6 +462,108 @@ namespace AL.ChampionMode.Customization
         {
             var state = GetState();
             return state == null ? AccentPalette[0] : new Color(state.AccentR, state.AccentG, state.AccentB);
+        }
+
+        private static void ApplyVanguardPreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "broad";
+            state.HairStyleId = "short";
+            state.ArmorStyleId = "warmaster_plate";
+            state.FaceMarkId = "scar";
+            state.WeaponStyleId = "sword";
+            state.OffhandStyleId = "shield";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = true;
+            ApplyPresetColors(
+                state,
+                new Color(0.22f, 0.27f, 0.34f),
+                new Color(0.07f, 0.055f, 0.045f),
+                new Color(0.64f, 0.48f, 0.36f),
+                new Color(0.86f, 0.62f, 0.24f),
+                new Color(0.92f, 0.64f, 0.20f));
+        }
+
+        private static void ApplyArcanistPreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "tall";
+            state.HairStyleId = "long";
+            state.ArmorStyleId = "arcane_robes";
+            state.FaceMarkId = "rune";
+            state.WeaponStyleId = "staff";
+            state.OffhandStyleId = "tome";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = false;
+            ApplyPresetColors(
+                state,
+                new Color(0.08f, 0.14f, 0.32f),
+                new Color(0.72f, 0.74f, 0.82f),
+                new Color(0.68f, 0.52f, 0.44f),
+                new Color(0.40f, 0.82f, 1.00f),
+                new Color(0.26f, 0.78f, 1.00f));
+        }
+
+        private static void ApplyNightbladePreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "slim";
+            state.HairStyleId = "topknot";
+            state.ArmorStyleId = "assassin_leathers";
+            state.FaceMarkId = "tattoo";
+            state.WeaponStyleId = "bow";
+            state.OffhandStyleId = "dagger";
+            state.CapeEnabled = false;
+            state.HelmetEnabled = false;
+            ApplyPresetColors(
+                state,
+                new Color(0.10f, 0.095f, 0.12f),
+                new Color(0.18f, 0.035f, 0.055f),
+                new Color(0.50f, 0.38f, 0.34f),
+                new Color(0.84f, 0.18f, 0.14f),
+                new Color(0.78f, 0.12f, 0.18f));
+        }
+
+        private static void ApplyPresetColors(
+            ChampionCustomizationState state,
+            Color primary,
+            Color hair,
+            Color skin,
+            Color eye,
+            Color accent)
+        {
+            state.PrimaryR = primary.r;
+            state.PrimaryG = primary.g;
+            state.PrimaryB = primary.b;
+            state.HairR = hair.r;
+            state.HairG = hair.g;
+            state.HairB = hair.b;
+            state.SkinR = skin.r;
+            state.SkinG = skin.g;
+            state.SkinB = skin.b;
+            state.EyeR = eye.r;
+            state.EyeG = eye.g;
+            state.EyeB = eye.b;
+            state.AccentR = accent.r;
+            state.AccentG = accent.g;
+            state.AccentB = accent.b;
+        }
+
+        private static string GetProfileLabel(ChampionCustomizationState state)
+        {
+            if (state.ArmorStyleId == "arcane_robes" || state.WeaponStyleId == "staff" || state.OffhandStyleId == "tome" || state.OffhandStyleId == "orb")
+            {
+                return "Arcanist";
+            }
+
+            if (state.ArmorStyleId == "assassin_leathers" || state.OffhandStyleId == "dagger" || state.WeaponStyleId == "bow")
+            {
+                return "Nightblade";
+            }
+
+            if (state.ArmorStyleId == "warmaster_plate" || state.ArmorStyleId == "heavy_plate" || state.OffhandStyleId == "shield")
+            {
+                return "Vanguard";
+            }
+
+            return "Custom";
         }
 
         private void SaveAndApply()
