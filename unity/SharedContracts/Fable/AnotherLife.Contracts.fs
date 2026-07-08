@@ -73,15 +73,59 @@ module DesignContracts =
         }
 
     [<CLIMutable>]
+    type WindProfile =
+        {
+            yawDegrees: float
+            main: float
+            turbulence: float
+            pulseAmplitude: float
+            pulseFrequency: float
+        }
+
+    [<CLIMutable>]
+    type LightingProfile =
+        {
+            applyFog: bool
+            fogColor: float array
+            fogDensity: float
+            ambientColor: float array
+            directionalLightColor: float array
+            directionalLightIntensity: float
+        }
+
+    [<CLIMutable>]
+    type LightningProfile =
+        {
+            enabled: bool
+            color: float array
+            flashIntensity: float
+            duration: float
+            minDelay: float
+            maxDelay: float
+        }
+
+    [<CLIMutable>]
     type WeatherProfile =
         {
             key: string
             realm: string
+            displayName: string
             particles: string array
             color: float array
+            particleStartColor: float array
+            particleEndColor: float array
             maxParticles: int
             radius: float
             fallSpeed: float
+            particleSize: float
+            particleLifetime: float
+            emissionRateMultiplier: float
+            horizontalDrift: float
+            noiseStrength: float
+            noiseFrequency: float
+            wind: WindProfile
+            lighting: LightingProfile
+            lightning: LightningProfile
         }
 
     [<CLIMutable>]

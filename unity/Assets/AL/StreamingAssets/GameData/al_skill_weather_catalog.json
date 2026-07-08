@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "skillEffects": [
     {
       "key": "stonehold_forge_burst",
@@ -28,49 +28,209 @@
   ],
   "weatherProfiles": [
     {
-      "key": "mountain_snow_wind",
+      "key": "stonehold_mountain_snow_wind",
       "realm": "Stonehold",
+      "displayName": "Mountain Snow Wind",
       "particles": ["snow", "wind_streak", "cold_fog"],
-      "color": [0.82, 0.92, 1.0, 0.42],
-      "maxParticles": 180,
-      "radius": 24.0,
-      "fallSpeed": 2.2
+      "color": [0.82, 0.92, 1.0, 0.58],
+      "particleStartColor": [0.82, 0.92, 1.0, 0.58],
+      "particleEndColor": [0.95, 0.98, 1.0, 0.20],
+      "maxParticles": 260,
+      "radius": 30.0,
+      "fallSpeed": 2.2,
+      "particleSize": 0.085,
+      "particleLifetime": 7.5,
+      "emissionRateMultiplier": 0.16,
+      "horizontalDrift": 1.05,
+      "noiseStrength": 0.34,
+      "noiseFrequency": 0.11,
+      "wind": {
+        "yawDegrees": 310.0,
+        "main": 0.62,
+        "turbulence": 0.42,
+        "pulseAmplitude": 0.18,
+        "pulseFrequency": 0.35
+      },
+      "lighting": {
+        "applyFog": true,
+        "fogColor": [0.58, 0.66, 0.72, 1.0],
+        "fogDensity": 0.019,
+        "ambientColor": [0.42, 0.47, 0.52, 1.0],
+        "directionalLightColor": [0.78, 0.86, 0.95, 1.0],
+        "directionalLightIntensity": 0.92
+      },
+      "lightning": {
+        "enabled": false,
+        "color": [0.82, 0.88, 1.0, 1.0],
+        "flashIntensity": 0.0,
+        "duration": 0.07,
+        "minDelay": 9.0,
+        "maxDelay": 18.0
+      }
     },
     {
       "key": "eldergrove_sunrain",
       "realm": "Eldergrove",
+      "displayName": "Worldroot Sunrain",
       "particles": ["rain", "glowing_pollen", "soft_mist"],
-      "color": [0.45, 0.95, 0.68, 0.34],
-      "maxParticles": 150,
-      "radius": 22.0,
-      "fallSpeed": 1.35
+      "color": [0.46, 0.98, 0.66, 0.44],
+      "particleStartColor": [0.46, 0.98, 0.66, 0.44],
+      "particleEndColor": [1.0, 0.90, 0.34, 0.20],
+      "maxParticles": 190,
+      "radius": 27.0,
+      "fallSpeed": 1.35,
+      "particleSize": 0.11,
+      "particleLifetime": 6.8,
+      "emissionRateMultiplier": 0.13,
+      "horizontalDrift": 0.38,
+      "noiseStrength": 0.22,
+      "noiseFrequency": 0.06,
+      "wind": {
+        "yawDegrees": 70.0,
+        "main": 0.18,
+        "turbulence": 0.26,
+        "pulseAmplitude": 0.05,
+        "pulseFrequency": 0.35
+      },
+      "lighting": {
+        "applyFog": true,
+        "fogColor": [0.24, 0.48, 0.34, 1.0],
+        "fogDensity": 0.009,
+        "ambientColor": [0.40, 0.50, 0.36, 1.0],
+        "directionalLightColor": [0.94, 0.92, 0.74, 1.0],
+        "directionalLightIntensity": 1.08
+      },
+      "lightning": {
+        "enabled": false,
+        "color": [0.82, 0.88, 1.0, 1.0],
+        "flashIntensity": 0.0,
+        "duration": 0.07,
+        "minDelay": 9.0,
+        "maxDelay": 18.0
+      }
     },
     {
       "key": "crownlands_clear_storm",
       "realm": "Crownlands",
+      "displayName": "Royal Road Storm",
       "particles": ["light_rain", "cloud_flash", "banner_wind"],
-      "color": [0.55, 0.62, 0.82, 0.30],
-      "maxParticles": 120,
-      "radius": 22.0,
-      "fallSpeed": 1.55
+      "color": [0.55, 0.62, 0.82, 0.40],
+      "particleStartColor": [0.55, 0.62, 0.82, 0.40],
+      "particleEndColor": [0.90, 0.78, 0.38, 0.14],
+      "maxParticles": 150,
+      "radius": 28.0,
+      "fallSpeed": 1.65,
+      "particleSize": 0.12,
+      "particleLifetime": 5.6,
+      "emissionRateMultiplier": 0.11,
+      "horizontalDrift": 0.58,
+      "noiseStrength": 0.28,
+      "noiseFrequency": 0.10,
+      "wind": {
+        "yawDegrees": 210.0,
+        "main": 0.34,
+        "turbulence": 0.34,
+        "pulseAmplitude": 0.12,
+        "pulseFrequency": 0.35
+      },
+      "lighting": {
+        "applyFog": true,
+        "fogColor": [0.30, 0.33, 0.44, 1.0],
+        "fogDensity": 0.011,
+        "ambientColor": [0.38, 0.40, 0.48, 1.0],
+        "directionalLightColor": [0.82, 0.86, 1.0, 1.0],
+        "directionalLightIntensity": 1.0
+      },
+      "lightning": {
+        "enabled": true,
+        "color": [0.82, 0.88, 1.0, 1.0],
+        "flashIntensity": 2.9,
+        "duration": 0.07,
+        "minDelay": 8.0,
+        "maxDelay": 16.0
+      }
     },
     {
       "key": "umbral_ashfall",
       "realm": "Umbral",
+      "displayName": "Void Rift Ashfall",
       "particles": ["ash", "ember", "smoke_wisp"],
-      "color": [0.24, 0.18, 0.20, 0.52],
-      "maxParticles": 220,
-      "radius": 20.0,
-      "fallSpeed": 0.95
+      "color": [0.25, 0.18, 0.18, 0.62],
+      "particleStartColor": [0.25, 0.18, 0.18, 0.62],
+      "particleEndColor": [0.95, 0.16, 0.08, 0.18],
+      "maxParticles": 280,
+      "radius": 25.0,
+      "fallSpeed": 0.92,
+      "particleSize": 0.13,
+      "particleLifetime": 8.2,
+      "emissionRateMultiplier": 0.17,
+      "horizontalDrift": 0.72,
+      "noiseStrength": 0.46,
+      "noiseFrequency": 0.14,
+      "wind": {
+        "yawDegrees": 135.0,
+        "main": 0.42,
+        "turbulence": 0.58,
+        "pulseAmplitude": 0.14,
+        "pulseFrequency": 0.35
+      },
+      "lighting": {
+        "applyFog": true,
+        "fogColor": [0.12, 0.08, 0.10, 1.0],
+        "fogDensity": 0.032,
+        "ambientColor": [0.22, 0.14, 0.16, 1.0],
+        "directionalLightColor": [0.84, 0.38, 0.28, 1.0],
+        "directionalLightIntensity": 0.72
+      },
+      "lightning": {
+        "enabled": true,
+        "color": [1.0, 0.20, 0.12, 1.0],
+        "flashIntensity": 1.8,
+        "duration": 0.07,
+        "minDelay": 13.0,
+        "maxDelay": 24.0
+      }
     },
     {
-      "key": "warzone_battle_fog",
+      "key": "neutral_battle_fog",
       "realm": "Shared",
+      "displayName": "Neutral Battle Fog",
       "particles": ["dust", "smoke", "distant_marker_haze"],
-      "color": [0.45, 0.42, 0.38, 0.35],
-      "maxParticles": 120,
-      "radius": 22.0,
-      "fallSpeed": 1.1
+      "color": [0.45, 0.42, 0.38, 0.38],
+      "particleStartColor": [0.45, 0.42, 0.38, 0.38],
+      "particleEndColor": [0.72, 0.78, 0.82, 0.16],
+      "maxParticles": 140,
+      "radius": 24.0,
+      "fallSpeed": 1.1,
+      "particleSize": 0.15,
+      "particleLifetime": 6.0,
+      "emissionRateMultiplier": 0.125,
+      "horizontalDrift": 0.35,
+      "noiseStrength": 0.16,
+      "noiseFrequency": 0.08,
+      "wind": {
+        "yawDegrees": 25.0,
+        "main": 0.22,
+        "turbulence": 0.18,
+        "pulseAmplitude": 0.04,
+        "pulseFrequency": 0.35
+      },
+      "lighting": {
+        "applyFog": true,
+        "fogColor": [0.28, 0.30, 0.32, 1.0],
+        "fogDensity": 0.012,
+        "ambientColor": [0.36, 0.38, 0.40, 1.0],
+        "directionalLightColor": [0.86, 0.89, 0.92, 1.0],
+        "directionalLightIntensity": 1.0
+      },
+      "lightning": {
+        "enabled": false,
+        "color": [0.82, 0.88, 1.0, 1.0],
+        "flashIntensity": 0.0,
+        "duration": 0.07,
+        "minDelay": 9.0,
+        "maxDelay": 18.0
+      }
     }
   ]
 }

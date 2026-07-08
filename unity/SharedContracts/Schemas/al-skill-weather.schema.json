@@ -46,12 +46,35 @@
     },
     "weatherProfile": {
       "type": "object",
-      "required": ["key", "realm", "particles", "color", "maxParticles", "radius", "fallSpeed"],
+      "required": [
+        "key",
+        "realm",
+        "displayName",
+        "particles",
+        "color",
+        "particleStartColor",
+        "particleEndColor",
+        "maxParticles",
+        "radius",
+        "fallSpeed",
+        "particleSize",
+        "particleLifetime",
+        "emissionRateMultiplier",
+        "horizontalDrift",
+        "noiseStrength",
+        "noiseFrequency",
+        "wind",
+        "lighting",
+        "lightning"
+      ],
       "properties": {
         "key": {
           "type": "string"
         },
         "realm": {
+          "type": "string"
+        },
+        "displayName": {
           "type": "string"
         },
         "particles": {
@@ -61,12 +84,13 @@
           }
         },
         "color": {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "minItems": 4,
-          "maxItems": 4
+          "$ref": "#/$defs/rgba"
+        },
+        "particleStartColor": {
+          "$ref": "#/$defs/rgba"
+        },
+        "particleEndColor": {
+          "$ref": "#/$defs/rgba"
         },
         "maxParticles": {
           "type": "integer",
@@ -79,6 +103,131 @@
         "fallSpeed": {
           "type": "number",
           "minimum": 0
+        },
+        "particleSize": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "particleLifetime": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "emissionRateMultiplier": {
+          "type": "number",
+          "minimum": 0
+        },
+        "horizontalDrift": {
+          "type": "number",
+          "minimum": 0
+        },
+        "noiseStrength": {
+          "type": "number",
+          "minimum": 0
+        },
+        "noiseFrequency": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "wind": {
+          "$ref": "#/$defs/windProfile"
+        },
+        "lighting": {
+          "$ref": "#/$defs/lightingProfile"
+        },
+        "lightning": {
+          "$ref": "#/$defs/lightningProfile"
+        }
+      },
+      "additionalProperties": false
+    },
+    "rgba": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "windProfile": {
+      "type": "object",
+      "required": ["yawDegrees", "main", "turbulence", "pulseAmplitude", "pulseFrequency"],
+      "properties": {
+        "yawDegrees": {
+          "type": "number"
+        },
+        "main": {
+          "type": "number",
+          "minimum": 0
+        },
+        "turbulence": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pulseAmplitude": {
+          "type": "number",
+          "minimum": 0
+        },
+        "pulseFrequency": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "lightingProfile": {
+      "type": "object",
+      "required": ["applyFog", "fogColor", "fogDensity", "ambientColor", "directionalLightColor", "directionalLightIntensity"],
+      "properties": {
+        "applyFog": {
+          "type": "boolean"
+        },
+        "fogColor": {
+          "$ref": "#/$defs/rgba"
+        },
+        "fogDensity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "ambientColor": {
+          "$ref": "#/$defs/rgba"
+        },
+        "directionalLightColor": {
+          "$ref": "#/$defs/rgba"
+        },
+        "directionalLightIntensity": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "lightningProfile": {
+      "type": "object",
+      "required": ["enabled", "color", "flashIntensity", "duration", "minDelay", "maxDelay"],
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "color": {
+          "$ref": "#/$defs/rgba"
+        },
+        "flashIntensity": {
+          "type": "number",
+          "minimum": 0
+        },
+        "duration": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "minDelay": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "maxDelay": {
+          "type": "number",
+          "exclusiveMinimum": 0
         }
       },
       "additionalProperties": false

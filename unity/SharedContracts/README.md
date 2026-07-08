@@ -25,6 +25,8 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 
 The character customization catalog includes body presets, hair styles, armor styles, skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
+The skill and weather catalog includes realm skill VFX keys plus detailed weather profile parameters for particles, fog, ambient light, directional light, wind, turbulence, and lightning. These values are plain JSON so Fable tools can preview, edit, or balance weather without referencing UnityEngine types.
+
 ## Runtime Snapshot Contracts
 
 `SharedContracts/Fable/AnotherLife.Contracts.fs` also includes lightweight records for prototype runtime state:
