@@ -117,7 +117,7 @@ namespace AL.ChampionMode
 
             var cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
-            var camera = cameraObject.AddComponent<Camera>();
+            var camera = cameraObject.AddComponent<UnityEngine.Camera>();
             camera.transform.position = new Vector3(0f, 8f, -15f);
             camera.transform.rotation = Quaternion.Euler(28f, 0f, 0f);
             camera.clearFlags = CameraClearFlags.SolidColor;

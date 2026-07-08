@@ -10,5 +10,6 @@ namespace AL.Core.Interfaces
         void Load();
         bool HasSave();
         void CreateNewSave(RealmId realmId);
+        void DeleteSave();
     }
 }

@@ -130,7 +130,7 @@ namespace AL.ChampionMode
             QualitySettings.shadowDistance = Mathf.Max(0f, profile.ShadowDistance);
             QualitySettings.pixelLightCount = Mathf.Max(0, profile.PixelLightCount);
             QualitySettings.lodBias = Mathf.Max(0.25f, profile.LodBias);
-            QualitySettings.masterTextureLimit = Mathf.Max(0, profile.TextureMipmapLimit);
+            QualitySettings.globalTextureMipmapLimit = Mathf.Max(0, profile.TextureMipmapLimit);
         }
     }
 }

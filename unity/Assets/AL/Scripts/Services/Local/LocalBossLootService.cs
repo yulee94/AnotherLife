@@ -31,7 +31,7 @@ namespace AL.Services.Local
 
         public IEnumerable<OwnedEquipmentState> GetOwnedEquipment()
         {
-            return _saveGameService.CurrentSave?.OwnedEquipment ?? Array.Empty<OwnedEquipmentState>();
+            return _saveGameService.CurrentSave?.OwnedEquipment ?? new List<OwnedEquipmentState>();
         }
 
         public BossLootResult RollLoot(BossLootRequest request)
