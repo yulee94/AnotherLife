@@ -46,6 +46,10 @@ namespace AL.ChampionMode
         private Image _damageFlashImage;
         private readonly Image[] _lowHealthEdges = new Image[4];
         private GameObject _defeatPanelObject;
+        private GameObject _introPanelObject;
+        private Text _introTitleText;
+        private Text _introSubtitleText;
+        private Text _introCountdownText;
         private Text _appearanceSummaryText;
         private readonly Image[] _appearanceSwatches = new Image[5];
         private readonly Text[] _skillButtonTexts = new Text[4];
@@ -60,6 +64,7 @@ namespace AL.ChampionMode
         private bool _enrageObserved;
         private bool _encounterClearShown;
         private bool _encounterFailed;
+        private bool _encounterIntroRunning;
         private RuntimePlatformQualityController _qualityController;
 
         private void Start()
@@ -68,6 +73,7 @@ namespace AL.ChampionMode
             ApplyRuntimeQuality();
             BuildArena();
             BuildHud();
+            StartCoroutine(EncounterIntroRoutine());
         }
 
         private void Update()
@@ -90,6 +96,11 @@ namespace AL.ChampionMode
             }
 
             if (_encounterFailed)
+            {
+                return;
+            }
+
+            if (_encounterIntroRunning)
             {
                 return;
             }
@@ -164,6 +175,7 @@ namespace AL.ChampionMode
             _enrageObserved = false;
             _encounterClearShown = false;
             _encounterFailed = false;
+            _encounterIntroRunning = false;
 
             SpawnBotChampions();
 
@@ -491,6 +503,7 @@ namespace AL.ChampionMode
             _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
             CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             CreateDefeatPanel(canvasObject.transform, font);
+            CreateIntroPanel(canvasObject.transform, font);
             if (_playerCombat != null)
             {
                 _playerCombat.OnHealthChanged += UpdateHealthText;
@@ -759,6 +772,77 @@ namespace AL.ChampionMode
             RefreshEncounterText();
         }
 
+        private IEnumerator EncounterIntroRoutine()
+        {
+            _encounterIntroRunning = true;
+            _playerController?.SetControlLocked(true);
+            _autoCombatController?.SetMode(AutoMode.Manual);
+            _encounterStartTime = Time.time;
+
+            if (_introPanelObject != null)
+            {
+                _introPanelObject.SetActive(true);
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = "Encounter initializing. Read the boss, break guard, then commit burst skills.";
+            }
+
+            SetIntroText("OBSIDIAN GATE", "Break the guard. Dodge the marked slam. Finish before enrage.", "3");
+            RuntimeCombatAudio.PlayWarning();
+            yield return new WaitForSecondsRealtime(0.62f);
+
+            SetIntroText("OBSIDIAN GATE", "Hold mana for the break window.", "2");
+            RuntimeCombatAudio.PlayWarning();
+            yield return new WaitForSecondsRealtime(0.62f);
+
+            SetIntroText("OBSIDIAN GATE", "Manual control ready.", "1");
+            RuntimeCombatAudio.PlayWarning();
+            yield return new WaitForSecondsRealtime(0.62f);
+
+            SetIntroText("ENGAGE", "Pressure the boss guard now.", "GO");
+            RuntimeCombatAudio.PlayClear();
+            yield return new WaitForSecondsRealtime(0.42f);
+
+            if (_introPanelObject != null)
+            {
+                _introPanelObject.SetActive(false);
+            }
+
+            _encounterStartTime = Time.time;
+            _encounterIntroRunning = false;
+            if (!_encounterFailed && _playerCombat != null && !_playerCombat.IsDead)
+            {
+                _playerController?.SetControlLocked(false);
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = "Pressure the guard bar, hold mana for the break window.";
+            }
+
+            RefreshEncounterText();
+        }
+
+        private void SetIntroText(string title, string subtitle, string countdown)
+        {
+            if (_introTitleText != null)
+            {
+                _introTitleText.text = title;
+            }
+
+            if (_introSubtitleText != null)
+            {
+                _introSubtitleText.text = subtitle;
+            }
+
+            if (_introCountdownText != null)
+            {
+                _introCountdownText.text = countdown;
+            }
+        }
+
         private static void RetryEncounter()
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
@@ -977,6 +1061,18 @@ namespace AL.ChampionMode
             CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(96f, -148f), new Vector2(154f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
             CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(290f, -148f), new Vector2(154f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
             _defeatPanelObject.SetActive(false);
+        }
+
+        private void CreateIntroPanel(Transform parent, Font font)
+        {
+            var panel = CreateHudPanel(parent, "EncounterIntroPanel", new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(650f, 210f), new Color(0.018f, 0.024f, 0.032f, 0.90f));
+            _introPanelObject = panel.gameObject;
+            CreateHudPanel(_introPanelObject.transform, "IntroTopAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(650f, 6f), new Color(1f, 0.64f, 0.22f, 0.88f));
+            _introTitleText = CreateText(_introPanelObject.transform, font, "OBSIDIAN GATE", 30, new Vector2(32f, -30f), new Vector2(430f, 42f), TextAnchor.UpperLeft, new Color(1f, 0.76f, 0.42f));
+            _introSubtitleText = CreateText(_introPanelObject.transform, font, "Break the guard. Dodge the marked slam. Finish before enrage.", 16, new Vector2(34f, -84f), new Vector2(470f, 54f), TextAnchor.UpperLeft, new Color(0.86f, 0.90f, 0.95f));
+            _introCountdownText = CreateText(_introPanelObject.transform, font, "3", 64, new Vector2(504f, -42f), new Vector2(112f, 110f), TextAnchor.MiddleCenter, new Color(1f, 0.34f, 0.18f));
+            CreateText(_introPanelObject.transform, font, "CHAMPION MODE", 13, new Vector2(36f, -150f), new Vector2(180f, 24f), TextAnchor.UpperLeft, new Color(0.54f, 0.68f, 0.84f));
+            _introPanelObject.SetActive(false);
         }
 
         private static Image CreateHudPanel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Color color)
