@@ -19,7 +19,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Replace the single debug capsule champion with a layered procedural hero model: hidden root capsule renderer, facial structure, hair variants, plated armor pieces, robe/cape variants, style-specific weapons, offhands, emissive trims, and PBR material tuning.
 - Replace the visible boss cylinder with a layered encounter silhouette: hidden root renderer, mantle, torso plates, core, faceplate, horns, shoulders, claws, back shards, orbit shards, aura ring, and boss-owned glow lights.
 - Add baseline combat feedback: configurable follow camera, impact shake, floating combat text, boss hit reactions, break/enrage callouts, and stronger skill-impact response.
-- Improve skill VFX polish with layered slash edges, wider shockwave rings, particle noise/size curves, and pooled primitive scale/fade animation.
+- Improve skill VFX polish with cast charge columns, layered slash edges and afterimages, guard plates, wider shockwave rings, radial ground cracks, particle noise/size curves, emissive primitive rendering, and pooled primitive scale/fade animation.
 - Polish the runtime HUD with bordered panels, a contained combat feed, boss state strip, hotbar accent bars, radial cooldown overlays, and tighter movement-pad labels.
 - Improve runtime weather mood with layered falling particles, ground mist, horizon haze, wind-driven emission pulses, and subtle directional-light gusts.
 - Upgrade the appearance rack into a lightweight character creator surface with current build summary, live color swatches, randomize/reset, helmet/cape toggles, and saved-state feedback.
