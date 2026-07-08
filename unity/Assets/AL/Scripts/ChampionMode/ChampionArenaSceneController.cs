@@ -1,6 +1,7 @@
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -20,8 +21,12 @@ namespace AL.ChampionMode
         private ChampionCustomizationController _playerCustomization;
         private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
+        private SkillCaster _playerSkillCaster;
         private Transform _bossTransform;
         private Text _healthText;
+        private Text _manaText;
+        private Text _skillText;
+        private float _skillHudTimer;
         private float _warzoneCreditTimer;
 
         private void Start()
@@ -33,7 +38,19 @@ namespace AL.ChampionMode
 
         private void Update()
         {
-            if (_playerController == null || _bossTransform == null)
+            if (_playerController == null)
+            {
+                return;
+            }
+
+            _skillHudTimer += Time.deltaTime;
+            if (_skillHudTimer >= 0.25f)
+            {
+                _skillHudTimer = 0f;
+                RefreshSkillText();
+            }
+
+            if (_bossTransform == null)
             {
                 return;
             }
@@ -73,8 +90,9 @@ namespace AL.ChampionMode
             player.tag = "Player";
             player.transform.position = new Vector3(0f, 1.1f, -8f);
             player.GetComponent<Renderer>().material.color = new Color(0.20f, 0.40f, 1.0f);
-            _playerController = player.AddComponent<ChampionController>();
             _playerCombat = player.AddComponent<ChampionCombat>();
+            _playerSkillCaster = player.AddComponent<SkillCaster>();
+            _playerController = player.AddComponent<ChampionController>();
             ProceduralChampionModelBuilder.EnsureModel(player);
             _playerCustomization = player.AddComponent<ChampionCustomizationController>();
             _autoCombatController = player.AddComponent<AutoCombatController>();
@@ -155,26 +173,32 @@ namespace AL.ChampionMode
 
             CreateText(canvasObject.transform, font, "Champion Arena\nWASD move  |  Mouse click attack  |  Space dodge\nDefeat the red dummies. Boss telegraphs when close.", 20, new Vector2(20, -20), new Vector2(780, 120), TextAnchor.UpperLeft);
             _healthText = CreateText(canvasObject.transform, font, "HP: 1000 / 1000", 22, new Vector2(20, -145), new Vector2(420, 45), TextAnchor.UpperLeft);
+            _manaText = CreateText(canvasObject.transform, font, "MP: 100 / 100", 22, new Vector2(20, -190), new Vector2(420, 45), TextAnchor.UpperLeft);
+            _skillText = CreateText(canvasObject.transform, font, "Skills ready", 18, new Vector2(20, -235), new Vector2(540, 130), TextAnchor.UpperLeft);
             if (_playerCombat != null)
             {
                 _playerCombat.OnHealthChanged += UpdateHealthText;
+                _playerCombat.OnManaChanged += UpdateManaText;
             }
 
-            CreateButton(canvasObject.transform, font, "Attack", new Vector2(-20, 310), () => _playerController.RequestBasicAttack());
-            CreateButton(canvasObject.transform, font, "Dodge", new Vector2(-20, 250), () => _playerController.RequestDodge());
-            CreateButton(canvasObject.transform, font, "Skill 1", new Vector2(-20, 190), () => _playerController.RequestSkill(0));
-            CreateButton(canvasObject.transform, font, "Manual", new Vector2(-20, 130), () => _autoCombatController.SetMode(AutoMode.Manual));
-            CreateButton(canvasObject.transform, font, "Assist", new Vector2(-20, 70), () => _autoCombatController.SetMode(AutoMode.SemiAuto));
-            CreateButton(canvasObject.transform, font, "Auto", new Vector2(-20, 10), () => _autoCombatController.SetMode(AutoMode.FullAuto));
+            CreateButton(canvasObject.transform, font, "Attack", new Vector2(-20, 350), () => _playerController.RequestBasicAttack());
+            CreateButton(canvasObject.transform, font, "Dodge", new Vector2(-20, 290), () => _playerController.RequestDodge());
+            CreateButton(canvasObject.transform, font, "Skill 1", new Vector2(-20, 230), () => _playerController.RequestSkill(0));
+            CreateButton(canvasObject.transform, font, "Skill 2", new Vector2(-20, 170), () => _playerController.RequestSkill(1));
+            CreateButton(canvasObject.transform, font, "Skill 3", new Vector2(-20, 110), () => _playerController.RequestSkill(2));
+            CreateButton(canvasObject.transform, font, "Skill 4", new Vector2(-20, 50), () => _playerController.RequestSkill(3));
+            CreateButton(canvasObject.transform, font, "Manual", new Vector2(-165, 350), () => _autoCombatController.SetMode(AutoMode.Manual));
+            CreateButton(canvasObject.transform, font, "Assist", new Vector2(-165, 290), () => _autoCombatController.SetMode(AutoMode.SemiAuto));
+            CreateButton(canvasObject.transform, font, "Auto", new Vector2(-165, 230), () => _autoCombatController.SetMode(AutoMode.FullAuto));
 
-            CreateButton(canvasObject.transform, font, "Primary", new Vector2(-165, 310), () => _playerCustomization.CyclePrimaryColor());
-            CreateButton(canvasObject.transform, font, "Hair Color", new Vector2(-165, 250), () => _playerCustomization.CycleHairColor());
-            CreateButton(canvasObject.transform, font, "Hair Style", new Vector2(-165, 190), () => _playerCustomization.CycleHairStyle());
-            CreateButton(canvasObject.transform, font, "Body", new Vector2(-165, 130), () => _playerCustomization.CycleBodyPreset());
-            CreateButton(canvasObject.transform, font, "Armor", new Vector2(-165, 70), () => _playerCustomization.CycleArmorStyle());
-            CreateButton(canvasObject.transform, font, "Helmet", new Vector2(-165, 10), () => _playerCustomization.ToggleHelmet());
-            CreateButton(canvasObject.transform, font, "Cape", new Vector2(-310, 70), () => _playerCustomization.ToggleCape());
-            CreateButton(canvasObject.transform, font, "Kingdom", new Vector2(-310, 10), () => SceneManager.LoadScene(_kingdomSceneName));
+            CreateButton(canvasObject.transform, font, "Primary", new Vector2(-310, 350), () => _playerCustomization.CyclePrimaryColor());
+            CreateButton(canvasObject.transform, font, "Hair Color", new Vector2(-310, 290), () => _playerCustomization.CycleHairColor());
+            CreateButton(canvasObject.transform, font, "Hair Style", new Vector2(-310, 230), () => _playerCustomization.CycleHairStyle());
+            CreateButton(canvasObject.transform, font, "Body", new Vector2(-310, 170), () => _playerCustomization.CycleBodyPreset());
+            CreateButton(canvasObject.transform, font, "Armor", new Vector2(-310, 110), () => _playerCustomization.CycleArmorStyle());
+            CreateButton(canvasObject.transform, font, "Helmet", new Vector2(-310, 50), () => _playerCustomization.ToggleHelmet());
+            CreateButton(canvasObject.transform, font, "Cape", new Vector2(-455, 110), () => _playerCustomization.ToggleCape());
+            CreateButton(canvasObject.transform, font, "Kingdom", new Vector2(-455, 50), () => SceneManager.LoadScene(_kingdomSceneName));
 
             CreateMoveButton(canvasObject.transform, font, "Up", new Vector2(95, 150), new Vector2(0, 1));
             CreateMoveButton(canvasObject.transform, font, "Left", new Vector2(30, 90), new Vector2(-1, 0));
@@ -188,6 +212,35 @@ namespace AL.ChampionMode
             {
                 _healthText.text = $"HP: {Mathf.CeilToInt(current)} / {Mathf.CeilToInt(max)}";
             }
+        }
+
+        private void UpdateManaText(float current, float max)
+        {
+            if (_manaText != null)
+            {
+                _manaText.text = $"MP: {Mathf.CeilToInt(current)} / {Mathf.CeilToInt(max)}";
+            }
+        }
+
+        private void RefreshSkillText()
+        {
+            if (_skillText == null || _playerSkillCaster == null)
+            {
+                return;
+            }
+
+            _skillText.text =
+                FormatSkillStatus(0) + "\n" +
+                FormatSkillStatus(1) + "\n" +
+                FormatSkillStatus(2) + "\n" +
+                FormatSkillStatus(3);
+        }
+
+        private string FormatSkillStatus(int slotIndex)
+        {
+            float remaining = _playerSkillCaster.GetCooldownRemaining(slotIndex);
+            string state = remaining <= 0.05f ? "ready" : $"{remaining:0.0}s";
+            return $"{slotIndex + 1}. {_playerSkillCaster.GetSkillName(slotIndex)}: {state}";
         }
 
         private void CreateMoveButton(Transform parent, Font font, string label, Vector2 anchoredPosition, Vector2 moveInput)

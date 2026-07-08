@@ -4,6 +4,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -42,8 +43,9 @@ namespace AL.Utilities
                 player.transform.position = new Vector3(0, 1, 0);
 
                 // Add basic components for the 3D mode
-                player.AddComponent<AL.ChampionMode.Control.ChampionController>();
                 player.AddComponent<AL.ChampionMode.Control.ChampionCombat>();
+                player.AddComponent<SkillCaster>();
+                player.AddComponent<AL.ChampionMode.Control.ChampionController>();
                 player.AddComponent<AutoCombatController>();
                 ProceduralChampionModelBuilder.EnsureModel(player);
                 player.AddComponent<ChampionCustomizationController>();
@@ -67,6 +69,10 @@ namespace AL.Utilities
             if (player.GetComponent<AutoCombatController>() == null)
             {
                 player.AddComponent<AutoCombatController>();
+            }
+            if (player.GetComponent<SkillCaster>() == null)
+            {
+                player.AddComponent<SkillCaster>();
             }
 
             // 2. Setup Camera
