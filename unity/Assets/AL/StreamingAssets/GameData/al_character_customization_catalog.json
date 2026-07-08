@@ -1,13 +1,19 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "game": "Another Life",
   "characterSlots": [
     "BodyPreset",
     "Head",
     "Hair",
+    "Ears",
+    "Brows",
     "Eyes",
     "Skin",
     "ArmorChest",
+    "ArmorTrim",
+    "Belt",
+    "Robe",
+    "Hood",
     "Gloves",
     "Boots",
     "Cape",
@@ -27,13 +33,17 @@
   "hairStyles": [
     { "id": "short", "displayName": "Short" },
     { "id": "long", "displayName": "Long" },
-    { "id": "braid", "displayName": "Braid" }
+    { "id": "braid", "displayName": "Braid" },
+    { "id": "mohawk", "displayName": "Mohawk" },
+    { "id": "topknot", "displayName": "Topknot" }
   ],
   "armorStyles": [
     { "id": "realm_basic", "displayName": "Realm Basic" },
     { "id": "light_scout", "displayName": "Light Scout" },
     { "id": "heavy_plate", "displayName": "Heavy Plate" },
-    { "id": "warmaster_plate", "displayName": "Warmaster Plate" }
+    { "id": "warmaster_plate", "displayName": "Warmaster Plate" },
+    { "id": "arcane_robes", "displayName": "Arcane Robes" },
+    { "id": "assassin_leathers", "displayName": "Assassin Leathers" }
   ],
   "skinColors": [
     { "id": "sunlit", "displayName": "Sunlit", "rgb": [0.72, 0.56, 0.42] },
@@ -60,18 +70,22 @@
     { "id": "none", "displayName": "None" },
     { "id": "scar", "displayName": "Scar" },
     { "id": "warpaint", "displayName": "Warpaint" },
-    { "id": "realm_mark", "displayName": "Realm Mark" }
+    { "id": "realm_mark", "displayName": "Realm Mark" },
+    { "id": "rune", "displayName": "Rune" },
+    { "id": "tattoo", "displayName": "Tattoo" }
   ],
   "weaponStyles": [
     { "id": "sword", "displayName": "Sword" },
     { "id": "axe", "displayName": "Axe" },
     { "id": "staff", "displayName": "Staff" },
-    { "id": "bow", "displayName": "Bow" }
+    { "id": "bow", "displayName": "Bow" },
+    { "id": "hammer", "displayName": "Hammer" }
   ],
   "offhandStyles": [
     { "id": "shield", "displayName": "Shield" },
     { "id": "orb", "displayName": "Orb" },
     { "id": "dagger", "displayName": "Dagger" },
+    { "id": "tome", "displayName": "Tome" },
     { "id": "none", "displayName": "None" }
   ],
   "realms": [
