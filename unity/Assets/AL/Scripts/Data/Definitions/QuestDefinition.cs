@@ -13,6 +13,12 @@ namespace AL.Data.Definitions
         public QuestType Type;
         public int TargetValue;
 
+        [Header("Unlock Conditions")]
+        public bool IsHidden;
+        public string RequiredItemId;
+        public TriggerCondition Trigger;
+        public string ConflictHint;
+
         [Header("Rewards")]
         public List<AL.Data.Runtime.ResourceData> RewardResources;
         public int RewardCredits;

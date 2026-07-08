@@ -121,6 +121,26 @@ namespace AL.Services.Local
             Debug.Log($"<color=gold>Quest Reward Claimed: {def.Title}</color>");
         }
 
+        public void TriggerHiddenQuest(string conditionId, TriggerCondition conditionType)
+        {
+            if (_saveGameService.CurrentSave == null) return;
+            EnsureQuestStates();
+
+            // Find all hidden quests that match this trigger
+            var hiddenQuests = _definitions.Values
+                .Where(d => d.IsHidden && d.Trigger == conditionType && d.RequiredItemId == conditionId);
+
+            foreach (var questDef in hiddenQuests)
+            {
+                var state = _saveGameService.CurrentSave.Quests.FirstOrDefault(q => q.QuestId == questDef.Id);
+                if (state != null && state.IsClaimed) continue; // Already done
+
+                // "Reveal" the quest
+                Debug.Log($"<color=purple>[Narrative] Hidden Quest Revealed: {questDef.Title}</color>");
+                // In a real UI, this would pop up a notification
+            }
+        }
+
         private void EnsureQuestStates()
         {
             if (_saveGameService.CurrentSave == null)

@@ -10,6 +10,10 @@ namespace AL.Data.Definitions
         public string CharacterName;
         public string Text;
         public List<DialogueChoice> Choices = new List<DialogueChoice>();
+
+        [Header("Conflict Info")]
+        public bool IsConflictHint;
+        public AL.Core.RealmId AssociatedRealmId;
     }
 
     [Serializable]

@@ -1,24 +1,33 @@
 # Project Plan
 
-Build the 'Body and Soul' of Another Life. Handle the creative world-building, 2.5D visuals, and narrative storylines autonomously. Provide a ready-to-play experience with deep quests and progression.
+Implement the 'The War of the Eight Gems' narrative expansion for Another Life. 
+
+The goal is to create a complete vertical slice of the game's 'Soul' including:
+1. All core narrative Data Models (Gems, Quests, NPCs, Dialogue).
+2. The Storyline content for all 4 realms (Dwarves, Elves, Humans, Dark Elves) through Chapter 3.
+3. The Boss Data and Loot systems for the 4 Inner Dragons and 4 Outer Warzone Bosses.
+4. The Quest and Dialogue services to manage hidden quests and territorial conflict hints.
+5. A final quality gate for narrative consistency.
 
 ## Project Brief
 
-# Another Life (AL) - Project Brief (Auto-Pilot Mode)
+# Another Life (AL): The War of the Eight Gems - Project Brief
 
-"Another Life" is a cross-platform mobile fantasy kingdom war MMO. This phase focuses on autonomous content generation and world-building.
+"Another Life" is a narrative-driven fantasy kingdom war MMO prototype. This expansion, "The War of the Eight Gems," focuses on an offline vertical slice that integrates deep narrative progression with high-stakes boss encounters and kingdom management within a Material Design 3 Android environment.
 
 ### Features
-*   **Mainstream Storyline**: Four unique narrative paths (one for each Realm) with chapters, dialogue, and moral choices.
-*   **2.5D Isometric Kingdom**: A visually distinct city-building mode using an isometric perspective and automated building placement.
-*   **Narrative Quest Engine**: A system that links story beats to gameplay actions (Building, Battling, Researching).
-*   **World Lore**: Deep history for Stonehold, Eldergrove, Crownlands, and Umbral.
+*   **Epic Narrative & Quest Engine**: A multi-layered quest system covering the primary hunt for the 8 mystical gems, side quests for world-building, and hidden event-triggered narratives that reflect the ongoing war between the four realms.
+*   **Tiered Boss Encounters**: Deterministic simulation of challenging combat modules, including unique Inner Realm Dragons and high-difficulty Outer Realm Warzone bosses, each featuring rare artifact loot systems (Rings and Amulets).
+*   **Adaptive Narrative Hub**: A state-driven dialogue and progression interface that utilizes Material Design 3 and adaptive layouts to deliver immersive storytelling across varying mobile form factors.
+*   **Kingdom Warfare Dashboard**: A real-time resource and construction management suite that tracks Food, Wood, Stone, and Gold production, providing a visual strategic overview of the realm's status in the war.
 
-### Technical Focus
-*   **StoryService**: C# service for narrative state management.
-*   **CityLayoutEngine**: Unity script for 2.5D grid-based building placement.
-*   **Dialogue UI**: A high-fidelity Material 3 dialogue system in Android/Compose.
-*   **Content Injection**: Automatically populating ScriptableObjects with lore, costs, and rewards.
+### High-Level Tech Stack
+*   **Languages**: Kotlin (Android Shell & UI), C# (Unity Simulation Logic).
+*   **UI Framework**: Jetpack Compose with Material Design 3 and full Edge-to-Edge display support.
+*   **Navigation**: Jetpack Navigation 3 (State-driven architecture).
+*   **Adaptive Strategy**: Compose Material Adaptive library for responsive multi-pane layouts.
+*   **Core Logic**: Unity C# Services and ScriptableObjects for narrative data and combat simulation.
+*   **Data & Persistence**: JSON-based local saves and Kotlin Coroutines for asynchronous UI/Engine communication.
 
 ## Implementation Steps
 **Total Duration:** 48m 10s
@@ -98,15 +107,28 @@ Build the 'Body and Soul' of Another Life. Handle the creative world-building, 2
 ### Task_8_2D5_Kingdom_Visualizer_and_Automated_Content: Implement the CityLayoutEngine for isometric 2.5D building placement. Automatically populate the game with buildings, tech trees, and rewards. Perform a final Run and Verify of the 'Body and Soul' content.
 - **Status:** COMPLETED
 - **Updates:** Successfully implemented the 2D5 Kingdom Visualizer and Automated Content:
-- CityLayoutEngine: Isometric 2.5D grid-based building placement with realm-specific automated layout algorithms.
-- KingdomVisualizer: Renders architectural styles and terrains dynamically based on the selected Realm.
-- Automated Content Injection: Populated 15 core buildings (levels 1-10), tech trees, and quest rewards into the game data service.
-- Final Verification: Verified the full narrative-driven gameplay cycle from Boot to Story progression.
-The application builds and runs without crashes, representing a complete vertical slice of the 'Body and Soul' content.
 - **Acceptance Criteria:**
   - Isometric 2.5D grid-based building placement engine functional
   - Kingdom visualizer renders distinct architectural styles for each Realm
   - Buildings, tech trees, and quest rewards automatically populated
   - App builds and runs without crashes, verifying full narrative-driven gameplay cycle
 - **Duration:** 3m 30s
+
+### Task_9_War_of_Gems_Narrative_Expansion: Implement 'The War of the Eight Gems' narrative expansion. Define core data models for Gems, NPCs, and Dialogue. Implement Chapter 1-3 storylines for all 4 Realms and enhance services to support hidden quests and territorial conflict hints.
+- **Status:** IN_PROGRESS
+- **Acceptance Criteria:**
+  - Narrative Data Models (Gems, NPCs) implemented
+  - Stonehold, Eldergrove, Crownlands, and Umbral storylines through Chapter 3 completed
+  - DialogueService supports territorial conflict hints
+  - QuestService manages hidden event-triggered narratives
+- **StartTime:** 2026-07-08 13:36:37 KST
+
+### Task_10_Boss_Encounters_Loot_and_Final_Quality_Gate: Implement Boss Data and Loot systems for 4 Inner Dragons and 4 Outer Warzone Bosses. Conduct a narrative consistency audit and perform a final Run and Verify of the application stability and requirement alignment.
+- **Status:** PENDING
+- **Acceptance Criteria:**
+  - 8 major boss encounters (4 Dragons, 4 Warzone) with combat parameters implemented
+  - Artifact loot system (Rings/Amulets) functional
+  - Narrative consistency across all chapters and realms verified
+  - Application builds and runs without crashes, all existing tests pass
+  - Critic_agent verifies stability and requirement alignment
 

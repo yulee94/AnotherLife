@@ -30,13 +30,27 @@ namespace AL.Services.Local
 
         private void InitializeFallbackDialogues()
         {
+            // Realm Intro Dialogues (Conflict-aware)
             AddNode(new DialogueNode {
                 Id = "intro_stonehold",
                 CharacterName = "Thane Ironbeard",
                 Text = "The Deep Forge has been silent for a century. Today, we strike the first spark. Are you ready, Lord?",
                 Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "The mountains will ring again.", NextNodeId = "end" }
-                }
+                },
+                IsConflictHint = false,
+                AssociatedRealmId = RealmId.Stonehold
+            });
+
+            AddNode(new DialogueNode {
+                Id = "hint_stonehold_war",
+                CharacterName = "Dwarven Sapper",
+                Text = "The Humans claim our border mines are theirs. Their greed knows no bounds. We must fortify.",
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "Show them our resolve.", NextNodeId = "end" }
+                },
+                IsConflictHint = true,
+                AssociatedRealmId = RealmId.Stonehold
             });
 
             AddNode(new DialogueNode {
@@ -45,7 +59,20 @@ namespace AL.Services.Local
                 Text = "A shadow creeps upon the roots of the World Tree. The whispers are troubled. We must act with grace and steel.",
                 Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "The forest will not fall.", NextNodeId = "end" }
-                }
+                },
+                IsConflictHint = false,
+                AssociatedRealmId = RealmId.Eldergrove
+            });
+
+            AddNode(new DialogueNode {
+                Id = "hint_eldergrove_blight",
+                CharacterName = "Forest Spirit",
+                Text = "The Humans are building walls near our sacred groves. Their progress is a blight upon the green.",
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "The wood remembers.", NextNodeId = "end" }
+                },
+                IsConflictHint = true,
+                AssociatedRealmId = RealmId.Eldergrove
             });
 
             AddNode(new DialogueNode {
@@ -54,7 +81,20 @@ namespace AL.Services.Local
                 Text = "The walls are rebuilt, but the spirit of the people is still fragile. Your decree will shape our future.",
                 Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "A new era begins today.", NextNodeId = "end" }
-                }
+                },
+                IsConflictHint = false,
+                AssociatedRealmId = RealmId.Crownlands
+            });
+
+            AddNode(new DialogueNode {
+                Id = "hint_crownlands_trade",
+                CharacterName = "Royal Merchant",
+                Text = "The Dwarves have raised taxes on iron through the mountain pass. They wish to starve our forges.",
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "We will find another way.", NextNodeId = "end" }
+                },
+                IsConflictHint = true,
+                AssociatedRealmId = RealmId.Crownlands
             });
 
             AddNode(new DialogueNode {
@@ -63,7 +103,20 @@ namespace AL.Services.Local
                 Text = "The volcanic rifts pulse with chaotic energy. The Void calls to us. Will you master it, or let it consume us?",
                 Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "The shadow serves me.", NextNodeId = "end" }
-                }
+                },
+                IsConflictHint = false,
+                AssociatedRealmId = RealmId.Umbral
+            });
+
+            AddNode(new DialogueNode {
+                Id = "hint_umbral_revenge",
+                CharacterName = "Exiled Scout",
+                Text = "The Elves have forgotten us, left us to rot in these ash-wastes. One day, the Void will reclaim their groves.",
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "The night is patient.", NextNodeId = "end" }
+                },
+                IsConflictHint = true,
+                AssociatedRealmId = RealmId.Umbral
             });
         }
 
@@ -72,13 +125,18 @@ namespace AL.Services.Local
         public void AdvanceStory()
         {
             Debug.Log($"Advancing story. Current Chapter: {CurrentChapterId}");
-            // Narrative advancement logic
+            // Narrative advancement logic handled by content scripts
         }
 
         public DialogueNode GetDialogue(string nodeId)
         {
             if (_dialogueCache.TryGetValue(nodeId, out var node)) return node;
             return null;
+        }
+
+        public IEnumerable<DialogueNode> GetConflictHints(RealmId currentRealm)
+        {
+            return _dialogueCache.Values.Where(n => n.IsConflictHint && n.AssociatedRealmId != currentRealm);
         }
 
         public void TriggerDialogue(string nodeId)

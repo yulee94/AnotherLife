@@ -52,17 +52,23 @@ namespace AL.Services.Local
 
         private void InitializeStoryData()
         {
-            // Chapter 1 for all Realms
+            // Chapter 1
             AddChapter(RealmId.Stonehold, "C1_SH", "The Echoes of Iron", "Re-opening the ancestral Deep Forge.");
             AddChapter(RealmId.Eldergrove, "C1_EG", "Whispers of the Sapling", "Investigating a blight on the World Tree.");
             AddChapter(RealmId.Crownlands, "C1_CL", "The King's Decree", "Rebuilding the capital after the Great Siege.");
             AddChapter(RealmId.Umbral, "C1_UM", "Shadows of the Void", "Rituals to stabilize the volcanic rifts.");
 
-            // Chapter 2 for all Realms - EXPANSION
-            AddChapter(RealmId.Stonehold, "C2_SH", "The Hearth's Awakening", "Relighting the Great Furnace of Stonehold.");
-            AddChapter(RealmId.Eldergrove, "C2_EG", "Roots of Conflict", "Defending the outer glades from the blighted spawns.");
-            AddChapter(RealmId.Crownlands, "C2_CL", "The Merchant's Path", "Securing the trade routes from the eastern borders.");
-            AddChapter(RealmId.Umbral, "C2_UM", "Void Walkers", "Infiltrating the crystalline caves to contain the rift.");
+            // Chapter 2
+            AddChapter(RealmId.Stonehold, "C2_SH", "The Smuggler's Trail", "Discovering Elven scouting parties deep in the mountain passes.");
+            AddChapter(RealmId.Eldergrove, "C2_EG", "Shadows in the Mist", "Capturing a Human spy attempting to extract sap from the World Tree.");
+            AddChapter(RealmId.Crownlands, "C2_CL", "Border Skirmishes", "Countering Dwarven expansion into the fertile border valleys.");
+            AddChapter(RealmId.Umbral, "C2_UM", "Night's Whisper", "Sabotaging Human trade routes to starve their war machine.");
+
+            // Chapter 3
+            AddChapter(RealmId.Stonehold, "C3_SH", "Heart of the Mountain", "The discovery of the first Ancestral Gem within the core forge.");
+            AddChapter(RealmId.Eldergrove, "C3_EG", "The Forest's Tear", "A mystical gem is born from the tree's purest sap.");
+            AddChapter(RealmId.Crownlands, "C3_CL", "The Sovereign's Jewel", "The discovery of a divine gem buried beneath the royal cathedral.");
+            AddChapter(RealmId.Umbral, "C3_UM", "The Void Shard", "Retrieving a crystal from the heart of the volcanic rifts.");
         }
 
         private void AddChapter(RealmId realmId, string id, string title, string summary)

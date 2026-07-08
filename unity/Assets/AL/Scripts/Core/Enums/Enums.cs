@@ -108,10 +108,23 @@ namespace AL.Core
 
     public enum QuestType
     {
+        Main,
+        Side,
+        Hidden,
+        Raid,
+        Warzone,
         BuildBuilding,
         TrainTroops,
         CaptureTerritory,
         ResearchTech,
         WinBattle
+    }
+
+    public enum TriggerCondition
+    {
+        None,
+        Item,
+        Event,
+        Dialogue
     }
 }

@@ -18,6 +18,7 @@ namespace AL.Core.Interfaces
         IEnumerable<QuestState> GetActiveQuests();
         void UpdateProgress(QuestType type, int amount);
         void ClaimReward(string questId);
+        void TriggerHiddenQuest(string conditionId, TriggerCondition conditionType);
         event Action<QuestState> OnQuestUpdated;
         event Action<QuestState> OnQuestCompleted;
     }
