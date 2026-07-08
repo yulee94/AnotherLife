@@ -13,20 +13,38 @@ namespace AL.ChampionMode.AI
         [SerializeField] private float _attackRange = 5f;
         [SerializeField] private float _attackCooldown = 3f;
         [SerializeField] private float _enrageThreshold = 0.3f;
+        [SerializeField] private float _timedEnrageSeconds = 90f;
+
+        [Header("Break Bar")]
+        [SerializeField] private float _breakBarMax = 100f;
+        [SerializeField] private float _breakRecoverPerSecond = 4f;
+        [SerializeField] private float _brokenDuration = 3f;
+        [SerializeField] private float _brokenDamageMultiplier = 1.25f;
 
         private Transform _player;
         private bool _isAttacking;
         private bool _isDead;
+        private bool _isBroken;
         private bool _phase70;
         private bool _phase40;
         private bool _phase15;
         private bool _enraged;
         private float _currentHealth;
+        private float _currentBreak;
         private float _healthPercent = 1.0f;
+        private float _fightStartTime;
+
+        public float CurrentHealth => _currentHealth;
+        public float MaxHealth => _maxHealth;
+        public float CurrentBreak => _currentBreak;
+        public float MaxBreak => _breakBarMax;
+        public bool IsBroken => _isBroken;
 
         private void Start()
         {
             _currentHealth = _maxHealth;
+            _currentBreak = _breakBarMax;
+            _fightStartTime = Time.time;
             GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
             if (playerObj != null) _player = playerObj.transform;
 
@@ -40,6 +58,15 @@ namespace AL.ChampionMode.AI
                 if (_isDead)
                 {
                     yield break;
+                }
+
+                TickTimedEnrage();
+                TickBreakRecovery();
+
+                if (_isBroken)
+                {
+                    yield return null;
+                    continue;
                 }
 
                 if (_player != null)
@@ -72,6 +99,12 @@ namespace AL.ChampionMode.AI
                 SkillEffectFactory.SpawnBossTelegraph(_player.position, _attackRange, 1.5f);
             }
             yield return new WaitForSeconds(1.5f);
+
+            if (_isDead || _isBroken)
+            {
+                _isAttacking = false;
+                yield break;
+            }
 
             Debug.Log("BOSS: SLAM!");
             if (_player != null && Vector3.Distance(transform.position, _player.position) <= _attackRange)
@@ -110,9 +143,7 @@ namespace AL.ChampionMode.AI
 
             if (!_enraged && _healthPercent <= _enrageThreshold)
             {
-                _enraged = true;
-                Debug.Log("BOSS: ENRAGED!");
-                _attackCooldown *= 0.5f;
+                TriggerEnrage("low health");
             }
         }
 
@@ -123,15 +154,85 @@ namespace AL.ChampionMode.AI
                 return;
             }
 
-            _currentHealth = Mathf.Max(0f, _currentHealth - amount);
+            float finalAmount = _isBroken ? amount * _brokenDamageMultiplier : amount;
+            _currentHealth = Mathf.Max(0f, _currentHealth - finalAmount);
+            ApplyBreakDamage(amount);
             UpdateHealth(_currentHealth, _maxHealth);
             SkillEffectFactory.SpawnForgeBurst(transform.position + Vector3.up);
-            Debug.Log($"BOSS: Took {amount} damage. HP {_currentHealth}/{_maxHealth}");
+            Debug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
 
             if (_currentHealth <= 0f)
             {
                 Die();
             }
+        }
+
+        private void ApplyBreakDamage(float sourceDamage)
+        {
+            if (_isBroken || sourceDamage <= 0f)
+            {
+                return;
+            }
+
+            float breakDamage = Mathf.Clamp(sourceDamage * 0.18f, 8f, 30f);
+            _currentBreak = Mathf.Max(0f, _currentBreak - breakDamage);
+            if (_currentBreak <= 0f)
+            {
+                StartCoroutine(BreakRoutine());
+            }
+        }
+
+        private void TickBreakRecovery()
+        {
+            if (_isBroken || _currentBreak >= _breakBarMax)
+            {
+                return;
+            }
+
+            _currentBreak = Mathf.Min(_breakBarMax, _currentBreak + _breakRecoverPerSecond * Time.deltaTime);
+        }
+
+        private IEnumerator BreakRoutine()
+        {
+            _isBroken = true;
+            _isAttacking = false;
+            Debug.Log("BOSS: BREAK! Damage window opened.");
+            SkillEffectFactory.SpawnBossTelegraph(transform.position, 2.25f, _brokenDuration);
+
+            yield return new WaitForSeconds(_brokenDuration);
+
+            if (_isDead)
+            {
+                yield break;
+            }
+
+            _currentBreak = _breakBarMax;
+            _isBroken = false;
+            Debug.Log("BOSS: Break recovered.");
+        }
+
+        private void TickTimedEnrage()
+        {
+            if (_enraged || Time.time - _fightStartTime < _timedEnrageSeconds)
+            {
+                return;
+            }
+
+            TriggerEnrage("timer");
+        }
+
+        private void TriggerEnrage(string reason)
+        {
+            if (_enraged)
+            {
+                return;
+            }
+
+            _enraged = true;
+            Debug.Log($"BOSS: ENRAGED by {reason}!");
+            _attackCooldown *= 0.5f;
+            _attackRange += 0.5f;
+            SkillEffectFactory.SpawnCurseMark(transform.position + Vector3.up);
         }
 
         private void Die()
