@@ -12,6 +12,7 @@ namespace AL.ChampionMode.Skills
     public class SkillCaster : MonoBehaviour
     {
         private const int SlotCount = 4;
+        private const float DeniedFeedbackCooldown = 0.55f;
 
         private readonly string[] _skillNames =
         {
@@ -49,6 +50,7 @@ namespace AL.ChampionMode.Skills
         private ChampionController _controller;
         private Coroutine _castRoutine;
         private int _activeSlot = -1;
+        private float _lastDeniedFeedbackTime = -999f;
 
         public bool IsCasting => _castRoutine != null;
 
@@ -64,14 +66,28 @@ namespace AL.ChampionMode.Skills
 
         public bool TryCastSkill(int slotIndex)
         {
-            if (!IsValidSlot(slotIndex) || IsCasting || Time.time < _nextReadyTimes[slotIndex])
+            if (!IsValidSlot(slotIndex))
             {
+                return false;
+            }
+
+            if (IsCasting)
+            {
+                ShowDeniedFeedback("CASTING", new Color(0.80f, 0.86f, 1f));
+                return false;
+            }
+
+            float cooldownRemaining = GetCooldownRemaining(slotIndex);
+            if (cooldownRemaining > 0.05f)
+            {
+                ShowDeniedFeedback(Mathf.CeilToInt(cooldownRemaining) + "s", new Color(1f, 0.74f, 0.32f));
                 return false;
             }
 
             if (_combat != null && !_combat.TrySpendMana(_manaCosts[slotIndex]))
             {
                 Debug.Log($"Not enough mana for {_skillNames[slotIndex]}.");
+                ShowDeniedFeedback("NO MANA", new Color(0.42f, 0.72f, 1f));
                 return false;
             }
 
@@ -132,7 +148,14 @@ namespace AL.ChampionMode.Skills
         {
             Debug.Log($"Casting {_skillNames[slotIndex]}.");
             var realmId = GetCurrentRealmId();
+            Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
+            Vector3 previewCenter = GetSkillGroundCenter(slotIndex, forward);
             SkillEffectFactory.SpawnSkillCastRing(transform.position, realmId, GetSkillPreviewRadius(slotIndex), _castTimes[slotIndex] + 0.15f);
+            if (slotIndex != 1)
+            {
+                SkillEffectFactory.SpawnSkillTargetPreview(transform.position, previewCenter, forward, realmId, _ranges[slotIndex], _castTimes[slotIndex] + 0.18f);
+            }
+
             yield return new WaitForSeconds(_castTimes[slotIndex]);
 
             ResolveSkill(slotIndex);
@@ -145,7 +168,7 @@ namespace AL.ChampionMode.Skills
         {
             var realmId = GetCurrentRealmId();
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
-            Vector3 groundCenter = transform.position + forward * Mathf.Max(1.5f, _ranges[slotIndex]);
+            Vector3 groundCenter = GetSkillGroundCenter(slotIndex, forward);
             Vector3 hitCenter = groundCenter + Vector3.up;
 
             switch (slotIndex)
@@ -181,6 +204,24 @@ namespace AL.ChampionMode.Skills
         private float GetSkillPreviewRadius(int slotIndex)
         {
             return slotIndex == 1 ? 1.35f : Mathf.Clamp(_ranges[slotIndex], 1.15f, 4.5f);
+        }
+
+        private Vector3 GetSkillGroundCenter(int slotIndex, Vector3 forward)
+        {
+            Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
+            return transform.position + safeForward * Mathf.Max(1.5f, _ranges[slotIndex]);
+        }
+
+        private void ShowDeniedFeedback(string message, Color color)
+        {
+            if (Time.time - _lastDeniedFeedbackTime < DeniedFeedbackCooldown)
+            {
+                return;
+            }
+
+            _lastDeniedFeedbackTime = Time.time;
+            SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.95f, message, color, 0.22f, 0.72f);
+            RuntimeCombatAudio.PlayWarning();
         }
 
         private void DamageTargets(Vector3 center, float radius, float power, RealmId attackerRealm, float botDamageMultiplier)
