@@ -108,6 +108,11 @@ namespace AL.ChampionMode.Skills
             return IsValidSlot(slotIndex) ? _cooldowns[slotIndex] : 0f;
         }
 
+        public float GetManaCost(int slotIndex)
+        {
+            return IsValidSlot(slotIndex) ? _manaCosts[slotIndex] : 0f;
+        }
+
         public string GetSkillName(int slotIndex)
         {
             return IsValidSlot(slotIndex) ? _skillNames[slotIndex] : "Unknown";
