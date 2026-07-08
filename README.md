@@ -49,7 +49,7 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 
 - Offline service stack and local save data.
 - Realm selection and realm-specific resource identity.
-- Kingdom simulation foundations for buildings, research, resources, troops, territory, and warzone credits.
+- Kingdom simulation foundations for buildings, research, resources, troops, territory, warzone credits, and a Unity-side 2.5D city board visualization.
 - Android Studio-owned narrative expansion with chapters, quests, NPC affinity/reputation, factions, persona data, artifacts, and story hooks.
 - Champion arena with movement, combat, auto modes, encounter intro/readiness flow, catalog-driven skill buttons, animated runtime skill VFX, generated combat audio cues, an atmospheric Obsidian Citadel combat presentation, layered procedural champion and boss models, mobile/PC combat camera feedback, hit pause, damage-state HUD feedback, polished combat HUD, runtime combat goals, clear/failure states, retry flow, readable boss telegraphs, boss encounters with live HP/break/enrage state, RvR bot crowds, world objective markers, layered runtime weather atmosphere, and detailed modular character customization with saved appearance feedback.
 - Boss loot service and owned-equipment save support.
@@ -60,6 +60,7 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 
 - Champion arena HUD shows shared-catalog skill names, mana costs, boss HP, boss break state, enrage state, boss defeat state, and encounter fail/retry state.
 - Champion Mode's first playable screen is being treated as the premium adult-facing vertical slice: darker arena lighting, stronger layered boss silhouette, bordered combat HUD panels, cooldown hotbar overlays, a more intentional plated hero silhouette, encounter intro countdown, camera shake/floating combat feedback, hit pause, damage flash, low-health edge feedback, encounter clear/failure feedback, and detailed customization controls contained in an appearance rack.
+- Kingdom Mode now opens over a runtime 2.5D board: orthographic camera, realm-colored terrain, board frame, landmarks, roads, distinct building silhouettes, and level labels behind the dashboard.
 - Skill/weather catalogs live in `unity/Assets/AL/StreamingAssets/GameData/` and are mirrored by schemas/Fable contracts in `unity/SharedContracts/`.
 - Narrative, NPC, quest, dialogue, chapter, and story content remain Android Studio-owned so Unity runtime work and narrative expansion can move in parallel.
 

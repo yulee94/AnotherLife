@@ -3,6 +3,7 @@ using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.Kingdom.Visuals;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -23,6 +24,7 @@ namespace AL.UI.Kingdom
         private Text _territoryText;
         private Text _battleText;
         private Text _messageText;
+        private KingdomVisualizer _kingdomVisualizer;
         private float _completionTimer;
 
         private readonly string[] _buildingIds =
@@ -56,6 +58,7 @@ namespace AL.UI.Kingdom
                 save.Load();
             }
 
+            BuildRuntimeWorld();
             BuildRuntimeUi();
             Refresh();
         }
@@ -82,6 +85,47 @@ namespace AL.UI.Kingdom
             Refresh();
         }
 
+        private void BuildRuntimeWorld()
+        {
+            ConfigureKingdomCamera();
+            ConfigureKingdomLighting();
+
+            var visualizerObject = new GameObject("Kingdom_2_5D_Board");
+            _kingdomVisualizer = visualizerObject.AddComponent<KingdomVisualizer>();
+            _kingdomVisualizer.InitializeKingdom();
+        }
+
+        private static void ConfigureKingdomCamera()
+        {
+            var cameraObject = UnityEngine.Camera.main != null
+                ? UnityEngine.Camera.main.gameObject
+                : new GameObject("Main Camera");
+            cameraObject.tag = "MainCamera";
+            var camera = cameraObject.GetComponent<UnityEngine.Camera>() ?? cameraObject.AddComponent<UnityEngine.Camera>();
+            camera.orthographic = true;
+            camera.orthographicSize = 8.6f;
+            camera.transform.position = new Vector3(0f, 10.4f, -10.8f);
+            camera.transform.rotation = Quaternion.Euler(55f, 0f, 0f);
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.020f, 0.026f, 0.034f);
+
+            if (cameraObject.GetComponent<AudioListener>() == null)
+            {
+                cameraObject.AddComponent<AudioListener>();
+            }
+        }
+
+        private static void ConfigureKingdomLighting()
+        {
+            RenderSettings.ambientLight = new Color(0.20f, 0.22f, 0.24f);
+            var lightObject = GameObject.Find("Kingdom_KeyLight") ?? new GameObject("Kingdom_KeyLight");
+            var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
+            light.type = LightType.Directional;
+            light.intensity = 1.15f;
+            light.color = new Color(1f, 0.92f, 0.78f);
+            lightObject.transform.rotation = Quaternion.Euler(48f, -36f, 0f);
+        }
+
         private void BuildRuntimeUi()
         {
             var canvas = CreateCanvas("KingdomCanvas");
@@ -90,7 +134,7 @@ namespace AL.UI.Kingdom
             var background = new GameObject("Kingdom_Backdrop");
             background.transform.SetParent(canvas.transform, false);
             var bg = background.AddComponent<Image>();
-            bg.color = new Color(0.08f, 0.10f, 0.12f, 1f);
+            bg.color = new Color(0.02f, 0.026f, 0.036f, 0.58f);
             Stretch(background.GetComponent<RectTransform>());
 
             _realmText = CreateText(canvas.transform, "RealmText", font, 30, TextAnchor.UpperLeft, new Vector2(40, -30), new Vector2(900, 90));
@@ -298,6 +342,8 @@ namespace AL.UI.Kingdom
 
         private void Refresh()
         {
+            _kingdomVisualizer?.RefreshVisuals();
+
             var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
             _realmText.text = realm == null
                 ? "Kingdom: No realm selected"
