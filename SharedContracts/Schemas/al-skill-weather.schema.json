@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-skill-weather.schema.json",
+  "title": "Another Life Skill And Weather Catalog",
+  "type": "object",
+  "required": ["version", "skillEffects", "weatherProfiles"],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "skillEffects": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/skillEffect"
+      }
+    },
+    "weatherProfiles": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/weatherProfile"
+      }
+    }
+  },
+  "$defs": {
+    "skillEffect": {
+      "type": "object",
+      "required": ["key", "realm", "use", "colors"],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "realm": {
+          "type": "string"
+        },
+        "use": {
+          "type": "string"
+        },
+        "colors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "weatherProfile": {
+      "type": "object",
+      "required": ["key", "realm", "particles"],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "realm": {
+          "type": "string"
+        },
+        "particles": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+

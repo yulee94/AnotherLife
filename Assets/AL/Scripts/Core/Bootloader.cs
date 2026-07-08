@@ -1,6 +1,7 @@
 using UnityEngine;
 using AL.Core.Interfaces;
 using AL.Services.Local;
+using System;
 
 namespace AL.Core
 {
@@ -10,7 +11,7 @@ namespace AL.Core
 
         private void Awake()
         {
-            InitializeServices();
+            InitializeIfMissing();
 
             if (_autoLoadOnStart)
             {
@@ -18,48 +19,64 @@ namespace AL.Core
             }
         }
 
-        private void InitializeServices()
+        public static void InitializeIfMissing()
         {
-            // 1. Data & Save Services
-            var gameData = new LocalGameDataService();
-            var saveGame = new LocalSaveGameService();
+            try
+            {
+                ServiceLocator.Get<IResourceService>();
+                Debug.Log("[Bootloader] Services already registered.");
+            }
+            catch (Exception)
+            {
+                Debug.Log("[Bootloader] Services missing. Initializing Offline Stack...");
 
-            ServiceLocator.Register<IGameDataService>(gameData);
-            ServiceLocator.Register<ISaveGameService>(saveGame);
+                // 1. Data & Save Services
+                var gameData = new LocalGameDataService();
+                var saveGame = new LocalSaveGameService();
 
-            // 2. Domain & Kingdom Services
-            var realmService = new LocalRealmService(saveGame, gameData);
-            var resourceService = new LocalResourceService(saveGame);
-            var researchService = new AL.Services.Local.LocalResearchService(saveGame, resourceService);
-            var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
-            var trainingService = new LocalTrainingService(saveGame, resourceService);
+                ServiceLocator.Register<IGameDataService>(gameData);
+                ServiceLocator.Register<ISaveGameService>(saveGame);
 
-            ServiceLocator.Register<IRealmService>(realmService);
-            ServiceLocator.Register<IResourceService>(resourceService);
-            ServiceLocator.Register<IResearchService>(researchService);
-            ServiceLocator.Register<IBuildingService>(buildingService);
-            ServiceLocator.Register<ITrainingService>(trainingService);
+                // 2. Domain & Kingdom Services
+                var realmService = new LocalRealmService(saveGame, gameData);
+                var resourceService = new LocalResourceService(saveGame);
+                var researchService = new LocalResearchService(saveGame, resourceService);
+                var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
+                var trainingService = new LocalTrainingService(saveGame, resourceService);
 
-            // 3. Battle & Economy Services
-            var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
-            var warzoneCredits = new LocalWarzoneCreditService();
-            var warmaster = new LocalWarmasterService(saveGame);
-            var territoryService = new AL.RealmWar.Warzone.WarzoneService();
-            var questService = new AL.Services.Local.LocalQuestService(saveGame, resourceService, warzoneCredits);
+                ServiceLocator.Register<IRealmService>(realmService);
+                ServiceLocator.Register<IResourceService>(resourceService);
+                ServiceLocator.Register<IResearchService>(researchService);
+                ServiceLocator.Register<IBuildingService>(buildingService);
+                ServiceLocator.Register<ITrainingService>(trainingService);
 
-            ServiceLocator.Register<IBattleSimulator>(battleSim);
-            ServiceLocator.Register<IWarzoneCreditService>(warzoneCredits);
-            ServiceLocator.Register<IWarmasterService>(warmaster);
-            ServiceLocator.Register<ITerritoryService>(territoryService);
-            ServiceLocator.Register<IQuestService>(questService);
+                // 3. Battle & Economy Services
+                var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
+                var warzoneCredits = new LocalWarzoneCreditService();
+                var warmaster = new LocalWarmasterService(saveGame);
+                var territoryService = new AL.RealmWar.Warzone.WarzoneService();
+                var questService = new LocalQuestService(saveGame, resourceService, warzoneCredits);
+                var storyService = new LocalStoryService(saveGame, gameData);
 
-            Debug.Log("Core Services Initialized.");
+                ServiceLocator.Register<IBattleSimulator>(battleSim);
+                ServiceLocator.Register<IWarzoneCreditService>(warzoneCredits);
+                ServiceLocator.Register<IWarmasterService>(warmaster);
+                ServiceLocator.Register<ITerritoryService>(territoryService);
+                ServiceLocator.Register<IQuestService>(questService);
+                ServiceLocator.Register<IStoryService>(storyService);
+
+                Debug.Log("<color=cyan>[Bootloader] Offline Services Initialized Successfully.</color>");
+            }
         }
 
         private void Update()
         {
             // Update resource production
-            ServiceLocator.Get<IResourceService>().TickProduction(Time.deltaTime);
+            var resourceService = ServiceLocator.Get<IResourceService>();
+            if (resourceService != null)
+            {
+                resourceService.TickProduction(Time.deltaTime);
+            }
         }
 
         private void OnApplicationQuit()

@@ -46,6 +46,42 @@ namespace AL.Services.Local
                 "Masters of shadow and infiltration from the depths.\n\nPerks:\n+20% Assassin Attack\n+15% March Speed\n+10% Resource Looting",
                 "Perks: Shadow Step, Ruthless Efficiency"
             );
+
+            InitializeStoryData();
+            InitializeAutomatedContent();
+        }
+
+        private Dictionary<string, BuildingDefinition> _buildings = new Dictionary<string, BuildingDefinition>();
+
+        private void InitializeAutomatedContent()
+        {
+            string[] buildingTypes = { "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks", "Academy", "Market", "Storehouse", "Forge", "Stable", "Workshop", "Embassy", "Wall", "Watchtower" };
+
+            foreach (var bId in buildingTypes)
+            {
+                var def = ScriptableObject.CreateInstance<BuildingDefinition>();
+                def.Id = bId;
+                def.DisplayName = bId.Replace("Mill", " Mill").Replace("Hall", " Hall").Replace("Mine", " Mine");
+                def.MaxLevel = 10;
+                _buildings[bId] = def;
+            }
+        }
+
+        private void InitializeStoryData()
+        {
+            // Initial Chapters for each Realm
+            AddChapter(RealmId.Stonehold, "C1_SH", "The Echoes of Iron", "Re-opening the ancestral Deep Forge.");
+            AddChapter(RealmId.Eldergrove, "C1_EG", "Whispers of the Sapling", "Investigating a blight on the World Tree.");
+            AddChapter(RealmId.Crownlands, "C1_CL", "The King's Decree", "Rebuilding the capital after the Great Siege.");
+            AddChapter(RealmId.Umbral, "C1_UM", "Shadows of the Void", "Rituals to stabilize the volcanic rifts.");
+        }
+
+        private void AddChapter(RealmId realmId, string id, string title, string summary)
+        {
+            var chapter = ScriptableObject.CreateInstance<ChapterDefinition>();
+            chapter.Id = id;
+            chapter.Title = title;
+            chapter.LoreSummary = summary;
         }
 
         private void CreateFallbackRealm(RealmId id, string name, string desc, string perks)
@@ -69,7 +105,7 @@ namespace AL.Services.Local
 
         public BuildingDefinition GetBuilding(string id)
         {
-            // For now, load from Resources or return null
+            if (_buildings.TryGetValue(id, out var def)) return def;
             return Resources.Load<BuildingDefinition>($"Data/Buildings/{id}");
         }
 

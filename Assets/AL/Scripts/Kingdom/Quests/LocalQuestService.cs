@@ -30,11 +30,12 @@ namespace AL.Services.Local
 
         private void InitializeQuests()
         {
-            // Fallback quests for prototype
-            AddDefinition("Q1", "Building the Future", "Upgrade any building to Level 2.", QuestType.BuildBuilding, 1);
-            AddDefinition("Q2", "Expansion Force", "Train 100 total troops.", QuestType.TrainTroops, 100);
-            AddDefinition("Q3", "Technological Edge", "Complete 2 research projects.", QuestType.ResearchTech, 2);
-            AddDefinition("Q4", "Proven in Battle", "Win 3 battle simulations.", QuestType.WinBattle, 3);
+            // Initial Milestone Quests
+            AddDefinition("Q1", "Foundation", "Upgrade any building to Level 2.", QuestType.BuildBuilding, 1);
+            AddDefinition("Q2", "Legion", "Train 100 total troops.", QuestType.TrainTroops, 100);
+            AddDefinition("Q3", "Arcane Study", "Complete 1 research project.", QuestType.ResearchTech, 1);
+            AddDefinition("Q4", "War Path", "Win 3 tactical battles.", QuestType.WinBattle, 3);
+            AddDefinition("Q5", "Expander", "Capture 1 territory.", QuestType.CaptureTerritory, 1);
         }
 
         private void AddDefinition(string id, string title, string desc, QuestType type, int target)
@@ -46,11 +47,11 @@ namespace AL.Services.Local
             def.Type = type;
             def.TargetValue = target;
             def.RewardResources = new List<AL.Data.Runtime.ResourceData> {
-                new AL.Data.Runtime.ResourceData { Type = ResourceType.Gold, Amount = 500 }
+                new AL.Data.Runtime.ResourceData { Type = ResourceType.Gold, Amount = 1000 }
             };
             _definitions[id] = def;
 
-            // Ensure state exists
+            // Sync with save data
             if (_saveGameService.CurrentSave != null && !_saveGameService.CurrentSave.Quests.Any(q => q.QuestId == id))
             {
                 _saveGameService.CurrentSave.Quests.Add(new QuestState { QuestId = id, CurrentValue = 0 });
@@ -68,6 +69,8 @@ namespace AL.Services.Local
 
             foreach (var state in _saveGameService.CurrentSave.Quests.Where(q => !q.IsCompleted))
             {
+                if (!_definitions.ContainsKey(state.QuestId)) continue;
+
                 var def = _definitions[state.QuestId];
                 if (def.Type == type)
                 {
@@ -77,6 +80,9 @@ namespace AL.Services.Local
                         state.CurrentValue = def.TargetValue;
                         state.IsCompleted = true;
                         OnQuestCompleted?.Invoke(state);
+
+                        // Check if this quest triggers a story beat
+                        ServiceLocator.Get<IStoryService>().AdvanceStory();
                     }
                     OnQuestUpdated?.Invoke(state);
                 }
@@ -99,7 +105,7 @@ namespace AL.Services.Local
             _creditService.AddCredits(def.RewardCredits);
 
             _saveGameService.Save();
-            Debug.Log($"Claimed rewards for quest: {def.Title}");
+            Debug.Log($"<color=gold>Quest Reward Claimed: {def.Title}</color>");
         }
     }
 }

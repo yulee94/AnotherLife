@@ -9,6 +9,7 @@ namespace AL.Core.Interfaces
         void AddResource(ResourceType type, long amount);
         bool ConsumeResource(ResourceType type, long amount);
         bool HasEnough(ResourceType type, long amount);
+        void TickProduction(double deltaSeconds);
         event Action<ResourceType, long> OnResourceChanged;
     }
 }
