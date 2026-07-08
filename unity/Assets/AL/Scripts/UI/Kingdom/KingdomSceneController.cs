@@ -701,18 +701,122 @@ namespace AL.UI.Kingdom
 
             CreatePanel(buttonObject.transform, "ButtonAccent", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.54f));
             CreatePanel(buttonObject.transform, "ButtonTopTrace", new Vector2(0f, -1f), new Vector2(-18f, 1.5f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.90f, 0.66f, 0.13f));
+            CreateCommandButtonIcon(buttonObject.transform, label, GetCommandIconColor(label, baseColor));
 
             int fontSize = rect.sizeDelta.x <= 190f ? 17 : 20;
-            var text = CreateText(buttonObject.transform, label + "_Text", font, fontSize, TextAnchor.MiddleCenter, Vector2.zero, rect.sizeDelta);
+            var text = CreateText(buttonObject.transform, label + "_Text", font, fontSize, TextAnchor.MiddleLeft, Vector2.zero, rect.sizeDelta);
             text.text = label;
             text.color = new Color(0.92f, 0.96f, 1f);
             var textRect = text.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
             textRect.pivot = new Vector2(0.5f, 0.5f);
-            textRect.offsetMin = Vector2.zero;
-            textRect.offsetMax = Vector2.zero;
+            textRect.offsetMin = new Vector2(rect.sizeDelta.x <= 190f ? 42f : 46f, 0f);
+            textRect.offsetMax = new Vector2(-8f, 0f);
             return button;
+        }
+
+        private static void CreateCommandButtonIcon(Transform parent, string label, Color iconColor)
+        {
+            Color frameColor = new Color(0.006f, 0.010f, 0.016f, 0.82f);
+            Color coreColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.24f);
+            var frame = CreatePanel(parent, "ButtonIconFrame", new Vector2(9f, -7f), new Vector2(26f, 26f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), frameColor);
+            CreatePanel(frame.transform, "IconCore", Vector2.zero, new Vector2(16f, 16f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), coreColor);
+
+            switch (GetCommandIconKind(label))
+            {
+                case CommandIconKind.Build:
+                    CreateIconStroke(frame.transform, "BuildBase", new Vector2(0f, -5f), new Vector2(16f, 3f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "BuildTowerL", new Vector2(-5f, 1f), new Vector2(4f, 13f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "BuildTowerR", new Vector2(5f, 1f), new Vector2(4f, 13f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "BuildCrown", new Vector2(0f, 7f), new Vector2(15f, 3f), 0f, Color.Lerp(iconColor, Color.white, 0.20f));
+                    break;
+                case CommandIconKind.Forces:
+                    CreateIconStroke(frame.transform, "ForceChevronA", new Vector2(-4f, 0f), new Vector2(14f, 3f), 35f, iconColor);
+                    CreateIconStroke(frame.transform, "ForceChevronB", new Vector2(4f, 0f), new Vector2(14f, 3f), -35f, iconColor);
+                    CreateIconStroke(frame.transform, "ForceSpear", new Vector2(0f, 0f), new Vector2(3f, 17f), 0f, Color.Lerp(iconColor, Color.white, 0.16f));
+                    break;
+                case CommandIconKind.Gem:
+                    CreateIconStroke(frame.transform, "GemTop", new Vector2(0f, 5f), new Vector2(12f, 3f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "GemLeft", new Vector2(-4f, -1f), new Vector2(12f, 3f), -45f, iconColor);
+                    CreateIconStroke(frame.transform, "GemRight", new Vector2(4f, -1f), new Vector2(12f, 3f), 45f, iconColor);
+                    CreateIconStroke(frame.transform, "GemCore", new Vector2(0f, 0f), new Vector2(5f, 5f), 45f, Color.Lerp(iconColor, Color.white, 0.24f));
+                    break;
+                case CommandIconKind.Board:
+                    CreateIconStroke(frame.transform, "BoardVertical", new Vector2(0f, 0f), new Vector2(3f, 18f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "BoardHorizontal", new Vector2(0f, 0f), new Vector2(18f, 3f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "BoardDot", new Vector2(5f, -5f), new Vector2(5f, 5f), 0f, Color.Lerp(iconColor, Color.white, 0.24f));
+                    break;
+                case CommandIconKind.Danger:
+                    CreateIconStroke(frame.transform, "DangerSlashA", new Vector2(0f, 0f), new Vector2(18f, 3f), 45f, iconColor);
+                    CreateIconStroke(frame.transform, "DangerSlashB", new Vector2(0f, 0f), new Vector2(18f, 3f), -45f, iconColor);
+                    break;
+                default:
+                    CreateIconStroke(frame.transform, "ProgressRingA", new Vector2(0f, 0f), new Vector2(16f, 3f), 0f, iconColor);
+                    CreateIconStroke(frame.transform, "ProgressRingB", new Vector2(0f, 0f), new Vector2(16f, 3f), 90f, iconColor);
+                    CreateIconStroke(frame.transform, "ProgressCore", new Vector2(0f, 0f), new Vector2(6f, 6f), 45f, Color.Lerp(iconColor, Color.white, 0.20f));
+                    break;
+            }
+        }
+
+        private static void CreateIconStroke(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, float rotationDegrees, Color color)
+        {
+            var stroke = CreatePanel(parent, name, anchoredPosition, sizeDelta, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), color);
+            stroke.transform.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
+        }
+
+        private static Color GetCommandIconColor(string label, Color baseColor)
+        {
+            return GetCommandIconKind(label) switch
+            {
+                CommandIconKind.Build => new Color(0.88f, 0.62f, 0.28f, 0.92f),
+                CommandIconKind.Forces => new Color(0.40f, 0.72f, 1f, 0.92f),
+                CommandIconKind.Gem => new Color(0.66f, 0.92f, 1f, 0.92f),
+                CommandIconKind.Board => new Color(0.78f, 0.88f, 1f, 0.92f),
+                CommandIconKind.Danger => new Color(0.94f, 0.28f, 0.20f, 0.92f),
+                _ => Color.Lerp(baseColor, new Color(1f, 0.88f, 0.54f, 0.92f), 0.44f)
+            };
+        }
+
+        private static CommandIconKind GetCommandIconKind(string label)
+        {
+            string lower = label?.ToLowerInvariant() ?? string.Empty;
+            if (lower.Contains("reset"))
+            {
+                return CommandIconKind.Danger;
+            }
+
+            if (lower.Contains("town") || lower.Contains("farm") || lower.Contains("lumber") || lower.Contains("quarry") || lower.Contains("gold") || lower.Contains("mana") || lower == "mine")
+            {
+                return CommandIconKind.Build;
+            }
+
+            if (lower.Contains("infantry") || lower.Contains("ranged") || lower.Contains("capture") || lower.Contains("drill") || lower.Contains("champion"))
+            {
+                return CommandIconKind.Forces;
+            }
+
+            if (lower.Contains("gem") || lower.Contains("wish"))
+            {
+                return CommandIconKind.Gem;
+            }
+
+            if (lower.Contains("board"))
+            {
+                return CommandIconKind.Board;
+            }
+
+            return CommandIconKind.Progress;
+        }
+
+        private enum CommandIconKind
+        {
+            Progress,
+            Build,
+            Forces,
+            Gem,
+            Board,
+            Danger
         }
 
         private static Font GetDefaultFont()
