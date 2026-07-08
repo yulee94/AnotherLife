@@ -14,6 +14,17 @@ Another Life is a high-fantasy kingdom war game prototype that combines an Andro
 | `unity/Docs/` | Project handoff docs, including the Android Studio/Codex collaboration prompt. |
 | `gradle/`, `build.gradle.kts`, `settings.gradle.kts` | Android/Gradle build configuration. |
 
+## Local Project Layout
+
+Use one canonical checkout for day-to-day work:
+
+- GitHub repository checkout: `C:\Users\MY\AndroidStudioProjects\AnotherLife`
+- Android Studio project: open `C:\Users\MY\AndroidStudioProjects\AnotherLife`
+- Unity Hub project: open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`
+- Codex scratch worktrees, when needed, live under `C:\Users\MY\AndroidStudioProjects\_CodexWorktrees`
+
+Avoid creating or pushing duplicate timestamped repositories such as `AnotherLife-YYYY-MM-DD_*` unless you are intentionally making a backup. The root GitHub repository is `yulee94/AnotherLife`, and `main` is the branch collaborators should review first.
+
 ## Quick Start
 
 ### Android Studio
