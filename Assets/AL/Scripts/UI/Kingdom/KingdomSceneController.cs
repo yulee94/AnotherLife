@@ -19,6 +19,7 @@ namespace AL.UI.Kingdom
         private Text _buildingText;
         private Text _troopText;
         private Text _researchText;
+        private Text _questText;
         private Text _battleText;
         private Text _messageText;
         private float _completionTimer;
@@ -80,7 +81,8 @@ namespace AL.UI.Kingdom
             _buildingText = CreateText(canvas.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(500, 300));
             _troopText = CreateText(canvas.transform, "TroopText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -570), new Vector2(500, 180));
             _researchText = CreateText(canvas.transform, "ResearchText", font, 22, TextAnchor.UpperLeft, new Vector2(600, -250), new Vector2(520, 210));
-            _battleText = CreateText(canvas.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 220));
+            _questText = CreateText(canvas.transform, "QuestText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 200));
+            _battleText = CreateText(canvas.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -690), new Vector2(560, 220));
             _messageText = CreateText(canvas.transform, "MessageText", font, 22, TextAnchor.LowerLeft, new Vector2(40, 40), new Vector2(900, 80));
 
             CreateButton(canvas.transform, font, "Upgrade Town Hall", new Vector2(-260, -80), () => UpgradeBuilding("TownHall"));
@@ -94,9 +96,10 @@ namespace AL.UI.Kingdom
             CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -630), () => TrainTroops(TroopType.Ranged));
             CreateButton(canvas.transform, font, "Earn Warzone", new Vector2(-260, -695), EarnWarzoneCredits);
             CreateButton(canvas.transform, font, "Unlock Warmaster", new Vector2(-260, -760), UnlockWarmaster);
-            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-260, -825), RunTestBattle);
-            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-260, -890), () => SceneManager.LoadScene(_arenaSceneName));
-            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-260, -955), ResetSave);
+            CreateButton(canvas.transform, font, "Claim Quests", new Vector2(-260, -825), ClaimCompletedQuests);
+            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-260, -890), RunTestBattle);
+            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-260, -955), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-260, -1020), ResetSave);
         }
 
         private void UpgradeBuilding(string buildingId)
@@ -170,6 +173,25 @@ namespace AL.UI.Kingdom
             Refresh();
         }
 
+        private void ClaimCompletedQuests()
+        {
+            var questService = ServiceLocator.Get<IQuestService>();
+            int claimed = 0;
+            foreach (var quest in questService.GetActiveQuests())
+            {
+                if (!quest.IsCompleted || quest.IsClaimed)
+                {
+                    continue;
+                }
+
+                questService.ClaimReward(quest.QuestId);
+                claimed++;
+            }
+
+            SetMessage(claimed > 0 ? $"Claimed {claimed} quest reward(s)." : "No completed quest rewards to claim.");
+            Refresh();
+        }
+
         private void ResetSave()
         {
             var save = ServiceLocator.Get<ISaveGameService>();
@@ -226,6 +248,15 @@ namespace AL.UI.Kingdom
                 FormatResearch("Plate Armor", armor) + "\n" +
                 $"Attack bonus: {research.GetStatBonus(StatType.Attack):P0}\n" +
                 $"Defense bonus: {research.GetStatBonus(StatType.Defense):P0}";
+
+            var quests = new StringBuilder();
+            quests.AppendLine("Quests");
+            foreach (var quest in ServiceLocator.Get<IQuestService>().GetActiveQuests())
+            {
+                string state = quest.IsCompleted ? "complete" : "active";
+                quests.AppendLine($"{quest.QuestId}: {quest.CurrentValue} ({state})");
+            }
+            _questText.text = quests.ToString();
         }
 
         private void SetMessage(string message)

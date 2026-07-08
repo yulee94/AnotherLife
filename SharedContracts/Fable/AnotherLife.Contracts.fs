@@ -56,10 +56,43 @@ module DesignContracts =
             weatherProfiles: WeatherProfile array
         }
 
+    [<CLIMutable>]
+    type TroopInventoryData =
+        {
+            troopType: string
+            count: int
+            woundedCount: int
+        }
+
+    [<CLIMutable>]
+    type ChampionCustomizationState =
+        {
+            bodyPresetId: string
+            hairStyleId: string
+            armorStyleId: string
+            primaryR: float
+            primaryG: float
+            primaryB: float
+            hairR: float
+            hairG: float
+            hairB: float
+            capeEnabled: bool
+            helmetEnabled: bool
+        }
+
+    [<CLIMutable>]
+    type PrototypeProgressionSnapshot =
+        {
+            selectedRealm: string
+            troops: TroopInventoryData array
+            warzoneCredits: int
+            warmasterSetId: string option
+            championCustomization: ChampionCustomizationState
+        }
+
     module CatalogPaths =
         [<Literal>]
         let CharacterCustomization = "Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json"
 
         [<Literal>]
         let SkillWeather = "Assets/AL/StreamingAssets/GameData/al_skill_weather_catalog.json"
-
