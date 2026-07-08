@@ -10,12 +10,16 @@ namespace AL.ChampionMode.Control
         [SerializeField] private float _currentHealth;
         [SerializeField] private float _attackPower = 50f;
 
+        public float CurrentHealth => _currentHealth;
+        public float MaxHealth => _maxHealth;
+
         public event Action<float, float> OnHealthChanged;
         public event Action OnDeath;
 
         private void Start()
         {
             _currentHealth = _maxHealth;
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
         }
 
         public void TakeDamage(float amount)

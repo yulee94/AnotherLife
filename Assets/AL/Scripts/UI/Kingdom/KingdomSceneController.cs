@@ -1,0 +1,295 @@
+using System;
+using System.Text;
+using AL.Core;
+using AL.Core.Interfaces;
+using AL.Data.Runtime;
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+namespace AL.UI.Kingdom
+{
+    public class KingdomSceneController : MonoBehaviour
+    {
+        [SerializeField] private string _arenaSceneName = "ChampionArena";
+
+        private Text _realmText;
+        private Text _resourceText;
+        private Text _buildingText;
+        private Text _researchText;
+        private Text _battleText;
+        private Text _messageText;
+        private float _completionTimer;
+
+        private readonly string[] _buildingIds =
+        {
+            "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks"
+        };
+
+        private void Start()
+        {
+            Bootloader.InitializeIfMissing();
+
+            var save = ServiceLocator.Get<ISaveGameService>();
+            if (save.CurrentSave == null)
+            {
+                save.Load();
+            }
+
+            BuildRuntimeUi();
+            Refresh();
+        }
+
+        private void Update()
+        {
+            _completionTimer += Time.deltaTime;
+            if (_completionTimer < 1f)
+            {
+                return;
+            }
+
+            _completionTimer = 0f;
+            var buildingService = ServiceLocator.Get<IBuildingService>();
+            foreach (var buildingId in _buildingIds)
+            {
+                buildingService.CompleteUpgrade(buildingId);
+            }
+
+            var researchService = ServiceLocator.Get<IResearchService>();
+            researchService.CompleteResearch("Steel Forging");
+            researchService.CompleteResearch("Plate Armor");
+
+            Refresh();
+        }
+
+        private void BuildRuntimeUi()
+        {
+            var canvas = CreateCanvas("KingdomCanvas");
+            var font = GetDefaultFont();
+
+            var background = new GameObject("Kingdom_Backdrop");
+            background.transform.SetParent(canvas.transform, false);
+            var bg = background.AddComponent<Image>();
+            bg.color = new Color(0.08f, 0.10f, 0.12f, 1f);
+            Stretch(background.GetComponent<RectTransform>());
+
+            _realmText = CreateText(canvas.transform, "RealmText", font, 30, TextAnchor.UpperLeft, new Vector2(40, -30), new Vector2(900, 90));
+            _resourceText = CreateText(canvas.transform, "ResourceText", font, 24, TextAnchor.UpperLeft, new Vector2(40, -120), new Vector2(900, 130));
+            _buildingText = CreateText(canvas.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(520, 310));
+            _researchText = CreateText(canvas.transform, "ResearchText", font, 22, TextAnchor.UpperLeft, new Vector2(600, -250), new Vector2(520, 210));
+            _battleText = CreateText(canvas.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 190));
+            _messageText = CreateText(canvas.transform, "MessageText", font, 22, TextAnchor.LowerLeft, new Vector2(40, 40), new Vector2(900, 80));
+
+            CreateButton(canvas.transform, font, "Upgrade Town Hall", new Vector2(-260, -80), () => UpgradeBuilding("TownHall"));
+            CreateButton(canvas.transform, font, "Upgrade Farm", new Vector2(-260, -145), () => UpgradeBuilding("Farm"));
+            CreateButton(canvas.transform, font, "Upgrade Lumber", new Vector2(-260, -210), () => UpgradeBuilding("LumberMill"));
+            CreateButton(canvas.transform, font, "Upgrade Quarry", new Vector2(-260, -275), () => UpgradeBuilding("Quarry"));
+            CreateButton(canvas.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
+            CreateButton(canvas.transform, font, "Research Steel", new Vector2(-260, -420), () => StartResearch("Steel Forging"));
+            CreateButton(canvas.transform, font, "Research Armor", new Vector2(-260, -485), () => StartResearch("Plate Armor"));
+            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-260, -565), RunTestBattle);
+            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-260, -630), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-260, -695), ResetSave);
+        }
+
+        private void UpgradeBuilding(string buildingId)
+        {
+            ServiceLocator.Get<IBuildingService>().StartUpgrade(buildingId);
+            SetMessage($"Started upgrade attempt: {buildingId}");
+            Refresh();
+        }
+
+        private void StartResearch(string researchId)
+        {
+            ServiceLocator.Get<IResearchService>().StartResearch(researchId);
+            SetMessage($"Started research attempt: {researchId}");
+            Refresh();
+        }
+
+        private void RunTestBattle()
+        {
+            var request = new BattleRequest
+            {
+                Type = BattleType.PvE,
+                AttackerTroops = new List<TroopStack>
+                {
+                    new TroopStack { Type = TroopType.Infantry, Count = 80 },
+                    new TroopStack { Type = TroopType.Ranged, Count = 45 },
+                    new TroopStack { Type = TroopType.Cavalry, Count = 20 }
+                },
+                DefenderTroops = new List<TroopStack>
+                {
+                    new TroopStack { Type = TroopType.Infantry, Count = 70 },
+                    new TroopStack { Type = TroopType.Ranged, Count = 35 }
+                }
+            };
+
+            var report = ServiceLocator.Get<IBattleSimulator>().Simulate(request);
+            _battleText.text =
+                "Battle Report\n" +
+                $"{report.Summary}\n" +
+                $"Attacker losses: {FormatLosses(report.AttackerLosses)}\n" +
+                $"Defender losses: {FormatLosses(report.DefenderLosses)}";
+            SetMessage(report.IsWinner ? "Victory report generated." : "Defeat report generated.");
+        }
+
+        private void ResetSave()
+        {
+            var save = ServiceLocator.Get<ISaveGameService>();
+            save.DeleteSave();
+            save.Load();
+            SetMessage("Save reset. Choose a realm again from the boot flow.");
+            SceneManager.LoadScene("Boot");
+        }
+
+        private void Refresh()
+        {
+            var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
+            _realmText.text = realm == null
+                ? "Kingdom: No realm selected"
+                : $"Kingdom: {realm.RealmName}";
+
+            var resources = ServiceLocator.Get<IResourceService>();
+            _resourceText.text =
+                $"Food {resources.GetResourceCount(ResourceType.Food)}    " +
+                $"Wood {resources.GetResourceCount(ResourceType.Wood)}    " +
+                $"Stone {resources.GetResourceCount(ResourceType.Stone)}    " +
+                $"Gold {resources.GetResourceCount(ResourceType.Gold)}";
+
+            var buildings = ServiceLocator.Get<IBuildingService>();
+            var builder = new StringBuilder();
+            builder.AppendLine("Buildings");
+            foreach (var buildingId in _buildingIds)
+            {
+                BuildingState state = buildings.GetBuildingState(buildingId);
+                string timer = state.IsUpgrading
+                    ? $" upgrading, completes in {Math.Max(0, state.UpgradeCompleteTimestamp - DateTimeOffset.UtcNow.ToUnixTimeSeconds())}s"
+                    : " ready";
+                builder.AppendLine($"{buildingId}: Level {state.Level}, {timer}");
+            }
+
+            _buildingText.text = builder.ToString();
+
+            var research = ServiceLocator.Get<IResearchService>();
+            var steel = research.GetResearchState("Steel Forging");
+            var armor = research.GetResearchState("Plate Armor");
+            _researchText.text =
+                "Research\n" +
+                FormatResearch("Steel Forging", steel) + "\n" +
+                FormatResearch("Plate Armor", armor) + "\n" +
+                $"Attack bonus: {research.GetStatBonus(StatType.Attack):P0}\n" +
+                $"Defense bonus: {research.GetStatBonus(StatType.Defense):P0}";
+        }
+
+        private void SetMessage(string message)
+        {
+            _messageText.text = message;
+        }
+
+        private static Canvas CreateCanvas(string name)
+        {
+            var canvasObject = new GameObject(name);
+            var canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            canvasObject.AddComponent<GraphicRaycaster>();
+            return canvas;
+        }
+
+        private static Text CreateText(Transform parent, string name, Font font, int size, TextAnchor alignment, Vector2 anchoredPosition, Vector2 sizeDelta)
+        {
+            var textObject = new GameObject(name);
+            textObject.transform.SetParent(parent, false);
+            var text = textObject.AddComponent<Text>();
+            text.font = font;
+            text.fontSize = size;
+            text.color = Color.white;
+            text.alignment = alignment;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var rect = textObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0, 1);
+            rect.anchorMax = new Vector2(0, 1);
+            rect.pivot = new Vector2(0, 1);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
+            return text;
+        }
+
+        private static void CreateButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action)
+        {
+            var buttonObject = new GameObject(label);
+            buttonObject.transform.SetParent(parent, false);
+
+            var image = buttonObject.AddComponent<Image>();
+            image.color = new Color(0.20f, 0.28f, 0.36f, 1f);
+
+            var button = buttonObject.AddComponent<Button>();
+            button.onClick.AddListener(action);
+
+            var rect = buttonObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1, 1);
+            rect.anchorMax = new Vector2(1, 1);
+            rect.pivot = new Vector2(1, 1);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = new Vector2(240, 48);
+
+            var text = CreateText(buttonObject.transform, label + "_Text", font, 20, TextAnchor.MiddleCenter, Vector2.zero, rect.sizeDelta);
+            text.text = label;
+            var textRect = text.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.pivot = new Vector2(0.5f, 0.5f);
+            textRect.offsetMin = Vector2.zero;
+            textRect.offsetMax = Vector2.zero;
+        }
+
+        private static Font GetDefaultFont()
+        {
+            return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
+                   Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
+
+        private static string FormatResearch(string label, ResearchState state)
+        {
+            if (state == null)
+            {
+                return $"{label}: Level 0";
+            }
+
+            if (!state.IsResearching)
+            {
+                return $"{label}: Level {state.Level}, ready";
+            }
+
+            long remaining = Math.Max(0, state.CompleteTimestamp - DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            return $"{label}: Level {state.Level}, researching {remaining}s";
+        }
+
+        private static string FormatLosses(IEnumerable<TroopStack> losses)
+        {
+            var builder = new StringBuilder();
+            foreach (var loss in losses)
+            {
+                if (builder.Length > 0)
+                {
+                    builder.Append(", ");
+                }
+
+                builder.Append(loss.Type).Append(" ").Append(loss.Count);
+            }
+
+            return builder.Length == 0 ? "none" : builder.ToString();
+        }
+
+        private static void Stretch(RectTransform rect)
+        {
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+        }
+    }
+}

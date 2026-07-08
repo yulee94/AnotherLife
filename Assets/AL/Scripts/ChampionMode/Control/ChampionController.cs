@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.ChampionMode.Skills;
 using System.Collections;
 using System.Linq;
 
@@ -30,6 +31,7 @@ namespace AL.ChampionMode.Control
         private bool _isDodging;
         private bool _isAttacking;
         private int _initialEnemyCount;
+        private Vector2 _externalMoveInput;
 
         private void Awake()
         {
@@ -68,8 +70,8 @@ namespace AL.ChampionMode.Control
         {
             if (_isAttacking) return;
 
-            float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
+            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : Input.GetAxis("Horizontal");
+            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : Input.GetAxis("Vertical");
 
             Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
@@ -158,12 +160,7 @@ namespace AL.ChampionMode.Control
 
         private void CreateHitVFX(Vector3 position)
         {
-            GameObject flash = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            flash.name = "Hit_Flash";
-            flash.transform.position = position;
-            flash.transform.localScale = Vector3.one * 0.5f;
-            flash.GetComponent<Renderer>().material.color = Color.white;
-            Destroy(flash, 0.2f);
+            SkillEffectFactory.SpawnForgeBurst(position);
         }
 
         private void CheckVictory()
@@ -204,6 +201,7 @@ namespace AL.ChampionMode.Control
         private void UseSkill(int index)
         {
             Debug.Log($"[Champion] Using Skill {index + 1}");
+            CreateHitVFX(transform.position + transform.forward * 1.5f + Vector3.up);
         }
 
         private IEnumerator Dodge()
@@ -221,6 +219,37 @@ namespace AL.ChampionMode.Control
             }
 
             _isDodging = false;
+        }
+
+        public void SetExternalMoveInput(Vector2 input)
+        {
+            _externalMoveInput = Vector2.ClampMagnitude(input, 1f);
+        }
+
+        public void RequestBasicAttack()
+        {
+            if (!_isAttacking)
+            {
+                StartCoroutine(PerformAttack());
+            }
+        }
+
+        public void RequestDodge()
+        {
+            if (!_isDodging)
+            {
+                StartCoroutine(Dodge());
+            }
+        }
+
+        public void RequestSkill(int index)
+        {
+            UseSkill(index);
+        }
+
+        public void SetBlocking(bool isBlocking)
+        {
+            _isBlocking = isBlocking;
         }
     }
 }

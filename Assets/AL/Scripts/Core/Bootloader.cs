@@ -57,6 +57,7 @@ namespace AL.Core
                 var territoryService = new AL.RealmWar.Warzone.WarzoneService();
                 var questService = new LocalQuestService(saveGame, resourceService, warzoneCredits);
                 var storyService = new LocalStoryService(saveGame, gameData);
+                var notificationService = new LocalNotificationService();
 
                 ServiceLocator.Register<IBattleSimulator>(battleSim);
                 ServiceLocator.Register<IWarzoneCreditService>(warzoneCredits);
@@ -64,6 +65,7 @@ namespace AL.Core
                 ServiceLocator.Register<ITerritoryService>(territoryService);
                 ServiceLocator.Register<IQuestService>(questService);
                 ServiceLocator.Register<IStoryService>(storyService);
+                ServiceLocator.Register<INotificationService>(notificationService);
 
                 Debug.Log("<color=cyan>[Bootloader] Offline Services Initialized Successfully.</color>");
             }
@@ -83,6 +85,14 @@ namespace AL.Core
         {
             // Auto-save on exit
             ServiceLocator.Get<ISaveGameService>().Save();
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus)
+            {
+                ServiceLocator.Get<ISaveGameService>().Save();
+            }
         }
     }
 }

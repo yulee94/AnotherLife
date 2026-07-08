@@ -20,6 +20,7 @@ namespace AL.Services.Local
         {
             if (_currentSave == null) return;
 
+            EnsureSaveDefaults(_currentSave);
             _currentSave.LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             string json = JsonUtility.ToJson(_currentSave, true);
             File.WriteAllText(SavePath, json);
@@ -32,6 +33,9 @@ namespace AL.Services.Local
             {
                 string json = File.ReadAllText(SavePath);
                 _currentSave = JsonUtility.FromJson<SaveGameData>(json);
+                EnsureSaveDefaults(_currentSave);
+                CalculateOfflineProgress();
+                Save();
                 Debug.Log("Game Loaded");
             }
             else
@@ -61,6 +65,7 @@ namespace AL.Services.Local
                 CurrentChapterId = "C1",
                 Warmaster = new WarmasterState()
             };
+            EnsureSaveDefaults(_currentSave);
             Save();
         }
 
@@ -68,6 +73,111 @@ namespace AL.Services.Local
         {
             if (File.Exists(SavePath)) File.Delete(SavePath);
             _currentSave = null;
+        }
+
+        private static void EnsureSaveDefaults(SaveGameData save)
+        {
+            if (save == null)
+            {
+                return;
+            }
+
+            save.Resources ??= new List<ResourceData>();
+            save.Buildings ??= new List<BuildingState>();
+            save.Researches ??= new List<ResearchState>();
+            save.Quests ??= new List<QuestState>();
+            save.Warmaster ??= new WarmasterState();
+
+            EnsureResource(save, ResourceType.Food, 1000);
+            EnsureResource(save, ResourceType.Wood, 1000);
+            EnsureResource(save, ResourceType.Stone, 500);
+            EnsureResource(save, ResourceType.Gold, 500);
+
+            if (string.IsNullOrWhiteSpace(save.CurrentChapterId))
+            {
+                save.CurrentChapterId = "C1";
+            }
+        }
+
+        private static void EnsureResource(SaveGameData save, ResourceType type, long startingAmount)
+        {
+            foreach (var resource in save.Resources)
+            {
+                if (resource.Type == type)
+                {
+                    return;
+                }
+            }
+
+            save.Resources.Add(new ResourceData { Type = type, Amount = startingAmount });
+        }
+
+        private void CalculateOfflineProgress()
+        {
+            if (_currentSave == null || _currentSave.LastSavedTimestamp <= 0)
+            {
+                return;
+            }
+
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            long elapsedSeconds = Math.Max(0, now - _currentSave.LastSavedTimestamp);
+            if (elapsedSeconds <= 0)
+            {
+                return;
+            }
+
+            long cappedSeconds = Math.Min(elapsedSeconds, 12 * 60 * 60);
+            AddOfflineResource(ResourceType.Food, cappedSeconds * 4);
+            AddOfflineResource(ResourceType.Wood, cappedSeconds * 2);
+            AddOfflineResource(ResourceType.Stone, cappedSeconds);
+            AddOfflineResource(ResourceType.Gold, cappedSeconds / 2);
+
+            CompleteFinishedBuildingTimers(now);
+            CompleteFinishedResearchTimers(now);
+            Debug.Log($"Offline progress applied for {cappedSeconds} seconds.");
+        }
+
+        private void AddOfflineResource(ResourceType type, long amount)
+        {
+            if (amount <= 0)
+            {
+                return;
+            }
+
+            foreach (var resource in _currentSave.Resources)
+            {
+                if (resource.Type == type)
+                {
+                    resource.Amount += amount;
+                    return;
+                }
+            }
+
+            _currentSave.Resources.Add(new ResourceData { Type = type, Amount = amount });
+        }
+
+        private void CompleteFinishedBuildingTimers(long now)
+        {
+            foreach (var building in _currentSave.Buildings)
+            {
+                if (building.IsUpgrading && now >= building.UpgradeCompleteTimestamp)
+                {
+                    building.IsUpgrading = false;
+                    building.Level++;
+                }
+            }
+        }
+
+        private void CompleteFinishedResearchTimers(long now)
+        {
+            foreach (var research in _currentSave.Researches)
+            {
+                if (research.IsResearching && now >= research.CompleteTimestamp)
+                {
+                    research.IsResearching = false;
+                    research.Level++;
+                }
+            }
         }
     }
 }

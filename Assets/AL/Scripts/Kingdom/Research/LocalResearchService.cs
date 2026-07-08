@@ -48,6 +48,7 @@ namespace AL.Services.Local
             {
                 state.IsResearching = true;
                 state.CompleteTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ((state.Level + 1) * 15);
+                _saveGameService.Save();
                 Debug.Log($"Started research for {researchId}. Completes in {(state.Level + 1) * 15}s");
             }
         }
@@ -63,7 +64,14 @@ namespace AL.Services.Local
                 state.IsResearching = false;
 
                 // Trigger Quest Update
-                ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.ResearchTech, 1);
+                try
+                {
+                    ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.ResearchTech, 1);
+                }
+                catch (Exception)
+                {
+                    // Quest service is optional in early scene tests.
+                }
 
                 _saveGameService.Save();
                 Debug.Log($"Research {researchId} completed. Level: {state.Level}");

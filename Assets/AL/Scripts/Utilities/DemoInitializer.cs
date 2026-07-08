@@ -2,15 +2,22 @@ using UnityEngine;
 using UnityEngine.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.ChampionMode.AI;
+using AL.Data.Runtime;
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 namespace AL.Utilities
 {
     public class DemoInitializer : MonoBehaviour
     {
+        private Text _statusText;
+
         private void Start()
         {
             // 0. Ensure Services are initialized (Plug-and-Play)
             Bootloader.InitializeIfMissing();
+            EnsureSaveLoaded();
 
             SetupDemoScene();
             Debug.Log("<color=green><b>Welcome to Another Life!</b></color>");
@@ -19,6 +26,9 @@ namespace AL.Utilities
 
         private void SetupDemoScene()
         {
+            EnsureEventSystem();
+            EnsureFloor();
+
             // 0. Build Kingdom Visuals
             gameObject.AddComponent<AL.Kingdom.Visuals.KingdomVisualizer>();
 
@@ -40,6 +50,8 @@ namespace AL.Utilities
                 Debug.Log("Created Player Champion (Capsule) for 3D Arena.");
             }
 
+            player.tag = "Player";
+
             // 2. Setup Camera
             Camera mainCam = Camera.main;
             if (mainCam != null && mainCam.GetComponent<AL.ChampionMode.Camera.CameraFollow>() == null)
@@ -50,6 +62,7 @@ namespace AL.Utilities
 
             // 3. Create a simple Debug UI for Resources
             CreateDebugUI();
+            SpawnArenaTargets();
         }
 
         private void CreateDebugUI()
@@ -78,8 +91,196 @@ namespace AL.Utilities
             rect.anchoredPosition = new Vector2(20, -20);
             rect.sizeDelta = new Vector2(400, 100);
 
+            _statusText = CreateText(canvasObj.transform, "StatusText", new Vector2(20, -150), new Vector2(620, 140), 20, Color.white);
+            _statusText.text = "Prototype controls ready.";
+
+            CreateButton(canvasObj.transform, "Select Crownlands", new Vector2(20, 160), () =>
+            {
+                ServiceLocator.Get<IRealmService>().SelectRealm(RealmId.Crownlands);
+                SetStatus("Selected Crownlands Humans.");
+            });
+
+            CreateButton(canvasObj.transform, "Add Resources", new Vector2(20, 105), () =>
+            {
+                var resources = ServiceLocator.Get<IResourceService>();
+                resources.AddResource(ResourceType.Food, 1000);
+                resources.AddResource(ResourceType.Wood, 1000);
+                resources.AddResource(ResourceType.Stone, 1000);
+                resources.AddResource(ResourceType.Gold, 1000);
+                SetStatus("Added 1,000 of each core resource.");
+            });
+
+            CreateButton(canvasObj.transform, "Upgrade Farm", new Vector2(20, 50), () =>
+            {
+                ServiceLocator.Get<IBuildingService>().StartUpgrade("Farm");
+                SetStatus("Started Farm upgrade if enough Stone is available.");
+            });
+
+            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -5), RunTestBattle);
+            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -60), SpawnArenaTargets);
+
             // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));
+        }
+
+        private void EnsureSaveLoaded()
+        {
+            var save = ServiceLocator.Get<ISaveGameService>();
+            if (save.CurrentSave == null)
+            {
+                save.Load();
+            }
+        }
+
+        private void EnsureEventSystem()
+        {
+            if (FindObjectOfType<EventSystem>() != null)
+            {
+                return;
+            }
+
+            var eventSystem = new GameObject("EventSystem");
+            eventSystem.AddComponent<EventSystem>();
+            eventSystem.AddComponent<StandaloneInputModule>();
+        }
+
+        private void EnsureFloor()
+        {
+            if (GameObject.Find("Demo_Floor") != null)
+            {
+                return;
+            }
+
+            var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
+            floor.name = "Demo_Floor";
+            floor.transform.localScale = new Vector3(8f, 1f, 8f);
+            floor.GetComponent<Renderer>().material.color = new Color(0.14f, 0.18f, 0.16f);
+        }
+
+        private void SpawnArenaTargets()
+        {
+            for (int i = 0; i < 12; i++)
+            {
+                string name = "Dummy_" + i;
+                if (GameObject.Find(name) != null)
+                {
+                    continue;
+                }
+
+                var dummy = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                dummy.name = name;
+                float angle = i * Mathf.PI * 2f / 12f;
+                dummy.transform.position = new Vector3(Mathf.Cos(angle) * 7f, 0.5f, Mathf.Sin(angle) * 7f);
+                dummy.GetComponent<Renderer>().material.color = Color.red;
+            }
+
+            if (GameObject.Find("BossDummy") == null)
+            {
+                var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+                boss.name = "BossDummy";
+                boss.transform.position = new Vector3(0f, 1.5f, 10f);
+                boss.transform.localScale = new Vector3(2.2f, 2.2f, 2.2f);
+                boss.GetComponent<Renderer>().material.color = new Color(0.7f, 0.05f, 0.05f);
+                boss.AddComponent<BossDummyAI>();
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                string botName = "BotChampion_" + i;
+                if (GameObject.Find(botName) != null)
+                {
+                    continue;
+                }
+
+                var bot = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                bot.name = botName;
+                bot.transform.position = new Vector3(-10f + i * 2f, 1.1f, 9f);
+                bot.GetComponent<Renderer>().material.color = new Color(0.55f, 0.1f, 0.65f);
+                bot.AddComponent<BotChampionAI>();
+            }
+
+            SetStatus("Arena targets spawned. Use WASD, mouse click, and Space to fight.");
+        }
+
+        private void RunTestBattle()
+        {
+            var request = new BattleRequest
+            {
+                Type = BattleType.PvE,
+                AttackerTroops = new List<TroopStack>
+                {
+                    new TroopStack { Type = TroopType.Infantry, Count = 60 },
+                    new TroopStack { Type = TroopType.Ranged, Count = 40 }
+                },
+                DefenderTroops = new List<TroopStack>
+                {
+                    new TroopStack { Type = TroopType.Infantry, Count = 45 },
+                    new TroopStack { Type = TroopType.Cavalry, Count = 20 }
+                }
+            };
+
+            var report = ServiceLocator.Get<IBattleSimulator>().Simulate(request);
+            SetStatus(report.Summary);
+        }
+
+        private Text CreateText(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, int fontSize, Color color)
+        {
+            var textObj = new GameObject(name);
+            textObj.transform.SetParent(parent, false);
+            var text = textObj.AddComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            if (text.font == null) text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
+            text.fontSize = fontSize;
+            text.color = color;
+            text.alignment = TextAnchor.UpperLeft;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+
+            var rect = textObj.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0, 0);
+            rect.anchorMax = new Vector2(0, 0);
+            rect.pivot = new Vector2(0, 0);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
+            return text;
+        }
+
+        private void CreateButton(Transform parent, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action)
+        {
+            var buttonObj = new GameObject(label);
+            buttonObj.transform.SetParent(parent, false);
+
+            var image = buttonObj.AddComponent<Image>();
+            image.color = new Color(0.12f, 0.22f, 0.32f, 0.92f);
+
+            var button = buttonObj.AddComponent<Button>();
+            button.onClick.AddListener(action);
+
+            var rect = buttonObj.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0, 0);
+            rect.anchorMax = new Vector2(0, 0);
+            rect.pivot = new Vector2(0, 0);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = new Vector2(190, 44);
+
+            var labelText = CreateText(buttonObj.transform, label + "_Text", Vector2.zero, rect.sizeDelta, 18, Color.white);
+            labelText.text = label;
+            labelText.alignment = TextAnchor.MiddleCenter;
+            var labelRect = labelText.GetComponent<RectTransform>();
+            labelRect.anchorMin = Vector2.zero;
+            labelRect.anchorMax = Vector2.one;
+            labelRect.offsetMin = Vector2.zero;
+            labelRect.offsetMax = Vector2.zero;
+        }
+
+        private void SetStatus(string message)
+        {
+            if (_statusText != null)
+            {
+                _statusText.text = message;
+            }
+
+            Debug.Log(message);
         }
 
         private System.Collections.IEnumerator UpdateResourceText(Text text)

@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using AL.ChampionMode.Skills;
 
 namespace AL.ChampionMode.AI
 {
@@ -51,11 +52,18 @@ namespace AL.ChampionMode.AI
         {
             _isAttacking = true;
             Debug.Log("BOSS: Telegraphing Slam Attack...");
-            // Highlight area / VFX
+            if (_player != null)
+            {
+                SkillEffectFactory.SpawnBossTelegraph(_player.position, _attackRange, 1.5f);
+            }
             yield return new WaitForSeconds(1.5f);
 
             Debug.Log("BOSS: SLAM!");
-            // Check for hits in radius
+            if (_player != null && Vector3.Distance(transform.position, _player.position) <= _attackRange)
+            {
+                var combat = _player.GetComponent<AL.ChampionMode.Control.ChampionCombat>();
+                combat?.TakeDamage(80f);
+            }
 
             yield return new WaitForSeconds(_attackCooldown);
             _isAttacking = false;

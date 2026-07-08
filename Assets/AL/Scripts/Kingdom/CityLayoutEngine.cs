@@ -25,10 +25,16 @@ namespace AL.Kingdom
         public void AutoPlaceBuildings(RealmId realmId, List<BuildingState> buildings)
         {
             _occupiedTiles.Clear();
+            ClearExistingBuildingVisuals();
             int index = 0;
 
             foreach (var b in buildings)
             {
+                if (b == null || string.IsNullOrWhiteSpace(b.BuildingId))
+                {
+                    continue;
+                }
+
                 Vector2Int pos = CalculateRealmPosition(realmId, index++);
                 _occupiedTiles[pos] = b;
 
@@ -74,6 +80,11 @@ namespace AL.Kingdom
 
         private void SpawnBuildingVisual(BuildingState state, Vector2Int pos)
         {
+            if (state == null)
+            {
+                return;
+            }
+
             GameObject buildingObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
             buildingObj.name = $"Building_{state.BuildingId}";
             buildingObj.transform.position = GridToWorld(pos) + Vector3.up * 0.5f;
@@ -82,6 +93,18 @@ namespace AL.Kingdom
             // Add a simple label or color based on ID
             var renderer = buildingObj.GetComponent<Renderer>();
             renderer.material.color = Color.Lerp(Color.grey, Color.white, state.Level / 10f);
+        }
+
+        private void ClearExistingBuildingVisuals()
+        {
+            var existingBuildings = GameObject.FindGameObjectsWithTag("Untagged");
+            foreach (var building in existingBuildings)
+            {
+                if (building != null && building.name.StartsWith("Building_"))
+                {
+                    Destroy(building);
+                }
+            }
         }
     }
 }

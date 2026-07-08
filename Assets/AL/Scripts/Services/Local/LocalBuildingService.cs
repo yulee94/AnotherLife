@@ -53,6 +53,7 @@ namespace AL.Services.Local
                 // 10 seconds per level for prototype
                 state.UpgradeCompleteTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (state.Level * 10);
                 Debug.Log($"Started upgrade for {buildingId}. Completes in {state.Level * 10}s");
+                _saveGameService.Save();
             }
             else
             {
@@ -73,7 +74,14 @@ namespace AL.Services.Local
                 Debug.Log($"Building {buildingId} upgraded to Level {state.Level}");
 
                 // Trigger Quest Update
-                ServiceLocator.Get<IQuestService>().UpdateProgress(Core.QuestType.BuildBuilding, 1);
+                try
+                {
+                    ServiceLocator.Get<IQuestService>().UpdateProgress(Core.QuestType.BuildBuilding, 1);
+                }
+                catch (Exception)
+                {
+                    // Quest service is optional in early scene tests.
+                }
 
                 _saveGameService.Save();
             }

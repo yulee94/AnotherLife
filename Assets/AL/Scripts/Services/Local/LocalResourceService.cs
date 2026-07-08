@@ -11,6 +11,7 @@ namespace AL.Services.Local
     public class LocalResourceService : IResourceService
     {
         private readonly ISaveGameService _saveGameService;
+        private readonly Dictionary<ResourceType, double> _productionRemainders = new Dictionary<ResourceType, double>();
         public event Action<ResourceType, long> OnResourceChanged;
 
         public LocalResourceService(ISaveGameService saveGameService)
@@ -59,6 +60,11 @@ namespace AL.Services.Local
 
         public void TickProduction(double deltaSeconds)
         {
+            if (_saveGameService.CurrentSave == null || deltaSeconds <= 0)
+            {
+                return;
+            }
+
             // Dynamic production logic based on building levels
             var buildingService = ServiceLocator.Get<IBuildingService>();
 
@@ -67,10 +73,28 @@ namespace AL.Services.Local
             int quarryLevel = buildingService.GetBuildingState("Quarry")?.Level ?? 1;
             int goldMineLevel = buildingService.GetBuildingState("GoldMine")?.Level ?? 1;
 
-            AddResource(ResourceType.Food, (long)(10 * farmLevel * deltaSeconds));
-            AddResource(ResourceType.Wood, (long)(5 * lumberMillLevel * deltaSeconds));
-            AddResource(ResourceType.Stone, (long)(2 * quarryLevel * deltaSeconds));
-            AddResource(ResourceType.Gold, (long)(1 * goldMineLevel * deltaSeconds));
+            AddProducedResource(ResourceType.Food, 10 * farmLevel * deltaSeconds);
+            AddProducedResource(ResourceType.Wood, 5 * lumberMillLevel * deltaSeconds);
+            AddProducedResource(ResourceType.Stone, 2 * quarryLevel * deltaSeconds);
+            AddProducedResource(ResourceType.Gold, 1 * goldMineLevel * deltaSeconds);
+        }
+
+        private void AddProducedResource(ResourceType type, double amount)
+        {
+            if (!_productionRemainders.ContainsKey(type))
+            {
+                _productionRemainders[type] = 0;
+            }
+
+            _productionRemainders[type] += amount;
+            long wholeAmount = (long)_productionRemainders[type];
+            if (wholeAmount <= 0)
+            {
+                return;
+            }
+
+            _productionRemainders[type] -= wholeAmount;
+            AddResource(type, wholeAmount);
         }
     }
 }
