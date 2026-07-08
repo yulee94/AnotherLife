@@ -60,7 +60,7 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 
 - Champion arena HUD shows shared-catalog skill names, mana costs, boss HP, boss break state, enrage state, boss defeat state, clear recap, and encounter fail/retry state.
 - Champion Mode's first playable screen is being treated as the premium adult-facing vertical slice: darker arena lighting, stronger layered boss silhouette, bordered combat HUD panels, cooldown hotbar overlays, a more intentional plated hero silhouette, encounter intro countdown, camera shake/floating combat feedback, hit pause, damage flash, low-health edge feedback, encounter clear/failure feedback, and detailed customization controls with close inspection mode contained in an appearance rack.
-- Kingdom Mode now opens over a runtime 2.5D board: orthographic camera, PC/mobile pan and zoom, realm-colored terrain, board frame, landmarks, roads, selectable building silhouettes, upgrade-state markers, level/status labels, and a Board View toggle that hides the dashboard for city inspection.
+- Kingdom Mode now opens over a runtime 2.5D board: orthographic camera, PC/mobile pan and zoom, realm-colored terrain, board frame, landmarks, roads, selectable building silhouettes, upgrade-state markers, territory outposts with owner/bonus labels, level/status labels, and a Board View toggle that hides the dashboard for city inspection.
 - Skill/weather catalogs live in `unity/Assets/AL/StreamingAssets/GameData/` and are mirrored by schemas/Fable contracts in `unity/SharedContracts/`.
 - Narrative, NPC, quest, dialogue, chapter, and story content remain Android Studio-owned so Unity runtime work and narrative expansion can move in parallel.
 
