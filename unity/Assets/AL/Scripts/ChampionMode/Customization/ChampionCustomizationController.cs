@@ -400,19 +400,22 @@ namespace AL.ChampionMode.Customization
                 return false;
             }
 
-            switch (presetId)
+            if (!TryApplyCatalogForgePreset(state, presetId))
             {
-                case "vanguard":
-                    ApplyVanguardPreset(state);
-                    break;
-                case "arcanist":
-                    ApplyArcanistPreset(state);
-                    break;
-                case "nightblade":
-                    ApplyNightbladePreset(state);
-                    break;
-                default:
-                    return false;
+                switch (presetId)
+                {
+                    case "vanguard":
+                        ApplyVanguardPreset(state);
+                        break;
+                    case "arcanist":
+                        ApplyArcanistPreset(state);
+                        break;
+                    case "nightblade":
+                        ApplyNightbladePreset(state);
+                        break;
+                    default:
+                        return false;
+                }
             }
 
             SaveAndApply();
@@ -544,6 +547,55 @@ namespace AL.ChampionMode.Customization
             state.AccentR = accent.r;
             state.AccentG = accent.g;
             state.AccentB = accent.b;
+        }
+
+        private bool TryApplyCatalogForgePreset(ChampionCustomizationState state, string presetId)
+        {
+            var presets = _catalog?.forgePresets;
+            if (presets == null)
+            {
+                return false;
+            }
+
+            foreach (var preset in presets)
+            {
+                if (preset == null || preset.id != presetId)
+                {
+                    continue;
+                }
+
+                state.BodyPresetId = preset.bodyPresetId;
+                state.HairStyleId = preset.hairStyleId;
+                state.ArmorStyleId = preset.armorStyleId;
+                state.FaceMarkId = preset.faceMarkId;
+                state.WeaponStyleId = preset.weaponStyleId;
+                state.OffhandStyleId = preset.offhandStyleId;
+                state.CapeEnabled = preset.capeEnabled;
+                state.HelmetEnabled = preset.helmetEnabled;
+                ApplyPresetColors(
+                    state,
+                    ReadPresetColor(preset.primaryColor, PrimaryPalette[0]),
+                    ReadPresetColor(preset.hairColor, HairPalette[0]),
+                    ReadPresetColor(preset.skinColor, SkinPalette[0]),
+                    ReadPresetColor(preset.eyeColor, EyePalette[0]),
+                    ReadPresetColor(preset.accentColor, AccentPalette[0]));
+                return true;
+            }
+
+            return false;
+        }
+
+        private static Color ReadPresetColor(float[] rgb, Color fallback)
+        {
+            if (rgb == null || rgb.Length < 3)
+            {
+                return fallback;
+            }
+
+            return new Color(
+                Mathf.Clamp01(rgb[0]),
+                Mathf.Clamp01(rgb[1]),
+                Mathf.Clamp01(rgb[2]));
         }
 
         private static string GetProfileLabel(ChampionCustomizationState state)

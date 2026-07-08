@@ -45,6 +45,27 @@ module DesignContracts =
         }
 
     [<CLIMutable>]
+    type ChampionForgePreset =
+        {
+            id: string
+            displayName: string
+            summary: string
+            bodyPresetId: string
+            hairStyleId: string
+            armorStyleId: string
+            faceMarkId: string
+            weaponStyleId: string
+            offhandStyleId: string
+            primaryColor: float array
+            hairColor: float array
+            skinColor: float array
+            eyeColor: float array
+            accentColor: float array
+            capeEnabled: bool
+            helmetEnabled: bool
+        }
+
+    [<CLIMutable>]
     type CharacterCustomizationCatalog =
         {
             version: string
@@ -61,6 +82,7 @@ module DesignContracts =
             faceMarks: StyleOption array
             weaponStyles: StyleOption array
             offhandStyles: StyleOption array
+            forgePresets: ChampionForgePreset array
             realms: RealmCustomization array
             qualityTargets: QualityTargets
         }
