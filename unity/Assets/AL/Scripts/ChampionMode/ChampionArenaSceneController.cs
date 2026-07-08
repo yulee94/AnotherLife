@@ -29,6 +29,7 @@ namespace AL.ChampionMode
         private Text _healthText;
         private Text _manaText;
         private Text _skillText;
+        private readonly Text[] _skillButtonTexts = new Text[4];
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private RuntimePlatformQualityController _qualityController;
@@ -205,10 +206,10 @@ namespace AL.ChampionMode
 
             CreateButton(canvasObject.transform, font, "Attack", new Vector2(-20, 350), () => _playerController.RequestBasicAttack());
             CreateButton(canvasObject.transform, font, "Dodge", new Vector2(-20, 290), () => _playerController.RequestDodge());
-            CreateButton(canvasObject.transform, font, "Skill 1", new Vector2(-20, 230), () => _playerController.RequestSkill(0));
-            CreateButton(canvasObject.transform, font, "Skill 2", new Vector2(-20, 170), () => _playerController.RequestSkill(1));
-            CreateButton(canvasObject.transform, font, "Skill 3", new Vector2(-20, 110), () => _playerController.RequestSkill(2));
-            CreateButton(canvasObject.transform, font, "Skill 4", new Vector2(-20, 50), () => _playerController.RequestSkill(3));
+            CreateSkillButton(canvasObject.transform, font, 0, new Vector2(-20, 230));
+            CreateSkillButton(canvasObject.transform, font, 1, new Vector2(-20, 170));
+            CreateSkillButton(canvasObject.transform, font, 2, new Vector2(-20, 110));
+            CreateSkillButton(canvasObject.transform, font, 3, new Vector2(-20, 50));
             CreateButton(canvasObject.transform, font, "Manual", new Vector2(-165, 350), () => _autoCombatController.SetMode(AutoMode.Manual));
             CreateButton(canvasObject.transform, font, "Assist", new Vector2(-165, 290), () => _autoCombatController.SetMode(AutoMode.SemiAuto));
             CreateButton(canvasObject.transform, font, "Auto", new Vector2(-165, 230), () => _autoCombatController.SetMode(AutoMode.FullAuto));
@@ -262,13 +263,48 @@ namespace AL.ChampionMode
                 FormatSkillStatus(1) + "\n" +
                 FormatSkillStatus(2) + "\n" +
                 FormatSkillStatus(3);
+            RefreshSkillButtonLabels();
         }
 
         private string FormatSkillStatus(int slotIndex)
         {
             float remaining = _playerSkillCaster.GetCooldownRemaining(slotIndex);
-            string state = remaining <= 0.05f ? "ready" : $"{remaining:0.0}s";
+            string state = remaining <= 0.05f ? $"ready ({_playerSkillCaster.GetManaCost(slotIndex):0} MP)" : $"{remaining:0.0}s";
             return $"{slotIndex + 1}. {_playerSkillCaster.GetSkillName(slotIndex)}: {state}";
+        }
+
+        private void CreateSkillButton(Transform parent, Font font, int slotIndex, Vector2 anchoredPosition)
+        {
+            var button = CreateButton(parent, font, BuildSkillButtonLabel(slotIndex), anchoredPosition, () => _playerController.RequestSkill(slotIndex));
+            _skillButtonTexts[slotIndex] = button.GetComponentInChildren<Text>();
+        }
+
+        private void RefreshSkillButtonLabels()
+        {
+            for (int i = 0; i < _skillButtonTexts.Length; i++)
+            {
+                if (_skillButtonTexts[i] != null)
+                {
+                    _skillButtonTexts[i].text = BuildSkillButtonLabel(i);
+                }
+            }
+        }
+
+        private string BuildSkillButtonLabel(int slotIndex)
+        {
+            string compactName = GetCompactSkillName(_playerSkillCaster != null ? _playerSkillCaster.GetSkillName(slotIndex) : string.Empty);
+            return $"{slotIndex + 1}. {compactName}";
+        }
+
+        private static string GetCompactSkillName(string skillName)
+        {
+            if (string.IsNullOrWhiteSpace(skillName))
+            {
+                return "Skill";
+            }
+
+            string[] words = skillName.Split(' ');
+            return words.Length == 0 ? skillName : words[words.Length - 1];
         }
 
         private void CreateMoveButton(Transform parent, Font font, string label, Vector2 anchoredPosition, Vector2 moveInput)
