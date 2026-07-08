@@ -9,7 +9,10 @@ Repository:
 https://github.com/yulee94/AnotherLife
 
 Primary rule:
-Do not overwrite or revert Codex work. Before changing code, fetch the latest master and inspect open pull requests. If a file is being changed by an open Codex PR, avoid that file unless the change is required for your narrative work.
+Do not overwrite or revert Codex work. Before changing code, fetch the latest main branch and inspect open pull requests. If a file is being changed by an open Codex PR, avoid that file unless the change is required for your narrative work.
+
+Branch rule:
+Use `main` as the only default branch. The old `master` branch was consolidated into `main` and removed from GitHub so the repository front page always shows the current project.
 
 Android Studio ownership:
 - NPC data, NPC affinity/reputation content, advisor content, and persona content.
@@ -32,7 +35,7 @@ When editing shared files:
 - Do not remove Codex interfaces, runtime services, generated design assets, weather profiles, world atlas data, boss loot services, or shared contract files.
 
 PR workflow:
-1. Fetch latest master.
+1. Fetch latest main.
 2. Run or inspect `gh pr list --state open` if GitHub CLI is available.
 3. Create a focused branch, preferably `android-studio/<short-scope>`.
 4. Keep each PR scoped to one major completion.
