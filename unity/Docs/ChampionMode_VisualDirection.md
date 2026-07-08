@@ -15,6 +15,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Replace the plain test floor with an Obsidian Citadel arena built from procedural Unity primitives, fog, rim lights, pillars, combat lanes, and boss dais.
 - Replace debug text with a structured combat HUD: player vitals, boss frame, boss HP/break/enrage state, skill hotbar, combat feed, action controls, movement pad, and appearance rack.
 - Replace the single debug capsule champion with a layered procedural hero model: hidden root capsule renderer, facial structure, hair variants, plated armor pieces, robe/cape variants, style-specific weapons, offhands, emissive trims, and PBR material tuning.
+- Replace the visible boss cylinder with a layered encounter silhouette: hidden root renderer, mantle, torso plates, core, faceplate, horns, shoulders, claws, back shards, orbit shards, aura ring, and boss-owned glow lights.
 - Add baseline combat feedback: configurable follow camera, impact shake, floating combat text, boss hit reactions, break/enrage callouts, and stronger skill-impact response.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
