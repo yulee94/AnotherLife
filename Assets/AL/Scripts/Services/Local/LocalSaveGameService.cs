@@ -89,6 +89,8 @@ namespace AL.Services.Local
             save.Researches ??= new List<ResearchState>();
             save.Quests ??= new List<QuestState>();
             save.Territories ??= new List<TerritoryData>();
+            save.RealmGems ??= new List<RealmGemState>();
+            save.Wishgate ??= new WishgateState();
             save.Warmaster ??= new WarmasterState();
             save.ChampionCustomization ??= new ChampionCustomizationState();
 

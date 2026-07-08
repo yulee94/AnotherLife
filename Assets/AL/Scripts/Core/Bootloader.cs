@@ -58,6 +58,7 @@ namespace AL.Core
                 var questService = new LocalQuestService(saveGame, resourceService, warzoneCredits);
                 var storyService = new LocalStoryService(saveGame, gameData);
                 var notificationService = new LocalNotificationService();
+                var realmGemService = new LocalRealmGemService(saveGame);
 
                 ServiceLocator.Register<IBattleSimulator>(battleSim);
                 ServiceLocator.Register<IWarzoneCreditService>(warzoneCredits);
@@ -66,6 +67,7 @@ namespace AL.Core
                 ServiceLocator.Register<IQuestService>(questService);
                 ServiceLocator.Register<IStoryService>(storyService);
                 ServiceLocator.Register<INotificationService>(notificationService);
+                ServiceLocator.Register<IRealmGemService>(realmGemService);
 
                 Debug.Log("<color=cyan>[Bootloader] Offline Services Initialized Successfully.</color>");
             }

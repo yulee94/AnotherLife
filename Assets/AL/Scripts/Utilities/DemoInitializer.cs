@@ -104,16 +104,16 @@ namespace AL.Utilities
             rect.anchoredPosition = new Vector2(20, -20);
             rect.sizeDelta = new Vector2(400, 100);
 
-            _statusText = CreateText(canvasObj.transform, "StatusText", new Vector2(20, -150), new Vector2(620, 140), 20, Color.white);
+            _statusText = CreateText(canvasObj.transform, "StatusText", new Vector2(20, 360), new Vector2(620, 90), 20, Color.white);
             _statusText.text = "Prototype controls ready.";
 
-            CreateButton(canvasObj.transform, "Select Crownlands", new Vector2(20, 160), () =>
+            CreateButton(canvasObj.transform, "Select Crownlands", new Vector2(20, 295), () =>
             {
                 ServiceLocator.Get<IRealmService>().SelectRealm(RealmId.Crownlands);
                 SetStatus("Selected Crownlands Humans.");
             });
 
-            CreateButton(canvasObj.transform, "Add Resources", new Vector2(20, 105), () =>
+            CreateButton(canvasObj.transform, "Add Resources", new Vector2(20, 240), () =>
             {
                 var resources = ServiceLocator.Get<IResourceService>();
                 resources.AddResource(ResourceType.Food, 1000);
@@ -123,55 +123,55 @@ namespace AL.Utilities
                 SetStatus("Added 1,000 of each core resource.");
             });
 
-            CreateButton(canvasObj.transform, "Upgrade Farm", new Vector2(20, 50), () =>
+            CreateButton(canvasObj.transform, "Upgrade Farm", new Vector2(20, 185), () =>
             {
                 ServiceLocator.Get<IBuildingService>().StartUpgrade("Farm");
                 SetStatus("Started Farm upgrade if enough Stone is available.");
             });
 
-            CreateButton(canvasObj.transform, "Train Infantry", new Vector2(20, -5), () =>
+            CreateButton(canvasObj.transform, "Train Infantry", new Vector2(20, 130), () =>
             {
                 ServiceLocator.Get<ITrainingService>().StartTraining(TroopType.Infantry, 25);
                 SetStatus($"Infantry trained. Total: {ServiceLocator.Get<ITrainingService>().GetTroopCount(TroopType.Infantry)}");
             });
 
-            CreateButton(canvasObj.transform, "Earn Warzone", new Vector2(20, -60), () =>
+            CreateButton(canvasObj.transform, "Earn Warzone", new Vector2(20, 75), () =>
             {
                 ServiceLocator.Get<IWarzoneCreditService>().AddCredits(250);
                 SetStatus($"Warzone Credits: {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}");
             });
 
-            CreateButton(canvasObj.transform, "Hero Color", new Vector2(20, -115), () =>
+            CreateButton(canvasObj.transform, "Hero Color", new Vector2(20, 20), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CyclePrimaryColor();
                 SetStatus("Cycled Champion primary color.");
             });
 
-            CreateButton(canvasObj.transform, "Hero Hair", new Vector2(20, -170), () =>
+            CreateButton(canvasObj.transform, "Hero Hair", new Vector2(220, 295), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CycleHairColor();
                 SetStatus("Cycled Champion hair color.");
             });
 
-            CreateButton(canvasObj.transform, "Toggle Cape", new Vector2(20, -225), () =>
+            CreateButton(canvasObj.transform, "Toggle Cape", new Vector2(220, 240), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.ToggleCape();
                 SetStatus("Toggled Champion cape.");
             });
 
-            CreateButton(canvasObj.transform, "Assist Mode", new Vector2(20, -280), () =>
+            CreateButton(canvasObj.transform, "Assist Mode", new Vector2(220, 185), () =>
             {
                 FindObjectOfType<AutoCombatController>()?.SetMode(AutoMode.SemiAuto);
                 SetStatus("Assist mode enabled. Manual input interrupts it.");
             });
 
-            CreateButton(canvasObj.transform, "Auto Mode", new Vector2(20, -335), () =>
+            CreateButton(canvasObj.transform, "Auto Mode", new Vector2(220, 130), () =>
             {
                 FindObjectOfType<AutoCombatController>()?.SetMode(AutoMode.FullAuto);
                 SetStatus("Auto mode enabled. Manual input interrupts it.");
             });
 
-            CreateButton(canvasObj.transform, "Capture Border", new Vector2(20, -390), () =>
+            CreateButton(canvasObj.transform, "Capture Border", new Vector2(220, 75), () =>
             {
                 var realm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
                 if (realm == RealmId.None)
@@ -184,8 +184,8 @@ namespace AL.Utilities
                 SetStatus($"Captured Neutral Borderlands for {realm}.");
             });
 
-            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -445), RunTestBattle);
-            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -500), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "Test Battle", new Vector2(220, 20), RunTestBattle);
+            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(420, 20), SpawnArenaTargets);
 
             // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));

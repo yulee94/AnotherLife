@@ -92,17 +92,21 @@ namespace AL.UI.Kingdom
             CreateButton(canvas.transform, font, "Upgrade Lumber", new Vector2(-260, -210), () => UpgradeBuilding("LumberMill"));
             CreateButton(canvas.transform, font, "Upgrade Quarry", new Vector2(-260, -275), () => UpgradeBuilding("Quarry"));
             CreateButton(canvas.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
-            CreateButton(canvas.transform, font, "Research Steel", new Vector2(-260, -420), () => StartResearch("Steel Forging"));
-            CreateButton(canvas.transform, font, "Research Armor", new Vector2(-260, -485), () => StartResearch("Plate Armor"));
-            CreateButton(canvas.transform, font, "Train Infantry", new Vector2(-260, -565), () => TrainTroops(TroopType.Infantry));
-            CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -630), () => TrainTroops(TroopType.Ranged));
-            CreateButton(canvas.transform, font, "Earn Warzone", new Vector2(-260, -695), EarnWarzoneCredits);
-            CreateButton(canvas.transform, font, "Unlock Warmaster", new Vector2(-260, -760), UnlockWarmaster);
-            CreateButton(canvas.transform, font, "Claim Quests", new Vector2(-260, -825), ClaimCompletedQuests);
-            CreateButton(canvas.transform, font, "Capture Border", new Vector2(-260, -890), CaptureBorderlands);
-            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-260, -955), RunTestBattle);
-            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-260, -1020), () => SceneManager.LoadScene(_arenaSceneName));
-            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-260, -1085), ResetSave);
+            CreateButton(canvas.transform, font, "Train Infantry", new Vector2(-260, -405), () => TrainTroops(TroopType.Infantry));
+            CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -470), () => TrainTroops(TroopType.Ranged));
+            CreateButton(canvas.transform, font, "Claim Quests", new Vector2(-260, -535), ClaimCompletedQuests);
+
+            CreateButton(canvas.transform, font, "Research Steel", new Vector2(-20, -80), () => StartResearch("Steel Forging"));
+            CreateButton(canvas.transform, font, "Research Armor", new Vector2(-20, -145), () => StartResearch("Plate Armor"));
+            CreateButton(canvas.transform, font, "Earn Warzone", new Vector2(-20, -210), EarnWarzoneCredits);
+            CreateButton(canvas.transform, font, "Unlock Warmaster", new Vector2(-20, -275), UnlockWarmaster);
+            CreateButton(canvas.transform, font, "Capture Border", new Vector2(-20, -340), CaptureBorderlands);
+            CreateButton(canvas.transform, font, "Pick Gem", new Vector2(-20, -405), PickTestGem);
+            CreateButton(canvas.transform, font, "Earn Wishgate", new Vector2(-20, -470), EarnWishgate);
+            CreateButton(canvas.transform, font, "Wish Reward", new Vector2(-20, -535), ChooseWishReward);
+            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-20, -600), RunTestBattle);
+            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-20, -665), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-20, -730), ResetSave);
         }
 
         private void UpgradeBuilding(string buildingId)
@@ -208,6 +212,29 @@ namespace AL.UI.Kingdom
             Refresh();
         }
 
+        private void PickTestGem()
+        {
+            var gemService = ServiceLocator.Get<IRealmGemService>();
+            bool pickedUp = gemService.PickUpGem("Stonehold_Gem_1", "offline_player");
+            SetMessage(pickedUp ? "Picked up Stonehold Gem 1 as offline_player." : "Could not pick up the gem yet.");
+            Refresh();
+        }
+
+        private void EarnWishgate()
+        {
+            ServiceLocator.Get<IRealmGemService>().MarkWishgateEarned("Offline realm objective test");
+            SetMessage("Wishgate earned for offline testing.");
+            Refresh();
+        }
+
+        private void ChooseWishReward()
+        {
+            ServiceLocator.Get<IRealmGemService>().ChooseWishReward("warmaster_credits");
+            ServiceLocator.Get<IWarzoneCreditService>().AddCredits(300);
+            SetMessage("Wish reward chosen: Warmaster Credits.");
+            Refresh();
+        }
+
         private void ResetSave()
         {
             var save = ServiceLocator.Get<ISaveGameService>();
@@ -279,6 +306,15 @@ namespace AL.UI.Kingdom
             foreach (var territory in ServiceLocator.Get<ITerritoryService>().GetTerritories())
             {
                 territories.AppendLine($"{territory.Name}: {territory.OwnerRealm} (+{territory.BonusAmount} {territory.BonusType})");
+            }
+            var wishgate = ServiceLocator.Get<IRealmGemService>().GetWishgateState();
+            territories.AppendLine(wishgate != null && wishgate.IsEarned ? "Wishgate: earned" : "Wishgate: dormant");
+            foreach (var gem in ServiceLocator.Get<IRealmGemService>().GetRealmGems())
+            {
+                if (!gem.IsAtHome || gem.IsDropped)
+                {
+                    territories.AppendLine($"{gem.GemId}: carrier {gem.CarrierId ?? "dropped"}");
+                }
             }
             _territoryText.text = territories.ToString();
         }

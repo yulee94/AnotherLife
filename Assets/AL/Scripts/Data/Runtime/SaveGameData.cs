@@ -14,6 +14,8 @@ namespace AL.Data.Runtime
         public List<AL.Core.Interfaces.ResearchState> Researches = new List<AL.Core.Interfaces.ResearchState>();
         public List<AL.Core.Interfaces.QuestState> Quests = new List<AL.Core.Interfaces.QuestState>();
         public List<AL.Core.Interfaces.TerritoryData> Territories = new List<AL.Core.Interfaces.TerritoryData>();
+        public List<RealmGemState> RealmGems = new List<RealmGemState>();
+        public WishgateState Wishgate = new WishgateState();
         public string CurrentChapterId;
         public WarmasterState Warmaster = new WarmasterState();
         public ChampionCustomizationState ChampionCustomization = new ChampionCustomizationState();
@@ -50,5 +52,26 @@ namespace AL.Data.Runtime
         public float HairB = 0.04f;
         public bool CapeEnabled = true;
         public bool HelmetEnabled;
+    }
+
+    [Serializable]
+    public class RealmGemState
+    {
+        public string GemId;
+        public RealmId HomeRealm;
+        public int GemIndex;
+        public bool IsAtHome = true;
+        public bool IsDropped;
+        public string CarrierId;
+        public long LastDroppedTimestamp;
+    }
+
+    [Serializable]
+    public class WishgateState
+    {
+        public bool IsEarned;
+        public string EarnReason;
+        public string LastRewardId;
+        public long LastRewardChosenTimestamp;
     }
 }
