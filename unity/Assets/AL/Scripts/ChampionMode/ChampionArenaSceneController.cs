@@ -5,6 +5,7 @@ using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -127,6 +128,7 @@ namespace AL.ChampionMode
             }
 
             CreateWeather();
+            CreateWorldObjectiveMarkers();
         }
 
         private void SpawnBotChampions()
@@ -141,6 +143,13 @@ namespace AL.ChampionMode
             var weatherObject = new GameObject("Warzone_BattleFog_Weather");
             weatherObject.transform.position = new Vector3(0f, 6f, 0f);
             weatherObject.AddComponent<RuntimeWeatherController>().ConfigureForRealm(GetCurrentRealmId());
+        }
+
+        private void CreateWorldObjectiveMarkers()
+        {
+            var markerObject = new GameObject("WorldObjectiveMarkers");
+            markerObject.transform.position = Vector3.zero;
+            markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(GetCurrentRealmId(), 8);
         }
 
         private RealmId GetCurrentRealmId()
