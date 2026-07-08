@@ -106,20 +106,24 @@ namespace AL.ChampionMode.AI
 
         private GameObject CreateMarker(Transform parent, Color realmColor, RealmId realmId)
         {
-            var marker = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            marker.name = "LowDetail_RealmMarker";
+            var marker = new GameObject("LowDetail_RealmMarker");
             marker.transform.SetParent(parent, false);
-            marker.transform.localPosition = new Vector3(0f, 0.12f, 0f);
+            marker.transform.localPosition = Vector3.zero;
             marker.transform.localRotation = Quaternion.identity;
-            marker.transform.localScale = new Vector3(0.52f, 0.04f, 0.52f);
-            SetMaterialColor(marker, Color.Lerp(realmColor, Color.white, 0.18f));
-            Destroy(marker.GetComponent<Collider>());
+
+            var disc = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            disc.name = "MarkerDisc";
+            disc.transform.SetParent(marker.transform, false);
+            disc.transform.localPosition = new Vector3(0f, 0.12f, 0f);
+            disc.transform.localScale = new Vector3(0.52f, 0.04f, 0.52f);
+            SetMaterialColor(disc, Color.Lerp(realmColor, Color.white, 0.18f));
+            Destroy(disc.GetComponent<Collider>());
 
             var banner = GameObject.CreatePrimitive(PrimitiveType.Cube);
             banner.name = $"MarkerBanner_{realmId}";
             banner.transform.SetParent(marker.transform, false);
-            banner.transform.localPosition = new Vector3(0f, 8f, 0f);
-            banner.transform.localScale = new Vector3(0.16f, 5.5f, 0.16f);
+            banner.transform.localPosition = new Vector3(0f, 1.2f, 0f);
+            banner.transform.localScale = new Vector3(0.16f, 1.4f, 0.16f);
             SetMaterialColor(banner, realmColor);
             Destroy(banner.GetComponent<Collider>());
             return marker;
