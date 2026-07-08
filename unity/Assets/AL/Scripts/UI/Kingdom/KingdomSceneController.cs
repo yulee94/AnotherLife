@@ -6,6 +6,7 @@ using AL.Data.Runtime;
 using AL.Kingdom.Visuals;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -116,6 +117,9 @@ namespace AL.UI.Kingdom
             {
                 cameraObject.AddComponent<AudioListener>();
             }
+
+            var controls = cameraObject.GetComponent<KingdomBoardCameraController>() ?? cameraObject.AddComponent<KingdomBoardCameraController>();
+            controls.Configure(camera);
         }
 
         private static void ConfigureKingdomLighting()
@@ -631,6 +635,128 @@ namespace AL.UI.Kingdom
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+        }
+    }
+
+    public class KingdomBoardCameraController : MonoBehaviour
+    {
+        [SerializeField] private float _minZoom = 5.2f;
+        [SerializeField] private float _maxZoom = 12.5f;
+        [SerializeField] private float _mousePanSpeed = 0.012f;
+        [SerializeField] private float _touchPanSpeed = 0.010f;
+        [SerializeField] private Vector2 _panLimit = new Vector2(5.8f, 5.2f);
+
+        private UnityEngine.Camera _camera;
+        private Vector3 _lastPointerPosition;
+        private float _lastPinchDistance;
+
+        public void Configure(UnityEngine.Camera camera)
+        {
+            _camera = camera;
+        }
+
+        private void Awake()
+        {
+            if (_camera == null)
+            {
+                _camera = GetComponent<UnityEngine.Camera>();
+            }
+        }
+
+        private void Update()
+        {
+            if (_camera == null || !_camera.orthographic)
+            {
+                return;
+            }
+
+            HandleMouse();
+            HandleTouch();
+        }
+
+        private void HandleMouse()
+        {
+            if (Input.touchCount > 0)
+            {
+                return;
+            }
+
+            if (!IsPointerOverUi() && Mathf.Abs(Input.mouseScrollDelta.y) > 0.01f)
+            {
+                Zoom(-Input.mouseScrollDelta.y * 0.65f);
+            }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                _lastPointerPosition = Input.mousePosition;
+            }
+
+            if (Input.GetMouseButton(1) && !IsPointerOverUi())
+            {
+                Vector3 delta = Input.mousePosition - _lastPointerPosition;
+                Pan(delta, _mousePanSpeed);
+                _lastPointerPosition = Input.mousePosition;
+            }
+        }
+
+        private void HandleTouch()
+        {
+            if (Input.touchCount == 1)
+            {
+                Touch touch = Input.GetTouch(0);
+                if (touch.phase == TouchPhase.Began)
+                {
+                    _lastPointerPosition = touch.position;
+                }
+                else if (touch.phase == TouchPhase.Moved && !IsPointerOverUi(touch.fingerId))
+                {
+                    Vector3 delta = (Vector3)touch.position - _lastPointerPosition;
+                    Pan(delta, _touchPanSpeed);
+                    _lastPointerPosition = touch.position;
+                }
+            }
+            else if (Input.touchCount >= 2)
+            {
+                Touch a = Input.GetTouch(0);
+                Touch b = Input.GetTouch(1);
+                float distance = Vector2.Distance(a.position, b.position);
+                if (a.phase == TouchPhase.Began || b.phase == TouchPhase.Began)
+                {
+                    _lastPinchDistance = distance;
+                    return;
+                }
+
+                float delta = distance - _lastPinchDistance;
+                Zoom(-delta * 0.012f);
+                _lastPinchDistance = distance;
+            }
+        }
+
+        private void Pan(Vector3 screenDelta, float speed)
+        {
+            float zoomScale = _camera.orthographicSize / 8.6f;
+            Vector3 right = transform.right;
+            Vector3 forward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+            Vector3 movement = (-right * screenDelta.x - forward * screenDelta.y) * speed * zoomScale;
+            Vector3 next = transform.position + movement;
+            next.x = Mathf.Clamp(next.x, -_panLimit.x, _panLimit.x);
+            next.z = Mathf.Clamp(next.z, -10.8f - _panLimit.y, -10.8f + _panLimit.y);
+            transform.position = next;
+        }
+
+        private void Zoom(float delta)
+        {
+            _camera.orthographicSize = Mathf.Clamp(_camera.orthographicSize + delta, _minZoom, _maxZoom);
+        }
+
+        private static bool IsPointerOverUi()
+        {
+            return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+        }
+
+        private static bool IsPointerOverUi(int fingerId)
+        {
+            return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(fingerId);
         }
     }
 }
