@@ -6,8 +6,9 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 
 ## Reference Learnings
 
-- AION 2-style combat references point toward action-focused boss readability, clean hotbars, visible class/loadout identity, and high-impact movement/combat presentation.
-- Infinity Kingdom and Lords Mobile references reinforce that persistent progression games need dense but readable status surfaces: resources, timers, formation/build state, and quick access controls.
+- AION 2-style combat references point toward action-focused boss readability, clean hotbars, visible class/loadout identity, high-impact movement/combat presentation, strong character creation, and encounter decisions built around timing and positioning.
+- Infinity Kingdom and Lords Mobile references reinforce that persistent progression games need dense but readable status surfaces: resources, timers, formation/build state, hero/team identity, event entry points, and quick access controls.
+- For the 20+ adult target, Another Life should avoid toy-like debug presentation, overstuffed novelty UI, and pressure-first monetization patterns. The quality bar is serious fantasy readability: clean combat state, meaningful failure/clear feedback, attractive character expression, and systems that feel deep before they feel busy.
 - Another Life should use these products as UX/gameplay references only. Do not copy their art, UI skin, names, icons, lore, or monetization framing.
 
 ## Current Champion Mode Pass
@@ -24,6 +25,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Add runtime-only combat goals, encounter timer, and clear grading so Champion Mode has a visible session loop without entering narrative/quest ownership.
 - Add generated runtime combat audio cues for attacks, impacts, dodges, skill casts, heals, boss warnings, guard breaks, and encounter clears until authored audio assets arrive.
 - Improve mobile/PC camera feel with mouse-wheel zoom, right-side touch orbit, pinch zoom, and UI-aware touch filtering.
+- Add a runtime defeat state: player death locks combat input, stops auto-combat, marks the encounter as failed, shows a centered retry panel, and gives immediate floating text/audio/camera feedback.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
 
@@ -32,3 +34,11 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Replace procedural blockout geometry with real mesh/texture assets for the player champion, boss, floor, pillars, and skill icons once the part names and customization contract stop moving.
 - Add hit pause, telegraph decals, and animation-driven skill-impact timing after the UI/arena layout is stable.
 - Add a proper character creator scene once the combat first impression feels worth keeping.
+- Expand the failure loop into build advice, death recap stats, and difficulty retry options after combat tuning is stable.
+
+## Reference Study Links
+
+- AION 2 Steam page: https://store.steampowered.com/app/3393110/AION_2/
+- Infinity Kingdom official site: https://infinitykingdom.gtarcade.com/m/en/
+- Infinity Kingdom Google Play page: https://play.google.com/store/apps/details?id=com.gtarcade.ioe.global
+- Lords Mobile Google Play page: https://play.google.com/store/apps/details?id=com.igg.android.lordsmobile
