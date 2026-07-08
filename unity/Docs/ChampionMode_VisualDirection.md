@@ -25,7 +25,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Add runtime-only combat goals, encounter timer, and clear grading so Champion Mode has a visible session loop without entering narrative/quest ownership.
 - Add generated runtime combat audio cues for attacks, impacts, dodges, skill casts, heals, boss warnings, guard breaks, and encounter clears until authored audio assets arrive.
 - Improve mobile/PC camera feel with mouse-wheel zoom, right-side touch orbit, pinch zoom, and UI-aware touch filtering.
-- Add a runtime defeat state: player death locks combat input, stops auto-combat, marks the encounter as failed, shows a centered retry panel, and gives immediate floating text/audio/camera feedback.
+- Add a runtime defeat state: player death locks combat input, stops auto-combat, marks the encounter as failed, samples the latest boss guard/enrage state, shows a centered battle report with time, boss health, tactical diagnosis, retry, inspection, and Kingdom actions, and gives immediate floating text/audio/camera feedback.
 - Upgrade boss slam telegraphs from generic warning rings to truthful impact zones with direction lines, edge ticks, impact bursts, and evade feedback when the player exits the marked area before damage resolves.
 - Add combat impact feedback with short hit pauses, red damage flash, and low-health edge pulse so successful hits and incoming danger feel more physical without blocking mobile controls.
 - Add a short runtime encounter intro that locks controls, frames the boss objective, counts down, and starts the timer on engage so the arena opens like a real combat mode instead of a debug sandbox.
@@ -39,7 +39,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Replace procedural blockout geometry with real mesh/texture assets for the player champion, boss, floor, pillars, and skill icons once the part names and customization contract stop moving.
 - Add hit pause, richer telegraph decals, and animation-driven skill-impact timing after the UI/arena layout is stable.
 - Add a proper character creator scene once the combat first impression feels worth keeping.
-- Expand the failure loop into build advice, death recap stats, and difficulty retry options after combat tuning is stable.
+- Add difficulty retry options after combat tuning is stable, such as practice mode, normal rematch, and harder rematch modifiers.
 
 ## Reference Study Links
 

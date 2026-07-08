@@ -47,6 +47,9 @@ namespace AL.ChampionMode
         private Image _damageFlashImage;
         private readonly Image[] _lowHealthEdges = new Image[4];
         private GameObject _defeatPanelObject;
+        private Text _defeatSummaryText;
+        private Text _defeatDetailText;
+        private Text _defeatActionText;
         private GameObject _clearPanelObject;
         private Text _clearTitleText;
         private Text _clearSummaryText;
@@ -817,6 +820,14 @@ namespace AL.ChampionMode
             SetAppearanceInspection(false);
             _playerController?.SetControlLocked(true);
             _autoCombatController?.SetMode(AutoMode.Manual);
+            if (_boss != null)
+            {
+                _guardBreakObserved |= _boss.IsBroken;
+                _enrageObserved |= _boss.IsEnraged;
+            }
+
+            float elapsed = Mathf.Max(0f, Time.time - _encounterStartTime);
+            UpdateDefeatPanel(elapsed);
 
             if (_defeatPanelObject != null)
             {
@@ -837,6 +848,66 @@ namespace AL.ChampionMode
             RuntimeCombatAudio.PlayWarning();
             RefreshBossText();
             RefreshEncounterText();
+        }
+
+        private void UpdateDefeatPanel(float elapsed)
+        {
+            string bossHealth = GetBossHealthPercentRemaining();
+
+            if (_defeatSummaryText != null)
+            {
+                _defeatSummaryText.text = $"Time {FormatEncounterTime(elapsed)}   Boss {bossHealth}   Guard {(_guardBreakObserved ? "broken" : "held")}   Enrage {(_enrageObserved ? "triggered" : "avoided")}";
+            }
+
+            if (_defeatDetailText != null)
+            {
+                _defeatDetailText.text = GetDefeatRecapLine(elapsed);
+            }
+
+            if (_defeatActionText != null)
+            {
+                _defeatActionText.text = "Next: retry for execution, inspect your champion, or return to Kingdom upgrades.";
+            }
+        }
+
+        private string GetDefeatRecapLine(float elapsed)
+        {
+            if (!_guardBreakObserved)
+            {
+                return "Guard held. Build pressure until the break bar collapses, then spend burst skills inside that window.";
+            }
+
+            if (GetBossHealthRatioRemaining() <= 0.18f)
+            {
+                return "Boss was nearly finished. Save a defensive response for enrage, dodge first, then punish the recovery.";
+            }
+
+            if (_enrageObserved)
+            {
+                return "Enrage overwhelmed the run. Respect the marked slam, then return to close range for controlled damage.";
+            }
+
+            if (elapsed <= 45f)
+            {
+                return "Early fall. Slow the opener, keep mana for the guard break, and dodge before committing.";
+            }
+
+            return "The run reached a clearable pace. Tighten dodge timing and hold burst for the next break window.";
+        }
+
+        private float GetBossHealthRatioRemaining()
+        {
+            return _boss != null && _boss.MaxHealth > 0f ? Mathf.Clamp01(_boss.CurrentHealth / _boss.MaxHealth) : 1f;
+        }
+
+        private string GetBossHealthPercentRemaining()
+        {
+            if (_boss == null || _boss.MaxHealth <= 0f)
+            {
+                return "unknown";
+            }
+
+            return $"{Mathf.CeilToInt(GetBossHealthRatioRemaining() * 100f)}%";
         }
 
         private IEnumerator EncounterIntroRoutine()
@@ -1158,14 +1229,23 @@ namespace AL.ChampionMode
 
         private void CreateDefeatPanel(Transform parent, Font font)
         {
-            var panel = CreateHudPanel(parent, "DefeatRetryPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(540f, 220f), new Color(0.035f, 0.018f, 0.018f, 0.92f));
+            var panel = CreateHudPanel(parent, "DefeatRetryPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(660f, 292f), new Color(0.035f, 0.018f, 0.018f, 0.93f));
             _defeatPanelObject = panel.gameObject;
 
-            CreateHudPanel(_defeatPanelObject.transform, "DefeatAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(540f, 6f), new Color(1f, 0.22f, 0.10f, 0.90f));
-            CreateText(_defeatPanelObject.transform, font, "CHAMPION FALLEN", 28, new Vector2(0f, -30f), new Vector2(540f, 40f), TextAnchor.MiddleCenter, new Color(1f, 0.42f, 0.28f));
-            CreateText(_defeatPanelObject.transform, font, "The encounter is lost. Retry immediately or return to Kingdom after adjusting your build.", 15, new Vector2(54f, -78f), new Vector2(432f, 46f), TextAnchor.MiddleCenter, new Color(0.90f, 0.92f, 0.94f));
-            CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(96f, -148f), new Vector2(154f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
-            CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(290f, -148f), new Vector2(154f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
+            CreateHudPanel(_defeatPanelObject.transform, "DefeatTopAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(660f, 6f), new Color(1f, 0.22f, 0.10f, 0.90f));
+            CreateHudPanel(_defeatPanelObject.transform, "DefeatSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -6f), new Vector2(6f, 286f), new Color(0.86f, 0.08f, 0.06f, 0.72f));
+            CreateText(_defeatPanelObject.transform, font, "BATTLE REPORT", 13, new Vector2(36f, -22f), new Vector2(150f, 22f), TextAnchor.UpperLeft, new Color(0.74f, 0.62f, 0.58f));
+            CreateText(_defeatPanelObject.transform, font, "CHAMPION FALLEN", 30, new Vector2(0f, -42f), new Vector2(660f, 42f), TextAnchor.MiddleCenter, new Color(1f, 0.42f, 0.28f));
+            _defeatSummaryText = CreateText(_defeatPanelObject.transform, font, "Time 00:00   Boss 100%   Guard held   Enrage avoided", 15, new Vector2(50f, -94f), new Vector2(560f, 28f), TextAnchor.MiddleCenter, new Color(0.95f, 0.92f, 0.88f));
+            _defeatDetailText = CreateText(_defeatPanelObject.transform, font, "Review the battle report, adjust timing, then choose the next attempt.", 15, new Vector2(70f, -134f), new Vector2(520f, 58f), TextAnchor.MiddleCenter, new Color(0.88f, 0.90f, 0.94f));
+            _defeatActionText = CreateText(_defeatPanelObject.transform, font, "Next: retry for execution, inspect your champion, or return to Kingdom upgrades.", 13, new Vector2(84f, -184f), new Vector2(492f, 30f), TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.84f));
+            CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(70f, -232f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
+            CreateHudButton(_defeatPanelObject.transform, font, "Inspect", new Vector2(260f, -232f), new Vector2(140f, 42f), () =>
+            {
+                _defeatPanelObject.SetActive(false);
+                SetAppearanceInspection(true);
+            }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(450f, -232f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
             _defeatPanelObject.SetActive(false);
         }
 
