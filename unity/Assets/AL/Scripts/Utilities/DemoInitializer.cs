@@ -120,11 +120,13 @@ namespace AL.Utilities
             CreateButton(canvasObj.transform, "Add Resources", new Vector2(20, 240), () =>
             {
                 var resources = ServiceLocator.Get<IResourceService>();
-                resources.AddResource(ResourceType.Food, 1000);
-                resources.AddResource(ResourceType.Wood, 1000);
-                resources.AddResource(ResourceType.Stone, 1000);
-                resources.AddResource(ResourceType.Gold, 1000);
-                SetStatus("Added 1,000 of each core resource.");
+                foreach (ResourceType resourceType in ResourceRules.WalletResources)
+                {
+                    long amount = ResourceRules.IsRareResource(resourceType) ? 100 : 1000;
+                    resources.AddResource(resourceType, amount);
+                }
+
+                SetStatus("Added debug resources, including ManaStone, Ore, and rare realm materials.");
             });
 
             CreateButton(canvasObj.transform, "Upgrade Farm", new Vector2(20, 185), () =>
@@ -386,11 +388,16 @@ namespace AL.Utilities
                 var resources = ServiceLocator.Get<IResourceService>();
                 if (resources != null)
                 {
+                    var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+                    ResourceType rareResourceType = ResourceRules.GetRareResourceForRealm(realmId);
                     text.text = $"<b>RESOURCES</b>\n" +
                                $"Food: {resources.GetResourceCount(ResourceType.Food)}\n" +
                                $"Wood: {resources.GetResourceCount(ResourceType.Wood)}\n" +
                                $"Stone: {resources.GetResourceCount(ResourceType.Stone)}\n" +
-                               $"Gold: {resources.GetResourceCount(ResourceType.Gold)}";
+                               $"Gold: {resources.GetResourceCount(ResourceType.Gold)}\n" +
+                               $"ManaStone: {resources.GetResourceCount(ResourceType.ManaStone)}\n" +
+                               $"Ore: {resources.GetResourceCount(ResourceType.Ore)}\n" +
+                               $"{rareResourceType}: {resources.GetResourceCount(rareResourceType)}";
                 }
                 yield return new WaitForSeconds(0.5f);
             }

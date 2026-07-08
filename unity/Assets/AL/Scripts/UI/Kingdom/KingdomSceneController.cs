@@ -27,7 +27,7 @@ namespace AL.UI.Kingdom
 
         private readonly string[] _buildingIds =
         {
-            "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks"
+            "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "ManaShrine", "Mine", "Barracks"
         };
 
         private const int WarmasterPieceCost = 100;
@@ -108,9 +108,11 @@ namespace AL.UI.Kingdom
             CreateButton(canvas.transform, font, "Upgrade Lumber", new Vector2(-260, -210), () => UpgradeBuilding("LumberMill"));
             CreateButton(canvas.transform, font, "Upgrade Quarry", new Vector2(-260, -275), () => UpgradeBuilding("Quarry"));
             CreateButton(canvas.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
-            CreateButton(canvas.transform, font, "Train Infantry", new Vector2(-260, -405), () => TrainTroops(TroopType.Infantry));
-            CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -470), () => TrainTroops(TroopType.Ranged));
-            CreateButton(canvas.transform, font, "Claim Quests", new Vector2(-260, -535), ClaimCompletedQuests);
+            CreateButton(canvas.transform, font, "Upgrade Mana Shrine", new Vector2(-260, -405), () => UpgradeBuilding("ManaShrine"));
+            CreateButton(canvas.transform, font, "Upgrade Mine", new Vector2(-260, -470), () => UpgradeBuilding("Mine"));
+            CreateButton(canvas.transform, font, "Train Infantry", new Vector2(-260, -535), () => TrainTroops(TroopType.Infantry));
+            CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -600), () => TrainTroops(TroopType.Ranged));
+            CreateButton(canvas.transform, font, "Claim Quests", new Vector2(-260, -665), ClaimCompletedQuests);
 
             CreateButton(canvas.transform, font, "Research Steel", new Vector2(-20, -80), () => StartResearch("Steel Forging"));
             CreateButton(canvas.transform, font, "Research Armor", new Vector2(-20, -145), () => StartResearch("Plate Armor"));
@@ -288,11 +290,16 @@ namespace AL.UI.Kingdom
                 : $"Kingdom: {realm.RealmName}";
 
             var resources = ServiceLocator.Get<IResourceService>();
+            var selectedRealmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+            ResourceType rareResourceType = ResourceRules.GetRareResourceForRealm(selectedRealmId);
             _resourceText.text =
                 $"Food {resources.GetResourceCount(ResourceType.Food)}    " +
                 $"Wood {resources.GetResourceCount(ResourceType.Wood)}    " +
                 $"Stone {resources.GetResourceCount(ResourceType.Stone)}    " +
-                $"Gold {resources.GetResourceCount(ResourceType.Gold)}    " +
+                $"Gold {resources.GetResourceCount(ResourceType.Gold)}\n" +
+                $"ManaStone {resources.GetResourceCount(ResourceType.ManaStone)}    " +
+                $"Ore {resources.GetResourceCount(ResourceType.Ore)}    " +
+                $"{rareResourceType} {resources.GetResourceCount(rareResourceType)}    " +
                 $"Warzone {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}";
 
             var buildings = ServiceLocator.Get<IBuildingService>();

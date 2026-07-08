@@ -14,7 +14,13 @@ namespace AL.Core
         Food,
         Wood,
         Stone,
-        Gold
+        Gold,
+        ManaStone,
+        Ore,
+        DeepOre,
+        WorldSap,
+        RoyalSigil,
+        DarkCrystal
     }
 
     public enum ClassFamily

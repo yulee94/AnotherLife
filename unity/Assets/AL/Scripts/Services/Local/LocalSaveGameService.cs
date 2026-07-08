@@ -58,7 +58,9 @@ namespace AL.Services.Local
                     new ResourceData { Type = ResourceType.Food, Amount = 1000 },
                     new ResourceData { Type = ResourceType.Wood, Amount = 1000 },
                     new ResourceData { Type = ResourceType.Stone, Amount = 500 },
-                    new ResourceData { Type = ResourceType.Gold, Amount = 500 }
+                    new ResourceData { Type = ResourceType.Gold, Amount = 500 },
+                    new ResourceData { Type = ResourceType.ManaStone, Amount = 150 },
+                    new ResourceData { Type = ResourceType.Ore, Amount = 150 }
                 },
                 Buildings = new List<BuildingState>(),
                 Troops = new List<TroopInventoryData>(),
@@ -100,6 +102,12 @@ namespace AL.Services.Local
             EnsureResource(save, ResourceType.Wood, 1000);
             EnsureResource(save, ResourceType.Stone, 500);
             EnsureResource(save, ResourceType.Gold, 500);
+            EnsureResource(save, ResourceType.ManaStone, 150);
+            EnsureResource(save, ResourceType.Ore, 150);
+            EnsureResource(save, ResourceType.DeepOre, 0);
+            EnsureResource(save, ResourceType.WorldSap, 0);
+            EnsureResource(save, ResourceType.RoyalSigil, 0);
+            EnsureResource(save, ResourceType.DarkCrystal, 0);
 
             if (string.IsNullOrWhiteSpace(save.CurrentChapterId))
             {
@@ -139,6 +147,13 @@ namespace AL.Services.Local
             AddOfflineResource(ResourceType.Wood, cappedSeconds * 2);
             AddOfflineResource(ResourceType.Stone, cappedSeconds);
             AddOfflineResource(ResourceType.Gold, cappedSeconds / 2);
+            AddOfflineResource(ResourceType.ManaStone, cappedSeconds / 4);
+            AddOfflineResource(ResourceType.Ore, cappedSeconds / 3);
+
+            if (_currentSave.SelectedRealm != RealmId.None)
+            {
+                AddOfflineResource(ResourceRules.GetRareResourceForRealm(_currentSave.SelectedRealm), cappedSeconds / 90);
+            }
 
             CompleteFinishedBuildingTimers(now);
             CompleteFinishedResearchTimers(now);
