@@ -76,6 +76,7 @@ namespace AL.ChampionMode
         private bool _encounterFailed;
         private bool _encounterIntroRunning;
         private bool _appearanceInspectionMode;
+        private GameObject _inspectionShowcaseRoot;
         private RuntimePlatformQualityController _qualityController;
 
         private void Start()
@@ -159,6 +160,7 @@ namespace AL.ChampionMode
             _playerController = player.AddComponent<ChampionController>();
             ProceduralChampionModelBuilder.EnsureModel(player);
             _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, GetRealmAccentColor(GetCurrentRealmId()));
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
             var cameraObject = new GameObject("Main Camera");
@@ -479,6 +481,38 @@ namespace AL.ChampionMode
             {
                 weather.ApplyParticleBudgetMultiplier(_qualityController.GetWeatherParticleMultiplier());
             }
+        }
+
+        private GameObject CreateInspectionShowcase(Transform player, Color realmAccent)
+        {
+            var showcase = new GameObject("ChampionAppearanceInspectionShowcase");
+            showcase.transform.SetParent(player, false);
+            showcase.transform.localPosition = Vector3.zero;
+            showcase.transform.localRotation = Quaternion.identity;
+
+            Color darkGlass = new Color(0.035f, 0.052f, 0.072f, 0.70f);
+            Color blackSteel = new Color(0.028f, 0.030f, 0.036f);
+            Color warmEdge = Color.Lerp(realmAccent, new Color(1f, 0.82f, 0.44f), 0.22f);
+
+            CreateArenaPrimitive(showcase.transform, "Inspection_StageBase", PrimitiveType.Cylinder, new Vector3(0f, -1.12f, 0f), new Vector3(1.46f, 0.035f, 1.46f), Vector3.zero, blackSteel, true, 0.22f, 0.68f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_StageGlow", PrimitiveType.Cylinder, new Vector3(0f, -1.07f, 0f), new Vector3(1.18f, 0.018f, 1.18f), Vector3.zero, realmAccent, true, 0.04f, 0.86f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_FootRimFront", PrimitiveType.Cube, new Vector3(0f, -0.96f, 0.88f), new Vector3(1.34f, 0.030f, 0.045f), Vector3.zero, warmEdge, true, 0.08f, 0.78f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_FootRimBack", PrimitiveType.Cube, new Vector3(0f, -0.96f, -0.88f), new Vector3(1.34f, 0.030f, 0.045f), Vector3.zero, warmEdge, true, 0.08f, 0.78f);
+
+            CreateArenaPrimitive(showcase.transform, "Inspection_MirrorLeft", PrimitiveType.Cube, new Vector3(-1.08f, -0.12f, -0.10f), new Vector3(0.040f, 1.42f, 0.62f), new Vector3(0f, 18f, 0f), darkGlass, true, 0.02f, 0.90f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_MirrorRight", PrimitiveType.Cube, new Vector3(1.08f, -0.12f, -0.10f), new Vector3(0.040f, 1.42f, 0.62f), new Vector3(0f, -18f, 0f), darkGlass, true, 0.02f, 0.90f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_BackLightSpine", PrimitiveType.Cube, new Vector3(0f, 0.10f, -0.96f), new Vector3(0.080f, 1.54f, 0.065f), Vector3.zero, realmAccent, true, 0.08f, 0.84f);
+            CreateArenaPrimitive(showcase.transform, "Inspection_BackCrossbar", PrimitiveType.Cube, new Vector3(0f, 0.72f, -0.96f), new Vector3(0.94f, 0.050f, 0.055f), Vector3.zero, warmEdge, true, 0.10f, 0.80f);
+
+            var keyLight = CreatePointLight("Inspection Key Light", player.position + new Vector3(0.0f, 2.35f, 1.55f), Color.Lerp(realmAccent, Color.white, 0.28f), 1.95f, 4.8f);
+            keyLight.transform.SetParent(showcase.transform, true);
+            var rimLight = CreatePointLight("Inspection Rim Light", player.position + new Vector3(0.0f, 1.85f, -1.35f), Color.Lerp(realmAccent, new Color(0.24f, 0.56f, 1f), 0.35f), 1.35f, 4.2f);
+            rimLight.transform.SetParent(showcase.transform, true);
+
+            var pulse = showcase.AddComponent<ChampionInspectionShowcase>();
+            pulse.Configure(realmAccent, warmEdge);
+            showcase.SetActive(false);
+            return showcase;
         }
 
         private void CreateWorldObjectiveMarkers()
@@ -1090,6 +1124,10 @@ namespace AL.ChampionMode
         {
             _appearanceInspectionMode = enabled;
             _cameraFollow?.SetInspectionMode(enabled);
+            if (_inspectionShowcaseRoot != null)
+            {
+                _inspectionShowcaseRoot.SetActive(enabled);
+            }
 
             if (_appearanceInspectButtonText != null)
             {
@@ -1519,6 +1557,85 @@ namespace AL.ChampionMode
             return text;
         }
 
+    }
+
+    internal sealed class ChampionInspectionShowcase : MonoBehaviour
+    {
+        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Light> _lights = new List<Light>();
+        private Color _accent;
+        private Color _edge;
+        private Vector3 _baseLocalPosition;
+
+        public void Configure(Color accent, Color edge)
+        {
+            _accent = accent;
+            _edge = edge;
+            _baseLocalPosition = transform.localPosition;
+            CollectTargets();
+        }
+
+        private void OnEnable()
+        {
+            CollectTargets();
+        }
+
+        private void CollectTargets()
+        {
+            _materials.Clear();
+            foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer == null || renderer.material == null)
+                {
+                    continue;
+                }
+
+                if (renderer.material.HasProperty("_EmissionColor"))
+                {
+                    renderer.material.EnableKeyword("_EMISSION");
+                    _materials.Add(renderer.material);
+                }
+            }
+
+            _lights.Clear();
+            foreach (var light in GetComponentsInChildren<Light>(true))
+            {
+                if (light != null)
+                {
+                    _lights.Add(light);
+                }
+            }
+        }
+
+        private void Update()
+        {
+            float time = Time.unscaledTime;
+            float pulse = 0.62f + Mathf.Sin(time * 1.45f) * 0.18f;
+            transform.localPosition = _baseLocalPosition + Vector3.up * (Mathf.Sin(time * 0.92f) * 0.018f);
+
+            for (int i = 0; i < _materials.Count; i++)
+            {
+                Material material = _materials[i];
+                if (material == null)
+                {
+                    continue;
+                }
+
+                Color color = i % 2 == 0 ? _accent : _edge;
+                material.SetColor("_EmissionColor", color * Mathf.Max(0f, pulse));
+            }
+
+            for (int i = 0; i < _lights.Count; i++)
+            {
+                Light light = _lights[i];
+                if (light == null)
+                {
+                    continue;
+                }
+
+                light.intensity = Mathf.Max(0f, (i == 0 ? 1.95f : 1.35f) * (0.92f + Mathf.Sin(time * 1.12f + i) * 0.08f));
+            }
+        }
     }
 
     internal sealed class ArenaAtmospherePulse : MonoBehaviour
