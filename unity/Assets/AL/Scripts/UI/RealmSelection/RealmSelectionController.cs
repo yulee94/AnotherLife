@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -14,6 +15,15 @@ namespace AL.UI.RealmSelection
         [SerializeField] private RealmSelectionCard _cardPrefab;
         [SerializeField] private Transform _container;
         [SerializeField] private string _nextScene = "Kingdom";
+
+        private bool _selectionInProgress;
+        private GameObject _commitOverlayObject;
+        private Image _commitBackdrop;
+        private Image _commitAccentLine;
+        private Image _commitProgressFill;
+        private Text _commitTitleText;
+        private Text _commitRealmText;
+        private Text _commitMetaText;
 
         private void Start()
         {
@@ -41,9 +51,30 @@ namespace AL.UI.RealmSelection
 
         private void OnRealmSelected(RealmId id)
         {
+            if (_selectionInProgress)
+            {
+                return;
+            }
+
             Debug.Log($"Realm Selected in UI: {id}");
+            StartCoroutine(RealmSelectionCommitRoutine(id));
+        }
+
+        private IEnumerator RealmSelectionCommitRoutine(RealmId id)
+        {
+            _selectionInProgress = true;
             var realmService = ServiceLocator.Get<IRealmService>();
             realmService.SelectRealm(id);
+            ShowCommitOverlay(id);
+
+            const float duration = 0.72f;
+            float elapsed = 0f;
+            while (elapsed < duration)
+            {
+                elapsed += Time.unscaledDeltaTime;
+                UpdateCommitOverlay(id, Mathf.Clamp01(elapsed / duration));
+                yield return null;
+            }
 
             SceneManager.LoadScene(_nextScene);
         }
@@ -148,6 +179,99 @@ namespace AL.UI.RealmSelection
             AnchorTopLeft(text, new Vector2(30f, -76f), new Vector2(585f, 58f));
             text.alignment = TextAnchor.UpperLeft;
             text.color = new Color(0.84f, 0.88f, 0.92f);
+        }
+
+        private void ShowCommitOverlay(RealmId id)
+        {
+            EnsureCommitOverlay();
+            _commitOverlayObject.SetActive(true);
+            UpdateCommitOverlay(id, 0f);
+        }
+
+        private void EnsureCommitOverlay()
+        {
+            if (_commitOverlayObject != null)
+            {
+                return;
+            }
+
+            var canvasObject = new GameObject("RealmSelectionCommitCanvas");
+            _commitOverlayObject = canvasObject;
+            var canvas = canvasObject.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvas.sortingOrder = 5000;
+            var scaler = canvasObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
+            canvasObject.AddComponent<GraphicRaycaster>();
+
+            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
+                       Resources.GetBuiltinResource<Font>("Arial.ttf");
+
+            _commitBackdrop = CreatePanel(canvasObject.transform, "CommitBackdrop", new Color(0f, 0f, 0f, 0f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            _commitBackdrop.raycastTarget = true;
+
+            var panel = CreateGradientPanel(canvasObject.transform, "CommitPanel", new Color(0.052f, 0.064f, 0.084f, 0.98f), new Color(0.010f, 0.014f, 0.020f, 0.98f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(760f, 236f));
+            var outline = panel.gameObject.AddComponent<Outline>();
+            outline.effectColor = new Color(1f, 0.80f, 0.48f, 0.34f);
+            outline.effectDistance = new Vector2(1.2f, -1.2f);
+            var shadow = panel.gameObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.54f);
+            shadow.effectDistance = new Vector2(0f, -6f);
+
+            CreatePanel(panel.transform, "CommitTopTrace", new Color(1f, 0.86f, 0.56f, 0.32f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-42f, 2f));
+            _commitAccentLine = CreatePanel(panel.transform, "CommitAccentLine", Color.white, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 0f));
+
+            var sigil = CreatePanel(panel.transform, "CommitSigil", new Color(1f, 0.86f, 0.56f, 0.32f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(72f, 72f));
+            sigil.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            CreatePanel(panel.transform, "CommitSigilCore", new Color(0.012f, 0.018f, 0.026f, 0.95f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(42f, 42f)).rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+
+            _commitTitleText = CreateText(panel.transform, "CommitTitle", font, "COMMAND ACCEPTED", 15, new Vector2(0f, -30f), new Vector2(640f, 24f));
+            _commitTitleText.color = new Color(1f, 0.84f, 0.52f);
+            _commitRealmText = CreateText(panel.transform, "CommitRealm", font, string.Empty, 34, new Vector2(0f, -66f), new Vector2(640f, 44f));
+            _commitMetaText = CreateText(panel.transform, "CommitMeta", font, string.Empty, 16, new Vector2(0f, -116f), new Vector2(640f, 30f));
+            _commitMetaText.color = new Color(0.80f, 0.88f, 0.94f);
+
+            CreatePanel(panel.transform, "CommitProgressTrack", new Color(0.08f, 0.10f, 0.13f, 0.96f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 42f), new Vector2(620f, 6f));
+            _commitProgressFill = CreatePanel(panel.transform, "CommitProgressFill", new Color(1f, 0.80f, 0.42f, 0.94f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0.5f), new Vector2(-310f, 42f), new Vector2(0f, 6f));
+
+            _commitOverlayObject.SetActive(false);
+        }
+
+        private void UpdateCommitOverlay(RealmId id, float progress)
+        {
+            Color realmColor = GetRealmColor(id);
+            float eased = Mathf.SmoothStep(0f, 1f, progress);
+            float pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 7.0f) * 0.5f;
+
+            if (_commitBackdrop != null)
+            {
+                _commitBackdrop.color = new Color(0f, 0f, 0f, Mathf.Lerp(0.15f, 0.72f, eased));
+            }
+
+            if (_commitAccentLine != null)
+            {
+                _commitAccentLine.color = new Color(realmColor.r, realmColor.g, realmColor.b, Mathf.Lerp(0.68f, 1f, pulse));
+            }
+
+            if (_commitProgressFill != null)
+            {
+                _commitProgressFill.color = Color.Lerp(realmColor, new Color(1f, 0.84f, 0.52f), 0.25f);
+                _commitProgressFill.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(0f, 620f, eased), 6f);
+            }
+
+            if (_commitRealmText != null)
+            {
+                _commitRealmText.text = GetRealmDisplayName(id).ToUpperInvariant();
+                _commitRealmText.color = Color.Lerp(realmColor, Color.white, 0.34f);
+            }
+
+            if (_commitMetaText != null)
+            {
+                _commitMetaText.text = GetRealmCommandProfile(id) + " // KINGDOM LINK ESTABLISHING";
+            }
         }
 
         private static List<Image> BuildAtmosphericBackdrop(Transform parent)
@@ -298,6 +422,11 @@ namespace AL.UI.RealmSelection
                 RealmId.Umbral => "SHADOW WARFARE",
                 _ => "COMMAND PROFILE"
             };
+        }
+
+        private static string GetRealmDisplayName(RealmId id)
+        {
+            return id == RealmId.None ? "Unclaimed Realm" : id.ToString();
         }
 
         private sealed class RealmSelectionFallbackAtmosphere : MonoBehaviour
