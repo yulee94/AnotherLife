@@ -81,8 +81,9 @@ namespace AL.Services.Local
                         state.IsCompleted = true;
                         OnQuestCompleted?.Invoke(state);
 
-                        // Check if this quest triggers a story beat
-                        ServiceLocator.Get<IStoryService>().AdvanceStory();
+                        // Link to Story
+                        var story = ServiceLocator.Get<IStoryService>();
+                        story?.AdvanceStory();
                     }
                     OnQuestUpdated?.Invoke(state);
                 }
@@ -98,12 +99,15 @@ namespace AL.Services.Local
             state.IsClaimed = true;
             var def = _definitions[questId];
 
-            foreach (var res in def.RewardResources)
+            if (def.RewardResources != null)
             {
-                _resourceService.AddResource(res.Type, res.Amount);
+                foreach (var res in def.RewardResources)
+                {
+                    _resourceService.AddResource(res.Type, res.Amount);
+                }
             }
-            _creditService.AddCredits(def.RewardCredits);
 
+            _creditService.AddCredits(def.RewardCredits);
             _saveGameService.Save();
             Debug.Log($"<color=gold>Quest Reward Claimed: {def.Title}</color>");
         }

@@ -30,15 +30,12 @@ namespace AL.Services.Local
 
         private void InitializeFallbackDialogues()
         {
-            // Placeholder logic for the vertical slice
-            // In a full build, these would be ScriptableObjects
             AddNode(new DialogueNode {
                 Id = "intro_stonehold",
                 CharacterName = "Thane Ironbeard",
                 Text = "The Deep Forge has been silent for a century. Today, we strike the first spark. Are you ready, Lord?",
                 Choices = new List<DialogueChoice> {
-                    new DialogueChoice { Text = "The mountains will ring again.", NextNodeId = "end" },
-                    new DialogueChoice { Text = "We need more fuel first.", NextNodeId = "end" }
+                    new DialogueChoice { Text = "The mountains will ring again.", NextNodeId = "end" }
                 }
             });
 
@@ -74,9 +71,8 @@ namespace AL.Services.Local
 
         public void AdvanceStory()
         {
-            // Logic to move to the next chapter based on Quest completion
-            Debug.Log($"Advancing story from chapter: {CurrentChapterId}");
-            // Placeholder: OnChapterAdvanced?.Invoke(nextId);
+            Debug.Log($"Advancing story. Current Chapter: {CurrentChapterId}");
+            // Narrative advancement logic
         }
 
         public DialogueNode GetDialogue(string nodeId)
@@ -88,10 +84,7 @@ namespace AL.Services.Local
         public void TriggerDialogue(string nodeId)
         {
             var node = GetDialogue(nodeId);
-            if (node != null)
-            {
-                OnDialogueTriggered?.Invoke(node);
-            }
+            if (node != null) OnDialogueTriggered?.Invoke(node);
         }
     }
 }

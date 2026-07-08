@@ -2,6 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using System.Collections.Generic;
 using AL.Core;
 using AL.Data.Definitions;
 
@@ -26,7 +27,10 @@ namespace AL.Utilities
                 "Assets/AL/ScriptableObjects/Skills",
                 "Assets/AL/ScriptableObjects/Equipment",
                 "Assets/AL/ScriptableObjects/Warmaster",
-                "Assets/AL/ScriptableObjects/Bosses"
+                "Assets/AL/ScriptableObjects/Bosses",
+                "Assets/AL/ScriptableObjects/Chapters",
+                "Assets/AL/ScriptableObjects/Dialogues",
+                "Assets/AL/ScriptableObjects/Quests"
             };
 
             foreach (var folder in folders)
@@ -46,6 +50,13 @@ namespace AL.Utilities
             CreateRealmTemplate(RealmId.Crownlands, "Crownlands Humans", "The adaptive and numerous people of the plains.");
             CreateRealmTemplate(RealmId.Umbral, "Umbral Dark Elves", "Masters of shadow and clandestine arts.");
 
+            // 3. Generate Building Templates (15 core buildings)
+            string[] buildingIds = { "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks", "Academy", "Market", "Storehouse", "Forge", "Stable", "Workshop", "Embassy", "Wall", "Watchtower" };
+            foreach(var id in buildingIds)
+            {
+                CreateBuildingTemplate(id);
+            }
+
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
             Debug.Log("Project Setup Complete!");
@@ -63,6 +74,20 @@ namespace AL.Utilities
 
             AssetDatabase.CreateAsset(realm, path);
             Debug.Log($"Created Realm Template: {path}");
+        }
+
+        private void CreateBuildingTemplate(string id)
+        {
+            string path = $"Assets/AL/ScriptableObjects/Buildings/{id}.asset";
+            if (File.Exists(path)) return;
+
+            BuildingDefinition def = ScriptableObject.CreateInstance<BuildingDefinition>();
+            def.Id = id;
+            def.DisplayName = id.Replace("Mill", " Mill").Replace("Hall", " Hall").Replace("Mine", " Mine");
+            def.MaxLevel = 10;
+
+            AssetDatabase.CreateAsset(def, path);
+            Debug.Log($"Created Building Template: {path}");
         }
     }
 }

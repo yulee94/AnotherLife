@@ -32,20 +32,16 @@ namespace AL.Services.Local
             {
                 string json = File.ReadAllText(SavePath);
                 _currentSave = JsonUtility.FromJson<SaveGameData>(json);
-                CalculateOfflineProgress();
                 Debug.Log("Game Loaded");
             }
             else
             {
-                _currentSave = null;
-                Debug.Log("No save file found");
+                Debug.Log("No save file found. Initializing defaults.");
+                CreateNewSave(RealmId.None);
             }
         }
 
-        public bool HasSave()
-        {
-            return File.Exists(SavePath);
-        }
+        public bool HasSave() => File.Exists(SavePath);
 
         public void CreateNewSave(RealmId realmId)
         {
@@ -58,9 +54,11 @@ namespace AL.Services.Local
                     new ResourceData { Type = ResourceType.Food, Amount = 1000 },
                     new ResourceData { Type = ResourceType.Wood, Amount = 1000 },
                     new ResourceData { Type = ResourceType.Stone, Amount = 500 },
-                    new ResourceData { Type = ResourceType.Gold, Amount = 100 }
+                    new ResourceData { Type = ResourceType.Gold, Amount = 500 }
                 },
                 Buildings = new List<BuildingState>(),
+                Quests = new List<QuestState>(),
+                CurrentChapterId = "C1",
                 Warmaster = new WarmasterState()
             };
             Save();
@@ -68,25 +66,8 @@ namespace AL.Services.Local
 
         public void DeleteSave()
         {
-            if (File.Exists(SavePath))
-            {
-                File.Delete(SavePath);
-            }
+            if (File.Exists(SavePath)) File.Delete(SavePath);
             _currentSave = null;
-        }
-
-        private void CalculateOfflineProgress()
-        {
-            if (_currentSave == null) return;
-
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            long diff = now - _currentSave.LastSavedTimestamp;
-
-            if (diff > 0)
-            {
-                Debug.Log($"Offline progress: {diff} seconds elapsed since last save.");
-                // TODO: Apply resource production based on 'diff'
-            }
         }
     }
 }
