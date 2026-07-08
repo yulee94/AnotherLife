@@ -20,7 +20,7 @@ Another Life is a high-fantasy kingdom war game prototype that combines an Andro
 
 1. Open the repository root in Android Studio.
 2. Use the `app` module for Android shell, navigation, and native UI work.
-3. Before starting work, fetch latest `master` and check open GitHub PRs.
+3. Before starting work, fetch latest `main` and check open GitHub PRs.
 
 ### Unity Hub
 
@@ -64,14 +64,18 @@ Shared files require extra care:
 
 If a merge conflict happens in a shared file, preserve both systems whenever possible. Service registration conflicts should keep all services. Save-data changes should stay backward compatible through default initialization.
 
+## Branches
+
+The repository uses `main` as the single default branch. The old `master` branch was consolidated into `main` and removed from GitHub so co-developers always see the current project from the repository front page.
+
 ## PR Workflow
 
-1. Fetch latest `master`.
+1. Fetch latest `main`.
 2. Check open GitHub PRs before editing.
 3. Use focused branches, such as `android-studio/<scope>` or `codex/<scope>`.
 4. Keep each PR scoped to one major completion.
 5. In the PR body, list ownership areas touched and validation performed.
-6. Rebase onto latest `master` instead of overwriting collaborator work.
+6. Rebase onto latest `main` instead of overwriting collaborator work.
 
 For a copy-paste coordination prompt, see:
 
