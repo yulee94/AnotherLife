@@ -3,11 +3,14 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 namespace AL.Kingdom.Visuals
 {
     public class KingdomVisualizer : MonoBehaviour
     {
+        public static event System.Action<string> OnTerritorySelected;
+
         private CityLayoutEngine _layoutEngine;
         private IRealmService _realmService;
         private IBuildingService _buildingService;
@@ -148,8 +151,10 @@ namespace AL.Kingdom.Visuals
                 root.transform.SetParent(outposts.transform, false);
                 root.transform.position = position;
 
-                CreateTerritoryPrimitive(root.transform, "OutpostBase", PrimitiveType.Cylinder, new Vector3(0f, 0.06f, 0f), territory.IsFortress ? new Vector3(0.46f, 0.12f, 0.46f) : new Vector3(0.34f, 0.08f, 0.34f), Color.Lerp(ownerColor, Color.black, 0.20f));
-                CreateTerritoryPrimitive(root.transform, "OutpostTower", territory.IsFortress ? PrimitiveType.Cylinder : PrimitiveType.Cube, new Vector3(0f, territory.IsFortress ? 0.40f : 0.28f, 0f), territory.IsFortress ? new Vector3(0.22f, 0.46f, 0.22f) : new Vector3(0.30f, 0.32f, 0.30f), ownerColor);
+                var baseObject = CreateTerritoryPrimitive(root.transform, "OutpostBase", PrimitiveType.Cylinder, new Vector3(0f, 0.06f, 0f), territory.IsFortress ? new Vector3(0.46f, 0.12f, 0.46f) : new Vector3(0.34f, 0.08f, 0.34f), Color.Lerp(ownerColor, Color.black, 0.20f));
+                var towerObject = CreateTerritoryPrimitive(root.transform, "OutpostTower", territory.IsFortress ? PrimitiveType.Cylinder : PrimitiveType.Cube, new Vector3(0f, territory.IsFortress ? 0.40f : 0.28f, 0f), territory.IsFortress ? new Vector3(0.22f, 0.46f, 0.22f) : new Vector3(0.30f, 0.32f, 0.30f), ownerColor);
+                baseObject.AddComponent<KingdomTerritorySelectable>().Configure(territory.Name, territory.OwnerRealm, territory.BonusType, territory.BonusAmount, territory.IsFortress, Color.Lerp(ownerColor, Color.black, 0.20f), ownerColor);
+                towerObject.AddComponent<KingdomTerritorySelectable>().Configure(territory.Name, territory.OwnerRealm, territory.BonusType, territory.BonusAmount, territory.IsFortress, ownerColor, Color.Lerp(ownerColor, Color.white, 0.25f));
                 CreateTerritoryPrimitive(root.transform, "OutpostFlag", PrimitiveType.Cube, new Vector3(0.24f, territory.IsFortress ? 0.76f : 0.56f, 0f), new Vector3(0.30f, 0.13f, 0.035f), Color.Lerp(ownerColor, Color.white, 0.25f));
 
                 var labelObject = new GameObject("OutpostLabel");
@@ -194,6 +199,14 @@ namespace AL.Kingdom.Visuals
             return name.Length <= 13 ? name : name.Substring(0, 13);
         }
 
+        internal static void RaiseTerritorySelected(string name, RealmId owner, ResourceType bonusType, long bonusAmount, bool isFortress)
+        {
+            string territoryName = string.IsNullOrWhiteSpace(name) ? "Outpost" : name;
+            string ownerLabel = owner == RealmId.None ? "Neutral" : owner.ToString();
+            string kind = isFortress ? "Fortress" : "Outpost";
+            OnTerritorySelected?.Invoke($"{kind}: {territoryName}. Owner {ownerLabel}. Bonus +{bonusAmount} {bonusType}.");
+        }
+
         private static void CreateFramePiece(Transform parent, string name, Vector3 position, Vector3 scale, Color color)
         {
             var piece = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -221,6 +234,68 @@ namespace AL.Kingdom.Visuals
             for (int i = parent.childCount - 1; i >= 0; i--)
             {
                 Destroy(parent.GetChild(i).gameObject);
+            }
+        }
+    }
+
+    public class KingdomTerritorySelectable : MonoBehaviour
+    {
+        private string _name;
+        private RealmId _owner;
+        private ResourceType _bonusType;
+        private long _bonusAmount;
+        private bool _isFortress;
+        private Color _baseColor;
+        private Color _accentColor;
+        private Renderer _renderer;
+        private float _highlightTimer;
+
+        public void Configure(string name, RealmId owner, ResourceType bonusType, long bonusAmount, bool isFortress, Color baseColor, Color accentColor)
+        {
+            _name = name;
+            _owner = owner;
+            _bonusType = bonusType;
+            _bonusAmount = bonusAmount;
+            _isFortress = isFortress;
+            _baseColor = baseColor;
+            _accentColor = accentColor;
+            _renderer = GetComponent<Renderer>();
+        }
+
+        private void OnMouseDown()
+        {
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                return;
+            }
+
+            _highlightTimer = 0.48f;
+            KingdomVisualizer.RaiseTerritorySelected(_name, _owner, _bonusType, _bonusAmount, _isFortress);
+        }
+
+        private void Update()
+        {
+            if (_highlightTimer <= 0f)
+            {
+                SetColor(_baseColor);
+                return;
+            }
+
+            _highlightTimer -= Time.deltaTime;
+            float pulse = Mathf.PingPong(Time.time * 7.5f, 1f);
+            SetColor(Color.Lerp(_baseColor, _accentColor, 0.40f + pulse * 0.38f));
+        }
+
+        private void SetColor(Color color)
+        {
+            if (_renderer == null)
+            {
+                _renderer = GetComponent<Renderer>();
+            }
+
+            if (_renderer != null)
+            {
+                _renderer.material.color = color;
             }
         }
     }

@@ -56,11 +56,13 @@ namespace AL.UI.Kingdom
         private void OnEnable()
         {
             CityLayoutEngine.OnBuildingSelected += HandleBuildingSelected;
+            KingdomVisualizer.OnTerritorySelected += HandleTerritorySelected;
         }
 
         private void OnDisable()
         {
             CityLayoutEngine.OnBuildingSelected -= HandleBuildingSelected;
+            KingdomVisualizer.OnTerritorySelected -= HandleTerritorySelected;
         }
 
         private void Start()
@@ -460,6 +462,11 @@ namespace AL.UI.Kingdom
         }
 
         private void HandleBuildingSelected(string message)
+        {
+            SetMessage(message);
+        }
+
+        private void HandleTerritorySelected(string message)
         {
             SetMessage(message);
         }
