@@ -85,7 +85,7 @@ namespace AL.ChampionMode.AI
 
             if (_mode != AutoMode.Manual && Random.value > 0.55f)
             {
-                _controller.RequestSkill(0);
+                _controller.RequestSkill(Random.Range(0, 4));
             }
         }
 
@@ -129,4 +129,3 @@ namespace AL.ChampionMode.AI
         }
     }
 }
-

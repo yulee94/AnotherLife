@@ -32,6 +32,7 @@ namespace AL.ChampionMode.Control
         private bool _isAttacking;
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
+        private SkillCaster _skillCaster;
 
         private void Awake()
         {
@@ -48,6 +49,8 @@ namespace AL.ChampionMode.Control
 
             if (_cameraTransform == null && UnityEngine.Camera.main != null)
                 _cameraTransform = UnityEngine.Camera.main.transform;
+
+            _skillCaster = GetComponent<SkillCaster>() ?? gameObject.AddComponent<SkillCaster>();
         }
 
         private void Start()
@@ -114,7 +117,10 @@ namespace AL.ChampionMode.Control
                 StartCoroutine(PerformAttack());
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha1)) UseSkill(0);
+            if (Input.GetKeyDown(KeyCode.Alpha1)) RequestSkill(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) RequestSkill(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) RequestSkill(2);
+            if (Input.GetKeyDown(KeyCode.Alpha4)) RequestSkill(3);
         }
 
         private IEnumerator PerformAttack()
@@ -148,7 +154,7 @@ namespace AL.ChampionMode.Control
                     CreateHitVFX(hitCollider.transform.position);
 
                     Destroy(hitCollider.gameObject);
-                    CheckVictory();
+                    CheckVictory(1);
                 }
                 else if (hitCollider.gameObject.name.StartsWith("BossDummy"))
                 {
@@ -169,10 +175,10 @@ namespace AL.ChampionMode.Control
             SkillEffectFactory.SpawnRealmImpact(position, GetCurrentRealmId());
         }
 
-        private void CheckVictory()
+        public void CheckVictory(int pendingDestroyedDummies = 0)
         {
             int remaining = GameObject.FindObjectsOfType<GameObject>()
-                .Count(obj => obj.name.StartsWith("Dummy_")) - 1; // -1 because current one isn't destroyed yet in this frame
+                .Count(obj => obj.name.StartsWith("Dummy_")) - pendingDestroyedDummies;
 
             if (remaining <= 0)
             {
@@ -207,12 +213,13 @@ namespace AL.ChampionMode.Control
         private void UseSkill(int index)
         {
             Debug.Log($"[Champion] Using Skill {index + 1}");
-            SkillEffectFactory.SpawnRealmImpact(transform.position + transform.forward * 1.5f + Vector3.up, GetCurrentRealmId());
+            _skillCaster?.TryCastSkill(index);
         }
 
         private IEnumerator Dodge()
         {
             _isDodging = true;
+            _skillCaster?.CancelCurrentSkill();
             SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, GetCurrentRealmId());
             Vector3 dodgeDir = transform.forward;
             float timer = 0f;
