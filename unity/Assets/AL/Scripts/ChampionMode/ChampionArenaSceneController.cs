@@ -668,9 +668,9 @@ namespace AL.ChampionMode
             CreateHudButton(actionPanel.transform, font, "Assist", new Vector2(18f, -202f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.SemiAuto), 14);
             CreateHudButton(actionPanel.transform, font, "Auto", new Vector2(18f, -242f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.FullAuto), 14);
 
-            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 430f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
+            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
-            CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 410f), new Color(0.24f, 0.56f, 1f, 0.48f));
+            CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 486f), new Color(0.24f, 0.56f, 1f, 0.48f));
             CreateText(appearancePanel.transform, font, "CHAMPION FORGE", 16, new Vector2(18f, -14f), new Vector2(178f, 22f), TextAnchor.UpperLeft, new Color(1f, 0.80f, 0.48f));
             CreateText(appearancePanel.transform, font, "COLORS", 12, new Vector2(244f, -16f), new Vector2(64f, 18f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             for (int i = 0; i < _appearanceSwatches.Length; i++)
@@ -689,6 +689,9 @@ namespace AL.ChampionMode
             Color vanguardButton = new Color(0.15f, 0.12f, 0.08f, 0.96f);
             Color arcanistButton = new Color(0.06f, 0.12f, 0.18f, 0.96f);
             Color nightbladeButton = new Color(0.14f, 0.055f, 0.065f, 0.96f);
+            Color dreadknightButton = new Color(0.15f, 0.035f, 0.030f, 0.96f);
+            Color oracleButton = new Color(0.08f, 0.16f, 0.13f, 0.96f);
+            Color duelistButton = new Color(0.16f, 0.11f, 0.06f, 0.96f);
             CreateHudButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CyclePrimaryColor(); RefreshAppearanceText(); }, 13, colorButton);
             CreateHudButton(appearancePanel.transform, font, "Hair", new Vector2(144f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairColor(); RefreshAppearanceText(); }, 13, colorButton);
             CreateHudButton(appearancePanel.transform, font, "Skin", new Vector2(270f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleSkinColor(); RefreshAppearanceText(); }, 13, colorButton);
@@ -704,12 +707,15 @@ namespace AL.ChampionMode
             CreateHudButton(appearancePanel.transform, font, "Vanguard", new Vector2(18f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("vanguard"), 12, vanguardButton);
             CreateHudButton(appearancePanel.transform, font, "Arcanist", new Vector2(144f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("arcanist"), 12, arcanistButton);
             CreateHudButton(appearancePanel.transform, font, "Nightblade", new Vector2(270f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("nightblade"), 12, nightbladeButton);
-            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -306f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -306f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -306f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
-            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -344f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Dread", new Vector2(18f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("dreadknight"), 12, dreadknightButton);
+            CreateHudButton(appearancePanel.transform, font, "Oracle", new Vector2(144f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("oracle"), 12, oracleButton);
+            CreateHudButton(appearancePanel.transform, font, "Duelist", new Vector2(270f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("duelist"), 12, duelistButton);
+            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -344f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -344f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -344f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
+            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -382f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
             _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
-            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -350f), new Vector2(238f, 62f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -388f), new Vector2(238f, 62f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -930,6 +936,9 @@ namespace AL.ChampionMode
                 "vanguard" => "Forge preset loaded: Vanguard. Heavy plate, shield discipline, and a front-line silhouette.",
                 "arcanist" => "Forge preset loaded: Arcanist. Robes, staff focus, and high-contrast arcane accents.",
                 "nightblade" => "Forge preset loaded: Nightblade. Lean armor, bow pressure, dagger offhand, and a darker profile.",
+                "dreadknight" => "Forge preset loaded: Dreadknight. Massive plate, hammer pressure, ash mask, and a heavier adult silhouette.",
+                "oracle" => "Forge preset loaded: Oracle. Tall ritual profile, staff and orb focus, and pale luminous accents.",
+                "duelist" => "Forge preset loaded: Duelist. Lean precision frame, sword and dagger, and close-read scar detail.",
                 _ => "Forge preset loaded. Fine tune colors, gear, and face marks before entering combat."
             };
         }

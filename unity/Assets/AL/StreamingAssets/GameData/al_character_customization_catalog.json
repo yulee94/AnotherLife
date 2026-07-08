@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.5.0",
   "game": "Another Life",
   "characterSlots": [
     "BodyPreset",
@@ -28,7 +28,11 @@
     { "id": "slim", "displayName": "Slim", "scale": [0.86, 1.06, 0.86] },
     { "id": "broad", "displayName": "Broad", "scale": [1.16, 1.0, 1.06] },
     { "id": "tall", "displayName": "Tall", "scale": [0.96, 1.18, 0.96] },
-    { "id": "stout", "displayName": "Stout", "scale": [1.08, 0.92, 1.08] }
+    { "id": "stout", "displayName": "Stout", "scale": [1.08, 0.92, 1.08] },
+    { "id": "duelist", "displayName": "Duelist", "scale": [0.94, 1.08, 0.92] },
+    { "id": "statuesque", "displayName": "Statuesque", "scale": [1.02, 1.24, 0.98] },
+    { "id": "massive", "displayName": "Massive", "scale": [1.24, 1.04, 1.14] },
+    { "id": "compact", "displayName": "Compact", "scale": [1.02, 0.86, 1.02] }
   ],
   "hairStyles": [
     { "id": "short", "displayName": "Short" },
@@ -50,35 +54,51 @@
     { "id": "stone_bronze", "displayName": "Stone Bronze", "rgb": [0.45, 0.38, 0.30] },
     { "id": "grove_green", "displayName": "Grove Green", "rgb": [0.18, 0.58, 0.32] },
     { "id": "royal_gold", "displayName": "Royal Gold", "rgb": [0.85, 0.62, 0.18] },
-    { "id": "umbral_violet", "displayName": "Umbral Violet", "rgb": [0.22, 0.08, 0.28] }
+    { "id": "umbral_violet", "displayName": "Umbral Violet", "rgb": [0.22, 0.08, 0.28] },
+    { "id": "obsidian_steel", "displayName": "Obsidian Steel", "rgb": [0.055, 0.060, 0.070] },
+    { "id": "blood_wine", "displayName": "Blood Wine", "rgb": [0.28, 0.035, 0.045] },
+    { "id": "ivory_battlecloth", "displayName": "Ivory Battlecloth", "rgb": [0.82, 0.78, 0.66] },
+    { "id": "duelist_steel", "displayName": "Duelist Steel", "rgb": [0.18, 0.21, 0.24] }
   ],
   "hairColors": [
     { "id": "raven", "displayName": "Raven", "rgb": [0.08, 0.06, 0.04] },
     { "id": "chestnut", "displayName": "Chestnut", "rgb": [0.55, 0.36, 0.16] },
     { "id": "sun_blonde", "displayName": "Sun Blonde", "rgb": [0.85, 0.78, 0.55] },
     { "id": "silver", "displayName": "Silver", "rgb": [0.80, 0.82, 0.90] },
-    { "id": "ember_black", "displayName": "Ember Black", "rgb": [0.25, 0.05, 0.08] }
+    { "id": "ember_black", "displayName": "Ember Black", "rgb": [0.25, 0.05, 0.08] },
+    { "id": "ivory", "displayName": "Ivory", "rgb": [0.88, 0.84, 0.72] },
+    { "id": "ash_black", "displayName": "Ash Black", "rgb": [0.16, 0.16, 0.18] },
+    { "id": "copper", "displayName": "Copper", "rgb": [0.42, 0.24, 0.11] }
   ],
   "skinColors": [
     { "id": "sunlit", "displayName": "Sunlit", "rgb": [0.72, 0.56, 0.42] },
     { "id": "deep_earth", "displayName": "Deep Earth", "rgb": [0.55, 0.38, 0.26] },
     { "id": "fair", "displayName": "Fair", "rgb": [0.86, 0.70, 0.54] },
     { "id": "rose_ash", "displayName": "Rose Ash", "rgb": [0.64, 0.50, 0.46] },
-    { "id": "umbral", "displayName": "Umbral", "rgb": [0.42, 0.34, 0.40] }
+    { "id": "umbral", "displayName": "Umbral", "rgb": [0.42, 0.34, 0.40] },
+    { "id": "warm_umber", "displayName": "Warm Umber", "rgb": [0.66, 0.48, 0.36] },
+    { "id": "porcelain_rose", "displayName": "Porcelain Rose", "rgb": [0.78, 0.62, 0.52] },
+    { "id": "storm_ash", "displayName": "Storm Ash", "rgb": [0.46, 0.34, 0.32] }
   ],
   "eyeColors": [
     { "id": "storm_blue", "displayName": "Storm Blue", "rgb": [0.25, 0.58, 0.92] },
     { "id": "grove_green", "displayName": "Grove Green", "rgb": [0.28, 0.72, 0.42] },
     { "id": "amber", "displayName": "Amber", "rgb": [0.70, 0.42, 0.18] },
     { "id": "moonlit", "displayName": "Moonlit", "rgb": [0.78, 0.72, 0.88] },
-    { "id": "curse_red", "displayName": "Curse Red", "rgb": [0.90, 0.18, 0.12] }
+    { "id": "curse_red", "displayName": "Curse Red", "rgb": [0.90, 0.18, 0.12] },
+    { "id": "pale_gold", "displayName": "Pale Gold", "rgb": [0.95, 0.64, 0.20] },
+    { "id": "jade_fire", "displayName": "Jade Fire", "rgb": [0.58, 1.00, 0.82] },
+    { "id": "void_red", "displayName": "Void Red", "rgb": [0.95, 0.18, 0.08] }
   ],
   "accentColors": [
     { "id": "royal_gold", "displayName": "Royal Gold", "rgb": [0.85, 0.62, 0.18] },
     { "id": "arcane_blue", "displayName": "Arcane Blue", "rgb": [0.30, 0.75, 1.00] },
     { "id": "worldsap", "displayName": "Worldsap", "rgb": [0.42, 1.00, 0.48] },
     { "id": "ember", "displayName": "Ember", "rgb": [0.90, 0.12, 0.16] },
-    { "id": "shadow_violet", "displayName": "Shadow Violet", "rgb": [0.68, 0.28, 0.96] }
+    { "id": "shadow_violet", "displayName": "Shadow Violet", "rgb": [0.68, 0.28, 0.96] },
+    { "id": "blood_ember", "displayName": "Blood Ember", "rgb": [0.94, 0.12, 0.08] },
+    { "id": "oracle_green", "displayName": "Oracle Green", "rgb": [0.38, 1.00, 0.74] },
+    { "id": "burnished_gold", "displayName": "Burnished Gold", "rgb": [0.92, 0.54, 0.16] }
   ],
   "faceMarks": [
     { "id": "none", "displayName": "None" },
@@ -157,6 +177,60 @@
       "skinColor": [0.50, 0.38, 0.34],
       "eyeColor": [0.84, 0.18, 0.14],
       "accentColor": [0.78, 0.12, 0.18],
+      "capeEnabled": false,
+      "helmetEnabled": false
+    },
+    {
+      "id": "dreadknight",
+      "displayName": "Dreadknight",
+      "summary": "Massive warmaster plate identity with hammer pressure, ash mask, shield wall posture, and blood ember accents.",
+      "bodyPresetId": "massive",
+      "hairStyleId": "mohawk",
+      "armorStyleId": "warmaster_plate",
+      "faceMarkId": "ash_mask",
+      "weaponStyleId": "hammer",
+      "offhandStyleId": "shield",
+      "primaryColor": [0.055, 0.060, 0.070],
+      "hairColor": [0.16, 0.16, 0.18],
+      "skinColor": [0.46, 0.34, 0.32],
+      "eyeColor": [0.95, 0.18, 0.08],
+      "accentColor": [0.94, 0.12, 0.08],
+      "capeEnabled": true,
+      "helmetEnabled": true
+    },
+    {
+      "id": "oracle",
+      "displayName": "Oracle",
+      "summary": "Statuesque ritual profile with braided hair, staff and orb focus, pale cloth, and luminous green accents.",
+      "bodyPresetId": "statuesque",
+      "hairStyleId": "braid",
+      "armorStyleId": "arcane_robes",
+      "faceMarkId": "realm_mark",
+      "weaponStyleId": "staff",
+      "offhandStyleId": "orb",
+      "primaryColor": [0.82, 0.78, 0.66],
+      "hairColor": [0.88, 0.84, 0.72],
+      "skinColor": [0.78, 0.62, 0.52],
+      "eyeColor": [0.58, 1.00, 0.82],
+      "accentColor": [0.38, 1.00, 0.74],
+      "capeEnabled": true,
+      "helmetEnabled": false
+    },
+    {
+      "id": "duelist",
+      "displayName": "Duelist",
+      "summary": "Lean precision frame with light scout armor, sword and dagger, copper hair, scar detail, and burnished gold accents.",
+      "bodyPresetId": "duelist",
+      "hairStyleId": "short",
+      "armorStyleId": "light_scout",
+      "faceMarkId": "duelist_scar",
+      "weaponStyleId": "sword",
+      "offhandStyleId": "dagger",
+      "primaryColor": [0.18, 0.21, 0.24],
+      "hairColor": [0.42, 0.24, 0.11],
+      "skinColor": [0.66, 0.48, 0.36],
+      "eyeColor": [0.95, 0.64, 0.20],
+      "accentColor": [0.92, 0.54, 0.16],
       "capeEnabled": false,
       "helmetEnabled": false
     }
