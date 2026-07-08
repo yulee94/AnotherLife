@@ -56,7 +56,10 @@ namespace AL.ChampionMode.Skills
         {
             _combat = GetComponent<ChampionCombat>();
             _controller = GetComponent<ChampionController>();
-            ApplySharedSkillLoadouts();
+            if (!TryApplySharedSkillLoadouts())
+            {
+                StartCoroutine(ApplySharedSkillLoadoutsAsync());
+            }
         }
 
         public bool TryCastSkill(int slotIndex)
@@ -208,9 +211,40 @@ namespace AL.ChampionMode.Skills
             }
         }
 
-        private void ApplySharedSkillLoadouts()
+        private bool TryApplySharedSkillLoadouts()
         {
             if (!SkillLoadoutCatalog.TryLoad(out var loadouts))
+            {
+                return false;
+            }
+
+            ApplySkillLoadouts(loadouts);
+            return true;
+        }
+
+        private IEnumerator ApplySharedSkillLoadoutsAsync()
+        {
+            bool applied = false;
+            yield return SkillLoadoutCatalog.LoadAsync(loadouts =>
+            {
+                if (loadouts == null || loadouts.Length == 0)
+                {
+                    return;
+                }
+
+                ApplySkillLoadouts(loadouts);
+                applied = true;
+            });
+
+            if (applied)
+            {
+                Debug.Log("[SkillCaster] Applied shared skill loadouts from StreamingAssets.");
+            }
+        }
+
+        private void ApplySkillLoadouts(SkillLoadoutData[] loadouts)
+        {
+            if (loadouts == null)
             {
                 return;
             }

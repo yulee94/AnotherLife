@@ -1,6 +1,8 @@
 using System;
+using System.Collections;
 using System.IO;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace AL.ChampionMode.Skills
 {
@@ -35,7 +37,7 @@ namespace AL.ChampionMode.Skills
         {
             loadouts = null;
 
-            string path = Path.Combine(Application.streamingAssetsPath, CatalogRelativePath);
+            string path = BuildCatalogPath();
             if (!File.Exists(path))
             {
                 return false;
@@ -43,21 +45,71 @@ namespace AL.ChampionMode.Skills
 
             try
             {
-                string json = File.ReadAllText(path);
-                var catalog = JsonUtility.FromJson<SkillWeatherCatalogData>(json);
-                if (catalog?.skillLoadouts == null || catalog.skillLoadouts.Length == 0)
-                {
-                    return false;
-                }
-
-                loadouts = catalog.skillLoadouts;
-                return true;
+                return TryParse(File.ReadAllText(path), out loadouts);
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"[SkillLoadoutCatalog] Could not load shared skill catalog. Using runtime defaults. {ex.Message}");
                 return false;
             }
+        }
+
+        public static IEnumerator LoadAsync(Action<SkillLoadoutData[]> onLoaded)
+        {
+            if (TryLoad(out var fileLoadouts))
+            {
+                onLoaded?.Invoke(fileLoadouts);
+                yield break;
+            }
+
+            string path = BuildCatalogPath();
+            if (!path.Contains("://"))
+            {
+                onLoaded?.Invoke(null);
+                yield break;
+            }
+
+            using (var request = UnityWebRequest.Get(path))
+            {
+                yield return request.SendWebRequest();
+
+#if UNITY_2020_2_OR_NEWER
+                bool failed = request.result != UnityWebRequest.Result.Success;
+#else
+                bool failed = request.isNetworkError || request.isHttpError;
+#endif
+                if (failed)
+                {
+                    Debug.LogWarning($"[SkillLoadoutCatalog] Could not load shared skill catalog from StreamingAssets. Using runtime defaults. {request.error}");
+                    onLoaded?.Invoke(null);
+                    yield break;
+                }
+
+                onLoaded?.Invoke(TryParse(request.downloadHandler.text, out var webLoadouts) ? webLoadouts : null);
+            }
+        }
+
+        private static bool TryParse(string json, out SkillLoadoutData[] loadouts)
+        {
+            loadouts = null;
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return false;
+            }
+
+            var catalog = JsonUtility.FromJson<SkillWeatherCatalogData>(json);
+            if (catalog?.skillLoadouts == null || catalog.skillLoadouts.Length == 0)
+            {
+                return false;
+            }
+
+            loadouts = catalog.skillLoadouts;
+            return true;
+        }
+
+        private static string BuildCatalogPath()
+        {
+            return Application.streamingAssetsPath.TrimEnd('/', '\\') + "/" + CatalogRelativePath;
         }
     }
 }
