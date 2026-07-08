@@ -24,8 +24,11 @@ namespace AL.UI.Kingdom
         private Text _territoryText;
         private Text _battleText;
         private Text _messageText;
+        private GameObject _dashboardRoot;
+        private Text _dashboardToggleText;
         private KingdomVisualizer _kingdomVisualizer;
         private float _completionTimer;
+        private bool _dashboardVisible = true;
 
         private readonly string[] _buildingIds =
         {
@@ -137,38 +140,45 @@ namespace AL.UI.Kingdom
             bg.color = new Color(0.02f, 0.026f, 0.036f, 0.58f);
             Stretch(background.GetComponent<RectTransform>());
 
-            _realmText = CreateText(canvas.transform, "RealmText", font, 30, TextAnchor.UpperLeft, new Vector2(40, -30), new Vector2(900, 90));
-            _resourceText = CreateText(canvas.transform, "ResourceText", font, 24, TextAnchor.UpperLeft, new Vector2(40, -120), new Vector2(900, 130));
-            _buildingText = CreateText(canvas.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(500, 300));
-            _troopText = CreateText(canvas.transform, "TroopText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -570), new Vector2(500, 180));
-            _researchText = CreateText(canvas.transform, "ResearchText", font, 22, TextAnchor.UpperLeft, new Vector2(600, -250), new Vector2(520, 210));
-            _questText = CreateText(canvas.transform, "QuestText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 200));
-            _territoryText = CreateText(canvas.transform, "TerritoryText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -690), new Vector2(560, 170));
-            _battleText = CreateText(canvas.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -870), new Vector2(560, 190));
-            _messageText = CreateText(canvas.transform, "MessageText", font, 22, TextAnchor.LowerLeft, new Vector2(40, 40), new Vector2(900, 80));
+            _dashboardRoot = new GameObject("KingdomDashboardRoot");
+            _dashboardRoot.transform.SetParent(canvas.transform, false);
+            Stretch(_dashboardRoot.AddComponent<RectTransform>());
 
-            CreateButton(canvas.transform, font, "Upgrade Town Hall", new Vector2(-260, -80), () => UpgradeBuilding("TownHall"));
-            CreateButton(canvas.transform, font, "Upgrade Farm", new Vector2(-260, -145), () => UpgradeBuilding("Farm"));
-            CreateButton(canvas.transform, font, "Upgrade Lumber", new Vector2(-260, -210), () => UpgradeBuilding("LumberMill"));
-            CreateButton(canvas.transform, font, "Upgrade Quarry", new Vector2(-260, -275), () => UpgradeBuilding("Quarry"));
-            CreateButton(canvas.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
-            CreateButton(canvas.transform, font, "Upgrade Mana Shrine", new Vector2(-260, -405), () => UpgradeBuilding("ManaShrine"));
-            CreateButton(canvas.transform, font, "Upgrade Mine", new Vector2(-260, -470), () => UpgradeBuilding("Mine"));
-            CreateButton(canvas.transform, font, "Train Infantry", new Vector2(-260, -535), () => TrainTroops(TroopType.Infantry));
-            CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -600), () => TrainTroops(TroopType.Ranged));
-            CreateButton(canvas.transform, font, "Claim Quests", new Vector2(-260, -665), ClaimCompletedQuests);
+            _realmText = CreateText(_dashboardRoot.transform, "RealmText", font, 30, TextAnchor.UpperLeft, new Vector2(40, -30), new Vector2(900, 90));
+            _resourceText = CreateText(_dashboardRoot.transform, "ResourceText", font, 24, TextAnchor.UpperLeft, new Vector2(40, -120), new Vector2(900, 130));
+            _buildingText = CreateText(_dashboardRoot.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(500, 300));
+            _troopText = CreateText(_dashboardRoot.transform, "TroopText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -570), new Vector2(500, 180));
+            _researchText = CreateText(_dashboardRoot.transform, "ResearchText", font, 22, TextAnchor.UpperLeft, new Vector2(600, -250), new Vector2(520, 210));
+            _questText = CreateText(_dashboardRoot.transform, "QuestText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 200));
+            _territoryText = CreateText(_dashboardRoot.transform, "TerritoryText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -690), new Vector2(560, 170));
+            _battleText = CreateText(_dashboardRoot.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -870), new Vector2(560, 190));
+            _messageText = CreateText(_dashboardRoot.transform, "MessageText", font, 22, TextAnchor.LowerLeft, new Vector2(40, 40), new Vector2(900, 80));
 
-            CreateButton(canvas.transform, font, "Research Steel", new Vector2(-20, -80), () => StartResearch("Steel Forging"));
-            CreateButton(canvas.transform, font, "Research Armor", new Vector2(-20, -145), () => StartResearch("Plate Armor"));
-            CreateButton(canvas.transform, font, "Earn Warzone", new Vector2(-20, -210), EarnWarzoneCredits);
-            CreateButton(canvas.transform, font, "Buy Warmaster Piece", new Vector2(-20, -275), UnlockWarmaster);
-            CreateButton(canvas.transform, font, "Capture Border", new Vector2(-20, -340), CaptureBorderlands);
-            CreateButton(canvas.transform, font, "Pick Gem", new Vector2(-20, -405), PickTestGem);
-            CreateButton(canvas.transform, font, "Earn Wishgate", new Vector2(-20, -470), EarnWishgate);
-            CreateButton(canvas.transform, font, "Wish Reward", new Vector2(-20, -535), ChooseWishReward);
-            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-20, -600), RunTestBattle);
-            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-20, -665), () => SceneManager.LoadScene(_arenaSceneName));
-            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-20, -730), ResetSave);
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Town Hall", new Vector2(-260, -80), () => UpgradeBuilding("TownHall"));
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Farm", new Vector2(-260, -145), () => UpgradeBuilding("Farm"));
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Lumber", new Vector2(-260, -210), () => UpgradeBuilding("LumberMill"));
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Quarry", new Vector2(-260, -275), () => UpgradeBuilding("Quarry"));
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Mana Shrine", new Vector2(-260, -405), () => UpgradeBuilding("ManaShrine"));
+            CreateButton(_dashboardRoot.transform, font, "Upgrade Mine", new Vector2(-260, -470), () => UpgradeBuilding("Mine"));
+            CreateButton(_dashboardRoot.transform, font, "Train Infantry", new Vector2(-260, -535), () => TrainTroops(TroopType.Infantry));
+            CreateButton(_dashboardRoot.transform, font, "Train Ranged", new Vector2(-260, -600), () => TrainTroops(TroopType.Ranged));
+            CreateButton(_dashboardRoot.transform, font, "Claim Quests", new Vector2(-260, -665), ClaimCompletedQuests);
+
+            CreateButton(_dashboardRoot.transform, font, "Research Steel", new Vector2(-20, -80), () => StartResearch("Steel Forging"));
+            CreateButton(_dashboardRoot.transform, font, "Research Armor", new Vector2(-20, -145), () => StartResearch("Plate Armor"));
+            CreateButton(_dashboardRoot.transform, font, "Earn Warzone", new Vector2(-20, -210), EarnWarzoneCredits);
+            CreateButton(_dashboardRoot.transform, font, "Buy Warmaster Piece", new Vector2(-20, -275), UnlockWarmaster);
+            CreateButton(_dashboardRoot.transform, font, "Capture Border", new Vector2(-20, -340), CaptureBorderlands);
+            CreateButton(_dashboardRoot.transform, font, "Pick Gem", new Vector2(-20, -405), PickTestGem);
+            CreateButton(_dashboardRoot.transform, font, "Earn Wishgate", new Vector2(-20, -470), EarnWishgate);
+            CreateButton(_dashboardRoot.transform, font, "Wish Reward", new Vector2(-20, -535), ChooseWishReward);
+            CreateButton(_dashboardRoot.transform, font, "Test Battle", new Vector2(-20, -600), RunTestBattle);
+            CreateButton(_dashboardRoot.transform, font, "Champion Arena", new Vector2(-20, -665), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateButton(_dashboardRoot.transform, font, "Reset Save", new Vector2(-20, -730), ResetSave);
+
+            var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-20, -20), ToggleDashboard);
+            _dashboardToggleText = toggle.GetComponentInChildren<Text>();
         }
 
         private void UpgradeBuilding(string buildingId)
@@ -434,6 +444,20 @@ namespace AL.UI.Kingdom
             _messageText.text = message;
         }
 
+        private void ToggleDashboard()
+        {
+            _dashboardVisible = !_dashboardVisible;
+            if (_dashboardRoot != null)
+            {
+                _dashboardRoot.SetActive(_dashboardVisible);
+            }
+
+            if (_dashboardToggleText != null)
+            {
+                _dashboardToggleText.text = _dashboardVisible ? "Board View" : "Show UI";
+            }
+        }
+
         private static Canvas CreateCanvas(string name)
         {
             var canvasObject = new GameObject(name);
@@ -465,7 +489,7 @@ namespace AL.UI.Kingdom
             return text;
         }
 
-        private static void CreateButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action)
+        private static Button CreateButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action)
         {
             var buttonObject = new GameObject(label);
             buttonObject.transform.SetParent(parent, false);
@@ -491,6 +515,7 @@ namespace AL.UI.Kingdom
             textRect.pivot = new Vector2(0.5f, 0.5f);
             textRect.offsetMin = Vector2.zero;
             textRect.offsetMax = Vector2.zero;
+            return button;
         }
 
         private static Font GetDefaultFont()
