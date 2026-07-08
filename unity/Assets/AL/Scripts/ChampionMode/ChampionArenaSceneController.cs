@@ -93,6 +93,10 @@ namespace AL.ChampionMode
         private Text _castChannelText;
         private Image _castChannelFill;
         private Image _castChannelGlow;
+        private Text _controlModeText;
+        private Image _controlModeStrip;
+        private readonly Text[] _controlModeButtonTexts = new Text[3];
+        private readonly Image[] _controlModeButtonImages = new Image[3];
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private float _encounterStartTime;
@@ -853,9 +857,11 @@ namespace AL.ChampionMode
             CreateText(actionPanel.transform, font, "ACTIONS", 15, new Vector2(16f, -16f), new Vector2(136f, 20f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
             CreateHudButton(actionPanel.transform, font, "Attack", new Vector2(18f, -48f), new Vector2(132f, 42f), () => _playerController.RequestBasicAttack(), 16, new Color(0.24f, 0.08f, 0.08f, 0.95f));
             CreateHudButton(actionPanel.transform, font, "Dodge", new Vector2(18f, -96f), new Vector2(132f, 42f), () => _playerController.RequestDodge(), 16, new Color(0.09f, 0.16f, 0.24f, 0.95f));
-            CreateHudButton(actionPanel.transform, font, "Manual", new Vector2(18f, -162f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.Manual), 14);
-            CreateHudButton(actionPanel.transform, font, "Assist", new Vector2(18f, -202f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.SemiAuto), 14);
-            CreateHudButton(actionPanel.transform, font, "Auto", new Vector2(18f, -242f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.FullAuto), 14);
+            _controlModeStrip = CreateUiImage(actionPanel.transform, "ControlModeStrip", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -145f), new Vector2(132f, 4f), new Color(0.45f, 0.70f, 1f, 0.74f));
+            _controlModeText = CreateText(actionPanel.transform, font, "CONTROL MANUAL", 10, new Vector2(18f, -130f), new Vector2(132f, 18f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
+            CreateControlModeButton(actionPanel.transform, font, "Manual", AutoMode.Manual, 0, new Vector2(18f, -162f));
+            CreateControlModeButton(actionPanel.transform, font, "Assist", AutoMode.SemiAuto, 1, new Vector2(18f, -202f));
+            CreateControlModeButton(actionPanel.transform, font, "Auto", AutoMode.FullAuto, 2, new Vector2(18f, -242f));
 
             var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
@@ -1006,6 +1012,7 @@ namespace AL.ChampionMode
                 _playerSkillCaster.GetSkillName(2) + " / " +
                 _playerSkillCaster.GetSkillName(3);
             RefreshSkillButtonLabels();
+            RefreshControlMode();
         }
 
         private void RefreshCastChannel()
@@ -1035,6 +1042,104 @@ namespace AL.ChampionMode
             string skillName = GetCompactSkillName(_playerSkillCaster.ActiveSkillName).ToUpperInvariant();
             _castChannelText.text = $"CASTING {skillName}  {Mathf.CeilToInt(progress * 100f)}%";
             _castChannelText.color = Color.Lerp(slotColor, Color.white, 0.26f);
+        }
+
+        private void CreateControlModeButton(Transform parent, Font font, string label, AutoMode mode, int index, Vector2 anchoredPosition)
+        {
+            var button = CreateHudButton(parent, font, label, anchoredPosition, new Vector2(132f, 34f), () => SetControlMode(mode, true), 14);
+            if (index < 0 || index >= _controlModeButtonImages.Length)
+            {
+                return;
+            }
+
+            _controlModeButtonImages[index] = button.GetComponent<Image>();
+            _controlModeButtonTexts[index] = button.GetComponentInChildren<Text>();
+        }
+
+        private void SetControlMode(AutoMode mode, bool announce)
+        {
+            _autoCombatController?.SetMode(mode);
+            RefreshControlMode();
+            if (!announce || _combatFeedText == null)
+            {
+                return;
+            }
+
+            _combatFeedText.text = mode switch
+            {
+                AutoMode.SemiAuto => "Assist control engaged. Champion will attack and cast while you keep movement authority.",
+                AutoMode.FullAuto => "Full Auto engaged. Champion will move, attack, and cast until manual input overrides.",
+                _ => "Manual control engaged. Your inputs drive movement, dodges, and skill timing."
+            };
+        }
+
+        private void RefreshControlMode()
+        {
+            AutoMode mode = _autoCombatController != null ? _autoCombatController.Mode : AutoMode.Manual;
+            Color modeColor = GetControlModeColor(mode);
+            float pulse = (Mathf.Sin(Time.unscaledTime * 4.8f) + 1f) * 0.5f;
+
+            if (_controlModeText != null)
+            {
+                _controlModeText.text = "CONTROL " + GetControlModeLabel(mode).ToUpperInvariant();
+                _controlModeText.color = Color.Lerp(modeColor, Color.white, 0.26f);
+            }
+
+            if (_controlModeStrip != null)
+            {
+                _controlModeStrip.color = WithAlpha(Color.Lerp(modeColor, Color.white, pulse * 0.14f), 0.62f + pulse * 0.18f);
+                _controlModeStrip.rectTransform.localScale = new Vector3(1f, 1f + pulse * 0.12f, 1f);
+            }
+
+            for (int i = 0; i < _controlModeButtonImages.Length; i++)
+            {
+                AutoMode buttonMode = GetControlModeByIndex(i);
+                bool isActive = buttonMode == mode;
+                Color buttonColor = GetControlModeColor(buttonMode);
+                if (_controlModeButtonImages[i] != null)
+                {
+                    _controlModeButtonImages[i].color = isActive
+                        ? Color.Lerp(new Color(0.075f, 0.108f, 0.140f, 0.96f), buttonColor, 0.34f + pulse * 0.10f)
+                        : new Color(0.095f, 0.125f, 0.158f, 0.94f);
+                }
+
+                if (_controlModeButtonTexts[i] != null)
+                {
+                    _controlModeButtonTexts[i].color = isActive
+                        ? Color.Lerp(buttonColor, Color.white, 0.34f)
+                        : new Color(0.84f, 0.88f, 0.92f, 0.86f);
+                }
+            }
+        }
+
+        private static AutoMode GetControlModeByIndex(int index)
+        {
+            return index switch
+            {
+                1 => AutoMode.SemiAuto,
+                2 => AutoMode.FullAuto,
+                _ => AutoMode.Manual
+            };
+        }
+
+        private static Color GetControlModeColor(AutoMode mode)
+        {
+            return mode switch
+            {
+                AutoMode.SemiAuto => new Color(0.92f, 0.70f, 0.34f, 0.96f),
+                AutoMode.FullAuto => new Color(1f, 0.38f, 0.20f, 0.96f),
+                _ => new Color(0.45f, 0.70f, 1f, 0.96f)
+            };
+        }
+
+        private static string GetControlModeLabel(AutoMode mode)
+        {
+            return mode switch
+            {
+                AutoMode.SemiAuto => "Assist",
+                AutoMode.FullAuto => "Auto",
+                _ => "Manual"
+            };
         }
 
         private void RefreshBossText()
