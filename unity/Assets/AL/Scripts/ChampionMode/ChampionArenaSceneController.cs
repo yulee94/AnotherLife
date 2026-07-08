@@ -68,6 +68,7 @@ namespace AL.ChampionMode
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private float _encounterStartTime;
+        private float _appearanceFeedTimer;
         private float _lastHealthRatio = 1f;
         private Coroutine _damageFlashRoutine;
         private bool _guardBreakObserved;
@@ -96,6 +97,10 @@ namespace AL.ChampionMode
             }
 
             RefreshLowHealthFeedback();
+            if (_appearanceFeedTimer > 0f)
+            {
+                _appearanceFeedTimer -= Time.deltaTime;
+            }
 
             _skillHudTimer += Time.deltaTime;
             if (_skillHudTimer >= 0.25f)
@@ -607,9 +612,9 @@ namespace AL.ChampionMode
             CreateHudButton(actionPanel.transform, font, "Assist", new Vector2(18f, -202f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.SemiAuto), 14);
             CreateHudButton(actionPanel.transform, font, "Auto", new Vector2(18f, -242f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.FullAuto), 14);
 
-            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 344f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
+            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 430f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
-            CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 324f), new Color(0.24f, 0.56f, 1f, 0.48f));
+            CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 410f), new Color(0.24f, 0.56f, 1f, 0.48f));
             CreateText(appearancePanel.transform, font, "CHAMPION FORGE", 16, new Vector2(18f, -14f), new Vector2(178f, 22f), TextAnchor.UpperLeft, new Color(1f, 0.80f, 0.48f));
             CreateText(appearancePanel.transform, font, "COLORS", 12, new Vector2(244f, -16f), new Vector2(64f, 18f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             for (int i = 0; i < _appearanceSwatches.Length; i++)
@@ -620,10 +625,14 @@ namespace AL.ChampionMode
             CreateUiImage(appearancePanel.transform, "ForgeDividerA", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(-32f, 1f), new Color(0.38f, 0.48f, 0.62f, 0.32f));
             CreateText(appearancePanel.transform, font, "STYLE", 11, new Vector2(18f, -61f), new Vector2(80f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
             CreateText(appearancePanel.transform, font, "LOADOUT", 11, new Vector2(18f, -181f), new Vector2(92f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
+            CreateText(appearancePanel.transform, font, "PRESETS", 11, new Vector2(18f, -239f), new Vector2(92f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
 
             Color colorButton = new Color(0.075f, 0.105f, 0.135f, 0.95f);
             Color styleButton = new Color(0.070f, 0.090f, 0.118f, 0.96f);
             Color gearButton = new Color(0.095f, 0.085f, 0.070f, 0.96f);
+            Color vanguardButton = new Color(0.15f, 0.12f, 0.08f, 0.96f);
+            Color arcanistButton = new Color(0.06f, 0.12f, 0.18f, 0.96f);
+            Color nightbladeButton = new Color(0.14f, 0.055f, 0.065f, 0.96f);
             CreateHudButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CyclePrimaryColor(); RefreshAppearanceText(); }, 13, colorButton);
             CreateHudButton(appearancePanel.transform, font, "Hair", new Vector2(144f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairColor(); RefreshAppearanceText(); }, 13, colorButton);
             CreateHudButton(appearancePanel.transform, font, "Skin", new Vector2(270f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleSkinColor(); RefreshAppearanceText(); }, 13, colorButton);
@@ -636,12 +645,15 @@ namespace AL.ChampionMode
             CreateHudButton(appearancePanel.transform, font, "Weapon", new Vector2(18f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.CycleWeaponStyle(); RefreshAppearanceText(); }, 13, gearButton);
             CreateHudButton(appearancePanel.transform, font, "Offhand", new Vector2(144f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.CycleOffhandStyle(); RefreshAppearanceText(); }, 13, gearButton);
             CreateHudButton(appearancePanel.transform, font, "Cape", new Vector2(270f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.ToggleCape(); RefreshAppearanceText(); }, 13, gearButton);
-            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -242f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -242f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -242f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
-            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -278f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Vanguard", new Vector2(18f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("vanguard"), 12, vanguardButton);
+            CreateHudButton(appearancePanel.transform, font, "Arcanist", new Vector2(144f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("arcanist"), 12, arcanistButton);
+            CreateHudButton(appearancePanel.transform, font, "Nightblade", new Vector2(270f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("nightblade"), 12, nightbladeButton);
+            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -306f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -306f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -306f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
+            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -344f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
             _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
-            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -286f), new Vector2(238f, 48f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -350f), new Vector2(238f, 62f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -796,13 +808,30 @@ namespace AL.ChampionMode
                 breakState;
             SetFillAmount(_bossHealthFill, healthPercent);
             SetFillAmount(_bossBreakFill, breakPercent);
-            if (_combatFeedText != null)
+            if (_combatFeedText != null && _appearanceFeedTimer <= 0f)
             {
                 _combatFeedText.text = _boss.IsBroken
                     ? "Guard broken. Commit burst skills before the boss recovers."
                     : _boss.IsEnraged
                         ? "Enrage active. Dodge first, punish after the telegraph."
                         : "Pressure the guard bar, hold mana for the break window.";
+            }
+        }
+
+        private void ApplyChampionPreset(string presetId)
+        {
+            if (_playerCustomization == null || !_playerCustomization.ApplyAppearancePreset(presetId))
+            {
+                return;
+            }
+
+            RefreshAppearanceText();
+            SetAppearanceInspection(true);
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = GetChampionPresetMessage(presetId);
+                _appearanceFeedTimer = 3.5f;
             }
         }
 
@@ -833,6 +862,17 @@ namespace AL.ChampionMode
             }
 
             _appearanceSwatches[index].color = new Color(color.r, color.g, color.b, 0.95f);
+        }
+
+        private static string GetChampionPresetMessage(string presetId)
+        {
+            return presetId switch
+            {
+                "vanguard" => "Forge preset loaded: Vanguard. Heavy plate, shield discipline, and a front-line silhouette.",
+                "arcanist" => "Forge preset loaded: Arcanist. Robes, staff focus, and high-contrast arcane accents.",
+                "nightblade" => "Forge preset loaded: Nightblade. Lean armor, bow pressure, dagger offhand, and a darker profile.",
+                _ => "Forge preset loaded. Fine tune colors, gear, and face marks before entering combat."
+            };
         }
 
         private void RefreshEncounterText()

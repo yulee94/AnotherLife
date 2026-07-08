@@ -23,7 +23,7 @@ The player controls one main Champion/Lord in 3D Champion Mode. The base model s
 
 | Slot | Purpose | Notes |
 | --- | --- | --- |
-| BodyPreset | Height, shoulders, torso, legs, build | Use blend shapes later; start with 3 presets. |
+| BodyPreset | Height, shoulders, torso, legs, build | Use blend shapes later; runtime currently includes average, slim, broad, tall, and stout presets. |
 | Head | Face shape and ears | Realm variants can affect ears, beard, brows, and skin tones. |
 | Hair | Hair mesh, beard mesh, color | Dwarves prioritize beard variants; elves prioritize long hair and ears. |
 | Eyes | Eye color, glow, pupil style | Warmaster and realm effects can add emissive overlays. |
@@ -61,6 +61,16 @@ The player controls one main Champion/Lord in 3D Champion Mode. The base model s
 - Nightmare: twin scythes, fear/lifesteal visual accents.
 - Shadow Assassin: dagger and shuriken, low-profile armor.
 - Cursor: curse sigils, debuff relics, masked face variants.
+
+## Runtime Forge Presets
+
+The Champion Forge includes three adult-facing identity presets that write into the same saved customization state as manual edits:
+
+- Vanguard: broad body, warmaster/heavy plate language, sword and shield, scar detail, gold/steel material mood, cape and helmet enabled.
+- Arcanist: tall body, arcane robes, long hair, rune mark, staff and tome, blue emissive accents, cape enabled, helmet disabled.
+- Nightblade: slim body, assassin leathers, topknot, tattoo mark, bow and dagger, dark leather/crimson accent mood, cape and helmet disabled.
+
+These presets are starting points only. Players can still fine tune every exposed color, body, hair, face mark, armor, weapon, offhand, cape, and helmet option after selecting one.
 
 ## Material Channels
 
