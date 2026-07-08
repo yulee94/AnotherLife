@@ -47,6 +47,11 @@ namespace AL.ChampionMode
         private Image _bossHealthFill;
         private Image _bossBreakFill;
         private Image _bossStateStrip;
+        private Image _combatPressurePanel;
+        private Image _combatPressureRail;
+        private Image _combatPressureGlow;
+        private Image _combatPressureFill;
+        private Text _combatPressureText;
         private Image _damageFlashImage;
         private GameObject _targetLockRoot;
         private RectTransform _targetLockRect;
@@ -59,6 +64,7 @@ namespace AL.ChampionMode
         private readonly Image[] _lowHealthEdges = new Image[4];
         private readonly Image[] _targetLockMarks = new Image[8];
         private readonly Image[] _targetLockTicks = new Image[6];
+        private readonly Image[] _combatPressurePips = new Image[5];
         private GameObject _defeatPanelObject;
         private Text _defeatSummaryText;
         private Text _defeatDetailText;
@@ -141,6 +147,7 @@ namespace AL.ChampionMode
             }
 
             RefreshLowHealthFeedback();
+            RefreshCombatPressureIndicator();
             UpdateTargetLockIndicator();
             RefreshCastChannel();
             if (_appearanceFeedTimer > 0f)
@@ -850,6 +857,7 @@ namespace AL.ChampionMode
             _bossBreakFill = CreateStatusBar(bossPanel.transform, new Vector2(380f, -76f), new Vector2(400f, 14f), new Color(0.25f, 0.95f, 1f));
             CreateText(bossPanel.transform, font, "HP", 13, new Vector2(346f, -46f), new Vector2(28f, 18f), TextAnchor.UpperLeft, new Color(0.86f, 0.82f, 0.78f));
             CreateText(bossPanel.transform, font, "BREAK", 13, new Vector2(326f, -79f), new Vector2(50f, 18f), TextAnchor.UpperLeft, new Color(0.86f, 0.82f, 0.78f));
+            CreateCombatPressureIndicator(canvasObject.transform, font);
 
             var skillPanel = CreateHudPanel(canvasObject.transform, "CombatHotbar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(748f, 120f), new Color(0.035f, 0.042f, 0.052f, 0.88f));
             _skillText = CreateText(skillPanel.transform, font, "Skill loadout ready", 15, new Vector2(24f, -12f), new Vector2(360f, 22f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -2374,6 +2382,28 @@ namespace AL.ChampionMode
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(_playerController, moveInput);
         }
 
+        private void CreateCombatPressureIndicator(Transform parent, Font font)
+        {
+            _combatPressurePanel = CreateHudPanel(parent, "CombatPressureFrame", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -156f), new Vector2(560f, 44f), new Color(0.016f, 0.020f, 0.028f, 0.82f));
+            _combatPressureGlow = CreateUiImage(_combatPressurePanel.transform, "CombatPressureGlow", Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero, new Color(1f, 0.18f, 0.08f, 0.04f));
+            _combatPressureRail = CreateUiImage(_combatPressurePanel.transform, "CombatPressureRail", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(5f, 44f), new Color(1f, 0.54f, 0.18f, 0.72f));
+
+            var pressureTrack = CreateUiImage(_combatPressurePanel.transform, "CombatPressureTrack", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(18f, 9f), new Vector2(356f, 5f), new Color(0.045f, 0.052f, 0.064f, 0.86f));
+            _combatPressureFill = CreateUiImage(pressureTrack.transform, "CombatPressureFill", Vector2.zero, Vector2.one, new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero, new Color(1f, 0.54f, 0.18f, 0.84f));
+            _combatPressureFill.type = Image.Type.Filled;
+            _combatPressureFill.fillMethod = Image.FillMethod.Horizontal;
+            _combatPressureFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            _combatPressureFill.fillAmount = 0.35f;
+
+            _combatPressureText = CreateText(_combatPressurePanel.transform, font, "PRESSURE STABLE", 14, new Vector2(20f, -8f), new Vector2(360f, 24f), TextAnchor.UpperLeft, new Color(0.90f, 0.94f, 1f));
+            CreateText(_combatPressurePanel.transform, font, "BOSS PRESSURE", 10, new Vector2(406f, -8f), new Vector2(126f, 16f), TextAnchor.UpperRight, new Color(0.62f, 0.72f, 0.82f));
+
+            for (int i = 0; i < _combatPressurePips.Length; i++)
+            {
+                _combatPressurePips[i] = CreateUiImage(_combatPressurePanel.transform, "CombatPressurePip_" + i, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(1f, 0.5f), new Vector2(-34f - i * 20f, 15f), new Vector2(10f, 10f), new Color(1f, 0.54f, 0.18f, 0.24f));
+            }
+        }
+
         private void CreateTargetLockIndicator(Transform parent, Font font)
         {
             _targetLockRoot = new GameObject("BossTargetLock");
@@ -2508,6 +2538,82 @@ namespace AL.ChampionMode
             float danger = 1f - ratio / threshold;
             float pulse = (Mathf.Sin(Time.unscaledTime * 6.2f) + 1f) * 0.5f;
             SetLowHealthEdgeAlpha(Mathf.Lerp(0.08f, 0.24f, pulse) * danger);
+        }
+
+        private void RefreshCombatPressureIndicator()
+        {
+            if (_combatPressurePanel == null)
+            {
+                return;
+            }
+
+            if (_encounterFailed || _boss == null || _boss.MaxHealth <= 0f)
+            {
+                SetCombatPressureState("PRESSURE OFFLINE", new Color(0.38f, 0.44f, 0.52f, 1f), 0.10f, 0.10f);
+                return;
+            }
+
+            float playerRatio = _playerCombat != null && _playerCombat.MaxHealth > 0f
+                ? Mathf.Clamp01(_playerCombat.CurrentHealth / _playerCombat.MaxHealth)
+                : 1f;
+            float bossHealthPressure = 1f - Mathf.Clamp01(_boss.CurrentHealth / _boss.MaxHealth);
+
+            if (_boss.IsTelegraphing)
+            {
+                SetCombatPressureState("DODGE NOW - SLAM TELEGRAPH", new Color(1f, 0.12f, 0.04f, 1f), 1f, 1f);
+                return;
+            }
+
+            if (playerRatio <= 0.22f)
+            {
+                SetCombatPressureState("CRITICAL HP - RESET TEMPO", new Color(1f, 0.18f, 0.08f, 1f), 0.92f, 0.86f);
+                return;
+            }
+
+            if (_boss.IsEnraged)
+            {
+                SetCombatPressureState("ENRAGE ACTIVE - DEFEND FIRST", new Color(1f, 0.34f, 0.10f, 1f), 0.86f, 0.78f);
+                return;
+            }
+
+            if (_boss.IsBroken)
+            {
+                SetCombatPressureState("BREAK WINDOW - SPEND BURST", new Color(0.38f, 1f, 0.92f, 1f), 0.42f, 0.50f);
+                return;
+            }
+
+            float pressure = Mathf.Clamp01(0.28f + bossHealthPressure * 0.34f + (playerRatio < 0.45f ? 0.16f : 0f));
+            SetCombatPressureState(pressure > 0.56f ? "PRESSURE RISING - HOLD DODGE" : "PRESSURE STABLE - BUILD GUARD DAMAGE", new Color(1f, 0.58f, 0.18f, 1f), pressure, 0.34f);
+        }
+
+        private void SetCombatPressureState(string label, Color accent, float amount, float urgency)
+        {
+            amount = Mathf.Clamp01(amount);
+            urgency = Mathf.Clamp01(urgency);
+            float pulse = (Mathf.Sin(Time.unscaledTime * Mathf.Lerp(3.2f, 9.6f, urgency)) + 1f) * 0.5f;
+
+            if (_combatPressureText != null)
+            {
+                _combatPressureText.text = label;
+                _combatPressureText.color = Color.Lerp(new Color(0.86f, 0.92f, 1f, 1f), accent, 0.20f + urgency * 0.24f);
+            }
+
+            SetImageColor(_combatPressurePanel, WithAlpha(Color.Lerp(new Color(0.016f, 0.020f, 0.028f, 1f), accent, 0.06f + urgency * 0.08f), 0.82f));
+            SetImageColor(_combatPressureRail, WithAlpha(Color.Lerp(accent, Color.white, pulse * 0.20f), 0.54f + urgency * 0.36f));
+            SetImageColor(_combatPressureGlow, WithAlpha(accent, 0.035f + urgency * (0.10f + pulse * 0.10f)));
+            SetImageColor(_combatPressureFill, WithAlpha(Color.Lerp(accent, Color.white, pulse * 0.16f), 0.72f + urgency * 0.18f));
+            SetFillAmount(_combatPressureFill, Mathf.Lerp(amount * 0.86f, amount, pulse * urgency));
+
+            int activePips = Mathf.Clamp(Mathf.CeilToInt(amount * _combatPressurePips.Length), 1, _combatPressurePips.Length);
+            for (int i = 0; i < _combatPressurePips.Length; i++)
+            {
+                float pipAlpha = i < activePips ? 0.24f + urgency * 0.42f + pulse * 0.18f : 0.10f;
+                SetImageColor(_combatPressurePips[i], WithAlpha(accent, pipAlpha));
+                if (_combatPressurePips[i] != null)
+                {
+                    _combatPressurePips[i].rectTransform.localScale = Vector3.one * (i < activePips ? 1f + urgency * pulse * 0.18f : 1f);
+                }
+            }
         }
 
         private void SetLowHealthEdgeAlpha(float alpha)
