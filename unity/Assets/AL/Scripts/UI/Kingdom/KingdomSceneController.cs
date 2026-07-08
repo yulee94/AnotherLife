@@ -56,6 +56,12 @@ namespace AL.UI.Kingdom
         private bool _dashboardVisible = true;
         private bool _championDeploymentInProgress;
         private readonly List<Image> _messageSignalBars = new List<Image>();
+        private readonly Text[] _readinessChipTexts = new Text[4];
+        private readonly Image[] _readinessChipPanels = new Image[4];
+        private readonly Image[] _readinessChipRails = new Image[4];
+        private readonly Image[] _readinessChipGlows = new Image[4];
+        private readonly Color[] _readinessChipAccents = new Color[4];
+        private readonly float[] _readinessChipUrgencies = new float[4];
 
         private readonly string[] _buildingIds =
         {
@@ -108,6 +114,7 @@ namespace AL.UI.Kingdom
         private void Update()
         {
             UpdateCommandMessagePulse();
+            UpdateStrategicReadinessPulse();
 
             _completionTimer += Time.deltaTime;
             if (_completionTimer < 1f)
@@ -193,8 +200,9 @@ namespace AL.UI.Kingdom
             CreatePanel(topBar.transform, "TopBarRule", new Vector2(0f, -1f), new Vector2(-36f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.88f, 0.58f, 0.20f));
             _realmText = CreateText(topBar.transform, "RealmText", font, 28, TextAnchor.UpperLeft, new Vector2(20f, -14f), new Vector2(1080f, 34f));
             _realmText.color = new Color(1f, 0.92f, 0.76f);
-            _resourceText = CreateText(topBar.transform, "ResourceText", font, 19, TextAnchor.UpperLeft, new Vector2(20f, -56f), new Vector2(1136f, 42f));
+            _resourceText = CreateText(topBar.transform, "ResourceText", font, 18, TextAnchor.UpperLeft, new Vector2(20f, -56f), new Vector2(676f, 42f));
             _resourceText.color = new Color(0.82f, 0.88f, 0.94f);
+            CreateStrategicReadinessConsole(topBar.transform, font);
 
             _buildingText = CreatePanelText(_dashboardRoot.transform, "DistrictPanel", "BuildingText", font, 18, TextAnchor.UpperLeft, new Vector2(32f, -150f), new Vector2(520f, 292f));
             _troopText = CreatePanelText(_dashboardRoot.transform, "ForcesPanel", "TroopText", font, 18, TextAnchor.UpperLeft, new Vector2(32f, -460f), new Vector2(520f, 214f));
@@ -568,6 +576,7 @@ namespace AL.UI.Kingdom
                 $"Ore {resources.GetResourceCount(ResourceType.Ore)}   |   " +
                 $"{rareResourceType} {resources.GetResourceCount(rareResourceType)}   |   " +
                 $"Warzone {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}";
+            RefreshStrategicReadiness();
 
             var buildings = ServiceLocator.Get<IBuildingService>();
             var builder = new StringBuilder();
@@ -634,6 +643,90 @@ namespace AL.UI.Kingdom
                 }
             }
             _territoryText.text = territories.ToString();
+        }
+
+        private void RefreshStrategicReadiness()
+        {
+            if (_readinessChipTexts[0] == null)
+            {
+                return;
+            }
+
+            var buildings = ServiceLocator.Get<IBuildingService>();
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            int upgradingCount = 0;
+            int totalBuildingLevels = 0;
+            foreach (var buildingId in _buildingIds)
+            {
+                BuildingState state = buildings.GetBuildingState(buildingId);
+                if (state == null)
+                {
+                    continue;
+                }
+
+                totalBuildingLevels += Math.Max(0, state.Level);
+                if (state.IsUpgrading && state.UpgradeCompleteTimestamp > now)
+                {
+                    upgradingCount++;
+                }
+            }
+
+            SetReadinessChip(
+                0,
+                "BUILD",
+                upgradingCount > 0 ? $"{upgradingCount} UP" : $"LV {totalBuildingLevels}",
+                upgradingCount > 0 ? new Color(0.92f, 0.62f, 0.28f, 1f) : new Color(0.62f, 0.86f, 0.56f, 1f),
+                upgradingCount > 0 ? 0.88f : 0.34f);
+
+            var training = ServiceLocator.Get<ITrainingService>();
+            int totalTroops =
+                training.GetTroopCount(TroopType.Infantry) +
+                training.GetTroopCount(TroopType.Cavalry) +
+                training.GetTroopCount(TroopType.Ranged) +
+                training.GetTroopCount(TroopType.Siege);
+            SetReadinessChip(
+                1,
+                "FORCE",
+                FormatCompactNumber(totalTroops),
+                totalTroops >= 250 ? new Color(0.62f, 0.88f, 0.58f, 1f) : new Color(0.42f, 0.74f, 1f, 1f),
+                totalTroops >= 250 ? 0.48f : 0.76f);
+
+            var research = ServiceLocator.Get<IResearchService>();
+            ResearchState steel = research.GetResearchState("Steel Forging");
+            ResearchState armor = research.GetResearchState("Plate Armor");
+            int activeResearch = CountActiveResearch(steel) + CountActiveResearch(armor);
+            int researchLevels = (steel?.Level ?? 0) + (armor?.Level ?? 0);
+            SetReadinessChip(
+                2,
+                "LAB",
+                activeResearch > 0 ? $"{activeResearch} RUN" : $"L{researchLevels}",
+                activeResearch > 0 ? new Color(0.54f, 0.76f, 1f, 1f) : new Color(0.72f, 0.60f, 1f, 1f),
+                activeResearch > 0 ? 0.82f : 0.42f);
+
+            int warzoneCredits = ServiceLocator.Get<IWarzoneCreditService>().GetCredits();
+            SetReadinessChip(
+                3,
+                "WAR",
+                FormatCompactNumber(warzoneCredits),
+                warzoneCredits >= WarmasterPieceCost ? new Color(0.96f, 0.76f, 0.34f, 1f) : new Color(0.88f, 0.42f, 0.34f, 1f),
+                warzoneCredits >= WarmasterPieceCost ? 0.68f : 0.82f);
+        }
+
+        private void SetReadinessChip(int index, string label, string value, Color accent, float urgency)
+        {
+            if (index < 0 || index >= _readinessChipTexts.Length || _readinessChipTexts[index] == null)
+            {
+                return;
+            }
+
+            urgency = Mathf.Clamp01(urgency);
+            _readinessChipAccents[index] = accent;
+            _readinessChipUrgencies[index] = urgency;
+            _readinessChipTexts[index].text = label + "\n" + value;
+            _readinessChipTexts[index].color = Color.Lerp(new Color(0.84f, 0.90f, 0.96f, 1f), accent, 0.24f);
+            SetImageColor(_readinessChipPanels[index], WithAlpha(Color.Lerp(new Color(0.018f, 0.026f, 0.036f, 1f), accent, 0.12f + urgency * 0.06f), 0.94f));
+            SetImageColor(_readinessChipRails[index], WithAlpha(accent, 0.56f + urgency * 0.30f));
+            SetImageColor(_readinessChipGlows[index], WithAlpha(accent, 0.07f + urgency * 0.10f));
         }
 
         private void SetMessage(string message)
@@ -755,6 +848,33 @@ namespace AL.UI.Kingdom
             }
         }
 
+        private void UpdateStrategicReadinessPulse()
+        {
+            if (_readinessChipTexts[0] == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _readinessChipTexts.Length; i++)
+            {
+                float urgency = Mathf.Clamp01(_readinessChipUrgencies[i]);
+                Color accent = _readinessChipAccents[i];
+                if (accent.a <= 0f)
+                {
+                    accent = new Color(0.42f, 0.62f, 0.78f, 1f);
+                }
+
+                float pulse = (Mathf.Sin(Time.unscaledTime * (2.4f + i * 0.18f) + i * 0.74f) + 1f) * 0.5f;
+                SetImageColor(_readinessChipRails[i], WithAlpha(Color.Lerp(accent, Color.white, pulse * 0.18f), 0.46f + urgency * 0.34f + pulse * 0.12f));
+                SetImageColor(_readinessChipGlows[i], WithAlpha(accent, 0.045f + pulse * (0.060f + urgency * 0.080f)));
+
+                if (_readinessChipPanels[i] != null)
+                {
+                    _readinessChipPanels[i].rectTransform.localScale = Vector3.one * (1f + urgency * pulse * 0.010f);
+                }
+            }
+        }
+
         private void ResetMessagePulseVisuals()
         {
             SetImageColor(_messageAccent, _messageAccentBaseColor);
@@ -834,6 +954,60 @@ namespace AL.UI.Kingdom
             rect.anchorMax = Vector2.zero;
             rect.pivot = Vector2.zero;
             return text;
+        }
+
+        private void CreateStrategicReadinessConsole(Transform parent, Font font)
+        {
+            var console = CreatePanel(
+                parent,
+                "StrategicReadinessConsole",
+                new Vector2(712f, -14f),
+                new Vector2(448f, 78f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Color(0.010f, 0.015f, 0.022f, 0.58f));
+            CreatePanel(console.transform, "StrategicReadinessRule", new Vector2(0f, -1f), new Vector2(-20f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.14f));
+
+            var title = CreateText(console.transform, "StrategicReadinessTitle", font, 11, TextAnchor.UpperLeft, new Vector2(12f, -7f), new Vector2(300f, 16f));
+            title.text = "STRATEGIC READINESS";
+            title.color = new Color(0.58f, 0.68f, 0.78f);
+
+            string[] labels = { "BUILD", "FORCE", "LAB", "WAR" };
+            for (int i = 0; i < labels.Length; i++)
+            {
+                CreateReadinessChip(console.transform, font, labels[i], i, new Vector2(12f + i * 106f, -29f));
+            }
+        }
+
+        private void CreateReadinessChip(Transform parent, Font font, string label, int index, Vector2 anchoredPosition)
+        {
+            var chip = CreatePanel(
+                parent,
+                "ReadinessChip_" + label,
+                anchoredPosition,
+                new Vector2(96f, 39f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Color(0.018f, 0.026f, 0.036f, 0.94f));
+            _readinessChipPanels[index] = chip.GetComponent<Image>();
+            _readinessChipRails[index] = CreatePanel(chip.transform, label + "_Rail", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.42f, 0.62f, 0.78f, 0.56f)).GetComponent<Image>();
+            _readinessChipGlows[index] = CreatePanel(chip.transform, label + "_Glow", new Vector2(0f, 0f), new Vector2(-10f, 3f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Color(0.42f, 0.62f, 0.78f, 0.08f)).GetComponent<Image>();
+
+            var text = CreateText(chip.transform, label + "_Text", font, 11, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(90f, 35f));
+            text.text = label + "\n--";
+            text.color = new Color(0.84f, 0.90f, 0.96f);
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 9;
+            text.resizeTextMaxSize = 11;
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.offsetMin = new Vector2(6f, 1f);
+            rect.offsetMax = new Vector2(-6f, -1f);
+            _readinessChipTexts[index] = text;
         }
 
         private void CreateCommandSignalBars(Transform parent)
@@ -1035,6 +1209,27 @@ namespace AL.UI.Kingdom
         {
             return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
                    Resources.GetBuiltinResource<Font>("Arial.ttf");
+        }
+
+        private static int CountActiveResearch(ResearchState state)
+        {
+            return state != null && state.IsResearching ? 1 : 0;
+        }
+
+        private static string FormatCompactNumber(int value)
+        {
+            int absoluteValue = Math.Abs(value);
+            if (absoluteValue >= 1000000)
+            {
+                return (value / 1000000f).ToString("0.#") + "M";
+            }
+
+            if (absoluteValue >= 1000)
+            {
+                return (value / 1000f).ToString("0.#") + "K";
+            }
+
+            return value.ToString();
         }
 
         private static string FormatResearch(string label, ResearchState state)
