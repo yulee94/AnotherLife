@@ -64,6 +64,7 @@ namespace AL.ChampionMode.Skills
         {
             Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
             Color color = GetRealmColor(realmId, 0.72f);
+            Quaternion rotation = Quaternion.LookRotation(safeForward) * Quaternion.Euler(0f, 0f, 22f);
             var slash = SpawnPrimitiveEffect(
                 "shape:realm-slash",
                 "VFX_Runtime_RealmSlash",
@@ -71,11 +72,22 @@ namespace AL.ChampionMode.Skills
                 MaxActiveSkillShapes,
                 MaxPooledSkillShapesPerKey,
                 groundPosition + Vector3.up * 0.95f + safeForward * 0.15f,
-                Quaternion.LookRotation(safeForward) * Quaternion.Euler(0f, 0f, 22f),
+                rotation,
                 new Vector3(1.85f, 0.09f, 0.42f),
                 color,
                 0.32f);
 
+            SpawnPrimitiveEffect(
+                "shape:realm-slash-edge",
+                "VFX_Runtime_RealmSlash_Edge",
+                PrimitiveType.Cube,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                groundPosition + Vector3.up * 1.02f + safeForward * 0.24f,
+                rotation,
+                new Vector3(2.12f, 0.045f, 0.12f),
+                Color.Lerp(color, Color.white, 0.55f),
+                0.22f);
             SpawnGroundRing("VFX_Runtime_RealmSlash_Crest", groundPosition, GetRealmColor(realmId, 0.28f), 1.15f, 0.38f);
             return slash;
         }
@@ -106,6 +118,7 @@ namespace AL.ChampionMode.Skills
             Color color = GetRealmColor(realmId, 0.42f);
             SpawnBurst("VFX_Runtime_WarzoneBurst_Core", groundPosition + Vector3.up * 0.85f, Color.Lerp(color, Color.white, 0.25f), color, 1.25f);
             SpawnGroundRing("VFX_Runtime_WarzoneBurst_Inner", groundPosition, color, safeRadius * 0.45f, 0.42f);
+            SpawnGroundRing("VFX_Runtime_WarzoneBurst_Outer", groundPosition, GetRealmColor(realmId, 0.20f), safeRadius * 1.18f, 0.68f);
             return SpawnGroundRing("VFX_Runtime_WarzoneBurst_Wave", groundPosition, color, safeRadius, 0.58f);
         }
 
@@ -216,6 +229,7 @@ namespace AL.ChampionMode.Skills
             main.startSize = size;
             main.startColor = new ParticleSystem.MinMaxGradient(startColor, endColor);
             main.maxParticles = 80;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
 
             var emission = particles.emission;
             emission.rateOverTime = 0;
@@ -224,6 +238,18 @@ namespace AL.ChampionMode.Skills
             var shape = particles.shape;
             shape.shapeType = ParticleSystemShapeType.Sphere;
             shape.radius = 0.25f;
+
+            var noise = particles.noise;
+            noise.enabled = true;
+            noise.strength = 0.45f;
+            noise.frequency = 0.35f;
+
+            var sizeOverLifetime = particles.sizeOverLifetime;
+            sizeOverLifetime.enabled = true;
+            sizeOverLifetime.size = new ParticleSystem.MinMaxCurve(1f, new AnimationCurve(
+                new Keyframe(0f, 0.35f),
+                new Keyframe(0.18f, 1.0f),
+                new Keyframe(1f, 0.08f)));
 
             particles.Clear(true);
             particles.Play(true);
@@ -241,8 +267,11 @@ namespace AL.ChampionMode.Skills
 
             ring.name = name;
             ring.transform.position = position + Vector3.up * 0.03f;
-            ring.transform.localScale = new Vector3(radius * 2f, 0.02f, radius * 2f);
+            Vector3 endScale = new Vector3(radius * 2f, 0.02f, radius * 2f);
+            Vector3 startScale = new Vector3(radius * 1.25f, 0.02f, radius * 1.25f);
+            ring.transform.localScale = startScale;
             SetRendererColor(ring.GetComponent<Renderer>(), color);
+            AnimatePrimitive(ring, color, lifetime, startScale, endScale);
             RuntimeVfxPool.ReleaseAfter(key, ring, lifetime, MaxPooledRingsPerKey);
             return ring;
         }
@@ -269,8 +298,20 @@ namespace AL.ChampionMode.Skills
             effect.transform.rotation = rotation;
             effect.transform.localScale = localScale;
             SetRendererColor(effect.GetComponent<Renderer>(), color);
+            AnimatePrimitive(effect, color, lifetime, localScale * 0.88f, localScale * 1.08f);
             RuntimeVfxPool.ReleaseAfter(key, effect, lifetime, maxPoolSize);
             return effect;
+        }
+
+        private static void AnimatePrimitive(GameObject effect, Color color, float lifetime, Vector3 startScale, Vector3 endScale)
+        {
+            if (effect == null)
+            {
+                return;
+            }
+
+            var animator = effect.GetComponent<PrimitiveVfxAnimator>() ?? effect.AddComponent<PrimitiveVfxAnimator>();
+            animator.Configure(color, Mathf.Max(0.05f, lifetime), startScale, endScale);
         }
 
         private static GameObject CreateBurstObject(string name)
@@ -374,6 +415,49 @@ namespace AL.ChampionMode.Skills
         private static void ReleaseFloatingCombatText()
         {
             _activeFloatingTexts = Mathf.Max(0, _activeFloatingTexts - 1);
+        }
+
+        private sealed class PrimitiveVfxAnimator : MonoBehaviour
+        {
+            private Color _baseColor;
+            private Renderer _renderer;
+            private Vector3 _startScale;
+            private Vector3 _endScale;
+            private float _elapsed;
+            private float _lifetime;
+
+            public void Configure(Color baseColor, float lifetime, Vector3 startScale, Vector3 endScale)
+            {
+                _baseColor = baseColor;
+                _lifetime = lifetime;
+                _startScale = startScale;
+                _endScale = endScale;
+                _elapsed = 0f;
+                _renderer = GetComponent<Renderer>();
+                transform.localScale = _startScale;
+                enabled = true;
+                SetRendererColor(_renderer, _baseColor);
+            }
+
+            private void Update()
+            {
+                _elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(_elapsed / Mathf.Max(0.01f, _lifetime));
+                float eased = 1f - Mathf.Pow(1f - t, 2f);
+                transform.localScale = Vector3.Lerp(_startScale, _endScale, eased);
+
+                if (_renderer != null)
+                {
+                    Color faded = _baseColor;
+                    faded.a = Mathf.Lerp(_baseColor.a, 0f, t);
+                    SetRendererColor(_renderer, faded);
+                }
+
+                if (t >= 1f)
+                {
+                    enabled = false;
+                }
+            }
         }
 
         private sealed class FloatingCombatText : MonoBehaviour
