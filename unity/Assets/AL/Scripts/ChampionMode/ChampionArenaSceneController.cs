@@ -791,6 +791,9 @@ namespace AL.ChampionMode
             Color dreadknightButton = new Color(0.15f, 0.035f, 0.030f, 0.96f);
             Color oracleButton = new Color(0.08f, 0.16f, 0.13f, 0.96f);
             Color duelistButton = new Color(0.16f, 0.11f, 0.06f, 0.96f);
+            Color inquisitorButton = new Color(0.12f, 0.11f, 0.08f, 0.96f);
+            Color wardenButton = new Color(0.06f, 0.14f, 0.10f, 0.96f);
+            Color spellbladeButton = new Color(0.07f, 0.08f, 0.18f, 0.96f);
             CreateHudButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CyclePrimaryColor(); RefreshAppearanceText(); }, 13, colorButton);
             CreateHudButton(appearancePanel.transform, font, "Hair", new Vector2(144f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairColor(); RefreshAppearanceText(); }, 13, colorButton);
             CreateHudButton(appearancePanel.transform, font, "Skin", new Vector2(270f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleSkinColor(); RefreshAppearanceText(); }, 13, colorButton);
@@ -809,12 +812,15 @@ namespace AL.ChampionMode
             CreateHudButton(appearancePanel.transform, font, "Dread", new Vector2(18f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("dreadknight"), 12, dreadknightButton);
             CreateHudButton(appearancePanel.transform, font, "Oracle", new Vector2(144f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("oracle"), 12, oracleButton);
             CreateHudButton(appearancePanel.transform, font, "Duelist", new Vector2(270f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("duelist"), 12, duelistButton);
-            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -344f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -344f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -344f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
-            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -382f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Inquisitor", new Vector2(18f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("inquisitor"), 12, inquisitorButton);
+            CreateHudButton(appearancePanel.transform, font, "Warden", new Vector2(144f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("warden"), 12, wardenButton);
+            CreateHudButton(appearancePanel.transform, font, "Spellblade", new Vector2(270f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("spellblade"), 12, spellbladeButton);
+            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
+            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -420f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
             _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
-            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -388f), new Vector2(238f, 62f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -426f), new Vector2(238f, 62f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -1190,6 +1196,9 @@ namespace AL.ChampionMode
                 "dreadknight" => "Forge preset loaded: Dreadknight. Massive plate, hammer pressure, ash mask, and a heavier adult silhouette.",
                 "oracle" => "Forge preset loaded: Oracle. Tall ritual profile, staff and orb focus, and pale luminous accents.",
                 "duelist" => "Forge preset loaded: Duelist. Lean precision frame, sword and dagger, and close-read scar detail.",
+                "inquisitor" => "Forge preset loaded: Inquisitor. Severe plate command profile with sword, tome, and gold-lit authority.",
+                "warden" => "Forge preset loaded: Warden. Broad guardian frame with axe, shield, braid detail, and grounded green accents.",
+                "spellblade" => "Forge preset loaded: Spellblade. Elegant sword-and-orb hybrid with arcane robes and silver hair.",
                 _ => "Forge preset loaded. Fine tune colors, gear, and face marks before entering combat."
             };
         }
