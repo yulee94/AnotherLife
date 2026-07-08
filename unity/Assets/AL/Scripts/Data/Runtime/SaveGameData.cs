@@ -22,6 +22,7 @@ namespace AL.Data.Runtime
         public string CurrentChapterId;
         public WarmasterState Warmaster = new WarmasterState();
         public ChampionCustomizationState ChampionCustomization = new ChampionCustomizationState();
+        public List<OwnedEquipmentState> OwnedEquipment = new List<OwnedEquipmentState>();
         public int WarzoneCredits;
         public long LastSavedTimestamp;
     }
@@ -39,6 +40,22 @@ namespace AL.Data.Runtime
         public TroopType Type;
         public int Count;
         public int WoundedCount;
+    }
+
+    [Serializable]
+    public class OwnedEquipmentState
+    {
+        public string EquipmentId;
+        public string DisplayName;
+        public EquipmentSlot Slot;
+        public int AttackBonus;
+        public int DefenseBonus;
+        public int HealthBonus;
+        public int Quantity;
+        public string SourceBossId;
+        public bool AnnounceWorldDrop;
+        public long FirstAcquiredTimestamp;
+        public long LastAcquiredTimestamp;
     }
 
     [Serializable]

@@ -1,8 +1,11 @@
 using UnityEngine;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 using AL.ChampionMode.Skills;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Data.Definitions;
 
 namespace AL.ChampionMode.AI
 {
@@ -14,6 +17,11 @@ namespace AL.ChampionMode.AI
         [SerializeField] private float _attackCooldown = 3f;
         [SerializeField] private float _enrageThreshold = 0.3f;
         [SerializeField] private float _timedEnrageSeconds = 90f;
+        [SerializeField] private BossDefinition _bossDefinition;
+        [SerializeField] private string _bossId = "boss_dummy";
+        [SerializeField] private string _bossName = "Boss Dummy";
+        [SerializeField] private int _warzoneCreditReward = 500;
+        [SerializeField] private List<EquipmentDefinition> _possibleLoot = new List<EquipmentDefinition>();
 
         [Header("Break Bar")]
         [SerializeField] private float _breakBarMax = 100f;
@@ -42,6 +50,7 @@ namespace AL.ChampionMode.AI
 
         private void Start()
         {
+            ApplyBossDefinition();
             _currentHealth = _maxHealth;
             _currentBreak = _breakBarMax;
             _fightStartTime = Time.time;
@@ -49,6 +58,34 @@ namespace AL.ChampionMode.AI
             if (playerObj != null) _player = playerObj.transform;
 
             StartCoroutine(BehaviorLoop());
+        }
+
+        private void ApplyBossDefinition()
+        {
+            if (_bossDefinition == null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_bossDefinition.Id))
+            {
+                _bossId = _bossDefinition.Id;
+            }
+
+            if (!string.IsNullOrWhiteSpace(_bossDefinition.BossName))
+            {
+                _bossName = _bossDefinition.BossName;
+            }
+
+            if (_bossDefinition.Health > 0)
+            {
+                _maxHealth = _bossDefinition.Health;
+            }
+
+            if (_bossDefinition.PossibleLoot != null && _bossDefinition.PossibleLoot.Count > 0)
+            {
+                _possibleLoot = _bossDefinition.PossibleLoot;
+            }
         }
 
         private IEnumerator BehaviorLoop()
@@ -242,15 +279,40 @@ namespace AL.ChampionMode.AI
 
             try
             {
-                ServiceLocator.Get<IWarzoneCreditService>().AddCredits(500);
-                ServiceLocator.Get<INotificationService>().ShowMessage("Anonymous player has acquired Ember Crown Shard from Boss Dummy.");
+                ServiceLocator.Get<IBossLootService>().RollLoot(CreateLootRequest());
             }
-            catch (System.Exception)
+            catch (Exception ex)
             {
-                // Services are optional in isolated tests.
+                Debug.LogWarning($"Boss loot service unavailable. Falling back to simple reward. {ex.Message}");
+                GrantFallbackLoot();
             }
 
             Destroy(gameObject);
+        }
+
+        private BossLootRequest CreateLootRequest()
+        {
+            return new BossLootRequest
+            {
+                BossId = _bossId,
+                BossName = _bossName,
+                WarzoneCreditReward = _warzoneCreditReward,
+                RandomSeed = unchecked(_bossId.GetHashCode() ^ Mathf.RoundToInt(Time.time * 1000f)),
+                LootTable = _possibleLoot ?? new List<EquipmentDefinition>()
+            };
+        }
+
+        private void GrantFallbackLoot()
+        {
+            try
+            {
+                ServiceLocator.Get<IWarzoneCreditService>().AddCredits(_warzoneCreditReward);
+                ServiceLocator.Get<INotificationService>().ShowMessage($"Anonymous player has acquired Ember Crown Shard from {_bossName}.");
+            }
+            catch (Exception)
+            {
+                // Services are optional in isolated tests.
+            }
         }
     }
 }

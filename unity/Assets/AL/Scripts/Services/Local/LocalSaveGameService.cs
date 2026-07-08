@@ -97,6 +97,7 @@ namespace AL.Services.Local
             save.Warmaster.UnlockedSetIds ??= new List<string>();
             save.Warmaster.PurchasedPieceIds ??= new List<string>();
             save.ChampionCustomization ??= new ChampionCustomizationState();
+            save.OwnedEquipment ??= new List<OwnedEquipmentState>();
 
             EnsureResource(save, ResourceType.Food, 1000);
             EnsureResource(save, ResourceType.Wood, 1000);
