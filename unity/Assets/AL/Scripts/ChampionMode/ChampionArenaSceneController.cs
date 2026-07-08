@@ -85,9 +85,11 @@ namespace AL.ChampionMode
         private readonly Image[] _appearanceSwatches = new Image[5];
         private readonly Text[] _skillButtonTexts = new Text[4];
         private readonly Text[] _skillCooldownTexts = new Text[4];
+        private readonly Text[] _skillRoleTexts = new Text[4];
         private readonly Image[] _skillCooldownFills = new Image[4];
         private readonly Image[] _skillReadyGlows = new Image[4];
         private readonly Image[] _skillManaPips = new Image[4];
+        private readonly Image[] _skillStateRails = new Image[4];
         private Text _castChannelText;
         private Image _castChannelFill;
         private Image _castChannelGlow;
@@ -1904,6 +1906,11 @@ namespace AL.ChampionMode
             CreateSkillIconTile(button.transform, slotIndex, slotColor);
             _skillCooldownFills[slotIndex] = CreateCooldownOverlay(button.transform);
             _skillManaPips[slotIndex] = CreateUiImage(button.transform, "SkillManaPip", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(48f, 7f), new Vector2(92f, 3f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.72f));
+            _skillStateRails[slotIndex] = CreateUiImage(button.transform, "SkillStateRail", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(48f, 3f), new Vector2(92f, 2f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.64f));
+            _skillStateRails[slotIndex].type = Image.Type.Filled;
+            _skillStateRails[slotIndex].fillMethod = Image.FillMethod.Horizontal;
+            _skillStateRails[slotIndex].fillOrigin = (int)Image.OriginHorizontal.Left;
+            _skillRoleTexts[slotIndex] = CreateText(button.transform, font, GetSkillRoleLabel(slotIndex), 9, new Vector2(8f, -47f), new Vector2(34f, 10f), TextAnchor.MiddleCenter, Color.Lerp(slotColor, Color.white, 0.22f));
             _skillButtonTexts[slotIndex] = button.GetComponentInChildren<Text>();
             if (_skillButtonTexts[slotIndex] != null)
             {
@@ -1962,9 +1969,18 @@ namespace AL.ChampionMode
                 if (_skillCooldownTexts[i] != null && _playerSkillCaster != null)
                 {
                     float remaining = _playerSkillCaster.GetCooldownRemaining(i);
-                    string state = remaining <= 0.05f ? $"{_playerSkillCaster.GetManaCost(i):0} MP" : $"{remaining:0.0}s";
+                    float manaCost = _playerSkillCaster.GetManaCost(i);
+                    bool hasMana = _playerCombat == null || _playerCombat.CurrentMana + 0.01f >= manaCost;
+                    bool isCasting = _playerSkillCaster.IsCasting && _playerSkillCaster.ActiveSlot == i;
+                    string state = GetSkillStateText(i, remaining, manaCost, hasMana, isCasting);
                     _skillCooldownTexts[i].text = state;
-                    _skillCooldownTexts[i].color = remaining <= 0.05f ? new Color(0.70f, 1f, 0.78f) : new Color(1f, 0.68f, 0.40f);
+                    _skillCooldownTexts[i].color = isCasting
+                        ? Color.Lerp(GetSkillSlotColor(i), Color.white, 0.32f)
+                        : remaining <= 0.05f && hasMana
+                            ? new Color(0.70f, 1f, 0.78f)
+                            : remaining <= 0.05f
+                                ? new Color(0.42f, 0.72f, 1f)
+                                : new Color(1f, 0.68f, 0.40f);
                     if (_skillCooldownFills[i] != null)
                     {
                         float duration = Mathf.Max(0.01f, _playerSkillCaster.GetCooldownDuration(i));
@@ -1972,12 +1988,12 @@ namespace AL.ChampionMode
                         _skillCooldownFills[i].color = remaining <= 0.05f ? new Color(0f, 0f, 0f, 0f) : new Color(0f, 0f, 0f, 0.56f);
                     }
 
-                    UpdateSkillReadinessVisual(i, remaining <= 0.05f);
+                    UpdateSkillReadinessVisual(i, remaining <= 0.05f && hasMana, remaining, manaCost, hasMana, isCasting);
                 }
             }
         }
 
-        private void UpdateSkillReadinessVisual(int slotIndex, bool isReady)
+        private void UpdateSkillReadinessVisual(int slotIndex, bool isReady, float cooldownRemaining, float manaCost, bool hasMana, bool isCasting)
         {
             Color slotColor = GetSkillSlotColor(slotIndex);
             float pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 5.4f + slotIndex * 0.72f) * 0.5f;
@@ -1992,8 +2008,64 @@ namespace AL.ChampionMode
             {
                 _skillManaPips[slotIndex].color = isReady
                     ? new Color(slotColor.r, slotColor.g, slotColor.b, 0.78f + pulse * 0.16f)
-                    : new Color(0.32f, 0.38f, 0.44f, 0.42f);
+                    : !hasMana
+                        ? new Color(0.26f, 0.48f, 0.92f, 0.62f)
+                        : new Color(0.32f, 0.38f, 0.44f, 0.42f);
             }
+
+            if (_skillStateRails[slotIndex] != null)
+            {
+                float amount;
+                Color railColor;
+                if (isCasting)
+                {
+                    amount = _playerSkillCaster != null ? _playerSkillCaster.ActiveCastProgress : 0f;
+                    railColor = Color.Lerp(slotColor, Color.white, 0.26f + pulse * 0.20f);
+                }
+                else if (cooldownRemaining > 0.05f && _playerSkillCaster != null)
+                {
+                    float duration = Mathf.Max(0.01f, _playerSkillCaster.GetCooldownDuration(slotIndex));
+                    amount = 1f - Mathf.Clamp01(cooldownRemaining / duration);
+                    railColor = new Color(1f, 0.68f, 0.40f, 0.78f);
+                }
+                else if (!hasMana && _playerCombat != null)
+                {
+                    amount = manaCost <= 0.01f ? 1f : Mathf.Clamp01(_playerCombat.CurrentMana / manaCost);
+                    railColor = new Color(0.34f, 0.66f, 1f, 0.80f);
+                }
+                else
+                {
+                    amount = 1f;
+                    railColor = new Color(slotColor.r, slotColor.g, slotColor.b, 0.78f + pulse * 0.12f);
+                }
+
+                _skillStateRails[slotIndex].fillAmount = amount;
+                _skillStateRails[slotIndex].color = railColor;
+            }
+
+            if (_skillRoleTexts[slotIndex] != null)
+            {
+                _skillRoleTexts[slotIndex].color = isCasting
+                    ? Color.Lerp(slotColor, Color.white, 0.36f)
+                    : isReady
+                        ? Color.Lerp(slotColor, Color.white, 0.22f)
+                        : new Color(0.62f, 0.70f, 0.78f, 0.78f);
+            }
+        }
+
+        private string GetSkillStateText(int slotIndex, float cooldownRemaining, float manaCost, bool hasMana, bool isCasting)
+        {
+            if (isCasting)
+            {
+                return $"CAST {Mathf.CeilToInt(_playerSkillCaster.ActiveCastProgress * 100f)}%";
+            }
+
+            if (cooldownRemaining > 0.05f)
+            {
+                return $"CD {cooldownRemaining:0.0}s";
+            }
+
+            return hasMana ? $"READY // {manaCost:0} MP" : $"NEED {manaCost:0} MP";
         }
 
         private static Image CreateCooldownOverlay(Transform parent)
@@ -2027,6 +2099,21 @@ namespace AL.ChampionMode
                     return new Color(1f, 0.52f, 0.16f, 0.92f);
                 default:
                     return new Color(0.95f, 0.22f, 0.16f, 0.92f);
+            }
+        }
+
+        private static string GetSkillRoleLabel(int slotIndex)
+        {
+            switch (slotIndex)
+            {
+                case 0:
+                    return "STR";
+                case 1:
+                    return "GRD";
+                case 2:
+                    return "AOE";
+                default:
+                    return "BRK";
             }
         }
 
