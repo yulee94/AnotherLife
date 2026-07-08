@@ -27,16 +27,27 @@ namespace AL.UI.Kingdom
         private Text _battleText;
         private Text _messageHeaderText;
         private Text _messageMetaText;
+        private Text _messageStatusText;
         private Text _messageText;
         private Text _boardHintText;
+        private Image _messagePanelImage;
         private Image _messageAccent;
+        private Image _messageTopRule;
+        private Image _messageBottomRule;
+        private Image _messageWash;
+        private Image _messageStatusPlate;
+        private Image _messageStatusRule;
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
         private KingdomVisualizer _kingdomVisualizer;
         private Color _messageAccentBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.92f);
+        private Color _messagePanelBaseColor = new Color(0.020f, 0.027f, 0.037f, 0.92f);
+        private Color _messageWashBaseColor = new Color(0.28f, 0.56f, 0.78f, 0.05f);
+        private Color _messageSignalBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.30f);
         private float _completionTimer;
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
+        private readonly List<Image> _messageSignalBars = new List<Image>();
 
         private readonly string[] _buildingIds =
         {
@@ -184,16 +195,30 @@ namespace AL.UI.Kingdom
             _territoryText = CreatePanelText(_dashboardRoot.transform, "TerritoryPanel", "TerritoryText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -526f), new Vector2(454f, 194f));
             _battleText = CreatePanelText(_dashboardRoot.transform, "BattlePanel", "BattleText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -738f), new Vector2(454f, 170f));
 
-            var messagePanel = CreatePanel(_dashboardRoot.transform, "CommandMessagePanel", new Vector2(32f, 32f), new Vector2(1008f, 118f), Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.020f, 0.027f, 0.037f, 0.92f));
+            var messagePanel = CreatePanel(_dashboardRoot.transform, "CommandMessagePanel", new Vector2(32f, 32f), new Vector2(1008f, 118f), Vector2.zero, Vector2.zero, Vector2.zero, _messagePanelBaseColor);
+            _messagePanelImage = messagePanel.GetComponent<Image>();
+            _messageWash = CreatePanel(messagePanel.transform, "CommandMessageWash", new Vector2(6f, -26f), new Vector2(996f, 70f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), _messageWashBaseColor).GetComponent<Image>();
             _messageAccent = CreatePanel(messagePanel.transform, "CommandMessageAccent", new Vector2(0f, 0f), new Vector2(6f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.88f, 0.62f, 0.30f, 0.92f)).GetComponent<Image>();
-            CreatePanel(messagePanel.transform, "CommandMessageTopRule", new Vector2(0f, -1f), new Vector2(-34f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.20f));
-            CreatePanel(messagePanel.transform, "CommandMessageBottomRule", new Vector2(0f, 1f), new Vector2(-34f, 2f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Color(0.28f, 0.56f, 0.78f, 0.18f));
+            _messageTopRule = CreatePanel(messagePanel.transform, "CommandMessageTopRule", new Vector2(0f, -1f), new Vector2(-34f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.20f)).GetComponent<Image>();
+            _messageBottomRule = CreatePanel(messagePanel.transform, "CommandMessageBottomRule", new Vector2(0f, 1f), new Vector2(-34f, 2f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Color(0.28f, 0.56f, 0.78f, 0.18f)).GetComponent<Image>();
             _messageHeaderText = CreateText(messagePanel.transform, "MessageHeaderText", font, 13, TextAnchor.UpperLeft, new Vector2(18f, -10f), new Vector2(380f, 20f));
             _messageHeaderText.text = "COMMAND DOSSIER";
             _messageHeaderText.color = new Color(0.78f, 0.86f, 0.94f);
             _messageMetaText = CreateText(messagePanel.transform, "MessageMetaText", font, 13, TextAnchor.UpperRight, new Vector2(648f, -10f), new Vector2(336f, 20f));
             _messageMetaText.color = new Color(0.54f, 0.66f, 0.76f);
-            _messageText = CreateText(messagePanel.transform, "MessageText", font, 20, TextAnchor.UpperLeft, new Vector2(18f, -36f), new Vector2(966f, 66f));
+            _messageStatusPlate = CreatePanel(messagePanel.transform, "CommandStatusPlate", new Vector2(18f, -42f), new Vector2(124f, 32f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.10f, 0.14f, 0.18f, 0.86f)).GetComponent<Image>();
+            _messageStatusRule = CreatePanel(_messageStatusPlate.transform, "CommandStatusPlateRule", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.88f, 0.62f, 0.30f, 0.62f)).GetComponent<Image>();
+            _messageStatusText = CreateText(_messageStatusPlate.transform, "MessageStatusText", font, 13, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(116f, 28f));
+            _messageStatusText.text = "ONLINE";
+            _messageStatusText.color = new Color(1f, 0.88f, 0.62f);
+            var statusRect = _messageStatusText.GetComponent<RectTransform>();
+            statusRect.anchorMin = Vector2.zero;
+            statusRect.anchorMax = Vector2.one;
+            statusRect.pivot = new Vector2(0.5f, 0.5f);
+            statusRect.offsetMin = new Vector2(6f, 0f);
+            statusRect.offsetMax = new Vector2(-6f, 0f);
+            CreateCommandSignalBars(messagePanel.transform);
+            _messageText = CreateText(messagePanel.transform, "MessageText", font, 19, TextAnchor.UpperLeft, new Vector2(158f, -36f), new Vector2(826f, 66f));
             _messageText.color = new Color(0.92f, 0.96f, 1f);
             _messageText.verticalOverflow = VerticalWrapMode.Truncate;
 
@@ -504,33 +529,54 @@ namespace AL.UI.Kingdom
                 ? "Command board online. Select a district or border outpost to inspect yield, readiness, and next order."
                 : message;
 
-            Color accent = GetMessageAccent(cleanMessage);
-            _messageAccentBaseColor = accent;
-            if (_messageAccent != null)
-            {
-                _messageAccent.color = accent;
-                _messagePulseTimer = 0.62f;
-            }
+            CommandMessageProfile profile = GetMessageProfile(cleanMessage);
+            ApplyMessageProfile(profile);
 
             if (_messageHeaderText != null)
             {
-                _messageHeaderText.text = "COMMAND DOSSIER";
+                _messageHeaderText.text = profile.Header;
+                _messageHeaderText.color = Color.Lerp(profile.Accent, Color.white, 0.28f);
             }
 
             if (_messageMetaText != null)
             {
-                _messageMetaText.text = DateTime.Now.ToString("HH:mm:ss") + " / LIVE OPS";
+                _messageMetaText.text = DateTime.Now.ToString("HH:mm:ss") + " / " + profile.Meta;
+            }
+
+            if (_messageStatusText != null)
+            {
+                _messageStatusText.text = profile.Status;
+                _messageStatusText.color = Color.Lerp(profile.Accent, Color.white, 0.34f);
             }
 
             if (_messageText != null)
             {
                 _messageText.text = cleanMessage;
+                _messageText.color = profile.MessageColor;
             }
 
             if (_boardHintText != null)
             {
                 _boardHintText.text = cleanMessage;
             }
+        }
+
+        private void ApplyMessageProfile(CommandMessageProfile profile)
+        {
+            _messageAccentBaseColor = profile.Accent;
+            _messagePanelBaseColor = WithAlpha(Color.Lerp(new Color(0.020f, 0.027f, 0.037f, 1f), profile.Accent, 0.07f), 0.92f);
+            _messageWashBaseColor = WithAlpha(profile.Accent, 0.065f);
+            _messageSignalBaseColor = WithAlpha(profile.Accent, 0.30f);
+            _messagePulseTimer = profile.PulseSeconds;
+
+            SetImageColor(_messagePanelImage, _messagePanelBaseColor);
+            SetImageColor(_messageAccent, profile.Accent);
+            SetImageColor(_messageTopRule, WithAlpha(Color.Lerp(profile.Accent, Color.white, 0.35f), 0.24f));
+            SetImageColor(_messageBottomRule, WithAlpha(profile.Accent, 0.20f));
+            SetImageColor(_messageWash, _messageWashBaseColor);
+            SetImageColor(_messageStatusPlate, WithAlpha(Color.Lerp(new Color(0.055f, 0.070f, 0.090f, 1f), profile.Accent, 0.20f), 0.88f));
+            SetImageColor(_messageStatusRule, WithAlpha(profile.Accent, 0.62f));
+            SetSignalBarsIdle();
         }
 
         private void HandleBuildingSelected(string message)
@@ -569,7 +615,7 @@ namespace AL.UI.Kingdom
 
         private void UpdateCommandMessagePulse()
         {
-            if (_messageAccent == null || _messagePulseTimer <= 0f)
+            if (_messagePulseTimer <= 0f)
             {
                 return;
             }
@@ -577,12 +623,31 @@ namespace AL.UI.Kingdom
             _messagePulseTimer -= Time.deltaTime;
             if (_messagePulseTimer <= 0f)
             {
-                _messageAccent.color = _messageAccentBaseColor;
+                ResetMessagePulseVisuals();
                 return;
             }
 
             float pulse = Mathf.PingPong(Time.time * 5.5f, 1f);
-            _messageAccent.color = Color.Lerp(_messageAccentBaseColor, Color.white, pulse * 0.16f);
+            SetImageColor(_messageAccent, Color.Lerp(_messageAccentBaseColor, Color.white, pulse * 0.20f));
+            SetImageColor(_messageWash, Color.Lerp(_messageWashBaseColor, WithAlpha(_messageAccentBaseColor, 0.13f), pulse));
+            SetImageColor(_messageStatusPlate, Color.Lerp(WithAlpha(Color.Lerp(new Color(0.055f, 0.070f, 0.090f, 1f), _messageAccentBaseColor, 0.20f), 0.88f), WithAlpha(_messageAccentBaseColor, 0.38f), pulse * 0.45f));
+
+            for (int i = 0; i < _messageSignalBars.Count; i++)
+            {
+                float barPulse = Mathf.PingPong(Time.time * 7.2f + i * 0.24f, 1f);
+                Color signalColor = Color.Lerp(_messageSignalBaseColor, Color.Lerp(_messageAccentBaseColor, Color.white, 0.30f), barPulse);
+                signalColor.a = 0.22f + barPulse * 0.44f;
+                _messageSignalBars[i].color = signalColor;
+                _messageSignalBars[i].transform.localScale = new Vector3(1f, 0.82f + barPulse * 0.42f, 1f);
+            }
+        }
+
+        private void ResetMessagePulseVisuals()
+        {
+            SetImageColor(_messageAccent, _messageAccentBaseColor);
+            SetImageColor(_messageWash, _messageWashBaseColor);
+            SetImageColor(_messageStatusPlate, WithAlpha(Color.Lerp(new Color(0.055f, 0.070f, 0.090f, 1f), _messageAccentBaseColor, 0.20f), 0.88f));
+            SetSignalBarsIdle();
         }
 
         private static Canvas CreateCanvas(string name)
@@ -656,6 +721,25 @@ namespace AL.UI.Kingdom
             rect.anchorMax = Vector2.zero;
             rect.pivot = Vector2.zero;
             return text;
+        }
+
+        private void CreateCommandSignalBars(Transform parent)
+        {
+            _messageSignalBars.Clear();
+            float[] heights = { 4f, 7f, 10f, 7f, 4f };
+            for (int i = 0; i < heights.Length; i++)
+            {
+                var bar = CreatePanel(
+                    parent,
+                    "CommandSignalBar_" + (i + 1),
+                    new Vector2(24f + i * 22f, -86f),
+                    new Vector2(14f, heights[i]),
+                    new Vector2(0f, 1f),
+                    new Vector2(0f, 1f),
+                    new Vector2(0f, 1f),
+                    WithAlpha(_messageSignalBaseColor, 0.24f + i * 0.035f)).GetComponent<Image>();
+                _messageSignalBars.Add(bar);
+            }
         }
 
         private static void CreateSectionHeader(Transform parent, Font font, string label, Vector2 anchoredPosition)
@@ -819,6 +903,16 @@ namespace AL.UI.Kingdom
             Danger
         }
 
+        private struct CommandMessageProfile
+        {
+            public string Header;
+            public string Status;
+            public string Meta;
+            public Color Accent;
+            public Color MessageColor;
+            public float PulseSeconds;
+        }
+
         private static Font GetDefaultFont()
         {
             return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
@@ -902,25 +996,120 @@ namespace AL.UI.Kingdom
             return builder.Length == 0 ? "none" : builder.ToString();
         }
 
-        private static Color GetMessageAccent(string message)
+        private static CommandMessageProfile GetMessageProfile(string message)
         {
             string lower = message?.ToLowerInvariant() ?? string.Empty;
-            if (lower.Contains("defeat") || lower.Contains("need ") || lower.Contains("could not") || lower.Contains("no completed"))
+            if (lower.Contains("war drill"))
             {
-                return new Color(0.86f, 0.34f, 0.22f, 0.95f);
+                return lower.Contains("victory")
+                    ? CreateMessageProfile("WAR DRILL", "VICTORY", "COMBAT SIM", new Color(0.72f, 0.88f, 0.42f, 0.95f), 0.78f)
+                    : CreateMessageProfile("WAR DRILL", "REVIEW", "COMBAT SIM", new Color(0.86f, 0.34f, 0.22f, 0.95f), 0.92f);
             }
 
-            if (lower.Contains("victory") || lower.Contains("captured") || lower.Contains("earned") || lower.Contains("completed") || lower.Contains("purchased"))
+            if (lower.Contains("defeat") || lower.Contains("need ") || lower.Contains("could not") || lower.Contains("denied") || lower.Contains("no completed"))
             {
-                return new Color(0.72f, 0.88f, 0.42f, 0.95f);
+                return CreateMessageProfile("RISK NOTICE", "BLOCKED", "VERIFY ORDER", new Color(0.86f, 0.34f, 0.22f, 0.95f), 0.92f);
             }
 
-            if (lower.Contains("lock") || lower.Contains("selected"))
+            if (lower.Contains("save reset") || lower.Contains("reset"))
             {
-                return new Color(0.92f, 0.66f, 0.30f, 0.95f);
+                return CreateMessageProfile("SYSTEM NOTICE", "RESET", "BOOT FLOW", new Color(0.92f, 0.45f, 0.30f, 0.95f), 0.90f);
             }
 
-            return new Color(0.42f, 0.62f, 0.78f, 0.92f);
+            if (lower.Contains("build order"))
+            {
+                return CreateMessageProfile("BUILD ORDER", "QUEUED", "DISTRICT OPS", new Color(0.88f, 0.62f, 0.30f, 0.95f), 0.70f);
+            }
+
+            if (lower.Contains("research order"))
+            {
+                return CreateMessageProfile("RESEARCH ORDER", "FILED", "LAB TIMER", new Color(0.54f, 0.76f, 1f, 0.95f), 0.70f);
+            }
+
+            if (lower.Contains("muster order"))
+            {
+                return CreateMessageProfile("MUSTER ORDER", "TRAINING", "FORCE GROWTH", new Color(0.44f, 0.78f, 1f, 0.95f), 0.72f);
+            }
+
+            if (lower.Contains("warzone payout"))
+            {
+                return CreateMessageProfile("WARZONE PAYOUT", "FUNDED", "WAR CHEST", new Color(0.76f, 0.88f, 0.48f, 0.95f), 0.78f);
+            }
+
+            if (lower.Contains("warmaster") || lower.Contains("purchased"))
+            {
+                return CreateMessageProfile("WARMASTER LOG", lower.Contains("complete") ? "COMPLETE" : "ARMING", "SET PROGRESS", new Color(0.92f, 0.66f, 0.30f, 0.95f), 0.78f);
+            }
+
+            if (lower.Contains("realm gem"))
+            {
+                return CreateMessageProfile("REALM GEM", lower.Contains("secured") ? "CARRIER" : "CHECK", "RELIC OPS", new Color(0.66f, 0.92f, 1f, 0.95f), 0.78f);
+            }
+
+            if (lower.Contains("wishgate"))
+            {
+                return CreateMessageProfile("WISHGATE", lower.Contains("selected") ? "REWARD" : "READY", "REALM OBJECTIVE", new Color(0.72f, 0.88f, 1f, 0.95f), 0.78f);
+            }
+
+            if (lower.Contains("realm ops") || lower.Contains("captured") || lower.Contains("territory") || lower.Contains("border"))
+            {
+                return CreateMessageProfile("REALM OPS", lower.Contains("captured") ? "SECURED" : "SCOUTING", "WAR ZONE", new Color(0.72f, 0.88f, 0.42f, 0.95f), 0.76f);
+            }
+
+            if (lower.Contains("claimed") || lower.Contains("quest reward") || lower.Contains("objective"))
+            {
+                return CreateMessageProfile("OBJECTIVE CLAIM", lower.Contains("claimed") ? "CLAIMED" : "STANDBY", "REWARD OPS", new Color(0.74f, 0.88f, 0.54f, 0.95f), 0.72f);
+            }
+
+            if (lower.Contains("selected") || lower.Contains("district") || lower.Contains("outpost") || lower.Contains("yield") || lower.Contains("owner"))
+            {
+                return CreateMessageProfile("FIELD INSPECTION", "SELECTED", "BOARD SCAN", new Color(0.92f, 0.66f, 0.30f, 0.95f), 0.66f);
+            }
+
+            if (lower.Contains("command board online"))
+            {
+                return CreateMessageProfile("COMMAND DOSSIER", "ONLINE", "LIVE OPS", new Color(0.42f, 0.62f, 0.78f, 0.92f), 0.62f);
+            }
+
+            return CreateMessageProfile("COMMAND DOSSIER", "LIVE", "COMMAND LOG", new Color(0.42f, 0.62f, 0.78f, 0.92f), 0.62f);
+        }
+
+        private static CommandMessageProfile CreateMessageProfile(string header, string status, string meta, Color accent, float pulseSeconds)
+        {
+            return new CommandMessageProfile
+            {
+                Header = header,
+                Status = status,
+                Meta = meta,
+                Accent = accent,
+                MessageColor = Color.Lerp(new Color(0.92f, 0.96f, 1f, 1f), accent, 0.08f),
+                PulseSeconds = pulseSeconds
+            };
+        }
+
+        private void SetSignalBarsIdle()
+        {
+            for (int i = 0; i < _messageSignalBars.Count; i++)
+            {
+                Color idleColor = _messageSignalBaseColor;
+                idleColor.a = Mathf.Clamp01(0.20f + i * 0.035f);
+                _messageSignalBars[i].color = idleColor;
+                _messageSignalBars[i].transform.localScale = Vector3.one;
+            }
+        }
+
+        private static void SetImageColor(Image image, Color color)
+        {
+            if (image != null)
+            {
+                image.color = color;
+            }
+        }
+
+        private static Color WithAlpha(Color color, float alpha)
+        {
+            color.a = alpha;
+            return color;
         }
 
         private static string GetNextWarmasterPieceId(WarmasterState state)
