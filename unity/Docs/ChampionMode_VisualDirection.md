@@ -19,6 +19,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Add baseline combat feedback: configurable follow camera, impact shake, floating combat text, boss hit reactions, break/enrage callouts, and stronger skill-impact response.
 - Improve skill VFX polish with layered slash edges, wider shockwave rings, particle noise/size curves, and pooled primitive scale/fade animation.
 - Polish the runtime HUD with bordered panels, a contained combat feed, boss state strip, hotbar accent bars, radial cooldown overlays, and tighter movement-pad labels.
+- Improve runtime weather mood with layered falling particles, ground mist, horizon haze, wind-driven emission pulses, and subtle directional-light gusts.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
 
