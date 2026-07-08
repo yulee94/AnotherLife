@@ -1,4 +1,6 @@
 using System.Collections;
+using System.Collections.Generic;
+using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -93,6 +95,8 @@ namespace AL.ChampionMode.Skills
         private IEnumerator CastRoutine(int slotIndex)
         {
             Debug.Log($"Casting {_skillNames[slotIndex]}.");
+            var realmId = GetCurrentRealmId();
+            SkillEffectFactory.SpawnSkillCastRing(transform.position, realmId, GetSkillPreviewRadius(slotIndex), _castTimes[slotIndex] + 0.15f);
             yield return new WaitForSeconds(_castTimes[slotIndex]);
 
             ResolveSkill(slotIndex);
@@ -104,34 +108,43 @@ namespace AL.ChampionMode.Skills
         private void ResolveSkill(int slotIndex)
         {
             var realmId = GetCurrentRealmId();
-            Vector3 center = transform.position + transform.forward * Mathf.Max(1.5f, _ranges[slotIndex]) + Vector3.up;
+            Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
+            Vector3 groundCenter = transform.position + forward * Mathf.Max(1.5f, _ranges[slotIndex]);
+            Vector3 hitCenter = groundCenter + Vector3.up;
 
             switch (slotIndex)
             {
                 case 1:
                     _combat?.Heal(_powers[slotIndex]);
-                    SkillEffectFactory.SpawnRealmImpact(transform.position + Vector3.up, realmId);
+                    SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
                     break;
                 case 2:
-                    DamageTargets(center, _ranges[slotIndex], _powers[slotIndex]);
-                    SkillEffectFactory.SpawnRealmImpact(center, realmId);
+                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId);
+                    SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, _ranges[slotIndex]);
                     break;
                 case 3:
-                    DamageTargets(center, _ranges[slotIndex], _powers[slotIndex]);
-                    SkillEffectFactory.SpawnRealmImpact(center, realmId);
-                    SkillEffectFactory.SpawnBossTelegraph(center, 1.6f, 0.45f);
+                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId);
+                    SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, _ranges[slotIndex]);
                     break;
                 default:
-                    DamageTargets(center, _ranges[slotIndex], _powers[slotIndex]);
-                    SkillEffectFactory.SpawnRealmImpact(center, realmId);
+                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId);
+                    SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId);
                     break;
             }
         }
 
-        private void DamageTargets(Vector3 center, float radius, float power)
+        private float GetSkillPreviewRadius(int slotIndex)
+        {
+            return slotIndex == 1 ? 1.35f : Mathf.Clamp(_ranges[slotIndex], 1.15f, 4.5f);
+        }
+
+        private void DamageTargets(Vector3 center, float radius, float power, RealmId attackerRealm)
         {
             Collider[] hitColliders = Physics.OverlapSphere(center, radius);
             int destroyedDummies = 0;
+            var damagedBots = new HashSet<int>();
+            var damagedBosses = new HashSet<int>();
+
             foreach (var hitCollider in hitColliders)
             {
                 if (hitCollider == null)
@@ -146,10 +159,17 @@ namespace AL.ChampionMode.Skills
                     continue;
                 }
 
-                if (hitCollider.gameObject.name.StartsWith("BossDummy"))
+                var boss = hitCollider.GetComponentInParent<BossDummyAI>();
+                if (boss != null && damagedBosses.Add(boss.GetInstanceID()))
                 {
-                    var boss = hitCollider.GetComponent<AL.ChampionMode.AI.BossDummyAI>();
-                    boss?.TakeDamage(power);
+                    boss.TakeDamage(power);
+                    continue;
+                }
+
+                var bot = hitCollider.GetComponentInParent<BotChampionAI>();
+                if (bot != null && bot.IsAlive && bot.RealmId != attackerRealm && damagedBots.Add(bot.GetInstanceID()))
+                {
+                    bot.TakeDamage(power * 0.72f, attackerRealm);
                 }
             }
 
