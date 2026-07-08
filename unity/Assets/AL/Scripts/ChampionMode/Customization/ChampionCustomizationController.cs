@@ -582,6 +582,9 @@ namespace AL.ChampionMode.Customization
             SetPartActive("RobeBackPanel", isRobe);
             SetPartActive("RobeSleeve", isRobe);
             SetPartActive("ArmorTrim", true);
+            SetPartActive("Armor_Rib", !isRobe);
+            SetExactPartActive("Armor_CenterGem", true);
+            SetPartActive("RobeTrim", isRobe);
             SetPartActive("Belt", true);
             SetPartActive("PlateSkirt", !isLight || isWarmaster);
             SetPartActive("Knee", !isRobe);
@@ -638,12 +641,20 @@ namespace AL.ChampionMode.Customization
 
             SetExactPartActive("Sword_Blade", isSword);
             SetExactPartActive("Sword_Guard", isSword);
+            SetExactPartActive("Sword_Edge_L", isSword);
+            SetExactPartActive("Sword_Edge_R", isSword);
+            SetExactPartActive("Sword_Gem", isSword);
             SetExactPartActive("Weapon_Head", isAxe);
             SetExactPartActive("Axe_Blade_L", isAxe);
             SetExactPartActive("Axe_Blade_R", isAxe);
+            SetExactPartActive("Axe_Edge_L", isAxe);
+            SetExactPartActive("Axe_Edge_R", isAxe);
             SetExactPartActive("Hammer_Face", isHammer);
+            SetExactPartActive("Hammer_Rune", isHammer);
             SetExactPartActive("Staff_Crystal", isStaff);
+            SetExactPartActive("Staff_Ring", isStaff);
             SetPartActive("Bow_Limb", isBow);
+            SetExactPartActive("Bow_GripWrap", isBow);
             SetExactPartActive("Bow_String", isBow);
 
             switch (weaponStyleId)
@@ -673,11 +684,15 @@ namespace AL.ChampionMode.Customization
         {
             SetExactPartActive("Shield_Off", offhandStyleId == "shield");
             SetExactPartActive("Shield_Crest", offhandStyleId == "shield");
+            SetExactPartActive("Shield_Rim_Top", offhandStyleId == "shield");
+            SetExactPartActive("Shield_Rim_Bottom", offhandStyleId == "shield");
             SetExactPartActive("Orb_Off", offhandStyleId == "orb");
             SetExactPartActive("Orb_Ring", offhandStyleId == "orb");
             SetExactPartActive("Weapon_Off", offhandStyleId == "dagger");
             SetExactPartActive("Dagger_Blade", offhandStyleId == "dagger");
+            SetExactPartActive("Dagger_Guard", offhandStyleId == "dagger");
             SetExactPartActive("Tome_Off", offhandStyleId == "tome");
+            SetExactPartActive("Tome_Page", offhandStyleId == "tome");
             SetExactPartActive("Tome_Clasp", offhandStyleId == "tome");
         }
 
@@ -692,13 +707,20 @@ namespace AL.ChampionMode.Customization
                 }
 
                 string objectName = renderer.gameObject.name.ToLowerInvariant();
+                bool isSkinShadow = objectName.Contains("skin_shadow");
+                bool isLip = objectName.Contains("lowerlip");
                 bool isHair = objectName.Contains("hair") || objectName.Contains("brow");
                 bool isSkin = objectName.Contains("skin") || objectName.Contains("ear");
                 bool isEye = objectName.Contains("eye");
+                bool isBrightMetal = objectName.Contains("blade") || objectName.Contains("edge");
+                bool isParchment = objectName.Contains("tome_page");
                 bool isAccent = objectName.Contains("facemark") ||
                                 objectName.Contains("backattachment") ||
                                 objectName.Contains("orb") ||
                                 objectName.Contains("trim") ||
+                                objectName.Contains("gem") ||
+                                objectName.Contains("rune") ||
+                                objectName.Contains("rim") ||
                                 objectName.Contains("tome_clasp") ||
                                 objectName.Contains("belt_buckle") ||
                                 objectName.Contains("clasp") ||
@@ -724,27 +746,35 @@ namespace AL.ChampionMode.Customization
                                objectName.Contains("knee") ||
                                objectName.Contains("belt");
 
-                Color targetColor = isHair
-                    ? hair
-                    : isSkin
-                        ? skin
-                        : isEye
-                            ? eye
-                            : isAccent
-                                ? accent
-                                : isFabric
-                                    ? Color.Lerp(primary, accent, 0.45f)
-                                    : isLeather
-                                        ? Color.Lerp(primary, new Color(0.16f, 0.10f, 0.06f), 0.64f)
-                                        : isMetal
-                                            ? Color.Lerp(primary, Color.white, 0.22f)
-                                            : primary;
+                Color targetColor = isSkinShadow
+                    ? Color.Lerp(skin, Color.black, 0.38f)
+                    : isLip
+                        ? Color.Lerp(skin, new Color(0.58f, 0.32f, 0.30f), 0.24f)
+                        : isParchment
+                            ? Color.Lerp(new Color(0.82f, 0.76f, 0.58f), accent, 0.12f)
+                            : isBrightMetal
+                                ? Color.Lerp(Color.white, primary, 0.16f)
+                                : isHair
+                                    ? hair
+                                    : isSkin
+                                        ? skin
+                                        : isEye
+                                            ? eye
+                                            : isAccent
+                                                ? accent
+                                                : isFabric
+                                                    ? Color.Lerp(primary, accent, 0.45f)
+                                                    : isLeather
+                                                        ? Color.Lerp(primary, new Color(0.16f, 0.10f, 0.06f), 0.64f)
+                                                        : isMetal
+                                                            ? Color.Lerp(primary, Color.white, 0.22f)
+                                                            : primary;
 
-                float metallic = isMetal ? 0.46f : isAccent ? 0.26f : isLeather ? 0.06f : 0f;
-                float smoothness = isEye || isAccent ? 0.72f : isMetal ? 0.60f : isSkin ? 0.30f : isHair ? 0.36f : 0.46f;
+                float metallic = isBrightMetal ? 0.58f : isMetal ? 0.46f : isAccent ? 0.26f : isLeather ? 0.06f : 0f;
+                float smoothness = isBrightMetal ? 0.78f : isEye || isAccent ? 0.72f : isMetal ? 0.60f : isSkin ? 0.30f : isHair ? 0.36f : 0.46f;
                 float emissionStrength = isEye
                     ? 0.22f
-                    : objectName.Contains("orb") || objectName.Contains("crystal") || objectName.Contains("backattachment_core")
+                    : objectName.Contains("orb") || objectName.Contains("crystal") || objectName.Contains("backattachment_core") || objectName.Contains("gem") || objectName.Contains("rune")
                         ? 0.46f
                         : objectName.Contains("facemark") || objectName.Contains("trim") || objectName.Contains("crest")
                             ? 0.10f
