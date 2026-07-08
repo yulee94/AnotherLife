@@ -60,6 +60,7 @@ namespace AL.Core
                 var reputationService = new ReputationService(saveGame);
                 var notificationService = new LocalNotificationService();
                 var realmGemService = new LocalRealmGemService(saveGame);
+                var worldAtlasService = new AL.RealmWar.World.LocalWorldAtlasService(storyService);
 
                 ServiceLocator.Register<IBattleSimulator>(battleSim);
                 ServiceLocator.Register<IWarzoneCreditService>(warzoneCredits);
@@ -70,6 +71,7 @@ namespace AL.Core
                 ServiceLocator.Register<IStoryService>(storyService);
                 ServiceLocator.Register<INotificationService>(notificationService);
                 ServiceLocator.Register<IRealmGemService>(realmGemService);
+                ServiceLocator.Register<IWorldAtlasService>(worldAtlasService);
 
                 Debug.Log("<color=cyan>[Bootloader] Offline Services Initialized Successfully.</color>");
             }
