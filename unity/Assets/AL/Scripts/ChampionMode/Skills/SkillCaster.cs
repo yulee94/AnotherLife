@@ -21,11 +21,28 @@ namespace AL.ChampionMode.Skills
             "Warmaster Breaker"
         };
 
+        private readonly string[] _skillIds =
+        {
+            "realm_strike",
+            "renewing_guard",
+            "warzone_burst",
+            "warmaster_breaker"
+        };
+
+        private readonly string[] _vfxKeys =
+        {
+            "realm_slash",
+            "renewing_guard",
+            "warzone_shockwave",
+            "warmaster_breaker"
+        };
+
         private readonly float[] _cooldowns = { 4f, 8f, 10f, 14f };
         private readonly float[] _manaCosts = { 20f, 30f, 45f, 60f };
         private readonly float[] _castTimes = { 0.05f, 0.35f, 0.45f, 0.65f };
         private readonly float[] _ranges = { 2.6f, 0f, 4.2f, 3.4f };
         private readonly float[] _powers = { 150f, 180f, 115f, 260f };
+        private readonly float[] _botDamageMultipliers = { 0.72f, 0f, 0.72f, 0.72f };
         private readonly float[] _nextReadyTimes = new float[SlotCount];
 
         private ChampionCombat _combat;
@@ -39,6 +56,7 @@ namespace AL.ChampionMode.Skills
         {
             _combat = GetComponent<ChampionCombat>();
             _controller = GetComponent<ChampionController>();
+            ApplySharedSkillLoadouts();
         }
 
         public bool TryCastSkill(int slotIndex)
@@ -92,6 +110,16 @@ namespace AL.ChampionMode.Skills
             return IsValidSlot(slotIndex) ? _skillNames[slotIndex] : "Unknown";
         }
 
+        public string GetSkillId(int slotIndex)
+        {
+            return IsValidSlot(slotIndex) ? _skillIds[slotIndex] : string.Empty;
+        }
+
+        public string GetSkillVfxKey(int slotIndex)
+        {
+            return IsValidSlot(slotIndex) ? _vfxKeys[slotIndex] : string.Empty;
+        }
+
         private IEnumerator CastRoutine(int slotIndex)
         {
             Debug.Log($"Casting {_skillNames[slotIndex]}.");
@@ -119,15 +147,15 @@ namespace AL.ChampionMode.Skills
                     SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
                     break;
                 case 2:
-                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId);
+                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
                     SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, _ranges[slotIndex]);
                     break;
                 case 3:
-                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId);
+                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
                     SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, _ranges[slotIndex]);
                     break;
                 default:
-                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId);
+                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
                     SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId);
                     break;
             }
@@ -138,7 +166,7 @@ namespace AL.ChampionMode.Skills
             return slotIndex == 1 ? 1.35f : Mathf.Clamp(_ranges[slotIndex], 1.15f, 4.5f);
         }
 
-        private void DamageTargets(Vector3 center, float radius, float power, RealmId attackerRealm)
+        private void DamageTargets(Vector3 center, float radius, float power, RealmId attackerRealm, float botDamageMultiplier)
         {
             Collider[] hitColliders = Physics.OverlapSphere(center, radius);
             int destroyedDummies = 0;
@@ -169,7 +197,7 @@ namespace AL.ChampionMode.Skills
                 var bot = hitCollider.GetComponentInParent<BotChampionAI>();
                 if (bot != null && bot.IsAlive && bot.RealmId != attackerRealm && damagedBots.Add(bot.GetInstanceID()))
                 {
-                    bot.TakeDamage(power * 0.72f, attackerRealm);
+                    bot.TakeDamage(power * Mathf.Max(0f, botDamageMultiplier), attackerRealm);
                 }
             }
 
@@ -178,6 +206,55 @@ namespace AL.ChampionMode.Skills
                 _controller ??= GetComponent<ChampionController>();
                 _controller?.CheckVictory(destroyedDummies);
             }
+        }
+
+        private void ApplySharedSkillLoadouts()
+        {
+            if (!SkillLoadoutCatalog.TryLoad(out var loadouts))
+            {
+                return;
+            }
+
+            foreach (var loadout in loadouts)
+            {
+                if (loadout == null || !IsValidSlot(loadout.slot))
+                {
+                    continue;
+                }
+
+                int slot = loadout.slot;
+                if (!string.IsNullOrWhiteSpace(loadout.id))
+                {
+                    _skillIds[slot] = loadout.id;
+                }
+
+                if (!string.IsNullOrWhiteSpace(loadout.displayName))
+                {
+                    _skillNames[slot] = loadout.displayName;
+                }
+
+                if (!string.IsNullOrWhiteSpace(loadout.vfxKey))
+                {
+                    _vfxKeys[slot] = loadout.vfxKey;
+                }
+
+                _cooldowns[slot] = UseCatalogValue(loadout.cooldownSeconds, _cooldowns[slot], 0f);
+                _manaCosts[slot] = UseCatalogValue(loadout.manaCost, _manaCosts[slot], 0f);
+                _castTimes[slot] = UseCatalogValue(loadout.castTimeSeconds, _castTimes[slot], 0f);
+                _ranges[slot] = UseCatalogValue(loadout.rangeMeters, _ranges[slot], 0f);
+                _powers[slot] = UseCatalogValue(loadout.power, _powers[slot], 0f);
+                _botDamageMultipliers[slot] = UseCatalogValue(loadout.botDamageMultiplier, _botDamageMultipliers[slot], 0f);
+            }
+        }
+
+        private static float UseCatalogValue(float value, float fallback, float minimum)
+        {
+            if (float.IsNaN(value) || float.IsInfinity(value))
+            {
+                return fallback;
+            }
+
+            return Mathf.Max(minimum, value);
         }
 
         private RealmId GetCurrentRealmId()

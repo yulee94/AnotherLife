@@ -1,5 +1,59 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
+  "skillLoadouts": [
+    {
+      "slot": 0,
+      "id": "realm_strike",
+      "displayName": "Realm Strike",
+      "role": "melee_damage",
+      "vfxKey": "realm_slash",
+      "cooldownSeconds": 4.0,
+      "manaCost": 20.0,
+      "castTimeSeconds": 0.05,
+      "rangeMeters": 2.6,
+      "power": 150.0,
+      "botDamageMultiplier": 0.72
+    },
+    {
+      "slot": 1,
+      "id": "renewing_guard",
+      "displayName": "Renewing Guard",
+      "role": "self_heal_guard",
+      "vfxKey": "renewing_guard",
+      "cooldownSeconds": 8.0,
+      "manaCost": 30.0,
+      "castTimeSeconds": 0.35,
+      "rangeMeters": 0.0,
+      "power": 180.0,
+      "botDamageMultiplier": 0.0
+    },
+    {
+      "slot": 2,
+      "id": "warzone_burst",
+      "displayName": "Warzone Burst",
+      "role": "area_damage",
+      "vfxKey": "warzone_shockwave",
+      "cooldownSeconds": 10.0,
+      "manaCost": 45.0,
+      "castTimeSeconds": 0.45,
+      "rangeMeters": 4.2,
+      "power": 115.0,
+      "botDamageMultiplier": 0.72
+    },
+    {
+      "slot": 3,
+      "id": "warmaster_breaker",
+      "displayName": "Warmaster Breaker",
+      "role": "elite_break_damage",
+      "vfxKey": "warmaster_breaker",
+      "cooldownSeconds": 14.0,
+      "manaCost": 60.0,
+      "castTimeSeconds": 0.65,
+      "rangeMeters": 3.4,
+      "power": 260.0,
+      "botDamageMultiplier": 0.72
+    }
+  ],
   "skillEffects": [
     {
       "key": "stonehold_forge_burst",
