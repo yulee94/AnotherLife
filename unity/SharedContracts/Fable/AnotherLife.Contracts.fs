@@ -53,6 +53,8 @@ module DesignContracts =
             bodyPresets: BodyPreset array
             hairStyles: StyleOption array
             armorStyles: StyleOption array
+            primaryColors: ColorOption array
+            hairColors: ColorOption array
             skinColors: ColorOption array
             eyeColors: ColorOption array
             accentColors: ColorOption array

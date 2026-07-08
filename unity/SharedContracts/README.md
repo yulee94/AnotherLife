@@ -23,7 +23,7 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_character_customization_catalog.json` | `al-character-customization.schema.json` | `CharacterCustomizationCatalog` |
 | `al_skill_weather_catalog.json` | `al-skill-weather.schema.json` | `SkillWeatherCatalog` |
 
-The character customization catalog includes body presets, hair styles, armor styles, skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
+The character customization catalog includes body presets, hair styles, armor styles, primary/hair/skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
 The skill and weather catalog includes champion skill loadouts, realm skill VFX keys, plus detailed weather profile parameters for particles, fog, ambient light, directional light, wind, turbulence, and lightning. Skill loadouts include slot IDs, display names, cooldowns, mana costs, cast times, ranges, power values, bot damage multipliers, and VFX keys so Unity and Fable tools can balance combat from the same data without referencing UnityEngine types.
 
