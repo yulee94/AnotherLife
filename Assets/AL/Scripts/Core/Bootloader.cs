@@ -52,7 +52,7 @@ namespace AL.Core
 
                 // 3. Battle & Economy Services
                 var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
-                var warzoneCredits = new LocalWarzoneCreditService();
+                var warzoneCredits = new LocalWarzoneCreditService(saveGame);
                 var warmaster = new LocalWarmasterService(saveGame);
                 var territoryService = new AL.RealmWar.Warzone.WarzoneService();
                 var questService = new LocalQuestService(saveGame, resourceService, warzoneCredits);

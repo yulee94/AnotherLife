@@ -5,21 +5,33 @@ namespace AL.Services.Local
 {
     public class LocalWarzoneCreditService : IWarzoneCreditService
     {
-        private int _credits = 0;
+        private readonly ISaveGameService _saveGameService;
 
-        public int GetCredits() => _credits;
+        public LocalWarzoneCreditService(ISaveGameService saveGameService)
+        {
+            _saveGameService = saveGameService;
+        }
+
+        public int GetCredits() => _saveGameService.CurrentSave?.WarzoneCredits ?? 0;
 
         public void AddCredits(int amount)
         {
-            _credits += amount;
-            Debug.Log($"Added {amount} Warzone Credits. Total: {_credits}");
+            if (_saveGameService.CurrentSave == null)
+            {
+                return;
+            }
+
+            _saveGameService.CurrentSave.WarzoneCredits += amount;
+            _saveGameService.Save();
+            Debug.Log($"Added {amount} Warzone Credits. Total: {_saveGameService.CurrentSave.WarzoneCredits}");
         }
 
         public bool SpendCredits(int amount)
         {
-            if (_credits >= amount)
+            if (_saveGameService.CurrentSave != null && _saveGameService.CurrentSave.WarzoneCredits >= amount)
             {
-                _credits -= amount;
+                _saveGameService.CurrentSave.WarzoneCredits -= amount;
+                _saveGameService.Save();
                 return true;
             }
             return false;

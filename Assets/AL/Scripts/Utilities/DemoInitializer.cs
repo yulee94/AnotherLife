@@ -116,8 +116,20 @@ namespace AL.Utilities
                 SetStatus("Started Farm upgrade if enough Stone is available.");
             });
 
-            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -5), RunTestBattle);
-            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -60), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "Train Infantry", new Vector2(20, -5), () =>
+            {
+                ServiceLocator.Get<ITrainingService>().StartTraining(TroopType.Infantry, 25);
+                SetStatus($"Infantry trained. Total: {ServiceLocator.Get<ITrainingService>().GetTroopCount(TroopType.Infantry)}");
+            });
+
+            CreateButton(canvasObj.transform, "Earn Warzone", new Vector2(20, -60), () =>
+            {
+                ServiceLocator.Get<IWarzoneCreditService>().AddCredits(250);
+                SetStatus($"Warzone Credits: {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}");
+            });
+
+            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -115), RunTestBattle);
+            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -170), SpawnArenaTargets);
 
             // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));

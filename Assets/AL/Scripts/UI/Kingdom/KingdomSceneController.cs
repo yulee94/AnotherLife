@@ -17,6 +17,7 @@ namespace AL.UI.Kingdom
         private Text _realmText;
         private Text _resourceText;
         private Text _buildingText;
+        private Text _troopText;
         private Text _researchText;
         private Text _battleText;
         private Text _messageText;
@@ -76,9 +77,10 @@ namespace AL.UI.Kingdom
 
             _realmText = CreateText(canvas.transform, "RealmText", font, 30, TextAnchor.UpperLeft, new Vector2(40, -30), new Vector2(900, 90));
             _resourceText = CreateText(canvas.transform, "ResourceText", font, 24, TextAnchor.UpperLeft, new Vector2(40, -120), new Vector2(900, 130));
-            _buildingText = CreateText(canvas.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(520, 310));
+            _buildingText = CreateText(canvas.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(500, 300));
+            _troopText = CreateText(canvas.transform, "TroopText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -570), new Vector2(500, 180));
             _researchText = CreateText(canvas.transform, "ResearchText", font, 22, TextAnchor.UpperLeft, new Vector2(600, -250), new Vector2(520, 210));
-            _battleText = CreateText(canvas.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 190));
+            _battleText = CreateText(canvas.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 220));
             _messageText = CreateText(canvas.transform, "MessageText", font, 22, TextAnchor.LowerLeft, new Vector2(40, 40), new Vector2(900, 80));
 
             CreateButton(canvas.transform, font, "Upgrade Town Hall", new Vector2(-260, -80), () => UpgradeBuilding("TownHall"));
@@ -88,9 +90,13 @@ namespace AL.UI.Kingdom
             CreateButton(canvas.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
             CreateButton(canvas.transform, font, "Research Steel", new Vector2(-260, -420), () => StartResearch("Steel Forging"));
             CreateButton(canvas.transform, font, "Research Armor", new Vector2(-260, -485), () => StartResearch("Plate Armor"));
-            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-260, -565), RunTestBattle);
-            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-260, -630), () => SceneManager.LoadScene(_arenaSceneName));
-            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-260, -695), ResetSave);
+            CreateButton(canvas.transform, font, "Train Infantry", new Vector2(-260, -565), () => TrainTroops(TroopType.Infantry));
+            CreateButton(canvas.transform, font, "Train Ranged", new Vector2(-260, -630), () => TrainTroops(TroopType.Ranged));
+            CreateButton(canvas.transform, font, "Earn Warzone", new Vector2(-260, -695), EarnWarzoneCredits);
+            CreateButton(canvas.transform, font, "Unlock Warmaster", new Vector2(-260, -760), UnlockWarmaster);
+            CreateButton(canvas.transform, font, "Test Battle", new Vector2(-260, -825), RunTestBattle);
+            CreateButton(canvas.transform, font, "Champion Arena", new Vector2(-260, -890), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateButton(canvas.transform, font, "Reset Save", new Vector2(-260, -955), ResetSave);
         }
 
         private void UpgradeBuilding(string buildingId)
@@ -134,6 +140,36 @@ namespace AL.UI.Kingdom
             SetMessage(report.IsWinner ? "Victory report generated." : "Defeat report generated.");
         }
 
+        private void TrainTroops(TroopType type)
+        {
+            ServiceLocator.Get<ITrainingService>().StartTraining(type, 25);
+            SetMessage($"Training request: 25 {type}");
+            Refresh();
+        }
+
+        private void EarnWarzoneCredits()
+        {
+            ServiceLocator.Get<IWarzoneCreditService>().AddCredits(250);
+            SetMessage("Earned 250 Warzone Credits from a test objective.");
+            Refresh();
+        }
+
+        private void UnlockWarmaster()
+        {
+            var credits = ServiceLocator.Get<IWarzoneCreditService>();
+            if (!credits.SpendCredits(100))
+            {
+                SetMessage("Need 100 Warzone Credits to unlock the prototype Warmaster set.");
+                return;
+            }
+
+            var warmaster = ServiceLocator.Get<IWarmasterService>();
+            warmaster.UnlockSet("prototype_true_warmaster");
+            warmaster.EquipSet("prototype_true_warmaster");
+            SetMessage("Prototype True Warmaster set unlocked.");
+            Refresh();
+        }
+
         private void ResetSave()
         {
             var save = ServiceLocator.Get<ISaveGameService>();
@@ -155,7 +191,8 @@ namespace AL.UI.Kingdom
                 $"Food {resources.GetResourceCount(ResourceType.Food)}    " +
                 $"Wood {resources.GetResourceCount(ResourceType.Wood)}    " +
                 $"Stone {resources.GetResourceCount(ResourceType.Stone)}    " +
-                $"Gold {resources.GetResourceCount(ResourceType.Gold)}";
+                $"Gold {resources.GetResourceCount(ResourceType.Gold)}    " +
+                $"Warzone {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}";
 
             var buildings = ServiceLocator.Get<IBuildingService>();
             var builder = new StringBuilder();
@@ -170,6 +207,15 @@ namespace AL.UI.Kingdom
             }
 
             _buildingText.text = builder.ToString();
+
+            var training = ServiceLocator.Get<ITrainingService>();
+            _troopText.text =
+                "Troops\n" +
+                $"Infantry: {training.GetTroopCount(TroopType.Infantry)}\n" +
+                $"Cavalry: {training.GetTroopCount(TroopType.Cavalry)}\n" +
+                $"Ranged: {training.GetTroopCount(TroopType.Ranged)}\n" +
+                $"Siege: {training.GetTroopCount(TroopType.Siege)}\n" +
+                $"Warmaster: {ServiceLocator.Get<IWarmasterService>().GetState()?.EquippedSetId ?? "none"}";
 
             var research = ServiceLocator.Get<IResearchService>();
             var steel = research.GetResearchState("Steel Forging");

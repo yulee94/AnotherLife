@@ -61,6 +61,7 @@ namespace AL.Services.Local
                     new ResourceData { Type = ResourceType.Gold, Amount = 500 }
                 },
                 Buildings = new List<BuildingState>(),
+                Troops = new List<TroopInventoryData>(),
                 Quests = new List<QuestState>(),
                 CurrentChapterId = "C1",
                 Warmaster = new WarmasterState()
@@ -84,6 +85,7 @@ namespace AL.Services.Local
 
             save.Resources ??= new List<ResourceData>();
             save.Buildings ??= new List<BuildingState>();
+            save.Troops ??= new List<TroopInventoryData>();
             save.Researches ??= new List<ResearchState>();
             save.Quests ??= new List<QuestState>();
             save.Warmaster ??= new WarmasterState();

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
@@ -11,9 +12,6 @@ namespace AL.Services.Local
     {
         private readonly ISaveGameService _saveGameService;
         private readonly IResourceService _resourceService;
-
-        // In a real save, these would be persisted in SaveGameData
-        private Dictionary<TroopType, int> _troops = new Dictionary<TroopType, int>();
 
         public LocalTrainingService(ISaveGameService saveGameService, IResourceService resourceService)
         {
@@ -31,7 +29,16 @@ namespace AL.Services.Local
                 Debug.Log($"Trained {count} {type}");
 
                 // Trigger Quest Update
-                ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.TrainTroops, count);
+                try
+                {
+                    ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.TrainTroops, count);
+                }
+                catch (Exception)
+                {
+                    // Quest service is optional in early scene tests.
+                }
+
+                _saveGameService.Save();
             }
         }
 
@@ -42,13 +49,37 @@ namespace AL.Services.Local
 
         public int GetTroopCount(TroopType type)
         {
-            return _troops.TryGetValue(type, out int count) ? count : 0;
+            return GetTroopState(type)?.Count ?? 0;
         }
 
         private void AddTroops(TroopType type, int count)
         {
-            if (_troops.ContainsKey(type)) _troops[type] += count;
-            else _troops[type] = count;
+            var state = GetTroopState(type);
+            if (state == null)
+            {
+                return;
+            }
+
+            state.Count += count;
+        }
+
+        private TroopInventoryData GetTroopState(TroopType type)
+        {
+            var save = _saveGameService.CurrentSave;
+            if (save == null)
+            {
+                return null;
+            }
+
+            save.Troops ??= new List<TroopInventoryData>();
+            var state = save.Troops.FirstOrDefault(t => t.Type == type);
+            if (state == null)
+            {
+                state = new TroopInventoryData { Type = type, Count = 0, WoundedCount = 0 };
+                save.Troops.Add(state);
+            }
+
+            return state;
         }
     }
 }
