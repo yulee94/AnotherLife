@@ -56,6 +56,8 @@ namespace AL.ChampionMode
         private Text _clearSummaryText;
         private Text _clearDetailText;
         private GameObject _introPanelObject;
+        private Image _introTopLetterbox;
+        private Image _introBottomLetterbox;
         private Text _introTitleText;
         private Text _introSubtitleText;
         private Text _introCountdownText;
@@ -78,6 +80,7 @@ namespace AL.ChampionMode
         private bool _encounterIntroRunning;
         private bool _appearanceInspectionMode;
         private GameObject _inspectionShowcaseRoot;
+        private GameObject _introStageCueRoot;
         private RuntimePlatformQualityController _qualityController;
 
         private void Start()
@@ -154,6 +157,7 @@ namespace AL.ChampionMode
         {
             ConfigureArenaLighting();
             BuildArenaEnvironment();
+            Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
 
             var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Champion";
@@ -165,7 +169,7 @@ namespace AL.ChampionMode
             _playerController = player.AddComponent<ChampionController>();
             ProceduralChampionModelBuilder.EnsureModel(player);
             _playerCustomization = player.AddComponent<ChampionCustomizationController>();
-            _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, GetRealmAccentColor(GetCurrentRealmId()));
+            _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
             var cameraObject = new GameObject("Main Camera");
@@ -188,6 +192,7 @@ namespace AL.ChampionMode
             DressBossVisual(boss);
             _boss = boss.AddComponent<BossDummyAI>();
             _bossTransform = boss.transform;
+            CreateIntroCinematicCues(player.transform, boss.transform, realmAccent);
             _encounterStartTime = Time.time;
             _guardBreakObserved = false;
             _enrageObserved = false;
@@ -528,6 +533,55 @@ namespace AL.ChampionMode
             markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(GetCurrentRealmId(), markerBudget);
         }
 
+        private void CreateIntroCinematicCues(Transform player, Transform boss, Color realmAccent)
+        {
+            if (player == null || boss == null)
+            {
+                return;
+            }
+
+            var root = new GameObject("ChampionIntroCinematicCues");
+            _introStageCueRoot = root;
+
+            Color threatRed = new Color(1f, 0.20f, 0.08f);
+            Color coldEdge = new Color(0.30f, 0.62f, 1f);
+            Vector3 playerGround = new Vector3(player.position.x, 0.07f, player.position.z);
+            Vector3 bossGround = new Vector3(boss.position.x, 0.09f, boss.position.z);
+            Vector3 laneCenter = Vector3.Lerp(playerGround, bossGround, 0.5f);
+            float laneLength = Vector3.Distance(playerGround, bossGround);
+
+            var heroHalo = CreateArenaPrimitive(root.transform, "Intro_Hero_CommandHalo", PrimitiveType.Cylinder, playerGround, new Vector3(2.30f, 0.018f, 2.30f), Vector3.zero, realmAccent, true, 0f, 0.86f);
+            var heroInner = CreateArenaPrimitive(root.transform, "Intro_Hero_InnerTrace", PrimitiveType.Cylinder, playerGround + Vector3.up * 0.018f, new Vector3(1.24f, 0.012f, 1.24f), Vector3.zero, coldEdge, true, 0f, 0.74f);
+            var bossHalo = CreateArenaPrimitive(root.transform, "Intro_Boss_ThreatHalo", PrimitiveType.Cylinder, bossGround, new Vector3(3.30f, 0.020f, 3.30f), Vector3.zero, threatRed, true, 0f, 0.90f);
+            var bossInner = CreateArenaPrimitive(root.transform, "Intro_Boss_BreakRing", PrimitiveType.Cylinder, bossGround + Vector3.up * 0.020f, new Vector3(2.08f, 0.014f, 2.08f), Vector3.zero, new Color(1f, 0.72f, 0.32f), true, 0f, 0.82f);
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * Mathf.PI * 0.5f;
+                Vector3 position = playerGround + new Vector3(Mathf.Cos(angle) * 1.18f, 0.038f, Mathf.Sin(angle) * 1.18f);
+                CreateArenaPrimitive(root.transform, "Intro_Hero_Notch_" + i, PrimitiveType.Cube, position, new Vector3(0.34f, 0.018f, 0.055f), new Vector3(0f, -angle * Mathf.Rad2Deg, 0f), Color.Lerp(realmAccent, Color.white, 0.18f), true, 0f, 0.76f);
+            }
+
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 6f;
+                Vector3 position = bossGround + new Vector3(Mathf.Cos(angle) * 1.72f, 0.042f, Mathf.Sin(angle) * 1.72f);
+                CreateArenaPrimitive(root.transform, "Intro_Boss_Notch_" + i, PrimitiveType.Cube, position, new Vector3(0.42f, 0.020f, 0.065f), new Vector3(0f, -angle * Mathf.Rad2Deg, 0f), i % 2 == 0 ? threatRed : new Color(1f, 0.72f, 0.32f), true, 0f, 0.80f);
+            }
+
+            CreateArenaPrimitive(root.transform, "Intro_PressureLane_Core", PrimitiveType.Cube, laneCenter + Vector3.up * 0.018f, new Vector3(0.060f, 0.018f, laneLength), Vector3.zero, Color.Lerp(realmAccent, Color.white, 0.18f), true, 0f, 0.72f);
+            CreateArenaPrimitive(root.transform, "Intro_PressureLane_Left", PrimitiveType.Cube, laneCenter + new Vector3(-0.62f, 0.016f, 0f), new Vector3(0.035f, 0.016f, laneLength * 0.82f), Vector3.zero, coldEdge, true, 0f, 0.62f);
+            CreateArenaPrimitive(root.transform, "Intro_PressureLane_Right", PrimitiveType.Cube, laneCenter + new Vector3(0.62f, 0.016f, 0f), new Vector3(0.035f, 0.016f, laneLength * 0.82f), Vector3.zero, threatRed, true, 0f, 0.62f);
+
+            var heroLight = CreatePointLight("Intro Champion Key Light", player.position + new Vector3(-1.1f, 2.8f, -1.8f), Color.Lerp(realmAccent, Color.white, 0.32f), 2.2f, 6.4f);
+            heroLight.transform.SetParent(root.transform, true);
+            var bossLight = CreatePointLight("Intro Boss Threat Light", boss.position + new Vector3(0.6f, 2.6f, -1.0f), threatRed, 2.9f, 7.2f);
+            bossLight.transform.SetParent(root.transform, true);
+
+            var cue = root.AddComponent<ChampionIntroCinematicCue>();
+            cue.Configure(heroHalo.transform, heroInner.transform, bossHalo.transform, bossInner.transform);
+            root.SetActive(false);
+        }
+
         private RealmId GetCurrentRealmId()
         {
             try
@@ -826,7 +880,10 @@ namespace AL.ChampionMode
             }
 
             RefreshAppearanceText();
-            SetAppearanceInspection(true);
+            if (!_encounterIntroRunning)
+            {
+                SetAppearanceInspection(true);
+            }
 
             if (_combatFeedText != null)
             {
@@ -1095,36 +1152,39 @@ namespace AL.ChampionMode
             _autoCombatController?.SetMode(AutoMode.Manual);
             _encounterStartTime = Time.time;
 
-            if (_introPanelObject != null)
-            {
-                _introPanelObject.SetActive(true);
-            }
+            SetIntroPresentationActive(true);
 
             if (_combatFeedText != null)
             {
-                _combatFeedText.text = "Encounter initializing. Read the boss, break guard, then commit burst skills.";
+                _combatFeedText.text = "Encounter initializing. Read the boss posture, then commit burst skills.";
             }
 
-            SetIntroText("OBSIDIAN GATE", "Break the guard. Dodge the marked slam. Finish before enrage.", "3");
-            RuntimeCombatAudio.PlayWarning();
-            yield return new WaitForSecondsRealtime(0.62f);
+            Vector3 playerLook = GetPlayerIntroLookPoint();
+            Vector3 bossLook = GetBossIntroLookPoint();
+            Vector3 arenaLook = Vector3.Lerp(playerLook, bossLook, 0.54f) + Vector3.up * 0.25f;
 
-            SetIntroText("OBSIDIAN GATE", "Hold mana for the break window.", "2");
+            _cameraFollow?.SetCinematicShot(playerLook + new Vector3(-3.2f, 1.15f, 2.85f), playerLook, 34f, 0.10f);
+            SetIntroText("CHAMPION READY", "Forge identity locked. Read the arena before committing.", "3");
             RuntimeCombatAudio.PlayWarning();
-            yield return new WaitForSecondsRealtime(0.62f);
+            yield return new WaitForSecondsRealtime(0.72f);
 
-            SetIntroText("OBSIDIAN GATE", "Manual control ready.", "1");
+            _cameraFollow?.SetCinematicShot(bossLook + new Vector3(3.6f, 1.05f, -3.35f), bossLook, 33f, 0.12f);
+            SetIntroText("BOSS TARGET ACQUIRED", "Break the guard, dodge the slam, punish the recovery.", "2");
             RuntimeCombatAudio.PlayWarning();
-            yield return new WaitForSecondsRealtime(0.62f);
+            yield return new WaitForSecondsRealtime(0.74f);
 
+            _cameraFollow?.SetCinematicShot(new Vector3(0f, 8.2f, -12.4f), arenaLook, 45f, 0.14f);
+            SetIntroText("TACTICAL WINDOW", "Manual control ready. Hold mana for the break window.", "1");
+            RuntimeCombatAudio.PlayWarning();
+            yield return new WaitForSecondsRealtime(0.70f);
+
+            _cameraFollow?.SetCinematicShot(new Vector3(0f, 6.8f, -10.8f), arenaLook, 42f, 0.10f);
             SetIntroText("ENGAGE", "Pressure the boss guard now.", "GO");
             RuntimeCombatAudio.PlayClear();
             yield return new WaitForSecondsRealtime(0.42f);
 
-            if (_introPanelObject != null)
-            {
-                _introPanelObject.SetActive(false);
-            }
+            SetIntroPresentationActive(false);
+            _cameraFollow?.ClearCinematicShot();
 
             _encounterStartTime = Time.time;
             _encounterIntroRunning = false;
@@ -1159,9 +1219,52 @@ namespace AL.ChampionMode
             }
         }
 
+        private void SetIntroPresentationActive(bool isActive)
+        {
+            if (_introPanelObject != null)
+            {
+                _introPanelObject.SetActive(isActive);
+            }
+
+            if (_introTopLetterbox != null)
+            {
+                _introTopLetterbox.gameObject.SetActive(isActive);
+            }
+
+            if (_introBottomLetterbox != null)
+            {
+                _introBottomLetterbox.gameObject.SetActive(isActive);
+            }
+
+            if (_introStageCueRoot != null)
+            {
+                _introStageCueRoot.SetActive(isActive);
+            }
+        }
+
+        private Vector3 GetPlayerIntroLookPoint()
+        {
+            if (_playerController == null)
+            {
+                return new Vector3(0f, 1.75f, -7.4f);
+            }
+
+            return _playerController.transform.position + new Vector3(0f, 0.80f, 0.12f);
+        }
+
+        private Vector3 GetBossIntroLookPoint()
+        {
+            if (_bossTransform == null)
+            {
+                return new Vector3(0f, 2.55f, 8.6f);
+            }
+
+            return _bossTransform.position + new Vector3(0f, 0.88f, 0.10f);
+        }
+
         private void ToggleAppearanceInspection()
         {
-            if (_encounterFailed)
+            if (_encounterFailed || _encounterIntroRunning)
             {
                 return;
             }
@@ -1495,13 +1598,23 @@ namespace AL.ChampionMode
 
         private void CreateIntroPanel(Transform parent, Font font)
         {
-            var panel = CreateHudPanel(parent, "EncounterIntroPanel", new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(650f, 210f), new Color(0.018f, 0.024f, 0.032f, 0.90f));
+            _introTopLetterbox = CreateUiImage(parent, "IntroLetterboxTop", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, 92f), new Color(0.002f, 0.004f, 0.007f, 0.78f));
+            _introBottomLetterbox = CreateUiImage(parent, "IntroLetterboxBottom", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, 110f), new Color(0.002f, 0.004f, 0.007f, 0.80f));
+            CreateUiImage(_introTopLetterbox.transform, "IntroTopGoldTrace", new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, 2f), new Color(1f, 0.68f, 0.28f, 0.64f));
+            CreateUiImage(_introBottomLetterbox.transform, "IntroBottomBlueTrace", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), Vector2.zero, new Vector2(0f, 2f), new Color(0.28f, 0.58f, 1f, 0.48f));
+            _introTopLetterbox.gameObject.SetActive(false);
+            _introBottomLetterbox.gameObject.SetActive(false);
+
+            var panel = CreateHudPanel(parent, "EncounterIntroPanel", new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.54f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(720f, 226f), new Color(0.012f, 0.018f, 0.026f, 0.88f));
             _introPanelObject = panel.gameObject;
-            CreateHudPanel(_introPanelObject.transform, "IntroTopAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(650f, 6f), new Color(1f, 0.64f, 0.22f, 0.88f));
-            _introTitleText = CreateText(_introPanelObject.transform, font, "OBSIDIAN GATE", 30, new Vector2(32f, -30f), new Vector2(430f, 42f), TextAnchor.UpperLeft, new Color(1f, 0.76f, 0.42f));
-            _introSubtitleText = CreateText(_introPanelObject.transform, font, "Break the guard. Dodge the marked slam. Finish before enrage.", 16, new Vector2(34f, -84f), new Vector2(470f, 54f), TextAnchor.UpperLeft, new Color(0.86f, 0.90f, 0.95f));
-            _introCountdownText = CreateText(_introPanelObject.transform, font, "3", 64, new Vector2(504f, -42f), new Vector2(112f, 110f), TextAnchor.MiddleCenter, new Color(1f, 0.34f, 0.18f));
-            CreateText(_introPanelObject.transform, font, "CHAMPION MODE", 13, new Vector2(36f, -150f), new Vector2(180f, 24f), TextAnchor.UpperLeft, new Color(0.54f, 0.68f, 0.84f));
+            CreateHudPanel(_introPanelObject.transform, "IntroTopAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(720f, 6f), new Color(1f, 0.64f, 0.22f, 0.88f));
+            CreateUiImage(_introPanelObject.transform, "IntroLeftTrace", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 202f), new Color(0.28f, 0.58f, 1f, 0.54f));
+            CreateUiImage(_introPanelObject.transform, "IntroThreatTrace", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0f, -8f), new Vector2(5f, 202f), new Color(1f, 0.28f, 0.12f, 0.58f));
+            _introTitleText = CreateText(_introPanelObject.transform, font, "CHAMPION READY", 30, new Vector2(36f, -30f), new Vector2(456f, 42f), TextAnchor.UpperLeft, new Color(1f, 0.76f, 0.42f));
+            _introSubtitleText = CreateText(_introPanelObject.transform, font, "Forge identity locked. Read the arena before committing.", 16, new Vector2(38f, -84f), new Vector2(500f, 58f), TextAnchor.UpperLeft, new Color(0.86f, 0.90f, 0.95f));
+            _introCountdownText = CreateText(_introPanelObject.transform, font, "3", 72, new Vector2(552f, -36f), new Vector2(132f, 120f), TextAnchor.MiddleCenter, new Color(1f, 0.34f, 0.18f));
+            CreateText(_introPanelObject.transform, font, "CHAMPION MODE", 13, new Vector2(40f, -162f), new Vector2(180f, 24f), TextAnchor.UpperLeft, new Color(0.54f, 0.68f, 0.84f));
+            CreateText(_introPanelObject.transform, font, "MANUAL ENGAGEMENT", 13, new Vector2(498f, -162f), new Vector2(180f, 24f), TextAnchor.UpperRight, new Color(1f, 0.70f, 0.40f));
             _introPanelObject.SetActive(false);
         }
 
@@ -1727,6 +1840,111 @@ namespace AL.ChampionMode
 
                 light.intensity = Mathf.Max(0f, (i == 0 ? 1.95f : 1.35f) * (0.92f + Mathf.Sin(time * 1.12f + i) * 0.08f));
             }
+        }
+    }
+
+    internal sealed class ChampionIntroCinematicCue : MonoBehaviour
+    {
+        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Color> _emissionColors = new List<Color>();
+        private readonly List<Light> _lights = new List<Light>();
+        private readonly List<float> _lightIntensities = new List<float>();
+        private Transform _heroHalo;
+        private Transform _heroInner;
+        private Transform _bossHalo;
+        private Transform _bossInner;
+        private float _time;
+
+        public void Configure(Transform heroHalo, Transform heroInner, Transform bossHalo, Transform bossInner)
+        {
+            _heroHalo = heroHalo;
+            _heroInner = heroInner;
+            _bossHalo = bossHalo;
+            _bossInner = bossInner;
+            CollectTargets();
+        }
+
+        private void OnEnable()
+        {
+            _time = 0f;
+            if (_materials.Count == 0)
+            {
+                CollectTargets();
+            }
+        }
+
+        private void CollectTargets()
+        {
+            _materials.Clear();
+            _emissionColors.Clear();
+            _lights.Clear();
+            _lightIntensities.Clear();
+
+            foreach (var renderer in GetComponentsInChildren<Renderer>(true))
+            {
+                if (renderer == null || renderer.material == null || !renderer.material.HasProperty("_EmissionColor"))
+                {
+                    continue;
+                }
+
+                renderer.material.EnableKeyword("_EMISSION");
+                _materials.Add(renderer.material);
+                _emissionColors.Add(renderer.material.color);
+            }
+
+            foreach (var light in GetComponentsInChildren<Light>(true))
+            {
+                if (light == null)
+                {
+                    continue;
+                }
+
+                _lights.Add(light);
+                _lightIntensities.Add(light.intensity);
+            }
+        }
+
+        private void Update()
+        {
+            _time += Time.unscaledDeltaTime;
+            RotateCue(_heroHalo, 18f);
+            RotateCue(_heroInner, -28f);
+            RotateCue(_bossHalo, -14f);
+            RotateCue(_bossInner, 34f);
+
+            for (int i = 0; i < _materials.Count; i++)
+            {
+                var material = _materials[i];
+                if (material == null)
+                {
+                    continue;
+                }
+
+                float pulse = 0.52f + Mathf.Sin(_time * 2.4f + i * 0.62f) * 0.34f;
+                material.SetColor("_EmissionColor", _emissionColors[i] * Mathf.Max(0f, pulse));
+            }
+
+            for (int i = 0; i < _lights.Count; i++)
+            {
+                var light = _lights[i];
+                if (light == null)
+                {
+                    continue;
+                }
+
+                float pulse = 1f + Mathf.Sin(_time * 2.0f + i * 0.9f) * 0.18f;
+                light.intensity = _lightIntensities[i] * pulse;
+            }
+        }
+
+        private void RotateCue(Transform cue, float degreesPerSecond)
+        {
+            if (cue == null)
+            {
+                return;
+            }
+
+            cue.Rotate(Vector3.up, degreesPerSecond * Time.unscaledDeltaTime, Space.World);
         }
     }
 
