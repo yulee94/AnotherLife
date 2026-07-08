@@ -500,6 +500,7 @@ namespace AL.ChampionMode.AI
             public Material Material;
             public Color BaseColor;
             public Color BaseEmission;
+            public float PressureWeight;
         }
 
         private struct LightState
@@ -507,11 +508,15 @@ namespace AL.ChampionMode.AI
             public Light Light;
             public Color BaseColor;
             public float BaseIntensity;
+            public float PressureWeight;
         }
 
+        private BossDummyAI _boss;
         private readonly List<MaterialState> _materials = new List<MaterialState>();
         private readonly List<LightState> _lights = new List<LightState>();
         private readonly List<Transform> _orbitShards = new List<Transform>();
+        private Transform _auraRing;
+        private Vector3 _auraRingBaseScale = Vector3.one;
         private bool _isBroken;
         private bool _isEnraged;
         private float _hitPulse;
@@ -567,6 +572,8 @@ namespace AL.ChampionMode.AI
 
         private void CollectTargets()
         {
+            _boss = GetComponent<BossDummyAI>();
+
             _materials.Clear();
             foreach (var renderer in GetComponentsInChildren<Renderer>(true))
             {
@@ -587,7 +594,8 @@ namespace AL.ChampionMode.AI
                 {
                     Material = material,
                     BaseColor = baseColor,
-                    BaseEmission = baseEmission
+                    BaseEmission = baseEmission,
+                    PressureWeight = GetPressureWeight(renderer.gameObject.name)
                 });
             }
 
@@ -603,16 +611,24 @@ namespace AL.ChampionMode.AI
                 {
                     Light = light,
                     BaseColor = light.color,
-                    BaseIntensity = light.intensity
+                    BaseIntensity = light.intensity,
+                    PressureWeight = GetPressureWeight(light.gameObject.name)
                 });
             }
 
             _orbitShards.Clear();
+            _auraRing = null;
             foreach (Transform child in GetComponentsInChildren<Transform>(true))
             {
                 if (child != null && child.name.Contains("Boss_OrbitShard"))
                 {
                     _orbitShards.Add(child);
+                }
+
+                if (child != null && child.name.Contains("Boss_AuraRing"))
+                {
+                    _auraRing = child;
+                    _auraRingBaseScale = child.localScale;
                 }
             }
         }
@@ -623,19 +639,42 @@ namespace AL.ChampionMode.AI
             _hitPulse = Mathf.MoveTowards(_hitPulse, 0f, Time.deltaTime * 3.8f);
             _defeatPulse = Mathf.MoveTowards(_defeatPulse, 0f, Time.deltaTime * 1.6f);
 
-            Color stateColor = _isBroken
+            if (_boss == null)
+            {
+                _boss = GetComponent<BossDummyAI>();
+            }
+
+            bool isBroken = _boss != null ? _boss.IsBroken : _isBroken;
+            bool isEnraged = _boss != null ? _boss.IsEnraged : _isEnraged;
+            bool isTelegraphing = _boss != null && _boss.IsTelegraphing;
+            float telegraphProgress = _boss != null ? _boss.TelegraphProgress : 0f;
+            float healthRatio = _boss != null && _boss.MaxHealth > 0f ? Mathf.Clamp01(_boss.CurrentHealth / _boss.MaxHealth) : 1f;
+            float healthPressure = 1f - healthRatio;
+
+            Color pressureColor = Color.Lerp(new Color(1f, 0.46f, 0.16f), new Color(1f, 0.12f, 0.035f), healthPressure);
+            Color stateColor = isBroken
                 ? new Color(0.34f, 1f, 0.95f)
-                : _isEnraged
-                    ? new Color(1f, 0.18f, 0.08f)
-                    : new Color(1f, 0.46f, 0.16f);
-            Color hitColor = _isBroken ? new Color(0.60f, 1f, 0.98f) : new Color(1f, 0.80f, 0.46f);
+                : isTelegraphing
+                    ? new Color(1f, 0.06f, 0.025f)
+                    : isEnraged
+                        ? new Color(1f, 0.22f, 0.06f)
+                        : pressureColor;
+            Color hitColor = isBroken ? new Color(0.60f, 1f, 0.98f) : new Color(1f, 0.80f, 0.46f);
             Color defeatColor = new Color(0.88f, 1f, 0.62f);
-            float statePulse = _isBroken
-                ? 0.56f + Mathf.Sin(_time * 7.4f) * 0.22f
-                : _isEnraged
-                    ? 0.42f + Mathf.Sin(_time * 5.6f) * 0.22f
-                    : 0.18f + Mathf.Sin(_time * 2.1f) * 0.05f;
-            statePulse = Mathf.Clamp01(statePulse);
+            float urgency = isBroken
+                ? 0.56f
+                : isTelegraphing
+                    ? Mathf.Lerp(0.68f, 1f, telegraphProgress)
+                    : isEnraged
+                        ? 0.78f
+                        : Mathf.Lerp(0.18f, 0.54f, healthPressure);
+            float rhythm = Mathf.Lerp(2.2f, 9.6f, urgency);
+            float pulse = (Mathf.Sin(_time * rhythm) + 1f) * 0.5f;
+            float statePulse = Mathf.Clamp01(0.16f + urgency * 0.38f + pulse * (0.08f + urgency * 0.22f));
+            if (isTelegraphing)
+            {
+                statePulse = Mathf.Clamp01(statePulse + telegraphProgress * 0.24f);
+            }
 
             for (int i = 0; i < _materials.Count; i++)
             {
@@ -645,14 +684,17 @@ namespace AL.ChampionMode.AI
                     continue;
                 }
 
-                Color targetColor = Color.Lerp(state.BaseColor, stateColor, statePulse * 0.22f);
+                float pressureWeight = Mathf.Clamp01(state.PressureWeight);
+                float stateBlend = Mathf.Clamp01(statePulse * Mathf.Lerp(0.10f, 0.38f, pressureWeight) + healthPressure * 0.08f * pressureWeight);
+                Color targetColor = Color.Lerp(state.BaseColor, stateColor, stateBlend);
                 targetColor = Color.Lerp(targetColor, hitColor, _hitPulse * 0.48f);
                 targetColor = Color.Lerp(targetColor, defeatColor, _defeatPulse * 0.62f);
                 ApplyColor(state.Material, targetColor);
 
                 if (state.Material.HasProperty("_EmissionColor"))
                 {
-                    Color emission = Color.Lerp(state.BaseEmission, stateColor, statePulse * (_isBroken ? 1.45f : _isEnraged ? 1.15f : 0.64f));
+                    float pressureEmission = (0.24f + statePulse * 0.86f) * Mathf.Lerp(0.32f, isTelegraphing ? 2.15f : isBroken ? 1.82f : isEnraged ? 1.52f : 1.04f, pressureWeight);
+                    Color emission = Color.Lerp(state.BaseEmission, stateColor * pressureEmission, Mathf.Clamp01(pressureWeight));
                     emission = Color.Lerp(emission, hitColor, _hitPulse * 1.05f);
                     emission = Color.Lerp(emission, defeatColor, _defeatPulse);
                     state.Material.SetColor("_EmissionColor", emission);
@@ -667,12 +709,30 @@ namespace AL.ChampionMode.AI
                     continue;
                 }
 
-                float pulseBoost = 1f + statePulse * (_isBroken ? 0.56f : _isEnraged ? 0.42f : 0.12f) + _hitPulse * 0.55f + _defeatPulse * 0.82f;
+                float lightWeight = Mathf.Clamp01(state.PressureWeight);
+                float pulseBoost = 1f + urgency * (0.12f + pulse * 0.62f) * lightWeight + _hitPulse * 0.55f + _defeatPulse * 0.82f;
                 state.Light.color = Color.Lerp(state.BaseColor, _defeatPulse > 0.01f ? defeatColor : stateColor, Mathf.Clamp01(statePulse + _hitPulse + _defeatPulse));
                 state.Light.intensity = Mathf.Max(0f, state.BaseIntensity * pulseBoost);
             }
 
-            float orbitSpeed = _isBroken ? 78f : _isEnraged ? 112f : 34f;
+            if (_auraRing != null)
+            {
+                float ringScale = 1f + urgency * (0.04f + pulse * 0.14f);
+                if (isTelegraphing)
+                {
+                    ringScale += telegraphProgress * 0.18f;
+                }
+
+                _auraRing.localScale = _auraRingBaseScale * ringScale;
+            }
+
+            float orbitSpeed = isTelegraphing
+                ? Mathf.Lerp(76f, 174f, telegraphProgress)
+                : isBroken
+                    ? 78f
+                    : isEnraged
+                        ? 126f
+                        : Mathf.Lerp(34f, 66f, healthPressure);
             for (int i = 0; i < _orbitShards.Count; i++)
             {
                 Transform shard = _orbitShards[i];
@@ -713,6 +773,11 @@ namespace AL.ChampionMode.AI
                 state.Light.color = state.BaseColor;
                 state.Light.intensity = state.BaseIntensity;
             }
+
+            if (_auraRing != null)
+            {
+                _auraRing.localScale = _auraRingBaseScale;
+            }
         }
 
         private static void ApplyColor(Material material, Color color)
@@ -728,6 +793,32 @@ namespace AL.ChampionMode.AI
             }
 
             material.color = color;
+        }
+
+        private static float GetPressureWeight(string objectName)
+        {
+            if (string.IsNullOrEmpty(objectName))
+            {
+                return 0.18f;
+            }
+
+            string name = objectName.ToLowerInvariant();
+            if (name.Contains("auraring") || name.Contains("core") || name.Contains("eye") || name.Contains("orbitshard") || name.Contains("backshard"))
+            {
+                return 1f;
+            }
+
+            if (name.Contains("crown") || name.Contains("horn") || name.Contains("pauldron") || name.Contains("claw") || name.Contains("light"))
+            {
+                return 0.68f;
+            }
+
+            if (name.Contains("torso") || name.Contains("rib") || name.Contains("face") || name.Contains("shoulder") || name.Contains("blade"))
+            {
+                return 0.42f;
+            }
+
+            return 0.18f;
         }
     }
 }
