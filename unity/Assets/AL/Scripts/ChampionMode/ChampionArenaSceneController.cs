@@ -27,6 +27,7 @@ namespace AL.ChampionMode
         private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
         private SkillCaster _playerSkillCaster;
+        private CameraFollow _cameraFollow;
         private RvrBotSpawner _rvrBotSpawner;
         private BossDummyAI _boss;
         private Transform _bossTransform;
@@ -50,6 +51,7 @@ namespace AL.ChampionMode
         private Text _introTitleText;
         private Text _introSubtitleText;
         private Text _introCountdownText;
+        private Text _appearanceInspectButtonText;
         private Text _appearanceSummaryText;
         private readonly Image[] _appearanceSwatches = new Image[5];
         private readonly Text[] _skillButtonTexts = new Text[4];
@@ -65,6 +67,7 @@ namespace AL.ChampionMode
         private bool _encounterClearShown;
         private bool _encounterFailed;
         private bool _encounterIntroRunning;
+        private bool _appearanceInspectionMode;
         private RuntimePlatformQualityController _qualityController;
 
         private void Start()
@@ -159,8 +162,8 @@ namespace AL.ChampionMode
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.025f, 0.03f, 0.04f);
             cameraObject.AddComponent<AudioListener>();
-            var cameraFollow = cameraObject.AddComponent<CameraFollow>();
-            cameraFollow.Configure(player.transform, 8.6f, 2.65f, 25f, 0f);
+            _cameraFollow = cameraObject.AddComponent<CameraFollow>();
+            _cameraFollow.Configure(player.transform, 8.6f, 2.65f, 25f, 0f);
 
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";
@@ -176,6 +179,7 @@ namespace AL.ChampionMode
             _encounterClearShown = false;
             _encounterFailed = false;
             _encounterIntroRunning = false;
+            _appearanceInspectionMode = false;
 
             SpawnBotChampions();
 
@@ -467,7 +471,7 @@ namespace AL.ChampionMode
             CreateHudButton(actionPanel.transform, font, "Assist", new Vector2(18f, -202f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.SemiAuto), 14);
             CreateHudButton(actionPanel.transform, font, "Auto", new Vector2(18f, -242f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.FullAuto), 14);
 
-            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 304f), new Color(0.035f, 0.042f, 0.052f, 0.84f));
+            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 344f), new Color(0.035f, 0.042f, 0.052f, 0.84f));
             CreateText(appearancePanel.transform, font, "APPEARANCE", 15, new Vector2(18f, -14f), new Vector2(150f, 22f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             CreateText(appearancePanel.transform, font, "COLORS", 12, new Vector2(244f, -16f), new Vector2(64f, 18f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             for (int i = 0; i < _appearanceSwatches.Length; i++)
@@ -490,7 +494,9 @@ namespace AL.ChampionMode
             CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -208f), new Vector2(112f, 32f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
             CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -208f), new Vector2(112f, 32f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
             CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -208f), new Vector2(112f, 32f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13);
-            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 13, new Vector2(18f, -244f), new Vector2(364f, 48f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -248f), new Vector2(112f, 32f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
+            _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
+            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 13, new Vector2(18f, -286f), new Vector2(364f, 48f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -748,6 +754,7 @@ namespace AL.ChampionMode
             }
 
             _encounterFailed = true;
+            SetAppearanceInspection(false);
             _playerController?.SetControlLocked(true);
             _autoCombatController?.SetMode(AutoMode.Manual);
 
@@ -812,7 +819,7 @@ namespace AL.ChampionMode
 
             _encounterStartTime = Time.time;
             _encounterIntroRunning = false;
-            if (!_encounterFailed && _playerCombat != null && !_playerCombat.IsDead)
+            if (!_encounterFailed && !_appearanceInspectionMode && _playerCombat != null && !_playerCombat.IsDead)
             {
                 _playerController?.SetControlLocked(false);
             }
@@ -840,6 +847,45 @@ namespace AL.ChampionMode
             if (_introCountdownText != null)
             {
                 _introCountdownText.text = countdown;
+            }
+        }
+
+        private void ToggleAppearanceInspection()
+        {
+            if (_encounterFailed)
+            {
+                return;
+            }
+
+            SetAppearanceInspection(!_appearanceInspectionMode);
+        }
+
+        private void SetAppearanceInspection(bool enabled)
+        {
+            _appearanceInspectionMode = enabled;
+            _cameraFollow?.SetInspectionMode(enabled);
+
+            if (_appearanceInspectButtonText != null)
+            {
+                _appearanceInspectButtonText.text = enabled ? "Resume" : "Inspect";
+            }
+
+            if (enabled)
+            {
+                _autoCombatController?.SetMode(AutoMode.Manual);
+                _playerController?.SetControlLocked(true);
+                if (_combatFeedText != null)
+                {
+                    _combatFeedText.text = "Inspection mode active. Adjust appearance, orbit with right drag or touch, then resume combat.";
+                }
+            }
+            else if (!_encounterFailed && !_encounterIntroRunning && _playerCombat != null && !_playerCombat.IsDead)
+            {
+                _playerController?.SetControlLocked(false);
+                if (_combatFeedText != null)
+                {
+                    _combatFeedText.text = "Inspection closed. Pressure the guard bar, hold mana for the break window.";
+                }
             }
         }
 
