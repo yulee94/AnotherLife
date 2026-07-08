@@ -181,6 +181,66 @@ namespace AL.ChampionMode.Skills
             return SpawnGroundRing("VFX_Runtime_BossTelegraph", position, new Color(1f, 0.08f, 0.02f, 0.45f), radius, lifetime);
         }
 
+        public static GameObject SpawnBossSlamTelegraph(Vector3 impactCenter, Vector3 sourcePosition, float radius, float lifetime, bool isEnraged)
+        {
+            float safeRadius = Mathf.Max(1.4f, radius);
+            Vector3 center = Grounded(impactCenter);
+            Vector3 source = Grounded(sourcePosition);
+            Vector3 toCenter = center - source;
+            toCenter.y = 0f;
+            Vector3 direction = toCenter.sqrMagnitude > 0.01f ? toCenter.normalized : Vector3.forward;
+            float distance = Mathf.Max(1f, toCenter.magnitude);
+            Color dangerColor = isEnraged
+                ? new Color(1f, 0.16f, 0.04f, 0.52f)
+                : new Color(1f, 0.08f, 0.02f, 0.44f);
+            Color edgeColor = Color.Lerp(dangerColor, new Color(1f, 0.82f, 0.36f, dangerColor.a), 0.42f);
+
+            var field = SpawnGroundRing("VFX_Runtime_BossSlam_Field", center, dangerColor, safeRadius, lifetime);
+            SpawnGroundRing("VFX_Runtime_BossSlam_Edge", center, edgeColor, safeRadius * 1.03f, lifetime * 0.92f);
+            SpawnGroundRing("VFX_Runtime_BossSlam_Core", center, new Color(1f, 0.48f, 0.16f, 0.32f), safeRadius * 0.28f, lifetime * 0.72f);
+
+            SpawnPrimitiveEffect(
+                "shape:boss-slam-direction-line",
+                "VFX_Runtime_BossSlam_Direction",
+                PrimitiveType.Cube,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                source + direction * (distance * 0.5f) + Vector3.up * 0.06f,
+                Quaternion.LookRotation(direction),
+                new Vector3(0.10f, 0.035f, distance),
+                new Color(1f, 0.22f, 0.08f, 0.34f),
+                lifetime * 0.82f);
+
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = i * 60f;
+                Vector3 radial = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+                SpawnPrimitiveEffect(
+                    "shape:boss-slam-edge-tick",
+                    "VFX_Runtime_BossSlam_EdgeTick",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    center + radial * safeRadius + Vector3.up * 0.08f,
+                    Quaternion.LookRotation(radial),
+                    new Vector3(0.12f, 0.04f, 0.62f),
+                    edgeColor,
+                    lifetime);
+            }
+
+            return field;
+        }
+
+        public static GameObject SpawnBossSlamImpact(Vector3 impactCenter, float radius, RealmId realmId)
+        {
+            float safeRadius = Mathf.Max(1.4f, radius);
+            Vector3 center = Grounded(impactCenter);
+            Color hotColor = new Color(1f, 0.22f, 0.08f, 0.72f);
+            SpawnBurst("VFX_Runtime_BossSlam_ImpactCore", center + Vector3.up * 0.75f, hotColor, new Color(0.42f, 0.08f, 0.04f, 0.62f), 1.35f);
+            SpawnGroundRing("VFX_Runtime_BossSlam_ImpactRing", center, hotColor, safeRadius * 0.72f, 0.44f);
+            return SpawnWarzoneShockwave(center, realmId, safeRadius);
+        }
+
         public static void ShakeCamera(float strength, float duration)
         {
             var cameraFollow = Object.FindObjectOfType<ChampionCameraFollow>();
@@ -370,6 +430,11 @@ namespace AL.ChampionMode.Skills
             };
             color.a = alpha;
             return color;
+        }
+
+        private static Vector3 Grounded(Vector3 position)
+        {
+            return new Vector3(position.x, 0.05f, position.z);
         }
 
         private static void SetRendererColor(Renderer renderer, Color color)

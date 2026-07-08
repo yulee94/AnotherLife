@@ -15,6 +15,8 @@ namespace AL.ChampionMode.AI
         [SerializeField] private float _maxHealth = 1200f;
         [SerializeField] private float _attackRange = 5f;
         [SerializeField] private float _attackCooldown = 3f;
+        [SerializeField] private float _telegraphDuration = 1.35f;
+        [SerializeField] private float _slamDamage = 80f;
         [SerializeField] private float _enrageThreshold = 0.3f;
         [SerializeField] private float _timedEnrageSeconds = 90f;
         [SerializeField] private BossDefinition _bossDefinition;
@@ -137,12 +139,24 @@ namespace AL.ChampionMode.AI
         {
             _isAttacking = true;
             Debug.Log("BOSS: Telegraphing Slam Attack...");
-            if (_player != null)
+            Vector3 impactCenter = _player != null ? Grounded(_player.position) : Grounded(transform.position + transform.forward * 2.5f);
+            float impactRadius = _enraged ? _attackRange * 1.12f : _attackRange;
+            SkillEffectFactory.SpawnBossSlamTelegraph(impactCenter, transform.position, impactRadius, _telegraphDuration, _enraged);
+            RuntimeCombatAudio.PlayWarning();
+
+            float windup = 0f;
+            while (windup < _telegraphDuration)
             {
-                SkillEffectFactory.SpawnBossTelegraph(_player.position, _attackRange, 1.5f);
-                RuntimeCombatAudio.PlayWarning();
+                if (_isDead || _isBroken)
+                {
+                    _isAttacking = false;
+                    yield break;
+                }
+
+                FacePosition(impactCenter, 5.5f);
+                windup += Time.deltaTime;
+                yield return null;
             }
-            yield return new WaitForSeconds(1.5f);
 
             if (_isDead || _isBroken)
             {
@@ -151,13 +165,19 @@ namespace AL.ChampionMode.AI
             }
 
             Debug.Log("BOSS: SLAM!");
-            if (_player != null && Vector3.Distance(transform.position, _player.position) <= _attackRange)
+            SkillEffectFactory.SpawnBossSlamImpact(impactCenter, impactRadius, GetCurrentRealmId());
+            RuntimeCombatAudio.PlayHeavySkill();
+
+            if (_player != null && DistanceOnGround(_player.position, impactCenter) <= impactRadius)
             {
                 var combat = _player.GetComponent<AL.ChampionMode.Control.ChampionCombat>();
-                combat?.TakeDamage(80f);
-                SkillEffectFactory.SpawnWarzoneShockwave(_player.position, GetCurrentRealmId(), 2.35f);
-                SkillEffectFactory.SpawnFloatingCombatText(_player.position + Vector3.up * 1.65f, "-80", new Color(1f, 0.32f, 0.20f), 0.28f, 0.85f);
+                combat?.TakeDamage(_slamDamage);
+                SkillEffectFactory.SpawnFloatingCombatText(_player.position + Vector3.up * 1.65f, "-" + Mathf.CeilToInt(_slamDamage), new Color(1f, 0.32f, 0.20f), 0.28f, 0.85f);
                 SkillEffectFactory.ShakeCamera(0.24f, 0.16f);
+            }
+            else if (_player != null)
+            {
+                SkillEffectFactory.SpawnFloatingCombatText(_player.position + Vector3.up * 1.65f, "EVADE", new Color(0.46f, 1f, 0.82f), 0.26f, 0.78f);
             }
 
             yield return new WaitForSeconds(_attackCooldown);
@@ -345,6 +365,30 @@ namespace AL.ChampionMode.AI
             }
 
             _hitReactRoutine = StartCoroutine(HitReactRoutine(scaleMultiplier));
+        }
+
+        private void FacePosition(Vector3 position, float speed)
+        {
+            Vector3 direction = position - transform.position;
+            direction.y = 0f;
+            if (direction.sqrMagnitude <= 0.01f)
+            {
+                return;
+            }
+
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction.normalized), Time.deltaTime * speed);
+        }
+
+        private static Vector3 Grounded(Vector3 position)
+        {
+            return new Vector3(position.x, 0f, position.z);
+        }
+
+        private static float DistanceOnGround(Vector3 a, Vector3 b)
+        {
+            a.y = 0f;
+            b.y = 0f;
+            return Vector3.Distance(a, b);
         }
 
         private IEnumerator HitReactRoutine(float scaleMultiplier)

@@ -26,13 +26,14 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Add generated runtime combat audio cues for attacks, impacts, dodges, skill casts, heals, boss warnings, guard breaks, and encounter clears until authored audio assets arrive.
 - Improve mobile/PC camera feel with mouse-wheel zoom, right-side touch orbit, pinch zoom, and UI-aware touch filtering.
 - Add a runtime defeat state: player death locks combat input, stops auto-combat, marks the encounter as failed, shows a centered retry panel, and gives immediate floating text/audio/camera feedback.
+- Upgrade boss slam telegraphs from generic warning rings to truthful impact zones with direction lines, edge ticks, impact bursts, and evade feedback when the player exits the marked area before damage resolves.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
 
 ## Next Quality Bar
 
 - Replace procedural blockout geometry with real mesh/texture assets for the player champion, boss, floor, pillars, and skill icons once the part names and customization contract stop moving.
-- Add hit pause, telegraph decals, and animation-driven skill-impact timing after the UI/arena layout is stable.
+- Add hit pause, richer telegraph decals, and animation-driven skill-impact timing after the UI/arena layout is stable.
 - Add a proper character creator scene once the combat first impression feels worth keeping.
 - Expand the failure loop into build advice, death recap stats, and difficulty retry options after combat tuning is stable.
 
