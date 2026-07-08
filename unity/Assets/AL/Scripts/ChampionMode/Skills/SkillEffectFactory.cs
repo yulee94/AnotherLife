@@ -1,4 +1,5 @@
 using AL.Core;
+using System.Collections.Generic;
 using UnityEngine;
 using ChampionCameraFollow = AL.ChampionMode.Camera.CameraFollow;
 
@@ -517,6 +518,121 @@ namespace AL.ChampionMode.Skills
                 _released = true;
                 ReleaseFloatingCombatText();
             }
+        }
+    }
+
+    public static class RuntimeCombatAudio
+    {
+        private const int SampleRate = 22050;
+        private static readonly Dictionary<string, AudioClip> Clips = new Dictionary<string, AudioClip>();
+        private static AudioSource _source;
+
+        public static void PlayBasicAttack()
+        {
+            PlayTone("basic_attack", 185f, 0.11f, 0.24f, 0.32f);
+        }
+
+        public static void PlayImpact()
+        {
+            PlayTone("impact", 92f, 0.16f, 0.30f, 0.70f);
+        }
+
+        public static void PlayDodge()
+        {
+            PlayTone("dodge", 320f, 0.13f, 0.18f, 0.18f);
+        }
+
+        public static void PlaySkillCast()
+        {
+            PlayTone("skill_cast", 420f, 0.22f, 0.22f, 0.36f);
+        }
+
+        public static void PlayHeavySkill()
+        {
+            PlayTone("heavy_skill", 128f, 0.28f, 0.32f, 0.74f);
+        }
+
+        public static void PlayHeal()
+        {
+            PlayTone("heal", 540f, 0.30f, 0.20f, 0.24f);
+        }
+
+        public static void PlayWarning()
+        {
+            PlayTone("warning", 260f, 0.24f, 0.22f, 0.50f);
+        }
+
+        public static void PlayBreak()
+        {
+            PlayTone("break", 156f, 0.34f, 0.34f, 0.82f);
+        }
+
+        public static void PlayClear()
+        {
+            PlayTone("clear", 660f, 0.42f, 0.28f, 0.30f);
+        }
+
+        private static void PlayTone(string key, float frequency, float duration, float volume, float brightness)
+        {
+            var source = GetOrCreateSource();
+            if (source == null)
+            {
+                return;
+            }
+
+            if (!Clips.TryGetValue(key, out var clip) || clip == null)
+            {
+                clip = CreateToneClip(key, frequency, duration, brightness);
+                Clips[key] = clip;
+            }
+
+            source.pitch = 1f + Random.Range(-0.025f, 0.025f);
+            source.PlayOneShot(clip, Mathf.Clamp01(volume));
+        }
+
+        private static AudioSource GetOrCreateSource()
+        {
+            if (_source != null)
+            {
+                return _source;
+            }
+
+            var host = new GameObject("ChampionRuntimeCombatAudio");
+            Object.DontDestroyOnLoad(host);
+            _source = host.AddComponent<AudioSource>();
+            _source.playOnAwake = false;
+            _source.spatialBlend = 0f;
+            _source.priority = 80;
+            return _source;
+        }
+
+        private static AudioClip CreateToneClip(string key, float frequency, float duration, float brightness)
+        {
+            int sampleCount = Mathf.Max(32, Mathf.CeilToInt(SampleRate * Mathf.Max(0.03f, duration)));
+            var samples = new float[sampleCount];
+            float safeBrightness = Mathf.Clamp01(brightness);
+            for (int i = 0; i < sampleCount; i++)
+            {
+                float t = i / (float)SampleRate;
+                float normalized = i / (float)Mathf.Max(1, sampleCount - 1);
+                float envelope = Mathf.Pow(1f - normalized, 2.2f);
+                float sweep = Mathf.Lerp(1.18f, 0.72f, normalized);
+                float fundamental = Mathf.Sin(Mathf.PI * 2f * frequency * sweep * t);
+                float harmonic = Mathf.Sin(Mathf.PI * 2f * frequency * 2.01f * t) * safeBrightness * 0.35f;
+                float noise = PseudoNoise(i, key.Length) * safeBrightness * 0.14f;
+                samples[i] = Mathf.Clamp((fundamental + harmonic + noise) * envelope, -1f, 1f);
+            }
+
+            var clip = AudioClip.Create("AL_" + key, sampleCount, 1, SampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private static float PseudoNoise(int sampleIndex, int seed)
+        {
+            int value = sampleIndex * 1103515245 + seed * 12345;
+            value = (value >> 16) & 0x7fff;
+            return value / 16384f - 1f;
         }
     }
 }

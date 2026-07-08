@@ -130,6 +130,7 @@ namespace AL.ChampionMode.Control
         {
             _isAttacking = true;
             Debug.Log("<color=orange>[Combat] Attacking!</color>");
+            RuntimeCombatAudio.PlayBasicAttack();
 
             // 1. Lunge Forward
             Vector3 lungeDir = transform.forward;
@@ -157,6 +158,7 @@ namespace AL.ChampionMode.Control
                     CreateHitVFX(hitCollider.transform.position);
                     SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
                     SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
+                    RuntimeCombatAudio.PlayImpact();
 
                     Destroy(hitCollider.gameObject);
                     CheckVictory(1);
@@ -166,6 +168,7 @@ namespace AL.ChampionMode.Control
                     hitAnything = true;
                     var boss = hitCollider.GetComponent<AL.ChampionMode.AI.BossDummyAI>();
                     boss?.TakeDamage(125f);
+                    RuntimeCombatAudio.PlayImpact();
                 }
             }
 
@@ -234,6 +237,7 @@ namespace AL.ChampionMode.Control
             _isDodging = true;
             _skillCaster?.CancelCurrentSkill();
             SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, GetCurrentRealmId());
+            RuntimeCombatAudio.PlayDodge();
             Vector3 dodgeDir = transform.forward;
             float timer = 0f;
             float duration = 0.2f;
