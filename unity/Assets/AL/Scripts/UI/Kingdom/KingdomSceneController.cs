@@ -155,50 +155,68 @@ namespace AL.UI.Kingdom
             var background = new GameObject("Kingdom_Backdrop");
             background.transform.SetParent(canvas.transform, false);
             var bg = background.AddComponent<Image>();
-            bg.color = new Color(0.02f, 0.026f, 0.036f, 0.58f);
+            bg.color = new Color(0.012f, 0.016f, 0.022f, 0.26f);
             Stretch(background.GetComponent<RectTransform>());
 
             _dashboardRoot = new GameObject("KingdomDashboardRoot");
             _dashboardRoot.transform.SetParent(canvas.transform, false);
             Stretch(_dashboardRoot.AddComponent<RectTransform>());
 
-            _realmText = CreateText(_dashboardRoot.transform, "RealmText", font, 30, TextAnchor.UpperLeft, new Vector2(40, -30), new Vector2(900, 90));
-            _resourceText = CreateText(_dashboardRoot.transform, "ResourceText", font, 24, TextAnchor.UpperLeft, new Vector2(40, -120), new Vector2(900, 130));
-            _buildingText = CreateText(_dashboardRoot.transform, "BuildingText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -250), new Vector2(500, 300));
-            _troopText = CreateText(_dashboardRoot.transform, "TroopText", font, 22, TextAnchor.UpperLeft, new Vector2(40, -570), new Vector2(500, 180));
-            _researchText = CreateText(_dashboardRoot.transform, "ResearchText", font, 22, TextAnchor.UpperLeft, new Vector2(600, -250), new Vector2(520, 210));
-            _questText = CreateText(_dashboardRoot.transform, "QuestText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -480), new Vector2(560, 200));
-            _territoryText = CreateText(_dashboardRoot.transform, "TerritoryText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -690), new Vector2(560, 170));
-            _battleText = CreateText(_dashboardRoot.transform, "BattleText", font, 20, TextAnchor.UpperLeft, new Vector2(600, -870), new Vector2(560, 190));
-            _messageText = CreateText(_dashboardRoot.transform, "MessageText", font, 22, TextAnchor.LowerLeft, new Vector2(40, 40), new Vector2(900, 80));
+            var topBar = CreatePanel(_dashboardRoot.transform, "CommandTopBar", new Vector2(32f, -24f), new Vector2(1180f, 106f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.030f, 0.040f, 0.052f, 0.86f));
+            _realmText = CreateText(topBar.transform, "RealmText", font, 28, TextAnchor.UpperLeft, new Vector2(20f, -14f), new Vector2(1080f, 34f));
+            _realmText.color = new Color(1f, 0.92f, 0.76f);
+            _resourceText = CreateText(topBar.transform, "ResourceText", font, 19, TextAnchor.UpperLeft, new Vector2(20f, -56f), new Vector2(1136f, 42f));
+            _resourceText.color = new Color(0.82f, 0.88f, 0.94f);
 
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Town Hall", new Vector2(-260, -80), () => UpgradeBuilding("TownHall"));
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Farm", new Vector2(-260, -145), () => UpgradeBuilding("Farm"));
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Lumber", new Vector2(-260, -210), () => UpgradeBuilding("LumberMill"));
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Quarry", new Vector2(-260, -275), () => UpgradeBuilding("Quarry"));
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Gold Mine", new Vector2(-260, -340), () => UpgradeBuilding("GoldMine"));
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Mana Shrine", new Vector2(-260, -405), () => UpgradeBuilding("ManaShrine"));
-            CreateButton(_dashboardRoot.transform, font, "Upgrade Mine", new Vector2(-260, -470), () => UpgradeBuilding("Mine"));
-            CreateButton(_dashboardRoot.transform, font, "Train Infantry", new Vector2(-260, -535), () => TrainTroops(TroopType.Infantry));
-            CreateButton(_dashboardRoot.transform, font, "Train Ranged", new Vector2(-260, -600), () => TrainTroops(TroopType.Ranged));
-            CreateButton(_dashboardRoot.transform, font, "Claim Quests", new Vector2(-260, -665), ClaimCompletedQuests);
+            _buildingText = CreatePanelText(_dashboardRoot.transform, "DistrictPanel", "BuildingText", font, 18, TextAnchor.UpperLeft, new Vector2(32f, -150f), new Vector2(520f, 292f));
+            _troopText = CreatePanelText(_dashboardRoot.transform, "ForcesPanel", "TroopText", font, 18, TextAnchor.UpperLeft, new Vector2(32f, -460f), new Vector2(520f, 214f));
+            _researchText = CreatePanelText(_dashboardRoot.transform, "ResearchPanel", "ResearchText", font, 18, TextAnchor.UpperLeft, new Vector2(584f, -150f), new Vector2(454f, 174f));
+            _questText = CreatePanelText(_dashboardRoot.transform, "QuestPanel", "QuestText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -342f), new Vector2(454f, 166f));
+            _territoryText = CreatePanelText(_dashboardRoot.transform, "TerritoryPanel", "TerritoryText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -526f), new Vector2(454f, 194f));
+            _battleText = CreatePanelText(_dashboardRoot.transform, "BattlePanel", "BattleText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -738f), new Vector2(454f, 170f));
 
-            CreateButton(_dashboardRoot.transform, font, "Research Steel", new Vector2(-20, -80), () => StartResearch("Steel Forging"));
-            CreateButton(_dashboardRoot.transform, font, "Research Armor", new Vector2(-20, -145), () => StartResearch("Plate Armor"));
-            CreateButton(_dashboardRoot.transform, font, "Earn Warzone", new Vector2(-20, -210), EarnWarzoneCredits);
-            CreateButton(_dashboardRoot.transform, font, "Buy Warmaster Piece", new Vector2(-20, -275), UnlockWarmaster);
-            CreateButton(_dashboardRoot.transform, font, "Capture Border", new Vector2(-20, -340), CaptureBorderlands);
-            CreateButton(_dashboardRoot.transform, font, "Pick Gem", new Vector2(-20, -405), PickTestGem);
-            CreateButton(_dashboardRoot.transform, font, "Earn Wishgate", new Vector2(-20, -470), EarnWishgate);
-            CreateButton(_dashboardRoot.transform, font, "Wish Reward", new Vector2(-20, -535), ChooseWishReward);
-            CreateButton(_dashboardRoot.transform, font, "Test Battle", new Vector2(-20, -600), RunTestBattle);
-            CreateButton(_dashboardRoot.transform, font, "Champion Arena", new Vector2(-20, -665), () => SceneManager.LoadScene(_arenaSceneName));
-            CreateButton(_dashboardRoot.transform, font, "Reset Save", new Vector2(-20, -730), ResetSave);
+            var messagePanel = CreatePanel(_dashboardRoot.transform, "CommandMessagePanel", new Vector2(32f, 32f), new Vector2(1008f, 70f), Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.030f, 0.040f, 0.052f, 0.84f));
+            _messageText = CreateText(messagePanel.transform, "MessageText", font, 21, TextAnchor.MiddleLeft, new Vector2(18f, -8f), new Vector2(972f, 54f));
+            _messageText.color = new Color(0.92f, 0.96f, 1f);
 
-            var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-20, -20), ToggleDashboard);
+            var commandDeck = CreatePanel(_dashboardRoot.transform, "CommandDeck", new Vector2(-28f, -78f), new Vector2(430f, 936f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Color(0.026f, 0.033f, 0.044f, 0.92f));
+            var commandTitle = CreateText(commandDeck.transform, "CommandDeckTitle", font, 23, TextAnchor.UpperLeft, new Vector2(18f, -16f), new Vector2(380f, 34f));
+            commandTitle.text = "COMMAND DECK";
+            commandTitle.color = new Color(1f, 0.88f, 0.62f);
+
+            CreateSectionHeader(commandDeck.transform, font, "BUILD", new Vector2(18f, -64f));
+            CreateDeckButton(commandDeck.transform, font, "Town Hall", new Vector2(-222f, -104f), () => UpgradeBuilding("TownHall"));
+            CreateDeckButton(commandDeck.transform, font, "Farm", new Vector2(-18f, -104f), () => UpgradeBuilding("Farm"));
+            CreateDeckButton(commandDeck.transform, font, "Lumber", new Vector2(-222f, -152f), () => UpgradeBuilding("LumberMill"));
+            CreateDeckButton(commandDeck.transform, font, "Quarry", new Vector2(-18f, -152f), () => UpgradeBuilding("Quarry"));
+            CreateDeckButton(commandDeck.transform, font, "Gold Mine", new Vector2(-222f, -200f), () => UpgradeBuilding("GoldMine"));
+            CreateDeckButton(commandDeck.transform, font, "Mana Shrine", new Vector2(-18f, -200f), () => UpgradeBuilding("ManaShrine"));
+            CreateDeckButton(commandDeck.transform, font, "Mine", new Vector2(-222f, -248f), () => UpgradeBuilding("Mine"));
+
+            CreateSectionHeader(commandDeck.transform, font, "FORCES", new Vector2(18f, -302f));
+            CreateDeckButton(commandDeck.transform, font, "Infantry", new Vector2(-222f, -342f), () => TrainTroops(TroopType.Infantry));
+            CreateDeckButton(commandDeck.transform, font, "Ranged", new Vector2(-18f, -342f), () => TrainTroops(TroopType.Ranged));
+            CreateDeckButton(commandDeck.transform, font, "Claim Rewards", new Vector2(-222f, -390f), ClaimCompletedQuests);
+
+            CreateSectionHeader(commandDeck.transform, font, "PROGRESSION", new Vector2(18f, -444f));
+            CreateDeckButton(commandDeck.transform, font, "Steel", new Vector2(-222f, -484f), () => StartResearch("Steel Forging"));
+            CreateDeckButton(commandDeck.transform, font, "Armor", new Vector2(-18f, -484f), () => StartResearch("Plate Armor"));
+            CreateDeckButton(commandDeck.transform, font, "Warzone", new Vector2(-222f, -532f), EarnWarzoneCredits);
+            CreateDeckButton(commandDeck.transform, font, "Warmaster", new Vector2(-18f, -532f), UnlockWarmaster);
+
+            CreateSectionHeader(commandDeck.transform, font, "REALM OPS", new Vector2(18f, -586f));
+            CreateDeckButton(commandDeck.transform, font, "Capture", new Vector2(-222f, -626f), CaptureBorderlands);
+            CreateDeckButton(commandDeck.transform, font, "Pick Gem", new Vector2(-18f, -626f), PickTestGem);
+            CreateDeckButton(commandDeck.transform, font, "Wishgate", new Vector2(-222f, -674f), EarnWishgate);
+            CreateDeckButton(commandDeck.transform, font, "Wish Reward", new Vector2(-18f, -674f), ChooseWishReward);
+            CreateDeckButton(commandDeck.transform, font, "Battle Sim", new Vector2(-222f, -722f), RunTestBattle);
+            CreateDeckButton(commandDeck.transform, font, "Champion", new Vector2(-18f, -722f), () => SceneManager.LoadScene(_arenaSceneName));
+            CreateDeckButton(commandDeck.transform, font, "Reset Save", new Vector2(-18f, -812f), ResetSave, new Color(0.34f, 0.12f, 0.12f, 1f));
+
+            var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-24f, -24f), ToggleDashboard, new Vector2(170f, 42f), new Color(0.075f, 0.095f, 0.122f, 0.96f));
             _dashboardToggleText = toggle.GetComponentInChildren<Text>();
             _boardHintText = CreateBoardHintText(canvas.transform, font);
-            _boardHintText.text = "Board View: drag, zoom, and select buildings or outposts for details.";
+            _boardHintText.text = "Command board online. Awaiting district or outpost orders.";
             RefreshBoardHintVisibility();
         }
 
@@ -377,32 +395,32 @@ namespace AL.UI.Kingdom
 
             var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
             _realmText.text = realm == null
-                ? "Kingdom: No realm selected"
-                : $"Kingdom: {realm.RealmName}";
+                ? "ANOTHERLIFE COMMAND"
+                : $"{realm.RealmName.ToUpperInvariant()} COMMAND";
 
             var resources = ServiceLocator.Get<IResourceService>();
             var selectedRealmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
             ResourceType rareResourceType = ResourceRules.GetRareResourceForRealm(selectedRealmId);
             _resourceText.text =
-                $"Food {resources.GetResourceCount(ResourceType.Food)}    " +
-                $"Wood {resources.GetResourceCount(ResourceType.Wood)}    " +
-                $"Stone {resources.GetResourceCount(ResourceType.Stone)}    " +
+                $"Food {resources.GetResourceCount(ResourceType.Food)}   |   " +
+                $"Wood {resources.GetResourceCount(ResourceType.Wood)}   |   " +
+                $"Stone {resources.GetResourceCount(ResourceType.Stone)}   |   " +
                 $"Gold {resources.GetResourceCount(ResourceType.Gold)}\n" +
-                $"ManaStone {resources.GetResourceCount(ResourceType.ManaStone)}    " +
-                $"Ore {resources.GetResourceCount(ResourceType.Ore)}    " +
-                $"{rareResourceType} {resources.GetResourceCount(rareResourceType)}    " +
+                $"Mana {resources.GetResourceCount(ResourceType.ManaStone)}   |   " +
+                $"Ore {resources.GetResourceCount(ResourceType.Ore)}   |   " +
+                $"{rareResourceType} {resources.GetResourceCount(rareResourceType)}   |   " +
                 $"Warzone {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}";
 
             var buildings = ServiceLocator.Get<IBuildingService>();
             var builder = new StringBuilder();
-            builder.AppendLine("Buildings");
+            builder.AppendLine("DISTRICTS");
             foreach (var buildingId in _buildingIds)
             {
                 BuildingState state = buildings.GetBuildingState(buildingId);
                 string timer = state.IsUpgrading
-                    ? $" upgrading, completes in {Math.Max(0, state.UpgradeCompleteTimestamp - DateTimeOffset.UtcNow.ToUnixTimeSeconds())}s"
-                    : " ready";
-                builder.AppendLine($"{buildingId}: Level {state.Level}, {timer}");
+                    ? $"UPGRADING {Math.Max(0, state.UpgradeCompleteTimestamp - DateTimeOffset.UtcNow.ToUnixTimeSeconds())}s"
+                    : "READY";
+                builder.AppendLine($"{FormatBuildingName(buildingId),-12}  Lv {state.Level}  {timer}");
             }
 
             _buildingText.text = builder.ToString();
@@ -415,26 +433,26 @@ namespace AL.UI.Kingdom
                 : warmasterState.EquippedSetId;
             string warmasterRank = warmaster.IsTrueWarmaster() ? "True Warmaster" : "assembling";
             _troopText.text =
-                "Troops\n" +
-                $"Infantry: {training.GetTroopCount(TroopType.Infantry)}\n" +
-                $"Cavalry: {training.GetTroopCount(TroopType.Cavalry)}\n" +
-                $"Ranged: {training.GetTroopCount(TroopType.Ranged)}\n" +
-                $"Siege: {training.GetTroopCount(TroopType.Siege)}\n" +
-                $"Warmaster pieces: {warmaster.GetPurchasedPieceCount()}/{warmaster.GetRequiredPieceCount()}\n" +
-                $"Warmaster set: {equippedWarmasterSet} ({warmasterRank})";
+                "FORCES\n" +
+                $"Infantry     {training.GetTroopCount(TroopType.Infantry)}\n" +
+                $"Cavalry      {training.GetTroopCount(TroopType.Cavalry)}\n" +
+                $"Ranged       {training.GetTroopCount(TroopType.Ranged)}\n" +
+                $"Siege        {training.GetTroopCount(TroopType.Siege)}\n" +
+                $"Warmaster    {warmaster.GetPurchasedPieceCount()}/{warmaster.GetRequiredPieceCount()}\n" +
+                $"Set          {equippedWarmasterSet} ({warmasterRank})";
 
             var research = ServiceLocator.Get<IResearchService>();
             var steel = research.GetResearchState("Steel Forging");
             var armor = research.GetResearchState("Plate Armor");
             _researchText.text =
-                "Research\n" +
+                "RESEARCH\n" +
                 FormatResearch("Steel Forging", steel) + "\n" +
                 FormatResearch("Plate Armor", armor) + "\n" +
                 $"Attack bonus: {research.GetStatBonus(StatType.Attack):P0}\n" +
                 $"Defense bonus: {research.GetStatBonus(StatType.Defense):P0}";
 
             var quests = new StringBuilder();
-            quests.AppendLine("Quests");
+            quests.AppendLine("OBJECTIVES");
             foreach (var quest in ServiceLocator.Get<IQuestService>().GetActiveQuests())
             {
                 string state = quest.IsCompleted ? "complete" : "active";
@@ -512,9 +530,38 @@ namespace AL.UI.Kingdom
             var canvasObject = new GameObject(name);
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            var scaler = canvasObject.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvas;
+        }
+
+        private static GameObject CreatePanel(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Color color)
+        {
+            var panel = new GameObject(name);
+            panel.transform.SetParent(parent, false);
+            var image = panel.AddComponent<Image>();
+            image.color = color;
+
+            var rect = panel.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.pivot = pivot;
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
+            return panel;
+        }
+
+        private static Text CreatePanelText(Transform parent, string panelName, string textName, Font font, int size, TextAnchor alignment, Vector2 anchoredPosition, Vector2 panelSize)
+        {
+            var panel = CreatePanel(parent, panelName, anchoredPosition, panelSize, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.026f, 0.034f, 0.045f, 0.84f));
+            var text = CreateText(panel.transform, textName, font, size, alignment, new Vector2(18f, -16f), new Vector2(panelSize.x - 36f, panelSize.y - 30f));
+            text.color = new Color(0.86f, 0.91f, 0.96f);
+            text.verticalOverflow = VerticalWrapMode.Truncate;
+            return text;
         }
 
         private static Text CreateText(Transform parent, string name, Font font, int size, TextAnchor alignment, Vector2 anchoredPosition, Vector2 sizeDelta)
@@ -549,26 +596,51 @@ namespace AL.UI.Kingdom
             return text;
         }
 
-        private static Button CreateButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action)
+        private static void CreateSectionHeader(Transform parent, Font font, string label, Vector2 anchoredPosition)
+        {
+            var header = CreateText(parent, label + "_Header", font, 16, TextAnchor.UpperLeft, anchoredPosition, new Vector2(360f, 28f));
+            header.text = label;
+            header.color = new Color(0.58f, 0.68f, 0.78f);
+        }
+
+        private static Button CreateDeckButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action, Color? fillColor = null)
+        {
+            return CreateButton(parent, font, label, anchoredPosition, action, new Vector2(190f, 40f), fillColor ?? new Color(0.105f, 0.138f, 0.178f, 1f));
+        }
+
+        private static Button CreateButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action, Vector2? sizeDelta = null, Color? fillColor = null)
         {
             var buttonObject = new GameObject(label);
             buttonObject.transform.SetParent(parent, false);
 
             var image = buttonObject.AddComponent<Image>();
-            image.color = new Color(0.20f, 0.28f, 0.36f, 1f);
+            Color baseColor = fillColor ?? new Color(0.20f, 0.28f, 0.36f, 1f);
+            image.color = baseColor;
 
             var button = buttonObject.AddComponent<Button>();
             button.onClick.AddListener(action);
+            button.colors = new ColorBlock
+            {
+                normalColor = baseColor,
+                highlightedColor = Color.Lerp(baseColor, Color.white, 0.16f),
+                pressedColor = Color.Lerp(baseColor, Color.black, 0.12f),
+                selectedColor = Color.Lerp(baseColor, Color.white, 0.10f),
+                disabledColor = new Color(0.12f, 0.13f, 0.15f, 0.60f),
+                colorMultiplier = 1f,
+                fadeDuration = 0.08f
+            };
 
             var rect = buttonObject.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(1, 1);
             rect.anchorMax = new Vector2(1, 1);
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = new Vector2(240, 48);
+            rect.sizeDelta = sizeDelta ?? new Vector2(240, 48);
 
-            var text = CreateText(buttonObject.transform, label + "_Text", font, 20, TextAnchor.MiddleCenter, Vector2.zero, rect.sizeDelta);
+            int fontSize = rect.sizeDelta.x <= 190f ? 17 : 20;
+            var text = CreateText(buttonObject.transform, label + "_Text", font, fontSize, TextAnchor.MiddleCenter, Vector2.zero, rect.sizeDelta);
             text.text = label;
+            text.color = new Color(0.92f, 0.96f, 1f);
             var textRect = text.GetComponent<RectTransform>();
             textRect.anchorMin = Vector2.zero;
             textRect.anchorMax = Vector2.one;
@@ -683,6 +755,21 @@ namespace AL.UI.Kingdom
 
             string name = pieceId.Replace("warmaster_", string.Empty).Replace("_", " ");
             return "Warmaster " + name;
+        }
+
+        private static string FormatBuildingName(string buildingId)
+        {
+            if (string.IsNullOrWhiteSpace(buildingId))
+            {
+                return "District";
+            }
+
+            return buildingId
+                .Replace("TownHall", "Town Hall")
+                .Replace("LumberMill", "Lumber")
+                .Replace("GoldMine", "Gold Mine")
+                .Replace("ManaShrine", "Mana")
+                .Replace("Barracks", "Barracks");
         }
 
         private static void Stretch(RectTransform rect)
