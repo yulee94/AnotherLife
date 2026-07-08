@@ -31,10 +31,19 @@ namespace AL.ChampionMode.Camera
         private float _shakeDuration;
         private float _shakeStrength;
         private bool _inspectionMode;
+        private bool _cinematicMode;
         private float _storedDistance;
         private float _storedHeightOffset;
         private float _storedPitch;
         private Vector3 _positionVelocity;
+        private Vector3 _cinematicTargetPosition;
+        private Vector3 _cinematicLookAt;
+        private Vector3 _cinematicPositionVelocity;
+        private float _cinematicFieldOfView;
+        private float _cinematicFovVelocity;
+        private float _cinematicSmoothTime = 0.16f;
+        private float _defaultFieldOfView = 42f;
+        private UnityEngine.Camera _camera;
 
         public void Configure(Transform target, float distance, float heightOffset, float pitch, float yaw)
         {
@@ -54,6 +63,28 @@ namespace AL.ChampionMode.Camera
             _shakeTime = _shakeDuration;
         }
 
+        public void SetCinematicShot(Vector3 position, Vector3 lookAt, float fieldOfView, float smoothTime)
+        {
+            EnsureCamera();
+            _cinematicMode = true;
+            _cinematicTargetPosition = position;
+            _cinematicLookAt = lookAt;
+            _cinematicFieldOfView = Mathf.Clamp(fieldOfView, 28f, 62f);
+            _cinematicSmoothTime = Mathf.Clamp(smoothTime, 0.04f, 0.40f);
+        }
+
+        public void ClearCinematicShot()
+        {
+            EnsureCamera();
+            _cinematicMode = false;
+            _cinematicPositionVelocity = Vector3.zero;
+            _positionVelocity = Vector3.zero;
+            if (_camera != null)
+            {
+                _camera.fieldOfView = _defaultFieldOfView;
+            }
+        }
+
         public void SetInspectionMode(bool enabled)
         {
             if (_inspectionMode == enabled)
@@ -64,6 +95,7 @@ namespace AL.ChampionMode.Camera
             _inspectionMode = enabled;
             if (enabled)
             {
+                ClearCinematicShot();
                 _storedDistance = _distance;
                 _storedHeightOffset = _heightOffset;
                 _storedPitch = _pitch;
@@ -85,6 +117,7 @@ namespace AL.ChampionMode.Camera
 
         private void Start()
         {
+            EnsureCamera();
             // Lock and hide cursor for action feel
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
@@ -92,6 +125,11 @@ namespace AL.ChampionMode.Camera
 
         private void Update()
         {
+            if (_cinematicMode)
+            {
+                return;
+            }
+
             HandleMouseInput();
             HandleTouchInput();
             _pitch = Mathf.Clamp(_pitch, _minPitch, _maxPitch);
@@ -166,6 +204,12 @@ namespace AL.ChampionMode.Camera
 
         private void LateUpdate()
         {
+            if (_cinematicMode)
+            {
+                UpdateCinematicCamera();
+                return;
+            }
+
             // 1. Bulletproof Type-Based Discovery
             if (_target == null)
             {
@@ -201,6 +245,36 @@ namespace AL.ChampionMode.Camera
                 if (Time.frameCount % 60 == 0)
                 {
                     Debug.LogError("CAMERA ERROR: Still cannot find a Champion in the scene! Ensure WorldBuilder spawned the hero.");
+                }
+            }
+        }
+
+        private void UpdateCinematicCamera()
+        {
+            EnsureCamera();
+
+            transform.position = Vector3.SmoothDamp(transform.position, _cinematicTargetPosition, ref _cinematicPositionVelocity, _cinematicSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            Vector3 lookDirection = _cinematicLookAt - transform.position;
+            if (lookDirection.sqrMagnitude > 0.001f)
+            {
+                Quaternion targetRotation = Quaternion.LookRotation(lookDirection.normalized, Vector3.up);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.unscaledDeltaTime * 7.5f);
+            }
+
+            if (_camera != null)
+            {
+                _camera.fieldOfView = Mathf.SmoothDamp(_camera.fieldOfView, _cinematicFieldOfView, ref _cinematicFovVelocity, _cinematicSmoothTime, Mathf.Infinity, Time.unscaledDeltaTime);
+            }
+        }
+
+        private void EnsureCamera()
+        {
+            if (_camera == null)
+            {
+                _camera = GetComponent<UnityEngine.Camera>();
+                if (_camera != null)
+                {
+                    _defaultFieldOfView = _camera.fieldOfView;
                 }
             }
         }
