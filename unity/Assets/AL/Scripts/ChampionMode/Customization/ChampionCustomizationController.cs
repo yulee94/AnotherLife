@@ -412,12 +412,24 @@ namespace AL.ChampionMode.Customization
 
         private void ApplyHairStyle(string hairStyleId)
         {
-            SetExactPartActive("Hair_Short", hairStyleId == "short");
-            SetExactPartActive("Hair_Long", hairStyleId == "long");
-            SetExactPartActive("Hair_Braid", hairStyleId == "braid");
-            SetExactPartActive("Hair_Mohawk", hairStyleId == "mohawk");
-            SetExactPartActive("Hair_Topknot", hairStyleId == "topknot");
-            SetExactPartActive("Hair_Topknot_Tail", hairStyleId == "topknot");
+            bool isShort = hairStyleId == "short";
+            bool isLong = hairStyleId == "long";
+            bool isBraid = hairStyleId == "braid";
+            bool isMohawk = hairStyleId == "mohawk";
+            bool isTopknot = hairStyleId == "topknot";
+
+            SetExactPartActive("Hair_Short", isShort);
+            SetExactPartActive("Hair_Short_Front", isShort);
+            SetExactPartActive("Hair_Long", isLong);
+            SetExactPartActive("Hair_Long_Side_L", isLong);
+            SetExactPartActive("Hair_Long_Side_R", isLong);
+            SetExactPartActive("Hair_Braid", isBraid);
+            SetExactPartActive("Hair_Braid_Band", isBraid);
+            SetExactPartActive("Hair_Mohawk", isMohawk);
+            SetExactPartActive("Hair_Mohawk_Tip", isMohawk);
+            SetExactPartActive("Hair_Topknot", isTopknot);
+            SetExactPartActive("Hair_Topknot_Tail", isTopknot);
+            SetExactPartActive("Hair_Topknot_Band", isTopknot);
         }
 
         private void ApplyArmorStyle(string armorStyleId)
@@ -429,22 +441,34 @@ namespace AL.ChampionMode.Customization
             bool isWarmaster = armorStyleId == "warmaster_plate";
 
             SetPartActive("ChestArmor", true);
+            SetPartActive("Armor_Pectoral", true);
+            SetPartActive("Armor_Collar", true);
+            SetPartActive("Armor_AbPlate", true);
+            SetPartActive("Armor_HipPlate", !isRobe);
+            SetPartActive("Armor_Thigh", !isRobe);
             SetPartActive("Glove", true);
             SetPartActive("Boot", true);
             SetPartActive("Weapon_Main", true);
             SetPartActive("Hood", isRobe);
             SetPartActive("RobePanel", isRobe);
-            SetPartActive("ArmorTrim", isRobe || isWarmaster);
+            SetPartActive("RobeBackPanel", isRobe);
+            SetPartActive("RobeSleeve", isRobe);
+            SetPartActive("ArmorTrim", true);
             SetPartActive("Belt", true);
+            SetPartActive("PlateSkirt", !isLight || isWarmaster);
             SetPartActive("Knee", !isRobe);
             SetPartActive("Shoulder", !isLight);
+            SetPartActive("ShoulderSpike", isWarmaster);
             SetPartActive("BackAttachment", isWarmaster);
 
             SetPartScale("ChestArmor", isRobe ? new Vector3(0.78f, 0.82f, 0.28f) : isAssassin ? new Vector3(0.84f, 0.64f, 0.26f) : isHeavy ? new Vector3(1.05f, 0.82f, 0.38f) : new Vector3(0.92f, 0.74f, 0.32f));
+            SetPartScale("Armor_Pectoral_L", isHeavy ? new Vector3(0.34f, 0.32f, 0.09f) : new Vector3(0.30f, 0.28f, 0.08f));
+            SetPartScale("Armor_Pectoral_R", isHeavy ? new Vector3(0.34f, 0.32f, 0.09f) : new Vector3(0.30f, 0.28f, 0.08f));
             SetPartScale("Shoulder_L", isHeavy ? new Vector3(0.34f, 0.26f, 0.34f) : new Vector3(0.26f, 0.20f, 0.28f));
             SetPartScale("Shoulder_R", isHeavy ? new Vector3(0.34f, 0.26f, 0.34f) : new Vector3(0.26f, 0.20f, 0.28f));
             SetPartScale("Glove_L", isAssassin ? new Vector3(0.14f, 0.30f, 0.14f) : new Vector3(0.18f, 0.24f, 0.18f));
             SetPartScale("Glove_R", isAssassin ? new Vector3(0.14f, 0.30f, 0.14f) : new Vector3(0.18f, 0.24f, 0.18f));
+            SetPartScale("PlateSkirt_Front", isWarmaster ? new Vector3(0.52f, 0.50f, 0.07f) : new Vector3(0.42f, 0.44f, 0.06f));
         }
 
         private void ApplyFaceMark(string faceMarkId)
@@ -478,8 +502,21 @@ namespace AL.ChampionMode.Customization
 
         private void ApplyWeaponStyle(string weaponStyleId)
         {
-            SetExactPartActive("Weapon_Head", weaponStyleId == "axe" || weaponStyleId == "hammer");
-            SetExactPartActive("Bow_String", weaponStyleId == "bow");
+            bool isSword = weaponStyleId == "sword";
+            bool isAxe = weaponStyleId == "axe";
+            bool isStaff = weaponStyleId == "staff";
+            bool isBow = weaponStyleId == "bow";
+            bool isHammer = weaponStyleId == "hammer";
+
+            SetExactPartActive("Sword_Blade", isSword);
+            SetExactPartActive("Sword_Guard", isSword);
+            SetExactPartActive("Weapon_Head", isAxe);
+            SetExactPartActive("Axe_Blade_L", isAxe);
+            SetExactPartActive("Axe_Blade_R", isAxe);
+            SetExactPartActive("Hammer_Face", isHammer);
+            SetExactPartActive("Staff_Crystal", isStaff);
+            SetPartActive("Bow_Limb", isBow);
+            SetExactPartActive("Bow_String", isBow);
 
             switch (weaponStyleId)
             {
@@ -496,7 +533,7 @@ namespace AL.ChampionMode.Customization
                     break;
                 case "hammer":
                     SetPartTransform("Weapon_Main", new Vector3(0.72f, 0.02f, 0.16f), new Vector3(0.075f, 0.60f, 0.075f), new Vector3(0f, 0f, 20f));
-                    SetPartTransform("Weapon_Head", new Vector3(0.84f, 0.50f, 0.18f), new Vector3(0.36f, 0.24f, 0.14f), new Vector3(0f, 0f, 20f));
+                    SetPartTransform("Hammer_Face", new Vector3(0.84f, 0.50f, 0.18f), new Vector3(0.40f, 0.22f, 0.16f), new Vector3(0f, 0f, 20f));
                     break;
                 default:
                     SetPartTransform("Weapon_Main", new Vector3(0.72f, 0.00f, 0.16f), new Vector3(0.06f, 0.70f, 0.06f), new Vector3(0f, 0f, 34f));
@@ -507,9 +544,13 @@ namespace AL.ChampionMode.Customization
         private void ApplyOffhandStyle(string offhandStyleId)
         {
             SetExactPartActive("Shield_Off", offhandStyleId == "shield");
+            SetExactPartActive("Shield_Crest", offhandStyleId == "shield");
             SetExactPartActive("Orb_Off", offhandStyleId == "orb");
+            SetExactPartActive("Orb_Ring", offhandStyleId == "orb");
             SetExactPartActive("Weapon_Off", offhandStyleId == "dagger");
+            SetExactPartActive("Dagger_Blade", offhandStyleId == "dagger");
             SetExactPartActive("Tome_Off", offhandStyleId == "tome");
+            SetExactPartActive("Tome_Clasp", offhandStyleId == "tome");
         }
 
         private void ApplyColors(Color primary, Color hair, Color skin, Color eye, Color accent)
@@ -527,11 +568,24 @@ namespace AL.ChampionMode.Customization
                 bool isSkin = objectName.Contains("skin") || objectName.Contains("ear");
                 bool isEye = objectName.Contains("eye");
                 bool isAccent = objectName.Contains("facemark") ||
-                                objectName.Contains("cape") ||
                                 objectName.Contains("backattachment") ||
                                 objectName.Contains("orb") ||
                                 objectName.Contains("trim") ||
+                                objectName.Contains("tome_clasp") ||
+                                objectName.Contains("belt_buckle") ||
+                                objectName.Contains("clasp") ||
+                                objectName.Contains("crystal") ||
+                                objectName.Contains("crest") ||
+                                objectName.Contains("spike") ||
+                                objectName.Contains("guard");
+                bool isFabric = objectName.Contains("cape") ||
+                                objectName.Contains("robe") ||
+                                objectName.Contains("hood") ||
                                 objectName.Contains("tome");
+                bool isLeather = objectName.Contains("belt") ||
+                                 objectName.Contains("boot") ||
+                                 objectName.Contains("grip") ||
+                                 objectName.Contains("bow_limb");
                 bool isMetal = objectName.Contains("helmet") ||
                                objectName.Contains("armor") ||
                                objectName.Contains("shoulder") ||
@@ -541,7 +595,8 @@ namespace AL.ChampionMode.Customization
                                objectName.Contains("shield") ||
                                objectName.Contains("knee") ||
                                objectName.Contains("belt");
-                renderer.material.color = isHair
+
+                Color targetColor = isHair
                     ? hair
                     : isSkin
                         ? skin
@@ -549,9 +604,64 @@ namespace AL.ChampionMode.Customization
                             ? eye
                             : isAccent
                                 ? accent
-                                : isMetal
-                                    ? Color.Lerp(primary, Color.white, 0.22f)
-                                    : primary;
+                                : isFabric
+                                    ? Color.Lerp(primary, accent, 0.45f)
+                                    : isLeather
+                                        ? Color.Lerp(primary, new Color(0.16f, 0.10f, 0.06f), 0.64f)
+                                        : isMetal
+                                            ? Color.Lerp(primary, Color.white, 0.22f)
+                                            : primary;
+
+                float metallic = isMetal ? 0.46f : isAccent ? 0.26f : isLeather ? 0.06f : 0f;
+                float smoothness = isEye || isAccent ? 0.72f : isMetal ? 0.60f : isSkin ? 0.30f : isHair ? 0.36f : 0.46f;
+                float emissionStrength = isEye
+                    ? 0.22f
+                    : objectName.Contains("orb") || objectName.Contains("crystal") || objectName.Contains("backattachment_core")
+                        ? 0.46f
+                        : objectName.Contains("facemark") || objectName.Contains("trim") || objectName.Contains("crest")
+                            ? 0.10f
+                            : 0f;
+                ApplyRendererMaterial(renderer, targetColor, metallic, smoothness, emissionStrength);
+            }
+        }
+
+        private static void ApplyRendererMaterial(Renderer renderer, Color color, float metallic, float smoothness, float emissionStrength)
+        {
+            if (renderer == null)
+            {
+                return;
+            }
+
+            var material = renderer.material;
+            material.color = color;
+            if (material.HasProperty("_Color"))
+            {
+                material.SetColor("_Color", color);
+            }
+
+            if (material.HasProperty("_BaseColor"))
+            {
+                material.SetColor("_BaseColor", color);
+            }
+
+            if (material.HasProperty("_Metallic"))
+            {
+                material.SetFloat("_Metallic", Mathf.Clamp01(metallic));
+            }
+
+            if (material.HasProperty("_Glossiness"))
+            {
+                material.SetFloat("_Glossiness", Mathf.Clamp01(smoothness));
+            }
+
+            if (emissionStrength > 0f && material.HasProperty("_EmissionColor"))
+            {
+                material.EnableKeyword("_EMISSION");
+                material.SetColor("_EmissionColor", color * emissionStrength);
+            }
+            else if (material.HasProperty("_EmissionColor"))
+            {
+                material.SetColor("_EmissionColor", Color.black);
             }
         }
 
