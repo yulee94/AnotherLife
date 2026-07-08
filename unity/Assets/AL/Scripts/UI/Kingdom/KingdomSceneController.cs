@@ -26,6 +26,7 @@ namespace AL.UI.Kingdom
         private Text _territoryText;
         private Text _battleText;
         private Text _messageText;
+        private Text _boardHintText;
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
         private KingdomVisualizer _kingdomVisualizer;
@@ -196,6 +197,9 @@ namespace AL.UI.Kingdom
 
             var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-20, -20), ToggleDashboard);
             _dashboardToggleText = toggle.GetComponentInChildren<Text>();
+            _boardHintText = CreateBoardHintText(canvas.transform, font);
+            _boardHintText.text = "Board View: drag, zoom, and select buildings or outposts for details.";
+            RefreshBoardHintVisibility();
         }
 
         private void UpgradeBuilding(string buildingId)
@@ -458,7 +462,15 @@ namespace AL.UI.Kingdom
 
         private void SetMessage(string message)
         {
-            _messageText.text = message;
+            if (_messageText != null)
+            {
+                _messageText.text = message;
+            }
+
+            if (_boardHintText != null)
+            {
+                _boardHintText.text = message;
+            }
         }
 
         private void HandleBuildingSelected(string message)
@@ -482,6 +494,16 @@ namespace AL.UI.Kingdom
             if (_dashboardToggleText != null)
             {
                 _dashboardToggleText.text = _dashboardVisible ? "Board View" : "Show UI";
+            }
+
+            RefreshBoardHintVisibility();
+        }
+
+        private void RefreshBoardHintVisibility()
+        {
+            if (_boardHintText != null)
+            {
+                _boardHintText.gameObject.SetActive(!_dashboardVisible);
             }
         }
 
@@ -513,6 +535,17 @@ namespace AL.UI.Kingdom
             rect.pivot = new Vector2(0, 1);
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta;
+            return text;
+        }
+
+        private static Text CreateBoardHintText(Transform parent, Font font)
+        {
+            var text = CreateText(parent, "BoardHintText", font, 19, TextAnchor.LowerLeft, new Vector2(40f, 34f), new Vector2(760f, 64f));
+            text.color = new Color(0.90f, 0.94f, 1f);
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.zero;
+            rect.pivot = Vector2.zero;
             return text;
         }
 
