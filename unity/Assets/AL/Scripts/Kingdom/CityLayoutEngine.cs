@@ -443,6 +443,11 @@ namespace AL.Kingdom
 
         private static string GetShortBuildingName(string buildingId)
         {
+            if (string.IsNullOrWhiteSpace(buildingId))
+            {
+                return "District";
+            }
+
             return buildingId
                 .Replace("TownHall", "Hall")
                 .Replace("LumberMill", "Lumber")
@@ -452,8 +457,89 @@ namespace AL.Kingdom
 
         internal static void RaiseBuildingSelected(string buildingId, int level, bool isUpgrading, int remainingSeconds)
         {
-            string status = isUpgrading ? $"upgrading, {remainingSeconds}s remaining" : "ready for orders";
-            OnBuildingSelected?.Invoke($"Selected {GetShortBuildingName(buildingId)} Lv {level}: {status}. Use upgrades, research, and troops to grow this district.");
+            string status = isUpgrading ? $"UPGRADING / {remainingSeconds}s" : "READY";
+            string district = GetShortBuildingName(buildingId).ToUpperInvariant();
+            OnBuildingSelected?.Invoke($"DISTRICT LOCK: {district} Lv {level} | {GetBuildingRole(buildingId)} | {status}. {GetBuildingRecommendation(buildingId, isUpgrading)}");
+        }
+
+        private static string GetBuildingRole(string buildingId)
+        {
+            if (buildingId == null)
+            {
+                buildingId = string.Empty;
+            }
+
+            if (buildingId.Contains("Hall"))
+            {
+                return "Realm authority";
+            }
+
+            if (buildingId.Contains("Barracks"))
+            {
+                return "Force projection";
+            }
+
+            if (buildingId.Contains("Farm"))
+            {
+                return "Food security";
+            }
+
+            if (buildingId.Contains("Lumber"))
+            {
+                return "Construction supply";
+            }
+
+            if (buildingId.Contains("Mana"))
+            {
+                return "Arcane reserves";
+            }
+
+            if (buildingId.Contains("Gold"))
+            {
+                return "Treasury pressure";
+            }
+
+            if (buildingId.Contains("Mine") || buildingId.Contains("Quarry"))
+            {
+                return "Material pipeline";
+            }
+
+            return "Civil district";
+        }
+
+        private static string GetBuildingRecommendation(string buildingId, bool isUpgrading)
+        {
+            if (buildingId == null)
+            {
+                buildingId = string.Empty;
+            }
+
+            if (isUpgrading)
+            {
+                return "Hold resources until the timer clears, then chain the next upgrade or pivot into research.";
+            }
+
+            if (buildingId.Contains("Barracks"))
+            {
+                return "Train infantry or ranged troops before running the battle sim.";
+            }
+
+            if (buildingId.Contains("Hall"))
+            {
+                return "Upgrade here when the rest of the city is stable; it defines your growth ceiling.";
+            }
+
+            if (buildingId.Contains("Mana"))
+            {
+                return "Bank mana before skill-heavy champion progression.";
+            }
+
+            if (buildingId.Contains("Gold"))
+            {
+                return "Use treasury growth to sustain Warmaster purchases.";
+            }
+
+            return "Upgrade when the command deck shows enough spare resources.";
         }
 
         private static int GetUpgradeRemainingSeconds(BuildingState state)
@@ -486,7 +572,9 @@ namespace AL.Kingdom
         private Color _baseColor;
         private Color _accentColor;
         private Renderer _renderer;
+        private Vector3 _baseScale;
         private float _highlightTimer;
+        private bool _hovered;
 
         public void Configure(string buildingId, int level, Color baseColor, Color accentColor, bool isUpgrading, int remainingSeconds)
         {
@@ -497,6 +585,7 @@ namespace AL.Kingdom
             _baseColor = baseColor;
             _accentColor = accentColor;
             _renderer = GetComponent<Renderer>();
+            _baseScale = transform.localScale;
         }
 
         private void OnMouseDown()
@@ -507,7 +596,18 @@ namespace AL.Kingdom
             }
 
             _highlightTimer = 0.42f;
+            SpawnSelectionPulse();
             CityLayoutEngine.RaiseBuildingSelected(_buildingId, _level, _isUpgrading, _remainingSeconds);
+        }
+
+        private void OnMouseEnter()
+        {
+            _hovered = true;
+        }
+
+        private void OnMouseExit()
+        {
+            _hovered = false;
         }
 
         private void Update()
@@ -519,17 +619,23 @@ namespace AL.Kingdom
                     float upgradePulse = Mathf.PingPong(Time.time * 2.8f, 1f);
                     SetColor(Color.Lerp(_baseColor, _accentColor, 0.18f + upgradePulse * 0.22f));
                 }
+                else if (_hovered)
+                {
+                    SetColor(Color.Lerp(_baseColor, _accentColor, 0.24f));
+                }
                 else
                 {
                     SetColor(_baseColor);
                 }
 
+                SetScale(_hovered ? 1.035f : 1f);
                 return;
             }
 
             _highlightTimer -= Time.deltaTime;
             float pulse = Mathf.PingPong(Time.time * 7f, 1f);
             SetColor(Color.Lerp(_baseColor, _accentColor, 0.45f + pulse * 0.35f));
+            SetScale(1.055f + pulse * 0.045f);
         }
 
         private void SetColor(Color color)
@@ -542,6 +648,87 @@ namespace AL.Kingdom
             if (_renderer != null)
             {
                 _renderer.material.color = color;
+            }
+        }
+
+        private void SetScale(float multiplier)
+        {
+            if (_baseScale == Vector3.zero)
+            {
+                _baseScale = transform.localScale;
+            }
+
+            transform.localScale = _baseScale * multiplier;
+        }
+
+        private void SpawnSelectionPulse()
+        {
+            if (transform.parent == null)
+            {
+                return;
+            }
+
+            var pulse = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            pulse.name = "DistrictSelectionPulse";
+            pulse.transform.SetParent(transform.parent, false);
+            pulse.transform.localPosition = new Vector3(0f, 0.12f, 0f);
+            pulse.transform.localScale = new Vector3(1.18f, 0.018f, 1.18f);
+            var collider = pulse.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+
+            pulse.AddComponent<KingdomSelectionPulse>().Configure(_accentColor, 0.58f, 1.42f);
+        }
+    }
+
+    public class KingdomSelectionPulse : MonoBehaviour
+    {
+        private Renderer _renderer;
+        private Color _color;
+        private float _age;
+        private float _duration = 0.55f;
+        private float _targetScale = 1.35f;
+        private Vector3 _startScale;
+
+        public void Configure(Color color, float duration, float targetScale)
+        {
+            _color = color;
+            _duration = Mathf.Max(0.1f, duration);
+            _targetScale = Mathf.Max(1f, targetScale);
+            _startScale = transform.localScale;
+            _renderer = GetComponent<Renderer>();
+
+            if (_renderer != null)
+            {
+                var shader = Shader.Find("Standard");
+                var material = shader != null ? new Material(shader) : new Material(_renderer.material);
+                material.color = Color.Lerp(color, Color.white, 0.16f);
+                if (material.HasProperty("_EmissionColor"))
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", color * 0.45f);
+                }
+
+                _renderer.material = material;
+            }
+        }
+
+        private void Update()
+        {
+            _age += Time.deltaTime;
+            float t = Mathf.Clamp01(_age / _duration);
+            transform.localScale = Vector3.Lerp(_startScale, _startScale * _targetScale, t);
+
+            if (_renderer != null)
+            {
+                _renderer.material.color = Color.Lerp(Color.Lerp(_color, Color.white, 0.20f), _color, t);
+            }
+
+            if (t >= 1f)
+            {
+                Destroy(gameObject);
             }
         }
     }

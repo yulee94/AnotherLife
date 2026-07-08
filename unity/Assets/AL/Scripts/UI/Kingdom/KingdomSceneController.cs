@@ -25,12 +25,17 @@ namespace AL.UI.Kingdom
         private Text _questText;
         private Text _territoryText;
         private Text _battleText;
+        private Text _messageHeaderText;
+        private Text _messageMetaText;
         private Text _messageText;
         private Text _boardHintText;
+        private Image _messageAccent;
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
         private KingdomVisualizer _kingdomVisualizer;
+        private Color _messageAccentBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.92f);
         private float _completionTimer;
+        private float _messagePulseTimer;
         private bool _dashboardVisible = true;
 
         private readonly string[] _buildingIds =
@@ -83,6 +88,8 @@ namespace AL.UI.Kingdom
 
         private void Update()
         {
+            UpdateCommandMessagePulse();
+
             _completionTimer += Time.deltaTime;
             if (_completionTimer < 1f)
             {
@@ -163,6 +170,8 @@ namespace AL.UI.Kingdom
             Stretch(_dashboardRoot.AddComponent<RectTransform>());
 
             var topBar = CreatePanel(_dashboardRoot.transform, "CommandTopBar", new Vector2(32f, -24f), new Vector2(1180f, 106f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.030f, 0.040f, 0.052f, 0.86f));
+            CreatePanel(topBar.transform, "TopBarAccent", new Vector2(0f, 0f), new Vector2(6f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.86f));
+            CreatePanel(topBar.transform, "TopBarRule", new Vector2(0f, -1f), new Vector2(-36f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.88f, 0.58f, 0.20f));
             _realmText = CreateText(topBar.transform, "RealmText", font, 28, TextAnchor.UpperLeft, new Vector2(20f, -14f), new Vector2(1080f, 34f));
             _realmText.color = new Color(1f, 0.92f, 0.76f);
             _resourceText = CreateText(topBar.transform, "ResourceText", font, 19, TextAnchor.UpperLeft, new Vector2(20f, -56f), new Vector2(1136f, 42f));
@@ -175,11 +184,22 @@ namespace AL.UI.Kingdom
             _territoryText = CreatePanelText(_dashboardRoot.transform, "TerritoryPanel", "TerritoryText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -526f), new Vector2(454f, 194f));
             _battleText = CreatePanelText(_dashboardRoot.transform, "BattlePanel", "BattleText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -738f), new Vector2(454f, 170f));
 
-            var messagePanel = CreatePanel(_dashboardRoot.transform, "CommandMessagePanel", new Vector2(32f, 32f), new Vector2(1008f, 70f), Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.030f, 0.040f, 0.052f, 0.84f));
-            _messageText = CreateText(messagePanel.transform, "MessageText", font, 21, TextAnchor.MiddleLeft, new Vector2(18f, -8f), new Vector2(972f, 54f));
+            var messagePanel = CreatePanel(_dashboardRoot.transform, "CommandMessagePanel", new Vector2(32f, 32f), new Vector2(1008f, 118f), Vector2.zero, Vector2.zero, Vector2.zero, new Color(0.020f, 0.027f, 0.037f, 0.92f));
+            _messageAccent = CreatePanel(messagePanel.transform, "CommandMessageAccent", new Vector2(0f, 0f), new Vector2(6f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.88f, 0.62f, 0.30f, 0.92f)).GetComponent<Image>();
+            CreatePanel(messagePanel.transform, "CommandMessageTopRule", new Vector2(0f, -1f), new Vector2(-34f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.20f));
+            CreatePanel(messagePanel.transform, "CommandMessageBottomRule", new Vector2(0f, 1f), new Vector2(-34f, 2f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Color(0.28f, 0.56f, 0.78f, 0.18f));
+            _messageHeaderText = CreateText(messagePanel.transform, "MessageHeaderText", font, 13, TextAnchor.UpperLeft, new Vector2(18f, -10f), new Vector2(380f, 20f));
+            _messageHeaderText.text = "COMMAND DOSSIER";
+            _messageHeaderText.color = new Color(0.78f, 0.86f, 0.94f);
+            _messageMetaText = CreateText(messagePanel.transform, "MessageMetaText", font, 13, TextAnchor.UpperRight, new Vector2(648f, -10f), new Vector2(336f, 20f));
+            _messageMetaText.color = new Color(0.54f, 0.66f, 0.76f);
+            _messageText = CreateText(messagePanel.transform, "MessageText", font, 20, TextAnchor.UpperLeft, new Vector2(18f, -36f), new Vector2(966f, 66f));
             _messageText.color = new Color(0.92f, 0.96f, 1f);
+            _messageText.verticalOverflow = VerticalWrapMode.Truncate;
 
             var commandDeck = CreatePanel(_dashboardRoot.transform, "CommandDeck", new Vector2(-28f, -78f), new Vector2(430f, 936f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Color(0.026f, 0.033f, 0.044f, 0.92f));
+            CreatePanel(commandDeck.transform, "CommandDeckAccent", new Vector2(0f, 0f), new Vector2(6f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.88f));
+            CreatePanel(commandDeck.transform, "CommandDeckTopRule", new Vector2(0f, -1f), new Vector2(-30f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.18f));
             var commandTitle = CreateText(commandDeck.transform, "CommandDeckTitle", font, 23, TextAnchor.UpperLeft, new Vector2(18f, -16f), new Vector2(380f, 34f));
             commandTitle.text = "COMMAND DECK";
             commandTitle.color = new Color(1f, 0.88f, 0.62f);
@@ -196,7 +216,7 @@ namespace AL.UI.Kingdom
             CreateSectionHeader(commandDeck.transform, font, "FORCES", new Vector2(18f, -302f));
             CreateDeckButton(commandDeck.transform, font, "Infantry", new Vector2(-222f, -342f), () => TrainTroops(TroopType.Infantry));
             CreateDeckButton(commandDeck.transform, font, "Ranged", new Vector2(-18f, -342f), () => TrainTroops(TroopType.Ranged));
-            CreateDeckButton(commandDeck.transform, font, "Claim Rewards", new Vector2(-222f, -390f), ClaimCompletedQuests);
+            CreateDeckButton(commandDeck.transform, font, "Claim", new Vector2(-222f, -390f), ClaimCompletedQuests);
 
             CreateSectionHeader(commandDeck.transform, font, "PROGRESSION", new Vector2(18f, -444f));
             CreateDeckButton(commandDeck.transform, font, "Steel", new Vector2(-222f, -484f), () => StartResearch("Steel Forging"));
@@ -206,31 +226,31 @@ namespace AL.UI.Kingdom
 
             CreateSectionHeader(commandDeck.transform, font, "REALM OPS", new Vector2(18f, -586f));
             CreateDeckButton(commandDeck.transform, font, "Capture", new Vector2(-222f, -626f), CaptureBorderlands);
-            CreateDeckButton(commandDeck.transform, font, "Pick Gem", new Vector2(-18f, -626f), PickTestGem);
+            CreateDeckButton(commandDeck.transform, font, "Secure Gem", new Vector2(-18f, -626f), PickTestGem);
             CreateDeckButton(commandDeck.transform, font, "Wishgate", new Vector2(-222f, -674f), EarnWishgate);
-            CreateDeckButton(commandDeck.transform, font, "Wish Reward", new Vector2(-18f, -674f), ChooseWishReward);
-            CreateDeckButton(commandDeck.transform, font, "Battle Sim", new Vector2(-222f, -722f), RunTestBattle);
+            CreateDeckButton(commandDeck.transform, font, "Claim Wish", new Vector2(-18f, -674f), ChooseWishReward);
+            CreateDeckButton(commandDeck.transform, font, "War Drill", new Vector2(-222f, -722f), RunTestBattle);
             CreateDeckButton(commandDeck.transform, font, "Champion", new Vector2(-18f, -722f), () => SceneManager.LoadScene(_arenaSceneName));
             CreateDeckButton(commandDeck.transform, font, "Reset Save", new Vector2(-18f, -812f), ResetSave, new Color(0.34f, 0.12f, 0.12f, 1f));
 
             var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-24f, -24f), ToggleDashboard, new Vector2(170f, 42f), new Color(0.075f, 0.095f, 0.122f, 0.96f));
             _dashboardToggleText = toggle.GetComponentInChildren<Text>();
             _boardHintText = CreateBoardHintText(canvas.transform, font);
-            _boardHintText.text = "Command board online. Awaiting district or outpost orders.";
+            SetMessage("Command board online. Select a district or border outpost to inspect yield, readiness, and next order.");
             RefreshBoardHintVisibility();
         }
 
         private void UpgradeBuilding(string buildingId)
         {
             ServiceLocator.Get<IBuildingService>().StartUpgrade(buildingId);
-            SetMessage($"Started upgrade attempt: {buildingId}");
+            SetMessage($"BUILD ORDER: {FormatBuildingName(buildingId)} upgrade queued. Watch the district timer before committing the next resource spend.");
             Refresh();
         }
 
         private void StartResearch(string researchId)
         {
             ServiceLocator.Get<IResearchService>().StartResearch(researchId);
-            SetMessage($"Started research attempt: {researchId}");
+            SetMessage($"RESEARCH ORDER: {researchId} filed. Combat bonuses update when the lab timer clears.");
             Refresh();
         }
 
@@ -272,20 +292,20 @@ namespace AL.UI.Kingdom
                 $"Attacker losses: {FormatDetailedLosses(report.AttackerDetailedLosses)}\n" +
                 $"Defender losses: {FormatDetailedLosses(report.DefenderDetailedLosses)}\n" +
                 $"Loot: {FormatLoot(report.Loot)}";
-            SetMessage(report.IsWinner ? "Victory report generated." : "Defeat report generated.");
+            SetMessage(report.IsWinner ? "WAR DRILL: Victory profile confirmed. Scale troop production before pushing another border." : "WAR DRILL: Defeat profile logged. Reinforce troops or research before the next push.");
         }
 
         private void TrainTroops(TroopType type)
         {
             ServiceLocator.Get<ITrainingService>().StartTraining(type, 25);
-            SetMessage($"Training request: 25 {type}");
+            SetMessage($"MUSTER ORDER: 25 {type} added to the queue. Keep force growth aligned with border captures.");
             Refresh();
         }
 
         private void EarnWarzoneCredits()
         {
             ServiceLocator.Get<IWarzoneCreditService>().AddCredits(250);
-            SetMessage("Earned 250 Warzone Credits from a test objective.");
+            SetMessage("WARZONE PAYOUT: +250 Credits secured for Warmaster progression.");
             Refresh();
         }
 
@@ -353,7 +373,7 @@ namespace AL.UI.Kingdom
             }
 
             ServiceLocator.Get<ITerritoryService>().CaptureTerritory("T5", realm);
-            SetMessage($"Captured Neutral Borderlands for {realm}.");
+            SetMessage($"REALM OPS: Neutral Borderlands captured for {realm}. Confirm the new yield in the war zone panel.");
             Refresh();
         }
 
@@ -361,14 +381,14 @@ namespace AL.UI.Kingdom
         {
             var gemService = ServiceLocator.Get<IRealmGemService>();
             bool pickedUp = gemService.PickUpGem("Stonehold_Gem_1", "offline_player");
-            SetMessage(pickedUp ? "Picked up Stonehold Gem 1 as offline_player." : "Could not pick up the gem yet.");
+            SetMessage(pickedUp ? "REALM GEM: Stonehold Gem secured by the active carrier." : "REALM GEM: Pickup denied. Confirm the gem is exposed before assigning a carrier.");
             Refresh();
         }
 
         private void EarnWishgate()
         {
             ServiceLocator.Get<IRealmGemService>().MarkWishgateEarned("Offline realm objective test");
-            SetMessage("Wishgate earned for offline testing.");
+            SetMessage("WISHGATE: Realm objective fulfilled. Choose a reward when the command window is stable.");
             Refresh();
         }
 
@@ -376,7 +396,7 @@ namespace AL.UI.Kingdom
         {
             ServiceLocator.Get<IRealmGemService>().ChooseWishReward("warmaster_credits");
             ServiceLocator.Get<IWarzoneCreditService>().AddCredits(300);
-            SetMessage("Wish reward chosen: Warmaster Credits.");
+            SetMessage("WISHGATE: Warmaster Credits selected. +300 Credits added to the war chest.");
             Refresh();
         }
 
@@ -480,14 +500,36 @@ namespace AL.UI.Kingdom
 
         private void SetMessage(string message)
         {
+            string cleanMessage = string.IsNullOrWhiteSpace(message)
+                ? "Command board online. Select a district or border outpost to inspect yield, readiness, and next order."
+                : message;
+
+            Color accent = GetMessageAccent(cleanMessage);
+            _messageAccentBaseColor = accent;
+            if (_messageAccent != null)
+            {
+                _messageAccent.color = accent;
+                _messagePulseTimer = 0.62f;
+            }
+
+            if (_messageHeaderText != null)
+            {
+                _messageHeaderText.text = "COMMAND DOSSIER";
+            }
+
+            if (_messageMetaText != null)
+            {
+                _messageMetaText.text = DateTime.Now.ToString("HH:mm:ss") + " / LIVE OPS";
+            }
+
             if (_messageText != null)
             {
-                _messageText.text = message;
+                _messageText.text = cleanMessage;
             }
 
             if (_boardHintText != null)
             {
-                _boardHintText.text = message;
+                _boardHintText.text = cleanMessage;
             }
         }
 
@@ -525,6 +567,24 @@ namespace AL.UI.Kingdom
             }
         }
 
+        private void UpdateCommandMessagePulse()
+        {
+            if (_messageAccent == null || _messagePulseTimer <= 0f)
+            {
+                return;
+            }
+
+            _messagePulseTimer -= Time.deltaTime;
+            if (_messagePulseTimer <= 0f)
+            {
+                _messageAccent.color = _messageAccentBaseColor;
+                return;
+            }
+
+            float pulse = Mathf.PingPong(Time.time * 5.5f, 1f);
+            _messageAccent.color = Color.Lerp(_messageAccentBaseColor, Color.white, pulse * 0.16f);
+        }
+
         private static Canvas CreateCanvas(string name)
         {
             var canvasObject = new GameObject(name);
@@ -558,6 +618,8 @@ namespace AL.UI.Kingdom
         private static Text CreatePanelText(Transform parent, string panelName, string textName, Font font, int size, TextAnchor alignment, Vector2 anchoredPosition, Vector2 panelSize)
         {
             var panel = CreatePanel(parent, panelName, anchoredPosition, panelSize, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.026f, 0.034f, 0.045f, 0.84f));
+            CreatePanel(panel.transform, panelName + "_Accent", new Vector2(0f, 0f), new Vector2(4f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.36f, 0.55f, 0.70f, 0.46f));
+            CreatePanel(panel.transform, panelName + "_TopRule", new Vector2(0f, -1f), new Vector2(-30f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.13f));
             var text = CreateText(panel.transform, textName, font, size, alignment, new Vector2(18f, -16f), new Vector2(panelSize.x - 36f, panelSize.y - 30f));
             text.color = new Color(0.86f, 0.91f, 0.96f);
             text.verticalOverflow = VerticalWrapMode.Truncate;
@@ -636,6 +698,9 @@ namespace AL.UI.Kingdom
             rect.pivot = new Vector2(1, 1);
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta ?? new Vector2(240, 48);
+
+            CreatePanel(buttonObject.transform, "ButtonAccent", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.54f));
+            CreatePanel(buttonObject.transform, "ButtonTopTrace", new Vector2(0f, -1f), new Vector2(-18f, 1.5f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.90f, 0.66f, 0.13f));
 
             int fontSize = rect.sizeDelta.x <= 190f ? 17 : 20;
             var text = CreateText(buttonObject.transform, label + "_Text", font, fontSize, TextAnchor.MiddleCenter, Vector2.zero, rect.sizeDelta);
@@ -731,6 +796,27 @@ namespace AL.UI.Kingdom
             }
 
             return builder.Length == 0 ? "none" : builder.ToString();
+        }
+
+        private static Color GetMessageAccent(string message)
+        {
+            string lower = message?.ToLowerInvariant() ?? string.Empty;
+            if (lower.Contains("defeat") || lower.Contains("need ") || lower.Contains("could not") || lower.Contains("no completed"))
+            {
+                return new Color(0.86f, 0.34f, 0.22f, 0.95f);
+            }
+
+            if (lower.Contains("victory") || lower.Contains("captured") || lower.Contains("earned") || lower.Contains("completed") || lower.Contains("purchased"))
+            {
+                return new Color(0.72f, 0.88f, 0.42f, 0.95f);
+            }
+
+            if (lower.Contains("lock") || lower.Contains("selected"))
+            {
+                return new Color(0.92f, 0.66f, 0.30f, 0.95f);
+            }
+
+            return new Color(0.42f, 0.62f, 0.78f, 0.92f);
         }
 
         private static string GetNextWarmasterPieceId(WarmasterState state)
