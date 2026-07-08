@@ -42,6 +42,10 @@ This document defines the first VFX and weather design pack for Another Life. Th
 | umbral_ashfall | Umbral | Ash particles, ember sparks, heat haze | Hostile invasion mood. |
 | warzone_battle_fog | War Zone | Dust, smoke wisps, banner silhouettes | RvR performance test. |
 
+## Combat Weather Response
+
+Heavy impacts and major skills should disturb the active weather instead of only flashing a light. The runtime weather controller now treats combat flashes as atmosphere surges: wind briefly spikes, ground mist and horizon haze intensify, and a small burst of realm-tinted particles is emitted into the arena. This keeps weather connected to gameplay while preserving readable boss telegraphs.
+
 ## Implementation Notes
 
 - Use Unity ParticleSystem for the first vertical slice.
@@ -56,4 +60,3 @@ Run:
 `Another Life > Generate Design Assets`
 
 The generator creates starter materials, one modular Champion placeholder prefab, four skill effect prefabs, and four weather prefabs. These are prototype assets for blocking and gameplay testing, not final production art.
-
