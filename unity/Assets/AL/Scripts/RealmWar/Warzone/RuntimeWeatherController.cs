@@ -12,10 +12,13 @@ namespace AL.RealmWar.Warzone
         [SerializeField] private Light _directionalLight;
 
         private ParticleSystem _particles;
+        private ParticleSystem _groundMistParticles;
+        private ParticleSystem _horizonHazeParticles;
         private WindZone _windZone;
         private Light _lightningLight;
         private Coroutine _lightningRoutine;
         private float _nextLightningTime;
+        private float _baseDirectionalIntensity;
 
         public WeatherProfileData CurrentProfile => _profile;
 
@@ -27,6 +30,7 @@ namespace AL.RealmWar.Warzone
         private void Update()
         {
             AnimateWind();
+            AnimateAtmosphere();
             TickLightning();
         }
 
@@ -68,6 +72,8 @@ namespace AL.RealmWar.Warzone
         {
             _profile ??= WeatherProfileData.CreateDefault();
             ConfigureParticleSystem(GetOrCreateParticleSystem());
+            ConfigureGroundMist(GetOrCreateChildParticleSystem("Weather_GroundMist", ref _groundMistParticles));
+            ConfigureHorizonHaze(GetOrCreateChildParticleSystem("Weather_HorizonHaze", ref _horizonHazeParticles));
             ConfigureWindZone(GetOrCreateWindZone());
             ApplyLightingProfile();
             ScheduleNextLightning();
@@ -77,6 +83,20 @@ namespace AL.RealmWar.Warzone
         {
             _particles = GetComponent<ParticleSystem>() ?? gameObject.AddComponent<ParticleSystem>();
             return _particles;
+        }
+
+        private ParticleSystem GetOrCreateChildParticleSystem(string name, ref ParticleSystem cachedParticles)
+        {
+            if (cachedParticles != null)
+            {
+                return cachedParticles;
+            }
+
+            var existing = transform.Find(name);
+            var particleObject = existing != null ? existing.gameObject : new GameObject(name);
+            particleObject.transform.SetParent(transform, false);
+            cachedParticles = particleObject.GetComponent<ParticleSystem>() ?? particleObject.AddComponent<ParticleSystem>();
+            return cachedParticles;
         }
 
         private WindZone GetOrCreateWindZone()
@@ -134,6 +154,96 @@ namespace AL.RealmWar.Warzone
             }
         }
 
+        private void ConfigureGroundMist(ParticleSystem particles)
+        {
+            particles.transform.localPosition = new Vector3(0f, -5.15f, 0f);
+
+            Color mistStart = Color.Lerp(_profile.FogColor, _profile.ParticleStartColor, 0.35f);
+            mistStart.a = Mathf.Clamp01(_profile.ParticleStartColor.a * 0.28f);
+            Color mistEnd = _profile.FogColor;
+            mistEnd.a = Mathf.Clamp01(mistStart.a * 0.35f);
+
+            var main = particles.main;
+            main.loop = true;
+            main.startLifetime = Mathf.Max(3.0f, _profile.ParticleLifetime * 0.72f);
+            main.startSpeed = Mathf.Max(0.05f, _profile.FallSpeed * 0.18f);
+            main.startSize = Mathf.Max(1.4f, _profile.ParticleSize * 16f);
+            main.startColor = new ParticleSystem.MinMaxGradient(mistStart, mistEnd);
+            int maxMistParticles = Mathf.Clamp(_profile.MaxParticles / 3, 16, 90);
+            main.maxParticles = maxMistParticles;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = particles.emission;
+            emission.rateOverTime = Mathf.Max(3f, maxMistParticles * 0.09f);
+
+            var shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(Mathf.Max(8f, _profile.Radius * 0.95f), 1.1f, Mathf.Max(8f, _profile.Radius * 0.95f));
+
+            var velocity = particles.velocityOverLifetime;
+            velocity.enabled = true;
+            velocity.x = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.35f, _profile.HorizontalDrift * 0.35f);
+            velocity.y = new ParticleSystem.MinMaxCurve(-0.03f, 0.08f);
+            velocity.z = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.35f, _profile.HorizontalDrift * 0.35f);
+
+            var noise = particles.noise;
+            noise.enabled = true;
+            noise.strength = Mathf.Max(0.05f, _profile.NoiseStrength * 0.75f);
+            noise.frequency = Mathf.Max(0.01f, _profile.NoiseFrequency * 0.65f);
+
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null)
+            {
+                renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                renderer.sortingOrder = -3;
+            }
+        }
+
+        private void ConfigureHorizonHaze(ParticleSystem particles)
+        {
+            particles.transform.localPosition = new Vector3(0f, -1.8f, 0f);
+
+            Color hazeStart = Color.Lerp(_profile.FogColor, _profile.ParticleEndColor, 0.55f);
+            hazeStart.a = Mathf.Clamp01(_profile.ParticleEndColor.a * 0.38f);
+            Color hazeEnd = hazeStart;
+            hazeEnd.a = Mathf.Clamp01(hazeStart.a * 0.22f);
+
+            var main = particles.main;
+            main.loop = true;
+            main.startLifetime = Mathf.Max(4.5f, _profile.ParticleLifetime * 0.95f);
+            main.startSpeed = Mathf.Max(0.04f, _profile.FallSpeed * 0.10f);
+            main.startSize = Mathf.Max(2.2f, _profile.ParticleSize * 22f);
+            main.startColor = new ParticleSystem.MinMaxGradient(hazeStart, hazeEnd);
+            int maxHazeParticles = Mathf.Clamp(_profile.MaxParticles / 4, 12, 72);
+            main.maxParticles = maxHazeParticles;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = particles.emission;
+            emission.rateOverTime = Mathf.Max(2f, maxHazeParticles * 0.07f);
+
+            var shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(Mathf.Max(10f, _profile.Radius * 1.15f), 3.2f, Mathf.Max(10f, _profile.Radius * 1.15f));
+
+            var velocity = particles.velocityOverLifetime;
+            velocity.enabled = true;
+            velocity.x = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.18f, _profile.HorizontalDrift * 0.18f);
+            velocity.y = new ParticleSystem.MinMaxCurve(-0.02f, 0.05f);
+            velocity.z = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.18f, _profile.HorizontalDrift * 0.18f);
+
+            var noise = particles.noise;
+            noise.enabled = true;
+            noise.strength = Mathf.Max(0.04f, _profile.NoiseStrength * 0.42f);
+            noise.frequency = Mathf.Max(0.01f, _profile.NoiseFrequency * 0.45f);
+
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null)
+            {
+                renderer.renderMode = ParticleSystemRenderMode.Billboard;
+                renderer.sortingOrder = -4;
+            }
+        }
+
         private void ConfigureWindZone(WindZone windZone)
         {
             windZone.mode = WindZoneMode.Directional;
@@ -144,6 +254,7 @@ namespace AL.RealmWar.Warzone
 
         private void ApplyLightingProfile()
         {
+            ResolveDirectionalLight();
             if (_applyRenderSettings)
             {
                 RenderSettings.fog = _profile.ApplyFog;
@@ -161,6 +272,25 @@ namespace AL.RealmWar.Warzone
             {
                 _directionalLight.color = _profile.DirectionalLightColor;
                 _directionalLight.intensity = Mathf.Max(0f, _profile.DirectionalLightIntensity);
+                _baseDirectionalIntensity = _directionalLight.intensity;
+            }
+        }
+
+        private void ResolveDirectionalLight()
+        {
+            if (_directionalLight != null)
+            {
+                return;
+            }
+
+            var lights = FindObjectsOfType<Light>();
+            foreach (var light in lights)
+            {
+                if (light != null && light.type == LightType.Directional)
+                {
+                    _directionalLight = light;
+                    return;
+                }
             }
         }
 
@@ -173,6 +303,32 @@ namespace AL.RealmWar.Warzone
 
             float pulse = Mathf.Sin(Time.time * Mathf.Max(0.01f, _profile.WindPulseFrequency)) * _profile.WindPulseAmplitude;
             _windZone.windMain = Mathf.Max(0f, _profile.WindMain + pulse);
+        }
+
+        private void AnimateAtmosphere()
+        {
+            if (_profile == null)
+            {
+                return;
+            }
+
+            float pulse = Mathf.Sin(Time.time * Mathf.Max(0.01f, _profile.WindPulseFrequency * 0.72f));
+            if (_groundMistParticles != null)
+            {
+                var emission = _groundMistParticles.emission;
+                emission.rateOverTimeMultiplier = 1f + Mathf.Clamp(pulse * 0.10f, -0.08f, 0.12f);
+            }
+
+            if (_horizonHazeParticles != null)
+            {
+                var emission = _horizonHazeParticles.emission;
+                emission.rateOverTimeMultiplier = 1f + Mathf.Clamp(-pulse * 0.08f, -0.06f, 0.10f);
+            }
+
+            if (_directionalLight != null && _baseDirectionalIntensity > 0f)
+            {
+                _directionalLight.intensity = Mathf.Max(0f, _baseDirectionalIntensity * (1f + pulse * 0.025f));
+            }
         }
 
         private void TickLightning()
