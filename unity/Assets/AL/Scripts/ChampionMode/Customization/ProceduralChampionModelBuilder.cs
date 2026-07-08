@@ -31,6 +31,10 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Skin_Jaw", PrimitiveType.Cube, new Vector3(0f, 0.50f, 0.16f), new Vector3(0.28f, 0.16f, 0.22f), Vector3.zero, shadowSkin, 0f, 0.28f);
             EnsurePart(root, "Skin_Neck", PrimitiveType.Cube, new Vector3(0f, 0.30f, 0.06f), new Vector3(0.22f, 0.24f, 0.18f), Vector3.zero, skin, 0f, 0.28f);
             EnsurePart(root, "Skin_Nose", PrimitiveType.Cube, new Vector3(0f, 0.68f, 0.46f), new Vector3(0.07f, 0.08f, 0.08f), Vector3.zero, shadowSkin, 0f, 0.22f);
+            EnsurePart(root, "Skin_Shadow_Cheek_L", PrimitiveType.Cube, new Vector3(-0.18f, 0.61f, 0.45f), new Vector3(0.12f, 0.035f, 0.026f), new Vector3(0f, 0f, -12f), shadowSkin, 0f, 0.24f);
+            EnsurePart(root, "Skin_Shadow_Cheek_R", PrimitiveType.Cube, new Vector3(0.18f, 0.61f, 0.45f), new Vector3(0.12f, 0.035f, 0.026f), new Vector3(0f, 0f, 12f), shadowSkin, 0f, 0.24f);
+            EnsurePart(root, "Skin_Shadow_Mouth", PrimitiveType.Cube, new Vector3(0f, 0.55f, 0.48f), new Vector3(0.18f, 0.024f, 0.026f), Vector3.zero, Color.Lerp(shadowSkin, Color.black, 0.30f), 0f, 0.20f);
+            EnsurePart(root, "Skin_LowerLip", PrimitiveType.Cube, new Vector3(0f, 0.52f, 0.47f), new Vector3(0.13f, 0.018f, 0.022f), Vector3.zero, Color.Lerp(skin, new Color(0.58f, 0.32f, 0.30f), 0.28f), 0f, 0.26f);
             EnsurePart(root, "Skin_Ear_L", PrimitiveType.Sphere, new Vector3(-0.32f, 0.70f, 0.06f), new Vector3(0.08f, 0.17f, 0.04f), new Vector3(0f, 0f, 18f), skin, 0f, 0.28f);
             EnsurePart(root, "Skin_Ear_R", PrimitiveType.Sphere, new Vector3(0.32f, 0.70f, 0.06f), new Vector3(0.08f, 0.17f, 0.04f), new Vector3(0f, 0f, -18f), skin, 0f, 0.28f);
             EnsurePart(root, "Eye_L", PrimitiveType.Sphere, new Vector3(-0.12f, 0.70f, 0.45f), new Vector3(0.075f, 0.04f, 0.035f), Vector3.zero, new Color(0.25f, 0.58f, 0.92f), 0f, 0.72f, 0.18f);
@@ -77,10 +81,17 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Armor_Pectoral_R", PrimitiveType.Cube, new Vector3(0.18f, 0.25f, 0.24f), new Vector3(0.30f, 0.28f, 0.08f), new Vector3(0f, 0f, -4f), Color.Lerp(primary, Color.white, 0.12f), 0.38f, 0.62f);
             EnsurePart(root, "Armor_Collar", PrimitiveType.Cube, new Vector3(0f, 0.48f, 0.12f), new Vector3(0.64f, 0.10f, 0.20f), Vector3.zero, darkPlate, 0.42f, 0.56f);
             EnsurePart(root, "Armor_AbPlate", PrimitiveType.Cube, new Vector3(0f, -0.12f, 0.23f), new Vector3(0.46f, 0.26f, 0.07f), Vector3.zero, darkPlate, 0.38f, 0.52f);
+            EnsurePart(root, "Armor_Rib_L_Upper", PrimitiveType.Cube, new Vector3(-0.24f, 0.15f, 0.29f), new Vector3(0.25f, 0.040f, 0.045f), new Vector3(0f, 0f, -8f), accent, 0.28f, 0.68f, 0.08f);
+            EnsurePart(root, "Armor_Rib_R_Upper", PrimitiveType.Cube, new Vector3(0.24f, 0.15f, 0.29f), new Vector3(0.25f, 0.040f, 0.045f), new Vector3(0f, 0f, 8f), accent, 0.28f, 0.68f, 0.08f);
+            EnsurePart(root, "Armor_Rib_L_Lower", PrimitiveType.Cube, new Vector3(-0.21f, -0.02f, 0.29f), new Vector3(0.22f, 0.036f, 0.043f), new Vector3(0f, 0f, -6f), Color.Lerp(accent, darkPlate, 0.28f), 0.26f, 0.62f, 0.06f);
+            EnsurePart(root, "Armor_Rib_R_Lower", PrimitiveType.Cube, new Vector3(0.21f, -0.02f, 0.29f), new Vector3(0.22f, 0.036f, 0.043f), new Vector3(0f, 0f, 6f), Color.Lerp(accent, darkPlate, 0.28f), 0.26f, 0.62f, 0.06f);
+            EnsurePart(root, "Armor_CenterGem", PrimitiveType.Sphere, new Vector3(0f, 0.22f, 0.34f), new Vector3(0.105f, 0.105f, 0.050f), Vector3.zero, accent, 0.18f, 0.78f, 0.28f);
             EnsurePart(root, "RobePanel", PrimitiveType.Cube, new Vector3(0f, -0.34f, 0.18f), new Vector3(0.62f, 0.84f, 0.07f), Vector3.zero, cloth, 0f, 0.48f);
             EnsurePart(root, "RobeBackPanel", PrimitiveType.Cube, new Vector3(0f, -0.32f, -0.24f), new Vector3(0.66f, 0.86f, 0.06f), Vector3.zero, cloth, 0f, 0.44f);
             EnsurePart(root, "RobeSleeve_L", PrimitiveType.Cube, new Vector3(-0.54f, 0.02f, 0.03f), new Vector3(0.18f, 0.70f, 0.20f), new Vector3(0f, 0f, -8f), cloth, 0f, 0.44f);
             EnsurePart(root, "RobeSleeve_R", PrimitiveType.Cube, new Vector3(0.54f, 0.02f, 0.03f), new Vector3(0.18f, 0.70f, 0.20f), new Vector3(0f, 0f, 8f), cloth, 0f, 0.44f);
+            EnsurePart(root, "RobeTrim_Front", PrimitiveType.Cube, new Vector3(0f, -0.34f, 0.24f), new Vector3(0.09f, 0.72f, 0.035f), Vector3.zero, accent, 0.08f, 0.66f, 0.10f);
+            EnsurePart(root, "RobeTrim_Hem", PrimitiveType.Cube, new Vector3(0f, -0.72f, 0.24f), new Vector3(0.52f, 0.045f, 0.035f), Vector3.zero, accent, 0.08f, 0.66f, 0.10f);
 
             EnsurePart(root, "ArmorTrim_L", PrimitiveType.Cube, new Vector3(-0.36f, 0.12f, 0.24f), new Vector3(0.055f, 0.82f, 0.08f), Vector3.zero, accent, 0.24f, 0.66f, 0.08f);
             EnsurePart(root, "ArmorTrim_R", PrimitiveType.Cube, new Vector3(0.36f, 0.12f, 0.24f), new Vector3(0.055f, 0.82f, 0.08f), Vector3.zero, accent, 0.24f, 0.66f, 0.08f);
@@ -103,6 +114,12 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Glove_R", PrimitiveType.Cube, new Vector3(0.50f, -0.27f, 0.08f), new Vector3(0.18f, 0.26f, 0.18f), Vector3.zero, metal, 0.42f, 0.56f);
             EnsurePart(root, "Glove_Cuff_L", PrimitiveType.Cube, new Vector3(-0.50f, -0.12f, 0.08f), new Vector3(0.22f, 0.07f, 0.21f), Vector3.zero, accent, 0.28f, 0.64f);
             EnsurePart(root, "Glove_Cuff_R", PrimitiveType.Cube, new Vector3(0.50f, -0.12f, 0.08f), new Vector3(0.22f, 0.07f, 0.21f), Vector3.zero, accent, 0.28f, 0.64f);
+            EnsurePart(root, "Glove_Finger_L_0", PrimitiveType.Cube, new Vector3(-0.58f, -0.43f, 0.16f), new Vector3(0.045f, 0.14f, 0.040f), new Vector3(0f, 0f, -8f), metal, 0.34f, 0.56f);
+            EnsurePart(root, "Glove_Finger_L_1", PrimitiveType.Cube, new Vector3(-0.50f, -0.44f, 0.18f), new Vector3(0.045f, 0.15f, 0.040f), Vector3.zero, metal, 0.34f, 0.56f);
+            EnsurePart(root, "Glove_Finger_L_2", PrimitiveType.Cube, new Vector3(-0.42f, -0.43f, 0.16f), new Vector3(0.045f, 0.14f, 0.040f), new Vector3(0f, 0f, 8f), metal, 0.34f, 0.56f);
+            EnsurePart(root, "Glove_Finger_R_0", PrimitiveType.Cube, new Vector3(0.42f, -0.43f, 0.16f), new Vector3(0.045f, 0.14f, 0.040f), new Vector3(0f, 0f, -8f), metal, 0.34f, 0.56f);
+            EnsurePart(root, "Glove_Finger_R_1", PrimitiveType.Cube, new Vector3(0.50f, -0.44f, 0.18f), new Vector3(0.045f, 0.15f, 0.040f), Vector3.zero, metal, 0.34f, 0.56f);
+            EnsurePart(root, "Glove_Finger_R_2", PrimitiveType.Cube, new Vector3(0.58f, -0.43f, 0.16f), new Vector3(0.045f, 0.14f, 0.040f), new Vector3(0f, 0f, 8f), metal, 0.34f, 0.56f);
 
             EnsurePart(root, "Armor_Thigh_L", PrimitiveType.Cube, new Vector3(-0.20f, -0.56f, 0.06f), new Vector3(0.20f, 0.36f, 0.18f), Vector3.zero, darkPlate, 0.32f, 0.48f);
             EnsurePart(root, "Armor_Thigh_R", PrimitiveType.Cube, new Vector3(0.20f, -0.56f, 0.06f), new Vector3(0.20f, 0.36f, 0.18f), Vector3.zero, darkPlate, 0.32f, 0.48f);
@@ -112,10 +129,16 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Boot_R", PrimitiveType.Cube, new Vector3(0.22f, -0.97f, 0.11f), new Vector3(0.25f, 0.24f, 0.36f), Vector3.zero, leather, 0.08f, 0.42f);
             EnsurePart(root, "Boot_Cuff_L", PrimitiveType.Cube, new Vector3(-0.22f, -0.82f, 0.08f), new Vector3(0.28f, 0.08f, 0.24f), Vector3.zero, metal, 0.34f, 0.54f);
             EnsurePart(root, "Boot_Cuff_R", PrimitiveType.Cube, new Vector3(0.22f, -0.82f, 0.08f), new Vector3(0.28f, 0.08f, 0.24f), Vector3.zero, metal, 0.34f, 0.54f);
+            EnsurePart(root, "Boot_Toe_L", PrimitiveType.Cube, new Vector3(-0.22f, -1.03f, 0.31f), new Vector3(0.24f, 0.10f, 0.18f), Vector3.zero, leather, 0.12f, 0.48f);
+            EnsurePart(root, "Boot_Toe_R", PrimitiveType.Cube, new Vector3(0.22f, -1.03f, 0.31f), new Vector3(0.24f, 0.10f, 0.18f), Vector3.zero, leather, 0.12f, 0.48f);
+            EnsurePart(root, "Boot_Sole_L", PrimitiveType.Cube, new Vector3(-0.22f, -1.12f, 0.14f), new Vector3(0.28f, 0.045f, 0.42f), Vector3.zero, Color.Lerp(leather, Color.black, 0.28f), 0.06f, 0.36f);
+            EnsurePart(root, "Boot_Sole_R", PrimitiveType.Cube, new Vector3(0.22f, -1.12f, 0.14f), new Vector3(0.28f, 0.045f, 0.42f), Vector3.zero, Color.Lerp(leather, Color.black, 0.28f), 0.06f, 0.36f);
 
             EnsurePart(root, "Cape", PrimitiveType.Cube, new Vector3(0f, 0.04f, -0.50f), new Vector3(0.82f, 1.26f, 0.08f), new Vector3(8f, 0f, 0f), cloth, 0f, 0.42f);
             EnsurePart(root, "Cape_LeftFold", PrimitiveType.Cube, new Vector3(-0.32f, -0.08f, -0.54f), new Vector3(0.16f, 1.10f, 0.07f), new Vector3(8f, 0f, -6f), Color.Lerp(cloth, Color.black, 0.08f), 0f, 0.42f);
             EnsurePart(root, "Cape_RightFold", PrimitiveType.Cube, new Vector3(0.32f, -0.08f, -0.54f), new Vector3(0.16f, 1.10f, 0.07f), new Vector3(8f, 0f, 6f), Color.Lerp(cloth, Color.black, 0.08f), 0f, 0.42f);
+            EnsurePart(root, "Cape_Seam_Center", PrimitiveType.Cube, new Vector3(0f, -0.10f, -0.58f), new Vector3(0.050f, 1.05f, 0.045f), new Vector3(8f, 0f, 0f), accent, 0.04f, 0.60f, 0.05f);
+            EnsurePart(root, "Cape_Hem", PrimitiveType.Cube, new Vector3(0f, -0.66f, -0.57f), new Vector3(0.68f, 0.055f, 0.045f), new Vector3(8f, 0f, 0f), accent, 0.04f, 0.60f, 0.05f);
             EnsurePart(root, "Cape_Clasp", PrimitiveType.Sphere, new Vector3(0f, 0.42f, 0.24f), new Vector3(0.14f, 0.08f, 0.05f), Vector3.zero, accent, 0.34f, 0.7f, 0.1f);
             EnsurePart(root, "BackAttachment", PrimitiveType.Cube, new Vector3(0f, 0.34f, -0.64f), new Vector3(0.20f, 0.78f, 0.08f), Vector3.zero, accent, 0.34f, 0.66f, 0.12f);
             EnsurePart(root, "BackAttachment_Core", PrimitiveType.Sphere, new Vector3(0f, 0.46f, -0.70f), new Vector3(0.13f, 0.13f, 0.08f), Vector3.zero, accent, 0.20f, 0.76f, 0.35f);
@@ -133,22 +156,34 @@ namespace AL.ChampionMode.Customization
             EnsurePart(root, "Weapon_Grip", PrimitiveType.Cylinder, new Vector3(0.63f, -0.32f, 0.15f), new Vector3(0.07f, 0.18f, 0.07f), new Vector3(0f, 0f, 34f), leather, 0.04f, 0.42f);
             EnsurePart(root, "Sword_Blade", PrimitiveType.Cube, new Vector3(0.84f, 0.36f, 0.18f), new Vector3(0.09f, 0.56f, 0.035f), new Vector3(0f, 0f, 34f), metal, 0.52f, 0.74f, 0.06f);
             EnsurePart(root, "Sword_Guard", PrimitiveType.Cube, new Vector3(0.68f, -0.02f, 0.17f), new Vector3(0.28f, 0.05f, 0.06f), new Vector3(0f, 0f, 34f), accent, 0.34f, 0.68f, 0.08f);
+            EnsurePart(root, "Sword_Edge_L", PrimitiveType.Cube, new Vector3(0.78f, 0.38f, 0.22f), new Vector3(0.030f, 0.52f, 0.020f), new Vector3(0f, 0f, 34f), Color.Lerp(metal, Color.white, 0.30f), 0.54f, 0.78f, 0.08f);
+            EnsurePart(root, "Sword_Edge_R", PrimitiveType.Cube, new Vector3(0.90f, 0.35f, 0.22f), new Vector3(0.030f, 0.52f, 0.020f), new Vector3(0f, 0f, 34f), Color.Lerp(metal, Color.white, 0.30f), 0.54f, 0.78f, 0.08f);
+            EnsurePart(root, "Sword_Gem", PrimitiveType.Sphere, new Vector3(0.68f, -0.02f, 0.23f), new Vector3(0.07f, 0.07f, 0.035f), Vector3.zero, accent, 0.12f, 0.78f, 0.28f);
             EnsurePart(root, "Weapon_Head", PrimitiveType.Cube, new Vector3(0.78f, 0.54f, 0.18f), new Vector3(0.28f, 0.18f, 0.10f), new Vector3(0f, 0f, 34f), metal, 0.48f, 0.64f);
             EnsurePart(root, "Axe_Blade_L", PrimitiveType.Cube, new Vector3(0.66f, 0.50f, 0.17f), new Vector3(0.16f, 0.24f, 0.045f), new Vector3(0f, 0f, -8f), metal, 0.48f, 0.68f);
             EnsurePart(root, "Axe_Blade_R", PrimitiveType.Cube, new Vector3(0.93f, 0.48f, 0.17f), new Vector3(0.16f, 0.24f, 0.045f), new Vector3(0f, 0f, 28f), metal, 0.48f, 0.68f);
+            EnsurePart(root, "Axe_Edge_L", PrimitiveType.Cube, new Vector3(0.60f, 0.56f, 0.22f), new Vector3(0.12f, 0.035f, 0.030f), new Vector3(0f, 0f, -8f), Color.Lerp(metal, Color.white, 0.30f), 0.54f, 0.76f, 0.06f);
+            EnsurePart(root, "Axe_Edge_R", PrimitiveType.Cube, new Vector3(0.99f, 0.55f, 0.22f), new Vector3(0.12f, 0.035f, 0.030f), new Vector3(0f, 0f, 28f), Color.Lerp(metal, Color.white, 0.30f), 0.54f, 0.76f, 0.06f);
             EnsurePart(root, "Hammer_Face", PrimitiveType.Cube, new Vector3(0.84f, 0.50f, 0.18f), new Vector3(0.40f, 0.22f, 0.16f), new Vector3(0f, 0f, 20f), darkMetal, 0.5f, 0.62f);
+            EnsurePart(root, "Hammer_Rune", PrimitiveType.Cube, new Vector3(0.84f, 0.50f, 0.28f), new Vector3(0.24f, 0.040f, 0.035f), new Vector3(0f, 0f, 20f), accent, 0.24f, 0.74f, 0.22f);
             EnsurePart(root, "Staff_Crystal", PrimitiveType.Sphere, new Vector3(0.82f, 0.76f, 0.18f), new Vector3(0.16f, 0.16f, 0.16f), Vector3.zero, arcane, 0f, 0.82f, 0.55f);
+            EnsurePart(root, "Staff_Ring", PrimitiveType.Cylinder, new Vector3(0.82f, 0.66f, 0.18f), new Vector3(0.20f, 0.018f, 0.20f), new Vector3(90f, 0f, 0f), accent, 0.24f, 0.72f, 0.18f);
             EnsurePart(root, "Bow_Limb_Top", PrimitiveType.Cube, new Vector3(0.52f, 0.40f, 0.16f), new Vector3(0.045f, 0.52f, 0.045f), new Vector3(0f, 0f, 66f), leather, 0f, 0.44f);
             EnsurePart(root, "Bow_Limb_Bottom", PrimitiveType.Cube, new Vector3(0.66f, -0.24f, 0.16f), new Vector3(0.045f, 0.52f, 0.045f), new Vector3(0f, 0f, 66f), leather, 0f, 0.44f);
+            EnsurePart(root, "Bow_GripWrap", PrimitiveType.Cube, new Vector3(0.60f, 0.07f, 0.20f), new Vector3(0.055f, 0.20f, 0.036f), new Vector3(0f, 0f, 76f), accent, 0.08f, 0.58f, 0.04f);
             EnsurePart(root, "Bow_String", PrimitiveType.Cube, new Vector3(0.58f, 0.10f, 0.16f), new Vector3(0.025f, 0.78f, 0.025f), new Vector3(0f, 0f, 78f), new Color(0.92f, 0.88f, 0.72f), 0f, 0.5f);
 
             EnsurePart(root, "Shield_Off", PrimitiveType.Cube, new Vector3(-0.72f, 0.02f, 0.18f), new Vector3(0.13f, 0.58f, 0.42f), Vector3.zero, darkMetal, 0.36f, 0.56f);
             EnsurePart(root, "Shield_Crest", PrimitiveType.Cube, new Vector3(-0.82f, 0.02f, 0.34f), new Vector3(0.045f, 0.34f, 0.22f), Vector3.zero, accent, 0.30f, 0.66f, 0.08f);
+            EnsurePart(root, "Shield_Rim_Top", PrimitiveType.Cube, new Vector3(-0.72f, 0.32f, 0.36f), new Vector3(0.060f, 0.08f, 0.44f), Vector3.zero, accent, 0.32f, 0.68f, 0.08f);
+            EnsurePart(root, "Shield_Rim_Bottom", PrimitiveType.Cube, new Vector3(-0.72f, -0.28f, 0.36f), new Vector3(0.060f, 0.08f, 0.44f), Vector3.zero, accent, 0.32f, 0.68f, 0.08f);
             EnsurePart(root, "Orb_Off", PrimitiveType.Sphere, new Vector3(-0.72f, 0.08f, 0.22f), new Vector3(0.24f, 0.24f, 0.24f), Vector3.zero, arcane, 0f, 0.82f, 0.55f);
             EnsurePart(root, "Orb_Ring", PrimitiveType.Cylinder, new Vector3(-0.72f, 0.08f, 0.22f), new Vector3(0.30f, 0.018f, 0.30f), new Vector3(90f, 0f, 0f), accent, 0.22f, 0.72f, 0.16f);
             EnsurePart(root, "Weapon_Off", PrimitiveType.Cylinder, new Vector3(-0.72f, -0.02f, 0.16f), new Vector3(0.045f, 0.45f, 0.045f), new Vector3(0f, 0f, -34f), metal, 0.46f, 0.66f);
             EnsurePart(root, "Dagger_Blade", PrimitiveType.Cube, new Vector3(-0.83f, 0.18f, 0.18f), new Vector3(0.06f, 0.32f, 0.035f), new Vector3(0f, 0f, -34f), metal, 0.52f, 0.74f);
+            EnsurePart(root, "Dagger_Guard", PrimitiveType.Cube, new Vector3(-0.74f, 0.02f, 0.20f), new Vector3(0.18f, 0.035f, 0.035f), new Vector3(0f, 0f, -34f), accent, 0.28f, 0.66f, 0.08f);
             EnsurePart(root, "Tome_Off", PrimitiveType.Cube, new Vector3(-0.72f, 0.10f, 0.22f), new Vector3(0.30f, 0.36f, 0.08f), new Vector3(0f, 0f, -10f), new Color(0.20f, 0.12f, 0.34f), 0f, 0.52f);
+            EnsurePart(root, "Tome_Page", PrimitiveType.Cube, new Vector3(-0.70f, 0.10f, 0.27f), new Vector3(0.24f, 0.30f, 0.025f), new Vector3(0f, 0f, -10f), new Color(0.82f, 0.76f, 0.58f), 0f, 0.48f);
             EnsurePart(root, "Tome_Clasp", PrimitiveType.Cube, new Vector3(-0.72f, 0.10f, 0.28f), new Vector3(0.20f, 0.045f, 0.035f), new Vector3(0f, 0f, -10f), accent, 0.30f, 0.66f, 0.12f);
         }
 
