@@ -97,6 +97,8 @@ namespace AL.ChampionMode
         private Image _controlModeStrip;
         private readonly Text[] _controlModeButtonTexts = new Text[3];
         private readonly Image[] _controlModeButtonImages = new Image[3];
+        private ChampionActionButtonFeedback _attackActionFeedback;
+        private ChampionActionButtonFeedback _dodgeActionFeedback;
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private float _encounterStartTime;
@@ -855,8 +857,8 @@ namespace AL.ChampionMode
 
             var actionPanel = CreateHudPanel(canvasObject.transform, "CombatActions", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, 28f), new Vector2(168f, 310f), new Color(0.035f, 0.042f, 0.052f, 0.82f));
             CreateText(actionPanel.transform, font, "ACTIONS", 15, new Vector2(16f, -16f), new Vector2(136f, 20f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
-            CreateHudButton(actionPanel.transform, font, "Attack", new Vector2(18f, -48f), new Vector2(132f, 42f), () => _playerController.RequestBasicAttack(), 16, new Color(0.24f, 0.08f, 0.08f, 0.95f));
-            CreateHudButton(actionPanel.transform, font, "Dodge", new Vector2(18f, -96f), new Vector2(132f, 42f), () => _playerController.RequestDodge(), 16, new Color(0.09f, 0.16f, 0.24f, 0.95f));
+            _attackActionFeedback = CreateChampionActionButton(actionPanel.transform, font, "Attack", new Vector2(18f, -48f), () => _playerController.RequestBasicAttack(), new Color(0.24f, 0.08f, 0.08f, 0.95f), new Color(1f, 0.42f, 0.20f, 0.96f));
+            _dodgeActionFeedback = CreateChampionActionButton(actionPanel.transform, font, "Dodge", new Vector2(18f, -96f), () => _playerController.RequestDodge(), new Color(0.09f, 0.16f, 0.24f, 0.95f), new Color(0.42f, 0.76f, 1f, 0.96f));
             _controlModeStrip = CreateUiImage(actionPanel.transform, "ControlModeStrip", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -145f), new Vector2(132f, 4f), new Color(0.45f, 0.70f, 1f, 0.74f));
             _controlModeText = CreateText(actionPanel.transform, font, "CONTROL MANUAL", 10, new Vector2(18f, -130f), new Vector2(132f, 18f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
             CreateControlModeButton(actionPanel.transform, font, "Manual", AutoMode.Manual, 0, new Vector2(18f, -162f));
@@ -1054,6 +1056,19 @@ namespace AL.ChampionMode
 
             _controlModeButtonImages[index] = button.GetComponent<Image>();
             _controlModeButtonTexts[index] = button.GetComponentInChildren<Text>();
+        }
+
+        private ChampionActionButtonFeedback CreateChampionActionButton(Transform parent, Font font, string label, Vector2 anchoredPosition, UnityEngine.Events.UnityAction action, Color fillColor, Color accentColor)
+        {
+            ChampionActionButtonFeedback feedback = null;
+            var button = CreateHudButton(parent, font, label, anchoredPosition, new Vector2(132f, 42f), () =>
+            {
+                feedback?.Pulse();
+                action?.Invoke();
+            }, 16, fillColor);
+            feedback = button.gameObject.AddComponent<ChampionActionButtonFeedback>();
+            feedback.Configure(button.GetComponent<RectTransform>(), button.GetComponent<Image>(), button.GetComponentInChildren<Text>(), accentColor);
+            return feedback;
         }
 
         private void SetControlMode(AutoMode mode, bool announce)
@@ -2663,6 +2678,86 @@ namespace AL.ChampionMode
             return text;
         }
 
+    }
+
+    internal sealed class ChampionActionButtonFeedback : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    {
+        private RectTransform _rectTransform;
+        private Image _background;
+        private Text _label;
+        private Color _baseColor;
+        private Color _baseTextColor;
+        private Color _accentColor = Color.white;
+        private float _hoverAmount;
+        private float _pressAmount;
+        private float _pulseAmount;
+        private bool _hovered;
+        private bool _pressed;
+
+        public void Configure(RectTransform rectTransform, Image background, Text label, Color accentColor)
+        {
+            _rectTransform = rectTransform;
+            _background = background;
+            _label = label;
+            _accentColor = accentColor;
+            _baseColor = background != null ? background.color : new Color(0.095f, 0.125f, 0.158f, 0.94f);
+            _baseTextColor = label != null ? label.color : Color.white;
+        }
+
+        public void Pulse()
+        {
+            _pulseAmount = 1f;
+        }
+
+        private void Update()
+        {
+            float delta = Time.unscaledDeltaTime;
+            _hoverAmount = Mathf.MoveTowards(_hoverAmount, _hovered ? 1f : 0f, delta * 9f);
+            _pressAmount = Mathf.MoveTowards(_pressAmount, _pressed ? 1f : 0f, delta * 18f);
+            _pulseAmount = Mathf.MoveTowards(_pulseAmount, 0f, delta * 5.5f);
+            float pulse = (Mathf.Sin(Time.unscaledTime * 9.4f) + 1f) * 0.5f;
+            float emphasis = Mathf.Clamp01(_hoverAmount * 0.42f + _pulseAmount * 0.72f);
+
+            if (_background != null)
+            {
+                Color activeColor = Color.Lerp(_baseColor, _accentColor, 0.32f + pulse * 0.08f);
+                Color color = Color.Lerp(_baseColor, activeColor, emphasis);
+                _background.color = Color.Lerp(color, Color.Lerp(_baseColor, Color.black, 0.18f), _pressAmount);
+            }
+
+            if (_label != null)
+            {
+                _label.color = Color.Lerp(_baseTextColor, Color.Lerp(_accentColor, Color.white, 0.42f), emphasis);
+            }
+
+            if (_rectTransform != null)
+            {
+                float scale = 1f + _hoverAmount * 0.012f - _pressAmount * 0.030f + _pulseAmount * 0.018f;
+                _rectTransform.localScale = Vector3.one * scale;
+            }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            _hovered = true;
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            _hovered = false;
+            _pressed = false;
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            _pressed = true;
+            _pulseAmount = Mathf.Max(_pulseAmount, 0.45f);
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            _pressed = false;
+        }
     }
 
     internal sealed class ChampionClearShowcaseVfx : MonoBehaviour
