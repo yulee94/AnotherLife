@@ -57,6 +57,12 @@ namespace AL.Services.Local
             AddChapter(RealmId.Eldergrove, "C1_EG", "Whispers of the Sapling", "Investigating a blight on the World Tree.");
             AddChapter(RealmId.Crownlands, "C1_CL", "The King's Decree", "Rebuilding the capital after the Great Siege.");
             AddChapter(RealmId.Umbral, "C1_UM", "Shadows of the Void", "Rituals to stabilize the volcanic rifts.");
+
+            // Chapter 2 for all Realms - EXPANSION
+            AddChapter(RealmId.Stonehold, "C2_SH", "The Hearth's Awakening", "Relighting the Great Furnace of Stonehold.");
+            AddChapter(RealmId.Eldergrove, "C2_EG", "Roots of Conflict", "Defending the outer glades from the blighted spawns.");
+            AddChapter(RealmId.Crownlands, "C2_CL", "The Merchant's Path", "Securing the trade routes from the eastern borders.");
+            AddChapter(RealmId.Umbral, "C2_UM", "Void Walkers", "Infiltrating the crystalline caves to contain the rift.");
         }
 
         private void AddChapter(RealmId realmId, string id, string title, string summary)
