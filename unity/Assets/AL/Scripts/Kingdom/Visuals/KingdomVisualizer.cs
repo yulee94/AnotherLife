@@ -1151,6 +1151,7 @@ namespace AL.Kingdom.Visuals
             }
 
             pulse.AddComponent<AL.Kingdom.KingdomSelectionPulse>().Configure(_accentColor, 0.62f, _isFortress ? 1.34f : 1.42f);
+            AL.Kingdom.KingdomSelectionBeacon.Spawn(transform.parent, _accentColor, _isFortress);
         }
     }
 }
