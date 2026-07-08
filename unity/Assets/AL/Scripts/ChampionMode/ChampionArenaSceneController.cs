@@ -39,6 +39,8 @@ namespace AL.ChampionMode
         private Image _bossHealthFill;
         private Image _bossBreakFill;
         private Image _bossStateStrip;
+        private Text _appearanceSummaryText;
+        private readonly Image[] _appearanceSwatches = new Image[5];
         private readonly Text[] _skillButtonTexts = new Text[4];
         private readonly Text[] _skillCooldownTexts = new Text[4];
         private readonly Image[] _skillCooldownFills = new Image[4];
@@ -67,6 +69,7 @@ namespace AL.ChampionMode
                 _skillHudTimer = 0f;
                 RefreshSkillText();
                 RefreshBossText();
+                RefreshAppearanceText();
             }
 
             if (_bossTransform == null)
@@ -416,21 +419,30 @@ namespace AL.ChampionMode
             CreateHudButton(actionPanel.transform, font, "Assist", new Vector2(18f, -202f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.SemiAuto), 14);
             CreateHudButton(actionPanel.transform, font, "Auto", new Vector2(18f, -242f), new Vector2(132f, 34f), () => _autoCombatController.SetMode(AutoMode.FullAuto), 14);
 
-            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(362f, 228f), new Color(0.035f, 0.042f, 0.052f, 0.82f));
+            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 304f), new Color(0.035f, 0.042f, 0.052f, 0.84f));
             CreateText(appearancePanel.transform, font, "APPEARANCE", 15, new Vector2(18f, -14f), new Vector2(150f, 22f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
-            CreateHudButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -44f), new Vector2(100f, 34f), () => _playerCustomization.CyclePrimaryColor(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Hair", new Vector2(130f, -44f), new Vector2(100f, 34f), () => _playerCustomization.CycleHairColor(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Skin", new Vector2(242f, -44f), new Vector2(100f, 34f), () => _playerCustomization.CycleSkinColor(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Hair Style", new Vector2(18f, -84f), new Vector2(100f, 34f), () => _playerCustomization.CycleHairStyle(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Body", new Vector2(130f, -84f), new Vector2(100f, 34f), () => _playerCustomization.CycleBodyPreset(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Armor", new Vector2(242f, -84f), new Vector2(100f, 34f), () => _playerCustomization.CycleArmorStyle(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Eyes", new Vector2(18f, -124f), new Vector2(100f, 34f), () => _playerCustomization.CycleEyeColor(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Accent", new Vector2(130f, -124f), new Vector2(100f, 34f), () => _playerCustomization.CycleAccentColor(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Face", new Vector2(242f, -124f), new Vector2(100f, 34f), () => _playerCustomization.CycleFaceMark(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Weapon", new Vector2(18f, -164f), new Vector2(100f, 34f), () => _playerCustomization.CycleWeaponStyle(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Offhand", new Vector2(130f, -164f), new Vector2(100f, 34f), () => _playerCustomization.CycleOffhandStyle(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Cape", new Vector2(242f, -164f), new Vector2(100f, 34f), () => _playerCustomization.ToggleCape(), 13);
-            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(242f, -188f), new Vector2(100f, 26f), () => _playerCustomization.ToggleHelmet(), 12);
+            CreateText(appearancePanel.transform, font, "COLORS", 12, new Vector2(244f, -16f), new Vector2(64f, 18f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
+            for (int i = 0; i < _appearanceSwatches.Length; i++)
+            {
+                _appearanceSwatches[i] = CreateHudPanel(appearancePanel.transform, "ColorSwatch_" + i, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(244f + i * 27f, -38f), new Vector2(22f, 22f), Color.white);
+            }
+
+            CreateHudButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -48f), new Vector2(112f, 34f), () => { _playerCustomization.CyclePrimaryColor(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Hair", new Vector2(144f, -48f), new Vector2(112f, 34f), () => { _playerCustomization.CycleHairColor(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Skin", new Vector2(270f, -48f), new Vector2(112f, 34f), () => { _playerCustomization.CycleSkinColor(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Hair Style", new Vector2(18f, -88f), new Vector2(112f, 34f), () => { _playerCustomization.CycleHairStyle(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Body", new Vector2(144f, -88f), new Vector2(112f, 34f), () => { _playerCustomization.CycleBodyPreset(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Armor", new Vector2(270f, -88f), new Vector2(112f, 34f), () => { _playerCustomization.CycleArmorStyle(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Eyes", new Vector2(18f, -128f), new Vector2(112f, 34f), () => { _playerCustomization.CycleEyeColor(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Accent", new Vector2(144f, -128f), new Vector2(112f, 34f), () => { _playerCustomization.CycleAccentColor(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Face", new Vector2(270f, -128f), new Vector2(112f, 34f), () => { _playerCustomization.CycleFaceMark(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Weapon", new Vector2(18f, -168f), new Vector2(112f, 34f), () => { _playerCustomization.CycleWeaponStyle(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Offhand", new Vector2(144f, -168f), new Vector2(112f, 34f), () => { _playerCustomization.CycleOffhandStyle(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Cape", new Vector2(270f, -168f), new Vector2(112f, 34f), () => { _playerCustomization.ToggleCape(); RefreshAppearanceText(); }, 13);
+            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -208f), new Vector2(112f, 32f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -208f), new Vector2(112f, 32f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
+            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -208f), new Vector2(112f, 32f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13);
+            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 13, new Vector2(18f, -244f), new Vector2(364f, 48f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -450,6 +462,7 @@ namespace AL.ChampionMode
 
             RefreshSkillText();
             RefreshBossText();
+            RefreshAppearanceText();
         }
 
         private static void EnsureEventSystem()
@@ -556,6 +569,35 @@ namespace AL.ChampionMode
                         ? "Enrage active. Dodge first, punish after the telegraph."
                         : "Pressure the guard bar, hold mana for the break window.";
             }
+        }
+
+        private void RefreshAppearanceText()
+        {
+            if (_playerCustomization == null)
+            {
+                return;
+            }
+
+            if (_appearanceSummaryText != null)
+            {
+                _appearanceSummaryText.text = _playerCustomization.GetAppearanceSummary();
+            }
+
+            SetSwatchColor(0, _playerCustomization.GetPrimaryColor());
+            SetSwatchColor(1, _playerCustomization.GetHairColor());
+            SetSwatchColor(2, _playerCustomization.GetSkinColor());
+            SetSwatchColor(3, _playerCustomization.GetEyeColor());
+            SetSwatchColor(4, _playerCustomization.GetAccentColor());
+        }
+
+        private void SetSwatchColor(int index, Color color)
+        {
+            if (index < 0 || index >= _appearanceSwatches.Length || _appearanceSwatches[index] == null)
+            {
+                return;
+            }
+
+            _appearanceSwatches[index].color = new Color(color.r, color.g, color.b, 0.95f);
         }
 
         private string FormatSkillStatus(int slotIndex)
