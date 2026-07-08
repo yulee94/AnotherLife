@@ -23,6 +23,8 @@ namespace AL.ChampionMode.Customization
             EnsureAnchors(root);
             var motion = champion.GetComponent<ProceduralChampionMotion>() ?? champion.AddComponent<ProceduralChampionMotion>();
             motion.Rebind();
+            var surfaceResponse = champion.GetComponent<ProceduralChampionSurfaceResponse>() ?? champion.AddComponent<ProceduralChampionSurfaceResponse>();
+            surfaceResponse.Rebind();
         }
 
         private static void EnsureSkin(Transform root)
@@ -602,6 +604,168 @@ namespace AL.ChampionMode.Customization
             {
                 Apply(parts[i], positionOffset, eulerOffset);
             }
+        }
+    }
+
+    public sealed class ProceduralChampionSurfaceResponse : MonoBehaviour
+    {
+        private struct SurfacePart
+        {
+            public Renderer Renderer;
+            public Material Material;
+            public Transform Transform;
+            public Vector3 BaseScale;
+            public float Strength;
+            public float Speed;
+            public float Phase;
+            public bool ScalePulse;
+        }
+
+        private SurfacePart[] _parts = System.Array.Empty<SurfacePart>();
+        private float _seed;
+
+        public void Rebind()
+        {
+            var parts = new System.Collections.Generic.List<SurfacePart>();
+            _seed = Mathf.Abs(GetInstanceID() * 0.137f) % 10f;
+
+            var renderers = GetComponentsInChildren<Renderer>(true);
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                var renderer = renderers[i];
+                if (renderer == null || !TryGetSurfaceProfile(renderer.gameObject.name, out float strength, out float speed, out bool scalePulse))
+                {
+                    continue;
+                }
+
+                var material = renderer.material;
+                if (material != null && material.HasProperty("_EmissionColor"))
+                {
+                    material.EnableKeyword("_EMISSION");
+                }
+
+                parts.Add(new SurfacePart
+                {
+                    Renderer = renderer,
+                    Material = material,
+                    Transform = renderer.transform,
+                    BaseScale = renderer.transform.localScale,
+                    Strength = strength,
+                    Speed = speed,
+                    Phase = i * 0.47f + _seed,
+                    ScalePulse = scalePulse
+                });
+            }
+
+            _parts = parts.ToArray();
+        }
+
+        private void LateUpdate()
+        {
+            if (_parts == null || _parts.Length == 0)
+            {
+                Rebind();
+                return;
+            }
+
+            float time = Time.time + _seed;
+            for (int i = 0; i < _parts.Length; i++)
+            {
+                var part = _parts[i];
+                if (part.Renderer == null || part.Material == null)
+                {
+                    continue;
+                }
+
+                float pulse = 0.68f + Mathf.Sin(time * part.Speed + part.Phase) * 0.18f + Mathf.Sin(time * (part.Speed * 0.43f) + part.Phase * 1.7f) * 0.10f;
+                pulse = Mathf.Clamp01(pulse);
+                Color baseColor = part.Material.HasProperty("_Color") ? part.Material.GetColor("_Color") : part.Material.color;
+
+                if (part.Material.HasProperty("_EmissionColor"))
+                {
+                    part.Material.SetColor("_EmissionColor", baseColor * (part.Strength * pulse));
+                }
+
+                if (part.Material.HasProperty("_Glossiness"))
+                {
+                    part.Material.SetFloat("_Glossiness", Mathf.Clamp01(0.56f + part.Strength * 0.42f + pulse * 0.08f));
+                }
+
+                if (part.ScalePulse && part.Transform != null)
+                {
+                    float scale = 1f + pulse * 0.018f;
+                    part.Transform.localScale = part.BaseScale * scale;
+                }
+            }
+        }
+
+        private static bool TryGetSurfaceProfile(string partName, out float strength, out float speed, out bool scalePulse)
+        {
+            string name = partName.ToLowerInvariant();
+            strength = 0f;
+            speed = 1f;
+            scalePulse = false;
+
+            if (name.Contains("eye_glint"))
+            {
+                strength = 0.42f;
+                speed = 2.7f;
+                scalePulse = true;
+                return true;
+            }
+
+            if (name.Contains("eye_"))
+            {
+                strength = 0.22f;
+                speed = 1.9f;
+                return true;
+            }
+
+            if (name.Contains("orb") ||
+                name.Contains("crystal") ||
+                name.Contains("backattachment_core") ||
+                name.Contains("gem") ||
+                name.Contains("rune") ||
+                name.Contains("coreline") ||
+                name.Contains("impactcore") ||
+                name.Contains("orbitstone") ||
+                name.Contains("commandseal") ||
+                name.Contains("arcane_focus"))
+            {
+                strength = 0.54f;
+                speed = 1.45f;
+                scalePulse = name.Contains("orb") || name.Contains("crystal") || name.Contains("gem") || name.Contains("impactcore") || name.Contains("orbitstone");
+                return true;
+            }
+
+            if (name.Contains("facemark") ||
+                name.Contains("etching") ||
+                name.Contains("crest") ||
+                name.Contains("trim") ||
+                name.Contains("cape_pin") ||
+                name.Contains("cape_chain") ||
+                name.Contains("backattachment_wing") ||
+                name.Contains("hammer_rune") ||
+                name.Contains("tome_clasp"))
+            {
+                strength = 0.16f;
+                speed = 1.18f;
+                return true;
+            }
+
+            if (name.Contains("edge") ||
+                name.Contains("blade") ||
+                name.Contains("rivet") ||
+                name.Contains("ridge") ||
+                name.Contains("boss") ||
+                name.Contains("buckle"))
+            {
+                strength = 0.07f;
+                speed = 0.96f;
+                return true;
+            }
+
+            return false;
         }
     }
 }
