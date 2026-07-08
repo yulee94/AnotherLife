@@ -32,6 +32,8 @@ namespace AL.ChampionMode
         private RvrBotSpawner _rvrBotSpawner;
         private BossDummyAI _boss;
         private Transform _bossTransform;
+        private UnityEngine.Camera _arenaCamera;
+        private RectTransform _hudCanvasRect;
         private Text _healthText;
         private Text _manaText;
         private Text _skillText;
@@ -46,7 +48,17 @@ namespace AL.ChampionMode
         private Image _bossBreakFill;
         private Image _bossStateStrip;
         private Image _damageFlashImage;
+        private GameObject _targetLockRoot;
+        private RectTransform _targetLockRect;
+        private Text _targetLockText;
+        private Text _targetLockMetaText;
+        private Image _targetLockGlow;
+        private Image _targetLockCore;
+        private Image _targetLockHealthFill;
+        private Image _targetLockBreakFill;
         private readonly Image[] _lowHealthEdges = new Image[4];
+        private readonly Image[] _targetLockMarks = new Image[8];
+        private readonly Image[] _targetLockTicks = new Image[6];
         private GameObject _defeatPanelObject;
         private Text _defeatSummaryText;
         private Text _defeatDetailText;
@@ -102,6 +114,7 @@ namespace AL.ChampionMode
             }
 
             RefreshLowHealthFeedback();
+            UpdateTargetLockIndicator();
             if (_appearanceFeedTimer > 0f)
             {
                 _appearanceFeedTimer -= Time.deltaTime;
@@ -177,6 +190,7 @@ namespace AL.ChampionMode
             var cameraObject = new GameObject("Main Camera");
             cameraObject.tag = "MainCamera";
             var camera = cameraObject.AddComponent<UnityEngine.Camera>();
+            _arenaCamera = camera;
             camera.transform.position = new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
             camera.fieldOfView = 42f;
@@ -695,6 +709,7 @@ namespace AL.ChampionMode
             var canvasObject = new GameObject("ChampionMode_HUD");
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _hudCanvasRect = canvasObject.GetComponent<RectTransform>();
             var scaler = canvasObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             scaler.referenceResolution = new Vector2(1920f, 1080f);
@@ -803,6 +818,7 @@ namespace AL.ChampionMode
             var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -296f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
             _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
             CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            CreateTargetLockIndicator(canvasObject.transform, font);
             CreateDefeatPanel(canvasObject.transform, font);
             CreateClearPanel(canvasObject.transform, font);
             CreateIntroPanel(canvasObject.transform, font);
@@ -953,6 +969,119 @@ namespace AL.ChampionMode
                     : _boss.IsEnraged
                         ? "Enrage active. Dodge first, punish after the telegraph."
                         : "Pressure the guard bar, hold mana for the break window.";
+            }
+        }
+
+        private void UpdateTargetLockIndicator()
+        {
+            if (_targetLockRoot == null)
+            {
+                return;
+            }
+
+            bool shouldShow = _boss != null &&
+                              _bossTransform != null &&
+                              !_boss.IsDead &&
+                              !_encounterFailed &&
+                              !_encounterIntroRunning &&
+                              !_appearanceInspectionMode;
+            if (!shouldShow)
+            {
+                if (_targetLockRoot.activeSelf)
+                {
+                    _targetLockRoot.SetActive(false);
+                }
+
+                return;
+            }
+
+            UnityEngine.Camera camera = _arenaCamera != null ? _arenaCamera : UnityEngine.Camera.main;
+            if (camera == null)
+            {
+                _targetLockRoot.SetActive(false);
+                return;
+            }
+
+            Vector3 screenPoint = camera.WorldToScreenPoint(_bossTransform.position + Vector3.up * 2.42f + _bossTransform.forward * 0.10f);
+            if (screenPoint.z <= 0.05f)
+            {
+                _targetLockRoot.SetActive(false);
+                return;
+            }
+
+            screenPoint.x = Mathf.Clamp(screenPoint.x, 168f, Screen.width - 168f);
+            screenPoint.y = Mathf.Clamp(screenPoint.y, 132f, Screen.height - 168f);
+            if (!_targetLockRoot.activeSelf)
+            {
+                _targetLockRoot.SetActive(true);
+            }
+
+            if (_hudCanvasRect != null && RectTransformUtility.ScreenPointToLocalPointInRectangle(_hudCanvasRect, screenPoint, null, out Vector2 localPoint))
+            {
+                _targetLockRect.anchoredPosition = localPoint;
+            }
+            else
+            {
+                _targetLockRect.position = screenPoint;
+            }
+
+            float healthRatio = _boss.MaxHealth > 0f ? Mathf.Clamp01(_boss.CurrentHealth / _boss.MaxHealth) : 0f;
+            float guardRatio = _boss.MaxBreak > 0f ? Mathf.Clamp01(_boss.CurrentBreak / _boss.MaxBreak) : 0f;
+            float distance = _playerController != null ? Vector3.Distance(_playerController.transform.position, _bossTransform.position) : 8f;
+            float pulse = (Mathf.Sin(Time.unscaledTime * (_boss.IsEnraged ? 7.8f : 4.8f)) + 1f) * 0.5f;
+            float scale = Mathf.Clamp(1.09f - distance * 0.018f, 0.78f, 1.08f);
+            if (_boss.IsEnraged)
+            {
+                scale += pulse * 0.055f;
+            }
+            else if (_boss.IsBroken)
+            {
+                scale += pulse * 0.035f;
+            }
+
+            _targetLockRect.localScale = Vector3.one * scale;
+            Color accent = GetTargetLockAccent();
+            SetImageColor(_targetLockGlow, WithAlpha(accent, _boss.IsEnraged ? 0.18f + pulse * 0.12f : 0.09f + pulse * 0.06f));
+            SetImageColor(_targetLockCore, Color.Lerp(accent, Color.white, 0.20f + pulse * 0.20f));
+            SetImageColor(_targetLockHealthFill, new Color(0.92f, 0.12f, 0.08f, 0.88f));
+            SetImageColor(_targetLockBreakFill, _boss.IsBroken ? new Color(0.50f, 1f, 0.92f, 0.95f) : new Color(0.28f, 0.90f, 1f, 0.82f));
+            SetFillAmount(_targetLockHealthFill, healthRatio);
+            SetFillAmount(_targetLockBreakFill, guardRatio);
+
+            for (int i = 0; i < _targetLockMarks.Length; i++)
+            {
+                if (_targetLockMarks[i] == null)
+                {
+                    continue;
+                }
+
+                float markPulse = 0.76f + pulse * 0.20f;
+                SetImageColor(_targetLockMarks[i], WithAlpha(Color.Lerp(accent, Color.white, i % 2 == 0 ? 0.14f : 0.04f), markPulse));
+                _targetLockMarks[i].rectTransform.localScale = Vector3.one * (_boss.IsEnraged ? 1f + pulse * 0.07f : 1f + pulse * 0.025f);
+            }
+
+            for (int i = 0; i < _targetLockTicks.Length; i++)
+            {
+                if (_targetLockTicks[i] == null)
+                {
+                    continue;
+                }
+
+                float tickPulse = Mathf.PingPong(Time.unscaledTime * 2.8f + i * 0.18f, 1f);
+                SetImageColor(_targetLockTicks[i], WithAlpha(Color.Lerp(accent, Color.white, 0.22f), 0.20f + tickPulse * 0.42f));
+                _targetLockTicks[i].rectTransform.localScale = new Vector3(1f + tickPulse * 0.22f, 1f, 1f);
+            }
+
+            if (_targetLockText != null)
+            {
+                _targetLockText.text = _boss.IsEnraged ? "ENRAGE LOCK" : _boss.IsBroken ? "BREAK WINDOW" : "TARGET LOCK";
+                _targetLockText.color = Color.Lerp(accent, Color.white, 0.24f);
+            }
+
+            if (_targetLockMetaText != null)
+            {
+                _targetLockMetaText.text = $"HP {Mathf.CeilToInt(healthRatio * 100f)} / GUARD {Mathf.CeilToInt(guardRatio * 100f)}";
+                _targetLockMetaText.color = new Color(0.86f, 0.92f, 0.98f, 0.88f);
             }
         }
 
@@ -1567,6 +1696,26 @@ namespace AL.ChampionMode
             }
         }
 
+        private Color GetTargetLockAccent()
+        {
+            if (_boss == null)
+            {
+                return new Color(1f, 0.58f, 0.18f, 0.82f);
+            }
+
+            if (_boss.IsEnraged)
+            {
+                return new Color(1f, 0.22f, 0.08f, 0.92f);
+            }
+
+            if (_boss.IsBroken)
+            {
+                return new Color(0.38f, 1f, 0.92f, 0.92f);
+            }
+
+            return new Color(1f, 0.58f, 0.18f, 0.82f);
+        }
+
         private string BuildSkillButtonLabel(int slotIndex)
         {
             string compactName = GetCompactSkillName(_playerSkillCaster != null ? _playerSkillCaster.GetSkillName(slotIndex) : string.Empty);
@@ -1588,6 +1737,75 @@ namespace AL.ChampionMode
         {
             var button = CreateHudButton(parent, font, label, anchoredPosition, new Vector2(56f, 42f), null, 13);
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(_playerController, moveInput);
+        }
+
+        private void CreateTargetLockIndicator(Transform parent, Font font)
+        {
+            _targetLockRoot = new GameObject("BossTargetLock");
+            _targetLockRoot.transform.SetParent(parent, false);
+            _targetLockRect = _targetLockRoot.AddComponent<RectTransform>();
+            SetRect(_targetLockRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(210f, 188f));
+
+            Color accent = new Color(1f, 0.58f, 0.18f, 0.78f);
+            _targetLockGlow = CreateUiImage(_targetLockRoot.transform, "TargetLockGlow", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(158f, 70f), WithAlpha(accent, 0.10f));
+            _targetLockCore = CreateUiImage(_targetLockRoot.transform, "TargetLockCore", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(8f, 8f), Color.Lerp(accent, Color.white, 0.18f));
+
+            int mark = 0;
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_TopLeft_H", new Vector2(-72f, 34f), new Vector2(40f, 3f), 0f, accent);
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_TopLeft_V", new Vector2(-92f, 16f), new Vector2(3f, 36f), 0f, accent);
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_TopRight_H", new Vector2(72f, 34f), new Vector2(40f, 3f), 0f, accent);
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_TopRight_V", new Vector2(92f, 16f), new Vector2(3f, 36f), 0f, accent);
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_BottomLeft_H", new Vector2(-72f, -34f), new Vector2(40f, 3f), 0f, accent);
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_BottomLeft_V", new Vector2(-92f, -16f), new Vector2(3f, 36f), 0f, accent);
+            _targetLockMarks[mark++] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_BottomRight_H", new Vector2(72f, -34f), new Vector2(40f, 3f), 0f, accent);
+            _targetLockMarks[mark] = CreateTargetLockMark(_targetLockRoot.transform, "LockMark_BottomRight_V", new Vector2(92f, -16f), new Vector2(3f, 36f), 0f, accent);
+
+            for (int i = 0; i < _targetLockTicks.Length; i++)
+            {
+                float angle = i * Mathf.PI * 2f / _targetLockTicks.Length;
+                Vector2 position = new Vector2(Mathf.Cos(angle) * 66f, Mathf.Sin(angle) * 28f);
+                _targetLockTicks[i] = CreateTargetLockMark(_targetLockRoot.transform, "LockTick_" + i, position, new Vector2(18f, 2.5f), -angle * Mathf.Rad2Deg, WithAlpha(accent, 0.32f));
+            }
+
+            _targetLockText = CreateTargetLockText(_targetLockRoot.transform, font, "TARGET LOCK", 12, new Vector2(0f, -47f), new Vector2(172f, 18f), TextAnchor.MiddleCenter, Color.Lerp(accent, Color.white, 0.20f));
+            _targetLockMetaText = CreateTargetLockText(_targetLockRoot.transform, font, "HP 100 / GUARD 100", 10, new Vector2(0f, -62f), new Vector2(172f, 16f), TextAnchor.MiddleCenter, new Color(0.84f, 0.90f, 0.96f, 0.84f));
+            _targetLockHealthFill = CreateTargetLockBar(_targetLockRoot.transform, "TargetLockHealth", new Vector2(0f, -78f), new Vector2(118f, 5f), new Color(0.92f, 0.12f, 0.08f, 0.88f));
+            _targetLockBreakFill = CreateTargetLockBar(_targetLockRoot.transform, "TargetLockBreak", new Vector2(0f, -86f), new Vector2(118f, 4f), new Color(0.28f, 0.90f, 1f, 0.82f));
+            _targetLockRoot.SetActive(false);
+        }
+
+        private static Image CreateTargetLockMark(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, float rotationDegrees, Color color)
+        {
+            var mark = CreateUiImage(parent, name, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, sizeDelta, color);
+            mark.transform.localRotation = Quaternion.Euler(0f, 0f, rotationDegrees);
+            return mark;
+        }
+
+        private static Text CreateTargetLockText(Transform parent, Font font, string value, int size, Vector2 anchoredPosition, Vector2 sizeDelta, TextAnchor alignment, Color color)
+        {
+            var text = CreateText(parent, font, value, size, Vector2.zero, sizeDelta, alignment, color);
+            SetRect(text.GetComponent<RectTransform>(), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, sizeDelta);
+            return text;
+        }
+
+        private static Image CreateTargetLockBar(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, Color fillColor)
+        {
+            var frame = CreateUiImage(parent, name + "_Frame", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), anchoredPosition, sizeDelta, new Color(0.005f, 0.008f, 0.012f, 0.68f));
+            var fillObject = new GameObject(name + "_Fill");
+            fillObject.transform.SetParent(frame.transform, false);
+            var fill = fillObject.AddComponent<Image>();
+            fill.raycastTarget = false;
+            fill.color = fillColor;
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Horizontal;
+            fill.fillOrigin = (int)Image.OriginHorizontal.Left;
+            fill.fillAmount = 1f;
+            var rect = fillObject.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = new Vector2(1f, 1f);
+            rect.offsetMax = new Vector2(-1f, -1f);
+            return fill;
         }
 
         private void CreateDamageFeedbackLayer(Transform parent)
@@ -1835,6 +2053,20 @@ namespace AL.ChampionMode
             var color = image.color;
             color.a = Mathf.Clamp01(alpha);
             image.color = color;
+        }
+
+        private static void SetImageColor(Image image, Color color)
+        {
+            if (image != null)
+            {
+                image.color = color;
+            }
+        }
+
+        private static Color WithAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
         }
 
         private static void SetRect(RectTransform rect, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
