@@ -75,6 +75,55 @@ namespace AL.Services.Local
             AddChapter(RealmId.Eldergrove, "C7_EG", "Whisper of the Glade", "Restoring the original bow of the Forest Sentinels.");
             AddChapter(RealmId.Crownlands, "C7_CL", "The Golden Aegis", "Recovering the shield that stood during the First War.");
             AddChapter(RealmId.Umbral, "C7_UM", "Void's Edge", "Forging the blade from the remains of the First Rift.");
+
+            // Chapters 10-12: The Heavens Ascended
+            AddChapter(RealmId.Stonehold, "C10_SH", "The Celestial Rift", "Ancient portals atop the mountain peaks begin to pulse with sky-light.");
+            AddChapter(RealmId.Eldergrove, "C10_EG", "Whispers of the Sky", "The highest leaves of the World Tree touch a new realm of magic.");
+            AddChapter(RealmId.Crownlands, "C10_CL", "The Sun-Gate Opens", "Portals appear in the clouds, revealing the path to the High Celestials.");
+            AddChapter(RealmId.Umbral, "C10_UM", "Void's Reach", "Shadow magic begins to pierce the heavens themselves.");
+
+            AddChapter(RealmId.Stonehold, "C11_SH", "Trial of the Granite King", "Confronting the guardians of the first floating fortress.");
+            AddChapter(RealmId.Eldergrove, "C11_EG", "Emerald Sky Trial", "Navigating the magical storms of the upper islands.");
+            AddChapter(RealmId.Crownlands, "C11_CL", "Radiant Vigil", "Proving your faith and strength to the Sky Wardens.");
+            AddChapter(RealmId.Umbral, "C11_UM", "Midnight Ascent", "Infiltrating the light-fortresses of the sky.");
+
+            AddChapter(RealmId.Stonehold, "C12_SH", "Throne of the Mountain Sky", "Reaching the ultimate seat of power and meeting the High Celestial.");
+            AddChapter(RealmId.Eldergrove, "C12_EG", "Glade of the Stars", "Securing the forest's place among the celestial powers.");
+            AddChapter(RealmId.Crownlands, "C12_CL", "Empire of Light", "Establishing a holy covenant between earth and sky.");
+            AddChapter(RealmId.Umbral, "C12_UM", "The Void Throne", "Claiming the sky for the shadows of the rift.");
+
+            InitializeSkillSoulQuests();
+        }
+
+        private void InitializeSkillSoulQuests()
+        {
+            // All 16 Subclass Soul Quests
+            AddSoulQuest(SubclassId.Vanguard, "Frontline Eternity", "Stand as the immovable object against the Celestial Tide.");
+            AddSoulQuest(SubclassId.Guardian, "The Unbreakable Vow", "Protect the Celestial Gate from an infinite onslaught.");
+            AddSoulQuest(SubclassId.Berserker, "Primal Rage", "Tame a legendary star-lion in a cosmic storm.");
+            AddSoulQuest(SubclassId.Pyromancer, "Sun-Fire Ascension", "Absorb the heat of the celestial sun into your core.");
+            AddSoulQuest(SubclassId.Cryomancer, "Absolute Zero", "Freeze the floating waterfalls of the Sky Castle.");
+            AddSoulQuest(SubclassId.Archmage, "Void Ascension", "Merge celestial light with shadow rift magic.");
+            AddSoulQuest(SubclassId.Sharpshooter, "Star-Piercer", "Strike a target on the furthest floating island.");
+            AddSoulQuest(SubclassId.Stalker, "The Celestial Hunt", "Track a creature made of pure starlight.");
+            AddSoulQuest(SubclassId.Beastmaster, "Sky-Bond", "Tame a High Celestial Gryphon.");
+            AddSoulQuest(SubclassId.Shadowblade, "Event Horizon", "Become one with the shadow cast by the Celestial Gate.");
+            AddSoulQuest(SubclassId.Infiltrator, "Heaven's Ghost", "Bypass the divine sentinels without being detected.");
+            AddSoulQuest(SubclassId.Nightstalker, "Void Reaper", "Execute the shadows lurking in the celestial gardens.");
+            AddSoulQuest(SubclassId.Paladin, "Divine Resonance", "Synchronize your armor with the High Celestial's song.");
+            AddSoulQuest(SubclassId.Necromancer, "Celestial Decay", "Study the life-cycles of the eternal sky-beings.");
+            AddSoulQuest(SubclassId.Slayer, "God-Killer", "Defeat the guardian of the Forbidden Island.");
+            AddSoulQuest(SubclassId.Druid, "World-Root Reach", "Connect the World Tree to the floating islands.");
+        }
+
+        private void AddSoulQuest(SubclassId subclass, string title, string description)
+        {
+            var quest = ScriptableObject.CreateInstance<SkillSoulQuestDefinition>();
+            quest.Id = $"SQ_{subclass}";
+            quest.AssociatedSubclass = subclass;
+            quest.Title = title;
+            quest.Description = description;
+            // Additional registration logic if needed
         }
 
         private void AddChapter(RealmId realmId, string id, string title, string summary)

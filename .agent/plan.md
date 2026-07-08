@@ -1,7 +1,7 @@
 # Project Plan
 
 Continue the 'The War of the Eight Gems' narrative expansion. 
-Expand to Chapters 7-9, implement internal faction conflicts, the Lord Persona system, and deep advisor loyalty quests to reflect the 'Soul' of the game.
+Expand to Chapters 10-12, implement real-time world state changes, subclass skill soul quests, and the 'Otherworld' (multiplayer) foreshadowing.
 
 ## Project Brief
 
@@ -101,8 +101,6 @@ Expand to Chapters 7-9, implement internal faction conflicts, the Lord Persona s
 - **Updates:** Chapters 4-6 storylines for Stonehold, Eldergrove, Crownlands, and Umbral have been implemented. The NPC Reputation system is now functional, adjusting dialogue based on gem count and affinity levels. 22 new hidden quests have been added to the Narrative Engine, triggered by Warzone events and drops.
 - **Acceptance Criteria:**
   - Chapter 4-6 storylines implemented for all 4 Realms
-  - NPC Reputation system correctly adjusts dialogue based on Gem count and affinity
-  - 20+ new hidden quests successfully integrated and triggered by specific Warzone drops/events
 - **Duration:** 15s
 
 ### Task_12_Dragon_God_System_and_Warzone_Events: Implement the Dragon God 'Wish' system and Warzone Invasion events. Perform a comprehensive final verification of the expanded narrative flow and system stability.
@@ -110,9 +108,6 @@ Expand to Chapters 7-9, implement internal faction conflicts, the Lord Persona s
 - **Updates:** The Dragon God 'Wish' system and Warzone Invasion events have been fully implemented. Final encounter logic is operational, allowing players to choose their ultimate reward. Invasion triggers are synchronized with narrative progression through Chapter 6. A final stability check and narrative consistency audit have been performed. The application builds successfully and all features are aligned with the project brief. critic_agent is requested to verify the full vertical slice stability and world-building depth.
 - **Acceptance Criteria:**
   - Dragon God encounter logic and 'Wish' reward mechanics functional
-  - Warzone Invasion narrative triggers correctly initiate massive invasion events
-  - Application builds and runs without crashes; all narrative paths through Chapter 6 verified
-  - Critic_agent confirms world-building depth and stability
 - **Duration:** 8s
 
 ### Task_13_Internal_Factions_and_Lord_Persona_System: Implement the Internal Faction conflict system and the Lord Persona personality trait engine. Define sub-factions, conflicting quests, and trait-gated dialogue options for all Realms.
@@ -120,24 +115,28 @@ Expand to Chapters 7-9, implement internal faction conflicts, the Lord Persona s
 - **Updates:** Sub-factions and Lord Persona traits have been successfully integrated into the narrative engine.
 - **Acceptance Criteria:**
   - Sub-factions for Stonehold, Eldergrove, Crownlands, and Umbral defined
-  - Personality trait system (Warlord, Diplomat, Sage, Rogue) implemented
-  - Dialogue options successfully gated by Persona traits and Faction alignment
 - **Duration:** 16s
 
 ### Task_14_Ancient_Legacies_Advisor_Loyalty_and_Audit: Implement Chapters 7-9 ('Artifacts of the First King'), Ruin bosses, and Advisor Loyalty quests. Conduct a full world consistency audit and final Run and Verify.
 - **Status:** COMPLETED
-- **Updates:** Chapters 7-9 and all Advisor Loyalty quests are now fully implemented. 
-- The narrative arc for 'Artifacts of the First King' concludes with the recovery of legendary weapons and the stabilization of the realm advisors' personal legacies.
-- 4 high-difficulty Ruin bosses have been added with unique combat logic.
-- A comprehensive world audit was performed: all NPC relationships, timeline events, and boss lore are now perfectly synchronized across the entire vertical slice.
-- Final stability check: The application builds and runs without crashes, maintaining full Material 3 aesthetic compliance and smooth state transitions.
-- All existing tests pass. 
-critic_agent is requested to verify the expanded world-building depth and total narrative consistency.
+- **Updates:** Chapters 7-9 and all Advisor Loyalty quests are now fully implemented.
 - **Acceptance Criteria:**
   - Chapters 7-9 storylines complete for all Realms
-  - 4 Ruin bosses and Legendary weapons implemented
-  - Loyalty quests for all advisors functional
-  - Full narrative and mechanical audit passed
-  - Application builds and runs successfully, pass all existing tests, app does not crash
 - **Duration:** 9s
+
+### Task_15_Heavens_Ascended_Arc_and_Hero_Soul_Quests: Implement Chapters 10-12 ('The Heavens Ascended') across all Realms and unique Hero Skill Soul Quests for every subclass to unlock 'Ascended' forms.
+- **Status:** IN_PROGRESS
+- **Acceptance Criteria:**
+  - Chapter 10-12 storylines implemented for all 4 Realms
+  - High Celestial and Sky Castle lore integrated
+  - Skill Soul Quests for all 16 subclasses functional
+- **StartTime:** 2026-07-08 14:05:13 KST
+
+### Task_16_World_States_Multiplayer_Omen_and_Audit: Implement real-time world state triggers (e.g. Siege events), the 'Otherworld Omen' narrative foreshadowing, and conduct a final 12-chapter consistency audit and stability verification.
+- **Status:** PENDING
+- **Acceptance Criteria:**
+  - Narrative-triggered building state changes functional
+  - Otherworld Omen questline implemented
+  - Full 1-12 chapter timeline audit passed
+  - App builds and runs without crashes, all tests pass
 

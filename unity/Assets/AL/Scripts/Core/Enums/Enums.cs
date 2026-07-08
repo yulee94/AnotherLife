@@ -45,7 +45,11 @@ namespace AL.Core
         Beastmaster,
         Shadowblade,
         Infiltrator,
-        Nightstalker
+        Nightstalker,
+        Paladin,
+        Necromancer,
+        Slayer,
+        Druid
     }
 
     public enum TroopType
