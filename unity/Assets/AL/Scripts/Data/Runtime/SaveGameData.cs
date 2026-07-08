@@ -13,6 +13,7 @@ namespace AL.Data.Runtime
         public List<TroopInventoryData> Troops = new List<TroopInventoryData>();
         public List<AL.Core.Interfaces.ResearchState> Researches = new List<AL.Core.Interfaces.ResearchState>();
         public List<AL.Core.Interfaces.QuestState> Quests = new List<AL.Core.Interfaces.QuestState>();
+        public List<NpcAffinityData> Reputation = new List<NpcAffinityData>();
         public List<AL.Core.Interfaces.TerritoryData> Territories = new List<AL.Core.Interfaces.TerritoryData>();
         public List<RealmGemState> RealmGems = new List<RealmGemState>();
         public WishgateState Wishgate = new WishgateState();
@@ -85,5 +86,12 @@ namespace AL.Data.Runtime
         public string EarnReason;
         public string LastRewardId;
         public long LastRewardChosenTimestamp;
+    }
+
+    [Serializable]
+    public class NpcAffinityData
+    {
+        public string NpcId;
+        public float Affinity;
     }
 }
