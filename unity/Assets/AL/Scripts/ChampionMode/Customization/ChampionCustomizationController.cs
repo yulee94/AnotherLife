@@ -423,6 +423,15 @@ namespace AL.ChampionMode.Customization
                     case "duelist":
                         ApplyDuelistPreset(state);
                         break;
+                    case "inquisitor":
+                        ApplyInquisitorPreset(state);
+                        break;
+                    case "warden":
+                        ApplyWardenPreset(state);
+                        break;
+                    case "spellblade":
+                        ApplySpellbladePreset(state);
+                        break;
                     default:
                         return false;
                 }
@@ -589,6 +598,63 @@ namespace AL.ChampionMode.Customization
                 new Color(0.66f, 0.48f, 0.36f),
                 new Color(0.95f, 0.64f, 0.20f),
                 new Color(0.92f, 0.54f, 0.16f));
+        }
+
+        private static void ApplyInquisitorPreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "tall";
+            state.HairStyleId = "short";
+            state.ArmorStyleId = "heavy_plate";
+            state.FaceMarkId = "realm_mark";
+            state.WeaponStyleId = "sword";
+            state.OffhandStyleId = "tome";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = true;
+            ApplyPresetColors(
+                state,
+                new Color(0.12f, 0.13f, 0.14f),
+                new Color(0.08f, 0.06f, 0.04f),
+                new Color(0.72f, 0.56f, 0.42f),
+                new Color(0.95f, 0.64f, 0.20f),
+                new Color(0.92f, 0.54f, 0.16f));
+        }
+
+        private static void ApplyWardenPreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "broad";
+            state.HairStyleId = "braid";
+            state.ArmorStyleId = "heavy_plate";
+            state.FaceMarkId = "warpaint";
+            state.WeaponStyleId = "axe";
+            state.OffhandStyleId = "shield";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = false;
+            ApplyPresetColors(
+                state,
+                new Color(0.12f, 0.26f, 0.18f),
+                new Color(0.55f, 0.36f, 0.16f),
+                new Color(0.55f, 0.38f, 0.26f),
+                new Color(0.58f, 1.00f, 0.82f),
+                new Color(0.38f, 1.00f, 0.74f));
+        }
+
+        private static void ApplySpellbladePreset(ChampionCustomizationState state)
+        {
+            state.BodyPresetId = "duelist";
+            state.HairStyleId = "long";
+            state.ArmorStyleId = "arcane_robes";
+            state.FaceMarkId = "rune";
+            state.WeaponStyleId = "sword";
+            state.OffhandStyleId = "orb";
+            state.CapeEnabled = true;
+            state.HelmetEnabled = false;
+            ApplyPresetColors(
+                state,
+                new Color(0.08f, 0.12f, 0.22f),
+                new Color(0.80f, 0.82f, 0.90f),
+                new Color(0.64f, 0.50f, 0.46f),
+                new Color(0.40f, 0.82f, 1.00f),
+                new Color(0.68f, 0.28f, 0.96f));
         }
 
         private static void ApplyPresetColors(
