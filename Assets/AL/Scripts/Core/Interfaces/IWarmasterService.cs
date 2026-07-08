@@ -7,5 +7,9 @@ namespace AL.Core.Interfaces
         WarmasterState GetState();
         void UnlockSet(string setId);
         void EquipSet(string setId);
+        bool PurchasePiece(string pieceId, int warzoneCreditCost);
+        int GetPurchasedPieceCount();
+        int GetRequiredPieceCount();
+        bool IsTrueWarmaster();
     }
 }

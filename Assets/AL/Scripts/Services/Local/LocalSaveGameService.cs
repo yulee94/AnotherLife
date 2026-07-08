@@ -92,6 +92,8 @@ namespace AL.Services.Local
             save.RealmGems ??= new List<RealmGemState>();
             save.Wishgate ??= new WishgateState();
             save.Warmaster ??= new WarmasterState();
+            save.Warmaster.UnlockedSetIds ??= new List<string>();
+            save.Warmaster.PurchasedPieceIds ??= new List<string>();
             save.ChampionCustomization ??= new ChampionCustomizationState();
 
             EnsureResource(save, ResourceType.Food, 1000);

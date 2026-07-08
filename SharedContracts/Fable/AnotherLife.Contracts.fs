@@ -92,6 +92,18 @@ module DesignContracts =
         }
 
     [<CLIMutable>]
+    type WarmasterProgression =
+        {
+            equippedSetId: string option
+            purchasedPieceIds: string array
+            purchasedPieceCount: int
+            requiredPieceCount: int
+            isTrueWarmaster: bool
+            level: int
+            experience: int
+        }
+
+    [<CLIMutable>]
     type PrototypeProgressionSnapshot =
         {
             selectedRealm: string
@@ -99,6 +111,7 @@ module DesignContracts =
             territories: TerritorySnapshot array
             warzoneCredits: int
             warmasterSetId: string option
+            warmaster: WarmasterProgression
             championCustomization: ChampionCustomizationState
         }
 

@@ -30,6 +30,22 @@ namespace AL.UI.Kingdom
             "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks"
         };
 
+        private const int WarmasterPieceCost = 100;
+
+        private static readonly string[] WarmasterPieceIds =
+        {
+            "warmaster_weapon",
+            "warmaster_helm",
+            "warmaster_chest",
+            "warmaster_gloves",
+            "warmaster_boots",
+            "warmaster_cape",
+            "warmaster_ring",
+            "warmaster_amulet",
+            "warmaster_mount_armor",
+            "warmaster_class_relic"
+        };
+
         private void Start()
         {
             Bootloader.InitializeIfMissing();
@@ -99,7 +115,7 @@ namespace AL.UI.Kingdom
             CreateButton(canvas.transform, font, "Research Steel", new Vector2(-20, -80), () => StartResearch("Steel Forging"));
             CreateButton(canvas.transform, font, "Research Armor", new Vector2(-20, -145), () => StartResearch("Plate Armor"));
             CreateButton(canvas.transform, font, "Earn Warzone", new Vector2(-20, -210), EarnWarzoneCredits);
-            CreateButton(canvas.transform, font, "Unlock Warmaster", new Vector2(-20, -275), UnlockWarmaster);
+            CreateButton(canvas.transform, font, "Buy Warmaster Piece", new Vector2(-20, -275), UnlockWarmaster);
             CreateButton(canvas.transform, font, "Capture Border", new Vector2(-20, -340), CaptureBorderlands);
             CreateButton(canvas.transform, font, "Pick Gem", new Vector2(-20, -405), PickTestGem);
             CreateButton(canvas.transform, font, "Earn Wishgate", new Vector2(-20, -470), EarnWishgate);
@@ -166,17 +182,37 @@ namespace AL.UI.Kingdom
 
         private void UnlockWarmaster()
         {
-            var credits = ServiceLocator.Get<IWarzoneCreditService>();
-            if (!credits.SpendCredits(100))
+            var warmaster = ServiceLocator.Get<IWarmasterService>();
+            if (warmaster.IsTrueWarmaster())
             {
-                SetMessage("Need 100 Warzone Credits to unlock the prototype Warmaster set.");
+                SetMessage("True Warmaster set is already complete and equipped.");
                 return;
             }
 
-            var warmaster = ServiceLocator.Get<IWarmasterService>();
-            warmaster.UnlockSet("prototype_true_warmaster");
-            warmaster.EquipSet("prototype_true_warmaster");
-            SetMessage("Prototype True Warmaster set unlocked.");
+            string nextPieceId = GetNextWarmasterPieceId(warmaster.GetState());
+            if (string.IsNullOrWhiteSpace(nextPieceId))
+            {
+                SetMessage("Warmaster pieces are complete. The True Warmaster set is ready.");
+                Refresh();
+                return;
+            }
+
+            if (!warmaster.PurchasePiece(nextPieceId, WarmasterPieceCost))
+            {
+                SetMessage($"Need {WarmasterPieceCost} Warzone Credits to buy the next Warmaster piece.");
+                Refresh();
+                return;
+            }
+
+            if (warmaster.IsTrueWarmaster())
+            {
+                SetMessage("True Warmaster set completed and equipped.");
+            }
+            else
+            {
+                SetMessage($"Purchased {FormatWarmasterPieceName(nextPieceId)} ({warmaster.GetPurchasedPieceCount()}/{warmaster.GetRequiredPieceCount()}).");
+            }
+
             Refresh();
         }
 
@@ -274,13 +310,20 @@ namespace AL.UI.Kingdom
             _buildingText.text = builder.ToString();
 
             var training = ServiceLocator.Get<ITrainingService>();
+            var warmaster = ServiceLocator.Get<IWarmasterService>();
+            var warmasterState = warmaster.GetState();
+            string equippedWarmasterSet = string.IsNullOrWhiteSpace(warmasterState?.EquippedSetId)
+                ? "none"
+                : warmasterState.EquippedSetId;
+            string warmasterRank = warmaster.IsTrueWarmaster() ? "True Warmaster" : "assembling";
             _troopText.text =
                 "Troops\n" +
                 $"Infantry: {training.GetTroopCount(TroopType.Infantry)}\n" +
                 $"Cavalry: {training.GetTroopCount(TroopType.Cavalry)}\n" +
                 $"Ranged: {training.GetTroopCount(TroopType.Ranged)}\n" +
                 $"Siege: {training.GetTroopCount(TroopType.Siege)}\n" +
-                $"Warmaster: {ServiceLocator.Get<IWarmasterService>().GetState()?.EquippedSetId ?? "none"}";
+                $"Warmaster pieces: {warmaster.GetPurchasedPieceCount()}/{warmaster.GetRequiredPieceCount()}\n" +
+                $"Warmaster set: {equippedWarmasterSet} ({warmasterRank})";
 
             var research = ServiceLocator.Get<IResearchService>();
             var steel = research.GetResearchState("Steel Forging");
@@ -419,6 +462,30 @@ namespace AL.UI.Kingdom
             }
 
             return builder.Length == 0 ? "none" : builder.ToString();
+        }
+
+        private static string GetNextWarmasterPieceId(WarmasterState state)
+        {
+            foreach (string pieceId in WarmasterPieceIds)
+            {
+                if (state?.PurchasedPieceIds == null || !state.PurchasedPieceIds.Contains(pieceId))
+                {
+                    return pieceId;
+                }
+            }
+
+            return null;
+        }
+
+        private static string FormatWarmasterPieceName(string pieceId)
+        {
+            if (string.IsNullOrWhiteSpace(pieceId))
+            {
+                return "Warmaster piece";
+            }
+
+            string name = pieceId.Replace("warmaster_", string.Empty).Replace("_", " ");
+            return "Warmaster " + name;
         }
 
         private static void Stretch(RectTransform rect)

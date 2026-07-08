@@ -8,6 +8,8 @@ namespace AL.Data.Runtime
     {
         public string EquippedSetId;
         public List<string> UnlockedSetIds = new List<string>();
+        public List<string> PurchasedPieceIds = new List<string>();
+        public bool IsTrueWarmaster;
         public int Level;
         public int Experience;
     }
