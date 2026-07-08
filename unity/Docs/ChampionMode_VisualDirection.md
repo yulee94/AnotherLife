@@ -23,6 +23,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Upgrade the appearance rack into a lightweight character creator surface with current build summary, live color swatches, randomize/reset, helmet/cape toggles, and saved-state feedback.
 - Add runtime-only combat goals, encounter timer, and clear grading so Champion Mode has a visible session loop without entering narrative/quest ownership.
 - Add generated runtime combat audio cues for attacks, impacts, dodges, skill casts, heals, boss warnings, guard breaks, and encounter clears until authored audio assets arrive.
+- Improve mobile/PC camera feel with mouse-wheel zoom, right-side touch orbit, pinch zoom, and UI-aware touch filtering.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
 
