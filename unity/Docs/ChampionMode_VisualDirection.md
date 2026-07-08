@@ -21,6 +21,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Polish the runtime HUD with bordered panels, a contained combat feed, boss state strip, hotbar accent bars, radial cooldown overlays, and tighter movement-pad labels.
 - Improve runtime weather mood with layered falling particles, ground mist, horizon haze, wind-driven emission pulses, and subtle directional-light gusts.
 - Upgrade the appearance rack into a lightweight character creator surface with current build summary, live color swatches, randomize/reset, helmet/cape toggles, and saved-state feedback.
+- Add runtime-only combat goals, encounter timer, and clear grading so Champion Mode has a visible session loop without entering narrative/quest ownership.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
 

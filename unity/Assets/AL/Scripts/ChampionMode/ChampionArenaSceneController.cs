@@ -34,6 +34,9 @@ namespace AL.ChampionMode
         private Text _skillText;
         private Text _bossText;
         private Text _combatFeedText;
+        private Text _encounterTimerText;
+        private Text _combatGoalsText;
+        private Text _encounterResultText;
         private Image _healthFill;
         private Image _manaFill;
         private Image _bossHealthFill;
@@ -46,6 +49,10 @@ namespace AL.ChampionMode
         private readonly Image[] _skillCooldownFills = new Image[4];
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
+        private float _encounterStartTime;
+        private bool _guardBreakObserved;
+        private bool _enrageObserved;
+        private bool _encounterClearShown;
         private RuntimePlatformQualityController _qualityController;
 
         private void Start()
@@ -70,6 +77,7 @@ namespace AL.ChampionMode
                 RefreshSkillText();
                 RefreshBossText();
                 RefreshAppearanceText();
+                RefreshEncounterText();
             }
 
             if (_bossTransform == null)
@@ -136,6 +144,10 @@ namespace AL.ChampionMode
             DressBossVisual(boss);
             _boss = boss.AddComponent<BossDummyAI>();
             _bossTransform = boss.transform;
+            _encounterStartTime = Time.time;
+            _guardBreakObserved = false;
+            _enrageObserved = false;
+            _encounterClearShown = false;
 
             SpawnBotChampions();
 
@@ -395,6 +407,12 @@ namespace AL.ChampionMode
             _healthFill = CreateStatusBar(playerPanel.transform, new Vector2(176f, -50f), new Vector2(226f, 18f), new Color(0.80f, 0.12f, 0.10f));
             _manaFill = CreateStatusBar(playerPanel.transform, new Vector2(176f, -95f), new Vector2(226f, 18f), new Color(0.20f, 0.48f, 1f));
 
+            var goalsPanel = CreateHudPanel(canvasObject.transform, "CombatGoals", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -190f), new Vector2(430f, 94f), new Color(0.026f, 0.034f, 0.045f, 0.80f));
+            CreateText(goalsPanel.transform, font, "COMBAT GOALS", 15, new Vector2(16f, -12f), new Vector2(160f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
+            _encounterTimerText = CreateText(goalsPanel.transform, font, "TIME 00:00", 14, new Vector2(292f, -12f), new Vector2(116f, 20f), TextAnchor.UpperRight, new Color(1f, 0.78f, 0.38f));
+            _combatGoalsText = CreateText(goalsPanel.transform, font, "Break Guard\nDefeat Boss", 13, new Vector2(16f, -38f), new Vector2(200f, 42f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            _encounterResultText = CreateText(goalsPanel.transform, font, "Grade pending", 13, new Vector2(214f, -38f), new Vector2(194f, 42f), TextAnchor.UpperRight, new Color(0.84f, 0.88f, 0.92f));
+
             var bossPanel = CreateHudPanel(canvasObject.transform, "BossFrame", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(820f, 124f), new Color(0.045f, 0.035f, 0.042f, 0.86f));
             _bossStateStrip = CreateHudPanel(bossPanel.transform, "BossStateStrip", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -12f), new Vector2(6f, 96f), new Color(1f, 0.36f, 0.12f, 0.82f));
             CreateText(bossPanel.transform, font, "OBSIDIAN GATE ENCOUNTER", 16, new Vector2(22f, -14f), new Vector2(300f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.74f, 0.45f));
@@ -451,7 +469,7 @@ namespace AL.ChampionMode
             CreateMoveButton(navPanel.transform, font, ">", new Vector2(146f, -92f), new Vector2(1, 0));
             CreateMoveButton(navPanel.transform, font, "v", new Vector2(90f, -142f), new Vector2(0, -1));
 
-            var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -190f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
+            var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -296f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
             _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
             CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             if (_playerCombat != null)
@@ -463,6 +481,7 @@ namespace AL.ChampionMode
             RefreshSkillText();
             RefreshBossText();
             RefreshAppearanceText();
+            RefreshEncounterText();
         }
 
         private static void EnsureEventSystem()
@@ -598,6 +617,83 @@ namespace AL.ChampionMode
             }
 
             _appearanceSwatches[index].color = new Color(color.r, color.g, color.b, 0.95f);
+        }
+
+        private void RefreshEncounterText()
+        {
+            float elapsed = Mathf.Max(0f, Time.time - _encounterStartTime);
+            bool bossDefeated = _boss == null || _boss.IsDead;
+            if (_boss != null)
+            {
+                _guardBreakObserved |= _boss.IsBroken;
+                _enrageObserved |= _boss.IsEnraged;
+            }
+
+            if (_encounterTimerText != null)
+            {
+                _encounterTimerText.text = "TIME " + FormatEncounterTime(elapsed);
+            }
+
+            if (_combatGoalsText != null)
+            {
+                _combatGoalsText.text =
+                    $"{GoalMark(_guardBreakObserved)} Break Guard\n" +
+                    $"{GoalMark(bossDefeated)} Defeat Boss";
+            }
+
+            if (_encounterResultText == null)
+            {
+                return;
+            }
+
+            if (!bossDefeated)
+            {
+                _encounterResultText.color = _enrageObserved ? new Color(1f, 0.58f, 0.32f) : new Color(0.84f, 0.88f, 0.92f);
+                _encounterResultText.text = _enrageObserved ? "Enrage survived\nfinish clean" : "Grade pending\nhold pressure";
+                return;
+            }
+
+            string grade = GetEncounterGrade(elapsed);
+            _encounterResultText.color = grade == "S"
+                ? new Color(1f, 0.86f, 0.36f)
+                : grade == "A"
+                    ? new Color(0.58f, 1f, 0.72f)
+                    : new Color(0.78f, 0.86f, 1f);
+            _encounterResultText.text = $"CLEAR {grade}\n{FormatEncounterTime(elapsed)}";
+
+            if (!_encounterClearShown && _playerController != null)
+            {
+                _encounterClearShown = true;
+                SkillEffectFactory.SpawnFloatingCombatText(_playerController.transform.position + Vector3.up * 2.6f, "CLEAR " + grade, _encounterResultText.color, 0.36f, 1.4f);
+            }
+        }
+
+        private string GetEncounterGrade(float elapsed)
+        {
+            if (_guardBreakObserved && !_enrageObserved && elapsed <= 60f)
+            {
+                return "S";
+            }
+
+            if (_guardBreakObserved && elapsed <= 90f)
+            {
+                return "A";
+            }
+
+            return elapsed <= 130f ? "B" : "C";
+        }
+
+        private static string GoalMark(bool isDone)
+        {
+            return isDone ? "[x]" : "[ ]";
+        }
+
+        private static string FormatEncounterTime(float seconds)
+        {
+            int totalSeconds = Mathf.Max(0, Mathf.FloorToInt(seconds));
+            int minutes = totalSeconds / 60;
+            int remainder = totalSeconds % 60;
+            return $"{minutes:00}:{remainder:00}";
         }
 
         private string FormatSkillStatus(int slotIndex)

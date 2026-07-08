@@ -51,7 +51,7 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 - Realm selection and realm-specific resource identity.
 - Kingdom simulation foundations for buildings, research, resources, troops, territory, and warzone credits.
 - Android Studio-owned narrative expansion with chapters, quests, NPC affinity/reputation, factions, persona data, artifacts, and story hooks.
-- Champion arena with movement, combat, auto modes, catalog-driven skill buttons, animated runtime skill VFX, an atmospheric Obsidian Citadel combat presentation, layered procedural champion and boss models, combat camera feedback, polished combat HUD, boss encounters with live HP/break/enrage state, RvR bot crowds, world objective markers, layered runtime weather atmosphere, and detailed modular character customization with saved appearance feedback.
+- Champion arena with movement, combat, auto modes, catalog-driven skill buttons, animated runtime skill VFX, an atmospheric Obsidian Citadel combat presentation, layered procedural champion and boss models, combat camera feedback, polished combat HUD, runtime combat goals and clear grades, boss encounters with live HP/break/enrage state, RvR bot crowds, world objective markers, layered runtime weather atmosphere, and detailed modular character customization with saved appearance feedback.
 - Boss loot service and owned-equipment save support.
 - Generated design assets for character blockouts, skill effects, and weather.
 - Shared JSON schemas and Fable contracts for customization and skill/weather catalogs.
