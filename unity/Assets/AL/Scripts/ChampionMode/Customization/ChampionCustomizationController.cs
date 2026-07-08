@@ -131,6 +131,7 @@ namespace AL.ChampionMode.Customization
             SetPartActive("Cape", state.CapeEnabled);
             SetPartActive("Cape_Rune", state.CapeEnabled && ShouldShowCapeRunes(state.ArmorStyleId));
             SetPartActive("Helmet", state.HelmetEnabled);
+            GetComponent<ProceduralChampionMotion>()?.Rebind();
         }
 
         public void CyclePrimaryColor()
