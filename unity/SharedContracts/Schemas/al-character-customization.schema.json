@@ -3,7 +3,7 @@
   "$id": "https://another-life.local/schemas/al-character-customization.schema.json",
   "title": "Another Life Character Customization Catalog",
   "type": "object",
-  "required": ["version", "game", "characterSlots", "bodyPresets", "hairStyles", "armorStyles", "primaryColors", "hairColors", "skinColors", "eyeColors", "accentColors", "faceMarks", "weaponStyles", "offhandStyles", "realms", "qualityTargets"],
+  "required": ["version", "game", "characterSlots", "bodyPresets", "hairStyles", "armorStyles", "primaryColors", "hairColors", "skinColors", "eyeColors", "accentColors", "faceMarks", "weaponStyles", "offhandStyles", "forgePresets", "realms", "qualityTargets"],
   "properties": {
     "version": {
       "type": "string"
@@ -95,6 +95,13 @@
       },
       "minItems": 1
     },
+    "forgePresets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/forgePreset"
+      },
+      "minItems": 1
+    },
     "realms": {
       "type": "array",
       "items": {
@@ -160,6 +167,71 @@
           },
           "minItems": 3,
           "maxItems": 3
+        }
+      },
+      "additionalProperties": false
+    },
+    "rgbColor": {
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+      },
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "forgePreset": {
+      "type": "object",
+      "required": ["id", "displayName", "summary", "bodyPresetId", "hairStyleId", "armorStyleId", "faceMarkId", "weaponStyleId", "offhandStyleId", "primaryColor", "hairColor", "skinColor", "eyeColor", "accentColor", "capeEnabled", "helmetEnabled"],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "bodyPresetId": {
+          "type": "string"
+        },
+        "hairStyleId": {
+          "type": "string"
+        },
+        "armorStyleId": {
+          "type": "string"
+        },
+        "faceMarkId": {
+          "type": "string"
+        },
+        "weaponStyleId": {
+          "type": "string"
+        },
+        "offhandStyleId": {
+          "type": "string"
+        },
+        "primaryColor": {
+          "$ref": "#/$defs/rgbColor"
+        },
+        "hairColor": {
+          "$ref": "#/$defs/rgbColor"
+        },
+        "skinColor": {
+          "$ref": "#/$defs/rgbColor"
+        },
+        "eyeColor": {
+          "$ref": "#/$defs/rgbColor"
+        },
+        "accentColor": {
+          "$ref": "#/$defs/rgbColor"
+        },
+        "capeEnabled": {
+          "type": "boolean"
+        },
+        "helmetEnabled": {
+          "type": "boolean"
         }
       },
       "additionalProperties": false

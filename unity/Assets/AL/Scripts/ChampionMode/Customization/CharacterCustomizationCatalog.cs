@@ -23,6 +23,7 @@ namespace AL.ChampionMode.Customization
         public StyleOptionData[] faceMarks;
         public StyleOptionData[] weaponStyles;
         public StyleOptionData[] offhandStyles;
+        public ChampionForgePresetData[] forgePresets;
     }
 
     [Serializable]
@@ -46,6 +47,27 @@ namespace AL.ChampionMode.Customization
         public string id;
         public string displayName;
         public float[] rgb;
+    }
+
+    [Serializable]
+    public class ChampionForgePresetData
+    {
+        public string id;
+        public string displayName;
+        public string summary;
+        public string bodyPresetId;
+        public string hairStyleId;
+        public string armorStyleId;
+        public string faceMarkId;
+        public string weaponStyleId;
+        public string offhandStyleId;
+        public float[] primaryColor;
+        public float[] hairColor;
+        public float[] skinColor;
+        public float[] eyeColor;
+        public float[] accentColor;
+        public bool capeEnabled;
+        public bool helmetEnabled;
     }
 
     public static class CharacterCustomizationCatalog

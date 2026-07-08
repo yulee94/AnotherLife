@@ -64,7 +64,7 @@ The player controls one main Champion/Lord in 3D Champion Mode. The base model s
 
 ## Runtime Forge Presets
 
-The Champion Forge includes three adult-facing identity presets that write into the same saved customization state as manual edits:
+The Champion Forge includes three adult-facing identity presets that live in the shared customization catalog and write into the same saved customization state as manual edits:
 
 - Vanguard: broad body, warmaster/heavy plate language, sword and shield, scar detail, gold/steel material mood, cape and helmet enabled.
 - Arcanist: tall body, arcane robes, long hair, rune mark, staff and tome, blue emissive accents, cape enabled, helmet disabled.

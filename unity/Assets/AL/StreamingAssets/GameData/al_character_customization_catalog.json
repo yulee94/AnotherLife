@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.4.0",
   "game": "Another Life",
   "characterSlots": [
     "BodyPreset",
@@ -101,6 +101,62 @@
     { "id": "dagger", "displayName": "Dagger" },
     { "id": "tome", "displayName": "Tome" },
     { "id": "none", "displayName": "None" }
+  ],
+  "forgePresets": [
+    {
+      "id": "vanguard",
+      "displayName": "Vanguard",
+      "summary": "Front-line plate identity with shield discipline and a heavy command silhouette.",
+      "bodyPresetId": "broad",
+      "hairStyleId": "short",
+      "armorStyleId": "warmaster_plate",
+      "faceMarkId": "scar",
+      "weaponStyleId": "sword",
+      "offhandStyleId": "shield",
+      "primaryColor": [0.22, 0.27, 0.34],
+      "hairColor": [0.07, 0.055, 0.045],
+      "skinColor": [0.64, 0.48, 0.36],
+      "eyeColor": [0.86, 0.62, 0.24],
+      "accentColor": [0.92, 0.64, 0.20],
+      "capeEnabled": true,
+      "helmetEnabled": true
+    },
+    {
+      "id": "arcanist",
+      "displayName": "Arcanist",
+      "summary": "Tall arcane profile with robe volume, staff focus, and cool emissive accents.",
+      "bodyPresetId": "tall",
+      "hairStyleId": "long",
+      "armorStyleId": "arcane_robes",
+      "faceMarkId": "rune",
+      "weaponStyleId": "staff",
+      "offhandStyleId": "tome",
+      "primaryColor": [0.08, 0.14, 0.32],
+      "hairColor": [0.72, 0.74, 0.82],
+      "skinColor": [0.68, 0.52, 0.44],
+      "eyeColor": [0.40, 0.82, 1.00],
+      "accentColor": [0.26, 0.78, 1.00],
+      "capeEnabled": true,
+      "helmetEnabled": false
+    },
+    {
+      "id": "nightblade",
+      "displayName": "Nightblade",
+      "summary": "Lean predatory profile with assassin leathers, bow pressure, and dagger offhand.",
+      "bodyPresetId": "slim",
+      "hairStyleId": "topknot",
+      "armorStyleId": "assassin_leathers",
+      "faceMarkId": "tattoo",
+      "weaponStyleId": "bow",
+      "offhandStyleId": "dagger",
+      "primaryColor": [0.10, 0.095, 0.12],
+      "hairColor": [0.18, 0.035, 0.055],
+      "skinColor": [0.50, 0.38, 0.34],
+      "eyeColor": [0.84, 0.18, 0.14],
+      "accentColor": [0.78, 0.12, 0.18],
+      "capeEnabled": false,
+      "helmetEnabled": false
+    }
   ],
   "realms": [
     {
