@@ -878,6 +878,7 @@ namespace AL.UI.Kingdom
 
             var button = buttonObject.AddComponent<Button>();
             button.onClick.AddListener(action);
+            button.transition = Selectable.Transition.None;
             button.colors = new ColorBlock
             {
                 normalColor = baseColor,
@@ -896,9 +897,10 @@ namespace AL.UI.Kingdom
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta ?? new Vector2(240, 48);
 
-            CreatePanel(buttonObject.transform, "ButtonAccent", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.54f));
-            CreatePanel(buttonObject.transform, "ButtonTopTrace", new Vector2(0f, -1f), new Vector2(-18f, 1.5f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.90f, 0.66f, 0.13f));
-            CreateCommandButtonIcon(buttonObject.transform, label, GetCommandIconColor(label, baseColor));
+            var accent = CreatePanel(buttonObject.transform, "ButtonAccent", new Vector2(0f, 0f), new Vector2(3f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.86f, 0.62f, 0.30f, 0.54f)).GetComponent<Image>();
+            var topTrace = CreatePanel(buttonObject.transform, "ButtonTopTrace", new Vector2(0f, -1f), new Vector2(-18f, 1.5f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.90f, 0.66f, 0.13f)).GetComponent<Image>();
+            Color iconColor = GetCommandIconColor(label, baseColor);
+            var iconFrame = CreateCommandButtonIcon(buttonObject.transform, label, iconColor);
 
             int fontSize = rect.sizeDelta.x <= 190f ? 17 : 20;
             var text = CreateText(buttonObject.transform, label + "_Text", font, fontSize, TextAnchor.MiddleLeft, Vector2.zero, rect.sizeDelta);
@@ -910,10 +912,11 @@ namespace AL.UI.Kingdom
             textRect.pivot = new Vector2(0.5f, 0.5f);
             textRect.offsetMin = new Vector2(rect.sizeDelta.x <= 190f ? 42f : 46f, 0f);
             textRect.offsetMax = new Vector2(-8f, 0f);
+            buttonObject.AddComponent<KingdomCommandButtonFeedback>().Configure(image, text, accent, topTrace, iconFrame, iconColor);
             return button;
         }
 
-        private static void CreateCommandButtonIcon(Transform parent, string label, Color iconColor)
+        private static Image CreateCommandButtonIcon(Transform parent, string label, Color iconColor)
         {
             Color frameColor = new Color(0.006f, 0.010f, 0.016f, 0.82f);
             Color coreColor = new Color(iconColor.r, iconColor.g, iconColor.b, 0.24f);
@@ -954,6 +957,8 @@ namespace AL.UI.Kingdom
                     CreateIconStroke(frame.transform, "ProgressCore", new Vector2(0f, 0f), new Vector2(6f, 6f), 45f, Color.Lerp(iconColor, Color.white, 0.20f));
                     break;
             }
+
+            return frame.GetComponent<Image>();
         }
 
         private static void CreateIconStroke(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, float rotationDegrees, Color color)
@@ -1289,6 +1294,117 @@ namespace AL.UI.Kingdom
             rect.anchorMax = Vector2.one;
             rect.offsetMin = Vector2.zero;
             rect.offsetMax = Vector2.zero;
+        }
+    }
+
+    internal sealed class KingdomCommandButtonFeedback : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    {
+        private RectTransform _rectTransform;
+        private Image _background;
+        private Image _accent;
+        private Image _topTrace;
+        private Image _iconFrame;
+        private Text _label;
+        private Color _baseColor;
+        private Color _accentColor;
+        private Color _accentBaseColor;
+        private Color _topTraceBaseColor;
+        private Color _iconFrameBaseColor;
+        private float _hoverAmount;
+        private float _pressAmount;
+        private float _impactAmount;
+        private bool _hovered;
+        private bool _pressed;
+
+        public void Configure(Image background, Text label, Image accent, Image topTrace, Image iconFrame, Color accentColor)
+        {
+            _rectTransform = GetComponent<RectTransform>();
+            _background = background;
+            _label = label;
+            _accent = accent;
+            _topTrace = topTrace;
+            _iconFrame = iconFrame;
+            _accentColor = accentColor;
+            _baseColor = background != null ? background.color : new Color(0.105f, 0.138f, 0.178f, 1f);
+            _accentBaseColor = accent != null ? accent.color : WithAlpha(accentColor, 0.54f);
+            _topTraceBaseColor = topTrace != null ? topTrace.color : new Color(1f, 0.90f, 0.66f, 0.13f);
+            _iconFrameBaseColor = iconFrame != null ? iconFrame.color : new Color(0.006f, 0.010f, 0.016f, 0.82f);
+        }
+
+        private void Update()
+        {
+            float delta = Time.unscaledDeltaTime;
+            _hoverAmount = Mathf.MoveTowards(_hoverAmount, _hovered ? 1f : 0f, delta * 9f);
+            _pressAmount = Mathf.MoveTowards(_pressAmount, _pressed ? 1f : 0f, delta * 16f);
+            _impactAmount = Mathf.MoveTowards(_impactAmount, 0f, delta * 5.8f);
+            float pulse = (Mathf.Sin(Time.unscaledTime * 8.6f) + 1f) * 0.5f;
+            float state = Mathf.Clamp01(_hoverAmount + _pressAmount * 0.65f + _impactAmount * 0.35f);
+
+            if (_background != null)
+            {
+                Color hoverColor = Color.Lerp(_baseColor, _accentColor, 0.20f + pulse * 0.06f);
+                Color pressedColor = Color.Lerp(_baseColor, Color.black, 0.16f);
+                _background.color = Color.Lerp(Color.Lerp(_baseColor, hoverColor, _hoverAmount), pressedColor, _pressAmount * 0.72f);
+            }
+
+            if (_accent != null)
+            {
+                Color color = Color.Lerp(_accentBaseColor, _accentColor, 0.56f + pulse * 0.18f);
+                _accent.color = WithAlpha(color, Mathf.Lerp(0.54f, 0.94f, state));
+                _accent.rectTransform.localScale = new Vector3(1f, 1f + state * 0.055f, 1f);
+            }
+
+            if (_topTrace != null)
+            {
+                Color color = Color.Lerp(_topTraceBaseColor, Color.Lerp(_accentColor, Color.white, 0.26f), 0.36f + pulse * 0.20f);
+                _topTrace.color = WithAlpha(color, Mathf.Lerp(0.13f, 0.72f, state));
+            }
+
+            if (_iconFrame != null)
+            {
+                _iconFrame.color = Color.Lerp(_iconFrameBaseColor, WithAlpha(_accentColor, 0.38f), 0.38f + state * 0.32f);
+                _iconFrame.rectTransform.localScale = Vector3.one * (1f + state * 0.055f + _impactAmount * 0.040f);
+            }
+
+            if (_label != null)
+            {
+                _label.color = Color.Lerp(new Color(0.92f, 0.96f, 1f), Color.Lerp(_accentColor, Color.white, 0.50f), state * 0.55f);
+            }
+
+            if (_rectTransform != null)
+            {
+                float scale = 1f + _hoverAmount * 0.014f - _pressAmount * 0.026f + _impactAmount * 0.012f;
+                _rectTransform.localScale = Vector3.one * scale;
+            }
+        }
+
+        public void OnPointerEnter(PointerEventData eventData)
+        {
+            _hovered = true;
+        }
+
+        public void OnPointerExit(PointerEventData eventData)
+        {
+            _hovered = false;
+            _pressed = false;
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            _pressed = true;
+            _impactAmount = 0.75f;
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            _pressed = false;
+            _impactAmount = Mathf.Max(_impactAmount, 0.58f);
+        }
+
+        private static Color WithAlpha(Color color, float alpha)
+        {
+            color.a = Mathf.Clamp01(alpha);
+            return color;
         }
     }
 
