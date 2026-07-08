@@ -62,12 +62,14 @@ namespace AL.Core
                 var personaService = new PersonaService(saveGame);
                 var notificationService = new LocalNotificationService();
                 var realmGemService = new LocalRealmGemService(saveGame);
+                var worldStateService = new WorldStateService(saveGame, notificationService);
                 var worldAtlasService = new AL.RealmWar.World.LocalWorldAtlasService(storyService);
 
                 ServiceLocator.Register<IBattleSimulator>(battleSim);
                 ServiceLocator.Register<IWarzoneCreditService>(warzoneCredits);
                 ServiceLocator.Register<IWarmasterService>(warmaster);
                 ServiceLocator.Register<ITerritoryService>(territoryService);
+                ServiceLocator.Register<IWorldStateService>(worldStateService);
                 ServiceLocator.Register<IReputationService>(reputationService);
                 ServiceLocator.Register<IFactionService>(factionService);
                 ServiceLocator.Register<IPersonaService>(personaService);
