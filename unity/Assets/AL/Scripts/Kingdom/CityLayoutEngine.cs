@@ -680,6 +680,7 @@ namespace AL.Kingdom
             }
 
             pulse.AddComponent<KingdomSelectionPulse>().Configure(_accentColor, 0.58f, 1.42f);
+            KingdomSelectionBeacon.Spawn(transform.parent, _accentColor, false);
         }
     }
 
@@ -729,6 +730,151 @@ namespace AL.Kingdom
             if (t >= 1f)
             {
                 Destroy(gameObject);
+            }
+        }
+    }
+
+    public class KingdomSelectionBeacon : MonoBehaviour
+    {
+        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Renderer> _renderers = new List<Renderer>();
+        private readonly List<Transform> _ticks = new List<Transform>();
+        private readonly List<float> _tickAngles = new List<float>();
+        private Color _color;
+        private Transform _beam;
+        private Transform _cap;
+        private Vector3 _capStartScale;
+        private float _age;
+        private float _duration = 0.72f;
+        private float _radius = 0.64f;
+        private float _beamStartHeight = 0.58f;
+
+        public static void Spawn(Transform parent, Color color, bool large)
+        {
+            if (parent == null)
+            {
+                return;
+            }
+
+            var beacon = new GameObject(large ? "FortressSelectionBeacon" : "DistrictSelectionBeacon");
+            beacon.transform.SetParent(parent, false);
+            beacon.transform.localPosition = Vector3.zero;
+            beacon.AddComponent<KingdomSelectionBeacon>().Configure(color, large);
+        }
+
+        public void Configure(Color color, bool large)
+        {
+            _color = color;
+            _duration = large ? 0.84f : 0.72f;
+            _radius = large ? 0.86f : 0.66f;
+            _beamStartHeight = large ? 0.72f : 0.58f;
+            _capStartScale = large ? new Vector3(0.18f, 0.11f, 0.18f) : new Vector3(0.15f, 0.10f, 0.15f);
+            CreateVisuals(large);
+        }
+
+        private void CreateVisuals(bool large)
+        {
+            _beam = CreateBeaconPrimitive("SelectionBeam", PrimitiveType.Cylinder, new Vector3(0f, large ? 0.78f : 0.66f, 0f), new Vector3(0.055f, _beamStartHeight, 0.055f), Color.Lerp(_color, Color.white, 0.18f), _color * 0.28f).transform;
+            _cap = CreateBeaconPrimitive("SelectionCap", PrimitiveType.Sphere, new Vector3(0f, large ? 1.52f : 1.24f, 0f), _capStartScale, Color.Lerp(_color, Color.white, 0.34f), _color * 0.42f).transform;
+
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * Mathf.PI * 0.5f + Mathf.PI * 0.25f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * _radius, 0.17f, Mathf.Sin(angle) * _radius);
+                var tick = CreateBeaconPrimitive("SelectionTick_" + i, PrimitiveType.Cube, position, new Vector3(0.26f, 0.035f, 0.070f), Color.Lerp(_color, Color.white, 0.24f), _color * 0.20f).transform;
+                tick.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
+                _ticks.Add(tick);
+                _tickAngles.Add(angle);
+            }
+        }
+
+        private GameObject CreateBeaconPrimitive(string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Color color, Color emission)
+        {
+            var obj = GameObject.CreatePrimitive(primitive);
+            obj.name = name;
+            obj.transform.SetParent(transform, false);
+            obj.transform.localPosition = localPosition;
+            obj.transform.localScale = localScale;
+            var collider = obj.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+
+            var renderer = obj.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                var shader = Shader.Find("Standard");
+                var material = shader != null ? new Material(shader) : new Material(renderer.material);
+                material.color = color;
+                if (material.HasProperty("_EmissionColor"))
+                {
+                    material.EnableKeyword("_EMISSION");
+                    material.SetColor("_EmissionColor", emission);
+                }
+
+                renderer.material = material;
+                _renderers.Add(renderer);
+                _materials.Add(material);
+            }
+
+            return obj;
+        }
+
+        private void Update()
+        {
+            _age += Time.deltaTime;
+            float t = Mathf.Clamp01(_age / _duration);
+            float pulse = 0.82f + Mathf.Sin(Time.time * 14f) * 0.12f;
+
+            if (_beam != null)
+            {
+                _beam.localScale = new Vector3(0.055f * pulse, Mathf.Lerp(_beamStartHeight, 0.22f, t), 0.055f * pulse);
+            }
+
+            if (_cap != null)
+            {
+                _cap.localPosition += Vector3.up * (Time.deltaTime * 0.22f);
+                _cap.localScale = _capStartScale * Mathf.Lerp(1f, 0.55f, t);
+            }
+
+            for (int i = 0; i < _ticks.Count; i++)
+            {
+                float angle = _tickAngles[i];
+                float radius = _radius + t * 0.28f;
+                _ticks[i].localPosition = new Vector3(Mathf.Cos(angle) * radius, 0.17f + t * 0.035f, Mathf.Sin(angle) * radius);
+                _ticks[i].localScale = new Vector3(Mathf.Lerp(0.26f, 0.42f, t), 0.035f, 0.070f);
+            }
+
+            foreach (var renderer in _renderers)
+            {
+                if (renderer == null)
+                {
+                    continue;
+                }
+
+                Color color = Color.Lerp(Color.Lerp(_color, Color.white, 0.32f), _color, t);
+                renderer.material.color = color;
+                if (renderer.material.HasProperty("_EmissionColor"))
+                {
+                    renderer.material.SetColor("_EmissionColor", _color * Mathf.Lerp(0.36f, 0.04f, t));
+                }
+            }
+
+            if (t >= 1f)
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            foreach (var material in _materials)
+            {
+                if (material != null)
+                {
+                    Destroy(material);
+                }
             }
         }
     }
