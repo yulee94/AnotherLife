@@ -308,6 +308,134 @@ namespace AL.ChampionMode.Customization
             SaveAndApply();
         }
 
+        public void RandomizeAppearance()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            state.BodyPresetId = PickRandom(GetBodyPresetIds(), "average");
+            state.HairStyleId = PickRandom(GetHairStyleIds(), "short");
+            state.ArmorStyleId = PickRandom(GetArmorStyleIds(), "realm_basic");
+            state.FaceMarkId = PickRandom(GetFaceMarkIds(), "none");
+            state.WeaponStyleId = PickRandom(GetWeaponStyleIds(), "sword");
+            state.OffhandStyleId = PickRandom(GetOffhandStyleIds(), "shield");
+            ApplyColorToState(PickRandom(GetPrimaryPalette(), PrimaryPalette[0]), (r, g, b) =>
+            {
+                state.PrimaryR = r;
+                state.PrimaryG = g;
+                state.PrimaryB = b;
+            });
+            ApplyColorToState(PickRandom(GetHairPalette(), HairPalette[0]), (r, g, b) =>
+            {
+                state.HairR = r;
+                state.HairG = g;
+                state.HairB = b;
+            });
+            ApplyColorToState(PickRandom(GetSkinPalette(), SkinPalette[0]), (r, g, b) =>
+            {
+                state.SkinR = r;
+                state.SkinG = g;
+                state.SkinB = b;
+            });
+            ApplyColorToState(PickRandom(GetEyePalette(), EyePalette[0]), (r, g, b) =>
+            {
+                state.EyeR = r;
+                state.EyeG = g;
+                state.EyeB = b;
+            });
+            ApplyColorToState(PickRandom(GetAccentPalette(), AccentPalette[0]), (r, g, b) =>
+            {
+                state.AccentR = r;
+                state.AccentG = g;
+                state.AccentB = b;
+            });
+            state.CapeEnabled = UnityEngine.Random.value > 0.18f;
+            state.HelmetEnabled = UnityEngine.Random.value > 0.42f;
+            SaveAndApply();
+        }
+
+        public void ResetAppearance()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            state.BodyPresetId = "average";
+            state.HairStyleId = "short";
+            state.ArmorStyleId = "realm_basic";
+            state.FaceMarkId = "none";
+            state.WeaponStyleId = "sword";
+            state.OffhandStyleId = "shield";
+            state.PrimaryR = 0.20f;
+            state.PrimaryG = 0.40f;
+            state.PrimaryB = 1.00f;
+            state.HairR = 0.08f;
+            state.HairG = 0.06f;
+            state.HairB = 0.04f;
+            state.SkinR = 0.72f;
+            state.SkinG = 0.56f;
+            state.SkinB = 0.42f;
+            state.EyeR = 0.25f;
+            state.EyeG = 0.58f;
+            state.EyeB = 0.92f;
+            state.AccentR = 0.85f;
+            state.AccentG = 0.62f;
+            state.AccentB = 0.18f;
+            state.CapeEnabled = true;
+            state.HelmetEnabled = false;
+            SaveAndApply();
+        }
+
+        public string GetAppearanceSummary()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return "Appearance unavailable";
+            }
+
+            NormalizeState(state);
+            return
+                $"{FormatId(state.BodyPresetId)} body | {FormatId(state.ArmorStyleId)}\n" +
+                $"{FormatId(state.HairStyleId)} hair | {FormatId(state.FaceMarkId)} mark\n" +
+                $"{FormatId(state.WeaponStyleId)} + {FormatId(state.OffhandStyleId)} | Cape {(state.CapeEnabled ? "On" : "Off")} | Helm {(state.HelmetEnabled ? "On" : "Off")}";
+        }
+
+        public Color GetPrimaryColor()
+        {
+            var state = GetState();
+            return state == null ? PrimaryPalette[0] : new Color(state.PrimaryR, state.PrimaryG, state.PrimaryB);
+        }
+
+        public Color GetHairColor()
+        {
+            var state = GetState();
+            return state == null ? HairPalette[0] : new Color(state.HairR, state.HairG, state.HairB);
+        }
+
+        public Color GetSkinColor()
+        {
+            var state = GetState();
+            return state == null ? SkinPalette[0] : new Color(state.SkinR, state.SkinG, state.SkinB);
+        }
+
+        public Color GetEyeColor()
+        {
+            var state = GetState();
+            return state == null ? EyePalette[0] : new Color(state.EyeR, state.EyeG, state.EyeB);
+        }
+
+        public Color GetAccentColor()
+        {
+            var state = GetState();
+            return state == null ? AccentPalette[0] : new Color(state.AccentR, state.AccentG, state.AccentB);
+        }
+
         private void SaveAndApply()
         {
             ServiceLocator.Get<ISaveGameService>().Save();
@@ -850,6 +978,31 @@ namespace AL.ChampionMode.Customization
             return colors.Count > 0 ? colors.ToArray() : fallback;
         }
 
+        private static string PickRandom(string[] ids, string fallback)
+        {
+            if (ids == null || ids.Length == 0)
+            {
+                return fallback;
+            }
+
+            return ids[UnityEngine.Random.Range(0, ids.Length)];
+        }
+
+        private static Color PickRandom(Color[] colors, Color fallback)
+        {
+            if (colors == null || colors.Length == 0)
+            {
+                return fallback;
+            }
+
+            return colors[UnityEngine.Random.Range(0, colors.Length)];
+        }
+
+        private static void ApplyColorToState(Color color, Action<float, float, float> apply)
+        {
+            apply?.Invoke(color.r, color.g, color.b);
+        }
+
         private static Color NextColor(Color current, Color[] palette)
         {
             if (palette == null || palette.Length == 0)
@@ -918,6 +1071,28 @@ namespace AL.ChampionMode.Customization
             }
 
             return false;
+        }
+
+        private static string FormatId(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                return "None";
+            }
+
+            string[] words = id.Replace('-', '_').Split('_');
+            for (int i = 0; i < words.Length; i++)
+            {
+                if (string.IsNullOrWhiteSpace(words[i]))
+                {
+                    continue;
+                }
+
+                string word = words[i].ToLowerInvariant();
+                words[i] = char.ToUpperInvariant(word[0]) + (word.Length > 1 ? word.Substring(1) : string.Empty);
+            }
+
+            return string.Join(" ", words);
         }
     }
 }
