@@ -142,6 +142,7 @@ namespace AL.Kingdom.Visuals
             CreateTacticalGrid(realmId);
             CreateRiverAndRavines(realmId);
             CreateCommandPlaza(realmId);
+            CreateCommandSignalNetwork(realmId);
             CreateBoardFrame(realmId);
             CreateRealmLandmarks(realmId);
         }
@@ -235,6 +236,56 @@ namespace AL.Kingdom.Visuals
             }
 
             CreatePointLight(plaza.transform, "CommandCoreLight", new Vector3(0f, 1.65f, -0.10f), hotAccent, 1.25f, 4.3f);
+        }
+
+        private void CreateCommandSignalNetwork(RealmId realmId)
+        {
+            var network = GameObject.Find("Kingdom_CommandSignalNetwork") ?? new GameObject("Kingdom_CommandSignalNetwork");
+            ClearChildren(network.transform);
+
+            Color accent = GetRealmAccent(realmId);
+            Color hotAccent = Color.Lerp(accent, Color.white, 0.30f);
+            Color dimAccent = Color.Lerp(accent, Color.black, 0.36f);
+
+            CreateCommandRingTicks(network.transform, accent, hotAccent);
+            CreateSignalBeaconLine(network.transform, "NorthCommandSignal", Vector3.zero, new Vector3(0.35f, 0f, 6.45f), 7, dimAccent, hotAccent, 0.0f);
+            CreateSignalBeaconLine(network.transform, "SouthCommandSignal", Vector3.zero, new Vector3(-0.35f, 0f, -6.45f), 7, dimAccent, hotAccent, 0.18f);
+            CreateSignalBeaconLine(network.transform, "WestCommandSignal", Vector3.zero, new Vector3(-6.40f, 0f, -0.28f), 7, dimAccent, hotAccent, 0.36f);
+            CreateSignalBeaconLine(network.transform, "EastCommandSignal", Vector3.zero, new Vector3(6.40f, 0f, 0.28f), 7, dimAccent, hotAccent, 0.54f);
+
+            CreatePointLight(network.transform, "SignalNetworkLight", new Vector3(0f, 0.95f, 0f), hotAccent, 0.36f, 4.7f);
+        }
+
+        private static void CreateCommandRingTicks(Transform parent, Color accent, Color hotAccent)
+        {
+            const int tickCount = 14;
+            for (int i = 0; i < tickCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / tickCount;
+                float radius = i % 2 == 0 ? 1.34f : 1.56f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * radius, 0.132f, Mathf.Sin(angle) * radius);
+                var tick = CreateTerritoryPrimitive(parent, "CommandRingTick_" + i, PrimitiveType.Cube, position, new Vector3(0.055f, 0.018f, i % 2 == 0 ? 0.30f : 0.20f), Color.Lerp(accent, Color.black, 0.24f), 0.02f, 0.50f, accent * 0.08f);
+                tick.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
+                RemoveCollider(tick);
+                tick.AddComponent<KingdomTacticalPulse>().Configure(Color.Lerp(accent, Color.black, 0.24f), hotAccent, 0.54f + i * 0.035f);
+            }
+        }
+
+        private static void CreateSignalBeaconLine(Transform parent, string name, Vector3 start, Vector3 end, int count, Color baseColor, Color pulseColor, float phase)
+        {
+            var root = new GameObject(name);
+            root.transform.SetParent(parent, false);
+
+            for (int i = 1; i <= count; i++)
+            {
+                float t = i / (count + 1f);
+                Vector3 position = Vector3.Lerp(start, end, t);
+                position.y = 0.125f;
+                float scale = Mathf.Lerp(0.060f, 0.090f, Mathf.PingPong(t + phase, 1f));
+                var beacon = CreateTerritoryPrimitive(root.transform, "SignalBeacon_" + i, PrimitiveType.Cylinder, position, new Vector3(scale, 0.018f, scale), Color.Lerp(baseColor, pulseColor, 0.16f + t * 0.16f), 0.02f, 0.55f, pulseColor * 0.10f);
+                RemoveCollider(beacon);
+                beacon.AddComponent<KingdomTacticalPulse>().Configure(Color.Lerp(baseColor, pulseColor, 0.10f), pulseColor, 0.82f + phase + i * 0.045f);
+            }
         }
 
         private void CreateBoardFrame(RealmId realmId)
@@ -584,6 +635,20 @@ namespace AL.Kingdom.Visuals
             }
 
             return obj;
+        }
+
+        private static void RemoveCollider(GameObject obj)
+        {
+            if (obj == null)
+            {
+                return;
+            }
+
+            var collider = obj.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
         }
 
         private static void CreateSurfaceStrip(Transform parent, string name, Vector3 localPosition, Vector3 localScale, Color color, Vector3? localEulerAngles = null)
