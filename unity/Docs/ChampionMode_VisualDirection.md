@@ -29,6 +29,7 @@ Champion Mode should feel like the premium first playable slice for adult MMORPG
 - Upgrade boss slam telegraphs from generic warning rings to truthful impact zones with direction lines, edge ticks, impact bursts, and evade feedback when the player exits the marked area before damage resolves.
 - Add combat impact feedback with short hit pauses, red damage flash, and low-health edge pulse so successful hits and incoming danger feel more physical without blocking mobile controls.
 - Add a short runtime encounter intro that locks controls, frames the boss objective, counts down, and starts the timer on engage so the arena opens like a real combat mode instead of a debug sandbox.
+- Add appearance inspection mode from the customization rack: close camera framing, combat input lock, manual mode, and safe resume so players can examine detailed character changes without leaving Champion Mode.
 - Keep character appearance controls visible but contained so customization supports the fantasy without overwhelming combat. The current model remains runtime-procedural so customization and save compatibility can harden before production mesh assets are imported.
 - Keep all narrative, NPC, quest, dialogue, and storyline ownership outside this pass.
 

@@ -30,6 +30,10 @@ namespace AL.ChampionMode.Camera
         private float _shakeTime;
         private float _shakeDuration;
         private float _shakeStrength;
+        private bool _inspectionMode;
+        private float _storedDistance;
+        private float _storedHeightOffset;
+        private float _storedPitch;
         private Vector3 _positionVelocity;
 
         public void Configure(Transform target, float distance, float heightOffset, float pitch, float yaw)
@@ -48,6 +52,35 @@ namespace AL.ChampionMode.Camera
             _shakeStrength = Mathf.Max(_shakeStrength, Mathf.Max(0f, strength));
             _shakeDuration = Mathf.Max(_shakeDuration, Mathf.Max(0.01f, duration));
             _shakeTime = _shakeDuration;
+        }
+
+        public void SetInspectionMode(bool enabled)
+        {
+            if (_inspectionMode == enabled)
+            {
+                return;
+            }
+
+            _inspectionMode = enabled;
+            if (enabled)
+            {
+                _storedDistance = _distance;
+                _storedHeightOffset = _heightOffset;
+                _storedPitch = _pitch;
+                _distance = 4.4f;
+                _heightOffset = 1.55f;
+                _pitch = Mathf.Clamp(8f, _minPitch, _maxPitch);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+            else
+            {
+                _distance = Mathf.Max(_minDistance, _storedDistance);
+                _heightOffset = _storedHeightOffset;
+                _pitch = Mathf.Clamp(_storedPitch, _minPitch, _maxPitch);
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
 
         private void Start()
@@ -79,8 +112,13 @@ namespace AL.ChampionMode.Camera
                 return;
             }
 
-            _yaw += Input.GetAxis("Mouse X") * _mouseSensitivity;
-            _pitch -= Input.GetAxis("Mouse Y") * _mouseSensitivity;
+            bool canOrbit = !_inspectionMode || Input.GetMouseButton(1);
+            if (canOrbit)
+            {
+                _yaw += Input.GetAxis("Mouse X") * _mouseSensitivity;
+                _pitch -= Input.GetAxis("Mouse Y") * _mouseSensitivity;
+            }
+
             float wheel = Input.GetAxis("Mouse ScrollWheel");
             if (Mathf.Abs(wheel) > 0.001f)
             {
