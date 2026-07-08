@@ -5,13 +5,6 @@ using AL.Data.Definitions;
 
 namespace AL.Core.Interfaces
 {
-    [Serializable]
-    public class DialogueChoice
-    {
-        public string Text;
-        public string NextNodeId;
-    }
-
     public interface IStoryService
     {
         string CurrentChapterId { get; }

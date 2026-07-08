@@ -146,6 +146,7 @@ namespace AL.Services.Local
         {
             Debug.Log($"Advancing story. Current Chapter: {CurrentChapterId}");
             // Narrative advancement logic handled by content scripts
+            OnChapterAdvanced?.Invoke(CurrentChapterId);
         }
 
         public DialogueNode GetDialogue(string nodeId)
