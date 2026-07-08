@@ -52,17 +52,17 @@ namespace AL.Services.Local
 
         private void InitializeStoryData()
         {
-            // Chapter 1
-            AddChapter(RealmId.Stonehold, "C1_SH", "The Echoes of Iron", "Re-opening the ancestral Deep Forge.");
-            AddChapter(RealmId.Eldergrove, "C1_EG", "Whispers of the Sapling", "Investigating a blight on the World Tree.");
-            AddChapter(RealmId.Crownlands, "C1_CL", "The King's Decree", "Rebuilding the capital after the Great Siege.");
-            AddChapter(RealmId.Umbral, "C1_UM", "Shadows of the Void", "Rituals to stabilize the volcanic rifts.");
+            // Chapter 1: The Proof of Worth
+            AddChapter(RealmId.Stonehold, "C1_SH", "The Echoes of Iron", "Re-opening the ancestral Deep Forge and defeating Ferrum the Iron Dragon to prove your worth.");
+            AddChapter(RealmId.Eldergrove, "C1_EG", "Whispers of the Sapling", "Investigating a blight on the World Tree and purging Virens the Blighted Dragon.");
+            AddChapter(RealmId.Crownlands, "C1_CL", "The King's Decree", "Rebuilding the capital and seeking the blessing of Aurelius the Gold Dragon.");
+            AddChapter(RealmId.Umbral, "C1_UM", "Shadows of the Void", "Rituals to stabilize the volcanic rifts and taming Nox the Void Dragon.");
 
-            // Chapter 2
-            AddChapter(RealmId.Stonehold, "C2_SH", "The Smuggler's Trail", "Discovering Elven scouting parties deep in the mountain passes.");
-            AddChapter(RealmId.Eldergrove, "C2_EG", "Shadows in the Mist", "Capturing a Human spy attempting to extract sap from the World Tree.");
-            AddChapter(RealmId.Crownlands, "C2_CL", "Border Skirmishes", "Countering Dwarven expansion into the fertile border valleys.");
-            AddChapter(RealmId.Umbral, "C2_UM", "Night's Whisper", "Sabotaging Human trade routes to starve their war machine.");
+            // Chapter 2: The Treasure Hunt
+            AddChapter(RealmId.Stonehold, "C2_SH", "The Smuggler's Trail", "Discovering Elven scouting parties deep in the mountain passes searching for the Ring of the Mountain King.");
+            AddChapter(RealmId.Eldergrove, "C2_EG", "Shadows in the Mist", "Capturing a Human spy attempting to steal the Ring of Forest Harmony.");
+            AddChapter(RealmId.Crownlands, "C2_CL", "Border Skirmishes", "Countering Dwarven expansion and protecting the Ring of Royal Decree.");
+            AddChapter(RealmId.Umbral, "C2_UM", "Night's Whisper", "Sabotaging Human trade routes to retrieve the stolen Ring of Shadow Step.");
 
             // Chapter 3
             AddChapter(RealmId.Stonehold, "C3_SH", "Heart of the Mountain", "The discovery of the first Ancestral Gem within the core forge.");

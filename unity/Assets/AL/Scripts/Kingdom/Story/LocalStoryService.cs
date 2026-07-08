@@ -34,7 +34,7 @@ namespace AL.Services.Local
             AddNode(new DialogueNode {
                 Id = "intro_stonehold",
                 CharacterName = "Thane Ironbeard",
-                Text = "The Deep Forge has been silent for a century. Today, we strike the first spark. Are you ready, Lord?",
+                Text = "The Deep Forge has been silent for a century. Today, we strike the first spark. Defeat Ferrum and the Ring of the Mountain King shall be yours.",
                 Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "The mountains will ring again.", NextNodeId = "end" }
                 },
@@ -45,7 +45,7 @@ namespace AL.Services.Local
             AddNode(new DialogueNode {
                 Id = "hint_stonehold_war",
                 CharacterName = "Dwarven Sapper",
-                Text = "The Humans claim our border mines are theirs. Their greed knows no bounds. We must fortify.",
+                Text = "The Humans claim our border mines are theirs. They seek our Ancestral Ring. We must fortify.",
                 Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "Show them our resolve.", NextNodeId = "end" }
                 },
