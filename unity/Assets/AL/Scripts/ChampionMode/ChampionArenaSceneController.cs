@@ -81,8 +81,15 @@ namespace AL.ChampionMode
         private Text _introSubtitleText;
         private Text _introCountdownText;
         private Text _appearanceInspectButtonText;
+        private Text _appearanceProfileText;
         private Text _appearanceSummaryText;
+        private Image _appearanceProfilePlate;
+        private Image _appearanceInspectButtonImage;
+        private Image _appearanceInspectGlow;
+        private Image _appearanceInspectRail;
         private readonly Image[] _appearanceSwatches = new Image[5];
+        private readonly Image[] _appearanceSwatchFrames = new Image[5];
+        private readonly Text[] _appearanceSwatchLabels = new Text[5];
         private readonly Text[] _skillButtonTexts = new Text[4];
         private readonly Text[] _skillCooldownTexts = new Text[4];
         private readonly Text[] _skillRoleTexts = new Text[4];
@@ -869,14 +876,18 @@ namespace AL.ChampionMode
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
             CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 486f), new Color(0.24f, 0.56f, 1f, 0.48f));
             CreateText(appearancePanel.transform, font, "CHAMPION FORGE", 16, new Vector2(18f, -14f), new Vector2(178f, 22f), TextAnchor.UpperLeft, new Color(1f, 0.80f, 0.48f));
+            _appearanceProfilePlate = CreateHudPanel(appearancePanel.transform, "ForgeActiveProfilePlate", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -40f), new Vector2(206f, 22f), new Color(0.014f, 0.022f, 0.032f, 0.92f));
+            CreateUiImage(_appearanceProfilePlate.transform, "ForgeProfilePlateRail", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(4f, 22f), new Color(1f, 0.68f, 0.28f, 0.62f));
+            _appearanceProfileText = CreateText(appearancePanel.transform, font, "PROFILE LOCKING", 11, new Vector2(28f, -42f), new Vector2(188f, 18f), TextAnchor.MiddleLeft, new Color(0.86f, 0.91f, 0.96f));
             CreateText(appearancePanel.transform, font, "COLORS", 12, new Vector2(244f, -16f), new Vector2(64f, 18f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
+            string[] swatchLabels = { "PRI", "HAI", "SKN", "EYE", "ACC" };
             for (int i = 0; i < _appearanceSwatches.Length; i++)
             {
-                _appearanceSwatches[i] = CreateHudPanel(appearancePanel.transform, "ColorSwatch_" + i, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(244f + i * 27f, -38f), new Vector2(22f, 22f), Color.white);
+                _appearanceSwatches[i] = CreateAppearanceSwatch(appearancePanel.transform, font, "ColorSwatch_" + i, swatchLabels[i], new Vector2(244f + i * 27f, -34f), out _appearanceSwatchFrames[i], out _appearanceSwatchLabels[i]);
             }
 
             CreateUiImage(appearancePanel.transform, "ForgeDividerA", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -74f), new Vector2(-32f, 1f), new Color(0.38f, 0.48f, 0.62f, 0.32f));
-            CreateText(appearancePanel.transform, font, "STYLE", 11, new Vector2(18f, -61f), new Vector2(80f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
+            CreateText(appearancePanel.transform, font, "STYLE", 11, new Vector2(18f, -65f), new Vector2(80f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
             CreateText(appearancePanel.transform, font, "LOADOUT", 11, new Vector2(18f, -181f), new Vector2(92f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
             CreateText(appearancePanel.transform, font, "PRESETS", 11, new Vector2(18f, -239f), new Vector2(92f, 18f), TextAnchor.UpperLeft, new Color(0.58f, 0.70f, 0.84f));
 
@@ -916,9 +927,14 @@ namespace AL.ChampionMode
             CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
             CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
             CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
+            CreateHudPanel(appearancePanel.transform, "ForgeSummaryPlate", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -420f), new Vector2(238f, 68f), new Color(0.012f, 0.018f, 0.026f, 0.84f));
+            CreateUiImage(appearancePanel.transform, "ForgeSummaryRail", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -420f), new Vector2(4f, 68f), new Color(0.24f, 0.56f, 1f, 0.50f));
+            _appearanceInspectGlow = CreateUiImage(appearancePanel.transform, "InspectModeGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(266f, -416f), new Vector2(120f, 38f), new Color(0.24f, 0.56f, 1f, 0.10f));
+            _appearanceInspectRail = CreateUiImage(appearancePanel.transform, "InspectModeRail", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(270f, -420f), new Vector2(4f, 30f), new Color(0.24f, 0.56f, 1f, 0.52f));
             var inspectButton = CreateHudButton(appearancePanel.transform, font, "Inspect", new Vector2(270f, -420f), new Vector2(112f, 30f), ToggleAppearanceInspection, 13, new Color(0.10f, 0.14f, 0.19f, 0.95f));
+            _appearanceInspectButtonImage = inspectButton.GetComponent<Image>();
             _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
-            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(18f, -426f), new Vector2(238f, 62f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(28f, -426f), new Vector2(218f, 58f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -1379,7 +1395,12 @@ namespace AL.ChampionMode
 
             if (_appearanceSummaryText != null)
             {
-                _appearanceSummaryText.text = _playerCustomization.GetAppearanceSummary();
+                string appearanceSummary = _playerCustomization.GetAppearanceSummary();
+                _appearanceSummaryText.text = appearanceSummary;
+                if (_appearanceProfileText != null)
+                {
+                    _appearanceProfileText.text = GetAppearanceProfilePlateText(appearanceSummary);
+                }
             }
 
             SetSwatchColor(0, _playerCustomization.GetPrimaryColor());
@@ -1387,6 +1408,7 @@ namespace AL.ChampionMode
             SetSwatchColor(2, _playerCustomization.GetSkinColor());
             SetSwatchColor(3, _playerCustomization.GetEyeColor());
             SetSwatchColor(4, _playerCustomization.GetAccentColor());
+            RefreshAppearanceInspectionChrome();
         }
 
         private void SetSwatchColor(int index, Color color)
@@ -1397,6 +1419,27 @@ namespace AL.ChampionMode
             }
 
             _appearanceSwatches[index].color = new Color(color.r, color.g, color.b, 0.95f);
+            if (_appearanceSwatchFrames[index] != null)
+            {
+                _appearanceSwatchFrames[index].color = Color.Lerp(new Color(0.012f, 0.018f, 0.026f, 0.94f), color, 0.18f);
+            }
+
+            if (_appearanceSwatchLabels[index] != null)
+            {
+                _appearanceSwatchLabels[index].color = Color.Lerp(color, Color.white, 0.36f);
+            }
+        }
+
+        private static string GetAppearanceProfilePlateText(string appearanceSummary)
+        {
+            if (string.IsNullOrWhiteSpace(appearanceSummary))
+            {
+                return "CUSTOM PROFILE";
+            }
+
+            int newlineIndex = appearanceSummary.IndexOf('\n');
+            string firstLine = newlineIndex >= 0 ? appearanceSummary.Substring(0, newlineIndex) : appearanceSummary;
+            return firstLine.Replace(" | ", "  /  ").ToUpperInvariant();
         }
 
         private static string GetChampionPresetMessage(string presetId)
@@ -1958,13 +2001,15 @@ namespace AL.ChampionMode
                 _appearanceInspectButtonText.text = enabled ? "Resume" : "Inspect";
             }
 
+            RefreshAppearanceInspectionChrome();
+
             if (enabled)
             {
                 _autoCombatController?.SetMode(AutoMode.Manual);
                 _playerController?.SetControlLocked(true);
                 if (_combatFeedText != null)
                 {
-                    _combatFeedText.text = "Inspection mode active. Adjust appearance, orbit with right drag or touch, then resume combat.";
+                    _combatFeedText.text = "Inspection mode active. Champion detail view is locked for forge adjustments.";
                 }
             }
             else if (!_encounterFailed && !_encounterIntroRunning && _playerCombat != null && !_playerCombat.IsDead)
@@ -1974,6 +2019,43 @@ namespace AL.ChampionMode
                 {
                     _combatFeedText.text = "Inspection closed. Pressure the guard bar, hold mana for the break window.";
                 }
+            }
+        }
+
+        private void RefreshAppearanceInspectionChrome()
+        {
+            Color active = new Color(0.34f, 0.64f, 1f, 0.96f);
+            Color idle = new Color(0.10f, 0.14f, 0.19f, 0.95f);
+            Color warm = new Color(1f, 0.68f, 0.28f, 0.84f);
+            if (_appearanceInspectButtonImage != null)
+            {
+                _appearanceInspectButtonImage.color = _appearanceInspectionMode ? Color.Lerp(active, new Color(0.03f, 0.04f, 0.05f, 1f), 0.34f) : idle;
+            }
+
+            if (_appearanceInspectGlow != null)
+            {
+                float pulse = 0.50f + Mathf.Sin(Time.unscaledTime * 2.1f) * 0.50f;
+                Color glowColor = _appearanceInspectionMode
+                    ? WithAlpha(Color.Lerp(active, Color.white, pulse * 0.18f), 0.20f + pulse * 0.12f)
+                    : WithAlpha(active, 0.08f);
+                _appearanceInspectGlow.color = glowColor;
+            }
+
+            if (_appearanceInspectRail != null)
+            {
+                _appearanceInspectRail.color = _appearanceInspectionMode ? active : WithAlpha(active, 0.52f);
+            }
+
+            if (_appearanceProfilePlate != null)
+            {
+                _appearanceProfilePlate.color = _appearanceInspectionMode
+                    ? new Color(0.026f, 0.044f, 0.066f, 0.94f)
+                    : new Color(0.014f, 0.022f, 0.032f, 0.92f);
+            }
+
+            if (_appearanceProfileText != null)
+            {
+                _appearanceProfileText.color = _appearanceInspectionMode ? Color.Lerp(active, Color.white, 0.34f) : Color.Lerp(warm, Color.white, 0.32f);
             }
         }
 
@@ -2525,6 +2607,15 @@ namespace AL.ChampionMode
             CreateText(_introPanelObject.transform, font, "CHAMPION MODE", 13, new Vector2(40f, -162f), new Vector2(180f, 24f), TextAnchor.UpperLeft, new Color(0.54f, 0.68f, 0.84f));
             CreateText(_introPanelObject.transform, font, "MANUAL ENGAGEMENT", 13, new Vector2(498f, -162f), new Vector2(180f, 24f), TextAnchor.UpperRight, new Color(1f, 0.70f, 0.40f));
             _introPanelObject.SetActive(false);
+        }
+
+        private static Image CreateAppearanceSwatch(Transform parent, Font font, string name, string label, Vector2 anchoredPosition, out Image frame, out Text labelText)
+        {
+            frame = CreateHudPanel(parent, name + "_Frame", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), anchoredPosition, new Vector2(24f, 30f), new Color(0.012f, 0.018f, 0.026f, 0.94f));
+            var fill = CreateUiImage(frame.transform, name + "_Fill", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(3f, -3f), new Vector2(18f, 18f), Color.white);
+            CreateUiImage(frame.transform, name + "_Sheen", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(3f, -3f), new Vector2(18f, 5f), new Color(1f, 1f, 1f, 0.18f));
+            labelText = CreateText(frame.transform, font, label, 7, new Vector2(0f, -19f), new Vector2(24f, 9f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f, 0.84f));
+            return fill;
         }
 
         private static Image CreateHudPanel(Transform parent, string name, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta, Color color)
