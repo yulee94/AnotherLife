@@ -37,6 +37,14 @@ module DesignContracts =
         }
 
     [<CLIMutable>]
+    type ColorOption =
+        {
+            id: string
+            displayName: string
+            rgb: float array
+        }
+
+    [<CLIMutable>]
     type CharacterCustomizationCatalog =
         {
             version: string
@@ -45,6 +53,12 @@ module DesignContracts =
             bodyPresets: BodyPreset array
             hairStyles: StyleOption array
             armorStyles: StyleOption array
+            skinColors: ColorOption array
+            eyeColors: ColorOption array
+            accentColors: ColorOption array
+            faceMarks: StyleOption array
+            weaponStyles: StyleOption array
+            offhandStyles: StyleOption array
             realms: RealmCustomization array
             qualityTargets: QualityTargets
         }
@@ -92,12 +106,24 @@ module DesignContracts =
             bodyPresetId: string
             hairStyleId: string
             armorStyleId: string
+            faceMarkId: string
+            weaponStyleId: string
+            offhandStyleId: string
             primaryR: float
             primaryG: float
             primaryB: float
             hairR: float
             hairG: float
             hairB: float
+            skinR: float
+            skinG: float
+            skinB: float
+            eyeR: float
+            eyeG: float
+            eyeB: float
+            accentR: float
+            accentG: float
+            accentB: float
             capeEnabled: bool
             helmetEnabled: bool
         }

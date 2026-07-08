@@ -24,6 +24,21 @@ namespace AL.ChampionMode.Customization
             "realm_basic", "light_scout", "heavy_plate", "warmaster_plate"
         };
 
+        private static readonly string[] FaceMarks =
+        {
+            "none", "scar", "warpaint", "realm_mark"
+        };
+
+        private static readonly string[] WeaponStyles =
+        {
+            "sword", "axe", "staff", "bow"
+        };
+
+        private static readonly string[] OffhandStyles =
+        {
+            "shield", "orb", "dagger", "none"
+        };
+
         private static readonly Color[] PrimaryPalette =
         {
             new Color(0.20f, 0.40f, 1.00f),
@@ -40,6 +55,33 @@ namespace AL.ChampionMode.Customization
             new Color(0.85f, 0.78f, 0.55f),
             new Color(0.80f, 0.82f, 0.90f),
             new Color(0.25f, 0.05f, 0.08f)
+        };
+
+        private static readonly Color[] SkinPalette =
+        {
+            new Color(0.72f, 0.56f, 0.42f),
+            new Color(0.55f, 0.38f, 0.26f),
+            new Color(0.86f, 0.70f, 0.54f),
+            new Color(0.64f, 0.50f, 0.46f),
+            new Color(0.42f, 0.34f, 0.40f)
+        };
+
+        private static readonly Color[] EyePalette =
+        {
+            new Color(0.25f, 0.58f, 0.92f),
+            new Color(0.28f, 0.72f, 0.42f),
+            new Color(0.70f, 0.42f, 0.18f),
+            new Color(0.78f, 0.72f, 0.88f),
+            new Color(0.90f, 0.18f, 0.12f)
+        };
+
+        private static readonly Color[] AccentPalette =
+        {
+            new Color(0.85f, 0.62f, 0.18f),
+            new Color(0.30f, 0.75f, 1.00f),
+            new Color(0.42f, 1.00f, 0.48f),
+            new Color(0.90f, 0.12f, 0.16f),
+            new Color(0.68f, 0.28f, 0.96f)
         };
 
         private void Awake()
@@ -67,7 +109,15 @@ namespace AL.ChampionMode.Customization
             ApplyBodyPreset(state.BodyPresetId);
             ApplyHairStyle(state.HairStyleId);
             ApplyArmorStyle(state.ArmorStyleId);
-            ApplyColors(new Color(state.PrimaryR, state.PrimaryG, state.PrimaryB), new Color(state.HairR, state.HairG, state.HairB));
+            ApplyFaceMark(state.FaceMarkId);
+            ApplyWeaponStyle(state.WeaponStyleId);
+            ApplyOffhandStyle(state.OffhandStyleId);
+            ApplyColors(
+                new Color(state.PrimaryR, state.PrimaryG, state.PrimaryB),
+                new Color(state.HairR, state.HairG, state.HairB),
+                new Color(state.SkinR, state.SkinG, state.SkinB),
+                new Color(state.EyeR, state.EyeG, state.EyeB),
+                new Color(state.AccentR, state.AccentG, state.AccentB));
             SetPartActive("Cape", state.CapeEnabled);
             SetPartActive("Helmet", state.HelmetEnabled);
         }
@@ -104,6 +154,54 @@ namespace AL.ChampionMode.Customization
             SaveAndApply();
         }
 
+        public void CycleSkinColor()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            Color current = new Color(state.SkinR, state.SkinG, state.SkinB);
+            Color next = NextColor(current, SkinPalette);
+            state.SkinR = next.r;
+            state.SkinG = next.g;
+            state.SkinB = next.b;
+            SaveAndApply();
+        }
+
+        public void CycleEyeColor()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            Color current = new Color(state.EyeR, state.EyeG, state.EyeB);
+            Color next = NextColor(current, EyePalette);
+            state.EyeR = next.r;
+            state.EyeG = next.g;
+            state.EyeB = next.b;
+            SaveAndApply();
+        }
+
+        public void CycleAccentColor()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            Color current = new Color(state.AccentR, state.AccentG, state.AccentB);
+            Color next = NextColor(current, AccentPalette);
+            state.AccentR = next.r;
+            state.AccentG = next.g;
+            state.AccentB = next.b;
+            SaveAndApply();
+        }
+
         public void CycleBodyPreset()
         {
             var state = GetState();
@@ -137,6 +235,42 @@ namespace AL.ChampionMode.Customization
             }
 
             state.ArmorStyleId = NextId(state.ArmorStyleId, ArmorStyles, "realm_basic");
+            SaveAndApply();
+        }
+
+        public void CycleFaceMark()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            state.FaceMarkId = NextId(state.FaceMarkId, FaceMarks, "none");
+            SaveAndApply();
+        }
+
+        public void CycleWeaponStyle()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            state.WeaponStyleId = NextId(state.WeaponStyleId, WeaponStyles, "sword");
+            SaveAndApply();
+        }
+
+        public void CycleOffhandStyle()
+        {
+            var state = GetState();
+            if (state == null)
+            {
+                return;
+            }
+
+            state.OffhandStyleId = NextId(state.OffhandStyleId, OffhandStyles, "shield");
             SaveAndApply();
         }
 
@@ -192,6 +326,21 @@ namespace AL.ChampionMode.Customization
             {
                 state.ArmorStyleId = "realm_basic";
             }
+
+            if (!ContainsId(state.FaceMarkId, FaceMarks))
+            {
+                state.FaceMarkId = "none";
+            }
+
+            if (!ContainsId(state.WeaponStyleId, WeaponStyles))
+            {
+                state.WeaponStyleId = "sword";
+            }
+
+            if (!ContainsId(state.OffhandStyleId, OffhandStyles))
+            {
+                state.OffhandStyleId = "shield";
+            }
         }
 
         private void ApplyBodyPreset(string presetId)
@@ -231,7 +380,56 @@ namespace AL.ChampionMode.Customization
             SetPartScale("Shoulder_R", isHeavy ? new Vector3(0.34f, 0.26f, 0.34f) : new Vector3(0.26f, 0.20f, 0.28f));
         }
 
-        private void ApplyColors(Color primary, Color hair)
+        private void ApplyFaceMark(string faceMarkId)
+        {
+            bool isVisible = faceMarkId != "none";
+            SetExactPartActive("FaceMark", isVisible);
+            if (!isVisible)
+            {
+                return;
+            }
+
+            switch (faceMarkId)
+            {
+                case "scar":
+                    SetPartTransform("FaceMark", new Vector3(-0.08f, 0.62f, 0.49f), new Vector3(0.035f, 0.28f, 0.025f), new Vector3(0f, 0f, 24f));
+                    break;
+                case "realm_mark":
+                    SetPartTransform("FaceMark", new Vector3(0f, 0.68f, 0.49f), new Vector3(0.13f, 0.13f, 0.025f), new Vector3(0f, 0f, 45f));
+                    break;
+                default:
+                    SetPartTransform("FaceMark", new Vector3(0f, 0.61f, 0.49f), new Vector3(0.24f, 0.035f, 0.025f), Vector3.zero);
+                    break;
+            }
+        }
+
+        private void ApplyWeaponStyle(string weaponStyleId)
+        {
+            switch (weaponStyleId)
+            {
+                case "axe":
+                    SetPartTransform("Weapon_Main", new Vector3(0.72f, 0.02f, 0.16f), new Vector3(0.08f, 0.56f, 0.08f), new Vector3(0f, 0f, 18f));
+                    break;
+                case "staff":
+                    SetPartTransform("Weapon_Main", new Vector3(0.72f, 0.02f, 0.16f), new Vector3(0.055f, 0.88f, 0.055f), new Vector3(0f, 0f, 8f));
+                    break;
+                case "bow":
+                    SetPartTransform("Weapon_Main", new Vector3(0.72f, 0.10f, 0.16f), new Vector3(0.04f, 0.82f, 0.04f), new Vector3(0f, 0f, 78f));
+                    break;
+                default:
+                    SetPartTransform("Weapon_Main", new Vector3(0.72f, 0.00f, 0.16f), new Vector3(0.06f, 0.70f, 0.06f), new Vector3(0f, 0f, 34f));
+                    break;
+            }
+        }
+
+        private void ApplyOffhandStyle(string offhandStyleId)
+        {
+            SetExactPartActive("Shield_Off", offhandStyleId == "shield");
+            SetExactPartActive("Orb_Off", offhandStyleId == "orb");
+            SetExactPartActive("Weapon_Off", offhandStyleId == "dagger");
+        }
+
+        private void ApplyColors(Color primary, Color hair, Color skin, Color eye, Color accent)
         {
             _renderers ??= GetComponentsInChildren<Renderer>(true);
             foreach (var renderer in _renderers)
@@ -243,17 +441,30 @@ namespace AL.ChampionMode.Customization
 
                 string objectName = renderer.gameObject.name.ToLowerInvariant();
                 bool isHair = objectName.Contains("hair");
+                bool isSkin = objectName.Contains("skin");
+                bool isEye = objectName.Contains("eye");
+                bool isAccent = objectName.Contains("facemark") ||
+                                objectName.Contains("cape") ||
+                                objectName.Contains("backattachment") ||
+                                objectName.Contains("orb");
                 bool isMetal = objectName.Contains("helmet") ||
                                objectName.Contains("armor") ||
                                objectName.Contains("shoulder") ||
                                objectName.Contains("glove") ||
                                objectName.Contains("boot") ||
-                               objectName.Contains("weapon");
+                               objectName.Contains("weapon") ||
+                               objectName.Contains("shield");
                 renderer.material.color = isHair
                     ? hair
-                    : isMetal
-                        ? Color.Lerp(primary, Color.white, 0.22f)
-                        : primary;
+                    : isSkin
+                        ? skin
+                        : isEye
+                            ? eye
+                            : isAccent
+                                ? accent
+                                : isMetal
+                                    ? Color.Lerp(primary, Color.white, 0.22f)
+                                    : primary;
             }
         }
 
@@ -283,6 +494,17 @@ namespace AL.ChampionMode.Customization
             if (part != null)
             {
                 part.localScale = scale;
+            }
+        }
+
+        private void SetPartTransform(string partName, Vector3 localPosition, Vector3 localScale, Vector3 localEulerAngles)
+        {
+            Transform part = FindPart(partName);
+            if (part != null)
+            {
+                part.localPosition = localPosition;
+                part.localScale = localScale;
+                part.localRotation = Quaternion.Euler(localEulerAngles);
             }
         }
 

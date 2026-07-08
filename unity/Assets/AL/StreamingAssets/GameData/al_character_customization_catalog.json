@@ -35,6 +35,45 @@
     { "id": "heavy_plate", "displayName": "Heavy Plate" },
     { "id": "warmaster_plate", "displayName": "Warmaster Plate" }
   ],
+  "skinColors": [
+    { "id": "sunlit", "displayName": "Sunlit", "rgb": [0.72, 0.56, 0.42] },
+    { "id": "deep_earth", "displayName": "Deep Earth", "rgb": [0.55, 0.38, 0.26] },
+    { "id": "fair", "displayName": "Fair", "rgb": [0.86, 0.70, 0.54] },
+    { "id": "rose_ash", "displayName": "Rose Ash", "rgb": [0.64, 0.50, 0.46] },
+    { "id": "umbral", "displayName": "Umbral", "rgb": [0.42, 0.34, 0.40] }
+  ],
+  "eyeColors": [
+    { "id": "storm_blue", "displayName": "Storm Blue", "rgb": [0.25, 0.58, 0.92] },
+    { "id": "grove_green", "displayName": "Grove Green", "rgb": [0.28, 0.72, 0.42] },
+    { "id": "amber", "displayName": "Amber", "rgb": [0.70, 0.42, 0.18] },
+    { "id": "moonlit", "displayName": "Moonlit", "rgb": [0.78, 0.72, 0.88] },
+    { "id": "curse_red", "displayName": "Curse Red", "rgb": [0.90, 0.18, 0.12] }
+  ],
+  "accentColors": [
+    { "id": "royal_gold", "displayName": "Royal Gold", "rgb": [0.85, 0.62, 0.18] },
+    { "id": "arcane_blue", "displayName": "Arcane Blue", "rgb": [0.30, 0.75, 1.00] },
+    { "id": "worldsap", "displayName": "Worldsap", "rgb": [0.42, 1.00, 0.48] },
+    { "id": "ember", "displayName": "Ember", "rgb": [0.90, 0.12, 0.16] },
+    { "id": "shadow_violet", "displayName": "Shadow Violet", "rgb": [0.68, 0.28, 0.96] }
+  ],
+  "faceMarks": [
+    { "id": "none", "displayName": "None" },
+    { "id": "scar", "displayName": "Scar" },
+    { "id": "warpaint", "displayName": "Warpaint" },
+    { "id": "realm_mark", "displayName": "Realm Mark" }
+  ],
+  "weaponStyles": [
+    { "id": "sword", "displayName": "Sword" },
+    { "id": "axe", "displayName": "Axe" },
+    { "id": "staff", "displayName": "Staff" },
+    { "id": "bow", "displayName": "Bow" }
+  ],
+  "offhandStyles": [
+    { "id": "shield", "displayName": "Shield" },
+    { "id": "orb", "displayName": "Orb" },
+    { "id": "dagger", "displayName": "Dagger" },
+    { "id": "none", "displayName": "None" }
+  ],
   "realms": [
     {
       "id": "Stonehold",
