@@ -81,6 +81,9 @@ namespace AL.ChampionMode
         private readonly Image[] _skillCooldownFills = new Image[4];
         private readonly Image[] _skillReadyGlows = new Image[4];
         private readonly Image[] _skillManaPips = new Image[4];
+        private Text _castChannelText;
+        private Image _castChannelFill;
+        private Image _castChannelGlow;
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private float _encounterStartTime;
@@ -115,6 +118,7 @@ namespace AL.ChampionMode
 
             RefreshLowHealthFeedback();
             UpdateTargetLockIndicator();
+            RefreshCastChannel();
             if (_appearanceFeedTimer > 0f)
             {
                 _appearanceFeedTimer -= Time.deltaTime;
@@ -746,6 +750,10 @@ namespace AL.ChampionMode
 
             var skillPanel = CreateHudPanel(canvasObject.transform, "CombatHotbar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(748f, 120f), new Color(0.035f, 0.042f, 0.052f, 0.88f));
             _skillText = CreateText(skillPanel.transform, font, "Skill loadout ready", 15, new Vector2(24f, -12f), new Vector2(360f, 22f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
+            _castChannelGlow = CreateUiImage(skillPanel.transform, "CastChannelGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(420f, -11f), new Vector2(306f, 24f), new Color(0.25f, 0.62f, 1f, 0.05f));
+            _castChannelFill = CreateStatusBar(skillPanel.transform, new Vector2(424f, -15f), new Vector2(298f, 16f), new Color(0.32f, 0.66f, 1f, 0.82f));
+            _castChannelText = CreateText(skillPanel.transform, font, "CHANNEL READY", 11, new Vector2(424f, -13f), new Vector2(298f, 18f), TextAnchor.MiddleCenter, new Color(0.72f, 0.82f, 0.92f));
+            SetFillAmount(_castChannelFill, 0f);
             for (int i = 0; i < 4; i++)
             {
                 CreateSkillButton(skillPanel.transform, font, i, new Vector2(24f + i * 176f, -42f));
@@ -899,6 +907,35 @@ namespace AL.ChampionMode
                 _playerSkillCaster.GetSkillName(2) + " / " +
                 _playerSkillCaster.GetSkillName(3);
             RefreshSkillButtonLabels();
+        }
+
+        private void RefreshCastChannel()
+        {
+            if (_castChannelText == null || _castChannelFill == null)
+            {
+                return;
+            }
+
+            if (_playerSkillCaster == null || !_playerSkillCaster.IsCasting)
+            {
+                SetFillAmount(_castChannelFill, 0f);
+                SetImageColor(_castChannelFill, new Color(0.32f, 0.66f, 1f, 0.16f));
+                SetImageColor(_castChannelGlow, new Color(0.25f, 0.62f, 1f, 0.05f));
+                _castChannelText.text = "CHANNEL READY";
+                _castChannelText.color = new Color(0.72f, 0.82f, 0.92f, 0.88f);
+                return;
+            }
+
+            int activeSlot = Mathf.Clamp(_playerSkillCaster.ActiveSlot, 0, 3);
+            float progress = _playerSkillCaster.ActiveCastProgress;
+            Color slotColor = GetSkillSlotColor(activeSlot);
+            float pulse = (Mathf.Sin(Time.unscaledTime * 8.4f) + 1f) * 0.5f;
+            SetFillAmount(_castChannelFill, progress);
+            SetImageColor(_castChannelFill, Color.Lerp(slotColor, Color.white, progress * 0.16f));
+            SetImageColor(_castChannelGlow, WithAlpha(slotColor, 0.12f + pulse * 0.14f));
+            string skillName = GetCompactSkillName(_playerSkillCaster.ActiveSkillName).ToUpperInvariant();
+            _castChannelText.text = $"CASTING {skillName}  {Mathf.CeilToInt(progress * 100f)}%";
+            _castChannelText.color = Color.Lerp(slotColor, Color.white, 0.26f);
         }
 
         private void RefreshBossText()
