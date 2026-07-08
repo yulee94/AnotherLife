@@ -47,6 +47,10 @@ namespace AL.ChampionMode
         private Image _damageFlashImage;
         private readonly Image[] _lowHealthEdges = new Image[4];
         private GameObject _defeatPanelObject;
+        private GameObject _clearPanelObject;
+        private Text _clearTitleText;
+        private Text _clearSummaryText;
+        private Text _clearDetailText;
         private GameObject _introPanelObject;
         private Text _introTitleText;
         private Text _introSubtitleText;
@@ -509,6 +513,7 @@ namespace AL.ChampionMode
             _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
             CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             CreateDefeatPanel(canvasObject.transform, font);
+            CreateClearPanel(canvasObject.transform, font);
             CreateIntroPanel(canvasObject.transform, font);
             if (_playerCombat != null)
             {
@@ -741,8 +746,63 @@ namespace AL.ChampionMode
             if (!_encounterClearShown && _playerController != null)
             {
                 _encounterClearShown = true;
+                ShowClearPanel(grade, elapsed);
                 SkillEffectFactory.SpawnFloatingCombatText(_playerController.transform.position + Vector3.up * 2.6f, "CLEAR " + grade, _encounterResultText.color, 0.36f, 1.4f);
                 RuntimeCombatAudio.PlayClear();
+            }
+        }
+
+        private void ShowClearPanel(string grade, float elapsed)
+        {
+            SetAppearanceInspection(false);
+            _autoCombatController?.SetMode(AutoMode.Manual);
+            _playerController?.SetControlLocked(true);
+
+            if (_clearPanelObject != null)
+            {
+                _clearPanelObject.SetActive(true);
+            }
+
+            Color gradeColor = grade == "S"
+                ? new Color(1f, 0.86f, 0.36f)
+                : grade == "A"
+                    ? new Color(0.58f, 1f, 0.72f)
+                    : new Color(0.78f, 0.86f, 1f);
+
+            if (_clearTitleText != null)
+            {
+                _clearTitleText.text = "ENCOUNTER CLEAR " + grade;
+                _clearTitleText.color = gradeColor;
+            }
+
+            if (_clearSummaryText != null)
+            {
+                _clearSummaryText.text = $"Time {FormatEncounterTime(elapsed)}   Guard {(_guardBreakObserved ? "broken" : "unbroken")}   Enrage {(_enrageObserved ? "survived" : "avoided")}";
+            }
+
+            if (_clearDetailText != null)
+            {
+                _clearDetailText.text = GetClearRecapLine(grade);
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = "Encounter cleared. Review the result, inspect your build, retry, or return to Kingdom.";
+            }
+        }
+
+        private string GetClearRecapLine(string grade)
+        {
+            switch (grade)
+            {
+                case "S":
+                    return "Clean pressure window. This build is ready for harder Champion encounters.";
+                case "A":
+                    return "Strong clear. Tighten break timing or avoid enrage for an elite result.";
+                case "B":
+                    return "Solid clear. Improve burst timing and dodge discipline before scaling difficulty.";
+                default:
+                    return "Clear secured. Upgrade the build, practice telegraphs, then retry for a better grade.";
             }
         }
 
@@ -1107,6 +1167,25 @@ namespace AL.ChampionMode
             CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(96f, -148f), new Vector2(154f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
             CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(290f, -148f), new Vector2(154f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
             _defeatPanelObject.SetActive(false);
+        }
+
+        private void CreateClearPanel(Transform parent, Font font)
+        {
+            var panel = CreateHudPanel(parent, "EncounterClearPanel", new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(620f, 250f), new Color(0.018f, 0.034f, 0.026f, 0.93f));
+            _clearPanelObject = panel.gameObject;
+
+            CreateHudPanel(_clearPanelObject.transform, "ClearAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(620f, 6f), new Color(0.62f, 1f, 0.40f, 0.90f));
+            _clearTitleText = CreateText(_clearPanelObject.transform, font, "ENCOUNTER CLEAR", 28, new Vector2(0f, -28f), new Vector2(620f, 40f), TextAnchor.MiddleCenter, new Color(0.72f, 1f, 0.54f));
+            _clearSummaryText = CreateText(_clearPanelObject.transform, font, "Time 00:00   Guard broken   Enrage avoided", 16, new Vector2(48f, -78f), new Vector2(524f, 28f), TextAnchor.MiddleCenter, new Color(0.90f, 0.94f, 0.92f));
+            _clearDetailText = CreateText(_clearPanelObject.transform, font, "Review the result, inspect your build, or retry for a better grade.", 15, new Vector2(54f, -112f), new Vector2(512f, 48f), TextAnchor.MiddleCenter, new Color(0.84f, 0.88f, 0.86f));
+            CreateHudButton(_clearPanelObject.transform, font, "Retry", new Vector2(70f, -184f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.12f, 0.20f, 0.13f, 0.96f));
+            CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(240f, -184f), new Vector2(140f, 42f), () =>
+            {
+                _clearPanelObject.SetActive(false);
+                SetAppearanceInspection(true);
+            }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            CreateHudButton(_clearPanelObject.transform, font, "Kingdom", new Vector2(410f, -184f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
+            _clearPanelObject.SetActive(false);
         }
 
         private void CreateIntroPanel(Transform parent, Font font)
