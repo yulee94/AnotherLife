@@ -38,8 +38,10 @@ namespace AL.ChampionMode
         private Image _manaFill;
         private Image _bossHealthFill;
         private Image _bossBreakFill;
+        private Image _bossStateStrip;
         private readonly Text[] _skillButtonTexts = new Text[4];
         private readonly Text[] _skillCooldownTexts = new Text[4];
+        private readonly Image[] _skillCooldownFills = new Image[4];
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
         private RuntimePlatformQualityController _qualityController;
@@ -391,6 +393,7 @@ namespace AL.ChampionMode
             _manaFill = CreateStatusBar(playerPanel.transform, new Vector2(176f, -95f), new Vector2(226f, 18f), new Color(0.20f, 0.48f, 1f));
 
             var bossPanel = CreateHudPanel(canvasObject.transform, "BossFrame", new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -24f), new Vector2(820f, 124f), new Color(0.045f, 0.035f, 0.042f, 0.86f));
+            _bossStateStrip = CreateHudPanel(bossPanel.transform, "BossStateStrip", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -12f), new Vector2(6f, 96f), new Color(1f, 0.36f, 0.12f, 0.82f));
             CreateText(bossPanel.transform, font, "OBSIDIAN GATE ENCOUNTER", 16, new Vector2(22f, -14f), new Vector2(300f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.74f, 0.45f));
             _bossText = CreateText(bossPanel.transform, font, "Boss: acquiring target", 20, new Vector2(22f, -40f), new Vector2(500f, 50f), TextAnchor.UpperLeft);
             _bossHealthFill = CreateStatusBar(bossPanel.transform, new Vector2(380f, -43f), new Vector2(400f, 20f), new Color(0.88f, 0.10f, 0.08f));
@@ -431,12 +434,13 @@ namespace AL.ChampionMode
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
-            CreateMoveButton(navPanel.transform, font, "Up", new Vector2(90f, -42f), new Vector2(0, 1));
-            CreateMoveButton(navPanel.transform, font, "Left", new Vector2(34f, -92f), new Vector2(-1, 0));
-            CreateMoveButton(navPanel.transform, font, "Right", new Vector2(146f, -92f), new Vector2(1, 0));
-            CreateMoveButton(navPanel.transform, font, "Down", new Vector2(90f, -142f), new Vector2(0, -1));
+            CreateMoveButton(navPanel.transform, font, "^", new Vector2(90f, -42f), new Vector2(0, 1));
+            CreateMoveButton(navPanel.transform, font, "<", new Vector2(34f, -92f), new Vector2(-1, 0));
+            CreateMoveButton(navPanel.transform, font, ">", new Vector2(146f, -92f), new Vector2(1, 0));
+            CreateMoveButton(navPanel.transform, font, "v", new Vector2(90f, -142f), new Vector2(0, -1));
 
-            _combatFeedText = CreateText(canvasObject.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(28f, -202f), new Vector2(520f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -190f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
+            _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
             CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             if (_playerCombat != null)
             {
@@ -506,6 +510,11 @@ namespace AL.ChampionMode
             {
                 _bossText.color = new Color(0.80f, 1f, 0.62f);
                 _bossText.text = "Boss defeated\nLoot roll complete";
+                if (_bossStateStrip != null)
+                {
+                    _bossStateStrip.color = new Color(0.42f, 1f, 0.48f, 0.90f);
+                }
+
                 SetFillAmount(_bossHealthFill, 0f);
                 SetFillAmount(_bossBreakFill, 1f);
                 if (_combatFeedText != null)
@@ -525,6 +534,15 @@ namespace AL.ChampionMode
                 : _boss.IsBroken
                     ? new Color(0.44f, 1f, 0.92f)
                     : Color.white;
+            if (_bossStateStrip != null)
+            {
+                _bossStateStrip.color = _boss.IsEnraged
+                    ? new Color(1f, 0.24f, 0.08f, 0.92f)
+                    : _boss.IsBroken
+                        ? new Color(0.24f, 0.95f, 1f, 0.90f)
+                        : new Color(1f, 0.62f, 0.20f, 0.78f);
+            }
+
             _bossText.text =
                 $"{_boss.BossName}  {Mathf.CeilToInt(healthPercent * 100f)}%  {enrageState}\n" +
                 breakState;
@@ -549,7 +567,10 @@ namespace AL.ChampionMode
 
         private void CreateSkillButton(Transform parent, Font font, int slotIndex, Vector2 anchoredPosition)
         {
+            Color slotColor = GetSkillSlotColor(slotIndex);
             var button = CreateHudButton(parent, font, BuildSkillButtonLabel(slotIndex), anchoredPosition, new Vector2(154f, 58f), () => _playerController.RequestSkill(slotIndex), 14, new Color(0.06f, 0.09f, 0.13f, 0.96f));
+            CreateHudPanel(button.transform, "SkillAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(154f, 5f), slotColor);
+            _skillCooldownFills[slotIndex] = CreateCooldownOverlay(button.transform);
             _skillButtonTexts[slotIndex] = button.GetComponentInChildren<Text>();
             _skillCooldownTexts[slotIndex] = CreateText(button.transform, font, "Ready", 12, new Vector2(8f, -37f), new Vector2(138f, 18f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
         }
@@ -569,7 +590,47 @@ namespace AL.ChampionMode
                     string state = remaining <= 0.05f ? $"{_playerSkillCaster.GetManaCost(i):0} MP" : $"{remaining:0.0}s";
                     _skillCooldownTexts[i].text = state;
                     _skillCooldownTexts[i].color = remaining <= 0.05f ? new Color(0.70f, 1f, 0.78f) : new Color(1f, 0.68f, 0.40f);
+                    if (_skillCooldownFills[i] != null)
+                    {
+                        float duration = Mathf.Max(0.01f, _playerSkillCaster.GetCooldownDuration(i));
+                        _skillCooldownFills[i].fillAmount = remaining <= 0.05f ? 0f : Mathf.Clamp01(remaining / duration);
+                        _skillCooldownFills[i].color = remaining <= 0.05f ? new Color(0f, 0f, 0f, 0f) : new Color(0f, 0f, 0f, 0.56f);
+                    }
                 }
+            }
+        }
+
+        private static Image CreateCooldownOverlay(Transform parent)
+        {
+            var overlayObject = new GameObject("CooldownOverlay");
+            overlayObject.transform.SetParent(parent, false);
+            var overlay = overlayObject.AddComponent<Image>();
+            overlay.color = new Color(0f, 0f, 0f, 0f);
+            overlay.type = Image.Type.Filled;
+            overlay.fillMethod = Image.FillMethod.Radial360;
+            overlay.fillOrigin = (int)Image.Origin360.Top;
+            overlay.fillClockwise = false;
+            overlay.fillAmount = 0f;
+            var rect = overlayObject.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            return overlay;
+        }
+
+        private static Color GetSkillSlotColor(int slotIndex)
+        {
+            switch (slotIndex)
+            {
+                case 0:
+                    return new Color(0.30f, 0.62f, 1f, 0.92f);
+                case 1:
+                    return new Color(0.42f, 1f, 0.54f, 0.92f);
+                case 2:
+                    return new Color(1f, 0.52f, 0.16f, 0.92f);
+                default:
+                    return new Color(0.95f, 0.22f, 0.16f, 0.92f);
             }
         }
 
@@ -602,6 +663,9 @@ namespace AL.ChampionMode
             panelObject.transform.SetParent(parent, false);
             var image = panelObject.AddComponent<Image>();
             image.color = color;
+            var outline = panelObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.25f, 0.34f, 0.44f, 0.45f);
+            outline.effectDistance = new Vector2(1.3f, -1.3f);
             SetRect(panelObject.GetComponent<RectTransform>(), anchorMin, anchorMax, pivot, anchoredPosition, sizeDelta);
             return image;
         }
@@ -642,6 +706,9 @@ namespace AL.ChampionMode
 
             var image = buttonObject.AddComponent<Image>();
             image.color = color ?? new Color(0.095f, 0.125f, 0.158f, 0.94f);
+            var outline = buttonObject.AddComponent<Outline>();
+            outline.effectColor = new Color(0.34f, 0.48f, 0.62f, 0.36f);
+            outline.effectDistance = new Vector2(1f, -1f);
             var button = buttonObject.AddComponent<Button>();
             if (action != null)
             {
@@ -702,6 +769,9 @@ namespace AL.ChampionMode
             text.alignment = alignment;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             text.verticalOverflow = VerticalWrapMode.Overflow;
+            var shadow = textObject.AddComponent<Shadow>();
+            shadow.effectColor = new Color(0f, 0f, 0f, 0.62f);
+            shadow.effectDistance = new Vector2(1.2f, -1.2f);
 
             var rect = textObject.GetComponent<RectTransform>();
             SetRect(rect, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), anchoredPosition, sizeDelta);
