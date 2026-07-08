@@ -35,6 +35,11 @@ namespace AL.RealmWar.Warzone
         private readonly Material[] _lightShaftMaterials = new Material[3];
         private readonly Vector3[] _lightShaftBaseScales = new Vector3[3];
         private readonly Color[] _lightShaftBaseColors = new Color[3];
+        private readonly Renderer[] _foregroundGustRenderers = new Renderer[4];
+        private readonly Material[] _foregroundGustMaterials = new Material[4];
+        private readonly Vector3[] _foregroundGustBasePositions = new Vector3[4];
+        private readonly Vector3[] _foregroundGustBaseScales = new Vector3[4];
+        private readonly Color[] _foregroundGustBaseColors = new Color[4];
 
         public WeatherProfileData CurrentProfile => _profile;
 
@@ -55,6 +60,7 @@ namespace AL.RealmWar.Warzone
         {
             DestroyMaterials(_horizonVeilMaterials);
             DestroyMaterials(_lightShaftMaterials);
+            DestroyMaterials(_foregroundGustMaterials);
         }
 
         public void Configure(Color particleColor, int maxParticles, float radius, float fallSpeed)
@@ -116,6 +122,7 @@ namespace AL.RealmWar.Warzone
             ConfigureWindStreaks(GetOrCreateChildParticleSystem("Weather_ForegroundWindStreaks", ref _windStreakParticles));
             ConfigureHorizonVeils();
             ConfigureLightShafts();
+            ConfigureForegroundGustBands();
             ConfigureAtmosphereLight();
             ConfigureWindZone(GetOrCreateWindZone());
             ApplyLightingProfile();
@@ -387,6 +394,32 @@ namespace AL.RealmWar.Warzone
             }
         }
 
+        private void ConfigureForegroundGustBands()
+        {
+            for (int i = 0; i < _foregroundGustRenderers.Length; i++)
+            {
+                Renderer renderer = GetOrCreateQuadRenderer("Weather_ForegroundGustBand_" + i);
+                renderer.sortingOrder = -1;
+                _foregroundGustRenderers[i] = renderer;
+
+                float side = i % 2 == 0 ? -1f : 1f;
+                float lane = i / 2f;
+                Transform gust = renderer.transform;
+                gust.localPosition = new Vector3(side * (5.4f + lane * 2.2f), -1.10f + lane * 0.46f, -5.8f - lane * 1.35f);
+                gust.localRotation = Quaternion.Euler(10f + lane * 5f, side * -16f, side * (10f + lane * 4f));
+                gust.localScale = new Vector3(4.8f + lane * 1.3f, 0.42f + lane * 0.08f, 1f);
+
+                Color color = Color.Lerp(_profile.ParticleStartColor, _profile.DirectionalLightColor, 0.32f);
+                color = Color.Lerp(color, _profile.FogColor, 0.24f + lane * 0.08f);
+                color.a = Mathf.Clamp01(0.030f + _profile.FogDensity * 1.55f + _profile.ParticleStartColor.a * 0.080f + lane * 0.010f);
+                _foregroundGustBaseColors[i] = color;
+                _foregroundGustBasePositions[i] = gust.localPosition;
+                _foregroundGustBaseScales[i] = gust.localScale;
+
+                SetRendererMaterial(ref _foregroundGustMaterials[i], renderer, "Weather_ForegroundGustBand_Material_" + i, color);
+            }
+        }
+
         private void ConfigureAtmosphereLight()
         {
             _atmosphereLight = GetOrCreateAtmosphereLight();
@@ -489,6 +522,7 @@ namespace AL.RealmWar.Warzone
 
             AnimateHorizonVeils(pulse, combatSurge);
             AnimateLightShafts(pulse, combatSurge);
+            AnimateForegroundGustBands(pulse, combatSurge);
             AnimateAtmosphereLight(pulse, combatSurge);
         }
 
@@ -795,6 +829,41 @@ namespace AL.RealmWar.Warzone
                 Transform shaft = renderer.transform;
                 Vector3 baseScale = _lightShaftBaseScales[i];
                 shaft.localScale = new Vector3(baseScale.x * (1f + combatSurge * 0.08f), baseScale.y * (1f + localPulse * 0.014f + combatSurge * 0.06f), baseScale.z);
+            }
+        }
+
+        private void AnimateForegroundGustBands(float pulse, float combatSurge)
+        {
+            if (_profile == null)
+            {
+                return;
+            }
+
+            float windRadians = _profile.WindYawDegrees * Mathf.Deg2Rad;
+            Vector3 windDirection = new Vector3(Mathf.Sin(windRadians), 0f, Mathf.Cos(windRadians));
+            for (int i = 0; i < _foregroundGustRenderers.Length; i++)
+            {
+                Renderer renderer = _foregroundGustRenderers[i];
+                Material material = _foregroundGustMaterials[i];
+                if (renderer == null || material == null)
+                {
+                    continue;
+                }
+
+                float localPulse = Mathf.Sin(Time.time * (0.20f + i * 0.043f) + i * 1.11f);
+                float flow = Mathf.Sin(Time.time * (0.13f + i * 0.021f) + i * 0.73f);
+                Color color = _foregroundGustBaseColors[i];
+                color.a = Mathf.Clamp01(color.a * (0.70f + localPulse * 0.24f + pulse * 0.08f + combatSurge * 1.80f));
+                ApplyMaterialColor(material, color);
+
+                Transform gust = renderer.transform;
+                Vector3 basePosition = _foregroundGustBasePositions[i];
+                Vector3 baseScale = _foregroundGustBaseScales[i];
+                gust.localPosition = basePosition + windDirection * (flow * (0.42f + i * 0.10f)) + Vector3.up * (localPulse * 0.055f + combatSurge * 0.16f);
+                gust.localScale = new Vector3(
+                    baseScale.x * (1f + Mathf.Abs(localPulse) * 0.028f + combatSurge * 0.11f),
+                    baseScale.y * (1f + combatSurge * 0.32f),
+                    baseScale.z);
             }
         }
 
