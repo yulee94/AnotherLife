@@ -1,6 +1,7 @@
 using AL.Core;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering;
 
 namespace AL.RealmWar.Warzone
 {
@@ -14,8 +15,10 @@ namespace AL.RealmWar.Warzone
         private ParticleSystem _particles;
         private ParticleSystem _groundMistParticles;
         private ParticleSystem _horizonHazeParticles;
+        private ParticleSystem _windStreakParticles;
         private WindZone _windZone;
         private Light _lightningLight;
+        private Light _atmosphereLight;
         private Coroutine _lightningRoutine;
         private Coroutine _combatFlashRoutine;
         private float _combatSurgeTimer;
@@ -23,6 +26,15 @@ namespace AL.RealmWar.Warzone
         private float _combatSurgeStrength;
         private float _nextLightningTime;
         private float _baseDirectionalIntensity;
+        private float _baseAtmosphereLightIntensity;
+        private readonly Renderer[] _horizonVeilRenderers = new Renderer[6];
+        private readonly Material[] _horizonVeilMaterials = new Material[6];
+        private readonly Vector3[] _horizonVeilBaseScales = new Vector3[6];
+        private readonly Color[] _horizonVeilBaseColors = new Color[6];
+        private readonly Renderer[] _lightShaftRenderers = new Renderer[3];
+        private readonly Material[] _lightShaftMaterials = new Material[3];
+        private readonly Vector3[] _lightShaftBaseScales = new Vector3[3];
+        private readonly Color[] _lightShaftBaseColors = new Color[3];
 
         public WeatherProfileData CurrentProfile => _profile;
 
@@ -37,6 +49,12 @@ namespace AL.RealmWar.Warzone
             AnimateWind();
             AnimateAtmosphere();
             TickLightning();
+        }
+
+        private void OnDestroy()
+        {
+            DestroyMaterials(_horizonVeilMaterials);
+            DestroyMaterials(_lightShaftMaterials);
         }
 
         public void Configure(Color particleColor, int maxParticles, float radius, float fallSpeed)
@@ -95,6 +113,10 @@ namespace AL.RealmWar.Warzone
             ConfigureParticleSystem(GetOrCreateParticleSystem());
             ConfigureGroundMist(GetOrCreateChildParticleSystem("Weather_GroundMist", ref _groundMistParticles));
             ConfigureHorizonHaze(GetOrCreateChildParticleSystem("Weather_HorizonHaze", ref _horizonHazeParticles));
+            ConfigureWindStreaks(GetOrCreateChildParticleSystem("Weather_ForegroundWindStreaks", ref _windStreakParticles));
+            ConfigureHorizonVeils();
+            ConfigureLightShafts();
+            ConfigureAtmosphereLight();
             ConfigureWindZone(GetOrCreateWindZone());
             ApplyLightingProfile();
             ScheduleNextLightning();
@@ -265,6 +287,117 @@ namespace AL.RealmWar.Warzone
             }
         }
 
+        private void ConfigureWindStreaks(ParticleSystem particles)
+        {
+            particles.transform.localPosition = new Vector3(0f, -1.15f, -2.4f);
+
+            Color streakStart = Color.Lerp(_profile.ParticleStartColor, _profile.DirectionalLightColor, 0.28f);
+            streakStart.a = Mathf.Clamp01(Mathf.Max(_profile.ParticleStartColor.a, 0.18f) * 0.42f);
+            Color streakEnd = Color.Lerp(_profile.ParticleEndColor, Color.white, 0.12f);
+            streakEnd.a = Mathf.Clamp01(streakStart.a * 0.24f);
+
+            var main = particles.main;
+            main.loop = true;
+            main.startLifetime = Mathf.Max(0.42f, _profile.ParticleLifetime * 0.18f);
+            main.startSpeed = Mathf.Max(1.8f, _profile.FallSpeed + _profile.WindMain * 2.6f);
+            main.startSize = Mathf.Max(0.025f, _profile.ParticleSize * 1.45f);
+            main.startColor = new ParticleSystem.MinMaxGradient(streakStart, streakEnd);
+            int maxStreakParticles = Mathf.Clamp(_profile.MaxParticles / 5, 22, 96);
+            main.maxParticles = maxStreakParticles;
+            main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+            var emission = particles.emission;
+            emission.rateOverTime = Mathf.Max(4f, maxStreakParticles * 0.18f);
+
+            var shape = particles.shape;
+            shape.shapeType = ParticleSystemShapeType.Box;
+            shape.scale = new Vector3(Mathf.Max(9f, _profile.Radius * 0.72f), 5.2f, Mathf.Max(7f, _profile.Radius * 0.46f));
+
+            var velocity = particles.velocityOverLifetime;
+            velocity.enabled = true;
+            float windDirection = _profile.WindYawDegrees * Mathf.Deg2Rad;
+            velocity.x = new ParticleSystem.MinMaxCurve(Mathf.Sin(windDirection) * _profile.WindMain * 1.4f - _profile.HorizontalDrift, Mathf.Sin(windDirection) * _profile.WindMain * 1.4f + _profile.HorizontalDrift);
+            velocity.y = new ParticleSystem.MinMaxCurve(-Mathf.Max(0.45f, _profile.FallSpeed * 0.62f), -Mathf.Max(1.2f, _profile.FallSpeed * 1.18f));
+            velocity.z = new ParticleSystem.MinMaxCurve(Mathf.Cos(windDirection) * _profile.WindMain * 1.4f - _profile.HorizontalDrift, Mathf.Cos(windDirection) * _profile.WindMain * 1.4f + _profile.HorizontalDrift);
+
+            var noise = particles.noise;
+            noise.enabled = true;
+            noise.strength = Mathf.Max(0.06f, _profile.NoiseStrength * 0.78f);
+            noise.frequency = Mathf.Max(0.01f, _profile.NoiseFrequency * 1.15f);
+
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            if (renderer != null)
+            {
+                renderer.renderMode = ParticleSystemRenderMode.Stretch;
+                renderer.lengthScale = Mathf.Lerp(2.1f, 4.8f, Mathf.InverseLerp(0.9f, 3.0f, _profile.FallSpeed + _profile.WindMain));
+                renderer.velocityScale = 0.55f;
+                renderer.cameraVelocityScale = 0.05f;
+                renderer.sortingOrder = -2;
+            }
+        }
+
+        private void ConfigureHorizonVeils()
+        {
+            for (int i = 0; i < _horizonVeilRenderers.Length; i++)
+            {
+                Renderer renderer = GetOrCreateQuadRenderer("Weather_HorizonVeil_" + i);
+                _horizonVeilRenderers[i] = renderer;
+
+                float angle = 20f + i * (360f / _horizonVeilRenderers.Length);
+                float radians = angle * Mathf.Deg2Rad;
+                float radius = Mathf.Max(15f, _profile.Radius * (0.58f + (i % 2) * 0.12f));
+                float width = Mathf.Max(7.5f, _profile.Radius * (0.38f + (i % 3) * 0.045f));
+                float height = Mathf.Lerp(4.8f, 7.2f, (i % 4) / 3f);
+
+                Transform veil = renderer.transform;
+                veil.localPosition = new Vector3(Mathf.Sin(radians) * radius, -1.4f + (i % 3) * 0.34f, Mathf.Cos(radians) * radius);
+                veil.localRotation = Quaternion.LookRotation(-new Vector3(veil.localPosition.x, 0f, veil.localPosition.z).normalized, Vector3.up) * Quaternion.Euler(i % 2 == 0 ? -4f : 5f, 0f, (i - 2) * 1.2f);
+                veil.localScale = new Vector3(width, height, 1f);
+
+                Color color = Color.Lerp(_profile.FogColor, i % 2 == 0 ? _profile.ParticleEndColor : _profile.ParticleStartColor, 0.48f);
+                color = Color.Lerp(color, Color.black, 0.16f);
+                color.a = Mathf.Clamp01(0.040f + _profile.FogDensity * 2.4f + _profile.ParticleEndColor.a * 0.18f + (i % 2) * 0.018f);
+                _horizonVeilBaseColors[i] = color;
+                _horizonVeilBaseScales[i] = veil.localScale;
+
+                SetRendererMaterial(ref _horizonVeilMaterials[i], renderer, "Weather_HorizonVeil_Material_" + i, color);
+            }
+        }
+
+        private void ConfigureLightShafts()
+        {
+            for (int i = 0; i < _lightShaftRenderers.Length; i++)
+            {
+                Renderer renderer = GetOrCreateQuadRenderer("Weather_LightShaft_" + i);
+                _lightShaftRenderers[i] = renderer;
+
+                float side = i - 1f;
+                Transform shaft = renderer.transform;
+                shaft.localPosition = new Vector3(side * 4.8f, -0.82f + i * 0.24f, 1.8f + i * 1.55f);
+                shaft.localRotation = Quaternion.Euler(10f + i * 4f, -18f + side * 12f, 7f - side * 8f);
+                shaft.localScale = new Vector3(1.05f + i * 0.20f, 7.2f + i * 0.75f, 1f);
+
+                Color color = Color.Lerp(_profile.DirectionalLightColor, _profile.ParticleStartColor, 0.42f);
+                color = Color.Lerp(color, Color.black, 0.10f);
+                color.a = Mathf.Clamp01(0.026f + _profile.FogDensity * 1.35f + i * 0.006f);
+                _lightShaftBaseColors[i] = color;
+                _lightShaftBaseScales[i] = shaft.localScale;
+
+                SetRendererMaterial(ref _lightShaftMaterials[i], renderer, "Weather_LightShaft_Material_" + i, color);
+            }
+        }
+
+        private void ConfigureAtmosphereLight()
+        {
+            _atmosphereLight = GetOrCreateAtmosphereLight();
+            Color lightColor = Color.Lerp(_profile.FogColor, _profile.ParticleStartColor, 0.64f);
+            lightColor = Color.Lerp(lightColor, _profile.DirectionalLightColor, 0.18f);
+            _baseAtmosphereLightIntensity = Mathf.Clamp(0.28f + _profile.FogDensity * 18f + _profile.ParticleStartColor.a * 0.42f, 0.36f, 1.28f);
+            _atmosphereLight.color = lightColor;
+            _atmosphereLight.intensity = _baseAtmosphereLightIntensity;
+            _atmosphereLight.range = Mathf.Max(8f, _profile.Radius * 0.58f);
+        }
+
         private void ConfigureWindZone(WindZone windZone)
         {
             windZone.mode = WindZoneMode.Directional;
@@ -353,6 +486,10 @@ namespace AL.RealmWar.Warzone
             {
                 _directionalLight.intensity = Mathf.Max(0f, _baseDirectionalIntensity * (1f + pulse * 0.025f + combatSurge * 0.045f));
             }
+
+            AnimateHorizonVeils(pulse, combatSurge);
+            AnimateLightShafts(pulse, combatSurge);
+            AnimateAtmosphereLight(pulse, combatSurge);
         }
 
         private void TickCombatSurge()
@@ -509,6 +646,180 @@ namespace AL.RealmWar.Warzone
             _lightningLight.type = LightType.Directional;
             _lightningLight.enabled = false;
             return _lightningLight;
+        }
+
+        private Light GetOrCreateAtmosphereLight()
+        {
+            if (_atmosphereLight != null)
+            {
+                return _atmosphereLight;
+            }
+
+            var existing = transform.Find("Weather_RealmAtmosphereLight");
+            var lightObject = existing != null ? existing.gameObject : new GameObject("Weather_RealmAtmosphereLight");
+            lightObject.transform.SetParent(transform, false);
+            lightObject.transform.localPosition = new Vector3(0f, -1.35f, 3.8f);
+
+            _atmosphereLight = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
+            _atmosphereLight.type = LightType.Point;
+            _atmosphereLight.shadows = LightShadows.None;
+            return _atmosphereLight;
+        }
+
+        private Renderer GetOrCreateQuadRenderer(string name)
+        {
+            var existing = transform.Find(name);
+            if (existing != null && existing.TryGetComponent(out Renderer existingRenderer))
+            {
+                return existingRenderer;
+            }
+
+            var quadObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quadObject.name = name;
+            quadObject.transform.SetParent(transform, false);
+            var collider = quadObject.GetComponent<Collider>();
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+
+            var renderer = quadObject.GetComponent<Renderer>();
+            renderer.receiveShadows = false;
+            renderer.shadowCastingMode = ShadowCastingMode.Off;
+            renderer.sortingOrder = -5;
+            return renderer;
+        }
+
+        private static void SetRendererMaterial(ref Material material, Renderer renderer, string name, Color color)
+        {
+            if (material == null)
+            {
+                material = CreateTransparentWeatherMaterial(name, color);
+                renderer.sharedMaterial = material;
+                return;
+            }
+
+            ApplyMaterialColor(material, color);
+            renderer.sharedMaterial = material;
+        }
+
+        private static Material CreateTransparentWeatherMaterial(string name, Color color)
+        {
+            Shader shader = Shader.Find("Sprites/Default") ?? Shader.Find("Unlit/Transparent") ?? Shader.Find("Standard");
+            var material = new Material(shader)
+            {
+                name = name,
+                color = color,
+                renderQueue = (int)RenderQueue.Transparent
+            };
+
+            if (material.HasProperty("_SrcBlend"))
+            {
+                material.SetInt("_SrcBlend", (int)BlendMode.SrcAlpha);
+            }
+
+            if (material.HasProperty("_DstBlend"))
+            {
+                material.SetInt("_DstBlend", (int)BlendMode.OneMinusSrcAlpha);
+            }
+
+            if (material.HasProperty("_ZWrite"))
+            {
+                material.SetInt("_ZWrite", 0);
+            }
+
+            if (material.HasProperty("_Cull"))
+            {
+                material.SetInt("_Cull", (int)CullMode.Off);
+            }
+
+            material.DisableKeyword("_ALPHATEST_ON");
+            material.EnableKeyword("_ALPHABLEND_ON");
+            material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+            ApplyMaterialColor(material, color);
+            return material;
+        }
+
+        private static void ApplyMaterialColor(Material material, Color color)
+        {
+            material.color = color;
+            if (material.HasProperty("_Color"))
+            {
+                material.SetColor("_Color", color);
+            }
+
+            if (material.HasProperty("_TintColor"))
+            {
+                material.SetColor("_TintColor", color);
+            }
+        }
+
+        private void AnimateHorizonVeils(float pulse, float combatSurge)
+        {
+            for (int i = 0; i < _horizonVeilRenderers.Length; i++)
+            {
+                Renderer renderer = _horizonVeilRenderers[i];
+                Material material = _horizonVeilMaterials[i];
+                if (renderer == null || material == null)
+                {
+                    continue;
+                }
+
+                float localPulse = Mathf.Sin(Time.time * (0.18f + i * 0.035f) + i * 1.37f);
+                Color color = _horizonVeilBaseColors[i];
+                color.a = Mathf.Clamp01(color.a * (0.82f + localPulse * 0.16f + pulse * 0.04f + combatSurge * 1.25f));
+                ApplyMaterialColor(material, color);
+
+                Transform veil = renderer.transform;
+                Vector3 baseScale = _horizonVeilBaseScales[i];
+                veil.localScale = new Vector3(baseScale.x * (1f + localPulse * 0.018f + combatSurge * 0.035f), baseScale.y * (1f + combatSurge * 0.055f), baseScale.z);
+            }
+        }
+
+        private void AnimateLightShafts(float pulse, float combatSurge)
+        {
+            for (int i = 0; i < _lightShaftRenderers.Length; i++)
+            {
+                Renderer renderer = _lightShaftRenderers[i];
+                Material material = _lightShaftMaterials[i];
+                if (renderer == null || material == null)
+                {
+                    continue;
+                }
+
+                float localPulse = Mathf.Sin(Time.time * (0.28f + i * 0.05f) + i * 0.91f);
+                Color color = _lightShaftBaseColors[i];
+                color.a = Mathf.Clamp01(color.a * (0.72f + localPulse * 0.18f + pulse * 0.08f + combatSurge * 1.55f));
+                ApplyMaterialColor(material, color);
+
+                Transform shaft = renderer.transform;
+                Vector3 baseScale = _lightShaftBaseScales[i];
+                shaft.localScale = new Vector3(baseScale.x * (1f + combatSurge * 0.08f), baseScale.y * (1f + localPulse * 0.014f + combatSurge * 0.06f), baseScale.z);
+            }
+        }
+
+        private void AnimateAtmosphereLight(float pulse, float combatSurge)
+        {
+            if (_atmosphereLight == null)
+            {
+                return;
+            }
+
+            _atmosphereLight.intensity = Mathf.Max(0f, _baseAtmosphereLightIntensity * (1f + pulse * 0.08f + combatSurge * 0.72f));
+        }
+
+        private static void DestroyMaterials(Material[] materials)
+        {
+            for (int i = 0; i < materials.Length; i++)
+            {
+                if (materials[i] == null)
+                {
+                    continue;
+                }
+
+                UnityEngine.Object.Destroy(materials[i]);
+                materials[i] = null;
+            }
         }
 
         private void ScheduleNextLightning()
