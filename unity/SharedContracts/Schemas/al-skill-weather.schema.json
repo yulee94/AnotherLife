@@ -3,10 +3,17 @@
   "$id": "https://another-life.local/schemas/al-skill-weather.schema.json",
   "title": "Another Life Skill And Weather Catalog",
   "type": "object",
-  "required": ["version", "skillEffects", "weatherProfiles"],
+  "required": ["version", "skillLoadouts", "skillEffects", "weatherProfiles"],
   "properties": {
     "version": {
       "type": "string"
+    },
+    "skillLoadouts": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "$ref": "#/$defs/skillLoadout"
+      }
     },
     "skillEffects": {
       "type": "array",
@@ -22,6 +29,66 @@
     }
   },
   "$defs": {
+    "skillLoadout": {
+      "type": "object",
+      "required": [
+        "slot",
+        "id",
+        "displayName",
+        "role",
+        "vfxKey",
+        "cooldownSeconds",
+        "manaCost",
+        "castTimeSeconds",
+        "rangeMeters",
+        "power",
+        "botDamageMultiplier"
+      ],
+      "properties": {
+        "slot": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "id": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        },
+        "vfxKey": {
+          "type": "string"
+        },
+        "cooldownSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "manaCost": {
+          "type": "number",
+          "minimum": 0
+        },
+        "castTimeSeconds": {
+          "type": "number",
+          "minimum": 0
+        },
+        "rangeMeters": {
+          "type": "number",
+          "minimum": 0
+        },
+        "power": {
+          "type": "number",
+          "minimum": 0
+        },
+        "botDamageMultiplier": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
     "skillEffect": {
       "type": "object",
       "required": ["key", "realm", "use", "colors"],

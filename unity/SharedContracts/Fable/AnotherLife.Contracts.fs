@@ -64,6 +64,22 @@ module DesignContracts =
         }
 
     [<CLIMutable>]
+    type SkillLoadout =
+        {
+            slot: int
+            id: string
+            displayName: string
+            role: string
+            vfxKey: string
+            cooldownSeconds: float
+            manaCost: float
+            castTimeSeconds: float
+            rangeMeters: float
+            power: float
+            botDamageMultiplier: float
+        }
+
+    [<CLIMutable>]
     type SkillEffect =
         {
             key: string
@@ -132,6 +148,7 @@ module DesignContracts =
     type SkillWeatherCatalog =
         {
             version: string
+            skillLoadouts: SkillLoadout array
             skillEffects: SkillEffect array
             weatherProfiles: WeatherProfile array
         }
