@@ -9,40 +9,70 @@ namespace AL.RealmWar.Warzone
 {
     public class WarzoneService : ITerritoryService
     {
-        private List<TerritoryData> _territories = new List<TerritoryData>();
+        private readonly ISaveGameService _saveGameService;
         public event Action<string, RealmId> OnTerritoryCaptured;
 
-        public WarzoneService()
+        public WarzoneService(ISaveGameService saveGameService)
         {
-            InitializeWarzone();
+            _saveGameService = saveGameService;
         }
 
-        private void InitializeWarzone()
+        private List<TerritoryData> Territories
         {
-            _territories.Add(new TerritoryData { Id = "T1", Name = "Iron Peaks", OwnerRealm = RealmId.Stonehold, BonusType = ResourceType.Stone, BonusAmount = 50, IsFortress = true });
-            _territories.Add(new TerritoryData { Id = "T2", Name = "Silver Woods", OwnerRealm = RealmId.Eldergrove, BonusType = ResourceType.Wood, BonusAmount = 40, IsFortress = false });
-            _territories.Add(new TerritoryData { Id = "T3", Name = "Golden Plains", OwnerRealm = RealmId.Crownlands, BonusType = ResourceType.Gold, BonusAmount = 20, IsFortress = false });
-            _territories.Add(new TerritoryData { Id = "T4", Name = "Shadow Vale", OwnerRealm = RealmId.Umbral, BonusType = ResourceType.Food, BonusAmount = 60, IsFortress = true });
-            _territories.Add(new TerritoryData { Id = "T5", Name = "Neutral Borderlands", OwnerRealm = RealmId.None, BonusType = ResourceType.Gold, BonusAmount = 10, IsFortress = false });
+            get
+            {
+                EnsureTerritories();
+                return _saveGameService.CurrentSave?.Territories;
+            }
         }
 
-        public IEnumerable<TerritoryData> GetTerritories() => _territories;
+        public IEnumerable<TerritoryData> GetTerritories() => Territories ?? Enumerable.Empty<TerritoryData>();
 
         public void CaptureTerritory(string territoryId, RealmId capturer)
         {
-            var territory = _territories.FirstOrDefault(t => t.Id == territoryId);
+            var territory = Territories?.FirstOrDefault(t => t.Id == territoryId);
             if (territory != null)
             {
                 territory.OwnerRealm = capturer;
                 OnTerritoryCaptured?.Invoke(territoryId, capturer);
                 Debug.Log($"Territory {territory.Name} captured by {capturer}");
+                try
+                {
+                    ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.CaptureTerritory, 1);
+                    ServiceLocator.Get<IWarzoneCreditService>().AddCredits(100);
+                }
+                catch (Exception)
+                {
+                    // Quest and credit services are optional in isolated tests.
+                }
+                _saveGameService.Save();
             }
         }
 
         public long CalculatePassiveIncome(ResourceType type)
         {
             // Simple logic for the vertical slice
-            return _territories.Where(t => t.BonusType == type).Sum(t => t.BonusAmount);
+            return GetTerritories().Where(t => t.BonusType == type).Sum(t => t.BonusAmount);
+        }
+
+        private void EnsureTerritories()
+        {
+            if (_saveGameService.CurrentSave == null)
+            {
+                return;
+            }
+
+            _saveGameService.CurrentSave.Territories ??= new List<TerritoryData>();
+            if (_saveGameService.CurrentSave.Territories.Count > 0)
+            {
+                return;
+            }
+
+            _saveGameService.CurrentSave.Territories.Add(new TerritoryData { Id = "T1", Name = "Iron Peaks", OwnerRealm = RealmId.Stonehold, BonusType = ResourceType.Stone, BonusAmount = 50, IsFortress = true });
+            _saveGameService.CurrentSave.Territories.Add(new TerritoryData { Id = "T2", Name = "Silver Woods", OwnerRealm = RealmId.Eldergrove, BonusType = ResourceType.Wood, BonusAmount = 40, IsFortress = false });
+            _saveGameService.CurrentSave.Territories.Add(new TerritoryData { Id = "T3", Name = "Golden Plains", OwnerRealm = RealmId.Crownlands, BonusType = ResourceType.Gold, BonusAmount = 20, IsFortress = false });
+            _saveGameService.CurrentSave.Territories.Add(new TerritoryData { Id = "T4", Name = "Shadow Vale", OwnerRealm = RealmId.Umbral, BonusType = ResourceType.Food, BonusAmount = 60, IsFortress = true });
+            _saveGameService.CurrentSave.Territories.Add(new TerritoryData { Id = "T5", Name = "Neutral Borderlands", OwnerRealm = RealmId.None, BonusType = ResourceType.Gold, BonusAmount = 10, IsFortress = false });
         }
     }
 }

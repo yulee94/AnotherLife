@@ -171,8 +171,21 @@ namespace AL.Utilities
                 SetStatus("Auto mode enabled. Manual input interrupts it.");
             });
 
-            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -390), RunTestBattle);
-            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -445), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "Capture Border", new Vector2(20, -390), () =>
+            {
+                var realm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+                if (realm == RealmId.None)
+                {
+                    realm = RealmId.Crownlands;
+                    ServiceLocator.Get<IRealmService>().SelectRealm(realm);
+                }
+
+                ServiceLocator.Get<ITerritoryService>().CaptureTerritory("T5", realm);
+                SetStatus($"Captured Neutral Borderlands for {realm}.");
+            });
+
+            CreateButton(canvasObj.transform, "Test Battle", new Vector2(20, -445), RunTestBattle);
+            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(20, -500), SpawnArenaTargets);
 
             // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));

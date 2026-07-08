@@ -88,6 +88,7 @@ namespace AL.Services.Local
             save.Troops ??= new List<TroopInventoryData>();
             save.Researches ??= new List<ResearchState>();
             save.Quests ??= new List<QuestState>();
+            save.Territories ??= new List<TerritoryData>();
             save.Warmaster ??= new WarmasterState();
             save.ChampionCustomization ??= new ChampionCustomizationState();
 

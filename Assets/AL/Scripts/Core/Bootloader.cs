@@ -54,7 +54,7 @@ namespace AL.Core
                 var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
                 var warzoneCredits = new LocalWarzoneCreditService(saveGame);
                 var warmaster = new LocalWarmasterService(saveGame);
-                var territoryService = new AL.RealmWar.Warzone.WarzoneService();
+                var territoryService = new AL.RealmWar.Warzone.WarzoneService(saveGame);
                 var questService = new LocalQuestService(saveGame, resourceService, warzoneCredits);
                 var storyService = new LocalStoryService(saveGame, gameData);
                 var notificationService = new LocalNotificationService();
