@@ -46,7 +46,10 @@ namespace AL.ChampionMode.AI
         public float MaxHealth => _maxHealth;
         public float CurrentBreak => _currentBreak;
         public float MaxBreak => _breakBarMax;
+        public string BossName => _bossName;
         public bool IsBroken => _isBroken;
+        public bool IsEnraged => _enraged;
+        public bool IsDead => _isDead;
 
         private void Start()
         {

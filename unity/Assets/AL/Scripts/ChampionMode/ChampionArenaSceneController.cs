@@ -25,10 +25,12 @@ namespace AL.ChampionMode
         private ChampionCombat _playerCombat;
         private SkillCaster _playerSkillCaster;
         private RvrBotSpawner _rvrBotSpawner;
+        private BossDummyAI _boss;
         private Transform _bossTransform;
         private Text _healthText;
         private Text _manaText;
         private Text _skillText;
+        private Text _bossText;
         private readonly Text[] _skillButtonTexts = new Text[4];
         private float _skillHudTimer;
         private float _warzoneCreditTimer;
@@ -54,6 +56,7 @@ namespace AL.ChampionMode
             {
                 _skillHudTimer = 0f;
                 RefreshSkillText();
+                RefreshBossText();
             }
 
             if (_bossTransform == null)
@@ -125,7 +128,7 @@ namespace AL.ChampionMode
             boss.transform.position = new Vector3(0f, 1.5f, 9f);
             boss.transform.localScale = new Vector3(2.4f, 2.4f, 2.4f);
             boss.GetComponent<Renderer>().material.color = new Color(0.75f, 0.08f, 0.08f);
-            boss.AddComponent<BossDummyAI>();
+            _boss = boss.AddComponent<BossDummyAI>();
             _bossTransform = boss.transform;
 
             SpawnBotChampions();
@@ -198,6 +201,7 @@ namespace AL.ChampionMode
             _healthText = CreateText(canvasObject.transform, font, "HP: 1000 / 1000", 22, new Vector2(20, -145), new Vector2(420, 45), TextAnchor.UpperLeft);
             _manaText = CreateText(canvasObject.transform, font, "MP: 100 / 100", 22, new Vector2(20, -190), new Vector2(420, 45), TextAnchor.UpperLeft);
             _skillText = CreateText(canvasObject.transform, font, "Skills ready", 18, new Vector2(20, -235), new Vector2(540, 130), TextAnchor.UpperLeft);
+            _bossText = CreateText(canvasObject.transform, font, "Boss: acquiring target", 18, new Vector2(20, -370), new Vector2(560, 95), TextAnchor.UpperLeft);
             if (_playerCombat != null)
             {
                 _playerCombat.OnHealthChanged += UpdateHealthText;
@@ -264,6 +268,35 @@ namespace AL.ChampionMode
                 FormatSkillStatus(2) + "\n" +
                 FormatSkillStatus(3);
             RefreshSkillButtonLabels();
+        }
+
+        private void RefreshBossText()
+        {
+            if (_bossText == null)
+            {
+                return;
+            }
+
+            if (_boss == null || _boss.IsDead)
+            {
+                _bossText.color = new Color(0.80f, 1f, 0.62f);
+                _bossText.text = "Boss defeated\nLoot roll complete";
+                return;
+            }
+
+            float healthPercent = _boss.MaxHealth > 0f ? Mathf.Clamp01(_boss.CurrentHealth / _boss.MaxHealth) : 0f;
+            float breakPercent = _boss.MaxBreak > 0f ? Mathf.Clamp01(_boss.CurrentBreak / _boss.MaxBreak) : 0f;
+            string breakState = _boss.IsBroken ? "BROKEN - damage window" : $"{Mathf.CeilToInt(breakPercent * 100f)}%";
+            string enrageState = _boss.IsEnraged ? " | ENRAGED" : string.Empty;
+
+            _bossText.color = _boss.IsEnraged
+                ? new Color(1f, 0.48f, 0.28f)
+                : _boss.IsBroken
+                    ? new Color(0.44f, 1f, 0.92f)
+                    : Color.white;
+            _bossText.text =
+                $"{_boss.BossName}: {Mathf.CeilToInt(_boss.CurrentHealth)} / {Mathf.CeilToInt(_boss.MaxHealth)} HP ({Mathf.CeilToInt(healthPercent * 100f)}%){enrageState}\n" +
+                $"Break: {breakState}";
         }
 
         private string FormatSkillStatus(int slotIndex)
