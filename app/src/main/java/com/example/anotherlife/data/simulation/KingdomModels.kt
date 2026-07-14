@@ -2,8 +2,6 @@ package com.example.anotherlife.data.simulation
 
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.compose.runtime.snapshots.SnapshotStateMap
 
 enum class ResourceType {
     Food, Wood, Stone, Gold
@@ -65,17 +63,13 @@ class KingdomState {
     )
 
     val quests = mutableStateListOf(
-        Quest("Q1", "Building the Future", "Upgrade any building to Level 2.", target = 1),
-        Quest("Q2", "Expansion Force", "Train 100 total troops.", target = 100),
-        Quest("Q3", "Technological Edge", "Complete 2 research projects.", target = 2),
-        Quest("Q4", "Proven in Battle", "Win 3 battle simulations.", target = 3),
-        Quest("OMEN_1", "The First Signal", "Investigate strange celestial vibrations at the Sky Castle.", target = 1),
-        Quest("OMEN_2", "Dimensional Rift", "Stabilize the portal to the Otherworld.", target = 1)
+        Quest("Q1", "Building the Future", "Upgrade any building to Level 2.", target = 1, mode = QuestMode.Kingdom),
+        Quest("Q2", "Expansion Force", "Train 100 total troops.", target = 100, mode = QuestMode.Kingdom),
+        Quest("Q3", "Technological Edge", "Complete 2 research projects.", target = 2, mode = QuestMode.Kingdom),
+        Quest("Q4", "Proven in Battle", "Win 3 battle simulations.", target = 3, mode = QuestMode.Kingdom),
+        Quest("OMEN_1", "The First Signal", "Investigate strange celestial vibrations at the Sky Castle.", target = 1, mode = QuestMode.Arena3D, mapMarkerId = "SKY_CASTLE"),
+        Quest("OMEN_2", "Dimensional Rift", "Stabilize the portal to the Otherworld.", target = 1, mode = QuestMode.Arena3D, mapMarkerId = "ANCIENT_PORTAL")
     )
-}
-
-enum class QuestMode {
-    Kingdom, Arena3D
 }
 
 data class Quest(
@@ -87,9 +81,7 @@ data class Quest(
     val mode: QuestMode = QuestMode.Kingdom,
     val mapMarkerId: String? = null,
     var isCompleted: Boolean = false,
-    var isClaimed: Boolean = false,
-    val mode: QuestMode = QuestMode.Kingdom,
-    val mapMarkerId: String? = null
+    var isClaimed: Boolean = false
 )
 
 data class Research(

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace AL.Data.Definitions
+namespace AL.Data.Definitions.Narrative
 {
     [Serializable]
     public class DialogueNode
