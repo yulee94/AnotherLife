@@ -12,13 +12,24 @@ These instructions apply to the entire repository. They define the working agree
 
 Do not create or use `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, timestamped repository copies, or any other duplicate checkout as an active project. Offline backups are allowed, but agents must not edit or publish from them.
 
+## Required session context
+
+Before beginning work, every agent must read:
+
+1. This root `AGENTS.md`.
+2. Its matching standalone prompt in `unity/Docs/Agent_Role_Prompts.md`.
+3. The active phase and gate in `unity/Docs/Project_Progression_Roadmap.md`.
+4. `unity/Docs/Three_Way_Collaboration_Plan.md` when working on NVS-01.
+5. The relevant issue, upstream artifact, and open pull requests.
+
 Before starting a task:
 
 1. Fetch the latest `main`.
-2. Inspect all open pull requests for overlapping files or ownership areas.
+2. Inspect all open pull requests for duplicate work, overlapping files, dependencies, and ownership areas.
 3. Create a focused branch from current `main`.
-4. Confirm the task owner, inputs, outputs, and acceptance criteria.
+4. Confirm the task owner, inputs, outputs, active roadmap phase, and acceptance criteria.
 5. Declare any shared files in the pull request before editing them.
+6. Stop or coordinate when another open pull request already addresses the same issue; do not silently create a parallel implementation.
 
 No agent may commit directly to `main`.
 
@@ -53,6 +64,7 @@ Narrative ownership follows the content, regardless of the directory in which a 
 Codex is responsible for:
 
 - Unity runtime services, scene bootstrapping, gameplay integration, combat, bosses, loot, champion controls, customization, weather, and world systems.
+- Android shell runtime and build-compatibility fixes that do not alter narrative meaning.
 - Loading, validating, and consuming approved narrative data through interfaces, JSON, schemas, or generated assets.
 - Save integration and backward-compatible migrations.
 - Editor generators, automated tests, build fixes, performance work, and shared technical contracts.
@@ -72,7 +84,9 @@ The standard handoff is:
 
 Runtime code must consume narrative data rather than duplicate it as hard-coded story text. Shared schemas and contracts belong in `unity/SharedContracts/` and shared catalogs belong in `unity/Assets/AL/StreamingAssets/GameData/` when those formats are appropriate.
 
-The first coordinated milestone is defined in `unity/Docs/Three_Way_Collaboration_Plan.md`.
+The first coordinated milestone is defined in `unity/Docs/Three_Way_Collaboration_Plan.md`. Long-range progression and phase gates are defined in `unity/Docs/Project_Progression_Roadmap.md`.
+
+Do not advance a later-phase feature while the current phase gate is blocked unless the user explicitly reprioritizes the roadmap. Broken `main`, save/data risk, and active milestone blockers take priority over speculative expansion.
 
 ## Branch and pull-request rules
 
@@ -85,12 +99,13 @@ Use these branch prefixes:
 Each pull request must:
 
 - Represent one major completion and exclude unrelated cleanup.
-- Identify the workstream owner and upstream artifact or dependency.
+- Identify the workstream owner, roadmap phase, and upstream artifact or dependency.
 - State whether narrative content, shared contracts, save data, or shared files changed.
 - List every shared file touched.
 - Include validation performed and any validation that could not be performed.
 - Rebase onto the latest `main` before final review instead of overwriting collaborator work.
 - Avoid force-pushing over another collaborator's commits.
+- Avoid duplicating an issue already addressed by another open pull request unless the user explicitly requests an alternative and the PR explains the comparison plan.
 
 Use `.github/pull_request_template.md` for the required declaration.
 
@@ -116,8 +131,10 @@ Rules:
 
 ## Validation expectations
 
-Documentation-only work must verify that the canonical workspace is consistent, links and paths are valid, and no gameplay or narrative content changed.
+Documentation-only work must verify that the canonical workspace is consistent, links and paths are valid, Markdown structure is sound, and no gameplay or narrative content changed.
 
-Narrative work must validate unique IDs, complete references, branch outcomes, and alignment with the approved narrative packet.
+Narrative work must validate unique IDs, complete references, branch outcomes, recovery paths, and alignment with the approved narrative packet.
 
-Runtime work must run the most relevant available compilation and automated tests, report exact results, validate old-save compatibility when save data changes, and clearly disclose anything that could not be tested.
+Runtime work must run the most relevant available compilation and automated tests, report exact commands and results, validate old-save compatibility when save data changes, and clearly disclose anything that could not be tested.
+
+Every task must end with the current phase, acceptance-criteria status, PR or issue status, shared-file status, and the next unblocked owner-specific step.
