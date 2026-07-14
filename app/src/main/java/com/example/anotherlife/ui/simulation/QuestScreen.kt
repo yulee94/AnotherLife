@@ -3,8 +3,10 @@ package com.example.anotherlife.ui.simulation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -14,9 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.Quest
+import com.example.anotherlife.data.simulation.QuestMode
 
 @Composable
-fun QuestScreen(state: KingdomState) {
+fun QuestScreen(state: KingdomState, onLocate: (String) -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -35,14 +38,14 @@ fun QuestScreen(state: KingdomState) {
             items(state.quests) { quest ->
                 QuestCard(quest = quest, onClaim = {
                     // Simulation logic
-                })
+                }, onLocate = { onLocate(quest.mapMarkerId ?: "") })
             }
         }
     }
 }
 
 @Composable
-fun QuestCard(quest: Quest, onClaim: () -> Unit) {
+fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit) {
     val progressPercent = quest.progress.toFloat() / quest.target.toFloat()
 
     OutlinedCard(
@@ -64,14 +67,38 @@ fun QuestCard(quest: Quest, onClaim: () -> Unit) {
                     Text(text = quest.description, style = MaterialTheme.typography.bodyMedium)
                 }
                 
-                if (quest.isCompleted) {
-                    Icon(
-                        Icons.Default.CheckCircle, 
-                        contentDescription = "Completed", 
-                        tint = Color(0xFF4CAF50),
-                        modifier = Modifier.size(32.dp)
-                    )
+                Column(horizontalAlignment = Alignment.End) {
+                    val modeColor = if (quest.mode == QuestMode.Arena3D) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
+                    Surface(
+                        color = modeColor,
+                        shape = RoundedCornerShape(4.dp)
+                    ) {
+                        Text(
+                            text = if (quest.mode == QuestMode.Arena3D) "3D ARENA" else "KINGDOM",
+                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                    }
+
+                    if (quest.isCompleted) {
+                        Icon(
+                            Icons.Default.CheckCircle,
+                            contentDescription = "Completed",
+                            tint = Color(0xFF4CAF50),
+                            modifier = Modifier.size(32.dp).padding(top = 4.dp)
+                        )
+                    }
                 }
+            }
+
+            if (quest.mapMarkerId != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                AssistChip(
+                    onClick = onLocate,
+                    label = { Text("Locate: ${quest.mapMarkerId}") },
+                    leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
