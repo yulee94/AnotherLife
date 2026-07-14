@@ -1,6 +1,8 @@
 # GPT, Android Studio, and Codex Collaboration Prompt
 
-Copy the relevant role section below into GPT, Android Studio, or Codex before it continues work on Another Life. The root `AGENTS.md` remains authoritative.
+For standalone copy-paste prompts with role-specific workload, boundaries, validation, and future progression, use `unity/Docs/Agent_Role_Prompts.md`. The root `AGENTS.md` remains authoritative, and `unity/Docs/Project_Progression_Roadmap.md` defines the long-range phase gates.
+
+The compact shared prompt below may be used when all three roles need the same coordination summary.
 
 ```text
 You are co-developing Another Life through GitHub with GPT, Codex, and the Android Studio narrative workflow.
@@ -15,7 +17,7 @@ Unity Hub should open D:\260711\MY\AndroidStudioProjects\AnotherLife\unity.
 Do not recreate or work from AnotherLifeUnity, AnotherLife-codex-*, _CodexWorktrees, timestamped duplicates, or any other active duplicate checkout.
 
 Primary rule:
-Do not overwrite or revert another workstream. Before changing files, fetch the latest main branch and inspect all open pull requests. If an open pull request owns a file or shared integration point, avoid it unless your task explicitly depends on that pull request and the owner has released the lock.
+Do not overwrite or revert another workstream. Before changing files, fetch the latest main branch and inspect all open pull requests. If an open pull request owns a file or shared integration point, avoid it unless your task explicitly depends on that pull request and the owner has released the lock. Do not create a parallel fix for an issue already addressed by another open pull request unless the user explicitly requests an alternative.
 
 Branch rule:
 Do not commit directly to main. Use one focused branch:
@@ -39,6 +41,7 @@ Android Studio must not redesign Unity combat, general runtime bootstrapping, VF
 
 Codex ownership:
 - Unity runtime gameplay systems, service boundaries, scene bootstrapping, combat simulation, boss runtime behavior, loot runtime, champion controls, character customization, 3D prototype models, skill VFX, weather, world atlas consumption, performance pooling, editor generators, automated tests, build fixes, and Fable/shared data contracts.
+- Android shell runtime and build-compatibility fixes that do not change narrative meaning.
 - Loading, validating, and consuming approved Android Studio narrative through interfaces, JSON, schemas, or generated assets.
 - Backward-compatible save integration.
 Codex must not rewrite the story, NPCs, quests, dialogue, chapter order, lore, or narrative outcomes.
@@ -65,13 +68,14 @@ When editing shared files:
 - Rebase the later branch after the lock-holding pull request merges. Never overwrite or force-push away collaborator work.
 
 PR workflow:
-1. Fetch latest main.
-2. Inspect all open pull requests for overlapping files and ownership areas.
-3. Create a focused branch with the correct owner prefix.
-4. Keep the pull request scoped to one major completion.
-5. Complete .github/pull_request_template.md.
-6. List changed ownership areas, upstream dependencies, shared files, contract/save effects, and validation performed.
-7. Rebase onto latest main before final review.
+1. Read AGENTS.md, the matching role prompt, and the active roadmap phase.
+2. Fetch latest main.
+3. Inspect all open pull requests for duplicate work, overlapping files, dependencies, and ownership areas.
+4. Create a focused branch with the correct owner prefix.
+5. Keep the pull request scoped to one major completion.
+6. Complete .github/pull_request_template.md.
+7. List changed ownership areas, upstream dependencies, shared files, contract/save effects, and validation performed.
+8. Rebase onto latest main before final review.
 
 Fable compatibility:
 - Use unity/SharedContracts and unity/Assets/AL/StreamingAssets/GameData for cross-tool data when appropriate.
@@ -79,8 +83,10 @@ Fable compatibility:
 - If Fable must consume a new system, add or update plain JSON, schema, or contract files instead of coupling Fable code to Unity MonoBehaviours.
 
 Current coordination intent:
-Android Studio continues narrative expansion. GPT plans, specifies, and reviews the handoffs. Codex continues gameplay, world, runtime, validation, and persistence implementation around approved narration. Coordinate through pull requests and stable data contracts instead of silently editing the same files.
+Android Studio continues narrative expansion. GPT plans, specifies, and reviews the handoffs. Codex continues gameplay, world, runtime, validation, persistence, and build implementation around approved narration. Coordinate through pull requests and stable data contracts instead of silently editing the same files.
 
-First coordinated milestone:
-Follow unity/Docs/Three_Way_Collaboration_Plan.md for NVS-01, including the task order and acceptance criteria.
+Progression:
+- Follow unity/Docs/Project_Progression_Roadmap.md for phase priority and exit gates.
+- Follow unity/Docs/Three_Way_Collaboration_Plan.md for NVS-01 task order and acceptance criteria.
+- Do not start later-phase expansion while the active phase gate is blocked unless the user explicitly reprioritizes the project.
 ```
