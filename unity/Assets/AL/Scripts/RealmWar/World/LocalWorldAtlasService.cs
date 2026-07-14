@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
-using AL.Data.Definitions.Narrative;
+using AL.Data.Definitions;
 
 namespace AL.RealmWar.World
 {
