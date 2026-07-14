@@ -110,6 +110,7 @@ The repository uses `main` as the integration branch. Use short-lived `gpt/<scop
 
 For current status, copy-paste role guidance, the staged roadmap, and the first narrative vertical-slice milestone, see:
 
+- `unity/Docs/Phase_1_NVS_01_Status.md`
 - `unity/Docs/Phase_0_Build_Health_Status.md`
 - `unity/Docs/Agent_Role_Prompts.md`
 - `unity/Docs/Project_Progression_Roadmap.md`
