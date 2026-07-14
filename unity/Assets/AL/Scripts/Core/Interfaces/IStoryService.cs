@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AL.Core;
-using AL.Data.Definitions.Narrative;
+using AL.Data.Definitions;
 
 namespace AL.Core.Interfaces
 {
