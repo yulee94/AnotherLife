@@ -1,200 +1,238 @@
-# Phase 0 Build Health Status
+# Phase 0 Build Health Closeout
 
 **Status date:** 2026-07-14  
 **Roadmap phase:** Phase 0 — Collaboration Baseline and Build Health  
-**Snapshot reviewed:** `main` at merge commit `35fb8fe1e4d0b6315916af03d6e458372fcbcd15`
+**Status:** Green — Android and Unity validation gates passed
 
-This is a coordination and evidence record. It does not replace `AGENTS.md`, author narrative, or implement runtime behavior.
+This is the authoritative Phase 0 coordination and evidence record. It does not replace `AGENTS.md`, author narrative, or implement gameplay.
 
-## Executive status
+## Executive decision
 
-Phase 0 is **red**. The collaboration baseline is merged, but current `main` is not Android-compilable because the two independent fixes for issue #111 were both merged and left duplicate `Quest` declarations. The user has reproduced the failure directly on the canonical workspace with Android Studio's bundled JBR, confirming this is a source defect rather than a PowerShell, path, Gradle-wrapper, or Java configuration problem.
+Phase 0 is complete.
 
-The immediate execution order is:
+The canonical Android checkout was fetched and fast-forwarded to `main`, `HEAD` matched `origin/main`, and the combined Android unit-test and debug-assembly command completed successfully.
 
-1. Codex resolves issue #118 through PR #119 and proves Android unit tests plus debug assembly on the corrected branch.
-2. GPT reviews the fix for scope, constructor compatibility, validation evidence, and duplicate-work prevention.
-3. PR #119 merges, and Android validation is repeated against the resulting latest `main`.
-4. Codex completes issue #117 by validating latest `main` in Unity 2022.3.62f3.
-5. GPT records the Phase 0 gate decision.
-6. Only after the gate is green does Android Studio begin the mergeable NVS-01 narrative packet.
+Unity was then validated from a clean worktree created from the same integrated `main` commit with Unity `2022.3.62f3`. Batch import and C# compilation completed successfully, all available EditMode tests passed, the PlayMode runner completed with no tests available, and `Assets/Test.unity` entered and exited Play Mode successfully through a temporary editor-only validation probe.
 
-## Verified repository state
+The project may now advance to Phase 1. The next active delivery is A1: Android Studio must revise draft PR #124 into exactly one bounded, user-approved NVS-01 narrative packet with no runtime-owned implementation changes.
 
-- Canonical workspace documentation is merged and consistently uses `D:\260711\MY\AndroidStudioProjects\AnotherLife`.
-- Root `AGENTS.md`, standalone role prompts, the staged roadmap, the NVS-01 plan, and the pull-request template are merged.
-- No shared runtime integration file was declared by an open pull request at the start of this audit.
-- Issue #111 was addressed by both PR #113 and PR #114.
-- Both PR #113 and PR #114 were merged.
-- Current `KingdomModels.kt` declares `QuestMode`, `mode`, and `mapMarkerId` more than once.
-- PR #114 reported `:app:testDebugUnitTest` passing on its pre-merge branch, but that evidence does not prove the later combined `main` state because PR #113 and PR #114 were both merged.
-- The user reproduced current-main failure with `:app:testDebugUnitTest :app:assembleDebug`; compilation failed before either validation target could complete.
-- The same failure occurred through both the relative wrapper command and the absolute wrapper path with `-p`, ruling out the working directory and wrapper lookup as causes.
-- The Unity project declares editor version `2022.3.62f3`.
-- No current-main Unity import, compilation, EditMode, PlayMode, or representative scene result is recorded after the latest merges.
+## Validated repository identity
 
-## Active issues, pull requests, and ownership
+```text
+Repository: yulee94/AnotherLife
+Canonical workspace: D:\260711\MY\AndroidStudioProjects\AnotherLife
+Validated branch: main
+Validated commit: accc94032eb57c9f4db1887378852bd089edeb8f
+origin/main at validation: accc94032eb57c9f4db1887378852bd089edeb8f
+```
 
-### Issue #118 / PR #119 — Android duplicate Quest metadata blocker
+The Unity validation used a separate clean worktree sourced from the same commit:
 
-**Classification:** Blocker  
-**Owner:** Codex  
-**GPT review status:** Pre-fix reproduction confirmed; constructor-order compatibility change still required before merge.
+```text
+D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117
+```
 
-Required result:
+Using a clean worktree prevented the preserved Android Studio narrative branch from being modified or reset during runtime validation.
 
-- Keep exactly one `QuestMode`, one `Quest.mode`, and one `Quest.mapMarkerId`.
-- Preserve existing positional constructor semantics by placing the new defaulted metadata after `isCompleted` and `isClaimed`.
-- Retain the focused metadata tests.
-- Run and report:
+## Android validation
+
+### Environment
+
+```text
+JAVA_HOME: C:\Program Files\Android\Android Studio\jbr
+ANDROID_HOME: C:\Users\MY\AppData\Local\Android\Sdk
+Java: OpenJDK 21.0.10
+Gradle wrapper: D:\260711\MY\AndroidStudioProjects\AnotherLife\gradlew.bat
+```
+
+### Command
 
 ```powershell
-$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
-$env:Path = "$env:JAVA_HOME\bin;$env:Path"
-.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug
+& "D:\260711\MY\AndroidStudioProjects\AnotherLife\gradlew.bat" `
+    -p "D:\260711\MY\AndroidStudioProjects\AnotherLife" `
+    :app:testDebugUnitTest `
+    :app:assembleDebug
 ```
 
-### Canonical current-main reproduction evidence
-
-The user ran the build directly from:
+### Result
 
 ```text
-D:\260711\MY\AndroidStudioProjects\AnotherLife
+BUILD SUCCESSFUL in 46s
+44 actionable tasks: 10 executed, 34 up-to-date
+Configuration cache entry stored.
 ```
 
-Environment evidence:
+The following targets passed on latest integrated `main`:
+
+- `:app:testDebugUnitTest`
+- `:app:assembleDebug`
+
+### Non-blocking Android diagnostics
+
+The successful build emitted two follow-up observations:
+
+1. A background AWT/KSP `NullPointerException` involving `BinaryFileTypeDecompilers.notifyDecompilerSetChange`.
+2. A Compose deprecation warning for the non-lambda `LinearProgressIndicator` overload in `QuestScreen.kt`.
+
+Neither diagnostic failed Gradle. They are future tooling/API cleanup items, not Phase 0 blockers.
+
+## Unity validation
+
+### Environment
 
 ```text
-Test-Path .\gradlew.bat = True
-openjdk version "21.0.10" 2026-01-20
-JAVA_HOME=C:\Program Files\Android\Android Studio\jbr
+Unity version: 2022.3.62f3 (96770f904ca7)
+Project: D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity
+Validated commit: accc94032eb57c9f4db1887378852bd089edeb8f
 ```
 
-Command:
+### Batch import and C# compilation
 
 ```powershell
-.\gradlew.bat :app:testDebugUnitTest :app:assembleDebug
+& 'C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe' `
+    -batchmode `
+    -quit `
+    -nographics `
+    -projectPath 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity' `
+    -logFile 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity\Logs\Issue117Compile.log'
 ```
 
-Observed failure:
+Result:
 
 ```text
-:app:compileDebugKotlin FAILED
-Redeclaration: enum class QuestMode
-Conflicting declarations: mode: QuestMode
-Conflicting declarations: mapMarkerId: String?
-BUILD FAILED in 27s
+Exit code: 0
+Tundra build: successful
+Final log: Exiting batchmode successfully now!
+C# compiler errors: none found
+C# compiler warnings: none found
 ```
 
-The user then invoked the absolute wrapper path with the project directory supplied through `-p`; it failed with the same declarations. This evidence satisfies PR #119's pre-fix reproduction requirement. It does not satisfy post-fix or integrated-main validation.
+Unity reported import-hygiene warnings where tracked `.meta` files existed for empty folders and Unity recreated those folders locally. These warnings did not block import, compilation, tests, or Play Mode.
 
-### Issue #116 — Closed duplicate coordination issue
+A separate user-supplied tail of `Phase0Compile-main.log` showed Unity startup, memory allocator configuration, player connection initialization, the Input System initializing, and PhysX starting. That tail did not include a completion marker or exit code and is therefore retained only as startup evidence. The clean-worktree exit-code and final-log evidence above is the authoritative compile result.
 
-**Classification:** Closed as duplicate of issue #118  
-**Active implementation path:** PR #119
+### EditMode tests
 
-Issue #116 captured the same Android duplicate-metadata root cause with stricter constructor-order acceptance criteria. That compatibility requirement has been carried forward to PR #119 through GPT review comments and this status record.
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe' `
+    -batchmode `
+    -nographics `
+    -projectPath 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity' `
+    -runTests `
+    -testPlatform EditMode `
+    -testResults 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity\Logs\Issue117EditModeResults.xml' `
+    -logFile 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity\Logs\Issue117EditModeTests.log'
+```
 
-### Issue #117 — Phase 0 gate: current-main Unity validation
+Result:
 
-**Classification:** Required after #118 / PR #119  
-**Owner:** Codex
+```text
+3 total
+3 passed
+0 failed
+0 skipped
+```
 
-Required result:
+Covered smoke contracts include playable-realm rare-resource mapping, unique wallet resources, and `ServiceLocator` replacement behavior.
 
-- Validate latest `main` after PR #119 merges using Unity 2022.3.62f3.
-- Record import and C# compilation results.
-- Run practical EditMode and PlayMode tests, or state the exact reason they could not run.
-- Enter a representative scene in Play Mode, or create focused issues for each blocker.
+### PlayMode tests
+
+```powershell
+& 'C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe' `
+    -batchmode `
+    -nographics `
+    -projectPath 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity' `
+    -runTests `
+    -testPlatform PlayMode `
+    -testResults 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity\Logs\Issue117PlayModeResults.xml' `
+    -logFile 'D:\260711\MY\AndroidStudioProjects\AnotherLife-unity117\unity\Logs\Issue117PlayModeTests.log'
+```
+
+Result:
+
+```text
+Runner invocation: passed
+0 total
+0 passed
+0 failed
+0 skipped
+Reason: no PlayMode test cases currently exist
+```
+
+The absence of PlayMode tests is explicitly recorded. It is not treated as invented test coverage.
+
+### Representative scene Play Mode
+
+A temporary editor-only validation probe opened `Assets/Test.unity`, entered Play Mode, observed runtime startup for several seconds, and exited successfully. The probe was removed after validation and the worktree was left clean.
+
+Evidence included:
+
+```text
+[Issue117] Entered Play Mode for Assets/Test.unity.
+Game Saved to: C:/Users/MY/AppData/LocalLow/DefaultCompany/AnotherLifeUnity\save.json
+Created Player Champion (Capsule) for 3D Arena.
+Welcome to Another Life!
+[Issue117] Play Mode probe passed for Assets/Test.unity.
+```
+
+No script-compilation blocker prevented representative scene startup.
+
+## Ownership and change safety
+
+Validation did not require changes to:
+
+- Narrative content, dialogue, NPCs, quest meaning, chapters, lore, or outcomes.
+- Save contracts or migration behavior.
+- Runtime services or service registrations.
+- The designated shared integration files.
+
+The temporary scene-validation probe was not retained. No shared-file lock remains open.
 
 ## Phase 0 gate checklist
 
-| Gate | Status | Evidence or owner |
+| Gate | Status | Evidence |
 | --- | --- | --- |
-| Canonical workspace and agent rules merged | Pass | PR #112 and PR #115 merged |
-| One active implementation path per issue | Pass | PR #119 is the sole active fix for issue #118; issue #116 is closed as duplicate |
-| Android unit tests on latest `main` | Blocked | User-confirmed `:app:compileDebugKotlin` failure; issue #118 / PR #119 — Codex |
-| Android debug assembly on latest `main` | Blocked before completion | Same Kotlin compilation failure prevents assembly; issue #118 / PR #119 — Codex |
-| Unity opens and compiles on latest `main` | Unverified | Issue #117 — Codex after PR #119 |
-| Remaining blockers have explicit owners | Pass | #118/#119 and #117 assigned |
-| No undeclared shared-file lock | Pass at audit time | No open PR declared a shared runtime file |
+| Canonical workspace and ownership rules merged | Pass | PR #112 and PR #115 |
+| One active implementation path per issue | Pass | Duplicate issue #111 fixes consolidated and repaired through PR #119 |
+| Android unit tests on latest `main` | Pass | Combined Gradle command, `BUILD SUCCESSFUL` |
+| Android debug assembly on latest `main` | Pass | Same combined Gradle command |
+| Unity import and C# compilation | Pass | Unity 2022.3.62f3 batch exit code 0 |
+| Unity EditMode tests | Pass | 3/3 passed |
+| Unity PlayMode runner | Pass with zero available tests | 0 tests recorded explicitly |
+| Representative scene enters Play Mode | Pass | `Assets/Test.unity` probe |
+| Remaining blockers have explicit owners | Pass | No Phase 0 blocker remains |
+| No undeclared shared-file lock | Pass | None open |
 
-Phase 0 must not be marked green until Android validation is repeated successfully on the integrated `main` state and the Unity evidence is recorded.
+## Phase transition
 
-## Duplicate-implementation incident rule
+Phase 0 is green. Phase 1 may begin.
 
-The #111 incident demonstrates that mergeability alone does not make two parallel fixes safe to merge together.
+### Next owner: Android Studio narrative workflow
 
-For all future issues:
-
-1. The first open implementation PR becomes the active path unless the user explicitly requests alternatives.
-2. A later PR for the same root problem must be marked as an alternative, compared against the active PR, and must not merge independently.
-3. Before merging an alternative, GPT must choose one implementation or define a consolidation branch.
-4. If both branches touched the same model, contract, constructor, save object, service registration, or dependency list, a combined-diff review is mandatory.
-5. Validation from either isolated branch does not prove the combined `main` result.
-6. After every merge sequence involving overlapping fixes, rerun validation on the integrated branch.
-
-## Workstream constraints while Phase 0 is red
-
-### GPT
-
-- Triage issue #118, PR #119, and issue #117.
-- Review PR #119 for constructor compatibility and validation evidence; do not create a parallel code fix.
-- Confirm post-fix branch validation and exact integrated-main validation before closing #118.
-- Confirm exact Unity evidence before closing #117.
-- Do not prepare the NVS-01 runtime specification until Android Studio supplies an approved narrative packet and Phase 0 is green.
-
-### Codex
-
-- Work only on PR #119 / issue #118 until it is merged and current-main Android validation passes.
-- Preserve original Boolean constructor positions when retaining the new metadata fields.
-- Then execute issue #117.
-- Do not start NVS-01 runtime implementation while either Phase 0 gate item is unresolved.
-
-### Android Studio narrative workflow
-
-- May inspect existing narrative IDs, references, and candidate quest-line scope on an isolated branch.
-- Must not merge content that depends on unresolved runtime behavior.
-- Must not modify `KingdomModels.kt`, Android build dependencies, Unity bootstrapping, save infrastructure, or runtime services to bypass Phase 0 failures.
-- After Phase 0 is green, select exactly one user-approved bounded quest line for the A1 narrative packet.
-
-### User
-
-- Do not rerun the unchanged broken `main`; the failure is now recorded.
-- After PR #119 is corrected and merged, update the canonical checkout and rerun the combined Android validation command against latest `main`.
-- Approve the first NVS-01 quest-line selection after Android Studio presents the bounded packet scope.
-- Do not merge two technical PRs for the same issue without a GPT consolidation decision.
-
-## Review checklist for PR #119
-
-GPT should clear the blocker only when all are true:
-
-- The branch started from current `main` containing both earlier merges.
-- The pre-fix current-main failure is reproduced and recorded.
-- Only the duplicate declarations and directly related tests changed.
-- `QuestMode` remains available to `QuestScreen`.
-- The retained constructor order preserves the original Boolean parameter positions.
-- Existing quest IDs, titles, descriptions, targets, outcomes, and navigation behavior are unchanged.
-- `QuestModelTest` passes.
-- `:app:testDebugUnitTest` passes on the corrected PR branch.
-- `:app:assembleDebug` passes on the corrected PR branch.
-- Exact command output or an unambiguous result summary is in the PR.
-- No shared runtime integration file is touched.
-- No second open PR targets the same implementation path.
-
-After merge, the same Android command must pass again on latest `main`; branch-only validation is not enough to close the Phase 0 gate.
-
-## Phase transition rule
-
-GPT may declare Phase 0 green only after:
-
-- PR #119 is corrected, approved, merged, and issue #118 is closed with successful post-merge Android test and assembly evidence.
-- Issue #117 is closed with current-main Unity evidence, or every discovered Unity failure has a focused, owned blocker issue and the user explicitly accepts proceeding under that exception.
-- No duplicate implementation PR remains open.
-- No shared-file lock remains undeclared.
-
-The next unblocked Phase 1 task is then:
+Revise draft PR #124 into the A1 deliverable:
 
 ```text
-A1 — Android Studio selects and completes one bounded, user-approved NVS-01 narrative packet on android-studio/nvs-01-narrative-packet.
+A1 — one bounded, user-approved NVS-01 narrative packet for OMEN_1
 ```
+
+Required boundaries:
+
+1. Refresh from latest `main` without discarding authored narrative work.
+2. Keep only the bounded NVS-01 packet in the A1 PR.
+3. Move or defer full Chapter 1, realm-wide hooks, building/research hooks, world-atlas expansion, templates, and general governance work to later PRs.
+4. Remove Unity runtime service, interface, definition deletion, namespace/path migration, and other Codex-owned changes.
+5. Preserve current `Quest` constructor compatibility.
+6. Resolve every dangling dialogue reference.
+7. Make failure, retry, cancellation, recovery, and `FAILED` state semantics internally consistent.
+8. Complete localization references or explicitly define source-text exceptions.
+9. Mark gameplay hooks as semantic requests unless existing runtime support is verified.
+10. List and validate every new or changed ID.
+11. Supply the Android Studio completion report and exact handoff request for GPT.
+
+### Following owner: GPT
+
+After Android Studio updates A1, GPT must verify packet completeness and produce G1: the implementation specification containing the state machine, runtime-event map, contracts, persistence/resume semantics, idempotency, error behavior, file impacts, shared-file locks, test matrix, and merge order.
+
+### Codex hold
+
+Codex must not begin NVS-01 runtime implementation until A1 is approved and GPT publishes G1.

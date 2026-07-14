@@ -108,8 +108,14 @@ The repository uses `main` as the integration branch. Use short-lived `gpt/<scop
 5. Complete `.github/pull_request_template.md`, including ownership, shared-file locks, dependencies, and validation.
 6. Rebase onto latest `main` instead of overwriting collaborator work.
 
-For current status, copy-paste role guidance, the staged roadmap, and the first narrative vertical-slice milestone, see:
+For current Phase 1 status, the D1–D16 decision gate, packet/specification structure, risk tracking, review controls, role guidance, and roadmap, see:
 
+- issue #138 — user D1–D16 approval
+- `unity/Docs/Phase_1_NVS_01_Status.md`
+- `unity/Docs/Phase_1_NVS_01_Risk_Register.md`
+- `unity/Docs/NVS_01_A1_Packet_Template.md`
+- `unity/Docs/NVS_01_G1_Specification_Template.md`
+- `unity/Docs/NVS_01_Review_and_Acceptance_Checklists.md`
 - `unity/Docs/Phase_0_Build_Health_Status.md`
 - `unity/Docs/Agent_Role_Prompts.md`
 - `unity/Docs/Project_Progression_Roadmap.md`
