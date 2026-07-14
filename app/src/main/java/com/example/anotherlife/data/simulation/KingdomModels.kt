@@ -69,6 +69,10 @@ class KingdomState {
     )
 }
 
+enum class QuestMode {
+    Kingdom, Arena3D
+}
+
 data class Quest(
     val id: String,
     val title: String,
@@ -76,7 +80,9 @@ data class Quest(
     var progress: Int = 0,
     val target: Int,
     var isCompleted: Boolean = false,
-    var isClaimed: Boolean = false
+    var isClaimed: Boolean = false,
+    val mode: QuestMode = QuestMode.Kingdom,
+    val mapMarkerId: String? = null
 )
 
 data class Research(
