@@ -108,9 +108,10 @@ The repository uses `main` as the integration branch. Use short-lived `gpt/<scop
 5. Complete `.github/pull_request_template.md`, including ownership, shared-file locks, dependencies, and validation.
 6. Rebase onto latest `main` instead of overwriting collaborator work.
 
-For current status, copy-paste role guidance, the staged roadmap, and the first narrative vertical-slice milestone, see:
+For current status, packet structure, copy-paste role guidance, the staged roadmap, and the first narrative vertical-slice milestone, see:
 
 - `unity/Docs/Phase_1_NVS_01_Status.md`
+- `unity/Docs/NVS_01_A1_Packet_Template.md`
 - `unity/Docs/Phase_0_Build_Health_Status.md`
 - `unity/Docs/Agent_Role_Prompts.md`
 - `unity/Docs/Project_Progression_Roadmap.md`
