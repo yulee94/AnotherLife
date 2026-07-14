@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.material.icons.rounded.Build
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
@@ -20,13 +21,13 @@ import com.example.anotherlife.ui.navigation.Route
 import com.example.anotherlife.ui.simulation.AcademyScreen
 import com.example.anotherlife.ui.simulation.BattleSimulatorScreen
 import com.example.anotherlife.ui.simulation.KingdomDashboard
-import com.example.anotherlife.ui.simulation.WarzoneMapScreen
+import com.example.anotherlife.ui.simulation.QuestScreen
 import com.example.anotherlife.ui.simulation.StoryDialogueScreen
+import com.example.anotherlife.ui.simulation.WarzoneMapScreen
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
 import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.DialogueChoice
-import com.example.anotherlife.ui.unity.UnityView
 
 /**
  * The core adaptive shell of "Another Life".
@@ -72,6 +73,16 @@ fun AnotherLifeShell() {
                 label = { Text("Kingdom") }
             )
             item(
+                selected = currentKey == Route.Quests,
+                onClick = {
+                    if (currentKey != Route.Quests) {
+                        backStack.add(Route.Quests)
+                    }
+                },
+                icon = { Icon(Icons.Rounded.CheckCircle, contentDescription = "Quests") },
+                label = { Text("Quests") }
+            )
+            item(
                 selected = currentKey == Route.Champion,
                 onClick = {
                     if (currentKey != Route.Champion) {
@@ -111,10 +122,20 @@ fun AnotherLifeShell() {
             entryProvider = { key ->
                 when (key) {
                     is Route.Kingdom -> NavEntry(key) { KingdomDashboard(state = kingdomState) }
+                    is Route.Quests -> NavEntry(key) {
+                        QuestScreen(
+                            state = kingdomState,
+                            onLocate = { markerId ->
+                                if (markerId.isNotBlank()) {
+                                    backStack.add(Route.Warzone)
+                                }
+                            }
+                        )
+                    }
                     is Route.Champion -> NavEntry(key) { AcademyScreen(state = kingdomState) }
                     is Route.Battle -> NavEntry(key) { BattleSimulatorScreen(state = kingdomState) }
                     is Route.Warzone -> NavEntry(key) { 
-                        WarzoneMapScreen(state = kingdomState, onAttack = { territory ->
+                        WarzoneMapScreen(state = kingdomState, onAttack = { _ ->
                             // Navigate to Battle screen for the selected territory
                             backStack.add(Route.Battle)
                         }) 

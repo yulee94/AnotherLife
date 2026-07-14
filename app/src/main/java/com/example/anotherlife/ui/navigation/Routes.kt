@@ -6,6 +6,8 @@ sealed interface Route {
     @Serializable
     data object Kingdom : Route
     @Serializable
+    data object Quests : Route
+    @Serializable
     data object Champion : Route
     @Serializable
     data object Battle : Route
