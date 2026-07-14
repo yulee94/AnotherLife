@@ -12,7 +12,7 @@ Phase 0 is **red**. The collaboration baseline is merged, but current `main` is 
 
 The immediate execution order is:
 
-1. Codex resolves issue #116 and proves Android unit tests plus debug assembly on latest `main`.
+1. Codex resolves issue #118 through PR #119 and proves Android unit tests plus debug assembly on latest `main`.
 2. GPT reviews the fix for scope, constructor compatibility, validation evidence, and duplicate-work prevention.
 3. Codex completes issue #117 by validating latest `main` in Unity 2022.3.62f3.
 4. GPT records the Phase 0 gate decision.
@@ -22,22 +22,22 @@ The immediate execution order is:
 
 - Canonical workspace documentation is merged and consistently uses `D:\260711\MY\AndroidStudioProjects\AnotherLife`.
 - Root `AGENTS.md`, standalone role prompts, the staged roadmap, the NVS-01 plan, and the pull-request template are merged.
-- No pull request was open at the start of this audit.
 - No shared runtime integration file was declared by an open pull request at the start of this audit.
 - Issue #111 was addressed by both PR #113 and PR #114.
 - Both PR #113 and PR #114 were merged.
 - Current `KingdomModels.kt` declares `mode` and `mapMarkerId` twice in the `Quest` primary constructor.
 - PR #114 reported `:app:testDebugUnitTest` passing on its pre-merge branch, but that evidence does not prove the later combined `main` state because PR #113 and PR #114 were both merged.
-- No current-main `:app:assembleDebug` result is recorded.
+- No current-main `:app:assembleDebug` result is recorded after the combined duplicate-field state.
 - The Unity project declares editor version `2022.3.62f3`.
 - No current-main Unity import, compilation, EditMode, PlayMode, or representative scene result is recorded after the latest merges.
 
-## Active issues and ownership
+## Active issues, pull requests, and ownership
 
-### Issue #116 — Phase 0 blocker: duplicated Quest metadata
+### Issue #118 / PR #119 — Android duplicate Quest metadata blocker
 
 **Classification:** Blocker  
-**Owner:** Codex
+**Owner:** Codex  
+**GPT review status:** Changes requested by comment for constructor-order compatibility.
 
 Required result:
 
@@ -52,14 +52,21 @@ $env:Path = "$env:JAVA_HOME\bin;$env:Path"
 .\gradlew.bat :app:testDebugUnitTest :app:assembleDebug
 ```
 
+### Issue #116 — Duplicate coordination issue
+
+**Classification:** Duplicate of issue #118  
+**Owner:** GPT to close as duplicate after this status record is published.
+
+Issue #116 captured the same Android duplicate-metadata root cause with stricter constructor-order acceptance criteria. The active implementation path is now PR #119 for issue #118, with GPT's constructor-order review comment carrying that compatibility requirement forward.
+
 ### Issue #117 — Phase 0 gate: current-main Unity validation
 
-**Classification:** Required after #116  
+**Classification:** Required after #118 / PR #119  
 **Owner:** Codex
 
 Required result:
 
-- Validate latest `main` after #116 using Unity 2022.3.62f3.
+- Validate latest `main` after PR #119 merges using Unity 2022.3.62f3.
 - Record import and C# compilation results.
 - Run practical EditMode and PlayMode tests, or state the exact reason they could not run.
 - Enter a representative scene in Play Mode, or create focused issues for each blocker.
@@ -69,11 +76,11 @@ Required result:
 | Gate | Status | Evidence or owner |
 | --- | --- | --- |
 | Canonical workspace and agent rules merged | Pass | PR #112 and PR #115 merged |
-| One active implementation path per issue | Pass now; process incident recorded | No open duplicate PRs; #113 and #114 were both merged for #111 |
-| Android unit tests on latest `main` | Blocked | Issue #116 — Codex |
-| Android debug assembly on latest `main` | Unverified | Issue #116 — Codex |
-| Unity opens and compiles on latest `main` | Unverified | Issue #117 — Codex after #116 |
-| Remaining blockers have explicit owners | Pass | #116 and #117 assigned |
+| One active implementation path per issue | Caution | PR #119 is the active path for #118; #116 is being closed as duplicate |
+| Android unit tests on latest `main` | Blocked | Issue #118 / PR #119 — Codex |
+| Android debug assembly on latest `main` | Unverified | Issue #118 / PR #119 — Codex |
+| Unity opens and compiles on latest `main` | Unverified | Issue #117 — Codex after #119 |
+| Remaining blockers have explicit owners | Pass | #118/#119 and #117 assigned |
 | No undeclared shared-file lock | Pass at audit time | No open PR declared a shared runtime file |
 
 Phase 0 must not be marked green until the Android and Unity evidence is produced against the integrated `main` state.
@@ -95,15 +102,16 @@ For all future issues:
 
 ### GPT
 
-- Triage #116 and #117.
-- Review the first implementation PR for #116; do not create a parallel code fix.
-- Confirm exact integrated validation before closing either issue.
+- Triage issue #118, PR #119, and issue #117.
+- Review PR #119 for constructor compatibility and validation evidence; do not create a parallel code fix.
+- Close issue #116 as duplicate after this status record is aligned.
+- Confirm exact integrated validation before closing #118 or #117.
 - Do not prepare the NVS-01 runtime specification until Android Studio supplies an approved narrative packet and Phase 0 is green.
 
 ### Codex
 
-- Work only on #116 until its PR is merged and current-main Android validation passes.
-- Then execute #117.
+- Work only on PR #119 / issue #118 until it is merged and current-main Android validation passes.
+- Then execute issue #117.
 - Do not start NVS-01 runtime implementation while either Phase 0 gate item is unresolved.
 
 ### Android Studio narrative workflow
@@ -118,9 +126,9 @@ For all future issues:
 - Approve the first NVS-01 quest-line selection after Android Studio presents the bounded packet scope.
 - Do not merge two technical PRs for the same issue without a GPT consolidation decision.
 
-## Review checklist for the #116 pull request
+## Review checklist for PR #119
 
-GPT should approve only when all are true:
+GPT should clear the blocker only when all are true:
 
 - The branch started from current `main` containing both earlier merges.
 - Only the duplicate declarations and directly related tests changed.
@@ -132,14 +140,14 @@ GPT should approve only when all are true:
 - `:app:assembleDebug` passes.
 - Exact command output or an unambiguous result summary is in the PR.
 - No shared runtime integration file is touched.
-- No second open PR targets #116.
+- No second open PR targets the same implementation path.
 
 ## Phase transition rule
 
 GPT may declare Phase 0 green only after:
 
-- #116 is merged and closed with current-main Android test and assembly evidence.
-- #117 is closed with current-main Unity evidence, or every discovered Unity failure has a focused, owned blocker issue and the user explicitly accepts proceeding under that exception.
+- PR #119 is merged and issue #118 is closed with current-main Android test and assembly evidence.
+- Issue #117 is closed with current-main Unity evidence, or every discovered Unity failure has a focused, owned blocker issue and the user explicitly accepts proceeding under that exception.
 - No duplicate implementation PR remains open.
 - No shared-file lock remains undeclared.
 
