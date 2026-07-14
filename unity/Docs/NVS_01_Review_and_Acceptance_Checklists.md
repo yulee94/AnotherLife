@@ -1,425 +1,424 @@
 # NVS-01 Review and Acceptance Checklists
 
-Use these checklists after A1 and G1 are approved and Codex opens the NVS-01 implementation PR.
+Use these evidence-driven checklists after A1 and G1 are approved and Codex opens the NVS-01 implementation PR.
 
-They define evidence and ownership boundaries. They do not change narrative intent or implementation requirements.
+They define review ownership and milestone evidence. They do not change approved narrative intent or implementation requirements.
 
 ## Document control
 
 ```text
 Milestone: NVS-01
-A1 issue/PR/commit:
-User narrative approval:
-G1 issue/PR/commit:
-Codex issue/PR/commit:
-Validated main/base commit:
-Shared-file locks declared:
-Current review stage: G2 / A2 / U1 / Closeout
+User decision issue/comment: #138 / 
+A1 issue/PR/commit: #128 / / 
+G1 issue/PR/commit: #133 / / 
+Codex issue/PR/commit: #134 / / 
+Validated base/main commit:
+Shared-file locks:
+Current stage: G2 / A2 / U1 / Closeout
 ```
 
-## Evidence package required from Codex
+## Required implementation evidence package
 
-Before G2 starts, the implementation PR must contain:
+Before G2 begins, the implementation PR must contain:
 
-- root cause/technical goal,
-- exact A1 and G1 inputs consumed,
+- exact A1 and G1 commits consumed,
+- issue #138 D1–D16 approval reference,
+- technical goal and bounded non-goals,
 - changed files and why,
-- required/optional/shared file declarations,
-- contract/schema decisions,
+- required/optional/prohibited file declarations,
+- shared-file locks,
+- contract/schema/version decisions,
 - loader/validator behavior,
-- state/event implementation mapping,
-- save/default/migration behavior,
-- consequence idempotency behavior,
-- encounter handoff and return behavior,
-- diagnostics/error behavior,
+- state/objective/dialogue/event implementation map,
+- encounter request/result behavior,
+- chapter/realm/location/start/report/artifact mapping,
+- save/default/migration/D16 resume behavior,
+- consequence ordering, atomicity, and idempotency,
+- diagnostics and player-visible error behavior,
 - exact compile/test/manual commands and results,
-- known limitations,
-- unperformed validation and reason,
-- rollback/recovery considerations,
-- confirmation that narrative text/meaning/outcomes were not rewritten.
+- known limitations and unperformed validation,
+- rollback/data-safety notes,
+- confirmation that narrative text, meaning, choices, and outcomes were not rewritten.
 
-A PR without this evidence is not ready for G2 even if code compiles.
+A compiling PR without this evidence is not review-ready.
 
 # G2 — GPT Technical and Integration Review
 
 **Owner:** GPT  
-**Input:** approved A1, approved G1, Codex PR/evidence  
-**Output:** approve, request changes tied to requirements, or block with explicit evidence gap
+**Inputs:** approved #138 decisions, approved A1, approved G1, Codex PR/evidence  
+**Output:** approval, requirement-linked requested changes, or an explicit block
 
 ## G2.1 Dependency and scope
 
-- [ ] A1 PR/commit exactly matches the approved narrative packet.
-- [ ] User narrative approval is linked.
-- [ ] G1 PR/commit exactly matches the implementation handoff.
-- [ ] Codex branch started from the required base.
-- [ ] No parallel implementation PR targets the same completion.
-- [ ] Diff contains one major completion and excludes unrelated cleanup.
-- [ ] Later Chapter 1, cross-system, governance, or Android↔Unity bridge scope is absent unless explicitly approved.
-- [ ] No A1 narrative file was rewritten by Codex.
+- [ ] Issue #138 D1–D16 approval is linked and unchanged.
+- [ ] A1 PR/commit matches the approved packet.
+- [ ] G1 PR/commit matches the implementation handoff.
+- [ ] Codex branch uses the approved base.
+- [ ] No parallel PR implements the same completion.
+- [ ] Diff is one reviewable completion with no unrelated cleanup.
+- [ ] Full Chapter 1, broad hooks/governance, #135 bridge work, and #137 save hardening remain out of scope unless explicitly approved.
+- [ ] No Android Studio narrative source was rewritten by Codex.
 
-## G2.2 Changed-file ownership
+## G2.2 D1–D16 implementation traceability
 
-For every changed file, record:
+For every decision, record the implementation and evidence.
 
-| File | Workstream owner | Required by G1? | Shared lock? | Review result |
+| Decision | Approved meaning | Implementation location | Test/evidence | Result |
+| --- | --- | --- | --- | --- |
+| D1 — handoff | | | | |
+| D2 — failure recovery | | | | |
+| D3 — `FAILED` meaning | | | | |
+| D4 — affinity | | | | |
+| D5 — Gold/Tear timing | | | | |
+| D6 — completion | | | | |
+| D7 — localization policy | | | | |
+| D8 — hook status | | | | |
+| D9 — cancellation | | | | |
+| D10 — chapter/realm placement | | | | |
+| D11 — speaker scope | | | | |
+| D12 — location/access/destination | | | | |
+| D13 — Celestial Tear meaning | | | | |
+| D14 — report interaction | | | | |
+| D15 — start trigger | | | | |
+| D16 — resume/interruption | | | | |
+
+Any mismatch is a blocking fidelity defect, not a discretionary runtime choice.
+
+## G2.3 Changed-file ownership
+
+| File | Workstream owner | Required by G1? | Shared lock | Review result |
 | --- | --- | --- | --- | --- |
 | | | | | |
 
 Checks:
 
-- [ ] Every runtime/test/tool/contract file is within Codex ownership.
-- [ ] Every generated file is deterministic and necessary.
-- [ ] No dialogue, NPC characterization, lore, choice, reward intent, failure meaning, or chapter placement changed.
-- [ ] No file absent from G1’s required/optional impact list changed without explanation and review.
-- [ ] No shared file was edited before its soft lock was declared.
+- [ ] Runtime, test, tooling, and contract files are within Codex ownership.
+- [ ] Generated files are deterministic and necessary.
+- [ ] No dialogue, characterization, lore, choice, reward meaning, failure meaning, or chapter placement changed.
+- [ ] Files outside G1’s impact plan have a reviewed justification.
+- [ ] Shared files were declared before editing.
+- [ ] Existing service registrations and unrelated save fields were preserved.
 
-## G2.3 Contract and source of truth
+## G2.4 Source of truth and contract
 
-- [ ] One authoritative OMEN_1 content source is identified.
+- [ ] One authoritative OMEN_1 content source exists.
 - [ ] Android, Unity, and external tools do not maintain conflicting authoritative copies.
-- [ ] Contract version and supported versions match G1.
+- [ ] Contract/schema ID and version match G1.
 - [ ] Required/optional fields match G1.
 - [ ] Stable IDs match A1 exactly.
 - [ ] Internal references resolve.
-- [ ] External dependencies are not falsely marked implemented.
-- [ ] Shared contracts contain no `UnityEngine` types where Fable compatibility applies.
-- [ ] Runtime does not silently substitute unrelated fallback story data.
+- [ ] External dependencies remain honestly requested or are verified with evidence.
+- [ ] Shared/Fable records contain no `UnityEngine` types where applicable.
+- [ ] Invalid/missing authoritative content does not silently fall back to unrelated story data.
 
-## G2.4 Validation/error behavior
+## G2.5 Validation and error behavior
 
-Verify tests/evidence for:
+Verify automated evidence for:
 
-- [ ] missing catalog/data,
-- [ ] malformed data,
+- [ ] missing catalog,
+- [ ] malformed catalog,
 - [ ] unsupported version,
 - [ ] duplicate IDs,
-- [ ] missing dialogue target,
-- [ ] invalid terminal target,
-- [ ] missing objective,
-- [ ] invalid/unreachable transition,
-- [ ] unknown/unavailable hook,
-- [ ] unknown location,
-- [ ] invalid consequence target,
-- [ ] corrupted/partial persisted state.
+- [ ] missing internal reference,
+- [ ] missing dialogue target or speaker,
+- [ ] invalid terminal,
+- [ ] missing state/objective,
+- [ ] unreachable or invalid transition,
+- [ ] unknown hook/location/event,
+- [ ] unavailable dependency,
+- [ ] invalid artifact/consequence target,
+- [ ] corrupted or partial persisted state,
+- [ ] duplicate, late, or mismatched encounter result.
 
 For every failure:
 
-- [ ] diagnostics are clear,
+- [ ] diagnostics are specific,
+- [ ] player/runtime enters the G1-approved safe state,
 - [ ] quest does not silently complete,
-- [ ] rewards/consequences are not applied,
-- [ ] player/runtime enters the G1-approved safe state.
+- [ ] chapter does not falsely advance,
+- [ ] affinity/reward/artifact is not applied.
 
-## G2.5 State machine fidelity
+## G2.6 State, objective, and dialogue fidelity
 
-Compare every G1 transition to code/tests:
-
-| G1 transition | Implementation location | Test | Result |
+| G1 transition/objective/node | Implementation | Test | Result |
 | --- | --- | --- | --- |
 | | | | |
 
-Checks:
+- [ ] D15 start transition is deterministic.
+- [ ] Optional lore/choice path is preserved.
+- [ ] Every state is reachable only through approved paths.
+- [ ] No extra narrative branch exists.
+- [ ] D2/D3 terminal/transient/recovery semantics match.
+- [ ] Invalid events are rejected visibly.
+- [ ] Objective activation/completion matches A1/G1.
+- [ ] Reserved terminal is distinct from a missing target.
+- [ ] D14 report interaction requires the approved player action.
+- [ ] Replayed dialogue does not duplicate consequences.
 
-- [ ] entry/unlock transition is deterministic,
-- [ ] optional lore/choice branch is preserved,
-- [ ] every state is reachable only through approved paths,
-- [ ] no extra narrative branch was added,
-- [ ] terminal/transient/recovery semantics match A1/G1,
-- [ ] invalid events are rejected visibly,
-- [ ] objective activation/completion matches G1,
-- [ ] reserved dialogue terminal is distinguished from missing targets.
+## G2.7 Encounter handoff and result
 
-## G2.6 Encounter handoff
+- [ ] Existing Champion arena is reused rather than duplicated.
+- [ ] Quest launch carries approved quest/state/objective/hook/location/realm context.
+- [ ] Free/non-quest Champion entry still works.
+- [ ] D1 request behavior matches A1.
+- [ ] Success maps to the approved event/state.
+- [ ] D2/D3 failure maps to the approved recovery path.
+- [ ] D9 cancel/unavailable behavior matches G1.
+- [ ] Context survives required scene transitions.
+- [ ] Duplicate request/result is idempotent.
+- [ ] Late or mismatched results fail safely.
+- [ ] Missing scene/hook/context is visible.
+- [ ] Android `UnityView` is not represented as a completed bridge unless #135 is in scope.
 
-- [ ] Existing Champion arena is reused; no duplicate combat implementation exists.
-- [ ] Quest launch carries the approved request/context IDs.
-- [ ] Free/non-quest Champion entry remains operational.
-- [ ] Success result maps to the approved success event/state.
-- [ ] Failure result maps to the approved failure/recovery event/state.
-- [ ] Cancel/unavailable/interruption behavior matches G1.
-- [ ] Context survives required scene transitions/reloads.
-- [ ] Duplicate result delivery is suppressed/handled idempotently.
-- [ ] Missing hook/scene/context fails visibly.
-- [ ] Android `UnityView` placeholder is not represented as a completed bridge unless #135 was explicitly brought into scope.
+## G2.8 Chapter, realm, speaker, location, and start
 
-## G2.7 Chapter/realm progression
-
-- [ ] Entry mapping matches A1-approved D10–D12.
-- [ ] Realm/speaker scope matches A1.
+- [ ] D10 chapter/realm placement matches A1.
+- [ ] D11 speaker/Valerius scope matches A1.
+- [ ] D12 location presentation and access rules match A1.
+- [ ] D15 start trigger is implemented once and tested.
 - [ ] Saved chapter/context mutation is real and testable.
-- [ ] Generic `AdvanceStory()` is not mistaken for mutation unless implementation changed according to G1.
-- [ ] Invalid/legacy chapter IDs are handled according to migration rules.
-- [ ] Post-completion destination/unlock matches A1.
+- [ ] Generic `AdvanceStory()` event emission is not mistaken for mutation.
+- [ ] Legacy/invalid chapter IDs follow G1 migration/error rules.
+- [ ] Post-completion destination/unlock matches D12.
 
-## G2.8 Persistence/defaults/migration
+## G2.9 Celestial Tear and report
+
+- [ ] D13 acquisition/delivery/retention/consumption meaning is preserved.
+- [ ] Artifact definition lookup is stable and validated.
+- [ ] Ownership or kingdom/story representation is persisted when required.
+- [ ] Equipment/boss-loot models are reused only with G1 justification.
+- [ ] D14 manual/automatic/custom report behavior matches A1.
+- [ ] Objective wording agrees with D13 and D14.
+- [ ] Missing artifact definition fails visibly without false completion.
+- [ ] Duplicate acquisition/delivery is prevented.
+
+## G2.10 Persistence, defaults, migration, and D16
 
 - [ ] Persisted fields match G1.
 - [ ] Old-save defaults are present.
-- [ ] Issue #136 or equivalent required normalization is complete before affinity/faction/persona consequences.
-- [ ] Existing non-null old-save data is preserved.
-- [ ] Mid-dialogue resume matches A1/G1.
-- [ ] Pre-handoff reload matches G1.
-- [ ] Mid-handoff interruption/recovery matches G1.
-- [ ] Failure/retry reload matches G1.
-- [ ] Success-before-report reload matches G1.
+- [ ] #136 or equivalent normalization is complete before affinity/faction/persona effects.
+- [ ] Existing non-null values are preserved.
+- [ ] Mid-dialogue reload matches D16.
+- [ ] Pre-handoff reload matches D16.
+- [ ] Mid-handoff and mid-arena interruption match D16.
+- [ ] Failure/retry reload matches D2/D3/D16.
+- [ ] Success-before-report reload matches D5/D6/D14/D16.
+- [ ] During-report reload matches D14/D16.
+- [ ] Partial-consequence reload recovers deterministically.
 - [ ] Completed-state reload remains completed.
-- [ ] Corrupted/partial narrative state has visible recovery/failure.
-- [ ] Existing unrelated save fields are unchanged.
+- [ ] Corrupted/partial state has visible safe behavior.
 
-## G2.9 Consequence idempotency and atomicity
-
-For each consequence:
+## G2.11 Consequence atomicity and idempotency
 
 | Consequence | Approved trigger | Idempotency key | Fault/reload tests | Result |
 | --- | --- | --- | --- | --- |
 | Affinity | | | | |
 | Gold/resource | | | | |
-| Artifact/reward | | | | |
+| Celestial Tear | | | | |
 | Completion | | | | |
-| Faction/world state if approved | | | | |
+| Chapter/unlock | | | | |
+| Faction/world state, if approved | | | | |
 
-Checks:
+- [ ] Operation order matches D4–D6, D13, and D14.
+- [ ] Duplicate success result applies nothing twice.
+- [ ] Dialogue replay applies nothing twice.
+- [ ] Retry applies nothing twice.
+- [ ] Fault injection after every boundary recovers deterministically.
+- [ ] Applied-effect ledger and actual service state agree.
+- [ ] One-time effects stay one-time after reload.
+- [ ] Repeatable effects repeat only under approved conditions.
 
-- [ ] operation order matches G1,
-- [ ] duplicate success event applies nothing twice,
-- [ ] dialogue replay applies nothing twice,
-- [ ] retry applies nothing twice,
-- [ ] partial failure after each consequence boundary recovers deterministically,
-- [ ] ledger/save state agrees with applied effects,
-- [ ] one-time effects remain one-time after reload,
-- [ ] intentionally repeatable effects repeat only under approved conditions.
-
-## G2.10 Artifact/reward implementation
-
-- [ ] Celestial Tear representation matches A1-approved meaning.
-- [ ] Definition lookup is stable and validated.
-- [ ] Ownership/consumption is persisted if required.
-- [ ] Equipment/boss-loot models were not reused without G1 justification.
-- [ ] acquisition/delivery/retention timing matches A1.
-- [ ] duplicate acquisition is prevented.
-- [ ] missing definition fails visibly without false completion.
-
-## G2.11 Regression and validation evidence
+## G2.12 Regression evidence
 
 Required exact evidence:
 
 - [ ] Unity batch import/C# compile.
-- [ ] EditMode test totals/results.
-- [ ] PlayMode test totals/results.
-- [ ] Existing representative scene smoke.
+- [ ] EditMode totals/results.
+- [ ] PlayMode totals/results.
+- [ ] Representative scene smoke.
+- [ ] Free Champion path.
 - [ ] NVS-01 happy path.
-- [ ] NVS-01 branch path.
-- [ ] failure/retry path.
-- [ ] reload/resume matrix.
-- [ ] invalid-data matrix.
-- [ ] duplicate/fault-injection matrix.
+- [ ] Optional branch path.
+- [ ] Failure/retry path.
+- [ ] Cancellation/unavailable path when applicable.
+- [ ] D16 reload/resume matrix.
+- [ ] Invalid-data matrix.
+- [ ] Duplicate/fault-injection matrix.
 - [ ] Android unit tests.
 - [ ] Android debug assembly.
-- [ ] schema/Fable validation when applicable.
-- [ ] exact tested branch and SHA.
-- [ ] final worktree/diff cleanliness.
+- [ ] Schema/Fable validation when applicable.
+- [ ] Exact tested branch and SHA.
+- [ ] Final diff/worktree cleanliness.
 
-No result may be inferred from a different branch or pre-merge state.
-
-## G2.12 G2 decision
+## G2 decision
 
 ```text
-Decision: Approve / Changes requested / Blocked
-Requirements violated or satisfied:
-Evidence gaps:
-Shared-lock status:
-Required next owner:
+Result: Approved / Changes requested / Blocked
+Requirement/evidence references:
+Shared locks released?:
+Handoff to A2:
 ```
-
-Requested changes must cite A1, G1, acceptance criteria, or verified regression risk. GPT must not request narrative changes based on preference.
 
 # A2 — Android Studio Narrative-Fidelity Review
 
 **Owner:** Android Studio narrative workflow  
-**Input:** approved A1 packet, integrated implementation build  
-**Output:** narrative fidelity approval or implementation discrepancies
+**Inputs:** issue #138, approved A1/G1, implemented runtime build  
+**Output:** fidelity approval or precise narrative mismatch report
 
-## A2.1 Narrative source integrity
+## A2.1 Decision fidelity
 
-- [ ] Dialogue text/key references match approved A1.
-- [ ] Speaker identity, display name, role, and realm scope match A1.
-- [ ] Quest title/description/objectives match A1.
-- [ ] Player choices and ordering match A1.
-- [ ] Lore/continuity meaning is unchanged.
-- [ ] No runtime fallback displays contradictory story content.
-- [ ] Localization/source-text exceptions match A1.
+- [ ] D1–D16 each match the approved issue #138 answer.
+- [ ] No runtime wording changes the approved tone or meaning.
+- [ ] No speaker substitution or realm scope was invented.
+- [ ] No reward, artifact, failure, report, completion, or resume meaning drifted.
 
-## A2.2 Player-flow fidelity
+Use the same D1–D16 table from G2 and record `match/mismatch/not testable` with evidence.
 
-- [ ] Quest becomes available at the approved chapter/realm moment.
-- [ ] Initial conversation begins as approved.
-- [ ] Optional lore branch is available and returns correctly.
-- [ ] Arena handoff occurs at the approved narrative beat.
-- [ ] Success return/report sequence matches A1.
-- [ ] Failure dialogue and recovery path match A1.
-- [ ] Cancellation/abandonment matches A1.
-- [ ] Completion timing matches A1.
-- [ ] Post-completion narrative destination matches A1.
+## A2.2 Narrative content
 
-## A2.3 Consequence fidelity
+- [ ] Quest title and description match A1.
+- [ ] Objective text and ordering match A1.
+- [ ] Speaker IDs/display names match A1.
+- [ ] Dialogue lines and choices match A1.
+- [ ] Optional lore branch remains optional and coherent.
+- [ ] Failure/retry text matches the approved recovery meaning.
+- [ ] Celestial Tear wording agrees with D13.
+- [ ] Report wording agrees with D14.
+- [ ] Post-completion continuity agrees with D12.
 
-- [ ] Affinity amount/target/timing matches A1.
-- [ ] Gold amount/timing matches A1.
-- [ ] Celestial Tear meaning/timing/retention matches A1.
-- [ ] Quest completion meaning matches A1.
-- [ ] Faction/world-state effects, if any, match A1.
-- [ ] Repeatability/one-time intent is honored from the player’s perspective.
+## A2.3 State and consequence meaning
 
-## A2.4 Recovery and continuity fidelity
+- [ ] Player-visible state sequence matches A1.
+- [ ] Failure/retry/cancellation meaning matches D2/D3/D9.
+- [ ] Affinity, Gold, Tear, and completion occur at approved narrative moments.
+- [ ] No consequence is presented twice.
+- [ ] Reload/resume presentation matches D16.
+- [ ] Technical errors do not masquerade as narrative outcomes.
 
-- [ ] Mid-dialogue reload does not change narrative meaning.
-- [ ] Arena interruption recovery matches approved meaning.
-- [ ] Failure/retry preserves intended tone and progression.
-- [ ] Reload after success/report does not replay contradictory dialogue.
-- [ ] Completed quest remains narratively complete.
-- [ ] Later Chapter 1/deferred content was not accidentally exposed.
+## A2.4 Localization/source text
 
-## A2.5 A2 decision
+- [ ] D7 policy is followed.
+- [ ] Keys match A1.
+- [ ] Approved source-text exceptions are the only embedded player-facing text.
+- [ ] Missing text/key is visible as a defect rather than silently replaced.
+
+## A2 decision
 
 ```text
-Decision: Narrative fidelity approved / Implementation discrepancy found / Creative change requested
-Discrepancies tied to A1:
-Creative change requiring user approval and A1 revision:
-Files/data affected:
-Next owner:
+Result: Approved / Changes requested / Blocked
+Narrative mismatches:
+Evidence:
+Handoff to U1:
 ```
 
-When implementation differs from A1, report an implementation issue. Do not silently edit runtime code or source narrative.
-
-When creative intent changes, revise/approve A1 first, then revise G1, then request Codex changes.
-
-# U1 — User Playtest and Milestone Acceptance
+# U1 — User Playtest and Acceptance
 
 **Owner:** User  
-**Input:** G2-approved implementation and A2-approved narrative build  
-**Output:** accept, reject with classified issues, or approve with documented exception
+**Inputs:** G2-approved build, A2 fidelity approval, test instructions  
+**Output:** accept NVS-01, reject with observed defect, or defer
 
-## U1.1 Test identity
+## U1.1 Test setup
+
+Record:
 
 ```text
-Build/commit:
+Build/branch/commit:
 Platform/device:
-Profile/save used:
-New profile or migrated save:
+Save fixture: new / old / migrated
 Realm/context:
-Date:
+Entry path:
+Known limitations disclosed:
 ```
 
-## U1.2 Start and readability
+## U1.2 Core playtest
 
-- [ ] OMEN_1 becomes available at the expected time.
-- [ ] Quest title/description/objectives are understandable.
-- [ ] Valerius/speaker presentation is coherent.
-- [ ] Player knows what action starts the quest.
-- [ ] Optional lore/choice branch is clear.
-- [ ] Arena handoff action is clear and responsive.
+- [ ] D15 quest start is understandable and works.
+- [ ] Initial advisor interaction is correct.
+- [ ] Optional lore choice behaves as expected.
+- [ ] D1 handoff is clear and enters the intended encounter.
+- [ ] Arena can succeed and return correctly.
+- [ ] D2/D3 failure and retry feel coherent.
+- [ ] D9 cancellation/unavailable behavior is acceptable when applicable.
+- [ ] D14 report interaction requires the intended action.
+- [ ] D13 Celestial Tear meaning is clear.
+- [ ] D4–D6 affinity/reward/completion occur at the intended moments.
+- [ ] D12 post-completion destination is correct.
 
-## U1.3 Gameplay handoff
+## U1.3 Reload and duplicate-safety playtest
 
-- [ ] Existing Champion arena loads successfully.
-- [ ] Quest context is visibly or diagnostically correct.
-- [ ] Free Champion mode remains usable outside the quest.
-- [ ] Success returns to the intended narrative state.
-- [ ] Failure returns to the intended recovery state.
-- [ ] Cancel/back/interruption behavior is understandable.
+Test practical D16 points:
 
-## U1.4 Consequences
+- [ ] close/reload during dialogue,
+- [ ] close/reload before handoff,
+- [ ] close/reload during encounter or its supported recovery point,
+- [ ] close/reload after failure,
+- [ ] close/reload after success before report,
+- [ ] close/reload during/after report,
+- [ ] reload completed quest.
 
-- [ ] Affinity effect feels narratively correct.
-- [ ] Gold/reward timing feels correct.
-- [ ] Celestial Tear behavior matches approved story meaning.
-- [ ] Quest completion happens at the intended moment.
-- [ ] No reward/consequence repeats after revisiting dialogue or reloading.
+Confirm:
 
-## U1.5 Save/reload scenarios
+- [ ] no duplicate affinity,
+- [ ] no duplicate Gold,
+- [ ] no duplicate Tear,
+- [ ] no duplicate completion/unlock,
+- [ ] no lost approved progress,
+- [ ] no false success after an error.
 
-Test at least:
+## U1.4 Presentation and clarity
 
-- [ ] before quest start,
-- [ ] during dialogue,
-- [ ] after acceptance before arena,
-- [ ] after failure before retry,
-- [ ] after success before report/completion,
-- [ ] after completion.
+- [ ] Quest purpose is understandable.
+- [ ] Speaker/realm/location context is coherent.
+- [ ] Dialogue choices communicate their effect.
+- [ ] Failure and retry instructions are clear.
+- [ ] Reward/artifact presentation matches the approved meaning.
+- [ ] Error/unavailable states are understandable.
+- [ ] Localization/source text is acceptable for the milestone.
 
-For each:
+## U1 decision
 
 ```text
-Save point:
-Observed loaded state:
-Expected state:
-Duplicate/missing consequence:
-Result:
+Result: Accepted / Rejected / Deferred
+Observed defects:
+Narrative concerns:
+Technical concerns:
+Required follow-up issues:
+Acceptance date/reference:
 ```
 
-## U1.6 Failure and recovery
+# Final milestone closeout
 
-- [ ] Arena defeat messaging makes sense.
-- [ ] Retry action/path is clear.
-- [ ] Quest cannot become silently stuck.
-- [ ] Unavailable/missing content produces visible safe behavior.
-- [ ] Existing unrelated gameplay remains operational.
+NVS-01 may close only when:
 
-## U1.7 User acceptance decision
-
-Classify findings:
-
-- **Blocker:** prevents milestone acceptance or risks data loss.
-- **Required:** violates approved A1/G1 or core usability.
-- **Follow-up:** valuable but not required for NVS-01 gate.
-- **Deferred:** later phase or speculative expansion.
-
-```text
-Decision: Accept / Reject / Accept with documented exception
-Blockers:
-Required fixes:
-Follow-ups:
-Deferred ideas:
-Creative observations:
-```
-
-User acceptance does not automatically authorize later-phase scope. New creative direction must enter the appropriate Android Studio packet/roadmap issue.
-
-# Milestone Closeout
-
-GPT may close NVS-01 only when:
-
-- [ ] A1 clean narrative packet is merged.
-- [ ] User narrative approval is recorded.
-- [ ] G1 specification is merged.
-- [ ] Codex implementation is merged in dependency order.
-- [ ] G2 technical review passes.
-- [ ] A2 narrative-fidelity review passes.
-- [ ] U1 user acceptance passes.
-- [ ] Android and Unity validation evidence is recorded on the integrated commit.
-- [ ] All shared-file locks are released.
-- [ ] No duplicate implementation PR remains open.
-- [ ] Required issues are closed or explicitly deferred with owners.
-- [ ] Final integrated commit is identified.
-- [ ] Phase 1 status and risk register are updated.
-- [ ] Next Phase 2 task is selected from the roadmap rather than self-assigned ad hoc.
+- [ ] #138 D1–D16 approval is recorded.
+- [ ] A1 and G1 are approved and merged.
+- [ ] Codex implementation is merged.
+- [ ] G2 is approved.
+- [ ] A2 is approved.
+- [ ] U1 is accepted.
+- [ ] All shared locks are released.
+- [ ] Required save/default/migration evidence is recorded.
+- [ ] No known Critical/High unaccepted defect remains.
+- [ ] Deferred work has focused issues and owners.
+- [ ] Phase status and risk register are updated.
+- [ ] Draft PR #124 is closed as superseded only after preservation is confirmed.
 
 ## Closeout report
 
 ```text
 Milestone: NVS-01
-Final integrated commit:
-A1 PR:
-G1 PR:
-Implementation PR(s):
+Approved #138 decision reference:
+A1 PR/commit:
+G1 PR/commit:
+Implementation PR/commit:
 G2 result:
 A2 result:
 U1 result:
-Android validation:
-Unity validation:
+Tests/builds:
 Save compatibility:
-Shared locks released:
-Closed issues:
+Shared locks:
+Closed risks:
+Accepted risks:
 Deferred issues:
-Known residual risks:
 Next roadmap phase/task:
 ```
