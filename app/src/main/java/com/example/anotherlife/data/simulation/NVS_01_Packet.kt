@@ -81,6 +81,14 @@ object NVS_01_Packet {
             choices = listOf(
                 DialogueChoice("The kingdom is safe for now.", "end")
             )
+        ),
+        DialogueNode(
+            id = "DLG_OMEN_1_FAILURE",
+            characterName = "Captain Valerius",
+            text = "The vibrations were too strong, My Lord. Your safety is paramount. We must regroup and try again when you are ready.",
+            choices = listOf(
+                DialogueChoice("I will return soon.", "end")
+            )
         )
     )
 
@@ -95,6 +103,10 @@ object NVS_01_Packet {
         "EVENT_ARENA_ENCOUNTER_SUCCESS:HOOK_SKY_CASTLE_ARENA" to listOf(
             "TRANSITION_STATE:REPORT_TO_VALERIUS",
             "TRIGGER_DIALOGUE:DLG_OMEN_1_SUCCESS"
+        ),
+        "EVENT_ARENA_ENCOUNTER_FAILURE:HOOK_SKY_CASTLE_ARENA" to listOf(
+            "TRANSITION_STATE:TALK_TO_VALERIUS", // Recovery point
+            "TRIGGER_DIALOGUE:DLG_OMEN_1_FAILURE"
         ),
         "DLG_OMEN_1_SUCCESS" to listOf(
             "ADD_RESOURCE:GOLD:500",
