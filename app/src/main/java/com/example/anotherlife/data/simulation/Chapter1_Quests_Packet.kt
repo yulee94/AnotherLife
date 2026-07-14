@@ -33,6 +33,34 @@ object Chapter1_Quests_Packet {
             consequences = mapOf(
                 "COMPLETION" to listOf("REPUTATION:FACT_DWARVEN_FORGE:+20", "ORE_PRODUCTION:+15%")
             )
+        ),
+        QuestTemplate(
+            id = "EG_BLIGHT_1",
+            titleKey = "Purging the Blight",
+            descKey = "Investigate the fungal spread at the World Tree border.",
+            type = QuestType.MAIN,
+            handoff = "HOOK_KINGDOM_BLIGHT_PURGE",
+            objectives = listOf(
+                QuestObjective("Gather 300 Mana Stones", 300),
+                QuestObjective("Heal 5 Blighted Treants", 5)
+            ),
+            consequences = mapOf(
+                "COMPLETION" to listOf("REPUTATION:FACT_ELVEN_GLADE:+20", "WOOD_PRODUCTION:+20%")
+            )
+        ),
+        QuestTemplate(
+            id = "UM_RIFT_1",
+            titleKey = "Echoes of the Void",
+            descKey = "Stabilize the unstable magma vents in the Umbral peaks.",
+            type = QuestType.MAIN,
+            handoff = "HOOK_KINGDOM_RIFT_STABILIZATION",
+            objectives = listOf(
+                QuestObjective("Gather 400 Dark Crystals", 400),
+                QuestObjective("Seal 2 Void Leaks", 2)
+            ),
+            consequences = mapOf(
+                "COMPLETION" to listOf("REPUTATION:FACT_DARK_ELF_RIFT:+20", "MANA_PRODUCTION:+10%")
+            )
         )
     )
 

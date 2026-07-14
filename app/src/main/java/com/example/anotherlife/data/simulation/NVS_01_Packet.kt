@@ -71,7 +71,7 @@ object NVS_01_Packet {
             characterName = "Captain Valerius",
             text = "As you command. The Sky Castle awaits your arrival. Be prepared for anything.",
             choices = listOf(
-                DialogueChoice("[Transition to Arena]", "DLG_OMEN_1_ARENA_START")
+                DialogueChoice("[Transition to Arena]", "end")
             )
         ),
         DialogueNode(

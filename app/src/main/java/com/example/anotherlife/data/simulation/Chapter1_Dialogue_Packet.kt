@@ -61,6 +61,70 @@ object Chapter1_Dialogue_Packet {
         )
     )
 
+    val eldergroveNodes = listOf(
+        DialogueNode(
+            id = "DLG_EG_C1_START",
+            characterName = "Molly",
+            text = "The World Tree's song is discordant, My Lord. A sickly grey rot creeps from the border. We must purge the blight or lose the wood's blessing.",
+            choices = listOf(
+                DialogueChoice("Initiate the Purge.", "DLG_EG_C1_PURGE"),
+                DialogueChoice("Search for the source first.", "DLG_EG_C1_SOURCE")
+            )
+        ),
+        DialogueNode(
+            id = "DLG_EG_C1_PURGE",
+            characterName = "Molly",
+            text = "I've prepared the purification rites. We'll need a vast amount of pure Mana Stones to fuel the cleansing.",
+            choices = listOf(
+                DialogueChoice("Begin the rites.", "end")
+            )
+        ),
+        DialogueNode(
+            id = "DLG_EG_C1_SOURCE",
+            characterName = "Molly",
+            text = "Searching for answers while the wood burns? Courageous, or perhaps foolhardy. We will send wardens to the 'Obsidian Peaks' border.",
+            choices = listOf(
+                DialogueChoice("Protect our borders.", "end")
+            )
+        )
+    )
+
+    val umbralNodes = listOf(
+        DialogueNode(
+            id = "DLG_UM_C1_START",
+            characterName = "Xerath",
+            text = "The Void is restless. The magma vents flare with an unnatural indigo light. If we do not stabilize the rift, the very earth will shatter.",
+            choices = listOf(
+                DialogueChoice("Stabilize the vents.", "DLG_UM_C1_STABILIZE"),
+                DialogueChoice("Harness the energy instead.", "DLG_UM_C1_HARNESS")
+            )
+        ),
+        DialogueNode(
+            id = "DLG_UM_C1_STABILIZE",
+            characterName = "Xerath",
+            text = "A prudent decision. We shall use Dark Crystals to anchor the energies. It will cost much, but buy us safety.",
+            choices = listOf(
+                DialogueChoice("Proceed with caution.", "end")
+            )
+        ),
+        DialogueNode(
+            id = "DLG_UM_C1_HARNESS",
+            characterName = "Xerath",
+            text = "Dangerous, yet potentially lucrative. The power is immense. I will begin the extraction, but be warned: the Radiant Council will not be pleased.",
+            choices = listOf(
+                DialogueChoice("Power justifies the risk.", "end")
+            )
+        ),
+        DialogueNode(
+            id = "DLG_C1_RECOVERY_RESOURCE",
+            characterName = "Advisor",
+            text = "We lack the necessary materials to proceed, My Lord. I suggest focusing on our resource production or perhaps a tactical raid to replenish our stores.",
+            choices = listOf(
+                DialogueChoice("I will oversee the production.", "end")
+            )
+        )
+    )
+
     // Consequences for Chapter 1 Choices
     val consequences = mapOf(
         "DLG_CL_C1_WALLS" to listOf(
@@ -77,6 +141,21 @@ object Chapter1_Dialogue_Packet {
             "SET_QUEST_STATE:SH_FORGE_1:ACTIVE",
             "SET_REPUTATION:FACT_DWARVEN_FORGE:+15",
             "ADD_RESOURCE_MODIFIER:ORE_PRODUCTION:+10%"
+        ),
+        "DLG_EG_C1_PURGE" to listOf(
+            "SET_QUEST_STATE:EG_BLIGHT_1:ACTIVE",
+            "SET_REPUTATION:FACT_ELVEN_GLADE:+15",
+            "SET_STRATEGIC_BIAS:ARCANE"
+        ),
+        "DLG_UM_C1_STABILIZE" to listOf(
+            "SET_QUEST_STATE:UM_RIFT_1:ACTIVE",
+            "SET_REPUTATION:FACT_DARK_ELF_RIFT:+15",
+            "SET_STRATEGIC_BIAS:ECONOMIC"
+        ),
+        "DLG_UM_C1_HARNESS" to listOf(
+            "SET_REPUTATION:FACT_HUMAN_COUNCIL:-25",
+            "ADD_RESOURCE_MODIFIER:MANA_PRODUCTION:+20%",
+            "SET_STRATEGIC_BIAS:SHADOW"
         )
     )
 }
