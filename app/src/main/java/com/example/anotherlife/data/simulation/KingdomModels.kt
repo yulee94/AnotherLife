@@ -22,6 +22,11 @@ data class Troop(
     val count: Int
 )
 
+enum class QuestMode {
+    Kingdom,
+    Arena3D
+}
+
 class KingdomState {
     val resources = mutableStateMapOf(
         ResourceType.Food to 1000L,
@@ -79,6 +84,8 @@ data class Quest(
     val description: String,
     var progress: Int = 0,
     val target: Int,
+    val mode: QuestMode = QuestMode.Kingdom,
+    val mapMarkerId: String? = null,
     var isCompleted: Boolean = false,
     var isClaimed: Boolean = false,
     val mode: QuestMode = QuestMode.Kingdom,

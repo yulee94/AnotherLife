@@ -1,14 +1,17 @@
 package com.example.anotherlife.ui.shell
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.material.icons.rounded.Build
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
@@ -60,54 +63,58 @@ fun AnotherLifeShell() {
     val backStack = remember { mutableStateListOf<Any>(Route.Kingdom) }
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            item(
-                selected = currentKey == Route.Kingdom,
-                onClick = { 
-                    backStack.clear()
-                    backStack.add(Route.Kingdom) 
-                },
-                icon = { Icon(Icons.Rounded.Build, contentDescription = "Kingdom") },
-                label = { Text("Kingdom") }
-            )
-            item(
-                selected = currentKey == Route.Champion,
-                onClick = {
-                    if (currentKey != Route.Champion) {
-                        backStack.add(Route.Champion)
-                    }
-                },
-                icon = { Icon(Icons.Rounded.AccountBox, contentDescription = "Academy") },
-                label = { Text("Academy") }
-            )
-            item(
-                selected = currentKey == Route.Battle,
-                onClick = {
-                    if (currentKey != Route.Battle) {
-                        backStack.add(Route.Battle)
-                    }
-                },
-                icon = { Icon(Icons.Rounded.Star, contentDescription = "Battle") },
-                label = { Text("Battle") }
-            )
-            item(
-                selected = currentKey == Route.Warzone,
-                onClick = {
-                    if (currentKey != Route.Warzone) {
-                        backStack.add(Route.Warzone)
-                    }
-                },
-                icon = { Icon(Icons.Rounded.LocationOn, contentDescription = "Warzone") },
-                label = { Text("Warzone") }
-            )
+    Scaffold(
+        bottomBar = {
+            NavigationBar {
+                NavigationBarItem(
+                    selected = currentKey == Route.Kingdom,
+                    onClick = {
+                        backStack.clear()
+                        backStack.add(Route.Kingdom)
+                    },
+                    icon = { Icon(Icons.Rounded.Build, contentDescription = "Kingdom") },
+                    label = { Text("Kingdom") }
+                )
+                NavigationBarItem(
+                    selected = currentKey == Route.Champion,
+                    onClick = {
+                        if (currentKey != Route.Champion) {
+                            backStack.add(Route.Champion)
+                        }
+                    },
+                    icon = { Icon(Icons.Rounded.AccountBox, contentDescription = "Academy") },
+                    label = { Text("Academy") }
+                )
+                NavigationBarItem(
+                    selected = currentKey == Route.Battle,
+                    onClick = {
+                        if (currentKey != Route.Battle) {
+                            backStack.add(Route.Battle)
+                        }
+                    },
+                    icon = { Icon(Icons.Rounded.Star, contentDescription = "Battle") },
+                    label = { Text("Battle") }
+                )
+                NavigationBarItem(
+                    selected = currentKey == Route.Warzone,
+                    onClick = {
+                        if (currentKey != Route.Warzone) {
+                            backStack.add(Route.Warzone)
+                        }
+                    },
+                    icon = { Icon(Icons.Rounded.LocationOn, contentDescription = "Warzone") },
+                    label = { Text("Warzone") }
+                )
+            }
         }
-    ) {
+    ) { contentPadding ->
         // NavDisplay observes the backstack and reflects state changes in the UI
         NavDisplay(
             backStack = backStack,
             onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(contentPadding),
             entryProvider = { key ->
                 when (key) {
                     is Route.Kingdom -> NavEntry(key) { KingdomDashboard(state = kingdomState) }
