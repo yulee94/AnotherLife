@@ -14,7 +14,7 @@ The canonical Android checkout was fetched and fast-forwarded to `main`, `HEAD` 
 
 Unity was then validated from a clean worktree created from the same integrated `main` commit with Unity `2022.3.62f3`. Batch import and C# compilation completed successfully, all available EditMode tests passed, the PlayMode runner completed with no tests available, and `Assets/Test.unity` entered and exited Play Mode successfully through a temporary editor-only validation probe.
 
-The project may now advance to Phase 1. The next active delivery is A1: Android Studio must revise draft PR #124 into exactly one bounded, user-approved NVS-01 narrative packet with no runtime-owned implementation changes.
+The project may advance to Phase 1. The first narrative gate is user approval of D1–D16 in issue #138. Android Studio then creates a new clean A1 branch from updated `main`; draft PR #124 remains an archive and must not be revised into or merged as the A1 delivery.
 
 ## Validated repository identity
 
@@ -74,7 +74,7 @@ The successful build emitted two follow-up observations:
 1. A background AWT/KSP `NullPointerException` involving `BinaryFileTypeDecompilers.notifyDecompilerSetChange`.
 2. A Compose deprecation warning for the non-lambda `LinearProgressIndicator` overload in `QuestScreen.kt`.
 
-Neither diagnostic failed Gradle. They are future tooling/API cleanup items, not Phase 0 blockers.
+Neither diagnostic failed Gradle. They are tracked separately by #126 and #132/PR #125 and are not Phase 0 blockers.
 
 ## Unity validation
 
@@ -109,7 +109,7 @@ C# compiler warnings: none found
 
 Unity reported import-hygiene warnings where tracked `.meta` files existed for empty folders and Unity recreated those folders locally. These warnings did not block import, compilation, tests, or Play Mode.
 
-A separate user-supplied tail of `Phase0Compile-main.log` showed Unity startup, memory allocator configuration, player connection initialization, the Input System initializing, and PhysX starting. That tail did not include a completion marker or exit code and is therefore retained only as startup evidence. The clean-worktree exit-code and final-log evidence above is the authoritative compile result.
+A separate user-supplied tail of `Phase0Compile-main.log` showed Unity startup, memory allocator configuration, player connection initialization, the Input System initializing, and PhysX starting. That tail did not include a completion marker or exit code and is retained only as startup evidence. The clean-worktree exit-code and final-log evidence above is authoritative.
 
 ### EditMode tests
 
@@ -159,11 +159,11 @@ Runner invocation: passed
 Reason: no PlayMode test cases currently exist
 ```
 
-The absence of PlayMode tests is explicitly recorded. It is not treated as invented test coverage.
+The absence of PlayMode tests is explicitly recorded and is not treated as invented behavioral coverage. Issue #127 owns the committed follow-up.
 
 ### Representative scene Play Mode
 
-A temporary editor-only validation probe opened `Assets/Test.unity`, entered Play Mode, observed runtime startup for several seconds, and exited successfully. The probe was removed after validation and the worktree was left clean.
+A temporary editor-only validation probe opened `Assets/Test.unity`, entered Play Mode, observed runtime startup for several seconds, and exited successfully. The probe was removed and the worktree was left clean.
 
 Evidence included:
 
@@ -181,10 +181,10 @@ No script-compilation blocker prevented representative scene startup.
 
 Validation did not require changes to:
 
-- Narrative content, dialogue, NPCs, quest meaning, chapters, lore, or outcomes.
-- Save contracts or migration behavior.
-- Runtime services or service registrations.
-- The designated shared integration files.
+- narrative content, dialogue, NPCs, quest meaning, chapters, lore, or outcomes,
+- save contracts or migration behavior,
+- runtime services or service registrations,
+- the designated shared integration files.
 
 The temporary scene-validation probe was not retained. No shared-file lock remains open.
 
@@ -193,46 +193,44 @@ The temporary scene-validation probe was not retained. No shared-file lock remai
 | Gate | Status | Evidence |
 | --- | --- | --- |
 | Canonical workspace and ownership rules merged | Pass | PR #112 and PR #115 |
-| One active implementation path per issue | Pass | Duplicate issue #111 fixes consolidated and repaired through PR #119 |
-| Android unit tests on latest `main` | Pass | Combined Gradle command, `BUILD SUCCESSFUL` |
-| Android debug assembly on latest `main` | Pass | Same combined Gradle command |
-| Unity import and C# compilation | Pass | Unity 2022.3.62f3 batch exit code 0 |
-| Unity EditMode tests | Pass | 3/3 passed |
-| Unity PlayMode runner | Pass with zero available tests | 0 tests recorded explicitly |
+| One active implementation path per issue | Pass | duplicate issue #111 fixes consolidated through PR #119 |
+| Android unit tests on latest `main` | Pass | combined Gradle command |
+| Android debug assembly on latest `main` | Pass | combined Gradle command |
+| Unity import and C# compilation | Pass | Unity batch exit code 0 |
+| Unity EditMode tests | Pass | 3/3 |
+| Unity PlayMode availability reported | Pass with zero available tests | explicit 0-test result |
 | Representative scene enters Play Mode | Pass | `Assets/Test.unity` probe |
-| Remaining blockers have explicit owners | Pass | No Phase 0 blocker remains |
-| No undeclared shared-file lock | Pass | None open |
+| Remaining Phase 0 blockers | None | all independent follow-ups tracked |
+| Undeclared shared-file lock | None | no lock open |
 
 ## Phase transition
 
-Phase 0 is green. Phase 1 may begin.
+Phase 0 is green. Phase 1 may begin through the following controlled sequence.
 
-### Next owner: Android Studio narrative workflow
+### First owner: user decision gate
 
-Revise draft PR #124 into the A1 deliverable:
+Issue #138 must approve D1–D16 for the bounded `OMEN_1` narrative intent. GPT and Codex do not select those answers.
 
-```text
-A1 — one bounded, user-approved NVS-01 narrative packet for OMEN_1
-```
+### Second owner: Android Studio narrative workflow
 
-Required boundaries:
+After PR #123 is merged and #138 is approved:
 
-1. Refresh from latest `main` without discarding authored narrative work.
-2. Keep only the bounded NVS-01 packet in the A1 PR.
-3. Move or defer full Chapter 1, realm-wide hooks, building/research hooks, world-atlas expansion, templates, and general governance work to later PRs.
-4. Remove Unity runtime service, interface, definition deletion, namespace/path migration, and other Codex-owned changes.
-5. Preserve current `Quest` constructor compatibility.
-6. Resolve every dangling dialogue reference.
-7. Make failure, retry, cancellation, recovery, and `FAILED` state semantics internally consistent.
-8. Complete localization references or explicitly define source-text exceptions.
-9. Mark gameplay hooks as semantic requests unless existing runtime support is verified.
-10. List and validate every new or changed ID.
-11. Supply the Android Studio completion report and exact handoff request for GPT.
+1. Fetch and fast-forward canonical `main`.
+2. Confirm `HEAD == origin/main`.
+3. Create `android-studio/nvs-01-a1-clean`.
+4. Use draft PR #124 only as source/reference.
+5. Encode exactly one bounded `OMEN_1` packet using `NVS_01_A1_Packet_Template.md`.
+6. Preserve D1–D16 without reinterpretation.
+7. Resolve every internal reference and deterministic start/state/objective path.
+8. Mark unimplemented hooks, locations, artifact ownership, localization runtime, and bridge work as external requests.
+9. Exclude all Unity runtime, Android model/navigation/Gradle, full Chapter 1, broad hook, and governance changes.
+10. Run packet tests plus Android unit tests/debug assembly.
+11. Supply the completion report and exact GPT handoff.
 
 ### Following owner: GPT
 
-After Android Studio updates A1, GPT must verify packet completeness and produce G1: the implementation specification containing the state machine, runtime-event map, contracts, persistence/resume semantics, idempotency, error behavior, file impacts, shared-file locks, test matrix, and merge order.
+After clean A1 and user approval are authoritative, GPT reviews ownership/completeness and produces G1 from `NVS_01_G1_Specification_Template.md`, including contract/schema, state machine, encounter request/result map, persistence/D16 resume, consequence atomicity, error behavior, file impacts, locks, tests, and C1–C4 order.
 
 ### Codex hold
 
-Codex must not begin NVS-01 runtime implementation until A1 is approved and GPT publishes G1.
+Codex must not begin NVS-01 runtime implementation until G1 is approved. Independent work on #126, #127, #132, or #136 must remain in separate focused PRs with no A1 overlap.
