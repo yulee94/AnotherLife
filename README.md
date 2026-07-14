@@ -6,37 +6,39 @@ Another Life is a high-fantasy kingdom war game prototype that combines an Andro
 
 | Path | Purpose |
 | --- | --- |
+| `AGENTS.md` | Repository-wide instructions for GPT, Codex, and the Android Studio narrative workflow. |
 | `app/` | Android native shell built with Kotlin, Jetpack Compose, Navigation, and Material UI. |
 | `unity/` | Unity 2022.3 LTS gameplay project and prototype runtime. Open this folder in Unity Hub. |
 | `unity/Assets/AL/Scripts/` | Unity C# gameplay, services, UI, battle, realm war, champion mode, and editor utilities. |
 | `unity/Assets/AL/StreamingAssets/GameData/` | JSON catalogs shared by Unity and external tools. |
 | `unity/SharedContracts/` | JSON schemas and Fable/F# contracts for non-Unity tooling. |
-| `unity/Docs/` | Project handoff docs, including the Android Studio/Codex collaboration prompt. |
+| `unity/Docs/` | Project handoff, collaboration, and milestone documentation. |
 | `gradle/`, `build.gradle.kts`, `settings.gradle.kts` | Android/Gradle build configuration. |
 
 ## Local Project Layout
 
 Use exactly one canonical local project for day-to-day work:
 
-- GitHub repository checkout: `C:\Users\MY\AndroidStudioProjects\AnotherLife`
-- Android Studio project: open `C:\Users\MY\AndroidStudioProjects\AnotherLife`
-- Unity Hub project: open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`
+- GitHub repository checkout: `D:\260711\MY\AndroidStudioProjects\AnotherLife`
+- Android Studio project: open `D:\260711\MY\AndroidStudioProjects\AnotherLife`
+- Unity Hub project: open `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
 
-Do not use `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, or timestamped repositories such as `AnotherLife-YYYY-MM-DD_*` as active projects. Those were cleanup/temporary folders and should not be recreated unless you are intentionally making an offline backup.
+Do not use `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, timestamped repositories such as `AnotherLife-YYYY-MM-DD_*`, or any other duplicate checkout as an active project. Those are cleanup, temporary, or backup folders and should not be recreated unless you are intentionally making an offline backup.
 
-The root GitHub repository is `yulee94/AnotherLife`, and `main` is the only active branch collaborators should review first.
+The root GitHub repository is `yulee94/AnotherLife`, and `main` is the integration branch collaborators should review first. All agents must read `AGENTS.md` before editing.
 
 ## Quick Start
 
 ### Android Studio
 
-1. Open the repository root in Android Studio.
-2. Use the `app` module for Android shell, navigation, and native UI work.
-3. Before starting work, fetch latest `main` and check open GitHub PRs.
+1. Open `D:\260711\MY\AndroidStudioProjects\AnotherLife` in Android Studio.
+2. Use the `app` module and narrative-owned Unity data or tooling for Android shell, navigation, native UI, and narrative work.
+3. Before starting work, fetch latest `main` and check open GitHub pull requests.
+4. Use an `android-studio/<scope>` branch for narrative changes.
 
 ### Unity Hub
 
-1. Open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub.
+1. Open `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub.
 2. Let Unity import the project.
 3. Use the `Another Life > Generate Design Assets` editor menu to create starter modular character, skill VFX, weather, and material assets.
 4. Run the test/champion scene to enter the 3D Champion Arena prototype.
@@ -68,6 +70,13 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 
 ## Collaboration Rules
 
+`AGENTS.md` is the authoritative repository-wide collaboration policy.
+
+GPT owns coordination and specification:
+
+- Milestone planning, task decomposition, dependency order, implementation specifications, acceptance criteria, and cross-workstream review.
+- GPT must not invent narrative content or implement gameplay unless the user explicitly reassigns that work.
+
 Android Studio owns narrative content and narrative progression:
 
 - NPCs, advisors, personas, affinity/reputation content.
@@ -75,7 +84,7 @@ Android Studio owns narrative content and narrative progression:
 
 Codex owns runtime implementation and Unity gameplay systems:
 
-- Unity runtime services, bootstrapping, combat simulation, boss runtime behavior, loot runtime, character customization, 3D prototype models, skill VFX, weather, world atlas consumption, performance work, editor generators, and shared contracts.
+- Unity runtime services, bootstrapping, combat simulation, boss runtime behavior, loot runtime, character customization, 3D prototype models, skill VFX, weather, world atlas consumption, performance work, editor generators, automated tests, and shared contracts.
 
 Shared files require extra care:
 
@@ -84,21 +93,22 @@ Shared files require extra care:
 - `unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs`
 - `unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs`
 
-If a merge conflict happens in a shared file, preserve both systems whenever possible. Service registration conflicts should keep all services. Save-data changes should stay backward compatible through default initialization.
+An open pull request that declares a shared file holds a soft lock on it. If a merge conflict happens in a shared file, preserve both systems whenever possible. Service registration conflicts should keep all services. Save-data changes should stay backward compatible through default initialization.
 
 ## Branches
 
-The repository uses `main` as the single active branch. The old `master`, completed `codex/*`, and completed `narrative/*` branches were consolidated into `main` and removed from GitHub so co-developers always see the current project from the repository front page.
+The repository uses `main` as the integration branch. Use short-lived `gpt/<scope>`, `android-studio/<scope>`, or `codex/<scope>` branches for focused work. Completed branches should be removed after merge so collaborators see current work from the repository front page and open pull requests.
 
 ## PR Workflow
 
 1. Fetch latest `main`.
-2. Check open GitHub PRs before editing.
-3. Use focused branches, such as `android-studio/<scope>` or `codex/<scope>`.
-4. Keep each PR scoped to one major completion.
-5. In the PR body, list ownership areas touched and validation performed.
+2. Check all open GitHub pull requests before editing.
+3. Create a focused `gpt/<scope>`, `android-studio/<scope>`, or `codex/<scope>` branch.
+4. Keep each pull request scoped to one major completion.
+5. Complete `.github/pull_request_template.md`, including ownership, shared-file locks, dependencies, and validation.
 6. Rebase onto latest `main` instead of overwriting collaborator work.
 
-For a copy-paste coordination prompt, see:
+For copy-paste coordination guidance and the first narrative vertical-slice milestone, see:
 
-`unity/Docs/AndroidStudio_Codex_Collaboration_Prompt.md`
+- `unity/Docs/AndroidStudio_Codex_Collaboration_Prompt.md`
+- `unity/Docs/Three_Way_Collaboration_Plan.md`
