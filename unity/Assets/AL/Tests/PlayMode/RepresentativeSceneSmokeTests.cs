@@ -1,5 +1,8 @@
 using System.Collections;
 using NUnit.Framework;
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
@@ -13,8 +16,16 @@ namespace AL.Tests.PlayMode
         {
             LogAssert.ignoreFailingMessages = false;
 
+#if UNITY_EDITOR
+            AsyncOperation load = EditorSceneManager.LoadSceneAsyncInPlayMode(
+                "Assets/Test.unity",
+                new LoadSceneParameters(LoadSceneMode.Single)
+            );
+            Assert.NotNull(load, "Expected Assets/Test.unity to exist for editor-only PlayMode smoke testing.");
+#else
             AsyncOperation load = SceneManager.LoadSceneAsync("Test", LoadSceneMode.Single);
-            Assert.NotNull(load, "Expected Assets/Test.unity to be included in build settings.");
+            Assert.NotNull(load, "Expected Test scene to be loadable in PlayMode.");
+#endif
 
             while (!load.isDone)
             {
