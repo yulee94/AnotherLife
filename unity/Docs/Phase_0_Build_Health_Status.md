@@ -2,40 +2,57 @@
 
 **Status date:** 2026-07-14  
 **Roadmap phase:** Phase 0 — Collaboration Baseline and Build Health  
-**Status:** Amber — Android validation succeeds; Unity validation remains open
+**Status:** Amber — fixes are merged, but latest-`main` Android validation and the full Unity gate remain open
 
 This is a coordination and evidence record. It does not replace `AGENTS.md`, author narrative, or implement runtime behavior.
 
 ## Executive status
 
-The Android duplicate-declaration blocker has been resolved through merged PR #119. The user then ran the combined Android unit-test and debug-assembly command from the canonical workspace with Android Studio's bundled JBR, and Gradle reported `BUILD SUCCESSFUL`.
+The duplicate Android `Quest` declaration defect was fixed through merged PR #119. Unity EditMode smoke-test infrastructure and branch-level validation were added through merged PR #122.
 
-Phase 0 is not green yet because issue #117 still requires current-main Unity 2022.3.62f3 import, compilation, test, and representative Play Mode evidence.
+The user's later combined Gradle run reported `BUILD SUCCESSFUL`, but the identity check proved it was executed on `android-studio/nvs-01-narrative-packet` at commit `28d28384d820896d9ad87432866e3eb4a2ddc9fb`, not on `main`.
 
-The successful Android transcript did not include `git status -sb` or the tested commit SHA. Before final Phase 0 closeout, record the checked-out branch and commit and ensure the Unity validation starts from a fetched, fast-forwarded `main`.
+At the time of comparison, that branch was:
+
+- 2 commits ahead of `main`
+- 10 commits behind `main`
+- diverged from `main`
+- based on merge base `35fb8fe1e4d0b6315916af03d6e458372fcbcd15`
+
+Therefore the successful Gradle run is valid branch-scoped evidence, but it does **not** close the latest-`main` Android Phase 0 gate.
 
 Immediate execution order:
 
-1. Record the canonical checkout branch and commit; fast-forward `main` if required.
-2. Codex completes issue #117 using Unity 2022.3.62f3.
-3. Any independent Unity failures receive focused Codex-owned issues.
-4. GPT records the final Phase 0 gate decision.
-5. Only after the gate is green does Android Studio begin the mergeable NVS-01 narrative packet.
+1. Preserve the narrative branch through draft PR #124.
+2. Switch the canonical checkout to a clean, fetched, fast-forwarded `main` without deleting the narrative branch.
+3. Record `main` and `origin/main` commit identity.
+4. Run `:app:testDebugUnitTest :app:assembleDebug` on that `main` checkout.
+5. Complete issue #117 on the same latest `main` with Unity 2022.3.62f3 import, compilation, tests, and representative Play Mode evidence.
+6. GPT records the final Phase 0 gate decision.
+7. Only after Phase 0 is green may the isolated A1 narrative packet become merge-ready.
 
 ## Verified repository state
 
-- Canonical workspace documentation uses `D:\260711\MY\AndroidStudioProjects\AnotherLife`.
-- Root `AGENTS.md`, standalone role prompts, the roadmap, the NVS-01 plan, the PR template, and the initial Phase 0 status record are merged.
-- PR #119 is merged.
-- PR #119 removed duplicate `QuestMode`, `Quest.mode`, and `Quest.mapMarkerId` declarations.
-- PR #119 preserved the original positions of `Quest.isCompleted` and `Quest.isClaimed`, with new metadata appended afterward.
-- PR #119 reported successful clean-worktree Android unit-test and debug-assembly results after the compatibility correction.
-- The user independently ran the combined Gradle targets from the canonical workspace and received `BUILD SUCCESSFUL`.
-- Issue #118 is closed; the Android duplicate-declaration implementation path is complete.
-- Issue #117 remains open and is the only required Phase 0 runtime-validation gate.
-- No shared Unity integration file was changed by the Android fix or this coordination update.
+- Canonical workspace: `D:\260711\MY\AndroidStudioProjects\AnotherLife`.
+- PR #119 is merged and preserves the original Boolean constructor positions in `Quest`.
+- PR #121 is merged and records the Phase 0 incident and duplicate-implementation rules.
+- PR #122 is merged and adds Unity Test Framework/EditMode smoke coverage.
+- Current GitHub `main` at the identity check was `accc94032eb57c9f4db1887378852bd089edeb8f`.
+- Issue #117 remains open.
+- Draft PR #124 now preserves and exposes the Android Studio narrative branch for review.
+- No designated shared integration file is locked by this status update.
 
 ## Android validation evidence
+
+### Tested branch
+
+```text
+Branch: android-studio/nvs-01-narrative-packet
+HEAD: 28d28384d820896d9ad87432866e3eb4a2ddc9fb
+Remote tracking branch: origin/android-studio/nvs-01-narrative-packet
+origin/main: accc94032eb57c9f4db1887378852bd089edeb8f
+Comparison: diverged, 2 ahead, 10 behind
+```
 
 ### Environment
 
@@ -47,8 +64,6 @@ Gradle wrapper: D:\260711\MY\AndroidStudioProjects\AnotherLife\gradlew.bat
 ```
 
 ### Command
-
-The command was run from `C:\Windows\System32` using the absolute wrapper path and explicit Gradle project directory, so shell location did not affect project resolution:
 
 ```powershell
 & "D:\260711\MY\AndroidStudioProjects\AnotherLife\gradlew.bat" `
@@ -65,118 +80,151 @@ BUILD SUCCESSFUL in 29s
 Configuration cache entry reused.
 ```
 
-This proves both requested Gradle targets completed successfully in the tested canonical worktree after the duplicate-declaration fix.
+### Interpretation
 
-### Final identity check required for gate closeout
+This proves the tested narrative branch's Android source compiled and completed both requested Gradle targets. It does not prove the current integrated `main` commit because the tested branch did not contain ten later `main` commits and included its own divergent model changes.
 
-Record these values before declaring the Android result to be current-main evidence:
+## Required latest-main Android validation
+
+First confirm the current worktree is clean. Do not discard any local work:
 
 ```powershell
 $repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+git -C $repo status --porcelain
+```
+
+When that command produces no output, preserve the narrative branch remotely and switch to `main`:
+
+```powershell
 git -C $repo fetch origin
+git -C $repo switch main
+git -C $repo pull --ff-only origin main
 git -C $repo status -sb
 git -C $repo rev-parse HEAD
 git -C $repo rev-parse origin/main
 ```
 
-When practical, use a clean checkout and rerun after:
+`HEAD` and `origin/main` must match before the gate command:
 
 ```powershell
-git -C $repo switch main
-git -C $repo pull --ff-only origin main
+$env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+
+& "$repo\gradlew.bat" `
+    -p $repo `
+    :app:testDebugUnitTest `
+    :app:assembleDebug
 ```
 
-If the worktree contains uncommitted changes, do not discard them. Record the status and coordinate before switching branches.
+After validation, the narrative branch can be restored with:
 
-## Remaining Phase 0 gate: issue #117
+```powershell
+git -C $repo switch android-studio/nvs-01-narrative-packet
+```
 
-**Owner:** Codex  
-**Dependency:** PR #119 merged — satisfied  
-**Required Unity version:** `2022.3.62f3`
+Do not rebase, merge, reset, or force-push that narrative branch until draft PR #124's split and ownership review is addressed.
 
-Required procedure:
+## Narrative branch containment
 
-1. Fetch and fast-forward the canonical checkout's `main` branch.
-2. Open `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub with Unity 2022.3.62f3.
-3. Allow import and script compilation to complete.
-4. Record Console compilation errors and build-health warnings.
-5. Run practical EditMode tests and record counts/results, or state why none can run.
-6. Run practical PlayMode tests and record counts/results, or state why none can run.
-7. Enter the documented boot/test or Champion scene in Play Mode.
-8. For each independent blocker, open one focused issue with reproduction, exact error, affected files or assembly, expected boundary, validation target, owner, and shared-file declaration.
-9. Do not alter narrative content merely to make runtime validation pass.
+Draft PR #124 is a preservation and coordination PR, not a merge-ready delivery.
+
+The branch currently mixes:
+
+- the bounded `OMEN_1` NVS-01 packet,
+- full Chapter 1 expansion,
+- later-phase governance and hook work,
+- Android runtime-model changes,
+- Unity definition path moves/deletions,
+- Unity service/interface edits.
+
+Before A1 can be approved, Android Studio must isolate the single NVS-01 packet, refresh from current `main`, remove Codex-owned Unity runtime changes, preserve `Quest` constructor compatibility, and resolve the packet's dangling dialogue/handoff and conflicting recovery semantics. The detailed review is in PR #124.
+
+## Unity evidence and remaining issue #117
+
+Merged PR #122 reported:
+
+- Unity version `2022.3.62f3`
+- branch-level batch compilation exit code 0
+- EditMode tests: 3 total, 3 passed, 0 failed, 0 skipped
+
+This is useful evidence, but issue #117 still requires validation against the latest integrated `main`, including:
+
+1. Unity import and C# compilation.
+2. Available EditMode tests.
+3. Available PlayMode tests, or an exact reason none can run.
+4. A representative Boot/test/Champion scene entering Play Mode.
+5. One focused issue per independent blocker.
+6. No narrative edits used to bypass runtime failures.
 
 ## Phase 0 gate checklist
 
 | Gate | Status | Evidence or owner |
 | --- | --- | --- |
 | Canonical workspace and agent rules merged | Pass | PR #112 and PR #115 |
-| One active implementation path per issue | Pass | Duplicate Android paths consolidated; PR #119 merged |
-| Android unit tests | Pass in tested canonical worktree | Combined Gradle command reported `BUILD SUCCESSFUL` |
-| Android debug assembly | Pass in tested canonical worktree | Same combined Gradle command completed `:app:assembleDebug` |
-| Tested branch and commit recorded | Pending closeout detail | Capture `status -sb`, `HEAD`, and `origin/main` |
-| Unity opens and compiles on latest `main` | Unverified | Issue #117 — Codex |
-| EditMode and PlayMode evidence | Unverified | Issue #117 — Codex |
+| Duplicate Android implementation incident resolved | Pass | PR #119 merged; duplicate paths closed |
+| Android unit tests on latest `main` | Pending | Branch-scoped success only; rerun on matched `main`/`origin/main` |
+| Android debug assembly on latest `main` | Pending | Same latest-main combined Gradle command |
+| Unity batch compile evidence | Partial pass | PR #122 branch evidence; latest integrated `main` confirmation required |
+| Unity EditMode evidence | Partial pass | PR #122: 3/3 passed; latest integrated `main` confirmation required |
+| Unity PlayMode evidence | Unverified | Issue #117 — Codex |
 | Representative scene enters Play Mode | Unverified | Issue #117 — Codex |
-| Remaining blockers have explicit owners | Pass | Issue #117 owns the remaining gate |
-| No undeclared shared-file lock | Pass at update time | No shared integration file declared by this work |
+| Narrative work preserved without premature merge | Pass | Draft PR #124 |
+| Remaining blockers have explicit owners | Pass | Issue #117, PR #124 review requirements |
+| No undeclared shared-file lock | Pass at update time | No designated shared file touched by this update |
 
-Phase 0 must not be marked green until issue #117 is complete and the tested checkout identity is recorded.
+Phase 0 must not be marked green until latest-`main` Android validation succeeds and issue #117's integrated Unity evidence is complete or every remaining blocker has a focused owner plus an explicit user-approved exception.
 
 ## Duplicate-implementation incident rule
 
 The issue #111 incident demonstrated that mergeability alone does not make two parallel fixes safe to merge together.
 
-For future issues:
-
-1. The first open implementation PR becomes the active path unless the user explicitly requests alternatives.
-2. A later PR for the same root problem must be marked as an alternative and must not merge independently.
-3. Before merging an alternative, GPT selects one implementation or defines a consolidation branch.
-4. If branches touch the same model, constructor, contract, save object, service registration, or dependency list, a combined-diff review is mandatory.
-5. Validation from an isolated branch does not prove a later combined `main` state.
-6. After overlapping merge sequences, rerun validation on the integrated branch.
+1. The first open implementation PR is the active path unless the user explicitly requests alternatives.
+2. A later PR for the same root problem is an alternative and must not merge independently.
+3. GPT selects one implementation or defines a consolidation branch before alternatives merge.
+4. Overlapping model, constructor, contract, save, service-registration, or dependency changes require a combined-diff review.
+5. Isolated branch validation does not prove the later integrated `main` state.
+6. After overlapping merges, rerun validation on the integrated branch.
 
 ## Workstream constraints while Phase 0 remains open
 
 ### GPT
 
-- Track issue #117 and any focused Unity blockers.
-- Verify validation evidence and ownership boundaries.
-- Record the tested branch and commit before final closeout.
-- Do not create an NVS-01 runtime specification before Android Studio supplies an approved narrative packet and Phase 0 is green.
+- Track latest-main Android evidence, issue #117, and draft PR #124.
+- Review evidence and ownership boundaries without implementing gameplay or rewriting narrative.
+- Do not issue a Codex NVS-01 implementation specification until A1 is approved and Phase 0 is green.
 
 ### Codex
 
-- Work on issue #117 next.
-- Start from fetched, fast-forwarded `main`.
+- Validate latest `main` for issue #117.
 - Preserve narrative ownership and all valid runtime services.
-- Open focused issues instead of combining unrelated Unity failures into a broad refactor.
-- Do not begin NVS-01 runtime implementation until Phase 0 is green and GPT publishes an approved specification.
+- Open focused issues for independent failures.
+- Do not begin NVS-01 runtime implementation before GPT publishes an approved specification.
 
 ### Android Studio narrative workflow
 
-- May inspect narrative IDs, references, and candidate quest-line scope on an isolated branch.
-- Must not merge content that depends on unresolved Unity behavior.
-- Must not edit Unity bootstrapping, save infrastructure, service registration, or runtime systems to bypass Phase 0 validation.
-- After Phase 0 is green, select exactly one user-approved bounded quest line for A1.
+- Preserve work on `android-studio/nvs-01-narrative-packet` and use draft PR #124.
+- Do not merge while Phase 0 is open.
+- Remove runtime-owned Unity changes and later-phase expansion from the A1 delivery.
+- Resolve narrative packet consistency findings without asking Codex or GPT to invent story intent.
 
 ### User
 
-- Preserve uncommitted local work when checking branch state.
-- Approve the first bounded NVS-01 quest-line selection after Android Studio presents it.
-- Do not merge parallel technical fixes for one issue without a GPT consolidation decision.
+- Validate fetched `main` without deleting the narrative branch.
+- Do not merge draft PR #124 until all listed blockers are resolved.
+- Approve the bounded NVS-01 narrative packet after Android Studio presents the corrected A1 scope.
 
 ## Phase transition rule
 
 GPT may declare Phase 0 green only after:
 
-- The canonical checkout branch and tested commit are recorded.
-- Issue #117 is closed with current-main Unity import, compilation, test, and representative Play Mode evidence, or every discovered Unity failure has a focused owner and the user explicitly accepts proceeding under a documented exception.
+- `main` and `origin/main` identity are recorded and match for the Android gate run.
+- The combined Android command passes on that latest `main`.
+- Issue #117 is closed with latest-main Unity import, compilation, tests, and representative Play Mode evidence, or the documented exception rule is satisfied.
 - No duplicate implementation PR remains open.
 - No shared-file lock remains undeclared.
 
 The next Phase 1 task is then:
 
 ```text
-A1 — Android Studio selects and completes one bounded, user-approved NVS-01 narrative packet on android-studio/nvs-01-narrative-packet.
+A1 — Android Studio revises draft PR #124 into one bounded, user-approved NVS-01 narrative packet with no runtime-owned implementation changes.
 ```
