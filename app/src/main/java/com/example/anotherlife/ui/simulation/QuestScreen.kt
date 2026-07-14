@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -19,7 +20,11 @@ import com.example.anotherlife.data.simulation.Quest
 import com.example.anotherlife.data.simulation.QuestMode
 
 @Composable
-fun QuestScreen(state: KingdomState, onLocate: (String) -> Unit) {
+fun QuestScreen(
+    state: KingdomState, 
+    onLocate: (String) -> Unit,
+    onStartQuest: (String) -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,16 +41,21 @@ fun QuestScreen(state: KingdomState, onLocate: (String) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(state.quests) { quest ->
-                QuestCard(quest = quest, onClaim = {
-                    // Simulation logic
-                }, onLocate = { onLocate(quest.mapMarkerId ?: "") })
+                QuestCard(
+                    quest = quest, 
+                    onClaim = {
+                        // Simulation logic
+                    }, 
+                    onLocate = { onLocate(quest.mapMarkerId ?: "") },
+                    onStart = { onStartQuest(quest.id) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit) {
+fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit, onStart: () -> Unit) {
     val progressPercent = quest.progress.toFloat() / quest.target.toFloat()
 
     OutlinedCard(
@@ -94,11 +104,26 @@ fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit) {
 
             if (quest.mapMarkerId != null) {
                 Spacer(modifier = Modifier.height(8.dp))
-                AssistChip(
-                    onClick = onLocate,
-                    label = { Text("Locate: ${quest.mapMarkerId}") },
-                    leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AssistChip(
+                        onClick = onLocate,
+                        label = { Text("Locate: ${quest.mapMarkerId}") },
+                        leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                    )
+                    
+                    if (!quest.isCompleted) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Button(
+                            onClick = onStart,
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
+                            modifier = Modifier.height(32.dp)
+                        ) {
+                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
+                            Spacer(Modifier.width(4.dp))
+                            Text("Start Story", style = MaterialTheme.typography.labelMedium)
+                        }
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

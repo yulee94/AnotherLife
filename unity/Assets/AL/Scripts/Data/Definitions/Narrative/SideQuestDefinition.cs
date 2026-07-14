@@ -2,7 +2,7 @@ using UnityEngine;
 using AL.Core;
 using System.Collections.Generic;
 
-namespace AL.Data.Definitions
+namespace AL.Data.Definitions.Narrative
 {
     [CreateAssetMenu(fileName = "New Side Quest", menuName = "AL/Data/SideQuest")]
     public class SideQuestDefinition : ScriptableObject

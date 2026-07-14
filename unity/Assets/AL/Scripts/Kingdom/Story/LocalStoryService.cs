@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AL.Core;
 using AL.Core.Interfaces;
-using AL.Data.Definitions;
+using AL.Data.Definitions.Narrative;
 using UnityEngine;
 
 namespace AL.Services.Local
