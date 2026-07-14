@@ -12,7 +12,7 @@ Another Life is a high-fantasy kingdom war game prototype that combines an Andro
 | `unity/Assets/AL/Scripts/` | Unity C# gameplay, services, UI, battle, realm war, champion mode, and editor utilities. |
 | `unity/Assets/AL/StreamingAssets/GameData/` | JSON catalogs shared by Unity and external tools. |
 | `unity/SharedContracts/` | JSON schemas and Fable/F# contracts for non-Unity tooling. |
-| `unity/Docs/` | Project handoff, collaboration, and milestone documentation. |
+| `unity/Docs/` | Project handoff, collaboration, milestone, roadmap, and current-phase documentation. |
 | `gradle/`, `build.gradle.kts`, `settings.gradle.kts` | Android/Gradle build configuration. |
 
 ## Local Project Layout
@@ -108,7 +108,10 @@ The repository uses `main` as the integration branch. Use short-lived `gpt/<scop
 5. Complete `.github/pull_request_template.md`, including ownership, shared-file locks, dependencies, and validation.
 6. Rebase onto latest `main` instead of overwriting collaborator work.
 
-For copy-paste coordination guidance and the first narrative vertical-slice milestone, see:
+For current status, copy-paste role guidance, the staged roadmap, and the first narrative vertical-slice milestone, see:
 
+- `unity/Docs/Phase_0_Build_Health_Status.md`
+- `unity/Docs/Agent_Role_Prompts.md`
+- `unity/Docs/Project_Progression_Roadmap.md`
 - `unity/Docs/AndroidStudio_Codex_Collaboration_Prompt.md`
 - `unity/Docs/Three_Way_Collaboration_Plan.md`
