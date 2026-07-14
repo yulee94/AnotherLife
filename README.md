@@ -121,3 +121,4 @@ For current Phase 1 status, the D1–D16 decision gate, packet/specification str
 - `unity/Docs/Project_Progression_Roadmap.md`
 - `unity/Docs/AndroidStudio_Codex_Collaboration_Prompt.md`
 - `unity/Docs/Three_Way_Collaboration_Plan.md`
+- `unity/Docs/Android_Unity_Runtime_Bridge.md`
