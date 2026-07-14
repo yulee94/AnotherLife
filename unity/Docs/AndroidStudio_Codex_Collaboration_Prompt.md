@@ -1,55 +1,86 @@
-# Android Studio and Codex Collaboration Prompt
+# GPT, Android Studio, and Codex Collaboration Prompt
 
-Copy the prompt below into Android Studio before it continues work on Another Life.
+Copy the relevant role section below into GPT, Android Studio, or Codex before it continues work on Another Life. The root `AGENTS.md` remains authoritative.
 
 ```text
-You are co-developing Another Life with Codex through GitHub.
+You are co-developing Another Life through GitHub with GPT, Codex, and the Android Studio narrative workflow.
 
 Repository:
 https://github.com/yulee94/AnotherLife
 
-Local project:
-Use `C:\Users\MY\AndroidStudioProjects\AnotherLife` as the only active checkout. Unity Hub should open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`. Do not recreate or work from `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, or timestamped duplicate repositories.
+Canonical local project:
+Use D:\260711\MY\AndroidStudioProjects\AnotherLife as the only active checkout.
+Android Studio should open D:\260711\MY\AndroidStudioProjects\AnotherLife.
+Unity Hub should open D:\260711\MY\AndroidStudioProjects\AnotherLife\unity.
+Do not recreate or work from AnotherLifeUnity, AnotherLife-codex-*, _CodexWorktrees, timestamped duplicates, or any other active duplicate checkout.
 
 Primary rule:
-Do not overwrite or revert Codex work. Before changing code, fetch the latest main branch and inspect open pull requests. If a file is being changed by an open Codex PR, avoid that file unless the change is required for your narrative work.
+Do not overwrite or revert another workstream. Before changing files, fetch the latest main branch and inspect all open pull requests. If an open pull request owns a file or shared integration point, avoid it unless your task explicitly depends on that pull request and the owner has released the lock.
 
 Branch rule:
-Use `main` as the only active branch unless you are opening a short-lived PR branch. The old `master`, completed `codex/*`, and completed `narrative/*` branches were consolidated into `main` and removed from GitHub so the repository front page always shows the current project.
+Do not commit directly to main. Use one focused branch:
+- gpt/<short-scope> for planning, specifications, reviews, and coordination docs.
+- android-studio/<short-scope> for narrative content and narrative-owned progression logic.
+- codex/<short-scope> for runtime implementation, tests, tooling, and technical contracts.
+
+GPT ownership:
+- Milestone planning, task decomposition, dependency order, and scope control.
+- Converting approved narrative packets into implementation specifications.
+- State-transition tables, runtime-event maps, contract requirements, edge cases, acceptance criteria, and test matrices.
+- Reviewing pull requests for ownership violations, save compatibility, contract drift, missing tests, and merge risk.
+- Coordinating shared-file locks.
+GPT must not invent or rewrite narrative content and must not implement gameplay unless the user explicitly assigns it.
 
 Android Studio ownership:
-- NPC data, NPC affinity/reputation content, advisor content, and persona content.
-- Main quests, side quests, hidden quests, quest hooks, chapter definitions, dialogue, storyline, lore, artifact lore, boss lore, and narrative ScriptableObject generation.
-- Narrative service logic when it is specifically about story progression, conflict hints, advisor loyalty, chapter unlocks, or quest outcomes.
+- NPC data, NPC affinity/reputation content, advisor content, persona content, and factions.
+- Main quests, side quests, hidden quests, quest hooks, chapter definitions, dialogue, storyline, lore, artifact lore, boss lore, localization-facing narrative text, and narrative ScriptableObject generation.
+- Narrative service logic when it specifically governs story progression, conflict hints, advisor loyalty, chapter unlocks, or quest outcomes.
+Android Studio must not redesign Unity combat, general runtime bootstrapping, VFX, weather, performance systems, or unrelated save infrastructure.
 
 Codex ownership:
-- Unity runtime gameplay systems, service boundaries, scene bootstrapping, combat simulation, boss runtime behavior, loot runtime, champion controls, character customization, 3D prototype models, skill VFX, weather, world atlas consumption, performance pooling, editor generators, and Fable/shared data contracts.
-- Codex may consume Android Studio narration through interfaces such as IStoryService and data definitions, but should not rewrite the story, NPCs, quests, or dialogue.
+- Unity runtime gameplay systems, service boundaries, scene bootstrapping, combat simulation, boss runtime behavior, loot runtime, champion controls, character customization, 3D prototype models, skill VFX, weather, world atlas consumption, performance pooling, editor generators, automated tests, build fixes, and Fable/shared data contracts.
+- Loading, validating, and consuming approved Android Studio narrative through interfaces, JSON, schemas, or generated assets.
+- Backward-compatible save integration.
+Codex must not rewrite the story, NPCs, quests, dialogue, chapter order, lore, or narrative outcomes.
 
-Shared files that require care:
+Standard handoff:
+1. Android Studio produces and approves a narrative packet.
+2. GPT converts it into an implementation specification without changing narrative intent.
+3. Codex implements the specification and reports validation evidence.
+4. GPT reviews ownership, contract fidelity, tests, save compatibility, and merge risk.
+5. Android Studio verifies narrative fidelity, and the user performs final playtest approval.
+
+Shared files that require an exclusive soft lock:
 - unity/Assets/AL/Scripts/Core/Bootloader.cs
 - unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs
 - unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs
 - unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs
 
 When editing shared files:
-- Keep both systems if a merge conflict happens. For example, service registration conflicts should preserve all registered services from both Android Studio and Codex.
-- Add new fields through backward-compatible save defaults.
-- Do not remove Codex interfaces, runtime services, generated design assets, weather profiles, world atlas data, boss loot services, or shared contract files.
+- Declare each file in the pull request before editing it.
+- Do not edit a file already declared by another open pull request.
+- Preserve all valid services when resolving registration conflicts.
+- Add new save fields through backward-compatible defaults or a documented migration.
+- Do not remove unfamiliar runtime services, interfaces, generated assets, weather profiles, world data, loot services, or shared contracts.
+- Rebase the later branch after the lock-holding pull request merges. Never overwrite or force-push away collaborator work.
 
 PR workflow:
 1. Fetch latest main.
-2. Run or inspect `gh pr list --state open` if GitHub CLI is available.
-3. Create a focused branch, preferably `android-studio/<short-scope>`.
-4. Keep each PR scoped to one major completion.
-5. In the PR body, list changed ownership areas and mention whether any shared files were touched.
-6. After opening a PR, check open Codex PRs and rebase if needed instead of force-pushing over unrelated work.
+2. Inspect all open pull requests for overlapping files and ownership areas.
+3. Create a focused branch with the correct owner prefix.
+4. Keep the pull request scoped to one major completion.
+5. Complete .github/pull_request_template.md.
+6. List changed ownership areas, upstream dependencies, shared files, contract/save effects, and validation performed.
+7. Rebase onto latest main before final review.
 
 Fable compatibility:
-- Use `unity/SharedContracts` and `unity/Assets/AL/StreamingAssets/GameData` for cross-tool data.
+- Use unity/SharedContracts and unity/Assets/AL/StreamingAssets/GameData for cross-tool data when appropriate.
 - Keep shared schemas and Fable contracts free of UnityEngine types.
-- If a new system needs to be consumed by Fable, add or update plain JSON/schema/contract files rather than coupling Fable code to Unity MonoBehaviours.
+- If Fable must consume a new system, add or update plain JSON, schema, or contract files instead of coupling Fable code to Unity MonoBehaviours.
 
 Current coordination intent:
-Android Studio continues narrative expansion. Codex continues gameplay/world/runtime implementation around that narration. If cooperation is needed, expose data through interfaces or JSON contracts and coordinate through a PR instead of editing the same narrative/runtime file silently.
+Android Studio continues narrative expansion. GPT plans, specifies, and reviews the handoffs. Codex continues gameplay, world, runtime, validation, and persistence implementation around approved narration. Coordinate through pull requests and stable data contracts instead of silently editing the same files.
+
+First coordinated milestone:
+Follow unity/Docs/Three_Way_Collaboration_Plan.md for NVS-01, including the task order and acceptance criteria.
 ```
