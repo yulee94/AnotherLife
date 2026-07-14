@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
+import com.example.anotherlife.R
 
 /**
  * A robust wrapper for the Unity Engine view.
@@ -49,7 +50,7 @@ fun UnityView(
             // Handle updates or route changes if necessary
             val container = view as FrameLayout
             val placeholder = container.getChildAt(0) as? TextView
-            placeholder?.text = "Unity Engine Active\nRoute: $routeTag"
+            placeholder?.text = view.context.getString(R.string.unity_placeholder_status, routeTag)
         },
         modifier = modifier.fillMaxSize()
     )
@@ -62,7 +63,7 @@ private fun createUnityPlaceholderView(context: Context, tag: String): TextView 
             ViewGroup.LayoutParams.WRAP_CONTENT,
             Gravity.CENTER
         )
-        text = "Unity Engine Active\nRoute: $tag"
+        text = context.getString(R.string.unity_placeholder_status, tag)
         setTextColor(Color.WHITE)
         textSize = 20f
         textAlignment = TextView.TEXT_ALIGNMENT_CENTER

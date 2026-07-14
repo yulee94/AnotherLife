@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Another Life</string>
+    <string name="unity_placeholder_status">Unity Engine Active\nRoute: %1$s</string>
 </resources>
