@@ -5,8 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.material.icons.rounded.Build
-import androidx.compose.material.icons.rounded.Info
-import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.Icon
@@ -24,11 +22,8 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.anotherlife.ui.navigation.Route
 import com.example.anotherlife.ui.simulation.AcademyScreen
 import com.example.anotherlife.ui.simulation.BattleSimulatorScreen
-import com.example.anotherlife.ui.simulation.DossierScreen
 import com.example.anotherlife.ui.simulation.KingdomDashboard
-import com.example.anotherlife.ui.simulation.NarrativeDebugScreen
 import com.example.anotherlife.ui.simulation.WarzoneMapScreen
-import com.example.anotherlife.ui.simulation.QuestScreen
 import com.example.anotherlife.ui.simulation.StoryDialogueScreen
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
@@ -47,13 +42,7 @@ import com.example.anotherlife.ui.unity.UnityView
 fun AnotherLifeShell() {
     // Shared state for the simulation
     val kingdomState = remember { KingdomState() }
-    val narrativeState = remember { 
-        NarrativeState().apply {
-            advisors.addAll(com.example.anotherlife.data.simulation.AdvisorPersonas.allAdvisors)
-            factions.addAll(com.example.anotherlife.data.simulation.FactionProfiles.allFactions)
-            narrativeLog.add("The kingdom awakens to a new era.")
-        }
-    }
+    val narrativeState = remember { NarrativeState() }
 
     // Initial Dialogue trigger logic (Demo)
     LaunchedEffect(Unit) {
@@ -64,7 +53,7 @@ fun AnotherLifeShell() {
                 text = "The walls are rebuilt, but the spirit of the people is still fragile. Your decree will shape our future.",
                 choices = listOf(
                     DialogueChoice("A new era begins today.", "end"),
-                    DialogueChoice("We must remain vigilant.", "end"),
+                    DialogueChoice("We must remain vigilant.", "end")
                 )
             )
         }
@@ -87,16 +76,6 @@ fun AnotherLifeShell() {
                     label = { Text("Kingdom") }
                 )
                 NavigationBarItem(
-                    selected = currentKey == Route.Dossier,
-                    onClick = {
-                        if (currentKey != Route.Dossier) {
-                            backStack.add(Route.Dossier)
-                        }
-                    },
-                    icon = { Icon(Icons.AutoMirrored.Rounded.List, contentDescription = "Dossier") },
-                    label = { Text("Dossier") }
-                )
-                NavigationBarItem(
                     selected = currentKey == Route.Champion,
                     onClick = {
                         if (currentKey != Route.Champion) {
@@ -107,6 +86,16 @@ fun AnotherLifeShell() {
                     label = { Text("Academy") }
                 )
                 NavigationBarItem(
+                    selected = currentKey == Route.Battle,
+                    onClick = {
+                        if (currentKey != Route.Battle) {
+                            backStack.add(Route.Battle)
+                        }
+                    },
+                    icon = { Icon(Icons.Rounded.Star, contentDescription = "Battle") },
+                    label = { Text("Battle") }
+                )
+                NavigationBarItem(
                     selected = currentKey == Route.Warzone,
                     onClick = {
                         if (currentKey != Route.Warzone) {
@@ -115,16 +104,6 @@ fun AnotherLifeShell() {
                     },
                     icon = { Icon(Icons.Rounded.LocationOn, contentDescription = "Warzone") },
                     label = { Text("Warzone") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Route.NarrativeDebug,
-                    onClick = {
-                        if (currentKey != Route.NarrativeDebug) {
-                            backStack.add(Route.NarrativeDebug)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.Info, contentDescription = "Debug") },
-                    label = { Text("Debug") }
                 )
             }
         }
@@ -138,22 +117,7 @@ fun AnotherLifeShell() {
                 .padding(contentPadding),
             entryProvider = { key ->
                 when (key) {
-                    is Route.Kingdom -> NavEntry(key) { 
-                        KingdomDashboard(state = kingdomState) 
-                    }
-                    is Route.Dossier -> NavEntry(key) { 
-                        DossierScreen(state = kingdomState, narrative = narrativeState)
-                    }
-                    is Route.Quest -> NavEntry(key) {
-                        QuestScreen(
-                            state = kingdomState,
-                            onLocate = { /* Navigation logic */ }
-                        ) { questId ->
-                            if (questId == "OMEN_1") {
-                                narrativeState.currentDialogue.value = findDialogueNode("DLG_OMEN_1_START")
-                            }
-                        }
-                    }
+                    is Route.Kingdom -> NavEntry(key) { KingdomDashboard(state = kingdomState) }
                     is Route.Champion -> NavEntry(key) { AcademyScreen(state = kingdomState) }
                     is Route.Battle -> NavEntry(key) { BattleSimulatorScreen(state = kingdomState) }
                     is Route.Warzone -> NavEntry(key) { 
@@ -162,7 +126,6 @@ fun AnotherLifeShell() {
                             backStack.add(Route.Battle)
                         }) 
                     }
-                    is Route.NarrativeDebug -> NavEntry(key) { NarrativeDebugScreen(state = narrativeState) }
                     else -> NavEntry(Unit) { Text("Unknown Route") }
                 }
             }
@@ -177,23 +140,9 @@ fun AnotherLifeShell() {
                 if (nodeId == "end") {
                     narrativeState.currentDialogue.value = null
                 } else {
-                    // Logic to load next node from packets (Simulation)
-                    val nextNode = findDialogueNode(nodeId)
-                    if (nextNode != null) {
-                        narrativeState.currentDialogue.value = nextNode
-                    } else {
-                        narrativeState.currentDialogue.value = null
-                    }
+                    // Logic to load next node
                 }
             }
         )
     }
-}
-
-/**
- * Helper to find dialogue nodes across authored packets.
- */
-private fun findDialogueNode(id: String): DialogueNode? {
-    val allNodes = com.example.anotherlife.data.simulation.NVS_01_Packet.storyNodes
-    return allNodes.find { it.id == id }
 }
