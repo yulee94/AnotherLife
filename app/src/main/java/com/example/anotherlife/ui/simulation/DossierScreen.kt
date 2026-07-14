@@ -4,19 +4,21 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.AccountBox
 import androidx.compose.material.icons.rounded.Info
+import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.example.anotherlife.data.simulation.DossierNarrative
-import com.example.anotherlife.data.simulation.KingdomState
+import com.example.anotherlife.data.simulation.*
 
 @Composable
-fun DossierScreen(state: KingdomState) {
+fun DossierScreen(state: KingdomState, narrative: NarrativeState) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -26,43 +28,47 @@ fun DossierScreen(state: KingdomState) {
             text = "Command Dossier",
             style = MaterialTheme.typography.headlineMedium,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        
+        Text(
+            text = "Chapter: ${narrative.currentChapterId.value}",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.secondary
         )
 
-        Text(
-            text = "Strategic Overview and Narrative Intelligence",
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
+        Spacer(modifier = Modifier.height(24.dp))
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.weight(1f)
         ) {
-            items(DossierNarrative.initialEntries) { entry ->
-                DossierCard(entry)
+            // Advisor Section
+            item { SectionHeader("Royal Advisors", Icons.Rounded.AccountBox) }
+            items(narrative.advisors) { advisor ->
+                AdvisorCard(advisor)
+            }
+
+            // Faction Section
+            item { SectionHeader("Faction Intelligence", Icons.Rounded.Star) }
+            items(narrative.factions) { faction ->
+                FactionCard(faction)
             }
             
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(
-                    text = DossierNarrative.LOG_TITLE,
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
-            
-            item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                ) {
+            // Strategic Log
+            item { SectionHeader("Strategic Narrative Log", Icons.Rounded.Info) }
+            if (narrative.narrativeLog.isEmpty()) {
+                item {
                     Text(
-                        text = DossierNarrative.EMPTY_LOG_MESSAGE,
+                        text = "No recent events recorded.",
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium,
                         color = Color.Gray
                     )
+                }
+            } else {
+                items(narrative.narrativeLog.reversed()) { log ->
+                    LogEntry(log)
                 }
             }
         }
@@ -70,55 +76,56 @@ fun DossierScreen(state: KingdomState) {
 }
 
 @Composable
-fun DossierCard(entry: DossierNarrative.DossierEntry) {
-    val categoryColor = when (entry.category) {
-        DossierNarrative.Category.CHAPTER_PROGRESS -> MaterialTheme.colorScheme.primary
-        DossierNarrative.Category.ADVISOR_STATUS -> MaterialTheme.colorScheme.secondary
-        DossierNarrative.Category.REPUTATION -> MaterialTheme.colorScheme.tertiary
-        DossierNarrative.Category.WORLD_EVENTS -> MaterialTheme.colorScheme.error
+fun SectionHeader(title: String, icon: ImageVector) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+        Spacer(Modifier.width(8.dp))
+        Text(text = title, style = MaterialTheme.typography.titleLarge)
     }
+}
 
-    OutlinedCard(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                Icons.Rounded.Info,
-                contentDescription = null,
-                tint = categoryColor,
-                modifier = Modifier.size(32.dp)
-            )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
+@Composable
+fun AdvisorCard(advisor: Persona) {
+    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = advisor.name, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+            Text(text = advisor.role, style = MaterialTheme.typography.labelSmall)
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
+                Text(text = "Affinity: ${advisor.affinity}", style = MaterialTheme.typography.bodyMedium)
                 Text(
-                    text = entry.category.name.replace("_", " "),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = categoryColor
+                    text = advisor.strategicBias.name,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.tertiary
                 )
-                Text(
-                    text = entry.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = entry.value,
-                    style = MaterialTheme.typography.bodyLarge
-                )
-                if (entry.trend != null) {
-                    Text(
-                        text = entry.trend,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
             }
+            LinearProgressIndicator(
+                progress = { advisor.affinity / 100f },
+                modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
+                color = MaterialTheme.colorScheme.secondary
+            )
         }
     }
+}
+
+@Composable
+fun FactionCard(faction: Faction) {
+    Card(modifier = Modifier.fillMaxWidth(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(text = faction.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+            Text(text = faction.description, style = MaterialTheme.typography.bodySmall)
+            Spacer(Modifier.height(8.dp))
+            Text(text = "Reputation: ${faction.reputation}", style = MaterialTheme.typography.labelLarge)
+        }
+    }
+}
+
+@Composable
+fun LogEntry(log: String) {
+    Text(
+        text = "> $log",
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+        color = MaterialTheme.colorScheme.outline
+    )
 }

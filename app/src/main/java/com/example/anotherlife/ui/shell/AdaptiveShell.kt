@@ -47,7 +47,13 @@ import com.example.anotherlife.ui.unity.UnityView
 fun AnotherLifeShell() {
     // Shared state for the simulation
     val kingdomState = remember { KingdomState() }
-    val narrativeState = remember { NarrativeState() }
+    val narrativeState = remember { 
+        NarrativeState().apply {
+            advisors.addAll(com.example.anotherlife.data.simulation.AdvisorPersonas.allAdvisors)
+            factions.addAll(com.example.anotherlife.data.simulation.FactionProfiles.allFactions)
+            narrativeLog.add("The kingdom awakens to a new era.")
+        }
+    }
 
     // Initial Dialogue trigger logic (Demo)
     LaunchedEffect(Unit) {
@@ -136,7 +142,7 @@ fun AnotherLifeShell() {
                         KingdomDashboard(state = kingdomState) 
                     }
                     is Route.Dossier -> NavEntry(key) { 
-                        DossierScreen(state = kingdomState) 
+                        DossierScreen(state = kingdomState, narrative = narrativeState)
                     }
                     is Route.Quest -> NavEntry(key) {
                         QuestScreen(
