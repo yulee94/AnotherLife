@@ -105,7 +105,7 @@ fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit) {
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LinearProgressIndicator(
-                    progress = progressPercent,
+                    progress = { progressPercent },
                     modifier = Modifier.weight(1f).height(8.dp),
                     color = if (quest.isCompleted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant
