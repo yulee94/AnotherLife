@@ -1,244 +1,201 @@
 # Phase 1 NVS-01 Status
 
 **Status date:** 2026-07-14  
-**Roadmap phase:** Phase 1 — one approved quest line end to end  
-**Status:** Active — D1–D16 approved; clean A1 packet is the sole narrative gate
+**Current integration branch:** `main`  
+**Audited current-main head:** `5a7ab24fc81d40a619eb71349fa32d81b1e5047e`  
+**Roadmap state:** Phase 1 is paused behind a Phase 0 build-health regression gate  
+**Immediate owner:** Codex under issue #145
 
-`AGENTS.md` remains authoritative. Use this record with:
+`AGENTS.md` is authoritative. This record replaces the stale assumption that the clean A1 → G1 → C1–C4 chain was completed merely because issues or pull requests were closed.
 
-- `unity/Docs/Phase_0_Build_Health_Status.md`
+Use this document with:
+
+- `AGENTS.md`
+- `unity/Docs/Project_Progression_Roadmap.md`
+- `unity/Docs/Three_Way_Collaboration_Plan.md`
 - `unity/Docs/Phase_1_NVS_01_Risk_Register.md`
-- `unity/Docs/NVS_01_A1_Packet_Template.md`
-- `unity/Docs/NVS_01_G1_Specification_Template.md`
-- `unity/Docs/NVS_01_Review_and_Acceptance_Checklists.md`
-- issue #138 decision record
-- issues #128, #133, and #134
+- issue #138 for the approved D1–D16 product decisions
+- reopened issues #127, #128, #133, #134, #135, #136, and #137
+- critical build-health issue #145
 
-## Integrated phase state
+## Current repository state
 
-The following are merged on `main`:
+The following changes are present on `main`:
 
-- PR #123 — Phase 0 closeout and complete Phase 1 control package.
-- PR #125 — independent Compose progress-indicator cleanup; issue #132 closed.
-- PR #139 — corrected Phase 0 handoff: #138 first, then a fresh clean A1 branch; draft PR #124 remains archive-only.
+- PR #141 — merged the KSP bump, partial save changes, save tests, and PlayMode test infrastructure despite a blocking review and without the required local Unity validation.
+- PR #124 — merged an archive explicitly described as “must not be merged,” including the bounded packet, broad Chapter 1 material, Android UI/model changes, and Unity definition/namespace changes.
+- PR #143 — removed `Assets/Test.unity` from normal Build Settings and changed the PlayMode smoke to load the scene by editor path.
+- PR #144 — added an Android reflection-based `UnityPlayer` host and bridge documentation.
 
-Current integrated head after these merges:
+At the time of this audit there were no open pull requests. Closed or merged status is not completion evidence; every gate below is based on current source and acceptance criteria.
 
-```text
-5f45940810c8cd6e7970d2227d8b909858f29538
+## Phase 0 regression gate
+
+### #145 — restore trusted Unity compilation
+
+**Status:** Open and blocking  
+**Owner:** Codex  
+**Scope:** mechanical namespace/build repair only
+
+Current source moved `DialogueNode` and `DialogueChoice` to `AL.Data.Definitions.Narrative`, while `LocalStoryService.cs` still constructs several choices using the old fully qualified type:
+
+```csharp
+new AL.Data.Definitions.DialogueChoice { ... }
 ```
 
-Phase 0 remains green:
+Issue #145 requires a pre-fix Unity `2022.3.62f3` compilation log, the smallest mechanical correction, a clean post-fix compile, EditMode results, and metadata/GUID verification.
 
-- Android unit tests passed.
-- Android debug assembly passed.
-- Unity `2022.3.62f3` import and C# compilation passed.
-- EditMode smoke tests passed 3/3.
-- PlayMode test absence was reported accurately and tracked in #127.
-- `Assets/Test.unity` entered and exited Play Mode through the validation probe.
-- No designated shared-file lock is open.
+No Unity-dependent completion claim is accepted until #145 is merged and current `main` is revalidated.
 
-## Milestone goal
+## Verified source audit
 
-Prove that one bounded, approved quest can move from Android Studio-owned narrative source to a playable, persistent runtime loop without:
+### Android shell
 
-- duplicated story authority,
-- ownership drift,
-- invalid references,
-- unsafe old-save behavior,
-- duplicate or partial consequences,
-- silent content fallback,
-- or uncontrolled merge overlap.
+The Android app currently creates separate in-memory `KingdomState` and `NarrativeState` objects in Compose. It does not load the Unity save, quest service, or story service.
+
+`Route.Quest` exists and has an entry-provider branch, but the current bottom navigation does not expose a Quest destination. `Route.Champion` renders `AcademyScreen`, not `UnityView`. `UnityView` is imported but not mounted by the shell.
+
+Therefore the Android app remains a native simulation/narrative preview rather than a proven host for the integrated game loop.
+
+### Current `OMEN_1` packet
+
+`NVS_01_Packet.kt` is still the archived pre-approval packet and conflicts with issue #138 in material ways:
+
+- it uses `CH0_PROLOGUE`, no realm prerequisite, and automatic start;
+- it references missing `DLG_OMEN_1_ARENA_START`;
+- it grants `+5` Valerius affinity at acceptance instead of report completion;
+- it automatically triggers the success dialogue after arena success instead of requiring a manual report;
+- it grants the Celestial Tear at report completion instead of arena success;
+- its failure consequence and retry constant disagree;
+- it prohibits abandonment;
+- its localization inventory is incomplete;
+- it does not encode the full D16 resume model.
+
+Issue #128 is therefore reopened. The merged archive is source history, not an approved A1 artifact.
+
+### Unity quest runtime
+
+`LocalQuestService` currently registers Q1–Q5 only. It does not load or register `OMEN_1`, consume the Android packet, validate narrative references, issue a typed arena request, process a typed result, or execute the approved report-completion transaction.
+
+`QuestState` contains only quest ID, scalar progress, completion, and claim flags. `SaveGameData` has no persisted NVS-01 dialogue node, objective state, handoff correlation, pending Tear, recovery state, or applied-consequence ledger.
+
+Issues #133 and #134 are therefore reopened and remain blocked in their original order.
+
+### Save compatibility and recovery
+
+Current source includes the three #136 default initializations and limited reflection-based tests. The issue remains open until service mutation, save/reload round-trip, Unity compilation, and exact test evidence are complete.
+
+Current #137 code is only a partial implementation. Verified gaps include:
+
+- current primary bytes can be copied over the backup before the primary is validated;
+- ordinary `IOException` paths are treated as unsupported-operation fallback;
+- load/recovery status and save status are not separate observable contracts;
+- recovery messages can be overwritten by an internal `Save()`;
+- the first successful save does not establish the documented backup generation;
+- installed primary and backup are not fully revalidated after rotation;
+- `DeleteSave()` leaves previous/quarantine profile artifacts;
+- offline progress is mutated before durable persistence without a rollback strategy;
+- the required fault-injection and deletion matrix is absent.
+
+Issue #137 is reopened and remains dependent on #136.
+
+### PlayMode coverage
+
+The current PlayMode test loads `Assets/Test.unity` by editor path, which fixes the shipped-Build-Settings problem. It still lacks:
+
+- developer profile snapshot/isolation/restoration;
+- bounded scene-load timeout;
+- guaranteed restoration of global log/time state;
+- static `ServiceLocator` cleanup;
+- proof that no extra save artifacts remain;
+- a recorded successful Unity PlayMode XML result on current `main`.
+
+Issue #127 is reopened.
+
+### Android↔Unity bridge
+
+`UnityView.kt` now contains a reflection-based host, lifecycle forwarding, route JSON, and a callback parser. However:
+
+- the Gradle project includes only `:app`;
+- no `unityLibrary` module or Unity AAR/native export is packaged;
+- the shell does not mount `UnityView`;
+- Unity-side `AndroidBridge.SetRouteContext` consumption and result production are not proven;
+- lifecycle, configuration, back, device, memory, and end-to-end route tests are absent.
+
+Issue #135 is reopened and remains deferred until the standalone NVS-01 pipeline is proven.
+
+## Correct dependency order
 
 ```text
-Milestone: NVS-01
-Quest: OMEN_1
-Title: The First Signal
-```
-
-## Dependency chain
-
-```text
-#138 — D1–D16 product decisions: COMPLETE
+#145 — restore and prove Unity compilation
         ↓
-#128 — Android Studio clean A1 packet: ACTIVE
+#127 — safe representative-scene PlayMode coverage     #136 — complete old-save defaults evidence
+                                                        ↓
+                                                     #137 — independent save hardening
         ↓
-#133 — GPT G1 runtime specification: BLOCKED BY A1
+#128 — clean, D1–D16-faithful A1 packet
         ↓
-#134 — Codex C1–C4 implementation: BLOCKED BY G1
+#133 — GPT G1 runtime integration specification
+        ↓
+#134 — Codex C1–C4 implementation and verification
         ↓
 G2 — GPT technical/integration review
         ↓
 A2 — Android Studio narrative-fidelity review
         ↓
-U1 — user playtest and milestone acceptance
+U1 — user playtest and NVS-01 acceptance
+        ↓
+#135 — production Android↔Unity embedding milestone
 ```
 
-No downstream owner may replace missing upstream evidence with an assumption.
+#127 and #136 may proceed independently after #145 restores a trusted Unity base. #137 starts after #136. #133 must not start before a clean, approved #128 artifact exists. #134 must not start before approved G1.
 
-## Completed gate: #138 D1–D16
+## Deferred archive content
 
-The user delegated manual product approvals to the project director with the instruction to choose the best player experience. Issue #138 records the resulting authoritative decisions and is closed as completed.
+Merged files associated with #129–#131 preserve future ideas but do not prove those milestones complete.
 
-Approved experience, summarized:
+- Chapter 1 packet files are unapproved future content until Phase 2 review and user acceptance.
+- Realm/building/dossier/world hooks are proposals until event ownership, payloads, persistence, idempotency, and tests are specified.
+- Narrative governance/templates are proposals until repeated packet needs justify a versioned policy and validator.
 
-- authored `DLG_OMEN_1_ARENA_START` before semantic arena deployment,
-- transient, encouraging failure/retry loop,
-- `FAILED` is recovery-only,
-- Tear acquired once on arena success,
-- manual return to Valerius,
-- Gold, `+5` affinity, quest completion, and Chapter 1 unlock occur once at successful report conclusion,
-- full localization-key inventory,
-- named arena/location/result capabilities remain requested until implemented,
-- abandonment only outside active encounter,
-- universal post-realm prologue for all four realms,
-- Valerius serves as inter-realm Veil Watch liaison,
-- selectable Sky Castle marker and Deploy Champion action requested,
-- retained Celestial Tear presented to Valerius,
-- quest offered by selecting Valerius rather than auto-accepted,
-- exact-node dialogue resume and duplicate-safe arena/report recovery intent.
+These files must not be treated as runtime authority for NVS-01.
 
-The complete wording and consistency ruling remain in issue #138 and must be copied into A1 without reinterpretation.
+## Evidence rules
 
-## Active gate: #128 clean A1 packet
+A task is complete only when its own acceptance criteria are met. The following are not sufficient by themselves:
 
-**Owner:** Android Studio narrative workflow  
-**Required branch:** `android-studio/nvs-01-a1-clean`  
-**Required base:** fetched current `main`  
-**Template:** `unity/Docs/NVS_01_A1_Packet_Template.md`
+- an issue being closed;
+- a pull request being merged;
+- Android compilation succeeding for a Unity-only change;
+- a test source file existing without a recorded runner result;
+- a document describing a contract that no producer or consumer implements;
+- code compiling without persistence, duplicate-safety, or player-visible behavior evidence.
 
-Issue #128 has been updated from “creative decisions pending” to an execution-ready D1–D16 encoding task.
+Every completion report must identify exact base/head SHA, files changed, commands, exit codes, test totals, unperformed validation, ownership boundaries, and remaining risk.
 
-### A1 required output
+## Pull-request and shared-file state
 
-- exactly one bounded `OMEN_1` packet,
-- D1–D16 approval traceability,
-- stable IDs for context, quest, state, objective, dialogue, speaker, artifact, location, hook, result events, and localization,
-- deterministic offer/accept/start transition,
-- complete state and objective lifecycle,
-- authored deployment dialogue node,
-- optional lore branch with resolved references,
-- success/failure/cancel semantic event meaning,
-- transient failure and explicit Retry sequence,
-- manual report interaction,
-- Tear acquisition/presentation/retention meaning,
-- affinity/Gold/completion/unlock narrative ordering and one-time intent,
-- abandonment and reacceptance meaning,
-- D16 resume matrix,
-- full localization-key inventory,
-- honest external dependency declarations,
-- focused positive and negative packet tests,
-- Android build evidence,
-- Android Studio completion report and exact GPT handoff.
+- Open pull requests at audit: none.
+- Current shared-file soft locks: none.
+- No direct commits to `main` are authorized.
 
-### A1 prohibited scope
-
-Do not include:
-
-- full Chapter 1,
-- broad realm/building/research/world hooks,
-- general governance/tooling,
-- Android runtime model/navigation/Gradle changes,
-- Unity services/interfaces/scenes/save/registration,
-- shared technical contracts,
-- Android↔Unity bridge implementation,
-- unrelated maintenance.
-
-### Archive rule
-
-Draft PR #124 is source/reference only and must never merge. Its branch must remain unchanged until GPT verifies that the clean A1 packet preserved the approved bounded content; only then may the draft close as superseded.
-
-## Blocked gate: #133 G1
-
-**Owner:** GPT  
-**Status:** Blocked only by approved clean A1  
-**Template:** `unity/Docs/NVS_01_G1_Specification_Template.md`
-
-User approval is complete, but G1 must remain blocked until Android Studio supplies:
-
-- the clean A1 PR and exact commit,
-- complete stable-ID and reference evidence,
-- state/objective/dialogue tables,
-- localization inventory,
-- external dependency classification,
-- packet tests and Android build results,
-- completion report and exact GPT handoff.
-
-After activation, G1 will define the authoritative runtime content path, schema, validation, state machine, encounter request/result contract, persistence/D16 resume, consequence atomicity/idempotency, file impacts, locks, tests, C1–C4 order, and rollback behavior.
-
-## Blocked gate: #134 C1–C4
-
-**Owner:** Codex  
-**Status:** Blocked by approved G1
-
-Codex must not implement the NVS-01 runtime, infer missing narrative, or open a parallel integration path before #133 is approved.
-
-## Independent foundation and maintenance
-
-These remain separate, non-overlapping Codex tasks:
-
-- **#126:** narrow KSP `2.3.5` → `2.3.6` tooling fix — open.
-- **#127:** committed Unity PlayMode smoke coverage — open.
-- **#136:** initialize missing old-save reputation/faction/persona fields — open; required before #134 applies those consequences.
-- **#132 / PR #125:** Compose progress cleanup — complete and merged.
-
-## Deferred scope
-
-- **#129 — Phase 2:** Chapter 1 four-realm playable spine.
-- **#130 — Phase 3:** realm/building/dossier/world narrative hooks.
-- **#131 — Phase 4:** ID governance, localization, and authoring templates.
-- **#135:** production Android↔Unity runtime bridge.
-- **#137 — Phase 5:** crash-safe save writes, backup, and recovery.
-
-## Pull-request state
-
-- **#123:** merged — Phase 0 closeout and Phase 1 controls.
-- **#125:** merged — independent Android warning cleanup.
-- **#139:** merged — corrected clean-A1 handoff.
-- **#124:** open Draft archive — never merge.
-- **Clean A1 PR:** not yet open.
-
-## Shared-file status
-
-No designated shared file is currently locked.
-
-Potential future integration files:
+Potential shared integration files remain:
 
 - `unity/Assets/AL/Scripts/Core/Bootloader.cs`
 - `unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs`
 - `unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs`
 - `unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs`
 
-A1 may not edit them. G1 must justify any future need. The first approved implementation PR declaring one holds its soft lock.
-
-## Gate checklist
-
-| Gate | Status | Owner/evidence |
-| --- | --- | --- |
-| Phase 0 green | Pass | #123 / Phase 0 record |
-| Phase 1 controls merged | Pass | PR #123 |
-| Correct clean-A1 handoff merged | Pass | PR #139 |
-| D1–D16 approved | Pass | issue #138 |
-| Clean A1 branch and PR | Active/pending | Android Studio, #128 |
-| A1 references and packet tests | Pending | Android Studio |
-| A1 Android build evidence | Pending | Android Studio |
-| A1 GPT completeness review | Blocked by packet | GPT |
-| Save-default foundation | Open | Codex, #136 |
-| G1 approved | Blocked by A1 | GPT, #133 |
-| C1–C4 implemented/tested | Blocked by G1 | Codex, #134 |
-| G2 approved | Blocked | GPT |
-| A2 approved | Blocked | Android Studio |
-| U1 accepted | Blocked | User |
-| Shared locks released | Pass currently | none |
+The first approved implementation PR declaring one holds its soft lock.
 
 ## Current next action
 
 ```text
-Owner: Android Studio narrative workflow
-Issue: #128
-Base: fetched current main
-Branch: android-studio/nvs-01-a1-clean
-Deliverable: one D1–D16-faithful OMEN_1 packet, packet tests, Android build evidence, and GPT handoff
+Owner: Codex
+Issue: #145
+Base: fetched current main at or after 5a7ab24fc81d40a619eb71349fa32d81b1e5047e
+Branch: codex/fix-narrative-namespace-compile
+Deliverable: pre-fix compiler evidence, narrow mechanical fix, clean Unity compile, EditMode totals, metadata verification, and focused PR
 ```
 
-Parallel work may proceed only in separate Codex PRs for #126, #127, or #136. Do not start substantive G1 or NVS-01 runtime implementation until A1 passes review.
+Android Studio may inspect #128 and prepare narrative work, but no A1 PR should claim a trusted base until #145 has established current-main Unity build health.
