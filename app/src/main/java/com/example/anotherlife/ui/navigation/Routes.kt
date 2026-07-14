@@ -11,10 +11,4 @@ sealed interface Route {
     data object Battle : Route
     @Serializable
     data object Warzone : Route
-    @Serializable
-    data object Quest : Route
-    @Serializable
-    data object Dossier : Route
-    @Serializable
-    data object NarrativeDebug : Route
 }
