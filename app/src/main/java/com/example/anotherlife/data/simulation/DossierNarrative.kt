@@ -35,7 +35,7 @@ object DossierNarrative {
             Category.ADVISOR_STATUS,
             "Military Advisor",
             "Captain Valerius (Loyal)",
-            "Affinity: 50",
+            "Affinity: 60",
             "dossier.advisor.valerius"
         ),
         DossierEntry(
@@ -45,6 +45,13 @@ object DossierNarrative {
             "Status: Unstable",
             "dossier.event.sky_castle"
         )
+    )
+
+    val strategicLogs = listOf(
+        "Day 1: The kingdom awakens to the sound of celestial vibrations.",
+        "Day 2: Captain Valerius has established the forward command post.",
+        "Day 3: Master Gruff reports critical shortage of Deep Ore for forge ignition.",
+        "Day 5: Observers report a widening of the rift above the Obsidian Citadel."
     )
 
     const val LOG_TITLE = "Strategic Narrative Log"
