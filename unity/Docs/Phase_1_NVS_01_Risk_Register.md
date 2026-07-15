@@ -8,6 +8,8 @@
 
 This register describes verified current-source risk. It supersedes assumptions based solely on issue closure, PR merge state, source-file presence, compilation, or one-platform validation.
 
+**Ownership update:** As of 2026-07-15, Android Studio is no longer a separate owner or narrative approval gate. Former Android Studio narrative/content responsibilities transfer to Codex narrative/content mode. Codex also owns design/asset workload, including terrestrial designs, under user approval.
+
 Use with:
 
 - `AGENTS.md`
@@ -151,7 +153,7 @@ Parallel work must still respect file overlap and shared-file locks. One broad b
 3. G1 identifies the exact focused technical foundations required for OMEN_1.
 4. #134 Codex C1–C4 after those foundations and G1 are approved.
 5. GPT G2.
-6. Android Studio A2.
+6. Codex narrative/content A2.
 7. User U1.
 
 ### Post-NVS embedding

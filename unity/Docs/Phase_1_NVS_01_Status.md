@@ -8,6 +8,8 @@
 
 `AGENTS.md` is authoritative. This record distinguishes source presence, issue state, merge state, validation evidence, and actual player-visible completion.
 
+**Ownership update:** As of 2026-07-15, Android Studio is no longer a separate owner or narrative approval gate. Former Android Studio narrative/content responsibilities transfer to Codex narrative/content mode. Codex also owns design/asset workload, including terrestrial designs, under user approval.
+
 Use this document with:
 
 - `AGENTS.md`
@@ -176,9 +178,9 @@ Its verified gaps include:
 
 ## NVS-01 narrative and runtime chain
 
-### #128 — clean Android Studio A1 packet
+### #128 — clean Codex narrative/content A1 packet
 
-Issue #128 is blocked by #156.
+Issue #128 is blocked by #156. It is Codex narrative/content work on a `codex/` branch.
 
 The merged `NVS_01_Packet.kt` remains the archived pre-approval packet and conflicts with issue #138:
 

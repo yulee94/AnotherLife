@@ -1,5 +1,7 @@
 # GPT, Android Studio, and Codex Collaboration Prompt
 
+> Retired ownership note, 2026-07-15: this prompt is historical. `AGENTS.md` is authoritative. Android Studio is now only an IDE; all former Android Studio narrative/content responsibilities and all design/asset workload belong to Codex.
+
 For standalone copy-paste prompts with role-specific workload, boundaries, validation, and future progression, use `unity/Docs/Agent_Role_Prompts.md`. The root `AGENTS.md` remains authoritative, and `unity/Docs/Project_Progression_Roadmap.md` defines the long-range phase gates.
 
 The compact shared prompt below may be used when all three roles need the same coordination summary.
@@ -22,7 +24,7 @@ Do not overwrite or revert another workstream. Before changing files, fetch the 
 Branch rule:
 Do not commit directly to main. Use one focused branch:
 - gpt/<short-scope> for planning, specifications, reviews, and coordination docs.
-- android-studio/<short-scope> for narrative content and narrative-owned progression logic.
+- Retired: `android-studio/<short-scope>` was the old narrative branch prefix. Use `codex/<short-scope>` under the current `AGENTS.md`.
 - codex/<short-scope> for runtime implementation, tests, tooling, and technical contracts.
 
 GPT ownership:

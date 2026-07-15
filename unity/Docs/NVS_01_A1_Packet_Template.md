@@ -1,6 +1,6 @@
 # NVS-01 A1 Narrative Packet Template
 
-Use this template for the Android Studio-owned A1 deliverable tracked by issue #128.
+Use this template for the Codex narrative/content A1 deliverable tracked by issue #128.
 
 This document defines structure, evidence, and ownership requirements only. It does not author dialogue, choose creative outcomes, or prescribe runtime implementation. Every placeholder must be replaced with user-approved narrative intent before A1 review.
 
@@ -11,8 +11,8 @@ Milestone: NVS-01
 Task: A1
 Quest: OMEN_1 / The First Signal
 Packet version:
-Android Studio branch: android-studio/nvs-01-a1-clean
-Android Studio commit:
+Codex branch: codex/nvs-01-a1-clean
+Codex commit:
 Upstream main commit:
 User decision issue: #138
 User approval comment/reference:
@@ -473,7 +473,7 @@ git -C $repo rev-parse origin/main
 
 Record exact command output, exit codes, branch SHA, and `origin/main` SHA. A successful historical build on draft PR #124 is not evidence for the clean A1 branch.
 
-## 19. Android Studio completion report
+## 19. Codex narrative/content completion report
 
 ```text
 Narrative scope completed:

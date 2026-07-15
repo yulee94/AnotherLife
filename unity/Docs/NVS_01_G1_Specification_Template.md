@@ -33,7 +33,7 @@ G1 may proceed only when all items pass:
 - [ ] All internal A1 IDs and references resolve.
 - [ ] States, objectives, dialogue, failure, retry, cancellation, report, artifact, consequence, completion, and resume intent are complete.
 - [ ] External dependencies are marked requested or verified with evidence.
-- [ ] Android Studio supplied its completion report and exact GPT handoff request.
+- [ ] Codex narrative/content supplied its completion report and exact GPT handoff request.
 - [ ] GPT verified narrative ownership and completeness.
 - [ ] No runtime-owned implementation is mixed into A1.
 
@@ -82,7 +82,7 @@ At minimum address:
 
 | File | Commit | Owner | Narrative responsibility |
 | --- | --- | --- | --- |
-| | | Android Studio | |
+| | | Codex narrative/content | |
 
 ### D1–D16 traceability
 
@@ -115,20 +115,20 @@ List IDs exactly as approved. A runtime-only idempotency/correlation ID may be a
 
 | Category | ID | Source owner | Runtime consumer | Persisted? | External dependency? |
 | --- | --- | --- | --- | --- | --- |
-| Milestone | | Android Studio | | | |
-| Chapter/context | | Android Studio | | | |
-| Quest | | Android Studio | | | |
-| State | | Android Studio | | | |
-| Objective | | Android Studio | | | |
-| Dialogue | | Android Studio | | | |
-| NPC/advisor | | Android Studio | | | |
-| Reward/artifact | | Android Studio | | | |
-| Location | | Android Studio intent | | | |
-| Gameplay hook | | Android Studio intent / GPT contract | | | |
-| Success event | | Android Studio intent / GPT contract | | | |
-| Failure event | | Android Studio intent / GPT contract | | | |
-| Cancel/unavailable event | | Android Studio intent / GPT contract | | | |
-| Localization key | | Android Studio | | | |
+| Milestone | | Codex narrative/content | | | |
+| Chapter/context | | Codex narrative/content | | | |
+| Quest | | Codex narrative/content | | | |
+| State | | Codex narrative/content | | | |
+| Objective | | Codex narrative/content | | | |
+| Dialogue | | Codex narrative/content | | | |
+| NPC/advisor | | Codex narrative/content | | | |
+| Reward/artifact | | Codex narrative/content | | | |
+| Location | | Codex narrative/content intent | | | |
+| Gameplay hook | | Codex narrative/content intent / GPT contract | | | |
+| Success event | | Codex narrative/content intent / GPT contract | | | |
+| Failure event | | Codex narrative/content intent / GPT contract | | | |
+| Cancel/unavailable event | | Codex narrative/content intent / GPT contract | | | |
+| Localization key | | Codex narrative/content | | | |
 | Idempotency/correlation key | | GPT technical | | yes | no |
 
 ### Legacy mapping and aliases
@@ -191,7 +191,7 @@ Explain how the implementation carries quest context and typed result through or
 ### Authoring/export path
 
 ```text
-<How Android Studio-owned narrative becomes the runtime artifact, including deterministic ordering and generated-file ownership.>
+<How Codex narrative/content-owned narrative becomes the runtime artifact, including deterministic ordering and generated-file ownership.>
 ```
 
 ### Runtime load path
@@ -727,13 +727,13 @@ G1 must not require deletion/reset of a valid player profile to recover from ord
 - [ ] Error behavior is visible and never grants false progress.
 - [ ] Required/optional/prohibited files and locks are explicit.
 - [ ] Test matrix and C1–C4 order are implementation-ready.
-- [ ] Android Studio can review narrative fidelity from the same specification.
+- [ ] Codex narrative/content can review narrative fidelity from the same specification.
 - [ ] Codex can implement without inventing story or architecture outside the approved boundary.
 
 ## 24. Codex handoff
 
 ```text
-Codex: implement issue #134 from this approved G1 specification and the exact approved A1 commit. Do not rewrite narrative, broaden scope, or start a parallel path. Declare shared-file locks before editing; preserve old saves and all existing service registrations; implement strict validation, deterministic state/event behavior, typed encounter request/result handling, D16 resume, and consequence idempotency; run and report the full specified test matrix. Return the implementation PR to GPT for G2 and Android Studio for A2.
+Codex engineering: implement issue #134 from this approved G1 specification and the exact approved A1 commit. Do not rewrite narrative, broaden scope, or start a parallel path. Declare shared-file locks before editing; preserve old saves and all existing service registrations; implement strict validation, deterministic state/event behavior, typed encounter request/result handling, D16 resume, and consequence idempotency; run and report the full specified test matrix. Return the implementation PR to GPT for G2 and Codex narrative/content for A2.
 ```
 
 ## 25. Unresolved decisions

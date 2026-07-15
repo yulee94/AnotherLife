@@ -57,7 +57,7 @@ A compiling PR without this evidence is not review-ready.
 - [ ] No parallel PR implements the same completion.
 - [ ] Diff is one reviewable completion with no unrelated cleanup.
 - [ ] Full Chapter 1, broad hooks/governance, #135 bridge work, and #137 save hardening remain out of scope unless explicitly approved.
-- [ ] No Android Studio narrative source was rewritten by Codex.
+- [ ] No Codex narrative/content source was rewritten in Codex engineering mode.
 
 ## G2.2 D1–D16 implementation traceability
 
@@ -259,9 +259,9 @@ Shared locks released?:
 Handoff to A2:
 ```
 
-# A2 — Android Studio Narrative-Fidelity Review
+# A2 — Codex Narrative-Fidelity Review
 
-**Owner:** Android Studio narrative workflow  
+**Owner:** Codex narrative/content mode
 **Inputs:** issue #138, approved A1/G1, implemented runtime build  
 **Output:** fidelity approval or precise narrative mismatch report
 

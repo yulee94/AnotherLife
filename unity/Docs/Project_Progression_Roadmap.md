@@ -1,6 +1,6 @@
 # AnotherLife Project Progression Roadmap
 
-This roadmap defines how GPT, Codex, the Android Studio narrative workflow, and the user build Another Life from the current prototype into a stable, content-scalable release candidate. It controls sequencing and gates; it does not author narrative or implement gameplay.
+This roadmap defines how GPT, Codex, and the user build Another Life from the current prototype into a stable, content-scalable release candidate. It controls sequencing and gates; it does not author narrative or implement gameplay.
 
 ## Authority and supporting documents
 
@@ -18,7 +18,7 @@ When documents conflict, `AGENTS.md` is authoritative. The user decides product 
 
 - Keep `main` buildable before expanding scope.
 - Deliver one thin, complete vertical slice before scaling content.
-- Android Studio owns narrative source material; Codex consumes it; GPT specifies and reviews the handoff.
+- Codex owns narrative/content, engineering, and design/asset work; GPT specifies and reviews handoffs; the user approves product and creative direction.
 - Use stable IDs and data contracts instead of duplicating narrative in runtime code.
 - Preserve old saves and existing service registrations.
 - Prefer focused PRs with measurable acceptance evidence over large mixed changes.
@@ -54,7 +54,7 @@ Establish one canonical workspace, one ownership model, one active implementatio
 - Document exact build and test commands.
 - Consolidate on one implementation when duplicate technical PRs exist.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Keep narrative work on isolated branches while build contracts are unstable.
 - Do not merge narrative content that depends on unresolved or undocumented runtime behavior.
@@ -81,7 +81,7 @@ Prove one bounded, user-approved quest line can move from narrative source to a 
 
 The detailed task order and acceptance criteria live in `unity/Docs/Three_Way_Collaboration_Plan.md`.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Select one bounded quest line approved by the user.
 - Produce the complete narrative packet: stable IDs, prerequisites, states, objectives, choices, consequences, gameplay handoff, completion/failure, retry/recovery, and localization references.
@@ -105,7 +105,7 @@ The detailed task order and acceptance criteria live in `unity/Docs/Three_Way_Co
 
 - The quest can start, progress, branch, hand off to existing gameplay, resolve, save, reload, and resume.
 - Rewards and consequences occur exactly as approved and do not duplicate after reload.
-- Narrative fidelity is approved by Android Studio.
+- Narrative fidelity is verified in Codex narrative/content mode and approved by the user.
 - GPT confirms contract, ownership, validation, and merge safety.
 - The user approves the playtest.
 
@@ -115,7 +115,7 @@ The detailed task order and acceptance criteria live in `unity/Docs/Three_Way_Co
 
 Generalize the NVS-01 path into a complete, coherent Chapter 1 flow while keeping content and runtime responsibilities separated.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Define the approved Chapter 1 structure, main progression, optional content, NPC arcs, factions, continuity, chapter entry, and chapter-close conditions.
 - Maintain stable IDs and explicit cross-quest dependencies.
@@ -147,7 +147,7 @@ Generalize the NVS-01 path into a complete, coherent Chapter 1 flow while keepin
 
 Make approved narrative choices visibly affect existing gameplay systems without allowing either workstream to duplicate or own the other’s logic.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Define the narrative meaning and approved consequences of realm, faction, advisor, affinity, reputation, artifact, boss, and world-state choices.
 - Specify semantic gameplay hooks and return events.
@@ -176,7 +176,7 @@ Make approved narrative choices visibly affect existing gameplay systems without
 
 Allow narrative and gameplay content to grow without manual reference drift, inconsistent IDs, or fragile one-off import steps.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Establish narrative naming conventions, ID registries, reusable content structures, continuity rules, localization keys, and authoring validation expectations.
 - Expand approved content using the proven pipeline.
@@ -204,7 +204,7 @@ Allow narrative and gameplay content to grow without manual reference drift, inc
 
 Harden the integrated game against old saves, invalid content, device differences, failure paths, and regression risk.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Review narrative pacing, clarity, continuity, recovery text, accessibility of presentation, and save/resume meaning.
 - Resolve approved continuity and localization-facing defects.
@@ -235,7 +235,7 @@ Harden the integrated game against old saves, invalid content, device difference
 
 Create a traceable, reproducible release candidate with frozen scope, known validation, and user approval.
 
-### Android Studio workload
+### Codex narrative/content workload
 
 - Freeze release narrative content.
 - Resolve release-blocking continuity and localization-facing defects.
@@ -273,7 +273,7 @@ Every feature or fix follows this cycle:
 3. **Branch** — create one focused branch from latest `main` with the correct prefix.
 4. **Implement or author** — stay within workstream ownership and declared file scope.
 5. **Validate** — run exact relevant checks and record results.
-6. **Review** — GPT checks technical and ownership fidelity; Android Studio checks narrative fidelity when applicable.
+6. **Review** — GPT checks technical and ownership fidelity; Codex narrative/content mode checks narrative fidelity when applicable.
 7. **Playtest** — the user validates player experience at milestone gates.
 8. **Merge and close** — merge in dependency order, release locks, remove completed branches, and update milestone status.
 
@@ -293,7 +293,7 @@ Before any milestone is declared complete:
 
 ## Selecting the next task
 
-GPT should select the next unblocked task using the active phase gate, not by choosing the most interesting feature. Android Studio and Codex should not self-assign work from a later phase when an earlier gate remains red. When a new request arrives, classify it as:
+GPT should select the next unblocked task using the active phase gate, not by choosing the most interesting feature. Codex should not self-assign work from a later phase when an earlier gate remains red. When a new request arrives, classify it as:
 
 - **Blocker:** prevents the active gate or breaks `main`.
 - **Required:** necessary to satisfy the active gate.

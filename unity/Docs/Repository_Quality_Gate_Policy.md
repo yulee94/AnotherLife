@@ -1,5 +1,7 @@
 # Repository Quality Gate Policy
 
+`AGENTS.md` is authoritative. As of 2026-07-15, Android Studio is no longer a separate owner or narrative approval gate. Former Android Studio narrative/content responsibilities and all design/asset workload belong to Codex, with the user retaining final product and creative approval.
+
 **Status date:** 2026-07-15  
 **Policy owner:** GPT  
 **Implementation owner:** Codex  
@@ -19,7 +21,7 @@ This decision record defines which checks block a merge, which checks apply only
 4. **A locked-down self-hosted Windows runner is the target Unity model**, but it becomes required only after the runner, #127 profile-safe PlayMode coverage, and #150 production Player build have each been proven on passing and intentionally failing test PRs.
 5. **Path classification is automated but does not replace ownership review.** Shared, save-sensitive, narrative, workflow, dependency, and production-scene changes require explicit human disposition.
 6. **No skipped, unavailable, cancelled, `continue-on-error`, or “not applicable” execution may be cited as passing product validation.**
-7. **The repository currently uses one GitHub identity for the user and all agents.** GitHub cannot count that same identity as an independent approving reviewer on its own PR. Until a separate trusted reviewer identity or GitHub App exists, GPT and Android Studio review evidence is a documented manual gate rather than cryptographically independent branch-protection approval.
+7. **The repository currently uses one GitHub identity for the user and all agents.** GitHub cannot count that same identity as an independent approving reviewer on its own PR. Until a separate trusted reviewer identity or GitHub App exists, GPT review and Codex narrative-fidelity evidence are documented manual gates rather than cryptographically independent branch-protection approval.
 
 ## 2. Gate categories
 
@@ -61,7 +63,7 @@ An informational warning can still cause GPT to block a PR through review when i
 These cannot be replaced by a passing build:
 
 - GPT contract, persistence, ownership, and integration review;
-- Android Studio narrative-fidelity review for narrative-owned content;
+- Codex narrative/content narrative-fidelity review for narrative-owned content;
 - user U1 playtest and milestone acceptance;
 - supported-device or release-signing validation;
 - emergency override authorization;
@@ -92,7 +94,7 @@ This job uses the pull-request event payload, base/head refs, and changed-file l
 - The base branch is `main`, unless the PR declares one already-approved prerequisite branch and links the approving issue/PR.
 - A PR based on a closed, rejected, or unapproved feature branch fails classification.
 - The PR links an issue or explicitly declares a root coordination change.
-- Exactly one primary workstream owner is declared: GPT, Android Studio, or Codex.
+- Exactly one primary workstream owner is declared: GPT, Codex narrative/content, Codex engineering, or Codex design/assets.
 - Narrative, runtime, shared-contract/catalog, save/migration, and unrelated-cleanup declarations are present.
 - Every changed designated shared file appears in the shared-file declaration.
 - The PR does not claim a shared-file lock already held by another open PR.
@@ -329,12 +331,12 @@ READY TO MERGE
 
 It must list unresolved validation and shared-file state. A label alone is not review evidence.
 
-### Android Studio disposition required
+### Codex narrative/content disposition required
 
-Android Studio narrative-fidelity review is required when a PR changes:
+Codex narrative/content narrative-fidelity review is required when a PR changes:
 
 - dialogue, quest meaning, chapter placement, lore, NPC characterization, affinity/faction/persona meaning, narrative outcomes, localization-facing story copy, or narrative stable IDs;
-- generated runtime content whose source is an Android Studio-owned packet.
+- generated runtime content whose source is a Codex narrative/content packet.
 
 ### User disposition required
 
@@ -361,7 +363,7 @@ After Phase A passes one success PR and the required failure fixtures, configure
 
 ### Review-count limitation
 
-Do not claim independent approval enforcement while all work uses the same GitHub identity. Setting a required approving-review count would block self-authored PRs without proving independent GPT or Android Studio review.
+Do not claim independent approval enforcement while all work uses the same GitHub identity. Setting a required approving-review count would block self-authored PRs without proving independent GPT or Codex narrative/content review.
 
 Until a separate trusted identity or GitHub App exists:
 

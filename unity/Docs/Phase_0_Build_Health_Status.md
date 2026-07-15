@@ -211,13 +211,13 @@ Phase 0 is green. Phase 1 may begin through the following controlled sequence.
 
 Issue #138 must approve D1–D16 for the bounded `OMEN_1` narrative intent. GPT and Codex do not select those answers.
 
-### Second owner: Android Studio narrative workflow
+### Second owner: Codex narrative/content mode
 
 After PR #123 is merged and #138 is approved:
 
 1. Fetch and fast-forward canonical `main`.
 2. Confirm `HEAD == origin/main`.
-3. Create `android-studio/nvs-01-a1-clean`.
+3. Create `codex/nvs-01-a1-clean`.
 4. Use draft PR #124 only as source/reference.
 5. Encode exactly one bounded `OMEN_1` packet using `NVS_01_A1_Packet_Template.md`.
 6. Preserve D1–D16 without reinterpretation.

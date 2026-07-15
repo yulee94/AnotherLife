@@ -1,6 +1,8 @@
-# Three-Way Collaboration Plan
+# Collaboration Plan
 
-This document defines the first coordinated delivery milestone for GPT, Codex, and the Android Studio narrative workflow. It is a process and acceptance specification only; it does not create gameplay or author narrative content.
+This legacy path defines the first coordinated delivery milestone for GPT, Codex, and the user. It is a process and acceptance specification only; it does not create gameplay or author narrative content.
+
+`AGENTS.md` is authoritative. Historical references to Android Studio mean the former narrative workflow now owned by Codex narrative/content mode. Android Studio may still be used as an IDE, but it is not an owner, branch prefix, or approval gate.
 
 ## Goal
 
@@ -8,7 +10,7 @@ Prove that one approved narrative quest line can move from authored content to a
 
 ## Milestone NVS-01: One Approved Quest Line, End to End
 
-NVS-01 uses one bounded quest line selected and approved by the Android Studio narrative workflow. GPT and Codex must not select, rewrite, or expand the story.
+NVS-01 uses one bounded quest line selected in Codex narrative/content mode and approved by the user. GPT must not select, rewrite, or expand the story.
 
 The vertical slice must demonstrate:
 
@@ -23,7 +25,7 @@ The vertical slice must demonstrate:
 
 ### Out of scope
 
-- Rewriting or extending narrative content outside the Android Studio workstream.
+- Rewriting or extending narrative content outside Codex narrative/content mode.
 - New combat mechanics, boss redesigns, scenes, 3D assets, VFX, weather, or UI redesigns.
 - Broad service refactors unrelated to the selected quest line.
 - Integrating multiple chapters or multiple unrelated quest lines.
@@ -31,7 +33,7 @@ The vertical slice must demonstrate:
 
 ## Required handoff artifacts
 
-### Narrative packet from Android Studio
+### Narrative packet from Codex narrative/content mode
 
 The packet must identify:
 
@@ -82,15 +84,15 @@ The report must include:
 **Acceptance criteria:**
 
 - The canonical workspace is consistently documented as `D:\260711\MY\AndroidStudioProjects\AnotherLife`.
-- GPT, Android Studio, and Codex ownership boundaries are explicit.
+- GPT, Codex narrative/content, Codex engineering, Codex design/asset, and user approval boundaries are explicit.
 - Branch, pull-request, shared-file, save-compatibility, and conflict rules are documented.
 - No gameplay code or narrative content changes are included.
 
 ### A1 — Select and complete the NVS-01 narrative packet
 
-**Owner:** Android Studio narrative workflow  
+**Owner:** Codex narrative/content mode
 **Dependency:** G0 merged  
-**Recommended branch:** `android-studio/nvs-01-narrative-packet`
+**Recommended branch:** `codex/nvs-01-narrative-packet`
 
 **Acceptance criteria:**
 
@@ -98,7 +100,7 @@ The report must include:
 - Every ID used by the packet is stable and unique.
 - Entry, objective, choice, consequence, completion, failure, retry, and recovery behavior are explicit.
 - The runtime handoff is described semantically without redesigning gameplay implementation.
-- All authored dialogue and narrative outcomes remain in Android Studio-owned files.
+- All authored dialogue and narrative outcomes remain in Codex narrative/content source files.
 - No Codex-owned gameplay system or shared integration file is modified unless separately declared and approved.
 
 ### G1 — Convert the packet into an implementation specification
@@ -178,11 +180,11 @@ The report must include:
 - The implementation is checked against A1 and G1, not against inferred story intent.
 - Ownership boundaries, contract fidelity, save compatibility, validation coverage, and shared-file declarations are reviewed.
 - Any requested change points to a violated requirement or acceptance criterion.
-- Narrative preferences are routed to Android Studio or the user rather than rewritten by GPT.
+- Narrative preferences are routed to Codex narrative/content mode or the user rather than rewritten by GPT.
 
 ### A2 — Verify narrative fidelity
 
-**Owner:** Android Studio narrative workflow  
+**Owner:** Codex narrative/content mode
 **Dependency:** Codex changes available in an integrated build
 
 **Acceptance criteria:**
@@ -210,7 +212,7 @@ The report must include:
 3. G1 implementation specification.
 4. C1–C4 Codex runtime integration.
 5. G2 review fixes, if required, on the Codex branch.
-6. A2 narrative-fidelity fixes in the owning workstream.
+6. A2 narrative-fidelity fixes in Codex narrative/content mode.
 7. U1 acceptance and milestone closeout.
 
 A dependent pull request must not merge before its upstream artifact is approved. When a change to an upstream narrative packet is necessary, update A1 first, then revise G1, and only then change Codex implementation.
@@ -231,7 +233,7 @@ A dependent pull request must not merge before its upstream artifact is approved
 NVS-01 is complete only when:
 
 - Every task above meets its acceptance criteria.
-- The canonical narrative remains Android Studio-owned.
+- The canonical narrative remains owned by Codex narrative/content mode.
 - The runtime consumes approved data without duplicating story logic.
 - Save and reload are proven for all states used by the slice.
 - Validation and automated tests cover expected and invalid inputs.
