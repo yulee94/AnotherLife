@@ -7,6 +7,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.anotherlife.data.simulation.DialogueNode
@@ -15,6 +17,8 @@ import com.example.anotherlife.data.simulation.NarrativeState
 
 @Composable
 fun NarrativeDebugScreen(state: NarrativeState) {
+    val errorMessage = remember { mutableStateOf<String?>(null) }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -28,17 +32,31 @@ fun NarrativeDebugScreen(state: NarrativeState) {
         )
 
         Text(
-            text = "Trigger Dialogue Nodes for NVS-01 Validation",
+            text = "Developer-only non-authoritative preview. This screen is unavailable in release builds.",
             style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        errorMessage.value?.let { message ->
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
+                modifier = Modifier.padding(bottom = 12.dp)
+            )
+        }
 
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(NVS_01_Packet.storyNodes) { node ->
                 NodeDebugCard(node) {
-                    state.currentDialogue.value = it
+                    val triggered = NarrativeDebugTriggers.triggerPreviewNode(state, it.id)
+                    errorMessage.value = if (triggered) {
+                        null
+                    } else {
+                        NarrativeDebugTriggers.missingNodeMessage(it.id)
+                    }
                 }
             }
         }
