@@ -79,8 +79,14 @@ namespace AL.ChampionMode
         private Text _clearLootText;
         private Image _clearBackdropImage;
         private Image _clearGradeHalo;
+        private Image _clearRewardPanel;
+        private Image _clearRewardAccent;
+        private Image _clearRewardGlow;
+        private Image _clearLootGradePlate;
+        private Image _clearLootGradeGlow;
         private Image _clearProgressFill;
         private readonly Image[] _clearSignalBars = new Image[4];
+        private readonly Image[] _clearRewardSparks = new Image[6];
         private GameObject _introPanelObject;
         private Image _introTopLetterbox;
         private Image _introBottomLetterbox;
@@ -878,6 +884,19 @@ namespace AL.ChampionMode
                 ItemGrade.Mythic => 0.84f,
                 ItemGrade.Celestial => 1f,
                 _ => 0.36f
+            };
+        }
+
+        private static Color GetItemGradeColor(ItemGrade grade)
+        {
+            return grade switch
+            {
+                ItemGrade.Rare => new Color(0.34f, 0.78f, 1f),
+                ItemGrade.Epic => new Color(0.74f, 0.36f, 1f),
+                ItemGrade.Legendary => new Color(1f, 0.72f, 0.24f),
+                ItemGrade.Mythic => new Color(1f, 0.30f, 0.14f),
+                ItemGrade.Celestial => new Color(0.72f, 0.94f, 1f),
+                _ => new Color(0.78f, 0.86f, 0.92f)
             };
         }
 
@@ -1691,6 +1710,8 @@ namespace AL.ChampionMode
             {
                 _clearLootText.text = BuildLootSummary();
             }
+
+            ApplyClearRewardVisualProfile();
         }
 
         private string BuildLootSummary()
@@ -1741,6 +1762,53 @@ namespace AL.ChampionMode
             return stats;
         }
 
+        private void ApplyClearRewardVisualProfile()
+        {
+            BossLootDrop featuredDrop = GetFeaturedDrop();
+            ItemGrade grade = featuredDrop?.Grade ?? ItemGrade.Common;
+            float gradePower = GetItemGradePower(grade);
+            RealmId realm = featuredDrop != null && featuredDrop.VisualRealm != RealmId.None
+                ? featuredDrop.VisualRealm
+                : GetCurrentRealmId();
+            Color gradeColor = featuredDrop == null
+                ? new Color(0.54f, 0.66f, 0.78f)
+                : GetItemGradeColor(grade);
+            Color realmAccent = GetRealmAccentColor(realm);
+            Color panelBase = Color.Lerp(new Color(0.020f, 0.038f, 0.042f, 0.94f), gradeColor, 0.08f + gradePower * 0.12f);
+
+            SetImageColor(_clearRewardPanel, WithAlpha(panelBase, 0.94f));
+            SetImageColor(_clearRewardAccent, WithAlpha(Color.Lerp(gradeColor, Color.white, 0.12f + gradePower * 0.18f), 0.58f + gradePower * 0.36f));
+            SetImageColor(_clearRewardGlow, WithAlpha(Color.Lerp(gradeColor, realmAccent, 0.22f), 0.08f + gradePower * 0.18f));
+            SetImageColor(_clearLootGradePlate, WithAlpha(Color.Lerp(new Color(0.014f, 0.022f, 0.028f), gradeColor, 0.18f + gradePower * 0.20f), 0.96f));
+            SetImageColor(_clearLootGradeGlow, WithAlpha(Color.Lerp(gradeColor, Color.white, 0.18f), featuredDrop == null ? 0.10f : 0.20f + gradePower * 0.36f));
+
+            if (_clearCreditText != null)
+            {
+                _clearCreditText.color = Color.Lerp(new Color(1f, 0.82f, 0.48f), gradeColor, gradePower * 0.22f);
+            }
+
+            if (_clearLootText != null)
+            {
+                _clearLootText.color = featuredDrop == null
+                    ? new Color(0.78f, 0.86f, 0.92f)
+                    : Color.Lerp(GetItemGradeColor(grade), Color.white, 0.22f);
+            }
+
+            for (int i = 0; i < _clearRewardSparks.Length; i++)
+            {
+                if (_clearRewardSparks[i] == null)
+                {
+                    continue;
+                }
+
+                bool active = featuredDrop != null && i <= Mathf.RoundToInt(Mathf.Lerp(1f, _clearRewardSparks.Length - 1f, gradePower));
+                _clearRewardSparks[i].enabled = active;
+                _clearRewardSparks[i].color = WithAlpha(i % 2 == 0 ? gradeColor : realmAccent, active ? 0.34f + gradePower * 0.44f : 0f);
+                float scale = Mathf.Lerp(0.72f, 1.18f, gradePower);
+                _clearRewardSparks[i].rectTransform.localScale = Vector3.one * scale;
+            }
+        }
+
         private void PlayClearPresentation(Color gradeColor)
         {
             if (_clearPresentationRoutine != null)
@@ -1784,6 +1852,8 @@ namespace AL.ChampionMode
                     _clearProgressFill.color = WithAlpha(Color.Lerp(gradeColor, Color.white, 0.10f + pulse * 0.16f), 0.94f);
                 }
 
+                AnimateClearRewardVisuals(eased, gradeColor, pulse);
+
                 for (int i = 0; i < _clearSignalBars.Length; i++)
                 {
                     if (_clearSignalBars[i] == null)
@@ -1811,9 +1881,41 @@ namespace AL.ChampionMode
                 _clearProgressFill.rectTransform.sizeDelta = new Vector2(672f, 7f);
             }
 
+            AnimateClearRewardVisuals(1f, gradeColor, 0.5f);
+
             yield return new WaitForSecondsRealtime(0.36f);
             _cameraFollow?.ClearCinematicShot();
             _clearPresentationRoutine = null;
+        }
+
+        private void AnimateClearRewardVisuals(float eased, Color gradeColor, float pulse)
+        {
+            BossLootDrop featuredDrop = GetFeaturedDrop();
+            ItemGrade grade = featuredDrop?.Grade ?? ItemGrade.Common;
+            float gradePower = GetItemGradePower(grade);
+            Color rewardColor = featuredDrop == null ? gradeColor : GetItemGradeColor(grade);
+            Color realmAccent = GetRealmAccentColor(featuredDrop != null && featuredDrop.VisualRealm != RealmId.None ? featuredDrop.VisualRealm : GetCurrentRealmId());
+
+            if (_clearRewardPanel != null)
+            {
+                _clearRewardPanel.rectTransform.localScale = Vector3.one * Mathf.Lerp(0.985f, 1f + gradePower * 0.016f, eased);
+            }
+
+            SetImageColor(_clearRewardGlow, WithAlpha(Color.Lerp(rewardColor, realmAccent, pulse * 0.22f), (0.06f + gradePower * 0.20f + pulse * gradePower * 0.10f) * eased));
+            SetImageColor(_clearLootGradeGlow, WithAlpha(Color.Lerp(rewardColor, Color.white, 0.10f + pulse * 0.28f), (0.14f + gradePower * 0.46f) * eased));
+
+            for (int i = 0; i < _clearRewardSparks.Length; i++)
+            {
+                if (_clearRewardSparks[i] == null || !_clearRewardSparks[i].enabled)
+                {
+                    continue;
+                }
+
+                float sparkPulse = Mathf.PingPong(Time.unscaledTime * (2.2f + gradePower * 3.4f) + i * 0.21f, 1f);
+                float alpha = Mathf.Lerp(0.20f, 0.86f, sparkPulse) * eased;
+                _clearRewardSparks[i].color = WithAlpha(i % 2 == 0 ? rewardColor : realmAccent, alpha);
+                _clearRewardSparks[i].rectTransform.localScale = Vector3.one * Mathf.Lerp(0.82f + gradePower * 0.16f, 1.26f + gradePower * 0.22f, sparkPulse);
+            }
         }
 
         private void SpawnClearShowcaseVfx(Color gradeColor)
@@ -1837,13 +1939,18 @@ namespace AL.ChampionMode
             CreateArenaPrimitive(root.transform, "Clear_InnerHalo", PrimitiveType.Cylinder, Vector3.up * 0.024f, new Vector3(1.78f, 0.014f, 1.78f), Vector3.zero, realmAccent, true, 0f, 0.86f);
             CreateArenaPrimitive(root.transform, "Clear_LightBlade", PrimitiveType.Cube, new Vector3(0f, 1.42f, 0f), new Vector3(0.10f, 2.72f, 0.10f), Vector3.zero, Color.Lerp(gradeColor, Color.white, 0.28f), true, 0f, 0.92f);
 
-            for (int i = 0; i < 8; i++)
+            ItemGrade lootGrade = featuredDrop?.Grade ?? ItemGrade.Common;
+            float lootPower = GetItemGradePower(lootGrade);
+            int notchCount = Mathf.RoundToInt(Mathf.Lerp(8f, 16f, lootPower));
+            float notchRadius = Mathf.Lerp(1.64f, 2.18f, lootPower);
+            Color lootColor = featuredDrop == null ? gradeColor : GetItemGradeColor(lootGrade);
+            for (int i = 0; i < notchCount; i++)
             {
-                float angle = i * Mathf.PI * 2f / 8f;
-                Vector3 position = new Vector3(Mathf.Cos(angle) * 1.64f, 0.064f, Mathf.Sin(angle) * 1.64f);
+                float angle = i * Mathf.PI * 2f / notchCount;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * notchRadius, 0.064f, Mathf.Sin(angle) * notchRadius);
                 Vector3 rotation = new Vector3(0f, -angle * Mathf.Rad2Deg, 0f);
-                Color notchColor = i % 2 == 0 ? gradeColor : realmAccent;
-                CreateArenaPrimitive(root.transform, "Clear_Notch_" + i, PrimitiveType.Cube, position, new Vector3(0.44f, 0.020f, 0.060f), rotation, notchColor, true, 0f, 0.84f);
+                Color notchColor = i % 2 == 0 ? lootColor : realmAccent;
+                CreateArenaPrimitive(root.transform, "Clear_Notch_" + i, PrimitiveType.Cube, position, new Vector3(0.44f + lootPower * 0.14f, 0.020f, 0.060f + lootPower * 0.030f), rotation, notchColor, true, 0f, 0.84f + lootPower * 0.08f);
             }
 
             var keyLight = CreatePointLight("Champion Clear Key Light", root.transform.position + new Vector3(0f, 2.4f, -0.8f), Color.Lerp(gradeColor, Color.white, 0.22f), 2.8f, 6.8f);
@@ -2781,10 +2888,21 @@ namespace AL.ChampionMode
                 _clearSignalBars[i] = CreateUiImage(_clearPanelObject.transform, "ClearSignalBar_" + i, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(648f + i * 18f, -28f), new Vector2(10f, 36f + i * 8f), new Color(0.62f, 1f, 0.40f, 0.42f));
             }
 
-            var rewardPanel = CreateHudPanel(_clearPanelObject.transform, "ClearRewardPanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -224f), new Vector2(672f, 76f), new Color(0.020f, 0.038f, 0.042f, 0.94f));
-            CreateHudPanel(rewardPanel.transform, "ClearRewardAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(672f, 4f), new Color(1f, 0.74f, 0.34f, 0.66f));
-            _clearCreditText = CreateText(rewardPanel.transform, font, "WARZONE CREDITS +500", 15, new Vector2(20f, -16f), new Vector2(250f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.82f, 0.48f));
-            _clearLootText = CreateText(rewardPanel.transform, font, "LOOT Ember Crown Shard", 14, new Vector2(288f, -16f), new Vector2(354f, 42f), TextAnchor.UpperLeft, new Color(0.84f, 0.92f, 1f));
+            _clearRewardPanel = CreateHudPanel(_clearPanelObject.transform, "ClearRewardPanel", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -224f), new Vector2(672f, 76f), new Color(0.020f, 0.038f, 0.042f, 0.94f));
+            _clearRewardGlow = CreateUiImage(_clearRewardPanel.transform, "ClearRewardGlow", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -10f), new Vector2(-20f, 52f), new Color(0.58f, 1f, 0.72f, 0.08f));
+            _clearRewardAccent = CreateHudPanel(_clearRewardPanel.transform, "ClearRewardAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(672f, 4f), new Color(1f, 0.74f, 0.34f, 0.66f));
+            _clearLootGradeGlow = CreateUiImage(_clearRewardPanel.transform, "ClearLootGradeGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(258f, -13f), new Vector2(22f, 46f), new Color(1f, 0.74f, 0.34f, 0.24f));
+            _clearLootGradePlate = CreateHudPanel(_clearRewardPanel.transform, "ClearLootGradePlate", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(264f, -18f), new Vector2(8f, 36f), new Color(1f, 0.74f, 0.34f, 0.82f));
+            _clearCreditText = CreateText(_clearRewardPanel.transform, font, "WARZONE CREDITS +500", 15, new Vector2(20f, -16f), new Vector2(230f, 24f), TextAnchor.UpperLeft, new Color(1f, 0.82f, 0.48f));
+            _clearLootText = CreateText(_clearRewardPanel.transform, font, "LOOT Ember Crown Shard", 14, new Vector2(288f, -16f), new Vector2(354f, 42f), TextAnchor.UpperLeft, new Color(0.84f, 0.92f, 1f));
+
+            for (int i = 0; i < _clearRewardSparks.Length; i++)
+            {
+                float x = 604f + i * 10f;
+                float y = -17f - i % 3 * 12f;
+                _clearRewardSparks[i] = CreateUiImage(_clearRewardPanel.transform, "ClearRewardSpark_" + i, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(x, y), new Vector2(5f + i % 2 * 3f, 22f - i % 2 * 5f), new Color(1f, 0.74f, 0.34f, 0.34f));
+                _clearRewardSparks[i].rectTransform.localEulerAngles = new Vector3(0f, 0f, -16f + i * 9f);
+            }
 
             CreateUiImage(_clearPanelObject.transform, "ClearProgressTrack", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(672f, 7f), new Color(0.045f, 0.060f, 0.066f, 0.92f));
             _clearProgressFill = CreateUiImage(_clearPanelObject.transform, "ClearProgressFill", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(0f, 7f), new Color(0.62f, 1f, 0.40f, 0.94f));
