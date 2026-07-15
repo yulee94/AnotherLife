@@ -2,32 +2,38 @@
 
 **Status date:** 2026-07-15  
 **Policy owner:** GPT  
-**Implementation owner:** Codex engineering mode  
+**Implementation owner:** Codex  
 **Tracking issue:** #155  
-**Ownership transition:** #193  
-**Baseline `main`:** `a6232e63c807f055cc43b302ad4e62b846c236ca`
+**Baseline `main`:** `e1497ceb0ab666f28477ae814a17da06560d54c7`  
+**Current phase:** Phase 0/1 foundation and continuous verification
 
-This record defines required automated checks, path-aware checks, manual dispositions, and branch protection for the GPT–Codex–user model. It changes no runtime, narrative, design, save, Android, Unity, or build behavior. `AGENTS.md` is authoritative.
+This decision record defines which checks block a merge, which checks apply only to matching paths, which evidence remains informational, and which approvals remain manual. It does not implement workflows or change runtime, narrative, save, Android, Unity, or build behavior.
+
+`AGENTS.md` remains authoritative for ownership, branch rules, shared-file locks, the canonical workspace, and the A1 → G1 → C1–C4 handoff.
 
 ## 1. Decisions
 
-1. Repository classification, hygiene, and Android unit/debug validation are the first required automated merge gates.
-2. Unity unavailable/licensing failures are blocked validation, never passing evidence.
-3. A locked-down self-hosted Windows runner remains the target Unity model after #127 and #150 are proven.
-4. Path classification reports ownership mode but never replaces GPT review.
-5. Skipped, cancelled, unavailable, `continue-on-error`, or `not applicable` checks cannot be cited as product validation.
-6. The repository currently uses one GitHub identity for the user and agents, so documented dispositions are evidence but not cryptographically independent approvals.
-7. Codex owns all source, terrestrial-design, and engineering delivery through separately declared modes.
+1. **Phase A repository and Android checks become the first required automated merge gate.**
+2. **The Android unit-test and debug-assembly job runs on every pull request**, including documentation-only work. The repository is small enough that a universal baseline is preferable to another period in which Android evidence is missing or incorrectly borrowed from a different branch.
+3. **Unity validation is not represented as passing while licensing or runner infrastructure is unavailable.** The interim model is retained manual/repository-dispatch evidence from the canonical licensed workspace. It is a manual merge gate for Unity-sensitive PRs, not a green CI status.
+4. **A locked-down self-hosted Windows runner is the target Unity model**, but it becomes required only after the runner, #127 profile-safe PlayMode coverage, and #150 production Player build have each been proven on passing and intentionally failing test PRs.
+5. **Path classification is automated but does not replace ownership review.** Shared, save-sensitive, narrative, workflow, dependency, and production-scene changes require explicit human disposition.
+6. **No skipped, unavailable, cancelled, `continue-on-error`, or “not applicable” execution may be cited as passing product validation.**
+7. **The repository currently uses one GitHub identity for the user and all agents.** GitHub cannot count that same identity as an independent approving reviewer on its own PR. Until a separate trusted reviewer identity or GitHub App exists, GPT and Android Studio review evidence is a documented manual gate rather than cryptographically independent branch-protection approval.
 
-## 2. Stable checks
+## 2. Gate categories
 
-### Required on every PR
+### 2.1 Required on every pull request
+
+A failure blocks merge. These checks always execute and return a real result:
 
 - `policy / classify`
 - `repository / hygiene`
 - `android / unit-debug`
 
-### Required when applicable
+### 2.2 Required when matching paths change
+
+The applicability check always executes. When applicable, the underlying validation must execute and pass. When not applicable, the result must explicitly say `not applicable`; that result proves only path classification, not product validation.
 
 - `android / release`
 - `contracts / validate`
@@ -36,226 +42,430 @@ This record defines required automated checks, path-aware checks, manual disposi
 - `unity / playmode`
 - `unity / player-build`
 
-A `not applicable` result proves only applicability, not product validation.
+### 2.3 Informational checks
 
-### Informational reports
+These report risk and ownership but do not independently authorize merge:
 
-- primary owner mode;
-- narrative/content source changes;
-- terrestrial-design source changes;
-- runtime/asset changes;
-- designated shared and save-sensitive files;
-- workflow/dependency changes;
-- generated/catalog drift;
-- manual Unity evidence state.
+- changed ownership area summary;
+- designated shared-file summary;
+- save-sensitive file summary;
+- dependency/workflow change summary;
+- generated-artifact or catalog drift summary;
+- test and artifact inventory;
+- local/manual Unity evidence status before the Unity runner is required.
 
-## 3. `policy / classify`
+An informational warning can still cause GPT to block a PR through review when it reveals an ownership, safety, or scope violation.
 
-Classification uses the PR event, base/head refs, body declarations, and changed-file list. It blocks readiness when:
+### 2.4 Manual gates
 
-- base is not `main` and no approved prerequisite branch is linked;
-- the base is closed, rejected, or unapproved;
-- no issue/upstream artifact is linked and the PR is not a root coordination change;
-- exactly one primary mode is not selected from GPT, Codex narrative/content, Codex terrestrial-design, or Codex engineering;
-- required impact declarations are missing;
-- a shared file is changed but not declared, or another open PR holds its lock;
-- a test-only PR changes production Build Settings;
-- narrative or terrestrial-design source is mixed with engineering without explicit GPT specification and justification;
-- engineering changes player-facing narrative or terrestrial visual intent without approved source-mode input;
-- issue completion is claimed without `Fixes #...` or an explicit completion link;
-- a draft PR is represented as merge-ready;
-- the head is not current for final merge.
+These cannot be replaced by a passing build:
 
-Codex should implement machine-readable policy at:
+- GPT contract, persistence, ownership, and integration review;
+- Android Studio narrative-fidelity review for narrative-owned content;
+- user U1 playtest and milestone acceptance;
+- supported-device or release-signing validation;
+- emergency override authorization;
+- Unity validation while the runner remains in the manual-evidence stage.
+
+## 3. Stable check names
+
+Branch protection and documentation must use stable names. Workflow refactors may change job internals but not these external status names without a migration PR.
+
+| Check | Initial state | Applies to | Merge effect |
+| --- | --- | --- | --- |
+| `policy / classify` | Phase A | every PR | required |
+| `repository / hygiene` | Phase A | every PR | required |
+| `android / unit-debug` | Phase A | every PR | required |
+| `android / release` | Phase A | Android release/build-sensitive paths | required when applicable |
+| `contracts / validate` | Phase A | shared contracts, schemas, catalogs, generated contract consumers | required when applicable |
+| `unity / compile` | manual first; automated Phase B | Unity source, packages, project settings, shared contracts/catalogs consumed by Unity | manual gate, then required |
+| `unity / editmode` | manual first; automated Phase B | Unity source/assets/editor/tests/project settings | manual gate, then required |
+| `unity / playmode` | after #127 | runtime, scenes, boot, save, integration, Champion/kingdom flows | manual gate, then required |
+| `unity / player-build` | after #150 | scenes, packages, project settings, production runtime, Android export dependencies | manual/release gate, then required |
+
+## 4. `policy / classify`
+
+This job uses the pull-request event payload, base/head refs, and changed-file list. It must not rely only on free-form prose.
+
+### Required validations
+
+- The base branch is `main`, unless the PR declares one already-approved prerequisite branch and links the approving issue/PR.
+- A PR based on a closed, rejected, or unapproved feature branch fails classification.
+- The PR links an issue or explicitly declares a root coordination change.
+- Exactly one primary workstream owner is declared: GPT, Android Studio, or Codex.
+- Narrative, runtime, shared-contract/catalog, save/migration, and unrelated-cleanup declarations are present.
+- Every changed designated shared file appears in the shared-file declaration.
+- The PR does not claim a shared-file lock already held by another open PR.
+- A test-only PR that changes normal production Build Settings fails.
+- A narrative-owned path mixed with runtime implementation requires an approved integration specification and both ownership dispositions.
+- A PR that claims completion of an issue without `Fixes #...` or an explicit completion link fails.
+- A draft PR is reported as not merge-ready even if all executable jobs pass.
+- The head is rebased or otherwise up to date with the protected base before final merge.
+
+### Machine-readable policy source
+
+Codex should add a small reviewed file such as:
 
 ```text
 .github/anotherlife-policy.yml
 ```
 
-It should define branch prefixes and mode path groups; designated shared and save-sensitive files; narrative/content and terrestrial-design source paths; runtime, scene, contract, catalog, workflow, and dependency paths; forbidden tracked artifacts; and stable status names.
+It should contain:
 
-The policy file is technical configuration. It does not authorize engineering mode to rewrite source owned by another Codex mode.
+- workstream path groups;
+- designated shared files;
+- save-sensitive files and directories;
+- narrative-owned paths;
+- build-settings and test-scene rules;
+- contract/catalog paths;
+- forbidden tracked artifact patterns;
+- stable status names.
 
-## 4. `repository / hygiene`
+The policy file is technical configuration. It does not transfer narrative ownership to Codex.
 
-The job runs read-only with enough history for the PR range. Required failures include:
+## 5. `repository / hygiene`
 
-- `git diff --check` failure;
-- tracked Unity `Library/`, `Temp/`, `Logs/`, `obj/`, build outputs, caches, crash dumps, or machine-specific artifacts;
-- tracked credentials, licenses, signing material, or sensitive profile paths;
-- duplicate GUIDs among tracked `.meta` files except explicit test fixtures;
-- missing enabled Build Settings scene path;
-- `Assets/Test.unity` enabled in production Build Settings;
-- duplicate enabled scene names;
-- malformed deterministic JSON or schemas;
-- failed catalog/schema validators;
-- canonical workspace changed to a duplicate active checkout;
-- unpinned third-party workflow actions without an approved exception;
-- overbroad workflow token permissions;
-- unsafe `pull_request_target` execution of untrusted code.
+This required job runs with read-only repository permissions and enough history to compare the PR base and head.
 
-Required reports include every changed shared, save-sensitive, narrative, terrestrial-design, asset/runtime, workflow/dependency, scene, generated, schema, and catalog path.
+### Required failures
 
-## 5. Android checks
+- `git diff --check` failure for the PR range;
+- tracked Unity `Library/`, `Temp/`, `Logs/`, `obj/`, build output, local cache, editor crash dump, or machine-specific generated artifact;
+- tracked secrets, credentials, license files, signing material, or sensitive local paths detected by the reviewed scanner;
+- duplicate GUID values among tracked Unity `.meta` files, excluding an explicit reviewed fixture used only to test the scanner;
+- enabled Build Settings scene path that does not exist;
+- `Assets/Test.unity` enabled in normal production Build Settings;
+- duplicate enabled scene names that make string loading ambiguous;
+- malformed deterministic JSON catalogs or JSON schemas;
+- schema/catalog files whose committed validator fails;
+- canonical-workspace documentation changed to a duplicate active checkout;
+- executable workflow using unpinned third-party actions without an approved exception;
+- PR workflow granting broader token permissions than required;
+- use of `pull_request_target` to execute untrusted PR code with write credentials.
 
-### `android / unit-debug`
+### Required reports
 
-Runs on every PR:
+- all designated shared files changed;
+- all save-sensitive files changed;
+- all workflow/dependency files changed;
+- all narrative-owned files changed;
+- all production scene/build-setting files changed;
+- all generated/schema/catalog files changed.
+
+These reports feed review; they do not make an unsafe mixed scope acceptable.
+
+## 6. `android / unit-debug`
+
+This required job runs for every pull request:
 
 ```text
 ./gradlew :app:testDebugUnitTest :app:assembleDebug --no-daemon
 ```
 
-Use a supported pinned JDK and committed wrapper. Dependency/network/cache failures fail. Retain unit reports, debug artifact, logs, and version information. Do not use `continue-on-error`.
+### Requirements
 
-### `android / release`
+- use a supported pinned JDK;
+- use the committed Gradle wrapper;
+- cache only reviewed Gradle inputs and never cache credentials;
+- dependency resolution, repository, cache corruption, and network failures fail the job;
+- scan logs for the known KSP/AWT failure signatures without suppressing unrelated failures;
+- upload unit-test reports and the debug APK or deterministic build output;
+- upload logs on both success and failure;
+- do not use `continue-on-error`;
+- record Java, Gradle, AGP, Kotlin, KSP, and Android SDK versions in the job summary.
 
-Required for Android runtime/UI, manifest, Gradle, packaging, resources, release/debug gating, Android↔Unity packaging, or packaged shared-data changes.
+### Artifact retention
+
+- ordinary PR logs, reports, and APK artifacts: at least 14 days;
+- release-candidate evidence: at least 90 days or the repository’s longer release-retention policy.
+
+## 7. `android / release`
+
+This job becomes required when any of the following changes:
+
+- `app/**` runtime or UI code;
+- `AndroidManifest.xml`;
+- Gradle settings, plugins, dependencies, packaging, ProGuard/R8, resources, signing configuration, or build types;
+- Android↔Unity host/export packaging;
+- release/debug route gating;
+- shared contracts/catalogs packaged into the Android application.
+
+Minimum command:
 
 ```text
 ./gradlew :app:assembleRelease --no-daemon
 ```
 
-Unavailable signing is an explicit blocker or uses a reviewed unsigned validation variant; it never silently downgrades to debug.
+Signing secrets are not required for an unsigned validation artifact. If the project’s release task requires unavailable signing material, the job must fail with a specific tracked blocker until a safe unsigned validation variant is provided. It must not silently downgrade to debug assembly.
 
-## 6. Contract and catalog checks
+## 8. `contracts / validate`
 
-`contracts / validate` applies to shared contracts, schemas, StreamingAssets catalogs, generated consumers, and source-mode exports. Validate syntax, IDs, versions, duplicate/blank IDs, internal references, deterministic generation, Fable compatibility, Android/Unity consumer compatibility, provenance/hash where supported, and source-to-generated mapping. Parser success alone is not semantic acceptance.
+This job applies to:
 
-## 7. Unity validation model
+```text
+unity/SharedContracts/**
+unity/Assets/AL/StreamingAssets/GameData/**
+JSON schemas
+Fable-compatible contracts
+Android or Unity generated contract consumers
+```
 
-### Interim manual evidence
+It must validate, where relevant:
 
-Until runner stability is proven, Unity-sensitive PRs require retained evidence from:
+- JSON/schema syntax;
+- schema and catalog IDs and versions;
+- duplicate and blank stable IDs;
+- internal references;
+- deterministic generation with a clean post-generation diff;
+- absence of `UnityEngine` types from Fable-compatible contracts;
+- Android/Unity consumer compatibility;
+- generated-file provenance and source hash when the format supports it.
+
+A successful parser alone is not enough when the owning issue requires semantic validation.
+
+## 9. Unity validation model
+
+### 9.1 Interim model: retained manual/repository-dispatch evidence
+
+Until licensing and runner stability are proven, Unity-sensitive PRs require manual evidence produced from:
 
 ```text
 D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
 Unity 2022.3.62f3
 ```
 
-Record base/head SHA, exact version and commands, exit codes, complete logs, compiler-error scan, EditMode/PlayMode XML and totals when applicable, Player output and launch evidence when applicable, import/missing-script diagnostics for asset work, final repository status, and every blocked check.
+The evidence package must identify:
 
-Exit 199, licensing IPC failure, missing XML, unavailable runner, or skipped suite is blocked validation.
+- base and head SHA;
+- exact Unity executable version;
+- exact commands;
+- exit codes;
+- complete compile log and `error CS` scan result;
+- EditMode XML and totals when applicable;
+- PlayMode XML and totals after #127 when applicable;
+- Player build output, target, and launch smoke after #150 when applicable;
+- missing-script/import diagnostics for serialized-asset work;
+- final repository status;
+- anything that could not run.
 
-### Target self-hosted runner
+Logs and XML should be attached to the PR or uploaded by a manual dispatch workflow. They must not be committed as repository source.
 
-Require a dedicated non-admin account, locked Unity version, isolated workspace/temp/profile, one job at a time, least-privilege secrets, no committed/printed license material, clean workspace checks, and failure artifacts.
+A licensing IPC failure, unavailable runner, skipped test, absent XML, or exit code 199 is a **blocked validation**, not a pass.
 
-`unity / compile` and `unity / editmode` become protected only after one passing and one intentionally failing proof PR, retained artifacts, documented licensing/restart behavior, and proof no developer profile is used. `unity / playmode` additionally requires #127. `unity / player-build` additionally requires #150.
+### 9.2 Target model: locked-down self-hosted Windows runner
 
-## 8. Path-aware Unity matrix
+The target runner labels should identify at least:
+
+```text
+self-hosted
+windows
+anotherlife-unity
+unity-2022.3.62f3
+```
+
+Before installation, `AGENTS.md` must explicitly permit an ephemeral CI-only checkout distinct from the one manual active workspace. Until that amendment is reviewed, the runner must not create a second editable project checkout.
+
+Runner requirements:
+
+- dedicated non-administrator service account;
+- no access to the developer’s real `Application.persistentDataPath` profile;
+- isolated working and temporary directories;
+- one Unity job at a time through a concurrency group;
+- locked Unity version;
+- least-privilege secrets and documented revocation;
+- no Unity license material committed or printed;
+- clean workspace verification before and after every job;
+- artifacts uploaded even when the command fails;
+- runner disabled when patching, licensing, or integrity is uncertain.
+
+### 9.3 When Unity checks become required
+
+`unity / compile` and `unity / editmode` become protected required checks only after:
+
+1. one current-main passing run;
+2. one intentionally failing compiler/test PR is correctly rejected;
+3. failure logs and XML are retained;
+4. licensing and runner restart behavior are documented;
+5. no developer profile or untracked workspace data is consumed.
+
+`unity / playmode` additionally requires #127 complete and proven.
+
+`unity / player-build` additionally requires #150 complete and proven.
+
+## 10. Path-aware Unity matrix
 
 | Changed area | Compile | EditMode | PlayMode | Player build |
 | --- | --- | --- | --- | --- |
-| Unity runtime/interface/data | required | required | when startup/integration changes | when packaged flow changes |
-| Editor/tooling/tests only | required | required | only for PlayMode infrastructure | when build tooling changes |
-| Scenes/prefabs/project settings | required | required validators | required | required |
-| Save/service boot/integration | required | required | required after #127 | required after #150 when packaged |
-| Contracts/catalogs/assets consumed by Unity | required | required validation | when runtime load changes | when packaging changes |
+| Unity C# runtime/interface/data source | required | required | when runtime/startup/integration affected | when production flow/package affected |
+| Unity editor/tooling/tests only | required | required | only when PlayMode infrastructure changes | no, unless build tooling changes |
+| Unity scene/prefab/project settings | required | required validators | required | required |
+| Save/service boot/integration | required | required | required after #127 | required after #150 when packaged flow changes |
+| Shared contract/catalog consumed by Unity | required | required validation | when runtime load behavior changes | when packaging changes |
 | Documentation only | not applicable | not applicable | not applicable | not applicable |
 
-## 9. Manual dispositions
+A `not applicable` result must identify the path decision and cannot be cited as Unity validation.
 
-### GPT disposition
+## 11. Manual ownership and review gates
 
-Required for shared files, save/migration/recovery, contracts/state/integration, issue completion beyond compilation, stacked/dependency-sensitive PRs, workflow/protection changes, and mixed-mode integrations.
+### GPT disposition required
+
+A GPT review comment tied to the current head SHA is required for:
+
+- designated shared-file changes;
+- save format, migration, recovery, deletion, or idempotency changes;
+- runtime event, schema, contract, state-machine, or integration changes;
+- issue closure where acceptance depends on more than compilation;
+- stacked or dependency-sensitive PRs;
+- workflow and branch-protection policy changes;
+- narrative/runtime mixed integrations.
+
+The disposition is one of:
 
 ```text
 BLOCKED
-READY FOR SOURCE-MODE REVIEW
+READY FOR OWNER REVIEW
 READY TO MERGE
 ```
 
-The comment identifies the reviewed head SHA, unresolved validation, and lock state.
+It must list unresolved validation and shared-file state. A label alone is not review evidence.
 
-### Codex narrative/content fidelity
+### Android Studio disposition required
 
-Required when narrative meaning, IDs, dialogue, lore, chapter placement, consequences, localization-facing copy, or generated narrative consumers change.
+Android Studio narrative-fidelity review is required when a PR changes:
 
-```text
-PASS
-CHANGES REQUIRED
-NOT APPLICABLE
-```
+- dialogue, quest meaning, chapter placement, lore, NPC characterization, affinity/faction/persona meaning, narrative outcomes, localization-facing story copy, or narrative stable IDs;
+- generated runtime content whose source is an Android Studio-owned packet.
 
-This is source fidelity, not independent technical approval.
+### User disposition required
 
-### Codex terrestrial-design fidelity
+User approval is required for:
 
-Required when terrestrial concepts, silhouettes, anatomy, scale, palettes, materials, motion intent, design-source assets, or generated visual consumers change.
+- creative/product decisions not already recorded;
+- U1 milestone acceptance;
+- supported-device/release-candidate acceptance;
+- changes that intentionally alter player experience, balance, monetization, or irreversible profile behavior.
 
-```text
-PASS
-CHANGES REQUIRED
-NOT APPLICABLE
-```
+## 12. Branch protection for `main`
 
-This is design fidelity, not independent technical approval.
+After Phase A passes one success PR and the required failure fixtures, configure:
 
-### User approval
+- pull requests required for all changes;
+- `policy / classify`, `repository / hygiene`, and `android / unit-debug` required;
+- applicable required checks must pass before merge;
+- branches must be up to date with `main` before merge, or use a proven merge queue;
+- conversation resolution required;
+- direct pushes, force pushes, and branch deletion blocked;
+- administrators included in normal enforcement;
+- squash merge as the default focused-PR method;
+- auto-merge disabled for shared, save-sensitive, narrative, workflow, dependency, scene, and release-sensitive changes.
 
-Required for unrecorded creative/product/design decisions, U1, release-candidate acceptance, intended player-experience/balance changes, and irreversible profile behavior.
+### Review-count limitation
 
-## 10. Branch protection
+Do not claim independent approval enforcement while all work uses the same GitHub identity. Setting a required approving-review count would block self-authored PRs without proving independent GPT or Android Studio review.
 
-After Phase A proof PRs:
+Until a separate trusted identity or GitHub App exists:
 
-- require PRs for all changes;
-- require `policy / classify`, `repository / hygiene`, and `android / unit-debug`;
-- require applicable checks;
-- require current base or a proven merge queue;
-- require conversation resolution;
-- block direct pushes, force pushes, and branch deletion;
-- include administrators;
-- prefer squash merge;
-- disable auto-merge for shared, save-sensitive, source-mode, workflow, dependency, scene, and release-sensitive changes.
+- use the manual disposition comments above;
+- require automated checks;
+- record the limitation in each shared/integration PR;
+- do not represent a self-applied label as independent approval.
 
-Because all work currently uses one GitHub identity, do not claim independent approval enforcement. Use automated checks plus documented dispositions until a separate trusted identity/App exists.
+When a separate identity exists, add a focused branch-protection PR that requires the appropriate reviewer or status App.
 
-## 11. Emergency override
+## 13. Emergency override
 
-Only for broken `main`, imminent data/security loss, or a release incident where delay is more dangerous than the skipped gate. Create an incident issue with affected SHA, symptom, skipped check, narrow scope, rollback, owner, required validation, and source/save/release impact. No feature or cleanup scope joins the override.
+An override is allowed only for an actively broken `main`, an imminent data-loss/security problem, or a release-blocking incident whose delay is more dangerous than the skipped gate.
 
-## 12. Workflow security
+Before merge, unless GitHub itself is unavailable, create an incident issue containing:
 
-- default token read-only;
-- write only for narrowly reviewed jobs;
-- third-party actions pinned to immutable SHAs;
-- untrusted PRs receive no secrets;
-- no unsafe `pull_request_target` checkout/execution;
-- no credentials, keystores, licenses, or profiles in cache/artifacts;
-- logs redact secrets;
-- untrusted jobs cannot mutate branch protection or repository settings.
+- affected commit and symptoms;
+- exact skipped/failed check;
+- reason the normal path is unsafe;
+- narrow fix scope;
+- rollback commit or procedure;
+- owner and required post-merge validation;
+- data, save, narrative, and release impact.
 
-## 13. Proof PRs
+Override rules:
 
-Codex must demonstrate:
+- no feature or cleanup scope;
+- one narrowly scoped PR;
+- unresolved validation is stated in the merge message;
+- protection changes are restored immediately after the emergency merge;
+- no unrelated PR merges until the incident’s missing validation is completed and recorded;
+- a follow-up issue remains open if the root cause is not removed.
 
-1. passing current-main repository/Android PR;
-2. intentional Android unit failure;
-3. duplicate `.meta` GUID failure;
-4. test scene enabled in Build Settings failure;
-5. missing enabled scene failure;
-6. undeclared shared-file failure;
-7. invalid/stacked base failure;
-8. artifact upload on failure;
-9. documentation-only correct classification;
-10. Android release-sensitive invocation;
-11. narrative/content source classification;
-12. terrestrial-design source classification;
-13. unauthorized engineering rewrite of source-mode data failure.
+## 14. Workflow security
 
-Failure fixtures close unmerged.
+- default workflow token permissions are read-only;
+- grant write permission only to a narrowly reviewed job that genuinely needs it;
+- third-party actions are pinned to immutable commit SHAs;
+- fork/untrusted PR code receives no secrets;
+- `pull_request_target` must not checkout and execute the untrusted head;
+- caches contain no credentials, keystores, licenses, or local profiles;
+- logs redact secrets and do not print raw environment dumps;
+- workflow artifacts contain no personal save/profile data;
+- branch-protection or repository-setting mutation is never performed by an untrusted PR job.
 
-## 14. Implementation order
+## 15. Required proof PRs
 
-1. Merge this ownership-aligned policy.
-2. Codex engineering adds machine-readable policy, Phase A workflow, and deterministic validators on `codex/repository-quality-gates`.
-3. Run proof PRs and attach run/artifact evidence to #155.
-4. GPT reviews false positives, false negatives, and stable names.
-5. Configure and verify Phase A protection.
-6. Add retained manual Unity evidence.
+Codex must prove the workflow using disposable branches and PRs:
+
+1. current-main passing repository/Android PR;
+2. intentional Android unit-test failure;
+3. duplicate Unity `.meta` GUID fixture;
+4. `Assets/Test.unity` enabled in Build Settings fixture;
+5. missing enabled scene path fixture;
+6. undeclared shared-file change fixture;
+7. invalid/stacked base fixture;
+8. artifact upload on failed job;
+9. documentation-only PR with correct classification;
+10. Android release-sensitive PR invoking `android / release`.
+
+Failure-fixture PRs are closed unmerged after evidence is captured. Fixtures must not be merged into `main` merely to test CI.
+
+## 16. Implementation order
+
+1. Merge this policy record.
+2. Codex adds `.github/anotherlife-policy.yml`, Phase A workflow, and deterministic validation scripts on `codex/repository-quality-gates`.
+3. Run the proof PR matrix and attach run URLs, job IDs, and artifacts to #155.
+4. GPT reviews false-positive/false-negative behavior and stable status names.
+5. Configure and verify Phase A branch protection.
+6. Add the Unity manual-evidence manifest/dispatch path.
 7. Complete #127 and #150.
-8. Prove and then require the Unity runner through a separate reviewed change.
+8. Amend `AGENTS.md` only if an ephemeral CI-only Unity checkout is approved.
+9. Install and prove the self-hosted Unity runner.
+10. Make Unity checks required through a separate reviewed protection change.
 
-No gameplay, narrative, terrestrial design, save, economy, combat, scene content, or broad dependency change is authorized by this policy.
+## 17. Expected implementation boundaries
+
+Likely Codex-owned files:
+
+```text
+.github/workflows/quality-gate.yml
+.github/anotherlife-policy.yml
+scripts/ci/**
+unity/Assets/AL/Tests/EditMode/** only for focused deterministic validators
+README or agent documentation links required by #155
+```
+
+No gameplay, narrative, save, economy, combat, scene content, or broad dependency changes are authorized by this policy.
+
+## 18. Acceptance mapping for #155
+
+- Gate categories: defined in sections 2–3.
+- Repository hygiene: defined in sections 4–5.
+- Android tests/build and artifacts: defined in sections 6–7.
+- Unity runner model: selected and staged in section 9.
+- Duplicate GUID and Build Settings failures: required in sections 5 and 15.
+- Ownership/shared-file classification: defined in sections 4 and 11.
+- Passing/failing workflow proof: section 15.
+- Branch controls: section 12.
+- Secret/profile safety: sections 9 and 14.
+- Documentation and commands: this record plus the future implementation PR.
+
+# GPT handoff to Codex
+
+```text
+Codex: implement Phase A of issue #155 from current main using unity/Docs/Repository_Quality_Gate_Policy.md. Add one focused repository/Android workflow, machine-readable policy, and deterministic validators. Do not add Unity licensing secrets or pretend Unity is automated. Prove the required passing and failing fixtures, retain artifacts, and leave the implementation PR for GPT review before branch protection changes.
+```
