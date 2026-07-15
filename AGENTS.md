@@ -1,121 +1,170 @@
 # AnotherLife Agent Instructions
 
-These instructions apply to the entire repository. They define the working agreement for GPT, Codex, and the user.
+These instructions apply to the entire repository. They define the working agreement for GPT, Codex, the Android Studio narrative workflow, and the Gemini terrestrial-design workflow.
 
-Android Studio and Unity are tools, not agents, owners, approval gates, or branch workstreams.
+## Canonical repository and workspace
 
-## Canonical workspace
-
-- Repository: `https://github.com/yulee94/AnotherLife`
+- GitHub repository: `https://github.com/yulee94/AnotherLife`
 - Integration branch: `main`
-- Active checkout: `D:\260711\MY\AndroidStudioProjects\AnotherLife`
-- Unity project: `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+- Only active Windows checkout: `D:\260711\MY\AndroidStudioProjects\AnotherLife`
+- Android Studio: open `D:\260711\MY\AndroidStudioProjects\AnotherLife`
+- Unity Hub: open `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
 
-Do not edit or publish from duplicate worktrees, timestamped copies, or backup repositories. No agent may commit directly to `main`.
+Do not create or use `AnotherLifeUnity`, `AnotherLife-codex-*`, `_CodexWorktrees`, timestamped repository copies, or any other duplicate checkout as an active project. Offline backups are allowed, but agents must not edit or publish from them.
 
-## Required startup
+## Required session context
 
-Before work:
+Before beginning work, every agent must read:
 
-1. Read this file, the matching prompt in `unity/Docs/Agent_Role_Prompts.md`, and the active gate in `unity/Docs/Project_Progression_Roadmap.md`.
-2. Read `unity/Docs/Three_Way_Collaboration_Plan.md` for NVS-01; the legacy filename is retained for link stability.
-3. Fetch current `main` and inspect all open issues and PRs for overlap, dependencies, and shared-file locks.
-4. Create one focused branch and declare the goal, non-goals, owner mode, file scope, and acceptance criteria.
+1. This root `AGENTS.md`.
+2. Its matching standalone prompt in `unity/Docs/Agent_Role_Prompts.md`; Gemini must also read `unity/Docs/Gemini_Terrestrial_Design_Prompt.md`.
+3. The active phase and gate in `unity/Docs/Project_Progression_Roadmap.md`.
+4. `unity/Docs/Three_Way_Collaboration_Plan.md` when working on NVS-01.
+5. The relevant issue, upstream artifact, and open pull requests.
 
-## Ownership
+Before starting a task:
 
-### GPT
+1. Fetch the latest `main`.
+2. Inspect all open pull requests for duplicate work, overlapping files, dependencies, and ownership areas.
+3. Create a focused branch from current `main`.
+4. Confirm the task owner, inputs, outputs, active roadmap phase, and acceptance criteria.
+5. Declare any shared files in the pull request before editing them.
+6. Stop or coordinate when another open pull request already addresses the same issue; do not silently create a parallel implementation.
 
-GPT owns planning, dependency order, specifications, state/event/contract/save/test design, PR review, shared-file sequencing, status and risk documentation, and merge-readiness decisions.
+No agent may commit directly to `main`.
 
-GPT must not author or rewrite narrative content, terrestrial designs, visual source, or gameplay/application code unless the user separately reassigns a narrow task.
+## Workstream ownership
 
-### Codex
+### GPT owns coordination and specification
 
-All project delivery outside GPT's duties and the user's final approval belongs to Codex. Codex uses three declared modes.
+GPT is responsible for:
 
-#### Narrative/content mode
+- Milestone planning, task decomposition, dependency ordering, and scope control.
+- Converting approved narrative packets into implementation specifications.
+- Defining state transitions, runtime events, data-contract requirements, edge cases, and acceptance tests.
+- Reviewing pull requests for ownership violations, contract drift, save compatibility, missing validation, and merge risk.
+- Coordinating exclusive access to shared files.
+- Coordinating Gemini terrestrial-design handoffs and the later Codex integration boundary.
+- Maintaining collaboration documentation and decision records.
 
-Owns quests, chapters, dialogue, NPCs, lore, artifacts, localization-facing copy, continuity, consequences, relationships, factions, stable narrative IDs, narrative packets, and narrative-fidelity correction.
+GPT must not invent or rewrite narrative content, author terrestrial creature/fauna visual design, or implement gameplay unless the user explicitly reassigns a narrowly scoped task.
 
-#### Terrestrial-design mode
+### Android Studio owns narrative source material
 
-Owns terrestrial creature/fauna concepts, silhouettes, anatomy, palettes, materials, habitat presentation, motion intent, scale, variants, design sheets, source assets, and design-fidelity correction.
+The Android Studio narrative workflow is the source of truth for:
 
-#### Engineering mode
+- Main quests, side quests, hidden quests, quest hooks, chapter definitions, and story progression.
+- Dialogue, NPCs, advisors, personas, affinity, loyalty, reputation, factions, and narrative outcomes.
+- Storylines, lore, artifacts, boss lore, localization-facing narrative text, and content IDs.
+- Narrative-specific generation and service logic when it directly governs chapter unlocks, quest outcomes, advisor loyalty, or conflict hints.
+- Terrestrial species names, lore, realm meaning, descriptions, and narrative encounters when those concepts become player-facing.
 
-Owns Android and Unity source, runtime services, gameplay, combat, bosses, loot, terrestrial runtime integration, assets and import, scenes, save/migration/recovery, catalogs, contracts, build systems, tests, CI, tooling, diagnostics, performance, and accessibility mechanics.
+Narrative ownership follows the content, regardless of the directory in which a file lives. Android Studio must not redesign Unity combat, runtime bootstrapping, general save infrastructure, VFX, weather, terrestrial anatomy/silhouettes, or unrelated gameplay systems.
 
-Engineering mode must consume approved narrative and terrestrial-design source rather than silently inventing or redesigning it in runtime code.
+### Gemini owns terrestrial creature and fauna visual design
 
-### User
+Gemini is the source of truth for the original visual design of non-humanoid land fauna and ambient terrestrial creatures, including:
 
-The user owns final product, creative, visual-design, balance, irreversible-profile, milestone, playtest, and release approval.
+- Concept art, turnarounds, silhouette language, anatomy, proportions, scale, materials, and color direction.
+- Approved visual variants and regional or biome presentation.
+- Motion and pose references such as idle, gait, alert, flee, observe, and reduced-motion intent.
+- Design-source files, previews, asset manifests, provenance, and licensing records.
+- Visual LOD intent, gameplay-distance readability, and non-color accessibility notes.
 
-## Mode separation and handoffs
+Gemini must work from the active issue and a clean `gemini/<scope>` branch. Gemini must not implement Unity C# runtime, gameplay AI, navigation, spawning, combat, rewards, save data, technical catalogs, scenes, Build Settings, or narrative meaning.
 
-The same Codex agent may perform every Codex mode, but source authoring/design and engineering implementation normally use separate branches and PRs.
+The authoritative terrestrial-design lane is issue #194. Closed PR #162 is reference-only and is not approved design authority.
 
-Narrative flow:
+### Codex owns runtime implementation
 
-1. User decisions.
-2. Codex narrative packet.
-3. GPT specification/review.
-4. Codex engineering implementation.
-5. GPT integration review.
-6. Codex narrative-fidelity disposition.
-7. User playtest and approval.
+Codex is responsible for:
 
-Terrestrial-design flow:
+- Unity runtime services, scene bootstrapping, gameplay integration, combat, bosses, loot, champion controls, customization, weather, and world systems.
+- Android shell runtime and build-compatibility fixes that do not alter narrative meaning.
+- Loading, validating, and consuming approved narrative data through interfaces, JSON, schemas, or generated assets.
+- Technical integration of user-approved Gemini terrestrial assets: import, prefabs, rigs, animation hookup, spawning, pooling, LOD, culling, colliders, shaders, runtime motion, and performance validation.
+- Save integration and backward-compatible migrations.
+- Editor generators, automated tests, build fixes, performance work, and shared technical contracts.
+- Fable-compatible contracts that remain free of `UnityEngine` types.
 
-1. User design goal.
-2. Codex terrestrial-design packet/source.
-3. GPT technical handoff requirements.
-4. Codex engineering implementation/integration.
-5. GPT technical review and Codex design-fidelity disposition.
-6. User approval.
+Codex may consume approved narrative data and approved Gemini terrestrial-design artifacts, but must not rewrite dialogue, NPC characterization, quest meaning, chapter order, lore, narrative outcomes, or independently invent/redraw/procedurally redesign terrestrial creatures, fauna, anatomy, silhouettes, materials, variants, or motion language. Any aesthetic deviation from an approved terrestrial package requires Gemini and user review.
 
-A mixed-mode PR requires an explicit GPT specification and a written reason that separation is impractical.
+## Source-of-truth and handoff rules
 
-## Branches and PRs
+The standard narrative handoff is:
 
-Allowed prefixes:
+1. Android Studio produces an approved narrative packet.
+2. GPT reviews it and publishes an implementation specification without changing narrative intent.
+3. Codex implements the approved specification and provides validation evidence.
+4. GPT reviews the implementation against the packet and acceptance criteria.
+5. Android Studio verifies narrative fidelity, and the user performs the final playtest and approval.
 
-- `gpt/<scope>` — coordination, specifications, review, documentation.
-- `codex/narrative-<scope>` — narrative/content mode.
-- `codex/terrestrial-<scope>` — terrestrial-design mode.
-- `codex/<scope>` — engineering mode.
+The terrestrial-design handoff is:
 
-`android-studio/` and `gemini/` are retired for new work.
+1. The user and GPT define the bounded design issue and technical handoff requirements.
+2. Gemini produces the design package and stable design manifest without runtime implementation.
+3. GPT reviews scope, provenance, IDs, technical completeness, and integration constraints without redesigning the artwork.
+4. Android Studio reviews names, lore, realm meaning, and player-facing content when applicable.
+5. The user gives final creative approval.
+6. Codex implements the approved assets and manifest without independent aesthetic redesign, then provides Unity validation evidence.
+7. GPT, Gemini, and the user review integration fidelity and performance.
 
-Every PR must:
+Runtime code must consume narrative data rather than duplicate it as hard-coded story text. Runtime terrestrial integration must consume the approved Gemini package rather than create a competing procedural design source. Shared schemas and contracts belong in `unity/SharedContracts/` and shared catalogs belong in `unity/Assets/AL/StreamingAssets/GameData/` when those formats are appropriate.
 
-- represent one major completion;
-- declare exactly one primary mode;
-- link the upstream issue/artifact;
-- declare narrative, terrestrial design, runtime, contracts/catalogs, save, assets, and shared-file impact;
-- list exact validation and unperformed validation;
-- stay focused and preserve collaborator work;
-- rebase onto current `main` before final review.
+The first coordinated narrative milestone is defined in `unity/Docs/Three_Way_Collaboration_Plan.md`. Long-range progression and phase gates are defined in `unity/Docs/Project_Progression_Roadmap.md`. Gemini terrestrial design is a separate parallel design lane and does not alter the A1 → G1 → C1–C4 NVS-01 ownership order.
 
-Use `.github/pull_request_template.md`.
+Do not advance a later-phase runtime feature while the current phase gate is blocked unless the user explicitly reprioritizes the roadmap. Broken `main`, save/data risk, and active milestone blockers take priority over speculative expansion. Design-only work may proceed in parallel only when it does not claim runtime completion or edit blocked technical systems.
 
-## Shared-file locks
+## Branch and pull-request rules
 
-These require an exclusive soft lock:
+Use these branch prefixes:
+
+- `gpt/<short-scope>` for planning, specifications, reviews, and coordination documentation.
+- `android-studio/<short-scope>` for narrative content and narrative-owned logic.
+- `gemini/<short-scope>` for terrestrial creature/fauna concepts, design sources, manifests, and design documentation.
+- `codex/<short-scope>` for runtime implementation, tests, tooling, and technical contracts.
+
+Each pull request must:
+
+- Represent one major completion and exclude unrelated cleanup.
+- Identify the workstream owner, roadmap phase, and upstream artifact or dependency.
+- State whether narrative content, terrestrial visual design, shared contracts, save data, or shared files changed.
+- List every shared file touched.
+- Include validation performed and any validation that could not be performed.
+- Rebase onto the latest `main` before final review instead of overwriting collaborator work.
+- Avoid force-pushing over another collaborator's commits.
+- Avoid duplicating an issue already addressed by another open pull request unless the user explicitly requests an alternative and the PR explains the comparison plan.
+
+Use `.github/pull_request_template.md` for the required declaration.
+
+## Shared-file lock and conflict rules
+
+These files are shared integration points and require an explicit soft lock:
 
 - `unity/Assets/AL/Scripts/Core/Bootloader.cs`
 - `unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs`
 - `unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs`
 - `unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs`
 
-The first approved open PR declaring a file holds the lock. Later work must wait, depend on it, or use another integration point. New save fields require backward-compatible defaults. Conflict resolution must preserve valid services, fields, assets, contracts, and registrations.
+Rules:
 
-## Validation
+1. The first open pull request that declares a shared file holds the soft lock until the pull request is merged, closed, or explicitly releases it.
+2. A second task must not edit that file in parallel. It must depend on the first pull request, choose another integration point, or be rescheduled by GPT.
+3. Before editing a shared file, refresh `main` and re-check open pull requests.
+4. Service-registration conflicts must preserve all valid services from every workstream.
+5. New save fields must have backward-compatible defaults, and old saves must continue to load.
+6. Merge conflicts must not be resolved by deleting unfamiliar systems, interfaces, generated assets, contracts, registrations, or approved Gemini design artifacts.
+7. The later branch rebases and resolves conflicts. It must not overwrite the earlier branch or force-push shared history.
+8. GPT resolves technical ownership disputes; the user resolves creative or product-direction disputes.
 
-- Documentation: verify paths, links, current issue/PR state, Markdown, and no behavior change.
-- Narrative/content: verify stable IDs, references, branches, consequences, localization, failure/retry/recovery, and user-approved intent.
-- Terrestrial design: verify scope, views, silhouette, scale, material, motion, variants, readability, and a clear engineering handoff without hidden gameplay authority.
-- Engineering: run relevant builds/tests, report exact commands/results, preserve old saves and approved source, and disclose every blocked check.
+## Validation expectations
 
-Every task ends with the current phase, acceptance status, PR/issue state, shared locks, unresolved validation, and the next GPT, Codex-mode, or user step.
+Documentation-only work must verify that the canonical workspace is consistent, links and paths are valid, Markdown structure is sound, and no gameplay, narrative content, or terrestrial design was unintentionally changed.
+
+Narrative work must validate unique IDs, complete references, branch outcomes, recovery paths, and alignment with the approved narrative packet.
+
+Gemini terrestrial-design work must validate stable design IDs, complete manifest references, asset paths, source/provenance and licensing, silhouette/scale/material/motion/LOD intent, accessibility notes, and confirmation that no runtime/gameplay/save/narrative implementation was mixed into the design PR.
+
+Runtime work must run the most relevant available compilation and automated tests, report exact commands and results, validate old-save compatibility when save data changes, validate asset/import/performance fidelity when integrating Gemini designs, and clearly disclose anything that could not be tested.
+
+Every task must end with the current phase, acceptance-criteria status, PR or issue status, shared-file status, and the next unblocked owner-specific step.
