@@ -1,239 +1,162 @@
-# Three-Way Collaboration Plan
+# NVS-01 GPT–Codex Collaboration Plan
 
-This document defines the first coordinated delivery milestone for GPT, Codex, and the Android Studio narrative workflow. It is a process and acceptance specification only; it does not create gameplay or author narrative content.
+The legacy filename is retained for link stability. This document defines the first coordinated milestone for GPT, Codex, and the user.
 
 ## Goal
 
-Prove that one approved narrative quest line can move from authored content to a playable, persistent runtime loop without overlapping ownership or duplicating story logic.
+Prove that one user-approved quest line can move from Codex-authored narrative source to a playable, persistent runtime loop without duplicated story logic or collapsed review boundaries.
 
-## Milestone NVS-01: One Approved Quest Line, End to End
+## Milestone NVS-01
 
-NVS-01 uses one bounded quest line selected and approved by the Android Studio narrative workflow. GPT and Codex must not select, rewrite, or expand the story.
+The slice must demonstrate:
 
-The vertical slice must demonstrate:
+- an approved quest offer and start condition;
+- tracked objectives and deterministic state transitions;
+- an approved player choice or conditional branch;
+- an approved affinity, reputation, faction, resource, or world consequence;
+- a handoff to an existing or explicitly requested gameplay capability;
+- completion, failure, retry, cancellation, and recovery behavior;
+- save, reload, and resume across every used state;
+- traceability from narrative IDs to runtime events and tests.
 
-- An approved quest start condition.
-- At least one tracked objective and state transition.
-- At least one approved player choice or conditional branch.
-- At least one approved NPC affinity, loyalty, reputation, or faction consequence.
-- One handoff to an existing gameplay objective, encounter, boss gate, or kingdom-state hook.
-- One approved completion or failure outcome.
-- Save, reload, and resume behavior across the quest states used by the slice.
-- Traceability from narrative IDs to runtime events and test evidence.
+Out of scope: unrelated chapters, broad gameplay redesign, terrestrial design, new combat or boss mechanics, speculative scenes/assets/VFX, hard-coded runtime story text, and unrelated service refactors.
 
-### Out of scope
+## Required artifacts
 
-- Rewriting or extending narrative content outside the Android Studio workstream.
-- New combat mechanics, boss redesigns, scenes, 3D assets, VFX, weather, or UI redesigns.
-- Broad service refactors unrelated to the selected quest line.
-- Integrating multiple chapters or multiple unrelated quest lines.
-- Hard-coding dialogue or story outcomes in runtime code.
+### A1 narrative packet — Codex narrative/content mode
 
-## Required handoff artifacts
+The packet identifies stable IDs, prerequisites, states, objectives, dialogue, choices, consequences, gameplay handoff, return events, localization keys, completion/failure/retry/recovery, resume behavior, and unresolved creative decisions.
 
-### Narrative packet from Android Studio
+### G1 implementation specification — GPT
 
-The packet must identify:
+The specification maps the approved packet to runtime state, events, contracts, persistence, migration, idempotency, error behavior, file impact, locks, tests, rollback, and delivery order without rewriting narrative intent.
 
-- Stable chapter, quest, objective, dialogue, NPC, faction, reward, and hook IDs used by the slice.
-- Entry conditions, prerequisites, and unlock rules.
-- Quest states and allowed transitions.
-- Dialogue references and player-choice branches.
-- Affinity, loyalty, reputation, faction, resource, reward, and world-state consequences.
-- Completion, failure, retry, and recovery behavior.
-- The intended gameplay handoff and the event that returns control to narrative progression.
-- Any localization keys or authored text references.
-- Narrative files changed and confirmation that no runtime-owned systems were redesigned.
+### C1–C4 implementation report — Codex engineering mode
 
-### Implementation specification from GPT
-
-The specification must include:
-
-- A state-transition table that preserves the approved narrative packet.
-- Runtime event names, producers, consumers, and payload requirements.
-- Data-contract or schema changes, including compatibility expectations.
-- Save fields, defaults, migration behavior, and resume semantics.
-- Validation and error-reporting rules for duplicate or missing references.
-- Exact ownership boundaries and an expected file-impact list.
-- Shared files that require a soft lock.
-- Acceptance tests and negative tests.
-- Unresolved decisions that block implementation.
-
-### Implementation report from Codex
-
-The report must include:
-
-- Files changed and why each change was necessary.
-- Approved narrative inputs consumed.
-- Shared files touched and lock status.
-- Contract and save-compatibility decisions.
-- Compilation, automated-test, and manual-validation evidence.
-- Known limitations or validation that could not be completed.
-- Confirmation that narrative text and outcomes were not rewritten.
+The report identifies files changed, source consumed, shared locks, contracts, compatibility decisions, exact build/test evidence, limitations, and confirmation that narrative meaning was not silently rewritten.
 
 ## Ordered task plan
 
-### G0 — Establish the collaboration baseline
+### G0 — Collaboration baseline
+
+**Owner:** GPT
+
+Acceptance:
+
+- canonical workspace, ownership modes, branches, PR declarations, locks, and evidence rules are merged;
+- no source behavior changes.
+
+### A1 — Complete the approved OMEN_1 packet
+
+**Owner:** Codex narrative/content mode  
+**Branch:** `codex/narrative-nvs-01-a1`
+
+Acceptance:
+
+- exactly one bounded quest line;
+- D1–D16 and user-approved intent encoded without reinterpretation;
+- unique stable IDs and complete internal references;
+- explicit offer, acceptance, objectives, choice, arena handoff, failure/retry, manual report, consequences, abandonment, and resume;
+- complete localization inventory;
+- requested external capabilities labeled honestly;
+- no runtime implementation or shared integration file changes.
+
+### G1 — Publish the runtime integration specification
 
 **Owner:** GPT  
-**Dependency:** None  
-**Deliverable:** Root agent instructions, corrected workspace documentation, this milestone plan, and the pull-request declaration template.
+**Branch:** `gpt/nvs-01-integration-spec`
 
-**Acceptance criteria:**
+Acceptance:
 
-- The canonical workspace is consistently documented as `D:\260711\MY\AndroidStudioProjects\AnotherLife`.
-- GPT, Android Studio, and Codex ownership boundaries are explicit.
-- Branch, pull-request, shared-file, save-compatibility, and conflict rules are documented.
-- No gameplay code or narrative content changes are included.
+- every A1 path appears in the state machine;
+- events include producer, consumer, payload, correlation, duplicate behavior, and failure semantics;
+- persistence, defaults, migration, atomicity, idempotency, and resume are explicit;
+- required/optional/prohibited files and locks are explicit;
+- positive, negative, duplicate, reload, and fault tests are specified;
+- no narrative change.
 
-### A1 — Select and complete the NVS-01 narrative packet
+### C1 — Contract loading and validation
 
-**Owner:** Android Studio narrative workflow  
-**Dependency:** G0 merged  
-**Recommended branch:** `android-studio/nvs-01-narrative-packet`
+**Owner:** Codex engineering mode  
+**Branch:** `codex/nvs-01-runtime-integration`
 
-**Acceptance criteria:**
+Acceptance:
 
-- Exactly one bounded quest line is selected for the vertical slice.
-- Every ID used by the packet is stable and unique.
-- Entry, objective, choice, consequence, completion, failure, retry, and recovery behavior are explicit.
-- The runtime handoff is described semantically without redesigning gameplay implementation.
-- All authored dialogue and narrative outcomes remain in Android Studio-owned files.
-- No Codex-owned gameplay system or shared integration file is modified unless separately declared and approved.
+- runtime consumes the approved source through a versioned representation;
+- duplicate IDs, missing references, invalid transitions, unsupported versions, and unavailable hooks fail visibly;
+- contracts stay compatible and do not duplicate narrative authority.
 
-### G1 — Convert the packet into an implementation specification
+### C2 — State machine and gameplay handoff
 
-**Owner:** GPT  
-**Dependency:** A1 available for review  
-**Recommended branch:** `gpt/nvs-01-integration-spec`
+Acceptance:
 
-**Acceptance criteria:**
+- offer, accept, objective, dialogue, choice, handoff, failure/retry, report, completion, and abandonment execute deterministically;
+- quest and free/demo encounter contexts are distinct;
+- late, duplicate, mismatched, and unavailable results cannot progress the quest.
 
-- The state machine covers every allowed path in the narrative packet.
-- Runtime events and contract fields map back to stable narrative IDs.
-- Save and resume behavior is defined for every persisted state.
-- Required and optional file impacts are separated.
-- Shared-file locks and merge order are declared.
-- Happy-path, branch, failure, reload, and invalid-data tests are specified.
-- No dialogue, characterization, lore, chapter order, or narrative outcome is changed.
+### C3 — Persistence and compatibility
 
-### C1 — Implement contract loading and validation
+Acceptance:
 
-**Owner:** Codex  
-**Dependency:** G1 approved  
-**Recommended branch:** `codex/nvs-01-runtime-integration`
+- dialogue/objective/handoff/report/artifact/consequence state persists as specified;
+- old saves load safely;
+- reload resumes correctly;
+- rewards and consequences cannot duplicate;
+- shared-file locks and migration rules are followed.
 
-**Acceptance criteria:**
+### C4 — Verification and runtime PR
 
-- Runtime code consumes the approved packet through existing interfaces, JSON, schemas, generated assets, or a narrowly justified extension.
-- Shared contracts remain free of `UnityEngine` types where Fable compatibility applies.
-- Duplicate IDs, missing references, invalid transitions, and unknown hooks produce clear validation failures.
-- Narrative text and outcomes are not copied into or rewritten in runtime code.
-- Any contract change is backward compatible or includes a documented migration plan.
+Acceptance:
 
-### C2 — Implement quest-state and gameplay-handoff integration
+- focused automated tests cover happy, branch, failure, retry, abandonment, report, reload, duplicate, malformed-data, and fault cases;
+- relevant Android/Unity/contract validation has exact evidence;
+- no narrative rewrite, unrelated refactor, or undeclared shared-file edit.
 
-**Owner:** Codex  
-**Dependency:** C1 complete on the same focused branch or an approved predecessor PR
+### G2 — Integration review
 
-**Acceptance criteria:**
+**Owner:** GPT
 
-- The approved start, objective, choice, consequence, completion, and failure transitions execute deterministically.
-- Runtime behavior uses approved IDs and events rather than quest-specific hard-coded branches.
-- The selected existing gameplay hook can receive control and return an outcome to narrative progression.
-- Existing service registrations and unrelated gameplay behavior remain intact.
-- Invalid or unavailable hooks fail visibly and do not silently complete the quest.
+Acceptance:
 
-### C3 — Implement persistence and compatibility
+- implementation is reviewed against A1 and G1;
+- ownership, contracts, persistence, validation, locks, and merge safety are dispositioned;
+- every requested change cites a violated requirement or acceptance criterion.
 
-**Owner:** Codex  
-**Dependency:** C2 complete
+### A2 — Narrative-fidelity disposition
 
-**Acceptance criteria:**
+**Owner:** Codex narrative/content mode
 
-- Quest progress, selected branch, relevant relationship or reputation effects, gameplay-handoff state, and final outcome persist as required by G1.
-- Saves created before NVS-01 still load through default initialization or a documented migration.
-- Save and reload resume the quest at the correct state without duplicating rewards or consequences.
-- Changes to `SaveGameData.cs` or local save services follow the shared-file lock rules.
+Acceptance:
 
-### C4 — Add verification and publish the runtime PR
+- dialogue order, choices, consequences, quest outcomes, and meaning match A1;
+- implementation discrepancies are reported without silently changing source;
+- any intentional creative change returns to user approval and requires A1/G1 revision before runtime changes.
 
-**Owner:** Codex  
-**Dependency:** C1–C3 complete
-
-**Acceptance criteria:**
-
-- Automated tests cover the happy path, the approved branch, save/reload, duplicate or missing references, an invalid transition, and reward/consequence idempotency.
-- Relevant Unity compilation and available test suites pass.
-- The pull request uses the repository template and reports exact validation evidence.
-- The diff contains no narrative rewrites, unrelated refactors, or undeclared shared-file edits.
-
-### G2 — Review implementation and integration risk
-
-**Owner:** GPT  
-**Dependency:** Codex runtime PR open
-
-**Acceptance criteria:**
-
-- The implementation is checked against A1 and G1, not against inferred story intent.
-- Ownership boundaries, contract fidelity, save compatibility, validation coverage, and shared-file declarations are reviewed.
-- Any requested change points to a violated requirement or acceptance criterion.
-- Narrative preferences are routed to Android Studio or the user rather than rewritten by GPT.
-
-### A2 — Verify narrative fidelity
-
-**Owner:** Android Studio narrative workflow  
-**Dependency:** Codex changes available in an integrated build
-
-**Acceptance criteria:**
-
-- Dialogue order, player choices, NPC or faction consequences, quest outcomes, and authored meaning match A1.
-- Any runtime discrepancy is reported as an implementation issue without silently changing the source narrative.
-- The narrative packet is updated only when the user intentionally approves a creative change.
+A2 is not independent technical approval because the same Codex agent may have authored and implemented the work. GPT review and user acceptance remain mandatory independent gates.
 
 ### U1 — Final playtest and milestone acceptance
 
-**Owner:** User  
-**Dependency:** G2 and A2 complete
+**Owner:** User
 
-**Acceptance criteria:**
+Acceptance:
 
-- The selected quest line can be started, progressed, branched, handed to gameplay, resolved, saved, reloaded, and resumed.
-- Rewards and consequences occur once and remain consistent after reload.
-- The runtime experience matches the approved narrative intent.
-- All NVS-01 pull requests are merged in dependency order and no shared-file lock remains open.
+- the quest starts, progresses, branches, hands off, resolves, saves, reloads, and resumes;
+- consequences occur once and remain stable;
+- the experience matches approved intent;
+- all required PRs are merged in order and locks are released.
 
-## Pull-request and merge order
+## Merge order
 
-1. G0 coordination baseline.
-2. A1 narrative packet.
-3. G1 implementation specification.
-4. C1–C4 Codex runtime integration.
-5. G2 review fixes, if required, on the Codex branch.
-6. A2 narrative-fidelity fixes in the owning workstream.
-7. U1 acceptance and milestone closeout.
+```text
+G0 → A1 → G1 → C1–C4 → G2 → A2 → U1
+```
 
-A dependent pull request must not merge before its upstream artifact is approved. When a change to an upstream narrative packet is necessary, update A1 first, then revise G1, and only then change Codex implementation.
+A dependent PR must not merge before its upstream artifact is approved. Changes to narrative intent update A1 first, then G1, then engineering.
 
-## Shared-file conflict protocol
+## Shared-file protocol
 
-1. Search open pull requests before editing.
-2. Declare each shared file in the new pull request using `.github/pull_request_template.md`.
-3. Treat the declaration as an exclusive soft lock.
-4. If another open pull request already holds the lock, do not edit the file in parallel.
-5. Rebase the later branch after the lock-holding pull request merges.
-6. Preserve all valid service registrations and initialize new save fields with compatible defaults.
-7. Never resolve a conflict by discarding unfamiliar systems or by force-pushing over collaborator commits.
-8. Ask GPT to resolve technical sequencing; ask the user to resolve creative intent.
+Search open PRs, declare locks, avoid parallel edits, rebase the later branch, preserve valid services and save fields, and never discard unfamiliar systems to resolve conflicts. GPT resolves technical sequence; the user resolves creative direction.
 
-## Milestone definition of done
+## Definition of done
 
-NVS-01 is complete only when:
-
-- Every task above meets its acceptance criteria.
-- The canonical narrative remains Android Studio-owned.
-- The runtime consumes approved data without duplicating story logic.
-- Save and reload are proven for all states used by the slice.
-- Validation and automated tests cover expected and invalid inputs.
-- All shared-file locks are released.
-- The final integrated state is on `main` and the user has approved the playtest.
+NVS-01 is complete only when all task acceptance criteria pass, Codex-authored narrative remains the canonical source, runtime consumes approved data, save/reload and invalid-input tests pass, all locks are released, the integrated state is on `main`, and the user accepts the playtest.
