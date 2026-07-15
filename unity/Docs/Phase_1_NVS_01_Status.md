@@ -2,23 +2,24 @@
 
 **Status date:** 2026-07-15  
 **Integration branch:** `main`  
-**Audited current-main head:** `1342f4194261450fe8cff3e529eddf29c6c7bb1e`  
+**Audited current-main head:** `dd865f077aed5a5543eab8dfff5138e7fbc9e9d4`  
 **Roadmap state:** Phase 1 remains paused behind QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
-`AGENTS.md` is authoritative. This record separates source presence, issue state, merge state, validation evidence, and player-visible completion. A draft PR, a green compile, or a merged specification is not implementation acceptance.
+`AGENTS.md` is authoritative. This record separates source presence, issue state, merge state, specification state, validation evidence, creative approval, and player-visible completion. A draft PR, source file, merged specification, green compile, uploaded LFS pointer, or issue closure is not implementation/product acceptance by itself.
 
 ## Current control summary
 
 - The active product milestone remains NVS-01.
 - No approved A1 narrative packet is active; the archived OMEN_1 material remains historical reference only.
-- #156 remains the first blocking technical gate. Its complete validator contract is now merged, but PR #189 has not implemented or canonically validated it.
-- The canonical Unity workspace is `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`; evidence from duplicate checkouts is blocked validation.
+- #156 remains the first blocking technical gate. PR #218 merged the binding validator contract, but PR #189 has not implemented or canonically validated it.
+- The canonical Unity workspace is `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`; duplicate-workspace evidence is blocked validation.
 - `Bootloader.cs` is exclusively soft-locked by draft PR #203.
 - Android dependency reproducibility issue #159 is complete through merged PR #191.
-- The #163 economy contract is complete through merged PR #215; implementation PR #214 is draft/blocked and does not satisfy it.
-- Terrestrial source-design PR #217 is draft/blocked pending technical manifest/LFS/import corrections and user creative review.
-- Ten implementation/tooling/source-design PRs are open and all are currently draft/blocked.
+- The #163 economy contract is complete through merged PR #215; implementation PR #214 remains draft/blocked and does not satisfy it.
+- The #183 versioned immutable game-data authority contract is complete through merged PR #220; implementation remains blocked by #156 and the future `LocalGameDataService.cs` lock sequence.
+- The #194 terrestrial source-packet technical-review contract is complete through merged PR #221; PR #217 remains draft/blocked and is not ready for user creative review.
+- Ten implementation/tooling/source-design PRs are open. All remain draft/blocked.
 
 ## Ownership state
 
@@ -50,6 +51,9 @@ Android Studio and Unity are tools. `android-studio/` and `gemini/` are retired 
 - PR #215 — transaction-safe resource and Warzone Credit integrity specification.
 - PR #216 — economy implementation/status dependency refresh.
 - PR #218 — complete QuestDefinition asset-authority validator specification.
+- PR #219 — QuestDefinition/terrestrial gate status refresh.
+- PR #220 — versioned immutable game-data catalog/query/authority specification.
+- PR #221 — terrestrial source-packet validation and user-review handoff specification.
 
 A merged specification is not implementation completion.
 
@@ -76,7 +80,7 @@ Accepted direction:
 - authoritative GUID `c385b2b183b74184ca75eeffbe2256ef` is preserved;
 - removed root GUID `226022aa7500f3e4abc8ac3757707ad8` must not reappear;
 - exactly one production type and project-wide valid typed-asset discovery are enforced;
-- the historical/current serialized field schema is proven equivalent.
+- the historical/current serialized field schema is equivalent.
 
 Binding completion contract:
 
@@ -97,7 +101,7 @@ Still required:
 - update the authority record/inventory;
 - run canonical Unity 2022.3.62f3 compile, complete/focused EditMode, reimport, missing-script, GUID, diff, and final-status evidence.
 
-No A1, #183 production authority, or production Player work may claim a trusted Unity asset baseline before #156 is complete.
+No A1, #183 implementation, or production Player work may claim a trusted Unity asset baseline before #156 is complete.
 
 ### #195 — Android narrative-debug release gating
 
@@ -111,7 +115,7 @@ Accepted direction:
 
 Still required:
 
-- retain the visible release rejection notice after back-stack sanitization instead of clearing it on the second Compose effect pass;
+- retain the visible release rejection notice after back-stack sanitization rather than clearing it on the second Compose effect pass;
 - add stabilized shell/state or Compose coverage for the durable one-shot notice;
 - rebase onto current `main` and rerun unit, debug, release, and diff validation.
 
@@ -132,7 +136,7 @@ The architectural direction is valid, but acceptance-critical work remains:
 
 ### #208 — Unity prototype-command containment
 
-The obvious Kingdom credit, Realm Gem, Wishgate, War Drill, reset, and Champion-deployment command handlers were removed from the command deck, but containment is incomplete:
+The obvious Kingdom credit, Realm Gem, Wishgate, War Drill, reset, and Champion-deployment command handlers were removed from the command deck, but containment remains incomplete:
 
 - `Update()` still completes building and research progress automatically;
 - dashboard reads seed buildings, quests, territories, Realm Gems, and Wishgate state;
@@ -141,13 +145,13 @@ The obvious Kingdom credit, Realm Gem, Wishgate, War Drill, reset, and Champion-
 - tests do not prove controller startup/refresh/update non-mutation, release hierarchy, accessibility, reload idempotency, missing-service safety, or release reachability across Champion direct grants;
 - validation is from a duplicate workspace and the branch is behind current `main`.
 
-The first containment PR must make every release controller lifecycle honest and non-mutating. Switching a direct grant to the typed economy primitive is not authorization.
+The first containment PR must make every release controller lifecycle honest and non-mutating. Switching a direct grant to a typed economy primitive is not authorization.
 
 ### #209 — profile-safe representative PlayMode smoke
 
 The external snapshot and scene-smoke direction is correct, but cleanup is not yet safe:
 
-- helper-test teardown can restore the default `Time.timeScale` value when global state was never captured;
+- helper-test teardown can restore default `Time.timeScale` when global state was never captured;
 - original profile files can be restored while scene destruction is still deferred;
 - the fallback creates another scene rather than proving the representative scene is unloaded;
 - required cleanup timeout, assertion/log failure, second-run, operation-fault, timestamp/attribute, and post-cleanup service tests are incomplete;
@@ -215,20 +219,40 @@ The latest SHA change was a rebase only; reviewed service blobs are unchanged. R
 
 ### #217 — terrestrial design-source foundation
 
-The packet has an appropriate source-mode boundary and useful base profile intent, but it is not yet technically ready for user creative review or issue closure:
+The packet has a useful source-mode boundary and base profile intent, but it is not technically ready for user creative review or issue closure.
 
-- change `Fixes #194` to `Refs #194`; user approval and later engineering fidelity remain outstanding;
+Binding completion contract:
+
+```text
+unity/Docs/Terrestrial_Source_Packet_Validation_Spec.md
+merged PR #221 at dd865f077aed5a5543eab8dfff5138e7fbc9e9d4
+```
+
+Current delivered state:
+
+```text
+3 profiles
+3 delivered base concept sheets
+9 declared variants
+6 non-standard variants with text-only intent
+```
+
+Still required:
+
+- change `Fixes #194` to `Refs #194`;
 - rebase onto current `main`;
-- render/link all three concept sheets directly in the PR for user review;
-- prove Git LFS retrieval with `git lfs fsck` and a clean/fresh checkout, then verify actual hashes/dimensions;
-- store immutable media type, dimensions, SHA-256, source version, and prompt/provenance reference in the manifest;
-- add visual source for all declared variants or mark non-standard variants proposed/pending user approval;
-- add deterministic manifest schema/semantic validation;
-- mark working labels and biome entries as non-player-facing, non-runtime design intent;
-- either run canonical Unity import for PNGs kept under `Assets` or move pure previews under Docs;
-- record explicit source-review/user-approval/runtime-blocked readiness state.
+- add retained manifest schema plus deterministic semantic/media validator;
+- store source version, media type, dimensions, byte length, SHA-256, Git LFS OID/size, prompt/generation/license links, and direct review links in normalized asset records;
+- prove `git lfs fsck` and actual binary retrieval from a disposable clean checkout;
+- render/link every exact full-resolution sheet directly in the PR;
+- classify text-only variants as proposed or provide exact visual source before review/engineering readiness;
+- mark working labels and biome/realm tags as nonlocalized, non-player-facing, non-runtime source intent;
+- complete truthful generation/editing/input/license provenance;
+- move review-only media outside Unity `Assets` or provide intentional importer settings, canonical Unity import, stable GUID, no-error, no-runtime-reference, and no-package evidence;
+- expose separate technical, user-creative, narrative-naming, and runtime-integration states;
+- return the exact corrected head for GPT technical review.
 
-The latest SHA change was a rebase only; the manifest and design-source blobs are unchanged. GPT has not approved creative fidelity. User visual approval remains mandatory before engineering integration or production use.
+GPT has not approved creative fidelity. The actual LFS binary pixels are not directly rendered by the current PR review surface. User visual approval remains mandatory after technical completion and before any engineering integration or production use.
 
 ## Active gate: #156
 
@@ -258,31 +282,48 @@ The narrative type/GUID authority and historical field equivalence are accepted.
 
 All implementations consume `Save_Semantic_Compatibility_Policy.md`. Queries do not perform data-changing repair; unknown stable data is preserved; malformed domains are disabled; candidate selection and clone → persist → publish remain #137.
 
-## Definition and progression dependency
+## Game-data authority and progression dependency
 
 ```text
-#156 trusted asset/type authority
+#156 trusted QuestDefinition/asset baseline
           ↓
-#183 versioned immutable game-data authority
+merged PR #220 game-data authority specification
           ↓
-#165 definition-backed building/research/training integrity
+#183 catalog foundation + approved source artifacts
+          ↓
+LocalGameDataService migration with declared shared-file lock
+          ↓
+#165/#173/#180/#168/#184/#181 and chapter/quest consumer migrations
 ```
 
-Current `LocalGameDataService` does not define `ManaShrine` or `Mine`, exposes no research query, and returns `null` for all troop lookups. Before #183, #165 may fail closed but must not invent temporary IDs, maximum levels, troop definitions, or balance.
+Binding #183 contract:
+
+```text
+unity/Docs/Game_Data_Catalog_Authority_Spec.md
+merged PR #220 at 91202c7b05ccf2897646fe7cdfafba2a1a1ddf96
+```
+
+Current `LocalGameDataService` creates mutable runtime definitions, omits `ManaShrine`/`Mine`, exposes no research query, discards chapter/soul-quest objects, and returns `null` for all troop/champion/skill lookups. No implementation may invent temporary IDs, definitions, maximum levels, names, balance, fallback content, or source authority.
+
+The first #183 implementation is a catalog-foundation PR only: manifest/envelope, typed load/query/diagnostics, immutable snapshots, strict validators, packaged file/UnityWebRequest seams, hashes/schema tests, and a complete source/consumer inventory. It does not edit `Bootloader.cs`, claim `LocalGameDataService.cs`, author content, switch production authority, modify saves, or promote terrestrial source.
 
 ## Terrestrial source and integration dependency
 
 ```text
-#194 / PR #217 technically complete source packet
+merged PR #221 source-packet validation specification
           ↓
-user creative approval
+PR #217 technically complete exact-source packet
           ↓
-#156 trusted Unity asset baseline + #183 game-data authority + owning runtime issue
+user creative approval for exact source version/profile/variant IDs
           ↓
-separate Codex engineering integration and fidelity review
+#156 trusted Unity asset baseline + #183 authority + owning runtime issue
+          ↓
+separate Codex engineering integration + GPT technical review + Codex design-fidelity review
+          ↓
+user integrated acceptance
 ```
 
-Terrestrial profile IDs, working labels, variant intent, biome tags, concept images, and source versions are not gameplay, spawn, AI, reward, save, lore, or runtime catalog authority.
+Terrestrial source profile IDs, working labels, variant intent, biome tags, concept images, source versions, and hashes are source-review evidence only—not gameplay, spawn, AI, combat, reward, save, lore, or runtime catalog authority.
 
 ## Validation and quality-gate dependency
 
@@ -296,7 +337,7 @@ Terrestrial profile IDs, working labels, variant intent, biome tags, concept ima
 reliable automated/manual Unity and release evidence
 ```
 
-A skipped, duplicate-workspace, unavailable, cancelled, or `continue-on-error` check is not passing evidence.
+A skipped, duplicate-workspace, unavailable, cancelled, development-fallback, or `continue-on-error` check is not passing evidence.
 
 ## NVS-01 chain
 
@@ -323,7 +364,8 @@ The archived packet is history, not approved A1. A1 must encode D1–D16, includ
 - #178 containment may continue only within focused controller/UI/release-reachability boundaries.
 - #173 implementation follows accepted #137/#183 prerequisites; its merged specification does not authorize early mutation work.
 - #165 full reconnection follows accepted #163 and #183; earlier containment may only fail closed.
-- terrestrial runtime work follows technical source completion, user creative approval, #156/#183, and a separately approved owning issue.
+- #183 foundation remains blocked by #156; no production source switch or `LocalGameDataService.cs` lock has been authorized.
+- terrestrial runtime work follows technical source completion, exact user creative approval, #156/#183, and a separately approved owning issue.
 
 ## Shared-file state
 
@@ -341,19 +383,20 @@ unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs
 unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs
 ```
 
-The first approved open PR declaring a designated file holds the lock. No conflict resolution may discard valid services, fields, assets, contracts, or registrations.
+The first approved open PR declaring a designated file holds the lock. No conflict resolution may discard valid services, fields, assets, contracts, or registrations. #183 foundation does not claim `LocalGameDataService.cs`; its later migration PR must declare the lock.
 
 ## Evidence rules
 
 Issue closure, PR merge, source presence, one-platform compilation, skipped checks, or documentation alone are insufficient. Evidence must match the risk:
 
 - build risk — exact commands, exit codes, logs, and compiler scan;
-- asset risk — GUID/reference inventory, LFS retrieval, import/reimport, malformed/missing-script scan, hashes, dimensions, and field preservation;
+- asset risk — GUID/reference inventory, LFS binary retrieval, import/reimport, malformed/missing-script scan, hashes, dimensions, media identity, and field preservation;
 - test risk — discovered totals and retained XML/log artifacts;
 - save/economy/reward risk — normal, recovery, fault, duplicate, overflow, reload, event/save-count, and idempotency matrices;
-- contract risk — valid/invalid data and implemented producer/consumer proof;
+- contract/catalog risk — schema/version/hash/provenance, valid/invalid data, immutable query results, packaging, and implemented producer/consumer proof;
 - packaging risk — actual Player/export build and launch transition;
-- source/design risk — approved packet fidelity, rendered references, provenance, version/hash mapping, accessibility, and user decision;
+- source/design risk — rendered exact-source references, provenance, immutable source-version/hash mapping, accessibility, technical disposition, and user decision;
+- integration risk — route/session/result/lifecycle evidence;
 - player-experience risk — integrated user playtest.
 
 ## Immediate next actions
@@ -367,6 +410,7 @@ Issue closure, PR merge, source presence, one-platform compilation, skipped chec
 6. Remove PR #208 hidden controller/direct-credit mutations and prove non-mutation/release reachability.
 7. Fix PR #195 durable rejection notice and rebase/revalidate Android.
 8. Complete PR #203 transaction-safe lifecycle and full fault matrix while retaining the lock.
-9. Correct PR #217 technical manifest/LFS/import/variant review gates, then obtain user creative approval.
-10. Do not activate #183 implementation, #165 reconnection, A1, G1, #137, #134, terrestrial runtime, or production Player claims before their prerequisites pass.
+9. Correct PR #217 against merged PR #221, complete exact-source technical review, then request user creative approval.
+10. After #156, begin only the contract-limited #183 catalog foundation; do not switch production authority or claim the shared file early.
+11. Do not activate #165 reconnection, A1, G1, #137, #134, terrestrial runtime, or production Player claims before their prerequisites pass.
 ```
