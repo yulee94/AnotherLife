@@ -6,13 +6,13 @@ Another Life is a high-fantasy kingdom war game prototype that combines an Andro
 
 | Path | Purpose |
 | --- | --- |
-| `AGENTS.md` | Repository-wide instructions for GPT, Codex, and the Android Studio narrative workflow. |
+| `AGENTS.md` | Repository-wide instructions for GPT, Codex, Android Studio, and the Gemini terrestrial-design workflow. |
 | `app/` | Android native shell built with Kotlin, Jetpack Compose, Navigation, and Material UI. |
 | `unity/` | Unity 2022.3 LTS gameplay project and prototype runtime. Open this folder in Unity Hub. |
 | `unity/Assets/AL/Scripts/` | Unity C# gameplay, services, UI, battle, realm war, champion mode, and editor utilities. |
 | `unity/Assets/AL/StreamingAssets/GameData/` | JSON catalogs shared by Unity and external tools. |
 | `unity/SharedContracts/` | JSON schemas and Fable/F# contracts for non-Unity tooling. |
-| `unity/Docs/` | Project handoff, collaboration, milestone, roadmap, and current-phase documentation. |
+| `unity/Docs/` | Project handoff, collaboration, milestone, roadmap, role prompts, design, and current-phase documentation. |
 | `gradle/`, `build.gradle.kts`, `settings.gradle.kts` | Android/Gradle build configuration. |
 
 ## Local Project Layout
@@ -40,8 +40,17 @@ The root GitHub repository is `yulee94/AnotherLife`, and `main` is the integrati
 
 1. Open `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub.
 2. Let Unity import the project.
-3. Use the `Another Life > Generate Design Assets` editor menu to create starter modular character, skill VFX, weather, and material assets.
+3. Use the `Another Life > Generate Design Assets` editor menu to create starter modular character, skill VFX, weather, and material assets. This generator is not terrestrial creature/fauna design authority.
 4. Run the test/champion scene to enter the 3D Champion Arena prototype.
+
+### Gemini terrestrial design
+
+1. Read issue #194 and `unity/Docs/Gemini_Terrestrial_Design_Prompt.md`.
+2. Fetch current `main` and inspect open PRs before creating design files.
+3. Use a `gemini/<scope>` branch.
+4. Produce terrestrial creature/fauna concepts, turnarounds, design sources, stable IDs, manifests, provenance, and design intent only.
+5. Do not implement C# runtime, gameplay, save data, scenes, spawning, combat, technical catalogs, or narrative meaning in the design PR.
+6. Return the design package for GPT technical-handoff review, Android Studio narrative review where needed, and user creative approval before Codex integration.
 
 ### Fable / External Tools
 
@@ -67,6 +76,7 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 - Skill/weather catalogs and Champion forge preset catalogs live in `unity/Assets/AL/StreamingAssets/GameData/` and are mirrored by schemas/Fable contracts in `unity/SharedContracts/`.
 - The Boot scene now opens with a premium runtime splash: layered atmospheric lighting, animated ash/embers, citadel silhouette, gate/sigil reveal, progress/status feedback, and the same dark command-fantasy tone used by the polished runtime slices.
 - Narrative, NPC, quest, dialogue, chapter, and story content remain Android Studio-owned so Unity runtime work and narrative expansion can move in parallel.
+- Original terrestrial creature/fauna visual design is Gemini-owned under issue #194; the current runtime has no approved terrestrial design package or completed integration from that lane.
 
 ## Collaboration Rules
 
@@ -75,16 +85,23 @@ Use `unity/SharedContracts/` and `unity/Assets/AL/StreamingAssets/GameData/` for
 GPT owns coordination and specification:
 
 - Milestone planning, task decomposition, dependency order, implementation specifications, acceptance criteria, and cross-workstream review.
-- GPT must not invent narrative content or implement gameplay unless the user explicitly reassigns that work.
+- GPT must not invent narrative content, terrestrial visual design, or gameplay unless the user explicitly reassigns a narrowly scoped task.
 
 Android Studio owns narrative content and narrative progression:
 
 - NPCs, advisors, personas, affinity/reputation content.
 - Main quests, side quests, hidden quests, quest hooks, dialogue, chapters, storylines, lore, artifacts, boss lore, and narrative ScriptableObject generation.
+- Terrestrial names, lore, realm meaning, descriptions, and story use when applicable.
+
+Gemini owns terrestrial creature/fauna visual design:
+
+- Concepts, turnarounds, silhouettes, anatomy, proportions, scale, materials, colors, variants, motion references, design sources, manifests, provenance, and licensing.
+- Gemini does not implement Unity runtime, gameplay, spawning, combat, save data, scenes, technical catalogs, or narrative meaning.
 
 Codex owns runtime implementation and Unity gameplay systems:
 
-- Unity runtime services, bootstrapping, combat simulation, boss runtime behavior, loot runtime, character customization, 3D prototype models, skill VFX, weather, world atlas consumption, performance work, editor generators, automated tests, and shared contracts.
+- Unity runtime services, bootstrapping, combat simulation, boss runtime behavior, loot runtime, character customization, 3D prototype models outside the Gemini terrestrial-design lane, skill VFX, weather, world atlas consumption, performance work, editor generators, automated tests, and shared contracts.
+- Codex may later integrate user-approved Gemini terrestrial assets technically but must not independently author or redesign them.
 
 Shared files require extra care:
 
@@ -97,20 +114,21 @@ An open pull request that declares a shared file holds a soft lock on it. If a m
 
 ## Branches
 
-The repository uses `main` as the integration branch. Use short-lived `gpt/<scope>`, `android-studio/<scope>`, or `codex/<scope>` branches for focused work. Completed branches should be removed after merge so collaborators see current work from the repository front page and open pull requests.
+The repository uses `main` as the integration branch. Use short-lived `gpt/<scope>`, `android-studio/<scope>`, `gemini/<scope>`, or `codex/<scope>` branches for focused work. Completed branches should be removed after merge so collaborators see current work from the repository front page and open pull requests.
 
 ## PR Workflow
 
 1. Fetch latest `main`.
 2. Check all open GitHub pull requests before editing.
-3. Create a focused `gpt/<scope>`, `android-studio/<scope>`, or `codex/<scope>` branch.
+3. Create a focused `gpt/<scope>`, `android-studio/<scope>`, `gemini/<scope>`, or `codex/<scope>` branch.
 4. Keep each pull request scoped to one major completion.
-5. Complete `.github/pull_request_template.md`, including ownership, shared-file locks, dependencies, and validation.
+5. Complete `.github/pull_request_template.md`, including ownership, terrestrial-design declaration, shared-file locks, dependencies, and validation.
 6. Rebase onto latest `main` instead of overwriting collaborator work.
 
-For current Phase 1 status, the D1–D16 decision gate, packet/specification structure, risk tracking, review controls, role guidance, and roadmap, see:
+For current Phase 1 status, the D1–D16 decision gate, packet/specification structure, risk tracking, review controls, role guidance, roadmap, and terrestrial design lane, see:
 
 - issue #138 — user D1–D16 approval
+- issue #194 — Gemini-owned terrestrial design foundation
 - `unity/Docs/Phase_1_NVS_01_Status.md`
 - `unity/Docs/Phase_1_NVS_01_Risk_Register.md`
 - `unity/Docs/NVS_01_A1_Packet_Template.md`
@@ -118,7 +136,10 @@ For current Phase 1 status, the D1–D16 decision gate, packet/specification str
 - `unity/Docs/NVS_01_Review_and_Acceptance_Checklists.md`
 - `unity/Docs/Phase_0_Build_Health_Status.md`
 - `unity/Docs/Agent_Role_Prompts.md`
+- `unity/Docs/Gemini_Terrestrial_Design_Prompt.md`
 - `unity/Docs/Project_Progression_Roadmap.md`
 - `unity/Docs/AndroidStudio_Codex_Collaboration_Prompt.md`
 - `unity/Docs/Three_Way_Collaboration_Plan.md`
 - `unity/Docs/Android_Unity_Runtime_Bridge.md`
+- `unity/Docs/Repository_Quality_Gate_Policy.md`
+- `unity/Docs/Repository_Quality_Gate_Gemini_Addendum.md`
