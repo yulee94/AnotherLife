@@ -65,16 +65,33 @@ namespace AL.ChampionMode.Skills
 
         public static GameObject SpawnSkillCastRing(Vector3 position, RealmId realmId, float radius, float lifetime)
         {
+            return SpawnSkillCastRing(position, realmId, radius, lifetime, ItemGrade.Common);
+        }
+
+        public static GameObject SpawnSkillCastRing(Vector3 position, RealmId realmId, float radius, float lifetime, ItemGrade grade)
+        {
             Vector3 groundPosition = Grounded(position);
-            Color color = GetRealmColor(realmId, 0.38f);
-            float safeRadius = Mathf.Max(0.9f, radius);
-            SpawnGroundRing("VFX_Runtime_SkillCastRing", groundPosition, color, safeRadius, Mathf.Max(0.15f, lifetime));
-            SpawnGroundRing("VFX_Runtime_SkillCastRing_Inner", groundPosition, Color.Lerp(color, Color.white, 0.28f), safeRadius * 0.56f, Mathf.Max(0.12f, lifetime * 0.85f));
-            SpawnCastSigilTicks(groundPosition, realmId, safeRadius, lifetime);
-            return SpawnSkillCastCharge(groundPosition, realmId, safeRadius, lifetime);
+            float gradePower = GetItemGradePower(grade);
+            Color color = GetRealmColor(realmId, Mathf.Lerp(0.34f, 0.56f, gradePower));
+            float safeRadius = Mathf.Max(0.9f, radius) * Mathf.Lerp(0.96f, 1.18f, gradePower);
+            float safeLifetime = Mathf.Max(0.15f, lifetime) * Mathf.Lerp(0.96f, 1.22f, gradePower);
+            SpawnGroundRing("VFX_Runtime_SkillCastRing", groundPosition, color, safeRadius, safeLifetime);
+            SpawnGroundRing("VFX_Runtime_SkillCastRing_Inner", groundPosition, Color.Lerp(color, Color.white, 0.28f + gradePower * 0.12f), safeRadius * 0.56f, safeLifetime * 0.85f);
+            if (grade >= ItemGrade.Legendary)
+            {
+                SpawnGroundRing("VFX_Runtime_SkillCastRing_OuterGrade", groundPosition + Vector3.up * 0.012f, GetRealmColor(realmId, 0.18f + gradePower * 0.12f), safeRadius * 1.26f, safeLifetime * 0.92f);
+            }
+
+            SpawnCastSigilTicks(groundPosition, realmId, safeRadius, safeLifetime, grade);
+            return SpawnSkillCastCharge(groundPosition, realmId, safeRadius, safeLifetime, grade);
         }
 
         public static GameObject SpawnSkillTargetPreview(Vector3 casterPosition, Vector3 targetGroundPosition, Vector3 forward, RealmId realmId, float radius, float lifetime)
+        {
+            return SpawnSkillTargetPreview(casterPosition, targetGroundPosition, forward, realmId, radius, lifetime, ItemGrade.Common);
+        }
+
+        public static GameObject SpawnSkillTargetPreview(Vector3 casterPosition, Vector3 targetGroundPosition, Vector3 forward, RealmId realmId, float radius, float lifetime, ItemGrade grade)
         {
             Vector3 start = Grounded(casterPosition);
             Vector3 target = Grounded(targetGroundPosition);
@@ -90,9 +107,10 @@ namespace AL.ChampionMode.Skills
             }
 
             float distance = Mathf.Max(1f, Vector3.Distance(start, target));
-            float safeRadius = Mathf.Clamp(radius, 1.1f, 4.8f);
-            float safeLifetime = Mathf.Max(0.14f, lifetime);
-            Color color = GetRealmColor(realmId, 0.30f);
+            float gradePower = GetItemGradePower(grade);
+            float safeRadius = Mathf.Clamp(radius, 1.1f, 4.8f) * Mathf.Lerp(0.98f, 1.14f, gradePower);
+            float safeLifetime = Mathf.Max(0.14f, lifetime) * Mathf.Lerp(0.96f, 1.18f, gradePower);
+            Color color = GetRealmColor(realmId, Mathf.Lerp(0.28f, 0.44f, gradePower));
             Color edgeColor = Color.Lerp(color, Color.white, 0.34f);
 
             var marker = SpawnGroundRing("VFX_Runtime_SkillTargetPreview_Marker", target, color, safeRadius * 0.58f, safeLifetime);
@@ -130,7 +148,13 @@ namespace AL.ChampionMode.Skills
 
         public static GameObject SpawnSkillCastCharge(Vector3 groundPosition, RealmId realmId, float radius, float lifetime)
         {
-            Color color = GetRealmColor(realmId, 0.46f);
+            return SpawnSkillCastCharge(groundPosition, realmId, radius, lifetime, ItemGrade.Common);
+        }
+
+        public static GameObject SpawnSkillCastCharge(Vector3 groundPosition, RealmId realmId, float radius, float lifetime, ItemGrade grade)
+        {
+            float gradePower = GetItemGradePower(grade);
+            Color color = GetRealmColor(realmId, Mathf.Lerp(0.42f, 0.66f, gradePower));
             float safeLifetime = Mathf.Max(0.12f, lifetime);
             float safeRadius = Mathf.Max(0.85f, radius);
             var column = SpawnPrimitiveEffect(
@@ -141,13 +165,14 @@ namespace AL.ChampionMode.Skills
                 MaxPooledSkillShapesPerKey,
                 groundPosition + Vector3.up * 0.62f,
                 Quaternion.identity,
-                new Vector3(safeRadius * 0.16f, 0.72f, safeRadius * 0.16f),
-                Color.Lerp(color, Color.white, 0.22f),
+                new Vector3(safeRadius * Mathf.Lerp(0.14f, 0.22f, gradePower), 0.72f + gradePower * 0.34f, safeRadius * Mathf.Lerp(0.14f, 0.22f, gradePower)),
+                Color.Lerp(color, Color.white, 0.22f + gradePower * 0.16f),
                 safeLifetime);
 
-            for (int i = 0; i < 4; i++)
+            int riserCount = Mathf.RoundToInt(Mathf.Lerp(4f, 8f, gradePower));
+            for (int i = 0; i < riserCount; i++)
             {
-                float angle = i * 90f + 45f;
+                float angle = i * 360f / riserCount + 45f;
                 Vector3 radial = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
                 SpawnPrimitiveEffect(
                     "shape:skill-charge-riser",
@@ -155,9 +180,9 @@ namespace AL.ChampionMode.Skills
                     PrimitiveType.Cube,
                     MaxActiveSkillShapes,
                     MaxPooledSkillShapesPerKey,
-                    groundPosition + radial * (safeRadius * 0.58f) + Vector3.up * 0.40f,
+                    groundPosition + radial * (safeRadius * Mathf.Lerp(0.50f, 0.72f, gradePower)) + Vector3.up * 0.40f,
                     Quaternion.LookRotation(radial),
-                    new Vector3(0.055f, 0.48f, 0.055f),
+                    new Vector3(0.055f + gradePower * 0.020f, 0.48f + gradePower * 0.24f, 0.055f + gradePower * 0.020f),
                     color,
                     safeLifetime * 0.82f);
             }
@@ -167,9 +192,15 @@ namespace AL.ChampionMode.Skills
 
         public static GameObject SpawnRealmSlash(Vector3 groundPosition, Vector3 forward, RealmId realmId)
         {
+            return SpawnRealmSlash(groundPosition, forward, realmId, ItemGrade.Common);
+        }
+
+        public static GameObject SpawnRealmSlash(Vector3 groundPosition, Vector3 forward, RealmId realmId, ItemGrade grade)
+        {
             groundPosition = Grounded(groundPosition);
             Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
-            Color color = GetRealmColor(realmId, 0.72f);
+            float gradePower = GetItemGradePower(grade);
+            Color color = GetRealmColor(realmId, Mathf.Lerp(0.66f, 0.88f, gradePower));
             Quaternion rotation = Quaternion.LookRotation(safeForward) * Quaternion.Euler(0f, 0f, 22f);
             var slash = SpawnPrimitiveEffect(
                 "shape:realm-slash",
@@ -179,7 +210,7 @@ namespace AL.ChampionMode.Skills
                 MaxPooledSkillShapesPerKey,
                 groundPosition + Vector3.up * 0.95f + safeForward * 0.15f,
                 rotation,
-                new Vector3(1.85f, 0.09f, 0.42f),
+                new Vector3(1.85f + gradePower * 0.42f, 0.09f + gradePower * 0.035f, 0.42f + gradePower * 0.16f),
                 color,
                 0.32f);
 
@@ -191,12 +222,13 @@ namespace AL.ChampionMode.Skills
                 MaxPooledSkillShapesPerKey,
                 groundPosition + Vector3.up * 1.02f + safeForward * 0.24f,
                 rotation,
-                new Vector3(2.12f, 0.045f, 0.12f),
+                new Vector3(2.12f + gradePower * 0.58f, 0.045f + gradePower * 0.020f, 0.12f + gradePower * 0.04f),
                 Color.Lerp(color, Color.white, 0.55f),
                 0.22f);
-            for (int i = 0; i < 3; i++)
+            int afterimageCount = Mathf.RoundToInt(Mathf.Lerp(3f, 5f, gradePower));
+            for (int i = 0; i < afterimageCount; i++)
             {
-                float sideOffset = (i - 1) * 0.26f;
+                float sideOffset = (i - (afterimageCount - 1) * 0.5f) * 0.26f;
                 Vector3 side = Vector3.Cross(Vector3.up, safeForward);
                 SpawnPrimitiveEffect(
                     "shape:realm-slash-afterimage",
@@ -206,15 +238,15 @@ namespace AL.ChampionMode.Skills
                     MaxPooledSkillShapesPerKey,
                     groundPosition + Vector3.up * (0.76f + i * 0.10f) + safeForward * (0.36f + i * 0.18f) + side * sideOffset,
                     rotation * Quaternion.Euler(0f, 0f, -8f + i * 8f),
-                    new Vector3(1.42f - i * 0.16f, 0.035f, 0.18f),
+                    new Vector3(Mathf.Max(0.70f, 1.42f - i * 0.12f + gradePower * 0.18f), 0.035f, 0.18f + gradePower * 0.04f),
                     Color.Lerp(color, Color.white, 0.18f + i * 0.14f),
                     0.18f + i * 0.035f);
             }
 
             SpawnGroundRing("VFX_Runtime_RealmSlash_Crest", groundPosition, GetRealmColor(realmId, 0.28f), 1.15f, 0.38f);
             SpawnBurst("VFX_Runtime_RealmSlash_Sparks", groundPosition + Vector3.up * 0.85f + safeForward * 0.62f, Color.Lerp(color, Color.white, 0.34f), color, 0.62f);
-            SpawnImpactDebris(groundPosition + safeForward * 0.82f, safeForward, color, 5, 0.36f);
-            SpawnImpactAftermath(groundPosition + safeForward * 0.62f, realmId, 1.15f, 0.92f, false);
+            SpawnImpactDebris(groundPosition + safeForward * 0.82f, safeForward, color, Mathf.RoundToInt(Mathf.Lerp(5f, 8f, gradePower)), 0.36f);
+            SpawnImpactAftermath(groundPosition + safeForward * 0.62f, realmId, 1.15f + gradePower * 0.34f, 0.92f + gradePower * 0.24f, grade >= ItemGrade.Legendary);
             SpawnCinematicImpactAccent(groundPosition + safeForward * 0.62f, realmId, 1.05f, safeForward, false);
             return slash;
         }
@@ -253,7 +285,13 @@ namespace AL.ChampionMode.Skills
 
         public static GameObject SpawnRenewingGuard(Vector3 groundPosition, RealmId realmId)
         {
+            return SpawnRenewingGuard(groundPosition, realmId, ItemGrade.Common);
+        }
+
+        public static GameObject SpawnRenewingGuard(Vector3 groundPosition, RealmId realmId, ItemGrade grade)
+        {
             groundPosition = Grounded(groundPosition);
+            float gradePower = GetItemGradePower(grade);
             Color shellColor = Color.Lerp(GetRealmColor(realmId, 0.36f), new Color(0.48f, 1f, 0.62f, 0.36f), 0.45f);
             var shell = SpawnPrimitiveEffect(
                 "shape:renewing-guard",
@@ -263,15 +301,16 @@ namespace AL.ChampionMode.Skills
                 MaxPooledGuardShells,
                 groundPosition + Vector3.up * 1.05f,
                 Quaternion.identity,
-                new Vector3(2.25f, 2.25f, 2.25f),
+                new Vector3(2.25f, 2.25f, 2.25f) * Mathf.Lerp(1f, 1.24f, gradePower),
                 shellColor,
-                0.65f);
+                0.65f + gradePower * 0.16f);
 
-            SpawnGroundRing("VFX_Runtime_RenewingGuard_Ring", groundPosition, new Color(0.48f, 1f, 0.62f, 0.42f), 1.35f, 0.55f);
-            SpawnGroundRing("VFX_Runtime_RenewingGuard_Halo", groundPosition + Vector3.up * 0.02f, Color.Lerp(shellColor, Color.white, 0.24f), 1.95f, 0.70f);
-            for (int i = 0; i < 6; i++)
+            SpawnGroundRing("VFX_Runtime_RenewingGuard_Ring", groundPosition, new Color(0.48f, 1f, 0.62f, 0.42f + gradePower * 0.12f), 1.35f + gradePower * 0.34f, 0.55f + gradePower * 0.16f);
+            SpawnGroundRing("VFX_Runtime_RenewingGuard_Halo", groundPosition + Vector3.up * 0.02f, Color.Lerp(shellColor, Color.white, 0.24f + gradePower * 0.12f), 1.95f + gradePower * 0.42f, 0.70f + gradePower * 0.18f);
+            int plateCount = Mathf.RoundToInt(Mathf.Lerp(6f, 10f, gradePower));
+            for (int i = 0; i < plateCount; i++)
             {
-                float angle = i * 60f;
+                float angle = i * 360f / plateCount;
                 Vector3 radial = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
                 SpawnPrimitiveEffect(
                     "shape:renewing-guard-plate",
@@ -292,33 +331,51 @@ namespace AL.ChampionMode.Skills
 
         public static GameObject SpawnWarzoneShockwave(Vector3 groundPosition, RealmId realmId, float radius)
         {
+            return SpawnWarzoneShockwave(groundPosition, realmId, radius, ItemGrade.Common);
+        }
+
+        public static GameObject SpawnWarzoneShockwave(Vector3 groundPosition, RealmId realmId, float radius, ItemGrade grade)
+        {
             groundPosition = Grounded(groundPosition);
-            float safeRadius = Mathf.Max(1.25f, radius);
-            Color color = GetRealmColor(realmId, 0.42f);
-            SpawnBurst("VFX_Runtime_WarzoneBurst_Core", groundPosition + Vector3.up * 0.85f, Color.Lerp(color, Color.white, 0.25f), color, 1.25f);
+            float gradePower = GetItemGradePower(grade);
+            float safeRadius = Mathf.Max(1.25f, radius) * Mathf.Lerp(0.98f, 1.18f, gradePower);
+            Color color = GetRealmColor(realmId, Mathf.Lerp(0.42f, 0.62f, gradePower));
+            SpawnBurst("VFX_Runtime_WarzoneBurst_Core", groundPosition + Vector3.up * 0.85f, Color.Lerp(color, Color.white, 0.25f + gradePower * 0.14f), color, 1.25f + gradePower * 0.28f);
             SpawnGroundRing("VFX_Runtime_WarzoneBurst_Inner", groundPosition, color, safeRadius * 0.45f, 0.42f);
-            SpawnGroundRing("VFX_Runtime_WarzoneBurst_Outer", groundPosition, GetRealmColor(realmId, 0.20f), safeRadius * 1.18f, 0.68f);
-            SpawnRadialCracks(groundPosition, safeRadius, color, 10, 0.58f);
-            SpawnImpactDebris(groundPosition, Vector3.forward, color, 9, 0.58f);
-            SpawnAerialShardRain(groundPosition, realmId, safeRadius, 7, 0.62f);
-            SpawnImpactAftermath(groundPosition, realmId, safeRadius, 1.25f, false);
+            SpawnGroundRing("VFX_Runtime_WarzoneBurst_Outer", groundPosition, GetRealmColor(realmId, 0.20f + gradePower * 0.10f), safeRadius * 1.18f, 0.68f + gradePower * 0.16f);
+            if (grade >= ItemGrade.Legendary)
+            {
+                SpawnGroundRing("VFX_Runtime_WarzoneBurst_GradeCrest", groundPosition + Vector3.up * 0.018f, Color.Lerp(color, Color.white, 0.32f), safeRadius * 1.42f, 0.74f + gradePower * 0.18f);
+            }
+
+            SpawnRadialCracks(groundPosition, safeRadius, color, Mathf.RoundToInt(Mathf.Lerp(10f, 16f, gradePower)), 0.58f + gradePower * 0.16f);
+            SpawnImpactDebris(groundPosition, Vector3.forward, color, Mathf.RoundToInt(Mathf.Lerp(9f, 15f, gradePower)), 0.58f + gradePower * 0.12f);
+            SpawnAerialShardRain(groundPosition, realmId, safeRadius, Mathf.RoundToInt(Mathf.Lerp(7f, 12f, gradePower)), 0.62f + gradePower * 0.16f);
+            SpawnImpactAftermath(groundPosition, realmId, safeRadius, 1.25f + gradePower * 0.32f, grade >= ItemGrade.Legendary);
             SpawnCinematicImpactAccent(groundPosition, realmId, safeRadius, Vector3.forward, true);
-            RequestWeatherFlash(realmId, 0.54f);
+            RequestWeatherFlash(realmId, Mathf.Lerp(0.42f, 0.82f, gradePower));
             return SpawnGroundRing("VFX_Runtime_WarzoneBurst_Wave", groundPosition, color, safeRadius, 0.58f);
         }
 
         public static GameObject SpawnWarmasterBreaker(Vector3 groundPosition, RealmId realmId, float radius)
         {
-            groundPosition = Grounded(groundPosition);
-            float safeRadius = Mathf.Max(1.6f, radius);
-            Color coreColor = Color.Lerp(GetRealmColor(realmId, 0.62f), new Color(1f, 0.62f, 0.18f, 0.62f), 0.35f);
-            var impact = SpawnWarzoneShockwave(groundPosition, realmId, safeRadius);
-            SpawnBurst("VFX_Runtime_WarmasterBreaker_Core", groundPosition + Vector3.up, coreColor, new Color(1f, 0.92f, 0.62f, 0.7f), 1.65f);
-            SpawnGroundRing("VFX_Runtime_WarmasterBreaker_Rune", groundPosition, Color.Lerp(coreColor, Color.white, 0.32f), safeRadius * 0.68f, 0.48f);
+            return SpawnWarmasterBreaker(groundPosition, realmId, radius, ItemGrade.Legendary);
+        }
 
-            for (int i = 0; i < 6; i++)
+        public static GameObject SpawnWarmasterBreaker(Vector3 groundPosition, RealmId realmId, float radius, ItemGrade grade)
+        {
+            groundPosition = Grounded(groundPosition);
+            float gradePower = GetItemGradePower(grade);
+            float safeRadius = Mathf.Max(1.6f, radius) * Mathf.Lerp(1f, 1.18f, gradePower);
+            Color coreColor = Color.Lerp(GetRealmColor(realmId, 0.62f + gradePower * 0.12f), new Color(1f, 0.62f, 0.18f, 0.70f), 0.35f);
+            var impact = SpawnWarzoneShockwave(groundPosition, realmId, safeRadius, grade);
+            SpawnBurst("VFX_Runtime_WarmasterBreaker_Core", groundPosition + Vector3.up, coreColor, new Color(1f, 0.92f, 0.62f, 0.7f), 1.65f + gradePower * 0.38f);
+            SpawnGroundRing("VFX_Runtime_WarmasterBreaker_Rune", groundPosition, Color.Lerp(coreColor, Color.white, 0.32f + gradePower * 0.12f), safeRadius * 0.68f, 0.48f + gradePower * 0.16f);
+
+            int pillarCount = Mathf.RoundToInt(Mathf.Lerp(6f, 10f, gradePower));
+            for (int i = 0; i < pillarCount; i++)
             {
-                float angle = i * 60f + 30f;
+                float angle = i * 360f / pillarCount + 30f;
                 Vector3 offset = Quaternion.Euler(0f, angle, 0f) * Vector3.forward * (safeRadius * 0.48f);
                 SpawnPrimitiveEffect(
                     "shape:warmaster-breaker-pillar",
@@ -328,9 +385,9 @@ namespace AL.ChampionMode.Skills
                     MaxPooledSkillShapesPerKey,
                     groundPosition + offset + Vector3.up * 0.45f,
                     Quaternion.Euler(0f, angle, 8f),
-                    new Vector3(0.22f, 0.9f, 0.22f),
+                    new Vector3(0.22f + gradePower * 0.08f, 0.9f + gradePower * 0.36f, 0.22f + gradePower * 0.08f),
                     coreColor,
-                    0.7f);
+                    0.7f + gradePower * 0.16f);
             }
 
             SpawnPrimitiveEffect(
@@ -341,7 +398,7 @@ namespace AL.ChampionMode.Skills
                 MaxPooledSkillShapesPerKey,
                 groundPosition + Vector3.up * 1.12f,
                 Quaternion.Euler(0f, 45f, 10f),
-                new Vector3(0.30f, 1.88f, 0.13f),
+                new Vector3(0.30f + gradePower * 0.08f, 1.88f + gradePower * 0.50f, 0.13f + gradePower * 0.04f),
                 Color.Lerp(coreColor, Color.white, 0.24f),
                 0.52f);
             SpawnPrimitiveEffect(
@@ -352,14 +409,14 @@ namespace AL.ChampionMode.Skills
                 MaxPooledSkillShapesPerKey,
                 groundPosition + Vector3.up * 1.08f,
                 Quaternion.Euler(0f, -45f, -10f),
-                new Vector3(0.22f, 1.56f, 0.11f),
+                new Vector3(0.22f + gradePower * 0.06f, 1.56f + gradePower * 0.38f, 0.11f + gradePower * 0.03f),
                 Color.Lerp(coreColor, Color.white, 0.36f),
                 0.44f);
-            SpawnAerialShardRain(groundPosition, realmId, safeRadius * 1.08f, 10, 0.74f);
-            SpawnRadialCracks(groundPosition, safeRadius * 1.05f, coreColor, 12, 0.74f);
-            SpawnImpactAftermath(groundPosition, realmId, safeRadius * 1.15f, 1.85f, true);
+            SpawnAerialShardRain(groundPosition, realmId, safeRadius * 1.08f, Mathf.RoundToInt(Mathf.Lerp(10f, 14f, gradePower)), 0.74f + gradePower * 0.18f);
+            SpawnRadialCracks(groundPosition, safeRadius * 1.05f, coreColor, Mathf.RoundToInt(Mathf.Lerp(12f, 18f, gradePower)), 0.74f + gradePower * 0.18f);
+            SpawnImpactAftermath(groundPosition, realmId, safeRadius * 1.15f, 1.85f + gradePower * 0.36f, true);
             SpawnCinematicImpactAccent(groundPosition, realmId, safeRadius * 1.08f, Vector3.forward, true);
-            RequestWeatherFlash(realmId, 0.92f);
+            RequestWeatherFlash(realmId, Mathf.Lerp(0.72f, 1f, gradePower));
             return impact;
         }
 
@@ -749,8 +806,14 @@ namespace AL.ChampionMode.Skills
 
         private static void SpawnCastSigilTicks(Vector3 groundPosition, RealmId realmId, float radius, float lifetime)
         {
-            int count = radius >= 3f ? 10 : 8;
-            Color color = Color.Lerp(GetRealmColor(realmId, 0.45f), Color.white, 0.22f);
+            SpawnCastSigilTicks(groundPosition, realmId, radius, lifetime, ItemGrade.Common);
+        }
+
+        private static void SpawnCastSigilTicks(Vector3 groundPosition, RealmId realmId, float radius, float lifetime, ItemGrade grade)
+        {
+            float gradePower = GetItemGradePower(grade);
+            int count = Mathf.RoundToInt((radius >= 3f ? 10f : 8f) + Mathf.Lerp(0f, 5f, gradePower));
+            Color color = Color.Lerp(GetRealmColor(realmId, 0.45f + gradePower * 0.12f), Color.white, 0.22f + gradePower * 0.12f);
             float safeLifetime = Mathf.Max(0.16f, lifetime);
             for (int i = 0; i < count; i++)
             {
@@ -765,7 +828,7 @@ namespace AL.ChampionMode.Skills
                     MaxPooledSkillShapesPerKey,
                     groundPosition + radial * radius + Vector3.up * 0.085f,
                     Quaternion.LookRotation(tangent),
-                    new Vector3(0.34f, 0.035f, 0.055f),
+                    new Vector3(0.34f + gradePower * 0.12f, 0.035f, 0.055f + gradePower * 0.02f),
                     color,
                     safeLifetime * (0.84f + (i % 3) * 0.04f));
             }
@@ -797,7 +860,7 @@ namespace AL.ChampionMode.Skills
 
         private static void SpawnAerialShardRain(Vector3 groundPosition, RealmId realmId, float radius, int count, float lifetime)
         {
-            int safeCount = Mathf.Clamp(count, 4, 12);
+            int safeCount = Mathf.Clamp(count, 4, 16);
             float safeRadius = Mathf.Max(1.2f, radius);
             Color color = Color.Lerp(GetRealmColor(realmId, 0.62f), Color.white, 0.18f);
             for (int i = 0; i < safeCount; i++)

@@ -38,6 +38,14 @@ namespace AL.ChampionMode.Skills
             "warmaster_breaker"
         };
 
+        private readonly ItemGrade[] _skillGrades =
+        {
+            ItemGrade.Rare,
+            ItemGrade.Epic,
+            ItemGrade.Legendary,
+            ItemGrade.Mythic
+        };
+
         private readonly float[] _cooldowns = { 4f, 8f, 10f, 14f };
         private readonly float[] _manaCosts = { 20f, 30f, 45f, 60f };
         private readonly float[] _castTimes = { 0.05f, 0.35f, 0.45f, 0.65f };
@@ -165,6 +173,11 @@ namespace AL.ChampionMode.Skills
             return IsValidSlot(slotIndex) ? _vfxKeys[slotIndex] : string.Empty;
         }
 
+        public ItemGrade GetSkillGrade(int slotIndex)
+        {
+            return IsValidSlot(slotIndex) ? _skillGrades[slotIndex] : ItemGrade.Common;
+        }
+
         private IEnumerator CastRoutine(int slotIndex)
         {
             Debug.Log($"Casting {_skillNames[slotIndex]}.");
@@ -173,10 +186,11 @@ namespace AL.ChampionMode.Skills
             var realmId = GetCurrentRealmId();
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 previewCenter = GetSkillGroundCenter(slotIndex, forward);
-            SkillEffectFactory.SpawnSkillCastRing(transform.position, realmId, GetSkillPreviewRadius(slotIndex), _castTimes[slotIndex] + 0.15f);
+            ItemGrade skillGrade = GetSkillGrade(slotIndex);
+            SkillEffectFactory.SpawnSkillCastRing(transform.position, realmId, GetSkillPreviewRadius(slotIndex), _castTimes[slotIndex] + 0.15f, skillGrade);
             if (slotIndex != 1)
             {
-                SkillEffectFactory.SpawnSkillTargetPreview(transform.position, previewCenter, forward, realmId, _ranges[slotIndex], _castTimes[slotIndex] + 0.18f);
+                SkillEffectFactory.SpawnSkillTargetPreview(transform.position, previewCenter, forward, realmId, _ranges[slotIndex], _castTimes[slotIndex] + 0.18f, skillGrade);
             }
 
             yield return new WaitForSeconds(_castTimes[slotIndex]);
@@ -200,31 +214,32 @@ namespace AL.ChampionMode.Skills
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 groundCenter = GetSkillGroundCenter(slotIndex, forward);
             Vector3 hitCenter = groundCenter + Vector3.up;
+            ItemGrade skillGrade = GetSkillGrade(slotIndex);
 
             switch (slotIndex)
             {
                 case 1:
                     _combat?.Heal(_powers[slotIndex]);
-                    SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
+                    SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId, skillGrade);
                     SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.85f, "+" + Mathf.CeilToInt(_powers[slotIndex]), new Color(0.48f, 1f, 0.62f), 0.28f, 0.95f);
                     SkillEffectFactory.ShakeCamera(0.06f, 0.08f);
                     RuntimeCombatAudio.PlayHeal();
                     break;
                 case 2:
                     DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
-                    SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, _ranges[slotIndex]);
+                    SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, _ranges[slotIndex], skillGrade);
                     SkillEffectFactory.ShakeCamera(0.18f, 0.14f);
                     RuntimeCombatAudio.PlaySkillCast();
                     break;
                 case 3:
                     DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
-                    SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, _ranges[slotIndex]);
+                    SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, _ranges[slotIndex], skillGrade);
                     SkillEffectFactory.ShakeCamera(0.24f, 0.18f);
                     RuntimeCombatAudio.PlayHeavySkill();
                     break;
                 default:
                     DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
-                    SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId);
+                    SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId, skillGrade);
                     SkillEffectFactory.ShakeCamera(0.12f, 0.10f);
                     RuntimeCombatAudio.PlaySkillCast();
                     break;
