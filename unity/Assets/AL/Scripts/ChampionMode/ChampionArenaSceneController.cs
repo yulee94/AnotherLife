@@ -28,6 +28,7 @@ namespace AL.ChampionMode
         private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
         private SkillCaster _playerSkillCaster;
+        private ChampionGearTierVisualController _gearTierVisuals;
         private CameraFollow _cameraFollow;
         private RvrBotSpawner _rvrBotSpawner;
         private BossDummyAI _boss;
@@ -221,6 +222,7 @@ namespace AL.ChampionMode
         private void HandleBossLootRolled(BossLootResult result)
         {
             _lastBossLootResult = result;
+            _gearTierVisuals?.RefreshNow();
         }
 
         private void ApplyRuntimeQuality()
@@ -248,6 +250,8 @@ namespace AL.ChampionMode
             _playerController = player.AddComponent<ChampionController>();
             ProceduralChampionModelBuilder.EnsureModel(player);
             _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _gearTierVisuals = player.AddComponent<ChampionGearTierVisualController>();
+            _gearTierVisuals.Configure(GetCurrentRealmId());
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
