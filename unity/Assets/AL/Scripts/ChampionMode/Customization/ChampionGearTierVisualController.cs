@@ -11,6 +11,15 @@ namespace AL.ChampionMode.Customization
         [SerializeField] private RealmId _fallbackRealm = RealmId.Crownlands;
         [SerializeField] private ItemGrade _fallbackGrade = ItemGrade.Common;
 
+        private struct AuraPart
+        {
+            public Transform Transform;
+            public Renderer Renderer;
+            public Vector3 BaseScale;
+            public bool Orbiting;
+        }
+
+        private readonly List<AuraPart> _auraParts = new List<AuraPart>();
         private readonly List<Renderer> _auraRenderers = new List<Renderer>();
         private Transform _auraRoot;
         private ItemGrade _activeGrade = ItemGrade.Common;
@@ -71,16 +80,16 @@ namespace AL.ChampionMode.Customization
             Transform leftHand = FindOrCreateAnchor("VFX_Hand_L", new Vector3(-0.55f, -0.10f, 0.20f));
             Transform rightHand = FindOrCreateAnchor("VFX_Hand_R", new Vector3(0.55f, -0.10f, 0.20f));
 
-            CreateAuraPart(chest, "GearAura_ChestHalo", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.55f, 0.014f, 0.55f), new Vector3(90f, 0f, 0f));
-            CreateAuraPart(chest, "GearAura_ChestCore", PrimitiveType.Sphere, new Vector3(0f, 0f, 0.035f), new Vector3(0.13f, 0.13f, 0.050f), Vector3.zero);
-            CreateAuraPart(leftHand, "GearAura_LeftHandRune", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.18f, 0.010f, 0.18f), new Vector3(90f, 0f, 0f));
-            CreateAuraPart(rightHand, "GearAura_RightHandRune", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.18f, 0.010f, 0.18f), new Vector3(90f, 0f, 0f));
+            CreateAuraPart(chest, "GearAura_ChestHalo", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.55f, 0.014f, 0.55f), new Vector3(90f, 0f, 0f), false);
+            CreateAuraPart(chest, "GearAura_ChestCore", PrimitiveType.Sphere, new Vector3(0f, 0f, 0.035f), new Vector3(0.13f, 0.13f, 0.050f), Vector3.zero, false);
+            CreateAuraPart(leftHand, "GearAura_LeftHandRune", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.18f, 0.010f, 0.18f), new Vector3(90f, 0f, 0f), false);
+            CreateAuraPart(rightHand, "GearAura_RightHandRune", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.18f, 0.010f, 0.18f), new Vector3(90f, 0f, 0f), false);
 
             for (int i = 0; i < 8; i++)
             {
                 float angle = i * Mathf.PI * 2f / 8f;
                 Vector3 position = new Vector3(Mathf.Cos(angle) * 0.42f, Mathf.Sin(angle) * 0.05f, Mathf.Sin(angle) * 0.18f);
-                CreateAuraPart(chest, "GearAura_OrbitShard_" + i, PrimitiveType.Cube, position, new Vector3(0.040f, 0.18f, 0.040f), new Vector3(0f, -angle * Mathf.Rad2Deg, 18f));
+                CreateAuraPart(chest, "GearAura_OrbitShard_" + i, PrimitiveType.Cube, position, new Vector3(0.040f, 0.18f, 0.040f), new Vector3(0f, -angle * Mathf.Rad2Deg, 18f), true);
             }
         }
 
@@ -98,7 +107,7 @@ namespace AL.ChampionMode.Customization
             return obj.transform;
         }
 
-        private void CreateAuraPart(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Vector3 localEulerAngles)
+        private void CreateAuraPart(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Vector3 localEulerAngles, bool orbiting)
         {
             var obj = GameObject.CreatePrimitive(primitive);
             obj.name = name;
@@ -122,6 +131,14 @@ namespace AL.ChampionMode.Customization
                 renderer.material = material;
                 _auraRenderers.Add(renderer);
             }
+
+            _auraParts.Add(new AuraPart
+            {
+                Transform = obj.transform,
+                Renderer = renderer,
+                BaseScale = localScale,
+                Orbiting = orbiting
+            });
         }
 
         private void ResolveOwnedGearProfile(out ItemGrade grade, out RealmId realm, out Color primary, out Color secondary)
@@ -166,17 +183,24 @@ namespace AL.ChampionMode.Customization
             bool visible = _activeGrade >= ItemGrade.Rare;
             if (_auraRoot != null)
             {
-                _auraRoot.gameObject.SetActive(visible);
+                _auraRoot.gameObject.SetActive(true);
             }
 
-            for (int i = 0; i < _auraRenderers.Count; i++)
+            for (int i = 0; i < _auraParts.Count; i++)
             {
-                var renderer = _auraRenderers[i];
+                var part = _auraParts[i];
+                if (part.Transform != null)
+                {
+                    part.Transform.localScale = part.BaseScale * Mathf.Lerp(0.92f, 1.14f, gradePower);
+                }
+
+                var renderer = part.Renderer;
                 if (renderer == null)
                 {
                     continue;
                 }
 
+                renderer.enabled = visible;
                 Color color = i % 2 == 0 ? _primary : _secondary;
                 renderer.material.color = new Color(color.r, color.g, color.b, Mathf.Lerp(0.32f, 0.72f, gradePower));
                 if (renderer.material.HasProperty("_EmissionColor"))
@@ -188,7 +212,7 @@ namespace AL.ChampionMode.Customization
 
         private void TickPulse()
         {
-            if (_auraRoot == null || !_auraRoot.gameObject.activeSelf)
+            if (_auraRoot == null || _activeGrade < ItemGrade.Rare)
             {
                 return;
             }
@@ -196,12 +220,20 @@ namespace AL.ChampionMode.Customization
             float gradePower = GetGradePower(_activeGrade);
             _pulseOffset += Time.deltaTime * Mathf.Lerp(0.55f, 1.65f, gradePower);
             float pulse = 0.5f + Mathf.Sin(_pulseOffset * Mathf.PI * 2f) * 0.5f;
-            _auraRoot.localScale = Vector3.one * Mathf.Lerp(0.92f + pulse * 0.04f, 1.18f + pulse * 0.14f, gradePower);
-            _auraRoot.Rotate(Vector3.up, Mathf.Lerp(18f, 62f, gradePower) * Time.deltaTime, Space.Self);
 
-            for (int i = 0; i < _auraRenderers.Count; i++)
+            for (int i = 0; i < _auraParts.Count; i++)
             {
-                var renderer = _auraRenderers[i];
+                var part = _auraParts[i];
+                if (part.Transform != null)
+                {
+                    part.Transform.localScale = part.BaseScale * Mathf.Lerp(0.94f + pulse * 0.04f, 1.20f + pulse * 0.14f, gradePower);
+                    if (part.Orbiting)
+                    {
+                        part.Transform.Rotate(Vector3.up, Mathf.Lerp(24f, 86f, gradePower) * Time.deltaTime, Space.Self);
+                    }
+                }
+
+                var renderer = part.Renderer;
                 if (renderer == null || !renderer.material.HasProperty("_EmissionColor"))
                 {
                     continue;
