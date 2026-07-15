@@ -300,6 +300,7 @@ namespace AL.ChampionMode
 
             CreateWeather();
             CreateWorldObjectiveMarkers();
+            CreateAmbientTerrestrials();
         }
 
         private void ConfigureArenaLighting()
@@ -793,6 +794,14 @@ namespace AL.ChampionMode
             markerObject.transform.position = Vector3.zero;
             int markerBudget = _qualityController != null ? _qualityController.GetWorldMarkerBudget(8) : 8;
             markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(GetCurrentRealmId(), markerBudget);
+        }
+
+        private void CreateAmbientTerrestrials()
+        {
+            var terrestrialObject = new GameObject("ChampionArena_AmbientTerrestrials");
+            terrestrialObject.transform.position = Vector3.zero;
+            int terrestrialBudget = _qualityController != null ? _qualityController.GetAmbientTerrestrialBudget(10) : 10;
+            terrestrialObject.AddComponent<AmbientTerrestrialSpawner>().Configure(GetCurrentRealmId(), terrestrialBudget);
         }
 
         private void CreateIntroCinematicCues(Transform player, Transform boss, Color realmAccent)

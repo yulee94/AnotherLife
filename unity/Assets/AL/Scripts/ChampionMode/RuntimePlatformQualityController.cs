@@ -11,6 +11,7 @@ namespace AL.ChampionMode
         public int BotChampionBudget = 40;
         public int DummyBudget = 16;
         public int WorldMarkerBudget = 8;
+        public int AmbientTerrestrialBudget = 10;
         public float WeatherParticleMultiplier = 1.0f;
         public float ShadowDistance = 42f;
         public int PixelLightCount = 2;
@@ -56,6 +57,11 @@ namespace AL.ChampionMode
             return Mathf.Clamp(requested, 0, Mathf.Max(1, _currentProfile.WorldMarkerBudget));
         }
 
+        public int GetAmbientTerrestrialBudget(int requested)
+        {
+            return Mathf.Clamp(requested, 0, Mathf.Max(0, _currentProfile.AmbientTerrestrialBudget));
+        }
+
         public float GetWeatherParticleMultiplier()
         {
             return Mathf.Clamp(_currentProfile.WeatherParticleMultiplier, 0.15f, 1.25f);
@@ -78,6 +84,7 @@ namespace AL.ChampionMode
                     BotChampionBudget = 16,
                     DummyBudget = 8,
                     WorldMarkerBudget = 5,
+                    AmbientTerrestrialBudget = 3,
                     WeatherParticleMultiplier = 0.45f,
                     ShadowDistance = 16f,
                     PixelLightCount = 0,
@@ -95,6 +102,7 @@ namespace AL.ChampionMode
                     BotChampionBudget = 24,
                     DummyBudget = 12,
                     WorldMarkerBudget = 6,
+                    AmbientTerrestrialBudget = 5,
                     WeatherParticleMultiplier = 0.65f,
                     ShadowDistance = 24f,
                     PixelLightCount = 1,
@@ -112,6 +120,7 @@ namespace AL.ChampionMode
                     BotChampionBudget = 32,
                     DummyBudget = 12,
                     WorldMarkerBudget = 7,
+                    AmbientTerrestrialBudget = 7,
                     WeatherParticleMultiplier = 0.80f,
                     ShadowDistance = 32f,
                     PixelLightCount = 1,
