@@ -1,7 +1,7 @@
 # Phase 1 NVS-01 Risk Register
 
 **Status date:** 2026-07-15  
-**Audited current-main head:** `7f887e1f645c53c09b50e76ffb4475637ac965b3`  
+**Audited current-main head:** `1342f4194261450fe8cff3e529eddf29c6c7bb1e`  
 **Active control state:** Phase 1 is paused behind #156 and the red Phase 0/1 foundation gate  
 **Approved product intent:** issue #138 D1–D16  
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
@@ -12,7 +12,7 @@ This register describes verified source and delivery risk. It supersedes assumpt
 
 | ID | Severity | Risk | Evidence | Owner | Tracking/status |
 | --- | --- | --- | --- | --- | --- |
-| R1 | Critical | QuestDefinition serialized identity and malformed-asset coverage are not trusted | surviving type/GUID direction is known, but malformed/missing/non-authoritative assets can escape current discovery and canonical Unity evidence is absent | Codex engineering + GPT | **Active — #156 / PR #189 blocked** |
+| R1 | Critical | QuestDefinition serialized identity and malformed-asset coverage are not yet trusted | authority/type/GUID/schema direction is accepted and PR #218 merged the complete Force-Text YAML/subasset validator contract, but PR #189 has not implemented or canonically validated it | Codex engineering + GPT | **Active — #156 / PR #189 blocked; spec merged PR #218** |
 | R2 | Critical | Archived OMEN_1 may be mistaken for approved A1/runtime | archive conflicts with approved start, failure, reward, report, abandonment, localization, and resume | Codex narrative/content + GPT | **Contained — #128 starts only after #156** |
 | R3 | Critical | NVS-01 consequences lack one atomic/idempotent transaction | resource, affinity, quest, artifact, and chapter domains save independently | GPT + Codex engineering | **Blocked — #133/#134 and foundations** |
 | R4 | Critical | Save rotation/recovery can destroy last-known-good data | candidate validation, backup ranking, repair, deletion, offline progress, and publication remain incomplete | Codex engineering | **Blocked/open — #137 after #136/#152/#163** |
@@ -34,12 +34,13 @@ This register describes verified source and delivery risk. It supersedes assumpt
 | R20 | High | Champion, atlas, game-data, and customization remain weakly validated and mutable | non-finite state, silent fallback, hard-coded authority, live save mutation | Codex modes + GPT | **Blocked/open — #180/#181/#183/#184** |
 | R21 | Medium | Old terrestrial prototype branches may be treated as design authority | stacked procedural visual work inherited rejected ancestors | Codex terrestrial-design + GPT | **Contained — #194; PR #162 reference-only** |
 | R22 | Critical | Ownership chronology could be inverted again | earlier Gemini instruction was once treated as newer than the later Codex reassignment | GPT | **Resolved/controlled — PR #205 + dated decision record** |
-| R23 | Medium | Status and issue metadata drift during concurrent work | merged specifications and newly opened PRs can make the canonical status stale within one review cycle | GPT | **Mitigated — recurring current-main refresh** |
+| R23 | Medium | Status and issue metadata drift during concurrent work | merged PR #218 and newly opened source-design PR #217 made the prior status incomplete within one review cycle | GPT | **Mitigated — recurring current-main refresh** |
 | R24 | High | Duplicate-workspace Unity evidence can be mistaken for acceptance | PRs #189, #203, #208, #209, #211, #212, and #214 report `C:\Users\MY\Documents\AnotherLife\unity`; #214’s latest run exited 199 with no XML | Codex engineering + GPT | **Active — canonical reruns required** |
 | R25 | Critical | Quest compatibility repair can discard or activate ambiguous state | PR #212 removes duplicate/null/blank rows, keeps the first duplicate, seeds Q1–Q5, and exposes unknown side quests | Codex engineering + GPT | **Active — #152 / PR #212 blocked** |
 | R26 | High | Relationship normalization may appear complete without real old-JSON coverage | PR #211 manually nulls fields after construction but does not prove omitted Unity JSON, repeated normalization, or unrelated-field preservation | Codex engineering + GPT | **Active — #136 / PR #211 blocked** |
 | R27 | High | Green CI may give false confidence before policy proof and protection | positive run exists, but intentional failures and required branch settings are not verified | Codex engineering + user/maintainer + GPT | **Active — #155 remains open** |
 | R28 | Critical | Progression can invent or use unauthoritative definitions | Kingdom/production references IDs absent from `LocalGameDataService`; research is private/unqueryable; all troop lookups return null; mutable runtime definitions have no version/provenance | GPT + Codex engineering + source modes | **Active — #183 after #156; full #165 blocked** |
+| R29 | High | Terrestrial preview assets may be mistaken for approved creative or runtime authority | PR #217 uses `Fixes #194`, declares nine variants with only three base sheets, lacks immutable manifest media hashes/schema validation, direct rendered user-review links, LFS retrieval proof, and canonical Unity import evidence; user creative approval is absent | Codex terrestrial-design + GPT + user | **Active — #194 / PR #217 blocked** |
 
 ## D1–D16 controls
 
@@ -85,6 +86,7 @@ Parallel focused lanes are limited to the existing non-overlapping PRs/issues:
 #161/#195   Android release debug-route gating
 #178/#208   Unity command containment
 #163/#214   economy integrity implementation against merged PR #215 contract
+#194/#217   terrestrial source-design review only; no runtime integration
 ```
 
 No later-phase implementation should be self-assigned while these earlier gates are red.
@@ -113,6 +115,18 @@ The merged `Save_Semantic_Compatibility_Policy.md` and `Economy_Integrity_Spec.m
 - use clone → validate → persist → publish;
 - do not apply offline progress to an unvalidated candidate.
 
+## Asset-authority dependency
+
+```text
+merged PR #218 validator specification
+          ↓
+PR #189 Force-Text YAML/subasset/schema implementation + canonical evidence
+          ↓
+#156 trusted QuestDefinition/Unity asset baseline
+```
+
+The narrative QuestDefinition type/GUID and historical field equivalence are accepted. #156 is not complete until the merged validator specification is implemented and passes canonical import/reimport/malformed-fixture evidence.
+
 ## Definition/progression dependency
 
 ```text
@@ -124,6 +138,22 @@ The merged `Save_Semantic_Compatibility_Policy.md` and `Economy_Integrity_Spec.m
 ```
 
 Before #183, #165 may contain invalid arithmetic/state and fail closed, but must not introduce a temporary definition authority or new IDs/balance.
+
+## Terrestrial source dependency
+
+```text
+PR #217 technically complete source packet
+          ↓
+user creative approval
+          ↓
+#156 trusted Unity asset baseline + #183 authority + owning runtime issue
+          ↓
+separate engineering integration + GPT technical review + Codex design-fidelity review
+          ↓
+user integrated acceptance
+```
+
+Until then, terrestrial working labels, profile/variant IDs, biome tags, concept images, and manifest values are source-review intent only—not spawn, AI, combat, reward, save, narrative, or runtime authority.
 
 ## Shared-file risk
 
@@ -146,12 +176,12 @@ The first approved open PR declaring one holds the lock. Save fields require def
 ## Evidence policy
 
 - build risk → exact commands, exit codes, complete error scan;
-- asset risk → GUID/reference inventory, reimport, malformed/missing-script scan, and field preservation;
+- asset risk → GUID/reference inventory, LFS retrieval, import/reimport, malformed/missing-script scan, hashes, dimensions, and field preservation;
 - test risk → discovered totals and retained XML/log artifacts;
 - save/economy/reward risk → normal, recovery, fault, deletion, semantic, overflow, duplicate, reload, event/save-count, and idempotency matrices;
 - contract risk → valid/invalid cases and implemented producer/consumer proof;
 - packaging risk → actual Player/export build and launch transition;
-- narrative/design risk → approved packet fidelity, references, provenance, readability, and user decision;
+- narrative/design risk → approved packet fidelity, rendered references, provenance, immutable source-version/hash mapping, accessibility intent, and user decision;
 - integration risk → route/session/result/lifecycle evidence;
 - player-experience risk → integrated playtest.
 
@@ -160,7 +190,7 @@ Skipped, unavailable, duplicate-workspace, compile-only, stale-base, or `continu
 ## Immediate mitigation
 
 ```text
-1. Correct PR #189 malformed-asset coverage and run canonical Unity evidence.
+1. Implement merged PR #218 in PR #189 and run canonical Unity evidence.
 2. Rewrite PR #214 against the merged economy specification; prohibit service-local repair and validate canonically.
 3. Correct PR #209 teardown ordering before any branch consumes PlayMode evidence.
 4. Harden PR #210, run the proof matrix, and keep #155 open through protection evidence.
@@ -168,5 +198,6 @@ Skipped, unavailable, duplicate-workspace, compile-only, stale-base, or `continu
 6. Remove PR #208 hidden controller/direct-credit mutation paths and prove release non-mutation.
 7. Fix PR #195 durable visible fallback.
 8. Complete PR #203 transaction, marker, lifecycle, and fault semantics while retaining the lock.
-9. Keep #183 implementation, #165 reconnection, A1/G1/runtime, and Player claims behind their prerequisites.
+9. Correct PR #217 manifest/LFS/import/variant/user-review gates before seeking creative approval.
+10. Keep #183, #165 reconnection, A1/G1/runtime, terrestrial integration, and Player claims behind their prerequisites.
 ```
