@@ -35,8 +35,8 @@ namespace AL.Services.Local
                 Id = "intro_stonehold",
                 CharacterName = "Thane Ironbeard",
                 Text = "The Deep Forge has been silent for a century. Today, we strike the first spark. Defeat Ferrum and the Ring of the Mountain King shall be yours.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "The mountains will ring again.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "The mountains will ring again.", NextNodeId = "end" }
                 },
                 IsConflictHint = false,
                 AssociatedRealmId = RealmId.Stonehold
@@ -46,8 +46,8 @@ namespace AL.Services.Local
                 Id = "hint_stonehold_war",
                 CharacterName = "Dwarven Sapper",
                 Text = "The Humans claim our border mines are theirs. They seek our Ancestral Ring. We must fortify.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "Show them our resolve.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "Show them our resolve.", NextNodeId = "end" }
                 },
                 IsConflictHint = true,
                 AssociatedRealmId = RealmId.Stonehold
@@ -57,7 +57,7 @@ namespace AL.Services.Local
                 Id = "intro_eldergrove",
                 CharacterName = "High Sentinel Elara",
                 Text = "A shadow creeps upon the roots of the World Tree. The whispers are troubled. We must act with grace and steel.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
+                Choices = new List<DialogueChoice> {
                     new DialogueChoice { Text = "The forest will not fall.", NextNodeId = "end" }
                 },
                 IsConflictHint = false,
@@ -68,8 +68,8 @@ namespace AL.Services.Local
                 Id = "hint_eldergrove_blight",
                 CharacterName = "Forest Spirit",
                 Text = "The Humans are building walls near our sacred groves. Their progress is a blight upon the green.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "The wood remembers.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "The wood remembers.", NextNodeId = "end" }
                 },
                 IsConflictHint = true,
                 AssociatedRealmId = RealmId.Eldergrove
@@ -79,8 +79,8 @@ namespace AL.Services.Local
                 Id = "intro_crownlands",
                 CharacterName = "Captain Valerius",
                 Text = "The walls are rebuilt, but the spirit of the people is still fragile. Your decree will shape our future.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "A new era begins today.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "A new era begins today.", NextNodeId = "end" }
                 },
                 IsConflictHint = false,
                 AssociatedRealmId = RealmId.Crownlands
@@ -90,8 +90,8 @@ namespace AL.Services.Local
                 Id = "hint_crownlands_trade",
                 CharacterName = "Royal Merchant",
                 Text = "The Dwarves have raised taxes on iron through the mountain pass. They wish to starve our forges.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "We will find another way.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "We will find another way.", NextNodeId = "end" }
                 },
                 IsConflictHint = true,
                 AssociatedRealmId = RealmId.Crownlands
@@ -101,8 +101,8 @@ namespace AL.Services.Local
                 Id = "intro_umbral",
                 CharacterName = "Shadow-Weaver Vex",
                 Text = "The volcanic rifts pulse with chaotic energy. The Void calls to us. Will you master it, or let it consume us?",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "The shadow serves me.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "The shadow serves me.", NextNodeId = "end" }
                 },
                 IsConflictHint = false,
                 AssociatedRealmId = RealmId.Umbral
@@ -112,8 +112,8 @@ namespace AL.Services.Local
                 Id = "hint_umbral_revenge",
                 CharacterName = "Exiled Scout",
                 Text = "The Elves have forgotten us, left us to rot in these ash-wastes. One day, the Void will reclaim their groves.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "The night is patient.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "The night is patient.", NextNodeId = "end" }
                 },
                 IsConflictHint = true,
                 AssociatedRealmId = RealmId.Umbral
@@ -124,9 +124,9 @@ namespace AL.Services.Local
                 Id = "c10_intro",
                 CharacterName = "High Celestial Lyra",
                 Text = "Mortal of the lower realms, the gates of the Sky Castle have not opened in an age. Why do you seek the light?",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "To save my people.", NextNodeId = "end" },
-                    new AL.Data.Definitions.DialogueChoice { Text = "To claim your power.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "To save my people.", NextNodeId = "end" },
+                    new DialogueChoice { Text = "To claim your power.", NextNodeId = "end" }
                 }
             });
 
@@ -134,8 +134,8 @@ namespace AL.Services.Local
                 Id = "c12_victory",
                 CharacterName = "High Celestial Lyra",
                 Text = "You have proven your worth. The Throne of the Skies is yours. But beware, for signals from the Otherworld grow stronger.",
-                Choices = new List<AL.Data.Definitions.DialogueChoice> {
-                    new AL.Data.Definitions.DialogueChoice { Text = "I am ready for what comes next.", NextNodeId = "end" }
+                Choices = new List<DialogueChoice> {
+                    new DialogueChoice { Text = "I am ready for what comes next.", NextNodeId = "end" }
                 }
             });
         }
