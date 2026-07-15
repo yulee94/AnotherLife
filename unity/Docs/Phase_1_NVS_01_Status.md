@@ -2,9 +2,9 @@
 
 **Status date:** 2026-07-15  
 **Current integration branch:** `main`  
-**Audited current-main head:** `55128d21a6dbf9402eb78396dbe59f8d7e4bcac9`  
-**Roadmap state:** Phase 1 is paused behind Phase 0 compilation and serialized-asset recovery  
-**Immediate owner:** Codex under issue #145 and draft PR #147
+**Audited current-main head:** `3c695ae289acabcfd8750bd6a2f0811ebdfb24cd`  
+**Roadmap state:** the Unity compilation gate is complete; Phase 1 remains paused behind serialized-asset recovery issue #156  
+**Immediate owner:** Codex under issue #156
 
 `AGENTS.md` is authoritative. This record distinguishes source presence, issue state, merge state, validation evidence, and actual player-visible completion.
 
@@ -15,48 +15,70 @@ Use this document with:
 - `unity/Docs/Three_Way_Collaboration_Plan.md`
 - `unity/Docs/Phase_1_NVS_01_Risk_Register.md`
 - issue #138 for the approved D1–D16 product decisions
-- active recovery issues #127, #128, #133–#137, #145, #148, #150, #152, #153, #155, and #156
+- active recovery and foundation issues referenced below
 
 ## Current repository state
 
-The following incident and remediation changes are present on `main`:
+### Completed compile recovery
 
-- PR #141 merged the KSP bump, partial save implementation, save tests, and PlayMode test infrastructure despite a blocking review and without its required local Unity validation.
-- PR #124 merged an archive explicitly described as “must not be merged,” including the bounded packet, broad Chapter 1 material, Android UI/model changes, and Unity definition/namespace changes.
-- PR #143 removed `Assets/Test.unity` from normal Build Settings and changed the PlayMode smoke to load the scene by editor path.
-- PR #144 added an Android reflection-based `UnityPlayer` host and bridge documentation.
-- PR #146 merged the first truthful current-main recovery status and risk records.
+PR #147 was reduced to the required one-file mechanical repair and squash-merged as:
 
-Current pull-request state:
-
-- PR #147 is an open draft for #145. Its `LocalStoryService.cs` namespace fix is correct, but it remains blocked until the unrelated #127 PlayMode test edit is removed and its description links `Fixes #145` / `Refs #156`.
-- PR #149 was closed unmerged. Its tiered-loot/VFX prototype is preserved under deferred issue #151 and holds no shared-file lock.
-
-Closed or merged status is not completion evidence. Every gate below is based on current source and the acceptance criteria of the owning issue.
-
-## Phase 0 recovery gates
-
-### Gate A — #145: restore trusted Unity compilation
-
-**Status:** Open; draft PR #147 blocked pending scope correction  
-**Owner:** Codex  
-**Scope:** one mechanical namespace/build repair
-
-Current source moved `DialogueNode` and `DialogueChoice` to `AL.Data.Definitions.Narrative`, while `LocalStoryService.cs` still constructs choices using the removed old type:
-
-```csharp
-new AL.Data.Definitions.DialogueChoice { ... }
+```text
+3c695ae289acabcfd8750bd6a2f0811ebdfb24cd
 ```
 
-PR #147 records the expected pre-fix `CS0234`, a post-fix successful compile, and EditMode 6/6. It must contain only the `LocalStoryService.cs` correction. Exact startup-log expectations in `RepresentativeSceneSmokeTests.cs` do not belong in #145 and do not satisfy #127.
+The merged diff changes only:
 
-### Gate B — #156: consolidate QuestDefinition authority and serialized GUIDs
+```text
+unity/Assets/AL/Scripts/Kingdom/Story/LocalStoryService.cs
+```
 
-**Status:** Open; starts after the #145 one-file compile fix  
+It replaces obsolete `AL.Data.Definitions.DialogueChoice` references with the imported `AL.Data.Definitions.Narrative.DialogueChoice` type. Dialogue text, IDs, choices, outcomes, saves, metadata, assets, and PlayMode infrastructure are unchanged.
+
+Issue #145 is closed. Its recorded evidence remains:
+
+- pre-fix Unity `CS0234` diagnostics;
+- successful post-fix Unity `2022.3.62f3` compilation;
+- EditMode result: 6 total, 6 passed, 0 failed.
+
+Safe PlayMode coverage was not claimed by #145 and remains issue #127.
+
+### Pull-request state
+
+There are currently **no open pull requests**.
+
+The speculative visual stack was closed unmerged:
+
+```text
+#149 → #154 → #157 → #162 → #164 → #167
+→ #170 → #175 → #179 → #182 → #185
+```
+
+The useful visual ideas are preserved only as historical references under deferred/not-planned issues #151, #160, and #187. None of those branches holds a shared-file lock, and none should be retargeted or cherry-picked wholesale.
+
+### Shared-file state
+
+Current designated shared-file soft locks: **none**.
+
+Designated shared integration files remain:
+
+- `unity/Assets/AL/Scripts/Core/Bootloader.cs`
+- `unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs`
+- `unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs`
+- `unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs`
+
+The first approved open implementation PR declaring one of these files holds its soft lock.
+
+## Active Phase 0 asset-health gate
+
+### #156 — QuestDefinition authority and serialized GUID migration
+
+**Status:** Ready and active  
 **Owner:** Codex  
-**Scope:** technical definition/asset migration without narrative changes
+**Branch:** `codex/consolidate-quest-definition-assets`  
+**Base:** fetched current `main` at or after `3c695ae289acabcfd8750bd6a2f0811ebdfb24cd`
 
-Before PR #124, two `QuestDefinition` scripts existed:
+Before merged PR #124, two `QuestDefinition` script identities existed:
 
 ```text
 AL.Data.Definitions.QuestDefinition
@@ -66,55 +88,79 @@ AL.Data.Definitions.Narrative.QuestDefinition
 GUID c385b2b183b74184ca75eeffbe2256ef
 ```
 
-PR #124 removed the root type and changed `LocalQuestService` to the narrative type. A clean compile does not prove serialized assets referencing the removed GUID remain valid. #156 must inventory both GUID populations, select one technical authority, migrate tracked assets deterministically, and add regression validation.
+PR #124 removed the root type and changed `LocalQuestService` to the narrative type. Compilation success does not prove that tracked ScriptableObjects, prefabs, or scenes still resolve their original script identity.
 
-No A1 packet or production Player build may claim a trusted Unity base until #145 and #156 are complete.
+#156 must:
 
-## Verified source audit
+1. inventory every tracked reference to both GUIDs;
+2. inventory all QuestDefinition assets, source references, generators, importers, schemas, and catalogs;
+3. choose one final technical authority based on evidence;
+4. migrate tracked serialized references deterministically when required;
+5. preserve all valid IDs, text, conditions, rewards, and unknown serialized fields;
+6. add guards against duplicate type/GUID/quest-asset ID regressions;
+7. recompile and reimport in Unity `2022.3.62f3` with exact EditMode/editor evidence.
 
-### Android shell and preview boundary
+Do not blindly replace the surviving `.meta` GUID. If no tracked asset references the removed GUID, record that evidence and add authority/GUID regression checks without inventing a migration.
 
-The Android app creates separate in-memory `KingdomState` and `NarrativeState` objects in Compose. It does not load the Unity save, quest service, or story service.
+No A1 packet or production Player build may claim a trusted Unity asset base until #156 is complete.
 
-`Route.Quest` exists and has an entry-provider branch, but bottom navigation does not expose it. `Route.Champion` renders `AcademyScreen`, not `UnityView`. `UnityView` is imported but not mounted.
+## Independent foundations now ready after #145
 
-The shell also hard-codes a Valerius intro and silently closes the overlay when a dialogue target cannot be found. It is therefore a non-authoritative preview/demo path until #133 defines the boundary and #135 later completes packaging and embedding.
+No implementation PR is currently open for these lanes. Each must start from fetched current `main`, use one focused branch, and avoid shared-file overlap.
 
-### Current `OMEN_1` packet
+### #127 — profile-safe PlayMode smoke
 
-`NVS_01_Packet.kt` is still the archived pre-approval packet and conflicts with issue #138:
+The current PlayMode test loads `Assets/Test.unity` by editor path but still lacks:
 
-- `CH0_PROLOGUE`, no realm prerequisite, and automatic start;
-- missing `DLG_OMEN_1_ARENA_START`;
-- `+5` affinity at acceptance instead of report completion;
-- automatic success dialogue instead of manual report;
-- Tear granted at report completion instead of arena success;
-- contradictory failure consequence and retry constant;
-- abandonment prohibited;
-- incomplete localization inventory;
-- no complete D16 resume model.
+- developer-profile snapshot/isolation/restoration;
+- protection for both `save.previous.json` and legacy `save.json.previous`;
+- bounded scene-load timeout;
+- global log/time-state restoration;
+- static `ServiceLocator` cleanup;
+- proof that no extra save artifact remains;
+- stable structural startup assertions;
+- accepted current-main PlayMode XML evidence.
 
-Issue #128 remains blocked by #145 and #156. The merged archive is source history, not an approved A1 artifact.
+Issue #127 is ready. It must not edit production Build Settings or runtime behavior.
 
-### Unity quest runtime
+### #136 — reputation, faction, and persona save compatibility
 
-`LocalQuestService` registers Q1–Q5 only. It does not load `OMEN_1`, consume an approved catalog, validate narrative references, issue a typed arena request, process a typed result, or execute the report-completion transaction.
+The three missing-field defaults exist, but acceptance still requires:
 
-`QuestState` contains only quest ID, scalar progress, completion, and claim flags. `SaveGameData` has no persisted NVS-01 dialogue node, objective state, handoff correlation, pending Tear, recovery state, or applied-consequence ledger.
+- real service mutations after normalization;
+- preservation of existing values;
+- save/reload round trip;
+- idempotent normalization;
+- Unity compile and focused EditMode evidence.
 
-Issues #133 and #134 remain blocked in their original order.
+Issue #136 is ready and must remain separate from broad save hardening.
 
-### Quest-state save compatibility — #152
+### #152 — quest-state save compatibility
 
-`SaveGameData.Quests` is normalized only at the list level. Current quest and side-quest services dereference null entries and blank IDs, and `ClaimReward` indexes `_definitions[questId]` without a checked definition lookup.
+Current quest services can dereference null entries or blank IDs and can index a missing definition during reward claim. #152 must define and test null, blank, unknown, duplicate, and downgrade-safe quest-state behavior without changing narrative meaning.
 
-#152 must define and test null, blank, unknown, and duplicate quest-state behavior. Unknown future/legacy IDs must be preserved safely and must never throw or grant rewards.
+Issue #152 is ready. Its semantic policy is required before #137 finalizes save validation.
 
-### Save compatibility and recovery
+### #153 — Bootloader service-stack integrity
 
-Current source includes the three #136 default initializations and limited reflection-based tests. #136 remains open until real reputation, faction, and persona service mutations persist through save/reload and normalization is proven idempotent.
+`Bootloader.InitializeIfMissing()` currently treats one registered `IResourceService` as proof that the complete service graph exists. #153 must establish deterministic full-stack readiness, coherent root dependencies, visible failure, and empty/full/partial/repeated initialization tests.
 
-Current #137 code remains partial. Verified gaps include:
+Issue #153 is ready. Any implementation PR must declare the `Bootloader.cs` shared lock.
+
+### Independent Android and repository lanes
+
+The following may proceed after checking file overlap:
+
+- #148 — restore Android `Quest` positional constructor compatibility;
+- #155 — repository/Android CI, staged Unity reporting, and merge controls;
+- #159 — remove dynamic Android dependency versions and verify the resolved graph;
+- #161 — hide narrative debug routes and arbitrary node triggers outside debug/internal builds.
+
+## Save-hardening dependency
+
+Issue #137 remains blocked until both #136 and #152 are complete.
+
+Its verified gaps include:
 
 - unvalidated primary bytes can overwrite the last-known-good backup;
 - ordinary `IOException` failures are treated as unsupported-operation fallback;
@@ -125,115 +171,125 @@ Current #137 code remains partial. Verified gaps include:
 - `DeleteSave()` leaves previous/quarantine artifacts;
 - offline progress mutates before durable persistence without rollback;
 - current fallback writes `save.json.previous` while the approved model uses `save.previous.json`;
-- quarantine failure can lead toward an unsafe new-profile path;
-- the fault-injection and deletion matrix is absent.
+- quarantine failure can lead toward unsafe profile recreation;
+- the required fault-injection, semantic-validation, duplicate-safety, and deletion matrices are absent.
 
-#137 starts after both #136 and the quest-state compatibility policy from #152 are integrated.
+## NVS-01 narrative and runtime chain
 
-### PlayMode coverage — #127
+### #128 — clean Android Studio A1 packet
 
-The current test loads `Assets/Test.unity` by editor path, fixing the shipped-Build-Settings problem. It still lacks:
+Issue #128 is blocked by #156.
 
-- developer-profile snapshot/isolation/restoration;
-- protection for both `save.previous.json` and legacy `save.json.previous`;
-- bounded load timeout;
-- guaranteed restoration of global log/time state;
-- static `ServiceLocator` cleanup;
-- proof that no extra save artifacts remain;
-- stable structural startup assertions rather than exact ordinary-log sequencing;
-- an accepted current-main PlayMode XML result.
+The merged `NVS_01_Packet.kt` remains the archived pre-approval packet and conflicts with issue #138:
 
-#127 starts after #145.
+- wrong chapter/realm start context and automatic start;
+- missing `DLG_OMEN_1_ARENA_START`;
+- affinity at acceptance instead of report completion;
+- automatic success dialogue instead of manual report;
+- Tear granted at report completion instead of arena success;
+- contradictory failure/retry behavior;
+- abandonment prohibited;
+- incomplete localization inventory;
+- incomplete D16 resume model.
 
-### Bootloader service integrity — #153
+The archive is source history, not approved A1 authority.
 
-`Bootloader.InitializeIfMissing()` treats a single registered `IResourceService` as proof that the entire offline service graph exists. A partial or stale static registry can therefore skip initialization and fail later on save, story, quest, or pause/quit paths.
+### #133 — GPT G1 specification
 
-#153 must replace the single-service sentinel with deterministic full-stack readiness, coherent root dependencies, visible failure, and empty/full/partial/repeated initialization tests. It requires a soft lock on `Bootloader.cs`.
+Issue #133 is blocked only by an approved #128 artifact. G1 must not invent or repair narrative. It translates the exact A1 packet into:
 
-### Android constructor compatibility — #148
+- one versioned runtime content authority;
+- strict validation/error behavior;
+- deterministic state/objective/dialogue behavior;
+- typed encounter request/result and session correlation;
+- artifact/report semantics;
+- persisted D16 resume state;
+- atomic and idempotent consequence orchestration;
+- explicit files, shared locks, tests, rollback, and C1–C4 order.
 
-PR #124 reordered `Quest` constructor parameters and regressed the compatibility guarantee from PR #119. `isCompleted` and `isClaimed` must again immediately follow `target`, before defaulted `mode` and `mapMarkerId`, with a positional-construction test.
+### #134 — Codex C1–C4
 
-#148 is Android-only and may proceed independently after checking open PR overlap.
+Issue #134 remains blocked by approved G1 and by the foundations G1 identifies as required.
 
-### Production Player scene list — #150
+The minimum known prerequisites for the approved OMEN_1 consequences include safe quest/save state, resource mutation, relationship mutation, realm identity, encounter lifecycle, and visible failure behavior. Existing focused issues include:
 
-`unity/ProjectSettings/EditorBuildSettings.asset` currently has `m_Scenes: []`, while runtime controllers load scenes such as `RealmSelection` and `Kingdom` by name.
+- #127, #136, #137, #152, #153;
+- #163 — economy integrity;
+- #173 — realm selection integrity;
+- #176 — relationship integrity;
+- #177 — player notifications;
+- #180 — Champion combat and encounter integrity;
+- #183 — game-data authority.
 
-#150 must inventory committed scenes and string-loaded dependencies, define the minimal production flow, keep `Assets/Test.unity` excluded, add build-settings validation, and prove a development Player build. It starts after #145 and #156.
+G1 must distinguish true NVS-01 blockers from broader release or later-phase quality work; issue existence alone does not automatically place every lane on the critical path.
 
-### Android↔Unity bridge — #135
+## Production and integration lanes
 
-`UnityView.kt` contains a reflection-based host, lifecycle forwarding, route JSON, and callback parsing. However:
+### #150 — production scenes and Player build
 
-- Gradle includes only `:app`;
-- no Unity export is packaged;
-- the shell does not mount `UnityView`;
-- Unity-side request consumption and result production are unproven;
-- duplicate suppression is keyed only by route string, so a second launch of the same route can have all outcomes ignored;
-- no session/correlation ID distinguishes duplicate, late, or retried results;
-- lifecycle, configuration, back, device, memory, and end-to-end tests are absent.
+Issue #150 is blocked by #156. Current `EditorBuildSettings.asset` has `m_Scenes: []` while runtime controllers load scenes by name.
+
+After #156, #150 must inventory every committed scene and string-loaded dependency, define the minimal production flow, keep `Assets/Test.unity` excluded, add deterministic Build Settings validation, build a development Player, and prove the first transition.
+
+### #135 — packaged Android↔Unity bridge
+
+The Android reflection host is not a packaged or mounted end-to-end bridge. There is no Unity export module, shell route, Unity request consumer/result producer, stable session identity, or device/lifecycle evidence.
 
 #135 remains deferred until standalone NVS-01 and #150 are complete.
 
-### Repository quality gate — #155
+### Additional integrity and release issues
 
-No repository CI workflow or required status check protects `main`. #155 must add staged repository/Android checks, a reviewed Unity runner model, metadata/build-settings guards, artifacts, path-aware ownership reporting, and verified branch/merge controls.
+The source audit also isolated focused issues for economy, progression, territory, loot, Realm Gems/Wishgate, Warmaster, world-state lifecycle, realm selection, deterministic battle results, relationships, notifications, release-only command gating, Champion combat, world atlas, game-data authority, customization, and Android quest preview:
 
-The Android/repository phase may begin after #145; Unity checks become required only after they are reliable.
+```text
+#163 #165 #166 #168 #169 #171 #172 #173 #174
+#176 #177 #178 #180 #181 #183 #184 #186
+```
+
+These issues preserve verified defects and acceptance criteria. They must be sequenced by actual file overlap and by the G1/release plan rather than implemented as one broad backlog PR.
 
 ## Correct dependency order
 
 ```text
-#145 — one-file Unity compile repair
+#145 — Unity namespace compile repair
+  COMPLETE at 3c695ae289acabcfd8750bd6a2f0811ebdfb24cd
         ↓
 #156 — QuestDefinition authority and serialized-asset migration
+  ACTIVE
         ↓
 trusted Unity source/asset baseline
 
-Independent or parallel foundations after #145:
-  #127 — profile-safe PlayMode smoke
-  #136 — reputation/faction/persona mutation and round trip
-  #152 — null/unknown/duplicate quest-state compatibility
-  #153 — coherent Bootloader service-stack readiness
-  #155 — repository/Android quality gates; staged Unity runner
+Parallel foundations available now:
+  #127  profile-safe PlayMode
+  #136  relationship-field normalization evidence
+  #152  quest-state compatibility
+  #153  service-stack integrity
+  #148  Android constructor compatibility
+  #155  CI/merge controls
+  #159  Android dependency reproducibility
+  #161  Android debug-route gating
 
 #136 + #152
         ↓
-#137 — validated crash-safe save persistence
+#137 — crash-safe save persistence
 
-Independent Android repair:
-  #148 — Quest positional constructor compatibility
-
-After #145 + #156:
-  #150 — production scene inventory, Build Settings, and Player smoke
-  #128 — clean D1–D16-faithful A1 packet
+After #156:
+  #128 — clean D1–D16 A1 packet
+  #150 — production scenes and Player build
+  catalog/authority work that explicitly depends on #156
 
 #128
   ↓
-#133 — GPT G1 runtime integration specification
+#133 — GPT G1
   ↓
-#134 — Codex C1–C4 only after G1 and required foundations (#127, #136, #137, #152, #153)
+required technical foundations identified by G1
   ↓
-G2 — GPT technical/integration review
+#134 — Codex C1–C4
   ↓
-A2 — Android Studio narrative-fidelity review
-  ↓
-U1 — user playtest and NVS-01 acceptance
+G2 → A2 → U1
   ↓
 #135 — packaged Android↔Unity bridge
 ```
-
-#150 is required before release or Android Unity export. #155 should protect the large #134 integration before it merges.
-
-## Deferred archive and prototype content
-
-Merged files associated with #129–#131 preserve future ideas but do not prove those milestones complete. Those issues are closed as `not_planned` for the active phase.
-
-PR #149 is closed unmerged. Its item-grade/loot-reveal proposal is preserved under deferred issue #151, also closed `not_planned`, until build and save foundations are complete.
-
-Neither archive nor prototype content is runtime authority for NVS-01.
 
 ## Evidence rules
 
@@ -243,40 +299,21 @@ A task is complete only when its own acceptance criteria are met. The following 
 - a pull request being merged;
 - a source or test file existing;
 - Android compilation for a Unity change;
+- compilation without serialized-asset, persistence, duplicate-safety, packaging, or player-visible evidence;
 - a skipped or unavailable job represented as passing;
 - a document whose producer/consumer is not implemented;
-- compilation without asset, persistence, duplicate-safety, build, or player-visible evidence.
+- a visual prototype based on a rejected ancestor branch.
 
-Every completion report must identify exact base/head SHA, files changed, commands, exit codes, test totals, artifacts, unperformed validation, ownership boundaries, shared locks, and remaining risk.
-
-## Pull-request and shared-file state
-
-- Open PR: #147, draft, blocked pending one-file scope correction.
-- Current designated shared-file soft locks: none.
-- PR #149 is closed and holds no lock.
-- No direct commits to `main` are authorized.
-
-Designated shared files:
-
-- `unity/Assets/AL/Scripts/Core/Bootloader.cs`
-- `unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs`
-- `unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs`
-- `unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs`
-
-The first approved open PR declaring one holds the lock.
+Every completion report must identify exact base/head SHA, changed files, commands, exit codes, test totals, retained artifacts, unperformed validation, ownership boundaries, shared locks, and remaining risk.
 
 ## Current next action
 
 ```text
 Owner: Codex
-Issue: #145
-PR: #147
-Required revision:
-  - remove RepresentativeSceneSmokeTests.cs from the diff;
-  - retain only LocalStoryService.cs namespace correction;
-  - update body with Fixes #145 / Refs #156;
-  - retain pre-fix CS0234, post-fix compile, and EditMode 6/6 evidence;
-  - leave draft for GPT re-review.
+Issue: #156
+Base: fetched current main at 3c695ae289acabcfd8750bd6a2f0811ebdfb24cd
+Branch: codex/consolidate-quest-definition-assets
+First deliverable: complete two-GUID, asset, source, generator, schema, and catalog inventory plus proposed authority decision
+Prohibited: blind GUID replacement, narrative edits, save changes, Build Settings, Champion work, visual work, or broad catalog migration
+Review gate: return inventory and authority decision to GPT before marking the PR ready
 ```
-
-After #145 merges, Codex takes #156. Android Studio may prepare #128, but no A1 PR should claim a trusted base until both recovery gates are complete.
