@@ -130,6 +130,30 @@ namespace AL.ChampionMode
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
 
+        private readonly struct BossVisualProfile
+        {
+            public BossVisualProfile(ItemGrade grade, RealmId realm, Color primary, Color secondary, Color plate, Color metal, float intensity, float silhouetteScale)
+            {
+                Grade = grade;
+                Realm = realm == RealmId.None ? RealmId.Umbral : realm;
+                Primary = primary;
+                Secondary = secondary;
+                Plate = plate;
+                Metal = metal;
+                Intensity = Mathf.Clamp(intensity, 0.4f, 2.8f);
+                SilhouetteScale = Mathf.Clamp(silhouetteScale, 0.8f, 1.8f);
+            }
+
+            public ItemGrade Grade { get; }
+            public RealmId Realm { get; }
+            public Color Primary { get; }
+            public Color Secondary { get; }
+            public Color Plate { get; }
+            public Color Metal { get; }
+            public float Intensity { get; }
+            public float SilhouetteScale { get; }
+        }
+
         private void Start()
         {
             Bootloader.InitializeIfMissing();
@@ -243,9 +267,11 @@ namespace AL.ChampionMode
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";
             boss.transform.position = new Vector3(0f, 1.8f, 8.6f);
-            boss.transform.localScale = new Vector3(1.55f, 1.8f, 1.55f);
-            ApplyMaterial(boss, new Color(0.20f, 0.03f, 0.05f), 0.2f, 0.42f);
-            DressBossVisual(boss);
+            BossVisualProfile bossProfile = CreateBossVisualProfile(GetCurrentRealmId());
+            boss.transform.localScale = new Vector3(1.55f, 1.8f, 1.55f) * bossProfile.SilhouetteScale;
+            ApplyMaterial(boss, Color.Lerp(bossProfile.Plate, Color.black, 0.22f), 0.2f, 0.42f);
+            boss.AddComponent<BossVisualProfileComponent>().Configure(bossProfile.Grade, bossProfile.Realm, bossProfile.Primary, bossProfile.Secondary, bossProfile.Intensity, bossProfile.SilhouetteScale);
+            DressBossVisual(boss, bossProfile);
             _boss = boss.AddComponent<BossDummyAI>();
             _boss.LootRolled += HandleBossLootRolled;
             _bossTransform = boss.transform;
@@ -479,7 +505,7 @@ namespace AL.ChampionMode
             }
         }
 
-        private void DressBossVisual(GameObject boss)
+        private void DressBossVisual(GameObject boss, BossVisualProfile profile)
         {
             var rootRenderer = boss.GetComponent<Renderer>();
             if (rootRenderer != null)
@@ -487,14 +513,20 @@ namespace AL.ChampionMode
                 rootRenderer.enabled = false;
             }
 
-            var obsidian = new Color(0.055f, 0.045f, 0.052f);
-            var bloodPlate = new Color(0.26f, 0.025f, 0.038f);
-            var hotCore = new Color(1f, 0.13f, 0.055f);
-            var brass = new Color(0.70f, 0.56f, 0.24f);
-            var coldEdge = new Color(0.24f, 0.42f, 0.62f);
+            var obsidian = Color.Lerp(new Color(0.055f, 0.045f, 0.052f), profile.Plate, 0.16f);
+            var bloodPlate = profile.Plate;
+            var hotCore = profile.Primary;
+            var brass = profile.Metal;
+            var coldEdge = profile.Secondary;
+            float gradePower = GetItemGradePower(profile.Grade);
+            float shardScale = Mathf.Lerp(0.92f, 1.34f, gradePower);
+            int orbitShardCount = Mathf.RoundToInt(Mathf.Lerp(6f, 12f, gradePower));
+            int dorsalSpineCount = Mathf.RoundToInt(Mathf.Lerp(3f, 7f, gradePower));
 
-            CreateArenaPrimitive(boss.transform, "Boss_AuraRing", PrimitiveType.Cylinder, new Vector3(0f, -0.98f, 0f), new Vector3(1.24f, 0.015f, 1.24f), Vector3.zero, new Color(0.95f, 0.05f, 0.025f), true, 0f, 0.82f);
+            CreateArenaPrimitive(boss.transform, "Boss_AuraRing", PrimitiveType.Cylinder, new Vector3(0f, -0.98f, 0f), new Vector3(1.24f, 0.015f, 1.24f) * Mathf.Lerp(1f, 1.22f, gradePower), Vector3.zero, hotCore, true, 0f, 0.82f);
+            CreateArenaPrimitive(boss.transform, "Boss_AuraRune_Outer", PrimitiveType.Cylinder, new Vector3(0f, -0.965f, 0f), new Vector3(1.70f, 0.010f, 1.70f) * Mathf.Lerp(0.98f, 1.18f, gradePower), Vector3.zero, Color.Lerp(hotCore, Color.white, 0.18f), true, 0f, 0.88f);
             CreateArenaPrimitive(boss.transform, "Boss_LowerMantle", PrimitiveType.Cylinder, new Vector3(0f, -0.35f, 0f), new Vector3(0.70f, 0.36f, 0.70f), Vector3.zero, obsidian, true, 0.16f, 0.36f);
+            CreateArenaPrimitive(boss.transform, "Boss_MantleVeil_Back", PrimitiveType.Cube, new Vector3(0f, -0.20f, -0.48f), new Vector3(0.92f, 0.76f, 0.06f), Vector3.zero, Color.Lerp(obsidian, coldEdge, 0.22f), true, 0.04f, 0.74f);
             CreateArenaPrimitive(boss.transform, "Boss_Torso", PrimitiveType.Cylinder, new Vector3(0f, 0.16f, 0f), new Vector3(0.54f, 0.64f, 0.50f), Vector3.zero, bloodPlate, true, 0.28f, 0.46f);
             CreateArenaPrimitive(boss.transform, "Boss_RibPlate", PrimitiveType.Cube, new Vector3(0f, 0.20f, 0.38f), new Vector3(0.58f, 0.54f, 0.09f), Vector3.zero, Color.Lerp(bloodPlate, Color.black, 0.18f), true, 0.30f, 0.52f);
             CreateArenaPrimitive(boss.transform, "Boss_ChestCore", PrimitiveType.Sphere, new Vector3(0f, 0.24f, 0.50f), new Vector3(0.22f, 0.22f, 0.09f), Vector3.zero, hotCore, true, 0f, 0.92f);
@@ -507,6 +539,7 @@ namespace AL.ChampionMode
             CreateArenaPrimitive(boss.transform, "Boss_Eye_R", PrimitiveType.Sphere, new Vector3(0.09f, 0.80f, 0.37f), new Vector3(0.055f, 0.030f, 0.030f), Vector3.zero, hotCore, true, 0f, 0.9f);
             CreateArenaPrimitive(boss.transform, "Boss_Crown", PrimitiveType.Cube, new Vector3(0f, 0.98f, 0f), new Vector3(0.54f, 0.08f, 0.48f), new Vector3(0f, 45f, 0f), brass, true, 0.26f, 0.62f);
             CreateArenaPrimitive(boss.transform, "Boss_CrownSpire", PrimitiveType.Cube, new Vector3(0f, 1.13f, -0.02f), new Vector3(0.12f, 0.28f, 0.10f), new Vector3(0f, 45f, 0f), brass, true, 0.26f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_CrownHalo", PrimitiveType.Cylinder, new Vector3(0f, 1.18f, -0.04f), new Vector3(0.72f, 0.014f, 0.72f) * Mathf.Lerp(0.96f, 1.2f, gradePower), new Vector3(90f, 0f, 0f), Color.Lerp(coldEdge, Color.white, 0.20f), true, 0f, 0.90f);
             CreateArenaPrimitive(boss.transform, "Boss_Horn_L", PrimitiveType.Cube, new Vector3(-0.28f, 1.00f, 0.02f), new Vector3(0.34f, 0.08f, 0.08f), new Vector3(0f, 0f, 24f), brass, true, 0.24f, 0.58f);
             CreateArenaPrimitive(boss.transform, "Boss_Horn_R", PrimitiveType.Cube, new Vector3(0.28f, 1.00f, 0.02f), new Vector3(0.34f, 0.08f, 0.08f), new Vector3(0f, 0f, -24f), brass, true, 0.24f, 0.58f);
 
@@ -519,21 +552,44 @@ namespace AL.ChampionMode
             CreateArenaPrimitive(boss.transform, "Boss_Claw_L", PrimitiveType.Cube, new Vector3(-0.76f, -0.44f, 0.13f), new Vector3(0.20f, 0.06f, 0.18f), new Vector3(0f, 0f, -14f), brass, true, 0.26f, 0.62f);
             CreateArenaPrimitive(boss.transform, "Boss_Claw_R", PrimitiveType.Cube, new Vector3(0.76f, -0.44f, 0.13f), new Vector3(0.20f, 0.06f, 0.18f), new Vector3(0f, 0f, 14f), brass, true, 0.26f, 0.62f);
 
-            CreateArenaPrimitive(boss.transform, "Boss_BackBlade", PrimitiveType.Cube, new Vector3(0f, 0.12f, -0.62f), new Vector3(0.10f, 0.92f, 0.10f), new Vector3(0f, 0f, 22f), brass, true, 0.18f, 0.62f);
+            CreateArenaPrimitive(boss.transform, "Boss_BackBlade", PrimitiveType.Cube, new Vector3(0f, 0.12f, -0.62f), new Vector3(0.10f, 0.92f, 0.10f) * shardScale, new Vector3(0f, 0f, 22f), brass, true, 0.18f, 0.62f);
             CreateArenaPrimitive(boss.transform, "Boss_BackShard_L", PrimitiveType.Cube, new Vector3(-0.30f, 0.18f, -0.60f), new Vector3(0.08f, 0.70f, 0.08f), new Vector3(0f, 0f, -18f), coldEdge, true, 0.12f, 0.74f);
             CreateArenaPrimitive(boss.transform, "Boss_BackShard_R", PrimitiveType.Cube, new Vector3(0.30f, 0.18f, -0.60f), new Vector3(0.08f, 0.70f, 0.08f), new Vector3(0f, 0f, 18f), coldEdge, true, 0.12f, 0.74f);
-
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < dorsalSpineCount; i++)
             {
-                float angle = i * Mathf.PI * 2f / 6f;
-                Vector3 position = new Vector3(Mathf.Cos(angle) * 0.72f, 0.58f + Mathf.Sin(i * 1.7f) * 0.08f, Mathf.Sin(angle) * 0.72f);
-                CreateArenaPrimitive(boss.transform, "Boss_OrbitShard_" + i, PrimitiveType.Cube, position, new Vector3(0.06f, 0.28f, 0.06f), new Vector3(0f, -angle * Mathf.Rad2Deg, 18f), i % 2 == 0 ? hotCore : coldEdge, true, 0.04f, 0.78f);
+                float t = dorsalSpineCount <= 1 ? 0f : i / (float)(dorsalSpineCount - 1);
+                float x = Mathf.Lerp(-0.42f, 0.42f, t);
+                float height = Mathf.Lerp(0.44f, 0.88f, 1f - Mathf.Abs(t - 0.5f) * 2f);
+                CreateArenaPrimitive(boss.transform, "Boss_DorsalSpine_" + i, PrimitiveType.Cube, new Vector3(x, 0.14f + height * 0.08f, -0.70f), new Vector3(0.055f, height, 0.070f), new Vector3(0f, 0f, Mathf.Lerp(-22f, 22f, t)), i % 2 == 0 ? coldEdge : brass, true, 0.10f, 0.78f);
             }
 
-            var coreLight = CreatePointLight("Boss Core Glow", boss.transform.position + new Vector3(0f, 1.8f, 0.65f), hotCore, 2.1f, 4.8f);
+            for (int i = 0; i < orbitShardCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / orbitShardCount;
+                float radius = Mathf.Lerp(0.72f, 0.92f, gradePower);
+                Vector3 position = new Vector3(Mathf.Cos(angle) * radius, 0.58f + Mathf.Sin(i * 1.7f) * 0.08f, Mathf.Sin(angle) * radius);
+                CreateArenaPrimitive(boss.transform, "Boss_OrbitShard_" + i, PrimitiveType.Cube, position, new Vector3(0.06f, 0.28f, 0.06f) * shardScale, new Vector3(0f, -angle * Mathf.Rad2Deg, 18f), i % 2 == 0 ? hotCore : coldEdge, true, 0.04f, 0.78f);
+            }
+            CreateBossRuneNotches(boss.transform, hotCore, coldEdge, gradePower);
+
+            var coreLight = CreatePointLight("Boss Core Glow", boss.transform.position + new Vector3(0f, 1.8f, 0.65f), hotCore, 2.1f * profile.Intensity, 4.8f + gradePower * 1.6f);
             coreLight.transform.SetParent(boss.transform, true);
-            var crownLight = CreatePointLight("Boss Crown Edge Glow", boss.transform.position + new Vector3(0f, 2.55f, -0.15f), coldEdge, 1.15f, 4.2f);
+            var crownLight = CreatePointLight("Boss Crown Edge Glow", boss.transform.position + new Vector3(0f, 2.55f, -0.15f), coldEdge, 1.15f * profile.Intensity, 4.2f + gradePower * 1.2f);
             crownLight.transform.SetParent(boss.transform, true);
+        }
+
+        private void CreateBossRuneNotches(Transform boss, Color primary, Color secondary, float gradePower)
+        {
+            int count = Mathf.RoundToInt(Mathf.Lerp(8f, 18f, gradePower));
+            float radius = Mathf.Lerp(1.18f, 1.52f, gradePower);
+            for (int i = 0; i < count; i++)
+            {
+                float angle = i * Mathf.PI * 2f / count;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * radius, -0.94f, Mathf.Sin(angle) * radius);
+                Vector3 euler = new Vector3(0f, -angle * Mathf.Rad2Deg, 0f);
+                Color color = i % 2 == 0 ? primary : secondary;
+                CreateArenaPrimitive(boss, "Boss_AuraRune_Notch_" + i, PrimitiveType.Cube, position, new Vector3(0.22f, 0.012f, 0.040f) * Mathf.Lerp(0.9f, 1.18f, gradePower), euler, color, true, 0f, 0.84f);
+            }
         }
 
         private void DressTrainingShade(GameObject dummy, float angle)
@@ -786,6 +842,30 @@ namespace AL.ChampionMode
             var cue = root.AddComponent<ChampionIntroCinematicCue>();
             cue.Configure(heroHalo.transform, heroInner.transform, bossHalo.transform, bossInner.transform);
             root.SetActive(false);
+        }
+
+        private static BossVisualProfile CreateBossVisualProfile(RealmId realmId)
+        {
+            Color realmAccent = GetRealmAccentColor(realmId);
+            Color primary = Color.Lerp(new Color(1f, 0.10f, 0.035f), realmAccent, 0.16f);
+            Color secondary = Color.Lerp(realmAccent, new Color(0.22f, 0.42f, 0.62f), 0.46f);
+            Color plate = Color.Lerp(new Color(0.26f, 0.025f, 0.038f), realmAccent, 0.08f);
+            Color metal = Color.Lerp(new Color(0.70f, 0.56f, 0.24f), realmAccent, 0.12f);
+            return new BossVisualProfile(ItemGrade.Mythic, realmId == RealmId.None ? RealmId.Umbral : realmId, primary, secondary, plate, metal, 1.55f, 1.12f);
+        }
+
+        private static float GetItemGradePower(ItemGrade grade)
+        {
+            return grade switch
+            {
+                ItemGrade.Common => 0.08f,
+                ItemGrade.Rare => 0.24f,
+                ItemGrade.Epic => 0.44f,
+                ItemGrade.Legendary => 0.64f,
+                ItemGrade.Mythic => 0.84f,
+                ItemGrade.Celestial => 1f,
+                _ => 0.36f
+            };
         }
 
         private RealmId GetCurrentRealmId()
