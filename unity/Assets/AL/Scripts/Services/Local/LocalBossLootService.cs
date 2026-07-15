@@ -125,9 +125,20 @@ namespace AL.Services.Local
                 EquipmentId = string.IsNullOrWhiteSpace(item.Id) ? item.name : item.Id,
                 DisplayName = string.IsNullOrWhiteSpace(item.DisplayName) ? item.name : item.DisplayName,
                 Slot = item.Slot,
+                Grade = item.Grade,
+                VisualRealm = item.VisualRealm,
+                VisualEffectKey = string.IsNullOrWhiteSpace(item.VisualEffectKey) ? "loot_common" : item.VisualEffectKey,
                 AttackBonus = item.AttackBonus,
                 DefenseBonus = item.DefenseBonus,
                 HealthBonus = item.HealthBonus,
+                AuraIntensity = Mathf.Max(0.05f, item.AuraIntensity),
+                RevealScale = Mathf.Max(0.5f, item.RevealScale),
+                PrimaryR = item.PrimaryColor.r,
+                PrimaryG = item.PrimaryColor.g,
+                PrimaryB = item.PrimaryColor.b,
+                SecondaryR = item.SecondaryColor.r,
+                SecondaryG = item.SecondaryColor.g,
+                SecondaryB = item.SecondaryColor.b,
                 AnnounceWorldDrop = item.AnnounceWorldDrop,
                 Quantity = 1
             };
@@ -140,6 +151,17 @@ namespace AL.Services.Local
                 EquipmentId = FallbackItemId,
                 DisplayName = FallbackItemName,
                 Slot = EquipmentSlot.Trinket,
+                Grade = ItemGrade.Rare,
+                VisualRealm = RealmId.Umbral,
+                VisualEffectKey = "loot_ember_shard",
+                AuraIntensity = 0.42f,
+                RevealScale = 1.15f,
+                PrimaryR = 0.95f,
+                PrimaryG = 0.34f,
+                PrimaryB = 0.10f,
+                SecondaryR = 0.48f,
+                SecondaryG = 0.06f,
+                SecondaryB = 0.04f,
                 AnnounceWorldDrop = true,
                 Quantity = 1
             };
@@ -167,6 +189,17 @@ namespace AL.Services.Local
                 owned.LastAcquiredTimestamp = now;
                 owned.SourceBossId = bossId;
                 owned.AnnounceWorldDrop |= drop.AnnounceWorldDrop;
+                owned.Grade = drop.Grade;
+                owned.VisualRealm = drop.VisualRealm;
+                owned.VisualEffectKey = drop.VisualEffectKey;
+                owned.AuraIntensity = drop.AuraIntensity;
+                owned.RevealScale = drop.RevealScale;
+                owned.PrimaryR = drop.PrimaryR;
+                owned.PrimaryG = drop.PrimaryG;
+                owned.PrimaryB = drop.PrimaryB;
+                owned.SecondaryR = drop.SecondaryR;
+                owned.SecondaryG = drop.SecondaryG;
+                owned.SecondaryB = drop.SecondaryB;
                 return;
             }
 
@@ -175,9 +208,20 @@ namespace AL.Services.Local
                 EquipmentId = drop.EquipmentId,
                 DisplayName = drop.DisplayName,
                 Slot = drop.Slot,
+                Grade = drop.Grade,
+                VisualRealm = drop.VisualRealm,
+                VisualEffectKey = drop.VisualEffectKey,
                 AttackBonus = drop.AttackBonus,
                 DefenseBonus = drop.DefenseBonus,
                 HealthBonus = drop.HealthBonus,
+                AuraIntensity = drop.AuraIntensity,
+                RevealScale = drop.RevealScale,
+                PrimaryR = drop.PrimaryR,
+                PrimaryG = drop.PrimaryG,
+                PrimaryB = drop.PrimaryB,
+                SecondaryR = drop.SecondaryR,
+                SecondaryG = drop.SecondaryG,
+                SecondaryB = drop.SecondaryB,
                 Quantity = drop.Quantity,
                 SourceBossId = bossId,
                 AnnounceWorldDrop = drop.AnnounceWorldDrop,

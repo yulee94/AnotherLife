@@ -71,6 +71,34 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void EnsureSaveDefaultsInitializesOwnedEquipmentVisualFields()
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type ownedEquipmentType = GetRuntimeType("AL.Data.Runtime.OwnedEquipmentState");
+            object save = Activator.CreateInstance(saveType);
+            object equipment = Activator.CreateInstance(ownedEquipmentType);
+            IList ownedEquipment = CreateRuntimeList(ownedEquipmentType);
+            ownedEquipment.Add(equipment);
+
+            SetField(save, "OwnedEquipment", ownedEquipment);
+            SetField(equipment, "VisualEffectKey", null);
+            SetField(equipment, "AuraIntensity", 0f);
+            SetField(equipment, "RevealScale", 0f);
+
+            InvokeEnsureSaveDefaults(save);
+
+            Assert.AreEqual("loot_common", GetField(equipment, "VisualEffectKey"));
+            Assert.AreEqual(0.15f, GetField(equipment, "AuraIntensity"));
+            Assert.AreEqual(1f, GetField(equipment, "RevealScale"));
+            Assert.AreEqual(0.62f, GetField(equipment, "PrimaryR"));
+            Assert.AreEqual(0.68f, GetField(equipment, "PrimaryG"));
+            Assert.AreEqual(0.74f, GetField(equipment, "PrimaryB"));
+            Assert.AreEqual(0.30f, GetField(equipment, "SecondaryR"));
+            Assert.AreEqual(0.36f, GetField(equipment, "SecondaryG"));
+            Assert.AreEqual(0.42f, GetField(equipment, "SecondaryB"));
+        }
+
+        [Test]
         public void CorruptedPrimaryRecoversLastKnownGoodBackup()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));

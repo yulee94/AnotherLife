@@ -1,4 +1,5 @@
 using AL.Core;
+using AL.Core.Interfaces;
 using AL.RealmWar.Warzone;
 using System.Collections;
 using System.Collections.Generic;
@@ -360,6 +361,72 @@ namespace AL.ChampionMode.Skills
             SpawnCinematicImpactAccent(groundPosition, realmId, safeRadius * 1.08f, Vector3.forward, true);
             RequestWeatherFlash(realmId, 0.92f);
             return impact;
+        }
+
+        public static GameObject SpawnLootReveal(Vector3 groundPosition, BossLootDrop drop, RealmId fallbackRealm)
+        {
+            groundPosition = Grounded(groundPosition);
+            ItemGrade grade = drop?.Grade ?? ItemGrade.Common;
+            RealmId realmId = drop != null && drop.VisualRealm != RealmId.None ? drop.VisualRealm : fallbackRealm;
+            float gradePower = GetItemGradePower(grade);
+            float revealScale = Mathf.Max(0.75f, drop?.RevealScale ?? 1f);
+            float aura = Mathf.Clamp01(Mathf.Max(drop?.AuraIntensity ?? 0.15f, gradePower * 0.18f));
+            Color primary = ResolveDropColor(drop, true, realmId, aura);
+            Color secondary = ResolveDropColor(drop, false, realmId, Mathf.Clamp01(aura * 0.72f));
+            float radius = Mathf.Lerp(0.88f, 2.45f, gradePower) * revealScale;
+            float lifetime = Mathf.Lerp(0.55f, 1.75f, gradePower);
+
+            SpawnGroundRing("VFX_Runtime_LootReveal_Base", groundPosition, primary, radius, lifetime);
+            SpawnGroundRing("VFX_Runtime_LootReveal_Inner", groundPosition + Vector3.up * 0.014f, secondary, radius * 0.58f, lifetime * 0.84f);
+
+            var core = SpawnPrimitiveEffect(
+                "shape:loot-reveal-core",
+                "VFX_Runtime_LootReveal_Core",
+                PrimitiveType.Cylinder,
+                MaxActiveSkillShapes,
+                MaxPooledSkillShapesPerKey,
+                groundPosition + Vector3.up * (0.42f + gradePower * 0.34f),
+                Quaternion.identity,
+                new Vector3(0.16f + gradePower * 0.15f, 0.66f + gradePower * 0.78f, 0.16f + gradePower * 0.15f) * revealScale,
+                Color.Lerp(primary, Color.white, 0.22f + gradePower * 0.18f),
+                lifetime);
+
+            int notchCount = Mathf.RoundToInt(Mathf.Lerp(4f, 12f, gradePower));
+            for (int i = 0; i < notchCount; i++)
+            {
+                float angle = i * 360f / notchCount;
+                Vector3 radial = Quaternion.Euler(0f, angle, 0f) * Vector3.forward;
+                SpawnPrimitiveEffect(
+                    "shape:loot-reveal-notch",
+                    "VFX_Runtime_LootReveal_Notch",
+                    PrimitiveType.Cube,
+                    MaxActiveSkillShapes,
+                    MaxPooledSkillShapesPerKey,
+                    groundPosition + radial * (radius * 0.62f) + Vector3.up * (0.12f + gradePower * 0.08f),
+                    Quaternion.LookRotation(radial),
+                    new Vector3(0.08f + gradePower * 0.05f, 0.04f, 0.34f + gradePower * 0.32f) * revealScale,
+                    i % 2 == 0 ? primary : secondary,
+                    lifetime * (0.74f + i % 3 * 0.045f));
+            }
+
+            if (grade >= ItemGrade.Epic)
+            {
+                SpawnBurst("VFX_Runtime_LootReveal_Sparks", groundPosition + Vector3.up * 1.05f, Color.Lerp(primary, Color.white, 0.30f), secondary, lifetime);
+                SpawnAerialShardRain(groundPosition, realmId, radius, Mathf.RoundToInt(Mathf.Lerp(5f, 11f, gradePower)), lifetime * 0.62f);
+            }
+
+            if (grade >= ItemGrade.Legendary)
+            {
+                SpawnCinematicImpactAccent(groundPosition, realmId, radius * 0.92f, Vector3.forward, true);
+                RequestWeatherFlash(realmId, Mathf.Lerp(0.45f, 1f, gradePower));
+            }
+
+            if (grade >= ItemGrade.Mythic)
+            {
+                SpawnImpactAftermath(groundPosition, realmId, radius * 0.84f, lifetime * 1.15f, true);
+            }
+
+            return core;
         }
 
         public static GameObject SpawnDodgeTrail(Vector3 position, Vector3 forward, RealmId realmId)
@@ -909,6 +976,44 @@ namespace AL.ChampionMode.Skills
                 RealmId.Umbral => new Color(0.72f, 0.12f, 0.94f, alpha),
                 _ => new Color(0.85f, 0.92f, 1f, alpha)
             };
+            color.a = alpha;
+            return color;
+        }
+
+        private static float GetItemGradePower(ItemGrade grade)
+        {
+            return grade switch
+            {
+                ItemGrade.Rare => 0.28f,
+                ItemGrade.Epic => 0.48f,
+                ItemGrade.Legendary => 0.68f,
+                ItemGrade.Mythic => 0.86f,
+                ItemGrade.Celestial => 1f,
+                _ => 0.12f
+            };
+        }
+
+        private static Color ResolveDropColor(BossLootDrop drop, bool primary, RealmId realmId, float alpha)
+        {
+            Color fallback = primary
+                ? Color.Lerp(GetRealmColor(realmId, alpha), Color.white, 0.16f)
+                : Color.Lerp(GetRealmColor(realmId, alpha), new Color(0.10f, 0.08f, 0.12f, alpha), 0.34f);
+
+            if (drop == null)
+            {
+                fallback.a = alpha;
+                return fallback;
+            }
+
+            Color color = primary
+                ? new Color(drop.PrimaryR, drop.PrimaryG, drop.PrimaryB, alpha)
+                : new Color(drop.SecondaryR, drop.SecondaryG, drop.SecondaryB, alpha);
+
+            if (Mathf.Approximately(color.r, 0f) && Mathf.Approximately(color.g, 0f) && Mathf.Approximately(color.b, 0f))
+            {
+                color = fallback;
+            }
+
             color.a = alpha;
             return color;
         }

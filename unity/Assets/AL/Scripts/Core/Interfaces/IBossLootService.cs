@@ -37,9 +37,20 @@ namespace AL.Core.Interfaces
         public string EquipmentId;
         public string DisplayName;
         public AL.Core.EquipmentSlot Slot;
+        public AL.Core.ItemGrade Grade;
+        public AL.Core.RealmId VisualRealm;
+        public string VisualEffectKey;
         public int AttackBonus;
         public int DefenseBonus;
         public int HealthBonus;
+        public float AuraIntensity;
+        public float RevealScale = 1f;
+        public float PrimaryR;
+        public float PrimaryG;
+        public float PrimaryB;
+        public float SecondaryR;
+        public float SecondaryG;
+        public float SecondaryB;
         public bool AnnounceWorldDrop;
         public int Quantity = 1;
     }

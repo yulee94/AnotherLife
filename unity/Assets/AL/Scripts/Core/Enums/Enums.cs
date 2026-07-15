@@ -70,6 +70,16 @@ namespace AL.Core
         Trinket
     }
 
+    public enum ItemGrade
+    {
+        Common,
+        Rare,
+        Epic,
+        Legendary,
+        Mythic,
+        Celestial
+    }
+
     public enum BattleType
     {
         PvE,

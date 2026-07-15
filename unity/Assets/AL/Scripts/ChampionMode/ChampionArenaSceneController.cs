@@ -1614,11 +1614,12 @@ namespace AL.ChampionMode
 
             BossLootDrop drop = _lastBossLootResult.Drops[0];
             string displayName = string.IsNullOrWhiteSpace(drop.DisplayName) ? "Unidentified relic" : drop.DisplayName;
+            string grade = drop.Grade.ToString().ToUpperInvariant();
             string overflow = _lastBossLootResult.Drops.Count > 1 ? $" +{_lastBossLootResult.Drops.Count - 1} more" : string.Empty;
             string stats = BuildDropStatLine(drop);
             return string.IsNullOrWhiteSpace(stats)
-                ? $"LOOT {displayName}{overflow}"
-                : $"LOOT {displayName}{overflow} // {stats}";
+                ? $"LOOT [{grade}] {displayName}{overflow}"
+                : $"LOOT [{grade}] {displayName}{overflow} // {stats}";
         }
 
         private static string BuildDropStatLine(BossLootDrop drop)
@@ -1732,6 +1733,13 @@ namespace AL.ChampionMode
             Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
             var root = new GameObject("ChampionClearShowcaseVfx");
             root.transform.position = _playerController.transform.position + Vector3.up * 0.035f;
+            BossLootDrop featuredDrop = GetFeaturedDrop();
+            if (featuredDrop != null)
+            {
+                Vector3 revealPosition = _playerController.transform.position + _playerController.transform.forward * 0.95f;
+                SkillEffectFactory.SpawnLootReveal(revealPosition, featuredDrop, GetCurrentRealmId());
+            }
+
             CreateArenaPrimitive(root.transform, "Clear_OuterHalo", PrimitiveType.Cylinder, Vector3.zero, new Vector3(3.35f, 0.018f, 3.35f), Vector3.zero, gradeColor, true, 0f, 0.90f);
             CreateArenaPrimitive(root.transform, "Clear_InnerHalo", PrimitiveType.Cylinder, Vector3.up * 0.024f, new Vector3(1.78f, 0.014f, 1.78f), Vector3.zero, realmAccent, true, 0f, 0.86f);
             CreateArenaPrimitive(root.transform, "Clear_LightBlade", PrimitiveType.Cube, new Vector3(0f, 1.42f, 0f), new Vector3(0.10f, 2.72f, 0.10f), Vector3.zero, Color.Lerp(gradeColor, Color.white, 0.28f), true, 0f, 0.92f);
@@ -1750,6 +1758,16 @@ namespace AL.ChampionMode
             var footLight = CreatePointLight("Champion Clear Foot Light", root.transform.position + new Vector3(0f, 0.48f, 0.2f), realmAccent, 1.55f, 4.4f);
             footLight.transform.SetParent(root.transform, true);
             root.AddComponent<ChampionClearShowcaseVfx>().Configure(gradeColor);
+        }
+
+        private BossLootDrop GetFeaturedDrop()
+        {
+            if (_lastBossLootResult?.Drops == null || _lastBossLootResult.Drops.Count == 0)
+            {
+                return null;
+            }
+
+            return _lastBossLootResult.Drops[0];
         }
 
         private string GetClearRecapLine(string grade)

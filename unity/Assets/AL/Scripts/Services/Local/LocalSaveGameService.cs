@@ -300,6 +300,7 @@ namespace AL.Services.Local
             save.Warmaster.PurchasedPieceIds ??= new List<string>();
             save.ChampionCustomization ??= new ChampionCustomizationState();
             save.OwnedEquipment ??= new List<OwnedEquipmentState>();
+            EnsureOwnedEquipmentVisualDefaults(save);
 
             EnsureResource(save, ResourceType.Food, 1000);
             EnsureResource(save, ResourceType.Wood, 1000);
@@ -315,6 +316,51 @@ namespace AL.Services.Local
             if (string.IsNullOrWhiteSpace(save.CurrentChapterId))
             {
                 save.CurrentChapterId = "C1";
+            }
+        }
+
+        private static void EnsureOwnedEquipmentVisualDefaults(SaveGameData save)
+        {
+            if (save?.OwnedEquipment == null)
+            {
+                return;
+            }
+
+            foreach (var equipment in save.OwnedEquipment)
+            {
+                if (equipment == null)
+                {
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(equipment.VisualEffectKey))
+                {
+                    equipment.VisualEffectKey = "loot_common";
+                }
+
+                if (equipment.RevealScale <= 0f)
+                {
+                    equipment.RevealScale = 1f;
+                }
+
+                if (equipment.AuraIntensity <= 0f)
+                {
+                    equipment.AuraIntensity = 0.15f;
+                }
+
+                if (equipment.PrimaryR == 0f && equipment.PrimaryG == 0f && equipment.PrimaryB == 0f)
+                {
+                    equipment.PrimaryR = 0.62f;
+                    equipment.PrimaryG = 0.68f;
+                    equipment.PrimaryB = 0.74f;
+                }
+
+                if (equipment.SecondaryR == 0f && equipment.SecondaryG == 0f && equipment.SecondaryB == 0f)
+                {
+                    equipment.SecondaryR = 0.30f;
+                    equipment.SecondaryG = 0.36f;
+                    equipment.SecondaryB = 0.42f;
+                }
             }
         }
 

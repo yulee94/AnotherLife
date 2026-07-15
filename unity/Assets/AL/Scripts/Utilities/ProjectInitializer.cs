@@ -78,13 +78,13 @@ namespace AL.Utilities
             CreateBossTemplate("abyssal", "The Abyssal Horror", "Eldritch monstrosity from the depths. Incomparably hard. Drains mana and sanity.", 60000, 1200, 800);
 
             // 6. Generate Rare Loot Templates
-            CreateLootTemplate("ring_stonehold", "Ring of the Mountain King", EquipmentSlot.Trinket, 0.001f, true);
-            CreateLootTemplate("ring_eldergrove", "Ring of Forest Harmony", EquipmentSlot.Trinket, 0.001f, true);
-            CreateLootTemplate("ring_crownlands", "Ring of Royal Decree", EquipmentSlot.Trinket, 0.001f, true);
-            CreateLootTemplate("ring_umbral", "Ring of Shadow Step", EquipmentSlot.Trinket, 0.001f, true);
+            CreateLootTemplate("ring_stonehold", "Ring of the Mountain King", EquipmentSlot.Trinket, 0.001f, true, ItemGrade.Legendary, RealmId.Stonehold, "loot_stonehold_ring", new Color(1.0f, 0.46f, 0.14f), new Color(0.36f, 0.30f, 0.25f), 0.74f, 1.35f, attack: 8, defense: 18, health: 120);
+            CreateLootTemplate("ring_eldergrove", "Ring of Forest Harmony", EquipmentSlot.Trinket, 0.001f, true, ItemGrade.Legendary, RealmId.Eldergrove, "loot_eldergrove_ring", new Color(0.32f, 1.0f, 0.52f), new Color(0.94f, 0.76f, 0.28f), 0.72f, 1.35f, defense: 10, health: 180);
+            CreateLootTemplate("ring_crownlands", "Ring of Royal Decree", EquipmentSlot.Trinket, 0.001f, true, ItemGrade.Legendary, RealmId.Crownlands, "loot_crownlands_ring", new Color(0.26f, 0.54f, 1.0f), new Color(1.0f, 0.78f, 0.22f), 0.76f, 1.35f, attack: 10, defense: 10, health: 120);
+            CreateLootTemplate("ring_umbral", "Ring of Shadow Step", EquipmentSlot.Trinket, 0.001f, true, ItemGrade.Legendary, RealmId.Umbral, "loot_umbral_ring", new Color(0.78f, 0.12f, 1.0f), new Color(0.95f, 0.06f, 0.18f), 0.78f, 1.35f, attack: 18, health: 80);
 
-            CreateLootTemplate("amulet_warzone", "Amulet of the Warzone", EquipmentSlot.Trinket, 0.0005f, true);
-            CreateLootTemplate("pendant_eternity", "Pendant of Eternity", EquipmentSlot.Trinket, 0.0005f, true);
+            CreateLootTemplate("amulet_warzone", "Amulet of the Warzone", EquipmentSlot.Trinket, 0.0005f, true, ItemGrade.Mythic, RealmId.None, "loot_warzone_amulet", new Color(1.0f, 0.28f, 0.08f), new Color(0.18f, 0.16f, 0.14f), 0.92f, 1.65f, attack: 24, defense: 14, health: 220);
+            CreateLootTemplate("pendant_eternity", "Pendant of Eternity", EquipmentSlot.Trinket, 0.0005f, true, ItemGrade.Celestial, RealmId.Crownlands, "loot_eternity_pendant", new Color(0.72f, 0.92f, 1.0f), new Color(1.0f, 0.82f, 0.34f), 1.0f, 1.95f, attack: 28, defense: 28, health: 320);
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
@@ -136,7 +136,22 @@ namespace AL.Utilities
             Debug.Log($"Created Boss Template: {path}");
         }
 
-        private void CreateLootTemplate(string id, string name, EquipmentSlot slot, float dropRate, bool announce)
+        private void CreateLootTemplate(
+            string id,
+            string name,
+            EquipmentSlot slot,
+            float dropRate,
+            bool announce,
+            ItemGrade grade = ItemGrade.Common,
+            RealmId visualRealm = RealmId.None,
+            string visualEffectKey = "loot_common",
+            Color? primaryColor = null,
+            Color? secondaryColor = null,
+            float auraIntensity = 0.15f,
+            float revealScale = 1f,
+            int attack = 0,
+            int defense = 0,
+            int health = 0)
         {
             string path = $"Assets/AL/ScriptableObjects/Narrative/Loot/{id}.asset";
             if (File.Exists(path)) return;
@@ -147,6 +162,16 @@ namespace AL.Utilities
             def.Slot = slot;
             def.DropRate = dropRate;
             def.AnnounceWorldDrop = announce;
+            def.Grade = grade;
+            def.VisualRealm = visualRealm;
+            def.VisualEffectKey = visualEffectKey;
+            def.PrimaryColor = primaryColor ?? new Color(0.62f, 0.68f, 0.74f);
+            def.SecondaryColor = secondaryColor ?? new Color(0.30f, 0.36f, 0.42f);
+            def.AuraIntensity = auraIntensity;
+            def.RevealScale = revealScale;
+            def.AttackBonus = attack;
+            def.DefenseBonus = defense;
+            def.HealthBonus = health;
 
             AssetDatabase.CreateAsset(def, path);
             Debug.Log($"Created Loot Template: {path}");
