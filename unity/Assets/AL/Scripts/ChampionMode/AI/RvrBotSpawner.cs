@@ -515,6 +515,42 @@ namespace AL.ChampionMode.AI
             CollectRenderers();
         }
 
+        public void PlayDefeatBurst(Vector3 position, RealmId attackerRealm)
+        {
+            if (_grade < ItemGrade.Rare)
+            {
+                return;
+            }
+
+            float gradePower = GetGradePower(_grade);
+            var root = new GameObject("BotChampionTierDefeatBurst_" + _grade);
+            root.transform.position = position + Vector3.up * 0.04f;
+            Color attackerTint = GetRealmTint(attackerRealm);
+            Color burstColor = Color.Lerp(_accent, attackerTint, 0.28f);
+
+            CreateBurstPrimitive(root.transform, "DefeatBurst_Ring", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.72f + gradePower * 0.72f, 0.012f, 0.72f + gradePower * 0.72f), Vector3.zero, burstColor, 0.82f);
+            CreateBurstPrimitive(root.transform, "DefeatBurst_Core", PrimitiveType.Sphere, Vector3.up * (0.42f + gradePower * 0.24f), new Vector3(0.20f + gradePower * 0.18f, 0.20f + gradePower * 0.18f, 0.20f + gradePower * 0.18f), Vector3.zero, Color.Lerp(burstColor, Color.white, 0.22f), 0.96f);
+
+            int shardCount = Mathf.RoundToInt(Mathf.Lerp(4f, 12f, gradePower));
+            for (int i = 0; i < shardCount; i++)
+            {
+                float angle = i * Mathf.PI * 2f / shardCount;
+                Vector3 radial = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
+                CreateBurstPrimitive(root.transform, "DefeatBurst_Shard_" + i, PrimitiveType.Cube, radial * (0.34f + gradePower * 0.28f) + Vector3.up * (0.34f + i % 3 * 0.16f), new Vector3(0.050f + gradePower * 0.030f, 0.28f + gradePower * 0.24f, 0.050f + gradePower * 0.030f), new Vector3(0f, -angle * Mathf.Rad2Deg, 22f), i % 2 == 0 ? burstColor : attackerTint, 0.72f + gradePower * 0.24f);
+            }
+
+            var lightObject = new GameObject("DefeatBurst_Light");
+            lightObject.transform.SetParent(root.transform, false);
+            lightObject.transform.localPosition = Vector3.up * (0.72f + gradePower * 0.36f);
+            var light = lightObject.AddComponent<Light>();
+            light.type = LightType.Point;
+            light.color = burstColor;
+            light.intensity = Mathf.Lerp(1.2f, 3.8f, gradePower);
+            light.range = Mathf.Lerp(3.2f, 6.4f, gradePower);
+
+            root.AddComponent<BotChampionTierDefeatBurst>().Configure(_grade, burstColor);
+        }
+
         private void OnEnable()
         {
             CollectRenderers();
@@ -563,6 +599,114 @@ namespace AL.ChampionMode.AI
                     renderer.material.EnableKeyword("_EMISSION");
                     renderer.material.SetColor("_EmissionColor", Color.Lerp(baseColor, _accent, 0.55f) * Mathf.Lerp(0.45f, 1.25f, pulse * gradePower));
                 }
+            }
+        }
+
+        private static float GetGradePower(ItemGrade grade)
+        {
+            return grade switch
+            {
+                ItemGrade.Rare => 0.22f,
+                ItemGrade.Epic => 0.42f,
+                ItemGrade.Legendary => 0.62f,
+                ItemGrade.Mythic => 0.82f,
+                ItemGrade.Celestial => 1f,
+                _ => 0.06f
+            };
+        }
+
+        private static Color GetRealmTint(RealmId realmId)
+        {
+            return realmId switch
+            {
+                RealmId.Stonehold => new Color(0.92f, 0.58f, 0.20f),
+                RealmId.Eldergrove => new Color(0.34f, 1f, 0.48f),
+                RealmId.Crownlands => new Color(0.32f, 0.58f, 1f),
+                RealmId.Umbral => new Color(0.82f, 0.16f, 1f),
+                _ => new Color(0.82f, 0.88f, 0.94f)
+            };
+        }
+
+        private static GameObject CreateBurstPrimitive(Transform parent, string name, PrimitiveType primitive, Vector3 localPosition, Vector3 localScale, Vector3 localEulerAngles, Color color, float emission)
+        {
+            var obj = GameObject.CreatePrimitive(primitive);
+            obj.name = name;
+            obj.transform.SetParent(parent, false);
+            obj.transform.localPosition = localPosition;
+            obj.transform.localScale = localScale;
+            obj.transform.localRotation = Quaternion.Euler(localEulerAngles);
+            Destroy(obj.GetComponent<Collider>());
+
+            var renderer = obj.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material.color = color;
+                if (renderer.material.HasProperty("_EmissionColor"))
+                {
+                    renderer.material.EnableKeyword("_EMISSION");
+                    renderer.material.SetColor("_EmissionColor", color * Mathf.Clamp(emission, 0.12f, 1.35f));
+                }
+            }
+
+            return obj;
+        }
+    }
+
+    internal sealed class BotChampionTierDefeatBurst : MonoBehaviour
+    {
+        private const float Lifetime = 1.15f;
+        private readonly System.Collections.Generic.List<Renderer> _renderers = new System.Collections.Generic.List<Renderer>();
+        private readonly System.Collections.Generic.List<Light> _lights = new System.Collections.Generic.List<Light>();
+        private ItemGrade _grade = ItemGrade.Rare;
+        private Color _accent = Color.white;
+        private float _age;
+
+        public void Configure(ItemGrade grade, Color accent)
+        {
+            _grade = grade;
+            _accent = accent;
+            _renderers.Clear();
+            _lights.Clear();
+            _renderers.AddRange(GetComponentsInChildren<Renderer>(true));
+            _lights.AddRange(GetComponentsInChildren<Light>(true));
+        }
+
+        private void Update()
+        {
+            _age += Time.deltaTime;
+            float normalized = Mathf.Clamp01(_age / Lifetime);
+            float gradePower = GetGradePower(_grade);
+            float pulse = (Mathf.Sin(Time.time * Mathf.Lerp(8f, 14f, gradePower)) + 1f) * 0.5f;
+            transform.localScale = Vector3.one * Mathf.Lerp(0.88f, 1.78f + gradePower * 0.34f, normalized);
+            transform.Rotate(Vector3.up, Mathf.Lerp(34f, 92f, gradePower) * Time.deltaTime, Space.Self);
+
+            foreach (var renderer in _renderers)
+            {
+                if (renderer == null || renderer.material == null)
+                {
+                    continue;
+                }
+
+                Color color = renderer.material.color;
+                color.a = Mathf.Lerp(0.88f, 0f, normalized);
+                renderer.material.color = Color.Lerp(color, _accent, pulse * 0.18f);
+                if (renderer.material.HasProperty("_EmissionColor"))
+                {
+                    renderer.material.SetColor("_EmissionColor", _accent * Mathf.Lerp(1.15f, 0.06f, normalized));
+                }
+            }
+
+            foreach (var light in _lights)
+            {
+                if (light != null)
+                {
+                    light.intensity = Mathf.Lerp(light.intensity, 0f, normalized);
+                }
+            }
+
+            if (_age >= Lifetime)
+            {
+                Destroy(gameObject);
             }
         }
 

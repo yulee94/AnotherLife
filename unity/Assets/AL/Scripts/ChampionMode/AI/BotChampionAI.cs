@@ -233,6 +233,7 @@ namespace AL.ChampionMode.AI
         private void Die(RealmId attackerRealm)
         {
             _isDead = true;
+            GetComponentInChildren<BotChampionTierVfx>(true)?.PlayDefeatBurst(transform.position, attackerRealm);
             SkillEffectFactory.SpawnRealmImpact(transform.position + Vector3.up, attackerRealm);
             foreach (var collider in GetComponentsInChildren<Collider>())
             {
