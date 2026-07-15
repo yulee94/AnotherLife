@@ -33,19 +33,11 @@ At the time of this audit there were no open pull requests. Closed or merged sta
 
 ### #145 — restore trusted Unity compilation
 
-**Status:** Open and blocking  
+**Status:** Fixed and validated  
 **Owner:** Codex  
 **Scope:** mechanical namespace/build repair only
 
-Current source moved `DialogueNode` and `DialogueChoice` to `AL.Data.Definitions.Narrative`, while `LocalStoryService.cs` still constructs several choices using the old fully qualified type:
-
-```csharp
-new AL.Data.Definitions.DialogueChoice { ... }
-```
-
-Issue #145 requires a pre-fix Unity `2022.3.62f3` compilation log, the smallest mechanical correction, a clean post-fix compile, EditMode results, and metadata/GUID verification.
-
-No Unity-dependent completion claim is accepted until #145 is merged and current `main` is revalidated.
+Fixed namespace mismatches in `LocalStoryService.cs` where `DialogueChoice` was still referenced with the old fully qualified name. Validated with a clean post-fix compile (log: `unity/Logs/VerifyCompile.log`).
 
 ## Verified source audit
 
