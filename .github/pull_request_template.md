@@ -2,33 +2,31 @@
 
 Describe the single major completion in this pull request.
 
-## Primary owner mode
+## Workstream owner
 
-Select exactly one:
+- [ ] GPT — planning, specification, review, or coordination documentation
+- [ ] Android Studio — narrative content or narrative-owned progression logic
+- [ ] Gemini — terrestrial creature/fauna visual design, design sources, or design manifests
+- [ ] Codex — runtime implementation, tests, tooling, or technical contracts
 
-- [ ] GPT — planning, specification, review, risk, or coordination documentation
-- [ ] Codex narrative/content — quests, dialogue, lore, localization-facing source, continuity, or narrative fidelity
-- [ ] Codex terrestrial design — terrestrial concepts, silhouettes, materials, motion intent, design source, or design fidelity
-- [ ] Codex engineering — Android, Unity, runtime, gameplay, assets, build, save, contracts, tests, CI, or tooling
+Select exactly one primary workstream owner. A downstream integration PR may require additional owner dispositions without changing its primary owner.
 
-A mixed-mode PR requires an explicit GPT specification and a written reason that separate PRs are impractical.
+## Upstream artifact or dependency
 
-## Roadmap phase and upstream dependency
-
-Link the issue, user decision, source packet, design packet, specification, or prerequisite PR. Write `None` only for a root coordination change.
+Link the narrative packet, terrestrial design package, implementation specification, issue, or pull request this work consumes. Write `None` only for a root coordination change.
 
 ## Ownership declaration
 
-- Narrative/content source changed: `yes / no`
-- Terrestrial design source changed: `yes / no`
-- Android or Unity runtime/gameplay changed: `yes / no`
-- Assets, scenes, importers, or generated artifacts changed: `yes / no`
+- Narrative content changed: `yes / no`
+- Terrestrial visual design changed: `yes / no`
+- Runtime gameplay code changed: `yes / no`
 - Shared contracts or catalogs changed: `yes / no`
-- Save data, migration, recovery, or deletion changed: `yes / no`
-- Workflow, dependencies, or repository settings changed: `yes / no`
+- Save data or migration behavior changed: `yes / no`
 - Unrelated cleanup included: `no`
 
-Explain every `yes` answer and identify the approved source/specification consumed.
+Explain any `yes` answer and confirm that the owning workstream made or approved the change.
+
+For terrestrial work, identify issue #194 or its approved successor, the Gemini design package/version, source/provenance, and whether the PR is design-only or Codex runtime integration. Codex must not claim original terrestrial visual authorship.
 
 ## Shared-file lock
 
@@ -39,7 +37,7 @@ List every shared file touched, or write `None`:
 - `unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs`
 - `unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs`
 
-Confirm no other open PR holds the lock.
+For each listed file, confirm that no other open pull request holds the soft lock.
 
 ## What changed
 
@@ -47,36 +45,28 @@ Confirm no other open PR holds the lock.
 
 ## Acceptance criteria
 
-- [ ] Task-specific acceptance criteria are listed or linked.
-- [ ] The diff stays within the declared primary mode and file scope.
-- [ ] Narrative meaning was not rewritten outside Codex narrative/content mode.
-- [ ] Terrestrial visual intent was not redesigned outside Codex terrestrial-design mode.
-- [ ] Engineering consumes approved source/design rather than creating parallel hard-coded authority.
+- [ ] The task-specific acceptance criteria are listed or linked.
+- [ ] The diff stays within the declared workstream ownership.
+- [ ] Approved narrative text, meaning, and outcomes were not rewritten outside the Android Studio workstream.
+- [ ] Terrestrial creature/fauna visual design was not authored or redesigned outside the Gemini workstream.
+- [ ] A Codex terrestrial integration consumes an approved Gemini package and records any fidelity deviation for Gemini/user review.
 - [ ] New save fields have backward-compatible defaults when applicable.
-- [ ] Existing service registrations, source packets, designs, assets, and unrelated systems are preserved.
-- [ ] Invalid data, unavailable dependencies, retries, and duplicate delivery are handled as required.
+- [ ] Existing service registrations, approved assets, and unrelated systems are preserved.
 
 ## Validation
 
-List exact commands, suites, validators, editor checks, source-reference reviews, design-fidelity checks, and manual scenarios with results.
+List exact commands, test suites, design-manifest checks, source/provenance review, editor checks, or manual scenarios and their results.
 
 ```text
-Not run: explain the exact blocker when applicable.
+Not run: explain why, when applicable.
 ```
 
 ## Conflict and readiness checks
 
 - [ ] Started from current `main`.
-- [ ] Inspected open PRs for overlap, dependencies, and ownership modes.
-- [ ] Declared all shared files before editing.
-- [ ] Rebased onto latest `main` before final review.
+- [ ] Inspected open pull requests for overlapping files and ownership areas.
+- [ ] Declared all shared files before editing them.
+- [ ] Rebased onto the latest `main` before final review.
 - [ ] No collaborator work was overwritten or force-pushed away.
-- [ ] Branch prefix matches `gpt/`, `codex/narrative-`, `codex/terrestrial-`, or `codex/` engineering.
 - [ ] Documentation uses `D:\260711\MY\AndroidStudioProjects\AnotherLife` as the canonical workspace.
-
-## Review gates
-
-- GPT disposition: `BLOCKED / READY FOR SOURCE-MODE REVIEW / READY TO MERGE`
-- Codex narrative/content fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
-- Codex terrestrial-design fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
-- User approval required: `yes / no`, with decision link when already recorded
+- [ ] Terrestrial work follows issue #194 and `unity/Docs/Gemini_Terrestrial_Design_Prompt.md`.

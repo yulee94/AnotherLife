@@ -1,288 +1,303 @@
 # AnotherLife Project Progression Roadmap
 
-This roadmap defines how GPT, Codex, and the user move Another Life from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay.
+This roadmap defines how GPT, Codex, the Android Studio narrative workflow, and the user build Another Life from the current prototype into a stable, content-scalable release candidate. It controls sequencing and gates; it does not author narrative or implement gameplay.
 
-## Authority
+## Authority and supporting documents
 
-Use together:
+Use these documents together:
 
-1. `AGENTS.md` — ownership, branches, locks, and conflict policy.
-2. `unity/Docs/Agent_Role_Prompts.md` — standalone GPT and Codex prompts.
-3. This roadmap — phase order and exit gates.
-4. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
-5. `.github/pull_request_template.md` — required PR declaration.
+1. `AGENTS.md` — repository-wide ownership and conflict policy.
+2. `unity/Docs/Agent_Role_Prompts.md` — standalone startup prompt for each workstream.
+3. This roadmap — long-range phases, priorities, and exit gates.
+4. `unity/Docs/Three_Way_Collaboration_Plan.md` — detailed NVS-01 execution plan.
+5. `.github/pull_request_template.md` — required PR ownership, dependency, lock, and validation declaration.
 
-`AGENTS.md` wins conflicts. The user decides creative/product direction. GPT resolves technical sequencing. Codex performs all source-authoring, design, implementation, build, asset, and test work through declared modes.
+When documents conflict, `AGENTS.md` is authoritative. The user decides product and creative direction. GPT resolves technical sequencing within that direction.
 
 ## Operating principles
 
-- Keep `main` buildable before expansion.
-- Deliver thin complete slices before scaling.
-- Codex narrative/content and terrestrial-design source precede Codex engineering implementation.
-- GPT specifies and reviews handoffs but does not author source.
-- Use stable IDs and validated data instead of duplicated hard-coded authority.
-- Preserve old saves and service registrations.
-- One focused PR per major completion and primary Codex mode.
-- Do not advance while the current phase gate is red unless the user reprioritizes.
+- Keep `main` buildable before expanding scope.
+- Deliver one thin, complete vertical slice before scaling content.
+- Android Studio owns narrative source material; Codex consumes it; GPT specifies and reviews the handoff.
+- Use stable IDs and data contracts instead of duplicating narrative in runtime code.
+- Preserve old saves and existing service registrations.
+- Prefer focused PRs with measurable acceptance evidence over large mixed changes.
+- Do not maintain parallel PRs for the same issue unless the user explicitly requests alternatives.
+- Do not advance to a later phase while the current phase gate is failing.
 
-## Priority inside every phase
+## Priority order inside every phase
 
-1. Broken `main` or unavailable core workflow.
-2. Data loss, save corruption, security, economy, or irreversible migration risk.
-3. Active phase blockers.
-4. Missing contracts, integration, tests, and diagnostics.
-5. Required user-facing clarity and accessibility.
-6. Optional expansion and polish.
+1. Broken `main`, failed compilation, or unavailable core workflow.
+2. Data loss, save corruption, security, or irreversible migration risk.
+3. Blockers to the active phase gate.
+4. Missing contracts, integration, automated tests, or diagnostics.
+5. User-facing clarity and polish required by the active milestone.
+6. Optional content expansion and speculative systems.
 
-## Phase 0 — Governance and Build Health
+## Phase 0 — Collaboration Baseline and Build Health
 
 ### Goal
 
-Establish one workspace, the GPT–Codex–user model, one active implementation path per issue, and reliable validation commands.
+Establish one canonical workspace, one ownership model, one active implementation path per issue, and reliable Android and Unity validation commands.
 
-### GPT
+### GPT workload
 
-- Maintain governance, roadmap, status, risk, and gate policy.
-- Triage issues/PRs, dependencies, and locks.
-- Review build blockers and evidence.
+- Maintain `AGENTS.md`, role prompts, roadmap, PR template, and ownership decisions.
+- Triage open issues and PRs for duplicate work and merge order.
+- Identify build blockers, shared-file locks, and missing validation.
+- Keep documentation aligned with the canonical workspace.
 
-### Codex narrative/content mode
+### Codex workload
 
-- Keep content isolated while runtime contracts are unstable.
-- Validate current IDs and references without broad expansion.
+- Reproduce and fix Android, Gradle, Unity, contract, and test blockers without changing narrative meaning.
+- Add focused regression tests for repaired failures.
+- Document exact build and test commands.
+- Consolidate on one implementation when duplicate technical PRs exist.
 
-### Codex terrestrial-design mode
+### Android Studio workload
 
-- Keep design experiments isolated and deferred unless a user-approved active task needs them.
-- Do not mix concept/design source into build-health PRs.
+- Keep narrative work on isolated branches while build contracts are unstable.
+- Do not merge narrative content that depends on unresolved or undocumented runtime behavior.
+- Validate existing narrative IDs and references in preparation for NVS-01.
 
-### Codex engineering mode
+### User workload
 
-- Reproduce and fix Android, Gradle, Unity, asset, contract, and test blockers.
-- Add focused regression tests and exact commands.
-- Consolidate duplicate technical paths.
-
-### User
-
-- Resolve materially different product/design options when review cannot establish a clear technical answer.
+- Choose between materially different duplicate implementations when technical review does not produce a clear winner.
+- Confirm the intended creative direction for the first narrative slice.
 
 ### Exit gate
 
-- Governance and workspace rules are on `main`.
-- Android and Unity have known passing commands or owned blockers.
-- No duplicate PR targets the same root problem.
+- Canonical workspace and agent rules are merged into `main`.
+- Android unit tests and debug assembly have a known passing command, or every remaining blocker has an owned issue.
+- Unity opens and compiles, or every remaining blocker has an owned issue.
+- No unresolved duplicate PRs target the same root problem.
 - No undeclared shared-file lock exists.
 
-## Phase 1 — NVS-01: One Approved Quest End to End
+## Phase 1 — NVS-01: One Approved Quest Line End to End
 
 ### Goal
 
-Prove one bounded user-approved quest can move from Codex narrative source to a playable persistent runtime loop.
+Prove one bounded, user-approved quest line can move from narrative source to a playable and persistent runtime loop without duplicated story logic.
 
-### Codex narrative/content mode
+The detailed task order and acceptance criteria live in `unity/Docs/Three_Way_Collaboration_Plan.md`.
 
-- Produce A1 with stable IDs, states, objectives, dialogue, choices, consequences, handoff, failure/retry/recovery, report, abandonment, resume, and localization.
-- Perform A2 narrative-fidelity disposition after implementation.
+### Android Studio workload
 
-### GPT
+- Select one bounded quest line approved by the user.
+- Produce the complete narrative packet: stable IDs, prerequisites, states, objectives, choices, consequences, gameplay handoff, completion/failure, retry/recovery, and localization references.
 
-- Review A1.
-- Publish G1 state/event/contract/persistence/test specification.
-- Perform G2 integration and merge-risk review.
+### GPT workload
 
-### Codex engineering mode
+- Verify packet completeness.
+- Produce the state machine, runtime event map, contract changes, save/resume semantics, error behavior, expected file impacts, shared-file locks, and test matrix.
 
-- Implement versioned content loading and strict validation.
-- Implement deterministic state transitions and gameplay handoff.
-- Implement persistence, migration, idempotency, recovery, and tests.
+### Codex workload
 
-### Codex terrestrial-design mode
+- Implement contract loading and validation.
+- Implement deterministic quest-state transitions and the approved gameplay handoff.
+- Implement persistence, old-save compatibility, idempotency, and automated tests.
 
-- No default Phase 1 workload. Terrestrial design starts only if the user explicitly makes it a dependency of the approved slice; it remains a separate source PR.
+### User workload
 
-### User
-
-- Approve source intent and complete U1 integrated playtest.
+- Approve the selected narrative packet and complete the final integrated playtest.
 
 ### Exit gate
 
-- Quest start, progression, branch, handoff, resolution, save, reload, and resume work.
-- Consequences occur once and remain stable.
-- A2 confirms source fidelity, GPT confirms technical acceptance, and the user accepts U1.
+- The quest can start, progress, branch, hand off to existing gameplay, resolve, save, reload, and resume.
+- Rewards and consequences occur exactly as approved and do not duplicate after reload.
+- Narrative fidelity is approved by Android Studio.
+- GPT confirms contract, ownership, validation, and merge safety.
+- The user approves the playtest.
 
 ## Phase 2 — Chapter 1 Playable Spine
 
 ### Goal
 
-Generalize NVS-01 into a complete Chapter 1 flow without quest-specific runtime branching.
+Generalize the NVS-01 path into a complete, coherent Chapter 1 flow while keeping content and runtime responsibilities separated.
 
-### Codex narrative/content mode
+### Android Studio workload
 
-- Define Chapter 1 structure, critical path, optional content, NPC arcs, continuity, entry, and close conditions.
-- Deliver bounded source packets with stable dependencies.
+- Define the approved Chapter 1 structure, main progression, optional content, NPC arcs, factions, continuity, chapter entry, and chapter-close conditions.
+- Maintain stable IDs and explicit cross-quest dependencies.
+- Provide narrative packets in reviewable increments rather than one monolithic content dump.
 
-### GPT
+### GPT workload
 
-- Split Chapter 1 into dependency-ordered milestones.
-- Define reusable state patterns, contracts, and tests.
-- Prevent NVS-specific shortcuts from becoming architecture.
+- Break Chapter 1 into dependency-ordered milestones.
+- Identify reusable state patterns versus content-specific rules.
+- Define contracts and acceptance tests for chapter unlocks, quest chains, optional branches, relationship effects, and recovery paths.
+- Prevent NVS-specific implementation details from becoming permanent architecture.
 
-### Codex engineering mode
+### Codex workload
 
-- Generalize quest, objective, reward, handoff, chapter, persistence, and validation systems.
-- Add cross-quest and old-save regression coverage.
-
-### Codex terrestrial-design mode
-
-- Author terrestrial designs only for user-approved Chapter 1 subjects and hand them to engineering through separate packets.
+- Generalize the proven quest pipeline for multiple approved quests and chapter progression.
+- Add reusable validation, persistence, objective, reward, and handoff mechanisms.
+- Add regression coverage for cross-quest dependencies, chapter unlocks, and old saves.
 
 ### Exit gate
 
-- A new profile can enter, progress through, save/reload within, and complete the approved Chapter 1 spine.
+- A new profile can enter Chapter 1, complete its approved critical path, engage optional approved content, save/reload at supported states, and reach the chapter-close condition.
+- No quest requires hard-coded dialogue or quest-specific runtime branching outside approved extensibility points.
 - Invalid references and impossible transitions fail visibly.
-- Ordinary new quests do not require runtime code edits.
+- Chapter 1 narrative and runtime regression tests pass.
 
 ## Phase 3 — Connected Kingdom, Realm, Champion, and World Consequences
 
 ### Goal
 
-Make approved choices visibly affect existing gameplay systems while preserving explicit source and runtime authority.
+Make approved narrative choices visibly affect existing gameplay systems without allowing either workstream to duplicate or own the other’s logic.
 
-### Codex narrative/content mode
+### Android Studio workload
 
-- Define narrative meaning for realm, faction, advisor, artifact, boss, reward, and world-state consequences.
-- Specify semantic hooks and return events.
+- Define the narrative meaning and approved consequences of realm, faction, advisor, affinity, reputation, artifact, boss, and world-state choices.
+- Specify semantic gameplay hooks and return events.
 
-### Codex terrestrial-design mode
+### GPT workload
 
-- Define user-approved terrestrial fauna/creature/habitat presentation and design-fidelity criteria.
-- Keep visual design separate from combat stats, AI, and runtime implementation.
+- Define event ownership, payloads, idempotency, rollback behavior, save boundaries, and conflict resolution between systems.
+- Sequence integration work to minimize shared-file contention.
 
-### GPT
+### Codex workload
 
-- Define event ownership, payloads, idempotency, rollback, save boundaries, and sequence.
-
-### Codex engineering mode
-
-- Connect approved events and designs to kingdom, realm, champion, encounter, loot, objective, world-state, AI, rendering, and asset systems.
-- Add integration, reload, performance, and accessibility tests.
+- Connect approved events to existing kingdom, realm, champion, encounter, loot, objective, and world-state services.
+- Preserve service registrations and validate unavailable hooks.
+- Add integration tests for cross-system consequences and reload behavior.
 
 ### Exit gate
 
-- Approved narrative decisions and terrestrial designs produce deterministic visible persistent results.
-- Retries, reloads, and duplicate delivery cannot repeat consequences.
-- Unrelated gameplay remains operational.
+- Approved narrative decisions produce deterministic, visible, persistent gameplay consequences.
+- Gameplay outcomes return to narrative progression through documented events.
+- Cross-system rewards and penalties cannot be duplicated by retries, reloads, or repeated event delivery.
+- Existing unrelated gameplay remains operational.
 
-## Phase 4 — Scalable Authoring and Asset Pipeline
+## Phase 4 — Scalable Content and Authoring Pipeline
 
 ### Goal
 
-Scale content and terrestrial designs without ID drift, broken references, inconsistent assets, or manual import fragility.
+Allow narrative and gameplay content to grow without manual reference drift, inconsistent IDs, or fragile one-off import steps.
 
-### Codex narrative/content mode
+### Android Studio workload
 
-- Establish naming, IDs, localization keys, continuity rules, reusable content structures, and source validation.
+- Establish narrative naming conventions, ID registries, reusable content structures, continuity rules, localization keys, and authoring validation expectations.
+- Expand approved content using the proven pipeline.
 
-### Codex terrestrial-design mode
+### GPT workload
 
-- Establish terrestrial design taxonomies, naming, variation rules, scale references, material conventions, motion briefs, LOD/readability expectations, and source-asset packaging.
+- Define content governance, schema evolution policy, compatibility rules, versioning, review gates, and reporting requirements.
+- Identify high-risk manual steps and convert them into tooling requirements.
 
-### GPT
+### Codex workload
 
-- Define governance, schema evolution, versioning, compatibility, review gates, and tool requirements.
-
-### Codex engineering mode
-
-- Build validators, importers, generators, editor diagnostics, localization/reference checks, asset-pipeline automation, and catalog performance tests.
+- Build or improve schema validators, catalog importers, ScriptableObject generators, editor diagnostics, localization reference checks, and batch validation.
+- Keep cross-tool contracts plain and Fable-compatible where required.
+- Add performance tests for larger catalogs.
 
 ### Exit gate
 
-- New approved content/design can enter through documented source steps without ordinary runtime edits.
-- Duplicate IDs, missing references, unsupported versions, localization gaps, and asset drift fail before runtime.
-- Generated outputs are deterministic.
+- New approved content can be added through documented steps without editing runtime code for ordinary cases.
+- Duplicate IDs, missing references, invalid hooks, unsupported schema versions, and localization gaps are detected before runtime.
+- Generated artifacts are reproducible and do not create noisy unrelated diffs.
 
 ## Phase 5 — Quality, Compatibility, Performance, and Recovery
 
 ### Goal
 
-Harden the game against old saves, invalid source, device differences, performance limits, accessibility failures, and interrupted flows.
+Harden the integrated game against old saves, invalid content, device differences, failure paths, and regression risk.
 
-### Codex narrative/content mode
+### Android Studio workload
 
-- Review pacing, clarity, continuity, recovery copy, save/resume meaning, and localization-facing defects.
+- Review narrative pacing, clarity, continuity, recovery text, accessibility of presentation, and save/resume meaning.
+- Resolve approved continuity and localization-facing defects.
 
-### Codex terrestrial-design mode
+### GPT workload
 
-- Review silhouette/readability at target distances, color-independent recognition, motion clarity, variant consistency, reduced-motion compatibility, and LOD fidelity.
+- Maintain the risk register and release-quality acceptance matrix.
+- Prioritize defects by severity and player impact.
+- Verify that fixes stay within ownership and do not reopen completed architecture decisions without evidence.
 
-### GPT
+### Codex workload
 
-- Maintain risk and release-quality matrices.
-- Prioritize defects and prevent scope/ownership regression.
-
-### Codex engineering mode
-
-- Expand Android, Unity, asset, contract, save, device, performance, accessibility, and recovery tests.
-- Improve diagnostics and safe failure behavior.
+- Expand Android and Unity regression suites.
+- Test save migration, corrupted or partial data recovery, low-memory/device constraints, performance, loading, input modes, and error reporting.
+- Improve diagnostics and safe fallback behavior.
 
 ### Exit gate
 
-- Supported old saves load/migrate safely.
-- Critical paths have regression coverage.
-- Performance/device budgets are met.
-- Invalid source and interrupted flows fail visibly without duplicated rewards or silent progression.
-- Narrative and terrestrial-design clarity blockers are resolved or accepted by the user.
+- Supported old saves load or migrate safely.
+- Critical paths have automated regression coverage.
+- Performance budgets and supported device checks are documented and met for the release target.
+- Invalid data and interrupted flows recover visibly without silent progression or duplicated rewards.
+- Accessibility and narrative clarity blockers are resolved or explicitly accepted by the user.
 
-## Phase 6 — Release Candidate
+## Phase 6 — Release Candidate and Final Acceptance
 
 ### Goal
 
-Produce a reproducible traceable release candidate with frozen source and user approval.
+Create a traceable, reproducible release candidate with frozen scope, known validation, and user approval.
 
-### Codex narrative/content mode
+### Android Studio workload
 
-- Freeze release narrative, continuity, and localization-facing source.
+- Freeze release narrative content.
+- Resolve release-blocking continuity and localization-facing defects.
 - Sign off narrative fidelity.
 
-### Codex terrestrial-design mode
+### GPT workload
 
-- Freeze terrestrial design source and sign off integrated design fidelity.
+- Freeze milestone scope and coordinate release-blocker triage.
+- Verify issue, PR, contract, save, validation, and documentation traceability.
+- Produce the final readiness report and unresolved-risk list.
 
-### GPT
+### Codex workload
 
-- Freeze scope, review traceability, coordinate blockers, and publish readiness/risk reports.
+- Produce release builds and support CI, packaging, signing configuration, diagnostics, crash investigation, and release-blocking fixes.
+- Run the full approved validation matrix and record exact evidence.
 
-### Codex engineering mode
+### User workload
 
-- Produce builds, packaging, signing configuration, diagnostics, full validation, and release-blocking fixes.
-
-### User
-
-- Perform final acceptance and approve or reject the release candidate.
+- Perform final acceptance playtests and approve or reject the release candidate.
 
 ### Exit gate
 
-- Reproducible builds and required checks pass.
-- No blocker, undeclared lock, duplicate PR, or unreviewed migration remains.
-- Narrative, terrestrial design, product direction, and player experience are accepted by the user.
-- Accepted commit is identified and tagged.
+- Release builds are reproducible.
+- Required checks pass with recorded evidence.
+- No release-blocking issue, undeclared shared-file lock, duplicate PR, or unreviewed migration remains.
+- Narrative fidelity and product direction are approved by the user.
+- The accepted release commit is identified and tagged according to the chosen release process.
 
 ## Recurring delivery cycle
 
-1. **Orient** — phase, issue, upstream source, dependencies, PRs, locks.
-2. **Author/design** — Codex narrative or terrestrial mode creates bounded source when needed.
-3. **Specify** — GPT defines implementation and acceptance.
-4. **Branch** — one focused branch with the correct mode.
-5. **Implement** — Codex engineering stays within scope.
-6. **Validate** — exact relevant checks and evidence.
-7. **Review** — GPT technical/source fidelity; Codex source-mode disposition.
-8. **Playtest** — user milestone acceptance.
-9. **Merge/close** — dependency order, release locks, update status.
+Every feature or fix follows this cycle:
 
-## Milestone readiness
+1. **Orient** — identify roadmap phase, owner, issue, upstream artifacts, dependencies, and open PRs.
+2. **Specify** — define goal, non-goals, acceptance criteria, data/save effects, risks, and validation.
+3. **Branch** — create one focused branch from latest `main` with the correct prefix.
+4. **Implement or author** — stay within workstream ownership and declared file scope.
+5. **Validate** — run exact relevant checks and record results.
+6. **Review** — GPT checks technical and ownership fidelity; Android Studio checks narrative fidelity when applicable.
+7. **Playtest** — the user validates player experience at milestone gates.
+8. **Merge and close** — merge in dependency order, release locks, remove completed branches, and update milestone status.
 
-A milestone is complete only when the upstream source is approved, declared ownership modes are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
+## Milestone readiness checklist
+
+Before any milestone is declared complete:
+
+- The upstream artifact was approved.
+- The implementation or content stayed within declared ownership.
+- Every changed shared file was locked and reviewed.
+- Save and contract compatibility were addressed.
+- Required tests and manual scenarios have exact results.
+- Narrative fidelity was checked when narrative was involved.
+- No duplicate open PR still targets the same completion.
+- The final integrated state exists on `main`.
+- The user completed the required acceptance decision.
 
 ## Selecting the next task
 
-GPT selects the next unblocked task from the active gate. Codex must not self-assign later-phase work while an earlier gate is red. Classify new work as blocker, required, follow-up, or deferred in the issue/spec/PR.
+GPT should select the next unblocked task using the active phase gate, not by choosing the most interesting feature. Android Studio and Codex should not self-assign work from a later phase when an earlier gate remains red. When a new request arrives, classify it as:
+
+- **Blocker:** prevents the active gate or breaks `main`.
+- **Required:** necessary to satisfy the active gate.
+- **Follow-up:** valuable after the gate is complete.
+- **Deferred:** speculative, later-phase, or currently unowned.
+
+This classification must appear in the issue, specification, or PR summary so future sessions can recover project intent without relying on chat history.
