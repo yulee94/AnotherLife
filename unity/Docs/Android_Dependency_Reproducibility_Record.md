@@ -3,7 +3,8 @@
 **Status date:** 2026-07-15
 **Owner:** Codex
 **Issue:** #159
-**Base:** `ecb8c43ebd8860e47840ac259e682431f00ece6d`
+**Original validation baseline:** `ecb8c43ebd8860e47840ac259e682431f00ece6d`
+**Current PR base:** `e2bfecb031e5bb5eb185d354db96a2b7d5c8f319`
 
 ## Dynamic Alias Classification
 
@@ -81,7 +82,7 @@ KSP tasks remained successful:
 
 No KSP/AWT diagnostic appeared in the validation output. Android packaging retained the existing non-fatal native-library strip warning for several dependency libraries.
 
-After rebasing onto `ecb8c43ebd8860e47840ac259e682431f00ece6d`, the full validation matrix passed again:
+After rebasing onto the original compatibility baseline `ecb8c43ebd8860e47840ac259e682431f00ece6d`, the full validation matrix passed again:
 
 ```text
 ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
@@ -110,6 +111,17 @@ The dynamic-version scan returned no matches:
 ```text
 rg '= "[^"]*\+"' gradle/libs.versions.toml
 ```
+
+## Current-Base Refresh
+
+The focused change was finally rebased onto `main` at `e2bfecb031e5bb5eb185d354db96a2b7d5c8f319`. The compare remains one focused commit and exactly two files:
+
+```text
+gradle/libs.versions.toml
+unity/Docs/Android_Dependency_Reproducibility_Record.md
+```
+
+No executable Android, Unity, source, asset, or save file changed during the final documentation-only base refresh. The previously recorded Android unit, debug assembly, release assembly, dependency insight, KSP, and dynamic-version evidence therefore remains applicable. Final merge review must still confirm the current head, changed-file set, and repository diff status.
 
 ## Locking And Verification
 
