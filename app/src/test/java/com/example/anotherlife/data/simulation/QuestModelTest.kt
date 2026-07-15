@@ -32,4 +32,14 @@ class QuestModelTest {
         assertEquals(QuestMode.Arena3D, quest.mode)
         assertEquals("arena_gate", quest.mapMarkerId)
     }
+
+    @Test
+    fun legacyBooleanSlotsRemainBeforeQuestMetadata() {
+        val quest = Quest("Q_COMPAT", "Title", "Description", 0, 1, true, true)
+
+        assertEquals(true, quest.isCompleted)
+        assertEquals(true, quest.isClaimed)
+        assertEquals(QuestMode.Kingdom, quest.mode)
+        assertNull(quest.mapMarkerId)
+    }
 }
