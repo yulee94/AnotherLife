@@ -2,7 +2,7 @@
 
 **Status date:** 2026-07-15  
 **Integration branch:** `main`  
-**Audited current-main head:** `1a3ba60f539e7b42ca675b99808e88f71bca2236`  
+**Audited current-main head:** `7f887e1f645c53c09b50e76ffb4475637ac965b3`  
 **Roadmap state:** Phase 1 remains paused behind QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
@@ -16,7 +16,8 @@
 - The canonical Unity workspace is `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`; evidence from duplicate checkouts is blocked validation.
 - `Bootloader.cs` is exclusively soft-locked by draft PR #203.
 - Android dependency reproducibility issue #159 is complete through merged PR #191.
-- Eight implementation/tooling PRs are open and all are currently draft/blocked.
+- The #163 economy contract is complete through merged PR #215; implementation PR #214 is draft/blocked and does not yet satisfy it.
+- Nine implementation/tooling PRs are open and all are currently draft/blocked.
 
 ## Ownership state
 
@@ -44,6 +45,8 @@ Android Studio and Unity are tools. `android-studio/` and `gemini/` are retired 
 - PR #205 — latest ownership decision restored and recorded.
 - PR #207 — representative PlayMode profile-isolation specification.
 - #159 / PR #191 — Android dynamic dependency versions removed; Material pinned to validated `1.4.0`.
+- PR #213 — current Phase 1 gate status and risk register refreshed.
+- PR #215 — transaction-safe resource and Warzone Credit integrity specification.
 
 A merged specification is not implementation completion.
 
@@ -59,6 +62,7 @@ A merged specification is not implementation completion.
 | #210 | #155 | repository/Android quality-gate workflow | **Draft / blocked** | none |
 | #211 | #136 | narrative relationship save-default regression | **Draft / blocked** | none |
 | #212 | #152 | quest save compatibility | **Draft / blocked** | none |
+| #214 | #163 | economy resource/credit integrity | **Draft / blocked** | none |
 
 ### #189 — QuestDefinition authority safeguards
 
@@ -76,7 +80,7 @@ Still required:
 - rebase onto current `main`;
 - run Unity 2022.3.62f3 compile, complete EditMode/editor tests, reimport, missing-script scan, and final GUID inventory from the canonical workspace.
 
-No A1 or production Player work may claim a trusted Unity asset baseline before #156 is complete.
+No A1, #183 production authority, or production Player work may claim a trusted Unity asset baseline before #156 is complete.
 
 ### #195 — Android narrative-debug release gating
 
@@ -111,15 +115,16 @@ The architectural direction is valid, but acceptance-critical work remains:
 
 ### #208 — Unity prototype-command containment
 
-The obvious credit, Realm Gem, Wishgate, War Drill, reset, and Champion command handlers were removed from the command deck, but the controller is not yet non-mutating:
+The obvious Kingdom credit, Realm Gem, Wishgate, War Drill, reset, and Champion-deployment command handlers were removed from the command deck, but containment is incomplete:
 
 - `Update()` still completes building and research progress automatically;
 - dashboard reads seed buildings, quests, territories, Realm Gems, and Wishgate state;
 - `Start()` owns an additional save-load path;
-- tests do not prove controller startup/refresh/update non-mutation, release hierarchy, accessibility, reload idempotency, or missing-service safety;
+- Champion Arena still contains a recurring proximity-credit grant that can continue after boss death/clear;
+- tests do not prove controller startup/refresh/update non-mutation, release hierarchy, accessibility, reload idempotency, missing-service safety, or release reachability across Champion direct grants;
 - validation is from a duplicate workspace and the branch is behind current `main`.
 
-The first containment PR must make the release surface and controller lifecycle honest and non-mutating without implementing downstream domain contracts.
+The first containment PR must make every release controller lifecycle honest and non-mutating. Switching a direct grant to the typed economy primitive is not authorization.
 
 ### #209 — profile-safe representative PlayMode smoke
 
@@ -174,6 +179,24 @@ The current implementation contradicts the merged save policy:
 
 #152 must operate through a non-mutating compatibility view. Data-changing repair and candidate replacement remain #137 responsibilities.
 
+### #214 — economy resource/credit integrity
+
+PR #215 merged the binding contract at `unity/Docs/Economy_Integrity_Spec.md`. PR #214 was created before it and currently implements the opposite repair policy:
+
+- reads initialize null wallets, delete null rows, and rewrite negative balances;
+- duplicate resource rows are summed into the first row;
+- duplicate overflow is clamped to `long.MaxValue`, which can fabricate value;
+- negative Warzone Credits are clamped to zero from ordinary reads;
+- missing resources are created without core/optional/unsupported classification;
+- no typed read/mutation result or no-save transaction primitive exists;
+- legacy nested save remains the only credit path;
+- live production delta, dependency validation, atomic batch, remainders, and event behavior remain uncorrected;
+- tests encode prohibited repair and omit the required matrix;
+- Unity evidence is duplicate-workspace exit `199` with no XML;
+- branch is behind current `main` and the merged specification.
+
+Required correction is a contract-first rewrite: preserve malformed evidence, disable mutation, implement typed no-save primitives and compatibility wrappers, enforce core/rare authority, make reads pure, stage production atomically, rebase, and validate canonically.
+
 ## Active gate: #156
 
 Before merged PR #124, two QuestDefinition identities existed:
@@ -195,12 +218,24 @@ Expected authority is the surviving narrative type/GUID only after complete inve
           +
 #152 non-mutating quest compatibility
           +
-#163 compatible economy semantics
+#163 typed non-repairing economy implementation
           ↓
 #137 crash-safe candidate selection, recovery, repair, deletion, and persistence
 ```
 
 All implementations consume `Save_Semantic_Compatibility_Policy.md`. Queries do not perform data-changing repair; unknown stable data is preserved; malformed domains are disabled; candidate selection and clone → persist → publish remain #137.
+
+## Definition and progression dependency
+
+```text
+#156 trusted asset/type authority
+          ↓
+#183 versioned immutable game-data authority
+          ↓
+#165 definition-backed building/research/training integrity
+```
+
+Current `LocalGameDataService` does not define `ManaShrine` or `Mine`, exposes no research query, and returns `null` for all troop lookups. Before #183, #165 may fail closed but must not invent temporary IDs, maximum levels, troop definitions, or balance.
 
 ## Validation and quality-gate dependency
 
@@ -238,8 +273,9 @@ The archived packet is history, not approved A1. A1 must encode D1–D16, includ
 
 - #150 remains blocked by #156; normal Unity Build Settings still lack the approved production scene flow.
 - #135 remains deferred until standalone NVS-01 and #150 are proven.
-- #178 containment may continue only within PR #208’s focused controller/UI boundary.
+- #178 containment may continue only within focused controller/UI/release-reachability boundaries.
 - #173 implementation follows accepted #137/#183 prerequisites; its merged specification does not authorize early mutation work.
+- #165 full reconnection follows accepted #163 and #183; earlier containment may only fail closed.
 
 ## Shared-file state
 
@@ -266,7 +302,7 @@ Issue closure, PR merge, source presence, one-platform compilation, skipped chec
 - build risk — exact commands, exit codes, logs, and compiler scan;
 - asset risk — GUID/reference inventory, reimport, malformed/missing-script scan, and field preservation;
 - test risk — discovered totals and retained XML/log artifacts;
-- save/economy/reward risk — normal, recovery, fault, duplicate, reload, and idempotency matrices;
+- save/economy/reward risk — normal, recovery, fault, duplicate, overflow, reload, event/save-count, and idempotency matrices;
 - contract risk — valid/invalid data and implemented producer/consumer proof;
 - packaging risk — actual Player/export build and launch transition;
 - source/design risk — approved packet fidelity, provenance, references, and user decision;
@@ -276,11 +312,12 @@ Issue closure, PR merge, source presence, one-platform compilation, skipped chec
 
 ```text
 1. Correct and revalidate PR #189 to clear the active #156 gate.
-2. Correct PR #209 cleanup ordering and merge the profile-safe PlayMode foundation.
-3. Harden PR #210 against the merged policy, run proof PRs, and retain live artifacts.
-4. Correct PRs #211 and #212 against the save semantic policy before #137 begins.
-5. Remove PR #208 hidden controller mutations and add lifecycle/UI non-mutation tests.
-6. Fix PR #195 durable rejection notice and rebase/revalidate Android.
-7. Complete PR #203 transaction-safe lifecycle and full fault matrix while retaining the lock.
-8. Do not activate A1, G1, #137, #134, or production Player claims before their prerequisites pass.
+2. Rewrite PR #214 against the merged economy specification and run canonical evidence.
+3. Correct PR #209 cleanup ordering before any branch consumes PlayMode evidence.
+4. Harden PR #210 against the merged policy, run proof PRs, and retain live artifacts.
+5. Correct PRs #211 and #212 against the save semantic policy before #137 begins.
+6. Remove PR #208 hidden controller/direct-credit mutations and prove non-mutation/release reachability.
+7. Fix PR #195 durable rejection notice and rebase/revalidate Android.
+8. Complete PR #203 transaction-safe lifecycle and full fault matrix while retaining the lock.
+9. Do not activate #183 implementation, #165 reconnection, A1, G1, #137, #134, or production Player claims before their prerequisites pass.
 ```
