@@ -80,6 +80,7 @@ namespace AL.Kingdom.Visuals
             _layoutEngine.AutoPlaceBuildings(realmId, buildings);
             CreateTerritoryOutposts();
             CreateAmbientBoardLife(realmId);
+            CreateRealmConvergenceRelics(realmId);
             CreateBoardAtmosphere(realmId);
             _lastVisualHash = BuildVisualHash();
             _hasVisualHash = true;
@@ -441,6 +442,44 @@ namespace AL.Kingdom.Visuals
             for (int i = 0; i < 4; i++)
             {
                 CreateAmbientToken(ambient.transform, "GatePatrol_" + i, patrolLoop, 0.38f + i * 0.025f, i / 4f, patrol, shadow, false);
+            }
+        }
+
+        private void CreateRealmConvergenceRelics(RealmId realmId)
+        {
+            var relics = GameObject.Find("Kingdom_RealmConvergenceRelics") ?? new GameObject("Kingdom_RealmConvergenceRelics");
+            ClearChildren(relics.transform);
+
+            Color accent = GetRealmAccent(realmId);
+            Color terrain = GetTerrainColor(realmId);
+            Color metal = Color.Lerp(new Color(0.58f, 0.60f, 0.64f), accent, 0.18f);
+            Color shadow = Color.Lerp(terrain, Color.black, 0.48f);
+
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * Mathf.PI * 0.5f + Mathf.PI * 0.25f;
+                Vector3 position = new Vector3(Mathf.Cos(angle) * 3.85f, 0.12f, Mathf.Sin(angle) * 3.85f);
+                var root = new GameObject("RealmConvergenceRelic_" + i);
+                root.transform.SetParent(relics.transform, false);
+                root.transform.localPosition = position;
+                root.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
+
+                Color relicAccent = Color.Lerp(accent, Color.white, 0.12f + i * 0.06f);
+                var baseRing = CreateTerritoryPrimitive(root.transform, "RelicBaseRing", PrimitiveType.Cylinder, Vector3.zero, new Vector3(0.46f, 0.026f, 0.46f), shadow, 0.04f, 0.48f, relicAccent * 0.08f);
+                baseRing.AddComponent<KingdomTacticalPulse>().Configure(shadow, relicAccent, 0.54f + i * 0.08f);
+                CreateTerritoryPrimitive(root.transform, "RelicPillar", PrimitiveType.Cylinder, new Vector3(0f, 0.36f, 0f), new Vector3(0.15f, 0.42f, 0.15f), metal, 0.16f, 0.62f, relicAccent * 0.12f);
+                var core = CreateTerritoryPrimitive(root.transform, "RelicCore", PrimitiveType.Sphere, new Vector3(0f, 0.86f, 0f), new Vector3(0.18f, 0.18f, 0.18f), relicAccent, 0f, 0.86f, relicAccent * 0.34f);
+                core.AddComponent<KingdomTacticalPulse>().Configure(relicAccent, Color.Lerp(relicAccent, Color.white, 0.38f), 0.94f + i * 0.10f);
+                CreateTerritoryPrimitive(root.transform, "RelicHalo", PrimitiveType.Cylinder, new Vector3(0f, 0.86f, 0f), new Vector3(0.34f, 0.012f, 0.34f), relicAccent, 0f, 0.84f, relicAccent * 0.22f);
+
+                for (int tick = 0; tick < 6; tick++)
+                {
+                    float tickAngle = tick * Mathf.PI * 2f / 6f;
+                    Vector3 tickPosition = new Vector3(Mathf.Cos(tickAngle) * 0.38f, 0.05f, Mathf.Sin(tickAngle) * 0.38f);
+                    CreateTerritoryPrimitive(root.transform, "RelicRuneTick_" + tick, PrimitiveType.Cube, tickPosition, new Vector3(0.11f, 0.014f, 0.030f), Color.Lerp(relicAccent, Color.white, tick % 2 == 0 ? 0.12f : 0.30f), 0f, 0.76f, relicAccent * 0.10f);
+                }
+
+                CreatePointLight(root.transform, "RelicCoreLight", new Vector3(0f, 1.12f, 0f), relicAccent, 0.24f, 1.65f);
             }
         }
 
