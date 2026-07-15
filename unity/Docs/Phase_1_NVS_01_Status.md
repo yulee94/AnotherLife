@@ -2,11 +2,11 @@
 
 **Status date:** 2026-07-15  
 **Integration branch:** `main`  
-**Audited current-main head:** `dd865f077aed5a5543eab8dfff5138e7fbc9e9d4`  
+**Audited current-main head:** `53e73be81c981256519b5562377d8560d13f4760`  
 **Roadmap state:** Phase 1 remains paused behind QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
-`AGENTS.md` is authoritative. This record separates source presence, issue state, merge state, specification state, validation evidence, creative approval, and player-visible completion. A draft PR, source file, merged specification, green compile, uploaded LFS pointer, or issue closure is not implementation/product acceptance by itself.
+`AGENTS.md` is authoritative. This record separates source presence, issue state, merge state, specification state, validation evidence, creative approval, packaging evidence, and player-visible completion. A draft PR, source file, merged specification, generated-but-uncommitted scene, green compile, uploaded LFS pointer, Player executable, or issue closure is not implementation/product/release acceptance by itself.
 
 ## Current control summary
 
@@ -19,6 +19,8 @@
 - The #163 economy contract is complete through merged PR #215; implementation PR #214 remains draft/blocked and does not satisfy it.
 - The #183 versioned immutable game-data authority contract is complete through merged PR #220; implementation remains blocked by #156 and the future `LocalGameDataService.cs` lock sequence.
 - The #194 terrestrial source-packet technical-review contract is complete through merged PR #221; PR #217 remains draft/blocked and is not ready for user creative review.
+- The #150 production scene/Player build contract is complete through merged PR #224. Scene-authoring issue #223 is open and blocked by #156 plus accepted #153 scene-lifecycle behavior.
+- The only committed Unity scene remains `Assets/Test.unity`; it is test-only. Normal Build Settings remain empty.
 - Ten implementation/tooling/source-design PRs are open. All remain draft/blocked.
 
 ## Ownership state
@@ -54,6 +56,9 @@ Android Studio and Unity are tools. `android-studio/` and `gemini/` are retired 
 - PR #219 — QuestDefinition/terrestrial gate status refresh.
 - PR #220 — versioned immutable game-data catalog/query/authority specification.
 - PR #221 — terrestrial source-packet validation and user-review handoff specification.
+- PR #222 — game-data/terrestrial status and risk refresh.
+- Issue #223 — focused production-scene asset authoring/generator-hardening prerequisite.
+- PR #224 — production scene applicability, Build Settings, Windows64 Player build, and isolated launch-smoke specification.
 
 A merged specification is not implementation completion.
 
@@ -101,7 +106,7 @@ Still required:
 - update the authority record/inventory;
 - run canonical Unity 2022.3.62f3 compile, complete/focused EditMode, reimport, missing-script, GUID, diff, and final-status evidence.
 
-No A1, #183 implementation, or production Player work may claim a trusted Unity asset baseline before #156 is complete.
+No A1, #183 implementation, #223 scene authoring, or production Player work may claim a trusted Unity asset baseline before #156 is complete.
 
 ### #195 — Android narrative-debug release gating
 
@@ -130,7 +135,13 @@ The architectural direction is valid, but acceptance-critical work remains:
 - marker data and required service inventory must be immutable;
 - missing, mismatched, phase, version, registration, and service diagnostics must remain distinct;
 - construction, publication, marker, lifecycle, load, save, drift, two-Bootloader, and no-service fault tests must be complete;
+- choose and prove one scene-lifecycle model: one persistent owner across scene loads or one marker-safe per-scene owner;
+- the owner count/reference identity must remain deterministic through Boot → RealmSelection → Kingdom → ChampionArena → Kingdom;
+- load occurs exactly once, production ticking continues, and pause/quit saves continue through the marker-validated save root after transitions;
+- duplicate owner, scene unload/destroy, and failed-load-then-transition behavior must be tested;
 - branch must rebase and validate from the canonical workspace.
+
+The production scene inventory proved that the generator puts `Bootloader` only in Boot. Current main and PR #203 do not preserve that object across `SceneManager.LoadScene(...)`. The first transition therefore destroys the only tick/pause/quit lifecycle owner while static service registrations remain. #223 and #150 cannot proceed until #153 resolves this explicitly.
 
 `Bootloader.cs` remains locked to PR #203. No other branch may edit it.
 
@@ -145,6 +156,13 @@ The obvious Kingdom credit, Realm Gem, Wishgate, War Drill, reset, and Champion-
 - tests do not prove controller startup/refresh/update non-mutation, release hierarchy, accessibility, reload idempotency, missing-service safety, or release reachability across Champion direct grants;
 - validation is from a duplicate workspace and the branch is behind current `main`.
 
+Before the ShellFoundation Player profile can ship, corrected #178 must also prove:
+
+- ChampionArena transition is unavailable/unreachable in normal production UI while the scene is excluded;
+- the unsafe reset-to-Boot handler is absent from production reachability;
+- unavailable commands do not claim success;
+- hidden/static invocation paths do not bypass the command policy.
+
 The first containment PR must make every release controller lifecycle honest and non-mutating. Switching a direct grant to a typed economy primitive is not authorization.
 
 ### #209 — profile-safe representative PlayMode smoke
@@ -158,7 +176,7 @@ The external snapshot and scene-smoke direction is correct, but cleanup is not y
 - the hard editor/process/OS crash limitation and incoming scene state need explicit disposition;
 - branch must rebase and validate from the canonical workspace.
 
-Until corrected PR #209 merges, no other PR may cite it as passing PlayMode evidence.
+Until corrected PR #209 merges, no other PR may cite it as passing PlayMode evidence. Player launch evidence under #150 does not replace this Editor/profile-isolation suite.
 
 ### #210 — repository/Android quality-gate workflow
 
@@ -172,7 +190,8 @@ Still required:
 - fail closed when diff discovery fails;
 - harden action-SHA, permission, forbidden-path, checkout-credential, timeout, Android transcript/cache, and KSP/AWT checks;
 - use `Refs #155`, not close #155;
-- rebase onto current `main`, rerun live CI, execute the intentional passing/failing proof PR matrix, and later verify branch protection.
+- rebase onto current `main`, rerun live CI, execute the intentional passing/failing proof PR matrix, and later verify branch protection;
+- later consume the shared production-scene descriptor so scene paths/build profiles are not duplicated in CI policy.
 
 ### #211 — narrative relationship save-default regression
 
@@ -325,6 +344,51 @@ user integrated acceptance
 
 Terrestrial source profile IDs, working labels, variant intent, biome tags, concept images, source versions, and hashes are source-review evidence only—not gameplay, spawn, AI, combat, reward, save, lore, or runtime catalog authority.
 
+## Production scene and Player-build dependency
+
+```text
+#156 trusted Unity asset baseline
+          +
+#153 accepted scene-lifecycle owner
+          ↓
+#223 non-destructive generator + four committed stable scene assets
+          ↓
+#178 ShellFoundation command/transition containment
+          +
+corrected #127 profile-safe PlayMode evidence
+          ↓
+#150 exact Build Settings + Windows64 Development build + isolated Boot→RealmSelection smoke
+          ↓
+#135 Android export/host packaging
+```
+
+Binding #150 contract:
+
+```text
+unity/Docs/Production_Scene_Player_Build_Spec.md
+merged PR #224 at 53e73be81c981256519b5562377d8560d13f4760
+```
+
+Issue #223 is the required source-authoring prerequisite. It hardens `ALVerticalSliceSceneGenerator`, commits stable Boot/RealmSelection/Kingdom/ChampionArena scenes and `.meta` files, adds one immutable descriptor/startup marker/validator, and leaves Build Settings unchanged.
+
+The initial normal Player profile is exactly:
+
+```text
+ShellFoundation
+0 Assets/AL/Scenes/Boot.unity
+1 Assets/AL/Scenes/RealmSelection.unity
+2 Assets/AL/Scenes/Kingdom.unity
+```
+
+Excluded:
+
+```text
+Assets/Test.unity
+Assets/AL/Scenes/ChampionArena.unity
+```
+
+ChampionArena remains a deferred committed candidate until #178/#180. A fresh disposable-profile Windows64 Development Player launch must prove ordered Boot → RealmSelection scene markers. External termination after success is not graceful quit/save evidence.
+
 ## Validation and quality-gate dependency
 
 ```text
@@ -332,12 +396,14 @@ Terrestrial source profile IDs, working labels, variant intent, biome tags, conc
           +
 #210 proven Phase A repository/Android gates
           +
+#223 committed production scenes
+          +
 #150 production Player build path
           ↓
 reliable automated/manual Unity and release evidence
 ```
 
-A skipped, duplicate-workspace, unavailable, cancelled, development-fallback, or `continue-on-error` check is not passing evidence.
+A skipped, duplicate-workspace, unavailable, cancelled, stale-output, missing-BuildReport, development-fallback, externally-killed-without-marker, or `continue-on-error` check is not passing evidence.
 
 ## NVS-01 chain
 
@@ -359,13 +425,16 @@ The archived packet is history, not approved A1. A1 must encode D1–D16, includ
 
 ## Production lanes
 
-- #150 remains blocked by #156; normal Unity Build Settings still lack the approved production scene flow.
+- #223 is blocked by #156 and accepted #153 lifecycle behavior; it owns production scene assets, not Build Settings.
+- #150 is specified and remains blocked by #156/#153/#223/#178 plus corrected #127 evidence.
+- #150's initial Build Settings are Boot, RealmSelection, Kingdom only; Test and ChampionArena stay absent.
 - #135 remains deferred until standalone NVS-01 and #150 are proven.
 - #178 containment may continue only within focused controller/UI/release-reachability boundaries.
 - #173 implementation follows accepted #137/#183 prerequisites; its merged specification does not authorize early mutation work.
 - #165 full reconnection follows accepted #163 and #183; earlier containment may only fail closed.
 - #183 foundation remains blocked by #156; no production source switch or `LocalGameDataService.cs` lock has been authorized.
 - terrestrial runtime work follows technical source completion, exact user creative approval, #156/#183, and a separately approved owning issue.
+- ChampionArena packaging and gameplay smoke follow #178/#180 in a separate profile change; they are not part of the first ShellFoundation build.
 
 ## Shared-file state
 
@@ -383,18 +452,19 @@ unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs
 unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs
 ```
 
-The first approved open PR declaring a designated file holds the lock. No conflict resolution may discard valid services, fields, assets, contracts, or registrations. #183 foundation does not claim `LocalGameDataService.cs`; its later migration PR must declare the lock.
+The first approved open PR declaring a designated file holds the lock. No conflict resolution may discard valid services, fields, assets, contracts, or registrations. #183 foundation does not claim `LocalGameDataService.cs`; its later migration PR must declare the lock. #223 and #150 may not edit `Bootloader.cs` or bypass PR #203's lock.
 
 ## Evidence rules
 
 Issue closure, PR merge, source presence, one-platform compilation, skipped checks, or documentation alone are insufficient. Evidence must match the risk:
 
-- build risk — exact commands, exit codes, logs, and compiler scan;
-- asset risk — GUID/reference inventory, LFS binary retrieval, import/reimport, malformed/missing-script scan, hashes, dimensions, media identity, and field preservation;
+- build risk — exact commands, exit codes, logs, compiler scan, current `BuildReport`, output inventory, and stale-output exclusion;
+- asset risk — GUID/reference inventory, LFS binary retrieval, import/reimport, malformed/missing-script scan, hashes, dimensions, media identity, stable scene GUIDs, and field preservation;
+- scene risk — complete scene inventory, exact path/name/controller/marker/transition structure, generator idempotency/non-overwrite behavior, descriptor drift checks, and Build Settings byte ownership;
 - test risk — discovered totals and retained XML/log artifacts;
 - save/economy/reward risk — normal, recovery, fault, duplicate, overflow, reload, event/save-count, and idempotency matrices;
 - contract/catalog risk — schema/version/hash/provenance, valid/invalid data, immutable query results, packaging, and implemented producer/consumer proof;
-- packaging risk — actual Player/export build and launch transition;
+- packaging risk — exact Build Settings/profile, successful current Player BuildReport/output, isolated launch environment, ordered scene markers, severe-log scan, and honest external-termination disposition;
 - source/design risk — rendered exact-source references, provenance, immutable source-version/hash mapping, accessibility, technical disposition, and user decision;
 - integration risk — route/session/result/lifecycle evidence;
 - player-experience risk — integrated user playtest.
@@ -403,14 +473,16 @@ Issue closure, PR merge, source presence, one-platform compilation, skipped chec
 
 ```text
 1. Implement merged PR #218 in PR #189 and run canonical Unity evidence to clear #156.
-2. Rewrite PR #214 against the merged economy specification and run canonical evidence.
-3. Correct PR #209 cleanup ordering before any branch consumes PlayMode evidence.
-4. Harden PR #210 against the merged policy, run proof PRs, and retain live artifacts.
-5. Correct PRs #211 and #212 against the save semantic policy before #137 begins.
-6. Remove PR #208 hidden controller/direct-credit mutations and prove non-mutation/release reachability.
-7. Fix PR #195 durable rejection notice and rebase/revalidate Android.
-8. Complete PR #203 transaction-safe lifecycle and full fault matrix while retaining the lock.
-9. Correct PR #217 against merged PR #221, complete exact-source technical review, then request user creative approval.
-10. After #156, begin only the contract-limited #183 catalog foundation; do not switch production authority or claim the shared file early.
-11. Do not activate #165 reconnection, A1, G1, #137, #134, terrestrial runtime, or production Player claims before their prerequisites pass.
+2. Complete PR #203's transaction-safe stack plus explicit cross-scene lifecycle owner while retaining the lock.
+3. After #156/#153, implement issue #223 as one focused non-destructive scene-authoring PR with no Build Settings change.
+4. Rewrite PR #214 against the merged economy specification and run canonical evidence.
+5. Correct PR #209 cleanup ordering before any branch consumes PlayMode evidence.
+6. Harden PR #210 against the merged policy, run proof PRs, and retain live artifacts.
+7. Correct PRs #211 and #212 against the save semantic policy before #137 begins.
+8. Remove PR #208 hidden controller/direct-credit mutations and prove ShellFoundation Champion/reset unreachability.
+9. Fix PR #195 durable rejection notice and rebase/revalidate Android.
+10. Correct PR #217 against merged PR #221, complete exact-source technical review, then request user creative approval.
+11. After #156, begin only the contract-limited #183 catalog foundation; do not switch production authority or claim the shared file early.
+12. After #223/#178/#127 prerequisites, implement #150's exact three-scene Windows64 shell build and isolated launch smoke.
+13. Do not activate #165 reconnection, A1, G1, #137, #134, terrestrial runtime, Champion packaging, Android export, or release claims before their prerequisites pass.
 ```
