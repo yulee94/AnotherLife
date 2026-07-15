@@ -71,6 +71,73 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void NarrativeCompatibilityFieldsCanMutateAndReloadAfterNormalization()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                object currentSave = GetProperty(service, "CurrentSave");
+                SetField(currentSave, "Reputation", null);
+                SetField(currentSave, "FactionReputations", null);
+                SetField(currentSave, "LordPersona", null);
+                InvokeEnsureSaveDefaults(currentSave);
+
+                object reputationService = CreateRuntimeService(
+                    "AL.Services.Local.ReputationService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    service);
+                object factionService = CreateRuntimeService(
+                    "AL.Services.Local.FactionService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    service);
+                object personaService = CreateRuntimeService(
+                    "AL.Services.Local.PersonaService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    service);
+
+                Type personaTraitType = GetRuntimeType("AL.Core.Interfaces.PersonaTrait");
+                object diplomat = Enum.Parse(personaTraitType, "Diplomat");
+
+                Invoke(reputationService, "ChangeAffinity", "ADVISOR_VALERIUS", 5.5f);
+                Invoke(factionService, "AdjustReputation", "FACTION_VEIL_WATCH", 12);
+                Invoke(personaService, "AdjustTrait", diplomat, 3);
+
+                object reloadedService = CreateSaveService(root);
+                Invoke(reloadedService, "Load");
+                object reloadedReputation = CreateRuntimeService(
+                    "AL.Services.Local.ReputationService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    reloadedService);
+                object reloadedFaction = CreateRuntimeService(
+                    "AL.Services.Local.FactionService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    reloadedService);
+                object reloadedPersona = CreateRuntimeService(
+                    "AL.Services.Local.PersonaService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    reloadedService);
+
+                Assert.AreEqual(5.5f, Invoke(reloadedReputation, "GetAffinity", "ADVISOR_VALERIUS"));
+                Assert.AreEqual(12, Invoke(reloadedFaction, "GetReputation", "FACTION_VEIL_WATCH"));
+                Assert.AreEqual(3, Invoke(reloadedPersona, "GetTraitValue", diplomat));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
         public void CorruptedPrimaryRecoversLastKnownGoodBackup()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
@@ -128,6 +195,15 @@ namespace AL.Tests.EditMode
                 null);
             Assert.NotNull(constructor, "Expected the testable persistence-path constructor.");
             return constructor.Invoke(new object[] { root });
+        }
+
+        private static object CreateRuntimeService(string serviceTypeName, string constructorArgumentTypeName, object argument)
+        {
+            Type serviceType = GetRuntimeType(serviceTypeName);
+            Type constructorArgumentType = GetRuntimeType(constructorArgumentTypeName);
+            ConstructorInfo constructor = serviceType.GetConstructor(new[] { constructorArgumentType });
+            Assert.NotNull(constructor, $"Expected constructor for {serviceTypeName}.");
+            return constructor.Invoke(new[] { argument });
         }
 
         private static void InvokeEnsureSaveDefaults(object save)
