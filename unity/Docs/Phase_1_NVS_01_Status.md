@@ -2,7 +2,7 @@
 
 **Status date:** 2026-07-15  
 **Integration branch:** `main`  
-**Audited current-main head:** `7f887e1f645c53c09b50e76ffb4475637ac965b3`  
+**Audited current-main head:** `1342f4194261450fe8cff3e529eddf29c6c7bb1e`  
 **Roadmap state:** Phase 1 remains paused behind QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
@@ -12,12 +12,13 @@
 
 - The active product milestone remains NVS-01.
 - No approved A1 narrative packet is active; the archived OMEN_1 material remains historical reference only.
-- #156 remains the first blocking technical gate because QuestDefinition type/GUID and malformed-asset safeguards are not yet accepted.
+- #156 remains the first blocking technical gate. Its complete validator contract is now merged, but PR #189 has not implemented or canonically validated it.
 - The canonical Unity workspace is `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`; evidence from duplicate checkouts is blocked validation.
 - `Bootloader.cs` is exclusively soft-locked by draft PR #203.
 - Android dependency reproducibility issue #159 is complete through merged PR #191.
-- The #163 economy contract is complete through merged PR #215; implementation PR #214 is draft/blocked and does not yet satisfy it.
-- Nine implementation/tooling PRs are open and all are currently draft/blocked.
+- The #163 economy contract is complete through merged PR #215; implementation PR #214 is draft/blocked and does not satisfy it.
+- Terrestrial source-design PR #217 is draft/blocked pending technical manifest/LFS/import corrections and user creative review.
+- Ten implementation/tooling/source-design PRs are open and all are currently draft/blocked.
 
 ## Ownership state
 
@@ -45,8 +46,10 @@ Android Studio and Unity are tools. `android-studio/` and `gemini/` are retired 
 - PR #205 — latest ownership decision restored and recorded.
 - PR #207 — representative PlayMode profile-isolation specification.
 - #159 / PR #191 — Android dynamic dependency versions removed; Material pinned to validated `1.4.0`.
-- PR #213 — current Phase 1 gate status and risk register refreshed.
+- PR #213 — Phase 1 gate status and risk register refresh.
 - PR #215 — transaction-safe resource and Warzone Credit integrity specification.
+- PR #216 — economy implementation/status dependency refresh.
+- PR #218 — complete QuestDefinition asset-authority validator specification.
 
 A merged specification is not implementation completion.
 
@@ -63,22 +66,36 @@ A merged specification is not implementation completion.
 | #211 | #136 | narrative relationship save-default regression | **Draft / blocked** | none |
 | #212 | #152 | quest save compatibility | **Draft / blocked** | none |
 | #214 | #163 | economy resource/credit integrity | **Draft / blocked** | none |
+| #217 | #194 | terrestrial design-source foundation | **Draft / blocked** | none |
 
 ### #189 — QuestDefinition authority safeguards
 
 Accepted direction:
 
-- `AL.Data.Definitions.Narrative.QuestDefinition` remains the expected authority;
+- `AL.Data.Definitions.Narrative.QuestDefinition` remains the authority;
 - authoritative GUID `c385b2b183b74184ca75eeffbe2256ef` is preserved;
 - removed root GUID `226022aa7500f3e4abc8ac3757707ad8` must not reappear;
-- project-wide discovery and one-production-type checks are appropriate.
+- exactly one production type and project-wide valid typed-asset discovery are enforced;
+- the historical/current serialized field schema is proven equivalent.
+
+Binding completion contract:
+
+```text
+unity/Docs/QuestDefinition_Asset_Authority_Validation_Spec.md
+merged PR #218 at 1342f4194261450fe8cff3e529eddf29c6c7bb1e
+```
 
 Still required:
 
-- detect malformed/missing/non-authoritative serialized quest assets that `AssetDatabase.FindAssets("t:QuestDefinition")` may not resolve;
-- assert the reflected `Id` field exists with the required type;
-- rebase onto current `main`;
-- run Unity 2022.3.62f3 compile, complete EditMode/editor tests, reimport, missing-script scan, and final GUID inventory from the canonical workspace.
+- rebase PR #189 onto current `main` and consume the merged specification;
+- add Force-Text disk/YAML scanning that detects quest-shaped assets even when `t:QuestDefinition` cannot resolve them;
+- parse exact `m_Script` fileID/GUID and distinguish missing, zero, removed, unrelated, and malformed references;
+- validate every `.asset` document/subasset by local file ID;
+- lock the exact historical 12-field schema/menu/type/GUID contract;
+- reject missing/unexpected fields, blank IDs, duplicate IDs, and wrong runtime types;
+- run the complete non-imported malformed-YAML matrix and one valid create/import/reimport/full-field round trip;
+- update the authority record/inventory;
+- run canonical Unity 2022.3.62f3 compile, complete/focused EditMode, reimport, missing-script, GUID, diff, and final-status evidence.
 
 No A1, #183 production authority, or production Player work may claim a trusted Unity asset baseline before #156 is complete.
 
@@ -177,11 +194,11 @@ The current implementation contradicts the merged save policy:
 - contradictory-state, no-side-effect, definition-return, exact-preservation, and query-idempotency tests are incomplete;
 - canonical-workspace Unity evidence is missing.
 
-#152 must operate through a non-mutating compatibility view. Data-changing repair and candidate replacement remain #137 responsibilities.
+The latest SHA change was a rebase only; reviewed service blobs are unchanged. #152 must operate through a non-mutating compatibility view. Data-changing repair and candidate replacement remain #137 responsibilities.
 
 ### #214 — economy resource/credit integrity
 
-PR #215 merged the binding contract at `unity/Docs/Economy_Integrity_Spec.md`. PR #214 was created before it and currently implements the opposite repair policy:
+PR #215 merged the binding contract at `unity/Docs/Economy_Integrity_Spec.md`. PR #214 was created before it and implements the opposite repair policy:
 
 - reads initialize null wallets, delete null rows, and rewrite negative balances;
 - duplicate resource rows are summed into the first row;
@@ -192,10 +209,26 @@ PR #215 merged the binding contract at `unity/Docs/Economy_Integrity_Spec.md`. P
 - legacy nested save remains the only credit path;
 - live production delta, dependency validation, atomic batch, remainders, and event behavior remain uncorrected;
 - tests encode prohibited repair and omit the required matrix;
-- Unity evidence is duplicate-workspace exit `199` with no XML;
-- branch is behind current `main` and the merged specification.
+- Unity evidence is duplicate-workspace exit `199` with no XML.
 
-Required correction is a contract-first rewrite: preserve malformed evidence, disable mutation, implement typed no-save primitives and compatibility wrappers, enforce core/rare authority, make reads pure, stage production atomically, rebase, and validate canonically.
+The latest SHA change was a rebase only; reviewed service blobs are unchanged. Required correction is a contract-first rewrite: preserve malformed evidence, disable mutation, implement typed no-save primitives and compatibility wrappers, enforce core/rare authority, make reads pure, stage production atomically, rebase to current `main`, and validate canonically.
+
+### #217 — terrestrial design-source foundation
+
+The packet has an appropriate source-mode boundary and useful base profile intent, but it is not yet technically ready for user creative review or issue closure:
+
+- change `Fixes #194` to `Refs #194`; user approval and later engineering fidelity remain outstanding;
+- rebase onto current `main`;
+- render/link all three concept sheets directly in the PR for user review;
+- prove Git LFS retrieval with `git lfs fsck` and a clean/fresh checkout, then verify actual hashes/dimensions;
+- store immutable media type, dimensions, SHA-256, source version, and prompt/provenance reference in the manifest;
+- add visual source for all declared variants or mark non-standard variants proposed/pending user approval;
+- add deterministic manifest schema/semantic validation;
+- mark working labels and biome entries as non-player-facing, non-runtime design intent;
+- either run canonical Unity import for PNGs kept under `Assets` or move pure previews under Docs;
+- record explicit source-review/user-approval/runtime-blocked readiness state.
+
+The latest SHA change was a rebase only; the manifest and design-source blobs are unchanged. GPT has not approved creative fidelity. User visual approval remains mandatory before engineering integration or production use.
 
 ## Active gate: #156
 
@@ -209,7 +242,7 @@ AL.Data.Definitions.Narrative.QuestDefinition
 GUID c385b2b183b74184ca75eeffbe2256ef
 ```
 
-Expected authority is the surviving narrative type/GUID only after complete inventory, malformed-asset coverage, exact type/GUID/ID guards, and canonical Unity import/editor evidence pass.
+The narrative type/GUID authority and historical field equivalence are accepted. Completion now means implementing the merged PR #218 YAML/subasset/schema validator contract and passing canonical Unity evidence.
 
 ## Save and persistence dependency
 
@@ -236,6 +269,20 @@ All implementations consume `Save_Semantic_Compatibility_Policy.md`. Queries do 
 ```
 
 Current `LocalGameDataService` does not define `ManaShrine` or `Mine`, exposes no research query, and returns `null` for all troop lookups. Before #183, #165 may fail closed but must not invent temporary IDs, maximum levels, troop definitions, or balance.
+
+## Terrestrial source and integration dependency
+
+```text
+#194 / PR #217 technically complete source packet
+          ↓
+user creative approval
+          ↓
+#156 trusted Unity asset baseline + #183 game-data authority + owning runtime issue
+          ↓
+separate Codex engineering integration and fidelity review
+```
+
+Terrestrial profile IDs, working labels, variant intent, biome tags, concept images, and source versions are not gameplay, spawn, AI, reward, save, lore, or runtime catalog authority.
 
 ## Validation and quality-gate dependency
 
@@ -276,6 +323,7 @@ The archived packet is history, not approved A1. A1 must encode D1–D16, includ
 - #178 containment may continue only within focused controller/UI/release-reachability boundaries.
 - #173 implementation follows accepted #137/#183 prerequisites; its merged specification does not authorize early mutation work.
 - #165 full reconnection follows accepted #163 and #183; earlier containment may only fail closed.
+- terrestrial runtime work follows technical source completion, user creative approval, #156/#183, and a separately approved owning issue.
 
 ## Shared-file state
 
@@ -300,18 +348,18 @@ The first approved open PR declaring a designated file holds the lock. No confli
 Issue closure, PR merge, source presence, one-platform compilation, skipped checks, or documentation alone are insufficient. Evidence must match the risk:
 
 - build risk — exact commands, exit codes, logs, and compiler scan;
-- asset risk — GUID/reference inventory, reimport, malformed/missing-script scan, and field preservation;
+- asset risk — GUID/reference inventory, LFS retrieval, import/reimport, malformed/missing-script scan, hashes, dimensions, and field preservation;
 - test risk — discovered totals and retained XML/log artifacts;
 - save/economy/reward risk — normal, recovery, fault, duplicate, overflow, reload, event/save-count, and idempotency matrices;
 - contract risk — valid/invalid data and implemented producer/consumer proof;
 - packaging risk — actual Player/export build and launch transition;
-- source/design risk — approved packet fidelity, provenance, references, and user decision;
+- source/design risk — approved packet fidelity, rendered references, provenance, version/hash mapping, accessibility, and user decision;
 - player-experience risk — integrated user playtest.
 
 ## Immediate next actions
 
 ```text
-1. Correct and revalidate PR #189 to clear the active #156 gate.
+1. Implement merged PR #218 in PR #189 and run canonical Unity evidence to clear #156.
 2. Rewrite PR #214 against the merged economy specification and run canonical evidence.
 3. Correct PR #209 cleanup ordering before any branch consumes PlayMode evidence.
 4. Harden PR #210 against the merged policy, run proof PRs, and retain live artifacts.
@@ -319,5 +367,6 @@ Issue closure, PR merge, source presence, one-platform compilation, skipped chec
 6. Remove PR #208 hidden controller/direct-credit mutations and prove non-mutation/release reachability.
 7. Fix PR #195 durable rejection notice and rebase/revalidate Android.
 8. Complete PR #203 transaction-safe lifecycle and full fault matrix while retaining the lock.
-9. Do not activate #183 implementation, #165 reconnection, A1, G1, #137, #134, or production Player claims before their prerequisites pass.
+9. Correct PR #217 technical manifest/LFS/import/variant review gates, then obtain user creative approval.
+10. Do not activate #183 implementation, #165 reconnection, A1, G1, #137, #134, terrestrial runtime, or production Player claims before their prerequisites pass.
 ```
