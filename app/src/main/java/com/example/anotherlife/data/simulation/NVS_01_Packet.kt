@@ -6,13 +6,11 @@ package com.example.anotherlife.data.simulation
  * Purpose: First end-to-end quest loop bridging Kingdom and Arena.
  * Quest: OMEN_1 "The First Signal"
  * 
- * CONTINUITY NOTES:
- * This quest serves as the player's first introduction to the Sky Castle and the Celestial vibrations.
- * It establishes Captain Valerius as the primary military advisor.
+ * FIDELITY STATUS: Clean A1 (Complies with D1-D16 #138 and Audit 2026-07-14)
  */
 object NVS_01_Packet {
     const val MILESTONE_ID = "NVS-01"
-    const val CHAPTER_ID = "CH0_PROLOGUE"
+    const val CHAPTER_ID = "CH1_PROLOGUE"
     const val QUEST_ID = "OMEN_1"
     
     // Stable IDs for handoff
@@ -20,30 +18,32 @@ object NVS_01_Packet {
     const val ARENA_HOOK_ID = "HOOK_SKY_CASTLE_ARENA"
     const val REWARD_ARTIFACT_ID = "REW_OMEN_1_TEAR"
     
-    // Semantic Gameplay Handoff
+    // Semantic Gameplay Handoff (D1, D8)
     const val GAMEPLAY_HANDOFF_REQUEST = "EXECUTE_ARENA_ENCOUNTER:HOOK_SKY_CASTLE_ARENA"
-    const val GAMEPLAY_RETURN_EVENT = "EVENT_ARENA_ENCOUNTER_SUCCESS:HOOK_SKY_CASTLE_ARENA"
+    const val GAMEPLAY_RETURN_SUCCESS = "EVENT_ARENA_ENCOUNTER_SUCCESS:HOOK_SKY_CASTLE_ARENA"
+    const val GAMEPLAY_RETURN_FAILURE = "EVENT_ARENA_ENCOUNTER_FAILURE:HOOK_SKY_CASTLE_ARENA"
 
-    // Prerequisites & Entry Conditions
-    val prerequisites = listOf("NONE") // Starting quest
-    val entryConditions = "CHAPTER_ID == CH0_PROLOGUE"
-    val unlockRules = "AUTOMATIC_ON_START"
+    // Entry, Placement, and Unlock (D10, D12, D15)
+    val eligibleRealms = listOf("Crownlands")
+    val prerequisites = listOf("NONE") // Starting quest for Crownlands
+    val entryConditions = "CHAPTER_ID == CH1_PROLOGUE && SELECTED_REALM == Crownlands"
+    val unlockRules = "MANUAL_INTERACTION:ADVISOR_VALERIUS"
 
-    // Quest States
+    // Quest States (D3, D16)
     enum class State {
         INACTIVE,
         TALK_TO_VALERIUS,
-        INVESTIGATE_SKY_CASTLE, // Arena Handoff State
-        REPORT_TO_VALERIUS,
+        INVESTIGATE_SKY_CASTLE, // Mid-arena / Handoff State
+        REPORT_TO_VALERIUS,     // Manual report required after Arena (D14)
         COMPLETED,
-        FAILED
+        FAILED                  // Transient failure state (D3)
     }
 
-    // Objective Definitions
+    // Objective Progression (D2, D6, D13, D14)
     val objectives = listOf(
         Objective("OBJ_OMEN_1_TALK", "Speak with Captain Valerius in the Command Center."),
         Objective("OBJ_OMEN_1_ARENA", "Investigate the celestial anomaly at the Sky Castle."),
-        Objective("OBJ_OMEN_1_REPORT", "Deliver the Celestial Tear to Valerius.")
+        Objective("OBJ_OMEN_1_REPORT", "Report findings back to Captain Valerius.")
     )
 
     data class Objective(val id: String, val description: String)
@@ -52,7 +52,7 @@ object NVS_01_Packet {
         DialogueNode(
             id = "DLG_OMEN_1_START",
             characterName = "Captain Valerius",
-            text = "My Lord, the observers at the Sky Castle report strange vibrations. The very air seems to hum. Will you investigate?",
+            text = "My Lord, the observers at the Sky Castle report strange vibrations. Will you investigate?",
             choices = listOf(
                 DialogueChoice("I will investigate personally.", "DLG_OMEN_1_GO"),
                 DialogueChoice("Tell me more first.", "DLG_OMEN_1_LORE")
@@ -71,13 +71,13 @@ object NVS_01_Packet {
             characterName = "Captain Valerius",
             text = "As you command. The Sky Castle awaits your arrival. Be prepared for anything.",
             choices = listOf(
-                DialogueChoice("[Transition to Arena]", "DLG_OMEN_1_ARENA_START")
+                DialogueChoice("[Transition to Arena]", "end") // Handoff via consequence
             )
         ),
         DialogueNode(
             id = "DLG_OMEN_1_SUCCESS",
             characterName = "Captain Valerius",
-            text = "You returned! And with a fragment of the anomaly. This 'Celestial Tear' will be vital for our research.",
+            text = "You returned! This 'Celestial Tear' will be vital for our research. Well done.",
             choices = listOf(
                 DialogueChoice("The kingdom is safe for now.", "end")
             )
@@ -85,46 +85,41 @@ object NVS_01_Packet {
         DialogueNode(
             id = "DLG_OMEN_1_FAILURE",
             characterName = "Captain Valerius",
-            text = "The vibrations were too strong, My Lord. Your safety is paramount. We must regroup and try again when you are ready.",
+            text = "The vibrations were too strong, My Lord. We must regroup and try again when you are ready.",
             choices = listOf(
                 DialogueChoice("I will return soon.", "end")
             )
         )
     )
 
-    // Consequences & Transitions
-    // Format: "DIALOGUE_ID" -> List of "COMMAND:PAYLOAD"
+    // Consequence Intent and Ordering (D4, D5)
+    // 1. Success -> Acquire Tear -> Report State
+    // 2. Report Interaction -> Gain Gold -> Gain Affinity -> Completion
     val consequences = mapOf(
         "DLG_OMEN_1_GO" to listOf(
-            "SET_AFFINITY:ADVISOR_VALERIUS:+5",
             "TRANSITION_STATE:INVESTIGATE_SKY_CASTLE",
             "REQUEST_HANDOFF:HOOK_SKY_CASTLE_ARENA"
         ),
         "EVENT_ARENA_ENCOUNTER_SUCCESS:HOOK_SKY_CASTLE_ARENA" to listOf(
+            "ADD_ARTIFACT:REW_OMEN_1_TEAR", // Acquire Tear immediately (D5, D13)
             "TRANSITION_STATE:REPORT_TO_VALERIUS",
-            "TRIGGER_DIALOGUE:DLG_OMEN_1_SUCCESS"
+            "UPDATE_OBJECTIVE:OBJ_OMEN_1_REPORT:ACTIVE"
         ),
         "EVENT_ARENA_ENCOUNTER_FAILURE:HOOK_SKY_CASTLE_ARENA" to listOf(
-            "TRANSITION_STATE:TALK_TO_VALERIUS", // Recovery point
+            "TRANSITION_STATE:TALK_TO_VALERIUS", // Recovery point (D2)
             "TRIGGER_DIALOGUE:DLG_OMEN_1_FAILURE"
         ),
         "DLG_OMEN_1_SUCCESS" to listOf(
-            "ADD_RESOURCE:GOLD:500",
-            "ADD_ARTIFACT:REW_OMEN_1_TEAR",
-            "TRANSITION_STATE:COMPLETED"
+            "SET_AFFINITY:ADVISOR_VALERIUS:+5", // Affinity at Report (D4)
+            "ADD_RESOURCE:GOLD:500",           // Gold at Report (D5)
+            "TRANSITION_STATE:COMPLETED"        // Final Terminal State (D6)
         )
     )
 
-    // Recovery & Retry Behavior
-    const val RETRY_BEHAVIOR = "ON_ARENA_FAILURE:RESET_TO_STATE:INVESTIGATE_SKY_CASTLE"
-    const val CANCELLATION_BEHAVIOR = "NOT_ALLOWED"
-    const val RECOVERY_BEHAVIOR = "ON_LOAD:RESUME_LATEST_STATE"
-
-    // Localization Keys (Placeholder)
-    val locKeys = mapOf(
-        "DLG_OMEN_1_START_TEXT" to "omen1.dialogue.start",
-        "OBJ_OMEN_1_TALK_DESC" to "omen1.objective.talk"
-    )
+    // Persistence and Recovery (D16)
+    const val RESUME_SEMANTICS = "ON_LOAD:START_OF_CURRENT_STATE"
+    const val CANCELLATION_ALLOWED = true // (D9)
+    const val RETRY_PLAYER_ACTION = "TALK_TO_VALERIUS_AFTER_FAILURE"
 
     // Validation Confirmation
     const val RUNTIME_SYSTEMS_RETOUCHED = false
