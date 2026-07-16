@@ -1081,7 +1081,7 @@ No raw technical event ID is shown as player copy. No hard-coded Unity rich text
 
 - Codex narrative/content writes names/descriptions/start/end/cancel copy and localization keys;
 - Codex engineering validates placeholders/schema and maps definitions;
-- GPT reviews semantic outcome mapping;
+- Codex coordination/review mode reviews semantic outcome mapping;
 - user approves unresolved tone/product meaning.
 
 ## 16. Commit events and queries
@@ -1467,7 +1467,7 @@ narrative copy/effect balance
 Phase B:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -1531,5 +1531,5 @@ Duplicate-workspace, exit `199`, missing XML, float countdown cited as persisten
 ## 24. Codex handoff
 
 ```text
-Codex engineering: implement only Phase B of issue #172 from current main using unity/Docs/World_State_Lifecycle_Transaction_Spec.md. Create codex/world-state-contract-planner. Add immutable world-event definition/effect/instance/snapshot/request/result/plan/event models, strict definition/instance validators, an injected UTC clock/definition resolver, one-active-global lifecycle planning for start/end/cancel/reconcile, fake effect-consumer registration/preparation/apply seams, stale-plan/idempotency/fake-target tests, and a current caller/interface inventory. Perform no mutation, save, event, notification, or real consumer effect. Do not edit SaveGameData.cs, LocalSaveGameService.cs, Bootloader.cs, LocalGameDataService.cs, WorldStateService production behavior, resource/territory/building/research/warzone services, scenes, Android, narrative/localization content, or balance. Run canonical Unity validation and return one focused draft PR for GPT review.
+Codex engineering: implement only Phase B of issue #172 from current main using unity/Docs/World_State_Lifecycle_Transaction_Spec.md. Create codex/world-state-contract-planner. Add immutable world-event definition/effect/instance/snapshot/request/result/plan/event models, strict definition/instance validators, an injected UTC clock/definition resolver, one-active-global lifecycle planning for start/end/cancel/reconcile, fake effect-consumer registration/preparation/apply seams, stale-plan/idempotency/fake-target tests, and a current caller/interface inventory. Perform no mutation, save, event, notification, or real consumer effect. Do not edit SaveGameData.cs, LocalSaveGameService.cs, Bootloader.cs, LocalGameDataService.cs, WorldStateService production behavior, resource/territory/building/research/warzone services, scenes, Android, narrative/localization content, or balance. Run canonical Unity validation and return one focused draft PR for Codex coordination/review.
 ```

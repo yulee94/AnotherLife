@@ -13,6 +13,7 @@ primary_modes:
 retired_agents_and_prefixes:
   - GPT
   - Android Studio
+  - Gemini
   - gpt/
   - android-studio/
   - gemini/
@@ -52,6 +53,6 @@ required_pr_checks:
   - one Codex primary mode is selected
   - upstream issue or artifact is linked
   - changed shared files are declared
-  - branch prefix matches the Codex-only ownership model
+  - branch prefix matches the single Codex agent ownership model
   - draft PRs are not represented as ready to merge
-  - no future GPT or Android Studio action is required
+  - no future GPT, Android Studio, Gemini, or external-agent action is required

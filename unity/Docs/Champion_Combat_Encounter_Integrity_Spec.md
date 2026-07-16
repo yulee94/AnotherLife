@@ -7,7 +7,7 @@
 **Specification/review owner:** GPT  
 **Skill, boss, encounter, and player-facing content owner:** Codex narrative/content  
 **Final balance, creative, playtest, and release approval:** User  
-**Canonical Unity workspace:** `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+**Canonical Unity workspace:** `C:\Users\MY\Documents\AnotherLife\unity`
 
 ## 1. Purpose
 
@@ -2310,7 +2310,7 @@ No conflict resolution may discard valid current services, fields, tests, contra
 Run from:
 
 ```text
-D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
+C:\Users\MY\Documents\AnotherLife\unity
 Unity 2022.3.62f3
 ```
 
@@ -2345,7 +2345,7 @@ Duplicate-workspace, stale-base, skipped, compile-only, missing XML, development
 
 ## 48. Review questions
 
-GPT review verifies:
+Codex coordination/review verifies:
 
 - all numeric/vector inputs are finite and bounded;
 - actor/action/boss/encounter state machines are explicit and total;

@@ -219,7 +219,7 @@ privacyClass
 sourceSystems
 ```
 
-GPT reviews outcome-to-definition mapping and failure/transaction semantics.
+Codex coordination/review mode reviews outcome-to-definition mapping and failure/transaction semantics.
 
 ### 4.2 Player-facing content
 
@@ -1477,7 +1477,7 @@ balance/rewards
 Phase B from canonical workspace:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -1538,5 +1538,5 @@ Duplicate-workspace, exit `199`, missing XML, skipped suite, console log represe
 ## 27. Codex handoff
 
 ```text
-Codex engineering: implement only Phase B of issue #177 from current main using unity/Docs/Notification_Delivery_Contract_Spec.md. Create codex/notification-contract-queue. Add immutable typed definition/request/enqueue-result/delivery-receipt/action/diagnostic contracts, an injected definition resolver and realtime clock, a deterministic 64-record session queue with correlation deduplication/capacity/state transitions, presenter registration seams with fake presenters, and complete EditMode tests. Retain/deprecate the three raw-string compatibility wrappers and inventory their callers. Do not edit Bootloader.cs, ServiceLocator.cs, saves, scenes, UI, Android, WorldStateService, LocalBossLootService, or narrative/localization content; do not add persistent history or migrate callers. Run canonical Unity validation and return one focused draft PR for GPT review.
+Codex engineering: implement only Phase B of issue #177 from current main using unity/Docs/Notification_Delivery_Contract_Spec.md. Create codex/notification-contract-queue. Add immutable typed definition/request/enqueue-result/delivery-receipt/action/diagnostic contracts, an injected definition resolver and realtime clock, a deterministic 64-record session queue with correlation deduplication/capacity/state transitions, presenter registration seams with fake presenters, and complete EditMode tests. Retain/deprecate the three raw-string compatibility wrappers and inventory their callers. Do not edit Bootloader.cs, ServiceLocator.cs, saves, scenes, UI, Android, WorldStateService, LocalBossLootService, or narrative/localization content; do not add persistent history or migrate callers. Run canonical Unity validation and return one focused draft PR for Codex coordination/review.
 ```

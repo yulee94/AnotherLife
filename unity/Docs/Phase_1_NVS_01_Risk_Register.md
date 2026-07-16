@@ -5,6 +5,7 @@
 **Active control state:** Phase 1 remains paused behind reopened #156 and the red Phase 0/1 foundation gate
 **Approved product intent:** issue #138 D1–D16
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
+**Product direction:** `unity/Docs/Product_Direction.md`
 
 This register records verified current-source and delivery risk. It supersedes assumptions based only on automatic issue closure, merged PR state, branch descriptions, passing tests that encode the wrong policy, source presence, generated files, compilation, workflow success, LFS pointers, or one-platform evidence.
 
@@ -32,7 +33,7 @@ The latest user decision assigns every future project task and risk disposition 
 | R16 | Critical | Production controller paths still mutate saves/economy invisibly | Kingdom starts another load, periodically completes progression, dashboard reads seed state, and Champion Arena grants recurring credits | engineering | **Active — #178 correction** |
 | R17 | High | Android release fallback notice can disappear | sanitized back-stack’s next Compose pass can clear the technical rejection notice | engineering | **Active — #161 correction** |
 | R18 | High | Green repository workflow can hide policy gaps | policy YAML is not fully authoritative; ranges/classifiers/security/transcripts/live failure proofs/Unity model/protection are incomplete | engineering + coordination/review + maintainer | **Active — #155; PR #232 partial only** |
-| R19 | High | Retired GPT or Android Studio ownership can persist in templates, branches, or review expectations | pre-handoff governance allowed `gpt/` branches and mandatory GPT dispositions | coordination/review | **Controlled by Codex-only governance/policy handoff; verify after merge** |
+| R19 | High | Retired GPT or Android Studio ownership can persist in templates, branches, or review expectations | pre-handoff governance allowed `gpt/` branches and mandatory GPT dispositions | coordination/review | **Controlled by single-agent governance/policy handoff; verify after merge** |
 | R20 | High | Duplicate-workspace Unity evidence may be cited as current | older drafts and issues cite different worktrees; evidence is trustworthy only when exact path, base/head, branch state, and dirty/clean state are reported | engineering + coordination/review | **Active — exact workspace evidence required** |
 | R21 | High | Production scenes have no committed authority | only test scene is committed and normal Build Settings are empty | engineering + coordination/review | **Active — #223 after #156/#153** |
 | R22 | Critical | Scene generator can overwrite authored assets and packaging policy | current generator recreates scenes and replaces Build Settings without stable-GUID protection, dry run, rollback, drift validation, or idempotency proof | engineering + coordination/review | **Active — #223** |
@@ -54,6 +55,8 @@ The latest user decision assigns every future project task and risk disposition 
 | R38 | High | Android↔Unity integration remains unproven | no packaged export, mounted host, request/result/session identity, lifecycle, or device evidence | engineering + coordination/review | **Deferred — #135 after standalone Player path** |
 | R39 | High | Status and issue metadata can drift during concurrent merges | partial work and documentation merges can change issue/PR metadata faster than acceptance records | coordination/review + maintainer | **Mitigated — recurring current-main audits** |
 | R40 | High | Shared-file overlap can invalidate concurrent work | draft PR #241 exclusively owns `Bootloader.cs`; overlapping changes would create lifecycle/conflict risk | coordination/review + engineering | **Active lock — no other PR may edit the file** |
+| R41 | High | Unity Hub playable experience can remain a debug toy instead of the requested adult realm-war game | current prototype still contains placeholder/demo arena, primitive objects, and incomplete launch→realm→kingdom→warzone objective flow | coordination/review + engineering + source modes | **Active — product direction now binding; visual/UX modernization and end-to-end gates required** |
+| R42 | Critical | Final warzone objective path can fragment across unsafe economy/save/boss/gem/Warmaster systems | dragon/boss/gem/Warmaster/final-wish loop depends on durable realm identity, committed rewards, anti-duplication, objective state, and save recovery | coordination/review + engineering | **Blocked behind #137/#163/#166/#168/#169/#171/#173/#180/#183 and later warzone objective spine** |
 
 ## 2. D1–D16 controls
 
@@ -256,7 +259,7 @@ Skipped, stale, duplicate-workspace, pointer-only, Console-only, compile-only, w
 ## 7. Immediate mitigation
 
 ```text
-1. Merge and verify the Codex-only governance handoff; reject new GPT/Android Studio ownership modes and prefixes.
+1. Merge and verify the single-agent governance handoff; reject new GPT/Android Studio/Gemini ownership modes and prefixes.
 2. Codex coordination/review rechecks all open PRs from current main and preserves the Bootloader lock.
 3. Keep Phase 1 paused until PR #237 fixes all false-pass paths and passes canonical #156 evidence.
 4. Keep the Bootloader lock on PR #241 until one owner/load/save/marker/rollback/scene lifecycle and the full canonical matrix pass.
@@ -269,6 +272,7 @@ Skipped, stale, duplicate-workspace, pointer-only, Console-only, compile-only, w
 11. Permit the nine pure planner lanes without production integration, shared locks, or issue closure.
 12. Keep #183, #223, #150, A1/G1/runtime, persisted progression/territory/customization/reward/world/relationship work,
     Android export, and release claims behind prerequisites.
+13. Reopen closed issues or create focused follow-ups whenever current source, Unity Hub play, or validation evidence shows a closed issue still blocks the product direction.
 ```
 
 No next GPT or Android Studio action exists.

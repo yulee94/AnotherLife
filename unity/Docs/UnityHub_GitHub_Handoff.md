@@ -2,13 +2,13 @@
 
 Project path:
 
-`C:\Users\MY\AndroidStudioProjects\AnotherLife\unity`
+`C:\Users\MY\Documents\AnotherLife\unity`
 
 GitHub target:
 
 `https://github.com/yulee94/AnotherLife`
 
-Use this one project only. The old `AnotherLifeUnity` duplicate project and temporary Codex worktrees were removed to keep the C drive and GitHub view simple.
+Use this one project only. The old `AnotherLifeUnity` duplicate project, historical `AndroidStudioProjects` workspace, and temporary Codex worktrees are not active workspaces.
 
 ## What Is In This Project
 
@@ -31,7 +31,7 @@ Use this one project only. The old `AnotherLifeUnity` duplicate project and temp
 
 ## Generate Starter Design Assets In Unity
 
-1. Open `C:\Users\MY\AndroidStudioProjects\AnotherLife\unity` in Unity Hub.
+1. Open `C:\Users\MY\Documents\AnotherLife\unity` in Unity Hub.
 2. Let Unity import the project.
 3. In the Unity top menu, choose `Another Life > Generate Design Assets`.
 4. Generated prototype assets will be created under `Assets/AL/Art/Generated`.
@@ -49,7 +49,7 @@ Before building the Kingdom scene deeper, test:
 
 ## Fable Compatibility
 
-Your co-developer can use the JSON catalogs without referencing Unity assemblies. The Fable-facing contract files are under `SharedContracts/`.
+Fable-compatible tooling can use the JSON catalogs without referencing Unity assemblies. The Fable-facing contract files are under `SharedContracts/`. This Codex agent remains responsible for project work; Unity Hub, GitHub, Fable, and Android tooling are tools only.
 
 Recommended flow:
 

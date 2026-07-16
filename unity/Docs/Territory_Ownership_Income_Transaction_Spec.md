@@ -8,7 +8,7 @@
 **Territory display names, descriptions, and localization owner:** Codex narrative/content  
 **World-map and terrestrial presentation fidelity owner:** Codex terrestrial-design where applicable  
 **Final balance, progression feel, product, playtest, and release approval:** User  
-**Canonical Unity workspace:** `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+**Canonical Unity workspace:** `C:\Users\MY\Documents\AnotherLife\unity`
 
 ## 1. Purpose
 

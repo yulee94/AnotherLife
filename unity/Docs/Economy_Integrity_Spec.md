@@ -668,7 +668,7 @@ Use isolated fake save services and fake dependencies. Never use the developer p
 Run from the canonical workspace only:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -717,7 +717,7 @@ Duplicate-workspace evidence is blocked validation.
 8. Refactor live production into validate → stage contribution/remainder/batch → commit.
 9. Add the complete focused test matrix.
 10. Inventory remaining legacy callers and link each to its owning issue.
-11. Run canonical Unity validation and return a draft PR for GPT review.
+11. Run canonical Unity validation and return a draft PR for Codex coordination/review.
 
 ## 18. Acceptance criteria
 
@@ -740,5 +740,5 @@ Duplicate-workspace evidence is blocked validation.
 ## Codex handoff
 
 ```text
-Codex engineering: implement issue #163 from current main using unity/Docs/Economy_Integrity_Spec.md and Save_Semantic_Compatibility_Policy.md. Add typed no-save resource and Warzone Credit read/mutation results, preserve compatibility wrappers, validate the complete known wallet without repairing malformed rows, distinguish missing core from optional rare resources, use checked staged arithmetic, and make live production an atomic bounded batch with session-only finite remainders. Do not authorize rewards, change balances/rates, edit shared save/Bootloader files, or absorb #165/#166/#168/#169/#171/#178/#180. Run the full matrix from D:\260711\MY\AndroidStudioProjects\AnotherLife\unity and return one focused draft PR for GPT review.
+Codex engineering: implement issue #163 from current main using unity/Docs/Economy_Integrity_Spec.md and Save_Semantic_Compatibility_Policy.md. Add typed no-save resource and Warzone Credit read/mutation results, preserve compatibility wrappers, validate the complete known wallet without repairing malformed rows, distinguish missing core from optional rare resources, use checked staged arithmetic, and make live production an atomic bounded batch with session-only finite remainders. Do not authorize rewards, change balances/rates, edit shared save/Bootloader files, or absorb #165/#166/#168/#169/#171/#178/#180. Run the full matrix from the active Codex Unity workspace and return one focused draft PR for Codex coordination/review.
 ```

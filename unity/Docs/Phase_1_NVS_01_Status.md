@@ -6,6 +6,7 @@
 **Roadmap state:** Phase 1 remains paused behind reopened QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate
 **Approved product intent:** issue #138 D1–D16
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
+**Product direction:** `unity/Docs/Product_Direction.md`
 
 `AGENTS.md` is authoritative. This record separates specification, source presence, merge state, issue state, validation evidence, accepted behavior, creative approval, packaging evidence, and player-visible completion.
 
@@ -14,7 +15,8 @@ A merged PR, closed issue, green test suite, generated asset, Console log, uploa
 ## 1. Current control summary
 
 - The active product milestone remains **NVS-01**.
-- The latest user decision assigns all future project work to **Codex only**. GPT and Android Studio receive no future task, review, or approval assignment.
+- The larger target experience is launch realm selection into polished 2.5D inner-kingdom progression, then 3D realm-vs-realm outer-warzone objectives that culminate in the eight-gem final wish to the dragon.
+- The latest user decision assigns all future project work and responsibility to **this Codex agent**. GPT, Android Studio, Gemini, and other assistants/tools receive no future task, review, or approval assignment.
 - Codex now operates through coordination/review, narrative/content, terrestrial-design, and engineering modes. The user retains final creative, product, balance, irreversible-profile, playtest, milestone, and release approval.
 - Historical GPT-authored specifications and review comments remain technical evidence. Open work must not wait for another GPT response; Codex coordination/review mode owns all future disposition and merge-readiness decisions.
 - No approved A1 narrative packet is active. Archived OMEN_1 material remains historical reference only.
@@ -27,7 +29,7 @@ A merged PR, closed issue, green test suite, generated asset, Console log, uploa
 - PR #232 is accepted as partial #155 progress: terrestrial path classification, disposable local failure fixtures, and a proof/protection plan. #155 remains open through policy authority, correct event/range semantics, complete security/classification/artifacts, live failure proofs, a Unity validation model, and verified branch protection.
 - PRs #238, #240, and #239 added binding **specifications**, not implementations, for progression, territory, and Champion customization.
 
-## 2. Codex-only ownership state
+## 2. Single-agent ownership state
 
 ### Codex coordination/review mode
 
