@@ -32,6 +32,8 @@ AnotherLife is an adult high-fantasy realm-war game, not a childlike prototype o
 - The skill tree is available from level 1 so new users can understand growth direction immediately.
 - Skill points are earned through leveling and spent through the skill tree. Skill-point grants, refunds, respec limits, and invalid-spend recovery need durable, duplicate-safe rules before production implementation.
 - Levels 10, 20, 30, 40, and 50 are major progression turning points. These milestone levels should unlock especially significant, powerful, or highly useful skills that reinforce the user's character/job choice and create clear gameplay identity shifts.
+- The main questline should naturally bring ordinary players to roughly level 40 by the time they are ready to proceed through the main gate into the outer-realm warzone. This should feel earned through the inner-realm and 2.5D kingdom progression, not skipped through uncontrolled grinding.
+- The level 40 to 50 climb should be a meaningful long-form party-hunting phase. For ordinary players, reaching level 50 from level 40 should take at least about one month of coordinated party hunting rather than a short solo grind.
 - Level 50 is the first cap, not the end of competitive growth. Only after reaching level 50, collecting sufficient Warzone points, and acquiring all required Warmaster gear can a player proceed to **True Warmaster**.
 - True Warmaster is the high-end RvR MMO progression state. It may grant overpowering realm-war skills, but those skills must be balanced around large-scale RvR objectives, counterplay, readability, cooldowns/resource costs, anti-exploit rules, and performance-safe VFX rather than ordinary early-game combat.
 - Warmaster gear, Warzone points, True Warmaster eligibility, and True Warmaster skills must be protected by durable save/reward ledgers and anti-duplication validation.
@@ -41,9 +43,14 @@ AnotherLife is an adult high-fantasy realm-war game, not a childlike prototype o
 - AnotherLife should not be balanced so that ordinary players can easily solo grind, hunt, or level up without powerful gear. Solo play can exist, but efficient progression should require either strong gear or coordinated party play.
 - The main questline should provide useful accessories and gear, but that gear should be only sufficient enough to let users party-grind or party-hunt neutral mobs for leveling. Main quest rewards should not trivialize solo hunting.
 - Neutral mob hunting should reward group composition, positioning, sustain, and support. Healers are a core party-sustain role rather than optional convenience.
+- Each realm warzone should include efficient party-hunting areas with considerably fast spawn speed and condensed monster camps. These camps should support sustained group play while still requiring safe spawn pacing, anti-farm controls, encounter readability, and performance-safe population budgets.
+- A normal party should usually be balanced around 4 to 5 players for grinding and hunting.
+- A **Squad** is a larger group structure for RvR or party PvP fights and should allow up to 10 players.
+- Party membership shares experience, gold, and mob loot from eligible mobs according to party reward rules. Party membership does not share Warzone points.
+- Squad membership is the structure that can distribute Warzone points to squad members. A squad member must have helped or contributed to the kill or objective to receive Warzone point distribution.
 - Potions should grant health regeneration only while the player is in **non-combat mode**. Potions should not replace healers during active combat or allow potion-spam solo sustain.
 - Healers and other buffer/support roles must gain fair experience, gold, and resource rewards from grinding/hunting through effective healing and buffing allies. Support contribution must be tracked through durable, anti-abuse participation rules so support players are not punished for not landing killing blows.
-- Combat contribution, healing contribution, buff contribution, party eligibility, proximity, encounter tagging, anti-leeching, and reward splitting need explicit contracts before production implementation.
+- Combat contribution, healing contribution, buff contribution, party eligibility, squad eligibility, proximity, encounter tagging, kill/objective participation, anti-leeching, reward splitting, mob-loot sharing, and Warzone point distribution need explicit contracts before production implementation.
 
 ## Quality Bar
 
