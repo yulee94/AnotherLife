@@ -35,6 +35,9 @@ jobs:
       - name: Repository hygiene
         shell: pwsh
         run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene
+      - name: Quality gate fixture proofs
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1
 
   android-unit-debug:
     name: android / unit-debug
