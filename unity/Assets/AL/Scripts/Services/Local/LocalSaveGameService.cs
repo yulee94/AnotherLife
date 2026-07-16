@@ -1,21 +1,62 @@
 using UnityEngine;
-using System.IO;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
-using System;
-using System.Text;
 
 namespace AL.Services.Local
 {
-    public enum SaveLoadStatus
+    internal interface ISaveFileOperations
     {
-        None,
-        LoadedPrimary,
-        RecoveredFromBackup,
-        CreatedNew,
-        CreatedNewAfterUnrecoverableCorruption
+        bool FileExists(string path);
+        void CreateDirectory(string path);
+        string ReadAllText(string path);
+        void WriteAllTextDurable(string path, string contents);
+        void Copy(string sourcePath, string destinationPath, bool overwrite);
+        void Move(string sourcePath, string destinationPath);
+        void Replace(string sourcePath, string destinationPath, string backupPath);
+        void Delete(string path);
+        IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern);
+    }
+
+    internal sealed class SystemSaveFileOperations : ISaveFileOperations
+    {
+        public bool FileExists(string path) => File.Exists(path);
+
+        public void CreateDirectory(string path) => Directory.CreateDirectory(path);
+
+        public string ReadAllText(string path) => File.ReadAllText(path);
+
+        public void WriteAllTextDurable(string path, string contents)
+        {
+            using var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
+            using var writer = new StreamWriter(stream, new UTF8Encoding(false));
+            writer.Write(contents);
+            writer.Flush();
+            stream.Flush(true);
+        }
+
+        public void Copy(string sourcePath, string destinationPath, bool overwrite) =>
+            File.Copy(sourcePath, destinationPath, overwrite);
+
+        public void Move(string sourcePath, string destinationPath) =>
+            File.Move(sourcePath, destinationPath);
+
+        public void Replace(string sourcePath, string destinationPath, string backupPath) =>
+            File.Replace(sourcePath, destinationPath, backupPath);
+
+        public void Delete(string path) => File.Delete(path);
+
+        public IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern)
+        {
+            return Directory.Exists(directoryPath)
+                ? Directory.EnumerateFiles(directoryPath, searchPattern)
+                : Enumerable.Empty<string>();
+        }
     }
 
     public class LocalSaveGameService : ISaveGameService
@@ -23,8 +64,11 @@ namespace AL.Services.Local
         private const string SaveFileName = "save.json";
         private const string BackupFileName = "save.backup.json";
         private const string TempFileName = "save.tmp.json";
+        private const string PreviousFileName = "save.previous.json";
+        private const int MaxQuarantinesPerSource = 3;
 
         private readonly string _persistencePathOverride;
+        private readonly ISaveFileOperations _fileOperations;
 
         private string PersistencePath => string.IsNullOrWhiteSpace(_persistencePathOverride)
             ? Application.persistentDataPath
@@ -32,19 +76,32 @@ namespace AL.Services.Local
         private string SavePath => Path.Combine(PersistencePath, SaveFileName);
         private string BackupPath => Path.Combine(PersistencePath, BackupFileName);
         private string TempPath => Path.Combine(PersistencePath, TempFileName);
+        private string PreviousPath => Path.Combine(PersistencePath, PreviousFileName);
 
         private SaveGameData _currentSave;
+
         public SaveGameData CurrentSave => _currentSave;
         public SaveLoadStatus LastLoadStatus { get; private set; }
-        public string LastPersistenceMessage { get; private set; } = string.Empty;
+        public string LastLoadMessage { get; private set; } = string.Empty;
+        public SaveOperationStatus LastSaveStatus { get; private set; }
+        public string LastSaveMessage { get; private set; } = string.Empty;
+        public string LastPersistenceMessage => string.IsNullOrWhiteSpace(LastSaveMessage)
+            ? LastLoadMessage
+            : LastSaveMessage;
 
         public LocalSaveGameService() : this(null)
         {
         }
 
         internal LocalSaveGameService(string persistencePathOverride)
+            : this(persistencePathOverride, new SystemSaveFileOperations())
+        {
+        }
+
+        internal LocalSaveGameService(string persistencePathOverride, ISaveFileOperations fileOperations)
         {
             _persistencePathOverride = persistencePathOverride;
+            _fileOperations = fileOperations ?? throw new ArgumentNullException(nameof(fileOperations));
         }
 
         public void Save()
@@ -54,101 +111,94 @@ namespace AL.Services.Local
                 return;
             }
 
-            try
+            if (TryPersistCandidate(CloneSave(_currentSave), out SaveGameData persistedSave, out string message))
             {
-                EnsureSaveDefaults(_currentSave);
-                _currentSave.LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-                string json = JsonUtility.ToJson(_currentSave, true);
-                WriteSaveAtomically(json);
-                LastPersistenceMessage = $"Game saved safely to {SavePath}.";
-                Debug.Log(LastPersistenceMessage);
+                _currentSave = persistedSave;
+                SetSaveStatus(SaveOperationStatus.SavedPrimary, message, false);
+                return;
             }
-            catch (Exception ex)
-            {
-                TryDelete(TempPath);
-                LastPersistenceMessage = $"Save failed; the previous save was preserved. {ex.Message}";
-                Debug.LogError(LastPersistenceMessage);
-            }
+
+            SetSaveStatus(SaveOperationStatus.SaveFailedPreviousPreserved, message, true);
         }
 
         public void Load()
         {
-            bool primaryExists = File.Exists(SavePath);
-            bool backupExists = File.Exists(BackupPath);
+            CleanStaleTransientFiles();
 
-            if (TryReadSave(SavePath, out SaveGameData primarySave, out string primaryError))
+            bool primaryExists = _fileOperations.FileExists(SavePath);
+            bool backupExists = _fileOperations.FileExists(BackupPath);
+
+            if (TryReadValidSave(SavePath, out SaveGameData primarySave, out string primaryError))
             {
-                CompleteLoad(primarySave, SaveLoadStatus.LoadedPrimary, "Game loaded from the primary save.");
+                CompleteLoad(primarySave, SaveLoadStatus.LoadedPrimary, "AL-SAVE-LOAD-PRIMARY: Game loaded from the primary save.");
                 return;
             }
 
-            if (primaryExists)
+            if (primaryExists && !TryQuarantineInvalidFile(SavePath, out string primaryQuarantineError))
             {
-                Debug.LogWarning($"Primary save is invalid and will be quarantined: {primaryError}");
-                QuarantineInvalidFile(SavePath);
+                if (TryReadValidSave(BackupPath, out SaveGameData lockedBackupSave, out _))
+                {
+                    _currentSave = lockedBackupSave;
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryFailed,
+                        $"AL-SAVE-RECOVERY-FAILED: Primary save is invalid but could not be quarantined. {primaryQuarantineError}",
+                        true);
+                    return;
+                }
+            }
+            else if (primaryExists)
+            {
+                Debug.LogWarning($"AL-SAVE-PRIMARY-CORRUPT: Primary save was invalid and quarantined. {primaryError}");
             }
 
-            if (TryReadSave(BackupPath, out SaveGameData backupSave, out string backupError))
+            if (TryReadValidSave(BackupPath, out SaveGameData backupSave, out string backupError))
             {
-                _currentSave = backupSave;
-                EnsureSaveDefaults(_currentSave);
-                CalculateOfflineProgress();
-                LastLoadStatus = SaveLoadStatus.RecoveredFromBackup;
-                LastPersistenceMessage = "Recovered the profile from the last known-good backup.";
-                Debug.LogWarning(LastPersistenceMessage);
-                Save();
+                RecoverFromBackup(backupSave);
                 return;
             }
 
             if (backupExists)
             {
-                Debug.LogError($"Backup save is also invalid and will be quarantined: {backupError}");
-                QuarantineInvalidFile(BackupPath);
+                if (TryQuarantineInvalidFile(BackupPath, out string backupQuarantineError))
+                {
+                    Debug.LogWarning($"AL-SAVE-BACKUP-CORRUPT: Backup save was invalid and quarantined. {backupError}");
+                }
+                else
+                {
+                    Debug.LogError($"AL-SAVE-BACKUP-QUARANTINE-FAILED: Backup save was invalid but could not be quarantined. {backupQuarantineError}");
+                }
             }
 
             bool hadUnrecoverableCorruption = primaryExists || backupExists;
-            CreateNewSave(RealmId.None);
-            LastLoadStatus = hadUnrecoverableCorruption
-                ? SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption
-                : SaveLoadStatus.CreatedNew;
-            LastPersistenceMessage = hadUnrecoverableCorruption
-                ? "No valid save or backup could be recovered. A new profile was created and the corrupt files were quarantined."
-                : "No save file was found. A new profile was created.";
+            SaveGameData newSave = CreateDefaultSave(RealmId.None);
+            _currentSave = newSave;
 
-            if (hadUnrecoverableCorruption)
+            if (!TryPersistCandidate(CloneSave(newSave), out SaveGameData persistedNewSave, out string createMessage))
             {
-                Debug.LogError(LastPersistenceMessage);
+                _currentSave = newSave;
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryFailed,
+                    $"AL-SAVE-RECOVERY-FAILED: Could not create a replacement profile after unrecoverable save state. {createMessage}",
+                    true);
+                return;
             }
-            else
-            {
-                Debug.Log(LastPersistenceMessage);
-            }
+
+            _currentSave = persistedNewSave;
+            SetLoadStatus(
+                hadUnrecoverableCorruption ? SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption : SaveLoadStatus.CreatedNew,
+                hadUnrecoverableCorruption
+                    ? "AL-SAVE-NEW-AFTER-CORRUPTION: No valid save or backup could be recovered. A new profile was created and corrupt files were quarantined where possible."
+                    : "AL-SAVE-CREATED-NEW: No save file was found. A new profile was created.",
+                hadUnrecoverableCorruption);
         }
 
-        public bool HasSave() => File.Exists(SavePath) || File.Exists(BackupPath);
+        public bool HasSave() =>
+            _fileOperations.FileExists(SavePath) ||
+            _fileOperations.FileExists(BackupPath);
 
         public void CreateNewSave(RealmId realmId)
         {
-            _currentSave = new SaveGameData
-            {
-                SelectedRealm = realmId,
-                LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                Resources = new List<ResourceData>
-                {
-                    new ResourceData { Type = ResourceType.Food, Amount = 1000 },
-                    new ResourceData { Type = ResourceType.Wood, Amount = 1000 },
-                    new ResourceData { Type = ResourceType.Stone, Amount = 500 },
-                    new ResourceData { Type = ResourceType.Gold, Amount = 500 },
-                    new ResourceData { Type = ResourceType.ManaStone, Amount = 150 },
-                    new ResourceData { Type = ResourceType.Ore, Amount = 150 }
-                },
-                Buildings = new List<BuildingState>(),
-                Troops = new List<TroopInventoryData>(),
-                Quests = new List<QuestState>(),
-                CurrentChapterId = "C1",
-                Warmaster = new WarmasterState()
-            };
-            EnsureSaveDefaults(_currentSave);
+            _currentSave = CreateDefaultSave(realmId);
             Save();
         }
 
@@ -157,94 +207,278 @@ namespace AL.Services.Local
             TryDelete(SavePath);
             TryDelete(BackupPath);
             TryDelete(TempPath);
+            TryDelete(PreviousPath);
+
+            foreach (string quarantine in EnumerateQuarantines(SaveFileName).Concat(EnumerateQuarantines(BackupFileName)).ToList())
+            {
+                TryDelete(quarantine);
+            }
+
             _currentSave = null;
             LastLoadStatus = SaveLoadStatus.None;
-            LastPersistenceMessage = "Local save data deleted.";
+            LastLoadMessage = "AL-SAVE-DELETED: Local save data deleted.";
+            LastSaveStatus = SaveOperationStatus.None;
+            LastSaveMessage = string.Empty;
         }
 
-        private void CompleteLoad(SaveGameData save, SaveLoadStatus status, string message)
+        private void CompleteLoad(SaveGameData loadedSave, SaveLoadStatus status, string message)
         {
-            _currentSave = save;
-            EnsureSaveDefaults(_currentSave);
-            CalculateOfflineProgress();
-            LastLoadStatus = status;
-            LastPersistenceMessage = message;
-            Save();
-            Debug.Log(message);
+            SaveGameData original = CloneSave(loadedSave);
+            SaveGameData candidate = CloneSave(loadedSave);
+            ApplyOfflineProgress(candidate);
+
+            if (!SavesAreEquivalent(original, candidate))
+            {
+                if (TryPersistCandidate(candidate, out SaveGameData persistedSave, out string saveMessage))
+                {
+                    _currentSave = persistedSave;
+                    SetSaveStatus(SaveOperationStatus.SavedPrimary, saveMessage, false);
+                }
+                else
+                {
+                    _currentSave = original;
+                    SetSaveStatus(SaveOperationStatus.SaveFailedPreviousPreserved, saveMessage, true);
+                }
+            }
+            else
+            {
+                _currentSave = original;
+            }
+
+            SetLoadStatus(status, message, false);
         }
 
-        private void WriteSaveAtomically(string json)
+        private void RecoverFromBackup(SaveGameData backupSave)
         {
-            Directory.CreateDirectory(PersistencePath);
-            TryDelete(TempPath);
+            SaveGameData repaired = CloneSave(backupSave);
 
-            using (var stream = new FileStream(TempPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
-            using (var writer = new StreamWriter(stream, new UTF8Encoding(false)))
+            if (!TryInstallBackupAsPrimary(repaired, out string repairMessage))
             {
-                writer.Write(json);
-                writer.Flush();
-                stream.Flush(true);
-            }
-
-            if (!TryReadSave(TempPath, out _, out string validationError))
-            {
-                throw new InvalidDataException($"Temporary save validation failed: {validationError}");
-            }
-
-            if (!File.Exists(SavePath))
-            {
-                File.Move(TempPath, SavePath);
+                _currentSave = repaired;
+                SetLoadStatus(SaveLoadStatus.RecoveryFailed, repairMessage, true);
                 return;
             }
 
-            File.Copy(SavePath, BackupPath, true);
+            CompleteLoad(repaired, SaveLoadStatus.RecoveredFromBackup, "AL-SAVE-RECOVERED-BACKUP: Recovered the profile from the last known-good backup.");
+        }
+
+        private bool TryPersistCandidate(SaveGameData candidate, out SaveGameData persistedSave, out string message)
+        {
+            persistedSave = null;
 
             try
             {
-                File.Replace(TempPath, SavePath, null);
+                _fileOperations.CreateDirectory(PersistencePath);
+                TryDelete(TempPath);
+
+                EnsureSaveDefaults(candidate);
+                candidate.LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                string json = JsonUtility.ToJson(candidate, true);
+                _fileOperations.WriteAllTextDurable(TempPath, json);
+
+                if (!TryReadValidSave(TempPath, out SaveGameData tempSave, out string tempValidationError))
+                {
+                    TryDelete(TempPath);
+                    message = $"AL-SAVE-TEMP-INVALID: Temporary save validation failed; previous save was preserved. {tempValidationError}";
+                    return false;
+                }
+
+                bool primaryExists = _fileOperations.FileExists(SavePath);
+                bool primaryValid = TryReadValidSave(SavePath, out _, out string primaryValidationError);
+
+                if (primaryExists && !primaryValid)
+                {
+                    if (!TryQuarantineInvalidFile(SavePath, out string quarantineError))
+                    {
+                        TryDelete(TempPath);
+                        message = $"AL-SAVE-PRIMARY-QUARANTINE-FAILED: Primary was invalid before save and could not be quarantined; backup was preserved. {quarantineError}";
+                        return false;
+                    }
+
+                    Debug.LogWarning($"AL-SAVE-PRIMARY-CORRUPT: Invalid primary quarantined before installing a validated candidate. {primaryValidationError}");
+                }
+
+                if (primaryValid)
+                {
+                    if (!TryInstallWithAtomicReplace(out message))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    _fileOperations.Move(TempPath, SavePath);
+                    if (!TryReadValidSave(SavePath, out _, out string installValidationError))
+                    {
+                        TryQuarantineInvalidFile(SavePath, out _);
+                        message = $"AL-SAVE-INSTALL-INVALID: Installed primary failed validation after first-generation save. {installValidationError}";
+                        return false;
+                    }
+
+                    _fileOperations.Copy(SavePath, BackupPath, true);
+                }
+
+                if (!TryReadValidSave(SavePath, out persistedSave, out string finalPrimaryError))
+                {
+                    message = $"AL-SAVE-FINAL-PRIMARY-INVALID: Installed primary failed final validation. {finalPrimaryError}";
+                    return false;
+                }
+
+                string finalBackupError = "Backup file does not exist.";
+                if (!_fileOperations.FileExists(BackupPath) ||
+                    !TryReadValidSave(BackupPath, out _, out finalBackupError))
+                {
+                    message = $"AL-SAVE-FINAL-BACKUP-INVALID: Backup missing or invalid after save. {finalBackupError}";
+                    return false;
+                }
+
+                TryDelete(TempPath);
+                TryDelete(PreviousPath);
+                PruneQuarantines(SaveFileName);
+                PruneQuarantines(BackupFileName);
+                message = $"AL-SAVE-SAVED-PRIMARY: Game saved safely to {SavePath}.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                TryDelete(TempPath);
+                message = $"AL-SAVE-FAILED-PREVIOUS-PRESERVED: Save failed; previous active files were preserved. {ex.Message}";
+                return false;
+            }
+        }
+
+        private bool TryInstallWithAtomicReplace(out string message)
+        {
+            try
+            {
+                TryDelete(PreviousPath);
+                _fileOperations.Replace(TempPath, SavePath, PreviousPath);
+
+                if (!TryReadValidSave(SavePath, out _, out string installedError))
+                {
+                    RestorePreviousPrimary();
+                    message = $"AL-SAVE-ATOMIC-INSTALL-INVALID: Atomic-installed primary failed validation and previous primary was restored. {installedError}";
+                    return false;
+                }
+
+                _fileOperations.Copy(PreviousPath, BackupPath, true);
+                TryDelete(PreviousPath);
+                message = string.Empty;
+                return true;
             }
             catch (PlatformNotSupportedException)
             {
-                ReplacePrimaryWithMoveFallback();
+                return TryInstallWithMoveFallback(out message);
             }
             catch (NotSupportedException)
             {
-                ReplacePrimaryWithMoveFallback();
+                return TryInstallWithMoveFallback(out message);
             }
-            catch (IOException)
+            catch (Exception ex)
             {
-                ReplacePrimaryWithMoveFallback();
+                RestorePreviousPrimary();
+                TryDelete(TempPath);
+                message = $"AL-SAVE-REPLACE-FAILED: Atomic replace failed without using destructive fallback; previous save was preserved or restored. {ex.Message}";
+                return false;
             }
         }
 
-        private void ReplacePrimaryWithMoveFallback()
+        private bool TryInstallWithMoveFallback(out string message)
         {
-            string previousPath = SavePath + ".previous";
-            TryDelete(previousPath);
-            File.Move(SavePath, previousPath);
-
             try
             {
-                File.Move(TempPath, SavePath);
-                TryDelete(previousPath);
-            }
-            catch
-            {
-                if (!File.Exists(SavePath) && File.Exists(previousPath))
+                TryDelete(PreviousPath);
+                _fileOperations.Move(SavePath, PreviousPath);
+                _fileOperations.Move(TempPath, SavePath);
+
+                if (!TryReadValidSave(SavePath, out _, out string installedError))
                 {
-                    File.Move(previousPath, SavePath);
+                    RestorePreviousPrimary();
+                    message = $"AL-SAVE-FALLBACK-INSTALL-INVALID: Fallback-installed primary failed validation and previous primary was restored. {installedError}";
+                    return false;
                 }
 
-                throw;
+                _fileOperations.Copy(PreviousPath, BackupPath, true);
+                TryDelete(PreviousPath);
+                message = string.Empty;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                RestorePreviousPrimary();
+                TryDelete(TempPath);
+                message = $"AL-SAVE-FALLBACK-FAILED: Fallback install failed and previous primary was preserved. {ex.Message}";
+                return false;
             }
         }
 
-        private static bool TryReadSave(string path, out SaveGameData save, out string error)
+        private bool TryInstallBackupAsPrimary(SaveGameData backupSave, out string message)
+        {
+            try
+            {
+                _fileOperations.CreateDirectory(PersistencePath);
+                TryDelete(TempPath);
+                EnsureSaveDefaults(backupSave);
+                _fileOperations.WriteAllTextDurable(TempPath, JsonUtility.ToJson(backupSave, true));
+
+                if (!TryReadValidSave(TempPath, out _, out string tempError))
+                {
+                    TryDelete(TempPath);
+                    message = $"AL-SAVE-RECOVERY-FAILED: Backup repair candidate failed validation. {tempError}";
+                    return false;
+                }
+
+                if (_fileOperations.FileExists(SavePath))
+                {
+                    TryQuarantineInvalidFile(SavePath, out _);
+                }
+
+                _fileOperations.Move(TempPath, SavePath);
+                if (!TryReadValidSave(SavePath, out _, out string repairedError))
+                {
+                    message = $"AL-SAVE-RECOVERY-FAILED: Repaired primary failed validation. {repairedError}";
+                    return false;
+                }
+
+                message = $"AL-SAVE-RECOVERED-BACKUP: Repaired primary from {BackupPath}.";
+                return true;
+            }
+            catch (Exception ex)
+            {
+                TryDelete(TempPath);
+                message = $"AL-SAVE-RECOVERY-FAILED: Could not repair primary from backup. {ex.Message}";
+                return false;
+            }
+        }
+
+        private void RestorePreviousPrimary()
+        {
+            try
+            {
+                if (!_fileOperations.FileExists(PreviousPath))
+                {
+                    return;
+                }
+
+                if (_fileOperations.FileExists(SavePath))
+                {
+                    TryDelete(SavePath);
+                }
+
+                _fileOperations.Move(PreviousPath, SavePath);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"AL-SAVE-ROLLBACK-FAILED: Could not restore previous primary. {ex.Message}");
+            }
+        }
+
+        private bool TryReadValidSave(string path, out SaveGameData save, out string error)
         {
             save = null;
             error = string.Empty;
 
-            if (!File.Exists(path))
+            if (!_fileOperations.FileExists(path))
             {
                 error = "File does not exist.";
                 return false;
@@ -252,7 +486,7 @@ namespace AL.Services.Local
 
             try
             {
-                string json = File.ReadAllText(path);
+                string json = _fileOperations.ReadAllText(path);
                 if (string.IsNullOrWhiteSpace(json))
                 {
                     error = "File is empty.";
@@ -267,6 +501,12 @@ namespace AL.Services.Local
                 }
 
                 EnsureSaveDefaults(save);
+                if (!ValidateSaveSemantics(save, out error))
+                {
+                    save = null;
+                    return false;
+                }
+
                 return true;
             }
             catch (Exception ex)
@@ -277,6 +517,37 @@ namespace AL.Services.Local
             }
         }
 
+        private static bool ValidateSaveSemantics(SaveGameData save, out string error)
+        {
+            if (save == null)
+            {
+                error = "Save object is null.";
+                return false;
+            }
+
+            if (save.Resources == null ||
+                save.Buildings == null ||
+                save.Troops == null ||
+                save.Researches == null ||
+                save.Quests == null ||
+                save.Reputation == null ||
+                save.FactionReputations == null ||
+                save.LordPersona == null ||
+                save.Territories == null ||
+                save.RealmGems == null ||
+                save.Wishgate == null ||
+                save.Warmaster == null ||
+                save.ChampionCustomization == null ||
+                save.OwnedEquipment == null)
+            {
+                error = "Required top-level save collections or objects are null after normalization.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
+        }
+
         private static void EnsureSaveDefaults(SaveGameData save)
         {
             if (save == null)
@@ -284,22 +555,22 @@ namespace AL.Services.Local
                 return;
             }
 
-            save.Resources ??= new List<ResourceData>();
-            save.Buildings ??= new List<BuildingState>();
-            save.Troops ??= new List<TroopInventoryData>();
-            save.Researches ??= new List<ResearchState>();
-            save.Quests ??= new List<QuestState>();
-            save.Reputation ??= new List<NpcAffinityData>();
-            save.FactionReputations ??= new List<FactionRepData>();
+            save.Resources = RemoveNullEntries(save.Resources);
+            save.Buildings = RemoveNullEntries(save.Buildings);
+            save.Troops = RemoveNullEntries(save.Troops);
+            save.Researches = RemoveNullEntries(save.Researches);
+            save.Quests = RemoveNullEntries(save.Quests);
+            save.Reputation = RemoveNullEntries(save.Reputation);
+            save.FactionReputations = RemoveNullEntries(save.FactionReputations);
+            save.Territories = RemoveNullEntries(save.Territories);
+            save.RealmGems = RemoveNullEntries(save.RealmGems);
+            save.OwnedEquipment = RemoveNullEntries(save.OwnedEquipment);
             save.LordPersona ??= new PersonaData();
-            save.Territories ??= new List<TerritoryData>();
-            save.RealmGems ??= new List<RealmGemState>();
             save.Wishgate ??= new WishgateState();
             save.Warmaster ??= new WarmasterState();
-            save.Warmaster.UnlockedSetIds ??= new List<string>();
-            save.Warmaster.PurchasedPieceIds ??= new List<string>();
+            save.Warmaster.UnlockedSetIds = RemoveNullStrings(save.Warmaster.UnlockedSetIds);
+            save.Warmaster.PurchasedPieceIds = RemoveNullStrings(save.Warmaster.PurchasedPieceIds);
             save.ChampionCustomization ??= new ChampionCustomizationState();
-            save.OwnedEquipment ??= new List<OwnedEquipmentState>();
 
             EnsureResource(save, ResourceType.Food, 1000);
             EnsureResource(save, ResourceType.Wood, 1000);
@@ -318,11 +589,25 @@ namespace AL.Services.Local
             }
         }
 
+        private static List<T> RemoveNullEntries<T>(List<T> entries) where T : class =>
+            entries == null
+                ? new List<T>()
+                : entries.Any(entry => entry == null)
+                    ? entries.Where(entry => entry != null).ToList()
+                    : entries;
+
+        private static List<string> RemoveNullStrings(List<string> entries) =>
+            entries == null
+                ? new List<string>()
+                : entries.Any(string.IsNullOrWhiteSpace)
+                    ? entries.Where(entry => !string.IsNullOrWhiteSpace(entry)).ToList()
+                    : entries;
+
         private static void EnsureResource(SaveGameData save, ResourceType type, long startingAmount)
         {
             foreach (var resource in save.Resources)
             {
-                if (resource != null && resource.Type == type)
+                if (resource.Type == type)
                 {
                     return;
                 }
@@ -331,98 +616,215 @@ namespace AL.Services.Local
             save.Resources.Add(new ResourceData { Type = type, Amount = startingAmount });
         }
 
-        private void QuarantineInvalidFile(string path)
+        private bool TryQuarantineInvalidFile(string path, out string error)
         {
-            if (!File.Exists(path))
+            error = string.Empty;
+            if (!_fileOperations.FileExists(path))
             {
-                return;
+                return true;
             }
 
-            string suffix = $".corrupt-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}";
-            string quarantinePath = path + suffix;
-
+            string quarantinePath = $"{path}.corrupt-{DateTime.UtcNow:yyyyMMddHHmmss}-{Guid.NewGuid():N}";
             try
             {
-                File.Move(path, quarantinePath);
-                Debug.LogWarning($"Quarantined invalid save file to {quarantinePath}.");
+                _fileOperations.Move(path, quarantinePath);
+                Debug.LogWarning($"AL-SAVE-QUARANTINED: Quarantined invalid save file to {quarantinePath}.");
+                return true;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"Could not quarantine invalid save file {path}: {ex.Message}");
+                error = ex.Message;
+                Debug.LogError($"AL-SAVE-QUARANTINE-FAILED: Could not quarantine invalid save file {path}: {ex.Message}");
+                return false;
             }
         }
 
-        private static void TryDelete(string path)
+        private void CleanStaleTransientFiles()
+        {
+            TryDelete(TempPath);
+
+            if (_fileOperations.FileExists(PreviousPath) &&
+                !_fileOperations.FileExists(SavePath) &&
+                TryReadValidSave(PreviousPath, out _, out _))
+            {
+                try
+                {
+                    _fileOperations.Move(PreviousPath, SavePath);
+                    Debug.LogWarning("AL-SAVE-PREVIOUS-RESTORED: Restored a valid previous save left by an interrupted fallback.");
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogError($"AL-SAVE-PREVIOUS-RESTORE-FAILED: Could not restore previous save. {ex.Message}");
+                }
+            }
+
+            TryDelete(PreviousPath);
+        }
+
+        private void PruneQuarantines(string sourceFileName)
+        {
+            var quarantines = EnumerateQuarantines(sourceFileName)
+                .Select(path => new FileInfo(path))
+                .OrderByDescending(info => info.CreationTimeUtc)
+                .ToList();
+
+            foreach (var old in quarantines.Skip(MaxQuarantinesPerSource))
+            {
+                TryDelete(old.FullName);
+                Debug.LogWarning($"AL-SAVE-QUARANTINE-PRUNED: Pruned old quarantine {old.FullName}.");
+            }
+        }
+
+        private IEnumerable<string> EnumerateQuarantines(string sourceFileName) =>
+            _fileOperations.EnumerateFiles(PersistencePath, $"{sourceFileName}.corrupt-*");
+
+        private void TryDelete(string path)
         {
             try
             {
-                if (File.Exists(path))
+                if (_fileOperations.FileExists(path))
                 {
-                    File.Delete(path);
+                    _fileOperations.Delete(path);
                 }
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Could not delete temporary save file {path}: {ex.Message}");
+                Debug.LogWarning($"AL-SAVE-DELETE-FAILED: Could not delete save artifact {path}: {ex.Message}");
             }
         }
 
-        private void CalculateOfflineProgress()
+        private void SetLoadStatus(SaveLoadStatus status, string message, bool error)
         {
-            if (_currentSave == null || _currentSave.LastSavedTimestamp <= 0)
+            LastLoadStatus = status;
+            LastLoadMessage = message;
+
+            if (error)
+            {
+                Debug.LogError(message);
+            }
+            else if (status == SaveLoadStatus.RecoveredFromBackup ||
+                     status == SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption ||
+                     status == SaveLoadStatus.RecoveryFailed)
+            {
+                Debug.LogWarning(message);
+            }
+            else
+            {
+                Debug.Log(message);
+            }
+        }
+
+        private void SetSaveStatus(SaveOperationStatus status, string message, bool error)
+        {
+            LastSaveStatus = status;
+            LastSaveMessage = message;
+
+            if (error)
+            {
+                Debug.LogError(message);
+            }
+            else
+            {
+                Debug.Log(message);
+            }
+        }
+
+        private static SaveGameData CreateDefaultSave(RealmId realmId)
+        {
+            var save = new SaveGameData
+            {
+                SelectedRealm = realmId,
+                LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                Resources = new List<ResourceData>
+                {
+                    new ResourceData { Type = ResourceType.Food, Amount = 1000 },
+                    new ResourceData { Type = ResourceType.Wood, Amount = 1000 },
+                    new ResourceData { Type = ResourceType.Stone, Amount = 500 },
+                    new ResourceData { Type = ResourceType.Gold, Amount = 500 },
+                    new ResourceData { Type = ResourceType.ManaStone, Amount = 150 },
+                    new ResourceData { Type = ResourceType.Ore, Amount = 150 }
+                },
+                Buildings = new List<BuildingState>(),
+                Troops = new List<TroopInventoryData>(),
+                Quests = new List<QuestState>(),
+                CurrentChapterId = "C1",
+                Warmaster = new WarmasterState()
+            };
+
+            EnsureSaveDefaults(save);
+            return save;
+        }
+
+        private static SaveGameData CloneSave(SaveGameData save)
+        {
+            if (save == null)
+            {
+                return null;
+            }
+
+            return JsonUtility.FromJson<SaveGameData>(JsonUtility.ToJson(save));
+        }
+
+        private static bool SavesAreEquivalent(SaveGameData left, SaveGameData right) =>
+            JsonUtility.ToJson(left) == JsonUtility.ToJson(right);
+
+        private static void ApplyOfflineProgress(SaveGameData save)
+        {
+            if (save == null || save.LastSavedTimestamp <= 0)
             {
                 return;
             }
 
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            long elapsedSeconds = Math.Max(0, now - _currentSave.LastSavedTimestamp);
+            long elapsedSeconds = Math.Max(0, now - save.LastSavedTimestamp);
             if (elapsedSeconds <= 0)
             {
                 return;
             }
 
             long cappedSeconds = Math.Min(elapsedSeconds, 12 * 60 * 60);
-            AddOfflineResource(ResourceType.Food, cappedSeconds * 4);
-            AddOfflineResource(ResourceType.Wood, cappedSeconds * 2);
-            AddOfflineResource(ResourceType.Stone, cappedSeconds);
-            AddOfflineResource(ResourceType.Gold, cappedSeconds / 2);
-            AddOfflineResource(ResourceType.ManaStone, cappedSeconds / 4);
-            AddOfflineResource(ResourceType.Ore, cappedSeconds / 3);
+            AddOfflineResource(save, ResourceType.Food, cappedSeconds * 4);
+            AddOfflineResource(save, ResourceType.Wood, cappedSeconds * 2);
+            AddOfflineResource(save, ResourceType.Stone, cappedSeconds);
+            AddOfflineResource(save, ResourceType.Gold, cappedSeconds / 2);
+            AddOfflineResource(save, ResourceType.ManaStone, cappedSeconds / 4);
+            AddOfflineResource(save, ResourceType.Ore, cappedSeconds / 3);
 
-            if (_currentSave.SelectedRealm != RealmId.None)
+            if (save.SelectedRealm != RealmId.None)
             {
-                AddOfflineResource(ResourceRules.GetRareResourceForRealm(_currentSave.SelectedRealm), cappedSeconds / 90);
+                AddOfflineResource(save, ResourceRules.GetRareResourceForRealm(save.SelectedRealm), cappedSeconds / 90);
             }
 
-            CompleteFinishedBuildingTimers(now);
-            CompleteFinishedResearchTimers(now);
-            Debug.Log($"Offline progress applied for {cappedSeconds} seconds.");
+            CompleteFinishedBuildingTimers(save, now);
+            CompleteFinishedResearchTimers(save, now);
+            Debug.Log($"AL-SAVE-OFFLINE-PROGRESS: Offline progress applied for {cappedSeconds} seconds.");
         }
 
-        private void AddOfflineResource(ResourceType type, long amount)
+        private static void AddOfflineResource(SaveGameData save, ResourceType type, long amount)
         {
             if (amount <= 0)
             {
                 return;
             }
 
-            foreach (var resource in _currentSave.Resources)
+            foreach (var resource in save.Resources)
             {
-                if (resource != null && resource.Type == type)
+                if (resource.Type == type)
                 {
                     resource.Amount += amount;
                     return;
                 }
             }
 
-            _currentSave.Resources.Add(new ResourceData { Type = type, Amount = amount });
+            save.Resources.Add(new ResourceData { Type = type, Amount = amount });
         }
 
-        private void CompleteFinishedBuildingTimers(long now)
+        private static void CompleteFinishedBuildingTimers(SaveGameData save, long now)
         {
-            foreach (var building in _currentSave.Buildings)
+            foreach (var building in save.Buildings)
             {
-                if (building != null && building.IsUpgrading && now >= building.UpgradeCompleteTimestamp)
+                if (building.IsUpgrading && now >= building.UpgradeCompleteTimestamp)
                 {
                     building.IsUpgrading = false;
                     building.Level++;
@@ -430,11 +832,11 @@ namespace AL.Services.Local
             }
         }
 
-        private void CompleteFinishedResearchTimers(long now)
+        private static void CompleteFinishedResearchTimers(SaveGameData save, long now)
         {
-            foreach (var research in _currentSave.Researches)
+            foreach (var research in save.Researches)
             {
-                if (research != null && research.IsResearching && now >= research.CompleteTimestamp)
+                if (research.IsResearching && now >= research.CompleteTimestamp)
                 {
                     research.IsResearching = false;
                     research.Level++;

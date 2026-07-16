@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 
 namespace AL.Tests.EditMode
 {
@@ -175,6 +177,238 @@ namespace AL.Tests.EditMode
                 Assert.True(File.Exists(backupPath));
                 Assert.False(File.Exists(tempPath));
                 Assert.That(File.ReadAllText(primaryPath), Does.Contain("C1_BACKUP"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void MissingPrimaryRecoversValidBackup()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                object currentSave = GetProperty(service, "CurrentSave");
+                SetField(currentSave, "CurrentChapterId", "C1_BACKUP_ONLY");
+                Invoke(service, "Save");
+
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                File.Copy(primaryPath, backupPath, true);
+                File.Delete(primaryPath);
+
+                object recoveredService = CreateSaveService(root);
+                Invoke(recoveredService, "Load");
+
+                Assert.AreEqual("RecoveredFromBackup", GetProperty(recoveredService, "LastLoadStatus").ToString());
+                Assert.That((string)GetProperty(recoveredService, "LastLoadMessage"), Does.Contain("AL-SAVE-RECOVERED-BACKUP"));
+                object recoveredSave = GetProperty(recoveredService, "CurrentSave");
+                Assert.AreEqual("C1_BACKUP_ONLY", GetField(recoveredSave, "CurrentChapterId"));
+                Assert.True(File.Exists(primaryPath));
+                Assert.True(File.Exists(backupPath));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void BothInvalidSaveFilesAreQuarantinedAndReplaced()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                File.WriteAllText(primaryPath, "{ invalid primary");
+                File.WriteAllText(backupPath, "{ invalid backup");
+
+                object service = CreateSaveService(root);
+                LogAssert.Expect(
+                    LogType.Error,
+                    "AL-SAVE-NEW-AFTER-CORRUPTION: No valid save or backup could be recovered. A new profile was created and corrupt files were quarantined where possible.");
+                Invoke(service, "Load");
+
+                Assert.AreEqual("CreatedNewAfterUnrecoverableCorruption", GetProperty(service, "LastLoadStatus").ToString());
+                Assert.That((string)GetProperty(service, "LastLoadMessage"), Does.Contain("AL-SAVE-NEW-AFTER-CORRUPTION"));
+                Assert.True(File.Exists(primaryPath));
+                Assert.True(File.Exists(backupPath));
+                Assert.AreEqual(1, Directory.GetFiles(root, "save.json.corrupt-*").Length);
+                Assert.AreEqual(1, Directory.GetFiles(root, "save.backup.json.corrupt-*").Length);
+                Assert.That(File.ReadAllText(primaryPath), Does.Contain("\"CurrentChapterId\": \"C1\""));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void StaleTempAndPreviousArtifactsAreCleanedBeforeLoad()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                object currentSave = GetProperty(service, "CurrentSave");
+                SetField(currentSave, "CurrentChapterId", "C1_PRIMARY");
+                Invoke(service, "Save");
+
+                string tempPath = Path.Combine(root, "save.tmp.json");
+                string previousPath = Path.Combine(root, "save.previous.json");
+                File.WriteAllText(tempPath, "{ stale temp");
+                File.WriteAllText(previousPath, "{ stale previous");
+
+                object reloadedService = CreateSaveService(root);
+                Invoke(reloadedService, "Load");
+
+                Assert.AreEqual("LoadedPrimary", GetProperty(reloadedService, "LastLoadStatus").ToString());
+                Assert.False(File.Exists(tempPath));
+                Assert.False(File.Exists(previousPath));
+                object reloadedSave = GetProperty(reloadedService, "CurrentSave");
+                Assert.AreEqual("C1_PRIMARY", GetField(reloadedSave, "CurrentChapterId"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void InvalidPrimaryNeverRotatesIntoBackupDuringSave()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                object currentSave = GetProperty(service, "CurrentSave");
+                SetField(currentSave, "CurrentChapterId", "C1_BACKUP_SAFE");
+                Invoke(service, "Save");
+
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                File.Copy(primaryPath, backupPath, true);
+                File.WriteAllText(primaryPath, "{ corrupt primary must not become backup");
+
+                currentSave = GetProperty(service, "CurrentSave");
+                SetField(currentSave, "CurrentChapterId", "C1_VALIDATED_CANDIDATE");
+                Invoke(service, "Save");
+
+                Assert.AreEqual("SavedPrimary", GetProperty(service, "LastSaveStatus").ToString());
+                Assert.That(File.ReadAllText(backupPath), Does.Not.Contain("corrupt primary"));
+                Assert.That(File.ReadAllText(primaryPath), Does.Contain("C1_VALIDATED_CANDIDATE"));
+                Assert.AreEqual(1, Directory.GetFiles(root, "save.json.corrupt-*").Length);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void QuarantineRetentionIsBoundedPerSourceFile()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    File.WriteAllText(Path.Combine(root, $"save.json.corrupt-2026010100000{i}-{Guid.NewGuid():N}"), "old");
+                }
+
+                string primaryPath = Path.Combine(root, "save.json");
+                File.WriteAllText(primaryPath, "{ invalid primary");
+
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                Assert.LessOrEqual(Directory.GetFiles(root, "save.json.corrupt-*").Length, 3);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void DeleteSaveRemovesPrimaryBackupTransientAndQuarantineArtifacts()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                string[] extraFiles =
+                {
+                    "save.tmp.json",
+                    "save.previous.json",
+                    $"save.json.corrupt-20260101000000-{Guid.NewGuid():N}",
+                    $"save.backup.json.corrupt-20260101000000-{Guid.NewGuid():N}"
+                };
+
+                foreach (string fileName in extraFiles)
+                {
+                    File.WriteAllText(Path.Combine(root, fileName), "artifact");
+                }
+
+                Invoke(service, "DeleteSave");
+
+                Assert.False((bool)Invoke(service, "HasSave"));
+                Assert.Null(GetProperty(service, "CurrentSave"));
+                Assert.AreEqual("None", GetProperty(service, "LastLoadStatus").ToString());
+                Assert.AreEqual("None", GetProperty(service, "LastSaveStatus").ToString());
+                Assert.IsEmpty(Directory.GetFiles(root, "save*.json*"));
             }
             finally
             {
