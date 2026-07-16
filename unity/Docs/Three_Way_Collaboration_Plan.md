@@ -1,6 +1,8 @@
-# NVS-01 GPT–Codex Collaboration Plan
+# NVS-01 Codex–User Delivery Plan
 
-The legacy filename is retained for link stability. This document defines the first coordinated milestone for GPT, Codex, and the user. `Ownership_Decision_Record.md` controls ownership chronology.
+The legacy filename is retained for link stability. This document defines the first coordinated milestone for Codex and the user. `Ownership_Decision_Record.md` controls ownership chronology.
+
+Historical artifact labels `G0`, `G1`, and `G2` are retained for traceability, but their owner is now **Codex coordination/review mode**, not GPT.
 
 ## Goal
 
@@ -27,7 +29,7 @@ Out of scope: unrelated chapters, broad gameplay redesign, terrestrial design, n
 
 The packet identifies stable IDs, prerequisites, states, objectives, dialogue, choices, consequences, gameplay handoff, return events, localization keys, completion/failure/retry/recovery, resume behavior, and unresolved creative decisions.
 
-### G1 implementation specification — GPT
+### G1 implementation specification — Codex coordination/review mode
 
 The specification maps the approved packet to runtime state, events, contracts, persistence, migration, idempotency, error behavior, file impact, locks, tests, rollback, and delivery order without rewriting narrative intent.
 
@@ -37,16 +39,16 @@ The report identifies files changed, source consumed, shared locks, contracts, c
 
 ## Ordered task plan
 
-### G0 — Collaboration baseline
+### G0 — Delivery baseline
 
-**Owner:** GPT
+**Owner:** Codex coordination/review mode
 
 Acceptance:
 
-- canonical workspace, ownership modes, branches, PR declarations, locks, and evidence rules are merged;
+- canonical workspace, Codex modes, branches, PR declarations, locks, and evidence rules are merged;
 - no source behavior changes.
 
-### A1 — Complete the approved OMEN_1 packet
+### A1 — Complete the approved NVS-01 narrative packet
 
 **Owner:** Codex narrative/content mode  
 **Branch:** `codex/narrative-nvs-01-a1`
@@ -63,8 +65,8 @@ Acceptance:
 
 ### G1 — Publish the runtime integration specification
 
-**Owner:** GPT  
-**Branch:** `gpt/nvs-01-integration-spec`
+**Owner:** Codex coordination/review mode  
+**Branch:** `codex/coordination-nvs-01-integration-spec`
 
 Acceptance:
 
@@ -114,13 +116,14 @@ Acceptance:
 
 ### G2 — Integration review
 
-**Owner:** GPT
+**Owner:** Codex coordination/review mode
 
 Acceptance:
 
-- implementation is reviewed against A1 and G1;
+- implementation is reviewed against A1 and G1 using current source and retained evidence;
 - ownership, contracts, persistence, validation, locks, and merge safety are dispositioned;
-- every requested change cites a violated requirement or acceptance criterion.
+- every requested change cites a violated requirement or acceptance criterion;
+- merge state, issue closure, and green tests are not accepted without matching source behavior and evidence.
 
 ### A2 — Narrative-fidelity disposition
 
@@ -132,7 +135,7 @@ Acceptance:
 - implementation discrepancies are reported without silently changing source;
 - any intentional creative change returns to user approval and requires A1/G1 revision before runtime changes.
 
-A2 is not independent technical approval because the same Codex agent may have authored and implemented the work. GPT review and user acceptance remain mandatory independent gates.
+Because the same Codex agent may author, implement, and review across separate modes, A2 is not independent technical approval. G2 evidence review and user acceptance remain required, but no future GPT gate exists.
 
 ### U1 — Final playtest and milestone acceptance
 
@@ -151,11 +154,11 @@ Acceptance:
 G0 → A1 → G1 → C1–C4 → G2 → A2 → U1
 ```
 
-A dependent PR must not merge before its upstream artifact is approved. Changes to narrative intent update A1 first, then G1, then engineering.
+A dependent PR must not merge before its upstream artifact is accepted. Changes to narrative intent update A1 first, then G1, then engineering.
 
 ## Shared-file protocol
 
-Search open PRs, declare locks, avoid parallel edits, rebase the later branch, preserve valid services and save fields, and never discard unfamiliar systems to resolve conflicts. GPT resolves technical sequence; the user resolves creative direction.
+Search open PRs, declare locks, avoid parallel edits, update the later branch, preserve valid services and save fields, and never discard unfamiliar systems to resolve conflicts. Codex coordination/review mode resolves technical sequence; the user resolves creative and product direction.
 
 ## Definition of done
 
