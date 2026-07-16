@@ -21,7 +21,9 @@ narrative_source_paths:
   - unity/Docs/Narrative
   - app/src/main/java/com/example/anotherlife/narrative/
 terrestrial_design_paths:
+  - unity/Assets/AL/Art/Terrestrials/
   - unity/Assets/AL/Art/Designs/Terrestrial
+  - unity/Docs/Terrestrials/
   - unity/Docs/Terrestrial
 runtime_paths:
   - app/
