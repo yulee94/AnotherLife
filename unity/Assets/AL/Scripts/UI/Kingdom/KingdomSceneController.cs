@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -9,15 +8,12 @@ using AL.Kingdom.Visuals;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AL.UI.Kingdom
 {
     public class KingdomSceneController : MonoBehaviour
     {
-        [SerializeField] private string _arenaSceneName = "ChampionArena";
-
         private Text _realmText;
         private Text _resourceText;
         private Text _buildingText;
@@ -40,12 +36,6 @@ namespace AL.UI.Kingdom
         private Image _messageStatusRule;
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
-        private GameObject _championDeploymentOverlayObject;
-        private Image _championDeploymentBackdrop;
-        private Image _championDeploymentAccent;
-        private Image _championDeploymentProgressFill;
-        private Text _championDeploymentTitleText;
-        private Text _championDeploymentMetaText;
         private KingdomVisualizer _kingdomVisualizer;
         private Color _messageAccentBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.92f);
         private Color _messagePanelBaseColor = new Color(0.020f, 0.027f, 0.037f, 0.92f);
@@ -54,7 +44,6 @@ namespace AL.UI.Kingdom
         private float _completionTimer;
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
-        private bool _championDeploymentInProgress;
         private readonly List<Image> _messageSignalBars = new List<Image>();
         private readonly Text[] _readinessChipTexts = new Text[4];
         private readonly Image[] _readinessChipPanels = new Image[4];
@@ -72,22 +61,6 @@ namespace AL.UI.Kingdom
         private readonly string[] _buildingIds =
         {
             "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "ManaShrine", "Mine", "Barracks"
-        };
-
-        private const int WarmasterPieceCost = 100;
-
-        private static readonly string[] WarmasterPieceIds =
-        {
-            "warmaster_weapon",
-            "warmaster_helm",
-            "warmaster_chest",
-            "warmaster_gloves",
-            "warmaster_boots",
-            "warmaster_cape",
-            "warmaster_ring",
-            "warmaster_amulet",
-            "warmaster_mount_armor",
-            "warmaster_class_relic"
         };
 
         private void OnEnable()
@@ -254,314 +227,13 @@ namespace AL.UI.Kingdom
             commandTitle.text = "COMMAND DECK";
             commandTitle.color = new Color(1f, 0.88f, 0.62f);
 
-            CreateSectionHeader(commandDeck.transform, font, "BUILD", new Vector2(18f, -64f));
-            CreateDeckButton(commandDeck.transform, font, "Town Hall", new Vector2(-222f, -104f), () => UpgradeBuilding("TownHall"));
-            CreateDeckButton(commandDeck.transform, font, "Farm", new Vector2(-18f, -104f), () => UpgradeBuilding("Farm"));
-            CreateDeckButton(commandDeck.transform, font, "Lumber", new Vector2(-222f, -152f), () => UpgradeBuilding("LumberMill"));
-            CreateDeckButton(commandDeck.transform, font, "Quarry", new Vector2(-18f, -152f), () => UpgradeBuilding("Quarry"));
-            CreateDeckButton(commandDeck.transform, font, "Gold Mine", new Vector2(-222f, -200f), () => UpgradeBuilding("GoldMine"));
-            CreateDeckButton(commandDeck.transform, font, "Mana Shrine", new Vector2(-18f, -200f), () => UpgradeBuilding("ManaShrine"));
-            CreateDeckButton(commandDeck.transform, font, "Mine", new Vector2(-222f, -248f), () => UpgradeBuilding("Mine"));
-
-            CreateSectionHeader(commandDeck.transform, font, "FORCES", new Vector2(18f, -302f));
-            CreateDeckButton(commandDeck.transform, font, "Infantry", new Vector2(-222f, -342f), () => TrainTroops(TroopType.Infantry));
-            CreateDeckButton(commandDeck.transform, font, "Ranged", new Vector2(-18f, -342f), () => TrainTroops(TroopType.Ranged));
-            CreateDeckButton(commandDeck.transform, font, "Claim", new Vector2(-222f, -390f), ClaimCompletedQuests);
-
-            CreateSectionHeader(commandDeck.transform, font, "PROGRESSION", new Vector2(18f, -444f));
-            CreateDeckButton(commandDeck.transform, font, "Steel", new Vector2(-222f, -484f), () => StartResearch("Steel Forging"));
-            CreateDeckButton(commandDeck.transform, font, "Armor", new Vector2(-18f, -484f), () => StartResearch("Plate Armor"));
-            CreateDeckButton(commandDeck.transform, font, "Warzone", new Vector2(-222f, -532f), EarnWarzoneCredits);
-            CreateDeckButton(commandDeck.transform, font, "Warmaster", new Vector2(-18f, -532f), UnlockWarmaster);
-
-            CreateSectionHeader(commandDeck.transform, font, "REALM OPS", new Vector2(18f, -586f));
-            CreateDeckButton(commandDeck.transform, font, "Capture", new Vector2(-222f, -626f), CaptureBorderlands);
-            CreateDeckButton(commandDeck.transform, font, "Secure Gem", new Vector2(-18f, -626f), PickTestGem);
-            CreateDeckButton(commandDeck.transform, font, "Wishgate", new Vector2(-222f, -674f), EarnWishgate);
-            CreateDeckButton(commandDeck.transform, font, "Claim Wish", new Vector2(-18f, -674f), ChooseWishReward);
-            CreateDeckButton(commandDeck.transform, font, "War Drill", new Vector2(-222f, -722f), RunTestBattle);
-            CreateDeckButton(commandDeck.transform, font, "Champion", new Vector2(-18f, -722f), BeginChampionDeployment);
-            CreateDeckButton(commandDeck.transform, font, "Reset Save", new Vector2(-18f, -812f), ResetSave, new Color(0.34f, 0.12f, 0.12f, 1f));
+            CreateCommandDeck(commandDeck.transform, font);
 
             var toggle = CreateButton(canvas.transform, font, "Board View", new Vector2(-24f, -24f), ToggleDashboard, new Vector2(170f, 42f), new Color(0.075f, 0.095f, 0.122f, 0.96f));
             _dashboardToggleText = toggle.GetComponentInChildren<Text>();
             _boardHintText = CreateBoardHintText(canvas.transform, font);
             SetMessage("Command board online. Select a district or border outpost to inspect yield, readiness, and next order.");
             RefreshBoardHintVisibility();
-        }
-
-        private void UpgradeBuilding(string buildingId)
-        {
-            ServiceLocator.Get<IBuildingService>().StartUpgrade(buildingId);
-            SetMessage($"BUILD ORDER: {FormatBuildingName(buildingId)} upgrade queued. Watch the district timer before committing the next resource spend.");
-            Refresh();
-        }
-
-        private void StartResearch(string researchId)
-        {
-            ServiceLocator.Get<IResearchService>().StartResearch(researchId);
-            SetMessage($"RESEARCH ORDER: {researchId} filed. Combat bonuses update when the lab timer clears.");
-            Refresh();
-        }
-
-        private void RunTestBattle()
-        {
-            RealmId attackerRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-            if (attackerRealm == RealmId.None)
-            {
-                attackerRealm = RealmId.Crownlands;
-            }
-
-            var request = new BattleRequest
-            {
-                Type = BattleType.Warzone,
-                RandomSeed = 20260708,
-                AttackerRealm = attackerRealm,
-                DefenderRealm = RealmId.Umbral,
-                AttackerMorale = 1.08f,
-                DefenderMorale = 0.96f,
-                TerrainId = "border_forest_road",
-                AttackerTroops = new List<TroopStack>
-                {
-                    new TroopStack { Type = TroopType.Infantry, Count = 80 },
-                    new TroopStack { Type = TroopType.Ranged, Count = 45 },
-                    new TroopStack { Type = TroopType.Cavalry, Count = 20 }
-                },
-                DefenderTroops = new List<TroopStack>
-                {
-                    new TroopStack { Type = TroopType.Infantry, Count = 70 },
-                    new TroopStack { Type = TroopType.Ranged, Count = 35 }
-                }
-            };
-
-            var report = ServiceLocator.Get<IBattleSimulator>().Simulate(request);
-            _battleText.text =
-                "Battle Report\n" +
-                $"{report.Summary}\n" +
-                $"Rounds: {report.Rounds}  Seed: {request.RandomSeed}\n" +
-                $"Attacker losses: {FormatDetailedLosses(report.AttackerDetailedLosses)}\n" +
-                $"Defender losses: {FormatDetailedLosses(report.DefenderDetailedLosses)}\n" +
-                $"Loot: {FormatLoot(report.Loot)}";
-            SetMessage(report.IsWinner ? "WAR DRILL: Victory profile confirmed. Scale troop production before pushing another border." : "WAR DRILL: Defeat profile logged. Reinforce troops or research before the next push.");
-        }
-
-        private void TrainTroops(TroopType type)
-        {
-            ServiceLocator.Get<ITrainingService>().StartTraining(type, 25);
-            SetMessage($"MUSTER ORDER: 25 {type} added to the queue. Keep force growth aligned with border captures.");
-            Refresh();
-        }
-
-        private void EarnWarzoneCredits()
-        {
-            ServiceLocator.Get<IWarzoneCreditService>().AddCredits(250);
-            SetMessage("WARZONE PAYOUT: +250 Credits secured for Warmaster progression.");
-            Refresh();
-        }
-
-        private void UnlockWarmaster()
-        {
-            var warmaster = ServiceLocator.Get<IWarmasterService>();
-            if (warmaster.IsTrueWarmaster())
-            {
-                SetMessage("True Warmaster set is already complete and equipped.");
-                return;
-            }
-
-            string nextPieceId = GetNextWarmasterPieceId(warmaster.GetState());
-            if (string.IsNullOrWhiteSpace(nextPieceId))
-            {
-                SetMessage("Warmaster pieces are complete. The True Warmaster set is ready.");
-                Refresh();
-                return;
-            }
-
-            if (!warmaster.PurchasePiece(nextPieceId, WarmasterPieceCost))
-            {
-                SetMessage($"Need {WarmasterPieceCost} Warzone Credits to buy the next Warmaster piece.");
-                Refresh();
-                return;
-            }
-
-            if (warmaster.IsTrueWarmaster())
-            {
-                SetMessage("True Warmaster set completed and equipped.");
-            }
-            else
-            {
-                SetMessage($"Purchased {FormatWarmasterPieceName(nextPieceId)} ({warmaster.GetPurchasedPieceCount()}/{warmaster.GetRequiredPieceCount()}).");
-            }
-
-            Refresh();
-        }
-
-        private void ClaimCompletedQuests()
-        {
-            var questService = ServiceLocator.Get<IQuestService>();
-            int claimed = 0;
-            foreach (var quest in questService.GetActiveQuests())
-            {
-                if (!quest.IsCompleted || quest.IsClaimed)
-                {
-                    continue;
-                }
-
-                questService.ClaimReward(quest.QuestId);
-                claimed++;
-            }
-
-            SetMessage(claimed > 0 ? $"Claimed {claimed} quest reward(s)." : "No completed quest rewards to claim.");
-            Refresh();
-        }
-
-        private void CaptureBorderlands()
-        {
-            var realm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-            if (realm == RealmId.None)
-            {
-                realm = RealmId.Crownlands;
-            }
-
-            ServiceLocator.Get<ITerritoryService>().CaptureTerritory("T5", realm);
-            SetMessage($"REALM OPS: Neutral Borderlands captured for {realm}. Confirm the new yield in the war zone panel.");
-            Refresh();
-        }
-
-        private void PickTestGem()
-        {
-            var gemService = ServiceLocator.Get<IRealmGemService>();
-            bool pickedUp = gemService.PickUpGem("Stonehold_Gem_1", "offline_player");
-            SetMessage(pickedUp ? "REALM GEM: Stonehold Gem secured by the active carrier." : "REALM GEM: Pickup denied. Confirm the gem is exposed before assigning a carrier.");
-            Refresh();
-        }
-
-        private void EarnWishgate()
-        {
-            ServiceLocator.Get<IRealmGemService>().MarkWishgateEarned("Offline realm objective test");
-            SetMessage("WISHGATE: Realm objective fulfilled. Choose a reward when the command window is stable.");
-            Refresh();
-        }
-
-        private void ChooseWishReward()
-        {
-            ServiceLocator.Get<IRealmGemService>().ChooseWishReward("warmaster_credits");
-            ServiceLocator.Get<IWarzoneCreditService>().AddCredits(300);
-            SetMessage("WISHGATE: Warmaster Credits selected. +300 Credits added to the war chest.");
-            Refresh();
-        }
-
-        private void ResetSave()
-        {
-            var save = ServiceLocator.Get<ISaveGameService>();
-            save.DeleteSave();
-            save.Load();
-            SetMessage("Save reset. Choose a realm again from the boot flow.");
-            SceneManager.LoadScene("Boot");
-        }
-
-        private void BeginChampionDeployment()
-        {
-            if (_championDeploymentInProgress)
-            {
-                return;
-            }
-
-            StartCoroutine(ChampionDeploymentRoutine());
-        }
-
-        private IEnumerator ChampionDeploymentRoutine()
-        {
-            _championDeploymentInProgress = true;
-            SetMessage("CHAMPION DEPLOYMENT: Arena gate opening. Transferring command focus to the 3D combat front.");
-            ShowChampionDeploymentOverlay();
-
-            const float duration = 0.78f;
-            float elapsed = 0f;
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                UpdateChampionDeploymentOverlay(Mathf.Clamp01(elapsed / duration));
-                yield return null;
-            }
-
-            SceneManager.LoadScene(_arenaSceneName);
-        }
-
-        private void ShowChampionDeploymentOverlay()
-        {
-            EnsureChampionDeploymentOverlay();
-            _championDeploymentOverlayObject.SetActive(true);
-            UpdateChampionDeploymentOverlay(0f);
-        }
-
-        private void EnsureChampionDeploymentOverlay()
-        {
-            if (_championDeploymentOverlayObject != null)
-            {
-                return;
-            }
-
-            var canvas = CreateCanvas("ChampionDeploymentCanvas");
-            canvas.sortingOrder = 5200;
-            _championDeploymentOverlayObject = canvas.gameObject;
-
-            var font = GetDefaultFont();
-            _championDeploymentBackdrop = CreatePanel(canvas.transform, "DeploymentBackdrop", Vector2.zero, Vector2.zero, Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), new Color(0f, 0f, 0f, 0f)).GetComponent<Image>();
-            _championDeploymentBackdrop.raycastTarget = true;
-
-            var panel = CreatePanel(canvas.transform, "DeploymentPanel", Vector2.zero, new Vector2(820f, 238f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Color(0.020f, 0.027f, 0.038f, 0.98f));
-            var outline = panel.AddComponent<Outline>();
-            outline.effectColor = new Color(0.42f, 0.68f, 1f, 0.36f);
-            outline.effectDistance = new Vector2(1.2f, -1.2f);
-            var shadow = panel.AddComponent<Shadow>();
-            shadow.effectColor = new Color(0f, 0f, 0f, 0.58f);
-            shadow.effectDistance = new Vector2(0f, -7f);
-
-            _championDeploymentAccent = CreatePanel(panel.transform, "DeploymentAccent", new Vector2(0f, 0f), new Vector2(8f, 0f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.42f, 0.68f, 1f, 0.92f)).GetComponent<Image>();
-            CreatePanel(panel.transform, "DeploymentTopTrace", new Vector2(0f, -1f), new Vector2(-44f, 2f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Color(1f, 0.86f, 0.54f, 0.22f));
-            CreatePanel(panel.transform, "DeploymentGateLeft", new Vector2(86f, -98f), new Vector2(10f, 96f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Color(0.42f, 0.68f, 1f, 0.76f));
-            CreatePanel(panel.transform, "DeploymentGateRight", new Vector2(136f, -98f), new Vector2(10f, 96f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Color(0.94f, 0.40f, 0.22f, 0.72f));
-            CreatePanel(panel.transform, "DeploymentGateCore", new Vector2(111f, -98f), new Vector2(56f, 10f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Color(1f, 0.84f, 0.52f, 0.42f));
-
-            _championDeploymentTitleText = CreateText(panel.transform, "DeploymentTitle", font, 28, TextAnchor.UpperLeft, new Vector2(178f, -38f), new Vector2(594f, 42f));
-            _championDeploymentTitleText.text = "CHAMPION DEPLOYMENT";
-            _championDeploymentTitleText.color = new Color(1f, 0.88f, 0.62f);
-            _championDeploymentMetaText = CreateText(panel.transform, "DeploymentMeta", font, 17, TextAnchor.UpperLeft, new Vector2(180f, -92f), new Vector2(588f, 54f));
-            _championDeploymentMetaText.color = new Color(0.82f, 0.90f, 0.98f);
-
-            CreatePanel(panel.transform, "DeploymentProgressTrack", new Vector2(180f, -168f), new Vector2(558f, 7f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.07f, 0.10f, 0.14f, 0.96f));
-            _championDeploymentProgressFill = CreatePanel(panel.transform, "DeploymentProgressFill", new Vector2(180f, -168f), new Vector2(0f, 7f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.42f, 0.68f, 1f, 0.94f)).GetComponent<Image>();
-
-            _championDeploymentOverlayObject.SetActive(false);
-        }
-
-        private void UpdateChampionDeploymentOverlay(float progress)
-        {
-            float eased = Mathf.SmoothStep(0f, 1f, progress);
-            float pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 8.5f) * 0.5f;
-            Color realmAccent = GetCurrentRealmAccent();
-
-            if (_championDeploymentBackdrop != null)
-            {
-                _championDeploymentBackdrop.color = new Color(0f, 0f, 0f, Mathf.Lerp(0.12f, 0.74f, eased));
-            }
-
-            if (_championDeploymentAccent != null)
-            {
-                _championDeploymentAccent.color = Color.Lerp(realmAccent, new Color(0.42f, 0.68f, 1f, 1f), 0.35f);
-                _championDeploymentAccent.color = WithAlpha(_championDeploymentAccent.color, Mathf.Lerp(0.70f, 1f, pulse));
-            }
-
-            if (_championDeploymentProgressFill != null)
-            {
-                _championDeploymentProgressFill.color = Color.Lerp(realmAccent, new Color(0.42f, 0.68f, 1f), 0.45f);
-                _championDeploymentProgressFill.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(0f, 558f, eased), 7f);
-            }
-
-            if (_championDeploymentMetaText != null)
-            {
-                _championDeploymentMetaText.text = $"{GetCurrentRealmLabel()} // ARENA GATE SYNC {Mathf.RoundToInt(eased * 100f)}%";
-            }
         }
 
         private void Refresh()
@@ -662,7 +334,7 @@ namespace AL.UI.Kingdom
             SetResourceChip(4, "MANA", resources.GetResourceCount(ResourceType.ManaStone), new Color(0.48f, 0.78f, 1f, 1f), 0.48f);
             SetResourceChip(5, "ORE", resources.GetResourceCount(ResourceType.Ore), new Color(0.52f, 0.60f, 0.70f, 1f), 0.34f);
             SetResourceChip(6, FormatResourceLabel(rareResourceType), resources.GetResourceCount(rareResourceType), GetCurrentRealmAccent(), 0.60f);
-            SetResourceChip(7, "WAR", warzoneCredits, warzoneCredits >= WarmasterPieceCost ? new Color(0.96f, 0.72f, 0.32f, 1f) : new Color(0.84f, 0.36f, 0.32f, 1f), warzoneCredits >= WarmasterPieceCost ? 0.74f : 0.58f);
+            SetResourceChip(7, "WAR", warzoneCredits, warzoneCredits > 0 ? new Color(0.96f, 0.72f, 0.32f, 1f) : new Color(0.84f, 0.36f, 0.32f, 1f), warzoneCredits > 0 ? 0.62f : 0.42f);
         }
 
         private void SetResourceChip(int index, string label, long value, Color accent, float weight)
@@ -745,8 +417,8 @@ namespace AL.UI.Kingdom
                 3,
                 "WAR",
                 FormatCompactNumber(warzoneCredits),
-                warzoneCredits >= WarmasterPieceCost ? new Color(0.96f, 0.76f, 0.34f, 1f) : new Color(0.88f, 0.42f, 0.34f, 1f),
-                warzoneCredits >= WarmasterPieceCost ? 0.68f : 0.82f);
+                warzoneCredits > 0 ? new Color(0.96f, 0.76f, 0.34f, 1f) : new Color(0.88f, 0.42f, 0.34f, 1f),
+                warzoneCredits > 0 ? 0.52f : 0.42f);
         }
 
         private void SetReadinessChip(int index, string label, string value, Color accent, float urgency)
@@ -1149,6 +821,118 @@ namespace AL.UI.Kingdom
             }
         }
 
+        private void CreateCommandDeck(Transform parent, Font font)
+        {
+            var context = CreateCommandContext();
+            IReadOnlyList<KingdomCommandDescriptor> descriptors = KingdomCommandPolicy.CreateDeckDescriptors(context);
+
+            CreateCommandSection(parent, font, descriptors, KingdomCommandCategory.Build, "BUILD", new Vector2(18f, -64f), -104f);
+            CreateCommandSection(parent, font, descriptors, KingdomCommandCategory.Forces, "FORCES", new Vector2(18f, -302f), -342f);
+            CreateCommandSection(parent, font, descriptors, KingdomCommandCategory.Progression, "PROGRESSION", new Vector2(18f, -444f), -484f);
+            CreateCommandSection(parent, font, descriptors, KingdomCommandCategory.RealmOps, "REALM OPS", new Vector2(18f, -586f), -626f);
+        }
+
+        private static KingdomCommandContext CreateCommandContext()
+        {
+            bool hasCommittedRealm = false;
+            try
+            {
+                hasCommittedRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId != RealmId.None;
+            }
+            catch (Exception)
+            {
+                hasCommittedRealm = false;
+            }
+
+            return new KingdomCommandContext(hasCommittedRealm, new KingdomCommandCapabilities());
+        }
+
+        private void CreateCommandSection(
+            Transform parent,
+            Font font,
+            IReadOnlyList<KingdomCommandDescriptor> descriptors,
+            KingdomCommandCategory category,
+            string label,
+            Vector2 headerPosition,
+            float firstButtonY)
+        {
+            CreateSectionHeader(parent, font, label, headerPosition);
+
+            int index = 0;
+            foreach (KingdomCommandDescriptor descriptor in descriptors)
+            {
+                if (descriptor.Category != category)
+                {
+                    continue;
+                }
+
+                float x = index % 2 == 0 ? -222f : -18f;
+                float y = firstButtonY - (index / 2) * 48f;
+                CreateDeckButton(parent, font, descriptor, new Vector2(x, y));
+                index++;
+            }
+        }
+
+        private Button CreateDeckButton(Transform parent, Font font, KingdomCommandDescriptor descriptor, Vector2 anchoredPosition)
+        {
+            Color fill = descriptor.IsInteractable
+                ? new Color(0.105f, 0.138f, 0.178f, 1f)
+                : new Color(0.062f, 0.073f, 0.088f, 0.94f);
+            var button = CreateButton(parent, font, descriptor.Label, anchoredPosition, () => HandleCommandSelected(descriptor), new Vector2(190f, 40f), fill);
+            button.name = descriptor.Id;
+            button.interactable = descriptor.IsInteractable;
+
+            if (!descriptor.IsInteractable)
+            {
+                var image = button.GetComponent<Image>();
+                if (image != null)
+                {
+                    image.color = fill;
+                }
+
+                var text = button.GetComponentInChildren<Text>();
+                if (text != null)
+                {
+                    text.color = new Color(0.58f, 0.66f, 0.74f, 0.92f);
+                }
+
+                var plate = CreatePanel(button.transform, "UnavailableStatus", new Vector2(-18f, -8f), new Vector2(46f, 13f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Color(0.18f, 0.13f, 0.08f, 0.88f));
+                var status = CreateText(plate.transform, "UnavailableStatusText", font, 8, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(46f, 13f));
+                status.text = "LOCKED";
+                status.color = new Color(1f, 0.78f, 0.42f, 0.92f);
+            }
+
+            return button;
+        }
+
+        private void HandleCommandSelected(KingdomCommandDescriptor descriptor)
+        {
+            if (!descriptor.IsInteractable)
+            {
+                SetMessage(CreateUnavailableCommandMessage(descriptor));
+                return;
+            }
+
+            if (descriptor.Id == KingdomCommandPolicy.BoardView)
+            {
+                ToggleDashboard();
+                return;
+            }
+
+            SetMessage(CreateUnavailableCommandMessage(descriptor));
+        }
+
+        private static string CreateUnavailableCommandMessage(KingdomCommandDescriptor descriptor)
+        {
+            string issues = descriptor.BlockingIssueIds.Count == 0
+                ? "pending contract"
+                : "#" + string.Join("/#", descriptor.BlockingIssueIds);
+            string code = string.IsNullOrWhiteSpace(descriptor.TechnicalCode)
+                ? "capability-disabled"
+                : descriptor.TechnicalCode;
+            return $"{descriptor.Label.ToUpperInvariant()} UNAVAILABLE: {code}; waiting on {issues}.";
+        }
+
         private static void CreateSectionHeader(Transform parent, Font font, string label, Vector2 anchoredPosition)
         {
             Color accent = GetCommandSectionAccent(label);
@@ -1478,51 +1262,6 @@ namespace AL.UI.Kingdom
             return builder.Length == 0 ? "none" : builder.ToString();
         }
 
-        private static string FormatDetailedLosses(IEnumerable<TroopLossReport> losses)
-        {
-            if (losses == null)
-            {
-                return "none";
-            }
-
-            var builder = new StringBuilder();
-            foreach (var loss in losses)
-            {
-                if (builder.Length > 0)
-                {
-                    builder.Append("; ");
-                }
-
-                builder.Append(loss.Type)
-                    .Append(" K").Append(loss.Killed)
-                    .Append(" W").Append(loss.Wounded)
-                    .Append(" S").Append(loss.Survived);
-            }
-
-            return builder.Length == 0 ? "none" : builder.ToString();
-        }
-
-        private static string FormatLoot(IEnumerable<ResourceData> loot)
-        {
-            if (loot == null)
-            {
-                return "none";
-            }
-
-            var builder = new StringBuilder();
-            foreach (var item in loot)
-            {
-                if (builder.Length > 0)
-                {
-                    builder.Append(", ");
-                }
-
-                builder.Append(item.Type).Append(" ").Append(item.Amount);
-            }
-
-            return builder.Length == 0 ? "none" : builder.ToString();
-        }
-
         private static CommandMessageProfile GetMessageProfile(string message)
         {
             string lower = message?.ToLowerInvariant() ?? string.Empty;
@@ -1650,36 +1389,6 @@ namespace AL.UI.Kingdom
                 RealmId.Umbral => new Color(0.68f, 0.26f, 0.92f, 1f),
                 _ => new Color(0.42f, 0.68f, 1f, 1f)
             };
-        }
-
-        private string GetCurrentRealmLabel()
-        {
-            var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
-            return realm == null ? "ANOTHERLIFE COMMAND" : realm.RealmName.ToUpperInvariant();
-        }
-
-        private static string GetNextWarmasterPieceId(WarmasterState state)
-        {
-            foreach (string pieceId in WarmasterPieceIds)
-            {
-                if (state?.PurchasedPieceIds == null || !state.PurchasedPieceIds.Contains(pieceId))
-                {
-                    return pieceId;
-                }
-            }
-
-            return null;
-        }
-
-        private static string FormatWarmasterPieceName(string pieceId)
-        {
-            if (string.IsNullOrWhiteSpace(pieceId))
-            {
-                return "Warmaster piece";
-            }
-
-            string name = pieceId.Replace("warmaster_", string.Empty).Replace("_", " ");
-            return "Warmaster " + name;
         }
 
         private static string FormatBuildingName(string buildingId)
