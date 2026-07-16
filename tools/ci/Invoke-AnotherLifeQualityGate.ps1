@@ -144,7 +144,7 @@ function Invoke-Classify {
     }
 
     $narrativeChanged = @($changedFiles | Where-Object { $_ -match "^(unity/Docs/NVS_01_A1|unity/Docs/Narrative|app/src/main/.*/narrative/)" })
-    $terrestrialChanged = @($changedFiles | Where-Object { $_ -match "^(unity/Assets/AL/Art/Designs/Terrestrial|unity/Docs/Terrestrial)" })
+    $terrestrialChanged = @($changedFiles | Where-Object { $_ -match "^(unity/Assets/AL/Art/Terrestrials/|unity/Assets/AL/Art/Designs/Terrestrial|unity/Docs/Terrestrials/|unity/Docs/Terrestrial)" })
     $engineeringChanged = @($changedFiles | Where-Object { $_ -match "^(app/|unity/Assets/AL/Scripts/|unity/Assets/AL/Tests/|\.github/|tools/ci/|gradle/|build\.gradle\.kts|settings\.gradle\.kts)" })
 
     if (($narrativeChanged -or $terrestrialChanged) -and $engineeringChanged -and $body -notmatch "(?i)mixed-mode|separate PRs are impractical") {
