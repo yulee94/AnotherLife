@@ -50,7 +50,7 @@ Acceptance:
 
 ### A1 — Complete the approved NVS-01 narrative packet
 
-**Owner:** Codex narrative/content mode  
+**Owner:** Codex narrative/content mode
 **Branch:** `codex/narrative-nvs-01-a1`
 
 Acceptance:
@@ -65,7 +65,7 @@ Acceptance:
 
 ### G1 — Publish the runtime integration specification
 
-**Owner:** Codex coordination/review mode  
+**Owner:** Codex coordination/review mode
 **Branch:** `codex/coordination-nvs-01-integration-spec`
 
 Acceptance:
@@ -79,7 +79,7 @@ Acceptance:
 
 ### C1 — Contract loading and validation
 
-**Owner:** Codex engineering mode  
+**Owner:** Codex engineering mode
 **Branch:** `codex/nvs-01-runtime-integration`
 
 Acceptance:
