@@ -71,14 +71,15 @@ function New-FixtureRepo {
     return $path
 }
 
-function Add-FixtureFiles {
+function Commit-FixtureFiles {
     param([Parameter(Mandatory = $true)][string] $FixtureRepo)
 
     Invoke-Checked git @("add", "-f", "--all") $FixtureRepo | Out-Null
     $staged = Invoke-Checked git @("diff", "--cached", "--name-only") $FixtureRepo
-    if (string.IsNullOrWhiteSpace($staged)) {
+    if ([string]::IsNullOrWhiteSpace($staged)) {
         throw "Fixture setup did not stage any changed files in $FixtureRepo."
     }
+    Invoke-Checked git @("commit", "-q", "-m", "fixture") $FixtureRepo | Out-Null
 }
 
 function Invoke-HygieneFailureFixture {
@@ -89,9 +90,9 @@ function Invoke-HygieneFailureFixture {
 
     $fixtureRepo = New-FixtureRepo $Name
     & $Arrange $fixtureRepo
-    Add-FixtureFiles $fixtureRepo
+    Commit-FixtureFiles $fixtureRepo
 
-    Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD") $fixtureRepo -ExpectFailure | Out-Null
+    Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD^") $fixtureRepo -ExpectFailure | Out-Null
 }
 
 function Test-DuplicateGuidFixture {
@@ -163,8 +164,8 @@ function Invoke-ClassifierFixture {
         [switch] $ExpectFailure
     )
 
-    Add-FixtureFiles $FixtureRepo
-    Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $FixtureRepo @{
+    Commit-FixtureFiles $FixtureRepo
+    Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD^") $FixtureRepo @{
         GITHUB_ACTIONS = ""
         GITHUB_EVENT_NAME = "pull_request"
         GITHUB_EVENT_PATH = $EventPath
