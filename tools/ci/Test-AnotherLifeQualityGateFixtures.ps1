@@ -157,6 +157,7 @@ EditorBuildSettings:
     try {
         Invoke-Checked git @("add", ".") $classifyRepo | Out-Null
         $classifyOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $classifyRepo @{
+            GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
             GITHUB_BASE_REF = "main"
@@ -189,6 +190,7 @@ EditorBuildSettings:
     try {
         Invoke-Checked git @("add", ".") $coordinationRepo | Out-Null
         Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $coordinationRepo @{
+            GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $coordinationEvent
             GITHUB_BASE_REF = "main"
@@ -217,6 +219,7 @@ EditorBuildSettings:
     try {
         Invoke-Checked git @("add", ".") $retiredRepo | Out-Null
         $retiredOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $retiredRepo @{
+            GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $retiredEvent
             GITHUB_BASE_REF = "main"
