@@ -35,9 +35,21 @@ jobs:
       - name: Repository hygiene
         shell: pwsh
         run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene
-      - name: Fixture proof - hygiene failures
+      - name: Fixture proof - duplicate Unity GUID
         shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario Hygiene
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario DuplicateGuid
+      - name: Fixture proof - production Test scene rejection
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario TestScene
+      - name: Fixture proof - missing enabled scene rejection
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MissingScene
+      - name: Fixture proof - malformed JSON rejection
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MalformedJson
+      - name: Fixture proof - mutable action rejection
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MutableAction
       - name: Fixture proof - mixed scope rejection
         shell: pwsh
         run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MixedScope
