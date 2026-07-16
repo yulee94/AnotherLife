@@ -52,16 +52,18 @@ namespace AL.Services.Local
             _definitions[id] = def;
 
             // Sync with save data
-            if (_saveGameService.CurrentSave != null && !_saveGameService.CurrentSave.Quests.Any(q => q.QuestId == id))
+            if (_saveGameService.CurrentSave != null)
             {
-                _saveGameService.CurrentSave.Quests.Add(new QuestState { QuestId = id, CurrentValue = 0 });
+                EnsureQuestStates();
             }
         }
 
         public IEnumerable<QuestState> GetActiveQuests()
         {
             EnsureQuestStates();
-            return _saveGameService.CurrentSave?.Quests.Where(q => !q.IsClaimed) ?? Enumerable.Empty<QuestState>();
+            return _saveGameService.CurrentSave?.Quests
+                .Where(IsKnownQuestState)
+                .Where(q => !q.IsClaimed) ?? Enumerable.Empty<QuestState>();
         }
 
         public void UpdateProgress(QuestType type, int amount)
@@ -69,10 +71,8 @@ namespace AL.Services.Local
             if (_saveGameService.CurrentSave == null) return;
             EnsureQuestStates();
 
-            foreach (var state in _saveGameService.CurrentSave.Quests.Where(q => !q.IsCompleted))
+            foreach (var state in _saveGameService.CurrentSave.Quests.Where(IsKnownQuestState).Where(q => !q.IsCompleted))
             {
-                if (!_definitions.ContainsKey(state.QuestId)) continue;
-
                 var def = _definitions[state.QuestId];
                 if (def.Type == type)
                 {
@@ -102,11 +102,22 @@ namespace AL.Services.Local
         public void ClaimReward(string questId)
         {
             EnsureQuestStates();
-            var state = _saveGameService.CurrentSave?.Quests.FirstOrDefault(q => q.QuestId == questId);
+            if (string.IsNullOrWhiteSpace(questId))
+            {
+                Debug.LogWarning("[AL-QST-INVALID-ID] Quest reward claim ignored for blank quest id.");
+                return;
+            }
+
+            if (!_definitions.TryGetValue(questId, out var def))
+            {
+                Debug.LogWarning($"[AL-QST-UNKNOWN-ID] Quest reward claim ignored for unsupported quest id '{questId}'.");
+                return;
+            }
+
+            var state = _saveGameService.CurrentSave?.Quests.FirstOrDefault(q => q != null && q.QuestId == questId);
             if (state == null || !state.IsCompleted || state.IsClaimed) return;
 
             state.IsClaimed = true;
-            var def = _definitions[questId];
 
             if (def.RewardResources != null)
             {
@@ -132,7 +143,7 @@ namespace AL.Services.Local
 
             foreach (var questDef in hiddenQuests)
             {
-                var state = _saveGameService.CurrentSave.Quests.FirstOrDefault(q => q.QuestId == questDef.Id);
+                var state = _saveGameService.CurrentSave.Quests.FirstOrDefault(q => q != null && q.QuestId == questDef.Id);
                 if (state != null && state.IsClaimed) continue; // Already done
 
                 // "Reveal" the quest
@@ -149,12 +160,57 @@ namespace AL.Services.Local
             }
 
             _saveGameService.CurrentSave.Quests ??= new List<QuestState>();
+            SanitizeQuestStates();
             foreach (var id in _definitions.Keys)
             {
                 if (_saveGameService.CurrentSave.Quests.All(q => q.QuestId != id))
                 {
                     _saveGameService.CurrentSave.Quests.Add(new QuestState { QuestId = id, CurrentValue = 0 });
                 }
+            }
+        }
+
+        private bool IsKnownQuestState(QuestState state)
+        {
+            return state != null &&
+                   !string.IsNullOrWhiteSpace(state.QuestId) &&
+                   _definitions.ContainsKey(state.QuestId);
+        }
+
+        private void SanitizeQuestStates()
+        {
+            var quests = _saveGameService.CurrentSave.Quests;
+            var seenIds = new HashSet<string>(StringComparer.Ordinal);
+
+            for (int index = quests.Count - 1; index >= 0; index--)
+            {
+                var state = quests[index];
+                if (state == null)
+                {
+                    quests.RemoveAt(index);
+                    Debug.LogWarning("[AL-QST-NULL-STATE] Removed null quest state from save compatibility view.");
+                    continue;
+                }
+
+                if (string.IsNullOrWhiteSpace(state.QuestId))
+                {
+                    quests.RemoveAt(index);
+                    Debug.LogWarning("[AL-QST-INVALID-ID] Removed quest state with blank quest id from save compatibility view.");
+                    continue;
+                }
+            }
+
+            for (int index = 0; index < quests.Count; index++)
+            {
+                var questId = quests[index].QuestId;
+                if (seenIds.Add(questId))
+                {
+                    continue;
+                }
+
+                quests.RemoveAt(index);
+                index--;
+                Debug.LogWarning($"[AL-QST-DUPLICATE-ID] Removed duplicate quest state for '{questId}' from save compatibility view.");
             }
         }
     }
