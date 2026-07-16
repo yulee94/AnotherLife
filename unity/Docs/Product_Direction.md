@@ -36,6 +36,15 @@ AnotherLife is an adult high-fantasy realm-war game, not a childlike prototype o
 - True Warmaster is the high-end RvR MMO progression state. It may grant overpowering realm-war skills, but those skills must be balanced around large-scale RvR objectives, counterplay, readability, cooldowns/resource costs, anti-exploit rules, and performance-safe VFX rather than ordinary early-game combat.
 - Warmaster gear, Warzone points, True Warmaster eligibility, and True Warmaster skills must be protected by durable save/reward ledgers and anti-duplication validation.
 
+## Party Grind And Support Role Direction
+
+- AnotherLife should not be balanced so that ordinary players can easily solo grind, hunt, or level up without powerful gear. Solo play can exist, but efficient progression should require either strong gear or coordinated party play.
+- The main questline should provide useful accessories and gear, but that gear should be only sufficient enough to let users party-grind or party-hunt neutral mobs for leveling. Main quest rewards should not trivialize solo hunting.
+- Neutral mob hunting should reward group composition, positioning, sustain, and support. Healers are a core party-sustain role rather than optional convenience.
+- Potions should grant health regeneration only while the player is in **non-combat mode**. Potions should not replace healers during active combat or allow potion-spam solo sustain.
+- Healers and other buffer/support roles must gain fair experience, gold, and resource rewards from grinding/hunting through effective healing and buffing allies. Support contribution must be tracked through durable, anti-abuse participation rules so support players are not punished for not landing killing blows.
+- Combat contribution, healing contribution, buff contribution, party eligibility, proximity, encounter tagging, anti-leeching, and reward splitting need explicit contracts before production implementation.
+
 ## Quality Bar
 
 - Unity Hub play must stop feeling like a toy/demo and move toward a premium adult fantasy UI/UX and presentation.
@@ -71,6 +80,7 @@ launch
 → 3D inner-realm champion start and main questline
 → 2.5D inner-kingdom progression
 → 3D inner-realm return and main-gate approach
+→ party-oriented neutral mob hunting with healer/buffer support progression
 → outer-realm warzone entry
 → warzone save-pillar interaction
 → realm-vs-realm objective play across connected realm continents
