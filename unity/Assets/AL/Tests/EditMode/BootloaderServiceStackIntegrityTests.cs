@@ -119,21 +119,65 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void RequiredServiceTypeInventoryIsImmutable()
+        {
+            object required = GetRuntimeType("AL.Core.OfflineServiceStack")
+                .GetField("RequiredServiceTypes", BindingFlags.Public | BindingFlags.Static)
+                .GetValue(null);
+
+            Assert.IsInstanceOf<IList>(required);
+            Assert.Throws<NotSupportedException>(() => ((IList)required).Add(typeof(string)));
+        }
+
+        [Test]
         public void FailedLoadDoesNotPermanentlyClaimMarkerLoad()
         {
             object created = InitializeIfMissing();
             AssertState(created, "CreatedCompleteStack");
 
             object marker = GetService(GetRuntimeType("AL.Core.IOfflineServiceStackMarker"));
+            const string owner = "load-owner";
 
-            Assert.True((bool)Invoke(marker, "TryBeginLoad"));
-            Assert.False((bool)Invoke(marker, "TryBeginLoad"));
+            Assert.True((bool)Invoke(marker, "TryClaimRuntimeOwner", owner));
+            Assert.True((bool)Invoke(marker, "TryBeginLoad", owner));
+            Assert.False((bool)Invoke(marker, "TryBeginLoad", owner));
 
-            Invoke(marker, "MarkLoadFailed");
-            Assert.True((bool)Invoke(marker, "TryBeginLoad"));
+            Invoke(marker, "MarkLoadFailed", owner);
+            Assert.True((bool)Invoke(marker, "TryBeginLoad", owner));
 
-            Invoke(marker, "MarkLoadSucceeded");
-            Assert.False((bool)Invoke(marker, "TryBeginLoad"));
+            Invoke(marker, "MarkLoadSucceeded", owner);
+            Assert.False((bool)Invoke(marker, "TryBeginLoad", owner));
+            Assert.False((bool)Invoke(marker, "TryBeginLoad", "different-owner"));
+        }
+
+        [Test]
+        public void DuplicateBootloadersLeaveOnlyOneRuntimeOwnerActive()
+        {
+            Type bootloaderType = GetRuntimeType("AL.Core.Bootloader");
+            var firstHost = new GameObject("BootloaderOwnerOne");
+            var secondHost = new GameObject("BootloaderOwnerTwo");
+            var first = (Behaviour)firstHost.AddComponent(bootloaderType);
+            var second = (Behaviour)secondHost.AddComponent(bootloaderType);
+            bootloaderType.GetField("_autoLoadOnStart", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(first, false);
+            bootloaderType.GetField("_autoLoadOnStart", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(second, false);
+
+            try
+            {
+                Invoke(first, "Awake");
+                Assert.True(first.enabled);
+
+                LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_RUNTIME_OWNER_REJECTED\]"));
+                Invoke(second, "Awake");
+
+                Assert.False(second.enabled);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(firstHost);
+                UnityEngine.Object.DestroyImmediate(secondHost);
+            }
         }
 
         [Test]
@@ -191,8 +235,13 @@ namespace AL.Tests.EditMode
 
         private static TResult CreateForcedPostInstallFailure<TResult, TMarker>()
         {
-            return (TResult)GetRuntimeType("AL.Core.BootloaderInitializationResult")
-                .GetMethod("FailedInconsistentMarker", BindingFlags.Public | BindingFlags.Static)
+            MethodInfo factory = GetRuntimeType("AL.Core.BootloaderInitializationResult")
+                .GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Single(method =>
+                    method.Name == "FailedInconsistentMarker" &&
+                    method.GetParameters().Length == 3);
+
+            return (TResult)factory
                 .Invoke(null, new object[]
                 {
                     "forced-post-install-failure",
@@ -225,9 +274,11 @@ namespace AL.Tests.EditMode
 
         private static IReadOnlyList<Type> RequiredServiceTypes()
         {
-            return ((Array)GetRuntimeType("AL.Core.OfflineServiceStack")
+            object value = GetRuntimeType("AL.Core.OfflineServiceStack")
                     .GetField("RequiredServiceTypes", BindingFlags.Public | BindingFlags.Static)
-                    .GetValue(null))
+                    .GetValue(null);
+
+            return ((IEnumerable)value)
                 .Cast<Type>()
                 .ToArray();
         }
