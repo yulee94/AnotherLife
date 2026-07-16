@@ -24,6 +24,9 @@ namespace AL.Tests.EditMode
         [TearDown]
         public void TearDown()
         {
+            GetRuntimeType("AL.Core.Bootloader")
+                .GetField("PostInstallValidationOverride", BindingFlags.NonPublic | BindingFlags.Static)
+                .SetValue(null, null);
             ClearServiceLocator();
         }
 
@@ -99,6 +102,106 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void MarkerExpectedInstancesAreImmutable()
+        {
+            object created = InitializeIfMissing();
+            AssertState(created, "CreatedCompleteStack");
+
+            object marker = GetService(GetRuntimeType("AL.Core.IOfflineServiceStackMarker"));
+            var expectedInstances = (IDictionary<Type, object>)marker.GetType()
+                .GetProperty("ExpectedInstances")
+                .GetValue(marker);
+
+            Assert.Throws<NotSupportedException>(() =>
+            {
+                expectedInstances[typeof(string)] = null;
+            });
+        }
+
+        [Test]
+        public void FailedLoadDoesNotPermanentlyClaimMarkerLoad()
+        {
+            object created = InitializeIfMissing();
+            AssertState(created, "CreatedCompleteStack");
+
+            object marker = GetService(GetRuntimeType("AL.Core.IOfflineServiceStackMarker"));
+
+            Assert.True((bool)Invoke(marker, "TryBeginLoad"));
+            Assert.False((bool)Invoke(marker, "TryBeginLoad"));
+
+            Invoke(marker, "MarkLoadFailed");
+            Assert.True((bool)Invoke(marker, "TryBeginLoad"));
+
+            Invoke(marker, "MarkLoadSucceeded");
+            Assert.False((bool)Invoke(marker, "TryBeginLoad"));
+        }
+
+        [Test]
+        public void PauseAfterServiceReplacementReportsDriftAndDisablesBootloader()
+        {
+            Type bootloaderType = GetRuntimeType("AL.Core.Bootloader");
+            var host = new GameObject("BootloaderDriftTest");
+            var bootloader = (Behaviour)host.AddComponent(bootloaderType);
+            bootloaderType.GetField("_autoLoadOnStart", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(bootloader, false);
+
+            try
+            {
+                Invoke(bootloader, "Awake");
+                Assert.True(bootloader.enabled);
+
+                Type saveType = GetRuntimeType("AL.Services.Local.LocalSaveGameService");
+                Type saveInterface = GetRuntimeType("AL.Core.Interfaces.ISaveGameService");
+                object replacementSave = Activator.CreateInstance(saveType);
+                Register(saveInterface, replacementSave);
+
+                LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_RUNTIME_DRIFT\]"));
+                Invoke(bootloader, "OnApplicationPause", true);
+
+                Assert.False(bootloader.enabled);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void PostInstallVerificationFailureRollsBackAttemptedStack()
+        {
+            Type bootloaderType = GetRuntimeType("AL.Core.Bootloader");
+            Type resultType = GetRuntimeType("AL.Core.BootloaderInitializationResult");
+            Type markerType = GetRuntimeType("AL.Core.IOfflineServiceStackMarker");
+            Type funcType = typeof(Func<>).MakeGenericType(resultType);
+            MethodInfo failedPublication = typeof(BootloaderServiceStackIntegrityTests)
+                .GetMethod(nameof(CreateForcedPostInstallFailure), BindingFlags.NonPublic | BindingFlags.Static)
+                .MakeGenericMethod(resultType, markerType);
+            Delegate forcedFailure = Delegate.CreateDelegate(funcType, failedPublication);
+
+            bootloaderType.GetField("PostInstallValidationOverride", BindingFlags.NonPublic | BindingFlags.Static)
+                .SetValue(null, forcedFailure);
+
+            LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_PUBLICATION_FAILED\]"));
+            object result = InitializeIfMissing();
+
+            AssertState(result, "FailedPublication");
+            Assert.False(RequiredServiceTypes().Any(IsRegistered));
+            AssertNotRegistered(markerType);
+        }
+
+        private static TResult CreateForcedPostInstallFailure<TResult, TMarker>()
+        {
+            return (TResult)GetRuntimeType("AL.Core.BootloaderInitializationResult")
+                .GetMethod("FailedInconsistentMarker", BindingFlags.Public | BindingFlags.Static)
+                .Invoke(null, new object[]
+                {
+                    "forced-post-install-failure",
+                    new[] { typeof(TMarker) },
+                    "Forced post-install verification failure."
+                });
+        }
+
+        [Test]
         public void TryGetReturnsFalseForMissingService()
         {
             Type serviceLocator = GetRuntimeType("AL.Core.ServiceLocator");
@@ -143,6 +246,14 @@ namespace AL.Tests.EditMode
             Assert.True((bool)isRegistered.Invoke(null, null), $"Expected {serviceType.Name} to be registered.");
         }
 
+        private static bool IsRegistered(Type serviceType)
+        {
+            Type serviceLocator = GetRuntimeType("AL.Core.ServiceLocator");
+            MethodInfo isRegistered = serviceLocator.GetMethod("IsRegistered", BindingFlags.Public | BindingFlags.Static)
+                .MakeGenericMethod(serviceType);
+            return (bool)isRegistered.Invoke(null, null);
+        }
+
         private static void AssertNotRegistered(Type serviceType)
         {
             Type serviceLocator = GetRuntimeType("AL.Core.ServiceLocator");
@@ -165,6 +276,13 @@ namespace AL.Tests.EditMode
             MethodInfo register = serviceLocator.GetMethod("Register", BindingFlags.Public | BindingFlags.Static)
                 .MakeGenericMethod(serviceType);
             register.Invoke(null, new[] { service });
+        }
+
+        private static object Invoke(object target, string methodName, params object[] args)
+        {
+            return target.GetType()
+                .GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Invoke(target, args);
         }
 
         private static Type GetRuntimeType(string typeName)

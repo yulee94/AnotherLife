@@ -3,6 +3,7 @@ using AL.Core.Interfaces;
 using AL.Services.Local;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace AL.Core
@@ -10,6 +11,7 @@ namespace AL.Core
     public class Bootloader : MonoBehaviour
     {
         private const int OfflineStackVersion = 1;
+        internal static Func<BootloaderInitializationResult> PostInstallValidationOverride;
 
         [SerializeField] private bool _autoLoadOnStart = true;
 
@@ -28,12 +30,43 @@ namespace AL.Core
                 return;
             }
 
+            var markerValidation = BootloaderInitializationResult.NotStarted();
             if (_autoLoadOnStart &&
-                ServiceLocator.TryGet<IOfflineServiceStackMarker>(out var marker) &&
-                marker.TryMarkLoaded() &&
-                ServiceLocator.TryGet<ISaveGameService>(out var saveGameService))
+                TryGetValidatedMarker(out var marker, out markerValidation) &&
+                marker.TryBeginLoad() &&
+                marker.TryGetExpected<ISaveGameService>(out var saveGameService))
             {
-                saveGameService.Load();
+                try
+                {
+                    saveGameService.Load();
+                    if (saveGameService.LastLoadStatus == SaveLoadStatus.RecoveryFailed)
+                    {
+                        marker.MarkLoadFailed();
+                        _initializationResult = BootloaderInitializationResult.FailedLoad(saveGameService.LastLoadMessage);
+                        _runtimeActive = false;
+                        enabled = false;
+                        LogInitializationResult(_initializationResult);
+                        return;
+                    }
+
+                    marker.MarkLoadSucceeded();
+                }
+                catch (Exception ex)
+                {
+                    marker.MarkLoadFailed();
+                    _initializationResult = BootloaderInitializationResult.FailedLoad(ex.Message);
+                    _runtimeActive = false;
+                    enabled = false;
+                    LogInitializationResult(_initializationResult);
+                    return;
+                }
+            }
+            else if (_autoLoadOnStart && !markerValidation.Succeeded && markerValidation.State != BootloaderInitializationState.NotStarted)
+            {
+                _initializationResult = markerValidation;
+                _runtimeActive = false;
+                enabled = false;
+                LogInitializationResult(_initializationResult);
             }
         }
 
@@ -78,10 +111,20 @@ namespace AL.Core
                 return failedPublicationResult;
             }
 
-            var installedResult = TryValidateExistingMarker();
+            var installedResult = PostInstallValidationOverride != null
+                ? PostInstallValidationOverride()
+                : TryValidateExistingMarker();
             var result = installedResult.State == BootloaderInitializationState.ReusedCompleteStack
                 ? BootloaderInitializationResult.CreatedCompleteStack(stack.Marker.RegistrationId)
                 : installedResult;
+
+            if (!result.Succeeded)
+            {
+                ServiceLocator.RemoveBatchIfCurrent(stack.Registrations);
+                result = BootloaderInitializationResult.FailedPublication(
+                    typeof(IOfflineServiceStackMarker),
+                    $"Post-install verification failed and the attempted stack was rolled back. {installedResult.Message}");
+            }
 
             LogInitializationResult(result);
             return result;
@@ -138,6 +181,21 @@ namespace AL.Core
             return BootloaderInitializationResult.ReusedCompleteStack(marker.RegistrationId);
         }
 
+        private static bool TryGetValidatedMarker(
+            out IOfflineServiceStackMarker marker,
+            out BootloaderInitializationResult validation)
+        {
+            validation = TryValidateExistingMarker();
+            if (!validation.Succeeded ||
+                !ServiceLocator.TryGet<IOfflineServiceStackMarker>(out marker))
+            {
+                marker = null;
+                return false;
+            }
+
+            return true;
+        }
+
         private void Update()
         {
             if (!_runtimeActive)
@@ -145,8 +203,7 @@ namespace AL.Core
                 return;
             }
 
-            var validation = TryValidateExistingMarker();
-            if (!validation.Succeeded)
+            if (!TryGetValidatedMarker(out var marker, out var validation))
             {
                 if (!_runtimeDriftReported)
                 {
@@ -159,7 +216,7 @@ namespace AL.Core
                 return;
             }
 
-            if (ServiceLocator.TryGet<IResourceService>(out var resourceService))
+            if (marker.TryGetExpected<IResourceService>(out var resourceService))
             {
                 resourceService.TickProduction(Time.deltaTime);
             }
@@ -180,8 +237,19 @@ namespace AL.Core
 
         private void SaveIfReady()
         {
-            if (!_runtimeActive || !ServiceLocator.TryGet<ISaveGameService>(out var saveGameService))
+            var validation = BootloaderInitializationResult.NotStarted();
+            if (!_runtimeActive ||
+                !TryGetValidatedMarker(out var marker, out validation) ||
+                !marker.TryGetExpected<ISaveGameService>(out var saveGameService))
             {
+                if (_runtimeActive && !validation.Succeeded && validation.State != BootloaderInitializationState.NotStarted)
+                {
+                    _runtimeActive = false;
+                    _runtimeDriftReported = true;
+                    enabled = false;
+                    Debug.LogError(BootloaderInitializationResult.RuntimeDrift(validation.Message).Message);
+                }
+
                 return;
             }
 
@@ -227,6 +295,7 @@ namespace AL.Core
         FailedInconsistentMarker,
         FailedConstruction,
         FailedPublication,
+        FailedLoad,
         RuntimeDrift
     }
 
@@ -329,6 +398,14 @@ namespace AL.Core
                 serviceType: serviceType);
         }
 
+        public static BootloaderInitializationResult FailedLoad(string message)
+        {
+            return new BootloaderInitializationResult(
+                BootloaderInitializationState.FailedLoad,
+                "BOOT_STACK_LOAD_FAILED",
+                $"[BOOT_STACK_LOAD_FAILED] Bootloader save load failed: {message}");
+        }
+
         public static BootloaderInitializationResult RuntimeDrift(string message)
         {
             return new BootloaderInitializationResult(
@@ -345,12 +422,16 @@ namespace AL.Core
         IReadOnlyDictionary<Type, object> ExpectedInstances { get; }
         object SaveRoot { get; }
         object GameDataRoot { get; }
-        bool TryMarkLoaded();
+        bool TryBeginLoad();
+        void MarkLoadSucceeded();
+        void MarkLoadFailed();
+        bool TryGetExpected<T>(out T service);
     }
 
     internal sealed class LocalOfflineServiceStackMarker : IOfflineServiceStackMarker
     {
-        private bool _loadClaimed;
+        private bool _loadInProgress;
+        private bool _loadSucceeded;
 
         public LocalOfflineServiceStackMarker(
             int stackVersion,
@@ -361,7 +442,8 @@ namespace AL.Core
         {
             StackVersion = stackVersion;
             RegistrationId = registrationId;
-            ExpectedInstances = expectedInstances;
+            ExpectedInstances = new ReadOnlyDictionary<Type, object>(
+                new Dictionary<Type, object>(expectedInstances));
             SaveRoot = saveRoot;
             GameDataRoot = gameDataRoot;
         }
@@ -372,15 +454,38 @@ namespace AL.Core
         public object SaveRoot { get; }
         public object GameDataRoot { get; }
 
-        public bool TryMarkLoaded()
+        public bool TryBeginLoad()
         {
-            if (_loadClaimed)
+            if (_loadInProgress || _loadSucceeded)
             {
                 return false;
             }
 
-            _loadClaimed = true;
+            _loadInProgress = true;
             return true;
+        }
+
+        public void MarkLoadSucceeded()
+        {
+            _loadInProgress = false;
+            _loadSucceeded = true;
+        }
+
+        public void MarkLoadFailed()
+        {
+            _loadInProgress = false;
+        }
+
+        public bool TryGetExpected<T>(out T service)
+        {
+            if (ExpectedInstances.TryGetValue(typeof(T), out var existing) && existing is T typed)
+            {
+                service = typed;
+                return true;
+            }
+
+            service = default;
+            return false;
         }
     }
 
