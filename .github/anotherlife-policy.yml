@@ -1,13 +1,21 @@
-version: 1
+version: 2
 status_names:
   classify: "policy / classify"
   hygiene: "repository / hygiene"
   android_unit_debug: "android / unit-debug"
 branch_prefixes:
-  - gpt/
   - codex/
-  - codex/narrative-
-  - codex/terrestrial-
+primary_modes:
+  - Codex coordination/review
+  - Codex narrative/content
+  - Codex terrestrial design
+  - Codex engineering
+retired_agents_and_prefixes:
+  - GPT
+  - Android Studio
+  - gpt/
+  - android-studio/
+  - gemini/
 shared_files:
   - unity/Assets/AL/Scripts/Core/Bootloader.cs
   - unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs
@@ -41,8 +49,9 @@ forbidden_tracked_path_patterns:
   - "(?i)(unity_lic|license|signing|keystore|password|secret)"
 production_test_scene_path: unity/Assets/Test.unity
 required_pr_checks:
-  - one primary owner mode is selected
+  - one Codex primary mode is selected
   - upstream issue or artifact is linked
   - changed shared files are declared
-  - branch prefix matches the declared ownership model
+  - branch prefix matches the Codex-only ownership model
   - draft PRs are not represented as ready to merge
+  - no future GPT or Android Studio action is required

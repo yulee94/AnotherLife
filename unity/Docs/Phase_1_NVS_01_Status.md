@@ -1,44 +1,68 @@
 # Phase 1 NVS-01 Status
 
-**Status date:** 2026-07-16  
-**Integration branch:** `main`  
-**Audited current-main head:** `59a82ce7786f7b4b6e831c0bc57f4a2b17c3f105`  
-**Roadmap state:** Phase 1 remains paused behind reopened QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
-**Approved product intent:** issue #138 D1–D16  
+**Status date:** 2026-07-16
+**Integration branch:** `main`
+**Audited current-main head:** `cbdb09f99c3f803a282e8582cd7375680ead3693`
+**Roadmap state:** Phase 1 remains paused behind reopened QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate
+**Approved product intent:** issue #138 D1–D16
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
 `AGENTS.md` is authoritative. This record separates specification, source presence, merge state, issue state, validation evidence, accepted behavior, creative approval, packaging evidence, and player-visible completion.
 
-A merged PR, closed issue, green test suite, generated asset, Console log, uploaded LFS pointer, Player executable, or passing workflow is not acceptance by itself. Post-merge source verification and current-head evidence supersede stale PR descriptions and automatic issue closure.
+A merged PR, closed issue, green test suite, generated asset, Console log, uploaded LFS pointer, Player executable, or passing workflow is not acceptance by itself. Current-source verification and matching evidence supersede stale PR descriptions and automatic issue closure.
 
 ## 1. Current control summary
 
 - The active product milestone remains **NVS-01**.
+- The latest user decision assigns all future project work to **Codex only**. GPT and Android Studio receive no future task, review, or approval assignment.
+- Codex now operates through coordination/review, narrative/content, terrestrial-design, and engineering modes. The user retains final creative, product, balance, irreversible-profile, playtest, milestone, and release approval.
+- Historical GPT-authored specifications and review comments remain technical evidence. Open work must not wait for another GPT response; Codex coordination/review mode owns all future disposition and merge-readiness decisions.
 - No approved A1 narrative packet is active. Archived OMEN_1 material remains historical reference only.
-- #156 remains the first trusted-Unity-content gate. Draft correction PR #237 exists, but GPT review found false-pass paths and canonical validation is still missing.
-- #153 has active draft correction PR #241 and currently holds the exclusive `Bootloader.cs` soft lock. GPT review found that duplicate runtime ownership, malformed-marker safety, exact rollback, load success, save outcome, cross-scene lifecycle, and the full fault matrix remain incomplete.
+- #156 remains the first trusted-Unity-content gate. Draft correction PR #237 exists; its current blocking review identifies false-pass paths and canonical validation is still missing.
+- #153 has active draft correction PR #241 and currently holds the exclusive `Bootloader.cs` soft lock. Its current blocking review identifies duplicate runtime ownership, malformed-marker safety, exact rollback, load/save success, cross-scene lifecycle, and fault-matrix gaps.
 - The other post-merge correction issues remain open: #163, #136, #152, #127, #178, #161, #155, and #137.
 - Three pull requests are open: correction drafts #237 and #241, and terrestrial source draft #217.
 - The only committed Unity scene remains test-only `Assets/Test.unity`; normal Build Settings remain empty.
-- The canonical Unity workspace remains `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`. Evidence from `C:\Users\MY\Documents\AnotherLife\unity` is development feedback, not closure evidence.
+- The active Codex Unity workspace is `C:\Users\MY\Documents\AnotherLife\unity`. Historical evidence from other worktrees remains useful only when its exact path, base/head, branch state, and dirty/clean state are reported.
 - PR #232 is accepted as partial #155 progress: terrestrial path classification, disposable local failure fixtures, and a proof/protection plan. #155 remains open through policy authority, correct event/range semantics, complete security/classification/artifacts, live failure proofs, a Unity validation model, and verified branch protection.
 - PRs #238, #240, and #239 added binding **specifications**, not implementations, for progression, territory, and Champion customization.
 
-## 2. Ownership state
+## 2. Codex-only ownership state
 
-The latest user decision assigns delivery to separately declared Codex modes while preserving GPT review and user approval:
+### Codex coordination/review mode
 
-- **GPT:** coordination, technical specifications, state/transaction/save/test design, review, risk, sequencing, and merge readiness;
-- **Codex narrative/content:** narrative source, player-facing copy, localization meaning, named-item/event/relationship meaning, and fidelity;
-- **Codex terrestrial-design:** terrestrial and applicable visual-design source and fidelity;
-- **Codex engineering:** Android, Unity, runtime, assets/import, saves, builds, tests, CI, tooling, and generated technical artifacts;
-- **User:** final product, creative, visual-design, balance, irreversible-profile, integrated playtest, milestone, and release approval.
+Owns planning, dependency ordering, specifications, state/event/contract/save/test design, issue/PR triage, integration review, shared-file sequencing, status/risk/governance records, and merge readiness.
 
-Android Studio and Unity are tools. `android-studio/` and `gemini/` are retired workstream prefixes for new work.
+### Codex narrative/content mode
+
+Owns narrative source, localization-facing meaning, continuity, stable narrative IDs, and narrative-fidelity correction.
+
+### Codex terrestrial-design mode
+
+Owns terrestrial creature/fauna visual-design source, source identity, and design-fidelity correction.
+
+### Codex engineering mode
+
+Owns Android and Unity code, runtime, gameplay, assets/import, scenes, saves/migrations/recovery, contracts/catalogs, builds, tests, CI, tooling, diagnostics, performance, and accessibility mechanics.
+
+### User
+
+Owns final product, creative, visual-design, balance, irreversible-profile, integrated playtest, milestone, and release approval.
+
+New branches use only:
+
+```text
+codex/coordination-<scope>
+codex/narrative-<scope>
+codex/terrestrial-<scope>
+codex/<engineering-scope>
+```
+
+`gpt/`, `android-studio/`, and `gemini/` are retired for new work.
 
 ## 3. Binding merged specifications
 
-A merged specification is a contract, not implementation completion.
+A merged specification is a contract, not implementation completion. Historical GPT authorship does not require future GPT approval; Codex coordination/review mode consumes or supersedes the artifact.
 
 | Area | Binding artifact / PR | Current implementation state |
 | --- | --- | --- |
@@ -64,7 +88,7 @@ A merged specification is a contract, not implementation completion.
 
 ## 4. Open pull requests and locks
 
-| PR | Issue | Scope | GPT disposition | Shared lock |
+| PR | Issue | Scope | Codex coordination/review disposition | Shared lock |
 | --- | --- | --- | --- | --- |
 | #237 | #156 | QuestDefinition Force-Text YAML authority validator | **Draft / blocked / changes required** | none |
 | #241 | #153 | Bootloader load, marker, rollback, and lifecycle correction | **Draft / blocked / changes required** | `unity/Assets/AL/Scripts/Core/Bootloader.cs` |
@@ -74,14 +98,14 @@ A merged specification is a contract, not implementation completion.
 
 The architecture is materially improved, but the current head still requires:
 
-- exact ordered field **name and type** validation for all twelve serialized QuestDefinition fields;
+- exact ordered field name and type validation for all twelve serialized QuestDefinition fields;
 - exact `m_Script` mapping validation: `fileID: 11500000`, `type: 3`, valid 32-hex GUID, deterministic duplicate/extra-key handling;
 - candidate-local validity accounting so malformed candidates never increment `ValidAssetCount`;
 - YAML class/root-object validation and deliberate production-assembly filtering;
 - exact current-head authority record and source inventory;
-- rebase/merge of current `main` and complete canonical-D compile/EditMode/import/reimport/missing-script/GUID evidence.
+- update onto current `main` and complete canonical compile/EditMode/import/reimport/missing-script/GUID evidence.
 
-No A1, #183 production authority, #223 scene authority, or #150 Player packaging may cite #237 until the corrected head is accepted.
+Codex coordination/review mode owns future re-review. No A1, #183 production authority, #223 scene authority, or #150 Player packaging may cite #237 until the corrected head is accepted.
 
 ### PR #241 — current blockers
 
@@ -89,7 +113,7 @@ The branch fixes several prior defects but remains unsafe because:
 
 - multiple Bootloaders can all tick production and save; load claiming does not elect one runtime owner;
 - `TryBeginLoad() == false` conflates already-loaded and load-in-progress states;
-- `Load()` success accepts `None`/null-profile and does not revalidate identity after loading;
+- `Load()` success accepts invalid/nonterminal results and does not revalidate identity after loading;
 - malformed/null/missing marker maps can still throw because root keys are directly indexed;
 - required type and snapshot inventories remain mutable or under-validated;
 - final-verification rollback cannot restore the exact prior registry snapshot;
@@ -98,14 +122,14 @@ The branch fixes several prior defects but remains unsafe because:
 - cross-scene owner identity and the complete construction/publication/load/two-owner/fault matrix remain absent;
 - all Unity evidence remains noncanonical.
 
-The `Bootloader.cs` lock remains active while #241 is open. #223, #150, lifecycle-sensitive #137 work, and NVS runtime remain blocked by #153.
+Codex coordination/review mode owns future re-review. The `Bootloader.cs` lock remains active while #241 is open. #223, #150, lifecycle-sensitive #137 work, and NVS runtime remain blocked by #153.
 
 ### PR #217 — current blockers
 
 Before user creative review, #217 must:
 
 - use `Refs #194`, not close the issue;
-- rebase onto current `main`;
+- update onto current `main`;
 - provide normalized source/version/profile/variant/media/hash/LFS/provenance identity;
 - provide retained schema and deterministic manifest/media validation;
 - prove clean binary retrieval and actual dimensions/hashes;
@@ -113,6 +137,8 @@ Before user creative review, #217 must:
 - provide direct exact-source rendered review links;
 - complete canonical Unity import evidence or move review-only media outside runtime `Assets`;
 - separate technical, creative, naming/content, and later runtime-integration states.
+
+Codex coordination/review and terrestrial-design modes own future technical and fidelity disposition. User creative approval remains required.
 
 ## 5. Post-merge implementations that remain unaccepted
 
@@ -151,7 +177,7 @@ Correction branches may proceed independently where files do not overlap:
 #194  codex/terrestrial-design-foundation                    [open PR #217]
 ```
 
-No correction may broaden into NVS, content/design authorship, balance, scenes, Android embedding, another domain, or another designated shared file without a reviewed dependency and lock.
+No correction may broaden into NVS, content/design authorship, balance, scenes, Android embedding, another domain, or another designated shared file without a Codex coordination/review dependency and lock decision.
 
 ## 7. Pure nonmutating implementation lanes
 
@@ -178,15 +204,15 @@ Each first PR must use `Refs`, not `Fixes`, and must not close its issue.
 ```text
 #156 accepted Force-Text QuestDefinition authority
   ↓
-#128 clean Codex narrative/content A1
+#128 Codex narrative/content A1
   ↓
-#133 GPT G1
+#133 Codex coordination/review G1
   ↓
 accepted save/economy/notification/relationship/scene/result foundations
   ↓
 #134 Codex engineering C1–C4
   ↓
-G2 GPT → A2 Codex narrative/content → U1 user
+G2 Codex coordination/review → A2 Codex narrative/content → U1 user
 ```
 
 A1 must implement issue #138 D1–D16 exactly. Archived OMEN_1 must not become a compatibility contract through tests, fallback catalogs, or runtime code.
@@ -310,7 +336,7 @@ The first approved open PR declaring an unlocked designated file obtains its loc
 
 Evidence must match the risk:
 
-- **current source:** inspect production blobs after merge; PR prose and issue closure are low-trust metadata;
+- **coordination/review:** current main, current source, exact issues/PRs, dependencies, locks, acceptance criteria, and evidence quality;
 - **build:** exact command/version/base/head/exit code, complete compiler/error scan, retained log;
 - **test:** exact discovered/passed/failed/skipped totals and retained XML/logs;
 - **asset:** Force-Text/GUID/script-file-ID/local-file-ID/class/root/schema inventory, import/reimport, missing-script and field-preservation proof;
@@ -326,19 +352,22 @@ Skipped, stale-base, duplicate-workspace, pointer-only, Console-only, compile-on
 ## 11. Immediate next actions
 
 ```text
-1. Correct PR #237's exact type/script mapping, validity accounting, metadata/assembly filtering,
-   rebase it, and run the complete canonical #156 matrix.
-2. Correct PR #241's single-owner/load/save/marker/rollback/diagnostic/scene lifecycle,
-   rebase it, and run canonical compile/EditMode plus corrected #127 PlayMode evidence.
-3. Correct #163 to typed pure reads and checked no-save candidate mutations without repair.
-4. Complete #136 real omitted-JSON/idempotency evidence and replace #152 query repair with a pure view.
-5. Correct #137 candidate ranking, rollback certainty, typed verified deletion, fault injection,
+1. Codex coordination/review rechecks all open PRs from current main and preserves the Bootloader lock.
+2. Correct PR #237's exact type/script mapping, validity accounting, metadata/assembly filtering,
+   update it, and run the complete canonical #156 matrix.
+3. Correct PR #241's single-owner/load/save/marker/rollback/diagnostic/scene lifecycle,
+   update it, and run canonical compile/EditMode plus corrected #127 PlayMode evidence.
+4. Correct #163 to typed pure reads and checked no-save candidate mutations without repair.
+5. Complete #136 real omitted-JSON/idempotency evidence and replace #152 query repair with a pure view.
+6. Correct #137 candidate ranking, rollback certainty, typed verified deletion, fault injection,
    and semantic preservation after #136/#152/#163.
-6. Correct #127 profile restoration and #178 hidden Kingdom/Champion mutations before scene/Player work.
-7. Complete #155 policy/live-proof/protection and the narrow #161 visible-notice correction.
-8. Bring PR #217 into exact PR #221 compliance before user creative review.
-9. Permit the nine pure planner lanes only within their nonmutating boundaries.
-10. After #156/#153, begin #223 stable scene assets; after #156, begin only the contract-limited #183 catalog foundation.
-11. Do not activate A1/G1/runtime, persisted progression/territory/customization/reward/world/relationship work,
+7. Correct #127 profile restoration and #178 hidden Kingdom/Champion mutations before scene/Player work.
+8. Complete #155 policy/live-proof/protection and the narrow #161 visible-notice correction.
+9. Bring PR #217 into exact PR #221 compliance before user creative review.
+10. Permit the nine pure planner lanes only within their nonmutating boundaries.
+11. After #156/#153, begin #223 stable scene assets; after #156, begin only the contract-limited #183 catalog foundation.
+12. Do not activate A1/G1/runtime, persisted progression/territory/customization/reward/world/relationship work,
     Player packaging, Android export, or release claims before their prerequisites pass.
 ```
+
+No next GPT or Android Studio action exists.

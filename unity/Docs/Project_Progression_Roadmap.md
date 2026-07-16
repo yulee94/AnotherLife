@@ -1,30 +1,31 @@
 # AnotherLife Project Progression Roadmap
 
-This roadmap defines how GPT, Codex, and the user move Another Life from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay. `Ownership_Decision_Record.md` controls ownership chronology.
+This roadmap defines how Codex and the user move Another Life from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay. `Ownership_Decision_Record.md` controls ownership chronology.
 
 ## Authority
 
 Use together:
 
-1. `AGENTS.md` — ownership, branches, locks, and conflict policy.
+1. `AGENTS.md` — Codex modes, branches, locks, and conflict policy.
 2. `unity/Docs/Ownership_Decision_Record.md` — final user ownership decision.
-3. `unity/Docs/Agent_Role_Prompts.md` — standalone GPT and Codex prompts.
+3. `unity/Docs/Agent_Role_Prompts.md` — standalone Codex prompt.
 4. This roadmap — phase order and exit gates.
 5. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
 6. `.github/pull_request_template.md` — required PR declaration.
 
-`AGENTS.md` wins conflicts. The user decides creative/product direction. GPT resolves technical sequencing. Codex performs all source-authoring, design, implementation, build, asset, and test work through declared modes.
+`AGENTS.md` wins conflicts. The user decides creative and product direction. Codex coordination/review mode resolves technical sequencing and acceptance disposition. Codex source/design and engineering modes perform delivery.
 
 ## Operating principles
 
 - Keep `main` buildable before expansion.
 - Deliver thin complete slices before scaling.
 - Codex narrative/content and terrestrial-design source precede Codex engineering implementation.
-- GPT specifies and reviews handoffs but does not author source.
+- Codex coordination/review mode specifies and reviews handoffs without silently rewriting source.
 - Use stable IDs and validated data instead of duplicated hard-coded authority.
 - Preserve old saves and service registrations.
-- One focused PR per major completion and primary Codex mode.
+- Use one focused PR per major completion and one primary Codex mode.
 - Do not advance while the current phase gate is red unless the user reprioritizes.
+- Historical GPT artifacts may be consumed as technical specifications/evidence, but no future GPT action or approval is required.
 
 ## Priority inside every phase
 
@@ -39,13 +40,13 @@ Use together:
 
 ### Goal
 
-Establish one workspace, the GPT–Codex–user model, one active implementation path per issue, and reliable validation commands.
+Establish one workspace, the Codex–user model, one active implementation path per issue, and reliable validation commands.
 
-### GPT
+### Codex coordination/review mode
 
 - Maintain governance, roadmap, status, risk, and gate policy.
-- Triage issues/PRs, dependencies, and locks.
-- Review build blockers and evidence.
+- Triage issues/PRs, dependencies, review findings, and locks.
+- Review build blockers and evidence against current source.
 
 ### Codex narrative/content mode
 
@@ -65,7 +66,7 @@ Establish one workspace, the GPT–Codex–user model, one active implementation
 
 ### User
 
-- Resolve materially different product/design options when review cannot establish a clear technical answer.
+- Resolve materially different product/design options when evidence cannot establish a clear technical answer.
 
 ### Exit gate
 
@@ -85,11 +86,11 @@ Prove one bounded user-approved quest can move from Codex narrative source to a 
 - Produce A1 with stable IDs, states, objectives, dialogue, choices, consequences, handoff, failure/retry/recovery, report, abandonment, resume, and localization.
 - Perform A2 narrative-fidelity disposition after implementation.
 
-### GPT
+### Codex coordination/review mode
 
-- Review A1.
+- Review A1 against user decisions and active constraints.
 - Publish G1 state/event/contract/persistence/test specification.
-- Perform G2 integration and merge-risk review.
+- Perform G2 integration, evidence, lock, and merge-risk review.
 
 ### Codex engineering mode
 
@@ -109,7 +110,7 @@ Prove one bounded user-approved quest can move from Codex narrative source to a 
 
 - Quest start, progression, branch, handoff, resolution, save, reload, and resume work.
 - Consequences occur once and remain stable.
-- A2 confirms source fidelity, GPT confirms technical acceptance, and the user accepts U1.
+- A2 confirms source fidelity, Codex coordination/review confirms technical acceptance, and the user accepts U1.
 
 ## Phase 2 — Chapter 1 Playable Spine
 
@@ -122,7 +123,7 @@ Generalize NVS-01 into a complete Chapter 1 flow without quest-specific runtime 
 - Define Chapter 1 structure, critical path, optional content, NPC arcs, continuity, entry, and close conditions.
 - Deliver bounded source packets with stable dependencies.
 
-### GPT
+### Codex coordination/review mode
 
 - Split Chapter 1 into dependency-ordered milestones.
 - Define reusable state patterns, contracts, and tests.
@@ -159,9 +160,10 @@ Make approved choices visibly affect existing gameplay systems while preserving 
 - Define user-approved terrestrial fauna/creature/habitat presentation and design-fidelity criteria.
 - Keep visual design separate from combat stats, AI, and runtime implementation.
 
-### GPT
+### Codex coordination/review mode
 
 - Define event ownership, payloads, idempotency, rollback, save boundaries, and sequence.
+- Review integration against approved source and durable transaction contracts.
 
 ### Codex engineering mode
 
@@ -188,7 +190,7 @@ Scale content and terrestrial designs without ID drift, broken references, incon
 
 - Establish terrestrial design taxonomies, naming, variation rules, scale references, material conventions, motion briefs, LOD/readability expectations, and source-asset packaging.
 
-### GPT
+### Codex coordination/review mode
 
 - Define governance, schema evolution, versioning, compatibility, review gates, and tool requirements.
 
@@ -216,10 +218,10 @@ Harden the game against old saves, invalid source, device differences, performan
 
 - Review silhouette/readability at target distances, color-independent recognition, motion clarity, variant consistency, reduced-motion compatibility, and LOD fidelity.
 
-### GPT
+### Codex coordination/review mode
 
 - Maintain risk and release-quality matrices.
-- Prioritize defects and prevent scope/ownership regression.
+- Prioritize defects and prevent scope, ownership, evidence, and completion regression.
 
 ### Codex engineering mode
 
@@ -249,9 +251,10 @@ Produce a reproducible traceable release candidate with frozen source and user a
 
 - Freeze terrestrial design source and sign off integrated design fidelity.
 
-### GPT
+### Codex coordination/review mode
 
 - Freeze scope, review traceability, coordinate blockers, and publish readiness/risk reports.
+- Verify that every acceptance claim matches current source and retained evidence.
 
 ### Codex engineering mode
 
@@ -270,20 +273,20 @@ Produce a reproducible traceable release candidate with frozen source and user a
 
 ## Recurring delivery cycle
 
-1. **Orient** — phase, issue, upstream source, dependencies, PRs, locks.
+1. **Orient** — Codex coordination/review identifies phase, issue, upstream source, dependencies, PRs, locks, and evidence.
 2. **Author/design** — Codex narrative or terrestrial mode creates bounded source when needed.
-3. **Specify** — GPT defines implementation and acceptance.
-4. **Branch** — one focused branch with the correct mode.
+3. **Specify** — Codex coordination/review defines implementation and acceptance.
+4. **Branch** — one focused Codex branch with the correct mode.
 5. **Implement** — Codex engineering stays within scope.
-6. **Validate** — exact relevant checks and evidence.
-7. **Review** — GPT technical/source fidelity; Codex source-mode disposition.
+6. **Validate** — exact relevant checks and retained evidence.
+7. **Review** — Codex coordination/review technical disposition plus applicable Codex source/design fidelity disposition.
 8. **Playtest** — user milestone acceptance.
 9. **Merge/close** — dependency order, release locks, update status.
 
 ## Milestone readiness
 
-A milestone is complete only when the upstream source is approved, declared ownership modes are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
+A milestone is complete only when upstream source is approved, declared Codex modes are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
 
 ## Selecting the next task
 
-GPT selects the next unblocked task from the active gate. Codex must not self-assign later-phase work while an earlier gate is red. Classify new work as blocker, required, follow-up, or deferred in the issue/spec/PR.
+Codex coordination/review mode selects the next unblocked task from the active gate. Codex must not self-assign later-phase work while an earlier gate is red. Classify new work as blocker, required, follow-up, or deferred in the issue/specification/PR.

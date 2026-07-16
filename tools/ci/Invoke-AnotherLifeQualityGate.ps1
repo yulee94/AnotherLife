@@ -34,7 +34,7 @@ function Get-ChangedFiles {
     $base = Get-BaseRef
     try {
         $files = @(Invoke-GitLines @("diff", "--name-only", "--diff-filter=ACMRT", "$base...HEAD"))
-        if ($files.Count -eq 0 -and -not $env:GITHUB_ACTIONS) {
+        if ($files.Count -eq 0 -and (-not $env:GITHUB_ACTIONS -or $BaseRef -eq "HEAD")) {
             $files = @(Invoke-GitLines @("diff", "--cached", "--name-only", "--diff-filter=ACMRT"))
         }
         return $files
@@ -101,8 +101,8 @@ function Invoke-Classify {
     Write-Host "Changed files:"
     $changedFiles | ForEach-Object { Write-Host "  $_" }
 
-    if ($headBranch -and $headBranch -notmatch "^(gpt/|codex/|codex/narrative-|codex/terrestrial-)") {
-        Add-Failure $failures "Branch '$headBranch' does not use an approved AnotherLife prefix."
+    if ($headBranch -and $headBranch -notmatch "^codex/") {
+        Add-Failure $failures "Branch '$headBranch' does not use the Codex-only AnotherLife prefix. GPT, Android Studio, and Gemini prefixes are retired."
     }
 
     if ($baseBranch -and $baseBranch -ne "main" -and $body -notmatch "(?i)(depends on|prerequisite|stacked|base branch)") {
@@ -112,11 +112,15 @@ function Invoke-Classify {
     if ($body) {
         $modeMatches = [regex]::Matches(
             $body,
-            "- \[[xX]\] (GPT|Codex narrative/content|Codex terrestrial design|Codex engineering)"
+            "- \[[xX]\] (Codex coordination/review|Codex narrative/content|Codex terrestrial design|Codex engineering)"
         )
 
         if ($modeMatches.Count -ne 1) {
-            Add-Failure $failures "Exactly one primary owner mode must be selected in the PR body."
+            Add-Failure $failures "Exactly one primary Codex mode must be selected in the PR body."
+        }
+
+        if ($body -match "- \[[xX]\] (GPT|Android Studio)") {
+            Add-Failure $failures "GPT and Android Studio are retired from future AnotherLife ownership modes."
         }
 
         if ($body -notmatch "(?i)(fixes|refs|closes|related|upstream|dependency).{0,80}(#\d+|https://github\.com/.+/issues/\d+)") {
