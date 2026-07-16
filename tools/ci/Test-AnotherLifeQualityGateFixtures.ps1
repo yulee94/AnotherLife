@@ -1,5 +1,7 @@
 param(
-    [string] $WorkingRoot = ""
+    [string] $WorkingRoot = "",
+    [ValidateSet("All", "Hygiene", "MixedScope", "Coordination", "RetiredPrefix")]
+    [string] $Scenario = "All"
 )
 
 $ErrorActionPreference = "Stop"
@@ -86,19 +88,13 @@ function Assert-Contains {
     }
 }
 
-if (Test-Path -LiteralPath $WorkingRoot) {
-    Remove-Item -LiteralPath $WorkingRoot -Recurse -Force
-}
+function Test-HygieneFixture {
+    $fixtureRepo = New-FixtureRepo "hygiene"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github/workflows") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/ProjectSettings") | Out-Null
 
-New-Item -ItemType Directory -Force -Path $WorkingRoot | Out-Null
-
-try {
-    $hygieneRepo = New-FixtureRepo "hygiene"
-    New-Item -ItemType Directory -Force -Path (Join-Path $hygieneRepo ".github/workflows") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $hygieneRepo "unity/Assets") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $hygieneRepo "unity/ProjectSettings") | Out-Null
-
-    Set-Content -LiteralPath (Join-Path $hygieneRepo ".github/workflows/bad.yml") -Value @"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo ".github/workflows/bad.yml") -Value @"
 name: Bad
 on: [pull_request]
 jobs:
@@ -109,10 +105,10 @@ jobs:
 "@
 
     $guid = "0123456789abcdef0123456789abcdef"
-    Set-Content -LiteralPath (Join-Path $hygieneRepo "unity/Assets/A.meta") -Value "guid: $guid"
-    Set-Content -LiteralPath (Join-Path $hygieneRepo "unity/Assets/B.meta") -Value "guid: $guid"
-    Set-Content -LiteralPath (Join-Path $hygieneRepo "bad.json") -Value "{ malformed"
-    Set-Content -LiteralPath (Join-Path $hygieneRepo "unity/ProjectSettings/EditorBuildSettings.asset") -Value @"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/A.meta") -Value "guid: $guid"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/B.meta") -Value "guid: $guid"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "bad.json") -Value "{ malformed"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/ProjectSettings/EditorBuildSettings.asset") -Value @"
 EditorBuildSettings:
   m_Scenes:
   - enabled: 1
@@ -121,27 +117,29 @@ EditorBuildSettings:
     path: Assets/Missing.unity
 "@
 
-    Push-Location $hygieneRepo
+    Push-Location $fixtureRepo
     try {
-        Invoke-Checked git @("add", ".") $hygieneRepo | Out-Null
-        $hygieneOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD") $hygieneRepo -ExpectFailure
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD") $fixtureRepo -ExpectFailure
     } finally {
         Pop-Location
     }
 
-    Assert-Contains $hygieneOutput "Duplicate Unity meta GUID"
-    Assert-Contains $hygieneOutput "Assets/Test.unity must not be enabled"
-    Assert-Contains $hygieneOutput "Enabled Build Settings scene is missing"
-    Assert-Contains $hygieneOutput "Malformed JSON file"
-    Assert-Contains $hygieneOutput "uses a mutable major-version action tag"
+    Assert-Contains $output "Duplicate Unity meta GUID"
+    Assert-Contains $output "Assets/Test.unity must not be enabled"
+    Assert-Contains $output "Enabled Build Settings scene is missing"
+    Assert-Contains $output "Malformed JSON file"
+    Assert-Contains $output "uses a mutable major-version action tag"
+}
 
-    $classifyRepo = New-FixtureRepo "classify"
-    New-Item -ItemType Directory -Force -Path (Join-Path $classifyRepo "unity/Docs/Terrestrials") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $classifyRepo "unity/Assets/AL/Scripts") | Out-Null
-    Set-Content -LiteralPath (Join-Path $classifyRepo "unity/Docs/Terrestrials/Design.md") -Value "# Fixture"
-    Set-Content -LiteralPath (Join-Path $classifyRepo "unity/Assets/AL/Scripts/RuntimeFixture.cs") -Value "public class RuntimeFixture {}"
+function Test-MixedScopeFixture {
+    $fixtureRepo = New-FixtureRepo "mixed-scope"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs/Terrestrials") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets/AL/Scripts") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Terrestrials/Design.md") -Value "# Fixture"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/AL/Scripts/RuntimeFixture.cs") -Value "public class RuntimeFixture {}"
 
-    $eventPath = Join-Path $classifyRepo "event.json"
+    $eventPath = Join-Path $fixtureRepo "event.json"
     Set-Content -LiteralPath $eventPath -Value @"
 {
   "pull_request": {
@@ -153,10 +151,10 @@ EditorBuildSettings:
 }
 "@
 
-    Push-Location $classifyRepo
+    Push-Location $fixtureRepo
     try {
-        Invoke-Checked git @("add", ".") $classifyRepo | Out-Null
-        $classifyOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $classifyRepo @{
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
@@ -167,15 +165,17 @@ EditorBuildSettings:
         Pop-Location
     }
 
-    Assert-Contains $classifyOutput "Terrestrial design paths changed: 1"
-    Assert-Contains $classifyOutput "Engineering/workflow paths changed: 1"
-    Assert-Contains $classifyOutput "Source-mode and engineering paths are mixed"
+    Assert-Contains $output "Terrestrial design paths changed: 1"
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
+    Assert-Contains $output "Source-mode and engineering paths are mixed"
+}
 
-    $coordinationRepo = New-FixtureRepo "coordination"
-    New-Item -ItemType Directory -Force -Path (Join-Path $coordinationRepo "unity/Docs") | Out-Null
-    Set-Content -LiteralPath (Join-Path $coordinationRepo "unity/Docs/Governance.md") -Value "# Governance fixture"
-    $coordinationEvent = Join-Path $coordinationRepo "event.json"
-    Set-Content -LiteralPath $coordinationEvent -Value @"
+function Test-CoordinationFixture {
+    $fixtureRepo = New-FixtureRepo "coordination"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Governance.md") -Value "# Governance fixture"
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Set-Content -LiteralPath $eventPath -Value @"
 {
   "pull_request": {
     "draft": false,
@@ -186,25 +186,27 @@ EditorBuildSettings:
 }
 "@
 
-    Push-Location $coordinationRepo
+    Push-Location $fixtureRepo
     try {
-        Invoke-Checked git @("add", ".") $coordinationRepo | Out-Null
-        Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $coordinationRepo @{
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
-            GITHUB_EVENT_PATH = $coordinationEvent
+            GITHUB_EVENT_PATH = $eventPath
             GITHUB_BASE_REF = "main"
             GITHUB_HEAD_REF = "codex/coordination-fixture"
         } | Out-Null
     } finally {
         Pop-Location
     }
+}
 
-    $retiredRepo = New-FixtureRepo "retired-gpt"
-    New-Item -ItemType Directory -Force -Path (Join-Path $retiredRepo "unity/Docs") | Out-Null
-    Set-Content -LiteralPath (Join-Path $retiredRepo "unity/Docs/Retired.md") -Value "# Retired fixture"
-    $retiredEvent = Join-Path $retiredRepo "event.json"
-    Set-Content -LiteralPath $retiredEvent -Value @"
+function Test-RetiredPrefixFixture {
+    $fixtureRepo = New-FixtureRepo "retired-gpt"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Retired.md") -Value "# Retired fixture"
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Set-Content -LiteralPath $eventPath -Value @"
 {
   "pull_request": {
     "draft": false,
@@ -215,13 +217,13 @@ EditorBuildSettings:
 }
 "@
 
-    Push-Location $retiredRepo
+    Push-Location $fixtureRepo
     try {
-        Invoke-Checked git @("add", ".") $retiredRepo | Out-Null
-        $retiredOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $retiredRepo @{
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
-            GITHUB_EVENT_PATH = $retiredEvent
+            GITHUB_EVENT_PATH = $eventPath
             GITHUB_BASE_REF = "main"
             GITHUB_HEAD_REF = "gpt/retired-fixture"
         } -ExpectFailure
@@ -229,9 +231,29 @@ EditorBuildSettings:
         Pop-Location
     }
 
-    Assert-Contains $retiredOutput "Codex-only AnotherLife prefix"
+    Assert-Contains $output "Codex-only AnotherLife prefix"
+}
 
-    Write-Host "Quality gate fixture self-tests passed."
+if (Test-Path -LiteralPath $WorkingRoot) {
+    Remove-Item -LiteralPath $WorkingRoot -Recurse -Force
+}
+New-Item -ItemType Directory -Force -Path $WorkingRoot | Out-Null
+
+try {
+    switch ($Scenario) {
+        "Hygiene" { Test-HygieneFixture }
+        "MixedScope" { Test-MixedScopeFixture }
+        "Coordination" { Test-CoordinationFixture }
+        "RetiredPrefix" { Test-RetiredPrefixFixture }
+        "All" {
+            Test-HygieneFixture
+            Test-MixedScopeFixture
+            Test-CoordinationFixture
+            Test-RetiredPrefixFixture
+        }
+    }
+
+    Write-Host "Quality gate fixture scenario '$Scenario' passed."
 } finally {
     if (Test-Path -LiteralPath $WorkingRoot) {
         Remove-Item -LiteralPath $WorkingRoot -Recurse -Force
