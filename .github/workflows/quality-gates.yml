@@ -1,0 +1,67 @@
+name: AnotherLife Quality Gates
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  classify:
+    name: policy / classify
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+      - name: Classify PR scope
+        shell: pwsh
+        run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Classify
+
+  hygiene:
+    name: repository / hygiene
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+      - name: Repository hygiene
+        shell: pwsh
+        run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene
+
+  android-unit-debug:
+    name: android / unit-debug
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          fetch-depth: 0
+      - name: Set up JDK
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Gradle version
+        shell: pwsh
+        run: ./gradlew.bat --version
+      - name: Android unit tests and debug assembly
+        shell: pwsh
+        run: ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
+      - name: Upload Android reports
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: android-unit-debug-reports
+          path: |
+            app/build/reports/tests/
+            app/build/test-results/
+            app/build/outputs/apk/debug/
+          if-no-files-found: warn
