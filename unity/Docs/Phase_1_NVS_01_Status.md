@@ -2,7 +2,7 @@
 
 **Status date:** 2026-07-16  
 **Integration branch:** `main`  
-**Audited current-main head:** `55c4ec140741bac95765e121b73daba8058bd209`  
+**Audited current-main head:** `371cc019c7a4526b8b20c145104c994d5c49a056`  
 **Roadmap state:** Phase 1 remains paused behind reopened QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
 **Approved product intent:** issue #138 D1–D16  
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
@@ -16,20 +16,23 @@ A merged PR, closed issue, green test suite, generated asset, Console log, uploa
 - The active product milestone remains NVS-01.
 - No approved A1 narrative packet is active. The archived OMEN_1 packet remains historical reference only.
 - #156 is reopened and remains the first trusted-Unity-content gate. Merged PR #189 did not implement the binding Force-Text YAML/subasset/schema validator from PR #218.
-- Nine other implementation issues were reopened after their merged source was found to retain blocking defects: #153, #163, #136, #152, #127, #178, #161, #155, and #137.
-- The only open pull request is draft terrestrial source PR #217. All correction work is currently issue-authorized but not yet published as a correction PR.
-- No designated shared file is currently locked. A correction PR must declare its lock before editing `Bootloader.cs`, `SaveGameData.cs`, `LocalGameDataService.cs`, or `ProjectInitializer.cs`.
+- Nine other implementation issues remain reopened after their merged source was found to retain blocking defects: #153, #163, #136, #152, #127, #178, #161, #155, and #137.
+- The only open pull request is draft terrestrial source PR #217. Correction and pure-planner work is issue-authorized but no correction/planner implementation PR is currently open.
+- No designated shared file is currently locked. A correction/integration PR must declare its lock before editing `Bootloader.cs`, `SaveGameData.cs`, `LocalGameDataService.cs`, or `ProjectInitializer.cs`.
 - The canonical Unity workspace is `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`. Evidence from `C:\Users\MY\Documents\AnotherLife\unity` is noncanonical and cannot close a Unity gate.
 - The only committed `.unity` scene remains test-only `Assets/Test.unity`. Normal Build Settings remain empty.
 - Merged PR #230 supplies the binding deterministic boss-reward transaction contract. It does not implement boss rewards.
 - Merged PR #231 supplies useful save-file scaffolding but is not accepted #137 completion; #137 is reopened for candidate ranking, rollback certainty, semantic preservation, fault coverage, and verified deletion.
+- Merged PR #232 supplies accepted partial quality-gate fixtures, terrestrial path coverage, and proof/protection documentation. #155 remains open because policy authority, exact event/diff behavior, complete classifiers/security/artifacts, live failure proofs, and configured protection are unfinished.
+- Merged PR #234 supplies the binding pure deterministic battle computation/result-application contract. It does not implement or reconnect battle simulation.
+- Merged PR #235 supplies the binding Champion combat/skill/boss/encounter integrity contract. It does not implement or package Champion combat.
 
 ## 2. Ownership state
 
 The latest user decision assigns all delivery to separately declared Codex modes while preserving GPT review and user approval:
 
 - **GPT:** coordination, specifications, state/contract/save/test design, technical review, risk, sequencing, and merge readiness;
-- **Codex narrative/content:** narrative source, player-facing copy, localization meaning, named-item/event/relationship meaning, and fidelity;
+- **Codex narrative/content:** narrative source, player-facing copy, localization meaning, named-item/event/relationship/skill/boss meaning, and fidelity;
 - **Codex terrestrial-design:** terrestrial visual-design source and fidelity;
 - **Codex engineering:** Android, Unity, runtime, assets/import, saves, builds, tests, CI, tooling, and generated technical artifacts;
 - **User:** final product, creative, visual-design, balance, irreversible-profile, integrated playtest, milestone, and release approval.
@@ -56,6 +59,8 @@ A merged specification is a contract, not implementation completion.
 | relationship transactions | `Relationship_Integrity_Transaction_Spec.md` | #227 | pure snapshot/planner phase may proceed |
 | world-state lifecycle | `World_State_Lifecycle_Transaction_Spec.md` | #228 | pure lifecycle/effect planner phase may proceed |
 | boss rewards | `Boss_Loot_Result_Transaction_Spec.md` | #230 | pure computation/application-planner phase may proceed |
+| battle computation/results | `Battle_Computation_Result_Transaction_Spec.md` | #234 | pure contract/validator/computation phase may proceed |
+| Champion combat/encounter | `Champion_Combat_Encounter_Integrity_Spec.md` | #235 | pure contract/validator/transition-planner phase may proceed |
 
 ## 4. Post-merge implementation audit
 
@@ -71,7 +76,7 @@ The following PRs are merged in Git history but are not accepted completion. The
 | #209 | #127 | external profile snapshot intent and explicit editor scene load | representative scene not unloaded before profile restore; deferred callbacks can write late; uncaptured helper teardown can set `Time.timeScale` to zero; fault/second-run matrix absent | `codex/playmode-profile-lifecycle-correction` |
 | #208 | #178 | obvious cheat buttons removed and fail-closed command descriptors added | scene startup loads again; periodic controller completes progression; dashboard reads seed state; Champion grants recurring credits | `codex/release-controller-containment-correction` |
 | #195 | #161 | compile-time debug gate, typed route policy, sanitized stack, stable preview test seam | second sanitized Compose pass can immediately clear the visible rejection notice | `codex/android-debug-route-notice-correction` |
-| #210 | #155 | three stable workflow jobs and one valid positive run | policy YAML unused; unsafe event/diff fallback; incomplete classifiers/security/artifacts/proof matrix/protection | `codex/repository-quality-gate-policy-correction` |
+| #210 + #232 | #155 | three stable workflow jobs, one positive run, terrestrial path coverage, local failure fixtures, and a documented live-proof/protection plan | policy YAML unused; unsafe event/diff fallback; incomplete classifiers/security/artifacts; live failing PR matrix, Unity model, and configured protection absent | `codex/repository-quality-gate-policy-correction` |
 | #231 | #137 | durable temp write, file-operation seam, separate statuses, primary validation, clone-before-publish | destructive normalization; weak candidate semantics; valid previous generation can be discarded; commit uncertainty mislabeled; rollback/delete failures swallowed; no fault matrix | `codex/crash-safe-save-candidate-correction` |
 
 No downstream issue may cite the merge or automatic closure of these PRs as accepted behavior.
@@ -148,7 +153,7 @@ Completion requires:
 - current caller inventory and no reward authorization;
 - complete malformed/overflow/reload/event/save-count evidence.
 
-#168, #137, #165, and NVS transactions require the accepted no-save economy boundary.
+#168, #174, #180, #137, #165, and NVS transactions require the accepted no-save economy boundary where they apply.
 
 ### 6.4 #136 + #152 + #137 — save semantics and persistence
 
@@ -209,19 +214,25 @@ Assets/Test.unity
 Assets/AL/Scenes/ChampionArena.unity
 ```
 
-ChampionArena remains deferred until #178/#180 and a separate approved profile change.
+ChampionArena remains deferred until corrected #178, accepted #180 implementation, and a separate approved scene-profile change.
 
 ### 6.6 #155 + #161 — release verification
 
+PR #232 is accepted partial #155 work, not completion.
+
 #155 remains open through:
 
-1. policy-authoritative Phase A correction;
-2. intentional pass/fail proof PR matrix;
-3. verified branch protection/merge controls.
+1. parsed policy authority or deterministic generated-policy drift enforcement;
+2. exact PR base/head and push before/after ranges with fail-closed diff behavior;
+3. complete owner/impact/path/completion/readiness/shared-lock/chronology classification;
+4. workflow permission/action-pin/credential/timeout/transcript/diagnostic hardening;
+5. live intentional pass/fail PR matrix with retained runs/artifacts;
+6. implemented or explicitly tracked Unity validation model;
+7. configured and API/screenshot-verified branch protection/merge controls.
 
 #161 requires one narrow Android shell correction so a rejected release route notice survives sanitization until an intentional consumption boundary.
 
-Neither a positive CI run nor passing pure route-policy tests prove these final behaviors.
+Neither local fixtures, a positive CI run, nor passing pure route-policy tests prove the final release behavior.
 
 ## 7. Game-data and gameplay dependencies
 
@@ -255,21 +266,79 @@ accepted #137 + #163 + #183
 
 Before these sources exist, presentation may fail closed but must not invent definitions, IDs, maximum levels, costs, rewards, or balance.
 
-### 7.3 Battle and boss rewards
+### 7.3 Battle computation and result application
+
+Binding contract:
 
 ```text
-#183 boss/reward/equipment source
-          +
-accepted #163 no-save economy primitive
-          +
-accepted #137 candidate transaction/ledger/outbox
-          +
-#180 typed Champion encounter completion
-          ↓
-#168 persisted deterministic boss rewards
-          ↓
-#177 visible committed-result delivery
+unity/Docs/Battle_Computation_Result_Transaction_Spec.md
 ```
+
+```text
+pure #174 battle contract/validator/computation
+          ↓
+#183 troop/rules/terrain/reward source
+          +
+#165 troop inventory/loss mutation
+          +
+corrected #152 quest operation
+          +
+accepted #163 economy operation
+          +
+accepted #137 candidate result ledger/outbox
+          ↓
+authoritative battle result application
+          +
+#166 territory consequence when applicable
+          +
+#168 boss reward handoff when applicable
+          +
+#177 committed-result delivery
+```
+
+The pure first branch may proceed now:
+
+```text
+codex/battle-contract-simulator
+```
+
+It is limited to immutable contracts, strict validators, fixed-point checked arithmetic, canonical SHA-256 entropy, pure round/outcome/casualty/reward-proposal computation, retained vectors, fake snapshot builders, and tests.
+
+### 7.4 Champion combat, boss encounter, and rewards
+
+Binding Champion contract:
+
+```text
+unity/Docs/Champion_Combat_Encounter_Integrity_Spec.md
+```
+
+```text
+pure #180 Champion actor/action/boss/encounter planners
+          ↓
+#156 + #183 Champion/skill/boss/encounter source
+          +
+#173 committed realm identity
+          +
+corrected #153/#178/#127 lifecycle/release/test support
+          ↓
+production actor/caster/boss/encounter migration
+          +
+accepted #137 result ledger/outbox
+          +
+#168 deterministic persisted boss reward
+          +
+#177 committed-result delivery
+          ↓
+separately approved Champion-capable #223/#150 scene/Player profile
+```
+
+The pure first branch may proceed now:
+
+```text
+codex/champion-combat-contract-planner
+```
+
+It is limited to immutable contracts, finite scalar/vector validation, actor/action/resource/cooldown/boss/encounter transition planners, fake participants/targets, retained matrices, and tests.
 
 Binding boss-reward contract:
 
@@ -277,13 +346,13 @@ Binding boss-reward contract:
 unity/Docs/Boss_Loot_Result_Transaction_Spec.md
 ```
 
-The pure first branch may proceed now:
+The pure boss-reward branch remains:
 
 ```text
 codex/boss-loot-contract-planner
 ```
 
-It is limited to immutable models, validators, deterministic SHA-256 computation, inventory snapshots, application planning, fake targets, vectors, and tests.
+No pure phase may mutate saves, production services/components, callers, catalogs, scenes, UI, Android, balance, or authored content.
 
 ## 8. Pure planner lanes that may proceed
 
@@ -295,8 +364,10 @@ These lanes are intentionally nonmutating and do not depend on save/service inte
 | #176 | `codex/relationship-contract-planner` | immutable identity/policy/snapshot/query/classification/mutation plans/fake targets/tests |
 | #172 | `codex/world-state-contract-planner` | immutable definitions/instances/UTC lifecycle/effect plans/fake consumers/tests |
 | #168 | `codex/boss-loot-contract-planner` | deterministic computation/inventory snapshots/application plans/fakes/vectors/tests |
+| #174 | `codex/battle-contract-simulator` | immutable validation/fixed math/SHA-256 pure battle computation/vectors/tests |
+| #180 | `codex/champion-combat-contract-planner` | finite actor/action/resource/boss/encounter transition contracts/fakes/matrices/tests |
 
-They must not edit saves, production service bodies, callers, content, scenes, UI, Android, balance, or designated shared files.
+They must not edit saves, production service/component bodies, callers, source content, scenes, UI, Android, balance, or designated shared files.
 
 ## 9. NVS-01 chain
 
@@ -307,7 +378,7 @@ They must not edit saves, production service bodies, callers, content, scenes, U
   ↓
 #133 GPT G1
   ↓
-accepted save/economy/notification/relationship/scene/result foundations
+accepted save/economy/notification/relationship/scene/battle/encounter/result foundations
   ↓
 #134 Codex engineering C1–C4
   ↓
@@ -341,13 +412,14 @@ Evidence must match the risk:
 - **test:** discovered/passed/failed/skipped totals and retained XML/logs;
 - **asset:** Force-Text/GUID/reference/local-file-ID inventory, import/reimport, missing-script scan, field preservation;
 - **save/economy/reward:** semantic candidates, normal/recovery/fault/delete/overflow/duplicate/reload/event/save-count/idempotency matrices;
+- **battle/combat/encounter:** immutable source identity, finite/range matrices, state-transition tables, deterministic vectors, purity, replay/conflict, exact event/resource/cooldown/result counts;
 - **catalog/contract:** schema/version/hash/provenance, valid/invalid vectors, immutable query behavior, generated-contract drift, packaged producer/consumer proof;
 - **scene:** exact path/name/GUID/root/component/transition/marker inventory, generator non-overwrite/idempotency, Build Settings ownership;
 - **PlayMode:** disposable profile, awaited scene teardown before restore, service/global cleanup, severe-log policy, second-run and fault proof;
 - **Player:** exact scene profile, current successful BuildReport/output, disposable launch environment, ordered markers, severe-log scan, honest external termination;
 - **Android:** unit/debug/release commands, current route state, retained transcript/reports/APK, failure diagnostics;
 - **source/design:** actual rendered exact-source media, LFS binary retrieval, immutable hash/version mapping, provenance, accessibility, technical disposition, and user decision;
-- **release:** implemented required checks plus intentional failure proofs and verified merge-control settings.
+- **release:** parsed/enforced policy, exact event ranges, complete classification, implemented required checks, intentional failure proofs, and verified merge-control settings.
 
 Skipped, unavailable, stale-base, stale-output, duplicate-workspace, pointer-only media, Console-only delivery, compile-only, wrong-policy green tests, missing XML/BuildReport, development fallback, or `continue-on-error` checks are not passing evidence.
 
@@ -361,12 +433,12 @@ Skipped, unavailable, stale-base, stale-output, duplicate-workspace, pointer-onl
 5. Replace #152 destructive repair with a pure non-mutating compatibility view.
 6. Correct #127 awaited scene unload/profile restoration and full fault/second-run matrix.
 7. Remove #178 hidden Kingdom/Champion/load mutations and prove ShellFoundation unreachability/nonmutation.
-8. Correct #155 policy authority/event ranges/classifiers/security/artifacts, then run proof PRs and verify protection.
+8. Continue #155 from accepted PR #232 partial fixtures into parsed policy, exact event ranges, complete classifiers/security/artifacts, live proof PRs, and verified protection.
 9. Correct #161 durable one-shot release rejection notice.
 10. Correct merged #231 through #137 candidate ranking, rollback certainty, typed deletion, fault injection, and semantic preservation.
 11. Bring PR #217 into exact PR #221 compliance before user creative review.
-12. Permit the four pure planner lanes without production integration or issue closure.
+12. Permit the six pure planner/computation lanes without production integration or issue closure.
 13. After #156/#153, implement #223 stable scene assets without Build Settings changes.
 14. After #156, start only the contract-limited #183 catalog foundation.
-15. Do not activate A1/G1/runtime, #165/#173 integration, persisted boss/world/relationship/notification work, Player packaging, Android export, or release claims before prerequisites pass.
+15. Do not activate A1/G1/runtime, #165/#173 integration, persisted battle/Champion/boss/world/relationship/notification work, Player packaging, Android export, or release claims before prerequisites pass.
 ```
