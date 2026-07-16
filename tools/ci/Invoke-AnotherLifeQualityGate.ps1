@@ -34,7 +34,7 @@ function Get-ChangedFiles {
     $base = Get-BaseRef
     try {
         $files = @(Invoke-GitLines @("diff", "--name-only", "--diff-filter=ACMRT", "$base...HEAD"))
-        if ($files.Count -eq 0 -and -not $env:GITHUB_ACTIONS) {
+        if ($files.Count -eq 0 -and (-not $env:GITHUB_ACTIONS -or $BaseRef -eq "HEAD")) {
             $files = @(Invoke-GitLines @("diff", "--cached", "--name-only", "--diff-filter=ACMRT"))
         }
         return $files
