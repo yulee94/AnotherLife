@@ -1,7 +1,7 @@
 # Ownership Decision Record
 
-**Status date:** 2026-07-16  
-**Decision owner:** User  
+**Status date:** 2026-07-16
+**Decision owner:** User
 **Sole project agent:** Codex
 
 ## Final instruction chronology
