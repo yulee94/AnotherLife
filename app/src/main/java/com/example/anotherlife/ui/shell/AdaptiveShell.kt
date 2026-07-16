@@ -1,6 +1,9 @@
 package com.example.anotherlife.ui.shell
 
+import com.example.anotherlife.BuildConfig
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccountBox
@@ -14,11 +17,14 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
 import com.example.anotherlife.ui.navigation.Route
@@ -45,6 +51,7 @@ import com.example.anotherlife.ui.unity.UnityView
  */
 @Composable
 fun AnotherLifeShell() {
+    val debugToolsEnabled = BuildConfig.DEBUG
     // Shared state for the simulation
     val kingdomState = remember { KingdomState() }
     val narrativeState = remember { 
@@ -72,101 +79,93 @@ fun AnotherLifeShell() {
 
     // Navigation 3 Backstack: snapshot-state backed list of keys
     val backStack = remember { mutableStateListOf<Any>(Route.Kingdom) }
+    val routeNotice = remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(debugToolsEnabled, backStack.toList()) {
+        val sanitized = ShellRoutePolicy.sanitizeBackStack(backStack, debugToolsEnabled)
+        if (sanitized.routes != backStack) {
+            backStack.clear()
+            backStack.addAll(sanitized.routes)
+        }
+        routeNotice.value = sanitized.rejectedTopRoute?.message
+    }
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
+    val currentRoute = ShellRoutePolicy.resolveRoute(currentKey, debugToolsEnabled).route
 
     Scaffold(
         bottomBar = {
             NavigationBar {
-                NavigationBarItem(
-                    selected = currentKey == Route.Kingdom,
-                    onClick = {
-                        backStack.clear()
-                        backStack.add(Route.Kingdom)
-                    },
-                    icon = { Icon(Icons.Rounded.Build, contentDescription = "Kingdom") },
-                    label = { Text("Kingdom") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Route.Dossier,
-                    onClick = {
-                        if (currentKey != Route.Dossier) {
-                            backStack.add(Route.Dossier)
-                        }
-                    },
-                    icon = { Icon(Icons.AutoMirrored.Rounded.List, contentDescription = "Dossier") },
-                    label = { Text("Dossier") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Route.Champion,
-                    onClick = {
-                        if (currentKey != Route.Champion) {
-                            backStack.add(Route.Champion)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.AccountBox, contentDescription = "Academy") },
-                    label = { Text("Academy") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Route.Warzone,
-                    onClick = {
-                        if (currentKey != Route.Warzone) {
-                            backStack.add(Route.Warzone)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.LocationOn, contentDescription = "Warzone") },
-                    label = { Text("Warzone") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Route.NarrativeDebug,
-                    onClick = {
-                        if (currentKey != Route.NarrativeDebug) {
-                            backStack.add(Route.NarrativeDebug)
-                        }
-                    },
-                    icon = { Icon(Icons.Rounded.Info, contentDescription = "Debug") },
-                    label = { Text("Debug") }
-                )
+                ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled).forEach { route ->
+                    NavigationBarItem(
+                        selected = currentRoute == route,
+                        onClick = {
+                            if (route == Route.Kingdom) {
+                                backStack.clear()
+                                backStack.add(Route.Kingdom)
+                            } else if (currentKey != route) {
+                                backStack.add(route)
+                            }
+                        },
+                        icon = { Icon(iconForRoute(route), contentDescription = labelForRoute(route)) },
+                        label = { Text(labelForRoute(route)) }
+                    )
+                }
             }
         }
     ) { contentPadding ->
-        // NavDisplay observes the backstack and reflects state changes in the UI
-        NavDisplay(
-            backStack = backStack,
-            onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(contentPadding),
-            entryProvider = { key ->
-                when (key) {
-                    is Route.Kingdom -> NavEntry(key) { 
-                        KingdomDashboard(state = kingdomState) 
-                    }
-                    is Route.Dossier -> NavEntry(key) { 
-                        DossierScreen(state = kingdomState, narrative = narrativeState)
-                    }
-                    is Route.Quest -> NavEntry(key) {
-                        QuestScreen(
-                            state = kingdomState,
-                            onLocate = { /* Navigation logic */ }
-                        ) { questId ->
-                            if (questId == "OMEN_1") {
-                                narrativeState.currentDialogue.value = findDialogueNode("DLG_OMEN_1_START")
+                .padding(contentPadding)
+        ) {
+            routeNotice.value?.let { message ->
+                Text(
+                    text = message,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+
+            // NavDisplay observes the backstack and reflects state changes in the UI
+            NavDisplay(
+                backStack = backStack,
+                onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
+                modifier = Modifier
+                    .fillMaxSize(),
+                entryProvider = { key ->
+                    val resolvedRoute = ShellRoutePolicy.resolveRoute(key, debugToolsEnabled).route
+                    when (resolvedRoute) {
+                        Route.Kingdom -> NavEntry(resolvedRoute) {
+                            KingdomDashboard(state = kingdomState)
+                        }
+                        Route.Dossier -> NavEntry(resolvedRoute) {
+                            DossierScreen(state = kingdomState, narrative = narrativeState)
+                        }
+                        Route.Quest -> NavEntry(resolvedRoute) {
+                            QuestScreen(
+                                state = kingdomState,
+                                onLocate = { /* Navigation logic */ }
+                            ) { questId ->
+                                if (questId == "OMEN_1") {
+                                    narrativeState.currentDialogue.value = findDialogueNode("DLG_OMEN_1_START")
+                                }
                             }
                         }
+                        Route.Champion -> NavEntry(resolvedRoute) { AcademyScreen(state = kingdomState) }
+                        Route.Battle -> NavEntry(resolvedRoute) { BattleSimulatorScreen(state = kingdomState) }
+                        Route.Warzone -> NavEntry(resolvedRoute) {
+                            WarzoneMapScreen(state = kingdomState, onAttack = { territory ->
+                                // Navigate to Battle screen for the selected territory
+                                backStack.add(Route.Battle)
+                            })
+                        }
+                        Route.NarrativeDebug -> NavEntry(resolvedRoute) { NarrativeDebugScreen(state = narrativeState) }
                     }
-                    is Route.Champion -> NavEntry(key) { AcademyScreen(state = kingdomState) }
-                    is Route.Battle -> NavEntry(key) { BattleSimulatorScreen(state = kingdomState) }
-                    is Route.Warzone -> NavEntry(key) { 
-                        WarzoneMapScreen(state = kingdomState, onAttack = { territory ->
-                            // Navigate to Battle screen for the selected territory
-                            backStack.add(Route.Battle)
-                        }) 
-                    }
-                    is Route.NarrativeDebug -> NavEntry(key) { NarrativeDebugScreen(state = narrativeState) }
-                    else -> NavEntry(Unit) { Text("Unknown Route") }
                 }
-            }
-        )
+            )
+        }
     }
 
     // Narrative Overlay
@@ -196,4 +195,26 @@ fun AnotherLifeShell() {
 private fun findDialogueNode(id: String): DialogueNode? {
     val allNodes = com.example.anotherlife.data.simulation.NVS_01_Packet.storyNodes
     return allNodes.find { it.id == id }
+}
+
+private fun labelForRoute(route: Route): String {
+    return when (route) {
+        Route.Kingdom -> "Kingdom"
+        Route.Dossier -> "Dossier"
+        Route.Champion -> "Academy"
+        Route.Warzone -> "Warzone"
+        Route.NarrativeDebug -> "Debug"
+        Route.Battle -> "Battle"
+        Route.Quest -> "Quest"
+    }
+}
+
+private fun iconForRoute(route: Route) = when (route) {
+    Route.Kingdom -> Icons.Rounded.Build
+    Route.Dossier -> Icons.AutoMirrored.Rounded.List
+    Route.Champion -> Icons.Rounded.AccountBox
+    Route.Warzone -> Icons.Rounded.LocationOn
+    Route.NarrativeDebug -> Icons.Rounded.Info
+    Route.Battle -> Icons.Rounded.Star
+    Route.Quest -> Icons.Rounded.Star
 }
