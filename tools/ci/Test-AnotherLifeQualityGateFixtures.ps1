@@ -170,6 +170,64 @@ EditorBuildSettings:
     Assert-Contains $classifyOutput "Engineering/workflow paths changed: 1"
     Assert-Contains $classifyOutput "Source-mode and engineering paths are mixed"
 
+    $coordinationRepo = New-FixtureRepo "coordination"
+    New-Item -ItemType Directory -Force -Path (Join-Path $coordinationRepo "unity/Docs") | Out-Null
+    Set-Content -LiteralPath (Join-Path $coordinationRepo "unity/Docs/Governance.md") -Value "# Governance fixture"
+    $coordinationEvent = Join-Path $coordinationRepo "event.json"
+    Set-Content -LiteralPath $coordinationEvent -Value @"
+{
+  "pull_request": {
+    "draft": false,
+    "body": "- [x] Codex coordination/review\n\nRefs #155\n\n## Shared-file lock\n\nNone.",
+    "base": { "ref": "main" },
+    "head": { "ref": "codex/coordination-fixture" }
+  }
+}
+"@
+
+    Push-Location $coordinationRepo
+    try {
+        Invoke-Checked git @("add", ".") $coordinationRepo | Out-Null
+        Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $coordinationRepo @{
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $coordinationEvent
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "codex/coordination-fixture"
+        } | Out-Null
+    } finally {
+        Pop-Location
+    }
+
+    $retiredRepo = New-FixtureRepo "retired-gpt"
+    New-Item -ItemType Directory -Force -Path (Join-Path $retiredRepo "unity/Docs") | Out-Null
+    Set-Content -LiteralPath (Join-Path $retiredRepo "unity/Docs/Retired.md") -Value "# Retired fixture"
+    $retiredEvent = Join-Path $retiredRepo "event.json"
+    Set-Content -LiteralPath $retiredEvent -Value @"
+{
+  "pull_request": {
+    "draft": false,
+    "body": "- [x] Codex coordination/review\n\nRefs #155\n\n## Shared-file lock\n\nNone.",
+    "base": { "ref": "main" },
+    "head": { "ref": "gpt/retired-fixture" }
+  }
+}
+"@
+
+    Push-Location $retiredRepo
+    try {
+        Invoke-Checked git @("add", ".") $retiredRepo | Out-Null
+        $retiredOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $retiredRepo @{
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $retiredEvent
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "gpt/retired-fixture"
+        } -ExpectFailure
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $retiredOutput "Codex-only AnotherLife prefix"
+
     Write-Host "Quality gate fixture self-tests passed."
 } finally {
     if (Test-Path -LiteralPath $WorkingRoot) {
