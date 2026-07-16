@@ -1,9 +1,9 @@
 # Phase 1 NVS-01 Risk Register
 
-**Status date:** 2026-07-16  
-**Audited current-main head:** `cbdb09f99c3f803a282e8582cd7375680ead3693`  
-**Active control state:** Phase 1 remains paused behind reopened #156 and the red Phase 0/1 foundation gate  
-**Approved product intent:** issue #138 D1–D16  
+**Status date:** 2026-07-16
+**Audited current-main head:** `cbdb09f99c3f803a282e8582cd7375680ead3693`
+**Active control state:** Phase 1 remains paused behind reopened #156 and the red Phase 0/1 foundation gate
+**Approved product intent:** issue #138 D1–D16
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
 This register records verified current-source and delivery risk. It supersedes assumptions based only on automatic issue closure, merged PR state, branch descriptions, passing tests that encode the wrong policy, source presence, generated files, compilation, workflow success, LFS pointers, or one-platform evidence.
