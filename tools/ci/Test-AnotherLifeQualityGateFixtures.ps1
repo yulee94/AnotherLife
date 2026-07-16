@@ -1,6 +1,6 @@
 param(
     [string] $WorkingRoot = "",
-    [ValidateSet("All", "Hygiene", "MixedScope", "Coordination", "RetiredPrefix")]
+    [ValidateSet("All", "DuplicateGuid", "TestScene", "MissingScene", "MalformedJson", "MutableAction", "MixedScope", "Coordination", "RetiredPrefix")]
     [string] $Scenario = "All"
 )
 
@@ -88,34 +88,15 @@ function Assert-Contains {
     }
 }
 
-function Test-HygieneFixture {
-    $fixtureRepo = New-FixtureRepo "hygiene"
-    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github/workflows") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets") | Out-Null
-    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/ProjectSettings") | Out-Null
+function Invoke-HygieneFailureFixture {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][scriptblock] $Arrange,
+        [Parameter(Mandatory = $true)][string] $ExpectedMessage
+    )
 
-    Set-Content -LiteralPath (Join-Path $fixtureRepo ".github/workflows/bad.yml") -Value @"
-name: Bad
-on: [pull_request]
-jobs:
-  bad:
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-"@
-
-    $guid = "0123456789abcdef0123456789abcdef"
-    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/A.meta") -Value "guid: $guid"
-    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/B.meta") -Value "guid: $guid"
-    Set-Content -LiteralPath (Join-Path $fixtureRepo "bad.json") -Value "{ malformed"
-    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/ProjectSettings/EditorBuildSettings.asset") -Value @"
-EditorBuildSettings:
-  m_Scenes:
-  - enabled: 1
-    path: Assets/Test.unity
-  - enabled: 1
-    path: Assets/Missing.unity
-"@
+    $fixtureRepo = New-FixtureRepo $Name
+    & $Arrange $fixtureRepo
 
     Push-Location $fixtureRepo
     try {
@@ -125,11 +106,68 @@ EditorBuildSettings:
         Pop-Location
     }
 
-    Assert-Contains $output "Duplicate Unity meta GUID"
-    Assert-Contains $output "Assets/Test.unity must not be enabled"
-    Assert-Contains $output "Enabled Build Settings scene is missing"
-    Assert-Contains $output "Malformed JSON file"
-    Assert-Contains $output "uses a mutable major-version action tag"
+    Assert-Contains $output $ExpectedMessage
+}
+
+function Test-DuplicateGuidFixture {
+    Invoke-HygieneFailureFixture "duplicate-guid" {
+        param($fixtureRepo)
+        New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets") | Out-Null
+        $guid = "0123456789abcdef0123456789abcdef"
+        Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/A.meta") -Value "guid: $guid"
+        Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/B.meta") -Value "guid: $guid"
+    } "Duplicate Unity meta GUID"
+}
+
+function Test-TestSceneFixture {
+    Invoke-HygieneFailureFixture "test-scene" {
+        param($fixtureRepo)
+        New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets") | Out-Null
+        New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/ProjectSettings") | Out-Null
+        Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/Test.unity") -Value "%YAML 1.1"
+        Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/ProjectSettings/EditorBuildSettings.asset") -Value @"
+EditorBuildSettings:
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Test.unity
+"@
+    } "Assets/Test.unity must not be enabled"
+}
+
+function Test-MissingSceneFixture {
+    Invoke-HygieneFailureFixture "missing-scene" {
+        param($fixtureRepo)
+        New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/ProjectSettings") | Out-Null
+        Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/ProjectSettings/EditorBuildSettings.asset") -Value @"
+EditorBuildSettings:
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Missing.unity
+"@
+    } "Enabled Build Settings scene is missing"
+}
+
+function Test-MalformedJsonFixture {
+    Invoke-HygieneFailureFixture "malformed-json" {
+        param($fixtureRepo)
+        Set-Content -LiteralPath (Join-Path $fixtureRepo "bad.json") -Value "{ malformed"
+    } "Malformed JSON file"
+}
+
+function Test-MutableActionFixture {
+    Invoke-HygieneFailureFixture "mutable-action" {
+        param($fixtureRepo)
+        New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github/workflows") | Out-Null
+        Set-Content -LiteralPath (Join-Path $fixtureRepo ".github/workflows/bad.yml") -Value @"
+name: Bad
+on: [pull_request]
+jobs:
+  bad:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+"@
+    } "uses a mutable major-version action tag"
 }
 
 function Test-MixedScopeFixture {
@@ -241,12 +279,20 @@ New-Item -ItemType Directory -Force -Path $WorkingRoot | Out-Null
 
 try {
     switch ($Scenario) {
-        "Hygiene" { Test-HygieneFixture }
+        "DuplicateGuid" { Test-DuplicateGuidFixture }
+        "TestScene" { Test-TestSceneFixture }
+        "MissingScene" { Test-MissingSceneFixture }
+        "MalformedJson" { Test-MalformedJsonFixture }
+        "MutableAction" { Test-MutableActionFixture }
         "MixedScope" { Test-MixedScopeFixture }
         "Coordination" { Test-CoordinationFixture }
         "RetiredPrefix" { Test-RetiredPrefixFixture }
         "All" {
-            Test-HygieneFixture
+            Test-DuplicateGuidFixture
+            Test-TestSceneFixture
+            Test-MissingSceneFixture
+            Test-MalformedJsonFixture
+            Test-MutableActionFixture
             Test-MixedScopeFixture
             Test-CoordinationFixture
             Test-RetiredPrefixFixture
