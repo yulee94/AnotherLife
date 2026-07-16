@@ -66,33 +66,47 @@ function New-FixtureRepo {
     New-Item -ItemType Directory -Force -Path (Join-Path $path "tools/ci") | Out-Null
     Copy-Item -LiteralPath (Join-Path $repoRoot "tools/ci/Invoke-AnotherLifeQualityGate.ps1") -Destination (Join-Path $path "tools/ci/Invoke-AnotherLifeQualityGate.ps1")
 
-    Invoke-Checked git @("add", "-f", "--all") $path | Out-Null
-    Invoke-Checked git @("commit", "-q", "-m", "base") $path | Out-Null
+    Push-Location $path
+    try {
+        Invoke-Checked git @("add", "tools/ci/Invoke-AnotherLifeQualityGate.ps1") $path | Out-Null
+        Invoke-Checked git @("commit", "-q", "-m", "base") $path | Out-Null
+    } finally {
+        Pop-Location
+    }
+
     return $path
 }
 
-function Commit-FixtureFiles {
-    param([Parameter(Mandatory = $true)][string] $FixtureRepo)
+function Assert-Contains {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Needle
+    )
 
-    Invoke-Checked git @("add", "-f", "--all") $FixtureRepo | Out-Null
-    $staged = Invoke-Checked git @("diff", "--cached", "--name-only") $FixtureRepo
-    if ([string]::IsNullOrWhiteSpace($staged)) {
-        throw "Fixture setup did not stage any changed files in $FixtureRepo."
+    if ($Text -notmatch [regex]::Escape($Needle)) {
+        throw "Expected output to contain '$Needle'. Actual output:`n$Text"
     }
-    Invoke-Checked git @("commit", "-q", "-m", "fixture") $FixtureRepo | Out-Null
 }
 
 function Invoke-HygieneFailureFixture {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
-        [Parameter(Mandatory = $true)][scriptblock] $Arrange
+        [Parameter(Mandatory = $true)][scriptblock] $Arrange,
+        [Parameter(Mandatory = $true)][string] $ExpectedMessage
     )
 
     $fixtureRepo = New-FixtureRepo $Name
     & $Arrange $fixtureRepo
-    Commit-FixtureFiles $fixtureRepo
 
-    Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD^") $fixtureRepo -ExpectFailure | Out-Null
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD") $fixtureRepo -ExpectFailure
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $output $ExpectedMessage
 }
 
 function Test-DuplicateGuidFixture {
@@ -102,7 +116,7 @@ function Test-DuplicateGuidFixture {
         $guid = "0123456789abcdef0123456789abcdef"
         Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/A.meta") -Value "guid: $guid"
         Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/B.meta") -Value "guid: $guid"
-    }
+    } "Duplicate Unity meta GUID"
 }
 
 function Test-TestSceneFixture {
@@ -117,7 +131,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Test.unity
 "@
-    }
+    } "Assets/Test.unity must not be enabled"
 }
 
 function Test-MissingSceneFixture {
@@ -130,14 +144,14 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Missing.unity
 "@
-    }
+    } "Enabled Build Settings scene is missing"
 }
 
 function Test-MalformedJsonFixture {
     Invoke-HygieneFailureFixture "malformed-json" {
         param($fixtureRepo)
         Set-Content -LiteralPath (Join-Path $fixtureRepo "bad.json") -Value "{ malformed"
-    }
+    } "Malformed JSON file"
 }
 
 function Test-MutableActionFixture {
@@ -153,25 +167,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 "@
-    }
-}
-
-function Invoke-ClassifierFixture {
-    param(
-        [Parameter(Mandatory = $true)][string] $FixtureRepo,
-        [Parameter(Mandatory = $true)][string] $EventPath,
-        [Parameter(Mandatory = $true)][string] $HeadBranch,
-        [switch] $ExpectFailure
-    )
-
-    Commit-FixtureFiles $FixtureRepo
-    Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD^") $FixtureRepo @{
-        GITHUB_ACTIONS = ""
-        GITHUB_EVENT_NAME = "pull_request"
-        GITHUB_EVENT_PATH = $EventPath
-        GITHUB_BASE_REF = "main"
-        GITHUB_HEAD_REF = $HeadBranch
-    } -ExpectFailure:$ExpectFailure | Out-Null
+    } "uses a mutable major-version action tag"
 }
 
 function Test-MixedScopeFixture {
@@ -193,7 +189,23 @@ function Test-MixedScopeFixture {
 }
 "@
 
-    Invoke-ClassifierFixture $fixtureRepo $eventPath "codex/quality-gate-fixture" -ExpectFailure
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+            GITHUB_ACTIONS = ""
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "codex/quality-gate-fixture"
+        } -ExpectFailure
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $output "Terrestrial design paths changed: 1"
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
+    Assert-Contains $output "Source-mode and engineering paths are mixed"
 }
 
 function Test-CoordinationFixture {
@@ -212,7 +224,19 @@ function Test-CoordinationFixture {
 }
 "@
 
-    Invoke-ClassifierFixture $fixtureRepo $eventPath "codex/coordination-fixture"
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+            GITHUB_ACTIONS = ""
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "codex/coordination-fixture"
+        } | Out-Null
+    } finally {
+        Pop-Location
+    }
 }
 
 function Test-RetiredPrefixFixture {
@@ -231,7 +255,21 @@ function Test-RetiredPrefixFixture {
 }
 "@
 
-    Invoke-ClassifierFixture $fixtureRepo $eventPath "gpt/retired-fixture" -ExpectFailure
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+            GITHUB_ACTIONS = ""
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "gpt/retired-fixture"
+        } -ExpectFailure
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $output "Codex-only AnotherLife prefix"
 }
 
 if (Test-Path -LiteralPath $WorkingRoot) {

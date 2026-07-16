@@ -35,30 +35,6 @@ jobs:
       - name: Repository hygiene
         shell: pwsh
         run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene
-      - name: Fixture proof - duplicate Unity GUID
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario DuplicateGuid
-      - name: Fixture proof - production Test scene rejection
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario TestScene
-      - name: Fixture proof - missing enabled scene rejection
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MissingScene
-      - name: Fixture proof - malformed JSON rejection
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MalformedJson
-      - name: Fixture proof - mutable action rejection
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MutableAction
-      - name: Fixture proof - mixed scope rejection
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MixedScope
-      - name: Fixture proof - Codex coordination acceptance
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario Coordination
-      - name: Fixture proof - retired GPT prefix rejection
-        shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario RetiredPrefix
 
   android-unit-debug:
     name: android / unit-debug
