@@ -23,38 +23,77 @@ namespace AL.Services.Local
 
         public long GetResourceCount(ResourceType type)
         {
-            if (Wallet == null) return 0;
-            var data = Wallet.FirstOrDefault(r => r.Type == type);
+            if (!TryNormalizeWallet(out var wallet)) return 0;
+            var data = wallet.FirstOrDefault(r => r.Type == type);
             return data?.Amount ?? 0;
         }
 
         public void AddResource(ResourceType type, long amount)
         {
             if (_saveGameService.CurrentSave == null) return;
+            if (amount == 0)
+            {
+                return;
+            }
 
-            var data = Wallet.FirstOrDefault(r => r.Type == type);
+            if (amount < 0)
+            {
+                Debug.LogWarning($"[AL-ECO-INVALID-AMOUNT] AddResource rejected negative amount {amount} for {type}.");
+                return;
+            }
+
+            if (!TryNormalizeWallet(out var wallet))
+            {
+                return;
+            }
+
+            var data = wallet.FirstOrDefault(r => r.Type == type);
             if (data == null)
             {
                 data = new ResourceData { Type = type, Amount = 0 };
-                Wallet.Add(data);
+                wallet.Add(data);
             }
 
-            data.Amount += amount;
+            long finalAmount;
+            try
+            {
+                finalAmount = checked(data.Amount + amount);
+            }
+            catch (OverflowException)
+            {
+                Debug.LogWarning($"[AL-ECO-OVERFLOW] AddResource rejected overflow for {type}: {data.Amount} + {amount}.");
+                return;
+            }
+
+            data.Amount = finalAmount;
             OnResourceChanged?.Invoke(type, data.Amount);
         }
 
         public bool ConsumeResource(ResourceType type, long amount)
         {
-            if (!HasEnough(type, amount)) return false;
+            if (amount <= 0)
+            {
+                Debug.LogWarning($"[AL-ECO-INVALID-AMOUNT] ConsumeResource rejected non-positive amount {amount} for {type}.");
+                return false;
+            }
 
-            var data = Wallet.First(r => r.Type == type);
-            data.Amount -= amount;
+            if (!TryNormalizeWallet(out var wallet)) return false;
+
+            var data = wallet.FirstOrDefault(r => r.Type == type);
+            if (data == null || data.Amount < amount) return false;
+
+            data.Amount = checked(data.Amount - amount);
             OnResourceChanged?.Invoke(type, data.Amount);
             return true;
         }
 
         public bool HasEnough(ResourceType type, long amount)
         {
+            if (amount <= 0)
+            {
+                return false;
+            }
+
             return GetResourceCount(type) >= amount;
         }
 
@@ -135,6 +174,65 @@ namespace AL.Services.Local
 
             _productionRemainders[type] -= wholeAmount;
             AddResource(type, wholeAmount);
+        }
+
+        private bool TryNormalizeWallet(out List<ResourceData> wallet)
+        {
+            wallet = null;
+            if (_saveGameService.CurrentSave == null)
+            {
+                return false;
+            }
+
+            _saveGameService.CurrentSave.Resources ??= new List<ResourceData>();
+            wallet = _saveGameService.CurrentSave.Resources;
+
+            for (int index = wallet.Count - 1; index >= 0; index--)
+            {
+                if (wallet[index] == null)
+                {
+                    wallet.RemoveAt(index);
+                    Debug.LogWarning("[AL-ECO-NULL-ENTRY] Removed null resource entry from wallet compatibility view.");
+                }
+            }
+
+            for (int index = wallet.Count - 1; index >= 0; index--)
+            {
+                if (wallet[index].Amount < 0)
+                {
+                    Debug.LogWarning($"[AL-ECO-NEGATIVE-BALANCE] Repaired negative {wallet[index].Type} balance {wallet[index].Amount} to 0.");
+                    wallet[index].Amount = 0;
+                }
+            }
+
+            var canonical = new Dictionary<ResourceType, ResourceData>();
+            for (int index = 0; index < wallet.Count; index++)
+            {
+                var entry = wallet[index];
+                if (!canonical.TryGetValue(entry.Type, out var existing))
+                {
+                    canonical[entry.Type] = entry;
+                    continue;
+                }
+
+                long repairedAmount;
+                try
+                {
+                    repairedAmount = checked(existing.Amount + entry.Amount);
+                }
+                catch (OverflowException)
+                {
+                    Debug.LogWarning($"[AL-ECO-DUPLICATE-OVERFLOW] Duplicate {entry.Type} balance overflowed during repair; clamped to long.MaxValue.");
+                    repairedAmount = long.MaxValue;
+                }
+
+                existing.Amount = repairedAmount;
+                wallet.RemoveAt(index);
+                index--;
+                Debug.LogWarning($"[AL-ECO-DUPLICATE-RESOURCE] Merged duplicate {entry.Type} resource entry into the first wallet entry.");
+            }
+
+            return true;
         }
     }
 }
