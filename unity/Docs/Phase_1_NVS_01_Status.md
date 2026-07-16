@@ -23,7 +23,7 @@ A merged PR, closed issue, green test suite, generated asset, Console log, uploa
 - The other post-merge correction issues remain open: #163, #136, #152, #127, #178, #161, #155, and #137.
 - Three pull requests are open: correction drafts #237 and #241, and terrestrial source draft #217.
 - The only committed Unity scene remains test-only `Assets/Test.unity`; normal Build Settings remain empty.
-- The canonical Unity workspace remains `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`. The directory name is historical and does not require Android Studio. Evidence from `C:\Users\MY\Documents\AnotherLife\unity` is development feedback, not closure evidence.
+- The active Codex Unity workspace is `C:\Users\MY\Documents\AnotherLife\unity`. Historical evidence from other worktrees remains useful only when its exact path, base/head, branch state, and dirty/clean state are reported.
 - PR #232 is accepted as partial #155 progress: terrestrial path classification, disposable local failure fixtures, and a proof/protection plan. #155 remains open through policy authority, correct event/range semantics, complete security/classification/artifacts, live failure proofs, a Unity validation model, and verified branch protection.
 - PRs #238, #240, and #239 added binding **specifications**, not implementations, for progression, territory, and Champion customization.
 

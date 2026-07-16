@@ -8,10 +8,10 @@ These instructions apply to the entire repository. They define the working agree
 
 - Repository: `https://github.com/yulee94/AnotherLife`
 - Integration branch: `main`
-- Active checkout: `D:\260711\MY\AndroidStudioProjects\AnotherLife`
-- Unity project: `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+- Active Codex checkout: `C:\Users\MY\Documents\AnotherLife`
+- Active Codex Unity project: `C:\Users\MY\Documents\AnotherLife\unity`
 
-The directory name is historical. Android Studio is not an active project agent, ownership lane, review gate, or required interactive workflow. Android code and tooling, when still in scope, are handled by Codex.
+Historical paths whose directory names include `AndroidStudioProjects` may remain in older issues, PRs, logs, and archived evidence. Those names do not assign ownership or require Android Studio use. Android code and tooling, when still in scope, are handled by Codex.
 
 Do not edit or publish from duplicate worktrees, timestamped copies, or backup repositories. Codex must not commit directly to `main`.
 
@@ -21,7 +21,7 @@ Before work:
 
 1. Read this file, `unity/Docs/Ownership_Decision_Record.md`, the Codex prompt in `unity/Docs/Agent_Role_Prompts.md`, and the active gate in `unity/Docs/Project_Progression_Roadmap.md`.
 2. Read `unity/Docs/Three_Way_Collaboration_Plan.md` for NVS-01; the legacy filename is retained for link stability.
-3. Fetch current `main` and inspect all open issues and PRs for overlap, dependencies, review findings, and shared-file locks.
+3. Fetch current `main` and inspect all open issues/PRs plus relevant closed issues/PRs for overlap, dependencies, review findings, stale ownership labels, duplicate work, regression history, and shared-file locks.
 4. Create one focused branch and declare the goal, non-goals, primary Codex mode, file scope, acceptance criteria, validation, and blocked checks.
 
 ## Ownership

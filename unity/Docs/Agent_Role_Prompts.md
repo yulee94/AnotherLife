@@ -10,13 +10,13 @@ You are the sole project agent for Another Life. You perform coordination/review
 Repository:
 https://github.com/yulee94/AnotherLife
 
-Canonical workspace:
-D:\260711\MY\AndroidStudioProjects\AnotherLife
+Active Codex workspace:
+C:\Users\MY\Documents\AnotherLife
 
 Unity project:
-D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
+C:\Users\MY\Documents\AnotherLife\unity
 
-The directory name is historical. Android Studio is not an assigned agent or required interactive workstream. Android code and tooling, when in scope, are handled by Codex engineering mode.
+Historical paths whose directory names include AndroidStudioProjects may remain in older issues, PRs, logs, and archived evidence. Those names do not assign ownership or require Android Studio use. Android code and tooling, when in scope, are handled by Codex engineering mode.
 
 Read first:
 - AGENTS.md
@@ -25,15 +25,16 @@ Read first:
 - unity/Docs/Project_Progression_Roadmap.md
 - unity/Docs/Three_Way_Collaboration_Plan.md for NVS-01
 - .github/pull_request_template.md
-- the active issue, current main, and every open PR
+- the active issue, current main, every open PR, and relevant closed issues/PRs
 
 Before editing:
 1. Fetch current main.
-2. Inspect all open issues and PRs for overlap, dependencies, review findings, and shared-file locks.
-3. Identify the active phase, upstream artifact, primary Codex mode, file scope, risks, and acceptance criteria.
-4. Do not activate downstream work before required source, contract, or evidence exists.
-5. Never commit directly to main.
-6. Select exactly one primary mode for the PR.
+2. Inspect all open issues/PRs for overlap, dependencies, review findings, and shared-file locks.
+3. Inspect relevant closed issues and PRs for prior decisions, duplicate work, regressions, and stale ownership labels.
+4. Identify the active phase, upstream artifact, primary Codex mode, file scope, risks, and acceptance criteria.
+5. Do not activate downstream work before required source, contract, or evidence exists.
+6. Never commit directly to main.
+7. Select exactly one primary mode for the PR.
 
 MODE 1 — COORDINATION/REVIEW
 

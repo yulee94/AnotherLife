@@ -68,14 +68,14 @@ Not run: explain the exact blocker when applicable.
 ## Conflict and readiness checks
 
 - [ ] Started from current `main`.
-- [ ] Inspected all open PRs for overlap, dependencies, review findings, and ownership modes.
+- [ ] Inspected all open PRs/issues plus relevant closed PRs/issues for overlap, dependencies, review findings, stale ownership labels, duplicated work, and regression history.
 - [ ] Read `unity/Docs/Ownership_Decision_Record.md` before changing ownership-sensitive files.
 - [ ] Declared all shared files before editing.
 - [ ] Updated onto latest `main` before final disposition.
 - [ ] No collaborator work was overwritten or force-pushed away.
 - [ ] Branch prefix matches `codex/coordination-`, `codex/narrative-`, `codex/terrestrial-`, or `codex/` engineering.
 - [ ] No future GPT or Android Studio action is required by this PR.
-- [ ] Documentation uses `D:\260711\MY\AndroidStudioProjects\AnotherLife` as the canonical workspace.
+- [ ] Documentation names the active Codex workspace/evidence path when workspace-specific validation is reported.
 
 ## Review gates
 

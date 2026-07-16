@@ -26,7 +26,7 @@ Codex is the sole project agent and operates through four declared modes:
 
 GPT receives no future planning, specification, review, merge-readiness, status, or risk assignment. Android Studio receives no future agent/workstream assignment. Android implementation or tooling that remains in project scope belongs to Codex engineering mode.
 
-The canonical path may continue to contain `AndroidStudioProjects` in its directory name; that historical filesystem name does not assign ownership or require Android Studio use.
+The active Codex workspace for this record is `C:\Users\MY\Documents\AnotherLife`. Historical paths may continue to contain `AndroidStudioProjects` in their directory name; that historical filesystem name does not assign ownership or require Android Studio use.
 
 ## Historical artifacts
 
