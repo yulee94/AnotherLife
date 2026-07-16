@@ -1,10 +1,10 @@
 # Phase 1 NVS-01 Status
 
-**Status date:** 2026-07-16  
-**Integration branch:** `main`  
-**Audited current-main head:** `cbdb09f99c3f803a282e8582cd7375680ead3693`  
-**Roadmap state:** Phase 1 remains paused behind reopened QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate  
-**Approved product intent:** issue #138 D1–D16  
+**Status date:** 2026-07-16
+**Integration branch:** `main`
+**Audited current-main head:** `cbdb09f99c3f803a282e8582cd7375680ead3693`
+**Roadmap state:** Phase 1 remains paused behind reopened QuestDefinition authority issue #156 and the red Phase 0/1 foundation gate
+**Approved product intent:** issue #138 D1–D16
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
 `AGENTS.md` is authoritative. This record separates specification, source presence, merge state, issue state, validation evidence, accepted behavior, creative approval, packaging evidence, and player-visible completion.
