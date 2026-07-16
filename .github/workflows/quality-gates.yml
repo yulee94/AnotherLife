@@ -35,9 +35,18 @@ jobs:
       - name: Repository hygiene
         shell: pwsh
         run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene
-      - name: Quality gate fixture proofs
+      - name: Fixture proof - hygiene failures
         shell: pwsh
-        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario Hygiene
+      - name: Fixture proof - mixed scope rejection
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario MixedScope
+      - name: Fixture proof - Codex coordination acceptance
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario Coordination
+      - name: Fixture proof - retired GPT prefix rejection
+        shell: pwsh
+        run: ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario RetiredPrefix
 
   android-unit-debug:
     name: android / unit-debug
