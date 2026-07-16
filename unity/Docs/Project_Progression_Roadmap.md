@@ -1,32 +1,34 @@
 # AnotherLife Project Progression Roadmap
 
-This roadmap defines how GPT, Codex, and the user move Another Life from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay. `Ownership_Decision_Record.md` controls ownership chronology.
+This roadmap defines how Codex and the user move AnotherLife from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay. `Ownership_Decision_Record.md` controls ownership chronology.
 
 ## Authority
 
 Use together:
 
-1. `AGENTS.md` — ownership, branches, locks, and conflict policy.
+1. `AGENTS.md` — Codex-only ownership, branches, locks, and conflict policy.
 2. `unity/Docs/Ownership_Decision_Record.md` — final user ownership decision.
-3. `unity/Docs/Agent_Role_Prompts.md` — standalone GPT and Codex prompts.
+3. `unity/Docs/Agent_Role_Prompts.md` — standalone Codex prompt.
 4. This roadmap — phase order and exit gates.
 5. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
 6. `.github/pull_request_template.md` — required PR declaration.
 
-`AGENTS.md` wins conflicts. The user decides creative/product direction. GPT resolves technical sequencing. Codex performs all source-authoring, design, implementation, build, asset, and test work through declared modes.
+`AGENTS.md` wins conflicts. The user decides creative/product direction and final acceptance. Codex resolves technical sequencing and performs coordination, source authoring, design, implementation, build, asset, test, review, and publication work through declared modes.
 
-## Operating principles
+## Operating Principles
 
 - Keep `main` buildable before expansion.
 - Deliver thin complete slices before scaling.
 - Codex narrative/content and terrestrial-design source precede Codex engineering implementation.
-- GPT specifies and reviews handoffs but does not author source.
+- Codex coordination/specification/review mode defines handoffs, acceptance, and merge readiness.
 - Use stable IDs and validated data instead of duplicated hard-coded authority.
 - Preserve old saves and service registrations.
-- One focused PR per major completion and primary Codex mode.
+- One focused PR per major completion and primary Codex mode unless a mixed-mode exception is justified.
+- Inspect open and relevant closed issues/PRs before work.
+- Check for duplicate authority, duplicate implementation paths, stale ownership labels, and closed-history regressions before new feature work.
 - Do not advance while the current phase gate is red unless the user reprioritizes.
 
-## Priority inside every phase
+## Priority Inside Every Phase
 
 1. Broken `main` or unavailable core workflow.
 2. Data loss, save corruption, security, economy, or irreversible migration risk.
@@ -39,13 +41,14 @@ Use together:
 
 ### Goal
 
-Establish one workspace, the GPT–Codex–user model, one active implementation path per issue, and reliable validation commands.
+Establish one workspace, the Codex-only model, one active implementation path per issue, no stale agent boundaries, and reliable validation commands.
 
-### GPT
+### Codex coordination/specification/review mode
 
 - Maintain governance, roadmap, status, risk, and gate policy.
-- Triage issues/PRs, dependencies, and locks.
+- Triage open and closed issues/PRs, dependencies, duplicated work, stale owner labels, and locks.
 - Review build blockers and evidence.
+- Keep active branches and PRs sequenced.
 
 ### Codex narrative/content mode
 
@@ -54,7 +57,7 @@ Establish one workspace, the GPT–Codex–user model, one active implementation
 
 ### Codex terrestrial-design mode
 
-- Keep design experiments isolated and deferred unless a user-approved active task needs them.
+- Keep design experiments isolated unless a user-approved active task needs them.
 - Do not mix concept/design source into build-health PRs.
 
 ### Codex engineering mode
@@ -67,11 +70,12 @@ Establish one workspace, the GPT–Codex–user model, one active implementation
 
 - Resolve materially different product/design options when review cannot establish a clear technical answer.
 
-### Exit gate
+### Exit Gate
 
 - Governance and workspace rules are on `main`.
 - Android and Unity have known passing commands or owned blockers.
 - No duplicate PR targets the same root problem.
+- No stale outside-owner gate blocks Codex work.
 - No undeclared shared-file lock exists.
 
 ## Phase 1 — NVS-01: One Approved Quest End to End
@@ -85,9 +89,9 @@ Prove one bounded user-approved quest can move from Codex narrative source to a 
 - Produce A1 with stable IDs, states, objectives, dialogue, choices, consequences, handoff, failure/retry/recovery, report, abandonment, resume, and localization.
 - Perform A2 narrative-fidelity disposition after implementation.
 
-### GPT
+### Codex coordination/specification/review mode
 
-- Review A1.
+- Review A1 for implementation readiness.
 - Publish G1 state/event/contract/persistence/test specification.
 - Perform G2 integration and merge-risk review.
 
@@ -105,11 +109,11 @@ Prove one bounded user-approved quest can move from Codex narrative source to a 
 
 - Approve source intent and complete U1 integrated playtest.
 
-### Exit gate
+### Exit Gate
 
 - Quest start, progression, branch, handoff, resolution, save, reload, and resume work.
 - Consequences occur once and remain stable.
-- A2 confirms source fidelity, GPT confirms technical acceptance, and the user accepts U1.
+- Codex source fidelity and technical acceptance pass, and the user accepts U1.
 
 ## Phase 2 — Chapter 1 Playable Spine
 
@@ -122,7 +126,7 @@ Generalize NVS-01 into a complete Chapter 1 flow without quest-specific runtime 
 - Define Chapter 1 structure, critical path, optional content, NPC arcs, continuity, entry, and close conditions.
 - Deliver bounded source packets with stable dependencies.
 
-### GPT
+### Codex coordination/specification/review mode
 
 - Split Chapter 1 into dependency-ordered milestones.
 - Define reusable state patterns, contracts, and tests.
@@ -137,7 +141,7 @@ Generalize NVS-01 into a complete Chapter 1 flow without quest-specific runtime 
 
 - Author terrestrial designs only for user-approved Chapter 1 subjects and hand them to engineering through separate packets.
 
-### Exit gate
+### Exit Gate
 
 - A new profile can enter, progress through, save/reload within, and complete the approved Chapter 1 spine.
 - Invalid references and impossible transitions fail visibly.
@@ -159,7 +163,7 @@ Make approved choices visibly affect existing gameplay systems while preserving 
 - Define user-approved terrestrial fauna/creature/habitat presentation and design-fidelity criteria.
 - Keep visual design separate from combat stats, AI, and runtime implementation.
 
-### GPT
+### Codex coordination/specification/review mode
 
 - Define event ownership, payloads, idempotency, rollback, save boundaries, and sequence.
 
@@ -168,7 +172,7 @@ Make approved choices visibly affect existing gameplay systems while preserving 
 - Connect approved events and designs to kingdom, realm, champion, encounter, loot, objective, world-state, AI, rendering, and asset systems.
 - Add integration, reload, performance, and accessibility tests.
 
-### Exit gate
+### Exit Gate
 
 - Approved narrative decisions and terrestrial designs produce deterministic visible persistent results.
 - Retries, reloads, and duplicate delivery cannot repeat consequences.
@@ -188,7 +192,7 @@ Scale content and terrestrial designs without ID drift, broken references, incon
 
 - Establish terrestrial design taxonomies, naming, variation rules, scale references, material conventions, motion briefs, LOD/readability expectations, and source-asset packaging.
 
-### GPT
+### Codex coordination/specification/review mode
 
 - Define governance, schema evolution, versioning, compatibility, review gates, and tool requirements.
 
@@ -196,7 +200,7 @@ Scale content and terrestrial designs without ID drift, broken references, incon
 
 - Build validators, importers, generators, editor diagnostics, localization/reference checks, asset-pipeline automation, and catalog performance tests.
 
-### Exit gate
+### Exit Gate
 
 - New approved content/design can enter through documented source steps without ordinary runtime edits.
 - Duplicate IDs, missing references, unsupported versions, localization gaps, and asset drift fail before runtime.
@@ -216,7 +220,7 @@ Harden the game against old saves, invalid source, device differences, performan
 
 - Review silhouette/readability at target distances, color-independent recognition, motion clarity, variant consistency, reduced-motion compatibility, and LOD fidelity.
 
-### GPT
+### Codex coordination/specification/review mode
 
 - Maintain risk and release-quality matrices.
 - Prioritize defects and prevent scope/ownership regression.
@@ -226,7 +230,7 @@ Harden the game against old saves, invalid source, device differences, performan
 - Expand Android, Unity, asset, contract, save, device, performance, accessibility, and recovery tests.
 - Improve diagnostics and safe failure behavior.
 
-### Exit gate
+### Exit Gate
 
 - Supported old saves load/migrate safely.
 - Critical paths have regression coverage.
@@ -249,7 +253,7 @@ Produce a reproducible traceable release candidate with frozen source and user a
 
 - Freeze terrestrial design source and sign off integrated design fidelity.
 
-### GPT
+### Codex coordination/specification/review mode
 
 - Freeze scope, review traceability, coordinate blockers, and publish readiness/risk reports.
 
@@ -261,29 +265,29 @@ Produce a reproducible traceable release candidate with frozen source and user a
 
 - Perform final acceptance and approve or reject the release candidate.
 
-### Exit gate
+### Exit Gate
 
 - Reproducible builds and required checks pass.
 - No blocker, undeclared lock, duplicate PR, or unreviewed migration remains.
 - Narrative, terrestrial design, product direction, and player experience are accepted by the user.
 - Accepted commit is identified and tagged.
 
-## Recurring delivery cycle
+## Recurring Delivery Cycle
 
-1. **Orient** — phase, issue, upstream source, dependencies, PRs, locks.
+1. **Orient** — phase, issue, upstream source, dependencies, open/closed PRs, open/closed issues, locks, and duplicate paths.
 2. **Author/design** — Codex narrative or terrestrial mode creates bounded source when needed.
-3. **Specify** — GPT defines implementation and acceptance.
-4. **Branch** — one focused branch with the correct mode.
+3. **Specify** — Codex coordination/specification/review mode defines implementation and acceptance.
+4. **Branch** — one focused `codex/` branch with the correct mode.
 5. **Implement** — Codex engineering stays within scope.
 6. **Validate** — exact relevant checks and evidence.
-7. **Review** — GPT technical/source fidelity; Codex source-mode disposition.
+7. **Review** — Codex technical/source fidelity disposition.
 8. **Playtest** — user milestone acceptance.
-9. **Merge/close** — dependency order, release locks, update status.
+9. **Merge/close** — dependency order, release locks, issue/PR cleanup, update status.
 
-## Milestone readiness
+## Milestone Readiness
 
-A milestone is complete only when the upstream source is approved, declared ownership modes are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
+A milestone is complete only when the upstream source is approved, declared Codex modes are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
 
-## Selecting the next task
+## Selecting the Next Task
 
-GPT selects the next unblocked task from the active gate. Codex must not self-assign later-phase work while an earlier gate is red. Classify new work as blocker, required, follow-up, or deferred in the issue/spec/PR.
+Codex selects the next unblocked task from the active gate after checking open and closed issues/PRs for overlap, duplication, stale ownership, and regression history. Classify new work as blocker, required, follow-up, or deferred in the issue/spec/PR.

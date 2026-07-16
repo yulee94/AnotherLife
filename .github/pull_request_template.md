@@ -2,20 +2,24 @@
 
 Describe the single major completion in this pull request.
 
-## Primary owner mode
+## Primary Codex mode
 
-Select exactly one:
+Select exactly one, or justify a mixed-mode exception:
 
-- [ ] GPT — planning, specification, review, risk, or coordination documentation
+- [ ] Codex coordination/specification/review — planning, specification, review, risk, roadmap, issue/PR triage, or governance documentation
 - [ ] Codex narrative/content — quests, dialogue, lore, localization-facing source, continuity, or narrative fidelity
 - [ ] Codex terrestrial design — terrestrial concepts, silhouettes, materials, motion intent, design source, or design fidelity
 - [ ] Codex engineering — Android, Unity, runtime, gameplay, assets, build, save, contracts, tests, CI, or tooling
 
-A mixed-mode PR requires an explicit GPT specification and a written reason that separate PRs are impractical.
+Mixed-mode exception, if any:
+
+```text
+None
+```
 
 ## Roadmap phase and upstream dependency
 
-Link the issue, user decision, source packet, design packet, specification, or prerequisite PR. Write `None` only for a root coordination change.
+Link the issue, user decision, source packet, design packet, specification, prerequisite PR, or write `None` only for a root coordination change.
 
 ## Ownership declaration
 
@@ -43,18 +47,19 @@ Confirm no other open PR holds the lock.
 
 ## What changed
 
-- 
+-
 
 ## Acceptance criteria
 
 - [ ] Task-specific acceptance criteria are listed or linked.
-- [ ] The diff stays within the declared primary mode and file scope.
+- [ ] The diff stays within the declared primary mode and file scope, or the mixed-mode exception is justified.
 - [ ] Narrative meaning was not rewritten outside Codex narrative/content mode.
 - [ ] Terrestrial visual intent was not redesigned outside Codex terrestrial-design mode.
 - [ ] Engineering consumes approved source/design rather than creating parallel hard-coded authority.
 - [ ] New save fields have backward-compatible defaults when applicable.
 - [ ] Existing service registrations, source packets, designs, assets, and unrelated systems are preserved.
 - [ ] Invalid data, unavailable dependencies, retries, and duplicate delivery are handled as required.
+- [ ] Stale GPT, Android Studio, Gemini, or other retired ownership labels are not introduced as active gates.
 
 ## Validation
 
@@ -67,17 +72,17 @@ Not run: explain the exact blocker when applicable.
 ## Conflict and readiness checks
 
 - [ ] Started from current `main`.
-- [ ] Inspected open PRs for overlap, dependencies, and ownership modes.
+- [ ] Inspected open and relevant closed PRs/issues for overlap, dependencies, stale ownership labels, duplicated work, and regression history.
 - [ ] Read `unity/Docs/Ownership_Decision_Record.md` before changing ownership-sensitive files.
+- [ ] Checked for duplicate authority, duplicate implementation paths, and stale owner boundaries.
 - [ ] Declared all shared files before editing.
 - [ ] Rebased onto latest `main` before final review.
-- [ ] No collaborator work was overwritten or force-pushed away.
-- [ ] Branch prefix matches `gpt/`, `codex/narrative-`, `codex/terrestrial-`, or `codex/` engineering.
-- [ ] Documentation uses `D:\260711\MY\AndroidStudioProjects\AnotherLife` as the canonical workspace.
+- [ ] No existing work was overwritten or force-pushed away.
+- [ ] Branch prefix matches `codex/spec-`, `codex/coordination-`, `codex/narrative-`, `codex/terrestrial-`, or `codex/`.
 
 ## Review gates
 
-- GPT disposition: `BLOCKED / READY FOR SOURCE-MODE REVIEW / READY TO MERGE`
+- Codex coordination/specification/review disposition: `BLOCKED / READY FOR SOURCE-MODE REVIEW / READY TO MERGE / NOT APPLICABLE`
 - Codex narrative/content fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
 - Codex terrestrial-design fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
 - User approval required: `yes / no`, with decision link when already recorded

@@ -1,6 +1,8 @@
-# NVS-01 GPT–Codex Collaboration Plan
+# NVS-01 Codex-Only Collaboration Plan
 
-The legacy filename is retained for link stability. This document defines the first coordinated milestone for GPT, Codex, and the user. `Ownership_Decision_Record.md` controls ownership chronology.
+The legacy filename is retained for link stability. This document defines the first coordinated milestone for Codex and the user. `Ownership_Decision_Record.md` controls ownership chronology.
+
+Historical task labels such as G1/G2 are retained for continuity, but their owner is now Codex coordination/specification/review mode. GPT, Android Studio, and Gemini are not active owners or gates.
 
 ## Goal
 
@@ -21,29 +23,30 @@ The slice must demonstrate:
 
 Out of scope: unrelated chapters, broad gameplay redesign, terrestrial design, new combat or boss mechanics, speculative scenes/assets/VFX, hard-coded runtime story text, and unrelated service refactors.
 
-## Required artifacts
+## Required Artifacts
 
 ### A1 narrative packet — Codex narrative/content mode
 
 The packet identifies stable IDs, prerequisites, states, objectives, dialogue, choices, consequences, gameplay handoff, return events, localization keys, completion/failure/retry/recovery, resume behavior, and unresolved creative decisions.
 
-### G1 implementation specification — GPT
+### G1 implementation specification — Codex coordination/specification/review mode
 
 The specification maps the approved packet to runtime state, events, contracts, persistence, migration, idempotency, error behavior, file impact, locks, tests, rollback, and delivery order without rewriting narrative intent.
 
-### C1–C4 implementation report — Codex engineering mode
+### C1-C4 implementation report — Codex engineering mode
 
 The report identifies files changed, source consumed, shared locks, contracts, compatibility decisions, exact build/test evidence, limitations, and confirmation that narrative meaning was not silently rewritten.
 
-## Ordered task plan
+## Ordered Task Plan
 
-### G0 — Collaboration baseline
+### G0 — Codex-only baseline
 
-**Owner:** GPT
+**Owner:** Codex coordination/specification/review mode
 
 Acceptance:
 
-- canonical workspace, ownership modes, branches, PR declarations, locks, and evidence rules are merged;
+- canonical workspace, Codex modes, branches, PR declarations, locks, closed-history checks, duplication checks, and evidence rules are merged;
+- retired owner labels are not active gates;
 - no source behavior changes.
 
 ### A1 — Complete the approved OMEN_1 packet
@@ -54,7 +57,7 @@ Acceptance:
 Acceptance:
 
 - exactly one bounded quest line;
-- D1–D16 and user-approved intent encoded without reinterpretation;
+- D1-D16 and user-approved intent encoded without reinterpretation;
 - unique stable IDs and complete internal references;
 - explicit offer, acceptance, objectives, choice, arena handoff, failure/retry, manual report, consequences, abandonment, and resume;
 - complete localization inventory;
@@ -63,8 +66,8 @@ Acceptance:
 
 ### G1 — Publish the runtime integration specification
 
-**Owner:** GPT  
-**Branch:** `gpt/nvs-01-integration-spec`
+**Owner:** Codex coordination/specification/review mode
+**Branch:** `codex/spec-nvs-01-integration`
 
 Acceptance:
 
@@ -114,7 +117,7 @@ Acceptance:
 
 ### G2 — Integration review
 
-**Owner:** GPT
+**Owner:** Codex coordination/specification/review mode
 
 Acceptance:
 
@@ -132,7 +135,7 @@ Acceptance:
 - implementation discrepancies are reported without silently changing source;
 - any intentional creative change returns to user approval and requires A1/G1 revision before runtime changes.
 
-A2 is not independent technical approval because the same Codex agent may have authored and implemented the work. GPT review and user acceptance remain mandatory independent gates.
+A2 is source-fidelity approval, not final product approval. User acceptance remains mandatory.
 
 ### U1 — Final playtest and milestone acceptance
 
@@ -145,18 +148,18 @@ Acceptance:
 - the experience matches approved intent;
 - all required PRs are merged in order and locks are released.
 
-## Merge order
+## Merge Order
 
 ```text
-G0 → A1 → G1 → C1–C4 → G2 → A2 → U1
+G0 -> A1 -> G1 -> C1-C4 -> G2 -> A2 -> U1
 ```
 
 A dependent PR must not merge before its upstream artifact is approved. Changes to narrative intent update A1 first, then G1, then engineering.
 
-## Shared-file protocol
+## Shared-File Protocol
 
-Search open PRs, declare locks, avoid parallel edits, rebase the later branch, preserve valid services and save fields, and never discard unfamiliar systems to resolve conflicts. GPT resolves technical sequence; the user resolves creative direction.
+Search open and relevant closed PRs/issues, declare locks, avoid parallel edits, rebase the later branch, preserve valid services and save fields, and never discard unfamiliar systems to resolve conflicts. Codex coordination/specification/review mode resolves technical sequence; the user resolves creative direction.
 
-## Definition of done
+## Definition of Done
 
 NVS-01 is complete only when all task acceptance criteria pass, Codex-authored narrative remains the canonical source, runtime consumes approved data, save/reload and invalid-input tests pass, all locks are released, the integrated state is on `main`, and the user accepts the playtest.
