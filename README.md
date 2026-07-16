@@ -120,7 +120,7 @@ Use:
 
 A closed issue, merged PR, source file, or successful compile is not by itself completion evidence. Match evidence to the owning acceptance criteria: build logs, test XML, migration/fault matrices, contract producer/consumer proof, actual Player/export builds, and user playtest where required.
 
-Closed issues may be reopened when current source or Unity Hub play shows they still block the product direction. The long-term playable path must launch into four-realm selection, realm-specific character creation, unique username creation, 3D inner-realm champion questing, polished 2.5D kingdom mode, 3D inner-realm return, outer-warzone save-pillar setup, bridge-connected realm-vs-realm warzone play, level-50 skill-tree progression, Warmaster gear/Warzone-point completion, True Warmaster unlocks, center-island neutral trade/chat under the Wish Dragon's consideration, dragon/boss/gem/Warmaster objectives, and ultimately the eight-gem final wish objective.
+Closed issues may be reopened when current source or Unity Hub play shows they still block the product direction. The long-term playable path must launch into four-realm selection, realm-specific character creation, account realm-locking with same-realm sub-characters and shared storage, unique username creation, 3D inner-realm champion questing, polished 2.5D kingdom mode, 3D inner-realm return, outer-warzone save-pillar setup, bridge-connected realm-vs-realm warzone play, level-50 skill-tree progression, Warmaster gear/Warzone-point completion, True Warmaster unlocks, center-island neutral trade/chat under the Wish Dragon's consideration, dragon/boss/gem/Warmaster objectives, and ultimately the eight-gem final wish objective.
 
 ## Optimization Mandate
 
