@@ -4,7 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using AL.Core;
 using AL.Data.Definitions.Narrative;
+using AL.Data.Runtime;
 using UnityEditor;
 using UnityEngine;
 
@@ -20,23 +22,23 @@ namespace AL.Editor.Validation
 
         private const string ZeroGuid = "00000000000000000000000000000000";
 
-        private static readonly string[] ExpectedQuestFields =
+        private static readonly QuestFieldContract[] ExpectedQuestFields =
         {
-            "Id",
-            "Title",
-            "Description",
-            "Type",
-            "TargetValue",
-            "IsHidden",
-            "RequiredItemId",
-            "Trigger",
-            "ConflictHint",
-            "RewardResources",
-            "RewardCredits",
-            "RewardXP"
+            new QuestFieldContract("Id", typeof(string)),
+            new QuestFieldContract("Title", typeof(string)),
+            new QuestFieldContract("Description", typeof(string)),
+            new QuestFieldContract("Type", typeof(QuestType)),
+            new QuestFieldContract("TargetValue", typeof(int)),
+            new QuestFieldContract("IsHidden", typeof(bool)),
+            new QuestFieldContract("RequiredItemId", typeof(string)),
+            new QuestFieldContract("Trigger", typeof(TriggerCondition)),
+            new QuestFieldContract("ConflictHint", typeof(string)),
+            new QuestFieldContract("RewardResources", typeof(List<ResourceData>)),
+            new QuestFieldContract("RewardCredits", typeof(int)),
+            new QuestFieldContract("RewardXP", typeof(int))
         };
 
-        private static readonly HashSet<string> ExpectedFieldSet = new HashSet<string>(ExpectedQuestFields, StringComparer.Ordinal);
+        private static readonly HashSet<string> ExpectedFieldSet = new HashSet<string>(ExpectedQuestFields.Select(field => field.Name), StringComparer.Ordinal);
 
         private static readonly HashSet<string> IgnoredTopLevelFields = new HashSet<string>(StringComparer.Ordinal)
         {
@@ -141,6 +143,16 @@ namespace AL.Editor.Validation
                 return;
             }
 
+            if (!typeof(ScriptableObject).IsAssignableFrom(definitionType))
+            {
+                snapshot.AddDiagnostic("AL-QDA-AUTHORITATIVE-TYPE-MISMATCH", AuthoritativePath, null, "Authoritative QuestDefinition type must derive from ScriptableObject.", typeof(ScriptableObject).FullName, definitionType.FullName);
+            }
+
+            if (!IsProductionRuntimeQuestDefinitionType(definitionType))
+            {
+                snapshot.AddDiagnostic("AL-QDA-AUTHORITATIVE-ASSEMBLY-MISMATCH", AuthoritativePath, null, "Authoritative QuestDefinition type must live in the production runtime assembly.", "Assembly-CSharp", definitionType.Assembly.GetName().Name);
+            }
+
             var menu = definitionType.GetCustomAttribute<CreateAssetMenuAttribute>();
             string actualMenu = menu != null ? menu.menuName : string.Empty;
             string actualFileName = menu != null ? menu.fileName : string.Empty;
@@ -159,6 +171,7 @@ namespace AL.Editor.Validation
         {
             string[] questDefinitionTypes = TypeCache.GetTypesDerivedFrom<ScriptableObject>()
                 .Where(type => type.Name == "QuestDefinition")
+                .Where(IsProductionRuntimeQuestDefinitionType)
                 .Select(type => type.FullName)
                 .OrderBy(typeName => typeName, StringComparer.Ordinal)
                 .ToArray();
@@ -178,27 +191,55 @@ namespace AL.Editor.Validation
 
         private static void ValidateAuthoritativeFieldSchema(QuestDefinitionAuthoritySnapshot snapshot)
         {
-            Type definitionType = typeof(QuestDefinition);
-            string[] actualFields = definitionType
-                .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
-                .Where(IsUnitySerializedField)
-                .OrderBy(field => field.MetadataToken)
-                .Select(field => field.Name)
+            ValidateSerializedFieldSchema(snapshot, typeof(QuestDefinition), AuthoritativePath);
+        }
+
+        public static QuestDefinitionAuthoritySnapshot ValidateFieldSchemaForTests(Type definitionType)
+        {
+            var snapshot = new QuestDefinitionAuthoritySnapshot
+            {
+                SerializationMode = SerializationMode.ForceText.ToString(),
+                ScriptPath = AuthoritativePath,
+                ScriptGuid = AuthoritativeGuid,
+                ScriptTypeFullName = definitionType?.FullName ?? string.Empty
+            };
+
+            ValidateSerializedFieldSchema(snapshot, definitionType, AuthoritativePath);
+            snapshot.SortAndSeal();
+            return snapshot;
+        }
+
+        public static QuestDefinitionAuthoritySnapshot ValidateFieldContractArraysForTests(string[] fieldNames, string[] fieldTypeFullNames)
+        {
+            var snapshot = new QuestDefinitionAuthoritySnapshot
+            {
+                SerializationMode = SerializationMode.ForceText.ToString(),
+                ScriptPath = AuthoritativePath,
+                ScriptGuid = AuthoritativeGuid,
+                ScriptTypeFullName = AuthoritativeTypeName
+            };
+
+            string[] actualFields = (fieldNames ?? Array.Empty<string>())
+                .Select((name, index) => name + ":" + (fieldTypeFullNames != null && index < fieldTypeFullNames.Length ? fieldTypeFullNames[index] : string.Empty))
+                .ToArray();
+            string[] expectedFields = ExpectedQuestFields
+                .Select(field => field.Name + ":" + field.FieldType.FullName)
                 .ToArray();
 
-            if (!ExpectedQuestFields.SequenceEqual(actualFields))
+            if (!expectedFields.SequenceEqual(actualFields))
             {
                 snapshot.AddDiagnostic(
                     "AL-QDA-SERIALIZED-FIELD-CONTRACT",
                     AuthoritativePath,
                     null,
                     "Authoritative QuestDefinition serialized field contract changed.",
-                    string.Join(", ", ExpectedQuestFields),
+                    string.Join(", ", expectedFields),
                     string.Join(", ", actualFields));
             }
 
-            FieldInfo idField = definitionType.GetField("Id", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-            if (idField == null || idField.FieldType != typeof(string) || !IsUnitySerializedField(idField))
+            int idIndex = Array.IndexOf(fieldNames ?? Array.Empty<string>(), "Id");
+            string idType = fieldTypeFullNames != null && idIndex >= 0 && idIndex < fieldTypeFullNames.Length ? fieldTypeFullNames[idIndex] : string.Empty;
+            if (idIndex < 0 || !string.Equals(idType, typeof(string).FullName, StringComparison.Ordinal))
             {
                 snapshot.AddDiagnostic(
                     "AL-QDA-ID-FIELD-CONTRACT",
@@ -206,9 +247,66 @@ namespace AL.Editor.Validation
                     null,
                     "QuestDefinition.Id must remain an explicitly serialized string field.",
                     "serialized System.String Id",
+                    idIndex < 0 ? "missing" : idType);
+            }
+
+            snapshot.SortAndSeal();
+            return snapshot;
+        }
+
+        public static string[] ExpectedFieldNamesForTests() =>
+            ExpectedQuestFields.Select(field => field.Name).ToArray();
+
+        public static string[] ExpectedFieldTypeNamesForTests() =>
+            ExpectedQuestFields.Select(field => field.FieldType.FullName).ToArray();
+
+        private static void ValidateSerializedFieldSchema(QuestDefinitionAuthoritySnapshot snapshot, Type definitionType, string path)
+        {
+            if (definitionType == null)
+            {
+                snapshot.AddDiagnostic(
+                    "AL-QDA-SERIALIZED-FIELD-CONTRACT",
+                    path,
+                    null,
+                    "Authoritative QuestDefinition serialized field contract changed.",
+                    FormatFieldContracts(ExpectedQuestFields),
+                    "missing type");
+                return;
+            }
+
+            QuestFieldContract[] actualFields = definitionType
+                .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+                .Where(IsUnitySerializedField)
+                .OrderBy(field => field.MetadataToken)
+                .Select(field => new QuestFieldContract(field.Name, field.FieldType))
+                .ToArray();
+
+            if (!ExpectedQuestFields.SequenceEqual(actualFields))
+            {
+                snapshot.AddDiagnostic(
+                    "AL-QDA-SERIALIZED-FIELD-CONTRACT",
+                    path,
+                    null,
+                    "Authoritative QuestDefinition serialized field contract changed.",
+                    FormatFieldContracts(ExpectedQuestFields),
+                    FormatFieldContracts(actualFields));
+            }
+
+            FieldInfo idField = definitionType.GetField("Id", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
+            if (idField == null || idField.FieldType != typeof(string) || !IsUnitySerializedField(idField))
+            {
+                snapshot.AddDiagnostic(
+                    "AL-QDA-ID-FIELD-CONTRACT",
+                    path,
+                    null,
+                    "QuestDefinition.Id must remain an explicitly serialized string field.",
+                    "serialized System.String Id",
                     idField == null ? "missing" : idField.FieldType.FullName);
             }
         }
+
+        private static string FormatFieldContracts(IEnumerable<QuestFieldContract> fields) =>
+            string.Join(", ", fields.Select(field => field.Name + ":" + field.FieldType.FullName));
 
         private static bool IsUnitySerializedField(FieldInfo field)
         {
@@ -294,7 +392,9 @@ namespace AL.Editor.Validation
             snapshot.CandidateCount++;
             snapshot.AddCandidate(document);
 
+            int diagnosticCountBefore = snapshot.Diagnostics.Count;
             ValidateScriptReference(snapshot, document);
+            ValidateYamlObjectMetadata(snapshot, document);
             ValidateFieldContract(snapshot, document);
 
             if (!string.Equals(document.ScriptGuid, AuthoritativeGuid, StringComparison.OrdinalIgnoreCase))
@@ -314,12 +414,27 @@ namespace AL.Editor.Validation
 
                 string id = loadedQuest.Id;
                 ValidateQuestId(snapshot, document, id, ids);
-                snapshot.ValidAssetCount++;
+                if (snapshot.Diagnostics.Count == diagnosticCountBefore)
+                {
+                    snapshot.ValidAssetCount++;
+                }
+                else
+                {
+                    snapshot.MalformedCandidateCount++;
+                }
+
                 return;
             }
 
             ValidateQuestId(snapshot, document, document.GetScalar("Id"), ids);
-            snapshot.ValidAssetCount++;
+            if (snapshot.Diagnostics.Count == diagnosticCountBefore)
+            {
+                snapshot.ValidAssetCount++;
+            }
+            else
+            {
+                snapshot.MalformedCandidateCount++;
+            }
         }
 
         private static void ValidateScriptReference(QuestDefinitionAuthoritySnapshot snapshot, QuestYamlDocument document)
@@ -336,14 +451,39 @@ namespace AL.Editor.Validation
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(document.ScriptMappingError))
+            {
+                snapshot.AddDiagnostic("AL-QDA-YAML-UNPARSEABLE", document.Path, document.LocalFileId, "Quest-shaped YAML document has an invalid m_Script mapping.", "unique fileID/guid/type keys", document.ScriptMappingError);
+                return;
+            }
+
             if (document.ScriptFileId == 0)
             {
                 snapshot.AddDiagnostic("AL-QDA-SCRIPT-FILEID-ZERO", document.Path, document.LocalFileId, "Quest-shaped YAML document has m_Script fileID 0.", "11500000", "0");
+            }
+            else if (document.ScriptFileId != 11500000)
+            {
+                snapshot.AddDiagnostic("AL-QDA-SCRIPT-FILEID-MISMATCH", document.Path, document.LocalFileId, "Quest-shaped YAML document has an unexpected m_Script fileID.", "11500000", document.ScriptFileId.ToString());
+            }
+
+            if (!document.ScriptType.HasValue)
+            {
+                snapshot.AddDiagnostic("AL-QDA-SCRIPT-TYPE-MISSING", document.Path, document.LocalFileId, "Quest-shaped YAML document has no m_Script type.", "3", string.Empty);
+            }
+            else if (document.ScriptType.Value != 3)
+            {
+                snapshot.AddDiagnostic("AL-QDA-SCRIPT-TYPE-MISMATCH", document.Path, document.LocalFileId, "Quest-shaped YAML document has an unexpected m_Script type.", "3", document.ScriptType.Value.ToString());
             }
 
             if (string.IsNullOrWhiteSpace(document.ScriptGuid))
             {
                 snapshot.AddDiagnostic("AL-QDA-SCRIPT-REFERENCE-MISSING", document.Path, document.LocalFileId, "Quest-shaped YAML document has no m_Script GUID.", AuthoritativeGuid, string.Empty);
+                return;
+            }
+
+            if (!Regex.IsMatch(document.ScriptGuid, "^[0-9a-fA-F]{32}$"))
+            {
+                snapshot.AddDiagnostic("AL-QDA-SCRIPT-GUID-MALFORMED", document.Path, document.LocalFileId, "Quest-shaped YAML document has a malformed m_Script GUID.", "32 hexadecimal characters", document.ScriptGuid);
                 return;
             }
 
@@ -365,15 +505,29 @@ namespace AL.Editor.Validation
             }
         }
 
+        private static void ValidateYamlObjectMetadata(QuestDefinitionAuthoritySnapshot snapshot, QuestYamlDocument document)
+        {
+            if (document.ClassId != 114)
+            {
+                snapshot.AddDiagnostic("AL-QDA-YAML-CLASSID-MISMATCH", document.Path, document.LocalFileId, "QuestDefinition YAML document must use Unity MonoBehaviour/ScriptableObject class ID 114.", "114", document.ClassId.ToString());
+            }
+
+            if (!string.Equals(document.RootObjectName, "MonoBehaviour", StringComparison.Ordinal))
+            {
+                snapshot.AddDiagnostic("AL-QDA-YAML-ROOT-MISMATCH", document.Path, document.LocalFileId, "QuestDefinition YAML document must use the MonoBehaviour root object.", "MonoBehaviour", document.RootObjectName);
+            }
+        }
+
         private static void ValidateFieldContract(QuestDefinitionAuthoritySnapshot snapshot, QuestYamlDocument document)
         {
             string[] missing = ExpectedQuestFields
+                .Select(field => field.Name)
                 .Where(field => !document.TopLevelFields.Contains(field))
                 .ToArray();
 
             if (missing.Length > 0)
             {
-                snapshot.AddDiagnostic("AL-QDA-REQUIRED-SERIALIZED-FIELD-MISSING", document.Path, document.LocalFileId, "QuestDefinition YAML is missing required serialized fields.", string.Join(", ", ExpectedQuestFields), string.Join(", ", missing));
+                snapshot.AddDiagnostic("AL-QDA-REQUIRED-SERIALIZED-FIELD-MISSING", document.Path, document.LocalFileId, "QuestDefinition YAML is missing required serialized fields.", string.Join(", ", ExpectedQuestFields.Select(field => field.Name)), string.Join(", ", missing));
             }
 
             string[] unexpected = document.TopLevelFields
@@ -420,6 +574,14 @@ namespace AL.Editor.Validation
                 snapshot.AddDiagnostic("AL-QDA-NONAUTHORITATIVE-SCRIPT", document.Path, document.LocalFileId, "Loaded QuestDefinition object resolves to the wrong script.", AuthoritativeGuid, scriptGuid);
             }
         }
+
+        private static bool IsProductionRuntimeQuestDefinitionType(Type type) =>
+            type != null &&
+            string.Equals(type.Name, "QuestDefinition", StringComparison.Ordinal) &&
+            string.Equals(type.Assembly.GetName().Name, "Assembly-CSharp", StringComparison.Ordinal) &&
+            !string.IsNullOrEmpty(type.Namespace) &&
+            !type.Namespace.StartsWith("AL.Editor", StringComparison.Ordinal) &&
+            !type.Namespace.Contains(".Tests", StringComparison.Ordinal);
 
         private static bool TryGetLocalFileId(UnityEngine.Object asset, out long localFileId)
         {
@@ -592,6 +754,28 @@ namespace AL.Editor.Validation
             }
         }
 
+        public readonly struct QuestFieldContract : IEquatable<QuestFieldContract>
+        {
+            public QuestFieldContract(string name, Type fieldType)
+            {
+                Name = name;
+                FieldType = fieldType;
+            }
+
+            public string Name { get; }
+            public Type FieldType { get; }
+
+            public bool Equals(QuestFieldContract other) =>
+                string.Equals(Name, other.Name, StringComparison.Ordinal) &&
+                FieldType == other.FieldType;
+
+            public override bool Equals(object obj) =>
+                obj is QuestFieldContract other && Equals(other);
+
+            public override int GetHashCode() =>
+                ((Name != null ? Name.GetHashCode() : 0) * 397) ^ (FieldType != null ? FieldType.GetHashCode() : 0);
+        }
+
         public sealed class QuestYamlDocument
         {
             private static readonly Regex ScriptMappingRegex = new Regex(@"m_Script:\s*\{(?<mapping>[^}]*)\}", RegexOptions.Compiled);
@@ -603,6 +787,7 @@ namespace AL.Editor.Validation
                 ClassId = classId;
                 LocalFileId = localFileId;
                 Text = text;
+                RootObjectName = ExtractRootObjectName(text);
                 TopLevelFields = ExtractTopLevelFields(text);
                 Scalars = ExtractScalars(text);
                 EditorClassIdentifier = Scalars.TryGetValue("m_EditorClassIdentifier", out string editorClassIdentifier)
@@ -617,14 +802,17 @@ namespace AL.Editor.Validation
             public int ClassId { get; }
             public long? LocalFileId { get; }
             public string Text { get; }
+            public string RootObjectName { get; }
             public IReadOnlyCollection<string> TopLevelFields { get; }
             public IReadOnlyDictionary<string, string> Scalars { get; }
             public string EditorClassIdentifier { get; }
             public bool HasScriptField { get; private set; }
             public bool ScriptMappingParsed { get; private set; }
+            public string ScriptMappingError { get; private set; } = string.Empty;
             public string ScriptLine { get; private set; } = string.Empty;
             public long ScriptFileId { get; private set; }
             public string ScriptGuid { get; private set; } = string.Empty;
+            public int? ScriptType { get; private set; }
             public bool IsQuestCandidate { get; }
 
             public string GetScalar(string fieldName) =>
@@ -646,12 +834,19 @@ namespace AL.Editor.Validation
                     return;
                 }
 
-                var mappingValues = MappingFieldRegex.Matches(match.Groups["mapping"].Value)
-                    .Cast<Match>()
-                    .ToDictionary(
-                        mapping => mapping.Groups["key"].Value,
-                        mapping => mapping.Groups["value"].Value.Trim(),
-                        StringComparer.Ordinal);
+                var mappingValues = new Dictionary<string, string>(StringComparer.Ordinal);
+                foreach (Match mapping in MappingFieldRegex.Matches(match.Groups["mapping"].Value))
+                {
+                    string key = mapping.Groups["key"].Value;
+                    if (mappingValues.ContainsKey(key))
+                    {
+                        ScriptMappingParsed = true;
+                        ScriptMappingError = "duplicate key " + key;
+                        return;
+                    }
+
+                    mappingValues.Add(key, mapping.Groups["value"].Value.Trim());
+                }
 
                 if (!mappingValues.TryGetValue("fileID", out string fileIdValue) ||
                     !long.TryParse(fileIdValue, out long fileId) ||
@@ -663,6 +858,11 @@ namespace AL.Editor.Validation
                 ScriptMappingParsed = true;
                 ScriptFileId = fileId;
                 ScriptGuid = guid;
+                if (mappingValues.TryGetValue("type", out string typeValue) &&
+                    int.TryParse(typeValue, out int type))
+                {
+                    ScriptType = type;
+                }
             }
 
             private bool DetermineQuestCandidate()
@@ -696,6 +896,21 @@ namespace AL.Editor.Validation
                 }
 
                 return fields;
+            }
+
+            private static string ExtractRootObjectName(string text)
+            {
+                string[] lines = text.Split('\n');
+                for (int i = 1; i < lines.Length; i++)
+                {
+                    Match match = Regex.Match(lines[i], @"^(?<root>[A-Za-z_][A-Za-z0-9_]*):\s*$");
+                    if (match.Success)
+                    {
+                        return match.Groups["root"].Value;
+                    }
+                }
+
+                return string.Empty;
             }
 
             private static IReadOnlyDictionary<string, string> ExtractScalars(string text)

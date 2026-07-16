@@ -31,15 +31,24 @@ namespace AL.Tests.EditMode
         [Test]
         public void MalformedYamlFixturesProduceExpectedDiagnostics()
         {
-            AssertSyntheticCodes(BuildQuestYaml(), Array.Empty<string>(), 1, 1);
+            AssertSyntheticCodes(BuildQuestYaml(), Array.Empty<string>(), 1, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(scriptGuid: ValidatorConstant("RemovedRootGuid")), new[] { "AL-QDA-REMOVED-ROOT-GUID" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(includeScript: false), new[] { "AL-QDA-SCRIPT-REFERENCE-MISSING" }, 1, 0);
-            AssertSyntheticCodes(BuildQuestYaml(scriptFileId: 0), new[] { "AL-QDA-SCRIPT-FILEID-ZERO" }, 1, 1);
+            AssertSyntheticCodes(BuildQuestYaml(scriptFileId: 0), new[] { "AL-QDA-SCRIPT-FILEID-ZERO" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(scriptFileId: 42), new[] { "AL-QDA-SCRIPT-FILEID-MISMATCH" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(includeScriptType: false), new[] { "AL-QDA-SCRIPT-TYPE-MISSING" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(scriptType: 2), new[] { "AL-QDA-SCRIPT-TYPE-MISMATCH" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(scriptGuid: "00000000000000000000000000000000"), new[] { "AL-QDA-SCRIPT-GUID-ZERO" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(scriptGuid: "not-a-guid"), new[] { "AL-QDA-SCRIPT-GUID-MALFORMED" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(scriptGuid: "11111111111111111111111111111111"), new[] { "AL-QDA-NONAUTHORITATIVE-SCRIPT" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(malformedScript: true), new[] { "AL-QDA-YAML-UNPARSEABLE" }, 1, 0);
-            AssertSyntheticCodes(BuildQuestYaml(omitField: "RewardXP"), new[] { "AL-QDA-REQUIRED-SERIALIZED-FIELD-MISSING" }, 1, 1);
-            AssertSyntheticCodes(BuildQuestYaml(extraField: "LegacyRewardId: old_reward"), new[] { "AL-QDA-UNEXPECTED-SERIALIZED-FIELD" }, 1, 1);
+            AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {fileID: 11500000, fileID: 11500000, guid: " + ValidatorConstant("AuthoritativeGuid") + ", type: 3}"), new[] { "AL-QDA-YAML-UNPARSEABLE" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {type: 3, guid: " + ValidatorConstant("AuthoritativeGuid") + ", fileID: 11500000}"), Array.Empty<string>(), 1, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {fileID: 11500000, guid: " + ValidatorConstant("AuthoritativeGuid") + ", type: 3, extra: ignored}"), Array.Empty<string>(), 1, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(classId: 115), new[] { "AL-QDA-YAML-CLASSID-MISMATCH" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(rootObjectName: "ScriptableObject"), new[] { "AL-QDA-YAML-ROOT-MISMATCH" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(omitField: "RewardXP"), new[] { "AL-QDA-REQUIRED-SERIALIZED-FIELD-MISSING" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(extraField: "LegacyRewardId: old_reward"), new[] { "AL-QDA-UNEXPECTED-SERIALIZED-FIELD" }, 1, 0);
 
             object partial = ValidateYamlTextForTests(
                 "Assets/AL/Tests/Fixtures/partial.asset",
@@ -67,12 +76,12 @@ namespace AL.Tests.EditMode
         [Test]
         public void BlankAndDuplicateIdsAreReportedFromYaml()
         {
-            AssertSyntheticCodes(BuildQuestYaml(id: string.Empty), new[] { "AL-QDA-BLANK-ASSET-ID" }, 1, 1);
-            AssertSyntheticCodes(BuildQuestYaml(id: "   "), new[] { "AL-QDA-BLANK-ASSET-ID" }, 1, 1);
+            AssertSyntheticCodes(BuildQuestYaml(id: string.Empty), new[] { "AL-QDA-BLANK-ASSET-ID" }, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(id: "   "), new[] { "AL-QDA-BLANK-ASSET-ID" }, 1, 0);
 
             string duplicateYaml = BuildQuestYaml(localFileId: 400, id: "DUPLICATE_ID") +
                                    BuildQuestYaml(localFileId: 401, id: "DUPLICATE_ID");
-            AssertSyntheticCodes(duplicateYaml, new[] { "AL-QDA-DUPLICATE-ASSET-ID" }, 2, 2);
+            AssertSyntheticCodes(duplicateYaml, new[] { "AL-QDA-DUPLICATE-ASSET-ID" }, 2, 1, 1);
 
             string caseDifferentYaml = BuildQuestYaml(localFileId: 410, id: "CaseSensitiveId") +
                                        BuildQuestYaml(localFileId: 411, id: "casesensitiveid");
@@ -80,6 +89,23 @@ namespace AL.Tests.EditMode
 
             AssertAuthoritySnapshotSucceeded(caseDifferent);
             Assert.AreEqual(2, GetProperty(caseDifferent, "ValidAssetCount"), "Quest IDs use ordinal exact identity; case-different IDs are distinct.");
+        }
+
+        [Test]
+        public void SerializedFieldSchemaRequiresExactTypes()
+        {
+            string[] names = InvokeStatic(ValidatorType(), "ExpectedFieldNamesForTests") as string[];
+            string[] validTypes = InvokeStatic(ValidatorType(), "ExpectedFieldTypeNamesForTests") as string[];
+            Assert.NotNull(names);
+            Assert.NotNull(validTypes);
+
+            object valid = ValidateFieldSchemaForTests(names, validTypes);
+            AssertAuthoritySnapshotSucceeded(valid);
+
+            string[] wrongTypes = (string[])validTypes.Clone();
+            wrongTypes[4] = "System.Int64";
+            object wrong = ValidateFieldSchemaForTests(names, wrongTypes);
+            CollectionAssert.AreEquivalent(new[] { "AL-QDA-SERIALIZED-FIELD-CONTRACT" }, DiagnosticCodes(wrong));
         }
 
         [Test]
@@ -169,13 +195,17 @@ namespace AL.Tests.EditMode
             return rewards;
         }
 
-        private static void AssertSyntheticCodes(string yaml, IReadOnlyCollection<string> expectedCodes, int expectedCandidates, int expectedValidAssets)
+        private static void AssertSyntheticCodes(string yaml, IReadOnlyCollection<string> expectedCodes, int expectedCandidates, int expectedValidAssets, int? expectedMalformedCandidates = null)
         {
             object snapshot = ValidateYamlTextForTests("Assets/AL/Tests/Fixtures/synthetic.asset", yaml);
 
             CollectionAssert.AreEquivalent(expectedCodes, DiagnosticCodes(snapshot));
             Assert.AreEqual(expectedCandidates, GetProperty(snapshot, "CandidateCount"));
             Assert.AreEqual(expectedValidAssets, GetProperty(snapshot, "ValidAssetCount"));
+            if (expectedMalformedCandidates.HasValue)
+            {
+                Assert.AreEqual(expectedMalformedCandidates.Value, GetProperty(snapshot, "MalformedCandidateCount"));
+            }
         }
 
         private static string[] DiagnosticCodes(object snapshot) =>
@@ -196,19 +226,24 @@ namespace AL.Tests.EditMode
 
         private static string BuildQuestYaml(
             long localFileId = 11400000,
+            int classId = 114,
+            string rootObjectName = "MonoBehaviour",
             string id = "QDA_SYNTHETIC_FIXTURE",
             bool includeScript = true,
             bool malformedScript = false,
             long scriptFileId = 11500000,
+            int scriptType = 3,
+            bool includeScriptType = true,
             string scriptGuid = null,
             string omitField = null,
-            string extraField = null)
+            string extraField = null,
+            string scriptMappingOverride = null)
         {
             scriptGuid ??= ValidatorConstant("AuthoritativeGuid");
             var fields = new List<string>
             {
-                "--- !u!114 &" + localFileId,
-                "MonoBehaviour:",
+                "--- !u!" + classId + " &" + localFileId,
+                rootObjectName + ":",
                 "  m_ObjectHideFlags: 0",
                 "  m_CorrespondingSourceObject: {fileID: 0}",
                 "  m_PrefabInstance: {fileID: 0}",
@@ -220,9 +255,19 @@ namespace AL.Tests.EditMode
 
             if (includeScript)
             {
-                fields.Add(malformedScript
-                    ? "  m_Script: not-a-map"
-                    : $"  m_Script: {{fileID: {scriptFileId}, guid: {scriptGuid}, type: 3}}");
+                if (!string.IsNullOrEmpty(scriptMappingOverride))
+                {
+                    fields.Add(scriptMappingOverride);
+                }
+                else if (malformedScript)
+                {
+                    fields.Add("  m_Script: not-a-map");
+                }
+                else
+                {
+                    string typePart = includeScriptType ? $", type: {scriptType}" : string.Empty;
+                    fields.Add($"  m_Script: {{fileID: {scriptFileId}, guid: {scriptGuid}{typePart}}}");
+                }
             }
 
             fields.Add("  m_Name: QdaSyntheticQuest");
@@ -263,6 +308,9 @@ namespace AL.Tests.EditMode
 
         private static object ValidateYamlTextForTests(string path, string yaml) =>
             InvokeStatic(ValidatorType(), "ValidateYamlTextForTests", path, yaml);
+
+        private static object ValidateFieldSchemaForTests(string[] fieldNames, string[] fieldTypeFullNames) =>
+            InvokeStatic(ValidatorType(), "ValidateFieldContractArraysForTests", fieldNames, fieldTypeFullNames);
 
         private static string ValidatorConstant(string name) =>
             (string)ValidatorType().GetField(name, BindingFlags.Public | BindingFlags.Static).GetValue(null);

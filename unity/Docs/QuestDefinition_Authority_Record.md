@@ -25,7 +25,7 @@ GUID 226022aa7500f3e4abc8ac3757707ad8
 
 ## Serialized field contract
 
-The authoritative narrative type preserves the historical root serialized schema exactly. The validator locks these twelve fields in declaration order:
+The authoritative narrative type preserves the historical root serialized schema exactly. The validator locks these twelve fields in declaration order and exact CLR type:
 
 ```text
 Id: System.String
@@ -42,11 +42,11 @@ RewardCredits: System.Int32
 RewardXP: System.Int32
 ```
 
-Any missing or unexpected serialized quest field now fails the authority gate until a migration specification updates this record.
+Any missing, unexpected, reordered, or type-changed serialized quest field now fails the authority gate until a migration specification updates this record.
 
 ## Inventory
 
-Pre-change tracked repository search found no serialized Unity asset references to the removed root GUID. The only tracked occurrence of `226022aa7500f3e4abc8ac3757707ad8` was documentation describing the recovery risk. The new regression test intentionally keeps this GUID literal so the old root script reference remains detectable.
+Pre-change tracked repository search found no serialized Unity asset references to the removed root GUID. The only tracked occurrence of `226022aa7500f3e4abc8ac3757707ad8` was documentation describing the recovery risk. The regression tests read the removed-root GUID from `QuestDefinitionAssetAuthorityValidator.RemovedRootGuid`, so the constant in the validator remains the single executable source for old-root detection.
 
 Pre-change tracked repository search found the narrative GUID only in:
 
@@ -55,7 +55,7 @@ unity/Assets/AL/Scripts/Data/Definitions/Narrative/QuestDefinition.cs.meta
 unity/Docs/Phase_1_NVS_01_Status.md
 ```
 
-The new regression test also intentionally keeps this GUID literal to lock the authority decision. Future valid `QuestDefinition` ScriptableObject assets are expected to reference this same GUID in their serialized `m_Script` field.
+The regression tests read the narrative GUID from `QuestDefinitionAssetAuthorityValidator.AuthoritativeGuid` to lock the authority decision without duplicating the literal in test code. Future valid `QuestDefinition` ScriptableObject assets are expected to reference this same GUID in their serialized `m_Script` field.
 
 `Assets/AL/ScriptableObjects/Quests` currently contains no tracked quest `.asset` files requiring GUID migration.
 
@@ -88,14 +88,17 @@ No tracked schema, catalog, editor importer, or editor generator currently creat
 - the loaded class is `AL.Data.Definitions.Narrative.QuestDefinition`;
 - the `CreateAssetMenu` path remains `AL/Narrative/Quest`;
 - exactly one production `ScriptableObject` type named `QuestDefinition` is discoverable;
-- the authoritative serialized field contract remains identical to the historical twelve-field schema;
+- the authoritative `QuestDefinition` derives from `ScriptableObject` in the production runtime assembly;
+- the authoritative serialized field contract remains identical to the historical twelve-field schema by name, order, and exact CLR type;
 - Unity serialization mode is Force Text before disk YAML scanning;
 - every relevant serialized Unity text file is scanned for the removed root GUID;
 - every `.asset` YAML document is parsed directly from disk, including documents Unity cannot resolve through typed `AssetDatabase.FindAssets`;
 - quest candidates are detected by authoritative GUID, removed GUID, editor class identifier, or the strict full-field signature;
-- `m_Script` references distinguish missing, malformed, zero file ID, zero GUID, removed GUID, and non-authoritative GUID states;
+- `m_Script` references distinguish missing, malformed, duplicate-key, wrong file ID, missing/wrong type, malformed GUID, zero file ID, zero GUID, removed GUID, and non-authoritative GUID states;
+- candidate YAML class ID and root object name are validated as Unity MonoBehaviour/ScriptableObject serialization;
 - authoritative quest documents map to loaded objects by local file ID, including subassets;
 - required fields, unexpected fields, blank IDs, and duplicate IDs fail deterministically;
+- malformed candidates are counted separately from fully valid assets; `ValidAssetCount` means the script reference, YAML metadata, field contract, loaded-object mapping, authoritative type/script, and nonblank unique ID all passed;
 - non-imported malformed YAML fixtures cover the required broken-reference matrix;
 - one temporary valid authoritative quest asset is created, imported, reimported, mapped by local file ID, field-compared, and deleted during EditMode validation.
 
