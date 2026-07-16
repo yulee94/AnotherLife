@@ -274,11 +274,11 @@ A family catalog does not self-authorize its player-facing meaning. Narrative/lo
 
 | Field kind | Authority |
 | --- | --- |
-| stable technical ID, schema, version, references, enum/profile IDs, packaging, hash | Codex engineering after GPT specification |
+| stable technical ID, schema, version, references, enum/profile IDs, packaging, hash | Codex engineering after Codex coordination/review consumes or supersedes this specification |
 | player-facing name, title, description, lore, quest text, realm identity copy, localization key mapping | Codex narrative/content plus user approval where required |
 | terrestrial silhouette, anatomy, scale, materials, motion, design variants | Codex terrestrial-design plus user approval |
 | balance/tuning values | existing approved value or separately approved balance issue/user decision |
-| save migration and compatibility | GPT specification + Codex engineering under #137/owning issue |
+| save migration and compatibility | Codex coordination/review specification + Codex engineering under #137/owning issue |
 | final product/creative/release acceptance | user |
 
 Engineering may copy an already approved source value into a generated artifact. It may not improvise missing copy, lore, names, visual meaning, spawn behavior, or balance.

@@ -104,7 +104,7 @@ Global rules:
 - Never force-push away collaborator work.
 - Report exact validation and every blocked check.
 - Declare performance, memory, asset, dependency, build-size, install-size, and low-end-device impact for every relevant PR.
-- Historical GPT specifications and review comments remain technical evidence, but no future GPT response or approval is required.
+- Historical GPT specifications and review comments remain technical evidence, but no future GPT, Android Studio, Gemini, or external-agent response or approval is required.
 
 Validation:
 - coordination/review: current source, current main, issue/PR state, dependencies, locks, source claims, acceptance criteria, and evidence quality;

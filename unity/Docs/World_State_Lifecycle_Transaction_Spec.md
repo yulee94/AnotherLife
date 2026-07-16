@@ -90,7 +90,7 @@ Save-backed application, durable operation history, real effect consumers, autho
 42. **Legacy wrappers do not retain raw hard-coded announcement behavior in the authoritative implementation.**
 43. **World-state player-facing names, descriptions, tone, and localization belong to Codex narrative/content mode.**
 44. **Codex engineering owns IDs, schemas, validators, lifecycle, effect interfaces, transaction mechanics, persistence adapter, and tests.**
-45. **GPT owns state/transaction/failure/sequence review.**
+45. **Codex coordination/review owns state/transaction/failure/sequence review.**
 46. **User approval remains required for unresolved event meaning, effect/balance, cadence, priority, stacking, and integrated player experience.**
 47. **The first planner PR changes no save fields, production service behavior, consumers, notifications, scenes, Android, narrative content, or balance.**
 48. **The first planner PR does not edit `Bootloader.cs` while PR #203 holds its lock.**

@@ -275,4 +275,4 @@ Skipped, stale, duplicate-workspace, pointer-only, Console-only, compile-only, w
 13. Reopen closed issues or create focused follow-ups whenever current source, Unity Hub play, or validation evidence shows a closed issue still blocks the product direction.
 ```
 
-No next GPT or Android Studio action exists.
+No next GPT, Android Studio, Gemini, or external-agent action exists.

@@ -26,7 +26,7 @@ This Codex agent owns all project workload and responsibility through four decla
 
 All modes share the user's standing optimization mandate: every project file, source packet, asset, generated artifact, dependency, runtime system, UI, and build choice must support broad device reach, low memory pressure, manageable performance, and the lowest feasible install size. Visual quality may scale upward by tier, but richer effects require an explicit quality/performance strategy.
 
-GPT receives no future planning, specification, review, merge-readiness, status, or risk assignment. Android Studio receives no future agent/workstream assignment. Android implementation or tooling that remains in project scope belongs to Codex engineering mode.
+GPT, Android Studio, Gemini, and other external assistants/tools receive no future planning, specification, review, merge-readiness, status, risk, agent/workstream, workload, or approval assignment. Android implementation or tooling that remains in project scope belongs to Codex engineering mode.
 
 The active Codex workspace for this record is `C:\Users\MY\Documents\AnotherLife`. Historical paths may continue to contain `AndroidStudioProjects` in their directory name; that historical filesystem name does not assign ownership or require Android Studio use.
 

@@ -372,4 +372,4 @@ Skipped, stale-base, duplicate-workspace, pointer-only, Console-only, compile-on
     Player packaging, Android export, or release claims before their prerequisites pass.
 ```
 
-No next GPT or Android Studio action exists.
+No next GPT, Android Studio, Gemini, or external-agent action exists.
