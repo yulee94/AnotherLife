@@ -80,6 +80,7 @@ namespace AL.Core
                 return ServicePublicationResult.Failed(null, "No registrations were supplied.");
             }
 
+            var seenTypes = new HashSet<Type>();
             var snapshot = new Dictionary<Type, object>();
             var hadExisting = new HashSet<Type>();
 
@@ -90,9 +91,19 @@ namespace AL.Core
                     return ServicePublicationResult.Failed(null, "A registration type was null.");
                 }
 
+                if (!seenTypes.Add(registration.ServiceType))
+                {
+                    return ServicePublicationResult.Failed(registration.ServiceType, $"Duplicate registration for {registration.ServiceType.FullName}.");
+                }
+
                 if (registration.Instance == null)
                 {
                     return ServicePublicationResult.Failed(registration.ServiceType, "A registration instance was null.");
+                }
+
+                if (!registration.ServiceType.IsInstanceOfType(registration.Instance))
+                {
+                    return ServicePublicationResult.Failed(registration.ServiceType, $"Registration instance {registration.Instance.GetType().FullName} does not implement {registration.ServiceType.FullName}.");
                 }
 
                 if (Services.TryGetValue(registration.ServiceType, out var existing))
@@ -101,6 +112,8 @@ namespace AL.Core
                     snapshot[registration.ServiceType] = existing;
                 }
             }
+
+            var transaction = new ServicePublicationTransaction(registrations, snapshot, hadExisting);
 
             try
             {
@@ -114,23 +127,63 @@ namespace AL.Core
                     Services[registration.ServiceType] = registration.Instance;
                 }
 
-                return ServicePublicationResult.Success();
+                return ServicePublicationResult.Success(transaction);
             }
             catch (Exception ex)
             {
-                foreach (var registration in registrations)
+                transaction.Rollback();
+                return ServicePublicationResult.Failed(null, ex.Message);
+            }
+        }
+
+        internal sealed class ServicePublicationTransaction
+        {
+            private readonly IReadOnlyList<ServiceRegistrationEntry> _registrations;
+            private readonly IReadOnlyDictionary<Type, object> _snapshot;
+            private readonly HashSet<Type> _hadExisting;
+            private bool _completed;
+
+            public ServicePublicationTransaction(
+                IReadOnlyList<ServiceRegistrationEntry> registrations,
+                IReadOnlyDictionary<Type, object> snapshot,
+                IReadOnlyCollection<Type> hadExisting)
+            {
+                _registrations = registrations ?? Array.Empty<ServiceRegistrationEntry>();
+                _snapshot = new Dictionary<Type, object>(snapshot ?? new Dictionary<Type, object>());
+                _hadExisting = new HashSet<Type>(hadExisting ?? Array.Empty<Type>());
+            }
+
+            public void Commit()
+            {
+                _completed = true;
+            }
+
+            public void Rollback()
+            {
+                if (_completed)
                 {
-                    if (hadExisting.Contains(registration.ServiceType))
+                    return;
+                }
+
+                foreach (var registration in _registrations)
+                {
+                    if (registration.ServiceType == null)
                     {
-                        Services[registration.ServiceType] = snapshot[registration.ServiceType];
+                        continue;
                     }
-                    else
+
+                    if (_hadExisting.Contains(registration.ServiceType))
+                    {
+                        Services[registration.ServiceType] = _snapshot[registration.ServiceType];
+                    }
+                    else if (Services.TryGetValue(registration.ServiceType, out var current) &&
+                             ReferenceEquals(current, registration.Instance))
                     {
                         Services.Remove(registration.ServiceType);
                     }
                 }
 
-                return ServicePublicationResult.Failed(null, ex.Message);
+                _completed = true;
             }
         }
     }
@@ -149,25 +202,27 @@ namespace AL.Core
 
     internal readonly struct ServicePublicationResult
     {
-        private ServicePublicationResult(bool succeeded, Type serviceType, string message)
+        private ServicePublicationResult(bool succeeded, Type serviceType, string message, ServiceLocator.ServicePublicationTransaction transaction)
         {
             Succeeded = succeeded;
             ServiceType = serviceType;
             Message = message ?? string.Empty;
+            Transaction = transaction;
         }
 
         public bool Succeeded { get; }
         public Type ServiceType { get; }
         public string Message { get; }
+        public ServiceLocator.ServicePublicationTransaction Transaction { get; }
 
-        public static ServicePublicationResult Success()
+        public static ServicePublicationResult Success(ServiceLocator.ServicePublicationTransaction transaction)
         {
-            return new ServicePublicationResult(true, null, string.Empty);
+            return new ServicePublicationResult(true, null, string.Empty, transaction);
         }
 
         public static ServicePublicationResult Failed(Type serviceType, string message)
         {
-            return new ServicePublicationResult(false, serviceType, message);
+            return new ServicePublicationResult(false, serviceType, message, null);
         }
     }
 }
