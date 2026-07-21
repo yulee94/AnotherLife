@@ -92,6 +92,33 @@ namespace AL.Editor.Validation
             return snapshot;
         }
 
+        public static void LogProjectAuthoritySnapshot()
+        {
+            QuestDefinitionAuthoritySnapshot snapshot = ValidateProject();
+            Debug.Log(
+                "[QDA-EVIDENCE] Succeeded=" + snapshot.Succeeded +
+                " SerializationMode=" + snapshot.SerializationMode +
+                " ScriptGuid=" + snapshot.ScriptGuid +
+                " ScriptTypeFullName=" + snapshot.ScriptTypeFullName +
+                " CandidateCount=" + snapshot.CandidateCount +
+                " ValidAssetCount=" + snapshot.ValidAssetCount +
+                " MalformedCandidateCount=" + snapshot.MalformedCandidateCount +
+                " RemovedGuidOccurrenceCount=" + snapshot.RemovedGuidOccurrenceCount +
+                " DuplicateIdCount=" + snapshot.DuplicateIdCount +
+                " DiagnosticCount=" + snapshot.Diagnostics.Count);
+            foreach (QuestDefinitionAuthorityDiagnostic diagnostic in snapshot.Diagnostics)
+            {
+                Debug.Log(
+                    "[QDA-EVIDENCE] " + diagnostic.Code + " " + diagnostic.Path + " " + diagnostic.LocalFileId +
+                    ": " + diagnostic.Message + " expected=" + diagnostic.Expected + " actual=" + diagnostic.Actual);
+            }
+
+            if (!snapshot.Succeeded)
+            {
+                EditorApplication.Exit(1);
+            }
+        }
+
         public static QuestDefinitionAuthoritySnapshot ValidateYamlTextForTests(string projectRelativePath, string yamlText)
         {
             var snapshot = new QuestDefinitionAuthoritySnapshot
@@ -169,13 +196,19 @@ namespace AL.Editor.Validation
 
         private static void ValidateProductionTypes(QuestDefinitionAuthoritySnapshot snapshot)
         {
-            string[] questDefinitionTypes = TypeCache.GetTypesDerivedFrom<ScriptableObject>()
-                .Where(type => type.Name == "QuestDefinition")
+            ValidateProductionTypeNames(snapshot, FilterProductionQuestDefinitionTypeNames(TypeCache.GetTypesDerivedFrom<ScriptableObject>()));
+        }
+
+        internal static string[] FilterProductionQuestDefinitionTypeNames(IEnumerable<Type> scriptableObjectTypes) =>
+            (scriptableObjectTypes ?? Enumerable.Empty<Type>())
+                .Where(type => type != null && type.Name == "QuestDefinition")
                 .Where(IsProductionRuntimeQuestDefinitionType)
                 .Select(type => type.FullName)
                 .OrderBy(typeName => typeName, StringComparer.Ordinal)
                 .ToArray();
 
+        internal static void ValidateProductionTypeNames(QuestDefinitionAuthoritySnapshot snapshot, string[] questDefinitionTypes)
+        {
             if (questDefinitionTypes.Length != 1 ||
                 !string.Equals(questDefinitionTypes[0], AuthoritativeTypeName, StringComparison.Ordinal))
             {
@@ -187,6 +220,21 @@ namespace AL.Editor.Validation
                     AuthoritativeTypeName,
                     string.Join(", ", questDefinitionTypes));
             }
+        }
+
+        internal static QuestDefinitionAuthoritySnapshot ValidateProductionTypeCandidatesForTests(IEnumerable<Type> scriptableObjectTypes)
+        {
+            var snapshot = new QuestDefinitionAuthoritySnapshot
+            {
+                SerializationMode = SerializationMode.ForceText.ToString(),
+                ScriptPath = AuthoritativePath,
+                ScriptGuid = AuthoritativeGuid,
+                ScriptTypeFullName = AuthoritativeTypeName
+            };
+
+            ValidateProductionTypeNames(snapshot, FilterProductionQuestDefinitionTypeNames(scriptableObjectTypes));
+            snapshot.SortAndSeal();
+            return snapshot;
         }
 
         private static void ValidateAuthoritativeFieldSchema(QuestDefinitionAuthoritySnapshot snapshot)
@@ -453,7 +501,7 @@ namespace AL.Editor.Validation
 
             if (!string.IsNullOrWhiteSpace(document.ScriptMappingError))
             {
-                snapshot.AddDiagnostic("AL-QDA-YAML-UNPARSEABLE", document.Path, document.LocalFileId, "Quest-shaped YAML document has an invalid m_Script mapping.", "unique fileID/guid/type keys", document.ScriptMappingError);
+                snapshot.AddDiagnostic("AL-QDA-YAML-UNPARSEABLE", document.Path, document.LocalFileId, "Quest-shaped YAML document has an invalid m_Script mapping.", "exact unique fileID/guid/type keys", document.ScriptMappingError);
                 return;
             }
 
@@ -780,6 +828,8 @@ namespace AL.Editor.Validation
         {
             private static readonly Regex ScriptMappingRegex = new Regex(@"m_Script:\s*\{(?<mapping>[^}]*)\}", RegexOptions.Compiled);
             private static readonly Regex MappingFieldRegex = new Regex(@"(?<key>fileID|guid|type)\s*:\s*(?<value>[^,\s}]+)", RegexOptions.Compiled);
+            private static readonly Regex MappingKeyRegex = new Regex(@"(?<key>[A-Za-z_][A-Za-z0-9_]*)\s*:", RegexOptions.Compiled);
+            private static readonly HashSet<string> AllowedScriptMappingKeys = new HashSet<string>(StringComparer.Ordinal) { "fileID", "guid", "type" };
 
             public QuestYamlDocument(string path, int classId, long localFileId, string text)
             {
@@ -832,6 +882,17 @@ namespace AL.Editor.Validation
                 if (!match.Success)
                 {
                     return;
+                }
+
+                foreach (Match mappingKey in MappingKeyRegex.Matches(match.Groups["mapping"].Value))
+                {
+                    string candidateKey = mappingKey.Groups["key"].Value;
+                    if (!AllowedScriptMappingKeys.Contains(candidateKey))
+                    {
+                        ScriptMappingParsed = true;
+                        ScriptMappingError = "unexpected key " + candidateKey;
+                        return;
+                    }
                 }
 
                 var mappingValues = new Dictionary<string, string>(StringComparer.Ordinal);

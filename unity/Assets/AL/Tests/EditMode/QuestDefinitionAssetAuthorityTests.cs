@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -44,7 +45,7 @@ namespace AL.Tests.EditMode
             AssertSyntheticCodes(BuildQuestYaml(malformedScript: true), new[] { "AL-QDA-YAML-UNPARSEABLE" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {fileID: 11500000, fileID: 11500000, guid: " + ValidatorConstant("AuthoritativeGuid") + ", type: 3}"), new[] { "AL-QDA-YAML-UNPARSEABLE" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {type: 3, guid: " + ValidatorConstant("AuthoritativeGuid") + ", fileID: 11500000}"), Array.Empty<string>(), 1, 1, 0);
-            AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {fileID: 11500000, guid: " + ValidatorConstant("AuthoritativeGuid") + ", type: 3, extra: ignored}"), Array.Empty<string>(), 1, 1, 0);
+            AssertSyntheticCodes(BuildQuestYaml(scriptMappingOverride: "  m_Script: {fileID: 11500000, guid: " + ValidatorConstant("AuthoritativeGuid") + ", type: 3, extra: ignored}"), new[] { "AL-QDA-YAML-UNPARSEABLE" }, 1, 0, 1);
             AssertSyntheticCodes(BuildQuestYaml(classId: 115), new[] { "AL-QDA-YAML-CLASSID-MISMATCH" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(rootObjectName: "ScriptableObject"), new[] { "AL-QDA-YAML-ROOT-MISMATCH" }, 1, 0);
             AssertSyntheticCodes(BuildQuestYaml(omitField: "RewardXP"), new[] { "AL-QDA-REQUIRED-SERIALIZED-FIELD-MISSING" }, 1, 0);
@@ -106,6 +107,51 @@ namespace AL.Tests.EditMode
             wrongTypes[4] = "System.Int64";
             object wrong = ValidateFieldSchemaForTests(names, wrongTypes);
             CollectionAssert.AreEquivalent(new[] { "AL-QDA-SERIALIZED-FIELD-CONTRACT" }, DiagnosticCodes(wrong));
+        }
+
+        [Test]
+        public void ProductionTypeFilterExcludesEditorAndTestTypesAndDetectsSecondProductionType()
+        {
+            Type authoritative = RuntimeType("AL.Data.Definitions.Narrative.QuestDefinition");
+
+            string[] projectNames = FilterProductionTypeNames(TypeCache.GetTypesDerivedFrom<ScriptableObject>());
+            CollectionAssert.AreEqual(
+                new[] { "AL.Data.Definitions.Narrative.QuestDefinition" },
+                projectNames,
+                "The real project must contain exactly the authoritative production QuestDefinition type.");
+
+            string[] withTestFixture = FilterProductionTypeNames(new[] { authoritative, typeof(QuestDefinition) });
+            CollectionAssert.AreEqual(
+                new[] { "AL.Data.Definitions.Narrative.QuestDefinition" },
+                withTestFixture,
+                "A QuestDefinition fixture declared in the EditMode test assembly must not count as production.");
+
+            Type editorShaped = EmitScriptableObjectType("Assembly-CSharp", "AL.Editor.Validation.Fixtures.QuestDefinition");
+            Type testShaped = EmitScriptableObjectType("Assembly-CSharp", "AL.Gameplay.Tests.QuestDefinition");
+            string[] withExcludedNamespaces = FilterProductionTypeNames(new[] { authoritative, editorShaped, testShaped });
+            CollectionAssert.AreEqual(
+                new[] { "AL.Data.Definitions.Narrative.QuestDefinition" },
+                withExcludedNamespaces,
+                "AL.Editor* and *.Tests namespaces in the production assembly must not count as production.");
+
+            Type secondProduction = EmitScriptableObjectType("Assembly-CSharp", "AL.Gameplay.QuestDefinition");
+            string[] withSecondProduction = FilterProductionTypeNames(new[] { authoritative, secondProduction, editorShaped, testShaped, typeof(QuestDefinition) });
+            CollectionAssert.AreEqual(
+                new[] { "AL.Data.Definitions.Narrative.QuestDefinition", "AL.Gameplay.QuestDefinition" },
+                withSecondProduction,
+                "A second production-assembly ScriptableObject named QuestDefinition must count.");
+
+            object duplicateSnapshot = ValidateProductionTypeCandidates(new[] { authoritative, secondProduction });
+            CollectionAssert.AreEquivalent(new[] { "AL-QDA-DUPLICATE-PRODUCTION-TYPE" }, DiagnosticCodes(duplicateSnapshot));
+            string duplicateActual = (string)GetProperty(Diagnostics(duplicateSnapshot).Single(), "Actual");
+            StringAssert.Contains("AL.Data.Definitions.Narrative.QuestDefinition", duplicateActual);
+            StringAssert.Contains("AL.Gameplay.QuestDefinition", duplicateActual);
+
+            object missingSnapshot = ValidateProductionTypeCandidates(new[] { editorShaped, testShaped, typeof(QuestDefinition) });
+            CollectionAssert.AreEquivalent(new[] { "AL-QDA-DUPLICATE-PRODUCTION-TYPE" }, DiagnosticCodes(missingSnapshot));
+
+            object validSnapshot = ValidateProductionTypeCandidates(new[] { authoritative, editorShaped, testShaped, typeof(QuestDefinition) });
+            AssertAuthoritySnapshotSucceeded(validSnapshot);
         }
 
         [Test]
@@ -312,6 +358,25 @@ namespace AL.Tests.EditMode
         private static object ValidateFieldSchemaForTests(string[] fieldNames, string[] fieldTypeFullNames) =>
             InvokeStatic(ValidatorType(), "ValidateFieldContractArraysForTests", fieldNames, fieldTypeFullNames);
 
+        private static string[] FilterProductionTypeNames(IEnumerable<Type> scriptableObjectTypes) =>
+            (string[])InvokeStatic(ValidatorType(), "FilterProductionQuestDefinitionTypeNames", scriptableObjectTypes);
+
+        private static object ValidateProductionTypeCandidates(IEnumerable<Type> scriptableObjectTypes) =>
+            InvokeStatic(ValidatorType(), "ValidateProductionTypeCandidatesForTests", scriptableObjectTypes);
+
+        private static Type EmitScriptableObjectType(string assemblyName, string typeFullName)
+        {
+            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(
+                new AssemblyName(assemblyName),
+                AssemblyBuilderAccess.Run);
+            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("QuestDefinitionAuthorityFixtures");
+            TypeBuilder typeBuilder = moduleBuilder.DefineType(
+                typeFullName,
+                TypeAttributes.Public | TypeAttributes.Class,
+                typeof(ScriptableObject));
+            return typeBuilder.CreateTypeInfo().AsType();
+        }
+
         private static string ValidatorConstant(string name) =>
             (string)ValidatorType().GetField(name, BindingFlags.Public | BindingFlags.Static).GetValue(null);
 
@@ -320,7 +385,10 @@ namespace AL.Tests.EditMode
 
         private static Type RuntimeType(string fullName, string assemblyName = "Assembly-CSharp")
         {
-            Type type = Type.GetType($"{fullName}, {assemblyName}");
+            Type type = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(assembly => !assembly.IsDynamic && string.Equals(assembly.GetName().Name, assemblyName, StringComparison.Ordinal))
+                .Select(assembly => assembly.GetType(fullName))
+                .FirstOrDefault(candidate => candidate != null);
             Assert.NotNull(type, $"Expected type {fullName} in {assemblyName}.");
             return type;
         }
@@ -348,6 +416,10 @@ namespace AL.Tests.EditMode
 
         private static object InvokeStatic(Type type, string methodName, params object[] args) =>
             type.GetMethod(methodName, BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic).Invoke(null, args);
+
+        private sealed class QuestDefinition : ScriptableObject
+        {
+        }
 
         private sealed class QuestSnapshot
         {
