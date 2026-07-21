@@ -321,7 +321,7 @@ Failure-path tests must not deliberately damage the real profile. Use injectable
 Run from the canonical workspace:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -400,5 +400,5 @@ No designated shared-file lock is expected.
 # GPT handoff to Codex
 
 ```text
-Codex engineering: implement issue #127 from current main using unity/Docs/PlayMode_Profile_Isolation_Spec.md. Keep the PR test-only. Snapshot and verify every current/legacy save artifact outside persistentDataPath before scene load, remove active artifacts, load Assets/Test.unity with realtime bounds, assert structural startup, fail only on severe logs, and restore the exact profile/file/global/service state in finally plus UnityTearDown. Do not edit Bootloader.cs while PR #203 holds its lock and do not change production save behavior. Run compile/EditMode/PlayMode in D:\260711\MY\AndroidStudioProjects\AnotherLife\unity and return exact XML/log/hash evidence for GPT review.
+Codex engineering: implement issue #127 from current main using unity/Docs/PlayMode_Profile_Isolation_Spec.md. Keep the PR test-only. Snapshot and verify every current/legacy save artifact outside persistentDataPath before scene load, remove active artifacts, load Assets/Test.unity with realtime bounds, assert structural startup, fail only on severe logs, and restore the exact profile/file/global/service state in finally plus UnityTearDown. Do not edit Bootloader.cs while an open PR holds its lock and do not change production save behavior. Run compile/EditMode/PlayMode in the active Codex Unity workspace and return exact XML/log/hash evidence for Codex coordination/review.
 ```

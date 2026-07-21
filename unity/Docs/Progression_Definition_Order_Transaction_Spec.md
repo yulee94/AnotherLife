@@ -7,7 +7,7 @@
 **Specification/review owner:** GPT  
 **Building, research, troop, and player-facing content owner:** Codex narrative/content  
 **Final balance, progression feel, and product approval:** User  
-**Canonical Unity workspace:** `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+**Canonical Unity workspace:** `C:\Users\MY\Documents\AnotherLife\unity`
 
 ## 1. Purpose
 
@@ -2113,7 +2113,7 @@ No conflict resolution may discard valid current services, fields, tests, contra
 Run from:
 
 ```text
-D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
+C:\Users\MY\Documents\AnotherLife\unity
 Unity 2022.3.62f3
 ```
 
@@ -2147,7 +2147,7 @@ Duplicate-workspace, stale-base, skipped, compile-only, missing XML, development
 
 ## 41. Review questions
 
-GPT review verifies:
+Codex coordination/review verifies:
 
 - definitions and saved state are separated;
 - every ID/version/hash/source is explicit;

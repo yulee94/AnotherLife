@@ -8,7 +8,7 @@
 **Visual-design and model-fidelity owner:** Codex terrestrial-design where applicable  
 **Specification/review owner:** GPT  
 **Final visual, product, balance, playtest, and release approval:** User  
-**Canonical Unity workspace:** `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+**Canonical Unity workspace:** `C:\Users\MY\Documents\AnotherLife\unity`
 
 ## 1. Purpose
 

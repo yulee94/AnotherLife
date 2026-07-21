@@ -7,7 +7,7 @@
 **Implementation owner:** Codex engineering mode  
 **Audited baseline:** `0cbd5ec91a6513167ad8a5922e5f5d7acd742c2f`  
 **Validated Unity target:** `2022.3.62f3`  
-**Canonical workspace:** `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`  
+**Canonical workspace:** `C:\Users\MY\Documents\AnotherLife\unity`
 **Ownership authority:** `unity/Docs/Ownership_Decision_Record.md`
 
 ## 1. Goal
@@ -502,7 +502,7 @@ The transcript records exact scene paths and confirms Test/Champion exclusion.
 ## 12. Canonical build command
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -755,7 +755,7 @@ Using seams around the Unity build call where practical:
 12. Retain ordered marker evidence and severe-log inventory.
 13. Externally terminate after success and clean disposable profile.
 14. Run final diff/status/shared-lock checks.
-15. Return draft PR for GPT review.
+15. Return draft PR for Codex coordination/review.
 
 ## 18. Expected implementation boundary
 
@@ -851,5 +851,5 @@ A failed Player build never authorizes switching Build Settings back to Test.
 ## 22. Codex handoff
 
 ```text
-Codex engineering: do not implement #150 until #156, #223, the accepted #153 scene-lifecycle contract, and the first #178 containment are merged. Then use current main and unity/Docs/Production_Scene_Player_Build_Spec.md on codex/production-scene-build-settings. Consume the shared production-scene descriptor; commit Build Settings with exactly Boot, RealmSelection, and Kingdom; keep Test and ChampionArena absent; add strict Build Settings validation and a typed Windows64 Development build script; build only into ignored validation output; and run an isolated fresh-profile Player smoke proving Boot -> RealmSelection through stable scene markers. Do not edit scenes, Bootloader, saves, gameplay, narrative, Android, branding, or add ChampionArena. Return one focused draft PR with exact canonical evidence for GPT review.
+Codex engineering: do not implement #150 until #156, #223, the accepted #153 scene-lifecycle contract, and the first #178 containment are merged. Then use current main and unity/Docs/Production_Scene_Player_Build_Spec.md on codex/production-scene-build-settings. Consume the shared production-scene descriptor; commit Build Settings with exactly Boot, RealmSelection, and Kingdom; keep Test and ChampionArena absent; add strict Build Settings validation and a typed Windows64 Development build script; build only into ignored validation output; and run an isolated fresh-profile Player smoke proving Boot -> RealmSelection through stable scene markers. Do not edit scenes, Bootloader, saves, gameplay, narrative, Android, branding, or add ChampionArena. Return one focused draft PR with exact canonical evidence for Codex coordination/review.
 ```
