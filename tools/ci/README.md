@@ -1,6 +1,7 @@
 # AnotherLife CI Gates
 
 This directory contains deterministic local validators used by issue #155 Phase A.
+`.github/anotherlife-policy.yml` is the maintained policy source for gate-owned prefixes, paths, shared files, and forbidden tracked patterns.
 
 Run from the repository root:
 

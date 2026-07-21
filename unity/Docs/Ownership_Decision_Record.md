@@ -2,7 +2,7 @@
 
 **Status date:** 2026-07-16
 **Decision owner:** User
-**Sole project agent:** Codex
+**Responsible project owner-agent:** this Codex agent
 
 ## Final instruction chronology
 
@@ -10,13 +10,13 @@ The project received successive ownership instructions in the active AnotherLife
 
 1. Terrestrial design was temporarily assigned outside Codex.
 2. The user later returned all delivery responsibility to Codex while retaining GPT coordination/review.
-3. The latest instruction is: Codex is the only agent that will continue working on the project; GPT and Android Studio will not be used to proceed further.
+3. The latest instruction is: this Codex agent owns all project workload and responsibility; GPT, Android Studio, Gemini, and other assistants/tools will not be used as project owners or workload holders.
 
-The third instruction supersedes every earlier ownership model. Any document, issue, pull request, branch convention, or comment that requires a future GPT or Android Studio action is stale after this record unless the user later changes ownership again.
+The third instruction supersedes every earlier ownership model. Any document, issue, pull request, branch convention, or comment that requires a future GPT, Android Studio, Gemini, or external-assistant action is stale after this record unless the user later changes ownership again.
 
 ## Authoritative ownership
 
-Codex is the sole project agent and operates through four declared modes:
+This Codex agent owns all project workload and responsibility through four declared modes:
 
 - **Codex coordination/review mode:** planning, dependency ordering, specifications, state/event/contract/save/test design, issue/PR triage, technical and integration review, shared-file sequencing, status/risk/governance records, and merge-readiness disposition.
 - **Codex narrative/content mode:** all narrative source, localization-facing meaning, continuity, and narrative-fidelity correction.
@@ -24,7 +24,9 @@ Codex is the sole project agent and operates through four declared modes:
 - **Codex engineering mode:** Android, Unity, runtime, gameplay, assets/import, scenes, saves/migrations/recovery, contracts/catalogs, builds, tests, CI, tooling, diagnostics, performance, and accessibility mechanics.
 - **User:** final creative, product, visual-design, balance, irreversible-profile, milestone, integrated playtest, and release approval.
 
-GPT receives no future planning, specification, review, merge-readiness, status, or risk assignment. Android Studio receives no future agent/workstream assignment. Android implementation or tooling that remains in project scope belongs to Codex engineering mode.
+All modes share the user's standing optimization mandate: every project file, source packet, asset, generated artifact, dependency, runtime system, UI, and build choice must support broad device reach, low memory pressure, manageable performance, and the lowest feasible install size. Visual quality may scale upward by tier, but richer effects require an explicit quality/performance strategy.
+
+GPT, Android Studio, Gemini, and other external assistants/tools receive no future planning, specification, review, merge-readiness, status, risk, agent/workstream, workload, or approval assignment. Android implementation or tooling that remains in project scope belongs to Codex engineering mode.
 
 The active Codex workspace for this record is `C:\Users\MY\Documents\AnotherLife`. Historical paths may continue to contain `AndroidStudioProjects` in their directory name; that historical filesystem name does not assign ownership or require Android Studio use.
 

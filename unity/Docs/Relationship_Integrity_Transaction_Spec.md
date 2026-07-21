@@ -1256,7 +1256,7 @@ notifications/presenter
 Phase B:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -1318,5 +1318,5 @@ Duplicate-workspace, exit `199`, missing XML, hard-coded label claimed as source
 ## 23. Codex handoff
 
 ```text
-Codex engineering: implement only Phase B of issue #176 from current main using unity/Docs/Relationship_Integrity_Transaction_Spec.md. Create codex/relationship-contract-planner. Add immutable relationship identity/policy resolver interfaces, typed validation/query/classification/request/plan/apply-result/event models, pure affinity/faction/persona snapshot builders and planners, an injected revision/fake mutation-target seam, current caller/interface inventory, and the complete EditMode matrix. Preserve existing numeric thresholds/ranges exactly, return honest persona tie/all-zero states, and perform no mutation/save/event/notification. Do not edit SaveGameData.cs, LocalSaveGameService.cs, Bootloader.cs, LocalGameDataService.cs, scenes, Android, narrative/localization content, current service bodies, callers, or NVS reward values. Run canonical Unity validation and return one focused draft PR for GPT review.
+Codex engineering: implement only Phase B of issue #176 from current main using unity/Docs/Relationship_Integrity_Transaction_Spec.md. Create codex/relationship-contract-planner. Add immutable relationship identity/policy resolver interfaces, typed validation/query/classification/request/plan/apply-result/event models, pure affinity/faction/persona snapshot builders and planners, an injected revision/fake mutation-target seam, current caller/interface inventory, and the complete EditMode matrix. Preserve existing numeric thresholds/ranges exactly, return honest persona tie/all-zero states, and perform no mutation/save/event/notification. Do not edit SaveGameData.cs, LocalSaveGameService.cs, Bootloader.cs, LocalGameDataService.cs, scenes, Android, narrative/localization content, current service bodies, callers, or NVS reward values. Run canonical Unity validation and return one focused draft PR for Codex coordination/review.
 ```

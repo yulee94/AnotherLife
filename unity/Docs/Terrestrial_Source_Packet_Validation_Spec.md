@@ -3,7 +3,7 @@
 **Status date:** 2026-07-15  
 **Tracking issue:** #194  
 **Active source PR:** #217  
-**Technical specification/review owner:** GPT  
+**Technical specification/review owner:** Codex coordination/review mode
 **Source-design owner:** Codex terrestrial-design mode  
 **Narrative naming/lore owner:** Codex narrative/content mode  
 **Engineering owner after approval:** Codex engineering mode  
@@ -30,7 +30,7 @@ This specification does not judge whether the creatures are attractive, appropri
 
 ## 2. Binding decisions
 
-1. **Technical completeness is not creative approval.** GPT may disposition a packet `TECHNICAL HANDOFF COMPLETE`; only the user may approve its visual direction.
+1. **Technical completeness is not creative approval.** Codex coordination/review mode may disposition a packet `TECHNICAL HANDOFF COMPLETE`; only the user may approve its visual direction.
 2. **Creative approval is not runtime approval.** A user-approved source packet remains non-runtime until a separate Codex engineering PR passes its own dependencies and technical review.
 3. **The source PR must not close #194.** Use `Refs #194`; the issue remains open through user approval and engineering consumption without silent redesign.
 4. **Every reviewed media file has immutable identity in the manifest.** PR prose alone is insufficient.
@@ -863,7 +863,7 @@ Reject
 Defer
 ```
 
-Approval must identify profile/variant IDs and source version. Silence, PR merge, source presence, or a GPT review is not user approval.
+Approval must identify profile/variant IDs and source version. Silence, PR merge, source presence, or a technical review is not user approval.
 
 ## 14. Engineering handoff contract
 
@@ -1096,7 +1096,7 @@ Clean retrieval must use a separate temporary path and the exact head SHA.
 If assets remain under Unity `Assets`:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -1144,7 +1144,7 @@ A complete comment identifies:
 - [ ] Provenance, generation steps, external inputs, and license evidence are complete and truthful.
 - [ ] The packet exposes separate technical, user-creative, narrative-naming, and runtime-integration states.
 - [ ] Review-only media is either moved outside `Assets` or intentionally imported with canonical Unity evidence and no runtime/package references.
-- [ ] GPT technical review does not claim creative approval.
+- [ ] Codex coordination/review technical disposition does not claim creative approval.
 - [ ] User approval identifies the exact source version and approved profile/variant IDs.
 - [ ] Engineering consumption remains a later separate PR with immutable source-to-runtime mapping and fidelity review.
 - [ ] No gameplay, AI, spawn, combat, reward, save, narrative, balance, Android, scene, prefab, shader, runtime catalog, or shared-file change is included.
@@ -1152,5 +1152,5 @@ A complete comment identifies:
 ## 21. Codex handoff
 
 ```text
-Codex terrestrial-design: correct PR #217 from current main using unity/Docs/Terrestrial_Source_Packet_Validation_Spec.md. Keep all creative authorship in terrestrial-design mode. Change `Fixes #194` to `Refs #194`; add the retained manifest schema/validator; record immutable media/LFS/provenance identity; prove clean LFS retrieval; embed direct full-resolution user-review images; classify undelivered variants as proposed or add exact visual source; clarify working labels and biome tags as non-authoritative; and either move review media outside Unity Assets or supply canonical Unity import/no-runtime-reference evidence. Do not add runtime, gameplay, AI, spawn, combat, reward, save, narrative, balance, Android, scene, prefab, shader, or #183 catalog work. Return the exact corrected head for GPT technical review; only after `TECHNICAL HANDOFF COMPLETE` should the user be asked for creative approval.
+Codex terrestrial-design: correct PR #217 from current main using unity/Docs/Terrestrial_Source_Packet_Validation_Spec.md. Keep all creative authorship in terrestrial-design mode. Change `Fixes #194` to `Refs #194`; add the retained manifest schema/validator; record immutable media/LFS/provenance identity; prove clean LFS retrieval; embed direct full-resolution user-review images; classify undelivered variants as proposed or add exact visual source; clarify working labels and biome tags as non-authoritative; and either move review media outside Unity Assets or supply canonical Unity import/no-runtime-reference evidence. Do not add runtime, gameplay, AI, spawn, combat, reward, save, narrative, balance, Android, scene, prefab, shader, or #183 catalog work. Return the exact corrected head for Codex coordination/review technical disposition; only after `TECHNICAL HANDOFF COMPLETE` should the user be asked for creative approval.
 ```

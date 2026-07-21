@@ -1,6 +1,6 @@
 param(
     [string] $WorkingRoot = "",
-    [ValidateSet("All", "DuplicateGuid", "TestScene", "MissingScene", "MalformedJson", "MutableAction", "MixedScope", "Coordination", "RetiredPrefix")]
+    [ValidateSet("All", "DuplicateGuid", "TestScene", "MissingScene", "MalformedJson", "MutableAction", "MixedScope", "Coordination", "RetiredPrefix", "PolicyAuthority")]
     [string] $Scenario = "All"
 )
 
@@ -272,6 +272,62 @@ function Test-RetiredPrefixFixture {
     Assert-Contains $output "Codex-only AnotherLife prefix"
 }
 
+function Test-PolicyAuthorityFixture {
+    $fixtureRepo = New-FixtureRepo "policy-authority"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "Runtime") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo ".github/anotherlife-policy.yml") -Value @"
+branch_prefixes:
+  - quality/
+primary_modes:
+  - Codex engineering
+retired_agents_and_prefixes:
+  - GPT
+shared_files:
+  - Shared.cs
+narrative_source_paths:
+  - Narrative/
+terrestrial_design_paths:
+  - Terrestrial/
+runtime_paths:
+  - Runtime/
+workflow_paths:
+  - .github/
+forbidden_tracked_path_patterns:
+  - "^Forbidden/"
+production_test_scene_path: unity/Assets/Test.unity
+"@
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "Runtime/Fixture.cs") -Value "public class Fixture {}"
+
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Set-Content -LiteralPath $eventPath -Value @"
+{
+  "pull_request": {
+    "draft": false,
+    "body": "- [x] Codex engineering\n\nRefs #155\n\n## Shared-file lock\n\nNone.",
+    "base": { "ref": "main" },
+    "head": { "ref": "quality/policy-fixture" }
+  }
+}
+"@
+
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+            GITHUB_ACTIONS = ""
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "quality/policy-fixture"
+        }
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $output "Engineering/workflow paths changed: 2"
+}
+
 if (Test-Path -LiteralPath $WorkingRoot) {
     Remove-Item -LiteralPath $WorkingRoot -Recurse -Force
 }
@@ -287,6 +343,7 @@ try {
         "MixedScope" { Test-MixedScopeFixture }
         "Coordination" { Test-CoordinationFixture }
         "RetiredPrefix" { Test-RetiredPrefixFixture }
+        "PolicyAuthority" { Test-PolicyAuthorityFixture }
         "All" {
             Test-DuplicateGuidFixture
             Test-TestSceneFixture
@@ -296,6 +353,7 @@ try {
             Test-MixedScopeFixture
             Test-CoordinationFixture
             Test-RetiredPrefixFixture
+            Test-PolicyAuthorityFixture
         }
     }
 
