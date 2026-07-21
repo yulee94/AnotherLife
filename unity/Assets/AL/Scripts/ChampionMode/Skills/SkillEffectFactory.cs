@@ -503,6 +503,8 @@ namespace AL.ChampionMode.Skills
             effect.transform.position = position;
 
             var particles = effect.GetComponent<ParticleSystem>();
+            ResetBurstParticlesForReuse(particles);
+
             var main = particles.main;
             main.duration = 0.75f;
             main.loop = false;
@@ -537,6 +539,17 @@ namespace AL.ChampionMode.Skills
             particles.Play(true);
             RuntimeVfxPool.ReleaseAfter(key, effect, 1.25f, MaxPooledBurstsPerKey);
             return effect;
+        }
+
+        private static void ResetBurstParticlesForReuse(ParticleSystem particles)
+        {
+            if (particles == null)
+            {
+                return;
+            }
+
+            particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            particles.Clear(true);
         }
 
         private static GameObject SpawnGroundRing(string name, Vector3 position, Color color, float radius, float lifetime)

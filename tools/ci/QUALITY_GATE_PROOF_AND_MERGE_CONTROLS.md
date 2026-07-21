@@ -63,6 +63,7 @@ The classification fixture proves these failures/signals are detected:
 - current terrestrial source path `unity/Docs/Terrestrials/**`
 - engineering path `unity/Assets/AL/Scripts/**`
 - mixed source-mode and engineering paths without explicit mixed-mode justification
+- `.github/anotherlife-policy.yml` is the maintained policy authority for branch prefixes, modes, path classifiers, shared files, forbidden tracked patterns, and the production test-scene path
 
 The script must be rerun after meaningful policy or classifier changes. It is not a substitute for temporary live failing PRs, but it gives a deterministic local guard before those PRs are opened.
 

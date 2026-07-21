@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -305,6 +306,83 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void ValidPreviousFallbackRecoversWhenPrimaryIsCorruptAndBackupMissing()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                object currentSave = GetProperty(service, "CurrentSave");
+                SetField(currentSave, "CurrentChapterId", "C1_PREVIOUS_SAFE");
+                Invoke(service, "Save");
+
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                string previousPath = Path.Combine(root, "save.previous.json");
+                File.Copy(primaryPath, previousPath, true);
+                File.WriteAllText(primaryPath, "{ corrupt primary");
+                File.Delete(backupPath);
+
+                object recoveredService = CreateSaveService(root);
+                Invoke(recoveredService, "Load");
+
+                Assert.AreEqual("RecoveredFromBackup", GetProperty(recoveredService, "LastLoadStatus").ToString());
+                object recoveredSave = GetProperty(recoveredService, "CurrentSave");
+                Assert.AreEqual("C1_PREVIOUS_SAFE", GetField(recoveredSave, "CurrentChapterId"));
+                Assert.True(File.Exists(primaryPath));
+                Assert.True(File.Exists(backupPath));
+                Assert.False(File.Exists(previousPath));
+                Assert.AreEqual(1, Directory.GetFiles(root, "save.json.corrupt-*").Length);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void HasSaveReportsPreviousFallbackCandidate()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                object noRealm = Enum.Parse(realmType, "None");
+                Invoke(service, "CreateNewSave", noRealm);
+
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                string previousPath = Path.Combine(root, "save.previous.json");
+                File.Copy(primaryPath, previousPath, true);
+                File.Delete(primaryPath);
+                File.Delete(backupPath);
+
+                object fallbackOnlyService = CreateSaveService(root);
+
+                Assert.True((bool)Invoke(fallbackOnlyService, "HasSave"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
         public void InvalidPrimaryNeverRotatesIntoBackupDuringSave()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
@@ -419,6 +497,91 @@ namespace AL.Tests.EditMode
             }
         }
 
+        [Test]
+        public void DeleteSaveDoesNotClaimSuccessWhenAnArtifactSurvives()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            object noRealm = Enum.Parse(realmType, "None");
+            Invoke(service, "CreateNewSave", noRealm);
+
+            string backupPath = Path.Combine(root, "save.backup.json");
+            fileSystem.DeleteFailures.Add(backupPath);
+
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED: Could not delete save artifact"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED: Local save reset could not remove every profile artifact"));
+            Invoke(service, "DeleteSave");
+
+            Assert.NotNull(GetProperty(service, "CurrentSave"));
+            Assert.AreEqual("DeleteFailed", GetProperty(service, "LastSaveStatus").ToString());
+            Assert.True(fileSystem.FileExists(backupPath));
+        }
+
+        [Test]
+        public void TempCleanupFailureStopsSaveBeforeActiveFilesChange()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            object noRealm = Enum.Parse(realmType, "None");
+            Invoke(service, "CreateNewSave", noRealm);
+
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_BEFORE_TEMP_FAILURE");
+            Invoke(service, "Save");
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            fileSystem.Files[tempPath] = "{ stale temp";
+            fileSystem.DeleteFailures.Add(tempPath);
+            SetField(currentSave, "CurrentChapterId", "C1_AFTER_TEMP_FAILURE");
+
+            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED: Could not delete save artifact"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-TEMP-CLEANUP-FAILED"));
+            Invoke(service, "Save");
+
+            Assert.AreEqual("SaveFailedPreviousPreserved", GetProperty(service, "LastSaveStatus").ToString());
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual("{ stale temp", fileSystem.ReadAllText(tempPath));
+        }
+
+        [Test]
+        public void BackupRecoveryStopsWhenInvalidPrimaryCannotBeQuarantined()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            object noRealm = Enum.Parse(realmType, "None");
+            Invoke(service, "CreateNewSave", noRealm);
+
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_BACKUP_RECOVERY");
+            Invoke(service, "Save");
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            fileSystem.Files[primaryPath] = "{ invalid primary";
+            fileSystem.MoveFailures.Add(primaryPath);
+
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-QUARANTINE-FAILED: Could not quarantine invalid save file"));
+            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-RECOVERY-FAILED: Primary save is invalid but could not be quarantined"));
+            object recoveredService = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Invoke(recoveredService, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(recoveredService, "LastLoadStatus").ToString());
+            Assert.AreEqual("{ invalid primary", fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+        }
+
         private static object CreateSaveService(string root)
         {
             Type serviceType = GetRuntimeType("AL.Services.Local.LocalSaveGameService");
@@ -429,6 +592,31 @@ namespace AL.Tests.EditMode
                 null);
             Assert.NotNull(constructor, "Expected the testable persistence-path constructor.");
             return constructor.Invoke(new object[] { root });
+        }
+
+        private static object CreateSaveService(string root, object fileOperations)
+        {
+            Type serviceType = GetRuntimeType("AL.Services.Local.LocalSaveGameService");
+            Type fileOperationsType = GetRuntimeType("AL.Services.Local.ISaveFileOperations");
+            ConstructorInfo constructor = serviceType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(string), fileOperationsType },
+                null);
+            Assert.NotNull(constructor, "Expected the testable file-operations constructor.");
+            return constructor.Invoke(new[] { root, fileOperations });
+        }
+
+        private static object CreateFileOperationsProxy(ScriptedSaveFileOperations fileSystem)
+        {
+            Type interfaceType = GetRuntimeType("AL.Services.Local.ISaveFileOperations");
+            MethodInfo createMethod = typeof(DispatchProxy).GetMethods(BindingFlags.Public | BindingFlags.Static)
+                .Single(method => method.Name == "Create" && method.GetGenericArguments().Length == 2);
+            object proxy = createMethod
+                .MakeGenericMethod(interfaceType, typeof(ScriptedSaveFileOperationsProxy))
+                .Invoke(null, null);
+            ((ScriptedSaveFileOperationsProxy)proxy).FileSystem = fileSystem;
+            return proxy;
         }
 
         private static object CreateRuntimeService(string serviceTypeName, string constructorArgumentTypeName, object argument)
@@ -492,6 +680,135 @@ namespace AL.Tests.EditMode
             FieldInfo field = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.NotNull(field, $"Expected field {name}.");
             field.SetValue(target, value);
+        }
+
+        public class ScriptedSaveFileOperationsProxy : DispatchProxy
+        {
+            public ScriptedSaveFileOperations FileSystem { get; set; }
+
+            protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+                FileSystem.Invoke(targetMethod.Name, args);
+        }
+
+        public sealed class ScriptedSaveFileOperations
+        {
+            public readonly Dictionary<string, string> Files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> DeleteFailures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> MoveFailures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            public object Invoke(string methodName, object[] args)
+            {
+                switch (methodName)
+                {
+                    case "FileExists":
+                        return FileExists((string)args[0]);
+                    case "CreateDirectory":
+                        return null;
+                    case "ReadAllText":
+                        return ReadAllText((string)args[0]);
+                    case "WriteAllTextDurable":
+                        Files[(string)args[0]] = (string)args[1];
+                        return null;
+                    case "Copy":
+                        Copy((string)args[0], (string)args[1], (bool)args[2]);
+                        return null;
+                    case "Move":
+                        Move((string)args[0], (string)args[1]);
+                        return null;
+                    case "Replace":
+                        Replace((string)args[0], (string)args[1], (string)args[2]);
+                        return null;
+                    case "Delete":
+                        Delete((string)args[0]);
+                        return null;
+                    case "EnumerateFiles":
+                        return EnumerateFiles((string)args[0], (string)args[1]);
+                    default:
+                        throw new NotSupportedException(methodName);
+                }
+            }
+
+            public bool FileExists(string path) => Files.ContainsKey(path);
+
+            public string ReadAllText(string path)
+            {
+                if (!Files.TryGetValue(path, out string contents))
+                {
+                    throw new FileNotFoundException(path);
+                }
+
+                return contents;
+            }
+
+            private void Copy(string sourcePath, string destinationPath, bool overwrite)
+            {
+                if (!Files.TryGetValue(sourcePath, out string contents))
+                {
+                    throw new FileNotFoundException(sourcePath);
+                }
+
+                if (!overwrite && Files.ContainsKey(destinationPath))
+                {
+                    throw new IOException($"File already exists: {destinationPath}");
+                }
+
+                Files[destinationPath] = contents;
+            }
+
+            private void Move(string sourcePath, string destinationPath)
+            {
+                if (MoveFailures.Contains(sourcePath))
+                {
+                    throw new IOException($"Move blocked for {sourcePath}");
+                }
+
+                if (!Files.TryGetValue(sourcePath, out string contents))
+                {
+                    throw new FileNotFoundException(sourcePath);
+                }
+
+                Files.Remove(sourcePath);
+                Files[destinationPath] = contents;
+            }
+
+            private void Replace(string sourcePath, string destinationPath, string backupPath)
+            {
+                if (!Files.TryGetValue(sourcePath, out string sourceContents))
+                {
+                    throw new FileNotFoundException(sourcePath);
+                }
+
+                if (!Files.TryGetValue(destinationPath, out string destinationContents))
+                {
+                    throw new FileNotFoundException(destinationPath);
+                }
+
+                Files[backupPath] = destinationContents;
+                Files[destinationPath] = sourceContents;
+                Files.Remove(sourcePath);
+            }
+
+            private void Delete(string path)
+            {
+                if (DeleteFailures.Contains(path))
+                {
+                    throw new IOException($"Delete blocked for {path}");
+                }
+
+                Files.Remove(path);
+            }
+
+            private IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern)
+            {
+                string prefix = searchPattern.EndsWith("*", StringComparison.Ordinal)
+                    ? searchPattern.Substring(0, searchPattern.Length - 1)
+                    : searchPattern;
+
+                return Files.Keys
+                    .Where(path => string.Equals(Path.GetDirectoryName(path), directoryPath, StringComparison.OrdinalIgnoreCase))
+                    .Where(path => Path.GetFileName(path).StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+            }
         }
     }
 }

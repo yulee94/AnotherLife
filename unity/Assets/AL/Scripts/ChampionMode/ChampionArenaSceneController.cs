@@ -113,7 +113,6 @@ namespace AL.ChampionMode
         private ChampionActionButtonFeedback _attackActionFeedback;
         private ChampionActionButtonFeedback _dodgeActionFeedback;
         private float _skillHudTimer;
-        private float _warzoneCreditTimer;
         private float _encounterStartTime;
         private float _appearanceFeedTimer;
         private float _lastHealthRatio = 1f;
@@ -165,33 +164,10 @@ namespace AL.ChampionMode
                 RefreshEncounterText();
             }
 
-            if (_encounterFailed)
-            {
-                return;
-            }
-
-            if (_encounterIntroRunning)
-            {
-                return;
-            }
-
-            if (_bossTransform == null)
-            {
-                return;
-            }
-
-            _warzoneCreditTimer += Time.deltaTime;
-            if (_warzoneCreditTimer < 5f)
-            {
-                return;
-            }
-
-            _warzoneCreditTimer = 0f;
-            float distance = Vector3.Distance(_playerController.transform.position, _bossTransform.position);
-            if (distance <= 12f)
-            {
-                ServiceLocator.Get<AL.Core.Interfaces.IWarzoneCreditService>().AddCredits(1);
-            }
+            // #178 containment: the per-second proximity Warzone-credit grant is removed. Credits are
+            // never issued directly by this presentation controller; only a committed encounter result
+            // under #180 may award them. The arena presentation below is retained but stays unreachable
+            // in the ShellFoundation profile (D10) until #150/#180.
         }
 
         private void HandleBossLootRolled(BossLootResult result)
