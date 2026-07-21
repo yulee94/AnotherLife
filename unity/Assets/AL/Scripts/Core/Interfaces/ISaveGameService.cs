@@ -17,7 +17,8 @@ namespace AL.Core.Interfaces
     {
         None,
         SavedPrimary,
-        SaveFailedPreviousPreserved
+        SaveFailedPreviousPreserved,
+        DeleteFailed
     }
 
     public interface ISaveGameService

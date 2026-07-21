@@ -67,6 +67,34 @@ namespace AL.Services.Local
         private const string PreviousFileName = "save.previous.json";
         private const int MaxQuarantinesPerSource = 3;
 
+        private enum SaveCandidateKind
+        {
+            Primary,
+            Backup,
+            Previous,
+            Temp
+        }
+
+        private sealed class SaveCandidateInfo
+        {
+            public SaveCandidateInfo(SaveCandidateKind kind, string path, bool exists, bool isValid, SaveGameData save, string error)
+            {
+                Kind = kind;
+                Path = path;
+                Exists = exists;
+                IsValid = isValid;
+                Save = save;
+                Error = error;
+            }
+
+            public SaveCandidateKind Kind { get; }
+            public string Path { get; }
+            public bool Exists { get; }
+            public bool IsValid { get; }
+            public SaveGameData Save { get; }
+            public string Error { get; }
+        }
+
         private readonly string _persistencePathOverride;
         private readonly ISaveFileOperations _fileOperations;
 
@@ -123,22 +151,25 @@ namespace AL.Services.Local
 
         public void Load()
         {
-            CleanStaleTransientFiles();
+            IReadOnlyList<SaveCandidateInfo> candidates = BuildCandidateInventory();
+            SaveCandidateInfo primary = candidates.First(candidate => candidate.Kind == SaveCandidateKind.Primary);
+            SaveCandidateInfo backup = candidates.First(candidate => candidate.Kind == SaveCandidateKind.Backup);
+            SaveCandidateInfo previous = candidates.First(candidate => candidate.Kind == SaveCandidateKind.Previous);
+            SaveCandidateInfo temp = candidates.First(candidate => candidate.Kind == SaveCandidateKind.Temp);
 
-            bool primaryExists = _fileOperations.FileExists(SavePath);
-            bool backupExists = _fileOperations.FileExists(BackupPath);
-
-            if (TryReadValidSave(SavePath, out SaveGameData primarySave, out string primaryError))
+            if (primary.IsValid)
             {
-                CompleteLoad(primarySave, SaveLoadStatus.LoadedPrimary, "AL-SAVE-LOAD-PRIMARY: Game loaded from the primary save.");
+                CompleteLoad(primary.Save, SaveLoadStatus.LoadedPrimary, "AL-SAVE-LOAD-PRIMARY: Game loaded from the primary save.");
+                CleanTransientFilesAfterActiveRecovery(deletePrevious: true);
                 return;
             }
 
-            if (primaryExists && !TryQuarantineInvalidFile(SavePath, out string primaryQuarantineError))
+            if (primary.Exists && !TryQuarantineInvalidFile(SavePath, out string primaryQuarantineError))
             {
-                if (TryReadValidSave(BackupPath, out SaveGameData lockedBackupSave, out _))
+                SaveCandidateInfo fallback = backup.IsValid ? backup : previous.IsValid ? previous : null;
+                if (fallback != null)
                 {
-                    _currentSave = lockedBackupSave;
+                    _currentSave = CloneSave(fallback.Save);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveryFailed,
                         $"AL-SAVE-RECOVERY-FAILED: Primary save is invalid but could not be quarantined. {primaryQuarantineError}",
@@ -146,30 +177,67 @@ namespace AL.Services.Local
                     return;
                 }
             }
-            else if (primaryExists)
+            else if (primary.Exists)
             {
-                Debug.LogWarning($"AL-SAVE-PRIMARY-CORRUPT: Primary save was invalid and quarantined. {primaryError}");
+                Debug.LogWarning($"AL-SAVE-PRIMARY-CORRUPT: Primary save was invalid and quarantined. {primary.Error}");
             }
 
-            if (TryReadValidSave(BackupPath, out SaveGameData backupSave, out string backupError))
+            if (backup.IsValid)
             {
-                RecoverFromBackup(backupSave);
+                RecoverFromBackup(backup.Save, BackupPath, deletePreviousAfterRecovery: true);
                 return;
             }
 
-            if (backupExists)
+            if (backup.Exists)
             {
                 if (TryQuarantineInvalidFile(BackupPath, out string backupQuarantineError))
                 {
-                    Debug.LogWarning($"AL-SAVE-BACKUP-CORRUPT: Backup save was invalid and quarantined. {backupError}");
+                    Debug.LogWarning($"AL-SAVE-BACKUP-CORRUPT: Backup save was invalid and quarantined. {backup.Error}");
                 }
                 else
                 {
-                    Debug.LogError($"AL-SAVE-BACKUP-QUARANTINE-FAILED: Backup save was invalid but could not be quarantined. {backupQuarantineError}");
+                    _currentSave = null;
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryFailed,
+                        $"AL-SAVE-RECOVERY-FAILED: Backup save is invalid but could not be quarantined. {backupQuarantineError}",
+                        true);
+                    return;
                 }
             }
 
-            bool hadUnrecoverableCorruption = primaryExists || backupExists;
+            if (previous.IsValid)
+            {
+                RecoverFromBackup(previous.Save, PreviousPath, deletePreviousAfterRecovery: true);
+                return;
+            }
+
+            if (previous.Exists)
+            {
+                if (TryQuarantineInvalidFile(PreviousPath, out string previousQuarantineError))
+                {
+                    Debug.LogWarning($"AL-SAVE-PREVIOUS-CORRUPT: Previous save was invalid and quarantined. {previous.Error}");
+                }
+                else
+                {
+                    _currentSave = null;
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryFailed,
+                        $"AL-SAVE-RECOVERY-FAILED: Previous save is invalid but could not be quarantined. {previousQuarantineError}",
+                        true);
+                    return;
+                }
+            }
+
+            if (temp.Exists)
+            {
+                TryDelete(TempPath);
+                if (temp.IsValid)
+                {
+                    Debug.LogWarning("AL-SAVE-TEMP-DISCARDED: Valid temporary save was discarded because temporary candidates are never active recovery sources.");
+                }
+            }
+
+            bool hadUnrecoverableCorruption = primary.Exists || backup.Exists || previous.Exists;
             SaveGameData newSave = CreateDefaultSave(RealmId.None);
             _currentSave = newSave;
 
@@ -194,7 +262,8 @@ namespace AL.Services.Local
 
         public bool HasSave() =>
             _fileOperations.FileExists(SavePath) ||
-            _fileOperations.FileExists(BackupPath);
+            _fileOperations.FileExists(BackupPath) ||
+            _fileOperations.FileExists(PreviousPath);
 
         public void CreateNewSave(RealmId realmId)
         {
@@ -204,14 +273,37 @@ namespace AL.Services.Local
 
         public void DeleteSave()
         {
-            TryDelete(SavePath);
-            TryDelete(BackupPath);
-            TryDelete(TempPath);
-            TryDelete(PreviousPath);
-
-            foreach (string quarantine in EnumerateQuarantines(SaveFileName).Concat(EnumerateQuarantines(BackupFileName)).ToList())
+            var deletionTargets = new List<string>
             {
-                TryDelete(quarantine);
+                SavePath,
+                BackupPath,
+                TempPath,
+                PreviousPath
+            };
+
+            deletionTargets.AddRange(EnumerateQuarantines(SaveFileName));
+            deletionTargets.AddRange(EnumerateQuarantines(BackupFileName));
+
+            var failures = new List<string>();
+            foreach (string target in deletionTargets.Distinct().ToList())
+            {
+                if (!TryDelete(target))
+                {
+                    failures.Add(target);
+                }
+            }
+
+            var remaining = deletionTargets
+                .Distinct()
+                .Where(path => _fileOperations.FileExists(path))
+                .ToList();
+
+            if (failures.Count > 0 || remaining.Count > 0)
+            {
+                LastSaveStatus = SaveOperationStatus.DeleteFailed;
+                LastSaveMessage = $"AL-SAVE-DELETE-FAILED: Local save reset could not remove every profile artifact. Failed={failures.Count}; Remaining={remaining.Count}.";
+                Debug.LogError(LastSaveMessage);
+                return;
             }
 
             _currentSave = null;
@@ -248,17 +340,18 @@ namespace AL.Services.Local
             SetLoadStatus(status, message, false);
         }
 
-        private void RecoverFromBackup(SaveGameData backupSave)
+        private void RecoverFromBackup(SaveGameData backupSave, string sourcePath, bool deletePreviousAfterRecovery)
         {
             SaveGameData repaired = CloneSave(backupSave);
 
-            if (!TryInstallBackupAsPrimary(repaired, out string repairMessage))
+            if (!TryInstallBackupAsPrimary(repaired, sourcePath, out string repairMessage))
             {
                 _currentSave = repaired;
                 SetLoadStatus(SaveLoadStatus.RecoveryFailed, repairMessage, true);
                 return;
             }
 
+            CleanTransientFilesAfterActiveRecovery(deletePreviousAfterRecovery);
             CompleteLoad(repaired, SaveLoadStatus.RecoveredFromBackup, "AL-SAVE-RECOVERED-BACKUP: Recovered the profile from the last known-good backup.");
         }
 
@@ -269,7 +362,11 @@ namespace AL.Services.Local
             try
             {
                 _fileOperations.CreateDirectory(PersistencePath);
-                TryDelete(TempPath);
+                if (!TryDelete(TempPath))
+                {
+                    message = "AL-SAVE-TEMP-CLEANUP-FAILED: Existing temporary save could not be removed before preparing a new candidate.";
+                    return false;
+                }
 
                 EnsureSaveDefaults(candidate);
                 candidate.LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
@@ -412,7 +509,7 @@ namespace AL.Services.Local
             }
         }
 
-        private bool TryInstallBackupAsPrimary(SaveGameData backupSave, out string message)
+        private bool TryInstallBackupAsPrimary(SaveGameData backupSave, string sourcePath, out string message)
         {
             try
             {
@@ -430,7 +527,11 @@ namespace AL.Services.Local
 
                 if (_fileOperations.FileExists(SavePath))
                 {
-                    TryQuarantineInvalidFile(SavePath, out _);
+                    if (!TryQuarantineInvalidFile(SavePath, out string quarantineError))
+                    {
+                        message = $"AL-SAVE-RECOVERY-FAILED: Could not quarantine invalid primary before repairing it from {sourcePath}. {quarantineError}";
+                        return false;
+                    }
                 }
 
                 _fileOperations.Move(TempPath, SavePath);
@@ -440,7 +541,17 @@ namespace AL.Services.Local
                     return false;
                 }
 
-                message = $"AL-SAVE-RECOVERED-BACKUP: Repaired primary from {BackupPath}.";
+                if (!string.Equals(sourcePath, BackupPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    _fileOperations.Copy(SavePath, BackupPath, true);
+                    if (!TryReadValidSave(BackupPath, out _, out string backupError))
+                    {
+                        message = $"AL-SAVE-RECOVERY-FAILED: Recreated backup failed validation after repairing primary from {sourcePath}. {backupError}";
+                        return false;
+                    }
+                }
+
+                message = $"AL-SAVE-RECOVERED-BACKUP: Repaired primary from {sourcePath}.";
                 return true;
             }
             catch (Exception ex)
@@ -639,27 +750,36 @@ namespace AL.Services.Local
             }
         }
 
-        private void CleanStaleTransientFiles()
+        private IReadOnlyList<SaveCandidateInfo> BuildCandidateInventory()
         {
-            TryDelete(TempPath);
-
-            if (_fileOperations.FileExists(PreviousPath) &&
-                !_fileOperations.FileExists(SavePath) &&
-                TryReadValidSave(PreviousPath, out _, out _))
+            return new[]
             {
-                try
-                {
-                    _fileOperations.Move(PreviousPath, SavePath);
-                    Debug.LogWarning("AL-SAVE-PREVIOUS-RESTORED: Restored a valid previous save left by an interrupted fallback.");
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Debug.LogError($"AL-SAVE-PREVIOUS-RESTORE-FAILED: Could not restore previous save. {ex.Message}");
-                }
+                InspectCandidate(SaveCandidateKind.Primary, SavePath),
+                InspectCandidate(SaveCandidateKind.Backup, BackupPath),
+                InspectCandidate(SaveCandidateKind.Previous, PreviousPath),
+                InspectCandidate(SaveCandidateKind.Temp, TempPath)
+            };
+        }
+
+        private SaveCandidateInfo InspectCandidate(SaveCandidateKind kind, string path)
+        {
+            bool exists = _fileOperations.FileExists(path);
+            if (!exists)
+            {
+                return new SaveCandidateInfo(kind, path, false, false, null, "File does not exist.");
             }
 
-            TryDelete(PreviousPath);
+            bool valid = TryReadValidSave(path, out SaveGameData save, out string error);
+            return new SaveCandidateInfo(kind, path, true, valid, save, error);
+        }
+
+        private void CleanTransientFilesAfterActiveRecovery(bool deletePrevious)
+        {
+            TryDelete(TempPath);
+            if (deletePrevious)
+            {
+                TryDelete(PreviousPath);
+            }
         }
 
         private void PruneQuarantines(string sourceFileName)
@@ -679,7 +799,7 @@ namespace AL.Services.Local
         private IEnumerable<string> EnumerateQuarantines(string sourceFileName) =>
             _fileOperations.EnumerateFiles(PersistencePath, $"{sourceFileName}.corrupt-*");
 
-        private void TryDelete(string path)
+        private bool TryDelete(string path)
         {
             try
             {
@@ -687,10 +807,13 @@ namespace AL.Services.Local
                 {
                     _fileOperations.Delete(path);
                 }
+
+                return !_fileOperations.FileExists(path);
             }
             catch (Exception ex)
             {
                 Debug.LogWarning($"AL-SAVE-DELETE-FAILED: Could not delete save artifact {path}: {ex.Message}");
+                return false;
             }
         }
 
