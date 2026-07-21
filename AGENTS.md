@@ -1,6 +1,6 @@
 # AnotherLife Agent Instructions
 
-These instructions apply to the entire repository. They define the working agreement for Codex and the user.
+These instructions apply to the entire repository. They define the working agreement for this Codex agent and the user.
 
 `unity/Docs/Ownership_Decision_Record.md` records the final user instruction chronology and controls ownership conflicts.
 
@@ -26,9 +26,9 @@ Before work:
 
 ## Ownership
 
-### Codex — sole project agent
+### This Codex agent — responsible project owner
 
-Codex owns all project work through four declared modes.
+This Codex agent owns all project work and responsibility through four declared modes.
 
 #### Coordination/review mode
 
@@ -50,11 +50,13 @@ Owns Android and Unity source, runtime services, gameplay, combat, bosses, loot,
 
 Engineering mode must consume approved narrative and terrestrial-design source rather than silently inventing or redesigning it in runtime code.
 
+Engineering mode also owns the standing optimization requirement: runtime code, assets, generated data, VFX, UI, catalogs, and builds must remain manageable for the broadest feasible device range with the lowest feasible install size. Prefer bounded data, pooling, compression, deduplication, lazy loading, deterministic generation, and scalable quality tiers before adding heavier content.
+
 ### User
 
 The user owns final product, creative, visual-design, balance, irreversible-profile, milestone, integrated playtest, and release approval.
 
-GPT and Android Studio receive no future project work, coordination assignment, review gate, or approval responsibility. Historical GPT-authored specifications and reviews remain repository evidence until Codex coordination/review mode or the user explicitly supersedes them.
+GPT, Android Studio, Gemini, and other external assistants/tools receive no future project work, coordination assignment, review gate, or approval responsibility. Historical GPT-authored specifications and reviews remain repository evidence until this Codex agent or the user explicitly supersedes them.
 
 ## Mode separation and handoffs
 
@@ -122,5 +124,6 @@ The first approved open PR declaring a file holds the lock. Later work must wait
 - Narrative/content: verify stable IDs, references, branches, consequences, localization, failure/retry/recovery, and user-approved intent.
 - Terrestrial design: verify scope, views, silhouette, scale, material, motion, variants, readability, source identity, and a clear engineering handoff without hidden gameplay authority.
 - Engineering: run relevant builds/tests, report exact commands/results, preserve old saves and approved source, and disclose every blocked check.
+- Optimization: for any runtime, asset, VFX, UI, catalog, dependency, or packaging change, declare expected performance, memory, build-size, install-size, and device-compatibility impact plus any unperformed measurement.
 
 Every task ends with the current phase, acceptance status, PR/issue state, shared locks, unresolved validation, and the next Codex mode or user step.

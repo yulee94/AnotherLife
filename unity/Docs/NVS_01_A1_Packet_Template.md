@@ -1,6 +1,6 @@
 # NVS-01 A1 Narrative Packet Template
 
-Use this template for the Android Studio-owned A1 deliverable tracked by issue #128.
+Use this template for the Codex narrative/content A1 deliverable tracked by issue #128.
 
 This document defines structure, evidence, and ownership requirements only. It does not author dialogue, choose creative outcomes, or prescribe runtime implementation. Every placeholder must be replaced with user-approved narrative intent before A1 review.
 
@@ -11,13 +11,13 @@ Milestone: NVS-01
 Task: A1
 Quest: OMEN_1 / The First Signal
 Packet version:
-Android Studio branch: android-studio/nvs-01-a1-clean
-Android Studio commit:
+Codex narrative branch: codex/narrative-nvs-01-a1-clean
+Codex narrative commit:
 Upstream main commit:
 User decision issue: #138
 User approval comment/reference:
 Narrative owner:
-GPT review status: Blocked / Ready / Approved
+Codex coordination/review status: Blocked / Ready / Approved
 ```
 
 ## 1. Approval gate
@@ -32,9 +32,9 @@ A1 is not complete until all of the following are true:
 - [ ] No Android runtime model, navigation, Gradle, or unrelated UI file changed.
 - [ ] All internal IDs and references resolve.
 - [ ] External semantic dependencies are clearly marked requested or verified.
-- [ ] Android unit tests and debug assembly pass on the clean branch.
+- [ ] Relevant validation passes on the clean branch, with Android unit/debug validation included when Android files or generated Android-facing outputs change.
 
-If any approval or reference is missing, leave the packet blocked and list the exact deficiency. Do not ask GPT or Codex to invent the answer.
+If any approval or reference is missing, leave the packet blocked and list the exact deficiency. Do not ask Codex engineering to invent the answer.
 
 ## 2. User-approved decision record
 
@@ -456,7 +456,7 @@ Do not add a broad new authoring framework merely to satisfy A1 tests.
 ## 18. Branch and Android validation
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 $env:ANDROID_HOME = "C:\Users\MY\AppData\Local\Android\Sdk"
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
@@ -473,7 +473,7 @@ git -C $repo rev-parse origin/main
 
 Record exact command output, exit codes, branch SHA, and `origin/main` SHA. A successful historical build on draft PR #124 is not evidence for the clean A1 branch.
 
-## 19. Android Studio completion report
+## 19. Codex narrative/content completion report
 
 ```text
 Narrative scope completed:
@@ -491,7 +491,7 @@ Prohibited areas confirmed untouched:
 Validation commands and results:
 Known limitations:
 Unresolved creative decisions:
-Exact handoff request for GPT:
+Exact handoff request for Codex coordination/review:
 ```
 
 ## 20. A1 acceptance checklist
@@ -507,15 +507,15 @@ Exact handoff request for GPT:
 - [ ] External dependencies are honest.
 - [ ] Localization coverage or approved exceptions are complete.
 - [ ] No runtime-owned or unrelated file changed.
-- [ ] Android tests and debug assembly pass.
-- [ ] Completion report and exact GPT handoff are present.
+- [ ] Relevant validation passes.
+- [ ] Completion report and exact Codex coordination/review handoff are present.
 
-## 21. Handoff to GPT
+## 21. Handoff to Codex coordination/review
 
 When every item above passes, request:
 
 ```text
-GPT: review this clean A1 packet against issue #138 D1–D16, issue #128, AGENTS.md, the Phase 1 risk register, and ownership boundaries. Do not implement or rewrite narrative. If complete and user-approved, activate #133 and produce G1 from NVS_01_G1_Specification_Template.md.
+Codex coordination/review: review this clean A1 packet against issue #138 D1–D16, issue #128, AGENTS.md, the Phase 1 risk register, and ownership boundaries. Do not implement or rewrite narrative in this review. If complete and user-approved, activate #133 and produce G1 from NVS_01_G1_Specification_Template.md.
 ```
 
-Codex remains blocked until the resulting G1 specification is approved.
+Codex engineering remains blocked until the resulting G1 specification is approved.

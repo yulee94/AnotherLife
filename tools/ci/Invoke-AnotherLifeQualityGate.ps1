@@ -62,6 +62,91 @@ function Add-Failure {
     Write-Host "::error::$Message"
 }
 
+function Get-PolicyPath {
+    $candidate = ".github/anotherlife-policy.yml"
+    if (Test-Path -LiteralPath $candidate) {
+        return $candidate
+    }
+
+    $repoCandidate = Join-Path (Join-Path $PSScriptRoot "..\..") ".github/anotherlife-policy.yml"
+    if (Test-Path -LiteralPath $repoCandidate) {
+        return $repoCandidate
+    }
+
+    return ""
+}
+
+function Convert-PolicyValue {
+    param([string] $Value)
+
+    $text = ""
+    if ($null -ne $Value) {
+        $text = $Value.Trim()
+    }
+    if (($text.StartsWith('"') -and $text.EndsWith('"')) -or
+        ($text.StartsWith("'") -and $text.EndsWith("'"))) {
+        $text = $text.Substring(1, $text.Length - 2)
+    }
+
+    return $text.Replace("\\", "\")
+}
+
+function Get-PolicyList {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [string[]] $Default = @()
+    )
+
+    $policyPath = Get-PolicyPath
+    if (-not $policyPath) {
+        return @($Default)
+    }
+
+    $lines = Get-Content -LiteralPath $policyPath
+    $values = [System.Collections.Generic.List[string]]::new()
+    $inList = $false
+    foreach ($line in $lines) {
+        if ($line -match "^\s*$([regex]::Escape($Name))\s*:\s*$") {
+            $inList = $true
+            continue
+        }
+
+        if ($inList -and $line -match "^\S[^:]*:\s*") {
+            break
+        }
+
+        if ($inList -and $line -match "^\s*-\s+(.+?)\s*$") {
+            $values.Add((Convert-PolicyValue $Matches[1])) | Out-Null
+        }
+    }
+
+    if ($values.Count -eq 0) {
+        return @($Default)
+    }
+
+    return @($values)
+}
+
+function Get-PolicyScalar {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [string] $Default = ""
+    )
+
+    $policyPath = Get-PolicyPath
+    if (-not $policyPath) {
+        return $Default
+    }
+
+    foreach ($line in Get-Content -LiteralPath $policyPath) {
+        if ($line -match "^\s*$([regex]::Escape($Name))\s*:\s*(.+?)\s*$") {
+            return Convert-PolicyValue $Matches[1]
+        }
+    }
+
+    return $Default
+}
+
 function Assert-NoFailures {
     param([System.Collections.Generic.List[string]] $Failures)
 
@@ -80,6 +165,29 @@ function Test-BodyContainsPath {
     return $Body -replace "\\", "/" -match [regex]::Escape($normalized)
 }
 
+function Test-AnyPathPrefix {
+    param(
+        [string] $Path,
+        [string[]] $Prefixes
+    )
+
+    $normalizedPath = ""
+    if ($null -ne $Path) {
+        $normalizedPath = $Path -replace "\\", "/"
+    }
+    foreach ($prefix in $Prefixes) {
+        $normalizedPrefix = ""
+        if ($null -ne $prefix) {
+            $normalizedPrefix = $prefix -replace "\\", "/"
+        }
+        if ($normalizedPrefix -and $normalizedPath.StartsWith($normalizedPrefix, [System.StringComparison]::Ordinal)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Invoke-Classify {
     $failures = [System.Collections.Generic.List[string]]::new()
     $event = Read-GitHubEvent
@@ -87,6 +195,14 @@ function Invoke-Classify {
     $draft = $false
     $baseBranch = $env:GITHUB_BASE_REF
     $headBranch = $env:GITHUB_HEAD_REF
+    $branchPrefixes = Get-PolicyList "branch_prefixes" @("codex/")
+    $primaryModes = Get-PolicyList "primary_modes" @(
+        "Codex coordination/review",
+        "Codex narrative/content",
+        "Codex terrestrial design",
+        "Codex engineering"
+    )
+    $retiredAgentsAndPrefixes = Get-PolicyList "retired_agents_and_prefixes" @("GPT", "Android Studio", "gpt/", "android-studio/", "gemini/")
 
     if ($null -ne $event -and $event.PSObject.Properties.Name -contains "pull_request") {
         $body = [string]$event.pull_request.body
@@ -101,8 +217,8 @@ function Invoke-Classify {
     Write-Host "Changed files:"
     $changedFiles | ForEach-Object { Write-Host "  $_" }
 
-    if ($headBranch -and $headBranch -notmatch "^codex/") {
-        Add-Failure $failures "Branch '$headBranch' does not use the Codex-only AnotherLife prefix. GPT, Android Studio, and Gemini prefixes are retired."
+    if ($headBranch -and -not ($branchPrefixes | Where-Object { $headBranch.StartsWith($_, [System.StringComparison]::Ordinal) })) {
+        Add-Failure $failures "Branch '$headBranch' does not use an allowed Codex-only AnotherLife prefix: $($branchPrefixes -join ', ')."
     }
 
     if ($baseBranch -and $baseBranch -ne "main" -and $body -notmatch "(?i)(depends on|prerequisite|stacked|base branch)") {
@@ -110,17 +226,19 @@ function Invoke-Classify {
     }
 
     if ($body) {
-        $modeMatches = [regex]::Matches(
-            $body,
-            "- \[[xX]\] (Codex coordination/review|Codex narrative/content|Codex terrestrial design|Codex engineering)"
-        )
+        $modePattern = ($primaryModes | ForEach-Object { [regex]::Escape($_) }) -join "|"
+        $modeMatches = [regex]::Matches($body, "- \[[xX]\] ($modePattern)")
 
         if ($modeMatches.Count -ne 1) {
             Add-Failure $failures "Exactly one primary Codex mode must be selected in the PR body."
         }
 
-        if ($body -match "- \[[xX]\] (GPT|Android Studio)") {
-            Add-Failure $failures "GPT and Android Studio are retired from future AnotherLife ownership modes."
+        $retiredModeNames = @($retiredAgentsAndPrefixes | Where-Object { $_ -notmatch "/$" })
+        if ($retiredModeNames.Count -gt 0) {
+            $retiredModePattern = ($retiredModeNames | ForEach-Object { [regex]::Escape($_) }) -join "|"
+            if ($body -match "- \[[xX]\] ($retiredModePattern)") {
+                Add-Failure $failures "Retired AnotherLife ownership modes are selected in the PR body."
+            }
         }
 
         if ($body -notmatch "(?i)(fixes|refs|closes|related|upstream|dependency).{0,80}(#\d+|https://github\.com/.+/issues/\d+)") {
@@ -134,7 +252,7 @@ function Invoke-Classify {
         Add-Failure $failures "Pull request body is unavailable or empty."
     }
 
-    $sharedFiles = @(
+    $sharedFiles = Get-PolicyList "shared_files" @(
         "unity/Assets/AL/Scripts/Core/Bootloader.cs",
         "unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs",
         "unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs",
@@ -147,9 +265,17 @@ function Invoke-Classify {
         }
     }
 
-    $narrativeChanged = @($changedFiles | Where-Object { $_ -match "^(unity/Docs/NVS_01_A1|unity/Docs/Narrative|app/src/main/.*/narrative/)" })
-    $terrestrialChanged = @($changedFiles | Where-Object { $_ -match "^(unity/Assets/AL/Art/Terrestrials/|unity/Assets/AL/Art/Designs/Terrestrial|unity/Docs/Terrestrials/|unity/Docs/Terrestrial)" })
-    $engineeringChanged = @($changedFiles | Where-Object { $_ -match "^(app/|unity/Assets/AL/Scripts/|unity/Assets/AL/Tests/|\.github/|tools/ci/|gradle/|build\.gradle\.kts|settings\.gradle\.kts)" })
+    $narrativePrefixes = Get-PolicyList "narrative_source_paths" @("unity/Docs/NVS_01_A1", "unity/Docs/Narrative", "app/src/main/java/com/example/anotherlife/narrative/")
+    $terrestrialPrefixes = Get-PolicyList "terrestrial_design_paths" @("unity/Assets/AL/Art/Terrestrials/", "unity/Assets/AL/Art/Designs/Terrestrial", "unity/Docs/Terrestrials/", "unity/Docs/Terrestrial")
+    $engineeringPrefixes = @(
+        Get-PolicyList "runtime_paths" @("app/", "unity/Assets/AL/Scripts/", "unity/Assets/AL/Tests/")
+    ) + @(
+        Get-PolicyList "workflow_paths" @(".github/workflows/", ".github/anotherlife-policy.yml", "tools/ci/")
+    )
+
+    $narrativeChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $narrativePrefixes })
+    $terrestrialChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $terrestrialPrefixes })
+    $engineeringChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringPrefixes })
 
     if (($narrativeChanged -or $terrestrialChanged) -and $engineeringChanged -and $body -notmatch "(?i)mixed-mode|separate PRs are impractical") {
         Add-Failure $failures "Source-mode and engineering paths are mixed without an explicit mixed-mode justification."
@@ -172,13 +298,15 @@ function Invoke-Hygiene {
     }
 
     $trackedFiles = @(Invoke-GitLines @("ls-files"))
-    $forbiddenPatterns = @(
+    $forbiddenPatterns = Get-PolicyList "forbidden_tracked_path_patterns" @(
         "^unity/(Library|Temp|Logs|Build|Builds|UserSettings)/",
         "^unity/Assets/StreamingAssets/aa/",
         "(^|/)(build|obj|bin|\.gradle)/",
         "\.(apk|aab|ipa|exe|dll|pdb|keystore|jks|p12|mobileprovision)$",
         "(?i)(unity_lic|signing\.properties|local\.properties|\.env)"
     )
+    $productionTestScenePath = Get-PolicyScalar "production_test_scene_path" "unity/Assets/Test.unity"
+    $productionTestSceneProjectPath = $productionTestScenePath -replace "^unity/", ""
 
     foreach ($file in $trackedFiles) {
         foreach ($pattern in $forbiddenPatterns) {
@@ -228,8 +356,8 @@ function Invoke-Hygiene {
 
         $sceneNames = @{}
         foreach ($scene in $enabledScenes) {
-            if ($scene -eq "Assets/Test.unity") {
-                Add-Failure $failures "Assets/Test.unity must not be enabled in production Build Settings."
+            if ($scene -eq $productionTestSceneProjectPath) {
+                Add-Failure $failures "$productionTestSceneProjectPath must not be enabled in production Build Settings."
             }
 
             $repoScenePath = "unity/$scene"

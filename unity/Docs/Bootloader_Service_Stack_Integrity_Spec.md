@@ -451,7 +451,7 @@ Do not edit:
 7. Add focused EditMode tests first.
 8. Run Unity compile and exact EditMode totals.
 9. Run safe PlayMode after #127 is available; until then report it as unavailable, not passing.
-10. Rebase and return for GPT review before merge.
+10. Rebase and return for Codex coordination/review before merge.
 
 ## 15. Acceptance criteria
 

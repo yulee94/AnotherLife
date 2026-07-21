@@ -482,7 +482,7 @@ A licensing IPC failure or missing Player build remains blocked validation, not 
 7. Ensure unavailable selection is non-mutating and honest.
 8. Add policy, reachability, mutation-spy, and UI hierarchy tests.
 9. Compile and run available Unity suites.
-10. Rebase and return for GPT review.
+10. Rebase and return for Codex coordination/review.
 
 ## 19. Acceptance criteria
 

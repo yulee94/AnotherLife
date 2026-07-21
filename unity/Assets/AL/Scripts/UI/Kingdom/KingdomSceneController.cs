@@ -41,9 +41,9 @@ namespace AL.UI.Kingdom
         private Color _messagePanelBaseColor = new Color(0.020f, 0.027f, 0.037f, 0.92f);
         private Color _messageWashBaseColor = new Color(0.28f, 0.56f, 0.78f, 0.05f);
         private Color _messageSignalBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.30f);
-        private float _completionTimer;
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
+        private bool _profileReady;
         private readonly List<Image> _messageSignalBars = new List<Image>();
         private readonly Text[] _readinessChipTexts = new Text[4];
         private readonly Image[] _readinessChipPanels = new Image[4];
@@ -77,43 +77,45 @@ namespace AL.UI.Kingdom
 
         private void Start()
         {
-            Bootloader.InitializeIfMissing();
-
-            var save = ServiceLocator.Get<ISaveGameService>();
-            if (save.CurrentSave == null)
-            {
-                save.Load();
-            }
+            // #178 containment: the controller no longer bootstraps the service stack or loads a
+            // profile itself. The committed Kingdom scene carries its own Bootloader owner root that
+            // performs the single marker-validated load (#241). This controller only consumes the
+            // already-ready profile; a controller-owned InitializeIfMissing()/Load() would be a second
+            // load that re-applies offline progress.
+            _profileReady = TryConsumeReadyProfile();
 
             BuildRuntimeWorld();
             BuildRuntimeUi();
             Refresh();
         }
 
+        // Reads the merged #241 offline-stack marker to decide whether a ready profile exists. It never
+        // triggers a load: if the scene's Bootloader owner has not completed the single load, this
+        // returns false and the read-only UI renders an honest unavailable state instead.
+        private static bool TryConsumeReadyProfile()
+        {
+            if (!ServiceLocator.TryGet<IOfflineServiceStackMarker>(out var marker))
+            {
+                return false;
+            }
+
+            if (marker.LoadState != OfflineStackLoadState.Succeeded)
+            {
+                return false;
+            }
+
+            return marker.TryGetExpected<ISaveGameService>(out var saveGameService) &&
+                   saveGameService.CurrentSave != null;
+        }
+
         private void Update()
         {
+            // #178 D7: the hidden per-second domain completion (CompleteUpgrade x8 + CompleteResearch)
+            // is removed. Upgrade/research timers now show their real, frozen state until #165/#183
+            // land. Update only drives cosmetic presentation pulses, which read no service state.
             UpdateCommandMessagePulse();
             UpdateStrategicReadinessPulse();
             UpdateResourceTickerPulse();
-
-            _completionTimer += Time.deltaTime;
-            if (_completionTimer < 1f)
-            {
-                return;
-            }
-
-            _completionTimer = 0f;
-            var buildingService = ServiceLocator.Get<IBuildingService>();
-            foreach (var buildingId in _buildingIds)
-            {
-                buildingService.CompleteUpgrade(buildingId);
-            }
-
-            var researchService = ServiceLocator.Get<IResearchService>();
-            researchService.CompleteResearch("Steel Forging");
-            researchService.CompleteResearch("Plate Armor");
-
-            Refresh();
         }
 
         private void BuildRuntimeWorld()
@@ -236,9 +238,28 @@ namespace AL.UI.Kingdom
             RefreshBoardHintVisibility();
         }
 
+        // Read-only refresh. The controller's own direct panel reads here are non-seeding: they never
+        // create domain entities as a side effect of rendering (#178 defect 2). Panels whose only data
+        // source is a state-seeding getter render a technical, layout-stable UNAVAILABLE state (D8)
+        // rather than calling that getter from read-only UI; DISTRICTS/RESEARCH still show their real
+        // (frozen) state through the non-seeding GetAll* reads (D7).
+        //
+        // Two deliberate carve-outs, neither of which persists state on a #241-canonical loaded profile:
+        //   (a) _kingdomVisualizer?.RefreshVisuals() below delegates to KingdomVisualizer, which seeds a
+        //       few base buildings only on an empty profile. That is a pre-existing, accepted board
+        //       behavior owned by a file outside this correction's scope, not a controller-owned read.
+        //   (b) GetResourceCount/GetCredits (resource ticker + WAR chip) run wallet/credit normalization
+        //       that is a strict no-op on a canonical loaded save and never calls Save(); they seed no
+        //       domain entities.
         private void Refresh()
         {
             _kingdomVisualizer?.RefreshVisuals();
+
+            if (!_profileReady)
+            {
+                RenderProfileUnavailable();
+                return;
+            }
 
             var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
             _realmText.text = realm == null
@@ -253,71 +274,120 @@ namespace AL.UI.Kingdom
             RefreshResourceTicker(resources, rareResourceType, warzoneCredits);
             RefreshStrategicReadiness();
 
+            RefreshDistrictsPanel();
+            RefreshResearchPanel();
+
+            // FORCES/OBJECTIVES/WAR ZONE are backed only by state-seeding getters
+            // (ITrainingService.GetTroopCount / IWarmasterService.GetState seed troop and warmaster
+            // state; IQuestService.GetActiveQuests seeds quest state; ITerritoryService.GetTerritories
+            // and IRealmGemService.GetRealmGems/GetWishgateState seed territory, gem, and Wishgate
+            // state). Per D8 they render a technical unavailable state until read-only contracts exist.
+            _troopText.text = BuildUnavailablePanel("FORCES");
+            _questText.text = BuildUnavailablePanel("OBJECTIVES");
+            _territoryText.text = BuildUnavailablePanel("WAR ZONE");
+        }
+
+        private void RefreshDistrictsPanel()
+        {
             var buildings = ServiceLocator.Get<IBuildingService>();
+            Dictionary<string, BuildingState> snapshot = BuildBuildingSnapshot(buildings);
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
             var builder = new StringBuilder();
             builder.AppendLine("DISTRICTS");
             foreach (var buildingId in _buildingIds)
             {
-                BuildingState state = buildings.GetBuildingState(buildingId);
-                string timer = state.IsUpgrading
-                    ? $"UPGRADING {Math.Max(0, state.UpgradeCompleteTimestamp - DateTimeOffset.UtcNow.ToUnixTimeSeconds())}s"
-                    : "READY";
-                builder.AppendLine($"{FormatBuildingName(buildingId),-12}  Lv {state.Level}  {timer}");
+                if (snapshot.TryGetValue(buildingId, out var state) && state != null)
+                {
+                    string timer = state.IsUpgrading
+                        ? $"UPGRADING {Math.Max(0, state.UpgradeCompleteTimestamp - now)}s"
+                        : "READY";
+                    builder.AppendLine($"{FormatBuildingName(buildingId),-12}  Lv {state.Level}  {timer}");
+                }
+                else
+                {
+                    builder.AppendLine($"{FormatBuildingName(buildingId),-12}  --  UNAVAILABLE");
+                }
             }
 
             _buildingText.text = builder.ToString();
+        }
 
-            var training = ServiceLocator.Get<ITrainingService>();
-            var warmaster = ServiceLocator.Get<IWarmasterService>();
-            var warmasterState = warmaster.GetState();
-            string equippedWarmasterSet = string.IsNullOrWhiteSpace(warmasterState?.EquippedSetId)
-                ? "none"
-                : warmasterState.EquippedSetId;
-            string warmasterRank = warmaster.IsTrueWarmaster() ? "True Warmaster" : "assembling";
-            _troopText.text =
-                "FORCES\n" +
-                $"Infantry     {training.GetTroopCount(TroopType.Infantry)}\n" +
-                $"Cavalry      {training.GetTroopCount(TroopType.Cavalry)}\n" +
-                $"Ranged       {training.GetTroopCount(TroopType.Ranged)}\n" +
-                $"Siege        {training.GetTroopCount(TroopType.Siege)}\n" +
-                $"Warmaster    {warmaster.GetPurchasedPieceCount()}/{warmaster.GetRequiredPieceCount()}\n" +
-                $"Set          {equippedWarmasterSet} ({warmasterRank})";
-
+        private void RefreshResearchPanel()
+        {
             var research = ServiceLocator.Get<IResearchService>();
-            var steel = research.GetResearchState("Steel Forging");
-            var armor = research.GetResearchState("Plate Armor");
+            Dictionary<string, ResearchState> snapshot = BuildResearchSnapshot(research);
+            snapshot.TryGetValue("Steel Forging", out var steel);
+            snapshot.TryGetValue("Plate Armor", out var armor);
+
+            // The derived Attack/Defense stat-bonus lines are dropped: the only API for them
+            // (IResearchService.GetStatBonus) internally seeds research state, and the bonus formula is
+            // domain-owned (#165/#183), not the controller's to reproduce. Levels and the real frozen
+            // research timer remain visible (D7).
             _researchText.text =
                 "RESEARCH\n" +
                 FormatResearch("Steel Forging", steel) + "\n" +
-                FormatResearch("Plate Armor", armor) + "\n" +
-                $"Attack bonus: {research.GetStatBonus(StatType.Attack):P0}\n" +
-                $"Defense bonus: {research.GetStatBonus(StatType.Defense):P0}";
+                FormatResearch("Plate Armor", armor);
+        }
 
-            var quests = new StringBuilder();
-            quests.AppendLine("OBJECTIVES");
-            foreach (var quest in ServiceLocator.Get<IQuestService>().GetActiveQuests())
+        private static Dictionary<string, BuildingState> BuildBuildingSnapshot(IBuildingService buildings)
+        {
+            var snapshot = new Dictionary<string, BuildingState>(StringComparer.Ordinal);
+            foreach (var state in buildings.GetAllBuildingStates())
             {
-                string state = quest.IsCompleted ? "complete" : "active";
-                quests.AppendLine($"{quest.QuestId}: {quest.CurrentValue} ({state})");
-            }
-            _questText.text = quests.ToString();
-
-            var territories = new StringBuilder();
-            territories.AppendLine("War Zone");
-            foreach (var territory in ServiceLocator.Get<ITerritoryService>().GetTerritories())
-            {
-                territories.AppendLine($"{territory.Name}: {territory.OwnerRealm} (+{territory.BonusAmount} {territory.BonusType})");
-            }
-            var wishgate = ServiceLocator.Get<IRealmGemService>().GetWishgateState();
-            territories.AppendLine(wishgate != null && wishgate.IsEarned ? "Wishgate: earned" : "Wishgate: dormant");
-            foreach (var gem in ServiceLocator.Get<IRealmGemService>().GetRealmGems())
-            {
-                if (!gem.IsAtHome || gem.IsDropped)
+                if (state != null && !string.IsNullOrEmpty(state.BuildingId) && !snapshot.ContainsKey(state.BuildingId))
                 {
-                    territories.AppendLine($"{gem.GemId}: carrier {gem.CarrierId ?? "dropped"}");
+                    snapshot[state.BuildingId] = state;
                 }
             }
-            _territoryText.text = territories.ToString();
+
+            return snapshot;
+        }
+
+        private static Dictionary<string, ResearchState> BuildResearchSnapshot(IResearchService research)
+        {
+            var snapshot = new Dictionary<string, ResearchState>(StringComparer.Ordinal);
+            foreach (var state in research.GetAllResearchStates())
+            {
+                if (state != null && !string.IsNullOrEmpty(state.ResearchId) && !snapshot.ContainsKey(state.ResearchId))
+                {
+                    snapshot[state.ResearchId] = state;
+                }
+            }
+
+            return snapshot;
+        }
+
+        private void RenderProfileUnavailable()
+        {
+            if (_realmText != null)
+            {
+                _realmText.text = "ANOTHERLIFE COMMAND";
+            }
+
+            if (_resourceText != null)
+            {
+                _resourceText.text = "TREASURY";
+            }
+
+            SetPanelText(_buildingText, BuildUnavailablePanel("DISTRICTS"));
+            SetPanelText(_troopText, BuildUnavailablePanel("FORCES"));
+            SetPanelText(_researchText, BuildUnavailablePanel("RESEARCH"));
+            SetPanelText(_questText, BuildUnavailablePanel("OBJECTIVES"));
+            SetPanelText(_territoryText, BuildUnavailablePanel("WAR ZONE"));
+        }
+
+        private static void SetPanelText(Text target, string value)
+        {
+            if (target != null)
+            {
+                target.text = value;
+            }
+        }
+
+        private static string BuildUnavailablePanel(string header)
+        {
+            return header + "\n\nTEMPORARILY UNAVAILABLE\nLive data pending domain contract.";
         }
 
         private void RefreshResourceTicker(IResourceService resources, ResourceType rareResourceType, int warzoneCredits)
@@ -365,9 +435,8 @@ namespace AL.UI.Kingdom
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             int upgradingCount = 0;
             int totalBuildingLevels = 0;
-            foreach (var buildingId in _buildingIds)
+            foreach (var state in buildings.GetAllBuildingStates())
             {
-                BuildingState state = buildings.GetBuildingState(buildingId);
                 if (state == null)
                 {
                     continue;
@@ -387,24 +456,32 @@ namespace AL.UI.Kingdom
                 upgradingCount > 0 ? new Color(0.92f, 0.62f, 0.28f, 1f) : new Color(0.62f, 0.86f, 0.56f, 1f),
                 upgradingCount > 0 ? 0.88f : 0.34f);
 
-            var training = ServiceLocator.Get<ITrainingService>();
-            int totalTroops =
-                training.GetTroopCount(TroopType.Infantry) +
-                training.GetTroopCount(TroopType.Cavalry) +
-                training.GetTroopCount(TroopType.Ranged) +
-                training.GetTroopCount(TroopType.Siege);
+            // FORCE: troop counts are only available through the state-seeding GetTroopCount getter, so
+            // the read-only readiness chip renders a neutral unavailable value (D8) instead.
             SetReadinessChip(
                 1,
                 "FORCE",
-                FormatCompactNumber(totalTroops),
-                totalTroops >= 250 ? new Color(0.62f, 0.88f, 0.58f, 1f) : new Color(0.42f, 0.74f, 1f, 1f),
-                totalTroops >= 250 ? 0.48f : 0.76f);
+                "N/A",
+                new Color(0.52f, 0.57f, 0.64f, 1f),
+                0.30f);
 
             var research = ServiceLocator.Get<IResearchService>();
-            ResearchState steel = research.GetResearchState("Steel Forging");
-            ResearchState armor = research.GetResearchState("Plate Armor");
-            int activeResearch = CountActiveResearch(steel) + CountActiveResearch(armor);
-            int researchLevels = (steel?.Level ?? 0) + (armor?.Level ?? 0);
+            int activeResearch = 0;
+            int researchLevels = 0;
+            foreach (var state in research.GetAllResearchStates())
+            {
+                if (state == null)
+                {
+                    continue;
+                }
+
+                researchLevels += Math.Max(0, state.Level);
+                if (state.IsResearching)
+                {
+                    activeResearch++;
+                }
+            }
+
             SetReadinessChip(
                 2,
                 "LAB",
@@ -1189,11 +1266,6 @@ namespace AL.UI.Kingdom
         {
             return Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
                    Resources.GetBuiltinResource<Font>("Arial.ttf");
-        }
-
-        private static int CountActiveResearch(ResearchState state)
-        {
-            return state != null && state.IsResearching ? 1 : 0;
         }
 
         private static string FormatCompactNumber(long value)

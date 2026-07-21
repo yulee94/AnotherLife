@@ -14,7 +14,7 @@ The canonical Android checkout was fetched and fast-forwarded to `main`, `HEAD` 
 
 Unity was then validated from a clean worktree created from the same integrated `main` commit with Unity `2022.3.62f3`. Batch import and C# compilation completed successfully, all available EditMode tests passed, the PlayMode runner completed with no tests available, and `Assets/Test.unity` entered and exited Play Mode successfully through a temporary editor-only validation probe.
 
-The project may advance to Phase 1. The first narrative gate is user approval of D1–D16 in issue #138. Android Studio then creates a new clean A1 branch from updated `main`; draft PR #124 remains an archive and must not be revised into or merged as the A1 delivery.
+The project may advance to Phase 1. The first narrative gate is user approval of D1–D16 in issue #138. This Codex agent then creates a new clean A1 branch from updated `main`; draft PR #124 remains an archive and must not be revised into or merged as the A1 delivery.
 
 ## Validated repository identity
 
@@ -209,15 +209,15 @@ Phase 0 is green. Phase 1 may begin through the following controlled sequence.
 
 ### First owner: user decision gate
 
-Issue #138 must approve D1–D16 for the bounded `OMEN_1` narrative intent. GPT and Codex do not select those answers.
+Issue #138 must approve D1–D16 for the bounded `OMEN_1` narrative intent. This Codex agent does not select those user-owned answers.
 
-### Second owner: Android Studio narrative workflow
+### Second owner: Codex narrative/content mode
 
 After PR #123 is merged and #138 is approved:
 
 1. Fetch and fast-forward canonical `main`.
 2. Confirm `HEAD == origin/main`.
-3. Create `android-studio/nvs-01-a1-clean`.
+3. Create `codex/narrative-nvs-01-a1-clean`.
 4. Use draft PR #124 only as source/reference.
 5. Encode exactly one bounded `OMEN_1` packet using `NVS_01_A1_Packet_Template.md`.
 6. Preserve D1–D16 without reinterpretation.
@@ -225,12 +225,12 @@ After PR #123 is merged and #138 is approved:
 8. Mark unimplemented hooks, locations, artifact ownership, localization runtime, and bridge work as external requests.
 9. Exclude all Unity runtime, Android model/navigation/Gradle, full Chapter 1, broad hook, and governance changes.
 10. Run packet tests plus Android unit tests/debug assembly.
-11. Supply the completion report and exact GPT handoff.
+11. Supply the completion report and exact Codex coordination/review handoff.
 
-### Following owner: GPT
+### Following owner: Codex coordination/review mode
 
-After clean A1 and user approval are authoritative, GPT reviews ownership/completeness and produces G1 from `NVS_01_G1_Specification_Template.md`, including contract/schema, state machine, encounter request/result map, persistence/D16 resume, consequence atomicity, error behavior, file impacts, locks, tests, and C1–C4 order.
+After clean A1 and user approval are authoritative, Codex coordination/review mode reviews ownership/completeness and produces G1 from `NVS_01_G1_Specification_Template.md`, including contract/schema, state machine, encounter request/result map, persistence/D16 resume, consequence atomicity, error behavior, file impacts, locks, tests, and C1–C4 order.
 
-### Codex hold
+### Engineering hold
 
-Codex must not begin NVS-01 runtime implementation until G1 is approved. Independent work on #126, #127, #132, or #136 must remain in separate focused PRs with no A1 overlap.
+Codex engineering must not begin NVS-01 runtime implementation until G1 is approved. Independent work on #126, #127, #132, or #136 must remain in separate focused PRs with no A1 overlap.

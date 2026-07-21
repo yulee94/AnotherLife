@@ -10,8 +10,9 @@ Use together:
 2. `unity/Docs/Ownership_Decision_Record.md` — final user ownership decision.
 3. `unity/Docs/Agent_Role_Prompts.md` — standalone Codex prompt.
 4. This roadmap — phase order and exit gates.
-5. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
-6. `.github/pull_request_template.md` — required PR declaration.
+5. `unity/Docs/Product_Direction.md` — target gameplay, presentation, optimization, and end-to-end objective direction.
+6. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
+7. `.github/pull_request_template.md` — required PR declaration.
 
 `AGENTS.md` wins conflicts. The user decides creative and product direction. Codex coordination/review mode resolves technical sequencing and acceptance disposition. Codex source/design and engineering modes perform delivery.
 
@@ -23,6 +24,8 @@ Use together:
 - Codex coordination/review mode specifies and reviews handoffs without silently rewriting source.
 - Use stable IDs and validated data instead of duplicated hard-coded authority.
 - Preserve old saves and service registrations.
+- Optimize continuously for broad device reach, low memory pressure, scalable visual quality, and the lowest feasible install size.
+- Reopen closed issues or create focused follow-ups when current source, Unity Hub play, or review evidence shows the issue still blocks the product direction.
 - Use one focused PR per major completion and one primary Codex mode.
 - Do not advance while the current phase gate is red unless the user reprioritizes.
 - Historical GPT artifacts may be consumed as technical specifications/evidence, but no future GPT action or approval is required.
@@ -33,14 +36,15 @@ Use together:
 2. Data loss, save corruption, security, economy, or irreversible migration risk.
 3. Active phase blockers.
 4. Missing contracts, integration, tests, and diagnostics.
-5. Required user-facing clarity and accessibility.
-6. Optional expansion and polish.
+5. Performance, memory, package size, device compatibility, and asset-pipeline risk.
+6. Required user-facing clarity and accessibility.
+7. Optional expansion and polish.
 
 ## Phase 0 — Governance and Build Health
 
 ### Goal
 
-Establish one workspace, the Codex–user model, one active implementation path per issue, and reliable validation commands.
+Establish one workspace, the single Codex agent responsibility model, one active implementation path per issue, and reliable validation commands.
 
 ### Codex coordination/review mode
 
@@ -148,7 +152,7 @@ Generalize NVS-01 into a complete Chapter 1 flow without quest-specific runtime 
 
 ### Goal
 
-Make approved choices visibly affect existing gameplay systems while preserving explicit source and runtime authority.
+Make approved choices visibly affect existing gameplay systems while preserving explicit source and runtime authority. This phase also starts aligning the playable spine with launch realm selection, 2.5D inner-kingdom progression, and 3D outer-warzone objectives.
 
 ### Codex narrative/content mode
 
@@ -175,6 +179,36 @@ Make approved choices visibly affect existing gameplay systems while preserving 
 - Approved narrative decisions and terrestrial designs produce deterministic visible persistent results.
 - Retries, reloads, and duplicate delivery cannot repeat consequences.
 - Unrelated gameplay remains operational.
+- Realm selection can lead into a credible inner-kingdom flow and a clearly marked path toward outer-warzone play.
+
+## Phase 3B — Realm Warzone Objective Spine
+
+### Goal
+
+Build the serious MMO-style objective loop: direct 3D champion/lord control in the outer kingdom warzone, realm-vs-realm gate conflict, crossroads conflict, dragon/boss/gem objectives, Warmaster PvP point progression, and the eight-gem final wish path.
+
+### Codex coordination/review mode
+
+- Define durable objective contracts, realm ownership, gem theft/return rules, Warmaster point policy, dragon/boss objective identity, anti-duplication, save/reload behavior, and end-to-end validation.
+
+### Codex narrative/content mode
+
+- Define realm stakes, dragon/final-wish meaning, boss/realm identity, objective messaging, failure/retry/counterplay meaning, and user-facing copy.
+
+### Codex terrestrial-design mode
+
+- Provide approved creature/boss/realm visual source where needed, without granting runtime authority until engineering integration.
+
+### Codex engineering mode
+
+- Implement playable, persistent, optimized 3D objective systems only after required save, economy, catalog, battle, boss, territory, Warmaster, Realm Gem, and notification contracts are safe.
+
+### Exit gate
+
+- Realm-vs-realm warzone entry is playable from the kingdom flow.
+- Main gate and crossroads objectives are visible and testable.
+- Dragon/boss/gem/Warmaster objectives use durable IDs and duplicate-safe committed results.
+- The eight-gem final wish path exists as a testable end-to-end objective or is explicitly blocked with focused issues.
 
 ## Phase 4 — Scalable Authoring and Asset Pipeline
 
@@ -226,13 +260,13 @@ Harden the game against old saves, invalid source, device differences, performan
 ### Codex engineering mode
 
 - Expand Android, Unity, asset, contract, save, device, performance, accessibility, and recovery tests.
-- Improve diagnostics and safe failure behavior.
+- Improve diagnostics, safe failure behavior, memory behavior, asset compression, dependency weight, scalable quality settings, and build/install size.
 
 ### Exit gate
 
 - Supported old saves load/migrate safely.
 - Critical paths have regression coverage.
-- Performance/device budgets are met.
+- Performance, memory, package-size, install-size, and device budgets are met.
 - Invalid source and interrupted flows fail visibly without duplicated rewards or silent progression.
 - Narrative and terrestrial-design clarity blockers are resolved or accepted by the user.
 
