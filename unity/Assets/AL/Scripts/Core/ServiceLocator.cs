@@ -136,24 +136,6 @@ namespace AL.Core
             }
         }
 
-        internal static void RemoveBatchIfCurrent(IReadOnlyList<ServiceRegistrationEntry> registrations)
-        {
-            if (registrations == null)
-            {
-                return;
-            }
-
-            foreach (var registration in registrations)
-            {
-                if (registration.ServiceType != null &&
-                    Services.TryGetValue(registration.ServiceType, out var current) &&
-                    ReferenceEquals(current, registration.Instance))
-                {
-                    Services.Remove(registration.ServiceType);
-                }
-            }
-        }
-
         internal sealed class ServicePublicationTransaction
         {
             private readonly IReadOnlyList<ServiceRegistrationEntry> _registrations;
