@@ -68,6 +68,7 @@ The current bundle identifier is a placeholder, not an accepted product identity
 | Xcode version | `26.6` (`17F113`) |
 | Device SDK | iOS `26.5` |
 | Unsigned Xcode Debug build | `BUILD SUCCEEDED` for generic physical iOS device |
+| Temporary App Store icon | 1024x1024 RGB PNG, no alpha; generated iPhone/iPad icon catalog compiled without the former missing-icon warning |
 | Built application | arm64 Mach-O, unsigned, 97 MiB, 36 files |
 | Reported output size | 809,741,503 bytes |
 | Generated file count | 2,773 |
@@ -90,6 +91,8 @@ eea61d4ec74436d7a004a22d49866271736d4483a184ed7d310b86ee8327823d  Unity-iPhone.x
 f6646bd1e5daaab89b3e59c32482bb5c0f1caf37abeca7ee34d3343cbdc03b52  Data/globalgamemanagers
 66ca38a8c671c0deb9ad7f77821d1c4a8ecf679bb837e11aa9c8732edf1b13aa  IosDevelopmentExport.summary.json
 bb791297fc960bc9658dfcb2a13e3353dc5c2b17e474fa5ad5543af3efe156cc  AnotherLifeUnity.app/AnotherLifeUnity
+433d0b7bb91d721815e86efa4b29a9a78818d29cf651c88be994ef8dbbdf9e4a  Assets/AL/Art/Temporary_App_Icon_AL.png
+b1728fc91c9eea11c00b68762126e87b23663690c5f16745063cb65c22e24795  AppIcon.appiconset/Icon-Store-1024.png
 ```
 
 ## Warning assessment
@@ -98,11 +101,14 @@ The initial non-incremental headless export reported three `-nographics` warning
 
 The remaining warning is actionable: Kingdom currently contains six `OnMouseDown`/`OnMouseEnter`/`OnMouseExit` handlers across `KingdomVisualizer` and `CityLayoutEngine`. Unity warns that these handlers can affect handheld performance. Replacing them with an intentional touch/pointer input path is a separate gameplay-input change and should be measured on hardware rather than folded into export tooling.
 
-The first full Xcode compile also exposed three Apple-stage follow-ups:
+The temporary 1024x1024 `AL` icon is assigned to Unity's iOS application and App Store slots. Unity generated the required iPhone, iPad, and marketing entries, and Xcode compiled the asset catalog without the former missing App Store icon warning.
 
-1. The generated app has no required 1024x1024 App Store icon. This is a release blocker that requires approved product artwork; the build foundation does not invent branding.
-2. Unity 2022.3.62f3 generated a call to the Game Controller `dpads` API, which Xcode marks as iOS 14 or newer, while the project currently targets iOS 12. The recommended compatibility floor is iOS 14 unless an older-device requirement justifies a Unity upgrade or a reviewed engine-side workaround.
-3. Xcode reports that Unity's `GameAssembly` script phase runs every build because it declares no outputs. This affects build iteration time, not Player runtime behavior.
+The temporary icon resolves build validation only; it is not approved final product artwork. **Release reminder:** replace `Assets/AL/Art/Temporary_App_Icon_AL.png` with the approved branded 1024x1024 icon before App Store submission, then repeat the unsigned build and archive checks.
+
+The open Apple-stage follow-ups are:
+
+1. Unity 2022.3.62f3 generated a call to the Game Controller `dpads` API, which Xcode marks as iOS 14 or newer, while the project currently targets iOS 12. The recommended compatibility floor is iOS 14 unless an older-device requirement justifies a Unity upgrade or a reviewed engine-side workaround.
+2. Xcode reports that Unity's `GameAssembly` script phase runs every build because it declares no outputs. This affects build iteration time, not Player runtime behavior.
 
 Xcode 26.6 also emitted atomic memory-order warnings from Unity's generated Baselib headers during the first compile. They did not prevent the arm64 framework from linking, but they are a Unity/Xcode compatibility diagnostic to revisit before treating this editor/toolchain pair as a release baseline.
 
@@ -115,7 +121,7 @@ No valid Apple code-signing identity is installed. The downloaded simulator comp
 Recommended sequence:
 
 1. Adopt iOS 14 as the minimum target, or explicitly justify and test the iOS 12 requirement against Unity's generated Game Controller code.
-2. Provide approved 1024x1024 App Store icon artwork.
+2. Replace the temporary `AL` icon with approved 1024x1024 App Store artwork before submission.
 3. Keep physical-device builds as the primary compatibility/performance target; repair simulator runtime registration only if rapid UI-only iteration justifies maintaining both variants.
 4. Decide the permanent bundle identifier and Apple Developer Team before enabling signing.
 5. Run Boot through RealmSelection on a signed physical-device build, then create a development archive.
@@ -123,4 +129,4 @@ Recommended sequence:
 
 ## Runtime and compatibility impact
 
-The committed implementation is Editor-only build tooling plus EditMode tests and documentation. It adds no runtime component, package, native library, scene, or asset to the Player. The generated Xcode project, DerivedData, and unsigned application are disposable and ignored. The unsigned Debug application occupies 97 MiB on disk; actual device compatibility and signed/install size remain unmeasured until the Apple-account and hardware gates are completed.
+The committed build foundation remains Editor-only tooling plus EditMode tests and documentation. The temporary-icon follow-up adds one 1024x1024 RGB image, its reproducible SVG source, and iOS Player Settings references; it adds no runtime component, package, native library, scene, or behavior. The generated Xcode project, DerivedData, and unsigned application are disposable and ignored. The unsigned Debug application occupies 97 MiB on disk; actual device compatibility and signed/install size remain unmeasured until the Apple-account and hardware gates are completed.
