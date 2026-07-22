@@ -16,11 +16,16 @@ function Test-Packet($packet) {
         if ($transition.dialogue) { Assert ($dialogue.ContainsKey($transition.dialogue)) 'missing transition dialogue' }
     }
     foreach ($objective in $packet.objectives) {
-        $allowed = @('id', 'textKey', 'activatesIn', 'completesOn')
-        foreach ($property in $objective.PSObject.Properties.Name) {
-            Assert ($allowed -contains $property) "unexpected objective property: $property"
+        $required = @('id', 'textKey', 'activatesIn', 'completesOn')
+        $actual = @($objective.PSObject.Properties.Name)
+        Assert ($actual.Count -eq $required.Count) 'objective property count mismatch'
+        foreach ($property in $required) {
+            Assert ($actual -ccontains $property) "missing objective property: $property"
         }
-        Assert ($packet.localization.PSObject.Properties.Name -contains $objective.textKey) 'missing objective localization'
+        foreach ($property in $actual) {
+            Assert ($required -ccontains $property) "unexpected objective property: $property"
+        }
+        Assert ($packet.localization.PSObject.Properties.Name -ccontains $objective.textKey) 'missing objective localization'
     }
     foreach ($node in $packet.dialogue) {
         Assert ($packet.localization.PSObject.Properties.Name -contains $node.textKey) 'missing dialogue localization'
@@ -52,6 +57,8 @@ $negative = @(
     @{ Name='unreachable state'; Mutate={ param($p) $p.states += [pscustomobject]@{ id='ORPHANED'; resume='none'; terminal=$false } } },
     @{ Name='conflicting consequence trigger'; Mutate={ param($p) $p.consequences[1].id=$p.consequences[0].id; $p.consequences[1].trigger='DIFFERENT_TRIGGER' } },
     @{ Name='duplicate objective source text'; Mutate={ param($p) $p.objectives[2] | Add-Member -NotePropertyName sourceText -NotePropertyValue 'Duplicate authority' } },
+    @{ Name='missing required objective property'; Mutate={ param($p) $p.objectives[2].PSObject.Properties.Remove('activatesIn') } },
+    @{ Name='wrong-case objective property'; Mutate={ param($p) $value=$p.objectives[0].textKey; $p.objectives[0].PSObject.Properties.Remove('textKey'); $p.objectives[0] | Add-Member -NotePropertyName TextKey -NotePropertyValue $value } },
     @{ Name='missing approval'; Mutate={ param($p) $p.approval.decisions=@('D1') } }
 )
 foreach ($case in $negative) {
