@@ -27,6 +27,10 @@
 *.shadergraph           unity-json
 *.shadersubgraph        unity-json
 
+# NVS-01 authoritative source and byte-stable generated runtime catalogs
+/Docs/Narrative/NVS_01/*.packet.json                    unity-json
+/Assets/StreamingAssets/AL/Narrative/*.catalog.json     unity-json
+
 # Unity UI Toolkit files
 *.tss                   text diff=css linguist-language=css
 *.uss                   text diff=css linguist-language=css
