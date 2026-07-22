@@ -1,93 +1,297 @@
+using System;
+using System.Collections.Generic;
 using AL.Core.Interfaces;
+using AL.Data.Runtime;
 using UnityEngine;
 
 namespace AL.Services.Local
 {
-    public class LocalWarzoneCreditService : IWarzoneCreditService
+    public class LocalWarzoneCreditService : IWarzoneCreditIntegrityService
     {
+        private const string CreditsPath = "WarzoneCredits";
+
         private readonly ISaveGameService _saveGameService;
+        private readonly Func<bool> _isProfileWritable;
 
         public LocalWarzoneCreditService(ISaveGameService saveGameService)
+            : this(saveGameService, () => true)
         {
-            _saveGameService = saveGameService;
         }
 
-        public int GetCredits()
+        internal LocalWarzoneCreditService(ISaveGameService saveGameService, Func<bool> isProfileWritable)
         {
-            NormalizeCredits();
-            return _saveGameService.CurrentSave?.WarzoneCredits ?? 0;
+            _saveGameService = saveGameService ?? throw new ArgumentNullException(nameof(saveGameService));
+            _isProfileWritable = isProfileWritable ?? throw new ArgumentNullException(nameof(isProfileWritable));
         }
 
-        public void AddCredits(int amount)
+        public EconomyBalanceReadResult ReadCredits()
         {
-            if (_saveGameService.CurrentSave == null)
+            if (!TryGetCurrentSave(out SaveGameData save))
             {
-                return;
+                return ReadFailure(
+                    EconomyBalanceReadStatus.UnavailableNoCurrentSave,
+                    EconomyDiagnosticCodes.NoCurrentSave);
             }
 
-            NormalizeCredits();
+            if (save.WarzoneCredits < 0)
+            {
+                return ReadFailure(
+                    EconomyBalanceReadStatus.UnavailableMalformedState,
+                    EconomyDiagnosticCodes.InvalidCredits);
+            }
+
+            return new EconomyBalanceReadResult(
+                IsProfileWritable()
+                    ? EconomyBalanceReadStatus.Available
+                    : EconomyBalanceReadStatus.AvailableReadOnly,
+                EconomyCurrencyKind.WarzoneCredits,
+                null,
+                save.WarzoneCredits,
+                EconomyContractCollections.EmptyDiagnostics);
+        }
+
+        public EconomyMutationResult TryAddCredits(int amount)
+        {
             if (amount == 0)
             {
-                return;
+                return Mutation(EconomyMutationStatus.NoChange, amount, null, null);
             }
 
             if (amount < 0)
             {
-                Debug.LogWarning($"[AL-ECO-INVALID-CREDITS] AddCredits rejected negative amount {amount}.");
-                return;
+                return MutationFailure(
+                    EconomyMutationStatus.RejectedInvalidAmount,
+                    amount,
+                    EconomyDiagnosticCodes.InvalidAmount);
             }
 
-            int finalCredits;
+            if (!TryGetWritableSave(amount, out SaveGameData save, out EconomyMutationResult failure))
+            {
+                return failure;
+            }
+
+            int previous = save.WarzoneCredits;
+            int current;
             try
             {
-                finalCredits = checked(_saveGameService.CurrentSave.WarzoneCredits + amount);
+                current = checked(previous + amount);
             }
-            catch (System.OverflowException)
+            catch (OverflowException)
             {
-                Debug.LogWarning($"[AL-ECO-CREDIT-OVERFLOW] AddCredits rejected overflow: {_saveGameService.CurrentSave.WarzoneCredits} + {amount}.");
+                return MutationFailure(
+                    EconomyMutationStatus.RejectedOverflow,
+                    amount,
+                    EconomyDiagnosticCodes.Overflow,
+                    previous,
+                    previous);
+            }
+
+            save.WarzoneCredits = current;
+            return Mutation(EconomyMutationStatus.Applied, amount, previous, current);
+        }
+
+        public EconomyMutationResult TrySpendCredits(int amount)
+        {
+            if (amount <= 0)
+            {
+                return MutationFailure(
+                    EconomyMutationStatus.RejectedInvalidAmount,
+                    amount,
+                    EconomyDiagnosticCodes.InvalidAmount);
+            }
+
+            if (!TryGetWritableSave(amount, out SaveGameData save, out EconomyMutationResult failure))
+            {
+                return failure;
+            }
+
+            int previous = save.WarzoneCredits;
+            if (previous < amount)
+            {
+                return MutationFailure(
+                    EconomyMutationStatus.RejectedInsufficientBalance,
+                    amount,
+                    EconomyDiagnosticCodes.InsufficientBalance,
+                    previous,
+                    previous);
+            }
+
+            int current;
+            try
+            {
+                current = checked(previous - amount);
+            }
+            catch (OverflowException)
+            {
+                return MutationFailure(
+                    EconomyMutationStatus.RejectedOverflow,
+                    amount,
+                    EconomyDiagnosticCodes.Overflow,
+                    previous,
+                    previous);
+            }
+
+            save.WarzoneCredits = current;
+            return Mutation(EconomyMutationStatus.Applied, amount, previous, current);
+        }
+
+        public int GetCredits()
+        {
+            EconomyBalanceReadResult result = ReadCredits();
+            return result.IsAvailable && result.Balance.HasValue
+                ? checked((int)result.Balance.Value)
+                : 0;
+        }
+
+        public void AddCredits(int amount)
+        {
+            EconomyMutationResult result = TryAddCredits(amount);
+            if (result.Status == EconomyMutationStatus.Applied)
+            {
+                _saveGameService.Save();
                 return;
             }
 
-            _saveGameService.CurrentSave.WarzoneCredits = finalCredits;
-            _saveGameService.Save();
-            Debug.Log($"Added {amount} Warzone Credits. Total: {_saveGameService.CurrentSave.WarzoneCredits}");
+            LogCompatibilityRejection("AddCredits", result);
         }
 
         public bool SpendCredits(int amount)
         {
-            if (_saveGameService.CurrentSave == null)
+            EconomyMutationResult result = TrySpendCredits(amount);
+            if (result.Status != EconomyMutationStatus.Applied)
             {
+                LogCompatibilityRejection("SpendCredits", result);
                 return false;
             }
 
-            NormalizeCredits();
-            if (amount <= 0)
-            {
-                Debug.LogWarning($"[AL-ECO-INVALID-CREDITS] SpendCredits rejected non-positive amount {amount}.");
-                return false;
-            }
-
-            if (_saveGameService.CurrentSave.WarzoneCredits >= amount)
-            {
-                _saveGameService.CurrentSave.WarzoneCredits -= amount;
-                _saveGameService.Save();
-                return true;
-            }
-            return false;
+            _saveGameService.Save();
+            return true;
         }
 
-        private void NormalizeCredits()
+        private bool TryGetWritableSave(
+            int amount,
+            out SaveGameData save,
+            out EconomyMutationResult failure)
         {
-            if (_saveGameService.CurrentSave == null)
+            if (!TryGetCurrentSave(out save))
+            {
+                failure = MutationFailure(
+                    EconomyMutationStatus.RejectedNoCurrentSave,
+                    amount,
+                    EconomyDiagnosticCodes.NoCurrentSave);
+                return false;
+            }
+
+            if (!IsProfileWritable())
+            {
+                failure = MutationFailure(
+                    EconomyMutationStatus.RejectedProfileNotWritable,
+                    amount,
+                    EconomyDiagnosticCodes.ProfileReadOnly,
+                    save.WarzoneCredits >= 0 ? save.WarzoneCredits : (long?)null,
+                    save.WarzoneCredits >= 0 ? save.WarzoneCredits : (long?)null);
+                return false;
+            }
+
+            if (save.WarzoneCredits < 0)
+            {
+                failure = MutationFailure(
+                    EconomyMutationStatus.RejectedMalformedState,
+                    amount,
+                    EconomyDiagnosticCodes.InvalidCredits);
+                return false;
+            }
+
+            failure = default;
+            return true;
+        }
+
+        private bool TryGetCurrentSave(out SaveGameData save)
+        {
+            try
+            {
+                save = _saveGameService.CurrentSave;
+                return save != null;
+            }
+            catch (Exception)
+            {
+                save = null;
+                return false;
+            }
+        }
+
+        private bool IsProfileWritable()
+        {
+            try
+            {
+                return _isProfileWritable();
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static EconomyBalanceReadResult ReadFailure(
+            EconomyBalanceReadStatus status,
+            string diagnosticCode)
+        {
+            return new EconomyBalanceReadResult(
+                status,
+                EconomyCurrencyKind.WarzoneCredits,
+                null,
+                null,
+                OneDiagnostic(diagnosticCode, CreditsPath));
+        }
+
+        private static EconomyMutationResult Mutation(
+            EconomyMutationStatus status,
+            int amount,
+            long? previous,
+            long? current)
+        {
+            return new EconomyMutationResult(
+                status,
+                EconomyCurrencyKind.WarzoneCredits,
+                null,
+                amount,
+                previous,
+                current,
+                EconomyContractCollections.EmptyDiagnostics);
+        }
+
+        private static EconomyMutationResult MutationFailure(
+            EconomyMutationStatus status,
+            int amount,
+            string diagnosticCode,
+            long? previous = null,
+            long? current = null)
+        {
+            return new EconomyMutationResult(
+                status,
+                EconomyCurrencyKind.WarzoneCredits,
+                null,
+                amount,
+                previous,
+                current,
+                OneDiagnostic(diagnosticCode, CreditsPath));
+        }
+
+        private static IReadOnlyList<EconomyDiagnostic> OneDiagnostic(string code, string path) =>
+            Array.AsReadOnly(new[] { new EconomyDiagnostic(code, path) });
+
+        private static void LogCompatibilityRejection(string operation, EconomyMutationResult result)
+        {
+            if (result.Status == EconomyMutationStatus.NoChange ||
+                result.Status == EconomyMutationStatus.RejectedInsufficientBalance)
             {
                 return;
             }
 
-            if (_saveGameService.CurrentSave.WarzoneCredits < 0)
-            {
-                Debug.LogWarning($"[AL-ECO-NEGATIVE-CREDITS] Repaired negative Warzone Credits balance {_saveGameService.CurrentSave.WarzoneCredits} to 0.");
-                _saveGameService.CurrentSave.WarzoneCredits = 0;
-            }
+            string code = string.IsNullOrWhiteSpace(result.DiagnosticCode)
+                ? EconomyDiagnosticCodes.InvalidCredits
+                : result.DiagnosticCode;
+            Debug.LogWarning($"[{code}] {operation} rejected with status {result.Status}.");
         }
     }
 }

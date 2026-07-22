@@ -6,4 +6,11 @@ namespace AL.Core.Interfaces
         void AddCredits(int amount);
         bool SpendCredits(int amount);
     }
+
+    public interface IWarzoneCreditIntegrityService : IWarzoneCreditService
+    {
+        EconomyBalanceReadResult ReadCredits();
+        EconomyMutationResult TryAddCredits(int amount);
+        EconomyMutationResult TrySpendCredits(int amount);
+    }
 }
