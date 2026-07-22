@@ -33,7 +33,7 @@ namespace AL.EditorTools
     ///   - InspectProductionScenes: report Missing/Valid/Drifted per scene.
     ///   - GenerateMissingProductionScenes: create only missing scenes; block on any drift; typed result.
     ///   - ValidateProductionScenes: drift validator (delegates to ProductionSceneValidator).
-    ///   - ApplyProductionBuildSettings: owned/invoked ONLY by #150 (no menu item, not called here).
+    ///   - ApplyProductionBuildSettings: owned ONLY by #150 (explicit repair seam; not called here or by builds).
     ///   - RegenerateProductionScenes(confirmToken): explicit reviewed overwrite preserving .meta identity.
     /// The old destructive Generate()/UpdateBuildSettings() menu path is removed entirely.
     /// </summary>
@@ -284,8 +284,8 @@ namespace AL.EditorTools
         /// <summary>
         /// Applies the ShellFoundation Build Settings list (Boot(0)/RealmSelection(1)/Kingdom(2), enabled;
         /// Test and ChampionArena absent) from the descriptor. This is the ONLY method that writes
-        /// EditorBuildSettings and it is invoked exclusively by the later #150 build entry. It has no menu
-        /// item and no batch entry and is never called by inspection/generation/validation.
+        /// EditorBuildSettings. It is an explicit #150 repair seam with no menu or batch entry; strict Player
+        /// builds validate the committed list and never call it, so repository drift cannot be hidden.
         /// </summary>
         public static void ApplyProductionBuildSettings()
         {

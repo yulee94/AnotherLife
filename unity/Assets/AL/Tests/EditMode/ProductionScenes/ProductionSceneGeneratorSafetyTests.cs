@@ -61,8 +61,11 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.AreEqual(before, after, "EditorBuildSettings.asset must not change during authoring/validation.");
 
             string text = System.Text.Encoding.UTF8.GetString(after);
-            Assert.That(text, Does.Not.Contain("Assets/AL/Scenes/"), "Authoring must not add scenes to Build Settings.");
+            Assert.That(text, Does.Contain("Assets/AL/Scenes/Boot.unity"));
+            Assert.That(text, Does.Contain("Assets/AL/Scenes/RealmSelection.unity"));
+            Assert.That(text, Does.Contain("Assets/AL/Scenes/Kingdom.unity"));
             Assert.That(text, Does.Not.Contain("Assets/Test.unity"));
+            Assert.That(text, Does.Not.Contain("Assets/AL/Scenes/ChampionArena.unity"));
         }
 
         [Test]
