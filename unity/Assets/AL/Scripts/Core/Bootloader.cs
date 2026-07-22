@@ -1,8 +1,10 @@
 using UnityEngine;
 using AL.Core.Interfaces;
+using AL.Data.Runtime;
 using AL.Services.Local;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace AL.Core
@@ -10,12 +12,17 @@ namespace AL.Core
     public class Bootloader : MonoBehaviour
     {
         private const int OfflineStackVersion = 1;
+        internal static Func<BootloaderInitializationResult> PostInstallValidationOverride;
+        internal static Func<Type, object, bool> PublishBeforeRegisterOverride;
 
         [SerializeField] private bool _autoLoadOnStart = true;
 
+        private readonly string _runtimeOwnerId = Guid.NewGuid().ToString("N");
         private BootloaderInitializationResult _initializationResult = BootloaderInitializationResult.NotStarted();
         private bool _runtimeActive;
         private bool _runtimeDriftReported;
+        private bool _standbyForOwnership;
+        private IOfflineServiceStackMarker _ownedMarker;
 
         private void Awake()
         {
@@ -28,13 +35,153 @@ namespace AL.Core
                 return;
             }
 
-            if (_autoLoadOnStart &&
-                ServiceLocator.TryGet<IOfflineServiceStackMarker>(out var marker) &&
-                marker.TryMarkLoaded() &&
-                ServiceLocator.TryGet<ISaveGameService>(out var saveGameService))
+            var markerValidation = BootloaderInitializationResult.NotStarted();
+            if (!TryGetValidatedMarker(out var marker, out markerValidation))
+            {
+                if (markerValidation.State != BootloaderInitializationState.NotStarted)
+                {
+                    _initializationResult = markerValidation;
+                    _runtimeActive = false;
+                    enabled = false;
+                    LogInitializationResult(_initializationResult);
+                }
+
+                return;
+            }
+
+            if (!marker.TryClaimRuntimeOwner(_runtimeOwnerId))
+            {
+                // Reverse-ordering handoff: an incoming Bootloader can awaken before the outgoing
+                // owner's OnDestroy releases the claim. Do not disable; stand by and reclaim ownership
+                // from Update once the previous owner releases it. Claim-first-wins stays intact and no
+                // liveness/takeover heuristic is used.
+                _initializationResult = BootloaderInitializationResult.RuntimeOwnerRejected(marker.RegistrationId);
+                _standbyForOwnership = true;
+                _runtimeActive = false;
+                LogInitializationResult(_initializationResult);
+                return;
+            }
+
+            ActivateAsRuntimeOwner(marker);
+        }
+
+        private void ActivateAsRuntimeOwner(IOfflineServiceStackMarker marker)
+        {
+            _ownedMarker = marker;
+            _runtimeActive = true;
+
+            if (_autoLoadOnStart)
+            {
+                RunAutoLoad(marker);
+            }
+        }
+
+        private void TryActivateFromStandby()
+        {
+            if (!TryGetValidatedMarker(out var marker, out _))
+            {
+                // No consistent complete stack to own yet; keep standing by silently so a transient
+                // or inconsistent registry does not spam drift diagnostics.
+                return;
+            }
+
+            if (!marker.TryClaimRuntimeOwner(_runtimeOwnerId))
+            {
+                // The previous owner is still alive; keep standing by without re-logging the rejection.
+                return;
+            }
+
+            _standbyForOwnership = false;
+            _initializationResult = BootloaderInitializationResult.ReusedCompleteStack(marker.RegistrationId);
+            ActivateAsRuntimeOwner(marker);
+        }
+
+        private void RunAutoLoad(IOfflineServiceStackMarker marker)
+        {
+            if (marker.LoadState == OfflineStackLoadState.Succeeded)
+            {
+                // A prior owner in this session already loaded offline progress for this stack;
+                // reuse it without loading again so repeated startup cannot double-apply progress.
+                return;
+            }
+
+            if (!marker.TryBeginLoad(_runtimeOwnerId))
+            {
+                if (marker.LoadState == OfflineStackLoadState.InProgress)
+                {
+                    _initializationResult = BootloaderInitializationResult.LoadInProgressConflict(marker.RegistrationId);
+                    _runtimeActive = false;
+                    enabled = false;
+                    ReleaseRuntimeOwnership();
+                    LogInitializationResult(_initializationResult);
+                }
+
+                return;
+            }
+
+            if (!marker.TryGetExpected<ISaveGameService>(out var saveGameService))
+            {
+                marker.MarkLoadFailed(_runtimeOwnerId);
+                _initializationResult = BootloaderInitializationResult.FailedLoad("Expected save service was not available for load.");
+                _runtimeActive = false;
+                enabled = false;
+                ReleaseRuntimeOwnership();
+                LogInitializationResult(_initializationResult);
+                return;
+            }
+
+            try
             {
                 saveGameService.Load();
+                bool approvedLoad = IsApprovedLoadSuccess(saveGameService);
+                bool markerStillValid = TryGetValidatedMarker(out var postLoadMarker, out var postLoadValidation);
+                if (!approvedLoad ||
+                    !markerStillValid ||
+                    !ReferenceEquals(marker, postLoadMarker) ||
+                    !postLoadMarker.TryGetExpected<ISaveGameService>(out var postLoadSave) ||
+                    !ReferenceEquals(saveGameService, postLoadSave))
+                {
+                    marker.MarkLoadFailed(_runtimeOwnerId);
+                    string message = !postLoadValidation.Succeeded && postLoadValidation.State != BootloaderInitializationState.NotStarted
+                        ? postLoadValidation.Message
+                        : $"Load status {saveGameService.LastLoadStatus}; current save present: {saveGameService.CurrentSave != null}.";
+                    _initializationResult = BootloaderInitializationResult.FailedLoad(message);
+                    _runtimeActive = false;
+                    enabled = false;
+                    ReleaseRuntimeOwnership();
+                    LogInitializationResult(_initializationResult);
+                    return;
+                }
+
+                marker.MarkLoadSucceeded(_runtimeOwnerId);
             }
+            catch (Exception ex)
+            {
+                marker.MarkLoadFailed(_runtimeOwnerId);
+                _initializationResult = BootloaderInitializationResult.FailedLoad(ex.Message);
+                _runtimeActive = false;
+                enabled = false;
+                ReleaseRuntimeOwnership();
+                LogInitializationResult(_initializationResult);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            // Release the single-owner claim so a later Bootloader (for example after a scene
+            // transition destroys this owner) can claim ownership and continue runtime work.
+            ReleaseRuntimeOwnership();
+        }
+
+        private void ReleaseRuntimeOwnership()
+        {
+            if (_ownedMarker == null)
+            {
+                return;
+            }
+
+            _ownedMarker.TryReleaseRuntimeOwner(_runtimeOwnerId);
+            _ownedMarker = null;
         }
 
         public static BootloaderInitializationResult InitializeIfMissing()
@@ -68,7 +215,7 @@ namespace AL.Core
                 return constructionResult;
             }
 
-            var publicationResult = ServiceLocator.PublishBatch(stack.Registrations);
+            var publicationResult = ServiceLocator.PublishBatch(stack.Registrations, PublishBeforeRegisterOverride);
             if (!publicationResult.Succeeded)
             {
                 var failedPublicationResult = BootloaderInitializationResult.FailedPublication(
@@ -78,10 +225,24 @@ namespace AL.Core
                 return failedPublicationResult;
             }
 
-            var installedResult = TryValidateExistingMarker();
+            var installedResult = PostInstallValidationOverride != null
+                ? PostInstallValidationOverride()
+                : TryValidateExistingMarker();
             var result = installedResult.State == BootloaderInitializationState.ReusedCompleteStack
                 ? BootloaderInitializationResult.CreatedCompleteStack(stack.Marker.RegistrationId)
                 : installedResult;
+
+            if (!result.Succeeded)
+            {
+                publicationResult.Transaction?.Rollback();
+                result = BootloaderInitializationResult.FailedPublication(
+                    typeof(IOfflineServiceStackMarker),
+                    $"Post-install verification failed and the attempted stack was rolled back. {installedResult.Message}");
+            }
+            else
+            {
+                publicationResult.Transaction?.Commit();
+            }
 
             LogInitializationResult(result);
             return result;
@@ -98,12 +259,42 @@ namespace AL.Core
             {
                 return BootloaderInitializationResult.FailedInconsistentMarker(
                     marker.RegistrationId,
-                    Array.Empty<Type>(),
-                    $"Unsupported offline stack marker version {marker.StackVersion}.");
+                    missingTypes: Array.Empty<Type>(),
+                    mismatchedTypes: Array.Empty<Type>(),
+                    unexpectedTypes: Array.Empty<Type>(),
+                    invalidTypes: new[] { typeof(IOfflineServiceStackMarker) },
+                    message: $"Unsupported offline stack marker version {marker.StackVersion}.");
             }
 
             var missing = new List<Type>();
             var mismatched = new List<Type>();
+            var unexpected = new List<Type>();
+            var invalid = new List<Type>();
+
+            if (string.IsNullOrWhiteSpace(marker.RegistrationId))
+            {
+                invalid.Add(typeof(IOfflineServiceStackMarker));
+            }
+
+            if (marker.ExpectedInstances == null)
+            {
+                invalid.Add(typeof(IOfflineServiceStackMarker));
+                return BootloaderInitializationResult.FailedInconsistentMarker(
+                    marker.RegistrationId,
+                    missingTypes: missing.ToArray(),
+                    mismatchedTypes: mismatched.ToArray(),
+                    unexpectedTypes: unexpected.ToArray(),
+                    invalidTypes: invalid.ToArray(),
+                    message: "Offline service stack marker has no expected-instance inventory.");
+            }
+
+            foreach (var key in marker.ExpectedInstances.Keys.Where(type => type != null))
+            {
+                if (!OfflineServiceStack.RequiredServiceTypes.Contains(key))
+                {
+                    unexpected.Add(key);
+                }
+            }
 
             foreach (var serviceType in OfflineServiceStack.RequiredServiceTypes)
             {
@@ -115,38 +306,65 @@ namespace AL.Core
 
                 if (!marker.ExpectedInstances.TryGetValue(serviceType, out var expected) ||
                     expected == null ||
+                    !serviceType.IsInstanceOfType(expected) ||
                     !ReferenceEquals(current, expected))
                 {
                     mismatched.Add(serviceType);
                 }
             }
 
-            if (!ReferenceEquals(marker.SaveRoot, marker.ExpectedInstances[typeof(ISaveGameService)]) ||
-                !ReferenceEquals(marker.GameDataRoot, marker.ExpectedInstances[typeof(IGameDataService)]))
+            if (!marker.ExpectedInstances.TryGetValue(typeof(ISaveGameService), out var expectedSave) ||
+                !marker.ExpectedInstances.TryGetValue(typeof(IGameDataService), out var expectedGameData) ||
+                !ReferenceEquals(marker.SaveRoot, expectedSave) ||
+                !ReferenceEquals(marker.GameDataRoot, expectedGameData))
             {
-                mismatched.Add(typeof(IOfflineServiceStackMarker));
+                invalid.Add(typeof(IOfflineServiceStackMarker));
             }
 
-            if (missing.Count > 0 || mismatched.Count > 0)
+            if (missing.Count > 0 || mismatched.Count > 0 || unexpected.Count > 0 || invalid.Count > 0)
             {
                 return BootloaderInitializationResult.FailedInconsistentMarker(
                     marker.RegistrationId,
-                    missing.Concat(mismatched).Distinct().ToArray(),
-                    "Offline service stack marker no longer matches registered services.");
+                    missingTypes: missing.ToArray(),
+                    mismatchedTypes: mismatched.ToArray(),
+                    unexpectedTypes: unexpected.ToArray(),
+                    invalidTypes: invalid.ToArray(),
+                    message: "Offline service stack marker no longer matches registered services.");
             }
 
             return BootloaderInitializationResult.ReusedCompleteStack(marker.RegistrationId);
         }
 
+        private static bool TryGetValidatedMarker(
+            out IOfflineServiceStackMarker marker,
+            out BootloaderInitializationResult validation)
+        {
+            validation = TryValidateExistingMarker();
+            if (!validation.Succeeded ||
+                !ServiceLocator.TryGet<IOfflineServiceStackMarker>(out marker))
+            {
+                marker = null;
+                return false;
+            }
+
+            return true;
+        }
+
         private void Update()
         {
+            if (_standbyForOwnership)
+            {
+                // Not the runtime owner yet: attempt to reclaim before any tick/drift/save work.
+                TryActivateFromStandby();
+                return;
+            }
+
             if (!_runtimeActive)
             {
                 return;
             }
 
-            var validation = TryValidateExistingMarker();
-            if (!validation.Succeeded)
+            if (!TryGetValidatedMarker(out var marker, out var validation))
             {
                 if (!_runtimeDriftReported)
                 {
@@ -154,12 +372,22 @@ namespace AL.Core
                     Debug.LogError(BootloaderInitializationResult.RuntimeDrift(validation.Message).Message);
                 }
 
+                // The runtime claim is deliberately NOT released here: an inconsistent or replaced
+                // marker already blocks any other Bootloader from validating and reusing this stack,
+                // and the claim is released on OnDestroy (reviewer m3 asymmetry note).
                 _runtimeActive = false;
                 enabled = false;
                 return;
             }
 
-            if (ServiceLocator.TryGet<IResourceService>(out var resourceService))
+            if (!marker.IsRuntimeOwner(_runtimeOwnerId))
+            {
+                _runtimeActive = false;
+                enabled = false;
+                return;
+            }
+
+            if (marker.TryGetExpected<IResourceService>(out var resourceService))
             {
                 resourceService.TickProduction(Time.deltaTime);
             }
@@ -180,19 +408,57 @@ namespace AL.Core
 
         private void SaveIfReady()
         {
-            if (!_runtimeActive || !ServiceLocator.TryGet<ISaveGameService>(out var saveGameService))
+            var validation = BootloaderInitializationResult.NotStarted();
+            if (!_runtimeActive ||
+                !TryGetValidatedMarker(out var marker, out validation) ||
+                !marker.TryGetExpected<ISaveGameService>(out var saveGameService))
             {
+                if (_runtimeActive && !validation.Succeeded && validation.State != BootloaderInitializationState.NotStarted)
+                {
+                    // As in Update, the claim is deliberately NOT released on drift here; the
+                    // inconsistent marker blocks reuse and OnDestroy performs the release
+                    // (reviewer m3 asymmetry note).
+                    _runtimeActive = false;
+                    _runtimeDriftReported = true;
+                    enabled = false;
+                    Debug.LogError(BootloaderInitializationResult.RuntimeDrift(validation.Message).Message);
+                }
+
+                return;
+            }
+
+            if (!marker.IsRuntimeOwner(_runtimeOwnerId) ||
+                saveGameService.CurrentSave == null)
+            {
+                Debug.LogError("[BOOT_STACK_SAVE_FAILED] Bootloader save skipped because this owner has no valid current save.");
                 return;
             }
 
             try
             {
                 saveGameService.Save();
+                if (saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
+                {
+                    Debug.LogError($"[BOOT_STACK_SAVE_FAILED] Bootloader save did not complete successfully: {saveGameService.LastSaveStatus} {saveGameService.LastSaveMessage}");
+                }
             }
             catch (Exception ex)
             {
                 Debug.LogError($"[BOOT_STACK_SAVE_FAILED] Bootloader save failed: {ex.Message}");
             }
+        }
+
+        private static bool IsApprovedLoadSuccess(ISaveGameService saveGameService)
+        {
+            if (saveGameService == null || saveGameService.CurrentSave == null)
+            {
+                return false;
+            }
+
+            return saveGameService.LastLoadStatus == SaveLoadStatus.LoadedPrimary ||
+                saveGameService.LastLoadStatus == SaveLoadStatus.RecoveredFromBackup ||
+                saveGameService.LastLoadStatus == SaveLoadStatus.CreatedNew ||
+                saveGameService.LastLoadStatus == SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption;
         }
 
         private static Type[] GetPresentRequiredTypes()
@@ -227,7 +493,10 @@ namespace AL.Core
         FailedInconsistentMarker,
         FailedConstruction,
         FailedPublication,
-        RuntimeDrift
+        FailedLoad,
+        FailedLoadInProgress,
+        RuntimeDrift,
+        RuntimeOwnerRejected
     }
 
     public sealed class BootloaderInitializationResult
@@ -240,16 +509,20 @@ namespace AL.Core
             Type serviceType = null,
             IReadOnlyList<Type> presentTypes = null,
             IReadOnlyList<Type> missingTypes = null,
-            IReadOnlyList<Type> mismatchedTypes = null)
+            IReadOnlyList<Type> mismatchedTypes = null,
+            IReadOnlyList<Type> unexpectedTypes = null,
+            IReadOnlyList<Type> invalidTypes = null)
         {
             State = state;
             Code = code ?? string.Empty;
             Message = message ?? string.Empty;
             RegistrationId = registrationId ?? string.Empty;
             ServiceType = serviceType;
-            PresentTypes = presentTypes ?? Array.Empty<Type>();
-            MissingTypes = missingTypes ?? Array.Empty<Type>();
-            MismatchedTypes = mismatchedTypes ?? Array.Empty<Type>();
+            PresentTypes = CopyTypes(presentTypes);
+            MissingTypes = CopyTypes(missingTypes);
+            MismatchedTypes = CopyTypes(mismatchedTypes);
+            UnexpectedTypes = CopyTypes(unexpectedTypes);
+            InvalidTypes = CopyTypes(invalidTypes);
         }
 
         public BootloaderInitializationState State { get; }
@@ -260,6 +533,8 @@ namespace AL.Core
         public IReadOnlyList<Type> PresentTypes { get; }
         public IReadOnlyList<Type> MissingTypes { get; }
         public IReadOnlyList<Type> MismatchedTypes { get; }
+        public IReadOnlyList<Type> UnexpectedTypes { get; }
+        public IReadOnlyList<Type> InvalidTypes { get; }
         public bool Succeeded => State == BootloaderInitializationState.ReusedCompleteStack ||
             State == BootloaderInitializationState.CreatedCompleteStack;
 
@@ -301,15 +576,41 @@ namespace AL.Core
                 missingTypes: missingTypes);
         }
 
-        public static BootloaderInitializationResult FailedInconsistentMarker(string registrationId, Type[] mismatchedTypes, string message)
+        public static BootloaderInitializationResult FailedInconsistentMarker(
+            string registrationId,
+            Type[] mismatchedTypes,
+            string message)
         {
+            return FailedInconsistentMarker(
+                registrationId,
+                missingTypes: Array.Empty<Type>(),
+                mismatchedTypes: mismatchedTypes,
+                unexpectedTypes: Array.Empty<Type>(),
+                invalidTypes: Array.Empty<Type>(),
+                message);
+        }
+
+        public static BootloaderInitializationResult FailedInconsistentMarker(
+            string registrationId,
+            Type[] missingTypes,
+            Type[] mismatchedTypes,
+            Type[] unexpectedTypes,
+            Type[] invalidTypes,
+            string message)
+        {
+            string missing = string.Join(", ", missingTypes.Select(type => type.Name));
             string mismatched = string.Join(", ", mismatchedTypes.Select(type => type.Name));
+            string unexpected = string.Join(", ", unexpectedTypes.Select(type => type.Name));
+            string invalid = string.Join(", ", invalidTypes.Select(type => type.Name));
             return new BootloaderInitializationResult(
                 BootloaderInitializationState.FailedInconsistentMarker,
                 "BOOT_STACK_MARKER_INCONSISTENT",
-                $"[BOOT_STACK_MARKER_INCONSISTENT] {message} Registration: {registrationId}. Types: {mismatched}.",
+                $"[BOOT_STACK_MARKER_INCONSISTENT] {message} Registration: {registrationId}. Missing: {missing}. Mismatched: {mismatched}. Unexpected: {unexpected}. Invalid: {invalid}.",
                 registrationId,
-                mismatchedTypes: mismatchedTypes);
+                missingTypes: missingTypes,
+                mismatchedTypes: mismatchedTypes,
+                unexpectedTypes: unexpectedTypes,
+                invalidTypes: invalidTypes);
         }
 
         public static BootloaderInitializationResult FailedConstruction(string message)
@@ -329,12 +630,43 @@ namespace AL.Core
                 serviceType: serviceType);
         }
 
+        public static BootloaderInitializationResult FailedLoad(string message)
+        {
+            return new BootloaderInitializationResult(
+                BootloaderInitializationState.FailedLoad,
+                "BOOT_STACK_LOAD_FAILED",
+                $"[BOOT_STACK_LOAD_FAILED] Bootloader save load failed: {message}");
+        }
+
+        public static BootloaderInitializationResult LoadInProgressConflict(string registrationId)
+        {
+            return new BootloaderInitializationResult(
+                BootloaderInitializationState.FailedLoadInProgress,
+                "BOOT_STACK_LOAD_IN_PROGRESS",
+                $"[BOOT_STACK_LOAD_IN_PROGRESS] Offline stack load is already in progress under another owner for stack {registrationId}.",
+                registrationId);
+        }
+
         public static BootloaderInitializationResult RuntimeDrift(string message)
         {
             return new BootloaderInitializationResult(
                 BootloaderInitializationState.RuntimeDrift,
                 "BOOT_STACK_RUNTIME_DRIFT",
                 $"[BOOT_STACK_RUNTIME_DRIFT] {message}");
+        }
+
+        public static BootloaderInitializationResult RuntimeOwnerRejected(string registrationId)
+        {
+            return new BootloaderInitializationResult(
+                BootloaderInitializationState.RuntimeOwnerRejected,
+                "BOOT_STACK_RUNTIME_OWNER_REJECTED",
+                $"[BOOT_STACK_RUNTIME_OWNER_REJECTED] Another Bootloader already owns runtime work for stack {registrationId}.",
+                registrationId);
+        }
+
+        private static IReadOnlyList<Type> CopyTypes(IReadOnlyList<Type> types)
+        {
+            return Array.AsReadOnly((types ?? Array.Empty<Type>()).ToArray());
         }
     }
 
@@ -345,12 +677,30 @@ namespace AL.Core
         IReadOnlyDictionary<Type, object> ExpectedInstances { get; }
         object SaveRoot { get; }
         object GameDataRoot { get; }
-        bool TryMarkLoaded();
+        string RuntimeOwnerId { get; }
+        OfflineStackLoadState LoadState { get; }
+        bool TryClaimRuntimeOwner(string ownerId);
+        bool IsRuntimeOwner(string ownerId);
+        bool TryReleaseRuntimeOwner(string ownerId);
+        bool TryBeginLoad(string ownerId);
+        void MarkLoadSucceeded(string ownerId);
+        void MarkLoadFailed(string ownerId);
+        bool TryGetExpected<T>(out T service);
+    }
+
+    internal enum OfflineStackLoadState
+    {
+        NotStarted,
+        InProgress,
+        Succeeded,
+        Failed
     }
 
     internal sealed class LocalOfflineServiceStackMarker : IOfflineServiceStackMarker
     {
-        private bool _loadClaimed;
+        private bool _loadInProgress;
+        private bool _loadSucceeded;
+        private string _runtimeOwnerId = string.Empty;
 
         public LocalOfflineServiceStackMarker(
             int stackVersion,
@@ -361,7 +711,8 @@ namespace AL.Core
         {
             StackVersion = stackVersion;
             RegistrationId = registrationId;
-            ExpectedInstances = expectedInstances;
+            ExpectedInstances = new ReadOnlyDictionary<Type, object>(
+                new Dictionary<Type, object>(expectedInstances));
             SaveRoot = saveRoot;
             GameDataRoot = gameDataRoot;
         }
@@ -371,16 +722,96 @@ namespace AL.Core
         public IReadOnlyDictionary<Type, object> ExpectedInstances { get; }
         public object SaveRoot { get; }
         public object GameDataRoot { get; }
+        public string RuntimeOwnerId => _runtimeOwnerId;
+        public OfflineStackLoadState LoadState { get; private set; }
 
-        public bool TryMarkLoaded()
+        public bool TryClaimRuntimeOwner(string ownerId)
         {
-            if (_loadClaimed)
+            if (string.IsNullOrWhiteSpace(ownerId))
             {
                 return false;
             }
 
-            _loadClaimed = true;
+            if (string.IsNullOrEmpty(_runtimeOwnerId))
+            {
+                _runtimeOwnerId = ownerId;
+                return true;
+            }
+
+            return string.Equals(_runtimeOwnerId, ownerId, StringComparison.Ordinal);
+        }
+
+        public bool IsRuntimeOwner(string ownerId)
+        {
+            return !string.IsNullOrWhiteSpace(ownerId) &&
+                string.Equals(_runtimeOwnerId, ownerId, StringComparison.Ordinal);
+        }
+
+        public bool TryReleaseRuntimeOwner(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId))
+            {
+                return false;
+            }
+
+            // A destroyed or disabled owner surrenders the claim so the next Bootloader can take over.
+            // If it died mid-load, fail the load state and clear the in-progress flag so the next
+            // owner can retry; an already-succeeded load stays succeeded so it is not re-applied.
+            if (_loadInProgress)
+            {
+                _loadInProgress = false;
+                LoadState = OfflineStackLoadState.Failed;
+            }
+
+            _runtimeOwnerId = string.Empty;
             return true;
+        }
+
+        public bool TryBeginLoad(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId) || _loadInProgress || _loadSucceeded)
+            {
+                return false;
+            }
+
+            _loadInProgress = true;
+            LoadState = OfflineStackLoadState.InProgress;
+            return true;
+        }
+
+        public void MarkLoadSucceeded(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId))
+            {
+                return;
+            }
+
+            _loadInProgress = false;
+            _loadSucceeded = true;
+            LoadState = OfflineStackLoadState.Succeeded;
+        }
+
+        public void MarkLoadFailed(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId))
+            {
+                return;
+            }
+
+            _loadInProgress = false;
+            LoadState = OfflineStackLoadState.Failed;
+        }
+
+        public bool TryGetExpected<T>(out T service)
+        {
+            if (ExpectedInstances.TryGetValue(typeof(T), out var existing) && existing is T typed)
+            {
+                service = typed;
+                return true;
+            }
+
+            service = default;
+            return false;
         }
     }
 
@@ -396,7 +827,7 @@ namespace AL.Core
             Registrations = registrations;
         }
 
-        public static readonly Type[] RequiredServiceTypes =
+        private static readonly Type[] RequiredServiceTypeArray =
         {
             typeof(IGameDataService),
             typeof(ISaveGameService),
@@ -421,17 +852,34 @@ namespace AL.Core
             typeof(IBossLootService)
         };
 
+        public static readonly IReadOnlyList<Type> RequiredServiceTypes = Array.AsReadOnly(RequiredServiceTypeArray);
         public IReadOnlyDictionary<Type, object> RequiredInstances { get; }
         public LocalOfflineServiceStackMarker Marker { get; }
         public IReadOnlyList<ServiceRegistrationEntry> Registrations { get; }
 
+        // Internal construction fault-injection seams (mirroring Bootloader.PostInstallValidationOverride).
+        // Each override, when non-null, substitutes or fails construction of the named service so tests
+        // can exercise the spec section-12 construction faults. They are reset in test TearDown; production
+        // always leaves them null and uses the current local implementations.
+        internal static Func<object> GameDataFactoryOverride;
+        internal static Func<object> SaveGameFactoryOverride;
+        internal static Func<object, object> ResourceFactoryOverride;
+        internal static Func<object> NotificationFactoryOverride;
+        internal static Func<object, object, object, object> BossLootFactoryOverride;
+
         public static OfflineServiceStack Create(int stackVersion)
         {
-            var gameData = new LocalGameDataService();
-            var saveGame = new LocalSaveGameService();
+            IGameDataService gameData = GameDataFactoryOverride != null
+                ? (IGameDataService)GameDataFactoryOverride()
+                : new LocalGameDataService();
+            ISaveGameService saveGame = SaveGameFactoryOverride != null
+                ? (ISaveGameService)SaveGameFactoryOverride()
+                : new LocalSaveGameService();
 
             var realmService = new LocalRealmService(saveGame, gameData);
-            var resourceService = new LocalResourceService(saveGame);
+            IResourceService resourceService = ResourceFactoryOverride != null
+                ? (IResourceService)ResourceFactoryOverride(saveGame)
+                : new LocalResourceService(saveGame);
             var researchService = new LocalResearchService(saveGame, resourceService);
             var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
             var trainingService = new LocalTrainingService(saveGame, resourceService);
@@ -445,11 +893,15 @@ namespace AL.Core
             var reputationService = new ReputationService(saveGame);
             var factionService = new FactionService(saveGame);
             var personaService = new PersonaService(saveGame);
-            var notificationService = new LocalNotificationService();
+            INotificationService notificationService = NotificationFactoryOverride != null
+                ? (INotificationService)NotificationFactoryOverride()
+                : new LocalNotificationService();
             var realmGemService = new LocalRealmGemService(saveGame);
             var worldStateService = new WorldStateService(saveGame, notificationService);
             var worldAtlasService = new AL.RealmWar.World.LocalWorldAtlasService(storyService);
-            var bossLootService = new LocalBossLootService(saveGame, warzoneCredits, notificationService);
+            IBossLootService bossLootService = BossLootFactoryOverride != null
+                ? (IBossLootService)BossLootFactoryOverride(saveGame, warzoneCredits, notificationService)
+                : new LocalBossLootService(saveGame, warzoneCredits, notificationService);
 
             var requiredInstances = new Dictionary<Type, object>
             {
@@ -481,19 +933,235 @@ namespace AL.Core
                 throw new InvalidOperationException("Offline service stack required-instance map is incomplete.");
             }
 
+            var immutableRequiredInstances = new ReadOnlyDictionary<Type, object>(
+                new Dictionary<Type, object>(requiredInstances));
+
             var marker = new LocalOfflineServiceStackMarker(
                 stackVersion,
                 Guid.NewGuid().ToString("N"),
-                requiredInstances,
+                immutableRequiredInstances,
                 saveGame,
                 gameData);
 
             var registrations = RequiredServiceTypes
-                .Select(type => new ServiceRegistrationEntry(type, requiredInstances[type]))
+                .Select(type => new ServiceRegistrationEntry(type, immutableRequiredInstances[type]))
                 .ToList();
             registrations.Add(new ServiceRegistrationEntry(typeof(IOfflineServiceStackMarker), marker));
 
-            return new OfflineServiceStack(requiredInstances, marker, registrations);
+            return new OfflineServiceStack(
+                immutableRequiredInstances,
+                marker,
+                new ReadOnlyCollection<ServiceRegistrationEntry>(registrations));
+        }
+    }
+
+    // The following internal types exist only to support the EditMode integrity tests. The test
+    // assembly (AL.EditMode.Tests) cannot reference the predefined Assembly-CSharp, so it cannot
+    // implement the internal marker interface or the service interfaces directly; these controllable
+    // doubles live in the production assembly and are driven by reflection. They are never referenced
+    // by production code paths and carry no static state beyond per-instance test configuration.
+    internal sealed class ControllableSaveGameService : ISaveGameService
+    {
+        private SaveGameData _currentSave;
+
+        internal int LoadCount;
+        internal int SaveCount;
+        internal int FailLoadTimes = 0;
+        internal bool ThrowOnSave = false;
+        internal bool ProvideCurrentSaveOnLoad = true;
+        internal SaveLoadStatus LoadStatusToReport = SaveLoadStatus.CreatedNew;
+        internal SaveOperationStatus SaveStatusToReport = SaveOperationStatus.SavedPrimary;
+        internal Action LoadCallback = null;
+
+        public SaveGameData CurrentSave => _currentSave;
+        public SaveLoadStatus LastLoadStatus { get; private set; }
+        public string LastLoadMessage { get; private set; } = string.Empty;
+        public SaveOperationStatus LastSaveStatus { get; private set; }
+        public string LastSaveMessage { get; private set; } = string.Empty;
+
+        internal void SeedCurrentSave()
+        {
+            _currentSave = new SaveGameData();
+        }
+
+        public void Load()
+        {
+            LoadCount++;
+            LoadCallback?.Invoke();
+
+            if (LoadCount <= FailLoadTimes)
+            {
+                throw new InvalidOperationException("Controlled offline stack load failure.");
+            }
+
+            LastLoadStatus = LoadStatusToReport;
+            LastLoadMessage = "Controlled load.";
+            _currentSave = ProvideCurrentSaveOnLoad ? (_currentSave ?? new SaveGameData()) : null;
+        }
+
+        public void Save()
+        {
+            SaveCount++;
+
+            if (ThrowOnSave)
+            {
+                throw new InvalidOperationException("Controlled save failure.");
+            }
+
+            LastSaveStatus = SaveStatusToReport;
+            LastSaveMessage = "Controlled save.";
+        }
+
+        public bool HasSave()
+        {
+            return _currentSave != null;
+        }
+
+        public void CreateNewSave(RealmId realmId)
+        {
+            _currentSave = new SaveGameData { SelectedRealm = realmId };
+        }
+
+        public void DeleteSave()
+        {
+            _currentSave = null;
+            LastLoadStatus = SaveLoadStatus.None;
+            LastSaveStatus = SaveOperationStatus.None;
+        }
+    }
+
+    internal sealed class CountingResourceService : IResourceService
+    {
+        internal int TickCount;
+
+        public event Action<ResourceType, long> OnResourceChanged;
+
+        public long GetResourceCount(ResourceType type)
+        {
+            return 0;
+        }
+
+        public void AddResource(ResourceType type, long amount)
+        {
+        }
+
+        public bool ConsumeResource(ResourceType type, long amount)
+        {
+            return false;
+        }
+
+        public bool HasEnough(ResourceType type, long amount)
+        {
+            return false;
+        }
+
+        public void TickProduction(double deltaSeconds)
+        {
+            TickCount++;
+            OnResourceChanged?.Invoke(ResourceType.Gold, 0);
+        }
+    }
+
+    internal sealed class ConfigurableOfflineServiceStackMarker : IOfflineServiceStackMarker
+    {
+        private string _runtimeOwnerId = string.Empty;
+        private bool _loadInProgress;
+        private bool _loadSucceeded;
+
+        public int StackVersion { get; set; } = 1;
+        public string RegistrationId { get; set; } = "configurable-marker";
+        public IReadOnlyDictionary<Type, object> ExpectedInstances { get; set; }
+        public object SaveRoot { get; set; }
+        public object GameDataRoot { get; set; }
+        public string RuntimeOwnerId => _runtimeOwnerId;
+        public OfflineStackLoadState LoadState { get; private set; }
+
+        public bool TryClaimRuntimeOwner(string ownerId)
+        {
+            if (string.IsNullOrWhiteSpace(ownerId))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(_runtimeOwnerId))
+            {
+                _runtimeOwnerId = ownerId;
+                return true;
+            }
+
+            return string.Equals(_runtimeOwnerId, ownerId, StringComparison.Ordinal);
+        }
+
+        public bool IsRuntimeOwner(string ownerId)
+        {
+            return !string.IsNullOrWhiteSpace(ownerId) &&
+                string.Equals(_runtimeOwnerId, ownerId, StringComparison.Ordinal);
+        }
+
+        public bool TryReleaseRuntimeOwner(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId))
+            {
+                return false;
+            }
+
+            if (_loadInProgress)
+            {
+                _loadInProgress = false;
+                LoadState = OfflineStackLoadState.Failed;
+            }
+
+            _runtimeOwnerId = string.Empty;
+            return true;
+        }
+
+        public bool TryBeginLoad(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId) || _loadInProgress || _loadSucceeded)
+            {
+                return false;
+            }
+
+            _loadInProgress = true;
+            LoadState = OfflineStackLoadState.InProgress;
+            return true;
+        }
+
+        public void MarkLoadSucceeded(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId))
+            {
+                return;
+            }
+
+            _loadInProgress = false;
+            _loadSucceeded = true;
+            LoadState = OfflineStackLoadState.Succeeded;
+        }
+
+        public void MarkLoadFailed(string ownerId)
+        {
+            if (!IsRuntimeOwner(ownerId))
+            {
+                return;
+            }
+
+            _loadInProgress = false;
+            LoadState = OfflineStackLoadState.Failed;
+        }
+
+        public bool TryGetExpected<T>(out T service)
+        {
+            if (ExpectedInstances != null &&
+                ExpectedInstances.TryGetValue(typeof(T), out var existing) &&
+                existing is T typed)
+            {
+                service = typed;
+                return true;
+            }
+
+            service = default;
+            return false;
         }
     }
 }

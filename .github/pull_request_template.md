@@ -17,6 +17,8 @@ A mixed-mode PR requires a written Codex coordination/review justification expla
 
 Link the issue, user decision, source packet, design packet, specification, or prerequisite PR. Write `None` only for a root governance change.
 
+If a closed issue is relevant, state whether the current evidence confirms it remains solved or whether it should be reopened/followed up.
+
 ## Ownership declaration
 
 - Narrative/content source changed: `yes / no`
@@ -26,6 +28,7 @@ Link the issue, user decision, source packet, design packet, specification, or p
 - Shared contracts or catalogs changed: `yes / no`
 - Save data, migration, recovery, or deletion changed: `yes / no`
 - Workflow, dependencies, or repository settings changed: `yes / no`
+- Performance, memory, package size, install size, or device compatibility changed: `yes / no`
 - Unrelated cleanup included: `no`
 
 Explain every `yes` answer and identify the approved source, design, decision, or specification consumed.
@@ -56,6 +59,7 @@ Confirm no other open PR holds the lock.
 - [ ] New save fields have backward-compatible defaults when applicable.
 - [ ] Existing service registrations, source packets, designs, assets, tests, and unrelated systems are preserved.
 - [ ] Invalid data, unavailable dependencies, retries, and duplicate delivery are handled as required.
+- [ ] Performance, memory, asset duplication, dependency weight, package size, install size, and low-end-device impact were assessed or explicitly marked not applicable.
 
 ## Validation
 
@@ -69,13 +73,15 @@ Not run: explain the exact blocker when applicable.
 
 - [ ] Started from current `main`.
 - [ ] Inspected all open PRs/issues plus relevant closed PRs/issues for overlap, dependencies, review findings, stale ownership labels, duplicated work, and regression history.
+- [ ] Reopened or created follow-up issues when closed issue evidence no longer matches current source or Unity Hub play.
 - [ ] Read `unity/Docs/Ownership_Decision_Record.md` before changing ownership-sensitive files.
 - [ ] Declared all shared files before editing.
 - [ ] Updated onto latest `main` before final disposition.
 - [ ] No collaborator work was overwritten or force-pushed away.
 - [ ] Branch prefix matches `codex/coordination-`, `codex/narrative-`, `codex/terrestrial-`, or `codex/` engineering.
-- [ ] No future GPT or Android Studio action is required by this PR.
+- [ ] No future GPT, Android Studio, Gemini, or external-agent action is required by this PR.
 - [ ] Documentation names the active Codex workspace/evidence path when workspace-specific validation is reported.
+- [ ] No unnecessary generated, duplicate, cache, build output, oversized binary, or machine-local artifact is included.
 
 ## Review gates
 

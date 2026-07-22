@@ -7,7 +7,7 @@
 **Specification/review owner:** GPT  
 **Player-facing battle copy/content owner:** Codex narrative/content  
 **Balance and final product approval:** User  
-**Canonical Unity workspace:** `D:\260711\MY\AndroidStudioProjects\AnotherLife\unity`
+**Canonical Unity workspace:** `C:\Users\MY\Documents\AnotherLife\unity`
 
 ## 1. Purpose
 
@@ -1685,7 +1685,7 @@ No conflict resolution may discard accepted current contracts, tests, services, 
 Run from:
 
 ```text
-D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
+C:\Users\MY\Documents\AnotherLife\unity
 Unity 2022.3.62f3
 ```
 
@@ -1719,7 +1719,7 @@ Duplicate-workspace, stale-base, skipped, compile-only, missing XML, wrong-polic
 
 ## 39. Review questions
 
-GPT review verifies:
+Codex coordination/review verifies:
 
 - computation is fully pure;
 - invalid input cannot become a valid battle;

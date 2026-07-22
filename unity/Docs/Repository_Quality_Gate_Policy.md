@@ -1,23 +1,24 @@
 # Repository Quality Gate Policy
 
-**Status date:** 2026-07-15  
-**Policy owner:** GPT  
-**Implementation owner:** Codex engineering mode  
-**Tracking issue:** #155  
+**Status date:** 2026-07-16
+**Policy owner:** Codex coordination/review mode
+**Implementation owner:** Codex engineering mode
+**Tracking issue:** #155
 **Ownership record:** `unity/Docs/Ownership_Decision_Record.md`
 
-This record defines required automated checks, path-aware checks, manual dispositions, and branch protection for the GPT–Codex–user model. It changes no runtime, narrative, design, save, Android, Unity, or build behavior. `AGENTS.md` is authoritative.
+This record defines required automated checks, path-aware checks, manual dispositions, and branch protection for the single Codex agent responsibility model. It changes no runtime, narrative, design, save, Android, Unity, or build behavior. `AGENTS.md` is authoritative.
 
 ## 1. Decisions
 
 1. Repository classification, hygiene, and Android unit/debug validation are the first required automated merge gates.
 2. Unity unavailable/licensing failures are blocked validation, never passing evidence.
 3. A locked-down self-hosted Windows runner remains the target Unity model after #127 and #150 are proven.
-4. Path classification reports ownership mode but never replaces GPT review.
+4. Path classification reports ownership mode but never replaces Codex coordination/review disposition.
 5. Skipped, cancelled, unavailable, `continue-on-error`, or `not applicable` checks cannot be cited as product validation.
 6. One GitHub identity currently represents the user and agents, so documented dispositions are evidence but not cryptographically independent approvals.
-7. Codex owns all source, terrestrial-design, and engineering delivery through separately declared modes.
+7. Codex owns all coordination/review, narrative/content, terrestrial-design, and engineering project work through separately declared modes.
 8. Ownership-sensitive changes must read `Ownership_Decision_Record.md`; an earlier instruction cannot override a later user instruction.
+9. PRs must declare performance, memory, package-size, install-size, dependency, and device-compatibility impact when applicable.
 
 ## 2. Stable checks
 
@@ -47,6 +48,7 @@ A `not applicable` result proves only applicability, not product validation.
 - designated shared and save-sensitive files;
 - workflow/dependency changes;
 - generated/catalog drift;
+- performance, memory, build-size, install-size, dependency, and device-compatibility impact;
 - manual Unity evidence state.
 
 ## 3. `policy / classify`
@@ -56,13 +58,14 @@ Classification uses the PR event, base/head refs, body declarations, changed-fil
 - base is not `main` and no approved prerequisite branch is linked;
 - the base is closed, rejected, or unapproved;
 - no issue/upstream artifact is linked and the PR is not a root coordination change;
-- exactly one primary mode is not selected from GPT, Codex narrative/content, Codex terrestrial-design, or Codex engineering;
+- exactly one primary mode is not selected from Codex coordination/review, Codex narrative/content, Codex terrestrial-design, or Codex engineering;
 - required impact declarations are missing;
 - a shared file is changed but not declared, or another open PR holds its lock;
 - a test-only PR changes production Build Settings;
-- narrative or terrestrial-design source is mixed with engineering without explicit GPT specification and justification;
+- narrative or terrestrial-design source is mixed with engineering without explicit Codex coordination/review specification and justification;
 - engineering changes player-facing narrative or terrestrial visual intent without approved source-mode input;
 - issue completion is claimed without `Fixes #...` or an explicit completion link;
+- performance, memory, asset/package-size, install-size, dependency, or device impact is applicable but undeclared;
 - a draft PR is represented as merge-ready;
 - the head is not current for final merge;
 - an ownership change contradicts the latest dated user instruction in `Ownership_Decision_Record.md`.
@@ -130,7 +133,7 @@ Unavailable signing is an explicit blocker or uses a reviewed unsigned validatio
 Until runner stability is proven, Unity-sensitive PRs require retained evidence from:
 
 ```text
-D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
+C:\Users\MY\Documents\AnotherLife\unity
 Unity 2022.3.62f3
 ```
 
@@ -157,7 +160,7 @@ Require a dedicated non-admin account, locked Unity version, isolated workspace/
 
 ## 9. Manual dispositions
 
-### GPT disposition
+### Codex coordination/review disposition
 
 Required for shared files, save/migration/recovery, contracts/state/integration, issue completion beyond compilation, stacked/dependency-sensitive PRs, workflow/protection changes, ownership changes, and mixed-mode integrations.
 
@@ -250,7 +253,7 @@ Failure fixtures close unmerged.
 1. Merge this ownership-aligned policy.
 2. Codex engineering adds machine-readable policy, Phase A workflow, and deterministic validators on `codex/repository-quality-gates`.
 3. Run proof PRs and attach run/artifact evidence to #155.
-4. GPT reviews false positives, false negatives, and stable names.
+4. Codex coordination/review mode reviews false positives, false negatives, and stable names.
 5. Configure and verify Phase A protection.
 6. Add retained manual Unity evidence.
 7. Complete #127 and #150.
