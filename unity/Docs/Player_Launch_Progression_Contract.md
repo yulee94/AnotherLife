@@ -37,9 +37,11 @@ Benchmarks are direction references, not permission to copy protected assets, na
 - The main questline to the outer-realm warzone should leave a typical player around level 40.
 - Level 40 to 50 should require at least about one month of coordinated party hunting for an ordinary player.
 - Skill trees are visible from level 1, while skill points are earned through leveling and progression.
+- Skill-point grants, spending, refunds, respec limits, and recovery from invalid or interrupted operations require durable, duplicate-safe transaction rules before implementation.
 - Levels 10, 20, 30, 40, and 50 are turning points with meaningfully stronger or more defining skills.
 - True Warmaster progression unlocks only after level 50, sufficient warzone points, and a complete Warmaster gear requirement.
 - True Warmaster skills may be overpowering in RvR context, but they require explicit balance, counterplay, readability, cooldown, and performance review before implementation.
+- Warmaster gear, warzone points, eligibility, and skill unlocks require authoritative ledgers and reload-safe anti-duplication validation.
 
 ## Account and Character Contract
 
@@ -93,6 +95,14 @@ Benchmarks are direction references, not permission to copy protected assets, na
 - Outside the center island, realm language separation remains the default unless a later narrative/content packet changes it.
 - Neutral-zone NPC services may include potions, consumables, event items, cash items, and related vendors, but economy/cash/item rules require separate approval and implementation contracts.
 
+## Optimization and Device-Reach Contract
+
+- Runtime implementations must support scalable quality tiers instead of assuming one expensive presentation profile.
+- Combat, reward, skill, creature, and ambient effects must use bounded lifetimes and pooling where reuse is practical.
+- Assets must be compressed, deduplicated, and excluded from runtime delivery when they are source-only or unused.
+- Spawn density, UI density, VFX richness, memory pressure, dependency weight, build size, and install size require measured budgets or explicitly disclosed limits before release claims.
+- Generated outputs and catalogs must remain deterministic and bounded so low-end-device support does not depend on silent content removal or divergent authority.
+
 ## Dependency Order
 
 1. Codex coordination/review: this contract and dependency mapping.
@@ -130,7 +140,10 @@ Benchmarks are direction references, not permission to copy protected assets, na
 - Squad warzone point distribution requires contribution evidence.
 - Healers and buffers receive progression credit for valid ally support.
 - Potions do not heal in combat through regeneration unless an approved exception exists.
+- Skill-point spending, refunds, and respec recovery are duplicate-safe and survive reload without lost or repeated grants.
+- Warmaster gear, warzone points, eligibility, and skill unlocks are ledger-backed and cannot duplicate across retry or reload.
 - Each warzone has party-oriented condensed hunting camps with performance and anti-exploit limits.
+- Quality tiers, pooled effects, compressed/deduplicated assets, and explicit memory/build/install-size budgets are verified for every relevant implementation slice.
 - Main bridges, realm gates, crossroads, center island, neutral PvP suppression, cross-realm trade/chat, and wish dragon language rules are represented in source and runtime contracts before release claims.
 
 ## Validation for This Coordination PR
