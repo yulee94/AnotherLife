@@ -31,7 +31,7 @@ Every dialogue line, choice, objective, speaker field, title, and description ha
 
 No Android runtime model, navigation, UI, Gradle, Unity runtime service, scene, save file, shared integration file, complete Chapter 1 content, or Android↔Unity bridge is changed. The existing Kotlin archive remains historical/runtime preview material and is not made authoritative by this packet.
 
-The focused PowerShell validator is included only to satisfy #128's packet acceptance matrix. It validates IDs, internal references, state/objective/dialogue targets, D1–D16 presence, localization coverage, and requested external classification, and exercises negative fixtures. It is not a general authoring framework.
+The focused PowerShell validator is included only to satisfy #128's packet acceptance matrix. It validates IDs, internal references, state/objective/dialogue targets, D1–D16 presence, localization coverage, requested external classification, reachability, and consequence-trigger conflicts, and exercises eight negative fixtures. It is not a general authoring framework.
 
 ## External dependencies and limitations
 

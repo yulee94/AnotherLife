@@ -43,6 +43,7 @@ $negative = @(
     @{ Name='missing objective'; Mutate={ param($p) $p.transitions[0].objective='MISSING' } },
     @{ Name='external classification'; Mutate={ param($p) $p.externalCapabilities[0].status='verified' } },
     @{ Name='unreachable state'; Mutate={ param($p) $p.states += [pscustomobject]@{ id='ORPHANED'; resume='none'; terminal=$false } } },
+    @{ Name='conflicting consequence trigger'; Mutate={ param($p) $p.consequences[1].id=$p.consequences[0].id; $p.consequences[1].trigger='DIFFERENT_TRIGGER' } },
     @{ Name='missing approval'; Mutate={ param($p) $p.approval.decisions=@('D1') } }
 )
 foreach ($case in $negative) {
