@@ -22,6 +22,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         internal const string BuildSceneEntryType = "AL.EditorTools.ProductionBuildSceneEntry";
         internal const string PlayerBuilderType = "AL.EditorTools.ProductionPlayerBuilder";
         internal const string PlayerLaunchValidatorType = "AL.EditorTools.ProductionPlayerLaunchLogValidator";
+        internal const string IosBuilderType = "AL.EditorTools.ProductionIosBuilder";
 
         internal static Type Runtime(string fullName)
         {
