@@ -3,7 +3,7 @@
 ## Control
 
 - Milestone: NVS-01, A1
-- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-22-v001`
+- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-22-v002`
 - Primary mode: Codex narrative/content
 - Upstream decision: issue #138, comment `4966062298`
 - Tracked task: issue #128
@@ -26,6 +26,8 @@ The tone is urgent, mysterious, hopeful, and non-punitive. The player always has
 - Abandonment: permitted only outside an active encounter, returning to `OFFERED` and clearing active/unearned progress without deleting earned consequences.
 
 Every dialogue line, choice, objective, speaker field, title, and description has a stable localization key with initial English source text in the packet.
+
+Version `v002` removes the report objective's redundant inline `sourceText`. The unchanged English objective remains exclusively at localization key `objective.omen1.report`, preserving D7 and D13 while eliminating duplicate localization authority. No dialogue, choice, state, consequence, or player-facing text changed.
 
 ## Boundaries
 

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packetVersion": "omen1-a1-2026-07-22-v001",
+  "packetVersion": "omen1-a1-2026-07-22-v002",
   "milestoneId": "NVS-01",
   "questId": "OMEN_1",
   "titleKey": "quest.omen1.title",
@@ -35,7 +35,7 @@
   "objectives": [
     {"id":"OBJ_OMEN_1_TALK","textKey":"objective.omen1.talk","activatesIn":"OFFERED","completesOn":"QUEST_ACCEPTED"},
     {"id":"OBJ_OMEN_1_ARENA","textKey":"objective.omen1.arena","activatesIn":"INVESTIGATE_SKY_CASTLE","completesOn":"EVENT_SKY_CASTLE_ARENA_SUCCESS"},
-    {"id":"OBJ_OMEN_1_REPORT","textKey":"objective.omen1.report","sourceText":"Present the Celestial Tear to Valerius.","activatesIn":"REPORT_TO_VALERIUS","completesOn":"DLG_OMEN_1_REPORT_CONCLUSION"}
+    {"id":"OBJ_OMEN_1_REPORT","textKey":"objective.omen1.report","activatesIn":"REPORT_TO_VALERIUS","completesOn":"DLG_OMEN_1_REPORT_CONCLUSION"}
   ],
   "dialogue": [
     {"id":"DLG_OMEN_1_OFFER","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.offer","choices":[{"key":"choice.omen1.accept","target":"DLG_OMEN_1_START"},{"key":"choice.omen1.decline","target":"end"}]},
