@@ -461,7 +461,7 @@ The historical field comparison in section 3 must be included in `QuestDefinitio
 Run from the canonical workspace only:
 
 ```text
-D:\260711\MY\AndroidStudioProjects\AnotherLife\unity
+C:\Users\MY\Documents\AnotherLife\unity
 ```
 
 Required evidence:
@@ -507,7 +507,7 @@ scenes or Build Settings
 Android/narrative packets
 ```
 
-unless a newly verified blocker is first returned to GPT for sequencing.
+unless a newly verified blocker is first returned to Codex coordination/review mode for sequencing.
 
 No designated shared-file lock is expected.
 
@@ -533,5 +533,5 @@ No designated shared-file lock is expected.
 ## Codex handoff
 
 ```text
-Codex engineering: correct PR #189 from current main using unity/Docs/QuestDefinition_Asset_Authority_Validation_Spec.md. Keep the narrative QuestDefinition type/GUID unchanged. Add a Force-Text YAML validator that scans every .asset document, detects quest-shaped assets even when t:QuestDefinition cannot resolve them, parses exact m_Script identity, maps authoritative documents to loaded objects by local file ID, locks the historical 12-field schema, rejects blank/duplicate IDs and unexpected fields, and covers the full non-imported malformed-YAML matrix plus one valid create/reimport/field-roundtrip fixture. Run all evidence from D:\260711\MY\AndroidStudioProjects\AnotherLife\unity. Do not author quests or edit runtime/save/shared/scene/Android files.
+Codex engineering: correct PR #189 from current main using unity/Docs/QuestDefinition_Asset_Authority_Validation_Spec.md. Keep the narrative QuestDefinition type/GUID unchanged. Add a Force-Text YAML validator that scans every .asset document, detects quest-shaped assets even when t:QuestDefinition cannot resolve them, parses exact m_Script identity, maps authoritative documents to loaded objects by local file ID, locks the historical 12-field schema, rejects blank/duplicate IDs and unexpected fields, and covers the full non-imported malformed-YAML matrix plus one valid create/reimport/field-roundtrip fixture. Run all evidence from `C:\Users\MY\Documents\AnotherLife\unity`. Do not author quests or edit runtime/save/shared/scene/Android files.
 ```

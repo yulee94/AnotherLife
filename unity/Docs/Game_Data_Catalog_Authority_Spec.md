@@ -274,11 +274,11 @@ A family catalog does not self-authorize its player-facing meaning. Narrative/lo
 
 | Field kind | Authority |
 | --- | --- |
-| stable technical ID, schema, version, references, enum/profile IDs, packaging, hash | Codex engineering after GPT specification |
+| stable technical ID, schema, version, references, enum/profile IDs, packaging, hash | Codex engineering after Codex coordination/review consumes or supersedes this specification |
 | player-facing name, title, description, lore, quest text, realm identity copy, localization key mapping | Codex narrative/content plus user approval where required |
 | terrestrial silhouette, anatomy, scale, materials, motion, design variants | Codex terrestrial-design plus user approval |
 | balance/tuning values | existing approved value or separately approved balance issue/user decision |
-| save migration and compatibility | GPT specification + Codex engineering under #137/owning issue |
+| save migration and compatibility | Codex coordination/review specification + Codex engineering under #137/owning issue |
 | final product/creative/release acceptance | user |
 
 Engineering may copy an already approved source value into a generated artifact. It may not improvise missing copy, lore, names, visual meaning, spawn behavior, or balance.
@@ -1143,7 +1143,7 @@ For every first-phase family:
 Run from the canonical workspace only:
 
 ```powershell
-$repo = "D:\260711\MY\AndroidStudioProjects\AnotherLife"
+$repo = "C:\Users\MY\Documents\AnotherLife"
 $unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
 
 & $unity -batchmode -quit -nographics `
@@ -1201,5 +1201,5 @@ Exit `199`, licensing failure, missing XML, duplicate-workspace execution, skipp
 ## 18. Codex handoff
 
 ```text
-Codex engineering: after #156 is accepted, implement issue #183 from current main using unity/Docs/Game_Data_Catalog_Authority_Spec.md. Begin with one focused catalog-foundation PR: common manifest/envelope, typed load/query/diagnostic results, immutable snapshots, strict validators, packaged file/UnityWebRequest seams, deterministic hash/schema tests, and a complete current source/consumer inventory. Do not edit Bootloader.cs, switch LocalGameDataService production authority, author player-facing content, promote PR #217 terrestrial data, change balances, or repair player saves in the foundation PR. Before the LocalGameDataService migration, declare its shared-file lock, coordinate with PR #203’s released lifecycle path, use separately approved source-mode catalogs, and return canonical Unity evidence for GPT review.
+Codex engineering: after #156 is accepted, implement issue #183 from current main using unity/Docs/Game_Data_Catalog_Authority_Spec.md. Begin with one focused catalog-foundation PR: common manifest/envelope, typed load/query/diagnostic results, immutable snapshots, strict validators, packaged file/UnityWebRequest seams, deterministic hash/schema tests, and a complete current source/consumer inventory. Do not edit Bootloader.cs, switch LocalGameDataService production authority, author player-facing content, promote PR #217 terrestrial data, change balances, or repair player saves in the foundation PR. Before the LocalGameDataService migration, declare its shared-file lock, coordinate with the accepted lifecycle path, use separately approved source-mode catalogs, and return canonical Unity evidence for Codex coordination/review.
 ```
