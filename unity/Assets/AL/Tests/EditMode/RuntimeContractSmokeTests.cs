@@ -27,12 +27,14 @@ namespace AL.Tests.EditMode
         public void WalletResourcesContainUniqueRareResources()
         {
             Type resourceType = GetRuntimeType("AL.Core.ResourceType");
-            FieldInfo walletResourcesField = GetRuntimeType("AL.Core.ResourceRules").GetField(
+            PropertyInfo walletResourcesProperty = GetRuntimeType("AL.Core.ResourceRules").GetProperty(
                 "WalletResources",
                 BindingFlags.Public | BindingFlags.Static);
 
-            Assert.NotNull(walletResourcesField);
-            var walletResources = ((Array)walletResourcesField.GetValue(null)).Cast<object>().ToArray();
+            Assert.NotNull(walletResourcesProperty);
+            var walletResources = ((System.Collections.IEnumerable)walletResourcesProperty.GetValue(null))
+                .Cast<object>()
+                .ToArray();
 
             Assert.AreEqual(walletResources.Length, walletResources.Distinct().Count());
             CollectionAssert.Contains(walletResources, EnumValue(resourceType, "DeepOre"));

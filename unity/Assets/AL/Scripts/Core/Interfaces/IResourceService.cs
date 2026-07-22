@@ -12,4 +12,12 @@ namespace AL.Core.Interfaces
         void TickProduction(double deltaSeconds);
         event Action<ResourceType, long> OnResourceChanged;
     }
+
+    public interface IResourceIntegrityService : IResourceService
+    {
+        EconomyBalanceReadResult ReadResource(ResourceType type);
+        EconomyMutationResult TryAddResource(ResourceType type, long amount);
+        EconomyMutationResult TryConsumeResource(ResourceType type, long amount);
+        EconomyProductionTickResult TryTickProduction(double deltaSeconds);
+    }
 }
