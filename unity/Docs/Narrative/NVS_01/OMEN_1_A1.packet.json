@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "packetVersion": "omen1-a1-2026-07-22-v001",
+  "milestoneId": "NVS-01",
+  "questId": "OMEN_1",
+  "titleKey": "quest.omen1.title",
+  "descriptionKey": "quest.omen1.description",
+  "approval": {
+    "issue": 138,
+    "commentId": 4966062298,
+    "decisions": ["D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10", "D11", "D12", "D13", "D14", "D15", "D16"]
+  },
+  "placement": {
+    "contextId": "POST_REALM_PROLOGUE",
+    "eligibleRealmIds": ["CROWNLANDS", "STONEHOLD", "ELDERGROVE", "UMBRAL"],
+    "prerequisite": "ONE_COMMITTED_PLAYABLE_REALM",
+    "offerAction": "SELECT_VALERIUS",
+    "autoAccept": false,
+    "completionUnlockId": "CH1_REALM_INTRO",
+    "completionDestination": "KINGDOM_COMMAND_VIEW"
+  },
+  "speaker": {
+    "id": "NPC_VALERIUS",
+    "nameKey": "npc.valerius.name",
+    "roleKey": "npc.valerius.role.veil_watch_liaison"
+  },
+  "states": [
+    {"id":"OFFERED","resume":"Offer remains available from Valerius.","terminal":false},
+    {"id":"TALK_TO_VALERIUS","resume":"Resume the exact active dialogue node and unselected choice.","terminal":false},
+    {"id":"INVESTIGATE_SKY_CASTLE","resume":"Resume an authoritative encounter snapshot; otherwise show Retry without penalty.","terminal":false},
+    {"id":"FAILED","resume":"Show the encouraging recovery conversation, then return to investigation.","terminal":false,"transient":true},
+    {"id":"REPORT_TO_VALERIUS","resume":"The Tear remains acquired; report consequences remain pending.","terminal":false},
+    {"id":"COMPLETED","resume":"All report consequences remain applied exactly once.","terminal":true}
+  ],
+  "objectives": [
+    {"id":"OBJ_OMEN_1_TALK","textKey":"objective.omen1.talk","activatesIn":"OFFERED","completesOn":"QUEST_ACCEPTED"},
+    {"id":"OBJ_OMEN_1_ARENA","textKey":"objective.omen1.arena","activatesIn":"INVESTIGATE_SKY_CASTLE","completesOn":"EVENT_SKY_CASTLE_ARENA_SUCCESS"},
+    {"id":"OBJ_OMEN_1_REPORT","textKey":"objective.omen1.report","sourceText":"Present the Celestial Tear to Valerius.","activatesIn":"REPORT_TO_VALERIUS","completesOn":"DLG_OMEN_1_REPORT_CONCLUSION"}
+  ],
+  "dialogue": [
+    {"id":"DLG_OMEN_1_OFFER","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.offer","choices":[{"key":"choice.omen1.accept","target":"DLG_OMEN_1_START"},{"key":"choice.omen1.decline","target":"end"}]},
+    {"id":"DLG_OMEN_1_START","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.start","choices":[{"key":"choice.omen1.investigate","target":"DLG_OMEN_1_GO"},{"key":"choice.omen1.ask_more","target":"DLG_OMEN_1_LORE"}]},
+    {"id":"DLG_OMEN_1_LORE","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.lore","choices":[{"key":"choice.omen1.depart","target":"DLG_OMEN_1_GO"}]},
+    {"id":"DLG_OMEN_1_GO","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.go","choices":[{"key":"choice.omen1.deploy","target":"DLG_OMEN_1_ARENA_START"}]},
+    {"id":"DLG_OMEN_1_ARENA_START","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.arena_start","semanticAction":"REQUEST_SKY_CASTLE_ARENA","choices":[]},
+    {"id":"DLG_OMEN_1_FAILURE","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.failure","choices":[{"key":"choice.omen1.retry","semanticAction":"RETRY_SKY_CASTLE_ARENA"}]},
+    {"id":"DLG_OMEN_1_REPORT","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.report","choices":[{"key":"choice.omen1.present_tear","target":"DLG_OMEN_1_REPORT_CONCLUSION"}]},
+    {"id":"DLG_OMEN_1_REPORT_CONCLUSION","speakerId":"NPC_VALERIUS","textKey":"dialogue.omen1.report_conclusion","choices":[{"key":"choice.omen1.continue","target":"end"}]}
+  ],
+  "transitions": [
+    {"from":"OFFERED","event":"QUEST_ACCEPTED","to":"TALK_TO_VALERIUS","objective":"OBJ_OMEN_1_TALK"},
+    {"from":"TALK_TO_VALERIUS","event":"REQUEST_SKY_CASTLE_ARENA","to":"INVESTIGATE_SKY_CASTLE","objective":"OBJ_OMEN_1_ARENA"},
+    {"from":"INVESTIGATE_SKY_CASTLE","event":"EVENT_SKY_CASTLE_ARENA_FAILURE","to":"FAILED","dialogue":"DLG_OMEN_1_FAILURE"},
+    {"from":"FAILED","event":"RETRY_SKY_CASTLE_ARENA","to":"INVESTIGATE_SKY_CASTLE","objective":"OBJ_OMEN_1_ARENA"},
+    {"from":"INVESTIGATE_SKY_CASTLE","event":"EVENT_SKY_CASTLE_ARENA_CANCELLED","to":"INVESTIGATE_SKY_CASTLE","objective":"OBJ_OMEN_1_ARENA"},
+    {"from":"INVESTIGATE_SKY_CASTLE","event":"EVENT_SKY_CASTLE_ARENA_SUCCESS","to":"REPORT_TO_VALERIUS","objective":"OBJ_OMEN_1_REPORT"},
+    {"from":"REPORT_TO_VALERIUS","event":"SELECT_VALERIUS","to":"REPORT_TO_VALERIUS","dialogue":"DLG_OMEN_1_REPORT"},
+    {"from":"REPORT_TO_VALERIUS","event":"DLG_OMEN_1_REPORT_CONCLUSION","to":"COMPLETED"}
+  ],
+  "externalCapabilities": [
+    {"id":"LOCATION_SKY_CASTLE_MARKER","status":"requested"},
+    {"id":"ACTION_DEPLOY_CHAMPION","status":"requested"},
+    {"id":"HOOK_SKY_CASTLE_ARENA","status":"requested"},
+    {"id":"EVENT_SKY_CASTLE_ARENA_SUCCESS","status":"requested"},
+    {"id":"EVENT_SKY_CASTLE_ARENA_FAILURE","status":"requested"},
+    {"id":"EVENT_SKY_CASTLE_ARENA_CANCELLED","status":"requested"},
+    {"id":"EVENT_SKY_CASTLE_ARENA_UNAVAILABLE","status":"requested"},
+    {"id":"ARTIFACT_CELESTIAL_TEAR","status":"requested"},
+    {"id":"CH1_REALM_INTRO","status":"requested"},
+    {"id":"KINGDOM_COMMAND_VIEW","status":"requested"}
+  ],
+  "consequences": [
+    {"id":"ACQUIRE_CELESTIAL_TEAR","target":"ARTIFACT_CELESTIAL_TEAR","trigger":"EVENT_SKY_CASTLE_ARENA_SUCCESS","repeatability":"once","retained":true},
+    {"id":"GRANT_GOLD_500","target":"RESOURCE_GOLD","trigger":"DLG_OMEN_1_REPORT_CONCLUSION","repeatability":"once","amount":500},
+    {"id":"GRANT_VALERIUS_AFFINITY_5","target":"NPC_VALERIUS","trigger":"DLG_OMEN_1_REPORT_CONCLUSION","repeatability":"once","amount":5},
+    {"id":"COMPLETE_OMEN_1","target":"OMEN_1","trigger":"DLG_OMEN_1_REPORT_CONCLUSION","repeatability":"once"},
+    {"id":"UNLOCK_REALM_CHAPTER_1","target":"CH1_REALM_INTRO","trigger":"DLG_OMEN_1_REPORT_CONCLUSION","repeatability":"once"}
+  ],
+  "abandonment": {"allowedOutsideActiveEncounter":true,"resultState":"OFFERED","clearsActiveProgress":true,"clearsUnearnedConsequences":true,"retainsEarnedConsequences":true},
+  "localization": {
+    "quest.omen1.title":"The First Signal",
+    "quest.omen1.description":"Investigate a celestial disturbance at the Sky Castle and report what you recover.",
+    "npc.valerius.name":"Captain Valerius",
+    "npc.valerius.role.veil_watch_liaison":"Veil Watch military liaison",
+    "objective.omen1.talk":"Speak with Captain Valerius.",
+    "objective.omen1.arena":"Deploy your Champion and investigate the Sky Castle anomaly.",
+    "objective.omen1.report":"Present the Celestial Tear to Valerius.",
+    "dialogue.omen1.offer":"My lord, the Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?",
+    "dialogue.omen1.start":"The air itself is trembling. Whatever waits there may threaten every realm, but we still have time to understand it.",
+    "dialogue.omen1.lore":"Our oldest records call it an opening of the Veil—not an ending, but a warning that the world is changing.",
+    "dialogue.omen1.go":"The Sky Castle marker is ready. When you are prepared, deploy your Champion and investigate.",
+    "dialogue.omen1.arena_start":"Go carefully. Return with whatever truth you can recover.",
+    "dialogue.omen1.failure":"You made it back—that matters more than one failed attempt. Regroup, and return when you are ready.",
+    "dialogue.omen1.report":"You carry the same light our observers saw. Let me examine it.",
+    "dialogue.omen1.report_conclusion":"A Celestial Tear... and it answers to you. Keep it. The Veil Watch will prepare your realm for what comes next.",
+    "choice.omen1.accept":"Tell me what happened.",
+    "choice.omen1.decline":"Not yet.",
+    "choice.omen1.investigate":"I will investigate personally.",
+    "choice.omen1.ask_more":"What do the old records say?",
+    "choice.omen1.depart":"Then I will go.",
+    "choice.omen1.deploy":"Deploy Champion.",
+    "choice.omen1.retry":"I will try again.",
+    "choice.omen1.present_tear":"Present the Celestial Tear.",
+    "choice.omen1.continue":"Prepare the realm."
+    ,"artifact.celestial_tear.name":"Celestial Tear"
+    ,"artifact.celestial_tear.lore":"A luminous fragment recovered where the Veil stirred above the Sky Castle. It remains bound to its finder."
+    ,"reward.omen1.gold":"500 Gold"
+    ,"reward.omen1.valerius_affinity":"Valerius affinity +5"
+  }
+}
