@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "sourceVersion": "tdf-2026-07-15-v001",
+  "authority": {
+    "ownerMode": "Codex terrestrial-design",
+    "issue": 194,
+    "runtimeAuthority": false,
+    "narrativeAuthority": false,
+    "requiresUserCreativeApprovalBeforeIntegration": true
+  },
+  "profiles": [
+    {
+      "terrestrialProfileId": "tdf_basalt_grazer",
+      "workingDisplayKey": "Basalt Grazer",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "realmOrBiomeEligibility": [
+        "volcanic_lowlands",
+        "rocky_steppe",
+        "quarry_edge"
+      ],
+      "approximateWorldScale": {
+        "shoulderHeightChampionUnits": 1.4,
+        "lengthChampionUnits": 3.0,
+        "massClass": "heavy"
+      },
+      "silhouetteClass": "heavy_low_shielded_quadruped",
+      "materialSlotIntent": [
+        "basalt_plate_shell",
+        "warm_hide_underbody",
+        "keratin_beak_and_claws",
+        "optional_mineral_seam_accent"
+      ],
+      "rigOrSkeletonIntent": "heavy quadruped; short legs; armored shell follows spine and shoulder mass; tail stub can be low-bone-count or static",
+      "requiredAnimationIntent": [
+        "idle_weight_shift",
+        "slow_walk",
+        "turn_in_place",
+        "alert_head_raise",
+        "graze_lower_head",
+        "flee_heavy_lumber"
+      ],
+      "lodIntent": "Preserve shell outline and beak/head block at every LOD; merge small plate cracks by LOD1; remove seam accents by reduced visual modes.",
+      "colliderIntent": "capsule or compound primitive centered on low body; separate broad front blocker only if engineering needs precise obstacle response",
+      "vfxAnchorIntent": [
+        "foot_dust_left_front",
+        "foot_dust_right_front",
+        "shell_seam_optional",
+        "graze_mouth"
+      ],
+      "accessibilityNotes": "Read must work as a low armored silhouette without teal seams; reduced motion disables seam shimmer and keeps only pose changes.",
+      "sourceAndLicense": {
+        "sourceType": "generated_original_concept",
+        "generator": "Codex built-in imagegen",
+        "date": "2026-07-15",
+        "externalInputs": [],
+        "licenseNotes": "No third-party source images, fonts, logos, or IP references were used. Project use remains pending user creative approval."
+      },
+      "assetPaths": [
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_basalt_grazer_concept_sheet_v001.png"
+      ],
+      "variants": [
+        {
+          "variantId": "tdf_basalt_grazer_standard",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "default charcoal basalt and ochre hide read"
+        },
+        {
+          "variantId": "tdf_basalt_grazer_ashen",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "paler dusted plates for dry rocky regions"
+        },
+        {
+          "variantId": "tdf_basalt_grazer_mineral",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "slightly stronger mineral seam accents; still non-narrative"
+        }
+      ]
+    },
+    {
+      "terrestrialProfileId": "tdf_grove_strider",
+      "workingDisplayKey": "Grove Strider",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "realmOrBiomeEligibility": [
+        "old_growth_forest",
+        "mossy_ridge",
+        "canopy_edge"
+      ],
+      "approximateWorldScale": {
+        "headHeightChampionUnits": 1.8,
+        "shoulderHeightChampionUnits": 1.4,
+        "lengthChampionUnits": 1.9,
+        "massClass": "medium_tall"
+      },
+      "silhouetteClass": "tall_browser_long_neck",
+      "materialSlotIntent": [
+        "bark_ridge_hide",
+        "matte_short_fur",
+        "lichen_patch_detail",
+        "leaf_tendril_secondary"
+      ],
+      "rigOrSkeletonIntent": "tall quadruped; long neck with modest bend controls; leaf-ear fins and tendrils need low-cost secondary motion or static reduced-motion pose",
+      "requiredAnimationIntent": [
+        "idle_head_sweep",
+        "slow_browse_step",
+        "ear_fin_alert",
+        "look_back",
+        "gentle_flee_trot",
+        "group_spacing_pause"
+      ],
+      "lodIntent": "Retain neck arc, high leg negative space, and leaf-ear silhouette; collapse tendril cards by LOD1; remove lichen micro-detail by LOD2.",
+      "colliderIntent": "narrow body capsule plus taller trigger volume if observation interaction is later approved",
+      "vfxAnchorIntent": [
+        "hoof_leaf_scuff",
+        "tendril_motion_root",
+        "browse_mouth",
+        "ear_fin_alert"
+      ],
+      "accessibilityNotes": "Must remain identifiable through tall neck and leg spacing, not green palette. Reduced motion freezes tendril flutter and keeps head/ear pose changes.",
+      "sourceAndLicense": {
+        "sourceType": "generated_original_concept",
+        "generator": "Codex built-in imagegen",
+        "date": "2026-07-15",
+        "externalInputs": [],
+        "licenseNotes": "No third-party source images, fonts, logos, or IP references were used. Project use remains pending user creative approval."
+      },
+      "assetPaths": [
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_grove_strider_concept_sheet_v001.png"
+      ],
+      "variants": [
+        {
+          "variantId": "tdf_grove_strider_standard",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "default moss, bark, and pale lichen read"
+        },
+        {
+          "variantId": "tdf_grove_strider_late_autumn",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "warmer tendril and lichen accents without changing silhouette"
+        },
+        {
+          "variantId": "tdf_grove_strider_mist",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "desaturated bark and lichen for foggy biomes"
+        }
+      ]
+    },
+    {
+      "terrestrialProfileId": "tdf_mire_lumenback",
+      "workingDisplayKey": "Mire Lumenback",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "realmOrBiomeEligibility": [
+        "wetland_mire",
+        "riverbank",
+        "flooded_ruins_edge"
+      ],
+      "approximateWorldScale": {
+        "shoulderHeightChampionUnits": 0.45,
+        "lengthChampionUnits": 1.2,
+        "massClass": "small_compact"
+      },
+      "silhouetteClass": "compact_low_amphibious_forager",
+      "materialSlotIntent": [
+        "wet_pebbled_hide",
+        "smooth_throat_pouch",
+        "rubbery_paddle_feet",
+        "optional_cyan_lumen_rings"
+      ],
+      "rigOrSkeletonIntent": "low amphibious quadruped; wide feet; throat pouch can scale subtly; whiskers are optional low-bone chains or static cards",
+      "requiredAnimationIntent": [
+        "idle_throat_breathe",
+        "low_shuffle_walk",
+        "short_hop_or_scramble",
+        "alert_freeze",
+        "forage_nose_down",
+        "group_idle_spacing"
+      ],
+      "lodIntent": "Preserve low dome, tail taper, paddle feet, and throat pouch; reduce individual lumen rings by LOD1; remove whiskers by LOD2 if needed.",
+      "colliderIntent": "low capsule or rounded box; avoid precise whisker or pouch collision",
+      "vfxAnchorIntent": [
+        "paddle_foot_splash_left",
+        "paddle_foot_splash_right",
+        "throat_pouch_breath",
+        "lumen_ring_optional"
+      ],
+      "accessibilityNotes": "Lumen rings are optional accents and must not be the only state read. Reduced motion disables glow pulsing and uses static ring intensity.",
+      "sourceAndLicense": {
+        "sourceType": "generated_original_concept",
+        "generator": "Codex built-in imagegen",
+        "date": "2026-07-15",
+        "externalInputs": [],
+        "licenseNotes": "No third-party source images, fonts, logos, or IP references were used. Project use remains pending user creative approval."
+      },
+      "assetPaths": [
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png"
+      ],
+      "variants": [
+        {
+          "variantId": "tdf_mire_lumenback_standard",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "default peat, blue-green skin, clay pouch, and cyan ring read"
+        },
+        {
+          "variantId": "tdf_mire_lumenback_clay",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "warmer underside and reduced blue for muddy wetland edges"
+        },
+        {
+          "variantId": "tdf_mire_lumenback_night",
+          "sourceVersion": "tdf-2026-07-15-v001",
+          "variantIntent": "higher ring contrast for low-light concept review only"
+        }
+      ]
+    }
+  ]
+}
