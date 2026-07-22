@@ -6,6 +6,7 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
+using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
@@ -14,6 +15,51 @@ namespace AL.Utilities
     public class DemoInitializer : MonoBehaviour
     {
         private Text _statusText;
+        private Text _modeText;
+        private readonly Dictionary<MaterialStyle, Material> _materials = new Dictionary<MaterialStyle, Material>();
+        private readonly Color _gold = new Color(0.92f, 0.66f, 0.30f, 1f);
+        private readonly Color _blue = new Color(0.36f, 0.58f, 0.82f, 1f);
+
+        private readonly struct MaterialStyle : IEquatable<MaterialStyle>
+        {
+            private readonly Color _color;
+            private readonly float _metallic;
+            private readonly float _smoothness;
+            private readonly Color _emission;
+            private readonly bool _hasEmission;
+
+            public MaterialStyle(Color color, float metallic, float smoothness, Color? emission)
+            {
+                _color = color;
+                _metallic = metallic;
+                _smoothness = smoothness;
+                _emission = emission.GetValueOrDefault();
+                _hasEmission = emission.HasValue;
+            }
+
+            public bool Equals(MaterialStyle other)
+            {
+                return _color.Equals(other._color)
+                    && _metallic.Equals(other._metallic)
+                    && _smoothness.Equals(other._smoothness)
+                    && _emission.Equals(other._emission)
+                    && _hasEmission == other._hasEmission;
+            }
+
+            public override bool Equals(object obj) => obj is MaterialStyle other && Equals(other);
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hash = _color.GetHashCode();
+                    hash = (hash * 397) ^ _metallic.GetHashCode();
+                    hash = (hash * 397) ^ _smoothness.GetHashCode();
+                    hash = (hash * 397) ^ _emission.GetHashCode();
+                    return (hash * 397) ^ _hasEmission.GetHashCode();
+                }
+            }
+        }
 
         private void Start()
         {
@@ -83,7 +129,6 @@ namespace AL.Utilities
                 Debug.Log("Attached CameraFollow to Main Camera.");
             }
 
-            // 3. Create a simple Debug UI for Resources
             CreateDebugUI();
             SpawnArenaTargets();
         }
@@ -93,37 +138,55 @@ namespace AL.Utilities
             GameObject canvasObj = new GameObject("DebugUI_Canvas");
             Canvas canvas = canvasObj.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            canvasObj.AddComponent<CanvasScaler>();
+            var scaler = canvasObj.AddComponent<CanvasScaler>();
+            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
+            scaler.matchWidthOrHeight = 0.5f;
             canvasObj.AddComponent<GraphicRaycaster>();
+
+            CreatePanel(canvasObj.transform, "CommandBackdrop", new Vector2(0f, 0f), new Vector2(688f, 0f), Vector2.zero, new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Color(0.006f, 0.010f, 0.016f, 0.70f));
+            CreatePanel(canvasObj.transform, "CommandTopRule", new Vector2(24f, -18f), new Vector2(634f, 2f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(1f, 0.84f, 0.50f, 0.34f));
+            CreatePanel(canvasObj.transform, "CommandAccent", new Vector2(24f, -28f), new Vector2(6f, 292f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(0.88f, 0.56f, 0.24f, 0.90f));
+
+            var title = CreateText(canvasObj.transform, "PrototypeTitle", new Vector2(44f, -28f), new Vector2(520f, 34f), 25, new Color(1f, 0.88f, 0.62f));
+            title.text = "ANOTHER LIFE // REALM WAR PROTOTYPE";
+            var subtitle = CreateText(canvasObj.transform, "PrototypeSubtitle", new Vector2(44f, -62f), new Vector2(520f, 42f), 15, new Color(0.72f, 0.82f, 0.92f));
+            subtitle.text = "2.5D kingdom command with 3D champion warzone staging.";
 
             GameObject textObj = new GameObject("ResourceText");
             textObj.transform.SetParent(canvasObj.transform);
             Text text = textObj.AddComponent<Text>();
-            // Fallback font handling for modern Unity versions
             text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
             if (text.font == null) text.font = Resources.GetBuiltinResource<Font>("Arial.ttf");
 
-            text.fontSize = 24;
-            text.color = Color.yellow;
-            text.text = "Initializing Kingdom State...";
+            text.fontSize = 15;
+            text.color = new Color(0.86f, 0.91f, 0.96f);
+            text.text = "Initializing command state...";
+            text.alignment = TextAnchor.UpperLeft;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Truncate;
 
             RectTransform rect = textObj.GetComponent<RectTransform>();
             rect.anchorMin = new Vector2(0, 1);
             rect.anchorMax = new Vector2(0, 1);
             rect.pivot = new Vector2(0, 1);
-            rect.anchoredPosition = new Vector2(20, -20);
-            rect.sizeDelta = new Vector2(400, 100);
+            rect.anchoredPosition = new Vector2(44, -116);
+            rect.sizeDelta = new Vector2(512, 160);
 
-            _statusText = CreateText(canvasObj.transform, "StatusText", new Vector2(20, 360), new Vector2(620, 90), 20, Color.white);
-            _statusText.text = "Prototype controls ready.";
+            _modeText = CreateText(canvasObj.transform, "ModeText", new Vector2(44f, -286f), new Vector2(512f, 42f), 15, new Color(0.56f, 0.70f, 0.84f));
+            _modeText.text = "INNER REALM: command board active // OUTER WARZONE: champion staging live";
 
-            CreateButton(canvasObj.transform, "Select Crownlands", new Vector2(20, 295), () =>
+            _statusText = CreateText(canvasObj.transform, "StatusText", new Vector2(44, -336), new Vector2(512, 82), 17, Color.white);
+            _statusText.text = "Command console ready. Use the board, inspect realm state, then fight in 3D.";
+
+            CreateButton(canvasObj.transform, "JOIN CROWNLANDS", new Vector2(44, -446), () =>
             {
                 ServiceLocator.Get<IRealmService>().SelectRealm(RealmId.Crownlands);
-                SetStatus("Selected Crownlands Humans.");
+                SetStatus("Crownlands oath recorded. Kingdom board and warzone staging are now aligned.");
             });
 
-            CreateButton(canvasObj.transform, "Add Resources", new Vector2(20, 240), () =>
+            CreateButton(canvasObj.transform, "SUPPLY CACHE", new Vector2(44, -500), () =>
             {
                 var resources = ServiceLocator.Get<IResourceService>();
                 foreach (ResourceType resourceType in ResourceRules.WalletResources)
@@ -132,82 +195,82 @@ namespace AL.Utilities
                     resources.AddResource(resourceType, amount);
                 }
 
-                SetStatus("Added debug resources, including ManaStone, Ore, and rare realm materials.");
+                SetStatus("Prototype supply cache delivered for kingdom-system inspection.");
             });
 
-            CreateButton(canvasObj.transform, "Upgrade Farm", new Vector2(20, 185), () =>
+            CreateButton(canvasObj.transform, "UPGRADE FARM", new Vector2(44, -554), () =>
             {
                 ServiceLocator.Get<IBuildingService>().StartUpgrade("Farm");
-                SetStatus("Started Farm upgrade if enough Stone is available.");
+                SetStatus("Farm upgrade order issued if Stone reserves are sufficient.");
             });
 
-            CreateButton(canvasObj.transform, "Train Infantry", new Vector2(20, 130), () =>
+            CreateButton(canvasObj.transform, "MUSTER INFANTRY", new Vector2(44, -608), () =>
             {
                 ServiceLocator.Get<ITrainingService>().StartTraining(TroopType.Infantry, 25);
-                SetStatus($"Infantry trained. Total: {ServiceLocator.Get<ITrainingService>().GetTroopCount(TroopType.Infantry)}");
+                SetStatus($"Infantry muster order resolved. Total: {ServiceLocator.Get<ITrainingService>().GetTroopCount(TroopType.Infantry)}");
             });
 
-            CreateButton(canvasObj.transform, "Earn Warzone", new Vector2(20, 75), () =>
+            CreateButton(canvasObj.transform, "WARZONE STIPEND", new Vector2(44, -662), () =>
             {
                 ServiceLocator.Get<IWarzoneCreditService>().AddCredits(250);
-                SetStatus($"Warzone Credits: {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}");
+                SetStatus($"Prototype Warzone Credits: {ServiceLocator.Get<IWarzoneCreditService>().GetCredits()}");
             });
 
-            CreateButton(canvasObj.transform, "Hero Color", new Vector2(20, 20), () =>
+            CreateButton(canvasObj.transform, "ARMOR COLOR", new Vector2(44, -716), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CyclePrimaryColor();
-                SetStatus("Cycled Champion primary color.");
+                SetStatus("Champion primary armor color cycled.");
             });
 
-            CreateButton(canvasObj.transform, "Hero Hair", new Vector2(220, 295), () =>
+            CreateButton(canvasObj.transform, "HAIR COLOR", new Vector2(252, -446), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CycleHairColor();
-                SetStatus("Cycled Champion hair color.");
+                SetStatus("Champion hair color cycled.");
             });
 
-            CreateButton(canvasObj.transform, "Toggle Cape", new Vector2(220, 240), () =>
+            CreateButton(canvasObj.transform, "CAPE", new Vector2(252, -500), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.ToggleCape();
-                SetStatus("Toggled Champion cape.");
+                SetStatus("Champion cape toggled.");
             });
 
-            CreateButton(canvasObj.transform, "Hero Body", new Vector2(420, 295), () =>
+            CreateButton(canvasObj.transform, "BODY PRESET", new Vector2(460, -446), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CycleBodyPreset();
-                SetStatus("Cycled Champion body preset.");
+                SetStatus("Champion body preset cycled.");
             });
 
-            CreateButton(canvasObj.transform, "Hair Style", new Vector2(420, 240), () =>
+            CreateButton(canvasObj.transform, "HAIR STYLE", new Vector2(460, -500), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CycleHairStyle();
-                SetStatus("Cycled Champion hair style.");
+                SetStatus("Champion hair style cycled.");
             });
 
-            CreateButton(canvasObj.transform, "Armor Style", new Vector2(420, 185), () =>
+            CreateButton(canvasObj.transform, "ARMOR STYLE", new Vector2(460, -554), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.CycleArmorStyle();
-                SetStatus("Cycled Champion armor style.");
+                SetStatus("Champion armor style cycled.");
             });
 
-            CreateButton(canvasObj.transform, "Toggle Helmet", new Vector2(420, 130), () =>
+            CreateButton(canvasObj.transform, "HELMET", new Vector2(460, -608), () =>
             {
                 FindObjectOfType<ChampionCustomizationController>()?.ToggleHelmet();
-                SetStatus("Toggled Champion helmet.");
+                SetStatus("Champion helmet toggled.");
             });
 
-            CreateButton(canvasObj.transform, "Assist Mode", new Vector2(220, 185), () =>
+            CreateButton(canvasObj.transform, "ASSIST MODE", new Vector2(252, -554), () =>
             {
                 FindObjectOfType<AutoCombatController>()?.SetMode(AutoMode.SemiAuto);
                 SetStatus("Assist mode enabled. Manual input interrupts it.");
             });
 
-            CreateButton(canvasObj.transform, "Auto Mode", new Vector2(220, 130), () =>
+            CreateButton(canvasObj.transform, "AUTO MODE", new Vector2(252, -608), () =>
             {
                 FindObjectOfType<AutoCombatController>()?.SetMode(AutoMode.FullAuto);
                 SetStatus("Auto mode enabled. Manual input interrupts it.");
             });
 
-            CreateButton(canvasObj.transform, "Capture Border", new Vector2(220, 75), () =>
+            CreateButton(canvasObj.transform, "SECURE BORDER", new Vector2(252, -662), () =>
             {
                 var realm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
                 if (realm == RealmId.None)
@@ -217,13 +280,12 @@ namespace AL.Utilities
                 }
 
                 ServiceLocator.Get<ITerritoryService>().CaptureTerritory("T5", realm);
-                SetStatus($"Captured Neutral Borderlands for {realm}.");
+                SetStatus($"Prototype border outpost secured for {realm}.");
             });
 
-            CreateButton(canvasObj.transform, "Test Battle", new Vector2(220, 20), RunTestBattle);
-            CreateButton(canvasObj.transform, "Spawn Targets", new Vector2(420, 20), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "BATTLE SIM", new Vector2(252, -716), RunTestBattle);
+            CreateButton(canvasObj.transform, "RESET TARGETS", new Vector2(460, -716), SpawnArenaTargets);
 
-            // Update text in a simple loop
             StartCoroutine(UpdateResourceText(text));
         }
 
@@ -257,8 +319,11 @@ namespace AL.Utilities
 
             var floor = GameObject.CreatePrimitive(PrimitiveType.Plane);
             floor.name = "Demo_Floor";
-            floor.transform.localScale = new Vector3(8f, 1f, 8f);
-            floor.GetComponent<Renderer>().material.color = new Color(0.14f, 0.18f, 0.16f);
+            floor.transform.localScale = new Vector3(10f, 1f, 10f);
+            ApplyMaterial(floor.GetComponent<Renderer>(), new Color(0.045f, 0.052f, 0.062f), 0.02f, 0.50f);
+
+            RenderSettings.ambientLight = new Color(0.14f, 0.16f, 0.19f);
+            CreateWarzoneFrame();
         }
 
         private void SpawnArenaTargets()
@@ -271,11 +336,12 @@ namespace AL.Utilities
                     continue;
                 }
 
-                var dummy = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                var dummy = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 dummy.name = name;
                 float angle = i * Mathf.PI * 2f / 12f;
                 dummy.transform.position = new Vector3(Mathf.Cos(angle) * 7f, 0.5f, Mathf.Sin(angle) * 7f);
-                dummy.GetComponent<Renderer>().material.color = Color.red;
+                dummy.transform.localScale = new Vector3(0.32f, 0.70f + (i % 3) * 0.12f, 0.32f);
+                ApplyMaterial(dummy.GetComponent<Renderer>(), new Color(0.54f, 0.13f, 0.11f), 0.05f, 0.58f, new Color(0.24f, 0.02f, 0.02f));
             }
 
             if (GameObject.Find("BossDummy") == null)
@@ -284,8 +350,9 @@ namespace AL.Utilities
                 boss.name = "BossDummy";
                 boss.transform.position = new Vector3(0f, 1.5f, 10f);
                 boss.transform.localScale = new Vector3(2.2f, 2.2f, 2.2f);
-                boss.GetComponent<Renderer>().material.color = new Color(0.7f, 0.05f, 0.05f);
+                ApplyMaterial(boss.GetComponent<Renderer>(), new Color(0.45f, 0.04f, 0.05f), 0.12f, 0.68f, new Color(0.35f, 0.02f, 0.02f));
                 boss.AddComponent<BossDummyAI>();
+                CreateBossCrown(boss.transform);
             }
 
             for (int i = 0; i < 6; i++)
@@ -299,11 +366,11 @@ namespace AL.Utilities
                 var bot = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 bot.name = botName;
                 bot.transform.position = new Vector3(-10f + i * 2f, 1.1f, 9f);
-                bot.GetComponent<Renderer>().material.color = new Color(0.55f, 0.1f, 0.65f);
+                ApplyMaterial(bot.GetComponent<Renderer>(), new Color(0.36f, 0.10f, 0.54f), 0.06f, 0.60f, new Color(0.10f, 0.02f, 0.16f));
                 bot.AddComponent<BotChampionAI>();
             }
 
-            SetStatus("Arena targets spawned. Use WASD, mouse click, and Space to fight.");
+            SetStatus("Warzone targets staged. Use WASD, mouse click, and Space to fight.");
         }
 
         private void RunTestBattle()
@@ -341,9 +408,9 @@ namespace AL.Utilities
             text.verticalOverflow = VerticalWrapMode.Overflow;
 
             var rect = textObj.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 0);
-            rect.anchorMax = new Vector2(0, 0);
-            rect.pivot = new Vector2(0, 0);
+            rect.anchorMin = new Vector2(0, 1);
+            rect.anchorMax = new Vector2(0, 1);
+            rect.pivot = new Vector2(0, 1);
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta;
             return text;
@@ -361,9 +428,9 @@ namespace AL.Utilities
             button.onClick.AddListener(action);
 
             var rect = buttonObj.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0, 0);
-            rect.anchorMax = new Vector2(0, 0);
-            rect.pivot = new Vector2(0, 0);
+            rect.anchorMin = new Vector2(0, 1);
+            rect.anchorMax = new Vector2(0, 1);
+            rect.pivot = new Vector2(0, 1);
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = new Vector2(190, 44);
 
@@ -384,6 +451,11 @@ namespace AL.Utilities
                 _statusText.text = message;
             }
 
+            if (_modeText != null)
+            {
+                _modeText.text = "LIVE TEST // realm command, kingdom board, and champion warzone staging";
+            }
+
             Debug.Log(message);
         }
 
@@ -396,17 +468,124 @@ namespace AL.Utilities
                 {
                     var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
                     ResourceType rareResourceType = ResourceRules.GetRareResourceForRealm(realmId);
-                    text.text = $"<b>RESOURCES</b>\n" +
-                               $"Food: {resources.GetResourceCount(ResourceType.Food)}\n" +
-                               $"Wood: {resources.GetResourceCount(ResourceType.Wood)}\n" +
-                               $"Stone: {resources.GetResourceCount(ResourceType.Stone)}\n" +
-                               $"Gold: {resources.GetResourceCount(ResourceType.Gold)}\n" +
-                               $"ManaStone: {resources.GetResourceCount(ResourceType.ManaStone)}\n" +
-                               $"Ore: {resources.GetResourceCount(ResourceType.Ore)}\n" +
-                               $"{rareResourceType}: {resources.GetResourceCount(rareResourceType)}";
+                    text.text = "TREASURY\n" +
+                               $"FOOD {resources.GetResourceCount(ResourceType.Food),8}   WOOD {resources.GetResourceCount(ResourceType.Wood),8}\n" +
+                               $"STONE {resources.GetResourceCount(ResourceType.Stone),7}   GOLD {resources.GetResourceCount(ResourceType.Gold),8}\n" +
+                               $"MANA {resources.GetResourceCount(ResourceType.ManaStone),8}   ORE {resources.GetResourceCount(ResourceType.Ore),9}\n" +
+                               $"{rareResourceType.ToString().ToUpperInvariant()} {resources.GetResourceCount(rareResourceType),8}";
                 }
                 yield return new WaitForSeconds(0.5f);
             }
+        }
+
+        private void CreateWarzoneFrame()
+        {
+            var root = new GameObject("Demo_WarzoneStaging");
+            for (int i = -1; i <= 1; i += 2)
+            {
+                CreatePrimitive(root.transform, "RealmGatePylon", PrimitiveType.Cube, new Vector3(i * 8.8f, 1.35f, 8.5f), new Vector3(0.42f, 2.7f, 0.42f), new Color(0.18f, 0.20f, 0.24f), new Color(0.14f, 0.05f, 0.02f));
+                CreatePrimitive(root.transform, "CrossroadBeacon", PrimitiveType.Cylinder, new Vector3(i * 4.8f, 0.42f, -6.7f), new Vector3(0.28f, 0.84f, 0.28f), _blue, _blue * 0.18f);
+            }
+
+            CreatePrimitive(root.transform, "RealmGateLintel", PrimitiveType.Cube, new Vector3(0f, 2.85f, 8.5f), new Vector3(9.8f, 0.34f, 0.38f), new Color(0.20f, 0.18f, 0.18f), new Color(0.20f, 0.07f, 0.02f));
+            CreatePrimitive(root.transform, "CentralCrossroad", PrimitiveType.Cylinder, new Vector3(0f, 0.07f, -3.2f), new Vector3(1.8f, 0.035f, 1.8f), new Color(0.10f, 0.12f, 0.15f), _gold * 0.08f);
+            CreatePrimitive(root.transform, "DragonWishMarker", PrimitiveType.Cylinder, new Vector3(0f, 0.28f, 7.15f), new Vector3(0.44f, 0.56f, 0.44f), _gold, _gold * 0.24f);
+        }
+
+        private void CreateBossCrown(Transform boss)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                float angle = i * Mathf.PI * 2f / 6f;
+                var shard = CreatePrimitive(boss, "BossCrownShard", PrimitiveType.Cube, new Vector3(Mathf.Cos(angle) * 0.74f, 0.95f, Mathf.Sin(angle) * 0.74f), new Vector3(0.12f, 0.62f, 0.12f), new Color(0.20f, 0.02f, 0.03f), new Color(0.34f, 0.02f, 0.02f));
+                shard.transform.localRotation = Quaternion.Euler(18f, -angle * Mathf.Rad2Deg, 22f);
+            }
+        }
+
+        private GameObject CreatePrimitive(Transform parent, string name, PrimitiveType type, Vector3 position, Vector3 scale, Color color, Color? emission = null)
+        {
+            var obj = GameObject.CreatePrimitive(type);
+            obj.name = name;
+            obj.transform.SetParent(parent, false);
+            obj.transform.localPosition = position;
+            obj.transform.localScale = scale;
+            ApplyMaterial(obj.GetComponent<Renderer>(), color, 0.04f, 0.54f, emission);
+            return obj;
+        }
+
+        private void ApplyMaterial(Renderer renderer, Color color, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
+        {
+            if (renderer == null || renderer.sharedMaterial == null)
+            {
+                return;
+            }
+
+            var style = new MaterialStyle(color, metallic, smoothness, emission);
+            if (!_materials.TryGetValue(style, out Material material))
+            {
+                material = new Material(renderer.sharedMaterial)
+                {
+                    name = "DemoStyleMaterial"
+                };
+                _materials.Add(style, material);
+            }
+
+            material.color = color;
+            if (material.HasProperty("_Metallic"))
+            {
+                material.SetFloat("_Metallic", metallic);
+            }
+
+            if (material.HasProperty("_Glossiness"))
+            {
+                material.SetFloat("_Glossiness", smoothness);
+            }
+
+            if (emission.HasValue && material.HasProperty("_EmissionColor"))
+            {
+                material.EnableKeyword("_EMISSION");
+                material.SetColor("_EmissionColor", emission.Value);
+            }
+
+            renderer.sharedMaterial = material;
+        }
+
+        private void OnDestroy()
+        {
+            foreach (Material material in _materials.Values)
+            {
+                if (material == null)
+                {
+                    continue;
+                }
+
+                if (Application.isPlaying)
+                {
+                    Destroy(material);
+                }
+                else
+                {
+                    DestroyImmediate(material);
+                }
+            }
+
+            _materials.Clear();
+        }
+
+        private Image CreatePanel(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Color color)
+        {
+            var panelObject = new GameObject(name);
+            panelObject.transform.SetParent(parent, false);
+            var image = panelObject.AddComponent<Image>();
+            image.color = color;
+            image.raycastTarget = false;
+            var rect = panelObject.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMax;
+            rect.pivot = pivot;
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
+            return image;
         }
     }
 }
