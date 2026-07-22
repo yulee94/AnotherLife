@@ -6,6 +6,7 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
+using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
@@ -15,8 +16,50 @@ namespace AL.Utilities
     {
         private Text _statusText;
         private Text _modeText;
+        private readonly Dictionary<MaterialStyle, Material> _materials = new Dictionary<MaterialStyle, Material>();
         private readonly Color _gold = new Color(0.92f, 0.66f, 0.30f, 1f);
         private readonly Color _blue = new Color(0.36f, 0.58f, 0.82f, 1f);
+
+        private readonly struct MaterialStyle : IEquatable<MaterialStyle>
+        {
+            private readonly Color _color;
+            private readonly float _metallic;
+            private readonly float _smoothness;
+            private readonly Color _emission;
+            private readonly bool _hasEmission;
+
+            public MaterialStyle(Color color, float metallic, float smoothness, Color? emission)
+            {
+                _color = color;
+                _metallic = metallic;
+                _smoothness = smoothness;
+                _emission = emission.GetValueOrDefault();
+                _hasEmission = emission.HasValue;
+            }
+
+            public bool Equals(MaterialStyle other)
+            {
+                return _color.Equals(other._color)
+                    && _metallic.Equals(other._metallic)
+                    && _smoothness.Equals(other._smoothness)
+                    && _emission.Equals(other._emission)
+                    && _hasEmission == other._hasEmission;
+            }
+
+            public override bool Equals(object obj) => obj is MaterialStyle other && Equals(other);
+
+            public override int GetHashCode()
+            {
+                unchecked
+                {
+                    int hash = _color.GetHashCode();
+                    hash = (hash * 397) ^ _metallic.GetHashCode();
+                    hash = (hash * 397) ^ _smoothness.GetHashCode();
+                    hash = (hash * 397) ^ _emission.GetHashCode();
+                    return (hash * 397) ^ _hasEmission.GetHashCode();
+                }
+            }
+        }
 
         private void Start()
         {
@@ -470,14 +513,23 @@ namespace AL.Utilities
             return obj;
         }
 
-        private static void ApplyMaterial(Renderer renderer, Color color, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
+        private void ApplyMaterial(Renderer renderer, Color color, float metallic = 0f, float smoothness = 0.35f, Color? emission = null)
         {
-            if (renderer == null)
+            if (renderer == null || renderer.sharedMaterial == null)
             {
                 return;
             }
 
-            Material material = renderer.material;
+            var style = new MaterialStyle(color, metallic, smoothness, emission);
+            if (!_materials.TryGetValue(style, out Material material))
+            {
+                material = new Material(renderer.sharedMaterial)
+                {
+                    name = "DemoStyleMaterial"
+                };
+                _materials.Add(style, material);
+            }
+
             material.color = color;
             if (material.HasProperty("_Metallic"))
             {
@@ -494,6 +546,30 @@ namespace AL.Utilities
                 material.EnableKeyword("_EMISSION");
                 material.SetColor("_EmissionColor", emission.Value);
             }
+
+            renderer.sharedMaterial = material;
+        }
+
+        private void OnDestroy()
+        {
+            foreach (Material material in _materials.Values)
+            {
+                if (material == null)
+                {
+                    continue;
+                }
+
+                if (Application.isPlaying)
+                {
+                    Destroy(material);
+                }
+                else
+                {
+                    DestroyImmediate(material);
+                }
+            }
+
+            _materials.Clear();
         }
 
         private Image CreatePanel(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Color color)
