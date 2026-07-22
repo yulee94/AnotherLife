@@ -1,7 +1,9 @@
 {
     "name": "AL.EditMode.Tests",
     "rootNamespace": "AL.Tests.EditMode",
-    "references": [],
+    "references": [
+        "AL.GameDataCatalog"
+    ],
     "includePlatforms": [
         "Editor"
     ],
