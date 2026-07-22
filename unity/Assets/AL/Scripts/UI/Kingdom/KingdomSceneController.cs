@@ -84,7 +84,11 @@ namespace AL.UI.Kingdom
             // load that re-applies offline progress.
             _profileReady = TryConsumeReadyProfile();
 
-            BuildRuntimeWorld();
+            if (_profileReady)
+            {
+                BuildRuntimeWorld();
+            }
+
             BuildRuntimeUi();
             Refresh();
         }
@@ -244,22 +248,18 @@ namespace AL.UI.Kingdom
         // rather than calling that getter from read-only UI; DISTRICTS/RESEARCH still show their real
         // (frozen) state through the non-seeding GetAll* reads (D7).
         //
-        // Two deliberate carve-outs, neither of which persists state on a #241-canonical loaded profile:
-        //   (a) _kingdomVisualizer?.RefreshVisuals() below delegates to KingdomVisualizer, which seeds a
-        //       few base buildings only on an empty profile. That is a pre-existing, accepted board
-        //       behavior owned by a file outside this correction's scope, not a controller-owned read.
-        //   (b) GetResourceCount/GetCredits (resource ticker + WAR chip) run wallet/credit normalization
+        // GetResourceCount/GetCredits (resource ticker + WAR chip) run wallet/credit normalization
         //       that is a strict no-op on a canonical loaded save and never calls Save(); they seed no
         //       domain entities.
         private void Refresh()
         {
-            _kingdomVisualizer?.RefreshVisuals();
-
             if (!_profileReady)
             {
                 RenderProfileUnavailable();
                 return;
             }
+
+            _kingdomVisualizer?.RefreshVisuals();
 
             var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
             _realmText.text = realm == null

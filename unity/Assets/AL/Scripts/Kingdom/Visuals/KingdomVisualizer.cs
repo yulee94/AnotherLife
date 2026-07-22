@@ -16,7 +16,6 @@ namespace AL.Kingdom.Visuals
         private CityLayoutEngine _layoutEngine;
         private IRealmService _realmService;
         private IBuildingService _buildingService;
-        private ITerritoryService _territoryService;
         private int _lastVisualHash;
         private bool _hasVisualHash;
 
@@ -46,14 +45,6 @@ namespace AL.Kingdom.Visuals
             _layoutEngine = gameObject.AddComponent<CityLayoutEngine>();
             _realmService = ServiceLocator.Get<IRealmService>();
             _buildingService = ServiceLocator.Get<IBuildingService>();
-            try
-            {
-                _territoryService = ServiceLocator.Get<ITerritoryService>();
-            }
-            catch (System.Exception)
-            {
-                _territoryService = null;
-            }
         }
 
         public void InitializeKingdom()
@@ -69,14 +60,6 @@ namespace AL.Kingdom.Visuals
             SetupTerrain(realmId);
 
             var buildings = new List<BuildingState>(_buildingService.GetAllBuildingStates());
-            if (buildings.Count == 0)
-            {
-                // Ensure base buildings exist for the visualization
-                buildings.Add(_buildingService.GetBuildingState("TownHall"));
-                buildings.Add(_buildingService.GetBuildingState("Farm"));
-                buildings.Add(_buildingService.GetBuildingState("Barracks"));
-            }
-
             _layoutEngine.AutoPlaceBuildings(realmId, buildings);
             CreateTerritoryOutposts();
             CreateAmbientBoardLife(realmId);
@@ -104,21 +87,6 @@ namespace AL.Kingdom.Visuals
                         hash = hash * 31 + (building.BuildingId == null ? 0 : building.BuildingId.GetHashCode());
                         hash = hash * 31 + building.Level;
                         hash = hash * 31 + (building.IsUpgrading ? 1 : 0);
-                    }
-                }
-
-                if (_territoryService != null)
-                {
-                    foreach (var territory in _territoryService.GetTerritories())
-                    {
-                        if (territory == null)
-                        {
-                            continue;
-                        }
-
-                        hash = hash * 31 + (territory.Id == null ? 0 : territory.Id.GetHashCode());
-                        hash = hash * 31 + (int)territory.OwnerRealm;
-                        hash = hash * 31 + (territory.IsFortress ? 1 : 0);
                     }
                 }
 
@@ -332,58 +300,11 @@ namespace AL.Kingdom.Visuals
         {
             var outposts = GameObject.Find("Kingdom_TerritoryOutposts") ?? new GameObject("Kingdom_TerritoryOutposts");
             ClearChildren(outposts.transform);
-            if (_territoryService == null)
-            {
-                return;
-            }
 
-            int index = 0;
-            foreach (var territory in _territoryService.GetTerritories())
-            {
-                if (territory == null)
-                {
-                    continue;
-                }
-
-                float angle = index * Mathf.PI * 2f / 5f + Mathf.PI / 5f;
-                float radius = territory.IsFortress ? 7.95f : 7.10f;
-                Vector3 position = new Vector3(Mathf.Cos(angle) * radius, 0.16f, Mathf.Sin(angle) * radius);
-                Color ownerColor = GetRealmAccent(territory.OwnerRealm);
-                Color routeColor = Color.Lerp(ownerColor, Color.black, territory.OwnerRealm == RealmId.None ? 0.65f : 0.32f);
-                CreateRouteSegment(outposts.transform, "OutpostSupplyRoute", Vector3.zero, position, territory.IsFortress ? 0.12f : 0.08f, routeColor, 0.072f);
-
-                var root = new GameObject("Territory_" + territory.Id);
-                root.transform.SetParent(outposts.transform, false);
-                root.transform.position = position;
-
-                var controlRing = CreateTerritoryPrimitive(root.transform, "OutpostControlRing", PrimitiveType.Cylinder, new Vector3(0f, 0.035f, 0f), territory.IsFortress ? new Vector3(0.66f, 0.03f, 0.66f) : new Vector3(0.52f, 0.025f, 0.52f), routeColor, 0.02f, 0.42f, territory.OwnerRealm == RealmId.None ? null : routeColor * 0.10f);
-                if (territory.OwnerRealm != RealmId.None || territory.IsFortress)
-                {
-                    controlRing.AddComponent<KingdomTacticalPulse>().Configure(routeColor, Color.Lerp(routeColor, Color.white, 0.22f), territory.IsFortress ? 1.08f : 0.78f);
-                }
-
-                var baseObject = CreateTerritoryPrimitive(root.transform, "OutpostBase", PrimitiveType.Cylinder, new Vector3(0f, 0.08f, 0f), territory.IsFortress ? new Vector3(0.46f, 0.12f, 0.46f) : new Vector3(0.34f, 0.08f, 0.34f), Color.Lerp(ownerColor, Color.black, 0.20f), 0.04f, 0.40f);
-                var towerObject = CreateTerritoryPrimitive(root.transform, "OutpostTower", territory.IsFortress ? PrimitiveType.Cylinder : PrimitiveType.Cube, new Vector3(0f, territory.IsFortress ? 0.42f : 0.30f, 0f), territory.IsFortress ? new Vector3(0.22f, 0.46f, 0.22f) : new Vector3(0.30f, 0.32f, 0.30f), ownerColor, 0.05f, 0.52f, territory.OwnerRealm == RealmId.None ? null : ownerColor * 0.12f);
-                baseObject.AddComponent<KingdomTerritorySelectable>().Configure(territory.Name, territory.OwnerRealm, territory.BonusType, territory.BonusAmount, territory.IsFortress, Color.Lerp(ownerColor, Color.black, 0.20f), ownerColor);
-                towerObject.AddComponent<KingdomTerritorySelectable>().Configure(territory.Name, territory.OwnerRealm, territory.BonusType, territory.BonusAmount, territory.IsFortress, ownerColor, Color.Lerp(ownerColor, Color.white, 0.25f));
-                CreateOutpostGarrisonMarkers(root.transform, ownerColor, routeColor, territory.IsFortress, territory.OwnerRealm == RealmId.None);
-                CreateTerritoryPrimitive(root.transform, "OutpostFlag", PrimitiveType.Cube, new Vector3(0.24f, territory.IsFortress ? 0.78f : 0.58f, 0f), new Vector3(0.30f, 0.13f, 0.035f), Color.Lerp(ownerColor, Color.white, 0.25f), 0.02f, 0.44f, territory.OwnerRealm == RealmId.None ? null : ownerColor * 0.08f);
-                CreatePointLight(root.transform, "OutpostStatusLight", new Vector3(0f, territory.IsFortress ? 1.12f : 0.88f, -0.08f), Color.Lerp(ownerColor, Color.white, 0.18f), territory.IsFortress ? 0.50f : 0.34f, territory.IsFortress ? 2.4f : 1.8f);
-
-                var labelObject = new GameObject("OutpostLabel");
-                labelObject.transform.SetParent(root.transform, false);
-                labelObject.transform.localPosition = new Vector3(0f, territory.IsFortress ? 1.08f : 0.86f, -0.14f);
-                labelObject.transform.localRotation = Quaternion.Euler(55f, 0f, 0f);
-                var label = labelObject.AddComponent<TextMesh>();
-                label.text = $"{FormatTerritoryName(territory.Name)}\n{territory.BonusType}+{territory.BonusAmount}";
-                label.anchor = TextAnchor.MiddleCenter;
-                label.alignment = TextAlignment.Center;
-                label.fontSize = 44;
-                label.characterSize = 0.050f;
-                label.color = Color.Lerp(ownerColor, Color.white, 0.38f);
-
-                index++;
-            }
+            // #178 containment: ITerritoryService.GetTerritories() currently seeds the authoritative
+            // save when the list is empty. A presentation refresh must not create domain state, so the
+            // board keeps this layer empty until #166 supplies a pure territory snapshot. Terrain,
+            // realm landmarks, command routes, and other realm-neutral board presentation remain.
         }
 
         private void CreateAmbientBoardLife(RealmId realmId)

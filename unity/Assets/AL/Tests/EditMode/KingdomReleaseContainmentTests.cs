@@ -11,11 +11,9 @@ namespace AL.Tests.EditMode
 {
     // Containment corrections for #178 (release-controller mutation containment). These tests prove the
     // corrected KingdomSceneController / ChampionArenaSceneController / KingdomCommandPolicy behavior:
-    //   * blocking-issue diagnostics were derived from the GitHub issue state frozen at implementation
-    //     time (2026-07-21) and stay honest against that snapshot (no closed issue listed as blocking,
-    //     #137 required for every mutation family except Champion, permanently-unavailable catalog
-    //     entries kept per D9). The snapshot is a fixed baseline captured in this test, not a live query;
-    //     if an issue's state changes later this guard is re-derived deliberately, not silently.
+    //   * blocking-issue diagnostics match accepted reconnection contracts rather than transient
+    //     GitHub open/closed state (#137 is required for every mutation family except Champion and
+    //     permanently-unavailable catalog entries remain per D9);
     //   * the hidden per-second progression, the controller-owned load, and the Champion proximity
     //     credit grant are gone from production source;
     //   * building the read-only UI and refreshing/updating/toggling it (and selecting every command)
@@ -26,11 +24,6 @@ namespace AL.Tests.EditMode
     // reached by reflection, mirroring BootloaderServiceStackIntegrityTests.
     public sealed class KingdomReleaseContainmentTests
     {
-        // GitHub issue state frozen at #178 containment implementation time (2026-07-21). This is a
-        // fixed snapshot, not a live lookup: closed = {127, 152, 156, 223}. A blockingIssueId that names
-        // any of these CLOSED issues is a diagnostics-honesty defect and fails BlockingIssueIds...().
-        private static readonly int[] ClosedIssuesAtImplementation = { 127, 152, 156, 223 };
-
         private const int SaveHardeningIssue = 137;
 
         [SetUp]
@@ -51,25 +44,29 @@ namespace AL.Tests.EditMode
         }
 
         // ---------------------------------------------------------------------
-        // (1) Blocking-issue diagnostics reflect live issue state
+        // (1) Blocking-issue diagnostics reflect accepted reconnection contracts
         // ---------------------------------------------------------------------
 
         [Test]
-        public void BlockingIssueIdsNeverReferenceAClosedIssue()
+        public void BlockingIssueIdsMatchAcceptedReconnectionContracts()
         {
-            foreach (object context in new[] { CommittedRealmContext(), NoRealmContext() })
-            {
-                foreach (object descriptor in CreateDescriptors(context))
-                {
-                    foreach (int issueId in BlockingIssueIds(descriptor))
-                    {
-                        Assert.That(
-                            ClosedIssuesAtImplementation,
-                            Has.No.Member(issueId),
-                            $"Command '{Id(descriptor)}' lists closed issue #{issueId} as a live blocker.");
-                    }
-                }
-            }
+            object context = CommittedRealmContext();
+
+            AssertBlockers(context, "TownHallUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "FarmUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "LumberMillUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "QuarryUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "GoldMineUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "ManaShrineUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "MineUpgrade", 137, 163, 165, 183);
+            AssertBlockers(context, "InfantryTraining", 137, 163, 165, 183);
+            AssertBlockers(context, "RangedTraining", 137, 163, 165, 183);
+            AssertBlockers(context, "QuestClaim", 133, 137, 152);
+            AssertBlockers(context, "SteelResearch", 137, 163, 165, 183);
+            AssertBlockers(context, "ArmorResearch", 137, 163, 165, 183);
+            AssertBlockers(context, "WarmasterPurchase", 137, 163, 171, 183);
+            AssertBlockers(context, "BorderlandsCapture", 137, 163, 166, 173);
+            AssertBlockers(context, "ChampionDeploy", 150, 173, 180);
         }
 
         [Test]
@@ -167,6 +164,15 @@ namespace AL.Tests.EditMode
                 "The proximity credit-grant timer field must be removed with the grant loop.");
         }
 
+        [Test]
+        public void KingdomVisualizerContainsNoStateSeedingReadPath()
+        {
+            string source = ReadProductionSource("Kingdom", "Visuals", "KingdomVisualizer.cs");
+
+            Assert.That(source, Does.Not.Contain("_buildingService.GetBuildingState("));
+            Assert.That(source, Does.Not.Contain("_territoryService.GetTerritories("));
+        }
+
         // ---------------------------------------------------------------------
         // (3) Read-only UI lifecycle seeds no profile state and never loads/saves
         // ---------------------------------------------------------------------
@@ -193,6 +199,7 @@ namespace AL.Tests.EditMode
             Type controllerType = GetRuntimeType("AL.UI.Kingdom.KingdomSceneController");
             var host = new GameObject("KingdomContainmentControllerTest");
             var controller = host.AddComponent(controllerType);
+            HashSet<int> existingRootIds = CaptureSceneRootIds();
             try
             {
                 bool ready = (bool)controllerType
@@ -201,9 +208,15 @@ namespace AL.Tests.EditMode
                 Assert.True(ready, "A succeeded marker load with a present save must be consumed as ready.");
                 SetInstanceField(controller, "_profileReady", ready);
 
-                // Build only the read-only UI and drive the read paths. The 2.5D world/visualizer is a
-                // separate MonoBehaviour outside this correction's scope, so it is not constructed here;
-                // that isolates the controller-owned refresh/update/toggle surface under test.
+                // Drive the visualizer's service-backed read paths without constructing its graphics
+                // materials in EditMode. Rendering itself has no domain authority; these are the paths
+                // that previously seeded buildings and territories as presentation fallbacks.
+                Type visualizerType = GetRuntimeType("AL.Kingdom.Visuals.KingdomVisualizer");
+                var board = new GameObject("Kingdom_2_5D_Board");
+                var visualizer = board.AddComponent(visualizerType);
+                Invoke(visualizer, "EnsureServices");
+                Invoke(visualizer, "BuildVisualHash");
+                Invoke(visualizer, "CreateTerritoryOutposts");
                 Invoke(controller, "BuildRuntimeUi");
                 Invoke(controller, "Refresh");
                 Invoke(controller, "Update");
@@ -228,14 +241,7 @@ namespace AL.Tests.EditMode
             finally
             {
                 UnityEngine.Object.DestroyImmediate(host);
-
-                // BuildRuntimeUi creates the Kingdom canvas as a separate scene root; destroy it so the
-                // read-only UI objects do not leak into other tests in the run.
-                var canvas = GameObject.Find("KingdomCanvas");
-                if (canvas != null)
-                {
-                    UnityEngine.Object.DestroyImmediate(canvas);
-                }
+                DestroyNewSceneRoots(existingRootIds);
             }
         }
 
@@ -320,6 +326,32 @@ namespace AL.Tests.EditMode
                 .Invoke(null, null);
 
             Assert.False(ready, "Without a succeeded marker load the controller must not treat the profile as ready.");
+
+            var host = new GameObject("KingdomUnavailableProfileControllerTest");
+            var controller = host.AddComponent(controllerType);
+            HashSet<int> existingRootIds = CaptureSceneRootIds();
+            try
+            {
+                Invoke(controller, "Start");
+
+                Assert.That(
+                    GameObject.Find("Kingdom_2_5D_Board"),
+                    Is.Null,
+                    "An unavailable profile must not construct a service-backed world visualizer.");
+
+                object save = GetInstanceProperty(fake, "CurrentSave");
+                AssertEmpty(save, "Buildings");
+                AssertEmpty(save, "Researches");
+                AssertEmpty(save, "Quests");
+                AssertEmpty(save, "Troops");
+                AssertEmpty(save, "RealmGems");
+                AssertEmpty(save, "Territories");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(host);
+                DestroyNewSceneRoots(existingRootIds);
+            }
         }
 
         // ---------------------------------------------------------------------
@@ -401,6 +433,15 @@ namespace AL.Tests.EditMode
             return ((IEnumerable)Property(descriptor, "BlockingIssueIds")).Cast<int>().ToArray();
         }
 
+        private static void AssertBlockers(object context, string commandFieldName, params int[] expected)
+        {
+            object descriptor = Resolve(CommandId(commandFieldName), context);
+            Assert.That(
+                BlockingIssueIds(descriptor),
+                Is.EquivalentTo(expected),
+                $"{commandFieldName} blockers must match the accepted reconnection contract.");
+        }
+
         private static object Property(object instance, string name)
         {
             return instance.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.Instance).GetValue(instance);
@@ -449,6 +490,26 @@ namespace AL.Tests.EditMode
                 .GetField(fieldName, BindingFlags.Instance | BindingFlags.Public)
                 .GetValue(save);
             Assert.AreEqual(0, list?.Count ?? 0, $"Read-only UI seeded {fieldName} state.");
+        }
+
+        private static HashSet<int> CaptureSceneRootIds()
+        {
+            return new HashSet<int>(
+                UnityEngine.SceneManagement.SceneManager
+                    .GetActiveScene()
+                    .GetRootGameObjects()
+                    .Select(root => root.GetInstanceID()));
+        }
+
+        private static void DestroyNewSceneRoots(HashSet<int> existingRootIds)
+        {
+            foreach (GameObject root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+            {
+                if (!existingRootIds.Contains(root.GetInstanceID()))
+                {
+                    UnityEngine.Object.DestroyImmediate(root);
+                }
+            }
         }
 
         private static object InitializeIfMissing()

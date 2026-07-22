@@ -22,19 +22,17 @@ namespace AL.UI.Kingdom
         public const string BorderlandsCapture = "territory.borderlands.capture";
         public const string ChampionDeploy = "champion.deploy";
 
-        // Blocking-issue diagnostics are re-derived from the spec section 15 reconnection matrix
-        // and the LIVE GitHub issue state at implementation time (2026-07-21), not copied from the
-        // stale post-merge audit table (#178):
+        // Blocking-issue diagnostics come from the accepted spec section 15 reconnection matrix,
+        // not from transient GitHub open/closed state. Project governance explicitly distinguishes
+        // issue closure from accepted behavior, so a prerequisite remains here until its contract is
+        // accepted and this policy is deliberately revised:
         //   - #137 (save hardening) is required by every mutation family except Champion (spec 15).
         //   - building / research / training share {137, 163, 165, 183}.
         //   - Warmaster {137, 163, 171, 183}; territory capture {137, 163, 166, 173};
-        //     quest claim {133, 137} (spec-15 quest set was {137, 152, 133}, but #152 is CLOSED and
-        //     therefore no longer blocking, so it is dropped — see KingdomReleaseContainmentTests);
+        //     quest claim {133, 137, 152};
         //     Champion {150, 173, 180}.
-        // Only issues that are OPEN (still blocking) are listed. #152/#156/#127/#223 are CLOSED and
-        // must never appear here; a listed closed issue is a diagnostics honesty defect that the
-        // live-state test fails on. mana_shrine / mine stay as permanently-unavailable deck entries
-        // (D9) rather than being dropped — the catalog defines no such building ids yet (#183).
+        // mana_shrine / mine stay as permanently-unavailable deck entries (D9) rather than being
+        // dropped — the catalog defines no such building ids yet (#183).
         public static IReadOnlyList<KingdomCommandDescriptor> CreateDescriptors(KingdomCommandContext context)
         {
             var descriptors = new List<KingdomCommandDescriptor>
@@ -49,7 +47,7 @@ namespace AL.UI.Kingdom
                 Mutating(MineUpgrade, "Mine", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
                 Mutating(InfantryTraining, "Infantry", KingdomCommandCategory.Forces, context.Capabilities.TroopTraining, "training-contract-missing", 137, 163, 165, 183),
                 Mutating(RangedTraining, "Ranged", KingdomCommandCategory.Forces, context.Capabilities.TroopTraining, "training-contract-missing", 137, 163, 165, 183),
-                Mutating(QuestClaim, "Claim", KingdomCommandCategory.Forces, context.Capabilities.QuestClaim, "quest-claim-contract-missing", 133, 137),
+                Mutating(QuestClaim, "Claim", KingdomCommandCategory.Forces, context.Capabilities.QuestClaim, "quest-claim-contract-missing", 133, 137, 152),
                 Mutating(SteelResearch, "Steel", KingdomCommandCategory.Progression, context.Capabilities.Research, "research-contract-missing", 137, 163, 165, 183),
                 Mutating(ArmorResearch, "Armor", KingdomCommandCategory.Progression, context.Capabilities.Research, "research-contract-missing", 137, 163, 165, 183),
                 Mutating(WarmasterPurchase, "Warmaster", KingdomCommandCategory.Progression, context.Capabilities.Warmaster, "warmaster-contract-missing", 137, 163, 171, 183),
