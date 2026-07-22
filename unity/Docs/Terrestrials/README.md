@@ -6,7 +6,7 @@ Current source package:
 
 - `Terrestrial_Design_Brief.md` - visual tone, rules, exclusions, and per-profile design intent.
 - `terrestrial_profiles_manifest.json` - stable source IDs, variants, scale, motion, LOD, accessibility, provenance, and asset paths.
-- `Terrestrial_Engineering_Handoff.md` - requirements for later GPT review and Codex engineering import after user creative approval.
+- `Terrestrial_Engineering_Handoff.md` - requirements for later Codex coordination/review and Codex engineering import after user creative approval.
 
 Concept sheets are stored under:
 

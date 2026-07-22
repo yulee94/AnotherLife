@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This note defines what a later engineering PR may consume after GPT technical review and user creative approval. It does not authorize implementation by itself.
+This note defines what a later engineering PR may consume after Codex coordination/review and user creative approval. It does not authorize implementation by itself.
 
 ## Source Inputs
 
@@ -36,4 +36,4 @@ This note defines what a later engineering PR may consume after GPT technical re
 - Every material slot maps to a documented `materialSlotIntent`.
 - Every animation or VFX anchor maps to documented intent.
 - Reduced-motion and non-color readability assumptions are preserved.
-- Runtime implementation remains separate from design-source changes unless a future PR explicitly declares mixed scope and GPT approves it.
+- Runtime implementation remains separate from design-source changes unless a future PR explicitly declares mixed scope and Codex coordination/review dispositions it.
