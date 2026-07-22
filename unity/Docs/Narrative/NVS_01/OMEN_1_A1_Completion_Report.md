@@ -3,7 +3,7 @@
 ## Control
 
 - Milestone: NVS-01, A1
-- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-22-v001`
+- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-22-v002`
 - Primary mode: Codex narrative/content
 - Upstream decision: issue #138, comment `4966062298`
 - Tracked task: issue #128
@@ -27,11 +27,13 @@ The tone is urgent, mysterious, hopeful, and non-punitive. The player always has
 
 Every dialogue line, choice, objective, speaker field, title, and description has a stable localization key with initial English source text in the packet.
 
+Version `v002` removes the report objective's redundant inline `sourceText`. The unchanged English objective remains exclusively at localization key `objective.omen1.report`, preserving D7 and D13 while eliminating duplicate localization authority. No dialogue, choice, state, consequence, or player-facing text changed.
+
 ## Boundaries
 
 No Android runtime model, navigation, UI, Gradle, Unity runtime service, scene, save file, shared integration file, complete Chapter 1 content, or Android↔Unity bridge is changed. The existing Kotlin archive remains historical/runtime preview material and is not made authoritative by this packet.
 
-The focused PowerShell validator is included only to satisfy #128's packet acceptance matrix. It validates IDs, internal references, state/objective/dialogue targets, D1–D16 presence, localization coverage, requested external classification, reachability, and consequence-trigger conflicts, and exercises eight negative fixtures. It is not a general authoring framework.
+The focused PowerShell validator is included only to satisfy #128's packet acceptance matrix. It validates IDs, internal references, state/objective/dialogue targets, D1–D16 presence, localization coverage, requested external classification, reachability, and consequence-trigger conflicts, and exercises eleven negative fixtures. It is not a general authoring framework.
 
 ## External dependencies and limitations
 
