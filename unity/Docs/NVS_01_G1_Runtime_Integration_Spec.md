@@ -3,15 +3,15 @@
 ## 1. Control and activation
 
 - Milestone/task: NVS-01 / G1
-- Specification version/status: `nvs01-g1-2026-07-22-v001` / draft for user approval
+- Specification version/status: `nvs01-g1-2026-07-22-v002` / approved; synchronized to A1 v002
 - Primary mode: Codex coordination/review
-- Current `main` inspected: `be7304ed6505dae4f557472f1dc480e328404520`
-- A1: issue #128, PR #256, merge `be7304ed6505dae4f557472f1dc480e328404520`
-- A1 packet: `omen1-a1-2026-07-22-v001`
+- Current `main` inspected: `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`
+- A1: issue #128, source PR #256 merge `be7304ed6505dae4f557472f1dc480e328404520`, authority-correction PR #258 merge `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`
+- A1 packet: `omen1-a1-2026-07-22-v002`; committed canonical UTF-8/LF/no-BOM bytes: 8,317; SHA-256 `b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f`
 - Product decision: issue #138 comment `4966062298`
 - Downstream implementation: issue #134
 
-A1 contains exactly one internally valid `OMEN_1` packet. Its eight negative fixtures, Android unit/debug build, repository classification, hygiene, and GitHub Actions #121 passed. No runtime file was mixed into A1. The user approved the A1 source before PR #256 merged. G1 is therefore active.
+A1 contains exactly one internally valid `OMEN_1` packet. Its eleven negative fixtures, Android unit/debug build, repository classification, hygiene, and GitHub Actions Quality Gates run #128 passed. No runtime file was mixed into A1. The user approved the A1 source before PR #256 merged; PR #258 removed only duplicate localization authority and did not change player-facing text or narrative meaning. G1 is therefore approved and active.
 
 ## 2. Goal, player outcome, and delivery target
 
@@ -30,7 +30,7 @@ The sole narrative source is `unity/Docs/Narrative/NVS_01/OMEN_1_A1.packet.json`
 | D1 | `DLG_OMEN_1_ARENA_START` commits dialogue position before emitting one correlated arena request. |
 | D2-D3 | Failure records transient `FAILED`, presents failure dialogue, then only explicit Retry returns to `INVESTIGATE_SKY_CASTLE`; it is never terminal. |
 | D4-D6 | Tear is committed on arena success; Gold, affinity, completion, and chapter unlock form one report-completion transaction. |
-| D7 | Every title, description, objective, speaker, line, choice, artifact, and reward resolves through the packet key inventory. |
+| D7 | Every title, description, objective, speaker, line, choice, artifact, and reward resolves through the packet key inventory; localization entries are the sole player-facing source-text authority. |
 | D8 | Marker, deploy action, request, and typed results are new contracts; missing capability is visible and non-mutating. |
 | D9 | Abandon is accepted only outside an active encounter, resets to `OFFERED`, and clears active/unearned state without deleting earned effects. |
 | D10-D12 | A durable realm is required; all four realms use Valerius and the same quest; completion unlocks that realm's `CH1_REALM_INTRO` and returns to Kingdom. |
@@ -58,9 +58,9 @@ The existing `CH0_PROLOGUE`, `C_OMEN`, and generic `C1` are not aliases for `POS
 
 ## 5. Runtime catalog contract
 
-Runtime representation: UTF-8 JSON catalog `al.narrative.nvs01`, schema version `1`, content version equal to the A1 packet version, with SHA-256 of the canonical A1 bytes. The build copies it into `StreamingAssets/AL/Narrative` using stable property and array order. Mobile loading must use the supported StreamingAssets API; parse once, retain one immutable catalog, and allocate no per-frame objects.
+Runtime representation: UTF-8 JSON catalog `al.narrative.nvs01`, schema version `1`, exact supported content version `omen1-a1-2026-07-22-v002`, with SHA-256 of the canonical A1 bytes. Canonical bytes are the committed UTF-8, LF, no-BOM packet bytes, including its final LF. C1 must apply the repository's existing `unity-json` LF attribute to both `Docs/Narrative/NVS_01/*.packet.json` and `Assets/StreamingAssets/AL/Narrative/*.catalog.json`. The exporter reads strict UTF-8 bytes, rejects a BOM or bare CR, deterministically converts any checkout-provided CRLF pairs to LF, requires the final LF and exact canonical hash, then writes those canonical bytes without JSON reserialization. The tracked artifact and bytes presented to the Player build must be byte-for-byte identical to the 8,317-byte committed blob; drift verification runs after checkout and immediately before packaging. Mobile loading must use the supported StreamingAssets API; parse once, retain one immutable catalog, and allocate no per-frame objects.
 
-Required root fields: `schemaVersion`, `packetVersion`, `milestoneId`, `questId`, `titleKey`, `descriptionKey`, `approval`, `placement`, `speaker`, `states`, `objectives`, `dialogue`, `transitions`, `externalCapabilities`, `consequences`, `abandonment`, and `localization`. Unknown root or record properties fail closed for version 1. Strings are nonblank; IDs are ordinal/case-sensitive; category IDs are unique; arrays use source order. `titleKey` and `descriptionKey` must resolve in `localization`, just like every other player-facing key.
+Required root fields: `schemaVersion`, `packetVersion`, `milestoneId`, `questId`, `titleKey`, `descriptionKey`, `approval`, `placement`, `speaker`, `states`, `objectives`, `dialogue`, `transitions`, `externalCapabilities`, `consequences`, `abandonment`, and `localization`. Unknown root or record properties fail closed for version 1. Schema-v1 objective records contain exactly `id`, `textKey`, `activatesIn`, and `completesOn`; `sourceText` and every other inline player-facing text property are prohibited and reject the catalog. Strings are nonblank; IDs and property names are ordinal/case-sensitive; category IDs are unique; arrays use source order. `titleKey` and `descriptionKey` must resolve in `localization`, just like every other player-facing key.
 
 Validation must prove:
 
@@ -190,6 +190,7 @@ Exact proposed paths (a mechanically necessary `.meta` accompanies each new Unit
 
 | Stage | Required path | Responsibility |
 | --- | --- | --- |
+| C1 | `unity/.gitattributes` | Apply the existing `unity-json` LF attribute to authoritative packet and generated runtime-catalog patterns; no broader attribute rewrite. |
 | C1 | `unity/Assets/AL/Scripts/Narrative/Nvs01/Contracts/Nvs01CatalogModels.cs` | Plain immutable catalog records; no `UnityEngine` types. |
 | C1 | `unity/Assets/AL/Scripts/Narrative/Nvs01/Nvs01CatalogLoader.cs` | One-time StreamingAssets load, hash/version checks, immutable cache. |
 | C1 | `unity/Assets/AL/Scripts/Narrative/Nvs01/Nvs01CatalogValidator.cs` | Complete fail-closed semantic validation and stable diagnostics. |
@@ -224,7 +225,7 @@ A1 packet and completion report are read-only inputs during engineering. Prohibi
 
 ## 12. Test and fault matrix
 
-C1: valid catalog; missing/malformed/unsupported/hash drift; duplicate/blank IDs; missing speaker/dialogue/objective/state/localization; invalid terminal; unreachable state; unknown hook/location/result; invalid consequence/artifact; deterministic output.
+C1: valid catalog; missing/malformed/unsupported/hash drift; duplicate/blank IDs; missing speaker/dialogue/objective/state/localization; unknown or wrong-case objective properties including inline `sourceText`; invalid terminal; unreachable state; unknown hook/location/result; invalid consequence/artifact; deterministic output. A Windows/`core.autocrlf=true` fixture must prove CRLF checkout input emits the same 8,317 LF bytes and `b22c1663...` hash, while raw artifact/package verification rejects CRLF, BOM, bare CR, or any byte drift.
 
 C2: offer defer/accept; lore branch; arena-start action; free arena isolation; success/failure/cancel/unavailable; explicit Retry; abandonment allowed/denied during encounter; manual report; every invalid, duplicate, late, or mismatched request/result.
 
@@ -265,4 +266,4 @@ G1 is implementation-ready when this specification is approved. Engineering #134
 
 No unresolved narrative or product decision remains. These are technical dependency/evidence blockers, not permission to alter A1.
 
-Codex engineering handoff: implement issue #134 from this approved G1 and A1 merge `be7304ed6505dae4f557472f1dc480e328404520`. Preserve narrative, old saves, service registrations, and free arena entry; declare locks; implement strict validation, deterministic correlated state/events, D16 resume, atomic/idempotent consequences, visible failure, and the complete evidence matrix; return for G2, A2, and U1.
+Codex engineering handoff: implement issue #134 from this approved G1 synchronized to A1 `omen1-a1-2026-07-22-v002`, authority-correction merge `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`, and canonical SHA-256 `b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f`. Preserve narrative, old saves, service registrations, and free arena entry; declare locks; implement strict validation, deterministic correlated state/events, D16 resume, atomic/idempotent consequences, visible failure, and the complete evidence matrix; return for G2, A2, and U1.
