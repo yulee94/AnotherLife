@@ -68,11 +68,11 @@ The current bundle identifier is a placeholder, not an accepted product identity
 | Xcode version | `26.6` (`17F113`) |
 | Device SDK | iOS `26.5` |
 | Unsigned Xcode Debug build | `BUILD SUCCEEDED` for generic physical iOS device |
-| Temporary App Store icon | 1024x1024 RGB PNG, no alpha; generated iPhone/iPad icon catalog compiled without the former missing-icon warning |
-| Built application | arm64 Mach-O, unsigned, 97 MiB, 36 files |
-| Reported output size | 809,741,503 bytes |
-| Generated file count | 2,773 |
-| On-disk Xcode directory | 778 MiB |
+| Selected App Store icon | Mystical-medieval `AL` artwork; 1024x1024 RGB PNG, no alpha; generated iPhone/iPad icon catalog compiled without the former missing-icon warning |
+| Built application | arm64 Mach-O, unsigned, 100 MiB, 36 files |
+| Reported output size | 811,960,614 bytes |
+| Generated file count | 2,775 |
+| On-disk Xcode directory | 781 MiB |
 | Output ignore check | Passed (`unity/.gitignore` ignores `/Builds/`) |
 
 Required output was present:
@@ -88,11 +88,12 @@ Selected SHA-256 evidence:
 ```text
 eea61d4ec74436d7a004a22d49866271736d4483a184ed7d310b86ee8327823d  Unity-iPhone.xcodeproj/project.pbxproj
 7e1038955b237214cbe58fb12b84b969a16b04422559a26f1742685cd3f2a0fd  Info.plist
-f6646bd1e5daaab89b3e59c32482bb5c0f1caf37abeca7ee34d3343cbdc03b52  Data/globalgamemanagers
-66ca38a8c671c0deb9ad7f77821d1c4a8ecf679bb837e11aa9c8732edf1b13aa  IosDevelopmentExport.summary.json
+02ec0c9bfebdba7d1d9bf29331edb316faf92e6589fca06f95e04e3c8650354a  Data/globalgamemanagers
+eeeac1fedcf0d76c7d86843359f51fd48ef40a8ad2fb853e98049f6733f0af6c  IosDevelopmentExport.summary.json
 bb791297fc960bc9658dfcb2a13e3353dc5c2b17e474fa5ad5543af3efe156cc  AnotherLifeUnity.app/AnotherLifeUnity
-433d0b7bb91d721815e86efa4b29a9a78818d29cf651c88be994ef8dbbdf9e4a  Assets/AL/Art/Temporary_App_Icon_AL.png
-b1728fc91c9eea11c00b68762126e87b23663690c5f16745063cb65c22e24795  AppIcon.appiconset/Icon-Store-1024.png
+db4fb6b262e537b76b57d855e1c46ce104520d3ef279b51f33717e085e5452ed  Docs/Branding/App_Icon_Mystic_Medieval_AL_Source_1254.png
+f53a38f1843c354e3ba464482ae017af99e6d9ca13b64fa83ce5fe6653f08a44  Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png
+64e6a31244649ea9bf6c487cb6d2553d02d2a998266ae6c43676b5960cf66c12  AppIcon.appiconset/Icon-Store-1024.png
 ```
 
 ## Warning assessment
@@ -101,9 +102,7 @@ The initial non-incremental headless export reported three `-nographics` warning
 
 The remaining warning is actionable: Kingdom currently contains six `OnMouseDown`/`OnMouseEnter`/`OnMouseExit` handlers across `KingdomVisualizer` and `CityLayoutEngine`. Unity warns that these handlers can affect handheld performance. Replacing them with an intentional touch/pointer input path is a separate gameplay-input change and should be measured on hardware rather than folded into export tooling.
 
-The temporary 1024x1024 `AL` icon is assigned to Unity's iOS application and App Store slots. Unity generated the required iPhone, iPad, and marketing entries, and Xcode compiled the asset catalog without the former missing App Store icon warning.
-
-The temporary icon resolves build validation only; it is not approved final product artwork. **Release reminder:** replace `Assets/AL/Art/Temporary_App_Icon_AL.png` with the approved branded 1024x1024 icon before App Store submission, then repeat the unsigned build and archive checks.
+The selected 1024x1024 mystical-medieval `AL` icon is assigned to Unity's iOS application and App Store slots. Its visual direction is an enchanted Gothic portal with carved stone, engraved silver-and-gold lettering, deep indigo magic, and a large readable monogram. The user-supplied 1254x1254 original is retained under `Docs/Branding`; the Unity asset is a no-alpha 1024x1024 derivative. Unity generated the required iPhone, iPad, and marketing entries, and Xcode compiled the asset catalog without the former missing App Store icon warning.
 
 The open Apple-stage follow-ups are:
 
@@ -121,12 +120,11 @@ No valid Apple code-signing identity is installed. The downloaded simulator comp
 Recommended sequence:
 
 1. Adopt iOS 14 as the minimum target, or explicitly justify and test the iOS 12 requirement against Unity's generated Game Controller code.
-2. Replace the temporary `AL` icon with approved 1024x1024 App Store artwork before submission.
+2. Decide the permanent bundle identifier and Apple Developer Team before enabling signing.
 3. Keep physical-device builds as the primary compatibility/performance target; repair simulator runtime registration only if rapid UI-only iteration justifies maintaining both variants.
-4. Decide the permanent bundle identifier and Apple Developer Team before enabling signing.
-5. Run Boot through RealmSelection on a signed physical-device build, then create a development archive.
-6. Profile and replace the Kingdom mouse-event path if hardware measurements show material input or frame-time cost.
+4. Run Boot through RealmSelection on a signed physical-device build, then create a development archive.
+5. Profile and replace the Kingdom mouse-event path if hardware measurements show material input or frame-time cost.
 
 ## Runtime and compatibility impact
 
-The committed build foundation remains Editor-only tooling plus EditMode tests and documentation. The temporary-icon follow-up adds one 1024x1024 RGB image, its reproducible SVG source, and iOS Player Settings references; it adds no runtime component, package, native library, scene, or behavior. The generated Xcode project, DerivedData, and unsigned application are disposable and ignored. The unsigned Debug application occupies 97 MiB on disk; actual device compatibility and signed/install size remain unmeasured until the Apple-account and hardware gates are completed.
+The committed build foundation remains Editor-only tooling plus EditMode tests and documentation. The selected-icon follow-up adds one 1024x1024 RGB application icon, its retained 1254x1254 original source, and the existing iOS Player Settings references; it adds no runtime component, package, native library, scene, or behavior. The generated Xcode project, DerivedData, and unsigned application are disposable and ignored. The unsigned Debug application occupies 100 MiB on disk; actual device compatibility and signed/install size remain unmeasured until the Apple-account and hardware gates are completed.
