@@ -18,6 +18,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         internal const string MarkerType = "AL.Core.Scenes.SceneStartupMarker";
         internal const string GeneratorType = "AL.EditorTools.ALVerticalSliceSceneGenerator";
         internal const string ValidatorType = "AL.EditorTools.ProductionSceneValidator";
+        internal const string BuildSettingsValidatorType = "AL.EditorTools.ProductionBuildSettingsValidator";
 
         internal static Type Runtime(string fullName)
         {

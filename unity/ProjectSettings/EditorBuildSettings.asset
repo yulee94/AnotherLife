@@ -4,5 +4,14 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/AL/Scenes/Boot.unity
+    guid: 14733c561820e497a96a3f2467d247cc
+  - enabled: 1
+    path: Assets/AL/Scenes/RealmSelection.unity
+    guid: 5c580ae0acb5e4b4db4b57a93077e308
+  - enabled: 1
+    path: Assets/AL/Scenes/Kingdom.unity
+    guid: dea6fe75315c3402fbfa8de764bd9873
   m_configObjects: {}
