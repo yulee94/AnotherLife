@@ -37,6 +37,22 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
+        public void MarkerEmitsFromAwakeBeforeSceneControllerStart()
+        {
+            System.Type markerType = R.Runtime(R.MarkerType);
+            Assert.NotNull(
+                markerType.GetMethod(
+                    "Awake",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                "The startup marker must emit during Awake so it precedes every scene-controller Start.");
+            Assert.IsNull(
+                markerType.GetMethod(
+                    "Start",
+                    System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic),
+                "A Start-based marker cannot guarantee ordering ahead of coroutine Start handlers.");
+        }
+
+        [Test]
         public void MismatchedPathAndNameEmitsOneErrorAndNoSuccessLine()
         {
             var host = new GameObject("MarkerMismatch");

@@ -6,7 +6,7 @@ namespace AL.Core.Scenes
     /// <summary>
     /// Narrow, non-mutating production scene startup marker (spec section 9, #223 approved seam D4).
     ///
-    /// On Start it validates the live scene path/name against its serialized identity and the shared
+    /// On Awake it validates the live scene path/name against its serialized identity and the shared
     /// <see cref="ProductionSceneDescriptor"/>, then emits exactly one stable technical log:
     ///   [AL-SCENE-ACTIVE] id=&lt;sceneId&gt; name=&lt;sceneName&gt; path=&lt;assetPath&gt; role=&lt;role&gt; version=&lt;sourceVersion&gt;
     /// A mismatch logs an Error (distinct prefix) so external launch validation cannot be fooled into a
@@ -28,7 +28,7 @@ namespace AL.Core.Scenes
         public string Role => _role;
         public string SourceVersion => _sourceVersion;
 
-        private void Start()
+        private void Awake()
         {
             Emit(gameObject.scene.path, gameObject.scene.name);
         }

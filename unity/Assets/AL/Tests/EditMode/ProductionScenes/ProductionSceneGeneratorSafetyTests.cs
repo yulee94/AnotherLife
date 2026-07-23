@@ -60,9 +60,21 @@ namespace AL.Tests.EditMode.ProductionScenes
             byte[] after = File.ReadAllBytes(BuildSettingsPath);
             Assert.AreEqual(before, after, "EditorBuildSettings.asset must not change during authoring/validation.");
 
+            CollectionAssert.AreEqual(
+                new[]
+                {
+                    "Assets/AL/Scenes/Boot.unity",
+                    "Assets/AL/Scenes/RealmSelection.unity",
+                    "Assets/AL/Scenes/Kingdom.unity"
+                },
+                EditorBuildSettings.scenes.Select(scene => scene.path).ToArray(),
+                "Authoring must preserve the exact committed ShellFoundation Build Settings order.");
+            Assert.That(EditorBuildSettings.scenes.All(scene => scene.enabled), Is.True,
+                "Every committed ShellFoundation scene must remain enabled.");
+
             string text = System.Text.Encoding.UTF8.GetString(after);
-            Assert.That(text, Does.Not.Contain("Assets/AL/Scenes/"), "Authoring must not add scenes to Build Settings.");
             Assert.That(text, Does.Not.Contain("Assets/Test.unity"));
+            Assert.That(text, Does.Not.Contain("Assets/AL/Scenes/ChampionArena.unity"));
         }
 
         [Test]
