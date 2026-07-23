@@ -1078,6 +1078,21 @@ namespace AL.Data.Catalogs
             var numberValue = value as StrictJsonNumber;
             if (numberValue != null)
             {
+                var hasSupportedNumericValue =
+                    numberValue.HasFiniteDoubleValue &&
+                    !(numberValue.HasNonZeroSignificand && numberValue.Value == 0d);
+                if (!hasSupportedNumericValue)
+                {
+                    collector.FieldValueError(
+                        descriptor,
+                        recordId,
+                        path,
+                        "FIELD-NUMBER-RANGE",
+                        "The JSON number is outside the supported finite numeric range.",
+                        artifactOrder,
+                        recordOrder);
+                }
+
                 long integer;
                 if (rule.IntegerOnly && !long.TryParse(
                         numberValue.RawValue,
@@ -1087,11 +1102,15 @@ namespace AL.Data.Catalogs
                 {
                     collector.FieldValueError(descriptor, recordId, path, "FIELD-INTEGER", "An exact 64-bit JSON integer is required.", artifactOrder, recordOrder);
                 }
-                if (rule.MinimumNumber.HasValue && numberValue.Value < rule.MinimumNumber.Value)
+                if (hasSupportedNumericValue &&
+                    rule.MinimumNumber.HasValue &&
+                    numberValue.Value < rule.MinimumNumber.Value)
                 {
                     collector.FieldValueError(descriptor, recordId, path, "FIELD-RANGE", "The numeric value is below the reviewed minimum.", artifactOrder, recordOrder);
                 }
-                if (rule.MaximumNumber.HasValue && numberValue.Value > rule.MaximumNumber.Value)
+                if (hasSupportedNumericValue &&
+                    rule.MaximumNumber.HasValue &&
+                    numberValue.Value > rule.MaximumNumber.Value)
                 {
                     collector.FieldValueError(descriptor, recordId, path, "FIELD-RANGE", "The numeric value exceeds the reviewed maximum.", artifactOrder, recordOrder);
                 }

@@ -7,6 +7,13 @@ namespace AL.Data.Runtime
     [Serializable]
     public class SaveGameData
     {
+        public const string CurrentSaveFormatId = "anotherlife.local-save";
+        public const int CurrentSaveSchemaVersion = 1;
+        public const int CurrentProfileInitializationVersion = 1;
+
+        public string SaveFormatId;
+        public int SaveSchemaVersion;
+        public int ProfileInitializationVersion;
         public RealmId SelectedRealm;
         public List<ResourceData> Resources = new List<ResourceData>();
         public List<BuildingState> Buildings = new List<BuildingState>();
