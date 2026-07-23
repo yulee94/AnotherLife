@@ -1299,8 +1299,12 @@ namespace AL.Tests.EditMode
             Type realmType = GetRuntimeType("AL.Core.RealmId");
             Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
 
+            string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            string priorBackup = fileSystem.ReadAllText(backupPath);
             object currentSave = GetProperty(service, "CurrentSave");
             SetField(currentSave, "CurrentChapterId", "C1_CLEANUP_FAILURE");
             fileSystem.ReplaceObserver = (sourcePath, destinationPath, rollbackPath) =>
@@ -1320,10 +1324,24 @@ namespace AL.Tests.EditMode
             Invoke(service, "Save");
 
             Assert.AreEqual(
-                "SaveFailedPreviousPreserved",
+                "CommitUncertain",
                 GetProperty(service, "LastSaveStatus").ToString());
-            Assert.True(fileSystem.FileExists(previousPath));
-            Assert.True(fileSystem.FileExists(backupPath));
+            string candidatePrimary = fileSystem.ReadAllText(primaryPath);
+            Assert.That(candidatePrimary, Does.Contain("C1_CLEANUP_FAILURE"));
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                priorPrimary,
+                null,
+                priorBackup);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: true,
+                cleanupVerified: false);
         }
 
         [Test]
@@ -1338,10 +1356,11 @@ namespace AL.Tests.EditMode
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
             string backupBefore = fileSystem.ReadAllText(backupPath);
             object currentSave = GetProperty(service, "CurrentSave");
             SetField(currentSave, "CurrentChapterId", "C1_NEW_VALIDATED");
-            fileSystem.ReplaceObserver = (sourcePath, destinationPath, previousPath) =>
+            fileSystem.ReplaceObserver = (sourcePath, destinationPath, rollbackPath) =>
             {
                 if (string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
@@ -1352,15 +1371,23 @@ namespace AL.Tests.EditMode
 
             LogAssert.Expect(
                 LogType.Error,
-                new System.Text.RegularExpressions.Regex("^AL-SAVE-BACKUP-STAGE-INVALID:"));
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-BACKUP-ROTATION-EVIDENCE-MISSING:"));
             Invoke(service, "Save");
 
             Assert.AreEqual(
-                "SaveFailedPreviousPreserved",
+                "CommitUncertain",
                 GetProperty(service, "LastSaveStatus").ToString());
             Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
             Assert.That(fileSystem.ReadAllText(primaryPath), Does.Contain("C1_NEW_VALIDATED"));
-            Assert.That(fileSystem.ReadAllText(tempPath), Does.Contain("changed after validation"));
+            Assert.False(fileSystem.FileExists(tempPath));
+            Assert.That(fileSystem.ReadAllText(previousPath), Does.Contain("changed after validation"));
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: true,
+                cleanupVerified: false);
         }
 
         [Test]
@@ -1396,6 +1423,738 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
             Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
             Assert.AreEqual("previous-sentinel", fileSystem.ReadAllText(previousPath));
+        }
+
+        [Test]
+        public void SaveOperationStatusContractIsAppendOnlyAndSuccessfulSavePublishesDisposition()
+        {
+            Type statusType = GetRuntimeType("AL.Core.Interfaces.SaveOperationStatus");
+            Assert.AreEqual(0, Convert.ToInt32(Enum.Parse(statusType, "None")));
+            Assert.AreEqual(1, Convert.ToInt32(Enum.Parse(statusType, "SavedPrimary")));
+            Assert.AreEqual(
+                2,
+                Convert.ToInt32(Enum.Parse(statusType, "SaveFailedPreviousPreserved")));
+            Assert.AreEqual(3, Convert.ToInt32(Enum.Parse(statusType, "DeleteFailed")));
+            Assert.AreEqual(4, Convert.ToInt32(Enum.Parse(statusType, "CommitUncertain")));
+
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type dispositionProviderType =
+                GetRuntimeType("AL.Core.Interfaces.ISaveOperationDispositionProvider");
+            Assert.True(
+                dispositionProviderType.IsAssignableFrom(service.GetType()),
+                "The save service must expose the typed Stage-3 save disposition.");
+
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            Assert.AreEqual(
+                "SavedPrimary",
+                GetProperty(service, "LastSaveStatus").ToString());
+            AssertSaveDisposition(
+                service,
+                "SavedPrimary",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: true,
+                cleanupVerified: true,
+                rollbackAttempted: false,
+                rollbackVerified: false);
+        }
+
+        [Test]
+        public void AtomicReplaceAfterMutationWithUnverifiedRollbackIsCommitUncertain()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_PRIOR_ATOMIC");
+            Invoke(service, "Save");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            string priorBackup = fileSystem.ReadAllText(backupPath);
+
+            currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_ATOMIC_AFTER_MUTATION");
+            string candidatePrimary = null;
+            fileSystem.MutationObserver = (operation, sourcePath, destinationPath, timing) =>
+            {
+                if (operation == "Replace" &&
+                    timing == ScriptedFaultTiming.BeforeMutation &&
+                    string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    candidatePrimary = fileSystem.ReadAllText(tempPath);
+                }
+            };
+            fileSystem.AddMutationFault(
+                "Replace",
+                tempPath,
+                primaryPath,
+                ScriptedFaultTiming.AfterMutation,
+                ScriptedFaultException.Io);
+            fileSystem.AddMutationFault(
+                "Copy",
+                previousPath,
+                primaryPath,
+                ScriptedFaultTiming.BeforeMutation,
+                ScriptedFaultException.Io);
+            fileSystem.ClearMutationLedger();
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                priorBackup,
+                null,
+                priorPrimary);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: false,
+                cleanupVerified: false);
+            Assert.AreEqual(
+                1,
+                fileSystem.GetMutationAttemptCount("Replace", tempPath, primaryPath));
+        }
+
+        [Test]
+        public void MoveFallbackWindowClaimsPreviousPreservedOnlyAfterVerifiedRollback()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            string priorBackup = fileSystem.ReadAllText(backupPath);
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_MOVE_FALLBACK_WINDOW");
+            string candidatePrimary = null;
+            fileSystem.MutationObserver = (operation, sourcePath, destinationPath, timing) =>
+            {
+                if (operation == "Move" &&
+                    timing == ScriptedFaultTiming.BeforeMutation &&
+                    string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    candidatePrimary = fileSystem.ReadAllText(tempPath);
+                }
+            };
+            fileSystem.AddMutationFault(
+                "Replace",
+                tempPath,
+                primaryPath,
+                ScriptedFaultTiming.BeforeMutation,
+                ScriptedFaultException.NotSupported);
+            fileSystem.AddMutationFault(
+                "Move",
+                tempPath,
+                primaryPath,
+                ScriptedFaultTiming.BeforeMutation,
+                ScriptedFaultException.Io);
+            fileSystem.AddMutationFault(
+                "Copy",
+                previousPath,
+                primaryPath,
+                ScriptedFaultTiming.AfterMutation,
+                ScriptedFaultException.Io);
+            fileSystem.ClearMutationLedger();
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "SaveFailedPreviousPreserved",
+                GetProperty(service, "LastSaveStatus").ToString());
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                priorPrimary,
+                priorBackup,
+                candidatePrimary,
+                priorPrimary);
+            AssertSaveDisposition(
+                service,
+                "SaveFailedPreviousPreserved",
+                true,
+                candidatePrimaryVerified: false,
+                previousAuthorityVerified: true,
+                rollbackAttempted: true,
+                rollbackVerified: true);
+            Assert.AreEqual(
+                "C1",
+                GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"),
+                "A proven previous-preserved result must republish exact P0 runtime state.");
+            Assert.AreEqual(
+                1,
+                fileSystem.GetMutationAttemptCount("Move", primaryPath, previousPath));
+            Assert.AreEqual(
+                1,
+                fileSystem.GetMutationAttemptCount("Move", tempPath, primaryPath));
+            Assert.AreEqual(
+                1,
+                fileSystem.GetMutationAttemptCount("Copy", previousPath, primaryPath));
+        }
+
+        [Test]
+        public void FirstGenerationMoveAfterMutationFreezesRepeatedSaveAsCommitUncertain()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string candidatePrimary = null;
+            fileSystem.MutationObserver = (operation, sourcePath, destinationPath, timing) =>
+            {
+                if (operation == "Move" &&
+                    timing == ScriptedFaultTiming.BeforeMutation &&
+                    string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    candidatePrimary = fileSystem.ReadAllText(tempPath);
+                }
+            };
+            fileSystem.AddMutationFault(
+                "Move",
+                tempPath,
+                primaryPath,
+                ScriptedFaultTiming.AfterMutation,
+                ScriptedFaultException.Io);
+
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            InvokeAllowingFailureLogs(
+                service,
+                "CreateNewSave",
+                Enum.Parse(realmType, "None"));
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                null,
+                null,
+                null);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: false);
+            Assert.Null(
+                GetProperty(service, "CurrentSave"),
+                "A first-generation uncertain candidate must not become public runtime authority.");
+
+            int mutationCountAfterUncertainty = fileSystem.MutationLedger.Count;
+            object firstDisposition = GetProperty(service, "LastSaveDisposition");
+            IReadOnlyList<string> firstDiagnosticCodes =
+                GetDiagnosticCodes(firstDisposition);
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.AreEqual(
+                mutationCountAfterUncertainty,
+                fileSystem.MutationLedger.Count,
+                "Commit uncertainty must freeze repeated persistence attempts.");
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            CollectionAssert.AreEqual(
+                firstDiagnosticCodes,
+                GetDiagnosticCodes(
+                    GetProperty(service, "LastSaveDisposition")));
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                null,
+                null,
+                null);
+        }
+
+        [Test]
+        public void SecondCommitVerificationReadFailurePublishesUncertaintyDiagnostic()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_SECOND_VERIFY_P0");
+            Invoke(service, "Save");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+
+            currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_SECOND_VERIFY_N");
+            string candidatePrimary = null;
+            int previousDeleteCompletions = 0;
+            fileSystem.MutationObserver =
+                (operation, sourcePath, destinationPath, timing) =>
+                {
+                    if (operation == "Replace" &&
+                        timing == ScriptedFaultTiming.BeforeMutation &&
+                        string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        candidatePrimary = fileSystem.ReadAllText(tempPath);
+                    }
+
+                    if (operation == "Delete" &&
+                        timing == ScriptedFaultTiming.AfterMutation &&
+                        string.Equals(sourcePath, previousPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        previousDeleteCompletions++;
+                        if (previousDeleteCompletions == 3)
+                        {
+                            fileSystem.AddReadFault(
+                                primaryPath,
+                                fileSystem.GetBoundedReadCount(primaryPath) + 2,
+                                ScriptedReadFaultDisposition.IoFailure);
+                        }
+                    }
+                };
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith("AL-SAVE-COMMIT-REVERIFY-FAILED:"));
+            CollectionAssert.Contains(
+                GetDiagnosticCodes(GetProperty(service, "LastSaveDisposition")),
+                "AL-SAVE-COMMIT-REVERIFY-FAILED");
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                priorPrimary,
+                null,
+                null);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: true,
+                cleanupVerified: true);
+            Assert.AreEqual(
+                "C1_SECOND_VERIFY_P0",
+                GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
+        }
+
+        [Test]
+        public void BackupReplaceAfterMutationNeverRunsDestructiveMoveFallback()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_BACKUP_REPLACE_P0");
+            Invoke(service, "Save");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            string priorBackup = fileSystem.ReadAllText(backupPath);
+
+            currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_BACKUP_REPLACE_N");
+            string candidatePrimary = null;
+            fileSystem.MutationObserver =
+                (operation, sourcePath, destinationPath, timing) =>
+                {
+                    if (operation == "Replace" &&
+                        timing == ScriptedFaultTiming.BeforeMutation &&
+                        string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        candidatePrimary = fileSystem.ReadAllText(tempPath);
+                    }
+                };
+            fileSystem.AddMutationFault(
+                "Replace",
+                tempPath,
+                backupPath,
+                ScriptedFaultTiming.AfterMutation,
+                ScriptedFaultException.NotSupported);
+            fileSystem.ClearMutationLedger();
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith("AL-SAVE-BACKUP-REPLACE-UNSUPPORTED-UNCERTAIN:"));
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                priorPrimary,
+                null,
+                priorBackup);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: true,
+                cleanupVerified: false);
+            Assert.AreEqual(
+                0,
+                fileSystem.GetMutationAttemptCount(
+                    "Move",
+                    backupPath,
+                    previousPath));
+            Assert.AreEqual(
+                "C1_BACKUP_REPLACE_P0",
+                GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
+        }
+
+        [Test]
+        public void ValidButDifferentFinalBackupRetainsCanonicalResidue()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_FINAL_EXACT_P0");
+            Invoke(service, "Save");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            string priorBackup = fileSystem.ReadAllText(backupPath);
+
+            currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_FINAL_EXACT_N");
+            string candidatePrimary = null;
+            fileSystem.MutationObserver =
+                (operation, sourcePath, destinationPath, timing) =>
+                {
+                    if (operation != "Replace")
+                    {
+                        return;
+                    }
+
+                    if (timing == ScriptedFaultTiming.BeforeMutation &&
+                        string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        candidatePrimary = fileSystem.ReadAllText(tempPath);
+                    }
+
+                    if (timing == ScriptedFaultTiming.AfterMutation &&
+                        string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(destinationPath, backupPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        int finalBackupRead =
+                            fileSystem.GetBoundedReadCount(backupPath) + 2;
+                        fileSystem.BoundedReadObserver = (path, count) =>
+                        {
+                            if (count == finalBackupRead &&
+                                string.Equals(path, backupPath, StringComparison.OrdinalIgnoreCase))
+                            {
+                                fileSystem.Files[backupPath] = priorBackup;
+                            }
+                        };
+                    }
+                };
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith("AL-SAVE-FINAL-BACKUP-INVALID:"));
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                priorBackup,
+                null,
+                priorBackup);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: false,
+                cleanupVerified: false);
+            Assert.AreEqual(
+                "C1_FINAL_EXACT_P0",
+                GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
+        }
+
+        [Test]
+        public void ValidButDifferentBackupStageNeverDeletesExactPriorPrimary()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_EXACT_STAGE_P0");
+            Invoke(service, "Save");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            string priorBackup = fileSystem.ReadAllText(backupPath);
+
+            currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_EXACT_STAGE_N");
+            string candidatePrimary = null;
+            fileSystem.MutationObserver =
+                (operation, sourcePath, destinationPath, timing) =>
+                {
+                    if (operation == "Replace" &&
+                        timing == ScriptedFaultTiming.BeforeMutation &&
+                        string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                    {
+                        candidatePrimary = fileSystem.ReadAllText(tempPath);
+                    }
+                };
+            fileSystem.AfterCopyObserver = (sourcePath, destinationPath, overwrite) =>
+            {
+                if (string.Equals(sourcePath, previousPath, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(destinationPath, tempPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    fileSystem.Files[tempPath] = priorBackup;
+                }
+            };
+
+            InvokeAllowingFailureLogs(service, "Save");
+
+            Assert.NotNull(candidatePrimary);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                candidatePrimary,
+                priorBackup,
+                priorBackup,
+                priorPrimary);
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: false,
+                cleanupVerified: false);
+            Assert.AreEqual(
+                "C1_EXACT_STAGE_P0",
+                GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
+        }
+
+        private static void AssertSaveDisposition(
+            object service,
+            string status,
+            bool mayHaveMutated,
+            bool? candidatePrimaryVerified = null,
+            bool? requiredBackupVerified = null,
+            bool? previousAuthorityVerified = null,
+            bool? cleanupVerified = null,
+            bool? rollbackAttempted = null,
+            bool? rollbackVerified = null)
+        {
+            object disposition = GetProperty(service, "LastSaveDisposition");
+            Assert.NotNull(disposition, "Expected a typed save-operation disposition.");
+            Assert.AreEqual(
+                status,
+                GetProperty(disposition, "Status").ToString());
+            Assert.AreEqual(
+                mayHaveMutated,
+                (bool)GetProperty(disposition, "MayHaveMutated"));
+
+            AssertOptionalBoolean(
+                disposition,
+                "CandidatePrimaryVerified",
+                candidatePrimaryVerified);
+            AssertOptionalBoolean(
+                disposition,
+                "RequiredBackupVerified",
+                requiredBackupVerified);
+            AssertOptionalBoolean(
+                disposition,
+                "PreviousAuthorityVerified",
+                previousAuthorityVerified);
+            AssertOptionalBoolean(disposition, "CleanupVerified", cleanupVerified);
+            AssertOptionalBoolean(disposition, "RollbackAttempted", rollbackAttempted);
+            AssertOptionalBoolean(disposition, "RollbackVerified", rollbackVerified);
+            IReadOnlyList<string> diagnosticCodes = GetDiagnosticCodes(disposition);
+            Assert.That(diagnosticCodes.Count, Is.LessThanOrEqualTo(16));
+            foreach (string diagnosticCode in diagnosticCodes)
+            {
+                Assert.That(diagnosticCode, Has.Length.LessThanOrEqualTo(128));
+            }
+        }
+
+        private static IReadOnlyList<string> GetDiagnosticCodes(object disposition)
+        {
+            var result = new List<string>();
+            foreach (object value in (IEnumerable)GetProperty(disposition, "DiagnosticCodes"))
+            {
+                result.Add((string)value);
+            }
+
+            return result;
+        }
+
+        private static void AssertOptionalBoolean(
+            object target,
+            string propertyName,
+            bool? expected)
+        {
+            if (expected.HasValue)
+            {
+                Assert.AreEqual(
+                    expected.Value,
+                    (bool)GetProperty(target, propertyName),
+                    propertyName);
+            }
+        }
+
+        private static void AssertCanonicalLedger(
+            ScriptedSaveFileOperations fileSystem,
+            string root,
+            string primary,
+            string backup,
+            string temp,
+            string previous)
+        {
+            AssertCanonicalFile(
+                fileSystem,
+                Path.Combine(root, "save.json"),
+                primary);
+            AssertCanonicalFile(
+                fileSystem,
+                Path.Combine(root, "save.backup.json"),
+                backup);
+            AssertCanonicalFile(
+                fileSystem,
+                Path.Combine(root, "save.tmp.json"),
+                temp);
+            AssertCanonicalFile(
+                fileSystem,
+                Path.Combine(root, "save.previous.json"),
+                previous);
+        }
+
+        private static void AssertCanonicalFile(
+            ScriptedSaveFileOperations fileSystem,
+            string path,
+            string expectedContents)
+        {
+            if (expectedContents == null)
+            {
+                Assert.False(
+                    fileSystem.FileExists(path),
+                    $"Expected canonical artifact to be missing: {Path.GetFileName(path)}");
+                return;
+            }
+
+            Assert.True(
+                fileSystem.FileExists(path),
+                $"Expected canonical artifact to exist: {Path.GetFileName(path)}");
+            Assert.AreEqual(expectedContents, fileSystem.ReadAllText(path));
+        }
+
+        private static object InvokeAllowingFailureLogs(
+            object target,
+            string methodName,
+            params object[] args)
+        {
+            bool priorIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                return Invoke(target, methodName, args);
+            }
+            finally
+            {
+                LogAssert.ignoreFailingMessages = priorIgnore;
+            }
         }
 
         private static object CreateSaveService(string root)
@@ -1498,6 +2257,67 @@ namespace AL.Tests.EditMode
             field.SetValue(target, value);
         }
 
+        public enum ScriptedFaultTiming
+        {
+            BeforeMutation,
+            AfterMutation
+        }
+
+        public enum ScriptedFaultException
+        {
+            Io,
+            NotSupported,
+            PlatformNotSupported
+        }
+
+        public enum ScriptedReadFaultDisposition
+        {
+            IoFailure,
+            ChangedDuringRead
+        }
+
+        private sealed class ScriptedReadFault
+        {
+            public ScriptedReadFault(
+                string path,
+                int occurrence,
+                ScriptedReadFaultDisposition disposition)
+            {
+                Path = path;
+                Occurrence = occurrence;
+                Disposition = disposition;
+            }
+
+            public string Path { get; }
+            public int Occurrence { get; }
+            public ScriptedReadFaultDisposition Disposition { get; }
+            public bool Triggered { get; set; }
+        }
+
+        private sealed class ScriptedMutationFault
+        {
+            public ScriptedMutationFault(
+                string operation,
+                string sourcePath,
+                string destinationPath,
+                ScriptedFaultTiming timing,
+                ScriptedFaultException exception)
+            {
+                Operation = operation;
+                SourcePath = sourcePath;
+                DestinationPath = destinationPath;
+                Timing = timing;
+                Exception = exception;
+            }
+
+            public string Operation { get; }
+            public string SourcePath { get; }
+            public string DestinationPath { get; }
+            public ScriptedFaultTiming Timing { get; }
+            public ScriptedFaultException Exception { get; }
+            public bool Triggered { get; set; }
+        }
+
         public class ScriptedSaveFileOperationsProxy : DispatchProxy
         {
             public ScriptedSaveFileOperations FileSystem { get; set; }
@@ -1519,11 +2339,17 @@ namespace AL.Tests.EditMode
             public readonly HashSet<string> WriteFailuresAfterMutation = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             public readonly Dictionary<string, int> BoundedReadCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
             public readonly Dictionary<string, int> MoveCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            public readonly List<string> MutationLedger = new List<string>();
+            private readonly List<ScriptedMutationFault> _mutationFaults =
+                new List<ScriptedMutationFault>();
+            private readonly List<ScriptedReadFault> _readFaults =
+                new List<ScriptedReadFault>();
             public int TotalMoveCount { get; private set; }
             public Action<string, int> BoundedReadObserver { get; set; }
             public Action<string, string, bool> CopyObserver { get; set; }
             public Action<string, string, bool> AfterCopyObserver { get; set; }
             public Action<string, string, string> ReplaceObserver { get; set; }
+            public Action<string, string, string, ScriptedFaultTiming> MutationObserver { get; set; }
 
             public object Invoke(MethodInfo targetMethod, object[] args)
             {
@@ -1580,6 +2406,50 @@ namespace AL.Tests.EditMode
             public int GetMoveCount(string path) =>
                 MoveCounts.TryGetValue(path, out int count) ? count : 0;
 
+            public void AddMutationFault(
+                string operation,
+                string sourcePath,
+                string destinationPath,
+                ScriptedFaultTiming timing,
+                ScriptedFaultException exception)
+            {
+                _mutationFaults.Add(
+                    new ScriptedMutationFault(
+                        operation,
+                        sourcePath,
+                        destinationPath,
+                        timing,
+                        exception));
+            }
+
+            public void AddReadFault(
+                string path,
+                int occurrence,
+                ScriptedReadFaultDisposition disposition)
+            {
+                _readFaults.Add(
+                    new ScriptedReadFault(path, occurrence, disposition));
+            }
+
+            public void ClearMutationLedger() => MutationLedger.Clear();
+
+            public int GetMutationAttemptCount(
+                string operation,
+                string sourcePath,
+                string destinationPath)
+            {
+                string expected = FormatMutationLedgerEntry(
+                    operation,
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.BeforeMutation);
+                return MutationLedger.Count(
+                    entry => string.Equals(
+                        entry,
+                        expected,
+                        StringComparison.OrdinalIgnoreCase));
+            }
+
             private object ReadAllBytesBounded(
                 MethodInfo targetMethod,
                 string path,
@@ -1592,6 +2462,32 @@ namespace AL.Tests.EditMode
 
                 Increment(BoundedReadCounts, path);
                 BoundedReadObserver?.Invoke(path, GetBoundedReadCount(path));
+                ScriptedReadFault readFault = _readFaults.FirstOrDefault(
+                    candidate =>
+                        !candidate.Triggered &&
+                        candidate.Occurrence == GetBoundedReadCount(path) &&
+                        string.Equals(
+                            candidate.Path,
+                            path,
+                            StringComparison.OrdinalIgnoreCase));
+                if (readFault != null)
+                {
+                    readFault.Triggered = true;
+                    string disposition =
+                        readFault.Disposition ==
+                        ScriptedReadFaultDisposition.ChangedDuringRead
+                            ? "ChangedDuringRead"
+                            : "IoFailure";
+                    return CreateReadResult(
+                        targetMethod.ReturnType,
+                        disposition,
+                        null,
+                        0,
+                        disposition == "ChangedDuringRead"
+                            ? "SAVE_FILE_CHANGED_DURING_READ"
+                            : "SAVE_FILE_IO_FAILURE");
+                }
+
                 if (BoundedReadIoFailures.Contains(path))
                 {
                     return CreateReadResult(
@@ -1724,6 +2620,11 @@ namespace AL.Tests.EditMode
             private void Copy(string sourcePath, string destinationPath, bool overwrite)
             {
                 CopyObserver?.Invoke(sourcePath, destinationPath, overwrite);
+                ReachMutationBoundary(
+                    "Copy",
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.BeforeMutation);
                 if (!Files.TryGetValue(sourcePath, out string contents))
                 {
                     throw new FileNotFoundException(sourcePath);
@@ -1736,6 +2637,11 @@ namespace AL.Tests.EditMode
 
                 Files[destinationPath] = contents;
                 AfterCopyObserver?.Invoke(sourcePath, destinationPath, overwrite);
+                ReachMutationBoundary(
+                    "Copy",
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.AfterMutation);
             }
 
             private void Move(string sourcePath, string destinationPath)
@@ -1747,6 +2653,11 @@ namespace AL.Tests.EditMode
                     throw new IOException($"Move blocked for {sourcePath}");
                 }
 
+                ReachMutationBoundary(
+                    "Move",
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.BeforeMutation);
                 if (!Files.TryGetValue(sourcePath, out string contents))
                 {
                     throw new FileNotFoundException(sourcePath);
@@ -1754,11 +2665,21 @@ namespace AL.Tests.EditMode
 
                 Files.Remove(sourcePath);
                 Files[destinationPath] = contents;
+                ReachMutationBoundary(
+                    "Move",
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.AfterMutation);
             }
 
             private void Replace(string sourcePath, string destinationPath, string backupPath)
             {
                 ReplaceObserver?.Invoke(sourcePath, destinationPath, backupPath);
+                ReachMutationBoundary(
+                    "Replace",
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.BeforeMutation);
                 if (!Files.TryGetValue(sourcePath, out string sourceContents))
                 {
                     throw new FileNotFoundException(sourcePath);
@@ -1772,16 +2693,94 @@ namespace AL.Tests.EditMode
                 Files[backupPath] = destinationContents;
                 Files[destinationPath] = sourceContents;
                 Files.Remove(sourcePath);
+                ReachMutationBoundary(
+                    "Replace",
+                    sourcePath,
+                    destinationPath,
+                    ScriptedFaultTiming.AfterMutation);
             }
 
             private void Delete(string path)
             {
+                ReachMutationBoundary(
+                    "Delete",
+                    path,
+                    null,
+                    ScriptedFaultTiming.BeforeMutation);
                 if (DeleteFailures.Contains(path))
                 {
                     throw new IOException($"Delete blocked for {path}");
                 }
 
                 Files.Remove(path);
+                ReachMutationBoundary(
+                    "Delete",
+                    path,
+                    null,
+                    ScriptedFaultTiming.AfterMutation);
+            }
+
+            private void ReachMutationBoundary(
+                string operation,
+                string sourcePath,
+                string destinationPath,
+                ScriptedFaultTiming timing)
+            {
+                MutationLedger.Add(
+                    FormatMutationLedgerEntry(
+                        operation,
+                        sourcePath,
+                        destinationPath,
+                        timing));
+                MutationObserver?.Invoke(
+                    operation,
+                    sourcePath,
+                    destinationPath,
+                    timing);
+
+                ScriptedMutationFault fault = _mutationFaults.FirstOrDefault(
+                    candidate =>
+                        !candidate.Triggered &&
+                        candidate.Timing == timing &&
+                        string.Equals(
+                            candidate.Operation,
+                            operation,
+                            StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(
+                            candidate.SourcePath,
+                            sourcePath,
+                            StringComparison.OrdinalIgnoreCase) &&
+                        string.Equals(
+                            candidate.DestinationPath,
+                            destinationPath,
+                            StringComparison.OrdinalIgnoreCase));
+                if (fault == null)
+                {
+                    return;
+                }
+
+                fault.Triggered = true;
+                string message =
+                    $"{operation} scripted {timing} fault: {sourcePath} -> {destinationPath}";
+                switch (fault.Exception)
+                {
+                    case ScriptedFaultException.NotSupported:
+                        throw new NotSupportedException(message);
+                    case ScriptedFaultException.PlatformNotSupported:
+                        throw new PlatformNotSupportedException(message);
+                    default:
+                        throw new IOException(message);
+                }
+            }
+
+            private static string FormatMutationLedgerEntry(
+                string operation,
+                string sourcePath,
+                string destinationPath,
+                ScriptedFaultTiming timing)
+            {
+                return
+                    $"{operation}|{timing}|{sourcePath ?? "<null>"}|{destinationPath ?? "<null>"}";
             }
 
             private IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern)

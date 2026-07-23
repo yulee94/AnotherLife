@@ -202,7 +202,10 @@ namespace AL.Services.Local
         }
     }
 
-    public class LocalSaveGameService : ISaveGameService, ISaveLoadDispositionProvider
+    public class LocalSaveGameService :
+        ISaveGameService,
+        ISaveLoadDispositionProvider,
+        ISaveOperationDispositionProvider
     {
         private const string SaveFileName = "save.json";
         private const string BackupFileName = "save.backup.json";
@@ -250,6 +253,7 @@ namespace AL.Services.Local
         public SaveOperationStatus LastSaveStatus { get; private set; }
         public string LastSaveMessage { get; private set; } = string.Empty;
         public SaveLoadDisposition LastLoadDisposition { get; private set; }
+        public SaveOperationDisposition LastSaveDisposition { get; private set; }
         public SaveGameData ReadOnlyCandidateSnapshot => CloneSave(_readOnlyCandidate);
         public string LastPersistenceMessage => string.IsNullOrWhiteSpace(LastSaveMessage)
             ? LastLoadMessage
@@ -281,11 +285,28 @@ namespace AL.Services.Local
 
         public void Save()
         {
+            if (!_profileWritable && LastSaveStatus == SaveOperationStatus.CommitUncertain)
+            {
+                Debug.LogError(
+                    "AL-SAVE-COMMIT-UNCERTAIN-BLOCKED: Persistence remains frozen until the canonical save inventory is reloaded and reconciled.");
+                return;
+            }
+
             if (!_profileWritable && LastLoadDisposition != null)
             {
+                const string readOnlyMessage =
+                    "AL-SAVE-READ-ONLY-DISPOSITION: The selected save generation is read-only; all on-disk evidence was preserved.";
+                LastSaveDisposition = CreateSaveDisposition(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    readOnlyMessage);
                 SetSaveStatus(
                     SaveOperationStatus.SaveFailedPreviousPreserved,
-                    "AL-SAVE-READ-ONLY-DISPOSITION: The selected save generation is read-only; all on-disk evidence was preserved.",
+                    readOnlyMessage,
                     true);
                 return;
             }
@@ -295,14 +316,32 @@ namespace AL.Services.Local
                 return;
             }
 
-            if (TryPersistCandidate(CloneSave(_currentSave), out SaveGameData persistedSave, out string message))
+            SaveOperationStatus status = PersistCandidate(
+                CloneSave(_currentSave),
+                out SaveGameData persistedSave,
+                out SaveOperationDisposition disposition,
+                out string message);
+            LastSaveDisposition = disposition;
+
+            if (status == SaveOperationStatus.SavedPrimary)
             {
                 _currentSave = persistedSave;
+                _profileWritable = true;
                 SetSaveStatus(SaveOperationStatus.SavedPrimary, message, false);
                 return;
             }
 
-            SetSaveStatus(SaveOperationStatus.SaveFailedPreviousPreserved, message, true);
+            if (status == SaveOperationStatus.CommitUncertain ||
+                (status == SaveOperationStatus.SaveFailedPreviousPreserved &&
+                 disposition != null &&
+                 !disposition.CleanupVerified))
+            {
+                _profileWritable = false;
+            }
+
+            _currentSave = persistedSave;
+
+            SetSaveStatus(status, message, true);
         }
 
         public void Load()
@@ -312,6 +351,7 @@ namespace AL.Services.Local
             _profileWritable = false;
             LastSaveStatus = SaveOperationStatus.None;
             LastSaveMessage = string.Empty;
+            LastSaveDisposition = null;
 
             IReadOnlyList<SaveCandidateInventoryEntry> inventory = BuildCandidateInventory();
             SaveCandidateInventoryEntry primary = Find(inventory, SaveCandidateSourceGeneration.Primary);
@@ -554,16 +594,123 @@ namespace AL.Services.Local
             LastLoadMessage = "AL-SAVE-DELETED: Local save data deleted.";
             LastSaveStatus = SaveOperationStatus.None;
             LastSaveMessage = string.Empty;
+            LastSaveDisposition = null;
         }
 
-        private bool TryPersistCandidate(SaveGameData candidate, out SaveGameData persistedSave, out string message)
+        private sealed class SaveAuthorityBaseline
+        {
+            public SaveAuthorityBaseline(
+                SaveFileReadResult primary,
+                SaveFileReadResult backup)
+            {
+                Primary = primary;
+                Backup = backup;
+            }
+
+            public SaveFileReadResult Primary { get; }
+            public SaveFileReadResult Backup { get; }
+        }
+
+        private sealed class SaveCanonicalLedger
+        {
+            public SaveCanonicalLedger(
+                SaveFileReadResult primary,
+                SaveFileReadResult backup,
+                SaveFileReadResult temp,
+                SaveFileReadResult previous)
+            {
+                Primary = primary;
+                Backup = backup;
+                Temp = temp;
+                Previous = previous;
+            }
+
+            public SaveFileReadResult Primary { get; }
+            public SaveFileReadResult Backup { get; }
+            public SaveFileReadResult Temp { get; }
+            public SaveFileReadResult Previous { get; }
+        }
+
+        private sealed class SaveTransactionTrace
+        {
+            public SaveTransactionTrace(
+                byte[] baselinePrimaryBytes,
+                SaveFileReadResult baselineBackup,
+                byte[] candidateBytes)
+            {
+                BaselinePrimaryBytes = baselinePrimaryBytes;
+                BaselineBackup = baselineBackup;
+                CandidateBytes = candidateBytes;
+            }
+
+            public byte[] BaselinePrimaryBytes { get; }
+            public SaveFileReadResult BaselineBackup { get; }
+            public byte[] CandidateBytes { get; }
+            public bool RollbackAttempted { get; set; }
+            public bool RollbackBytesVerified { get; set; }
+        }
+
+        private SaveOperationStatus PersistCandidate(
+            SaveGameData candidate,
+            out SaveGameData persistedSave,
+            out SaveOperationDisposition disposition,
+            out string message)
         {
             persistedSave = null;
+            disposition = null;
+            message = string.Empty;
+            bool mayHaveMutated = false;
+
+            SaveAuthorityBaseline baseline;
+            try
+            {
+                baseline = new SaveAuthorityBaseline(
+                    ReadCanonicalPath(SavePath),
+                    ReadCanonicalPath(BackupPath));
+            }
+            catch (Exception ex)
+            {
+                message = $"AL-SAVE-BASELINE-READ-FAILED: Canonical authority could not be inventoried before persistence. {ex.GetType().Name}";
+                disposition = CreateSaveDisposition(
+                    SaveOperationStatus.CommitUncertain,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    message);
+                return SaveOperationStatus.CommitUncertain;
+            }
+
+            if (!IsStableBoundedState(baseline.Primary) ||
+                !IsStableBoundedState(baseline.Backup))
+            {
+                message = "AL-SAVE-BASELINE-UNREADABLE: Primary or backup authority was not a stable bounded generation; persistence was not attempted.";
+                disposition = CreateSaveDisposition(
+                    SaveOperationStatus.CommitUncertain,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    message);
+                return SaveOperationStatus.CommitUncertain;
+            }
 
             if (!HasCurrentSaveMetadata(candidate))
             {
                 message = "AL-SAVE-UNMIGRATED-READ-ONLY: Legacy or unsupported save metadata requires an explicit reviewed migration before persistence; existing files were preserved.";
-                return false;
+                return ReconcileSaveAttempt(
+                    baseline,
+                    null,
+                    null,
+                    false,
+                    false,
+                    candidate,
+                    null,
+                    ref persistedSave,
+                    out disposition,
+                    ref message);
             }
 
             try
@@ -572,49 +719,142 @@ namespace AL.Services.Local
                 candidate.LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
                 if (!TrySerializeBounded(candidate, out string json, out message))
                 {
-                    return false;
+                    return ReconcileSaveAttempt(
+                        baseline,
+                        null,
+                        null,
+                        false,
+                        false,
+                        candidate,
+                        null,
+                        ref persistedSave,
+                        out disposition,
+                        ref message);
                 }
 
+                byte[] candidateBytes = StrictUtf8.GetBytes(json);
+                bool priorPrimaryValid =
+                    baseline.Primary.Disposition == SaveFileReadDisposition.Read &&
+                    TryDeserializeValidSaveBytes(
+                        baseline.Primary.Bytes,
+                        out _,
+                        out _);
+                byte[] requiredBackupBytes = priorPrimaryValid
+                    ? baseline.Primary.Bytes
+                    : candidateBytes;
+                var trace = new SaveTransactionTrace(
+                    priorPrimaryValid ? baseline.Primary.Bytes : null,
+                    baseline.Backup,
+                    candidateBytes);
+
+                bool coreSucceeded = TryPersistCandidateCore(
+                    json,
+                    candidateBytes,
+                    baseline.Primary,
+                    priorPrimaryValid,
+                    trace,
+                    out message,
+                    out bool coreMayHaveMutated);
+                mayHaveMutated |= coreMayHaveMutated;
+
+                return ReconcileSaveAttempt(
+                    baseline,
+                    candidateBytes,
+                    requiredBackupBytes,
+                    coreSucceeded,
+                    mayHaveMutated,
+                    candidate,
+                    trace,
+                    ref persistedSave,
+                    out disposition,
+                    ref message);
+            }
+            catch (Exception ex)
+            {
+                mayHaveMutated = true;
+                message = $"AL-SAVE-TRANSACTION-INTERRUPTED: Save transaction stopped; every remaining generation was preserved for reconciliation. {ex.GetType().Name}";
+                return ReconcileSaveAttempt(
+                    baseline,
+                    null,
+                    null,
+                    false,
+                    mayHaveMutated,
+                    candidate,
+                    null,
+                    ref persistedSave,
+                    out disposition,
+                    ref message);
+            }
+        }
+
+        private bool TryPersistCandidateCore(
+            string json,
+            byte[] candidateBytes,
+            SaveFileReadResult baselinePrimary,
+            bool primaryValid,
+            SaveTransactionTrace trace,
+            out string message,
+            out bool mayHaveMutated)
+        {
+            mayHaveMutated = false;
+            try
+            {
                 _fileOperations.CreateDirectory(PersistencePath);
+                bool tempExisted = _fileOperations.FileExists(TempPath);
                 if (!TryDelete(TempPath))
                 {
+                    mayHaveMutated |= tempExisted;
                     message = "AL-SAVE-TEMP-CLEANUP-FAILED: Existing temporary save could not be removed before preparing a new candidate.";
                     return false;
                 }
 
+                mayHaveMutated |= tempExisted;
                 SaveFileWriteResult writeResult =
                     _fileOperations.WriteAllTextDurable(TempPath, json);
+                mayHaveMutated |= writeResult.DiskChanged;
                 if (!writeResult.Succeeded)
                 {
                     message = $"AL-SAVE-TEMP-WRITE-FAILED: The temporary save could not be written durably. {writeResult.DiagnosticCode}";
                     return false;
                 }
 
-                if (!TryReadValidSave(TempPath, out SaveGameData tempSave, out string tempValidationError))
+                if (!TryReadValidSaveBytes(
+                        TempPath,
+                        out byte[] stagedBytes,
+                        out _,
+                        out string tempValidationError) ||
+                    !BytesEqual(stagedBytes, candidateBytes))
                 {
-                    TryDelete(TempPath);
-                    message = $"AL-SAVE-TEMP-INVALID: Temporary save validation failed; previous save was preserved. {tempValidationError}";
+                    message = $"AL-SAVE-TEMP-INVALID: Temporary save validation or exact-byte verification failed; existing authority was retained. {tempValidationError}";
                     return false;
                 }
 
-                bool primaryExists = _fileOperations.FileExists(SavePath);
-                bool primaryValid = TryReadValidSave(SavePath, out _, out string primaryValidationError);
+                SaveFileReadResult currentPrimary = ReadCanonicalPath(SavePath);
+                if (!MatchesExactState(currentPrimary, baselinePrimary))
+                {
+                    message = "AL-SAVE-PRIMARY-CHANGED: Primary authority changed after baseline inventory; no install was attempted.";
+                    return false;
+                }
 
+                bool primaryExists =
+                    baselinePrimary.Disposition == SaveFileReadDisposition.Read;
                 if (primaryExists && !primaryValid)
                 {
+                    mayHaveMutated = true;
                     if (!TryQuarantineInvalidFile(SavePath, out string quarantineError))
                     {
-                        TryDelete(TempPath);
-                        message = $"AL-SAVE-PRIMARY-QUARANTINE-FAILED: Primary was invalid before save and could not be quarantined; backup was preserved. {quarantineError}";
+                        message = $"AL-SAVE-PRIMARY-QUARANTINE-FAILED: Primary was invalid before save and could not be quarantined; remaining evidence was preserved. {quarantineError}";
                         return false;
                     }
 
-                    Debug.LogWarning($"AL-SAVE-PRIMARY-CORRUPT: Invalid primary quarantined before installing a validated candidate. {primaryValidationError}");
+                    Debug.LogWarning(
+                        "AL-SAVE-PRIMARY-CORRUPT: Invalid primary quarantined before installing a validated candidate.");
                 }
 
+                mayHaveMutated = true;
                 if (primaryValid)
                 {
-                    if (!TryInstallWithAtomicReplace(out message))
+                    if (!TryInstallWithAtomicReplace(trace, out message))
                     {
                         return false;
                     }
@@ -624,25 +864,45 @@ namespace AL.Services.Local
                     _fileOperations.Move(TempPath, SavePath);
                     if (!TryReadValidSave(SavePath, out _, out string installValidationError))
                     {
-                        TryQuarantineInvalidFile(SavePath, out _);
-                        message = $"AL-SAVE-INSTALL-INVALID: Installed primary failed validation after first-generation save. {installValidationError}";
+                        message = $"AL-SAVE-INSTALL-INVALID: Installed primary failed validation; every remaining generation was retained. {installValidationError}";
                         return false;
                     }
 
                     _fileOperations.Copy(SavePath, BackupPath, true);
                 }
 
-                if (!TryReadValidSave(SavePath, out persistedSave, out string finalPrimaryError))
+                if (!TryReadValidSaveBytes(
+                        SavePath,
+                        out byte[] finalPrimaryBytes,
+                        out _,
+                        out string finalPrimaryError) ||
+                    !BytesEqual(finalPrimaryBytes, candidateBytes))
                 {
-                    message = $"AL-SAVE-FINAL-PRIMARY-INVALID: Installed primary failed final validation. {finalPrimaryError}";
+                    message = $"AL-SAVE-FINAL-PRIMARY-INVALID: Installed primary failed exact C1 verification. {finalPrimaryError}";
                     return false;
                 }
 
+                byte[] requiredBackupBytes = primaryValid
+                    ? baselinePrimary.Bytes
+                    : candidateBytes;
                 string finalBackupError = "Backup file does not exist.";
                 if (!_fileOperations.FileExists(BackupPath) ||
-                    !TryReadValidSave(BackupPath, out _, out finalBackupError))
+                    !TryReadValidSaveBytes(
+                        BackupPath,
+                        out byte[] finalBackupBytes,
+                        out _,
+                        out finalBackupError) ||
+                    !BytesEqual(finalBackupBytes, requiredBackupBytes))
                 {
-                    message = $"AL-SAVE-FINAL-BACKUP-INVALID: Backup missing or invalid after save. {finalBackupError}";
+                    message = $"AL-SAVE-FINAL-BACKUP-INVALID: Backup failed exact required-generation verification. {finalBackupError}";
+                    return false;
+                }
+
+                bool tempClean = TryDelete(TempPath);
+                bool previousClean = TryDelete(PreviousPath);
+                if (!tempClean || !previousClean)
+                {
+                    message = "AL-SAVE-BACKUP-CLEANUP-FAILED: Candidate and backup validated, but canonical transaction residue could not be removed.";
                     return false;
                 }
 
@@ -653,13 +913,263 @@ namespace AL.Services.Local
             }
             catch (Exception ex)
             {
-                TryDelete(TempPath);
-                message = $"AL-SAVE-FAILED-PREVIOUS-PRESERVED: Save failed; previous active files were preserved. {ex.Message}";
+                message = $"AL-SAVE-TRANSACTION-INTERRUPTED: Save transaction stopped; every remaining generation was preserved for reconciliation. {ex.GetType().Name}";
                 return false;
             }
         }
 
-        private bool TryInstallWithAtomicReplace(out string message)
+        private SaveOperationStatus ReconcileSaveAttempt(
+            SaveAuthorityBaseline baseline,
+            byte[] candidateBytes,
+            byte[] requiredBackupBytes,
+            bool coreSucceeded,
+            bool mayHaveMutated,
+            SaveGameData candidate,
+            SaveTransactionTrace trace,
+            ref SaveGameData persistedSave,
+            out SaveOperationDisposition disposition,
+            ref string message)
+        {
+            SaveCanonicalLedger finalLedger = CaptureCanonicalLedger();
+            SaveGameData verifiedCandidate = null;
+            bool candidatePrimaryVerified =
+                candidateBytes != null &&
+                IsExactValidGeneration(
+                    finalLedger.Primary,
+                    candidateBytes,
+                    out verifiedCandidate);
+            bool requiredBackupVerified =
+                requiredBackupBytes != null &&
+                IsExactValidGeneration(
+                    finalLedger.Backup,
+                    requiredBackupBytes,
+                    out _);
+            bool previousAuthorityVerified =
+                MatchesExactState(finalLedger.Primary, baseline.Primary) &&
+                MatchesExactState(finalLedger.Backup, baseline.Backup);
+            bool cleanupVerified =
+                finalLedger.Temp.Disposition == SaveFileReadDisposition.Missing &&
+                finalLedger.Previous.Disposition == SaveFileReadDisposition.Missing;
+            SaveGameData priorPublishedSave = null;
+            if (baseline.Primary.Disposition == SaveFileReadDisposition.Read)
+            {
+                TryDeserializeValidSaveBytes(
+                    baseline.Primary.Bytes,
+                    out priorPublishedSave,
+                    out _);
+            }
+
+            bool completeCommitTarget =
+                candidatePrimaryVerified &&
+                requiredBackupVerified &&
+                cleanupVerified;
+            bool commitVerifiedTwice =
+                completeCommitTarget &&
+                VerifyCommitTargetAgain(
+                    candidateBytes,
+                    requiredBackupBytes,
+                    out verifiedCandidate);
+
+            SaveOperationStatus status;
+            if (commitVerifiedTwice)
+            {
+                status = SaveOperationStatus.SavedPrimary;
+                persistedSave = verifiedCandidate ?? CloneSave(candidate);
+                if (!coreSucceeded)
+                {
+                    message = "AL-SAVE-COMMIT-RECONCILED: The interrupted transaction nevertheless reached and twice verified the complete commit target.";
+                }
+            }
+            else if (completeCommitTarget)
+            {
+                status = SaveOperationStatus.CommitUncertain;
+                persistedSave = priorPublishedSave;
+                message = "AL-SAVE-COMMIT-REVERIFY-FAILED: The complete commit target was observed once but could not be proven by the required second bounded inventory.";
+            }
+            else if (previousAuthorityVerified)
+            {
+                status = SaveOperationStatus.SaveFailedPreviousPreserved;
+                persistedSave = priorPublishedSave;
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = "AL-SAVE-FAILED-PREVIOUS-PRESERVED: Exact prior primary and backup authority remained unchanged.";
+                }
+            }
+            else
+            {
+                status = SaveOperationStatus.CommitUncertain;
+                persistedSave = priorPublishedSave;
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = "AL-SAVE-COMMIT-UNCERTAIN: Exact candidate commit and exact prior authority could not both be ruled in; all evidence was preserved.";
+                }
+            }
+
+            disposition = CreateSaveDisposition(
+                status,
+                mayHaveMutated,
+                candidatePrimaryVerified,
+                requiredBackupVerified,
+                previousAuthorityVerified,
+                cleanupVerified,
+                trace != null && trace.RollbackAttempted,
+                trace != null &&
+                trace.RollbackAttempted &&
+                previousAuthorityVerified,
+                message);
+            return status;
+        }
+
+        private SaveFileReadResult ReadCanonicalPath(string path)
+        {
+            try
+            {
+                return _fileOperations.ReadAllBytesBounded(
+                    path,
+                    _semanticPolicy.MaximumInputBytes);
+            }
+            catch (Exception)
+            {
+                return new SaveFileReadResult(
+                    SaveFileReadDisposition.IoFailure,
+                    null,
+                    0,
+                    "SAVE_FILE_READ_THREW");
+            }
+        }
+
+        private SaveCanonicalLedger CaptureCanonicalLedger() =>
+            new SaveCanonicalLedger(
+                ReadCanonicalPath(SavePath),
+                ReadCanonicalPath(BackupPath),
+                ReadCanonicalPath(TempPath),
+                ReadCanonicalPath(PreviousPath));
+
+        private static bool IsStableBoundedState(SaveFileReadResult result) =>
+            result != null &&
+            (result.Disposition == SaveFileReadDisposition.Read ||
+             result.Disposition == SaveFileReadDisposition.Missing);
+
+        private static bool MatchesExactState(
+            SaveFileReadResult actual,
+            SaveFileReadResult expected)
+        {
+            if (actual == null || expected == null ||
+                actual.Disposition != expected.Disposition)
+            {
+                return false;
+            }
+
+            if (expected.Disposition == SaveFileReadDisposition.Missing)
+            {
+                return true;
+            }
+
+            return expected.Disposition == SaveFileReadDisposition.Read &&
+                   BytesEqual(actual.Bytes, expected.Bytes);
+        }
+
+        private bool IsExactValidGeneration(
+            SaveFileReadResult actual,
+            byte[] expectedBytes,
+            out SaveGameData save)
+        {
+            save = null;
+            return actual != null &&
+                   actual.Disposition == SaveFileReadDisposition.Read &&
+                   BytesEqual(actual.Bytes, expectedBytes) &&
+                   TryDeserializeValidSaveBytes(actual.Bytes, out save, out _);
+        }
+
+        private bool VerifyCommitTargetAgain(
+            byte[] candidateBytes,
+            byte[] requiredBackupBytes,
+            out SaveGameData persistedSave)
+        {
+            SaveCanonicalLedger verification = CaptureCanonicalLedger();
+            bool primaryVerified = IsExactValidGeneration(
+                verification.Primary,
+                candidateBytes,
+                out persistedSave);
+            return primaryVerified &&
+                   IsExactValidGeneration(
+                       verification.Backup,
+                       requiredBackupBytes,
+                       out _) &&
+                   verification.Temp.Disposition == SaveFileReadDisposition.Missing &&
+                   verification.Previous.Disposition == SaveFileReadDisposition.Missing;
+        }
+
+        private static bool BytesEqual(byte[] left, byte[] right) =>
+            ReferenceEquals(left, right) ||
+            (left != null && right != null && left.SequenceEqual(right));
+
+        private static SaveOperationDisposition CreateSaveDisposition(
+            SaveOperationStatus status,
+            bool mayHaveMutated,
+            bool candidatePrimaryVerified,
+            bool requiredBackupVerified,
+            bool previousAuthorityVerified,
+            bool cleanupVerified,
+            bool rollbackAttempted,
+            bool rollbackVerified,
+            string message)
+        {
+            string diagnosticCode = ExtractDiagnosticCode(message);
+            return new SaveOperationDisposition(
+                status,
+                mayHaveMutated,
+                candidatePrimaryVerified,
+                requiredBackupVerified,
+                previousAuthorityVerified,
+                cleanupVerified,
+                rollbackAttempted,
+                rollbackVerified,
+                string.IsNullOrWhiteSpace(diagnosticCode)
+                    ? Array.Empty<string>()
+                    : new[] { diagnosticCode });
+        }
+
+        private static SaveOperationDisposition CreateSaveDisposition(
+            SaveOperationStatus status,
+            bool mayHaveMutated,
+            bool candidatePrimaryVerified,
+            bool requiredBackupVerified,
+            bool previousAuthorityVerified,
+            bool cleanupVerified,
+            string message) =>
+            CreateSaveDisposition(
+                status,
+                mayHaveMutated,
+                candidatePrimaryVerified,
+                requiredBackupVerified,
+                previousAuthorityVerified,
+                cleanupVerified,
+                false,
+                false,
+                message);
+
+        private static string ExtractDiagnosticCode(string message)
+        {
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return string.Empty;
+            }
+
+            int delimiter = message.IndexOf(':');
+            string code = delimiter < 0 ? message : message.Substring(0, delimiter);
+            return new string(code
+                .Where(character =>
+                    char.IsLetterOrDigit(character) ||
+                    character == '-' ||
+                    character == '_')
+                .Take(128)
+                .ToArray());
+        }
+
+        private bool TryInstallWithAtomicReplace(
+            SaveTransactionTrace trace,
+            out string message)
         {
             bool primaryInstalled = false;
             try
@@ -675,26 +1185,38 @@ namespace AL.Services.Local
 
                 if (!TryReadValidSave(SavePath, out _, out string installedError))
                 {
-                    RestorePreviousPrimary();
-                    message = $"AL-SAVE-ATOMIC-INSTALL-INVALID: Atomic-installed primary failed validation and previous primary was restored. {installedError}";
+                    TryRestorePreviousPrimary(trace);
+                    message = $"AL-SAVE-ATOMIC-INSTALL-INVALID: Atomic-installed primary failed validation; rollback certainty was recorded for final reconciliation. {installedError}";
                     return false;
                 }
 
-                return TryRotatePreviousIntoBackup(true, out message);
+                return TryRotatePreviousIntoBackup(true, trace, out message);
             }
             catch (PlatformNotSupportedException) when (!primaryInstalled)
             {
-                return TryInstallWithMoveFallback(out message);
+                if (CanSafelyUseMoveFallback(trace))
+                {
+                    return TryInstallWithMoveFallback(trace, out message);
+                }
+
+                message = "AL-SAVE-REPLACE-UNSUPPORTED-UNCERTAIN: Atomic replace reported unsupported after changing the canonical ledger; fallback was not attempted.";
+                return false;
             }
             catch (NotSupportedException) when (!primaryInstalled)
             {
-                return TryInstallWithMoveFallback(out message);
+                if (CanSafelyUseMoveFallback(trace))
+                {
+                    return TryInstallWithMoveFallback(trace, out message);
+                }
+
+                message = "AL-SAVE-REPLACE-UNSUPPORTED-UNCERTAIN: Atomic replace reported unsupported after changing the canonical ledger; fallback was not attempted.";
+                return false;
             }
             catch (Exception ex)
             {
                 if (!primaryInstalled)
                 {
-                    RestorePreviousPrimary();
+                    TryRestorePreviousPrimary(trace);
                 }
 
                 message = primaryInstalled
@@ -704,7 +1226,9 @@ namespace AL.Services.Local
             }
         }
 
-        private bool TryInstallWithMoveFallback(out string message)
+        private bool TryInstallWithMoveFallback(
+            SaveTransactionTrace trace,
+            out string message)
         {
             try
             {
@@ -719,19 +1243,19 @@ namespace AL.Services.Local
 
                 if (!TryReadValidSave(SavePath, out _, out string installedError))
                 {
-                    RestorePreviousPrimary();
-                    message = $"AL-SAVE-FALLBACK-INSTALL-INVALID: Fallback-installed primary failed validation and previous primary was restored. {installedError}";
+                    TryRestorePreviousPrimary(trace);
+                    message = $"AL-SAVE-FALLBACK-INSTALL-INVALID: Fallback-installed primary failed validation; rollback certainty was recorded for final reconciliation. {installedError}";
                     return false;
                 }
 
-                return TryRotatePreviousIntoBackup(false, out message);
+                return TryRotatePreviousIntoBackup(false, trace, out message);
             }
             catch (Exception ex)
             {
                 if (!_fileOperations.FileExists(SavePath) &&
                     _fileOperations.FileExists(PreviousPath))
                 {
-                    RestorePreviousPrimary();
+                    TryRestorePreviousPrimary(trace);
                 }
 
                 message = $"AL-SAVE-FALLBACK-FAILED: Fallback install stopped and every remaining generation was preserved. {ex.Message}";
@@ -741,20 +1265,46 @@ namespace AL.Services.Local
 
         private bool TryRotatePreviousIntoBackup(
             bool useAtomicReplace,
+            SaveTransactionTrace trace,
             out string message)
         {
             try
             {
-                if (!_fileOperations.FileExists(PreviousPath))
+                if (trace == null || trace.BaselinePrimaryBytes == null)
                 {
-                    message = "AL-SAVE-BACKUP-ROTATION-EVIDENCE-MISSING: The exact prior-primary generation was missing; the installed primary and remaining evidence were preserved.";
+                    message = "AL-SAVE-BACKUP-ROTATION-BASELINE-MISSING: Exact prior-primary identity was unavailable; no backup mutation was attempted.";
+                    return false;
+                }
+
+                SaveFileReadResult priorPrimary = ReadCanonicalPath(PreviousPath);
+                if (!IsExactValidGeneration(
+                        priorPrimary,
+                        trace.BaselinePrimaryBytes,
+                        out _))
+                {
+                    message = "AL-SAVE-BACKUP-ROTATION-EVIDENCE-MISSING: The exact prior-primary generation was missing or changed; the installed primary and remaining evidence were preserved.";
                     return false;
                 }
 
                 _fileOperations.Copy(PreviousPath, TempPath, false);
-                if (!TryReadValidSave(TempPath, out _, out string stagedError))
+                if (!TryReadValidSaveBytes(
+                        TempPath,
+                        out byte[] stagedBytes,
+                        out _,
+                        out string stagedError) ||
+                    !BytesEqual(stagedBytes, trace.BaselinePrimaryBytes))
                 {
-                    message = $"AL-SAVE-BACKUP-STAGE-INVALID: The exact prior-primary copy was not semantically writable, so the existing backup was preserved. {stagedError}";
+                    message = $"AL-SAVE-BACKUP-STAGE-INVALID: The staged prior-primary copy was not the exact bounded P0 generation, so the authentic source and existing backup were preserved. {stagedError}";
+                    return false;
+                }
+
+                priorPrimary = ReadCanonicalPath(PreviousPath);
+                if (!IsExactValidGeneration(
+                        priorPrimary,
+                        trace.BaselinePrimaryBytes,
+                        out _))
+                {
+                    message = "AL-SAVE-BACKUP-STAGE-SOURCE-CHANGED: The authentic prior-primary source changed after staging and was preserved; backup rotation stopped.";
                     return false;
                 }
 
@@ -777,11 +1327,23 @@ namespace AL.Services.Local
                     }
                     catch (PlatformNotSupportedException)
                     {
-                        return TryRotateStagedBackupWithMoves(out message);
+                        if (CanSafelyUseBackupMoveFallback(trace))
+                        {
+                            return TryRotateStagedBackupWithMoves(out message);
+                        }
+
+                        message = "AL-SAVE-BACKUP-REPLACE-UNSUPPORTED-UNCERTAIN: Backup replace reported unsupported after changing the canonical ledger; fallback was not attempted.";
+                        return false;
                     }
                     catch (NotSupportedException)
                     {
-                        return TryRotateStagedBackupWithMoves(out message);
+                        if (CanSafelyUseBackupMoveFallback(trace))
+                        {
+                            return TryRotateStagedBackupWithMoves(out message);
+                        }
+
+                        message = "AL-SAVE-BACKUP-REPLACE-UNSUPPORTED-UNCERTAIN: Backup replace reported unsupported after changing the canonical ledger; fallback was not attempted.";
+                        return false;
                     }
                 }
                 else
@@ -792,12 +1354,6 @@ namespace AL.Services.Local
                 if (!TryReadValidSave(BackupPath, out _, out string backupError))
                 {
                     message = $"AL-SAVE-BACKUP-INSTALL-UNCERTAIN: The rotated backup could not be verified; both it and the prior backup were preserved. {backupError}";
-                    return false;
-                }
-
-                if (!TryDelete(PreviousPath))
-                {
-                    message = "AL-SAVE-BACKUP-CLEANUP-FAILED: The rotated backup is valid, but the prior backup could not be removed and remains preserved.";
                     return false;
                 }
 
@@ -834,24 +1390,14 @@ namespace AL.Services.Local
 
         private bool TryRotateStagedBackupWithMoves(out string message)
         {
-            bool priorBackupMoved = false;
-            bool stagedBackupInstalled = false;
             try
             {
                 _fileOperations.Move(BackupPath, PreviousPath);
-                priorBackupMoved = true;
                 _fileOperations.Move(TempPath, BackupPath);
-                stagedBackupInstalled = true;
 
                 if (!TryReadValidSave(BackupPath, out _, out string backupError))
                 {
                     message = $"AL-SAVE-BACKUP-FALLBACK-UNCERTAIN: The fallback-rotated backup could not be verified; both it and the prior backup were preserved. {backupError}";
-                    return false;
-                }
-
-                if (!TryDelete(PreviousPath))
-                {
-                    message = "AL-SAVE-BACKUP-FALLBACK-CLEANUP-FAILED: The rotated backup is valid, but the prior backup could not be removed and remains preserved.";
                     return false;
                 }
 
@@ -860,53 +1406,131 @@ namespace AL.Services.Local
             }
             catch (Exception ex)
             {
-                if (priorBackupMoved && !stagedBackupInstalled)
-                {
-                    RestorePreviousBackup();
-                }
-
                 message = $"AL-SAVE-BACKUP-FALLBACK-FAILED: Every generation left by the fallback operation was preserved for explicit recovery. {ex.Message}";
                 return false;
             }
         }
 
-        private void RestorePreviousPrimary()
+        private bool CanSafelyUseMoveFallback(SaveTransactionTrace trace)
         {
+            SaveFileReadResult primary = ReadCanonicalPath(SavePath);
+            SaveFileReadResult temp = ReadCanonicalPath(TempPath);
+            SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
+            return trace != null &&
+                   trace.BaselinePrimaryBytes != null &&
+                   IsExactValidGeneration(
+                       primary,
+                       trace.BaselinePrimaryBytes,
+                       out _) &&
+                   IsExactValidGeneration(
+                       temp,
+                       trace.CandidateBytes,
+                       out _) &&
+                   previous.Disposition == SaveFileReadDisposition.Missing;
+        }
+
+        private bool CanSafelyUseBackupMoveFallback(SaveTransactionTrace trace)
+        {
+            if (trace == null ||
+                trace.BaselineBackup == null ||
+                trace.BaselinePrimaryBytes == null)
+            {
+                return false;
+            }
+
+            SaveFileReadResult backup = ReadCanonicalPath(BackupPath);
+            SaveFileReadResult temp = ReadCanonicalPath(TempPath);
+            SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
+            return MatchesExactState(backup, trace.BaselineBackup) &&
+                   IsExactValidGeneration(
+                       temp,
+                       trace.BaselinePrimaryBytes,
+                       out _) &&
+                   previous.Disposition == SaveFileReadDisposition.Missing;
+        }
+
+        private bool TryRestorePreviousPrimary(SaveTransactionTrace trace)
+        {
+            if (trace == null || trace.BaselinePrimaryBytes == null)
+            {
+                return false;
+            }
+
+            SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
+            if (!IsExactValidGeneration(
+                    previous,
+                    trace.BaselinePrimaryBytes,
+                    out _))
+            {
+                return false;
+            }
+
+            trace.RollbackAttempted = true;
             try
             {
-                if (!_fileOperations.FileExists(PreviousPath))
-                {
-                    return;
-                }
-
                 _fileOperations.Copy(PreviousPath, SavePath, true);
+                SaveFileReadResult restored = ReadCanonicalPath(SavePath);
+                trace.RollbackBytesVerified = IsExactValidGeneration(
+                    restored,
+                    trace.BaselinePrimaryBytes,
+                    out _);
+                return trace.RollbackBytesVerified;
             }
             catch (Exception ex)
             {
-                Debug.LogError($"AL-SAVE-ROLLBACK-FAILED: Could not restore previous primary. {ex.Message}");
+                trace.RollbackBytesVerified = false;
+                Debug.LogError(
+                    $"AL-SAVE-ROLLBACK-FAILED: Could not prove exact restoration of the previous primary. {ex.GetType().Name}");
+                return false;
             }
         }
 
-        private bool TryReadValidSave(string path, out SaveGameData save, out string error)
+        private bool TryReadValidSave(
+            string path,
+            out SaveGameData save,
+            out string error) =>
+            TryReadValidSaveBytes(path, out _, out save, out error);
+
+        private bool TryReadValidSaveBytes(
+            string path,
+            out byte[] bytes,
+            out SaveGameData save,
+            out string error)
         {
+            bytes = null;
             save = null;
             error = string.Empty;
 
-            SaveFileReadResult readResult = _fileOperations.ReadAllBytesBounded(
-                path,
-                _semanticPolicy.MaximumInputBytes);
+            SaveFileReadResult readResult = ReadCanonicalPath(path);
             if (readResult.Disposition != SaveFileReadDisposition.Read)
             {
                 error = readResult.DiagnosticCode;
                 return false;
             }
 
+            bytes = readResult.Bytes;
+            return TryDeserializeValidSaveBytes(
+                bytes,
+                out save,
+                out error,
+                SourceForPath(path));
+        }
+
+        private bool TryDeserializeValidSaveBytes(
+            byte[] bytes,
+            out SaveGameData save,
+            out string error,
+            SaveCandidateSourceGeneration source =
+                SaveCandidateSourceGeneration.Primary)
+        {
+            save = null;
+            error = string.Empty;
             try
             {
                 SaveSemanticCandidate semanticCandidate =
                     SaveSemanticCandidateValidator.Validate(
-                        readResult.Bytes,
-                        SourceForPath(path),
+                        bytes,
+                        source,
                         _semanticPolicy);
                 if (!semanticCandidate.IsWritable ||
                     (semanticCandidate.Outcome != SaveSemanticCandidateOutcome.Valid &&
@@ -919,7 +1543,7 @@ namespace AL.Services.Local
                     return false;
                 }
 
-                string json = StrictUtf8.GetString(readResult.Bytes);
+                string json = StrictUtf8.GetString(bytes);
                 if (string.IsNullOrWhiteSpace(json))
                 {
                     error = "File is empty.";
@@ -1244,23 +1868,6 @@ namespace AL.Services.Local
             {
                 message = $"AL-SAVE-CREATE-FIRST-GENERATION-FAILED: Existing and newly created evidence was preserved. {ex.Message}";
                 return false;
-            }
-        }
-
-        private void RestorePreviousBackup()
-        {
-            try
-            {
-                if (!_fileOperations.FileExists(PreviousPath))
-                {
-                    return;
-                }
-
-                _fileOperations.Copy(PreviousPath, BackupPath, true);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"AL-SAVE-BACKUP-ROLLBACK-FAILED: Could not restore the prior backup. {ex.Message}");
             }
         }
 
