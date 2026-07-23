@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.0
+**Version:** 1.1
 **Last updated:** 2026-07-23
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -25,11 +25,14 @@ AI-generated or externally sourced work is always a proposal until a human appro
 
 Another Life is:
 
-- **Adult, realistic, high-end dark fantasy.**
-- **Mystical medieval**, with materials and ornament that imply age, craft, ritual, and history.
+- **Mystical medieval naturalism:** adult, realistic high fantasy with dark foundations, luminous wonder, and a premium illustrated finish.
+- **Medieval in craft and worldview**, with materials, construction, heraldry, ornament, and ritual that imply age, labor, inheritance, and history.
 - **Grounded in believable anatomy, construction, weight, and physical materials.**
+- **Mystical through controlled phenomena**, such as biologically integrated luminescence, purposeful runes, celestial energy, mineral seams, sacred geometry, or environmental transformation.
 - **Art-directed for gameplay**, using selective silhouette and proportion exaggeration where it improves recognition.
-- **Premium and serious**, without becoming visually muddy, relentlessly bleak, or dependent on gore.
+- **Premium, artistic, and serious**, without becoming visually muddy, relentlessly bleak, or dependent on gore.
+
+Use **mystical medieval naturalism** as the canonical shorthand for the project style. The approved terrestrial creatures establish the standard for believable bodies, ecology, silhouette, and integrated magic. The approved app icon establishes the standard for medieval mysticism, material richness, focal hierarchy, and presentation finish. New work should sit within the shared range of those references rather than copying one reference literally.
 
 Another Life is not:
 
@@ -52,9 +55,42 @@ This guide consolidates the active project direction in:
 - [Customization Design](unity/Assets/AL/Art/Designs/ModularChampionCustomization.md)
 - [Skill Effects and Weather Design](unity/Assets/AL/Art/Designs/SkillEffectsAndWeather.md)
 - GitHub issue `#259`, which establishes the active realistic, high-end dark-fantasy direction for realm bosses and elites.
-- The approved mystical medieval `AL` application icon at commit `c9a00fa`, path `unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png`.
+- The approved mystical medieval `AL` application icon on the iOS foundation branch at commit `523c60d`, path `unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png`.
+- The approved terrestrial source concepts introduced by commit `8893306`: [Basalt Grazer](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_basalt_grazer_concept_sheet_v001.png), [Grove Strider](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_grove_strider_concept_sheet_v001.png), and [Mire Lumenback](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png).
 
 External games and images are benchmarks for quality, readability, or experience only. Never reproduce their characters, symbols, costumes, architecture, compositions, or proprietary visual signatures.
+
+### Approved visual north stars
+
+These four approved sources define the current artistic range. Contributors and AI tools must study them together. No single source should be treated as a universal template.
+
+| Approved source | What it establishes | Carry forward | Do not copy literally |
+| --- | --- | --- | --- |
+| **Mystical medieval `AL` app icon** | Brand mood and finish | Dark stone and midnight-indigo foundations; engraved aged metal; gothic and sacred framing; restrained gold/silver contrast; celestial violet energy; one dominant heraldic read supported by intricate craft | The `AL` monogram, exact arch, exact filigree, centered symmetry, or violet-and-gold palette on every asset |
+| **Basalt Grazer** | Believable mass and geological adaptation | Broad weight-bearing anatomy; protective silhouette; layered stone-like plates; warm hide against dark mineral surfaces; tiny magical mineral accents | Its quadruped anatomy, plate layout, or basalt treatment as the default solution for all heavy creatures |
+| **Grove Strider** | Elegant ecological mysticism | Tall browsing silhouette; credible locomotion; bark, moss, lichen, and living growth integrated into the body; quiet magical dignity rather than decorative spectacle | Its long-neck body plan, antler/branch language, or forest materials on unrelated species |
+| **Mire Lumenback** | Biological magic and compact readability | Squat amphibian mass; wet material response; throat and breathing behavior; cyan ring markings integrated like natural signaling; strong profile recognition at small scale | Its amphibian anatomy, ring pattern, or cyan emission as a generic magic treatment |
+
+Together they establish this relationship:
+
+1. **Nature and function determine the base form.**
+2. **Medieval craft, ritual, and age determine how cultures frame, equip, build around, or represent that form.**
+3. **Magic emerges from a specific biological, material, celestial, cultural, or environmental source.**
+4. **A premium illustrated finish unifies the result through deliberate composition, tactile surfaces, controlled contrast, and a clear focal read.**
+
+The app icon is the strongest reference for branding, interface framing, relics, heraldry, ceremonial architecture, title presentation, and marketing finish. The terrestrial sheets are the strongest references for living anatomy, ecological credibility, material integration, and creature-sheet presentation. Character, creature, architecture, UI, and VFX work should share their artistic seriousness and material richness without forcing the same shapes or colors onto every category.
+
+### Approved-range test
+
+Before presenting a new concept, verify:
+
+- The subject remains understandable with its glow, particles, ornament, and surface noise removed.
+- Its anatomy or construction could support its stated movement, habitat, use, or load.
+- Its medieval influence comes through believable craft, ritual, heraldry, repair, or material history—not costume clichés.
+- Its magic has a named source and changes material, behavior, silhouette, or atmosphere purposefully.
+- Its primary shape remains readable at the intended gameplay or icon size.
+- Its detail is concentrated around focal and functional areas rather than spread uniformly.
+- It could be presented beside the approved icon and terrestrial sheets without appearing cartoonish, generic, toy-like, sterile, or borrowed from another franchise.
 
 ## Brand
 
@@ -75,13 +111,16 @@ Use these attributes to judge every visual:
 
 ### Signature motif
 
-The approved app icon establishes a useful brand signature: engraved precious metal, gothic framing, dark stone, indigo-violet magic, and a centered heraldic focus. Apply the relationship—not the literal composition—across the product:
+The approved app icon establishes the brand's ceremonial signature: engraved precious metal, gothic and sacred framing, dark stone, indigo-violet magic, and a centered heraldic focus. Apply the relationship—not the literal composition—across the product:
 
 - Dark, materially rich foundations.
 - Controlled precious-metal highlights.
 - Magic used as a focal accent rather than a full-surface coating.
 - Fine detail supported by a strong, readable primary shape.
 - Symmetry for authority and ritual; asymmetry for corruption, nature, damage, and danger.
+- A sense that symbols, equipment, buildings, and interfaces were crafted or inherited inside the world rather than applied as modern decoration.
+
+Indigo-violet celestial magic and gold/silver metal are signature brand accents, not mandatory colors for every in-world subject. Realm and ecological palettes remain distinct. Use the icon's hierarchy, richness, contrast discipline, and atmosphere more broadly than its exact colors.
 
 ### Content boundaries
 
@@ -294,6 +333,8 @@ This is a composition check, not a polygon allocation formula.
 - Establish readable light/dark grouping before hue.
 - Keep most surfaces within controlled, naturalistic saturation.
 - Reserve the brightest values, strongest hue contrast, and emissive color for focus and state.
+- Favor the approved overall range: midnight blue, indigo, charcoal, aged stone, tarnished metals, natural hides, bark, moss, wet earth, restrained precious-metal warmth, and small luminous magical accents.
+- Let habitat, realm, and material determine the local palette; the app icon's violet, silver, and gold are a brand anchor rather than a universal recoloring rule.
 - Ensure important identities survive grayscale and common color-vision simulations.
 - Avoid crushing Umbral assets into featureless black or lifting magical elements until they lose a physical base.
 
@@ -356,15 +397,20 @@ Prefer physically plausible values and controlled variation. Avoid:
 
 ### Reference quality bar
 
-The existing Basalt Grazer, Grove Strider, and Mire Lumenback concept sheets are useful examples of the desired creature relationship:
+The approved Basalt Grazer, Grove Strider, and Mire Lumenback concept sheets are the current creature-design quality anchors. Match their relationship between form, ecology, material, and restrained fantasy:
 
 - Realistic, naturalistic anatomy.
 - Distinct profile silhouettes.
 - Materials and magical features integrated into ecology.
 - Restrained accent color.
 - Enough exaggeration for gameplay recognition without becoming cartoon-like.
+- Tactile surface differentiation that remains subordinate to the large body masses.
+- Multiple consistent views suitable for later modeling decisions.
+- A serious, artistic presentation compatible with the app icon's medieval-mystical world.
 
-They are source evidence, not universal templates. New creatures must not reuse their anatomy with only palette changes.
+They are approved source evidence, not universal anatomy templates or finished runtime models. New creatures must occupy the same artistic range without reusing their anatomy, markings, surface motifs, or palette as a shortcut.
+
+For non-creature work, translate rather than imitate: preserve the sheets' believable function, silhouette discipline, restrained fantasy, tactile material separation, and production-readable presentation. Add the app icon's sense of ancient craft, ritual, atmosphere, and focal richness where appropriate to the category.
 
 ## Model categories
 
@@ -510,7 +556,7 @@ Keep text labels outside the subject. Do not allow watermarks, pseudo-text, or g
 
 Use this structure when requesting visual exploration:
 
-> Create an original production concept for **[ASSET ID / CATEGORY]** in Another Life, an adult, realistic, high-end dark-fantasy world with mystical medieval craftsmanship. The asset serves **[PURPOSE]**, belongs to **[REALM/AFFILIATION]**, measures **[SCALE]**, and must read from **[CAMERAS]**. Its primary silhouette is **[SILHOUETTE]**. Use believable **[ANATOMY/CONSTRUCTION]**, physically plausible **[MATERIALS]**, layered age and repair, restrained **[PALETTE]**, and controlled magic originating from **[SOURCE]**. Preserve non-color recognition through **[SHAPE/MOTION/MATERIAL CUES]**. Provide **[REQUIRED VIEWS]** under neutral studio lighting plus one gameplay-lighting view, with scale reference, material swatches, grayscale check, and LOD silhouette intent. Keep the result original and production-readable. Do not invent lore, statistics, names, or mechanics; label unresolved decisions OPEN.
+> Create an original production concept for **[ASSET ID / CATEGORY]** in Another Life using the project's **mystical medieval naturalism**. Match the approved visual range: the ecological credibility, silhouette discipline, tactile material separation, and restrained integrated magic of the Basalt Grazer, Grove Strider, and Mire Lumenback concept sheets; and the ancient craftsmanship, dark material richness, controlled precious-metal contrast, celestial atmosphere, and clear focal hierarchy of the approved `AL` app icon. Translate those qualities to this asset—do not copy their anatomy, markings, monogram, arch, filigree, composition, or exact palette. The asset serves **[PURPOSE]**, belongs to **[REALM/AFFILIATION]**, measures **[SCALE]**, and must read from **[CAMERAS]**. Its primary silhouette is **[SILHOUETTE]**. Use believable **[ANATOMY/CONSTRUCTION]**, physically plausible **[MATERIALS]**, layered age and repair, restrained **[PALETTE]**, and controlled magic originating from **[SOURCE]**. Preserve non-color recognition through **[SHAPE/MOTION/MATERIAL CUES]**. Provide **[REQUIRED VIEWS]** under neutral studio lighting plus one cinematic medieval-mystical presentation and one gameplay-lighting view, with scale reference, material swatches, grayscale check, and LOD silhouette intent. Keep the result original and production-readable. Do not invent lore, statistics, names, or mechanics; label unresolved decisions OPEN.
 
 Add asset-specific exclusions after the baseline negative direction:
 
