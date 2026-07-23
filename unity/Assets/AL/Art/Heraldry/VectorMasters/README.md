@@ -10,7 +10,7 @@
 
 Provide deterministic, manually constructed source vectors for the approved Stonehold, Eldergrove, Crownlands, and Umbral Arcane Axis identities.
 
-These files establish the approved editable geometry for flat and micro applications. They are not runtime sprites, final color authority, Unity realm mappings, atlas inputs, or ceremonial material renders.
+These files establish the approved editable geometry for flat and micro applications. The committed [`RuntimeExports`](../RuntimeExports/README.md) are the Unity-compatible raster derivatives. The vectors themselves are not runtime sprites, final color authority, Unity realm mappings, atlas inputs, or ceremonial material renders.
 
 **Owner approval:** 2026-07-23
 
@@ -74,11 +74,11 @@ Every file uses:
 
 ## Approval and runtime boundary
 
-The geometry approval is complete. Before these masters become runtime production assets:
+The geometry approval and platform-neutral raster export are complete. Before the derivatives become an integrated runtime surface:
 
 1. Confirm final realm colors and accessibility alternatives separately.
 2. Select the first runtime surface.
-3. Define rasterization, sprite, atlas, import, and catalog requirements.
-4. Profile representative assets on the minimum supported iPhone.
+3. Define atlas and realm-catalog mapping for that surface.
+4. Profile representative assets on the minimum supported iPhone, Android device, and Windows PC.
 
-Unity SVG import packages, sprite conversion, atlas grouping, catalog mapping, compression, mip behavior, device profiling, and runtime usage remain a later coordination and engineering decision.
+No Unity SVG package is required. Sprite conversion and Android/Standalone import settings are committed; atlas grouping, catalog mapping, final color, device profiling, and consuming runtime usage remain later coordination and engineering decisions.

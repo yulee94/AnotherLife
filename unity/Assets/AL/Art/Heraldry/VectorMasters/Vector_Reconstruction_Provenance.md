@@ -79,4 +79,4 @@ These values demonstrate geometry only. They must not be copied into runtime tok
 
 Project-owner approval locks the flat and micro `v001` paths. Future contributors may change value, scale, placement, and approved rasterization settings without changing the paths. Any geometry modification, realm variant, combined fifth symbol, ceremonial extension that changes the protected read, or replacement mark requires renewed project-owner approval.
 
-Ceremonial materials, orbit nodes, satellites, texture, bevel, glow, animation, Unity import strategy, sprite and atlas settings, realm-catalog mapping, memory budgets, iPhone profiling, and commercial emblem clearance remain open.
+The downstream [`RuntimeExports`](../RuntimeExports/README.md) now retain neutral `256 px` flat and `32 px` micro Sprite derivatives with Android and Standalone import settings. Ceremonial materials, orbit nodes, satellites, texture, bevel, glow, animation, final color, atlas settings, realm-catalog mapping, consuming surfaces, measured device budgets, iPhone/Android/Windows profiling, and commercial emblem clearance remain open.

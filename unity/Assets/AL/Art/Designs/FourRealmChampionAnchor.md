@@ -250,5 +250,5 @@ These decisions remain open and require project-owner approval before production
 - Champion body-type, age, gender-presentation, face, hair, and skin-tone ranges.
 - Whether helmets are optional, class-dependent, or required in combat.
 - Which realm becomes the first detailed production-model pilot.
-- Exact realm palette tokens. Core heraldic identities are approved in [Four-Realm Heraldry — Arcane Axis](FourRealmHeraldry.md), while final vector masters and runtime imports remain open.
+- Exact realm palette tokens. Core heraldic identities, vector masters, and neutral Android/Standalone Sprite derivatives are approved in [Four-Realm Heraldry — Arcane Axis](FourRealmHeraldry.md), while final colors, catalog mapping, atlases, and consuming surfaces remain open.
 - Minimum supported iPhone and the final measured Champion budget for that device.
