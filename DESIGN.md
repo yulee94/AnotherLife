@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.1
+**Version:** 1.2
 **Last updated:** 2026-07-23
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -55,6 +55,7 @@ This guide consolidates the active project direction in:
 - [Customization Design](unity/Assets/AL/Art/Designs/ModularChampionCustomization.md)
 - [Four-Realm Champion Anchor](unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md)
 - [Four-Realm Heraldry — Arcane Axis](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md)
+- [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Skill Effects and Weather Design](unity/Assets/AL/Art/Designs/SkillEffectsAndWeather.md)
 - GitHub issue `#259`, which establishes the active realistic, high-end dark-fantasy direction for realm bosses and elites.
 - The approved mystical medieval `AL` application icon on the iOS foundation branch at commit `523c60d`, path `unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png`.
@@ -82,7 +83,7 @@ Together they establish this relationship:
 3. **Magic emerges from a specific biological, material, celestial, cultural, or environmental source.**
 4. **A premium illustrated finish unifies the result through deliberate composition, tactile surfaces, controlled contrast, and a clear focal read.**
 
-The app icon is the strongest reference for branding, interface framing, relics, ceremonial architecture, title presentation, and marketing finish. The Arcane Axis packet is the strongest reference for realm marks, banners, allegiance UI, equipment stamps, and realm-controlled architecture. The terrestrial sheets are the strongest references for living anatomy, ecological credibility, material integration, and creature-sheet presentation. Character, creature, architecture, UI, and VFX work should share their artistic seriousness and material richness without forcing the same shapes or colors onto every category.
+The app icon is the strongest reference for branding, interface framing, relics, ceremonial architecture, title presentation, and marketing finish. The Arcane Axis packet and its owner-approved flat and micro vector masters are the strongest references for realm marks, banners, allegiance UI, equipment stamps, and realm-controlled architecture. The terrestrial sheets are the strongest references for living anatomy, ecological credibility, material integration, and creature-sheet presentation. Character, creature, architecture, UI, and VFX work should share their artistic seriousness and material richness without forcing the same shapes or colors onto every category.
 
 ### Approved-range test
 

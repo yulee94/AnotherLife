@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Stonehold Arcane Axis flat vector master v001</title>
+  <metadata>Draft deterministic reconstruction. Source-only geometry; no runtime or color authority.</metadata>
+  <defs>
+    <path id="stonehold-strata-flat" d="M34 36H106V58H63V93H82C94 93 103 89 111 81L125 95C114 107 99 114 81 114H40V79H34V36Z"/>
+    <path id="stonehold-axis-flat" d="M122 90V39H117L128 21L139 39H134V90H122Z"/>
+  </defs>
+  <g fill="currentColor">
+    <use href="#stonehold-strata-flat"/>
+    <use href="#stonehold-strata-flat" transform="rotate(90 128 128)"/>
+    <use href="#stonehold-strata-flat" transform="rotate(180 128 128)"/>
+    <use href="#stonehold-strata-flat" transform="rotate(270 128 128)"/>
+    <use href="#stonehold-axis-flat"/>
+    <use href="#stonehold-axis-flat" transform="rotate(90 128 128)"/>
+    <use href="#stonehold-axis-flat" transform="rotate(180 128 128)"/>
+    <use href="#stonehold-axis-flat" transform="rotate(270 128 128)"/>
+    <circle cx="128" cy="128" r="34" fill="none" stroke="currentColor" stroke-width="12"/>
+    <path d="M128 114L142 128L128 142L114 128L128 114Z"/>
+  </g>
+</svg>
