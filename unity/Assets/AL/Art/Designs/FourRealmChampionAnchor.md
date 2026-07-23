@@ -1,8 +1,8 @@
 # Four-Realm Champion Anchor
 
-**Status:** Working direction — requires project-owner visual approval
+**Status:** Anchor direction approved; multi-angle candidates complete and awaiting project-owner review
 
-**Version:** 0.1
+**Version:** 0.2
 
 **Design contract:** Root `DESIGN.md`
 
@@ -10,9 +10,17 @@
 
 **Runtime priority:** Mobile-first, scalable to PC and promotional presentation
 
-**Selected visual candidate:** [Four-realm Champion anchor v001](../Champions/ConceptSheets/champion_four_realm_anchor_v001.png) — pending project-owner approval
+**Selected visual anchor:** [Four-realm Champion anchor v001](../Champions/ConceptSheets/champion_four_realm_anchor_v001.png) — direction approved for expansion; production approval pending
 
 **Generation record:** [Source prompts and provenance](../Champions/ConceptSheets/Champion_Anchor_Source_Prompts_And_Provenance.md)
+
+**Multi-angle candidates:**
+
+- [Stonehold Vanguard turnaround v001](../Champions/ConceptSheets/champion_stonehold_vanguard_turnaround_v001.png)
+- [Eldergrove Vanguard turnaround v001](../Champions/ConceptSheets/champion_eldergrove_vanguard_turnaround_v001.png)
+- [Crownlands Vanguard turnaround v001](../Champions/ConceptSheets/champion_crownlands_vanguard_turnaround_v001.png)
+- [Umbral Vanguard turnaround v001](../Champions/ConceptSheets/champion_umbral_vanguard_turnaround_v001.png)
+- [Turnaround prompts, checksums, and validation](../Champions/ConceptSheets/Champion_Turnaround_Source_Prompts_And_Provenance.md)
 
 ## Purpose
 
@@ -26,6 +34,12 @@ The anchor is intended to settle:
 - A reusable visual reference for human and AI-assisted contributors.
 
 It does not approve final face options, body-type range, production topology, narrative identity, exact palette tokens, or a final runtime model.
+
+## Owner decision record
+
+- 2026-07-23: Project owner accepted the four-realm anchor direction and requested creature-sheet-quality surface treatment plus additional model angles.
+- Approval scope: realm silhouettes, shared Vanguard comparison strategy, overall mystical medieval finish, and progression to detailed sheets.
+- Not yet approved: final production meshes, exact surface maps, topology, rig, body/identity range, measured runtime budgets, or individual realm final sheets.
 
 ## Shared Champion foundation
 
@@ -48,6 +62,58 @@ It does not approve final face options, body-type range, production topology, na
 - Concentrate emission in one primary and, at most, one secondary focal area. Magic must not outline every armor edge.
 - Realm recognition must survive grayscale, reduced particles, reduced texture resolution, and removal of emission.
 - Design every protected identity cue to survive LOD reduction without adding geometry back through VFX.
+
+## Surface-texture strategy
+
+Match the approved terrestrial sheets' tactile material separation while keeping runtime geometry economical. Surface richness must reinforce the large armor and body forms rather than compete with them.
+
+### Texture hierarchy
+
+1. **Macro read:** Large metal, stone, bark, textile, leather, and magical-material zones visible at gameplay distance.
+2. **Meso read:** Plate direction, forging, growth grain, weave scale, repairs, edge condition, and contact wear visible during Champion presentation.
+3. **Micro read:** Pores, scratches, fibers, pitting, fine grain, and engraving reserved for close inspection and higher texture mips.
+
+Macro identity must survive when meso and micro information disappear.
+
+### Mobile implementation intent
+
+- Keep silhouette-changing damage, major plate overlaps, shield openings, and protected realm cues in geometry.
+- Move shallow engraving, hammered metal, bark grain, weave, leather grain, fine scratches, and mineral pores into normal, color, and material-response maps.
+- Use large value and roughness separation before relying on high-frequency normal detail.
+- Reuse tiled or trim-based material families where they preserve the approved craft language.
+- Pack compatible grayscale masks when it reduces memory and sampling without obscuring ownership.
+- Author high-resolution source textures only when they produce measured runtime derivatives.
+- Prefer one reusable realm material family plus asset-specific masks over a unique shader for each armor piece.
+- Avoid parallax, deep layered transparency, animated micro-displacement, and full-surface emission as identity requirements.
+- Ensure mip reduction removes micro-noise cleanly instead of turning armor into shimmer.
+- Keep face and hair texture budgets independent from armor when customization or inspection requires it, but merge materials in lower LODs where practical.
+
+### Realm surface anchors
+
+| Realm | Primary surface response | Meso detail | Micro detail | Mobile protection |
+| --- | --- | --- | --- | --- |
+| **Stonehold** | Matte basalt against low-to-medium roughness aged iron | Forge hammering, repair bands, soot direction, chipped mineral edges | Fine iron pitting, leather grain, restrained copper oxidation | Basalt/iron value break and one warm mineral seam |
+| **Eldergrove** | Dry bark and woven fiber against softly reflective weathered bronze | Growth flow, lichen grouping, grown joins, fiber direction | Bark pores, fine weave, moss softness, bronze patina | Broad living-wood planes, bronze spine, branching negative spaces |
+| **Crownlands** | Controlled steel reflections against deep woven blue textile | Disciplined plate brushing, tailored seams, restrained heraldic engraving | Fine steel wear, textile weave, leather pores, subtle gold age | Silver/blue value blocks, kite shield, celestial focal point |
+| **Umbral** | Satin blackened steel and glassy obsidian against absorbent ash cloth | Fracture planes, smoke wear, offset plate edges, restrained glass transition | Fine ash fibers, cool metal scratches, sparse glass inclusions | Charcoal/aubergine separation, shield split, single violet fracture |
+
+## Multi-angle model-sheet requirements
+
+Create one dedicated landscape sheet per realm rather than compressing sixteen views into a single image.
+
+Each realm sheet must include:
+
+- Front, three-quarter, side, and back full-body views.
+- Identical body proportions, face, hair, armor construction, equipment, and material placement across all views.
+- Near-orthographic or long-lens presentation with minimal perspective distortion.
+- A neutral modeling stance that reveals joints, modular seams, and load-bearing construction.
+- Shield and weapon placement adjusted only as needed to expose the torso and back; equipment design must remain unchanged.
+- Three or four unlabeled material close-ups or swatches showing the primary surface families and controlled magical response.
+- Neutral studio lighting for material judgment, with no atmospheric effect hiding the forms.
+- Safe padding around every view and no crop through the weapon, shield, feet, hair, or armor.
+- A compact grayscale preview and a color preview at phone width.
+
+The sheet is concept and modeling guidance. It must not imply that generated cross-view consistency is sufficient for production modeling without artist correction.
 
 ## Realm anchors
 
