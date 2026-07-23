@@ -8,7 +8,7 @@
 - Reference image: `champion_four_realm_anchor_v001.png`
 - Design authority: Root `DESIGN.md` and `unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md`
 - Runtime authority: None. These images do not prove topology, textures, UVs, rigging, animation, LODs, materials, or measured mobile performance.
-- Owner status: Multi-angle and surface expansion requested; individual sheets await project-owner review.
+- Owner status: All four sheets approved for publication as visual source direction on 2026-07-23.
 
 ## Selected files and validation
 

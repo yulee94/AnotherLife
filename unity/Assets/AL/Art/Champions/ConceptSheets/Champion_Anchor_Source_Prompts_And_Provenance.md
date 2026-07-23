@@ -3,7 +3,7 @@
 ## Selected candidate
 
 - File: `champion_four_realm_anchor_v001.png`
-- Status: Visual direction approved for multi-angle and surface expansion; production source not yet approved
+- Status: Owner-approved visual source direction; production implementation not yet approved
 - Generated: 2026-07-23
 - Tool path: Codex built-in image generation
 - Source type: AI-assisted visual-direction proposal
@@ -12,6 +12,8 @@
 - Runtime authority: None. This image does not prove topology, textures, rigging, animation, LODs, materials, or measured mobile performance.
 
 Owner decision recorded 2026-07-23: the four-realm anchor direction was accepted for expansion, with explicit requests for creature-sheet-quality surface treatment and additional viewing angles.
+
+Owner decision recorded 2026-07-23: the anchor and its four detailed realm turnarounds were accepted for publication as the shared visual source direction.
 
 The selected image is the third step in a controlled generation chain. Earlier generations were visual-review drafts and were not retained as project assets.
 

@@ -1,6 +1,6 @@
 # Four-Realm Champion Anchor
 
-**Status:** Anchor direction approved; multi-angle candidates complete and awaiting project-owner review
+**Status:** Owner-approved visual source direction; production implementation not yet approved
 
 **Version:** 0.2
 
@@ -10,11 +10,11 @@
 
 **Runtime priority:** Mobile-first, scalable to PC and promotional presentation
 
-**Selected visual anchor:** [Four-realm Champion anchor v001](../Champions/ConceptSheets/champion_four_realm_anchor_v001.png) — direction approved for expansion; production approval pending
+**Approved visual anchor:** [Four-realm Champion anchor v001](../Champions/ConceptSheets/champion_four_realm_anchor_v001.png)
 
 **Generation record:** [Source prompts and provenance](../Champions/ConceptSheets/Champion_Anchor_Source_Prompts_And_Provenance.md)
 
-**Multi-angle candidates:**
+**Approved multi-angle source sheets:**
 
 - [Stonehold Vanguard turnaround v001](../Champions/ConceptSheets/champion_stonehold_vanguard_turnaround_v001.png)
 - [Eldergrove Vanguard turnaround v001](../Champions/ConceptSheets/champion_eldergrove_vanguard_turnaround_v001.png)
@@ -38,8 +38,10 @@ It does not approve final face options, body-type range, production topology, na
 ## Owner decision record
 
 - 2026-07-23: Project owner accepted the four-realm anchor direction and requested creature-sheet-quality surface treatment plus additional model angles.
+- 2026-07-23: Project owner accepted all four detailed turnaround and material sheets and authorized publication to the shared repository.
 - Approval scope: realm silhouettes, shared Vanguard comparison strategy, overall mystical medieval finish, and progression to detailed sheets.
-- Not yet approved: final production meshes, exact surface maps, topology, rig, body/identity range, measured runtime budgets, or individual realm final sheets.
+- Approved source scope: Stonehold, Eldergrove, Crownlands, and Umbral armor construction, shield/weapon direction, macro material families, controlled magical focal points, surface hierarchy, and multi-angle visual source.
+- Not yet approved: final production meshes, exact surface maps, topology, rig, body/identity range, orthographic artist corrections, shader implementation, or measured runtime budgets.
 
 ## Shared Champion foundation
 
