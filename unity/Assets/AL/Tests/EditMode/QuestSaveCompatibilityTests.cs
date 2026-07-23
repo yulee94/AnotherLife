@@ -453,7 +453,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void MixedMalformedUnknownDuplicateAndKnownRowsKeepTheirPositionsAcrossSaveReload()
+        public void MixedMalformedUnknownDuplicateAndKnownRowsStayReadOnlyAndKeepPositions()
         {
             string root = CreateTempRoot();
             try
@@ -470,22 +470,37 @@ namespace AL.Tests.EditMode
                     CreateQuestState("Q2", 0, false, false));
                 SetField(save, "Quests", quests);
 
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
+                LogAssert.Expect(
+                    LogType.Error,
+                    new System.Text.RegularExpressions.Regex("^AL-SAVE-TEMP-INVALID:"));
                 Invoke(saveService, "Save");
-                AssertPersistedMixedRows(GetProperty(saveService, "CurrentSave"));
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(saveService, "LastSaveStatus").ToString());
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
+
+                string diagnosticJson = JsonUtility.ToJson(save, true);
+                File.WriteAllText(primaryPath, diagnosticJson);
+                File.WriteAllText(backupPath, diagnosticJson);
+                byte[] diagnosticPrimary = File.ReadAllBytes(primaryPath);
+                byte[] diagnosticBackup = File.ReadAllBytes(backupPath);
 
                 object reloaded = CreateActualSaveService(root);
                 Invoke(reloaded, "Load");
-                object reloadedSave = GetProperty(reloaded, "CurrentSave");
+                Assert.AreEqual(
+                    "RecoveryRequired",
+                    GetProperty(reloaded, "LastLoadStatus").ToString());
+                Assert.Null(GetProperty(reloaded, "CurrentSave"));
+                object reloadedSave = GetProperty(reloaded, "ReadOnlyCandidateSnapshot");
                 IList reloadedQuests = AssertPersistedMixedRows(reloadedSave);
-
-                ResourceFixture resource = CreateResourceProxy();
-                CreditFixture credit = CreateCreditProxy();
-                object questService = CreateQuestService(reloaded, resource.Proxy, credit.Proxy);
-                object[] active = Enumerate(Invoke(questService, "GetActiveQuests"));
-                Assert.AreEqual(1, active.Length);
-                Assert.AreSame(reloadedQuests[5], active[0]);
-                Assert.AreEqual("Q2", GetField(active[0], "QuestId"));
-                Assert.AreEqual(6, reloadedQuests.Count, "Queries must not seed or remove persisted rows.");
+                Assert.AreEqual(6, reloadedQuests.Count);
+                CollectionAssert.AreEqual(diagnosticPrimary, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(diagnosticBackup, File.ReadAllBytes(backupPath));
             }
             finally
             {
