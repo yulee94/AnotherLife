@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Crownlands Arcane Axis flat vector master v001</title>
+  <metadata>Draft deterministic reconstruction. Source-only geometry; no runtime or color authority.</metadata>
+  <defs>
+    <path id="crownlands-orbit-flat" d="M153 45A88 88 0 0 1 211 103" fill="none" stroke="currentColor" stroke-width="12" stroke-linecap="square"/>
+  </defs>
+  <g fill="currentColor" fill-rule="evenodd" clip-rule="evenodd">
+    <use href="#crownlands-orbit-flat"/>
+    <use href="#crownlands-orbit-flat" transform="rotate(90 128 128)"/>
+    <use href="#crownlands-orbit-flat" transform="rotate(180 128 128)"/>
+    <use href="#crownlands-orbit-flat" transform="rotate(270 128 128)"/>
+    <path d="M128 15C116 70 103 103 64 128C103 153 116 186 128 241C140 186 153 153 192 128C153 103 140 70 128 15ZM128 86C118 104 106 118 88 128C106 138 118 152 128 170C138 152 150 138 168 128C150 118 138 104 128 86Z"/>
+    <path d="M66 119L26 128L66 137V119ZM190 119L230 128L190 137V119Z"/>
+  </g>
+</svg>

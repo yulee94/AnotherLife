@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Umbral Arcane Axis micro vector master v001</title>
+  <metadata>Draft 24–47 px reconstruction with broadened severance and no satellites. Source-only geometry.</metadata>
+  <defs>
+    <mask id="umbral-sever-micro" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <rect width="256" height="256" fill="white"/>
+      <path d="M34 222L222 34" stroke="black" stroke-width="29"/>
+    </mask>
+  </defs>
+  <g fill="currentColor" stroke="currentColor">
+    <circle cx="112" cy="128" r="64" fill="none" stroke-width="30" mask="url(#umbral-sever-micro)"/>
+    <path d="M198 70A102 102 0 0 1 174 224" fill="none" stroke-width="15" stroke-linecap="square"/>
+    <path d="M216 96A114 114 0 0 1 196 215" fill="none" stroke-width="11" stroke-linecap="square"/>
+    <path d="M40 216L120 132L216 40L138 126L40 216Z" stroke="none"/>
+  </g>
+</svg>

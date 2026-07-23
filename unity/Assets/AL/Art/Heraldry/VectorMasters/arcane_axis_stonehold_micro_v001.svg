@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Stonehold Arcane Axis micro vector master v001</title>
+  <metadata>Draft 24–47 px reconstruction with opened inner corners. Source-only geometry.</metadata>
+  <defs>
+    <path id="stonehold-strata-micro" d="M42 44H100V66H69V94H44V77H42V44Z"/>
+    <path id="stonehold-axis-micro" d="M121 99V47H116L128 27L140 47H135V99H121Z"/>
+  </defs>
+  <g fill="currentColor">
+    <use href="#stonehold-strata-micro"/>
+    <use href="#stonehold-strata-micro" transform="rotate(90 128 128)"/>
+    <use href="#stonehold-strata-micro" transform="rotate(180 128 128)"/>
+    <use href="#stonehold-strata-micro" transform="rotate(270 128 128)"/>
+    <use href="#stonehold-axis-micro"/>
+    <use href="#stonehold-axis-micro" transform="rotate(90 128 128)"/>
+    <use href="#stonehold-axis-micro" transform="rotate(180 128 128)"/>
+    <use href="#stonehold-axis-micro" transform="rotate(270 128 128)"/>
+    <circle cx="128" cy="128" r="28" fill="none" stroke="currentColor" stroke-width="12"/>
+    <path d="M128 120L136 128L128 136L120 128L128 120Z"/>
+  </g>
+</svg>

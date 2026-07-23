@@ -1,8 +1,8 @@
 # Four-Realm Heraldry — Arcane Axis
 
-**Status:** Owner-approved visual source direction; vector construction and runtime implementation not yet approved
+**Status:** Owner-approved visual direction and flat/micro vector geometry; final colors and runtime implementation not yet approved
 
-**Version:** 0.1
+**Version:** 0.2
 
 **Design contract:** Root `DESIGN.md`
 
@@ -14,6 +14,8 @@
 
 **Generation record:** [Source prompts and provenance](../Heraldry/ConceptSheets/Heraldry_Source_Prompts_And_Provenance.md)
 
+**Approved vector source:** [Arcane Axis Vector Masters](../Heraldry/VectorMasters/README.md)
+
 ## Purpose
 
 Establish one original abstract heraldic family for Stonehold, Eldergrove, Crownlands, and Umbral. These marks give every contributor a shared realm-identity source that can survive mobile UI scale while still supporting the engraved, material-rich medieval mysticism established by the app icon and root design contract.
@@ -22,21 +24,24 @@ This packet settles:
 
 - The Arcane Axis family as the approved heraldic direction.
 - The protected structural identity of all four realm marks.
+- The deterministic flat and micro vector geometry for all four marks.
 - A shared rendered, flat, inverse, and micro application hierarchy.
 - Mobile readability and simplification rules.
 - Boundaries between approved visual source and later vector/runtime work.
 
-It does not add realm gameplay authority, faction rules, class meaning, production vectors, final color tokens, individual runtime sprites, shaders, VFX, import automation, or engine integration.
+It does not add realm gameplay authority, faction rules, class meaning, final color tokens, individual runtime sprites, shaders, VFX, import automation, or engine integration.
 
 ## Owner decision record
 
 - 2026-07-23: Project owner selected abstract heraldry instead of literal creature, crown, character, or weapon imagery.
 - 2026-07-23: Project owner selected Direction B, **Arcane Axis Seals**, over the Monumental Bastion and Ancient Oath alternatives.
 - 2026-07-23: Project owner approved the refined production-review sheet after flat, inverse, and micro variants were added and corrected.
+- 2026-07-23: Project owner approved deterministic vector reconstruction `v001`, including the separate standard-flat and `24–47 px` micro geometries for all four realms.
 - Approval locks the four core symbol identities, their shared arcane-geometric family relationship, their realm order, and the application hierarchy shown in the approved master sheet.
-- Approval does not lock raster-generation artifacts, exact future vector control points, exact pixel spacing, final sRGB values, texture maps, material response, animation, shader behavior, or runtime budgets.
+- Approval also locks the `v001` flat and micro SVG geometry retained in the vector-master packet. Future adjustments to those paths require project-owner approval.
+- Approval does not lock raster-generation artifacts, ceremonial vector embellishment, final sRGB values, texture maps, material response, animation, shader behavior, runtime import strategy, or runtime budgets.
 
-The approved master is visual authority. Future vector reconstruction must preserve its protected geometry while correcting optical spacing and grid fit; it must not mechanically auto-trace incidental raster irregularities.
+The approved raster master remains the identity authority, and the approved `v001` vectors are the deterministic geometry authority for flat and micro use. Future ceremonial or runtime derivatives must preserve those protected paths and must not mechanically auto-trace incidental raster irregularities.
 
 ## Family language
 
@@ -191,21 +196,23 @@ Color supports recognition but never replaces geometry.
 - Flat and micro identity survives without color, texture, bevel, or glow.
 - Literal animals, crowns, weapons, characters, and botanical icons are excluded.
 - Source prompts, reference roles, checksum, owner decision, and visual-verdict history are retained.
-- Runtime, vector, color-token, and performance authority remain explicitly deferred.
+- Owner-approved flat and micro vector masters are retained with reconstruction provenance.
+- Runtime, ceremonial-vector, color-token, and performance authority remain explicitly deferred.
 
 ## Production handoff sequence
 
-1. Reconstruct deterministic vector masters for the four marks.
-2. Produce aligned `24`, `32`, `48`, `64`, `128`, and `256 px` review exports in color, grayscale, and inverse.
-3. Compare optical weight and protected geometry across the family.
-4. Obtain user approval for the vector reconstruction and final color relationships.
-5. Define Unity sprite/atlas/import requirements and realm-catalog mapping in a separate coordination handoff.
-6. Implement and profile the approved assets in Codex engineering mode.
+1. [x] Reconstruct deterministic flat and micro vector masters for the four marks.
+2. [x] Produce aligned `24`, `32`, `48`, `64`, `128`, and `256 px` review exports in color, grayscale, and inverse.
+3. [x] Compare optical weight and protected geometry across the family.
+4. [x] Obtain project-owner approval for vector geometry.
+5. [ ] Obtain project-owner approval for final color relationships.
+6. [ ] Define Unity sprite/atlas/import requirements and realm-catalog mapping in a separate coordination handoff.
+7. [ ] Implement and profile the approved assets in Codex engineering mode.
 
 ## Critical direction decisions still open
 
-- Exact vector control points, corner radii, orbit thickness, gap sizes, and optical corrections.
 - Final realm color tokens and accessibility alternatives.
+- Ceremonial-vector ornament, material divisions, and any large-format geometry beyond the approved flat and micro masters.
 - Whether ceremonial Crownlands orbit nodes remain in every large-scale use.
 - Whether ceremonial Umbral satellites remain outside major realm-selection and architecture presentation.
 - The first runtime surface: realm selection UI, Champion equipment, banners/architecture, or map markers.

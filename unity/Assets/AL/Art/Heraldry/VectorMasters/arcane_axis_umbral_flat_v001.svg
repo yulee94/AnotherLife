@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Umbral Arcane Axis flat vector master v001</title>
+  <metadata>Draft deterministic reconstruction. Source-only geometry; no runtime or color authority.</metadata>
+  <defs>
+    <mask id="umbral-sever-flat" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <rect width="256" height="256" fill="white"/>
+      <path d="M35 220L220 35" stroke="black" stroke-width="25"/>
+    </mask>
+  </defs>
+  <g fill="currentColor" stroke="currentColor">
+    <circle cx="112" cy="128" r="66" fill="none" stroke-width="28" mask="url(#umbral-sever-flat)"/>
+    <path d="M202 67A106 106 0 0 1 176 229" fill="none" stroke-width="13" stroke-linecap="square"/>
+    <path d="M220 93A119 119 0 0 1 198 218" fill="none" stroke-width="9" stroke-linecap="square"/>
+    <path d="M39 218L120 132L217 38L138 126L39 218Z" stroke="none"/>
+  </g>
+</svg>

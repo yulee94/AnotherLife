@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Eldergrove Arcane Axis flat vector master v001</title>
+  <metadata>Draft deterministic reconstruction. Source-only geometry; no runtime or color authority.</metadata>
+  <defs>
+    <path id="eldergrove-growth-flat" d="M128 36C180 36 218 75 218 124C218 163 195 195 162 207C175 189 179 166 171 145C162 121 143 105 118 102" fill="none" stroke="currentColor" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+    <mask id="eldergrove-seed-cut-flat" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <rect width="256" height="256" fill="white"/>
+      <path d="M128 98C113 115 112 132 128 157C144 132 143 115 128 98Z" fill="black"/>
+    </mask>
+  </defs>
+  <g fill="currentColor" stroke="currentColor" mask="url(#eldergrove-seed-cut-flat)">
+    <use href="#eldergrove-growth-flat"/>
+    <use href="#eldergrove-growth-flat" transform="rotate(120 128 128)"/>
+    <use href="#eldergrove-growth-flat" transform="rotate(240 128 128)"/>
+    <path d="M128 72C100 99 97 128 128 176C159 128 156 99 128 72Z" stroke="none"/>
+  </g>
+</svg>

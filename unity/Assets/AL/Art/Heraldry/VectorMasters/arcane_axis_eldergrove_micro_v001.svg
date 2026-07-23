@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" fill="none">
+  <title>Eldergrove Arcane Axis micro vector master v001</title>
+  <metadata>Draft 24–47 px reconstruction with enlarged seed void. Source-only geometry.</metadata>
+  <defs>
+    <path id="eldergrove-growth-micro" d="M128 42C174 42 211 78 211 124C211 160 190 190 160 201C172 184 175 165 168 147C159 124 141 109 119 106" fill="none" stroke="currentColor" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+    <mask id="eldergrove-seed-cut-micro" maskUnits="userSpaceOnUse" x="0" y="0" width="256" height="256">
+      <rect width="256" height="256" fill="white"/>
+      <path d="M128 99C111 117 111 135 128 162C145 135 145 117 128 99Z" fill="black"/>
+    </mask>
+  </defs>
+  <g fill="currentColor" stroke="currentColor" mask="url(#eldergrove-seed-cut-micro)">
+    <use href="#eldergrove-growth-micro"/>
+    <use href="#eldergrove-growth-micro" transform="rotate(120 128 128)"/>
+    <use href="#eldergrove-growth-micro" transform="rotate(240 128 128)"/>
+    <path d="M128 74C99 101 97 130 128 178C159 130 157 101 128 74Z" stroke="none"/>
+  </g>
+</svg>
