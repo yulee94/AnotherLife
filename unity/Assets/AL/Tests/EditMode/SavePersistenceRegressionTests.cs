@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using AL.Data.Catalogs;
 using NUnit.Framework;
 using UnityEngine;
@@ -84,7 +85,8 @@ namespace AL.Tests.EditMode
 
                 object service = CreateSaveService(root);
                 Invoke(service, "Load");
-                object currentSave = GetProperty(service, "CurrentSave");
+                Assert.Null(GetProperty(service, "CurrentSave"));
+                object currentSave = GetProperty(service, "ReadOnlyCandidateSnapshot");
                 Assert.That((string)GetField(currentSave, "SaveFormatId"), Is.Null.Or.Empty);
                 Assert.AreEqual(0, GetField(currentSave, "SaveSchemaVersion"));
                 Assert.AreEqual(0, GetField(currentSave, "ProfileInitializationVersion"));
@@ -93,7 +95,7 @@ namespace AL.Tests.EditMode
                 LogAssert.Expect(
                     LogType.Error,
                     new System.Text.RegularExpressions.Regex(
-                        "AL-SAVE-UNMIGRATED-READ-ONLY"));
+                        "AL-SAVE-READ-ONLY-DISPOSITION"));
                 Invoke(service, "Save");
 
                 Assert.AreEqual(
@@ -101,7 +103,7 @@ namespace AL.Tests.EditMode
                     GetProperty(service, "LastSaveStatus").ToString());
                 Assert.That(
                     (string)GetProperty(service, "LastSaveMessage"),
-                    Does.Contain("AL-SAVE-UNMIGRATED-READ-ONLY"));
+                    Does.Contain("AL-SAVE-READ-ONLY-DISPOSITION"));
                 CollectionAssert.AreEqual(originalBytes, File.ReadAllBytes(primaryPath));
                 Assert.False(File.Exists(Path.Combine(root, "save.tmp.json")));
             }
@@ -479,6 +481,13 @@ namespace AL.Tests.EditMode
 
                 object reloadedService = CreateSaveService(root);
                 Invoke(reloadedService, "Load");
+                Assert.AreEqual(
+                    "LoadedPrimary",
+                    GetProperty(reloadedService, "LastLoadStatus").ToString());
+                Assert.True(
+                    (bool)GetProperty(
+                        GetProperty(reloadedService, "LastLoadDisposition"),
+                        "IsWritable"));
                 object reloadedReputation = CreateRuntimeService(
                     "AL.Services.Local.ReputationService",
                     "AL.Core.Interfaces.ISaveGameService",
@@ -506,7 +515,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void CorruptedPrimaryRecoversLastKnownGoodBackup()
+        public void CorruptedPrimaryAndValidBackupArePreservedForExplicitRecovery()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -532,17 +541,26 @@ namespace AL.Tests.EditMode
                 Assert.True(File.Exists(backupPath));
 
                 File.WriteAllText(primaryPath, "{ this is not valid json");
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
 
                 object recoveredService = CreateSaveService(root);
                 Invoke(recoveredService, "Load");
 
-                Assert.AreEqual("RecoveredFromBackup", GetProperty(recoveredService, "LastLoadStatus").ToString());
-                object recoveredSave = GetProperty(recoveredService, "CurrentSave");
+                Assert.AreEqual("RecoveryRequired", GetProperty(recoveredService, "LastLoadStatus").ToString());
+                Assert.That(
+                    (string)GetProperty(recoveredService, "LastLoadMessage"),
+                    Does.Contain("AL-SAVE-RECOVERY-REQUIRED"));
+                Assert.Null(GetProperty(recoveredService, "CurrentSave"));
+                object recoveredSave = GetProperty(recoveredService, "ReadOnlyCandidateSnapshot");
+                Assert.NotNull(recoveredSave);
                 Assert.AreEqual("C1_BACKUP", GetField(recoveredSave, "CurrentChapterId"));
                 Assert.True(File.Exists(primaryPath));
                 Assert.True(File.Exists(backupPath));
                 Assert.False(File.Exists(tempPath));
-                Assert.That(File.ReadAllText(primaryPath), Does.Contain("C1_BACKUP"));
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
+                Assert.IsEmpty(Directory.GetFiles(root, "save.json.corrupt-*"));
             }
             finally
             {
@@ -554,7 +572,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void MissingPrimaryRecoversValidBackup()
+        public void MissingPrimaryAndValidBackupArePreservedForExplicitRecovery()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -574,16 +592,23 @@ namespace AL.Tests.EditMode
                 string backupPath = Path.Combine(root, "save.backup.json");
                 File.Copy(primaryPath, backupPath, true);
                 File.Delete(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
 
                 object recoveredService = CreateSaveService(root);
                 Invoke(recoveredService, "Load");
 
-                Assert.AreEqual("RecoveredFromBackup", GetProperty(recoveredService, "LastLoadStatus").ToString());
-                Assert.That((string)GetProperty(recoveredService, "LastLoadMessage"), Does.Contain("AL-SAVE-RECOVERED-BACKUP"));
-                object recoveredSave = GetProperty(recoveredService, "CurrentSave");
+                Assert.AreEqual("RecoveryRequired", GetProperty(recoveredService, "LastLoadStatus").ToString());
+                Assert.That(
+                    (string)GetProperty(recoveredService, "LastLoadMessage"),
+                    Does.Contain("AL-SAVE-RECOVERY-REQUIRED"));
+                Assert.Null(GetProperty(recoveredService, "CurrentSave"));
+                object recoveredSave = GetProperty(recoveredService, "ReadOnlyCandidateSnapshot");
+                Assert.NotNull(recoveredSave);
                 Assert.AreEqual("C1_BACKUP_ONLY", GetField(recoveredSave, "CurrentChapterId"));
-                Assert.True(File.Exists(primaryPath));
+                Assert.False(File.Exists(primaryPath));
                 Assert.True(File.Exists(backupPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
+                Assert.IsEmpty(Directory.GetFiles(root, "*.corrupt-*"));
             }
             finally
             {
@@ -595,7 +620,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void BothInvalidSaveFilesAreQuarantinedAndReplaced()
+        public void BothInvalidSaveFilesArePreservedForExplicitRecovery()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -606,20 +631,22 @@ namespace AL.Tests.EditMode
                 string backupPath = Path.Combine(root, "save.backup.json");
                 File.WriteAllText(primaryPath, "{ invalid primary");
                 File.WriteAllText(backupPath, "{ invalid backup");
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
 
                 object service = CreateSaveService(root);
-                LogAssert.Expect(
-                    LogType.Error,
-                    "AL-SAVE-NEW-AFTER-CORRUPTION: No valid save or backup could be recovered. A new profile was created and corrupt files were quarantined where possible.");
                 Invoke(service, "Load");
 
-                Assert.AreEqual("CreatedNewAfterUnrecoverableCorruption", GetProperty(service, "LastLoadStatus").ToString());
-                Assert.That((string)GetProperty(service, "LastLoadMessage"), Does.Contain("AL-SAVE-NEW-AFTER-CORRUPTION"));
+                Assert.AreEqual("RecoveryRequired", GetProperty(service, "LastLoadStatus").ToString());
+                Assert.That(
+                    (string)GetProperty(service, "LastLoadMessage"),
+                    Does.Contain("AL-SAVE-RECOVERY-REQUIRED"));
+                Assert.Null(GetProperty(service, "CurrentSave"));
                 Assert.True(File.Exists(primaryPath));
                 Assert.True(File.Exists(backupPath));
-                Assert.AreEqual(1, Directory.GetFiles(root, "save.json.corrupt-*").Length);
-                Assert.AreEqual(1, Directory.GetFiles(root, "save.backup.json.corrupt-*").Length);
-                Assert.That(File.ReadAllText(primaryPath), Does.Contain("\"CurrentChapterId\": \"C1\""));
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
+                Assert.IsEmpty(Directory.GetFiles(root, "*.corrupt-*"));
             }
             finally
             {
@@ -631,7 +658,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void StaleTempAndPreviousArtifactsAreCleanedBeforeLoad()
+        public void ValidPrimaryRemainsActiveWhileStaleAuxiliaryArtifactsArePreserved()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -651,15 +678,38 @@ namespace AL.Tests.EditMode
                 string previousPath = Path.Combine(root, "save.previous.json");
                 File.WriteAllText(tempPath, "{ stale temp");
                 File.WriteAllText(previousPath, "{ stale previous");
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
+                byte[] tempBefore = File.ReadAllBytes(tempPath);
+                byte[] previousBefore = File.ReadAllBytes(previousPath);
 
                 object reloadedService = CreateSaveService(root);
                 Invoke(reloadedService, "Load");
 
                 Assert.AreEqual("LoadedPrimary", GetProperty(reloadedService, "LastLoadStatus").ToString());
-                Assert.False(File.Exists(tempPath));
-                Assert.False(File.Exists(previousPath));
+                Assert.True(File.Exists(tempPath));
+                Assert.True(File.Exists(previousPath));
                 object reloadedSave = GetProperty(reloadedService, "CurrentSave");
+                Assert.NotNull(reloadedSave);
+                Assert.Null(GetProperty(reloadedService, "ReadOnlyCandidateSnapshot"));
                 Assert.AreEqual("C1_PRIMARY", GetField(reloadedSave, "CurrentChapterId"));
+                object disposition = GetProperty(reloadedService, "LastLoadDisposition");
+                Assert.False((bool)GetProperty(disposition, "IsWritable"));
+                Assert.True((bool)GetProperty(disposition, "IsRuntimeUsable"));
+                LogAssert.Expect(
+                    LogType.Error,
+                    new System.Text.RegularExpressions.Regex(
+                        "^AL-SAVE-READ-ONLY-DISPOSITION:"));
+                Invoke(reloadedService, "Save");
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(reloadedService, "LastSaveStatus").ToString());
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
+                CollectionAssert.AreEqual(tempBefore, File.ReadAllBytes(tempPath));
+                CollectionAssert.AreEqual(previousBefore, File.ReadAllBytes(previousPath));
             }
             finally
             {
@@ -671,7 +721,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void ValidPreviousFallbackRecoversWhenPrimaryIsCorruptAndBackupMissing()
+        public void ValidPreviousFallbackIsPreservedForExplicitRecovery()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -693,17 +743,23 @@ namespace AL.Tests.EditMode
                 File.Copy(primaryPath, previousPath, true);
                 File.WriteAllText(primaryPath, "{ corrupt primary");
                 File.Delete(backupPath);
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] previousBefore = File.ReadAllBytes(previousPath);
 
                 object recoveredService = CreateSaveService(root);
                 Invoke(recoveredService, "Load");
 
-                Assert.AreEqual("RecoveredFromBackup", GetProperty(recoveredService, "LastLoadStatus").ToString());
-                object recoveredSave = GetProperty(recoveredService, "CurrentSave");
+                Assert.AreEqual("RecoveryRequired", GetProperty(recoveredService, "LastLoadStatus").ToString());
+                Assert.Null(GetProperty(recoveredService, "CurrentSave"));
+                object recoveredSave = GetProperty(recoveredService, "ReadOnlyCandidateSnapshot");
+                Assert.NotNull(recoveredSave);
                 Assert.AreEqual("C1_PREVIOUS_SAFE", GetField(recoveredSave, "CurrentChapterId"));
                 Assert.True(File.Exists(primaryPath));
-                Assert.True(File.Exists(backupPath));
-                Assert.False(File.Exists(previousPath));
-                Assert.AreEqual(1, Directory.GetFiles(root, "save.json.corrupt-*").Length);
+                Assert.False(File.Exists(backupPath));
+                Assert.True(File.Exists(previousPath));
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(previousBefore, File.ReadAllBytes(previousPath));
+                Assert.IsEmpty(Directory.GetFiles(root, "*.corrupt-*"));
             }
             finally
             {
@@ -917,7 +973,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void BackupRecoveryStopsWhenInvalidPrimaryCannotBeQuarantined()
+        public void InvalidPrimaryAndValidBackupRequireRecoveryWithoutMoveAttempt()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
@@ -935,16 +991,411 @@ namespace AL.Tests.EditMode
             string backupPath = Path.Combine(root, "save.backup.json");
             string backupBefore = fileSystem.ReadAllText(backupPath);
             fileSystem.Files[primaryPath] = "{ invalid primary";
-            fileSystem.MoveFailures.Add(primaryPath);
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            int moveCallsBeforeLoad = fileSystem.TotalMoveCount;
 
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-QUARANTINE-FAILED: Could not quarantine invalid save file"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-RECOVERY-FAILED: Primary save is invalid but could not be quarantined"));
             object recoveredService = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Invoke(recoveredService, "Load");
 
-            Assert.AreEqual("RecoveryFailed", GetProperty(recoveredService, "LastLoadStatus").ToString());
-            Assert.AreEqual("{ invalid primary", fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual("RecoveryRequired", GetProperty(recoveredService, "LastLoadStatus").ToString());
+            Assert.Null(GetProperty(recoveredService, "CurrentSave"));
+            Assert.NotNull(GetProperty(recoveredService, "ReadOnlyCandidateSnapshot"));
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
             Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+            Assert.AreEqual(moveCallsBeforeLoad, fileSystem.TotalMoveCount);
+            Assert.AreEqual(0, fileSystem.GetMoveCount(primaryPath));
+        }
+
+        [Test]
+        public void InaccessiblePrimaryFailsClosedWithoutSelectingOrChangingBackup()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            object currentBefore = GetProperty(service, "CurrentSave");
+            int movesBefore = fileSystem.TotalMoveCount;
+            fileSystem.BoundedReadIoFailures.Add(primaryPath);
+
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("AL-SAVE-PRIMARY-UNREADABLE"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.NotNull(GetProperty(service, "ReadOnlyCandidateSnapshot"));
+            Assert.AreNotSame(currentBefore, GetProperty(service, "ReadOnlyCandidateSnapshot"));
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+            Assert.AreEqual(movesBefore, fileSystem.TotalMoveCount);
+        }
+
+        [Test]
+        public void PrimaryChangingDuringReadFailsClosedAndPreservesEveryGeneration()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            int movesBefore = fileSystem.TotalMoveCount;
+            fileSystem.ChangedDuringReadPaths.Add(primaryPath);
+
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("AL-SAVE-PRIMARY-UNREADABLE"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+            Assert.AreEqual(movesBefore, fileSystem.TotalMoveCount);
+        }
+
+        [Test]
+        public void AllMissingLoadDoesNotReplaceBackupThatAppearsAfterInventory()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var seedFileSystem = new ScriptedSaveFileOperations();
+            object seedService = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(seedFileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(seedService, "CreateNewSave", Enum.Parse(realmType, "None"));
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string validBackup = seedFileSystem.ReadAllText(backupPath);
+
+            var fileSystem = new ScriptedSaveFileOperations();
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.BoundedReadObserver = (path, count) =>
+            {
+                if (string.Equals(path, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    count == 1)
+                {
+                    fileSystem.Files[backupPath] = validBackup;
+                }
+            };
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-CREATE-FAILED:"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(validBackup, fileSystem.ReadAllText(backupPath));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.json")));
+            Assert.False(fileSystem.FileExists(tempPath));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.previous.json")));
+            Assert.False(
+                (bool)GetProperty(
+                    GetProperty(service, "LastLoadDisposition"),
+                    "DiskChanged"));
+        }
+
+        [Test]
+        public void AllMissingLoadReportsDiskChangeWhenTempWritePrecedesFailure()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.BoundedReadObserver = (path, count) =>
+            {
+                if (string.Equals(path, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    count == 3)
+                {
+                    fileSystem.ChangedDuringReadPaths.Add(tempPath);
+                }
+            };
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-CREATE-FAILED:"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.True(fileSystem.FileExists(tempPath));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.json")));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.backup.json")));
+            Assert.True(
+                (bool)GetProperty(
+                    GetProperty(service, "LastLoadDisposition"),
+                    "DiskChanged"));
+        }
+
+        [Test]
+        public void AllMissingLoadReportsNoDiskChangeWhenDurableWriteFailsBeforeCreate()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.WriteFailuresBeforeMutation.Add(tempPath);
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-CREATE-FAILED:"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.False(fileSystem.FileExists(tempPath));
+            Assert.False(
+                (bool)GetProperty(
+                    GetProperty(service, "LastLoadDisposition"),
+                    "DiskChanged"));
+        }
+
+        [Test]
+        public void AllMissingLoadReportsDiskChangeWhenDurableWriteFailsAfterCreate()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.WriteFailuresAfterMutation.Add(tempPath);
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-CREATE-FAILED:"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.True(fileSystem.FileExists(tempPath));
+            Assert.True(
+                (bool)GetProperty(
+                    GetProperty(service, "LastLoadDisposition"),
+                    "DiskChanged"));
+        }
+
+        [Test]
+        public void AllMissingLoadDoesNotInstallPrimaryWhenBackupAppearsAtCommit()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var seedFileSystem = new ScriptedSaveFileOperations();
+            object seedService = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(seedFileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(seedService, "CreateNewSave", Enum.Parse(realmType, "None"));
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string validBackup = seedFileSystem.ReadAllText(backupPath);
+
+            var fileSystem = new ScriptedSaveFileOperations();
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.CopyObserver = (sourcePath, destinationPath, overwrite) =>
+            {
+                if (!overwrite &&
+                    string.Equals(destinationPath, backupPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    fileSystem.Files[backupPath] = validBackup;
+                }
+            };
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-CREATE-FAILED:"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.json")));
+            Assert.AreEqual(validBackup, fileSystem.ReadAllText(backupPath));
+            Assert.True(fileSystem.FileExists(tempPath));
+            Assert.True(
+                (bool)GetProperty(
+                    GetProperty(service, "LastLoadDisposition"),
+                    "DiskChanged"));
+        }
+
+        [Test]
+        public void AllMissingLoadDoesNotInstallPrimaryWhenPreviousAppearsAfterBackupCopy()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var seedFileSystem = new ScriptedSaveFileOperations();
+            object seedService = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(seedFileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(seedService, "CreateNewSave", Enum.Parse(realmType, "None"));
+            string seededPrimaryPath = Path.Combine(root, "save.json");
+            string authenticPrevious = seedFileSystem.ReadAllText(seededPrimaryPath);
+
+            var fileSystem = new ScriptedSaveFileOperations();
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.AfterCopyObserver = (sourcePath, destinationPath, overwrite) =>
+            {
+                if (!overwrite &&
+                    string.Equals(destinationPath, backupPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    fileSystem.Files[previousPath] = authenticPrevious;
+                }
+            };
+
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-CREATE-FAILED:"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual("RecoveryFailed", GetProperty(service, "LastLoadStatus").ToString());
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.json")));
+            Assert.False(fileSystem.FileExists(backupPath));
+            Assert.AreEqual(authenticPrevious, fileSystem.ReadAllText(previousPath));
+            Assert.True(fileSystem.FileExists(tempPath));
+        }
+
+        [Test]
+        public void MissingBackupIsRecreatedFromExactPriorPrimary()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_PRIOR_PRIMARY");
+            Invoke(service, "Save");
+            string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            fileSystem.Files.Remove(backupPath);
+
+            currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_NEW_PRIMARY");
+            Invoke(service, "Save");
+
+            Assert.AreEqual("SavedPrimary", GetProperty(service, "LastSaveStatus").ToString());
+            Assert.AreEqual(priorPrimary, fileSystem.ReadAllText(backupPath));
+            Assert.That(fileSystem.ReadAllText(primaryPath), Does.Contain("C1_NEW_PRIMARY"));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.tmp.json")));
+            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.previous.json")));
+        }
+
+        [Test]
+        public void PostRotationCleanupFailurePreservesPriorBackupAndReportsFailure()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_CLEANUP_FAILURE");
+            fileSystem.ReplaceObserver = (sourcePath, destinationPath, rollbackPath) =>
+            {
+                if (string.Equals(destinationPath, backupPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    fileSystem.DeleteFailures.Add(previousPath);
+                }
+            };
+
+            LogAssert.Expect(
+                LogType.Warning,
+                new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED:.*save.previous.json"));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-BACKUP-CLEANUP-FAILED:"));
+            Invoke(service, "Save");
+
+            Assert.AreEqual(
+                "SaveFailedPreviousPreserved",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.True(fileSystem.FileExists(previousPath));
+            Assert.True(fileSystem.FileExists(backupPath));
+        }
+
+        [Test]
+        public void PrimaryChangedAfterValidationNeverRotatesIntoBackup()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_NEW_VALIDATED");
+            fileSystem.ReplaceObserver = (sourcePath, destinationPath, previousPath) =>
+            {
+                if (string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    string.Equals(destinationPath, primaryPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    fileSystem.Files[primaryPath] = "{ changed after validation";
+                }
+            };
+
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-BACKUP-STAGE-INVALID:"));
+            Invoke(service, "Save");
+
+            Assert.AreEqual(
+                "SaveFailedPreviousPreserved",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+            Assert.That(fileSystem.ReadAllText(primaryPath), Does.Contain("C1_NEW_VALIDATED"));
+            Assert.That(fileSystem.ReadAllText(tempPath), Does.Contain("changed after validation"));
+        }
+
+        [Test]
+        public void StalePreviousCleanupFailureStopsInstallWithoutDeletingPrimary()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            fileSystem.Files[previousPath] = "previous-sentinel";
+            fileSystem.DeleteFailures.Add(previousPath);
+            object currentSave = GetProperty(service, "CurrentSave");
+            SetField(currentSave, "CurrentChapterId", "C1_NEW_CANDIDATE");
+
+            LogAssert.Expect(
+                LogType.Warning,
+                new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED:.*save.previous.json"));
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex("^AL-SAVE-PREVIOUS-CLEANUP-FAILED:"));
+            Invoke(service, "Save");
+
+            Assert.AreEqual(
+                "SaveFailedPreviousPreserved",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+            Assert.AreEqual("previous-sentinel", fileSystem.ReadAllText(previousPath));
         }
 
         private static object CreateSaveService(string root)
@@ -1052,28 +1503,46 @@ namespace AL.Tests.EditMode
             public ScriptedSaveFileOperations FileSystem { get; set; }
 
             protected override object Invoke(MethodInfo targetMethod, object[] args) =>
-                FileSystem.Invoke(targetMethod.Name, args);
+                FileSystem.Invoke(targetMethod, args);
         }
 
         public sealed class ScriptedSaveFileOperations
         {
+            private static readonly UTF8Encoding StrictUtf8 = new UTF8Encoding(false, true);
+
             public readonly Dictionary<string, string> Files = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             public readonly HashSet<string> DeleteFailures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             public readonly HashSet<string> MoveFailures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> BoundedReadIoFailures = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> ChangedDuringReadPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> WriteFailuresBeforeMutation = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public readonly HashSet<string> WriteFailuresAfterMutation = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            public readonly Dictionary<string, int> BoundedReadCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            public readonly Dictionary<string, int> MoveCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            public int TotalMoveCount { get; private set; }
+            public Action<string, int> BoundedReadObserver { get; set; }
+            public Action<string, string, bool> CopyObserver { get; set; }
+            public Action<string, string, bool> AfterCopyObserver { get; set; }
+            public Action<string, string, string> ReplaceObserver { get; set; }
 
-            public object Invoke(string methodName, object[] args)
+            public object Invoke(MethodInfo targetMethod, object[] args)
             {
-                switch (methodName)
+                switch (targetMethod.Name)
                 {
                     case "FileExists":
                         return FileExists((string)args[0]);
                     case "CreateDirectory":
                         return null;
-                    case "ReadAllText":
-                        return ReadAllText((string)args[0]);
+                    case "ReadAllBytesBounded":
+                        return ReadAllBytesBounded(
+                            targetMethod,
+                            (string)args[0],
+                            (int)args[1]);
                     case "WriteAllTextDurable":
-                        Files[(string)args[0]] = (string)args[1];
-                        return null;
+                        return WriteAllTextDurable(
+                            targetMethod,
+                            (string)args[0],
+                            (string)args[1]);
                     case "Copy":
                         Copy((string)args[0], (string)args[1], (bool)args[2]);
                         return null;
@@ -1089,7 +1558,7 @@ namespace AL.Tests.EditMode
                     case "EnumerateFiles":
                         return EnumerateFiles((string)args[0], (string)args[1]);
                     default:
-                        throw new NotSupportedException(methodName);
+                        throw new NotSupportedException(targetMethod.Name);
                 }
             }
 
@@ -1105,8 +1574,156 @@ namespace AL.Tests.EditMode
                 return contents;
             }
 
+            public int GetBoundedReadCount(string path) =>
+                BoundedReadCounts.TryGetValue(path, out int count) ? count : 0;
+
+            public int GetMoveCount(string path) =>
+                MoveCounts.TryGetValue(path, out int count) ? count : 0;
+
+            private object ReadAllBytesBounded(
+                MethodInfo targetMethod,
+                string path,
+                int maximumBytes)
+            {
+                if (maximumBytes <= 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(maximumBytes));
+                }
+
+                Increment(BoundedReadCounts, path);
+                BoundedReadObserver?.Invoke(path, GetBoundedReadCount(path));
+                if (BoundedReadIoFailures.Contains(path))
+                {
+                    return CreateReadResult(
+                        targetMethod.ReturnType,
+                        "IoFailure",
+                        null,
+                        0,
+                        "SAVE_FILE_IO_FAILURE");
+                }
+
+                if (!Files.TryGetValue(path, out string contents))
+                {
+                    return CreateReadResult(
+                        targetMethod.ReturnType,
+                        "Missing",
+                        null,
+                        0,
+                        "SAVE_FILE_MISSING");
+                }
+
+                byte[] bytes = StrictUtf8.GetBytes(contents);
+                if (ChangedDuringReadPaths.Contains(path))
+                {
+                    return CreateReadResult(
+                        targetMethod.ReturnType,
+                        "ChangedDuringRead",
+                        null,
+                        bytes.LongLength,
+                        "SAVE_FILE_CHANGED_DURING_READ");
+                }
+
+                if (bytes.Length > maximumBytes)
+                {
+                    return CreateReadResult(
+                        targetMethod.ReturnType,
+                        "Oversize",
+                        null,
+                        bytes.LongLength,
+                        "SAVE_FILE_OVERSIZE");
+                }
+
+                return CreateReadResult(
+                    targetMethod.ReturnType,
+                    "Read",
+                    bytes,
+                    bytes.LongLength,
+                    string.Empty);
+            }
+
+            private static object CreateReadResult(
+                Type resultType,
+                string dispositionName,
+                byte[] bytes,
+                long observedByteCount,
+                string diagnosticCode)
+            {
+                ConstructorInfo constructor = resultType
+                    .GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Single(candidate => candidate.GetParameters().Length == 4);
+                Type dispositionType = constructor.GetParameters()[0].ParameterType;
+                object disposition = Enum.Parse(dispositionType, dispositionName);
+                return constructor.Invoke(
+                    new object[]
+                    {
+                        disposition,
+                        bytes,
+                        observedByteCount,
+                        diagnosticCode
+                    });
+            }
+
+            private object WriteAllTextDurable(
+                MethodInfo targetMethod,
+                string path,
+                string contents)
+            {
+                if (WriteFailuresBeforeMutation.Contains(path))
+                {
+                    return CreateWriteResult(
+                        targetMethod.ReturnType,
+                        false,
+                        false,
+                        "SAVE_FILE_WRITE_FAILED");
+                }
+
+                if (WriteFailuresAfterMutation.Contains(path))
+                {
+                    Files[path] = contents.Substring(0, Math.Min(contents.Length, 16));
+                    return CreateWriteResult(
+                        targetMethod.ReturnType,
+                        false,
+                        true,
+                        "SAVE_FILE_WRITE_FAILED");
+                }
+
+                Files[path] = contents;
+                return CreateWriteResult(
+                    targetMethod.ReturnType,
+                    true,
+                    true,
+                    string.Empty);
+            }
+
+            private static object CreateWriteResult(
+                Type resultType,
+                bool succeeded,
+                bool diskChanged,
+                string diagnosticCode)
+            {
+                ConstructorInfo constructor = resultType
+                    .GetConstructors(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                    .Single(candidate => candidate.GetParameters().Length == 3);
+                return constructor.Invoke(
+                    new object[]
+                    {
+                        succeeded,
+                        diskChanged,
+                        diagnosticCode
+                    });
+            }
+
+            private static void Increment(
+                IDictionary<string, int> counts,
+                string path)
+            {
+                counts.TryGetValue(path, out int current);
+                counts[path] = current + 1;
+            }
+
             private void Copy(string sourcePath, string destinationPath, bool overwrite)
             {
+                CopyObserver?.Invoke(sourcePath, destinationPath, overwrite);
                 if (!Files.TryGetValue(sourcePath, out string contents))
                 {
                     throw new FileNotFoundException(sourcePath);
@@ -1118,10 +1735,13 @@ namespace AL.Tests.EditMode
                 }
 
                 Files[destinationPath] = contents;
+                AfterCopyObserver?.Invoke(sourcePath, destinationPath, overwrite);
             }
 
             private void Move(string sourcePath, string destinationPath)
             {
+                TotalMoveCount++;
+                Increment(MoveCounts, sourcePath);
                 if (MoveFailures.Contains(sourcePath))
                 {
                     throw new IOException($"Move blocked for {sourcePath}");
@@ -1138,6 +1758,7 @@ namespace AL.Tests.EditMode
 
             private void Replace(string sourcePath, string destinationPath, string backupPath)
             {
+                ReplaceObserver?.Invoke(sourcePath, destinationPath, backupPath);
                 if (!Files.TryGetValue(sourcePath, out string sourceContents))
                 {
                     throw new FileNotFoundException(sourcePath);
