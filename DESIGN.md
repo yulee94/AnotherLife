@@ -53,20 +53,24 @@ This guide consolidates the active project direction in:
 - [Terrestrial Design Brief](unity/Docs/Terrestrials/Terrestrial_Design_Brief.md)
 - [Terrestrial Engineering Handoff](unity/Docs/Terrestrials/Terrestrial_Engineering_Handoff.md)
 - [Customization Design](unity/Assets/AL/Art/Designs/ModularChampionCustomization.md)
+- [Four-Realm Champion Anchor](unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md)
+- [Four-Realm Heraldry — Arcane Axis](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md)
 - [Skill Effects and Weather Design](unity/Assets/AL/Art/Designs/SkillEffectsAndWeather.md)
 - GitHub issue `#259`, which establishes the active realistic, high-end dark-fantasy direction for realm bosses and elites.
 - The approved mystical medieval `AL` application icon on the iOS foundation branch at commit `523c60d`, path `unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png`.
 - The approved terrestrial source concepts introduced by commit `8893306`: [Basalt Grazer](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_basalt_grazer_concept_sheet_v001.png), [Grove Strider](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_grove_strider_concept_sheet_v001.png), and [Mire Lumenback](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png).
+- The owner-approved [Arcane Axis four-realm heraldry](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md), which establishes the protected abstract marks for Stonehold, Eldergrove, Crownlands, and Umbral.
 
 External games and images are benchmarks for quality, readability, or experience only. Never reproduce their characters, symbols, costumes, architecture, compositions, or proprietary visual signatures.
 
 ### Approved visual north stars
 
-These four approved sources define the current artistic range. Contributors and AI tools must study them together. No single source should be treated as a universal template.
+These five approved source groups define the current artistic range. Contributors and AI tools must study them together. No single source should be treated as a universal template.
 
 | Approved source | What it establishes | Carry forward | Do not copy literally |
 | --- | --- | --- | --- |
 | **Mystical medieval `AL` app icon** | Brand mood and finish | Dark stone and midnight-indigo foundations; engraved aged metal; gothic and sacred framing; restrained gold/silver contrast; celestial violet energy; one dominant heraldic read supported by intricate craft | The `AL` monogram, exact arch, exact filigree, centered symmetry, or violet-and-gold palette on every asset |
+| **Arcane Axis four-realm heraldry** | Realm identity and symbol construction | Original abstract geometry; one protected center or void; broad negative spaces; rendered, flat, inverse, and micro hierarchy; distinct realm marks held in one family | Raster artifacts, exact incidental bevels, ceremonial detail at micro size, literal mascots, or the marks as gameplay authority |
 | **Basalt Grazer** | Believable mass and geological adaptation | Broad weight-bearing anatomy; protective silhouette; layered stone-like plates; warm hide against dark mineral surfaces; tiny magical mineral accents | Its quadruped anatomy, plate layout, or basalt treatment as the default solution for all heavy creatures |
 | **Grove Strider** | Elegant ecological mysticism | Tall browsing silhouette; credible locomotion; bark, moss, lichen, and living growth integrated into the body; quiet magical dignity rather than decorative spectacle | Its long-neck body plan, antler/branch language, or forest materials on unrelated species |
 | **Mire Lumenback** | Biological magic and compact readability | Squat amphibian mass; wet material response; throat and breathing behavior; cyan ring markings integrated like natural signaling; strong profile recognition at small scale | Its amphibian anatomy, ring pattern, or cyan emission as a generic magic treatment |
@@ -78,7 +82,7 @@ Together they establish this relationship:
 3. **Magic emerges from a specific biological, material, celestial, cultural, or environmental source.**
 4. **A premium illustrated finish unifies the result through deliberate composition, tactile surfaces, controlled contrast, and a clear focal read.**
 
-The app icon is the strongest reference for branding, interface framing, relics, heraldry, ceremonial architecture, title presentation, and marketing finish. The terrestrial sheets are the strongest references for living anatomy, ecological credibility, material integration, and creature-sheet presentation. Character, creature, architecture, UI, and VFX work should share their artistic seriousness and material richness without forcing the same shapes or colors onto every category.
+The app icon is the strongest reference for branding, interface framing, relics, ceremonial architecture, title presentation, and marketing finish. The Arcane Axis packet is the strongest reference for realm marks, banners, allegiance UI, equipment stamps, and realm-controlled architecture. The terrestrial sheets are the strongest references for living anatomy, ecological credibility, material integration, and creature-sheet presentation. Character, creature, architecture, UI, and VFX work should share their artistic seriousness and material richness without forcing the same shapes or colors onto every category.
 
 ### Approved-range test
 

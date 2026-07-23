@@ -14,6 +14,8 @@
 
 **Generation record:** [Source prompts and provenance](../Champions/ConceptSheets/Champion_Anchor_Source_Prompts_And_Provenance.md)
 
+**Approved realm heraldry:** [Four-Realm Heraldry — Arcane Axis](FourRealmHeraldry.md)
+
 **Approved multi-angle source sheets:**
 
 - [Stonehold Vanguard turnaround v001](../Champions/ConceptSheets/champion_stonehold_vanguard_turnaround_v001.png)
@@ -39,6 +41,7 @@ It does not approve final face options, body-type range, production topology, na
 
 - 2026-07-23: Project owner accepted the four-realm anchor direction and requested creature-sheet-quality surface treatment plus additional model angles.
 - 2026-07-23: Project owner accepted all four detailed turnaround and material sheets and authorized publication to the shared repository.
+- 2026-07-23: Project owner accepted the Arcane Axis heraldry family for Stonehold, Eldergrove, Crownlands, and Umbral. The heraldry packet now controls realm-mark identity; vector and runtime implementation remain separate approval gates.
 - Approval scope: realm silhouettes, shared Vanguard comparison strategy, overall mystical medieval finish, and progression to detailed sheets.
 - Approved source scope: Stonehold, Eldergrove, Crownlands, and Umbral armor construction, shield/weapon direction, macro material families, controlled magical focal points, surface hierarchy, and multi-angle visual source.
 - Not yet approved: final production meshes, exact surface maps, topology, rig, body/identity range, orthographic artist corrections, shader implementation, or measured runtime budgets.
@@ -247,5 +250,5 @@ These decisions remain open and require project-owner approval before production
 - Champion body-type, age, gender-presentation, face, hair, and skin-tone ranges.
 - Whether helmets are optional, class-dependent, or required in combat.
 - Which realm becomes the first detailed production-model pilot.
-- Exact realm palette tokens and approved heraldic symbols.
+- Exact realm palette tokens. Core heraldic identities are approved in [Four-Realm Heraldry — Arcane Axis](FourRealmHeraldry.md), while final vector masters and runtime imports remain open.
 - Minimum supported iPhone and the final measured Champion budget for that device.

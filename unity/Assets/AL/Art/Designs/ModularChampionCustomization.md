@@ -47,6 +47,8 @@ The player controls one main Champion/Lord in 3D Champion Mode. The base model s
 | Crownlands Humans | Balanced, heroic, practical | Polished steel, blue cloth, royal gold, leather | Tabards, heraldic capes, clean plate, trade-road gear. |
 | Umbral Dark Elves | Sharp, lean, predatory | Obsidian, red glass, ash cloth, shadow metal | Spikes, masks, glowing cracks, curse tattoos. |
 
+Realm marks on Champions, capes, shields, equipment, and realm-facing UI must follow [Four-Realm Heraldry — Arcane Axis](FourRealmHeraldry.md). Class, guild, house, and boss symbols must not silently alter or replace those protected realm identities.
+
 ## Class Silhouette Rules
 
 - Guardian: shield must read clearly from the front and side.
