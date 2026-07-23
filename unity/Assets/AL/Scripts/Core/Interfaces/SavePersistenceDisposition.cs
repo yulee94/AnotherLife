@@ -141,4 +141,72 @@ namespace AL.Core.Interfaces
         SaveLoadDisposition LastLoadDisposition { get; }
         SaveGameData ReadOnlyCandidateSnapshot { get; }
     }
+
+    public sealed class SaveOperationDisposition
+    {
+        private const int MaximumDiagnosticCodes = 16;
+        private const int MaximumDiagnosticCodeLength = 128;
+
+        public SaveOperationDisposition(
+            SaveOperationStatus status,
+            bool mayHaveMutated,
+            bool candidatePrimaryVerified,
+            bool requiredBackupVerified,
+            bool previousAuthorityVerified,
+            bool cleanupVerified,
+            bool rollbackAttempted,
+            bool rollbackVerified,
+            IEnumerable<string> diagnosticCodes)
+        {
+            Status = status;
+            MayHaveMutated = mayHaveMutated;
+            CandidatePrimaryVerified = candidatePrimaryVerified;
+            RequiredBackupVerified = requiredBackupVerified;
+            PreviousAuthorityVerified = previousAuthorityVerified;
+            CleanupVerified = cleanupVerified;
+            RollbackAttempted = rollbackAttempted;
+            RollbackVerified = rollbackVerified;
+            DiagnosticCodes = CopyDiagnosticCodes(diagnosticCodes);
+        }
+
+        public SaveOperationStatus Status { get; }
+        public bool MayHaveMutated { get; }
+        public bool CandidatePrimaryVerified { get; }
+        public bool RequiredBackupVerified { get; }
+        public bool PreviousAuthorityVerified { get; }
+        public bool CleanupVerified { get; }
+        public bool RollbackAttempted { get; }
+        public bool RollbackVerified { get; }
+        public IReadOnlyList<string> DiagnosticCodes { get; }
+
+        private static IReadOnlyList<string> CopyDiagnosticCodes(
+            IEnumerable<string> diagnosticCodes)
+        {
+            if (diagnosticCodes == null)
+            {
+                return Array.AsReadOnly(Array.Empty<string>());
+            }
+
+            var copy = new List<string>(MaximumDiagnosticCodes);
+            foreach (string diagnosticCode in diagnosticCodes)
+            {
+                if (copy.Count == MaximumDiagnosticCodes)
+                {
+                    break;
+                }
+
+                string value = diagnosticCode ?? string.Empty;
+                copy.Add(value.Length <= MaximumDiagnosticCodeLength
+                    ? value
+                    : value.Substring(0, MaximumDiagnosticCodeLength));
+            }
+
+            return new ReadOnlyCollection<string>(copy);
+        }
+    }
+
+    public interface ISaveOperationDispositionProvider
+    {
+        SaveOperationDisposition LastSaveDisposition { get; }
+    }
 }

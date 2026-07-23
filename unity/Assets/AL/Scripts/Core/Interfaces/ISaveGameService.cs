@@ -20,10 +20,11 @@ namespace AL.Core.Interfaces
 
     public enum SaveOperationStatus
     {
-        None,
-        SavedPrimary,
-        SaveFailedPreviousPreserved,
-        DeleteFailed
+        None = 0,
+        SavedPrimary = 1,
+        SaveFailedPreviousPreserved = 2,
+        DeleteFailed = 3,
+        CommitUncertain = 4
     }
 
     public interface ISaveGameService
