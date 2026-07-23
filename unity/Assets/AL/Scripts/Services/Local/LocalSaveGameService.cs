@@ -246,6 +246,7 @@ namespace AL.Services.Local
         private SaveGameData _currentSave;
         private SaveGameData _readOnlyCandidate;
         private bool _profileWritable;
+        private byte[] _committedRecoveryWitnessBytes;
 
         public SaveGameData CurrentSave => _currentSave;
         public SaveLoadStatus LastLoadStatus { get; private set; }
@@ -316,8 +317,36 @@ namespace AL.Services.Local
                 return;
             }
 
+            byte[] requiredRecoveryWitnessBytes = _committedRecoveryWitnessBytes;
+            if (requiredRecoveryWitnessBytes != null &&
+                !TryVerifyExactBackupRecoveryTargetTwice(
+                    requiredRecoveryWitnessBytes,
+                    out _,
+                    out _))
+            {
+                const string witnessChangedMessage =
+                    "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact primary, backup, staged witness, and missing-previous identity changed before save; persistence was frozen and every generation was preserved.";
+                _profileWritable = false;
+                _readOnlyCandidate = CloneSave(_currentSave);
+                _currentSave = null;
+                LastSaveDisposition = CreateSaveDisposition(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    witnessChangedMessage);
+                SetSaveStatus(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    witnessChangedMessage,
+                    true);
+                return;
+            }
+
             SaveOperationStatus status = PersistCandidate(
                 CloneSave(_currentSave),
+                requiredRecoveryWitnessBytes,
                 out SaveGameData persistedSave,
                 out SaveOperationDisposition disposition,
                 out string message);
@@ -326,8 +355,19 @@ namespace AL.Services.Local
             if (status == SaveOperationStatus.SavedPrimary)
             {
                 _currentSave = persistedSave;
+                _readOnlyCandidate = null;
                 _profileWritable = true;
+                _committedRecoveryWitnessBytes = null;
                 SetSaveStatus(SaveOperationStatus.SavedPrimary, message, false);
+                return;
+            }
+
+            if (requiredRecoveryWitnessBytes != null)
+            {
+                _profileWritable = false;
+                _readOnlyCandidate = CloneSave(persistedSave);
+                _currentSave = null;
+                SetSaveStatus(status, message, true);
                 return;
             }
 
@@ -349,6 +389,7 @@ namespace AL.Services.Local
             SaveGameData priorSave = _currentSave;
             _readOnlyCandidate = null;
             _profileWritable = false;
+            _committedRecoveryWitnessBytes = null;
             LastSaveStatus = SaveOperationStatus.None;
             LastSaveMessage = string.Empty;
             LastSaveDisposition = null;
@@ -459,18 +500,96 @@ namespace AL.Services.Local
                 return;
             }
 
+            bool hasCommittedBackupRecoveryWitness =
+                TryGetCommittedBackupRecoveryWitness(
+                    inventory,
+                    out byte[] committedBackupRecoveryWitnessBytes);
+            if (selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
+                HasWritableTempEvidence(inventory) &&
+                !hasCommittedBackupRecoveryWitness)
+            {
+                _currentSave = null;
+                _readOnlyCandidate = selectedSave;
+                PublishDisposition(
+                    inventory,
+                    selected,
+                    "SAVE_SELECT_RECOVERY_WITNESS_CONFLICT",
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryRequired,
+                    "AL-SAVE-RECOVERY-WITNESS-CONFLICT: A valid staged generation does not match complete primary and backup authority; all evidence remains read-only.",
+                    false);
+                return;
+            }
+
+            if (CanAttemptExactBackupRecovery(
+                    inventory,
+                    primary,
+                    backup,
+                    previous,
+                    selected))
+            {
+                bool recovered = TryRecoverMissingPrimaryFromExactBackup(
+                    selected,
+                    out SaveGameData recoveredSave,
+                    out bool diskChanged,
+                    out string recoveryMessage);
+                if (recovered)
+                {
+                    _currentSave = recoveredSave;
+                    _readOnlyCandidate = null;
+                    _profileWritable = true;
+                    _committedRecoveryWitnessBytes = selected.CopyRawBytes();
+                    PublishDisposition(
+                        inventory,
+                        selected,
+                        selection.ReasonCode,
+                        true,
+                        true,
+                        diskChanged);
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveredFromBackup,
+                        recoveryMessage,
+                        false);
+                    return;
+                }
+
+                _currentSave = null;
+                _readOnlyCandidate = selectedSave;
+                _profileWritable = false;
+                PublishDisposition(
+                    inventory,
+                    selected,
+                    selection.ReasonCode,
+                    false,
+                    false,
+                    diskChanged);
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryFailed,
+                    recoveryMessage,
+                    true);
+                return;
+            }
+
             bool runtimeUsable =
                 selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
                 selected.IsWritable &&
                 IsRuntimeRoundTrippable(selected.Outcome);
             bool writable = runtimeUsable &&
-                !HasUnresolvedAuxiliaryEvidence(inventory);
+                (!HasUnresolvedAuxiliaryEvidence(inventory) ||
+                 hasCommittedBackupRecoveryWitness);
             _profileWritable = writable;
 
             if (runtimeUsable)
             {
                 _currentSave = selectedSave;
                 _readOnlyCandidate = null;
+                _committedRecoveryWitnessBytes =
+                    hasCommittedBackupRecoveryWitness
+                        ? committedBackupRecoveryWitnessBytes
+                        : null;
                 PublishDisposition(
                     inventory,
                     selected,
@@ -547,6 +666,7 @@ namespace AL.Services.Local
             _currentSave = CreateDefaultSave(realmId);
             _readOnlyCandidate = null;
             _profileWritable = true;
+            _committedRecoveryWitnessBytes = null;
             LastLoadDisposition = null;
             Save();
         }
@@ -589,6 +709,7 @@ namespace AL.Services.Local
             _currentSave = null;
             _readOnlyCandidate = null;
             _profileWritable = false;
+            _committedRecoveryWitnessBytes = null;
             LastLoadDisposition = null;
             LastLoadStatus = SaveLoadStatus.None;
             LastLoadMessage = "AL-SAVE-DELETED: Local save data deleted.";
@@ -652,6 +773,7 @@ namespace AL.Services.Local
 
         private SaveOperationStatus PersistCandidate(
             SaveGameData candidate,
+            byte[] requiredRecoveryWitnessBytes,
             out SaveGameData persistedSave,
             out SaveOperationDisposition disposition,
             out string message)
@@ -752,6 +874,7 @@ namespace AL.Services.Local
                     candidateBytes,
                     baseline.Primary,
                     priorPrimaryValid,
+                    requiredRecoveryWitnessBytes,
                     trace,
                     out message,
                     out bool coreMayHaveMutated);
@@ -792,6 +915,7 @@ namespace AL.Services.Local
             byte[] candidateBytes,
             SaveFileReadResult baselinePrimary,
             bool primaryValid,
+            byte[] requiredRecoveryWitnessBytes,
             SaveTransactionTrace trace,
             out string message,
             out bool mayHaveMutated)
@@ -800,6 +924,17 @@ namespace AL.Services.Local
             try
             {
                 _fileOperations.CreateDirectory(PersistencePath);
+                if (requiredRecoveryWitnessBytes != null &&
+                    !IsExactBackupRecoveryTarget(
+                        CaptureCanonicalLedger(),
+                        requiredRecoveryWitnessBytes,
+                        out _))
+                {
+                    message =
+                        "AL-SAVE-RECOVERY-WITNESS-CONSUME-BLOCKED: Exact recovery authority changed at the temp-consumption boundary; every generation was preserved.";
+                    return false;
+                }
+
                 bool tempExisted = _fileOperations.FileExists(TempPath);
                 if (!TryDelete(TempPath))
                 {
@@ -1044,6 +1179,197 @@ namespace AL.Services.Local
                 ReadCanonicalPath(BackupPath),
                 ReadCanonicalPath(TempPath),
                 ReadCanonicalPath(PreviousPath));
+
+        private bool CanAttemptExactBackupRecovery(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveCandidateInventoryEntry primary,
+            SaveCandidateInventoryEntry backup,
+            SaveCandidateInventoryEntry previous,
+            SaveSemanticCandidate selected)
+        {
+            SaveCandidateInventoryEntry temp = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Temp);
+            return selected != null &&
+                   ReferenceEquals(selected, backup.SemanticCandidate) &&
+                   selected.SourceGeneration == SaveCandidateSourceGeneration.Backup &&
+                   selected.HasRetainedRawBytes &&
+                   selected.HasExplicitSaveSchemaVersion &&
+                   selected.SaveSchemaVersion == _semanticPolicy.CurrentSaveSchemaVersion &&
+                   selected.HasExplicitProfileInitializationVersion &&
+                   selected.ProfileInitializationVersion ==
+                       _semanticPolicy.CurrentProfileInitializationVersion &&
+                   selected.IsWritable &&
+                   IsRuntimeRoundTrippable(selected.Outcome) &&
+                   primary.ReadResult.Disposition == SaveFileReadDisposition.Missing &&
+                   backup.ReadResult.Disposition == SaveFileReadDisposition.Read &&
+                   temp.ReadResult.Disposition == SaveFileReadDisposition.Missing &&
+                   previous.ReadResult.Disposition == SaveFileReadDisposition.Missing;
+        }
+
+        private bool TryRecoverMissingPrimaryFromExactBackup(
+            SaveSemanticCandidate selectedBackup,
+            out SaveGameData recoveredSave,
+            out bool diskChanged,
+            out string message)
+        {
+            recoveredSave = null;
+            diskChanged = false;
+            message = string.Empty;
+            byte[] backupBytes = selectedBackup?.CopyRawBytes();
+            if (backupBytes == null)
+            {
+                message =
+                    "AL-SAVE-BACKUP-RECOVERY-EVIDENCE-MISSING: Exact selected backup bytes were unavailable; no disk mutation was attempted.";
+                return false;
+            }
+
+            string exactJson;
+            try
+            {
+                exactJson = StrictUtf8.GetString(backupBytes);
+                if (!BytesEqual(StrictUtf8.GetBytes(exactJson), backupBytes))
+                {
+                    message =
+                        "AL-SAVE-BACKUP-RECOVERY-ENCODING-MISMATCH: The selected backup could not be represented as exact UTF-8 text; no disk mutation was attempted.";
+                    return false;
+                }
+            }
+            catch (Exception ex) when (
+                ex is DecoderFallbackException ||
+                ex is EncoderFallbackException)
+            {
+                message =
+                    $"AL-SAVE-BACKUP-RECOVERY-ENCODING-FAILED: The selected backup could not be staged without changing its bytes. {ex.GetType().Name}";
+                return false;
+            }
+
+            SaveCanonicalLedger baseline = CaptureCanonicalLedger();
+            if (!IsExactBackupRecoveryBaseline(baseline, backupBytes))
+            {
+                message =
+                    "AL-SAVE-BACKUP-RECOVERY-BASELINE-CHANGED: Canonical evidence changed after selection; every observed generation was preserved.";
+                return false;
+            }
+
+            bool installReturned = false;
+            try
+            {
+                _fileOperations.CreateDirectory(PersistencePath);
+                SaveFileWriteResult writeResult =
+                    _fileOperations.WriteAllTextDurable(TempPath, exactJson);
+                diskChanged |= writeResult.DiskChanged;
+                if (!writeResult.Succeeded)
+                {
+                    message =
+                        $"AL-SAVE-BACKUP-RECOVERY-STAGE-WRITE-FAILED: Exact backup staging did not complete durably; all resulting evidence was preserved. {writeResult.DiagnosticCode}";
+                    return false;
+                }
+
+                SaveCanonicalLedger staged = CaptureCanonicalLedger();
+                if (!IsExactBackupRecoveryStagedState(staged, backupBytes))
+                {
+                    message =
+                        "AL-SAVE-BACKUP-RECOVERY-STAGE-VERIFY-FAILED: The durable stage or canonical authority changed before install; all resulting evidence was preserved.";
+                    return false;
+                }
+
+                SaveFileWriteResult installResult =
+                    _fileOperations.WriteAllTextDurable(SavePath, exactJson);
+                diskChanged |= installResult.DiskChanged;
+                installReturned = installResult.Succeeded;
+                if (!installReturned)
+                {
+                    message =
+                        $"AL-SAVE-BACKUP-RECOVERY-PRIMARY-WRITE-FAILED: Exact primary installation did not complete durably; the recovery witness and every resulting generation were preserved. {installResult.DiagnosticCode}";
+                }
+            }
+            catch (Exception ex)
+            {
+                message =
+                    $"AL-SAVE-BACKUP-RECOVERY-INSTALL-INTERRUPTED: Exact backup installation stopped; all resulting evidence was preserved for bounded reconciliation. {ex.GetType().Name}";
+            }
+
+            bool observedCompleteTarget;
+            if (TryVerifyExactBackupRecoveryTargetTwice(
+                    backupBytes,
+                    out recoveredSave,
+                    out observedCompleteTarget))
+            {
+                message = installReturned
+                    ? "AL-SAVE-RECOVERED-BACKUP: The exact current-format backup was durably staged, installed as primary, and twice verified with its recovery witness without offline progression."
+                    : "AL-SAVE-RECOVERED-BACKUP-RECONCILED: An interrupted install nevertheless reached and twice verified the exact recovery target without offline progression.";
+                return true;
+            }
+
+            if (observedCompleteTarget)
+            {
+                message =
+                    "AL-SAVE-BACKUP-RECOVERY-REVERIFY-FAILED: The exact recovery target was observed once but not proven by the required second bounded inventory; all evidence was preserved.";
+            }
+            else if (installReturned)
+            {
+                message =
+                    "AL-SAVE-BACKUP-RECOVERY-VERIFY-FAILED: The install operation returned, but exact primary, backup, and cleanup identity could not be proven; all evidence was preserved.";
+            }
+
+            recoveredSave = null;
+            return false;
+        }
+
+        private bool IsExactBackupRecoveryBaseline(
+            SaveCanonicalLedger ledger,
+            byte[] backupBytes) =>
+            ledger.Primary.Disposition == SaveFileReadDisposition.Missing &&
+            IsExactValidGeneration(ledger.Backup, backupBytes, out _) &&
+            ledger.Temp.Disposition == SaveFileReadDisposition.Missing &&
+            ledger.Previous.Disposition == SaveFileReadDisposition.Missing;
+
+        private bool IsExactBackupRecoveryStagedState(
+            SaveCanonicalLedger ledger,
+            byte[] backupBytes) =>
+            ledger.Primary.Disposition == SaveFileReadDisposition.Missing &&
+            IsExactValidGeneration(ledger.Backup, backupBytes, out _) &&
+            IsExactValidGeneration(ledger.Temp, backupBytes, out _) &&
+            ledger.Previous.Disposition == SaveFileReadDisposition.Missing;
+
+        private bool TryVerifyExactBackupRecoveryTargetTwice(
+            byte[] backupBytes,
+            out SaveGameData recoveredSave,
+            out bool observedCompleteTarget)
+        {
+            SaveCanonicalLedger finalLedger = CaptureCanonicalLedger();
+            observedCompleteTarget = IsExactBackupRecoveryTarget(
+                finalLedger,
+                backupBytes,
+                out recoveredSave);
+            if (!observedCompleteTarget)
+            {
+                recoveredSave = null;
+                return false;
+            }
+
+            SaveCanonicalLedger verification = CaptureCanonicalLedger();
+            return IsExactBackupRecoveryTarget(
+                verification,
+                backupBytes,
+                out recoveredSave);
+        }
+
+        private bool IsExactBackupRecoveryTarget(
+            SaveCanonicalLedger ledger,
+            byte[] backupBytes,
+            out SaveGameData recoveredSave)
+        {
+            bool primaryVerified = IsExactValidGeneration(
+                ledger.Primary,
+                backupBytes,
+                out recoveredSave);
+            return primaryVerified &&
+                   IsExactValidGeneration(ledger.Backup, backupBytes, out _) &&
+                   IsExactValidGeneration(ledger.Temp, backupBytes, out _) &&
+                   ledger.Previous.Disposition == SaveFileReadDisposition.Missing;
+        }
 
         private static bool IsStableBoundedState(SaveFileReadResult result) =>
             result != null &&
@@ -2150,6 +2476,69 @@ namespace AL.Services.Local
 
             return false;
         }
+
+        private bool TryGetCommittedBackupRecoveryWitness(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            out byte[] witnessBytes)
+        {
+            witnessBytes = null;
+            SaveCandidateInventoryEntry primary = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Primary);
+            SaveCandidateInventoryEntry backup = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Backup);
+            SaveCandidateInventoryEntry temp = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Temp);
+            SaveCandidateInventoryEntry previous = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Previous);
+            if (primary.ReadResult.Disposition != SaveFileReadDisposition.Read ||
+                backup.ReadResult.Disposition != SaveFileReadDisposition.Read ||
+                temp.ReadResult.Disposition != SaveFileReadDisposition.Read ||
+                previous.ReadResult.Disposition != SaveFileReadDisposition.Missing ||
+                !IsExplicitCurrentWritableCandidate(primary.SemanticCandidate) ||
+                !IsExplicitCurrentWritableCandidate(backup.SemanticCandidate) ||
+                !IsExplicitCurrentWritableCandidate(temp.SemanticCandidate))
+            {
+                return false;
+            }
+
+            byte[] primaryBytes = primary.SemanticCandidate.CopyRawBytes();
+            byte[] backupBytes = backup.SemanticCandidate.CopyRawBytes();
+            byte[] tempBytes = temp.SemanticCandidate.CopyRawBytes();
+            if (!BytesEqual(primaryBytes, backupBytes) ||
+                !BytesEqual(primaryBytes, tempBytes))
+            {
+                return false;
+            }
+
+            witnessBytes = primaryBytes;
+            return true;
+        }
+
+        private bool HasWritableTempEvidence(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory)
+        {
+            SaveCandidateInventoryEntry temp = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Temp);
+            return temp.ReadResult.Disposition == SaveFileReadDisposition.Read &&
+                   IsExplicitCurrentWritableCandidate(temp.SemanticCandidate);
+        }
+
+        private bool IsExplicitCurrentWritableCandidate(
+            SaveSemanticCandidate candidate) =>
+            candidate != null &&
+            candidate.HasRetainedRawBytes &&
+            candidate.HasExplicitSaveSchemaVersion &&
+            candidate.SaveSchemaVersion == _semanticPolicy.CurrentSaveSchemaVersion &&
+            candidate.HasExplicitProfileInitializationVersion &&
+            candidate.ProfileInitializationVersion ==
+                _semanticPolicy.CurrentProfileInitializationVersion &&
+            candidate.IsWritable &&
+            IsRuntimeRoundTrippable(candidate.Outcome);
 
         private static bool IsRuntimeRoundTrippable(
             SaveSemanticCandidateOutcome outcome) =>
