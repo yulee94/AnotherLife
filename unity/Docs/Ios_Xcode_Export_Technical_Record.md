@@ -41,35 +41,36 @@ It exports a Unity Development Xcode project for `BuildTarget.iOS` using exactly
 
 Preflight failures preserve the last successful Xcode project. Machine-readable JSON and a complete text BuildReport are written beside the Xcode directory under `unity/Builds/Validation/iOS/`, so a failed validation cannot overwrite source or erase prior successful evidence.
 
-## Signing-neutral boundary
+## Product identity and signing boundary
 
-The exporter records but never changes the bundle identifier, version, minimum iOS version, Apple Team ID, provisioning, or automatic-signing setting. The current inherited values are:
+The exporter records but never changes the bundle identifier, version, minimum iOS version, Apple Team ID, provisioning, or automatic-signing setting. Preflight now enforces the accepted product identifier and deployment floor before Unity can replace the last successful Xcode output.
 
 | Setting | Current value |
 | --- | --- |
-| Bundle identifier | `com.DefaultCompany.AnotherLifeUnity` |
+| Bundle identifier | `com.yulee94.anotherlife` |
 | Bundle version | `1.0` |
-| Minimum iOS version | `12.0` |
+| Minimum iOS version | `14.0` |
 | Apple Team ID | Not configured |
 | Unity automatic signing | Disabled |
 
-The current bundle identifier is a placeholder, not an accepted product identity. Selecting the permanent reverse-domain identifier and Apple Developer Team is an explicit product/account decision because changing them affects App Store identity, provisioning, entitlements, upgrades, and device installation.
+`com.yulee94.anotherlife` is the accepted permanent reverse-domain identifier for this product lane. The Apple Team remains deliberately unset because this Mac currently has no installed Apple code-signing identity or discoverable Team ID. The project must use the real Team ID from the enrolled account; inventing or committing a placeholder would create misleading provisioning state. Unsigned validation remains available while automatic signing stays disabled.
 
 ## Automated and export evidence
 
 | Validation | Result |
 | --- | --- |
-| Focused iOS EditMode tests | 6 passed, 0 failed |
-| Complete EditMode suite on macOS | 531 total: 529 passed, 2 failed in cross-platform save-lock assertions |
+| Focused iOS/input EditMode tests | 17 passed, 0 failed |
+| Complete EditMode suite on macOS | 532 total: 530 passed, 2 failed in cross-platform save-lock assertions |
 | Complete PlayMode suite | 26 passed, 0 failed |
 | iOS Unity export | Succeeded |
-| Final Unity BuildReport after merging `8237e43` | `Succeeded`, 0 errors, 4 reviewed warnings |
+| Final Unity BuildReport | `Succeeded`, 0 errors, 0 warnings |
 | Xcode version | `26.6` (`17F113`) |
 | Device SDK | iOS `26.5` |
-| Unsigned Xcode Debug build | `BUILD SUCCEEDED` for generic physical iOS device |
+| Unsigned Xcode Release build | `BUILD SUCCEEDED` for generic physical iOS device |
+| Built product identity | `com.yulee94.anotherlife`; minimum iOS `14.0` |
 | Selected App Store icon | Mystical-medieval `AL` artwork; 1024x1024 RGB PNG, no alpha; generated iPhone/iPad icon catalog compiled without the former missing-icon warning |
-| Built application | arm64 Mach-O, unsigned, 100 MiB, 36 files |
-| Reported output size | 814,044,258 bytes |
+| Built application | arm64 Mach-O, unsigned, 69 MiB on disk, 36 files |
+| Reported output size | 814,049,823 bytes |
 | Generated file count | 2,776 |
 | On-disk Xcode directory | 783 MiB |
 | Output ignore check | Passed (`unity/.gitignore` ignores `/Builds/`) |
@@ -85,11 +86,11 @@ Required output was present:
 Selected SHA-256 evidence:
 
 ```text
-667c8f281aab2b6cb5d47d9ecd2fc33b1591fa2aa61516b7d640fd23d3676cdc  Unity-iPhone.xcodeproj/project.pbxproj
+c5ceb169f4a62cb8774e1fd86ac50b3898dc843c6b82f1a62efbb524c38294f0  Unity-iPhone.xcodeproj/project.pbxproj
 7e1038955b237214cbe58fb12b84b969a16b04422559a26f1742685cd3f2a0fd  Info.plist
-d52819cf2c5d20686b2869816eeef38100172361afac1cf9e62f8983fdc60357  Data/globalgamemanagers
-f5cad99c8b374a56b1bac59b15e0176fb6ad4ff40d56c85d48ce6c35b7355828  IosDevelopmentExport.summary.json
-bb791297fc960bc9658dfcb2a13e3353dc5c2b17e474fa5ad5543af3efe156cc  AnotherLifeUnity.app/AnotherLifeUnity
+526b93a59fcfa91792ebedea221ca733a26be2d3cfbc305fc6fa7b061d8413fc  Data/globalgamemanagers
+6581b3a687224ba2f298e2a84a89e70f924ed5caf5e0507f417d471aaf5a1db1  IosDevelopmentExport.summary.json
+99907aa038d5629f21419ad290b550f945d57de54622157474c579ed1711788e  AnotherLifeUnity.app/AnotherLifeUnity
 db4fb6b262e537b76b57d855e1c46ce104520d3ef279b51f33717e085e5452ed  Docs/Branding/App_Icon_Mystic_Medieval_AL_Source_1254.png
 f53a38f1843c354e3ba464482ae017af99e6d9ca13b64fa83ce5fe6653f08a44  Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png
 64e6a31244649ea9bf6c487cb6d2553d02d2a998266ae6c43676b5960cf66c12  AppIcon.appiconset/Icon-Store-1024.png
@@ -97,20 +98,16 @@ f53a38f1843c354e3ba464482ae017af99e6d9ca13b64fa83ce5fe6653f08a44  Assets/AL/Art/
 
 ## Warning assessment
 
-The initial non-incremental headless export reported three `-nographics` warnings: Unity could not refresh ambient/reflection probes for Boot, RealmSelection, and Kingdom without a graphics device. They did not indicate missing Xcode output. The final incremental export reused validated build data and completed with zero warnings and zero errors.
+The non-incremental headless export reported three `-nographics` warnings: Unity could not refresh ambient/reflection probes for Boot, RealmSelection, and Kingdom without a graphics device. They did not indicate missing Xcode output. The final incremental export reused validated scene data and completed with zero warnings and zero errors.
 
-The post-merge export rebuilt scripts and therefore reported the same three reviewed `-nographics` warnings plus the handheld `OnMouse_` warning. It completed with zero errors, and the unsigned Xcode compile succeeded.
-
-The remaining warning is actionable: Kingdom currently contains six `OnMouseDown`/`OnMouseEnter`/`OnMouseExit` handlers across `KingdomVisualizer` and `CityLayoutEngine`. Unity warns that these handlers can affect handheld performance. Replacing them with an intentional touch/pointer input path is a separate gameplay-input change and should be measured on hardware rather than folded into export tooling.
+The six Kingdom `OnMouseDown`/`OnMouseEnter`/`OnMouseExit` handlers were replaced by `IPointerClickHandler`, `IPointerEnterHandler`, and `IPointerExitHandler` contracts. An empty `IDragHandler` contract lets Unity cancel selection after the EventSystem drag threshold while the existing camera controller retains board-pan ownership. The runtime Kingdom camera now owns a `PhysicsRaycaster`, allowing the existing EventSystem to route both touch input on iOS and pointer input in the editor. The former handheld `OnMouse_` warning is absent from the final export. Physical-device validation is still required for gesture feel and selection ergonomics.
 
 The selected 1024x1024 mystical-medieval `AL` icon is assigned to Unity's iOS application and App Store slots. Its visual direction is an enchanted Gothic portal with carved stone, engraved silver-and-gold lettering, deep indigo magic, and a large readable monogram. The user-supplied 1254x1254 original is retained under `Docs/Branding`; the Unity asset is a no-alpha 1024x1024 derivative. Unity generated the required iPhone, iPad, and marketing entries, and Xcode compiled the asset catalog without the former missing App Store icon warning.
 
-The open Apple-stage follow-ups are:
+The iOS 14 deployment floor resolves the former `dpads` availability mismatch caused by targeting iOS 12. The remaining Apple-stage follow-ups are:
 
-1. Unity 2022.3.62f3 generated a call to the Game Controller `dpads` API, which Xcode marks as iOS 14 or newer, while the project currently targets iOS 12. The recommended compatibility floor is iOS 14 unless an older-device requirement justifies a Unity upgrade or a reviewed engine-side workaround.
-2. Xcode reports that Unity's `GameAssembly` script phase runs every build because it declares no outputs. This affects build iteration time, not Player runtime behavior.
-
-Xcode 26.6 also emitted atomic memory-order warnings from Unity's generated Baselib headers during the first compile. They did not prevent the arm64 framework from linking, but they are a Unity/Xcode compatibility diagnostic to revisit before treating this editor/toolchain pair as a release baseline.
+1. Xcode reports that Unity's `GameAssembly` script phase runs every build because it declares no outputs. This affects build iteration time, not Player runtime behavior.
+2. Unity 2022.3-generated Apple glue code triggers SDK deprecation warnings under Xcode 26.6, and its Baselib headers emit atomic memory-order warnings. They do not prevent the arm64 app from compiling, but they are Unity/Xcode compatibility diagnostics to revisit before treating this editor/toolchain pair as a release baseline.
 
 ## Critical merged-main finding: macOS save-lock semantics
 
@@ -125,19 +122,18 @@ Recommended direction: keep the iOS packaging branch out of the active save impl
 
 ## Environment gates and recommended direction
 
-Unity iOS Build Support and Xcode 26.6 are installed, Xcode is the selected developer directory, and the iOS 26.5 device SDK can compile the generated project. The account-free Debug build succeeded with code signing explicitly disabled and produced an unsigned arm64 application at `unity/Builds/Validation/iOS/DerivedData/Build/Products/Debug-iphoneos/AnotherLifeUnity.app`.
+Unity iOS Build Support and Xcode 26.6 are installed, Xcode is the selected developer directory, and the iOS 26.5 device SDK can compile the generated project. The account-free Release build succeeded with code signing explicitly disabled and produced an unsigned arm64 application at `unity/Builds/Validation/iOS/DerivedData/Build/Products/Release-iphoneos/AnotherLifeUnity.app`.
 
 No valid Apple code-signing identity is installed. The downloaded simulator component is also not currently registered with `simctl`. Therefore physical-device installation, simulator launch, signed archive creation, and App Store signing remain unproven.
 
 Recommended sequence:
 
 1. Resolve and revalidate the cross-platform save-lock contract in the save-hardening lane before claiming Apple release persistence.
-2. Adopt iOS 14 as the minimum target, or explicitly justify and test the iOS 12 requirement against Unity's generated Game Controller code.
-3. Decide the permanent bundle identifier and Apple Developer Team before enabling signing.
-4. Keep physical-device builds as the primary compatibility/performance target; repair simulator runtime registration only if rapid UI-only iteration justifies maintaining both variants.
-5. Run Boot through RealmSelection on a signed physical-device build, then create a development archive.
-6. Profile and replace the Kingdom mouse-event path if hardware measurements show material input or frame-time cost.
+2. Enroll or connect the Apple Developer account, then set the real Apple Team ID without changing `com.yulee94.anotherlife`.
+3. Keep physical-device builds as the primary compatibility/performance target; repair simulator runtime registration only if rapid UI-only iteration justifies maintaining both variants.
+4. Run Boot through RealmSelection and exercise Kingdom touch selection on a signed physical-device build.
+5. Create and validate a development archive.
 
 ## Runtime and compatibility impact
 
-The committed build foundation remains Editor-only tooling plus EditMode tests and documentation. The selected-icon follow-up adds one 1024x1024 RGB application icon, its retained 1254x1254 original source, and the existing iOS Player Settings references; it adds no runtime component, package, native library, scene, or behavior. The generated Xcode project, DerivedData, and unsigned application are disposable and ignored. The unsigned Debug application occupies 100 MiB on disk; actual device compatibility and signed/install size remain unmeasured until the Apple-account and hardware gates are completed.
+The identity/deployment changes are confined to iOS Player Settings and iOS preflight validation. The selected-icon follow-up adds one 1024x1024 RGB application icon, its retained 1254x1254 original source, and the existing iOS Player Settings references. The Kingdom input change replaces legacy Unity mouse callbacks with existing EventSystem pointer interfaces and adds a `PhysicsRaycaster`; it introduces no package, native library, save mutation, narrative change, or scene-asset edit. The generated Xcode project, DerivedData, and unsigned application are disposable and ignored. The unsigned Release application occupies 69 MiB on disk; actual device compatibility and signed/install size remain unmeasured until the Apple-account and hardware gates are completed.

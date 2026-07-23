@@ -563,7 +563,7 @@ namespace AL.Kingdom
         }
     }
 
-    public class KingdomBuildingSelectable : MonoBehaviour
+    public class KingdomBuildingSelectable : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IDragHandler
     {
         private string _buildingId;
         private int _level;
@@ -588,9 +588,9 @@ namespace AL.Kingdom
             _baseScale = transform.localScale;
         }
 
-        private void OnMouseDown()
+        public void OnPointerClick(PointerEventData eventData)
         {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (eventData != null && eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
             }
@@ -600,14 +600,19 @@ namespace AL.Kingdom
             CityLayoutEngine.RaiseBuildingSelected(_buildingId, _level, _isUpgrading, _remainingSeconds);
         }
 
-        private void OnMouseEnter()
+        public void OnPointerEnter(PointerEventData eventData)
         {
             _hovered = true;
         }
 
-        private void OnMouseExit()
+        public void OnPointerExit(PointerEventData eventData)
         {
             _hovered = false;
+        }
+
+        // Presence of a drag handler lets the EventSystem cancel clicks after the board-pan threshold.
+        public void OnDrag(PointerEventData eventData)
+        {
         }
 
         private void Update()

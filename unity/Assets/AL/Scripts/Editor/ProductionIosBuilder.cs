@@ -64,6 +64,8 @@ namespace AL.EditorTools
             bool outputPathValid,
             bool outputPathIgnored,
             bool xcodeInstalled,
+            bool bundleIdentifierValid,
+            bool targetOsVersionValid,
             IEnumerable<string> failures,
             IEnumerable<string> notices)
         {
@@ -75,6 +77,8 @@ namespace AL.EditorTools
             OutputPathValid = outputPathValid;
             OutputPathIgnored = outputPathIgnored;
             XcodeInstalled = xcodeInstalled;
+            BundleIdentifierValid = bundleIdentifierValid;
+            TargetOsVersionValid = targetOsVersionValid;
             Failures = (failures ?? Array.Empty<string>()).ToList().AsReadOnly();
             Notices = (notices ?? Array.Empty<string>()).ToList().AsReadOnly();
         }
@@ -87,6 +91,8 @@ namespace AL.EditorTools
         public bool OutputPathValid { get; }
         public bool OutputPathIgnored { get; }
         public bool XcodeInstalled { get; }
+        public bool BundleIdentifierValid { get; }
+        public bool TargetOsVersionValid { get; }
         public IReadOnlyList<string> Failures { get; }
         public IReadOnlyList<string> Notices { get; }
         public bool IsValid => BuildSettings != null && BuildSettings.IsValid && Failures.Count == 0;
@@ -190,6 +196,8 @@ namespace AL.EditorTools
         public const string RelativeArtifactDirectoryPath = "Builds/Validation/iOS";
         public const string SummaryFileName = "IosDevelopmentExport.summary.json";
         public const string ReportFileName = "IosDevelopmentExport.report.txt";
+        public const string RequiredBundleIdentifier = "com.yulee94.anotherlife";
+        public const string RequiredTargetOsVersion = "14.0";
 
         internal static Func<BuildPlayerOptions, BuildReport> BuildPlayerOverride;
 
@@ -322,6 +330,14 @@ namespace AL.EditorTools
             bool outputPathValid = IsOutputPathSafe(OutputPath);
             bool outputPathIgnored = IsOutputPathIgnored();
             bool xcodeInstalled = Directory.Exists("/Applications/Xcode.app/Contents/Developer");
+            bool bundleIdentifierValid = string.Equals(
+                signing.BundleIdentifier,
+                RequiredBundleIdentifier,
+                StringComparison.Ordinal);
+            bool targetOsVersionValid = string.Equals(
+                signing.TargetOsVersion,
+                RequiredTargetOsVersion,
+                StringComparison.Ordinal);
 
             if (!unityVersionValid)
             {
@@ -353,6 +369,18 @@ namespace AL.EditorTools
                 failures.Add("Production Build Settings validation failed.");
             }
 
+            if (!bundleIdentifierValid)
+            {
+                failures.Add(
+                    $"iOS bundle identifier '{signing.BundleIdentifier}' does not match required '{RequiredBundleIdentifier}'.");
+            }
+
+            if (!targetOsVersionValid)
+            {
+                failures.Add(
+                    $"iOS minimum version '{signing.TargetOsVersion}' does not match required '{RequiredTargetOsVersion}'.");
+            }
+
             if (!xcodeInstalled)
             {
                 notices.Add("Full Xcode is not installed; Unity can export, but this Mac cannot compile/archive the project.");
@@ -372,6 +400,8 @@ namespace AL.EditorTools
                 outputPathValid,
                 outputPathIgnored,
                 xcodeInstalled,
+                bundleIdentifierValid,
+                targetOsVersionValid,
                 failures,
                 notices);
         }

@@ -32,6 +32,8 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.IsTrue(R.PropBool(preflight, "CompilationValid"));
             Assert.IsTrue(R.PropBool(preflight, "OutputPathValid"));
             Assert.IsTrue(R.PropBool(preflight, "OutputPathIgnored"));
+            Assert.IsTrue(R.PropBool(preflight, "BundleIdentifierValid"));
+            Assert.IsTrue(R.PropBool(preflight, "TargetOsVersionValid"));
 
             if (!R.PropBool(preflight, "IosModuleAvailable"))
             {
@@ -60,9 +62,9 @@ namespace AL.Tests.EditMode.ProductionScenes
 
             Assert.NotNull(options);
             Assert.NotNull(preflight);
-            Assert.IsNotEmpty(R.PropString(signing, "BundleIdentifier"));
+            Assert.AreEqual("com.yulee94.anotherlife", R.PropString(signing, "BundleIdentifier"));
             Assert.IsNotEmpty(R.PropString(signing, "BundleVersion"));
-            Assert.IsNotEmpty(R.PropString(signing, "TargetOsVersion"));
+            Assert.AreEqual("14.0", R.PropString(signing, "TargetOsVersion"));
             Assert.AreEqual(before, File.ReadAllBytes(settingsPath),
                 "iOS inspection/export planning must not mutate Player Settings.");
         }

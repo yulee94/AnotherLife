@@ -151,6 +151,11 @@ namespace AL.UI.Kingdom
                 cameraObject.AddComponent<AudioListener>();
             }
 
+            if (cameraObject.GetComponent<PhysicsRaycaster>() == null)
+            {
+                cameraObject.AddComponent<PhysicsRaycaster>();
+            }
+
             var controls = cameraObject.GetComponent<KingdomBoardCameraController>() ?? cameraObject.AddComponent<KingdomBoardCameraController>();
             controls.Configure(camera);
         }

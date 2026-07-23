@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace AL.Tests.EditMode
 {
@@ -171,6 +172,33 @@ namespace AL.Tests.EditMode
 
             Assert.That(source, Does.Not.Contain("_buildingService.GetBuildingState("));
             Assert.That(source, Does.Not.Contain("_territoryService.GetTerritories("));
+        }
+
+        [Test]
+        public void KingdomWorldSelectionUsesPointerEventsAndCameraRaycasting()
+        {
+            Type territory = GetRuntimeType("AL.Kingdom.Visuals.KingdomTerritorySelectable");
+            Type building = GetRuntimeType("AL.Kingdom.KingdomBuildingSelectable");
+
+            foreach (Type selectable in new[] { territory, building })
+            {
+                Assert.That(typeof(IPointerClickHandler).IsAssignableFrom(selectable), Is.True);
+                Assert.That(typeof(IPointerEnterHandler).IsAssignableFrom(selectable), Is.True);
+                Assert.That(typeof(IPointerExitHandler).IsAssignableFrom(selectable), Is.True);
+                Assert.That(typeof(IDragHandler).IsAssignableFrom(selectable), Is.True);
+                Assert.That(selectable.GetMethod("OnPointerClick", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+                Assert.That(selectable.GetMethod("OnDrag", BindingFlags.Instance | BindingFlags.Public), Is.Not.Null);
+                Assert.That(selectable.GetMethod("OnMouseDown", BindingFlags.Instance | BindingFlags.NonPublic), Is.Null);
+                Assert.That(selectable.GetMethod("OnMouseEnter", BindingFlags.Instance | BindingFlags.NonPublic), Is.Null);
+                Assert.That(selectable.GetMethod("OnMouseExit", BindingFlags.Instance | BindingFlags.NonPublic), Is.Null);
+            }
+
+            string visualizerSource = ReadProductionSource("Kingdom", "Visuals", "KingdomVisualizer.cs");
+            string layoutSource = ReadProductionSource("Kingdom", "CityLayoutEngine.cs");
+            string controllerSource = ReadProductionSource("UI", "Kingdom", "KingdomSceneController.cs");
+            Assert.That(visualizerSource, Does.Not.Contain("OnMouse"));
+            Assert.That(layoutSource, Does.Not.Contain("OnMouse"));
+            Assert.That(controllerSource, Does.Contain("AddComponent<PhysicsRaycaster>()"));
         }
 
         // ---------------------------------------------------------------------

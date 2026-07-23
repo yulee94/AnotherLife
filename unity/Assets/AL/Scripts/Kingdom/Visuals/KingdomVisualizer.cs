@@ -1030,7 +1030,7 @@ namespace AL.Kingdom.Visuals
         }
     }
 
-    public class KingdomTerritorySelectable : MonoBehaviour
+    public class KingdomTerritorySelectable : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IDragHandler
     {
         private string _name;
         private RealmId _owner;
@@ -1057,9 +1057,9 @@ namespace AL.Kingdom.Visuals
             _baseScale = transform.localScale;
         }
 
-        private void OnMouseDown()
+        public void OnPointerClick(PointerEventData eventData)
         {
-            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            if (eventData != null && eventData.button != PointerEventData.InputButton.Left)
             {
                 return;
             }
@@ -1069,14 +1069,19 @@ namespace AL.Kingdom.Visuals
             KingdomVisualizer.RaiseTerritorySelected(_name, _owner, _bonusType, _bonusAmount, _isFortress);
         }
 
-        private void OnMouseEnter()
+        public void OnPointerEnter(PointerEventData eventData)
         {
             _hovered = true;
         }
 
-        private void OnMouseExit()
+        public void OnPointerExit(PointerEventData eventData)
         {
             _hovered = false;
+        }
+
+        // Presence of a drag handler lets the EventSystem cancel clicks after the board-pan threshold.
+        public void OnDrag(PointerEventData eventData)
+        {
         }
 
         private void Update()
