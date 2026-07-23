@@ -1,6 +1,6 @@
 param(
     [string] $WorkingRoot = "",
-    [ValidateSet("All", "DuplicateGuid", "TestScene", "MissingScene", "MalformedJson", "MutableAction", "MixedScope", "Coordination", "RetiredPrefix", "PolicyAuthority")]
+    [ValidateSet("All", "DuplicateGuid", "TestScene", "MissingScene", "MalformedJson", "MutableAction", "MixedScope", "Coordination", "RetiredPrefix", "PolicyAuthority", "PushMain")]
     [string] $Scenario = "All"
 )
 
@@ -239,6 +239,74 @@ function Test-CoordinationFixture {
     }
 }
 
+function Test-PushMainFixture {
+    $fixtureRepo = New-FixtureRepo "push-main"
+
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("branch", "-M", "main") $fixtureRepo | Out-Null
+        $before = (
+            Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+        ).Trim()
+
+        $runtimePath = Join-Path $fixtureRepo "unity/Assets/AL/Scripts"
+        New-Item -ItemType Directory -Force -Path $runtimePath | Out-Null
+        Set-Content -LiteralPath (Join-Path $runtimePath "PushFixture.cs") -Value "public sealed class PushFixture {}" -NoNewline
+        Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
+        Invoke-Checked git @("commit", "-q", "-m", "push change") $fixtureRepo | Out-Null
+        $after = (
+            Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+        ).Trim()
+
+        $eventPath = Join-Path $fixtureRepo "event.json"
+        Set-Content -LiteralPath $eventPath -Value @"
+{
+  "ref": "refs/heads/main",
+  "before": "$before",
+  "after": "$after"
+}
+"@
+
+        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify") $fixtureRepo @{
+            GITHUB_ACTIONS = "true"
+            GITHUB_EVENT_NAME = "push"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = ""
+            GITHUB_HEAD_REF = ""
+        }
+        $hygieneOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene") $fixtureRepo @{
+            GITHUB_ACTIONS = "true"
+            GITHUB_EVENT_NAME = "push"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = ""
+            GITHUB_HEAD_REF = ""
+        }
+
+        $mismatchEventPath = Join-Path $fixtureRepo "event-mismatch.json"
+        Set-Content -LiteralPath $mismatchEventPath -Value @"
+{
+  "ref": "refs/heads/main",
+  "before": "$before",
+  "after": "$before"
+}
+"@
+        $mismatchOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify") $fixtureRepo @{
+            GITHUB_ACTIONS = "true"
+            GITHUB_EVENT_NAME = "push"
+            GITHUB_EVENT_PATH = $mismatchEventPath
+            GITHUB_BASE_REF = ""
+            GITHUB_HEAD_REF = ""
+        } -ExpectFailure
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $output "Event: push; PR metadata checks: False"
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
+    Assert-Contains $hygieneOutput "Running git diff --check against $before..$after"
+    Assert-Contains $mismatchOutput "does not match event after SHA"
+}
+
 function Test-RetiredPrefixFixture {
     $fixtureRepo = New-FixtureRepo "retired-gpt"
     New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs") | Out-Null
@@ -342,6 +410,7 @@ try {
         "MutableAction" { Test-MutableActionFixture }
         "MixedScope" { Test-MixedScopeFixture }
         "Coordination" { Test-CoordinationFixture }
+        "PushMain" { Test-PushMainFixture }
         "RetiredPrefix" { Test-RetiredPrefixFixture }
         "PolicyAuthority" { Test-PolicyAuthorityFixture }
         "All" {
@@ -352,6 +421,7 @@ try {
             Test-MutableActionFixture
             Test-MixedScopeFixture
             Test-CoordinationFixture
+            Test-PushMainFixture
             Test-RetiredPrefixFixture
             Test-PolicyAuthorityFixture
         }
