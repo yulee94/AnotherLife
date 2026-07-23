@@ -107,15 +107,23 @@ namespace AL.Data.Catalogs
 
     internal sealed class StrictJsonNumber : StrictJsonValue
     {
-        internal StrictJsonNumber(string rawValue, double value)
+        internal StrictJsonNumber(
+            string rawValue,
+            double value,
+            bool hasFiniteDoubleValue,
+            bool hasNonZeroSignificand)
             : base(GameDataValueKind.Number)
         {
             RawValue = rawValue ?? throw new ArgumentNullException(nameof(rawValue));
             Value = value;
+            HasFiniteDoubleValue = hasFiniteDoubleValue;
+            HasNonZeroSignificand = hasNonZeroSignificand;
         }
 
         internal string RawValue { get; }
         internal double Value { get; }
+        internal bool HasFiniteDoubleValue { get; }
+        internal bool HasNonZeroSignificand { get; }
     }
 
     internal sealed class StrictJsonBoolean : StrictJsonValue
@@ -476,14 +484,39 @@ namespace AL.Data.Catalogs
 
                 var rawValue = source.Substring(start, index - start);
                 double value;
-                if (!double.TryParse(rawValue, NumberStyles.Float, CultureInfo.InvariantCulture, out value) ||
-                    double.IsNaN(value) ||
-                    double.IsInfinity(value))
+                var hasFiniteDoubleValue =
+                    double.TryParse(
+                        rawValue,
+                        NumberStyles.Float,
+                        CultureInfo.InvariantCulture,
+                        out value) &&
+                    !double.IsNaN(value) &&
+                    !double.IsInfinity(value);
+
+                var hasNonZeroSignificand = false;
+                for (var tokenIndex = 0; tokenIndex < rawValue.Length; tokenIndex++)
                 {
-                    FailAt("NUMBER_NONFINITE", path, start, "JSON number is outside the supported finite numeric range.");
+                    var character = rawValue[tokenIndex];
+                    if (character == 'e' || character == 'E')
+                    {
+                        break;
+                    }
+
+                    if (character >= '1' && character <= '9')
+                    {
+                        hasNonZeroSignificand = true;
+                        break;
+                    }
                 }
 
-                return new StrictJsonNumber(rawValue, value);
+                // JSON itself does not impose an IEEE-754 range. Keep the exact token
+                // so domain validators can degrade a known field or preserve an
+                // unknown future field without rejecting the entire document.
+                return new StrictJsonNumber(
+                    rawValue,
+                    hasFiniteDoubleValue ? value : 0d,
+                    hasFiniteDoubleValue,
+                    hasNonZeroSignificand);
             }
 
             private void ParseLiteral(string path, string literal)

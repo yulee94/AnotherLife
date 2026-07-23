@@ -1,332 +1,457 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework;
-using UnityEditor;
-using UnityEditor.Build.Reporting;
+using UnityEngine;
 using R = AL.Tests.EditMode.ProductionScenes.ProductionSceneTestReflection;
 
 namespace AL.Tests.EditMode.ProductionScenes
 {
     /// <summary>
-    /// #150 ShellFoundation contract: exact committed Build Settings, strict failure classifications,
-    /// exact Windows64 Development build intent, report classification, and ordered launch-log evidence.
+    /// Focused #150 contract tests for the pure ShellFoundation Build Settings validator. Malformed
+    /// profiles are supplied through immutable snapshots, so no test needs to rewrite Build Settings.
     /// </summary>
     public sealed class ProductionBuildSettingsTests
     {
+        private const string SnapshotEntryType = "AL.EditorTools.ProductionBuildSettingsSnapshotEntry";
+
+        private static string BuildSettingsPath =>
+            Path.GetFullPath(Path.Combine(Application.dataPath, "..", "ProjectSettings", "EditorBuildSettings.asset"));
+
         [Test]
-        public void CurrentBuildSettingsAreExactShellFoundationAndValidateClean()
+        public void StatusCodesMatchTheReviewedSpecificationExactly()
         {
-            EditorBuildSettingsScene[] scenes = EditorBuildSettings.scenes;
-            Assert.AreEqual(3, scenes.Length);
-            Assert.AreEqual(new[]
+            CollectionAssert.AreEqual(new[]
             {
-                "Assets/AL/Scenes/Boot.unity",
-                "Assets/AL/Scenes/RealmSelection.unity",
-                "Assets/AL/Scenes/Kingdom.unity"
-            }, scenes.Select(scene => scene.path).ToArray());
-            Assert.IsTrue(scenes.All(scene => scene.enabled));
-            Assert.IsFalse(scenes.Any(scene => scene.path == "Assets/Test.unity"));
-            Assert.IsFalse(scenes.Any(scene => scene.path.EndsWith("/ChampionArena.unity", StringComparison.Ordinal)));
+                "Valid",
+                "MissingBuildSettings",
+                "EmptyBuildSettings",
+                "WrongEntryScene",
+                "MissingRequiredScene",
+                "UnexpectedScene",
+                "DeferredSceneEnabled",
+                "TestSceneEnabled",
+                "DisabledStaleScene",
+                "MissingPath",
+                "DuplicatePath",
+                "DuplicateName",
+                "GuidMismatch",
+                "DescriptorDrift",
+                "TransitionUnavailable",
+                "DeferredTransitionReachable"
+            }, Enum.GetNames(R.Runtime("AL.EditorTools.ProductionBuildSettingsValidationStatus")));
+        }
 
-            object report = R.StaticMethod(R.BuildSettingsValidatorType, "ValidateCurrent");
+        [Test]
+        public void ExactShellFoundationPassesAndReturnsImmutableOrderedPaths()
+        {
+            Array snapshot = ValidSnapshot();
+            object report = Validate(true, true, snapshot);
+
             Assert.IsTrue(R.PropBool(report, "IsValid"), R.Invoke(report, "Summarize").ToString());
-            Assert.AreEqual(new[] { "Valid" }, Outcomes(report));
+            Assert.AreEqual("Valid", R.Prop(report, "PrimaryStatus").ToString());
+            Assert.IsEmpty(R.AsObjects(R.Prop(report, "Diagnostics")));
+            CollectionAssert.AreEqual(
+                R.DescriptorShellFoundation().Select(record => R.PropString(record, "AssetPath")).ToArray(),
+                R.AsStrings(R.Prop(report, "ScenePaths")));
+
+            IList paths = (IList)R.Prop(report, "ScenePaths");
+            IList diagnostics = (IList)R.Prop(report, "Diagnostics");
+            Assert.IsTrue(paths.IsReadOnly);
+            Assert.IsTrue(diagnostics.IsReadOnly);
+            Assert.Throws<NotSupportedException>(() => paths.Add("Assets/Injected.unity"));
+            Assert.Throws<NotSupportedException>(() => diagnostics.Add(null));
+
+            snapshot.SetValue(Snapshot("Assets/Injected.unity", "Injected", "0", true, true), 0);
+            Assert.AreEqual(
+                R.PropString(R.DescriptorShellFoundation()[0], "AssetPath"),
+                R.AsStrings(R.Prop(report, "ScenePaths"))[0],
+                "The report must copy the supplied snapshot paths.");
         }
 
         [Test]
-        public void EmptyBuildSettingsFail()
+        public void MissingBuildSettingsReturnsExactStatus()
         {
-            AssertOutcome(Validate(), "EmptyBuildSettings");
+            object report = Validate(false, true, EmptySnapshot());
+            AssertInvalid(report, "MissingBuildSettings");
+            Assert.That(Statuses(report), Is.EqualTo(new[] { "MissingBuildSettings" }));
         }
 
         [Test]
-        public void MissingBootAndWrongIndexZeroFail()
+        public void EmptyBuildSettingsReturnsExactStatus()
         {
-            object report = Validate(Entry(RealmPath), Entry(KingdomPath));
-            AssertOutcome(report, "WrongEntryScene");
-            AssertOutcome(report, "MissingRequiredScene");
+            object report = Validate(true, true, EmptySnapshot());
+            AssertInvalid(report, "EmptyBuildSettings");
+            Assert.That(Statuses(report), Is.EqualTo(new[] { "EmptyBuildSettings" }));
         }
 
         [Test]
-        public void MissingRealmSelectionOrKingdomFails()
+        public void MissingBootAndWrongEntryAreBothReported()
         {
-            AssertOutcome(Validate(Entry(BootPath), Entry(KingdomPath)), "MissingRequiredScene");
-            AssertOutcome(Validate(Entry(BootPath), Entry(RealmPath)), "MissingRequiredScene");
+            IReadOnlyList<object> records = R.DescriptorShellFoundation();
+            object report = Validate(true, true, SnapshotArray(ValidEntry(records[1]), ValidEntry(records[2])));
+
+            AssertInvalid(report, "WrongEntryScene");
+            AssertStatus(report, "MissingRequiredScene");
         }
 
         [Test]
-        public void WrongOrderFails()
+        public void MissingRequiredRealmAndKingdomAreReportedDeterministically()
         {
-            object report = Validate(Entry(BootPath), Entry(KingdomPath), Entry(RealmPath));
-            Assert.IsFalse(R.PropBool(report, "IsValid"));
-            AssertOutcome(report, "UnexpectedScene");
+            object report = Validate(true, true,
+                SnapshotArray(ValidEntry(R.DescriptorShellFoundation()[0])));
+
+            AssertInvalid(report, "MissingRequiredScene");
+            Assert.AreEqual(2, Statuses(report).Count(status => status == "MissingRequiredScene"));
+            AssertStatus(report, "TransitionUnavailable");
         }
 
         [Test]
-        public void DisabledRequiredOrStaleEntryFails()
+        public void WrongOrderAfterBootReturnsDescriptorDrift()
         {
-            object requiredDisabled = Validate(Entry(BootPath), Entry(RealmPath, enabled: false), Entry(KingdomPath));
-            AssertOutcome(requiredDisabled, "DisabledStaleScene");
+            IReadOnlyList<object> records = R.DescriptorShellFoundation();
+            object report = Validate(true, true,
+                SnapshotArray(ValidEntry(records[0]), ValidEntry(records[2]), ValidEntry(records[1])));
 
-            object staleDisabled = Validate(
-                Entry(BootPath), Entry(RealmPath), Entry(KingdomPath),
-                Entry("Assets/Other/Legacy.unity", enabled: false));
-            AssertOutcome(staleDisabled, "DisabledStaleScene");
-            AssertOutcome(staleDisabled, "UnexpectedScene");
+            AssertInvalid(report, "DescriptorDrift");
         }
 
         [Test]
-        public void TestOrChampionListedFailsWithSpecificOutcome()
+        public void DisabledRequiredSceneReturnsDisabledStaleScene()
         {
-            object test = Validate(Entry(BootPath), Entry(RealmPath), Entry(KingdomPath), Entry("Assets/Test.unity"));
-            AssertOutcome(test, "TestSceneEnabled");
+            Array snapshot = ValidSnapshot();
+            object realm = R.DescriptorShellFoundation()[1];
+            snapshot.SetValue(Entry(realm, false, true), 1);
 
-            object champion = Validate(
-                Entry(BootPath), Entry(RealmPath), Entry(KingdomPath),
-                Entry("Assets/AL/Scenes/ChampionArena.unity"));
-            AssertOutcome(champion, "DeferredSceneEnabled");
+            object report = Validate(true, true, snapshot);
+            AssertInvalid(report, "DisabledStaleScene");
+            AssertStatus(report, "TransitionUnavailable");
         }
 
         [Test]
-        public void MissingPathFails()
+        public void UnexpectedSceneReturnsUnexpectedScene()
         {
-            object report = Validate(Entry(BootPath), Entry(RealmPath, assetExists: false), Entry(KingdomPath));
-            AssertOutcome(report, "MissingPath");
+            var entries = ValidEntries();
+            entries.Add(Snapshot("Assets/AL/Scenes/Unexpected.unity", "Unexpected",
+                "11111111111111111111111111111111", true, true));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertInvalid(report, "UnexpectedScene");
         }
 
         [Test]
-        public void DuplicatePathAndDuplicateNameFail()
+        public void DisabledUnexpectedSceneAlsoReturnsDisabledStaleScene()
         {
-            object duplicatePath = Validate(Entry(BootPath), Entry(BootPath), Entry(RealmPath), Entry(KingdomPath));
-            AssertOutcome(duplicatePath, "DuplicatePath");
-            AssertOutcome(duplicatePath, "DuplicateName");
+            var entries = ValidEntries();
+            entries.Add(Snapshot("Assets/AL/Scenes/Stale.unity", "Stale",
+                "22222222222222222222222222222222", false, true));
 
-            object duplicateName = Validate(
-                Entry(BootPath), Entry(RealmPath), Entry(KingdomPath), Entry("Assets/Legacy/Boot.unity"));
-            AssertOutcome(duplicateName, "DuplicateName");
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertInvalid(report, "UnexpectedScene");
+            AssertStatus(report, "DisabledStaleScene");
+        }
+
+        [TestCase(true)]
+        [TestCase(false)]
+        public void RepresentativeTestIsRejectedEvenWhenDisabled(bool enabled)
+        {
+            var entries = ValidEntries();
+            object testRecord = R.RecordById("al_scene_test_representative");
+            entries.Add(Entry(testRecord, enabled, true));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertInvalid(report, "TestSceneEnabled");
+            AssertStatus(report, "TestSceneEnabled");
+            if (!enabled)
+            {
+                AssertStatus(report, "DisabledStaleScene");
+            }
         }
 
         [Test]
-        public void GuidMismatchFails()
+        public void EnabledChampionIsDeferredAndMakesTransitionReachable()
+        {
+            var entries = ValidEntries();
+            entries.Add(Entry(R.RecordById("al_scene_champion_arena"), true, true));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertInvalid(report, "DeferredSceneEnabled");
+            AssertStatus(report, "DeferredSceneEnabled");
+            AssertStatus(report, "DeferredTransitionReachable");
+        }
+
+        [Test]
+        public void DisabledChampionIsStillRejectedAsUnexpectedStaleEntry()
+        {
+            var entries = ValidEntries();
+            entries.Add(Entry(R.RecordById("al_scene_champion_arena"), false, true));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertStatus(report, "UnexpectedScene");
+            AssertStatus(report, "DisabledStaleScene");
+        }
+
+        [Test]
+        public void MissingPathReturnsMissingPath()
+        {
+            Array snapshot = ValidSnapshot();
+            snapshot.SetValue(Entry(R.DescriptorShellFoundation()[2], true, false), 2);
+
+            object report = Validate(true, true, snapshot);
+            AssertInvalid(report, "MissingPath");
+        }
+
+        [Test]
+        public void DuplicatePathReturnsDuplicatePath()
+        {
+            var entries = ValidEntries();
+            entries.Add(ValidEntry(R.DescriptorShellFoundation()[0]));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertStatus(report, "DuplicatePath");
+        }
+
+        [Test]
+        public void DuplicateNameReturnsDuplicateName()
+        {
+            var entries = ValidEntries();
+            object boot = R.DescriptorShellFoundation()[0];
+            entries.Add(Snapshot(
+                "Assets/AL/Scenes/BootCopy.unity",
+                R.PropString(boot, "SceneName"),
+                "33333333333333333333333333333333",
+                true,
+                true));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertStatus(report, "DuplicateName");
+        }
+
+        [Test]
+        public void CaseOnlyDuplicateNameReturnsDuplicateName()
+        {
+            var entries = ValidEntries();
+            object boot = R.DescriptorShellFoundation()[0];
+            entries.Add(Snapshot(
+                "Assets/AL/Scenes/BootCaseCopy.unity",
+                R.PropString(boot, "SceneName").ToLowerInvariant(),
+                "55555555555555555555555555555555",
+                true,
+                true));
+
+            object report = Validate(true, true, SnapshotArray(entries));
+            AssertStatus(report, "DuplicateName");
+        }
+
+        [TestCase(true, false)]
+        [TestCase(false, true)]
+        [TestCase(true, true)]
+        public void ActiveDeferredOrResetImplementationReachabilityFailsClosed(
+            bool deferredChampionHandlerReachable,
+            bool resetToBootReachable)
         {
             object report = Validate(
-                Entry(BootPath, resolvedGuid: "00000000000000000000000000000000"),
-                Entry(RealmPath),
-                Entry(KingdomPath));
-            AssertOutcome(report, "GuidMismatch");
+                true,
+                true,
+                ValidSnapshot(),
+                deferredChampionHandlerReachable,
+                resetToBootReachable);
+
+            AssertInvalid(report, "DeferredTransitionReachable");
         }
 
         [Test]
-        public void ExactShellFoundationEntriesPassPureValidation()
+        public void GuidMismatchReturnsGuidMismatch()
         {
-            object report = Validate(Entry(BootPath), Entry(RealmPath), Entry(KingdomPath));
+            Array snapshot = ValidSnapshot();
+            object boot = R.DescriptorShellFoundation()[0];
+            snapshot.SetValue(Snapshot(
+                R.PropString(boot, "AssetPath"),
+                R.PropString(boot, "SceneName"),
+                "44444444444444444444444444444444",
+                true,
+                true), 0);
+
+            object report = Validate(true, true, snapshot);
+            AssertInvalid(report, "GuidMismatch");
+        }
+
+        [Test]
+        public void ExactPathWithWrongNameReturnsDescriptorDrift()
+        {
+            Array snapshot = ValidSnapshot();
+            object realm = R.DescriptorShellFoundation()[1];
+            snapshot.SetValue(Snapshot(
+                R.PropString(realm, "AssetPath"),
+                "realmSelection",
+                R.PropString(realm, "AssetGuid"),
+                true,
+                true), 1);
+
+            object report = Validate(true, true, snapshot);
+            AssertInvalid(report, "DescriptorDrift");
+        }
+
+        [Test]
+        public void CaseMismatchedPathFailsClosed()
+        {
+            Array snapshot = ValidSnapshot();
+            object realm = R.DescriptorShellFoundation()[1];
+            snapshot.SetValue(Snapshot(
+                R.PropString(realm, "AssetPath").ToLowerInvariant(),
+                R.PropString(realm, "SceneName"),
+                R.PropString(realm, "AssetGuid"),
+                true,
+                true), 1);
+
+            object report = Validate(true, true, snapshot);
+            Assert.IsFalse(R.PropBool(report, "IsValid"));
+            AssertStatus(report, "MissingRequiredScene");
+            AssertStatus(report, "UnexpectedScene");
+        }
+
+        [Test]
+        public void InvalidCommittedDescriptorReturnsDescriptorDrift()
+        {
+            object report = Validate(true, false, ValidSnapshot());
+            AssertInvalid(report, "DescriptorDrift");
+        }
+
+        [Test]
+        public void DiagnosticsAndSummaryHaveDeterministicOrdering()
+        {
+            var entries = ValidEntries();
+            entries[0] = Snapshot(string.Empty, string.Empty, string.Empty, false, false);
+            entries.Add(Entry(R.RecordById("al_scene_test_representative"), false, true));
+
+            object first = Validate(true, false, SnapshotArray(entries));
+            object second = Validate(true, false, SnapshotArray(entries.AsEnumerable().Reverse().Reverse()));
+            CollectionAssert.AreEqual(Statuses(first), Statuses(second));
+            Assert.AreEqual(R.Invoke(first, "Summarize").ToString(), R.Invoke(second, "Summarize").ToString());
+
+            int[] statusValues = R.AsObjects(R.Prop(first, "Diagnostics"))
+                .Select(diagnostic => Convert.ToInt32(R.Prop(diagnostic, "Status")))
+                .ToArray();
+            CollectionAssert.AreEqual(statusValues.OrderBy(value => value).ToArray(), statusValues,
+                "Diagnostics must be ordered by the stable status-code declaration.");
+        }
+
+        [Test]
+        public void CurrentValidationLeavesBuildSettingsByteForByteUnchanged()
+        {
+            byte[] before = File.ReadAllBytes(BuildSettingsPath);
+            object report = R.StaticMethod(R.BuildSettingsValidatorType, "ValidateCurrentShellFoundation");
+            Assert.NotNull(report);
             Assert.IsTrue(R.PropBool(report, "IsValid"), R.Invoke(report, "Summarize").ToString());
-            Assert.AreEqual(new[] { "Valid" }, Outcomes(report));
+            byte[] after = File.ReadAllBytes(BuildSettingsPath);
+            Assert.AreEqual(before, after,
+                "ShellFoundation validation must never rewrite EditorBuildSettings.asset.");
         }
 
-        [Test]
-        public void WindowsBuildOptionsAreExactAndExcludeTestAndChampion()
+        private static void AssertInvalid(object report, string primaryStatus)
         {
-            object options = R.StaticMethod(R.PlayerBuilderType, "CreateWindows64DevelopmentOptions");
-            Assert.AreEqual("StandaloneWindows64", R.Prop(options, "target").ToString());
-            Assert.AreEqual(BuildOptions.Development, (BuildOptions)R.Prop(options, "options"));
-            Assert.AreEqual(new[] { BootPath, RealmPath, KingdomPath }, (string[])R.Prop(options, "scenes"));
-
-            string output = (string)R.Prop(options, "locationPathName");
-            Assert.That(output.Replace('\\', '/'), Does.EndWith("/unity/Builds/Validation/Windows64/AnotherLifeUnity.exe"));
-
-            string intent = R.StaticMethod(R.PlayerBuilderType, "DescribeBuildIntent").ToString();
-            Assert.That(intent, Does.Contain("Assets/Test.unity"));
-            Assert.That(intent, Does.Contain("Assets/AL/Scenes/ChampionArena.unity"));
-            Assert.That(intent, Does.Contain("excluded=["));
+            Assert.IsFalse(R.PropBool(report, "IsValid"));
+            Assert.AreEqual(primaryStatus, R.Prop(report, "PrimaryStatus").ToString(),
+                R.Invoke(report, "Summarize").ToString());
         }
 
-        [Test]
-        public void BuildReportClassificationRequiresSuccessAndBothOutputParts()
+        private static void AssertStatus(object report, string status)
         {
-            Assert.AreEqual("Succeeded", Classify(BuildResult.Succeeded, true, true));
-            Assert.AreEqual("MissingOutput", Classify(BuildResult.Succeeded, false, true));
-            Assert.AreEqual("MissingOutput", Classify(BuildResult.Succeeded, true, false));
-            Assert.AreEqual("BuildFailed", Classify(BuildResult.Failed, true, true));
-            Assert.AreEqual("BuildFailed", Classify(BuildResult.Cancelled, true, true));
-            Assert.AreEqual("BuildFailed", Classify(BuildResult.Unknown, true, true));
+            Assert.That(Statuses(report), Has.Member(status), R.Invoke(report, "Summarize").ToString());
         }
 
-        [Test]
-        public void PreflightValidatesRepositoryBeforeAnyBuildCall()
+        private static IReadOnlyList<string> Statuses(object report)
         {
-            object preflight = R.StaticMethod(R.PlayerBuilderType, "ValidatePreflight");
-            object settings = R.Prop(preflight, "BuildSettings");
-            Assert.IsTrue(R.PropBool(settings, "IsValid"), R.Invoke(settings, "Summarize").ToString());
-            Assert.IsTrue(R.PropBool(preflight, "UnityVersionValid"));
-            Assert.IsTrue(R.PropBool(preflight, "CompilationValid"));
-            Assert.IsTrue(R.PropBool(preflight, "OutputPathValid"));
-            Assert.IsTrue(R.PropBool(preflight, "OutputPathIgnored"));
-
-            // Platform modules are intentionally environmental: Windows CI passes; a Mac editor without
-            // Windows support fails closed before BuildPipeline.BuildPlayer.
-            if (!R.PropBool(preflight, "BuildTargetSupported"))
-            {
-                Assert.IsFalse(R.PropBool(preflight, "IsValid"));
-                Assert.That(R.AsStrings(R.Prop(preflight, "Failures")),
-                    Has.Some.Contains("StandaloneWindows64 build support is not installed"));
-            }
+            return R.AsObjects(R.Prop(report, "Diagnostics"))
+                .Select(diagnostic => R.Prop(diagnostic, "Status").ToString())
+                .ToList();
         }
 
-        [Test]
-        public void PreflightFailurePreventsBuildAndRemovesStaleOutput()
+        private static object Validate(bool buildSettingsPresent, bool descriptorValid, Array snapshot)
         {
-            EditorBuildSettingsScene[] before = EditorBuildSettings.scenes;
-            int buildCalls = 0;
-            Func<BuildPlayerOptions, UnityEditor.Build.Reporting.BuildReport> buildOverride = options =>
-            {
-                buildCalls++;
-                return null;
-            };
-            R.SetStaticField(R.PlayerBuilderType, "BuildPlayerOverride", buildOverride);
-
-            string output = (string)R.StaticProperty(R.PlayerBuilderType, "OutputPath");
-            string directory = Path.GetDirectoryName(output);
-            string stale = Path.Combine(directory, "stale-output-sentinel.txt");
-            Directory.CreateDirectory(directory);
-            File.WriteAllText(stale, "stale");
-
-            try
-            {
-                EditorBuildSettings.scenes = Array.Empty<EditorBuildSettingsScene>();
-                object result = R.StaticMethod(R.PlayerBuilderType, "BuildWindows64DevelopmentPlayer");
-                Assert.AreEqual("PreflightFailed", R.Prop(result, "Status").ToString());
-                Assert.AreEqual(0, buildCalls, "BuildPipeline seam must not run after a preflight failure.");
-                Assert.IsFalse(File.Exists(stale), "Exact validation output must be cleaned before preflight evidence is emitted.");
-                Assert.IsFalse(File.Exists(output), "A stale executable must not survive a failed preflight.");
-                Assert.IsTrue(File.Exists(Path.Combine(directory, "PlayerBuildWindows64.summary.json")));
-            }
-            finally
-            {
-                EditorBuildSettings.scenes = before;
-                R.SetStaticField(R.PlayerBuilderType, "BuildPlayerOverride", null);
-            }
+            return R.StaticMethod(
+                R.BuildSettingsValidatorType,
+                "ValidateSnapshot",
+                buildSettingsPresent,
+                snapshot,
+                descriptorValid);
         }
 
-        [Test]
-        public void OrderedFreshProfileLaunchLogPassesAndAllowsExternalTermination()
+        private static object Validate(
+            bool buildSettingsPresent,
+            bool descriptorValid,
+            Array snapshot,
+            bool deferredChampionHandlerReachable,
+            bool resetToBootReachable)
         {
-            object result = ValidateLaunch(ValidLaunchLog, processExited: true, isolatedProfileVerified: true);
-            Assert.IsTrue(R.PropBool(result, "IsValid"));
-            Assert.IsTrue(R.PropBool(result, "ExternalTerminationAllowed"));
-            Assert.That(R.PropString(result, "TerminationDisposition"), Does.Contain("no graceful quit/save claim"));
+            return R.StaticMethod(
+                R.BuildSettingsValidatorType,
+                "ValidateSnapshot",
+                buildSettingsPresent,
+                snapshot,
+                descriptorValid,
+                deferredChampionHandlerReachable,
+                resetToBootReachable);
         }
 
-        [Test]
-        public void LaunchLogWrongOrderOrMissingSecondMarkerFails()
+        private static Array ValidSnapshot()
         {
-            string wrongOrder = RealmMarker + "\n" + BootMarker + "\nAL Boot Sequence Started...\n" +
-                                "No Realm Selected. Transitioning to Realm Selection...";
-            AssertLaunchOutcome(ValidateLaunch(wrongOrder, false, true), "WrongOrder");
-
-            string earlyExit = BootMarker + "\nAL Boot Sequence Started...\n" +
-                               "No Realm Selected. Transitioning to Realm Selection...";
-            object missing = ValidateLaunch(earlyExit, true, true);
-            AssertLaunchOutcome(missing, "MissingRealmSelectionMarker");
-            AssertLaunchOutcome(missing, "ProcessExitedEarly");
+            return SnapshotArray(ValidEntries());
         }
 
-        [Test]
-        public void LaunchLogSevereErrorWrongBranchOrUnverifiedProfileFails()
+        private static List<object> ValidEntries()
         {
-            AssertLaunchOutcome(ValidateLaunch(ValidLaunchLog + "\nNullReferenceException", false, true), "SevereLog");
-            AssertLaunchOutcome(ValidateLaunch(ValidLaunchLog + "\n[AL-SCENE-ACTIVE] id=al_scene_kingdom name=Kingdom", false, true), "WrongProfileBranch");
-            AssertLaunchOutcome(ValidateLaunch(ValidLaunchLog, false, false), "ProfileIsolationFailed");
+            return R.DescriptorShellFoundation().Select(ValidEntry).ToList();
         }
 
-        [Test]
-        public void OrdinaryWarningsDoNotFailLaunchEvidence()
+        private static object ValidEntry(object descriptorRecord)
         {
-            object result = ValidateLaunch(ValidLaunchLog + "\nWarning: optional cosmetic asset was not preloaded.", false, true);
-            Assert.IsTrue(R.PropBool(result, "IsValid"));
+            return Entry(descriptorRecord, true, true);
         }
 
-        private const string BootPath = "Assets/AL/Scenes/Boot.unity";
-        private const string RealmPath = "Assets/AL/Scenes/RealmSelection.unity";
-        private const string KingdomPath = "Assets/AL/Scenes/Kingdom.unity";
-        private const string BootMarker =
-            "[AL-SCENE-ACTIVE] id=al_scene_boot name=Boot path=Assets/AL/Scenes/Boot.unity role=production_entry version=223.1";
-        private const string RealmMarker =
-            "[AL-SCENE-ACTIVE] id=al_scene_realm_selection name=RealmSelection path=Assets/AL/Scenes/RealmSelection.unity role=onboarding_selection version=223.1";
-        private const string ValidLaunchLog = BootMarker + "\nAL Boot Sequence Started...\n" +
-                                              "No Realm Selected. Transitioning to Realm Selection...\n" + RealmMarker;
-
-        private static object Entry(
-            string path,
-            bool enabled = true,
-            string serializedGuid = null,
-            string resolvedGuid = null,
-            bool assetExists = true)
+        private static object Entry(object descriptorRecord, bool enabled, bool pathExists)
         {
-            object record = R.DescriptorAll().FirstOrDefault(item => R.PropString(item, "AssetPath") == path);
-            string expectedGuid = record == null ? "11111111111111111111111111111111" : R.PropString(record, "AssetGuid");
-            return Activator.CreateInstance(
-                R.Runtime(R.BuildSceneEntryType),
-                path,
+            return Snapshot(
+                R.PropString(descriptorRecord, "AssetPath"),
+                R.PropString(descriptorRecord, "SceneName"),
+                R.PropString(descriptorRecord, "AssetGuid"),
                 enabled,
-                serializedGuid ?? expectedGuid,
-                resolvedGuid ?? expectedGuid,
-                assetExists);
+                pathExists);
         }
 
-        private static object Validate(params object[] entries)
+        private static object Snapshot(string path, string name, string guid, bool enabled, bool pathExists)
         {
-            Type entryType = R.Runtime(R.BuildSceneEntryType);
-            Array typed = Array.CreateInstance(entryType, entries.Length);
-            for (int index = 0; index < entries.Length; index++)
+            return Activator.CreateInstance(
+                R.Runtime(SnapshotEntryType),
+                path,
+                name,
+                guid,
+                enabled,
+                pathExists);
+        }
+
+        private static Array EmptySnapshot()
+        {
+            return Array.CreateInstance(R.Runtime(SnapshotEntryType), 0);
+        }
+
+        private static Array SnapshotArray(params object[] entries)
+        {
+            return SnapshotArray((IEnumerable<object>)entries);
+        }
+
+        private static Array SnapshotArray(IEnumerable<object> entries)
+        {
+            object[] copied = (entries ?? Array.Empty<object>()).ToArray();
+            Array array = Array.CreateInstance(R.Runtime(SnapshotEntryType), copied.Length);
+            for (int index = 0; index < copied.Length; index++)
             {
-                typed.SetValue(entries[index], index);
+                array.SetValue(copied[index], index);
             }
 
-            MethodInfo method = R.Runtime(R.BuildSettingsValidatorType).GetMethod(
-                "ValidateEntries",
-                BindingFlags.Public | BindingFlags.Static);
-            Assert.NotNull(method);
-            return method.Invoke(null, new object[] { typed });
-        }
-
-        private static string[] Outcomes(object report)
-        {
-            return R.AsObjects(R.Prop(report, "Outcomes")).Select(item => item.ToString()).ToArray();
-        }
-
-        private static void AssertOutcome(object report, string expected)
-        {
-            Assert.That(Outcomes(report), Has.Member(expected), R.Invoke(report, "Summarize").ToString());
-        }
-
-        private static string Classify(BuildResult result, bool executableExists, bool dataDirectoryExists)
-        {
-            return R.StaticMethod(
-                R.PlayerBuilderType,
-                "ClassifyBuildResult",
-                result,
-                executableExists,
-                dataDirectoryExists).ToString();
-        }
-
-        private static object ValidateLaunch(string log, bool processExited, bool isolatedProfileVerified)
-        {
-            return R.StaticMethod(
-                R.PlayerLaunchValidatorType,
-                "Evaluate",
-                log,
-                processExited,
-                isolatedProfileVerified);
-        }
-
-        private static void AssertLaunchOutcome(object result, string expected)
-        {
-            string[] outcomes = R.AsObjects(R.Prop(result, "Outcomes")).Select(item => item.ToString()).ToArray();
-            Assert.That(outcomes, Has.Member(expected));
-            Assert.IsFalse(R.PropBool(result, "IsValid"));
+            return array;
         }
     }
 }

@@ -56,7 +56,7 @@ namespace AL.EditorTools
     public sealed class ProductionIosPreflightReport
     {
         public ProductionIosPreflightReport(
-            ProductionBuildSettingsReport buildSettings,
+            ProductionBuildSettingsValidationReport buildSettings,
             ProductionIosSigningSnapshot signing,
             bool unityVersionValid,
             bool compilationValid,
@@ -79,7 +79,7 @@ namespace AL.EditorTools
             Notices = (notices ?? Array.Empty<string>()).ToList().AsReadOnly();
         }
 
-        public ProductionBuildSettingsReport BuildSettings { get; }
+        public ProductionBuildSettingsValidationReport BuildSettings { get; }
         public ProductionIosSigningSnapshot Signing { get; }
         public bool UnityVersionValid { get; }
         public bool CompilationValid { get; }
@@ -310,11 +310,12 @@ namespace AL.EditorTools
         {
             var failures = new List<string>();
             var notices = new List<string>();
-            ProductionBuildSettingsReport buildSettings = ProductionBuildSettingsValidator.ValidateCurrent();
+            ProductionBuildSettingsValidationReport buildSettings =
+                ProductionBuildSettingsValidator.ValidateCurrentShellFoundation();
             ProductionIosSigningSnapshot signing = CurrentSigningSnapshot();
             bool unityVersionValid = string.Equals(
                 Application.unityVersion,
-                ProductionPlayerBuilder.ExpectedUnityVersion,
+                ProductionPlayerBuilder.RequiredUnityVersion,
                 StringComparison.Ordinal);
             bool compilationValid = !EditorUtility.scriptCompilationFailed && !EditorApplication.isCompiling;
             bool iosModuleAvailable = BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.iOS, BuildTarget.iOS);
@@ -324,7 +325,7 @@ namespace AL.EditorTools
 
             if (!unityVersionValid)
             {
-                failures.Add($"Unity version '{Application.unityVersion}' does not match required '{ProductionPlayerBuilder.ExpectedUnityVersion}'.");
+                failures.Add($"Unity version '{Application.unityVersion}' does not match required '{ProductionPlayerBuilder.RequiredUnityVersion}'.");
             }
 
             if (!compilationValid)

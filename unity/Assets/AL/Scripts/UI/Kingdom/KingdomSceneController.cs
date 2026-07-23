@@ -277,11 +277,9 @@ namespace AL.UI.Kingdom
             RefreshDistrictsPanel();
             RefreshResearchPanel();
 
-            // FORCES/OBJECTIVES/WAR ZONE are backed only by state-seeding getters
-            // (ITrainingService.GetTroopCount / IWarmasterService.GetState seed troop and warmaster
-            // state; IQuestService.GetActiveQuests seeds quest state; ITerritoryService.GetTerritories
-            // and IRealmGemService.GetRealmGems/GetWishgateState seed territory, gem, and Wishgate
-            // state). Per D8 they render a technical unavailable state until read-only contracts exist.
+            // FORCES/WAR ZONE still depend on state-seeding getters. OBJECTIVES now has a
+            // non-mutating quest compatibility query, but no approved read-only presentation
+            // contract. Per D8 these panels remain technically unavailable until those contracts exist.
             _troopText.text = BuildUnavailablePanel("FORCES");
             _questText.text = BuildUnavailablePanel("OBJECTIVES");
             _territoryText.text = BuildUnavailablePanel("WAR ZONE");

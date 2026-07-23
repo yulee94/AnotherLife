@@ -1,6 +1,8 @@
 #if UNITY_EDITOR
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,439 +14,1105 @@ using UnityEngine;
 
 namespace AL.EditorTools
 {
-    public enum ProductionBuildValidationStatus
-    {
-        Valid,
-        MissingBuildSettings,
-        EmptyBuildSettings,
-        WrongEntryScene,
-        MissingRequiredScene,
-        UnexpectedScene,
-        DeferredSceneEnabled,
-        TestSceneEnabled,
-        DisabledStaleScene,
-        MissingPath,
-        DuplicatePath,
-        DuplicateName,
-        GuidMismatch,
-        DescriptorDrift,
-        TransitionUnavailable,
-        DeferredTransitionReachable
-    }
-
-    /// <summary>Immutable, testable projection of one serialized Build Settings entry.</summary>
-    public sealed class ProductionBuildSceneEntry
-    {
-        public ProductionBuildSceneEntry(
-            string path,
-            bool enabled,
-            string serializedGuid,
-            string resolvedGuid,
-            bool assetExists)
-        {
-            Path = path ?? string.Empty;
-            Enabled = enabled;
-            SerializedGuid = serializedGuid ?? string.Empty;
-            ResolvedGuid = resolvedGuid ?? string.Empty;
-            AssetExists = assetExists;
-        }
-
-        public string Path { get; }
-        public bool Enabled { get; }
-        public string SerializedGuid { get; }
-        public string ResolvedGuid { get; }
-        public bool AssetExists { get; }
-        public string SceneName => System.IO.Path.GetFileNameWithoutExtension(Path) ?? string.Empty;
-    }
-
-    public sealed class ProductionBuildValidationIssue
-    {
-        public ProductionBuildValidationIssue(ProductionBuildValidationStatus status, string message)
-        {
-            Status = status;
-            Message = message ?? string.Empty;
-        }
-
-        public ProductionBuildValidationStatus Status { get; }
-        public string Message { get; }
-    }
-
-    /// <summary>Complete deterministic validation result; a valid report contains only Valid.</summary>
-    public sealed class ProductionBuildSettingsReport
-    {
-        public ProductionBuildSettingsReport(IEnumerable<ProductionBuildValidationIssue> issues)
-        {
-            var normalized = (issues ?? Array.Empty<ProductionBuildValidationIssue>())
-                .Where(issue => issue != null)
-                .Where(issue => issue.Status != ProductionBuildValidationStatus.Valid)
-                .ToList();
-
-            if (normalized.Count == 0)
-            {
-                normalized.Add(new ProductionBuildValidationIssue(
-                    ProductionBuildValidationStatus.Valid,
-                    "Build Settings match the ShellFoundation descriptor."));
-            }
-
-            Issues = normalized.AsReadOnly();
-            Outcomes = normalized.Select(issue => issue.Status).Distinct().ToList().AsReadOnly();
-        }
-
-        public IReadOnlyList<ProductionBuildValidationIssue> Issues { get; }
-        public IReadOnlyList<ProductionBuildValidationStatus> Outcomes { get; }
-        public bool IsValid => Outcomes.Count == 1 && Outcomes[0] == ProductionBuildValidationStatus.Valid;
-
-        public ProductionBuildSettingsReport WithIssue(ProductionBuildValidationStatus status, string message)
-        {
-            return new ProductionBuildSettingsReport(Issues.Concat(new[] { new ProductionBuildValidationIssue(status, message) }));
-        }
-
-        public string Summarize()
-        {
-            var builder = new StringBuilder();
-            builder.Append("[AL-PRODUCTION-BUILD-SETTINGS] valid=").Append(IsValid);
-            foreach (ProductionBuildValidationIssue issue in Issues)
-            {
-                builder.Append('\n').Append("  ").Append(issue.Status).Append(": ").Append(issue.Message);
-            }
-
-            return builder.ToString();
-        }
-    }
-
     /// <summary>
-    /// Strict ShellFoundation Build Settings validator. The production descriptor owns the scene list;
-    /// this class checks its committed serialization, GUIDs, structure, and transition applicability.
-    /// Validation never rewrites Build Settings.
+    /// Deterministic #150 ShellFoundation Player builder. The batch entry deliberately delegates all
+    /// policy to the committed descriptor and the non-mutating Build Settings validator, cleans only
+    /// the one guarded validation-output directory, and fails closed on incomplete build evidence.
     /// </summary>
-    public static class ProductionBuildSettingsValidator
+    public static class ProductionPlayerBuilder
     {
-        public static ProductionBuildSettingsReport ValidateCurrent()
+        public const string RequiredUnityVersion = "2022.3.62f3";
+        public const string OutputRelativeDirectory = "Builds/Validation/Windows64";
+        public const string ExecutableFileName = "AnotherLifeUnity.exe";
+        public const string DataDirectoryName = "AnotherLifeUnity_Data";
+        public const string SummaryRelativePath = "Logs/ProductionPlayerBuildSummary.json";
+
+        /// <summary>Canonical Unity -executeMethod entry. An exception is intentional non-zero batch evidence.</summary>
+        public static void BuildWindows64Development()
         {
-            string settingsPath = Path.Combine(ProjectRoot(), "ProjectSettings", "EditorBuildSettings.asset");
-            if (!File.Exists(settingsPath))
+            PlayerBuildSummary summary = Execute(new UnityProductionPlayerBuildEnvironment());
+            Debug.Log("[AL-PLAYER-BUILD-SUMMARY] " + summary.Summarize());
+
+            if (!summary.Succeeded)
             {
-                return Report(ProductionBuildValidationStatus.MissingBuildSettings,
-                    $"Build Settings asset is missing at '{settingsPath}'.");
+                throw new BuildFailedException(summary.SummaryMessage);
+            }
+        }
+
+        /// <summary>
+        /// Testable orchestration seam. Preflight is completed before stale-output cleanup or the Unity
+        /// build call, so every rejected preflight is observably non-mutating.
+        /// </summary>
+        internal static PlayerBuildSummary Execute(IProductionPlayerBuildEnvironment environment)
+        {
+            if (environment == null)
+            {
+                throw new ArgumentNullException(nameof(environment));
             }
 
-            EditorBuildSettingsScene[] scenes;
+            DateTime startedAtUtc = SafeUtcNow(environment);
+            string projectRoot;
+            string outputDirectory;
+            string summaryPath;
             try
             {
-                scenes = EditorBuildSettings.scenes;
+                projectRoot = NormalizeFullPath(environment.ProjectRoot);
+                outputDirectory = NormalizeFullPath(Path.Combine(projectRoot, "Builds", "Validation", "Windows64"));
+                summaryPath = NormalizeFullPath(Path.Combine(projectRoot, "Logs", "ProductionPlayerBuildSummary.json"));
             }
             catch (Exception exception)
             {
-                return Report(ProductionBuildValidationStatus.MissingBuildSettings,
-                    "Build Settings could not be read: " + exception.Message);
+                return PlayerBuildSummary.PreflightFailure(
+                    string.Empty,
+                    string.Empty,
+                    Array.Empty<string>(),
+                    environment.UnityVersion,
+                    startedAtUtc,
+                    SafeUtcNow(environment),
+                    "Project/output path resolution failed: " + exception.GetType().Name);
             }
 
-            var entries = (scenes ?? Array.Empty<EditorBuildSettingsScene>())
-                .Select(scene => ToEntry(scene))
-                .ToArray();
-
-            ProductionBuildSettingsReport report = ValidateEntries(entries);
-            SceneValidationReport sceneReport = ProductionSceneValidator.Validate();
-            if (!sceneReport.IsValid)
+            BuildValidationSnapshot validation;
+            try
             {
-                report = report.WithIssue(
-                    ProductionBuildValidationStatus.DescriptorDrift,
-                    "Production scene structure/marker validation failed. " + sceneReport.Summarize());
+                validation = environment.ValidateCurrentShellFoundation() ??
+                    BuildValidationSnapshot.Invalid("Build Settings validator returned no report.");
+            }
+            catch (Exception exception)
+            {
+                validation = BuildValidationSnapshot.Invalid(
+                    "Build Settings validation threw " + exception.GetType().Name + ": " + exception.Message);
             }
 
-            return report;
+            bool outputIgnored = SafeBoolean(() => environment.IsIgnoredPath(outputDirectory));
+            bool summaryIgnored = SafeBoolean(() => environment.IsIgnoredPath(summaryPath));
+            bool outputHasReparsePoint = SafeBooleanFailureClosed(() => environment.HasReparsePoint(outputDirectory));
+            bool summaryHasReparsePoint = SafeBooleanFailureClosed(
+                () => environment.HasReparsePoint(summaryPath));
+
+            PlayerBuildPlan plan = CreatePlan(
+                projectRoot,
+                outputDirectory,
+                environment.UnityVersion,
+                environment.IsCompiling,
+                environment.HasCompilationErrors,
+                validation,
+                outputIgnored,
+                summaryIgnored,
+                outputHasReparsePoint,
+                summaryHasReparsePoint);
+
+            if (!plan.IsValid)
+            {
+                PlayerBuildSummary failure = PlayerBuildSummary.PreflightFailure(
+                    plan.OutputPath,
+                    plan.Target.ToString(),
+                    plan.ScenePaths,
+                    plan.UnityVersion,
+                    startedAtUtc,
+                    SafeUtcNow(environment),
+                    plan.SummarizeFailures());
+                return FinalizeSummary(environment, plan, failure);
+            }
+
+            try
+            {
+                if (environment.DirectoryExists(plan.OutputDirectory))
+                {
+                    // The plan's exact-path and reparse-point gates have already succeeded. No other
+                    // directory can reach this destructive operation.
+                    environment.DeleteDirectory(plan.OutputDirectory);
+                }
+
+                if (environment.DirectoryExists(plan.OutputDirectory))
+                {
+                    throw new IOException("Guarded validation output still exists after cleanup.");
+                }
+
+                environment.CreateDirectory(plan.OutputDirectory);
+                if (!environment.DirectoryExists(plan.OutputDirectory))
+                {
+                    throw new IOException("Guarded validation output could not be created.");
+                }
+            }
+            catch (Exception exception)
+            {
+                PlayerBuildSummary failure = PlayerBuildSummary.PreparationFailure(
+                    plan,
+                    startedAtUtc,
+                    SafeUtcNow(environment),
+                    exception.GetType().Name + ": " + exception.Message);
+                return FinalizeSummary(environment, plan, failure);
+            }
+
+            PlayerBuildReportSnapshot report;
+            try
+            {
+                report = environment.BuildPlayer(plan.CreateBuildPlayerOptions()) ??
+                    PlayerBuildReportSnapshot.NotRun(
+                        plan.Target.ToString(),
+                        plan.OutputPath,
+                        "BuildPipeline returned no BuildReport.");
+            }
+            catch (Exception exception)
+            {
+                report = PlayerBuildReportSnapshot.Exception(
+                    plan.Target.ToString(),
+                    plan.OutputPath,
+                    exception.GetType().Name + ": " + exception.Message);
+            }
+
+            bool executableExists = SafeBoolean(() => environment.FileExists(plan.OutputPath));
+            bool dataDirectoryExists = SafeBoolean(() => environment.DirectoryExists(plan.DataDirectoryPath));
+            PlayerBuildSummary completion = EvaluateCompletion(
+                plan,
+                report,
+                startedAtUtc,
+                SafeUtcNow(environment),
+                executableExists,
+                dataDirectoryExists);
+            return FinalizeSummary(environment, plan, completion);
         }
 
-        /// <summary>Pure entry validation used by EditMode tests and the current-settings adapter.</summary>
-        public static ProductionBuildSettingsReport ValidateEntries(IEnumerable<ProductionBuildSceneEntry> entries)
+        /// <summary>Pure preflight/option planning seam used by EditMode tests.</summary>
+        internal static PlayerBuildPlan CreatePlan(
+            string projectRoot,
+            string outputDirectory,
+            string unityVersion,
+            bool isCompiling,
+            bool hasCompilationErrors,
+            BuildValidationSnapshot validation,
+            bool outputIgnored,
+            bool summaryIgnored,
+            bool outputHasReparsePoint,
+            bool summaryHasReparsePoint)
         {
-            if (entries == null)
+            var failures = new List<string>();
+            string normalizedRoot = TryNormalize(projectRoot);
+            string normalizedOutput = TryNormalize(outputDirectory);
+            string summaryPath = normalizedRoot.Length == 0
+                ? string.Empty
+                : TryNormalize(Path.Combine(normalizedRoot, "Logs", "ProductionPlayerBuildSummary.json"));
+
+            if (normalizedRoot.Length == 0)
             {
-                return Report(ProductionBuildValidationStatus.MissingBuildSettings,
-                    "Build Settings entries are unavailable.");
+                failures.Add("Project root is missing or invalid.");
             }
 
-            List<ProductionBuildSceneEntry> actual = entries.ToList();
-            if (actual.Count == 0)
+            if (!string.Equals(unityVersion, RequiredUnityVersion, StringComparison.Ordinal))
             {
-                return Report(ProductionBuildValidationStatus.EmptyBuildSettings,
-                    "Build Settings contain no scenes.");
+                failures.Add("Exact Unity version required: " + RequiredUnityVersion + "; actual: " +
+                    (string.IsNullOrEmpty(unityVersion) ? "<missing>" : unityVersion) + ".");
             }
 
-            var issues = new List<ProductionBuildValidationIssue>();
-            IReadOnlyList<ProductionSceneRecord> expected = ProductionSceneDescriptor.ShellFoundationOrdered;
-            ValidateDescriptor(expected, issues);
-
-            if (!string.Equals(actual[0].Path, expected[0].AssetPath, StringComparison.Ordinal))
+            if (isCompiling)
             {
-                Add(issues, ProductionBuildValidationStatus.WrongEntryScene,
-                    $"Build index 0 is '{actual[0].Path}', expected '{expected[0].AssetPath}'.");
+                failures.Add("Unity script compilation is still in progress.");
             }
 
-            var expectedByPath = expected.ToDictionary(record => record.AssetPath, StringComparer.Ordinal);
-            var expectedPaths = new HashSet<string>(expectedByPath.Keys, StringComparer.Ordinal);
-
-            foreach (IGrouping<string, ProductionBuildSceneEntry> duplicate in actual
-                         .GroupBy(entry => entry.Path, StringComparer.Ordinal).Where(group => group.Count() > 1))
+            if (hasCompilationErrors)
             {
-                Add(issues, ProductionBuildValidationStatus.DuplicatePath,
-                    $"Build Settings contain duplicate path '{duplicate.Key}'.");
+                failures.Add("Unity reports script compilation errors.");
             }
 
-            foreach (IGrouping<string, ProductionBuildSceneEntry> duplicate in actual
-                         .GroupBy(entry => entry.SceneName, StringComparer.Ordinal).Where(group => group.Count() > 1))
+            if (validation == null || !validation.IsValid)
             {
-                Add(issues, ProductionBuildValidationStatus.DuplicateName,
-                    $"Build Settings contain duplicate scene name '{duplicate.Key}'.");
+                failures.Add("ShellFoundation Build Settings/scene validation failed: " +
+                    (validation == null ? "no report" : validation.Summary));
             }
 
-            ProductionSceneRecord testRecord = Record(ProductionSceneDescriptor.TestSceneId);
-            ProductionSceneRecord deferredRecord = Record(ProductionSceneDescriptor.ChampionArenaSceneId);
-
-            for (int index = 0; index < actual.Count; index++)
+            if (!IsGuardedOutputDirectory(normalizedRoot, normalizedOutput))
             {
-                ProductionBuildSceneEntry entry = actual[index];
-                if (!entry.Enabled)
+                failures.Add("Player output is not the exact guarded Builds/Validation/Windows64 directory outside Assets.");
+            }
+
+            if (!outputIgnored)
+            {
+                failures.Add("Guarded Player output is not covered by the Unity project ignore policy.");
+            }
+
+            if (outputHasReparsePoint)
+            {
+                failures.Add("Guarded Player output contains a reparse-point/symlink boundary.");
+            }
+
+            if (!IsGuardedSummaryPath(normalizedRoot, summaryPath) || !summaryIgnored)
+            {
+                failures.Add("Build summary path is not the exact ignored Logs path outside Assets.");
+            }
+
+            if (summaryHasReparsePoint)
+            {
+                failures.Add("Build summary directory contains a reparse-point/symlink boundary.");
+            }
+
+            ProductionSceneRecord[] records = ProductionSceneDescriptor.ShellFoundationOrdered.ToArray();
+            if (records.Length != 3 ||
+                records.Any(record => record == null || !record.IsProductionScene || !record.IsInShellFoundation) ||
+                records.Any(record =>
+                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal) ||
+                    string.Equals(record.SceneId, ProductionSceneDescriptor.ChampionArenaSceneId, StringComparison.Ordinal)) ||
+                records.Select(record => record.AssetPath).Distinct(StringComparer.Ordinal).Count() != records.Length)
+            {
+                failures.Add("ShellFoundation descriptor is not three unique production scenes with Test/Champion excluded.");
+            }
+
+            string[] scenePaths = records
+                .Where(record => record != null)
+                .Select(record => record.AssetPath ?? string.Empty)
+                .ToArray();
+            string outputPath = normalizedOutput.Length == 0
+                ? string.Empty
+                : Path.Combine(normalizedOutput, ExecutableFileName);
+            return new PlayerBuildPlan(
+                normalizedRoot,
+                normalizedOutput,
+                outputPath,
+                summaryPath,
+                unityVersion ?? string.Empty,
+                scenePaths,
+                failures,
+                IsGuardedSummaryPath(normalizedRoot, summaryPath) &&
+                summaryIgnored &&
+                !summaryHasReparsePoint);
+        }
+
+        /// <summary>Pure BuildReport/artifact evaluation seam used by EditMode tests.</summary>
+        internal static PlayerBuildSummary EvaluateCompletion(
+            PlayerBuildPlan plan,
+            PlayerBuildReportSnapshot report,
+            DateTime startedAtUtc,
+            DateTime endedAtUtc,
+            bool executableExists,
+            bool dataDirectoryExists)
+        {
+            if (plan == null)
+            {
+                throw new ArgumentNullException(nameof(plan));
+            }
+
+            if (report == null)
+            {
+                report = PlayerBuildReportSnapshot.NotRun(
+                    plan.Target.ToString(),
+                    plan.OutputPath,
+                    "BuildPipeline returned no report snapshot.");
+            }
+
+            if (!string.Equals(report.Result, BuildResult.Succeeded.ToString(), StringComparison.Ordinal))
+            {
+                return PlayerBuildSummary.BuildFailure(
+                    plan,
+                    report,
+                    startedAtUtc,
+                    endedAtUtc,
+                    "BuildPipeline result was " + report.Result + ". " + report.ReportSummary);
+            }
+
+            if (report.ErrorCount != 0)
+            {
+                return PlayerBuildSummary.BuildFailure(
+                    plan,
+                    report,
+                    startedAtUtc,
+                    endedAtUtc,
+                    "BuildReport reported " + report.ErrorCount +
+                    " error(s) despite a Succeeded result; postflight fails closed.");
+            }
+
+            if (!string.Equals(report.Target, plan.Target.ToString(), StringComparison.Ordinal))
+            {
+                return PlayerBuildSummary.BuildFailure(
+                    plan,
+                    report,
+                    startedAtUtc,
+                    endedAtUtc,
+                    "BuildReport target did not match the guarded plan.");
+            }
+
+            if (!SamePath(report.OutputPath, plan.OutputPath))
+            {
+                return PlayerBuildSummary.BuildFailure(
+                    plan,
+                    report,
+                    startedAtUtc,
+                    endedAtUtc,
+                    "BuildReport output path did not match the guarded plan.");
+            }
+
+            if (!executableExists || !dataDirectoryExists)
+            {
+                var missing = new List<string>(2);
+                if (!executableExists)
                 {
-                    Add(issues, ProductionBuildValidationStatus.DisabledStaleScene,
-                        $"Disabled/stale Build Settings entry at index {index}: '{entry.Path}'.");
+                    missing.Add(ExecutableFileName);
                 }
 
-                if (string.Equals(entry.Path, testRecord.AssetPath, StringComparison.Ordinal))
+                if (!dataDirectoryExists)
                 {
-                    Add(issues, ProductionBuildValidationStatus.TestSceneEnabled,
-                        $"Representative test scene is listed in Build Settings: '{entry.Path}'.");
+                    missing.Add(DataDirectoryName);
                 }
 
-                if (string.Equals(entry.Path, deferredRecord.AssetPath, StringComparison.Ordinal))
+                return PlayerBuildSummary.ArtifactFailure(
+                    plan,
+                    report,
+                    startedAtUtc,
+                    endedAtUtc,
+                    "BuildReport succeeded but required current-run artifacts are missing: " +
+                    string.Join(", ", missing) + ".");
+            }
+
+            return PlayerBuildSummary.Success(plan, report, startedAtUtc, endedAtUtc);
+        }
+
+        /// <summary>Fixed-order, invariant-culture JSON serializer; does not depend on JsonUtility field order.</summary>
+        internal static string SerializeSummary(PlayerBuildSummary summary)
+        {
+            if (summary == null)
+            {
+                throw new ArgumentNullException(nameof(summary));
+            }
+
+            var json = new StringBuilder(768);
+            json.Append("{\n");
+            AppendJsonProperty(json, "status", summary.Status.ToString(), comma: true);
+            AppendJsonProperty(json, "target", summary.Target, comma: true);
+            AppendJsonProperty(json, "unityVersion", summary.UnityVersion, comma: true);
+            AppendJsonProperty(json, "outputPath", summary.OutputPath, comma: true);
+            json.Append("  \"scenePaths\": [");
+            for (int index = 0; index < summary.ScenePaths.Count; index++)
+            {
+                if (index > 0)
                 {
-                    Add(issues, ProductionBuildValidationStatus.DeferredSceneEnabled,
-                        $"Deferred ChampionArena scene is listed before its applicability gates: '{entry.Path}'.");
+                    json.Append(',');
                 }
 
-                if (!expectedPaths.Contains(entry.Path))
+                json.Append("\n    \"").Append(EscapeJson(summary.ScenePaths[index])).Append('"');
+            }
+
+            if (summary.ScenePaths.Count > 0)
+            {
+                json.Append('\n').Append("  ");
+            }
+
+            json.Append("],\n");
+            AppendJsonProperty(json, "startedAtUtc", FormatUtc(summary.StartedAtUtc), comma: true);
+            AppendJsonProperty(json, "endedAtUtc", FormatUtc(summary.EndedAtUtc), comma: true);
+            AppendJsonProperty(json, "totalTime", summary.TotalTime.ToString("c", CultureInfo.InvariantCulture), comma: true);
+            AppendJsonNumber(json, "totalSize", summary.TotalSize.ToString(CultureInfo.InvariantCulture), comma: true);
+            AppendJsonNumber(json, "warningCount", summary.WarningCount.ToString(CultureInfo.InvariantCulture), comma: true);
+            AppendJsonNumber(json, "errorCount", summary.ErrorCount.ToString(CultureInfo.InvariantCulture), comma: true);
+            AppendJsonProperty(json, "buildResult", summary.BuildResult, comma: true);
+            AppendJsonProperty(json, "summaryMessage", summary.SummaryMessage, comma: false);
+            json.Append("}\n");
+            return json.ToString();
+        }
+
+        internal static bool IsGuardedOutputDirectory(string projectRoot, string candidateOutputDirectory)
+        {
+            string root = TryNormalize(projectRoot);
+            string candidate = TryNormalize(candidateOutputDirectory);
+            if (root.Length == 0 || candidate.Length == 0)
+            {
+                return false;
+            }
+
+            string expected = TryNormalize(Path.Combine(root, "Builds", "Validation", "Windows64"));
+            string assets = TryNormalize(Path.Combine(root, "Assets"));
+            return SamePath(candidate, expected) && !IsSameOrDescendant(candidate, assets);
+        }
+
+        internal static bool IsGuardedSummaryPath(string projectRoot, string candidateSummaryPath)
+        {
+            string root = TryNormalize(projectRoot);
+            string candidate = TryNormalize(candidateSummaryPath);
+            if (root.Length == 0 || candidate.Length == 0)
+            {
+                return false;
+            }
+
+            string expected = TryNormalize(Path.Combine(root, "Logs", "ProductionPlayerBuildSummary.json"));
+            string assets = TryNormalize(Path.Combine(root, "Assets"));
+            return SamePath(candidate, expected) && !IsSameOrDescendant(candidate, assets);
+        }
+
+        private static PlayerBuildSummary FinalizeSummary(
+            IProductionPlayerBuildEnvironment environment,
+            PlayerBuildPlan plan,
+            PlayerBuildSummary summary)
+        {
+            if (!plan.CanWriteSummary)
+            {
+                Debug.LogError("[AL-PLAYER-BUILD-SUMMARY-NOT-WRITTEN] " + summary.Summarize());
+                return summary;
+            }
+
+            try
+            {
+                environment.CreateDirectory(Path.GetDirectoryName(plan.SummaryPath));
+                string json = SerializeSummary(summary);
+                environment.WriteAllText(plan.SummaryPath, json);
+                Debug.Log("[AL-PLAYER-BUILD-SUMMARY-PATH] " + plan.SummaryPath);
+                Debug.Log("[AL-PLAYER-BUILD-REPORT] " + summary.Summarize());
+                return summary;
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("[AL-PLAYER-BUILD-SUMMARY-WRITE-FAILED] " + exception);
+                return PlayerBuildSummary.SummaryWriteFailure(
+                    summary,
+                    exception.GetType().Name + ": " + exception.Message);
+            }
+        }
+
+        private static DateTime SafeUtcNow(IProductionPlayerBuildEnvironment environment)
+        {
+            try
+            {
+                return ToUtc(environment.UtcNow());
+            }
+            catch
+            {
+                return DateTime.UtcNow;
+            }
+        }
+
+        private static bool SafeBoolean(Func<bool> read)
+        {
+            try
+            {
+                return read();
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static bool SafeBooleanFailureClosed(Func<bool> read)
+        {
+            try
+            {
+                return read();
+            }
+            catch
+            {
+                return true;
+            }
+        }
+
+        private static string NormalizeFullPath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                throw new ArgumentException("Path is required.", nameof(path));
+            }
+
+            string full = Path.GetFullPath(path);
+            string volumeRoot = Path.GetPathRoot(full) ?? string.Empty;
+            return full.Length > volumeRoot.Length
+                ? full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                : full;
+        }
+
+        private static string TryNormalize(string path)
+        {
+            try
+            {
+                return NormalizeFullPath(path);
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
+        private static bool SamePath(string left, string right)
+        {
+            string normalizedLeft = TryNormalize(left);
+            string normalizedRight = TryNormalize(right);
+            return normalizedLeft.Length > 0 && normalizedRight.Length > 0 &&
+                string.Equals(normalizedLeft, normalizedRight, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsSameOrDescendant(string candidate, string parent)
+        {
+            string normalizedCandidate = TryNormalize(candidate);
+            string normalizedParent = TryNormalize(parent);
+            if (normalizedCandidate.Length == 0 || normalizedParent.Length == 0)
+            {
+                return false;
+            }
+
+            if (string.Equals(normalizedCandidate, normalizedParent, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            string prefix = normalizedParent + Path.DirectorySeparatorChar;
+            return normalizedCandidate.StartsWith(prefix, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static DateTime ToUtc(DateTime value)
+        {
+            if (value.Kind == DateTimeKind.Utc)
+            {
+                return value;
+            }
+
+            if (value.Kind == DateTimeKind.Unspecified)
+            {
+                return DateTime.SpecifyKind(value, DateTimeKind.Utc);
+            }
+
+            return value.ToUniversalTime();
+        }
+
+        private static string FormatUtc(DateTime value) =>
+            ToUtc(value).ToString("O", CultureInfo.InvariantCulture);
+
+        private static void AppendJsonProperty(StringBuilder json, string name, string value, bool comma)
+        {
+            json.Append("  \"").Append(name).Append("\": \"")
+                .Append(EscapeJson(value ?? string.Empty)).Append('"');
+            json.Append(comma ? ",\n" : "\n");
+        }
+
+        private static void AppendJsonNumber(StringBuilder json, string name, string value, bool comma)
+        {
+            json.Append("  \"").Append(name).Append("\": ").Append(value);
+            json.Append(comma ? ",\n" : "\n");
+        }
+
+        private static string EscapeJson(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return string.Empty;
+            }
+
+            var escaped = new StringBuilder(value.Length + 16);
+            foreach (char character in value)
+            {
+                switch (character)
                 {
-                    Add(issues, ProductionBuildValidationStatus.UnexpectedScene,
-                        $"Unexpected Build Settings scene at index {index}: '{entry.Path}'.");
+                    case '"': escaped.Append("\\\""); break;
+                    case '\\': escaped.Append("\\\\"); break;
+                    case '\b': escaped.Append("\\b"); break;
+                    case '\f': escaped.Append("\\f"); break;
+                    case '\n': escaped.Append("\\n"); break;
+                    case '\r': escaped.Append("\\r"); break;
+                    case '\t': escaped.Append("\\t"); break;
+                    default:
+                        if (character < 0x20)
+                        {
+                            escaped.Append("\\u").Append(((int)character).ToString("x4", CultureInfo.InvariantCulture));
+                        }
+                        else
+                        {
+                            escaped.Append(character);
+                        }
+                        break;
+                }
+            }
+
+            return escaped.ToString();
+        }
+    }
+
+    internal interface IProductionPlayerBuildEnvironment
+    {
+        string ProjectRoot { get; }
+        string UnityVersion { get; }
+        bool IsCompiling { get; }
+        bool HasCompilationErrors { get; }
+        DateTime UtcNow();
+        BuildValidationSnapshot ValidateCurrentShellFoundation();
+        bool IsIgnoredPath(string fullPath);
+        bool HasReparsePoint(string fullPath);
+        bool DirectoryExists(string fullPath);
+        bool FileExists(string fullPath);
+        void DeleteDirectory(string fullPath);
+        void CreateDirectory(string fullPath);
+        PlayerBuildReportSnapshot BuildPlayer(BuildPlayerOptions options);
+        void WriteAllText(string fullPath, string contents);
+    }
+
+    internal sealed class UnityProductionPlayerBuildEnvironment : IProductionPlayerBuildEnvironment
+    {
+        public string ProjectRoot => Directory.GetParent(Application.dataPath)?.FullName ?? string.Empty;
+        public string UnityVersion => Application.unityVersion;
+        public bool IsCompiling => EditorApplication.isCompiling;
+        public bool HasCompilationErrors => EditorUtility.scriptCompilationFailed;
+
+        public DateTime UtcNow() => DateTime.UtcNow;
+
+        public BuildValidationSnapshot ValidateCurrentShellFoundation()
+        {
+            var report = ProductionBuildSettingsValidator.ValidateCurrentShellFoundation();
+            return report == null
+                ? BuildValidationSnapshot.Invalid("ProductionBuildSettingsValidator returned no report.")
+                : new BuildValidationSnapshot(report.IsValid, report.Summarize());
+        }
+
+        public bool IsIgnoredPath(string fullPath)
+        {
+            string root = ProductionPlayerBuilderPath.Normalize(ProjectRoot);
+            string candidate = ProductionPlayerBuilderPath.Normalize(fullPath);
+            if (!ProductionPlayerBuilderPath.IsDescendant(candidate, root))
+            {
+                return false;
+            }
+
+            string repositoryRoot = FindRepositoryRoot(root);
+            if (repositoryRoot.Length == 0 || !ProductionPlayerBuilderPath.IsDescendant(candidate, repositoryRoot))
+            {
+                return false;
+            }
+
+            string relative = candidate.Substring(repositoryRoot.Length)
+                .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                .Replace(Path.DirectorySeparatorChar, '/');
+            GitCommandResult ignored = RunGit(repositoryRoot,
+                "check-ignore --no-index -q -- " + QuoteGitArgument(relative));
+            if (ignored.ExitCode != 0)
+            {
+                return false;
+            }
+
+            GitCommandResult tracked = RunGit(repositoryRoot,
+                "ls-files -- " + QuoteGitArgument(relative));
+            return tracked.ExitCode == 0 && string.IsNullOrWhiteSpace(tracked.StandardOutput);
+        }
+
+        public bool HasReparsePoint(string fullPath)
+        {
+            string root = ProductionPlayerBuilderPath.Normalize(ProjectRoot);
+            string candidate = ProductionPlayerBuilderPath.Normalize(fullPath);
+            if (!ProductionPlayerBuilderPath.IsDescendantOrSame(candidate, root))
+            {
+                return true;
+            }
+
+            string cursor = candidate;
+            while (!string.IsNullOrEmpty(cursor))
+            {
+                try
+                {
+                    if ((File.GetAttributes(cursor) & FileAttributes.ReparsePoint) != 0)
+                    {
+                        return true;
+                    }
+                }
+                catch (Exception exception) when (
+                    exception is FileNotFoundException ||
+                    exception is DirectoryNotFoundException)
+                {
+                    // A planned leaf or intermediate directory may not exist yet. Its first existing
+                    // ancestor is still inspected, including the canonical project root itself.
+                }
+                catch
+                {
+                    // Inaccessible or otherwise uninspectable path state is not safe build evidence.
+                    return true;
+                }
+
+                if (string.Equals(cursor, root, StringComparison.OrdinalIgnoreCase))
+                {
+                    return false;
+                }
+
+                string parent = Path.GetDirectoryName(cursor);
+                if (string.IsNullOrEmpty(parent) ||
+                    string.Equals(parent, cursor, StringComparison.OrdinalIgnoreCase) ||
+                    !ProductionPlayerBuilderPath.IsDescendantOrSame(parent, root))
+                {
+                    return true;
+                }
+
+                cursor = ProductionPlayerBuilderPath.Normalize(parent);
+            }
+
+            return true;
+        }
+
+        public bool DirectoryExists(string fullPath) => Directory.Exists(fullPath);
+        public bool FileExists(string fullPath) => File.Exists(fullPath);
+        public void DeleteDirectory(string fullPath) => Directory.Delete(fullPath, recursive: true);
+        public void CreateDirectory(string fullPath) => Directory.CreateDirectory(fullPath);
+
+        public PlayerBuildReportSnapshot BuildPlayer(BuildPlayerOptions options)
+        {
+            BuildReport report = BuildPipeline.BuildPlayer(options);
+            if (report == null)
+            {
+                return null;
+            }
+
+            BuildSummary summary = report.summary;
+            foreach (BuildStep step in report.steps)
+            {
+                foreach (BuildStepMessage message in step.messages)
+                {
+                    string evidence = "[AL-PLAYER-BUILD-MESSAGE] step=" + SingleLine(step.name) +
+                                      "; type=" + message.type +
+                                      "; content=" + SingleLine(message.content);
+                    if (message.type == LogType.Warning)
+                    {
+                        Debug.LogWarning(evidence);
+                    }
+                    else if (message.type == LogType.Error ||
+                             message.type == LogType.Assert ||
+                             message.type == LogType.Exception)
+                    {
+                        Debug.LogError(evidence);
+                    }
+                }
+            }
+
+            string reportSummary = string.Format(
+                CultureInfo.InvariantCulture,
+                "result={0}; target={1}; outputPath={2}; totalTime={3}; totalSize={4}; warnings={5}; errors={6}",
+                summary.result,
+                summary.platform,
+                summary.outputPath,
+                summary.totalTime.ToString("c", CultureInfo.InvariantCulture),
+                summary.totalSize,
+                summary.totalWarnings,
+                summary.totalErrors);
+            return new PlayerBuildReportSnapshot(
+                summary.result.ToString(),
+                summary.platform.ToString(),
+                summary.outputPath,
+                summary.totalTime,
+                summary.totalSize,
+                summary.totalWarnings,
+                summary.totalErrors,
+                reportSummary);
+        }
+
+        private static string SingleLine(string value)
+        {
+            return (value ?? string.Empty)
+                .Replace('\r', ' ')
+                .Replace('\n', ' ')
+                .Trim();
+        }
+
+        public void WriteAllText(string fullPath, string contents)
+        {
+            string root = ProductionPlayerBuilderPath.Normalize(ProjectRoot);
+            string destination = ProductionPlayerBuilderPath.Normalize(fullPath);
+            if (!ProductionPlayerBuilder.IsGuardedSummaryPath(root, destination) ||
+                HasReparsePoint(destination))
+            {
+                throw new IOException("Build summary destination is not the exact guarded non-reparse path.");
+            }
+
+            string temporary = destination + ".tmp-" + System.Diagnostics.Process.GetCurrentProcess().Id;
+            byte[] payload = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false)
+                .GetBytes(contents ?? string.Empty);
+            try
+            {
+                using (var stream = new FileStream(
+                           temporary,
+                           FileMode.CreateNew,
+                           FileAccess.Write,
+                           FileShare.None))
+                {
+                    stream.Write(payload, 0, payload.Length);
+                    stream.Flush(flushToDisk: true);
+                }
+
+                // Replace the directory entry atomically when a prior summary exists. This also
+                // severs an ordinary hard link without ever opening its other name for write.
+                // Reparse leaves were rejected above and are checked again for every write.
+                if (File.Exists(destination))
+                {
+                    File.Replace(temporary, destination, null);
                 }
                 else
                 {
-                    ProductionSceneRecord record = expectedByPath[entry.Path];
-                    if (!string.Equals(entry.ResolvedGuid, record.AssetGuid, StringComparison.Ordinal) ||
-                        (!string.IsNullOrEmpty(entry.SerializedGuid) &&
-                         !string.Equals(entry.SerializedGuid, record.AssetGuid, StringComparison.Ordinal)))
-                    {
-                        Add(issues, ProductionBuildValidationStatus.GuidMismatch,
-                            $"GUID mismatch for '{entry.Path}': serialized='{entry.SerializedGuid}', resolved='{entry.ResolvedGuid}', expected='{record.AssetGuid}'.");
-                    }
+                    File.Move(temporary, destination);
                 }
-
-                if (!entry.AssetExists)
+            }
+            finally
+            {
+                if (File.Exists(temporary))
                 {
-                    Add(issues, ProductionBuildValidationStatus.MissingPath,
-                        $"Build Settings scene asset is missing: '{entry.Path}'.");
+                    File.Delete(temporary);
                 }
-
-                if (index < expected.Count && !string.Equals(entry.Path, expected[index].AssetPath, StringComparison.Ordinal))
-                {
-                    Add(issues, ProductionBuildValidationStatus.UnexpectedScene,
-                        $"Wrong ShellFoundation order at index {index}: found '{entry.Path}', expected '{expected[index].AssetPath}'.");
-                }
-            }
-
-            foreach (ProductionSceneRecord required in expected)
-            {
-                if (!actual.Any(entry => string.Equals(entry.Path, required.AssetPath, StringComparison.Ordinal)))
-                {
-                    Add(issues, ProductionBuildValidationStatus.MissingRequiredScene,
-                        $"Required ShellFoundation scene is absent: '{required.AssetPath}'.");
-                }
-            }
-
-            ValidateTransitions(expected, issues);
-            return new ProductionBuildSettingsReport(issues);
-        }
-
-        private static void ValidateDescriptor(
-            IReadOnlyList<ProductionSceneRecord> expected,
-            ICollection<ProductionBuildValidationIssue> issues)
-        {
-            IReadOnlyList<ProductionSceneRecord> profileRecords = ProductionSceneDescriptor.All
-                .Where(record => record.BuildProfiles.Contains(ProductionSceneDescriptor.ShellFoundationProfile))
-                .ToList();
-
-            bool profileMatches = expected != null &&
-                                  expected.Count > 0 &&
-                                  profileRecords.Select(record => record.SceneId)
-                                      .SequenceEqual(expected.Select(record => record.SceneId), StringComparer.Ordinal);
-            if (!profileMatches)
-            {
-                Add(issues, ProductionBuildValidationStatus.DescriptorDrift,
-                    "ShellFoundationOrdered does not match descriptor profile applicability.");
-                return;
-            }
-
-            if (!string.Equals(expected[0].SceneId, ProductionSceneDescriptor.BootSceneId, StringComparison.Ordinal) ||
-                expected.Any(record => !record.IsProductionScene ||
-                                       !string.Equals(record.Status, ProductionSceneDescriptor.StatusCommittedActive, StringComparison.Ordinal)) ||
-                expected.Select(record => record.AssetPath).Distinct(StringComparer.Ordinal).Count() != expected.Count ||
-                expected.Select(record => record.SceneName).Distinct(StringComparer.Ordinal).Count() != expected.Count ||
-                expected.Select(record => record.AssetGuid).Distinct(StringComparer.Ordinal).Count() != expected.Count)
-            {
-                Add(issues, ProductionBuildValidationStatus.DescriptorDrift,
-                    "ShellFoundation descriptor invariants (Boot entry, active production status, or uniqueness) are invalid.");
-            }
-
-            ProductionSceneRecord test = Record(ProductionSceneDescriptor.TestSceneId);
-            ProductionSceneRecord champion = Record(ProductionSceneDescriptor.ChampionArenaSceneId);
-            if (test.BuildProfiles.Count != 0 || test.IsProductionScene ||
-                champion.BuildProfiles.Count != 0 ||
-                !string.Equals(champion.Status, ProductionSceneDescriptor.StatusCommittedDeferred, StringComparison.Ordinal))
-            {
-                Add(issues, ProductionBuildValidationStatus.DescriptorDrift,
-                    "Test/Champion descriptor applicability no longer matches the ShellFoundation policy.");
             }
         }
 
-        private static void ValidateTransitions(
-            IReadOnlyList<ProductionSceneRecord> expected,
-            ICollection<ProductionBuildValidationIssue> issues)
+        private static string FindRepositoryRoot(string startPath)
         {
-            var shellIds = new HashSet<string>(expected.Select(record => record.SceneId), StringComparer.Ordinal);
-            foreach (ProductionSceneRecord source in ProductionSceneDescriptor.ProductionScenes)
+            var cursor = new DirectoryInfo(startPath);
+            while (cursor != null)
             {
-                foreach (SceneTransition transition in source.TransitionTargets)
+                string marker = Path.Combine(cursor.FullName, ".git");
+                if (Directory.Exists(marker) || File.Exists(marker))
                 {
-                    if (!ProductionSceneDescriptor.TryGetById(transition.TargetSceneId, out ProductionSceneRecord target) ||
-                        !string.Equals(transition.SerializedValue, target.SceneName, StringComparison.Ordinal))
+                    return ProductionPlayerBuilderPath.Normalize(cursor.FullName);
+                }
+
+                cursor = cursor.Parent;
+            }
+
+            return string.Empty;
+        }
+
+        private static GitCommandResult RunGit(string repositoryRoot, string arguments)
+        {
+            try
+            {
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "git",
+                    Arguments = arguments,
+                    WorkingDirectory = repositoryRoot,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+                using (System.Diagnostics.Process process = System.Diagnostics.Process.Start(startInfo))
+                {
+                    if (process == null)
                     {
-                        Add(issues, ProductionBuildValidationStatus.TransitionUnavailable,
-                            $"Transition '{source.SceneId}' -> '{transition.TargetSceneId}' does not resolve exactly in the descriptor.");
-                        continue;
+                        return GitCommandResult.Failed();
                     }
 
-                    if (transition.Status == TransitionStatus.Active &&
-                        shellIds.Contains(source.SceneId) &&
-                        !shellIds.Contains(target.SceneId))
+                    var standardOutput = new StringBuilder();
+                    var standardError = new StringBuilder();
+                    process.OutputDataReceived += (_, eventArgs) =>
                     {
-                        Add(issues, ProductionBuildValidationStatus.TransitionUnavailable,
-                            $"Active ShellFoundation transition '{source.SceneId}' targets unavailable scene '{target.SceneId}'.");
+                        if (eventArgs.Data != null)
+                        {
+                            lock (standardOutput)
+                            {
+                                standardOutput.AppendLine(eventArgs.Data);
+                            }
+                        }
+                    };
+                    process.ErrorDataReceived += (_, eventArgs) =>
+                    {
+                        if (eventArgs.Data != null)
+                        {
+                            lock (standardError)
+                            {
+                                standardError.AppendLine(eventArgs.Data);
+                            }
+                        }
+                    };
+                    process.BeginOutputReadLine();
+                    process.BeginErrorReadLine();
+                    if (!process.WaitForExit(10000))
+                    {
+                        try
+                        {
+                            process.Kill();
+                        }
+                        catch
+                        {
+                            // The preflight remains failed regardless of cleanup outcome.
+                        }
+
+                        return GitCommandResult.Failed();
                     }
 
-                    if (transition.Status == TransitionStatus.Deferred &&
-                        (shellIds.Contains(target.SceneId) || transition.HasSerializedField))
+                    // A parameterless wait after the timed wait lets asynchronous stream callbacks
+                    // flush without reopening an unbounded wait on a still-running Git process.
+                    process.WaitForExit();
+                    string output;
+                    lock (standardOutput)
                     {
-                        Add(issues, ProductionBuildValidationStatus.DeferredTransitionReachable,
-                            $"Deferred transition '{source.SceneId}' -> '{target.SceneId}' is represented as reachable.");
+                        output = standardOutput.ToString();
                     }
+
+                    return new GitCommandResult(process.ExitCode, output);
                 }
             }
-
-            if (ProductionSceneDescriptor.IsResetToBootProductionReachable)
+            catch
             {
-                Add(issues, ProductionBuildValidationStatus.DeferredTransitionReachable,
-                    "Unsafe reset-to-Boot is marked production reachable.");
+                return GitCommandResult.Failed();
             }
         }
 
-        private static ProductionBuildSceneEntry ToEntry(EditorBuildSettingsScene scene)
+        private static string QuoteGitArgument(string value)
         {
-            string path = scene?.path ?? string.Empty;
-            string serializedGuid = scene == null ? string.Empty : scene.guid.ToString();
-            string resolvedGuid = string.IsNullOrEmpty(path) ? string.Empty : AssetDatabase.AssetPathToGUID(path);
-            bool exists = !string.IsNullOrEmpty(path) && AssetDatabase.LoadAssetAtPath<SceneAsset>(path) != null;
-            return new ProductionBuildSceneEntry(path, scene != null && scene.enabled, serializedGuid, resolvedGuid, exists);
+            return "\"" + (value ?? string.Empty).Replace("\"", "\\\"") + "\"";
         }
 
-        private static ProductionSceneRecord Record(string sceneId)
+        private sealed class GitCommandResult
         {
-            if (!ProductionSceneDescriptor.TryGetById(sceneId, out ProductionSceneRecord record))
+            internal GitCommandResult(int exitCode, string standardOutput)
             {
-                throw new InvalidOperationException("Production descriptor is missing required record '" + sceneId + "'.");
+                ExitCode = exitCode;
+                StandardOutput = standardOutput ?? string.Empty;
             }
 
-            return record;
-        }
+            internal int ExitCode { get; }
+            internal string StandardOutput { get; }
 
-        private static ProductionBuildSettingsReport Report(ProductionBuildValidationStatus status, string message)
-        {
-            return new ProductionBuildSettingsReport(new[] { new ProductionBuildValidationIssue(status, message) });
-        }
-
-        private static void Add(
-            ICollection<ProductionBuildValidationIssue> issues,
-            ProductionBuildValidationStatus status,
-            string message)
-        {
-            issues.Add(new ProductionBuildValidationIssue(status, message));
-        }
-
-        private static string ProjectRoot()
-        {
-            return Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            internal static GitCommandResult Failed() => new GitCommandResult(-1, string.Empty);
         }
     }
 
-    public enum ProductionPlayerBuildStatus
+    /// <summary>Small path helper shared only by the production environment; no policy duplication.</summary>
+    internal static class ProductionPlayerBuilderPath
     {
-        Succeeded,
+        internal static string Normalize(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                return string.Empty;
+            }
+
+            string full = Path.GetFullPath(path);
+            string volumeRoot = Path.GetPathRoot(full) ?? string.Empty;
+            return full.Length > volumeRoot.Length
+                ? full.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                : full;
+        }
+
+        internal static bool IsDescendant(string candidate, string parent)
+        {
+            if (string.IsNullOrEmpty(candidate) || string.IsNullOrEmpty(parent))
+            {
+                return false;
+            }
+
+            return candidate.StartsWith(parent + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase);
+        }
+
+        internal static bool IsDescendantOrSame(string candidate, string parent) =>
+            string.Equals(candidate, parent, StringComparison.OrdinalIgnoreCase) || IsDescendant(candidate, parent);
+    }
+
+    internal sealed class BuildValidationSnapshot
+    {
+        internal BuildValidationSnapshot(bool isValid, string summary)
+        {
+            IsValid = isValid;
+            Summary = summary ?? string.Empty;
+        }
+
+        internal bool IsValid { get; }
+        internal string Summary { get; }
+
+        internal static BuildValidationSnapshot Invalid(string summary) =>
+            new BuildValidationSnapshot(false, summary);
+    }
+
+    internal sealed class PlayerBuildPlan
+    {
+        private readonly ReadOnlyCollection<string> _scenePaths;
+        private readonly ReadOnlyCollection<string> _failures;
+
+        internal PlayerBuildPlan(
+            string projectRoot,
+            string outputDirectory,
+            string outputPath,
+            string summaryPath,
+            string unityVersion,
+            IEnumerable<string> scenePaths,
+            IEnumerable<string> failures,
+            bool canWriteSummary)
+        {
+            ProjectRoot = projectRoot ?? string.Empty;
+            OutputDirectory = outputDirectory ?? string.Empty;
+            OutputPath = outputPath ?? string.Empty;
+            SummaryPath = summaryPath ?? string.Empty;
+            UnityVersion = unityVersion ?? string.Empty;
+            _scenePaths = Array.AsReadOnly((scenePaths ?? Array.Empty<string>()).ToArray());
+            _failures = Array.AsReadOnly((failures ?? Array.Empty<string>()).ToArray());
+            CanWriteSummary = canWriteSummary;
+        }
+
+        internal string ProjectRoot { get; }
+        internal string OutputDirectory { get; }
+        internal string OutputPath { get; }
+        internal string DataDirectoryPath => Path.Combine(OutputDirectory, ProductionPlayerBuilder.DataDirectoryName);
+        internal string SummaryPath { get; }
+        internal string UnityVersion { get; }
+        internal IReadOnlyList<string> ScenePaths => _scenePaths;
+        internal IReadOnlyList<string> Failures => _failures;
+        internal BuildTarget Target => BuildTarget.StandaloneWindows64;
+        internal BuildOptions Options => BuildOptions.Development;
+        internal bool IsValid => _failures.Count == 0;
+        internal bool CanWriteSummary { get; }
+
+        internal BuildPlayerOptions CreateBuildPlayerOptions()
+        {
+            return new BuildPlayerOptions
+            {
+                scenes = _scenePaths.ToArray(),
+                locationPathName = OutputPath,
+                target = Target,
+                options = Options
+            };
+        }
+
+        internal string SummarizeFailures() =>
+            _failures.Count == 0 ? string.Empty : string.Join(" ", _failures);
+    }
+
+    internal sealed class PlayerBuildReportSnapshot
+    {
+        internal PlayerBuildReportSnapshot(
+            string result,
+            string target,
+            string outputPath,
+            TimeSpan totalTime,
+            ulong totalSize,
+            int warningCount,
+            int errorCount,
+            string reportSummary)
+        {
+            Result = result ?? BuildResult.Unknown.ToString();
+            Target = target ?? string.Empty;
+            OutputPath = outputPath ?? string.Empty;
+            TotalTime = totalTime < TimeSpan.Zero ? TimeSpan.Zero : totalTime;
+            TotalSize = totalSize;
+            WarningCount = Math.Max(0, warningCount);
+            ErrorCount = Math.Max(0, errorCount);
+            ReportSummary = reportSummary ?? string.Empty;
+        }
+
+        internal string Result { get; }
+        internal string Target { get; }
+        internal string OutputPath { get; }
+        internal TimeSpan TotalTime { get; }
+        internal ulong TotalSize { get; }
+        internal int WarningCount { get; }
+        internal int ErrorCount { get; }
+        internal string ReportSummary { get; }
+
+        internal static PlayerBuildReportSnapshot NotRun(string target, string outputPath, string message) =>
+            new PlayerBuildReportSnapshot("NotRun", target, outputPath, TimeSpan.Zero, 0UL, 0, 1, message);
+
+        internal static PlayerBuildReportSnapshot Exception(string target, string outputPath, string message) =>
+            new PlayerBuildReportSnapshot("Exception", target, outputPath, TimeSpan.Zero, 0UL, 0, 1, message);
+    }
+
+    internal enum PlayerBuildStatus
+    {
         PreflightFailed,
+        PreparationFailed,
         BuildFailed,
-        MissingOutput,
-        Exception
+        ArtifactsMissing,
+        SummaryWriteFailed,
+        Succeeded
     }
 
-    public sealed class ProductionPlayerBuildPreflightReport
+    internal sealed class PlayerBuildSummary
     {
-        public ProductionPlayerBuildPreflightReport(
-            ProductionBuildSettingsReport buildSettings,
-            bool unityVersionValid,
-            bool compilationValid,
-            bool buildTargetSupported,
-            bool outputPathValid,
-            bool outputPathIgnored,
-            IEnumerable<string> failures)
-        {
-            BuildSettings = buildSettings;
-            UnityVersionValid = unityVersionValid;
-            CompilationValid = compilationValid;
-            BuildTargetSupported = buildTargetSupported;
-            OutputPathValid = outputPathValid;
-            OutputPathIgnored = outputPathIgnored;
-            Failures = (failures ?? Array.Empty<string>()).ToList().AsReadOnly();
-        }
+        private readonly ReadOnlyCollection<string> _scenePaths;
 
-        public ProductionBuildSettingsReport BuildSettings { get; }
-        public bool UnityVersionValid { get; }
-        public bool CompilationValid { get; }
-        public bool BuildTargetSupported { get; }
-        public bool OutputPathValid { get; }
-        public bool OutputPathIgnored { get; }
-        public IReadOnlyList<string> Failures { get; }
-        public bool IsValid => BuildSettings != null && BuildSettings.IsValid && Failures.Count == 0;
-
-        public string Summarize()
-        {
-            var builder = new StringBuilder("[AL-PLAYER-BUILD-PREFLIGHT] valid=").Append(IsValid);
-            if (BuildSettings != null)
-            {
-                builder.Append('\n').Append(BuildSettings.Summarize());
-            }
-
-            foreach (string failure in Failures)
-            {
-                builder.Append('\n').Append("  - ").Append(failure);
-            }
-
-            return builder.ToString();
-        }
-    }
-
-    public sealed class ProductionPlayerBuildResult
-    {
-        internal ProductionPlayerBuildResult(
-            ProductionPlayerBuildStatus status,
-            BuildTarget target,
+        private PlayerBuildSummary(
+            PlayerBuildStatus status,
+            string target,
             string unityVersion,
             string outputPath,
             IEnumerable<string> scenePaths,
@@ -454,570 +1122,161 @@ namespace AL.EditorTools
             ulong totalSize,
             int warningCount,
             int errorCount,
-            BuildResult buildResult,
-            string summaryMessage,
-            BuildReport report)
+            string buildResult,
+            string summaryMessage)
         {
             Status = status;
-            Target = target;
+            Target = target ?? string.Empty;
             UnityVersion = unityVersion ?? string.Empty;
             OutputPath = outputPath ?? string.Empty;
-            ScenePaths = (scenePaths ?? Array.Empty<string>()).ToList().AsReadOnly();
-            StartedAtUtc = startedAtUtc;
-            EndedAtUtc = endedAtUtc;
-            TotalTime = totalTime;
+            _scenePaths = Array.AsReadOnly((scenePaths ?? Array.Empty<string>()).ToArray());
+            StartedAtUtc = startedAtUtc.Kind == DateTimeKind.Utc
+                ? startedAtUtc
+                : DateTime.SpecifyKind(startedAtUtc, DateTimeKind.Utc);
+            EndedAtUtc = endedAtUtc.Kind == DateTimeKind.Utc
+                ? endedAtUtc
+                : DateTime.SpecifyKind(endedAtUtc, DateTimeKind.Utc);
+            TotalTime = totalTime < TimeSpan.Zero ? TimeSpan.Zero : totalTime;
             TotalSize = totalSize;
-            WarningCount = warningCount;
-            ErrorCount = errorCount;
-            BuildResult = buildResult;
+            WarningCount = Math.Max(0, warningCount);
+            ErrorCount = Math.Max(0, errorCount);
+            BuildResult = buildResult ?? string.Empty;
             SummaryMessage = summaryMessage ?? string.Empty;
-            Report = report;
         }
 
-        public ProductionPlayerBuildStatus Status { get; }
-        public BuildTarget Target { get; }
-        public string UnityVersion { get; }
-        public string OutputPath { get; }
-        public IReadOnlyList<string> ScenePaths { get; }
-        public DateTime StartedAtUtc { get; }
-        public DateTime EndedAtUtc { get; }
-        public TimeSpan TotalTime { get; }
-        public ulong TotalSize { get; }
-        public int WarningCount { get; }
-        public int ErrorCount { get; }
-        public BuildResult BuildResult { get; }
-        public string SummaryMessage { get; }
-        public BuildReport Report { get; }
-        public bool Succeeded => Status == ProductionPlayerBuildStatus.Succeeded && BuildResult == BuildResult.Succeeded;
+        internal PlayerBuildStatus Status { get; }
+        internal string Target { get; }
+        internal string UnityVersion { get; }
+        internal string OutputPath { get; }
+        internal IReadOnlyList<string> ScenePaths => _scenePaths;
+        internal DateTime StartedAtUtc { get; }
+        internal DateTime EndedAtUtc { get; }
+        internal TimeSpan TotalTime { get; }
+        internal ulong TotalSize { get; }
+        internal int WarningCount { get; }
+        internal int ErrorCount { get; }
+        internal string BuildResult { get; }
+        internal string SummaryMessage { get; }
+        internal bool Succeeded => Status == PlayerBuildStatus.Succeeded;
 
-        public string Summarize()
+        internal string Summarize()
         {
-            return $"[AL-PLAYER-BUILD-RESULT] status={Status} target={Target} unity={UnityVersion} " +
-                   $"buildResult={BuildResult} output='{OutputPath}' scenes={ScenePaths.Count} " +
-                   $"duration={TotalTime.TotalSeconds:0.###}s size={TotalSize} warnings={WarningCount} errors={ErrorCount} " +
-                   $"message='{SummaryMessage}'";
-        }
-    }
-
-    public enum ProductionPlayerLaunchValidationStatus
-    {
-        Passed,
-        ProfileIsolationFailed,
-        MissingBootMarker,
-        MissingBootSequence,
-        MissingFreshProfileTransition,
-        MissingRealmSelectionMarker,
-        WrongOrder,
-        WrongProfileBranch,
-        ForbiddenSceneActivated,
-        SevereLog,
-        ProcessExitedEarly
-    }
-
-    public sealed class ProductionPlayerLaunchValidationResult
-    {
-        public ProductionPlayerLaunchValidationResult(
-            IEnumerable<ProductionPlayerLaunchValidationStatus> outcomes,
-            IEnumerable<string> failures,
-            bool externalTerminationAllowed)
-        {
-            var failureList = (failures ?? Array.Empty<string>()).ToList();
-            var statusList = (outcomes ?? Array.Empty<ProductionPlayerLaunchValidationStatus>())
-                .Where(status => status != ProductionPlayerLaunchValidationStatus.Passed)
-                .Distinct()
-                .ToList();
-            if (statusList.Count == 0)
-            {
-                statusList.Add(ProductionPlayerLaunchValidationStatus.Passed);
-            }
-
-            Outcomes = statusList.AsReadOnly();
-            Failures = failureList.AsReadOnly();
-            ExternalTerminationAllowed = externalTerminationAllowed &&
-                                         statusList.Count == 1 &&
-                                         statusList[0] == ProductionPlayerLaunchValidationStatus.Passed;
-        }
-
-        public IReadOnlyList<ProductionPlayerLaunchValidationStatus> Outcomes { get; }
-        public IReadOnlyList<string> Failures { get; }
-        public bool IsValid => Outcomes.Count == 1 && Outcomes[0] == ProductionPlayerLaunchValidationStatus.Passed;
-        public bool ExternalTerminationAllowed { get; }
-        public string TerminationDisposition => ExternalTerminationAllowed
-            ? "process may be terminated externally for validation; no graceful quit/save claim"
-            : "external termination is not authorized before successful transition evidence";
-    }
-
-    /// <summary>Pure ordered-log validator used by the external disposable-profile launch harness.</summary>
-    public static class ProductionPlayerLaunchLogValidator
-    {
-        private const string BootMarker = "[AL-SCENE-ACTIVE] id=al_scene_boot ";
-        private const string BootSequence = "AL Boot Sequence Started...";
-        private const string FreshProfileTransition = "No Realm Selected. Transitioning to Realm Selection...";
-        private const string RealmSelectionMarker = "[AL-SCENE-ACTIVE] id=al_scene_realm_selection ";
-
-        private static readonly string[] SevereTokens =
-        {
-            "ArgumentException",
-            "MissingReferenceException",
-            "MissingMethodException",
-            "NullReferenceException",
-            "Assertion failed",
-            "Unhandled Exception",
-            "Scene couldn't be loaded",
-            "is not in the build settings",
-            "[AL-SCENE-ACTIVE-MISMATCH]"
-        };
-
-        public static ProductionPlayerLaunchValidationResult Evaluate(
-            string logText,
-            bool processExited,
-            bool isolatedProfileVerified)
-        {
-            string log = logText ?? string.Empty;
-            var statuses = new List<ProductionPlayerLaunchValidationStatus>();
-            var failures = new List<string>();
-
-            if (!isolatedProfileVerified)
-            {
-                Add(statuses, failures, ProductionPlayerLaunchValidationStatus.ProfileIsolationFailed,
-                    "Disposable Player profile isolation was not verified.");
-            }
-
-            int boot = log.IndexOf(BootMarker, StringComparison.Ordinal);
-            int sequence = log.IndexOf(BootSequence, StringComparison.Ordinal);
-            int transition = log.IndexOf(FreshProfileTransition, StringComparison.Ordinal);
-            int realm = log.IndexOf(RealmSelectionMarker, StringComparison.Ordinal);
-
-            Require(boot, ProductionPlayerLaunchValidationStatus.MissingBootMarker, "Boot startup marker is missing.", statuses, failures);
-            Require(sequence, ProductionPlayerLaunchValidationStatus.MissingBootSequence, "Boot sequence log is missing.", statuses, failures);
-            Require(transition, ProductionPlayerLaunchValidationStatus.MissingFreshProfileTransition,
-                "Fresh-profile transition log is missing.", statuses, failures);
-            Require(realm, ProductionPlayerLaunchValidationStatus.MissingRealmSelectionMarker,
-                "RealmSelection startup marker is missing.", statuses, failures);
-
-            if (boot >= 0 && sequence >= 0 && transition >= 0 && realm >= 0 &&
-                !(boot < sequence && sequence < transition && transition < realm))
-            {
-                Add(statuses, failures, ProductionPlayerLaunchValidationStatus.WrongOrder,
-                    "Required Boot -> boot sequence -> fresh transition -> RealmSelection evidence is out of order.");
-            }
-
-            if (log.Contains("[AL-SCENE-ACTIVE] id=al_scene_kingdom "))
-            {
-                Add(statuses, failures, ProductionPlayerLaunchValidationStatus.WrongProfileBranch,
-                    "Kingdom activated during the fresh-profile smoke.");
-            }
-
-            if (log.Contains("[AL-SCENE-ACTIVE] id=al_scene_champion_arena ") ||
-                log.Contains("[AL-SCENE-ACTIVE] id=al_scene_test_representative "))
-            {
-                Add(statuses, failures, ProductionPlayerLaunchValidationStatus.ForbiddenSceneActivated,
-                    "A deferred or representative test scene activated during the ShellFoundation smoke.");
-            }
-
-            foreach (string token in SevereTokens.Where(log.Contains))
-            {
-                Add(statuses, failures, ProductionPlayerLaunchValidationStatus.SevereLog,
-                    "Severe Player log token found: " + token);
-            }
-
-            bool reachedRealm = realm >= 0 && boot >= 0 && realm > boot;
-            if (processExited && !reachedRealm)
-            {
-                Add(statuses, failures, ProductionPlayerLaunchValidationStatus.ProcessExitedEarly,
-                    "Player exited before the RealmSelection marker was observed.");
-            }
-
-            return new ProductionPlayerLaunchValidationResult(statuses, failures, reachedRealm);
-        }
-
-        private static void Require(
-            int index,
-            ProductionPlayerLaunchValidationStatus status,
-            string message,
-            ICollection<ProductionPlayerLaunchValidationStatus> statuses,
-            ICollection<string> failures)
-        {
-            if (index < 0)
-            {
-                Add(statuses, failures, status, message);
-            }
-        }
-
-        private static void Add(
-            ICollection<ProductionPlayerLaunchValidationStatus> statuses,
-            ICollection<string> failures,
-            ProductionPlayerLaunchValidationStatus status,
-            string message)
-        {
-            statuses.Add(status);
-            failures.Add(message);
-        }
-    }
-
-    /// <summary>Fail-closed Windows64 Development Player builder for the ShellFoundation profile.</summary>
-    public static class ProductionPlayerBuilder
-    {
-        public const string ExpectedUnityVersion = "2022.3.62f3";
-        public const string RelativeOutputPath = "Builds/Validation/Windows64/AnotherLifeUnity.exe";
-        public const string SummaryFileName = "PlayerBuildWindows64.summary.json";
-        public const string ReportFileName = "PlayerBuildWindows64.report.txt";
-
-        // Test seam. Production leaves this null and invokes BuildPipeline.BuildPlayer directly.
-        internal static Func<BuildPlayerOptions, BuildReport> BuildPlayerOverride;
-
-        public static string OutputPath => Path.GetFullPath(Path.Combine(ProjectRoot(), RelativeOutputPath));
-
-        /// <summary>Unity -executeMethod entry. Any non-success throws and therefore fails batch mode.</summary>
-        public static void BuildWindows64Development()
-        {
-            ProductionPlayerBuildResult result = BuildWindows64DevelopmentPlayer();
-            Debug.Log(result.Summarize());
-            if (!result.Succeeded)
-            {
-                throw new BuildFailedException(result.Summarize());
-            }
-        }
-
-        public static ProductionPlayerBuildResult BuildWindows64DevelopmentPlayer()
-        {
-            DateTime startedAtUtc = DateTime.UtcNow;
-            string[] scenes = ProductionSceneDescriptor.ShellFoundationOrdered.Select(record => record.AssetPath).ToArray();
-
-            if (IsOutputPathSafe(OutputPath))
-            {
-                CleanExactOutputDirectory();
-            }
-
-            ProductionPlayerBuildPreflightReport preflight = ValidatePreflight();
-            if (!preflight.IsValid)
-            {
-                ProductionPlayerBuildResult failed = Result(
-                    ProductionPlayerBuildStatus.PreflightFailed,
-                    scenes,
-                    startedAtUtc,
-                    DateTime.UtcNow,
-                    TimeSpan.Zero,
-                    0,
-                    0,
-                    1,
-                    BuildResult.Unknown,
-                    preflight.Summarize(),
-                    null);
-                WriteArtifacts(failed);
-                return failed;
-            }
-
-            BuildReport report;
-            try
-            {
-                BuildPlayerOptions options = CreateWindows64DevelopmentOptions();
-                report = BuildPlayerOverride != null
-                    ? BuildPlayerOverride(options)
-                    : BuildPipeline.BuildPlayer(options);
-            }
-            catch (Exception exception)
-            {
-                ProductionPlayerBuildResult failed = Result(
-                    ProductionPlayerBuildStatus.Exception,
-                    scenes,
-                    startedAtUtc,
-                    DateTime.UtcNow,
-                    DateTime.UtcNow - startedAtUtc,
-                    0,
-                    0,
-                    1,
-                    BuildResult.Failed,
-                    exception.ToString(),
-                    null);
-                WriteArtifacts(failed);
-                return failed;
-            }
-
-            if (report == null)
-            {
-                ProductionPlayerBuildResult missingReport = Result(
-                    ProductionPlayerBuildStatus.BuildFailed,
-                    scenes,
-                    startedAtUtc,
-                    DateTime.UtcNow,
-                    DateTime.UtcNow - startedAtUtc,
-                    0,
-                    0,
-                    1,
-                    BuildResult.Unknown,
-                    "BuildPipeline returned no BuildReport.",
-                    null);
-                WriteArtifacts(missingReport);
-                return missingReport;
-            }
-
-            BuildSummary summary = report.summary;
-            string dataDirectory = Path.Combine(Path.GetDirectoryName(OutputPath) ?? string.Empty, "AnotherLifeUnity_Data");
-            bool executableExists = File.Exists(OutputPath);
-            bool dataDirectoryExists = Directory.Exists(dataDirectory);
-            ProductionPlayerBuildStatus status = ClassifyBuildResult(summary.result, executableExists, dataDirectoryExists);
-            string message = status == ProductionPlayerBuildStatus.Succeeded
-                ? "Windows64 Development Player built successfully with required executable and data directory."
-                : $"Build validation failed: report={summary.result}, executableExists={executableExists}, dataDirectoryExists={dataDirectoryExists}.";
-
-            ProductionPlayerBuildResult result = new ProductionPlayerBuildResult(
-                status,
-                BuildTarget.StandaloneWindows64,
-                Application.unityVersion,
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "status={0}; target={1}; unityVersion={2}; outputPath={3}; scenes=[{4}]; startedAtUtc={5}; endedAtUtc={6}; totalTime={7}; totalSize={8}; warnings={9}; errors={10}; buildResult={11}; message={12}",
+                Status,
+                Target,
+                UnityVersion,
                 OutputPath,
-                scenes,
-                summary.buildStartedAt.ToUniversalTime(),
-                summary.buildEndedAt.ToUniversalTime(),
-                summary.totalTime,
-                summary.totalSize,
-                summary.totalWarnings,
-                summary.totalErrors,
-                summary.result,
-                message,
-                report);
-            WriteArtifacts(result);
-            return result;
+                string.Join(",", _scenePaths),
+                StartedAtUtc.ToString("O", CultureInfo.InvariantCulture),
+                EndedAtUtc.ToString("O", CultureInfo.InvariantCulture),
+                TotalTime.ToString("c", CultureInfo.InvariantCulture),
+                TotalSize,
+                WarningCount,
+                ErrorCount,
+                BuildResult,
+                SummaryMessage);
         }
 
-        public static ProductionPlayerBuildPreflightReport ValidatePreflight()
-        {
-            var failures = new List<string>();
-            ProductionBuildSettingsReport buildSettings = ProductionBuildSettingsValidator.ValidateCurrent();
-            bool unityVersionValid = string.Equals(Application.unityVersion, ExpectedUnityVersion, StringComparison.Ordinal);
-            bool compilationValid = !EditorUtility.scriptCompilationFailed && !EditorApplication.isCompiling;
-            bool buildTargetSupported = BuildPipeline.IsBuildTargetSupported(
-                BuildTargetGroup.Standalone, BuildTarget.StandaloneWindows64);
-            bool outputPathValid = IsOutputPathSafe(OutputPath);
-            bool outputPathIgnored = IsOutputPathIgnored();
-
-            if (!unityVersionValid)
-            {
-                failures.Add($"Unity version '{Application.unityVersion}' does not match required '{ExpectedUnityVersion}'.");
-            }
-
-            if (!compilationValid)
-            {
-                failures.Add("Unity scripts have compile errors or compilation is still active.");
-            }
-
-            if (!buildTargetSupported)
-            {
-                failures.Add("StandaloneWindows64 build support is not installed for this Unity editor.");
-            }
-
-            if (!outputPathValid)
-            {
-                failures.Add("Player output path is not the exact safe validation path outside Assets.");
-            }
-
-            if (!outputPathIgnored)
-            {
-                failures.Add("Player validation output is not covered by the Unity project .gitignore.");
-            }
-
-            if (!buildSettings.IsValid)
-            {
-                failures.Add("Production Build Settings validation failed.");
-            }
-
-            return new ProductionPlayerBuildPreflightReport(
-                buildSettings,
-                unityVersionValid,
-                compilationValid,
-                buildTargetSupported,
-                outputPathValid,
-                outputPathIgnored,
-                failures);
-        }
-
-        internal static BuildPlayerOptions CreateWindows64DevelopmentOptions()
-        {
-            return new BuildPlayerOptions
-            {
-                scenes = ProductionSceneDescriptor.ShellFoundationOrdered.Select(record => record.AssetPath).ToArray(),
-                locationPathName = OutputPath,
-                target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.Development
-            };
-        }
-
-        internal static ProductionPlayerBuildStatus ClassifyBuildResult(
-            BuildResult buildResult,
-            bool executableExists,
-            bool dataDirectoryExists)
-        {
-            if (buildResult != BuildResult.Succeeded)
-            {
-                return ProductionPlayerBuildStatus.BuildFailed;
-            }
-
-            return executableExists && dataDirectoryExists
-                ? ProductionPlayerBuildStatus.Succeeded
-                : ProductionPlayerBuildStatus.MissingOutput;
-        }
-
-        internal static string DescribeBuildIntent()
-        {
-            return "profile=ShellFoundation target=StandaloneWindows64 options=Development " +
-                   "scenes=[" + string.Join(",", ProductionSceneDescriptor.ShellFoundationOrdered.Select(record => record.AssetPath)) + "] " +
-                   "excluded=[Assets/Test.unity,Assets/AL/Scenes/ChampionArena.unity] output='" + OutputPath + "'";
-        }
-
-        private static ProductionPlayerBuildResult Result(
-            ProductionPlayerBuildStatus status,
+        internal static PlayerBuildSummary PreflightFailure(
+            string outputPath,
+            string target,
             IEnumerable<string> scenes,
+            string unityVersion,
             DateTime startedAtUtc,
             DateTime endedAtUtc,
-            TimeSpan totalTime,
-            ulong totalSize,
-            int warningCount,
-            int errorCount,
-            BuildResult buildResult,
-            string message,
-            BuildReport report)
-        {
-            return new ProductionPlayerBuildResult(
-                status,
-                BuildTarget.StandaloneWindows64,
-                Application.unityVersion,
-                OutputPath,
+            string message) =>
+            new PlayerBuildSummary(
+                PlayerBuildStatus.PreflightFailed,
+                target,
+                unityVersion,
+                outputPath,
                 scenes,
                 startedAtUtc,
                 endedAtUtc,
-                totalTime,
-                totalSize,
-                warningCount,
-                errorCount,
+                TimeSpan.Zero,
+                0UL,
+                0,
+                0,
+                "NotRun",
+                message);
+
+        internal static PlayerBuildSummary PreparationFailure(
+            PlayerBuildPlan plan,
+            DateTime startedAtUtc,
+            DateTime endedAtUtc,
+            string message) =>
+            FromPlan(PlayerBuildStatus.PreparationFailed, plan, null, startedAtUtc, endedAtUtc, "NotRun", message);
+
+        internal static PlayerBuildSummary BuildFailure(
+            PlayerBuildPlan plan,
+            PlayerBuildReportSnapshot report,
+            DateTime startedAtUtc,
+            DateTime endedAtUtc,
+            string message) =>
+            FromPlan(PlayerBuildStatus.BuildFailed, plan, report, startedAtUtc, endedAtUtc, report.Result, message);
+
+        internal static PlayerBuildSummary ArtifactFailure(
+            PlayerBuildPlan plan,
+            PlayerBuildReportSnapshot report,
+            DateTime startedAtUtc,
+            DateTime endedAtUtc,
+            string message) =>
+            FromPlan(PlayerBuildStatus.ArtifactsMissing, plan, report, startedAtUtc, endedAtUtc, report.Result, message);
+
+        internal static PlayerBuildSummary Success(
+            PlayerBuildPlan plan,
+            PlayerBuildReportSnapshot report,
+            DateTime startedAtUtc,
+            DateTime endedAtUtc) =>
+            FromPlan(
+                PlayerBuildStatus.Succeeded,
+                plan,
+                report,
+                startedAtUtc,
+                endedAtUtc,
+                report.Result,
+                "Windows64 Development Player build succeeded and required artifacts were verified.");
+
+        internal static PlayerBuildSummary SummaryWriteFailure(PlayerBuildSummary source, string message) =>
+            new PlayerBuildSummary(
+                PlayerBuildStatus.SummaryWriteFailed,
+                source.Target,
+                source.UnityVersion,
+                source.OutputPath,
+                source.ScenePaths,
+                source.StartedAtUtc,
+                source.EndedAtUtc,
+                source.TotalTime,
+                source.TotalSize,
+                source.WarningCount,
+                Math.Max(1, source.ErrorCount),
+                source.BuildResult,
+                "Build summary could not be written: " + message);
+
+        private static PlayerBuildSummary FromPlan(
+            PlayerBuildStatus status,
+            PlayerBuildPlan plan,
+            PlayerBuildReportSnapshot report,
+            DateTime startedAtUtc,
+            DateTime endedAtUtc,
+            string buildResult,
+            string message) =>
+            new PlayerBuildSummary(
+                status,
+                plan.Target.ToString(),
+                plan.UnityVersion,
+                plan.OutputPath,
+                plan.ScenePaths,
+                startedAtUtc,
+                endedAtUtc,
+                report?.TotalTime ?? TimeSpan.Zero,
+                report?.TotalSize ?? 0UL,
+                report?.WarningCount ?? 0,
+                report?.ErrorCount ?? (status == PlayerBuildStatus.Succeeded ? 0 : 1),
                 buildResult,
-                message,
-                report);
-        }
-
-        private static void CleanExactOutputDirectory()
-        {
-            string directory = Path.GetDirectoryName(OutputPath);
-            if (string.IsNullOrEmpty(directory) || !IsOutputPathSafe(OutputPath))
-            {
-                throw new InvalidOperationException("Refusing to clean an unsafe Player output directory.");
-            }
-
-            if (Directory.Exists(directory))
-            {
-                Directory.Delete(directory, recursive: true);
-            }
-        }
-
-        private static bool IsOutputPathSafe(string outputPath)
-        {
-            string projectRoot = ProjectRoot();
-            string expected = Path.GetFullPath(Path.Combine(projectRoot, RelativeOutputPath));
-            string assets = Path.GetFullPath(Application.dataPath) + Path.DirectorySeparatorChar;
-            string actual = Path.GetFullPath(outputPath ?? string.Empty);
-            return string.Equals(actual, expected, PathComparison()) &&
-                   !actual.StartsWith(assets, PathComparison());
-        }
-
-        private static bool IsOutputPathIgnored()
-        {
-            string ignorePath = Path.Combine(ProjectRoot(), ".gitignore");
-            if (!File.Exists(ignorePath))
-            {
-                return false;
-            }
-
-            string text = File.ReadAllText(ignorePath);
-            return text.IndexOf("/[Bb]uilds/", StringComparison.Ordinal) >= 0 ||
-                   text.IndexOf("/Builds/", StringComparison.Ordinal) >= 0 ||
-                   text.IndexOf("/Builds/Validation/", StringComparison.Ordinal) >= 0;
-        }
-
-        private static StringComparison PathComparison()
-        {
-            return Application.platform == RuntimePlatform.WindowsEditor
-                ? StringComparison.OrdinalIgnoreCase
-                : StringComparison.Ordinal;
-        }
-
-        private static string ProjectRoot()
-        {
-            return Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
-        }
-
-        private static void WriteArtifacts(ProductionPlayerBuildResult result)
-        {
-            string directory = Path.GetDirectoryName(OutputPath) ?? ProjectRoot();
-            Directory.CreateDirectory(directory);
-
-            var json = new ProductionPlayerBuildSummaryJson
-            {
-                status = result.Status.ToString(),
-                target = result.Target.ToString(),
-                unityVersion = result.UnityVersion,
-                outputPath = result.OutputPath,
-                scenePaths = result.ScenePaths.ToArray(),
-                startedAtUtc = result.StartedAtUtc.ToString("O"),
-                endedAtUtc = result.EndedAtUtc.ToString("O"),
-                totalTime = result.TotalTime.ToString(),
-                totalSize = result.TotalSize.ToString(),
-                warningCount = result.WarningCount,
-                errorCount = result.ErrorCount,
-                BuildResult = result.BuildResult.ToString(),
-                summaryMessage = result.SummaryMessage
-            };
-            File.WriteAllText(Path.Combine(directory, SummaryFileName), JsonUtility.ToJson(json, prettyPrint: true));
-            File.WriteAllText(Path.Combine(directory, ReportFileName), BuildReportText(result));
-        }
-
-        private static string BuildReportText(ProductionPlayerBuildResult result)
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine(result.Summarize());
-            builder.AppendLine(DescribeBuildIntent());
-            builder.AppendLine("Test excluded: Assets/Test.unity");
-            builder.AppendLine("Champion deferred/excluded: Assets/AL/Scenes/ChampionArena.unity");
-
-            if (result.Report == null)
-            {
-                builder.AppendLine("BuildReport: unavailable");
-                return builder.ToString();
-            }
-
-            foreach (BuildStep step in result.Report.steps)
-            {
-                builder.Append("STEP ").Append(step.name).Append(" duration=").AppendLine(step.duration.ToString());
-                foreach (BuildStepMessage message in step.messages)
-                {
-                    builder.Append("  ").Append(message.type).Append(": ").AppendLine(message.content);
-                }
-            }
-
-            foreach (BuildFile file in result.Report.GetFiles())
-            {
-                builder.Append("FILE ").Append(file.path).Append(" role=").Append(file.role)
-                    .Append(" size=").AppendLine(file.size.ToString());
-            }
-
-            return builder.ToString();
-        }
-
-        [Serializable]
-        private sealed class ProductionPlayerBuildSummaryJson
-        {
-            public string status;
-            public string target;
-            public string unityVersion;
-            public string outputPath;
-            public string[] scenePaths;
-            public string startedAtUtc;
-            public string endedAtUtc;
-            public string totalTime;
-            public string totalSize;
-            public int warningCount;
-            public int errorCount;
-            public string BuildResult;
-            public string summaryMessage;
-        }
+                message);
     }
 }
 #endif

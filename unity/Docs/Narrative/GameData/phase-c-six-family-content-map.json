@@ -1,0 +1,470 @@
+{
+  "schemaVersion": 1,
+  "packetId": "game-data-phase-c-six-family-source-2026-07-23-v001",
+  "sourceBaseCommit": "38de51138cc8b92c8469c7e9b5c37e84dead7ff1",
+  "expectedContentReferenceCount": 35,
+  "authority": {
+    "primaryMode": "codex_narrative_content",
+    "codexFidelityStatus": "content_reference_handoff_ready",
+    "userFinalCreativeAcceptance": "pending",
+    "runtimeAuthority": "unchanged"
+  },
+  "provenance": {
+    "hashBytes": "committed_git_blob_content_bytes",
+    "generatedArtifactsMustRecordSourceCommit": true,
+    "generatedArtifactsMustRecordSourceBlobSha256": true
+  },
+  "families": [
+    {
+      "family": "realms",
+      "sourceStatus": "content_references_ready",
+      "sourceEvidence": [
+        "unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs",
+        "unity/Docs/Game_Data_Source_Inventory.md"
+      ],
+      "entries": [
+        {
+          "technicalAnchor": "RealmId.Stonehold",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "realm.stonehold.name",
+              "sourceText": "Stonehold Dwarves"
+            },
+            {
+              "field": "description",
+              "key": "realm.stonehold.description",
+              "sourceText": "Mountain kings and master smiths.\n\nPerks:\n+20% Stone\n+10% Def\n\nPerks: Resilience"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "RealmId.Eldergrove",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "realm.eldergrove.name",
+              "sourceText": "Eldergrove Elves"
+            },
+            {
+              "field": "description",
+              "key": "realm.eldergrove.description",
+              "sourceText": "Forest guardians and peerless mages.\n\nPerks:\n+20% Wood\n+15% Magic\n\nPerks: Harmony"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "RealmId.Crownlands",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "realm.crownlands.name",
+              "sourceText": "Crownlands Humans"
+            },
+            {
+              "field": "description",
+              "key": "realm.crownlands.description",
+              "sourceText": "Adaptive leaders of the central plains.\n\nPerks:\n+15% Gold\n+10% All Atk\n\nPerks: Ambition"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "RealmId.Umbral",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "realm.umbral.name",
+              "sourceText": "Umbral Dark Elves"
+            },
+            {
+              "field": "description",
+              "key": "realm.umbral.description",
+              "sourceText": "Masters of shadow and volcanic power.\n\nPerks:\n+20% Crit\n+15% Speed\n\nPerks: Cunning"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "buildings",
+      "sourceStatus": "content_references_ready_with_unavailable_ids",
+      "sourceEvidence": [
+        "unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs",
+        "unity/Docs/Game_Data_Source_Inventory.md"
+      ],
+      "entries": [
+        {
+          "technicalAnchor": "TownHall",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.town_hall.name",
+              "sourceText": "Town Hall"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Farm",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.farm.name",
+              "sourceText": "Farm"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "LumberMill",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.lumber_mill.name",
+              "sourceText": "Lumber Mill"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Quarry",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.quarry.name",
+              "sourceText": "Quarry"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "GoldMine",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.gold_mine.name",
+              "sourceText": "Gold Mine"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Barracks",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.barracks.name",
+              "sourceText": "Barracks"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Academy",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.academy.name",
+              "sourceText": "Academy"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Market",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.market.name",
+              "sourceText": "Market"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Storehouse",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.storehouse.name",
+              "sourceText": "Storehouse"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Forge",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.forge.name",
+              "sourceText": "Forge"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Stable",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.stable.name",
+              "sourceText": "Stable"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Workshop",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.workshop.name",
+              "sourceText": "Workshop"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Embassy",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.embassy.name",
+              "sourceText": "Embassy"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Wall",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.wall.name",
+              "sourceText": "Wall"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Watchtower",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "building.watchtower.name",
+              "sourceText": "Watchtower"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "ManaShrine",
+          "disposition": "not_authored_unavailable",
+          "content": []
+        },
+        {
+          "technicalAnchor": "Mine",
+          "disposition": "not_authored_unavailable",
+          "content": []
+        }
+      ]
+    },
+    {
+      "family": "research",
+      "sourceStatus": "content_references_ready_technical_aliases_blocked",
+      "sourceEvidence": [
+        "unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs",
+        "unity/Docs/Game_Data_Source_Inventory.md"
+      ],
+      "entries": [
+        {
+          "technicalAnchor": "Steel Forging",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.steel_forging.name",
+              "sourceText": "Steel Forging"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Plate Armor",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.plate_armor.name",
+              "sourceText": "Plate Armor"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Advanced Masonry",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.advanced_masonry.name",
+              "sourceText": "Advanced Masonry"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Irrigation",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.irrigation.name",
+              "sourceText": "Irrigation"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Ballistics",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.ballistics.name",
+              "sourceText": "Ballistics"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Logistics",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.logistics.name",
+              "sourceText": "Logistics"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Trade Routes",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.trade_routes.name",
+              "sourceText": "Trade Routes"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "Arcane Study",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "research.arcane_study.name",
+              "sourceText": "Arcane Study"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "family": "troops",
+      "sourceStatus": "not_authored_unavailable_requiredness_unresolved",
+      "sourceEvidence": [
+        "unity/Assets/AL/Scripts/Core/Enums/Enums.cs",
+        "unity/Docs/Game_Data_Source_Inventory.md"
+      ],
+      "entries": [
+        {
+          "technicalAnchor": "TroopType.Infantry",
+          "disposition": "not_authored_unavailable",
+          "content": []
+        },
+        {
+          "technicalAnchor": "TroopType.Cavalry",
+          "disposition": "not_authored_unavailable",
+          "content": []
+        },
+        {
+          "technicalAnchor": "TroopType.Ranged",
+          "disposition": "not_authored_unavailable",
+          "content": []
+        },
+        {
+          "technicalAnchor": "TroopType.Siege",
+          "disposition": "not_authored_unavailable",
+          "content": []
+        }
+      ]
+    },
+    {
+      "family": "champions",
+      "sourceStatus": "not_authored_unavailable_requiredness_unresolved",
+      "sourceEvidence": [
+        "unity/Assets/AL/Scripts/Data/Definitions/ChampionDefinition.cs",
+        "unity/Docs/Game_Data_Source_Inventory.md"
+      ],
+      "entries": []
+    },
+    {
+      "family": "skills",
+      "sourceStatus": "content_references_ready_technical_mapping_blocked",
+      "sourceEvidence": [
+        "unity/Assets/AL/Scripts/ChampionMode/Skills/SkillCaster.cs",
+        "unity/Assets/AL/StreamingAssets/GameData/al_skill_weather_catalog.json",
+        "unity/Docs/Game_Data_Source_Inventory.md"
+      ],
+      "entries": [
+        {
+          "technicalAnchor": "realm_strike",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "skill.realm_strike.name",
+              "sourceText": "Realm Strike"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "renewing_guard",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "skill.renewing_guard.name",
+              "sourceText": "Renewing Guard"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "warzone_burst",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "skill.warzone_burst.name",
+              "sourceText": "Warzone Burst"
+            }
+          ]
+        },
+        {
+          "technicalAnchor": "warmaster_breaker",
+          "disposition": "verbatim_preserved",
+          "content": [
+            {
+              "field": "name",
+              "key": "skill.warmaster_breaker.name",
+              "sourceText": "Warmaster Breaker"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
