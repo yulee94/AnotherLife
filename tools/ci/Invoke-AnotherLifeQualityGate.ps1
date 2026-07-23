@@ -18,9 +18,51 @@ function Invoke-GitLines {
     return @($output)
 }
 
+function Get-PushEventCommitRange {
+    if ($env:GITHUB_EVENT_NAME -ne "push") {
+        return $null
+    }
+
+    $event = Read-GitHubEvent
+    if ($null -eq $event -or
+        -not ($event.PSObject.Properties.Name -contains "before") -or
+        -not ($event.PSObject.Properties.Name -contains "after")) {
+        throw "Push event payload is unavailable or does not contain before/after commit SHAs."
+    }
+
+    $before = [string]$event.before
+    $after = [string]$event.after
+    $shaPattern = "^[0-9a-fA-F]{40}$"
+    if ($before -notmatch $shaPattern -or
+        $after -notmatch $shaPattern -or
+        $before -eq ("0" * 40)) {
+        throw "Push event before/after commit range is invalid for protected-main verification."
+    }
+
+    $checkedOutHead = (
+        Invoke-GitLines @("rev-parse", "HEAD") |
+            Select-Object -First 1
+    ).Trim()
+    if (-not $checkedOutHead.Equals(
+            $after,
+            [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Push checkout HEAD '$checkedOutHead' does not match event after SHA '$after'."
+    }
+
+    return [pscustomobject]@{
+        Before = $before
+        After = $after
+    }
+}
+
 function Get-BaseRef {
     if ($BaseRef) {
         return $BaseRef
+    }
+
+    $pushRange = Get-PushEventCommitRange
+    if ($null -ne $pushRange) {
+        return $pushRange.Before
     }
 
     if ($env:GITHUB_BASE_REF) {
@@ -30,17 +72,37 @@ function Get-BaseRef {
     return "origin/main"
 }
 
+function Get-DiffRange {
+    if ($BaseRef) {
+        return "$BaseRef...HEAD"
+    }
+
+    $pushRange = Get-PushEventCommitRange
+    if ($null -ne $pushRange) {
+        return "$($pushRange.Before)..$($pushRange.After)"
+    }
+
+    return "$(Get-BaseRef)...HEAD"
+}
+
 function Get-ChangedFiles {
-    $base = Get-BaseRef
+    $diffRange = Get-DiffRange
+
     try {
-        $files = @(Invoke-GitLines @("diff", "--name-only", "--diff-filter=ACMRT", "$base...HEAD"))
+        $files = @(
+            Invoke-GitLines @(
+                "diff",
+                "--name-only",
+                "--diff-filter=ACMRT",
+                $diffRange
+            )
+        )
         if ($files.Count -eq 0 -and (-not $env:GITHUB_ACTIONS -or $BaseRef -eq "HEAD")) {
             $files = @(Invoke-GitLines @("diff", "--cached", "--name-only", "--diff-filter=ACMRT"))
         }
         return $files
     } catch {
-        Write-Warning "Falling back to HEAD file list because changed-file diff was unavailable: $($_.Exception.Message)"
-        return @(Invoke-GitLines @("ls-files"))
+        throw "Changed-file diff failed closed for '$diffRange': $($_.Exception.Message)"
     }
 }
 
@@ -191,6 +253,7 @@ function Test-AnyPathPrefix {
 function Invoke-Classify {
     $failures = [System.Collections.Generic.List[string]]::new()
     $event = Read-GitHubEvent
+    $isPullRequest = $env:GITHUB_EVENT_NAME -eq "pull_request"
     $body = ""
     $draft = $false
     $baseBranch = $env:GITHUB_BASE_REF
@@ -205,23 +268,30 @@ function Invoke-Classify {
     $retiredAgentsAndPrefixes = Get-PolicyList "retired_agents_and_prefixes" @("GPT", "Android Studio", "gpt/", "android-studio/", "gemini/")
 
     if ($null -ne $event -and $event.PSObject.Properties.Name -contains "pull_request") {
+        $isPullRequest = $true
         $body = [string]$event.pull_request.body
         $draft = [bool]$event.pull_request.draft
         $baseBranch = [string]$event.pull_request.base.ref
         $headBranch = [string]$event.pull_request.head.ref
-    } else {
+    } elseif (-not $isPullRequest) {
         $headBranch = (Invoke-GitLines @("branch", "--show-current") | Select-Object -First 1)
     }
 
     $changedFiles = Get-ChangedFiles
+    Write-Host "Event: $($env:GITHUB_EVENT_NAME); PR metadata checks: $isPullRequest"
     Write-Host "Changed files:"
     $changedFiles | ForEach-Object { Write-Host "  $_" }
 
-    if ($headBranch -and -not ($branchPrefixes | Where-Object { $headBranch.StartsWith($_, [System.StringComparison]::Ordinal) })) {
+    if ($isPullRequest -and
+        $headBranch -and
+        -not ($branchPrefixes | Where-Object { $headBranch.StartsWith($_, [System.StringComparison]::Ordinal) })) {
         Add-Failure $failures "Branch '$headBranch' does not use an allowed Codex-only AnotherLife prefix: $($branchPrefixes -join ', ')."
     }
 
-    if ($baseBranch -and $baseBranch -ne "main" -and $body -notmatch "(?i)(depends on|prerequisite|stacked|base branch)") {
+    if ($isPullRequest -and
+        $baseBranch -and
+        $baseBranch -ne "main" -and
+        $body -notmatch "(?i)(depends on|prerequisite|stacked|base branch)") {
         Add-Failure $failures "Base branch '$baseBranch' is not main and no stacked/dependency declaration was found."
     }
 
@@ -248,7 +318,7 @@ function Invoke-Classify {
         if ($draft -and $body -match "READY TO MERGE") {
             Add-Failure $failures "Draft PR body must not claim READY TO MERGE."
         }
-    } elseif ($env:GITHUB_EVENT_NAME -eq "pull_request") {
+    } elseif ($isPullRequest) {
         Add-Failure $failures "Pull request body is unavailable or empty."
     }
 
@@ -277,7 +347,10 @@ function Invoke-Classify {
     $terrestrialChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $terrestrialPrefixes })
     $engineeringChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringPrefixes })
 
-    if (($narrativeChanged -or $terrestrialChanged) -and $engineeringChanged -and $body -notmatch "(?i)mixed-mode|separate PRs are impractical") {
+    if ($isPullRequest -and
+        ($narrativeChanged -or $terrestrialChanged) -and
+        $engineeringChanged -and
+        $body -notmatch "(?i)mixed-mode|separate PRs are impractical") {
         Add-Failure $failures "Source-mode and engineering paths are mixed without an explicit mixed-mode justification."
     }
 
@@ -289,10 +362,10 @@ function Invoke-Classify {
 
 function Invoke-Hygiene {
     $failures = [System.Collections.Generic.List[string]]::new()
-    $base = Get-BaseRef
+    $diffRange = Get-DiffRange
 
-    Write-Host "Running git diff --check against $base...HEAD"
-    $diffCheck = & git diff --check "$base...HEAD" 2>&1
+    Write-Host "Running git diff --check against $diffRange"
+    $diffCheck = & git diff --check $diffRange 2>&1
     if ($LASTEXITCODE -ne 0) {
         Add-Failure $failures "git diff --check failed:`n$diffCheck"
     }
