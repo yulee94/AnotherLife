@@ -1,8 +1,8 @@
 # Four-Realm Heraldry — Arcane Axis
 
-**Status:** Owner-approved visual direction and flat/micro vector geometry; final colors and runtime implementation not yet approved
+**Status:** Owner-approved visual direction, vector geometry, and cross-platform neutral sprite derivatives; final colors and runtime mapping not yet approved
 
-**Version:** 0.2
+**Version:** 0.3
 
 **Design contract:** Root `DESIGN.md`
 
@@ -16,6 +16,8 @@
 
 **Approved vector source:** [Arcane Axis Vector Masters](../Heraldry/VectorMasters/README.md)
 
+**Cross-platform derivatives:** [Arcane Axis Runtime Exports](../Heraldry/RuntimeExports/README.md)
+
 ## Purpose
 
 Establish one original abstract heraldic family for Stonehold, Eldergrove, Crownlands, and Umbral. These marks give every contributor a shared realm-identity source that can survive mobile UI scale while still supporting the engraved, material-rich medieval mysticism established by the app icon and root design contract.
@@ -25,11 +27,12 @@ This packet settles:
 - The Arcane Axis family as the approved heraldic direction.
 - The protected structural identity of all four realm marks.
 - The deterministic flat and micro vector geometry for all four marks.
+- White-alpha Unity Sprite derivatives with Android and Standalone import settings.
 - A shared rendered, flat, inverse, and micro application hierarchy.
 - Mobile readability and simplification rules.
 - Boundaries between approved visual source and later vector/runtime work.
 
-It does not add realm gameplay authority, faction rules, class meaning, final color tokens, individual runtime sprites, shaders, VFX, import automation, or engine integration.
+It does not add realm gameplay authority, faction rules, class meaning, final color tokens, sprite atlases, catalog mappings, shaders, VFX, materials, or consuming UI.
 
 ## Owner decision record
 
@@ -37,9 +40,10 @@ It does not add realm gameplay authority, faction rules, class meaning, final co
 - 2026-07-23: Project owner selected Direction B, **Arcane Axis Seals**, over the Monumental Bastion and Ancient Oath alternatives.
 - 2026-07-23: Project owner approved the refined production-review sheet after flat, inverse, and micro variants were added and corrected.
 - 2026-07-23: Project owner approved deterministic vector reconstruction `v001`, including the separate standard-flat and `24–47 px` micro geometries for all four realms.
+- 2026-07-23: The approved paths were exported as tintable white-alpha `256 px` flat and `32 px` micro Unity Sprites with Android and Standalone import settings; this creates platform compatibility without granting color or catalog authority.
 - Approval locks the four core symbol identities, their shared arcane-geometric family relationship, their realm order, and the application hierarchy shown in the approved master sheet.
 - Approval also locks the `v001` flat and micro SVG geometry retained in the vector-master packet. Future adjustments to those paths require project-owner approval.
-- Approval does not lock raster-generation artifacts, ceremonial vector embellishment, final sRGB values, texture maps, material response, animation, shader behavior, runtime import strategy, or runtime budgets.
+- Approval does not lock incidental raster-generation artifacts, ceremonial vector embellishment, final sRGB values, texture maps, material response, animation, shader behavior, consuming-surface strategy, or measured runtime budgets. The committed neutral PNG derivatives and their Android/Standalone import settings are reproducible engineering outputs of the approved paths.
 
 The approved raster master remains the identity authority, and the approved `v001` vectors are the deterministic geometry authority for flat and micro use. Future ceremonial or runtime derivatives must preserve those protected paths and must not mechanically auto-trace incidental raster irregularities.
 
@@ -154,7 +158,7 @@ These sizes are starting guidance, not measured runtime budgets. Final masters r
 - Keep all four marks at comparable optical area, not merely equal bounding-box dimensions.
 - Allow separate ceremonial and micro vector masters when simplification is documented and protected geometry remains unchanged.
 - Avoid full-surface emission, blur-dependent edges, transparency-dependent identity, animated noise, and particles as required recognition cues.
-- Profile final imported sprites, atlases, mip behavior, compression, overdraw, and memory on the lowest supported iPhone before runtime approval.
+- Profile final imported sprites, atlases, mip behavior, compression, overdraw, and memory on the lowest supported iPhone and Android device plus a representative Windows PC before runtime approval.
 
 ## Realm color and material intent
 
@@ -197,7 +201,7 @@ Color supports recognition but never replaces geometry.
 - Literal animals, crowns, weapons, characters, and botanical icons are excluded.
 - Source prompts, reference roles, checksum, owner decision, and visual-verdict history are retained.
 - Owner-approved flat and micro vector masters are retained with reconstruction provenance.
-- Runtime, ceremonial-vector, color-token, and performance authority remain explicitly deferred.
+- Runtime consumption, ceremonial-vector, color-token, catalog, atlas, and measured performance authority remain explicitly deferred.
 
 ## Production handoff sequence
 
@@ -206,8 +210,9 @@ Color supports recognition but never replaces geometry.
 3. [x] Compare optical weight and protected geometry across the family.
 4. [x] Obtain project-owner approval for vector geometry.
 5. [ ] Obtain project-owner approval for final color relationships.
-6. [ ] Define Unity sprite/atlas/import requirements and realm-catalog mapping in a separate coordination handoff.
-7. [ ] Implement and profile the approved assets in Codex engineering mode.
+6. [x] Define and commit platform-neutral Unity sprite derivatives plus Android/Standalone import requirements.
+7. [ ] Select the first runtime surface and define realm-catalog and atlas mapping.
+8. [ ] Implement the consuming surface and profile it on representative Android and Windows hardware.
 
 ## Critical direction decisions still open
 
@@ -217,4 +222,4 @@ Color supports recognition but never replaces geometry.
 - Whether ceremonial Umbral satellites remain outside major realm-selection and architecture presentation.
 - The first runtime surface: realm selection UI, Champion equipment, banners/architecture, or map markers.
 - Formal trademark and emblem-conflict clearance before commercial lock.
-- Minimum supported iPhone and measured atlas, memory, and overdraw budgets.
+- Minimum supported iPhone, Android, and Windows hardware plus measured atlas, memory, and overdraw budgets.

@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.2
+**Version:** 1.3
 **Last updated:** 2026-07-23
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -56,9 +56,10 @@ This guide consolidates the active project direction in:
 - [Four-Realm Champion Anchor](unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md)
 - [Four-Realm Heraldry — Arcane Axis](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
+- [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
 - [Skill Effects and Weather Design](unity/Assets/AL/Art/Designs/SkillEffectsAndWeather.md)
 - GitHub issue `#259`, which establishes the active realistic, high-end dark-fantasy direction for realm bosses and elites.
-- The approved mystical medieval `AL` application icon on the iOS foundation branch at commit `523c60d`, path `unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png`.
+- The approved mystical medieval [`AL` application icon](unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png), shared on `main` for iOS, Android, and Windows derivatives.
 - The approved terrestrial source concepts introduced by commit `8893306`: [Basalt Grazer](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_basalt_grazer_concept_sheet_v001.png), [Grove Strider](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_grove_strider_concept_sheet_v001.png), and [Mire Lumenback](unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png).
 - The owner-approved [Arcane Axis four-realm heraldry](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md), which establishes the protected abstract marks for Stonehold, Eldergrove, Crownlands, and Umbral.
 
@@ -599,6 +600,9 @@ Never overwrite an approved source version. Create a new version and preserve th
 - Target experiences include mobile and PC.
 - Current generated prefabs and materials are blockouts/reference implementations, not a final quality bar.
 - Production models must use Unity's meter scale: `1 Unity unit = 1 meter`.
+- Shared design handoffs must remain usable from Android and Windows checkouts: preserve committed Unity metadata, portable paths, and Git LFS assets; do not require a macOS-only path or an iOS-only branch to recover approved source.
+- Concept sheets and review images are production reference, not runtime textures. A Player-ready use requires an explicit derivative, import contract, and measured budget.
+- The approved Arcane Axis runtime derivatives are white-alpha PNG Sprites with exact Android and Standalone overrides; consuming UI owns tint while final realm colors remain open.
 
 A render-pipeline migration, a change to the target device floor, or a material-system replacement is a broad technical/design decision and requires an explicit migration plan.
 
