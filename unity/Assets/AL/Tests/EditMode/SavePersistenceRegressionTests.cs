@@ -24,13 +24,124 @@ namespace AL.Tests.EditMode
 
             InvokeEnsureSaveDefaults(save);
 
-            Assert.NotNull(GetField(save, "Reputation"));
-            Assert.NotNull(GetField(save, "FactionReputations"));
-            Assert.NotNull(GetField(save, "LordPersona"));
+            IList reputation = (IList)GetField(save, "Reputation");
+            IList factions = (IList)GetField(save, "FactionReputations");
+            object persona = GetField(save, "LordPersona");
+            Assert.IsEmpty(reputation);
+            Assert.IsEmpty(factions);
+            Assert.NotNull(persona);
+            Assert.AreEqual(0, GetField(persona, "Warlord"));
+            Assert.AreEqual(0, GetField(persona, "Diplomat"));
+            Assert.AreEqual(0, GetField(persona, "Sage"));
+            Assert.AreEqual(0, GetField(persona, "Rogue"));
         }
 
         [Test]
-        public void EnsureSaveDefaultsPreservesExistingNarrativeCompatibilityData()
+        public void HistoricalJsonWithoutNarrativeCompatibilityFieldsNormalizesWithoutLosingProgress()
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            const string historicalJson =
+                "{\n" +
+                "  \"SelectedRealm\": 2,\n" +
+                "  \"Resources\": [{ \"Type\": 3, \"Amount\": 4321 }],\n" +
+                "  \"Buildings\": [{ \"BuildingId\": \"BLD_LEGACY_KEEP\", \"Level\": 7, \"IsUpgrading\": true, \"UpgradeCompleteTimestamp\": 1700000001 }],\n" +
+                "  \"Troops\": [],\n" +
+                "  \"Researches\": [],\n" +
+                "  \"Quests\": [{ \"QuestId\": \"Q_LEGACY_PATH\", \"CurrentValue\": 4, \"IsCompleted\": false, \"IsClaimed\": false }],\n" +
+                "  \"Territories\": [],\n" +
+                "  \"RealmGems\": [],\n" +
+                "  \"Wishgate\": {},\n" +
+                "  \"CurrentChapterId\": \"C7_LEGACY\",\n" +
+                "  \"Warmaster\": {},\n" +
+                "  \"ChampionCustomization\": {},\n" +
+                "  \"OwnedEquipment\": [{ \"EquipmentId\": \"EQ_LEGACY_BLADE\", \"DisplayName\": \"Legacy Blade\", \"Slot\": 3, \"AttackBonus\": 19, \"Quantity\": 2, \"SourceBossId\": \"BOSS_ARCHIVE\", \"FirstAcquiredTimestamp\": 1699999900, \"LastAcquiredTimestamp\": 1700000000 }],\n" +
+                "  \"LastSavedTimestamp\": 1700000123\n" +
+                "}";
+
+            Assert.That(historicalJson, Does.Not.Contain("\"Reputation\""));
+            Assert.That(historicalJson, Does.Not.Contain("\"FactionReputations\""));
+            Assert.That(historicalJson, Does.Not.Contain("\"LordPersona\""));
+
+            object save = JsonUtility.FromJson(historicalJson, saveType);
+
+            Assert.NotNull(save);
+            IList deserializedReputation = (IList)GetField(save, "Reputation");
+            IList deserializedFactions = (IList)GetField(save, "FactionReputations");
+            object deserializedPersona = GetField(save, "LordPersona");
+            Assert.IsEmpty(deserializedReputation);
+            Assert.IsEmpty(deserializedFactions);
+            Assert.NotNull(deserializedPersona);
+            Assert.AreEqual(0, GetField(deserializedPersona, "Warlord"));
+            Assert.AreEqual(0, GetField(deserializedPersona, "Diplomat"));
+            Assert.AreEqual(0, GetField(deserializedPersona, "Sage"));
+            Assert.AreEqual(0, GetField(deserializedPersona, "Rogue"));
+
+            InvokeEnsureSaveDefaults(save);
+
+            IList reputation = (IList)GetField(save, "Reputation");
+            IList factions = (IList)GetField(save, "FactionReputations");
+            object persona = GetField(save, "LordPersona");
+            IList resources = (IList)GetField(save, "Resources");
+            IList buildings = (IList)GetField(save, "Buildings");
+            IList quests = (IList)GetField(save, "Quests");
+            IList ownedEquipment = (IList)GetField(save, "OwnedEquipment");
+
+            Assert.AreSame(deserializedReputation, reputation);
+            Assert.AreSame(deserializedFactions, factions);
+            Assert.AreSame(deserializedPersona, persona);
+            Assert.IsEmpty(reputation);
+            Assert.IsEmpty(factions);
+            Assert.AreEqual(0, GetField(persona, "Warlord"));
+            Assert.AreEqual(0, GetField(persona, "Diplomat"));
+            Assert.AreEqual(0, GetField(persona, "Sage"));
+            Assert.AreEqual(0, GetField(persona, "Rogue"));
+
+            Assert.AreEqual("Eldergrove", GetField(save, "SelectedRealm").ToString());
+            Assert.AreEqual("C7_LEGACY", GetField(save, "CurrentChapterId"));
+            Assert.AreEqual(1700000123L, GetField(save, "LastSavedTimestamp"));
+            Assert.AreEqual("Gold", GetField(resources[0], "Type").ToString());
+            Assert.AreEqual(4321L, GetField(resources[0], "Amount"));
+            Assert.AreEqual("BLD_LEGACY_KEEP", GetField(buildings[0], "BuildingId"));
+            Assert.AreEqual(7, GetField(buildings[0], "Level"));
+            Assert.True((bool)GetField(buildings[0], "IsUpgrading"));
+            Assert.AreEqual(1700000001L, GetField(buildings[0], "UpgradeCompleteTimestamp"));
+            Assert.AreEqual("Q_LEGACY_PATH", GetField(quests[0], "QuestId"));
+            Assert.AreEqual(4, GetField(quests[0], "CurrentValue"));
+            Assert.False((bool)GetField(quests[0], "IsCompleted"));
+            Assert.False((bool)GetField(quests[0], "IsClaimed"));
+            Assert.AreEqual("EQ_LEGACY_BLADE", GetField(ownedEquipment[0], "EquipmentId"));
+            Assert.AreEqual("Legacy Blade", GetField(ownedEquipment[0], "DisplayName"));
+            Assert.AreEqual("MainHand", GetField(ownedEquipment[0], "Slot").ToString());
+            Assert.AreEqual(19, GetField(ownedEquipment[0], "AttackBonus"));
+            Assert.AreEqual(2, GetField(ownedEquipment[0], "Quantity"));
+            Assert.AreEqual("BOSS_ARCHIVE", GetField(ownedEquipment[0], "SourceBossId"));
+
+            object resource = resources[0];
+            object building = buildings[0];
+            object quest = quests[0];
+            object equipment = ownedEquipment[0];
+
+            InvokeEnsureSaveDefaults(save);
+
+            Assert.AreSame(reputation, GetField(save, "Reputation"));
+            Assert.AreSame(factions, GetField(save, "FactionReputations"));
+            Assert.AreSame(persona, GetField(save, "LordPersona"));
+            Assert.AreSame(resources, GetField(save, "Resources"));
+            Assert.AreSame(buildings, GetField(save, "Buildings"));
+            Assert.AreSame(quests, GetField(save, "Quests"));
+            Assert.AreSame(ownedEquipment, GetField(save, "OwnedEquipment"));
+            Assert.AreSame(resource, ((IList)GetField(save, "Resources"))[0]);
+            Assert.AreSame(building, ((IList)GetField(save, "Buildings"))[0]);
+            Assert.AreSame(quest, ((IList)GetField(save, "Quests"))[0]);
+            Assert.AreSame(equipment, ((IList)GetField(save, "OwnedEquipment"))[0]);
+            Assert.AreEqual(4321L, GetField(resource, "Amount"));
+            Assert.AreEqual(7, GetField(building, "Level"));
+            Assert.AreEqual(4, GetField(quest, "CurrentValue"));
+            Assert.AreEqual(2, GetField(equipment, "Quantity"));
+        }
+
+        [Test]
+        public void RepeatedEnsureSaveDefaultsPreservesExistingNarrativeCompatibilityData()
         {
             Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
             Type affinityType = GetRuntimeType("AL.Data.Runtime.NpcAffinityData");
@@ -61,6 +172,7 @@ namespace AL.Tests.EditMode
             SetField(save, "LordPersona", persona);
 
             InvokeEnsureSaveDefaults(save);
+            InvokeEnsureSaveDefaults(save);
 
             Assert.AreSame(reputation, GetField(save, "Reputation"));
             Assert.AreSame(factions, GetField(save, "FactionReputations"));
@@ -71,6 +183,123 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(9, GetField(factions[0], "Reputation"));
             Assert.AreEqual(7, GetField(persona, "Diplomat"));
             Assert.AreEqual(11, GetField(persona, "Sage"));
+        }
+
+        [Test]
+        public void NarrativeCompatibilityAndUnrelatedProgressSurviveJsonRoundTripAndNormalization()
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type affinityType = GetRuntimeType("AL.Data.Runtime.NpcAffinityData");
+            Type factionType = GetRuntimeType("AL.Data.Runtime.FactionRepData");
+            Type personaType = GetRuntimeType("AL.Data.Runtime.PersonaData");
+            Type resourceType = GetRuntimeType("AL.Data.Runtime.ResourceData");
+            Type buildingType = GetRuntimeType("AL.Data.Runtime.BuildingState");
+            Type questType = GetRuntimeType("AL.Core.Interfaces.QuestState");
+            Type equipmentType = GetRuntimeType("AL.Data.Runtime.OwnedEquipmentState");
+            object save = Activator.CreateInstance(saveType);
+
+            object affinity = Activator.CreateInstance(affinityType);
+            SetField(affinity, "NpcId", "NPC_ROUND_TRIP");
+            SetField(affinity, "Affinity", 23.75f);
+            IList reputation = CreateRuntimeList(affinityType);
+            reputation.Add(affinity);
+
+            object faction = Activator.CreateInstance(factionType);
+            SetField(faction, "FactionId", "FACTION_ROUND_TRIP");
+            SetField(faction, "Reputation", -8);
+            IList factions = CreateRuntimeList(factionType);
+            factions.Add(faction);
+
+            object persona = Activator.CreateInstance(personaType);
+            SetField(persona, "Warlord", 5);
+            SetField(persona, "Diplomat", 9);
+            SetField(persona, "Sage", 13);
+            SetField(persona, "Rogue", 4);
+
+            object resource = Activator.CreateInstance(resourceType);
+            SetField(resource, "Type", Enum.Parse(GetRuntimeType("AL.Core.ResourceType"), "DarkCrystal"));
+            SetField(resource, "Amount", 87L);
+            IList resources = CreateRuntimeList(resourceType);
+            resources.Add(resource);
+
+            object building = Activator.CreateInstance(buildingType);
+            SetField(building, "BuildingId", "BLD_ROUND_TRIP");
+            SetField(building, "Level", 6);
+            SetField(building, "UpgradeCompleteTimestamp", 1800000001L);
+            IList buildings = CreateRuntimeList(buildingType);
+            buildings.Add(building);
+
+            object quest = Activator.CreateInstance(questType);
+            SetField(quest, "QuestId", "Q_ROUND_TRIP");
+            SetField(quest, "CurrentValue", 12);
+            SetField(quest, "IsCompleted", true);
+            SetField(quest, "IsClaimed", false);
+            IList quests = CreateRuntimeList(questType);
+            quests.Add(quest);
+
+            object equipment = Activator.CreateInstance(equipmentType);
+            SetField(equipment, "EquipmentId", "EQ_ROUND_TRIP");
+            SetField(equipment, "DisplayName", "Round Trip Sigil");
+            SetField(equipment, "Slot", Enum.Parse(GetRuntimeType("AL.Core.EquipmentSlot"), "Trinket"));
+            SetField(equipment, "HealthBonus", 31);
+            SetField(equipment, "Quantity", 3);
+            SetField(equipment, "SourceBossId", "BOSS_ROUND_TRIP");
+            IList ownedEquipment = CreateRuntimeList(equipmentType);
+            ownedEquipment.Add(equipment);
+
+            SetField(save, "SelectedRealm", Enum.Parse(GetRuntimeType("AL.Core.RealmId"), "Umbral"));
+            SetField(save, "CurrentChapterId", "C9_ROUND_TRIP");
+            SetField(save, "LastSavedTimestamp", 1800000123L);
+            SetField(save, "Reputation", reputation);
+            SetField(save, "FactionReputations", factions);
+            SetField(save, "LordPersona", persona);
+            SetField(save, "Resources", resources);
+            SetField(save, "Buildings", buildings);
+            SetField(save, "Quests", quests);
+            SetField(save, "OwnedEquipment", ownedEquipment);
+
+            InvokeEnsureSaveDefaults(save);
+            string json = JsonUtility.ToJson(save);
+            object roundTripped = JsonUtility.FromJson(json, saveType);
+            InvokeEnsureSaveDefaults(roundTripped);
+            string normalizedRoundTripJson = JsonUtility.ToJson(roundTripped);
+
+            Assert.AreEqual(json, normalizedRoundTripJson);
+            IList reloadedReputation = (IList)GetField(roundTripped, "Reputation");
+            IList reloadedFactions = (IList)GetField(roundTripped, "FactionReputations");
+            object reloadedPersona = GetField(roundTripped, "LordPersona");
+            IList reloadedResources = (IList)GetField(roundTripped, "Resources");
+            IList reloadedBuildings = (IList)GetField(roundTripped, "Buildings");
+            IList reloadedQuests = (IList)GetField(roundTripped, "Quests");
+            IList reloadedEquipment = (IList)GetField(roundTripped, "OwnedEquipment");
+
+            Assert.AreEqual("NPC_ROUND_TRIP", GetField(reloadedReputation[0], "NpcId"));
+            Assert.AreEqual(23.75f, GetField(reloadedReputation[0], "Affinity"));
+            Assert.AreEqual("FACTION_ROUND_TRIP", GetField(reloadedFactions[0], "FactionId"));
+            Assert.AreEqual(-8, GetField(reloadedFactions[0], "Reputation"));
+            Assert.AreEqual(5, GetField(reloadedPersona, "Warlord"));
+            Assert.AreEqual(9, GetField(reloadedPersona, "Diplomat"));
+            Assert.AreEqual(13, GetField(reloadedPersona, "Sage"));
+            Assert.AreEqual(4, GetField(reloadedPersona, "Rogue"));
+
+            Assert.AreEqual("Umbral", GetField(roundTripped, "SelectedRealm").ToString());
+            Assert.AreEqual("C9_ROUND_TRIP", GetField(roundTripped, "CurrentChapterId"));
+            Assert.AreEqual(1800000123L, GetField(roundTripped, "LastSavedTimestamp"));
+            Assert.AreEqual("DarkCrystal", GetField(reloadedResources[0], "Type").ToString());
+            Assert.AreEqual(87L, GetField(reloadedResources[0], "Amount"));
+            Assert.AreEqual("BLD_ROUND_TRIP", GetField(reloadedBuildings[0], "BuildingId"));
+            Assert.AreEqual(6, GetField(reloadedBuildings[0], "Level"));
+            Assert.AreEqual(1800000001L, GetField(reloadedBuildings[0], "UpgradeCompleteTimestamp"));
+            Assert.AreEqual("Q_ROUND_TRIP", GetField(reloadedQuests[0], "QuestId"));
+            Assert.AreEqual(12, GetField(reloadedQuests[0], "CurrentValue"));
+            Assert.True((bool)GetField(reloadedQuests[0], "IsCompleted"));
+            Assert.False((bool)GetField(reloadedQuests[0], "IsClaimed"));
+            Assert.AreEqual("EQ_ROUND_TRIP", GetField(reloadedEquipment[0], "EquipmentId"));
+            Assert.AreEqual("Round Trip Sigil", GetField(reloadedEquipment[0], "DisplayName"));
+            Assert.AreEqual("Trinket", GetField(reloadedEquipment[0], "Slot").ToString());
+            Assert.AreEqual(31, GetField(reloadedEquipment[0], "HealthBonus"));
+            Assert.AreEqual(3, GetField(reloadedEquipment[0], "Quantity"));
+            Assert.AreEqual("BOSS_ROUND_TRIP", GetField(reloadedEquipment[0], "SourceBossId"));
         }
 
         [Test]
