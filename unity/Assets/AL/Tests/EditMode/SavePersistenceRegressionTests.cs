@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AL.Data.Catalogs;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -12,6 +13,107 @@ namespace AL.Tests.EditMode
 {
     public class SavePersistenceRegressionTests
     {
+        private const string CurrentSaveFormatId = "anotherlife.local-save";
+
+        [Test]
+        public void ExplicitNewProfileStampsAndReloadsCurrentSaveMetadata()
+        {
+            string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Eldergrove"));
+
+                object currentSave = GetProperty(service, "CurrentSave");
+                Assert.AreEqual(CurrentSaveFormatId, GetField(currentSave, "SaveFormatId"));
+                Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
+                Assert.AreEqual(1, GetField(currentSave, "ProfileInitializationVersion"));
+
+                string primaryPath = Path.Combine(root, "save.json");
+                SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                    File.ReadAllBytes(primaryPath),
+                    SaveCandidateSourceGeneration.Primary,
+                    CreateSemanticPolicy());
+                Assert.AreEqual(SaveSemanticCandidateOutcome.Valid, candidate.Outcome);
+                Assert.True(candidate.IsWritable);
+
+                object reloadedService = CreateSaveService(root);
+                Invoke(reloadedService, "Load");
+                object reloadedSave = GetProperty(reloadedService, "CurrentSave");
+                Assert.AreEqual(CurrentSaveFormatId, GetField(reloadedSave, "SaveFormatId"));
+                Assert.AreEqual(1, GetField(reloadedSave, "SaveSchemaVersion"));
+                Assert.AreEqual(1, GetField(reloadedSave, "ProfileInitializationVersion"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void LegacyProfileCannotBeRewrittenBeforeExplicitMigration()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                string primaryPath = Path.Combine(root, "save.json");
+                long futureTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60;
+                string historicalJson =
+                    "{" +
+                    "\"SelectedRealm\":1," +
+                    "\"Resources\":[{\"Type\":0,\"Amount\":1000}]," +
+                    "\"Buildings\":[],\"Troops\":[],\"Researches\":[]," +
+                    "\"Quests\":[],\"Territories\":[],\"RealmGems\":[]," +
+                    "\"Wishgate\":{},\"CurrentChapterId\":\"C1\"," +
+                    "\"Warmaster\":{},\"ChampionCustomization\":{}," +
+                    "\"WarzoneCredits\":0,\"LastSavedTimestamp\":" +
+                    futureTimestamp + "}";
+                File.WriteAllText(primaryPath, historicalJson);
+                byte[] originalBytes = File.ReadAllBytes(primaryPath);
+
+                object service = CreateSaveService(root);
+                Invoke(service, "Load");
+                object currentSave = GetProperty(service, "CurrentSave");
+                Assert.That((string)GetField(currentSave, "SaveFormatId"), Is.Null.Or.Empty);
+                Assert.AreEqual(0, GetField(currentSave, "SaveSchemaVersion"));
+                Assert.AreEqual(0, GetField(currentSave, "ProfileInitializationVersion"));
+
+                SetField(currentSave, "CurrentChapterId", "C2_MUST_NOT_PERSIST");
+                LogAssert.Expect(
+                    LogType.Error,
+                    new System.Text.RegularExpressions.Regex(
+                        "AL-SAVE-UNMIGRATED-READ-ONLY"));
+                Invoke(service, "Save");
+
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(service, "LastSaveStatus").ToString());
+                Assert.That(
+                    (string)GetProperty(service, "LastSaveMessage"),
+                    Does.Contain("AL-SAVE-UNMIGRATED-READ-ONLY"));
+                CollectionAssert.AreEqual(originalBytes, File.ReadAllBytes(primaryPath));
+                Assert.False(File.Exists(Path.Combine(root, "save.tmp.json")));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
         [Test]
         public void EnsureSaveDefaultsInitializesNarrativeCompatibilityFields()
         {
@@ -65,6 +167,9 @@ namespace AL.Tests.EditMode
             object save = JsonUtility.FromJson(historicalJson, saveType);
 
             Assert.NotNull(save);
+            Assert.IsNull(GetField(save, "SaveFormatId"));
+            Assert.AreEqual(0, GetField(save, "SaveSchemaVersion"));
+            Assert.AreEqual(0, GetField(save, "ProfileInitializationVersion"));
             IList deserializedReputation = (IList)GetField(save, "Reputation");
             IList deserializedFactions = (IList)GetField(save, "FactionReputations");
             object deserializedPersona = GetField(save, "LordPersona");
@@ -78,6 +183,9 @@ namespace AL.Tests.EditMode
 
             InvokeEnsureSaveDefaults(save);
 
+            Assert.IsNull(GetField(save, "SaveFormatId"));
+            Assert.AreEqual(0, GetField(save, "SaveSchemaVersion"));
+            Assert.AreEqual(0, GetField(save, "ProfileInitializationVersion"));
             IList reputation = (IList)GetField(save, "Reputation");
             IList factions = (IList)GetField(save, "FactionReputations");
             object persona = GetField(save, "LordPersona");
@@ -138,6 +246,34 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(7, GetField(building, "Level"));
             Assert.AreEqual(4, GetField(quest, "CurrentValue"));
             Assert.AreEqual(2, GetField(equipment, "Quantity"));
+        }
+
+        private static SaveSemanticValidationPolicy CreateSemanticPolicy()
+        {
+            var authority = new SaveSemanticValidationAuthority(
+                new[] { 0, 1, 2, 3, 4 },
+                new[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 },
+                new[] { 0, 1, 2, 3 },
+                new[] { 0, 1, 2, 3, 4, 5 },
+                new[] { 0, 1, 2, 3 },
+                new[] { 0, 1, 2, 3, 4, 5 },
+                Array.Empty<SaveSemanticQuestRule>(),
+                new[]
+                {
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.Chapter, "C1"),
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.BodyPreset, "average"),
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.HairStyle, "short"),
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.ArmorStyle, "realm_basic"),
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.FaceMark, "none"),
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.WeaponStyle, "sword"),
+                    new SaveSemanticStableIdRule(SaveSemanticStableIdKind.OffhandStyle, "shield")
+                });
+            return new SaveSemanticValidationPolicy(
+                CurrentSaveFormatId,
+                1,
+                1,
+                authority,
+                maximumInputBytes: 1024 * 1024);
         }
 
         [Test]

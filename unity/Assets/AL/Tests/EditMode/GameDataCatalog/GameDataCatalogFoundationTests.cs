@@ -214,6 +214,25 @@ namespace AL.Tests.EditMode.GameDataCatalog
             }
         }
 
+        [TestCase("1e400")]
+        [TestCase("1e-4000")]
+        public void KnownCatalogNumberOutsideFiniteDoubleRangeFailsWithTypedDiagnostic(
+            string token)
+        {
+            var artifact = CatalogFixture.SkillArtifact(
+                records:
+                    "[{\"id\":\"ember\",\"power\":" + token + "," +
+                    "\"tags\":[\"fire\"]}]");
+
+            GameDataCatalogLoadResult result = CatalogFixture.Validate(artifact);
+
+            Assert.AreEqual(GameDataCatalogLoadStatus.InvalidRecord, result.Status);
+            Assert.IsNull(result.Snapshot);
+            CollectionAssert.Contains(
+                result.Diagnostics.Select(item => item.Code).ToArray(),
+                "AL-GDC-FIELD-NUMBER-RANGE");
+        }
+
         [Test]
         public void EnvelopeIdentityVersionAndRegisteredFamilyMustMatchManifestExactly()
         {

@@ -359,6 +359,12 @@ namespace AL.Services.Local
         {
             persistedSave = null;
 
+            if (!HasCurrentSaveMetadata(candidate))
+            {
+                message = "AL-SAVE-UNMIGRATED-READ-ONLY: Legacy or unsupported save metadata requires an explicit reviewed migration before persistence; existing files were preserved.";
+                return false;
+            }
+
             try
             {
                 _fileOperations.CreateDirectory(PersistencePath);
@@ -511,12 +517,19 @@ namespace AL.Services.Local
 
         private bool TryInstallBackupAsPrimary(SaveGameData backupSave, string sourcePath, out string message)
         {
+            if (!HasCurrentSaveMetadata(backupSave))
+            {
+                message = "AL-SAVE-UNMIGRATED-RECOVERY-READ-ONLY: Legacy or unsupported backup metadata requires an explicit reviewed migration before installation; source files were preserved.";
+                return false;
+            }
+
             try
             {
                 _fileOperations.CreateDirectory(PersistencePath);
                 TryDelete(TempPath);
                 EnsureSaveDefaults(backupSave);
-                _fileOperations.WriteAllTextDurable(TempPath, JsonUtility.ToJson(backupSave, true));
+                string backupJson = JsonUtility.ToJson(backupSave, true);
+                _fileOperations.WriteAllTextDurable(TempPath, backupJson);
 
                 if (!TryReadValidSave(TempPath, out _, out string tempError))
                 {
@@ -876,6 +889,9 @@ namespace AL.Services.Local
             };
 
             EnsureSaveDefaults(save);
+            save.SaveFormatId = SaveGameData.CurrentSaveFormatId;
+            save.SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion;
+            save.ProfileInitializationVersion = SaveGameData.CurrentProfileInitializationVersion;
             return save;
         }
 
@@ -888,6 +904,16 @@ namespace AL.Services.Local
 
             return JsonUtility.FromJson<SaveGameData>(JsonUtility.ToJson(save));
         }
+
+        private static bool HasCurrentSaveMetadata(SaveGameData save) =>
+            save != null &&
+            string.Equals(
+                save.SaveFormatId,
+                SaveGameData.CurrentSaveFormatId,
+                StringComparison.Ordinal) &&
+            save.SaveSchemaVersion == SaveGameData.CurrentSaveSchemaVersion &&
+            save.ProfileInitializationVersion ==
+                SaveGameData.CurrentProfileInitializationVersion;
 
         private static bool SavesAreEquivalent(SaveGameData left, SaveGameData right) =>
             JsonUtility.ToJson(left) == JsonUtility.ToJson(right);
