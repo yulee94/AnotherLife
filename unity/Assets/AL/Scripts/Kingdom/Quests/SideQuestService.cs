@@ -19,7 +19,9 @@ namespace AL.Services.Local
     {
         private readonly ISaveGameService _saveGameService;
         private readonly IResourceService _resourceService;
-        private Dictionary<string, SideQuestDefinition> _definitions = new Dictionary<string, SideQuestDefinition>();
+        private Dictionary<string, SideQuestDefinition> _definitions =
+            new Dictionary<string, SideQuestDefinition>(StringComparer.Ordinal);
+        private QuestStateCompatibilityIssues _reportedCompatibilityIssues;
 
         public SideQuestService(ISaveGameService saveGameService, IResourceService resourceService)
         {
@@ -30,17 +32,39 @@ namespace AL.Services.Local
         public void AcceptQuest(string questId)
         {
             if (_saveGameService.CurrentSave == null) return;
-            _saveGameService.CurrentSave.Quests ??= new List<QuestState>();
-            SanitizeQuestStates();
             if (string.IsNullOrWhiteSpace(questId))
             {
                 Debug.LogWarning("[AL-QST-INVALID-ID] Side quest accept ignored for blank quest id.");
                 return;
             }
 
-            if (_saveGameService.CurrentSave.Quests.Any(q => q.QuestId == questId)) return;
+            if (!_definitions.TryGetValue(questId, out SideQuestDefinition definition) ||
+                definition == null ||
+                !string.Equals(definition.Id, questId, StringComparison.Ordinal) ||
+                definition.TargetValue <= 0)
+            {
+                Debug.LogWarning($"[AL-QST-UNKNOWN-ID] Side quest accept ignored for unsupported quest id '{questId}'.");
+                return;
+            }
 
-            _saveGameService.CurrentSave.Quests.Add(new QuestState { QuestId = questId, CurrentValue = 0 });
+            IReadOnlyList<QuestState> existingStates = _saveGameService.CurrentSave.Quests;
+            if (QuestStateCompatibility.ContainsExactId(existingStates, questId))
+            {
+                if (!CreateCompatibilityView().Any(state =>
+                        string.Equals(state.QuestId, questId, StringComparison.Ordinal)))
+                {
+                    Debug.LogWarning($"[AL-QST-UNSAFE-STATE] Side quest accept ignored for duplicate or contradictory state '{questId}'.");
+                }
+
+                return;
+            }
+
+            _saveGameService.CurrentSave.Quests ??= new List<QuestState>();
+            _saveGameService.CurrentSave.Quests.Add(new QuestState
+            {
+                QuestId = questId,
+                CurrentValue = 0
+            });
             _saveGameService.Save();
             Debug.Log($"[SideQuest] Accepted: {questId}");
         }
@@ -57,47 +81,24 @@ namespace AL.Services.Local
                 return Enumerable.Empty<QuestState>();
             }
 
-            _saveGameService.CurrentSave.Quests ??= new List<QuestState>();
-            SanitizeQuestStates();
-            return _saveGameService.CurrentSave.Quests
-                .Where(q => q.QuestId.StartsWith("SQ_", StringComparison.Ordinal) && !q.IsClaimed);
+            return CreateCompatibilityView()
+                .Where(q => !q.IsClaimed)
+                .ToArray();
         }
 
-        private void SanitizeQuestStates()
+        private QuestState[] CreateCompatibilityView()
         {
-            var quests = _saveGameService.CurrentSave.Quests;
-            var seenIds = new HashSet<string>(StringComparer.Ordinal);
-
-            for (int index = quests.Count - 1; index >= 0; index--)
-            {
-                var state = quests[index];
-                if (state == null)
-                {
-                    quests.RemoveAt(index);
-                    Debug.LogWarning("[AL-QST-NULL-STATE] Removed null quest state from side-quest compatibility view.");
-                    continue;
-                }
-
-                if (string.IsNullOrWhiteSpace(state.QuestId))
-                {
-                    quests.RemoveAt(index);
-                    Debug.LogWarning("[AL-QST-INVALID-ID] Removed quest state with blank quest id from side-quest compatibility view.");
-                    continue;
-                }
-            }
-
-            for (int index = 0; index < quests.Count; index++)
-            {
-                var questId = quests[index].QuestId;
-                if (seenIds.Add(questId))
-                {
-                    continue;
-                }
-
-                quests.RemoveAt(index);
-                index--;
-                Debug.LogWarning($"[AL-QST-DUPLICATE-ID] Removed duplicate quest state for '{questId}' from side-quest compatibility view.");
-            }
+            QuestState[] states = QuestStateCompatibility.CreateSupportedView(
+                _saveGameService.CurrentSave?.Quests,
+                _definitions,
+                definition => definition.Id,
+                definition => definition.TargetValue,
+                out QuestStateCompatibilityIssues issues);
+            QuestStateCompatibilityDiagnostics.ReportOnce(
+                ref _reportedCompatibilityIssues,
+                issues,
+                nameof(SideQuestService));
+            return states;
         }
     }
 }

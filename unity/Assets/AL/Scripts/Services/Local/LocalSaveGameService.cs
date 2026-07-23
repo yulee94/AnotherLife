@@ -670,7 +670,7 @@ namespace AL.Services.Local
             save.Buildings = RemoveNullEntries(save.Buildings);
             save.Troops = RemoveNullEntries(save.Troops);
             save.Researches = RemoveNullEntries(save.Researches);
-            save.Quests = RemoveNullEntries(save.Quests);
+            save.Quests ??= new List<QuestState>();
             save.Reputation = RemoveNullEntries(save.Reputation);
             save.FactionReputations = RemoveNullEntries(save.FactionReputations);
             save.Territories = RemoveNullEntries(save.Territories);
