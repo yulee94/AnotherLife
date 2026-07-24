@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -211,7 +212,77 @@ namespace AL.Services.Local
         private const string BackupFileName = "save.backup.json";
         private const string TempFileName = "save.tmp.json";
         private const string PreviousFileName = "save.previous.json";
+        private const string StageFiveRecoveryMarkerFileName =
+            "save.recovery.stage5";
         private const int MaxQuarantinesPerSource = 3;
+        private const int MaxStageFiveQuarantineMarkers = 16;
+        private const int Sha256Base64UrlLength = 43;
+        private const int TransactionIdBase64UrlLength = 22;
+
+        private enum InvalidPrimaryRecoveryStage
+        {
+            Initial = 0,
+            BackupStaged = 1,
+            PrimaryPreserved = 2,
+            PrimaryInstalled = 3,
+            Quarantined = 4
+        }
+
+        private sealed class InvalidPrimaryRecoveryPlan
+        {
+            public InvalidPrimaryRecoveryPlan(
+                InvalidPrimaryRecoveryStage stage,
+                SaveSemanticCandidate backupCandidate,
+                byte[] invalidPrimaryBytes,
+                byte[] backupBytes,
+                string quarantinePath,
+                byte[] transactionMarkerBytes)
+            {
+                Stage = stage;
+                BackupCandidate = backupCandidate;
+                InvalidPrimaryBytes = invalidPrimaryBytes;
+                BackupBytes = backupBytes;
+                QuarantinePath = quarantinePath;
+                TransactionMarkerBytes = transactionMarkerBytes;
+            }
+
+            public InvalidPrimaryRecoveryStage Stage { get; }
+            public SaveSemanticCandidate BackupCandidate { get; }
+            public byte[] InvalidPrimaryBytes { get; }
+            public byte[] BackupBytes { get; }
+            public string QuarantinePath { get; }
+            public byte[] TransactionMarkerBytes { get; }
+        }
+
+        private sealed class StageFiveQuarantineMarker
+        {
+            public StageFiveQuarantineMarker(string path)
+            {
+                Path = path;
+            }
+
+            public string Path { get; }
+        }
+
+        private sealed class StageFiveTransactionMarker
+        {
+            public StageFiveTransactionMarker(
+                byte[] bytes,
+                string quarantinePath,
+                string backupIdentity,
+                string invalidPrimaryIdentity)
+            {
+                Bytes = bytes;
+                QuarantinePath = quarantinePath;
+                BackupIdentity = backupIdentity;
+                InvalidPrimaryIdentity = invalidPrimaryIdentity;
+            }
+
+            public byte[] Bytes { get; }
+            public string QuarantinePath { get; }
+            public string BackupIdentity { get; }
+            public string InvalidPrimaryIdentity { get; }
+        }
 
         private sealed class SaveCandidateInventoryEntry
         {
@@ -242,11 +313,17 @@ namespace AL.Services.Local
         private string BackupPath => Path.Combine(PersistencePath, BackupFileName);
         private string TempPath => Path.Combine(PersistencePath, TempFileName);
         private string PreviousPath => Path.Combine(PersistencePath, PreviousFileName);
+        private string StageFiveRecoveryMarkerPath =>
+            Path.Combine(PersistencePath, StageFiveRecoveryMarkerFileName);
 
         private SaveGameData _currentSave;
         private SaveGameData _readOnlyCandidate;
         private bool _profileWritable;
         private byte[] _committedRecoveryWitnessBytes;
+        private byte[] _committedInvalidPrimaryWitnessBytes;
+        private string _committedInvalidPrimaryQuarantinePath;
+        private byte[] _committedInvalidPrimaryRecoveryMarkerBytes;
+        private string _committedInvalidPrimaryRecoveryMarkerPath;
 
         public SaveGameData CurrentSave => _currentSave;
         public SaveLoadStatus LastLoadStatus { get; private set; }
@@ -319,13 +396,13 @@ namespace AL.Services.Local
 
             byte[] requiredRecoveryWitnessBytes = _committedRecoveryWitnessBytes;
             if (requiredRecoveryWitnessBytes != null &&
-                !TryVerifyExactBackupRecoveryTargetTwice(
+                !TryVerifyCommittedRecoveryWitnessTargetTwice(
                     requiredRecoveryWitnessBytes,
                     out _,
                     out _))
             {
                 const string witnessChangedMessage =
-                    "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact primary, backup, staged witness, and missing-previous identity changed before save; persistence was frozen and every generation was preserved.";
+                    "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact primary, backup, staged witness, previous-generation, or committed quarantine identity changed before save; persistence was frozen and every generation was preserved.";
                 _profileWritable = false;
                 _readOnlyCandidate = CloneSave(_currentSave);
                 _currentSave = null;
@@ -358,6 +435,10 @@ namespace AL.Services.Local
                 _readOnlyCandidate = null;
                 _profileWritable = true;
                 _committedRecoveryWitnessBytes = null;
+                _committedInvalidPrimaryWitnessBytes = null;
+                _committedInvalidPrimaryQuarantinePath = null;
+                _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                _committedInvalidPrimaryRecoveryMarkerPath = null;
                 SetSaveStatus(SaveOperationStatus.SavedPrimary, message, false);
                 return;
             }
@@ -390,6 +471,10 @@ namespace AL.Services.Local
             _readOnlyCandidate = null;
             _profileWritable = false;
             _committedRecoveryWitnessBytes = null;
+            _committedInvalidPrimaryWitnessBytes = null;
+            _committedInvalidPrimaryQuarantinePath = null;
+            _committedInvalidPrimaryRecoveryMarkerBytes = null;
+            _committedInvalidPrimaryRecoveryMarkerPath = null;
             LastSaveStatus = SaveOperationStatus.None;
             LastSaveMessage = string.Empty;
             LastSaveDisposition = null;
@@ -438,6 +523,33 @@ namespace AL.Services.Local
             if (inventory.All(entry =>
                     entry.ReadResult.Disposition == SaveFileReadDisposition.Missing))
             {
+                bool quarantineInventoryReadable =
+                    TryEnumerateStageFiveQuarantineMarkers(
+                        out IReadOnlyList<StageFiveQuarantineMarker>
+                            orphanedStageFiveMarkers,
+                        out bool quarantineEvidenceConflict);
+                if (ReadCanonicalPath(StageFiveRecoveryMarkerPath).Disposition !=
+                        SaveFileReadDisposition.Missing ||
+                    !quarantineInventoryReadable ||
+                    quarantineEvidenceConflict ||
+                    orphanedStageFiveMarkers.Count != 0 ||
+                    HasStageFiveTransactionArchiveEvidence())
+                {
+                    _currentSave = null;
+                    PublishDisposition(
+                        inventory,
+                        null,
+                        "SAVE_SELECT_ORPHANED_STAGE5_MARKER",
+                        false,
+                        false,
+                        false);
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryRequired,
+                        "AL-SAVE-ORPHANED-STAGE5-EVIDENCE: A recovery marker, quarantine, or transaction archive survived without canonical generations; it was preserved for explicit recovery.",
+                        false);
+                    return;
+                }
+
                 CreateNewProfileAfterAllMissing(inventory);
                 return;
             }
@@ -497,6 +609,86 @@ namespace AL.Services.Local
                     SaveLoadStatus.RecoveryFailed,
                     "AL-SAVE-SELECTED-DESERIALIZE-FAILED: The selected bounded candidate could not be materialized safely; disk evidence was preserved.",
                     true);
+                return;
+            }
+
+            if (TryBuildInvalidPrimaryRecoveryPlan(
+                    inventory,
+                    primary,
+                    backup,
+                    previous,
+                    selected,
+                    out InvalidPrimaryRecoveryPlan invalidPrimaryRecoveryPlan,
+                    out bool invalidPrimaryRecoveryEvidenceConflict))
+            {
+                bool recovered = TryRecoverInvalidPrimaryFromExactBackup(
+                    invalidPrimaryRecoveryPlan,
+                    out SaveGameData recoveredSave,
+                    out string quarantinePath,
+                    out bool diskChanged,
+                    out string recoveryMessage);
+                if (recovered)
+                {
+                    _currentSave = recoveredSave;
+                    _readOnlyCandidate = null;
+                    _profileWritable = true;
+                    _committedRecoveryWitnessBytes =
+                        invalidPrimaryRecoveryPlan.BackupBytes.ToArray();
+                    _committedInvalidPrimaryWitnessBytes =
+                        invalidPrimaryRecoveryPlan.InvalidPrimaryBytes.ToArray();
+                    _committedInvalidPrimaryQuarantinePath = quarantinePath;
+                    _committedInvalidPrimaryRecoveryMarkerBytes =
+                        invalidPrimaryRecoveryPlan.TransactionMarkerBytes.ToArray();
+                    _committedInvalidPrimaryRecoveryMarkerPath =
+                        StageFiveRecoveryMarkerPath;
+                    PublishDisposition(
+                        inventory,
+                        invalidPrimaryRecoveryPlan.BackupCandidate,
+                        "SAVE_SELECT_INVALID_PRIMARY_EXACT_BACKUP_RECOVERY",
+                        true,
+                        true,
+                        diskChanged,
+                        SaveCandidateSourceGeneration.Backup);
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveredFromBackup,
+                        recoveryMessage,
+                        false);
+                    return;
+                }
+
+                _currentSave = null;
+                _readOnlyCandidate = selectedSave;
+                _profileWritable = false;
+                PublishDisposition(
+                    inventory,
+                    invalidPrimaryRecoveryPlan.BackupCandidate,
+                    "SAVE_SELECT_INVALID_PRIMARY_EXACT_BACKUP_RECOVERY",
+                    false,
+                    false,
+                    diskChanged,
+                    SaveCandidateSourceGeneration.Backup);
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryFailed,
+                    recoveryMessage,
+                    true);
+                return;
+            }
+
+            if (invalidPrimaryRecoveryEvidenceConflict)
+            {
+                _currentSave = null;
+                _readOnlyCandidate = selectedSave;
+                PublishDisposition(
+                    inventory,
+                    selected,
+                    "SAVE_SELECT_INVALID_PRIMARY_RECOVERY_EVIDENCE_CONFLICT",
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryRequired,
+                    "AL-SAVE-INVALID-PRIMARY-RECOVERY-EVIDENCE-CONFLICT: Stage 5 quarantine provenance was malformed, ambiguous, or inconsistent; all evidence remains read-only.",
+                    false);
                 return;
             }
 
@@ -655,11 +847,23 @@ namespace AL.Services.Local
             SetLoadStatus(status, message, false);
         }
 
-        public bool HasSave() =>
-            HasSaveEvidence(SavePath) ||
-            HasSaveEvidence(BackupPath) ||
-            HasSaveEvidence(PreviousPath) ||
-            HasSaveEvidence(TempPath);
+        public bool HasSave()
+        {
+            if (HasSaveEvidence(SavePath) ||
+                HasSaveEvidence(BackupPath) ||
+                HasSaveEvidence(PreviousPath) ||
+                HasSaveEvidence(TempPath) ||
+                HasSaveEvidence(StageFiveRecoveryMarkerPath))
+            {
+                return true;
+            }
+
+            return !TryEnumerateStageFiveQuarantineMarkers(
+                       out IReadOnlyList<StageFiveQuarantineMarker> markers,
+                       out _) ||
+                   markers.Count != 0 ||
+                   HasStageFiveTransactionArchiveEvidence();
+        }
 
         public void CreateNewSave(RealmId realmId)
         {
@@ -667,6 +871,10 @@ namespace AL.Services.Local
             _readOnlyCandidate = null;
             _profileWritable = true;
             _committedRecoveryWitnessBytes = null;
+            _committedInvalidPrimaryWitnessBytes = null;
+            _committedInvalidPrimaryQuarantinePath = null;
+            _committedInvalidPrimaryRecoveryMarkerBytes = null;
+            _committedInvalidPrimaryRecoveryMarkerPath = null;
             LastLoadDisposition = null;
             Save();
         }
@@ -678,7 +886,8 @@ namespace AL.Services.Local
                 SavePath,
                 BackupPath,
                 TempPath,
-                PreviousPath
+                PreviousPath,
+                StageFiveRecoveryMarkerPath
             };
 
             deletionTargets.AddRange(EnumerateQuarantines(SaveFileName));
@@ -710,6 +919,10 @@ namespace AL.Services.Local
             _readOnlyCandidate = null;
             _profileWritable = false;
             _committedRecoveryWitnessBytes = null;
+            _committedInvalidPrimaryWitnessBytes = null;
+            _committedInvalidPrimaryQuarantinePath = null;
+            _committedInvalidPrimaryRecoveryMarkerBytes = null;
+            _committedInvalidPrimaryRecoveryMarkerPath = null;
             LastLoadDisposition = null;
             LastLoadStatus = SaveLoadStatus.None;
             LastLoadMessage = "AL-SAVE-DELETED: Local save data deleted.";
@@ -925,7 +1138,7 @@ namespace AL.Services.Local
             {
                 _fileOperations.CreateDirectory(PersistencePath);
                 if (requiredRecoveryWitnessBytes != null &&
-                    !IsExactBackupRecoveryTarget(
+                    !IsCommittedRecoveryWitnessTarget(
                         CaptureCanonicalLedger(),
                         requiredRecoveryWitnessBytes,
                         out _))
@@ -1035,13 +1248,18 @@ namespace AL.Services.Local
 
                 bool tempClean = TryDelete(TempPath);
                 bool previousClean = TryDelete(PreviousPath);
-                if (!tempClean || !previousClean)
+                bool recoveryMarkerArchived =
+                    TryArchiveCommittedInvalidPrimaryRecoveryMarker();
+                if (!tempClean || !previousClean || !recoveryMarkerArchived)
                 {
-                    message = "AL-SAVE-BACKUP-CLEANUP-FAILED: Candidate and backup validated, but canonical transaction residue could not be removed.";
+                    message = "AL-SAVE-BACKUP-CLEANUP-FAILED: Candidate and backup validated, but canonical residue or the preserved Stage 5 transaction marker did not reach its exact cleanup target.";
                     return false;
                 }
 
-                PruneQuarantines(SaveFileName);
+                PruneQuarantines(
+                    SaveFileName,
+                    _committedInvalidPrimaryQuarantinePath,
+                    _committedInvalidPrimaryRecoveryMarkerPath);
                 PruneQuarantines(BackupFileName);
                 message = $"AL-SAVE-SAVED-PRIMARY: Game saved safely to {SavePath}.";
                 return true;
@@ -1084,7 +1302,10 @@ namespace AL.Services.Local
                 MatchesExactState(finalLedger.Backup, baseline.Backup);
             bool cleanupVerified =
                 finalLedger.Temp.Disposition == SaveFileReadDisposition.Missing &&
-                finalLedger.Previous.Disposition == SaveFileReadDisposition.Missing;
+                finalLedger.Previous.Disposition == SaveFileReadDisposition.Missing &&
+                IsCommittedRecoveryMarkerCleanupVerified();
+            bool committedQuarantineVerified =
+                IsCommittedInvalidPrimaryQuarantineIntact();
             SaveGameData priorPublishedSave = null;
             if (baseline.Primary.Disposition == SaveFileReadDisposition.Read)
             {
@@ -1097,7 +1318,8 @@ namespace AL.Services.Local
             bool completeCommitTarget =
                 candidatePrimaryVerified &&
                 requiredBackupVerified &&
-                cleanupVerified;
+                cleanupVerified &&
+                committedQuarantineVerified;
             bool commitVerifiedTwice =
                 completeCommitTarget &&
                 VerifyCommitTargetAgain(
@@ -1179,6 +1401,1012 @@ namespace AL.Services.Local
                 ReadCanonicalPath(BackupPath),
                 ReadCanonicalPath(TempPath),
                 ReadCanonicalPath(PreviousPath));
+
+        private bool TryBuildInvalidPrimaryRecoveryPlan(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveCandidateInventoryEntry primary,
+            SaveCandidateInventoryEntry backup,
+            SaveCandidateInventoryEntry previous,
+            SaveSemanticCandidate selected,
+            out InvalidPrimaryRecoveryPlan plan,
+            out bool evidenceConflict)
+        {
+            plan = null;
+            evidenceConflict = false;
+            SaveCandidateInventoryEntry temp = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Temp);
+            SaveFileReadResult transactionMarkerRead =
+                ReadCanonicalPath(StageFiveRecoveryMarkerPath);
+            if (!TryGetExplicitCurrentWritableBytes(backup, out byte[] backupBytes))
+            {
+                evidenceConflict =
+                    transactionMarkerRead.Disposition !=
+                    SaveFileReadDisposition.Missing;
+                return false;
+            }
+
+            string backupIdentity = ComputeSha256Base64Url(backupBytes);
+            StageFiveTransactionMarker transactionMarker = null;
+            if (transactionMarkerRead.Disposition !=
+                    SaveFileReadDisposition.Missing &&
+                (transactionMarkerRead.Disposition !=
+                     SaveFileReadDisposition.Read ||
+                 !TryParseStageFiveTransactionMarker(
+                     transactionMarkerRead.Bytes,
+                     out transactionMarker)))
+            {
+                evidenceConflict = true;
+                return false;
+            }
+
+            bool backupSelected =
+                selected != null &&
+                ReferenceEquals(selected, backup.SemanticCandidate) &&
+                selected.SourceGeneration == SaveCandidateSourceGeneration.Backup;
+            bool primarySelected =
+                selected != null &&
+                ReferenceEquals(selected, primary.SemanticCandidate) &&
+                selected.SourceGeneration == SaveCandidateSourceGeneration.Primary;
+            bool primaryMissing =
+                primary.ReadResult.Disposition == SaveFileReadDisposition.Missing;
+            bool tempMissing =
+                temp.ReadResult.Disposition == SaveFileReadDisposition.Missing;
+            bool previousMissing =
+                previous.ReadResult.Disposition == SaveFileReadDisposition.Missing;
+            bool primaryIsBackup =
+                TryGetExplicitCurrentWritableBytes(primary, out byte[] primaryBytes) &&
+                BytesEqual(primaryBytes, backupBytes);
+            bool tempIsBackup =
+                TryGetExplicitCurrentWritableBytes(temp, out byte[] tempBytes) &&
+                BytesEqual(tempBytes, backupBytes);
+            bool primaryIsInvalid =
+                TryGetStrictInvalidBytes(primary, out byte[] invalidPrimaryBytes);
+            bool previousIsInvalid =
+                TryGetStrictInvalidBytes(previous, out byte[] previousInvalidBytes);
+
+            InvalidPrimaryRecoveryStage? stage = null;
+            byte[] exactInvalidBytes = null;
+            if (backupSelected &&
+                primaryIsInvalid &&
+                tempMissing &&
+                previousMissing)
+            {
+                stage = InvalidPrimaryRecoveryStage.Initial;
+                exactInvalidBytes = invalidPrimaryBytes;
+            }
+            else if (backupSelected &&
+                     primaryIsInvalid &&
+                     tempIsBackup &&
+                     previousMissing)
+            {
+                stage = InvalidPrimaryRecoveryStage.BackupStaged;
+                exactInvalidBytes = invalidPrimaryBytes;
+            }
+            else if (backupSelected &&
+                     primaryMissing &&
+                     tempIsBackup &&
+                     previousIsInvalid)
+            {
+                stage = InvalidPrimaryRecoveryStage.PrimaryPreserved;
+                exactInvalidBytes = previousInvalidBytes;
+            }
+            else if (primarySelected &&
+                     primaryIsBackup &&
+                     tempIsBackup &&
+                     previousIsInvalid)
+            {
+                stage = InvalidPrimaryRecoveryStage.PrimaryInstalled;
+                exactInvalidBytes = previousInvalidBytes;
+            }
+            else if (primarySelected &&
+                     primaryIsBackup &&
+                     tempIsBackup &&
+                     previousMissing)
+            {
+                stage = InvalidPrimaryRecoveryStage.Quarantined;
+            }
+
+            if (!stage.HasValue)
+            {
+                if (transactionMarker != null)
+                {
+                    evidenceConflict = true;
+                }
+
+                return false;
+            }
+
+            if (!TryEnumerateStageFiveQuarantineMarkers(
+                    out IReadOnlyList<StageFiveQuarantineMarker> markers,
+                    out bool markerConflict))
+            {
+                evidenceConflict = markerConflict;
+                return false;
+            }
+
+            if (transactionMarker == null)
+            {
+                // Only S0 may begin without a durable transaction marker.
+                // S1-S3 without it may be Stage 4 residue and must remain idle.
+                if (stage.Value != InvalidPrimaryRecoveryStage.Initial)
+                {
+                    return false;
+                }
+
+                string quarantinePath = CreateStageFiveQuarantinePath();
+                byte[] transactionMarkerBytes =
+                    CreateStageFiveTransactionMarkerBytes(
+                        quarantinePath,
+                        backupBytes,
+                        exactInvalidBytes);
+                plan = new InvalidPrimaryRecoveryPlan(
+                    stage.Value,
+                    backup.SemanticCandidate,
+                    exactInvalidBytes,
+                    backupBytes,
+                    quarantinePath,
+                    transactionMarkerBytes);
+                return true;
+            }
+
+            if (!string.Equals(
+                    transactionMarker.BackupIdentity,
+                    backupIdentity,
+                    StringComparison.Ordinal))
+            {
+                evidenceConflict = true;
+                return false;
+            }
+
+            if (stage.Value == InvalidPrimaryRecoveryStage.Quarantined)
+            {
+                List<StageFiveQuarantineMarker> activeMatches = markers
+                    .Where(marker => string.Equals(
+                        marker.Path,
+                        transactionMarker.QuarantinePath,
+                        StringComparison.OrdinalIgnoreCase))
+                    .Take(2)
+                    .ToList();
+                if (activeMatches.Count != 1 ||
+                    !TryReadExactInvalidPrimaryQuarantine(
+                        activeMatches[0],
+                        transactionMarker.InvalidPrimaryIdentity,
+                        out exactInvalidBytes))
+                {
+                    evidenceConflict = true;
+                    return false;
+                }
+            }
+
+            string invalidPrimaryIdentity =
+                ComputeSha256Base64Url(exactInvalidBytes);
+            if (!string.Equals(
+                    transactionMarker.InvalidPrimaryIdentity,
+                    invalidPrimaryIdentity,
+                    StringComparison.Ordinal) ||
+                (stage.Value != InvalidPrimaryRecoveryStage.Quarantined &&
+                 ReadCanonicalPath(
+                          transactionMarker.QuarantinePath)
+                      .Disposition != SaveFileReadDisposition.Missing))
+            {
+                evidenceConflict = true;
+                return false;
+            }
+
+            plan = new InvalidPrimaryRecoveryPlan(
+                stage.Value,
+                backup.SemanticCandidate,
+                exactInvalidBytes,
+                backupBytes,
+                transactionMarker.QuarantinePath,
+                transactionMarker.Bytes);
+            return true;
+        }
+
+        private bool TryGetStrictInvalidBytes(
+            SaveCandidateInventoryEntry entry,
+            out byte[] bytes)
+        {
+            bytes = null;
+            SaveSemanticCandidate candidate = entry?.SemanticCandidate;
+            if (entry == null ||
+                entry.ReadResult.Disposition != SaveFileReadDisposition.Read ||
+                candidate == null ||
+                candidate.SourceGeneration != entry.Source ||
+                candidate.Outcome != SaveSemanticCandidateOutcome.Invalid ||
+                !candidate.HasRetainedRawBytes)
+            {
+                return false;
+            }
+
+            bytes = candidate.CopyRawBytes();
+            return bytes != null &&
+                   bytes.LongLength == entry.ReadResult.ObservedByteCount &&
+                   bytes.Length == candidate.OriginalRawByteCount &&
+                   bytes.Length <= _semanticPolicy.MaximumInputBytes;
+        }
+
+        private bool TryGetExplicitCurrentWritableBytes(
+            SaveCandidateInventoryEntry entry,
+            out byte[] bytes)
+        {
+            bytes = null;
+            SaveSemanticCandidate candidate = entry?.SemanticCandidate;
+            if (entry == null ||
+                entry.ReadResult.Disposition != SaveFileReadDisposition.Read ||
+                candidate == null ||
+                candidate.SourceGeneration != entry.Source ||
+                !IsExplicitCurrentWritableCandidate(candidate))
+            {
+                return false;
+            }
+
+            bytes = candidate.CopyRawBytes();
+            return bytes != null &&
+                   bytes.LongLength == entry.ReadResult.ObservedByteCount &&
+                   bytes.Length == candidate.OriginalRawByteCount &&
+                   bytes.Length <= _semanticPolicy.MaximumInputBytes;
+        }
+
+        private bool TryRecoverInvalidPrimaryFromExactBackup(
+            InvalidPrimaryRecoveryPlan plan,
+            out SaveGameData recoveredSave,
+            out string quarantinePath,
+            out bool diskChanged,
+            out string message)
+        {
+            recoveredSave = null;
+            quarantinePath = plan?.QuarantinePath;
+            diskChanged = false;
+            message = string.Empty;
+            if (plan == null ||
+                plan.InvalidPrimaryBytes == null ||
+                plan.BackupBytes == null ||
+                plan.TransactionMarkerBytes == null ||
+                string.IsNullOrWhiteSpace(plan.QuarantinePath))
+            {
+                message =
+                    "AL-SAVE-INVALID-PRIMARY-RECOVERY-EVIDENCE-MISSING: Exact invalid-primary or backup bytes were unavailable; no disk mutation was attempted.";
+                return false;
+            }
+
+            if (!TryGetExactUtf8(
+                    plan.BackupBytes,
+                    out string exactBackupJson,
+                    out string encodingError))
+            {
+                message =
+                    $"AL-SAVE-INVALID-PRIMARY-RECOVERY-ENCODING-FAILED: The selected backup could not be staged without changing its bytes. {encodingError}";
+                return false;
+            }
+
+            InvalidPrimaryRecoveryStage stage = plan.Stage;
+            if (stage == InvalidPrimaryRecoveryStage.Quarantined)
+            {
+                if (TryVerifyInvalidPrimaryRecoveryTargetTwice(
+                        plan.BackupBytes,
+                        plan.InvalidPrimaryBytes,
+                        quarantinePath,
+                        plan.TransactionMarkerBytes,
+                        out recoveredSave,
+                        out bool observedCompleteTarget))
+                {
+                    message =
+                        "AL-SAVE-RECOVERED-INVALID-PRIMARY-RECONCILED: The exact backup and its hash-linked invalid-primary quarantine were twice verified after an interrupted recovery without offline progression.";
+                    return true;
+                }
+
+                message = observedCompleteTarget
+                    ? "AL-SAVE-INVALID-PRIMARY-RECOVERY-REVERIFY-FAILED: The complete recovery target was observed once but changed before the required second inventory; every generation was preserved."
+                    : "AL-SAVE-INVALID-PRIMARY-RECOVERY-TARGET-INVALID: The completed recovery marker did not prove exact canonical and quarantine identity; every generation was preserved.";
+                return false;
+            }
+
+            SaveFileReadResult transactionMarkerRead =
+                ReadCanonicalPath(StageFiveRecoveryMarkerPath);
+            if (transactionMarkerRead.Disposition ==
+                SaveFileReadDisposition.Missing)
+            {
+                if (stage != InvalidPrimaryRecoveryStage.Initial)
+                {
+                    message =
+                        "AL-SAVE-INVALID-PRIMARY-MARKER-MISSING: A resumable state lacked its exact Stage 5 transaction marker.";
+                    return false;
+                }
+
+                if (!TryGetExactUtf8(
+                        plan.TransactionMarkerBytes,
+                        out string transactionMarkerText,
+                        out string transactionMarkerEncodingError))
+                {
+                    message =
+                        $"AL-SAVE-INVALID-PRIMARY-MARKER-ENCODING-FAILED: The transaction marker could not be represented exactly. {transactionMarkerEncodingError}";
+                    return false;
+                }
+
+                SaveFileWriteResult markerWrite;
+                try
+                {
+                    _fileOperations.CreateDirectory(PersistencePath);
+                    markerWrite =
+                        _fileOperations.WriteAllTextDurable(
+                            StageFiveRecoveryMarkerPath,
+                            transactionMarkerText);
+                }
+                catch (Exception ex)
+                {
+                    message =
+                        $"AL-SAVE-INVALID-PRIMARY-MARKER-CREATE-FAILED: The recovery directory or transaction marker could not be created; S0 evidence was preserved. {ex.GetType().Name}";
+                    return false;
+                }
+
+                diskChanged |= markerWrite.DiskChanged;
+                transactionMarkerRead =
+                    ReadCanonicalPath(StageFiveRecoveryMarkerPath);
+                if (transactionMarkerRead.Disposition !=
+                        SaveFileReadDisposition.Read ||
+                    !BytesEqual(
+                        transactionMarkerRead.Bytes,
+                        plan.TransactionMarkerBytes))
+                {
+                    message =
+                        $"AL-SAVE-INVALID-PRIMARY-MARKER-WRITE-FAILED: The durable transaction marker did not reach its exact target; every artifact was preserved. {markerWrite.DiagnosticCode}";
+                    return false;
+                }
+
+                diskChanged = true;
+            }
+            else if (transactionMarkerRead.Disposition !=
+                         SaveFileReadDisposition.Read ||
+                     !BytesEqual(
+                         transactionMarkerRead.Bytes,
+                         plan.TransactionMarkerBytes))
+            {
+                message =
+                    "AL-SAVE-INVALID-PRIMARY-MARKER-CONFLICT: The durable transaction marker changed before recovery; every artifact was preserved.";
+                return false;
+            }
+
+            SaveCanonicalLedger current = CaptureCanonicalLedger();
+            if (!IsExactInvalidPrimaryRecoveryState(
+                    current,
+                    stage,
+                    plan.InvalidPrimaryBytes,
+                    plan.BackupBytes))
+            {
+                message =
+                    "AL-SAVE-INVALID-PRIMARY-RECOVERY-BASELINE-CHANGED: Canonical evidence changed after selection; every observed generation was preserved.";
+                return false;
+            }
+
+            if (stage == InvalidPrimaryRecoveryStage.Initial)
+            {
+                SaveFileWriteResult stageResult =
+                    _fileOperations.WriteAllTextDurable(TempPath, exactBackupJson);
+                diskChanged |= stageResult.DiskChanged;
+                SaveCanonicalLedger afterStage = CaptureCanonicalLedger();
+                if (!IsExactInvalidPrimaryRecoveryState(
+                        afterStage,
+                        InvalidPrimaryRecoveryStage.BackupStaged,
+                        plan.InvalidPrimaryBytes,
+                        plan.BackupBytes))
+                {
+                    message =
+                        $"AL-SAVE-INVALID-PRIMARY-STAGE-WRITE-FAILED: Exact backup staging did not reach the only resumable target; all resulting evidence was preserved. {stageResult.DiagnosticCode}";
+                    return false;
+                }
+
+                diskChanged = true;
+                stage = InvalidPrimaryRecoveryStage.BackupStaged;
+            }
+
+            if (stage == InvalidPrimaryRecoveryStage.BackupStaged)
+            {
+                bool moveReturned = false;
+                try
+                {
+                    _fileOperations.Move(SavePath, PreviousPath);
+                    moveReturned = true;
+                }
+                catch (Exception ex)
+                {
+                    message =
+                        $"AL-SAVE-INVALID-PRIMARY-PRESERVE-INTERRUPTED: Moving the invalid primary to the canonical previous witness stopped. {ex.GetType().Name}";
+                }
+
+                SaveCanonicalLedger afterPreserve = CaptureCanonicalLedger();
+                if (!IsExactInvalidPrimaryRecoveryState(
+                        afterPreserve,
+                        InvalidPrimaryRecoveryStage.PrimaryPreserved,
+                        plan.InvalidPrimaryBytes,
+                        plan.BackupBytes))
+                {
+                    bool unchanged = IsExactInvalidPrimaryRecoveryState(
+                        afterPreserve,
+                        InvalidPrimaryRecoveryStage.BackupStaged,
+                        plan.InvalidPrimaryBytes,
+                        plan.BackupBytes);
+                    diskChanged |= !unchanged;
+                    if (moveReturned)
+                    {
+                        message =
+                            "AL-SAVE-INVALID-PRIMARY-PRESERVE-VERIFY-FAILED: The preserve move returned without reaching its exact target; every generation was retained.";
+                    }
+
+                    return false;
+                }
+
+                diskChanged = true;
+                stage = InvalidPrimaryRecoveryStage.PrimaryPreserved;
+            }
+
+            if (stage == InvalidPrimaryRecoveryStage.PrimaryPreserved)
+            {
+                SaveFileWriteResult installResult =
+                    _fileOperations.WriteAllTextDurable(SavePath, exactBackupJson);
+                diskChanged |= installResult.DiskChanged;
+                SaveCanonicalLedger afterInstall = CaptureCanonicalLedger();
+                if (!IsExactInvalidPrimaryRecoveryState(
+                        afterInstall,
+                        InvalidPrimaryRecoveryStage.PrimaryInstalled,
+                        plan.InvalidPrimaryBytes,
+                        plan.BackupBytes))
+                {
+                    message =
+                        $"AL-SAVE-INVALID-PRIMARY-INSTALL-FAILED: Exact primary installation did not reach the only resumable target; all resulting evidence was preserved. {installResult.DiagnosticCode}";
+                    return false;
+                }
+
+                diskChanged = true;
+                stage = InvalidPrimaryRecoveryStage.PrimaryInstalled;
+            }
+
+            if (stage != InvalidPrimaryRecoveryStage.PrimaryInstalled)
+            {
+                message =
+                    "AL-SAVE-INVALID-PRIMARY-RECOVERY-STATE-UNRECOGNIZED: The recovery state was not an approved resumable generation.";
+                return false;
+            }
+
+            quarantinePath = plan.QuarantinePath;
+            SaveFileReadResult quarantineBaseline = ReadCanonicalPath(quarantinePath);
+            SaveCanonicalLedger beforeQuarantine = CaptureCanonicalLedger();
+            if (quarantineBaseline.Disposition != SaveFileReadDisposition.Missing ||
+                !IsExactInvalidPrimaryRecoveryState(
+                    beforeQuarantine,
+                    InvalidPrimaryRecoveryStage.PrimaryInstalled,
+                    plan.InvalidPrimaryBytes,
+                    plan.BackupBytes))
+            {
+                message =
+                    "AL-SAVE-INVALID-PRIMARY-QUARANTINE-BASELINE-CONFLICT: The unique quarantine target or canonical ledger changed before the non-overwriting move.";
+                return false;
+            }
+
+            bool quarantineMoveReturned = false;
+            try
+            {
+                _fileOperations.Move(PreviousPath, quarantinePath);
+                quarantineMoveReturned = true;
+            }
+            catch (Exception ex)
+            {
+                message =
+                    $"AL-SAVE-INVALID-PRIMARY-QUARANTINE-INTERRUPTED: The non-overwriting quarantine move stopped; all resulting evidence was preserved. {ex.GetType().Name}";
+            }
+
+            bool reachedCompleteTarget = IsExactInvalidPrimaryRecoveryTarget(
+                CaptureCanonicalLedger(),
+                plan.BackupBytes,
+                plan.InvalidPrimaryBytes,
+                quarantinePath,
+                plan.TransactionMarkerBytes,
+                out _);
+            if (!reachedCompleteTarget)
+            {
+                bool unchanged = IsExactInvalidPrimaryRecoveryState(
+                    CaptureCanonicalLedger(),
+                    InvalidPrimaryRecoveryStage.PrimaryInstalled,
+                    plan.InvalidPrimaryBytes,
+                    plan.BackupBytes);
+                diskChanged |= !unchanged;
+                if (quarantineMoveReturned)
+                {
+                    message =
+                        "AL-SAVE-INVALID-PRIMARY-QUARANTINE-VERIFY-FAILED: The quarantine move returned without proving exact destination identity; every artifact was retained.";
+                }
+
+                return false;
+            }
+
+            diskChanged = true;
+            if (TryVerifyInvalidPrimaryRecoveryTargetTwice(
+                    plan.BackupBytes,
+                    plan.InvalidPrimaryBytes,
+                    quarantinePath,
+                    plan.TransactionMarkerBytes,
+                    out recoveredSave,
+                    out bool observedFinalTarget))
+            {
+                message = quarantineMoveReturned
+                    ? "AL-SAVE-RECOVERED-INVALID-PRIMARY: The exact backup was staged and installed, the invalid primary was hash-linked in quarantine, and the full target was twice verified without offline progression."
+                    : "AL-SAVE-RECOVERED-INVALID-PRIMARY-RECONCILED: An interrupted quarantine move nevertheless reached and twice verified the exact recovery target without offline progression.";
+                return true;
+            }
+
+            message = observedFinalTarget
+                ? "AL-SAVE-INVALID-PRIMARY-RECOVERY-REVERIFY-FAILED: The exact recovery target was observed once but not proven by the required second inventory; every artifact was preserved."
+                : "AL-SAVE-INVALID-PRIMARY-RECOVERY-VERIFY-FAILED: Exact canonical and quarantine identity could not be proven; every artifact was preserved.";
+            recoveredSave = null;
+            return false;
+        }
+
+        private bool IsExactInvalidPrimaryRecoveryState(
+            SaveCanonicalLedger ledger,
+            InvalidPrimaryRecoveryStage stage,
+            byte[] invalidPrimaryBytes,
+            byte[] backupBytes)
+        {
+            switch (stage)
+            {
+                case InvalidPrimaryRecoveryStage.Initial:
+                    return IsExactInvalidGeneration(
+                               ledger.Primary,
+                               invalidPrimaryBytes,
+                               SaveCandidateSourceGeneration.Primary) &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Backup,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Backup,
+                               out _) &&
+                           ledger.Temp.Disposition == SaveFileReadDisposition.Missing &&
+                           ledger.Previous.Disposition == SaveFileReadDisposition.Missing;
+                case InvalidPrimaryRecoveryStage.BackupStaged:
+                    return IsExactInvalidGeneration(
+                               ledger.Primary,
+                               invalidPrimaryBytes,
+                               SaveCandidateSourceGeneration.Primary) &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Backup,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Backup,
+                               out _) &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Temp,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Temp,
+                               out _) &&
+                           ledger.Previous.Disposition == SaveFileReadDisposition.Missing;
+                case InvalidPrimaryRecoveryStage.PrimaryPreserved:
+                    return ledger.Primary.Disposition == SaveFileReadDisposition.Missing &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Backup,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Backup,
+                               out _) &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Temp,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Temp,
+                               out _) &&
+                           IsExactInvalidGeneration(
+                               ledger.Previous,
+                               invalidPrimaryBytes,
+                               SaveCandidateSourceGeneration.Previous);
+                case InvalidPrimaryRecoveryStage.PrimaryInstalled:
+                    return IsExactExplicitCurrentWritableGeneration(
+                               ledger.Primary,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Primary,
+                               out _) &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Backup,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Backup,
+                               out _) &&
+                           IsExactExplicitCurrentWritableGeneration(
+                               ledger.Temp,
+                               backupBytes,
+                               SaveCandidateSourceGeneration.Temp,
+                               out _) &&
+                           IsExactInvalidGeneration(
+                               ledger.Previous,
+                               invalidPrimaryBytes,
+                               SaveCandidateSourceGeneration.Previous);
+                default:
+                    return false;
+            }
+        }
+
+        private bool TryVerifyInvalidPrimaryRecoveryTargetTwice(
+            byte[] backupBytes,
+            byte[] invalidPrimaryBytes,
+            string quarantinePath,
+            byte[] transactionMarkerBytes,
+            out SaveGameData recoveredSave,
+            out bool observedCompleteTarget)
+        {
+            SaveCanonicalLedger first = CaptureCanonicalLedger();
+            observedCompleteTarget = IsExactInvalidPrimaryRecoveryTarget(
+                first,
+                backupBytes,
+                invalidPrimaryBytes,
+                quarantinePath,
+                transactionMarkerBytes,
+                out recoveredSave);
+            if (!observedCompleteTarget)
+            {
+                recoveredSave = null;
+                return false;
+            }
+
+            SaveCanonicalLedger second = CaptureCanonicalLedger();
+            return IsExactInvalidPrimaryRecoveryTarget(
+                second,
+                backupBytes,
+                invalidPrimaryBytes,
+                quarantinePath,
+                transactionMarkerBytes,
+                out recoveredSave);
+        }
+
+        private bool IsExactInvalidPrimaryRecoveryTarget(
+            SaveCanonicalLedger ledger,
+            byte[] backupBytes,
+            byte[] invalidPrimaryBytes,
+            string quarantinePath,
+            byte[] transactionMarkerBytes,
+            out SaveGameData recoveredSave)
+        {
+            recoveredSave = null;
+            if (string.IsNullOrWhiteSpace(quarantinePath) ||
+                !IsExactExplicitCurrentWritableGeneration(
+                    ledger.Primary,
+                    backupBytes,
+                    SaveCandidateSourceGeneration.Primary,
+                    out recoveredSave) ||
+                !IsExactExplicitCurrentWritableGeneration(
+                    ledger.Backup,
+                    backupBytes,
+                    SaveCandidateSourceGeneration.Backup,
+                    out _) ||
+                !IsExactExplicitCurrentWritableGeneration(
+                    ledger.Temp,
+                    backupBytes,
+                    SaveCandidateSourceGeneration.Temp,
+                    out _) ||
+                ledger.Previous.Disposition != SaveFileReadDisposition.Missing ||
+                transactionMarkerBytes == null ||
+                !MatchesExactBytes(
+                    ReadCanonicalPath(StageFiveRecoveryMarkerPath),
+                    transactionMarkerBytes))
+            {
+                recoveredSave = null;
+                return false;
+            }
+
+            return IsExactInvalidGeneration(
+                ReadCanonicalPath(quarantinePath),
+                invalidPrimaryBytes,
+                SaveCandidateSourceGeneration.Primary);
+        }
+
+        private bool IsExactInvalidGeneration(
+            SaveFileReadResult actual,
+            byte[] expectedBytes,
+            SaveCandidateSourceGeneration source)
+        {
+            if (actual == null ||
+                actual.Disposition != SaveFileReadDisposition.Read ||
+                !BytesEqual(actual.Bytes, expectedBytes))
+            {
+                return false;
+            }
+
+            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                actual.Bytes,
+                source,
+                _semanticPolicy);
+            return candidate.Outcome == SaveSemanticCandidateOutcome.Invalid &&
+                   candidate.HasRetainedRawBytes &&
+                   candidate.OriginalRawByteCount == actual.Bytes.Length;
+        }
+
+        private bool IsExactExplicitCurrentWritableGeneration(
+            SaveFileReadResult actual,
+            byte[] expectedBytes,
+            SaveCandidateSourceGeneration source,
+            out SaveGameData save)
+        {
+            save = null;
+            if (actual == null ||
+                actual.Disposition != SaveFileReadDisposition.Read ||
+                !BytesEqual(actual.Bytes, expectedBytes))
+            {
+                return false;
+            }
+
+            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                actual.Bytes,
+                source,
+                _semanticPolicy);
+            return IsExplicitCurrentWritableCandidate(candidate) &&
+                   TryDeserializeSelectedCandidate(candidate, out save);
+        }
+
+        private bool TryEnumerateStageFiveQuarantineMarkers(
+            out IReadOnlyList<StageFiveQuarantineMarker> markers,
+            out bool evidenceConflict)
+        {
+            var result = new List<StageFiveQuarantineMarker>();
+            evidenceConflict = false;
+            try
+            {
+                string persistenceRoot = Path.GetFullPath(PersistencePath)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                foreach (string path in EnumerateQuarantines(SaveFileName))
+                {
+                    string fileName = Path.GetFileName(path);
+                    if (fileName == null ||
+                        fileName.EndsWith(
+                            ".txn",
+                            StringComparison.OrdinalIgnoreCase) ||
+                        fileName.IndexOf("-stage5-", StringComparison.OrdinalIgnoreCase) < 0)
+                    {
+                        continue;
+                    }
+
+                    if (result.Count >= MaxStageFiveQuarantineMarkers)
+                    {
+                        evidenceConflict = true;
+                        markers = Array.Empty<StageFiveQuarantineMarker>();
+                        return false;
+                    }
+
+                    string fullPath = Path.GetFullPath(path);
+                    string directory = Path.GetDirectoryName(fullPath)?
+                        .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                    if (!string.Equals(
+                            directory,
+                            persistenceRoot,
+                            StringComparison.OrdinalIgnoreCase) ||
+                        !TryParseStageFiveQuarantineMarker(
+                            fullPath,
+                            out StageFiveQuarantineMarker marker))
+                    {
+                        evidenceConflict = true;
+                        markers = Array.Empty<StageFiveQuarantineMarker>();
+                        return false;
+                    }
+
+                    result.Add(marker);
+                }
+            }
+            catch (Exception)
+            {
+                evidenceConflict = true;
+                markers = Array.Empty<StageFiveQuarantineMarker>();
+                return false;
+            }
+
+            markers = result;
+            return true;
+        }
+
+        private bool TryReadExactInvalidPrimaryQuarantine(
+            StageFiveQuarantineMarker marker,
+            string expectedInvalidPrimaryIdentity,
+            out byte[] invalidPrimaryBytes)
+        {
+            invalidPrimaryBytes = null;
+            SaveFileReadResult result = ReadCanonicalPath(marker.Path);
+            if (result.Disposition != SaveFileReadDisposition.Read ||
+                !string.Equals(
+                    ComputeSha256Base64Url(result.Bytes),
+                    expectedInvalidPrimaryIdentity,
+                    StringComparison.Ordinal) ||
+                !IsExactInvalidGeneration(
+                    result,
+                    result.Bytes,
+                    SaveCandidateSourceGeneration.Primary))
+            {
+                return false;
+            }
+
+            invalidPrimaryBytes = result.Bytes.ToArray();
+            return true;
+        }
+
+        private static bool TryParseStageFiveQuarantineMarker(
+            string path,
+            out StageFiveQuarantineMarker marker)
+        {
+            marker = null;
+            string fileName = Path.GetFileName(path);
+            string prefix = SaveFileName + ".corrupt-";
+            const string stageTag = "-stage5-t";
+            if (fileName == null ||
+                fileName.EndsWith(".txn", StringComparison.OrdinalIgnoreCase) ||
+                !fileName.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            string remainder = fileName.Substring(prefix.Length);
+            int expectedLength =
+                14 +
+                stageTag.Length +
+                TransactionIdBase64UrlLength;
+            if (remainder.Length != expectedLength ||
+                !remainder.Substring(0, 14).All(char.IsDigit) ||
+                !string.Equals(
+                    remainder.Substring(14, stageTag.Length),
+                    stageTag,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            int cursor = 14 + stageTag.Length;
+            string transactionIdentity =
+                remainder.Substring(cursor, TransactionIdBase64UrlLength);
+            if (!IsBase64UrlIdentity(
+                    transactionIdentity,
+                    TransactionIdBase64UrlLength))
+            {
+                return false;
+            }
+
+            marker = new StageFiveQuarantineMarker(path);
+            return true;
+        }
+
+        private bool TryParseStageFiveTransactionMarker(
+            byte[] bytes,
+            out StageFiveTransactionMarker marker)
+        {
+            try
+            {
+                return TryParseStageFiveTransactionMarkerCore(
+                    bytes,
+                    out marker);
+            }
+            catch (Exception)
+            {
+                marker = null;
+                return false;
+            }
+        }
+
+        private bool TryParseStageFiveTransactionMarkerCore(
+            byte[] bytes,
+            out StageFiveTransactionMarker marker)
+        {
+            marker = null;
+            if (!TryGetExactUtf8(bytes, out string text, out _))
+            {
+                return false;
+            }
+
+            string[] fields = text.Split('|');
+            if (fields.Length != 5 ||
+                fields[0] != "AL-STAGE5" ||
+                fields[1] != "1" ||
+                !IsBase64UrlIdentity(
+                    fields[2],
+                    Sha256Base64UrlLength) ||
+                !IsBase64UrlIdentity(
+                    fields[3],
+                    Sha256Base64UrlLength) ||
+                string.IsNullOrWhiteSpace(fields[4]) ||
+                fields[4] != Path.GetFileName(fields[4]))
+            {
+                return false;
+            }
+
+            string quarantinePath = Path.Combine(PersistencePath, fields[4]);
+            string persistenceRoot = Path.GetFullPath(PersistencePath)
+                .TrimEnd(
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar);
+            string fullQuarantinePath = Path.GetFullPath(quarantinePath);
+            string quarantineDirectory = Path.GetDirectoryName(
+                    fullQuarantinePath)?
+                .TrimEnd(
+                    Path.DirectorySeparatorChar,
+                    Path.AltDirectorySeparatorChar);
+            if (!string.Equals(
+                    persistenceRoot,
+                    quarantineDirectory,
+                    StringComparison.OrdinalIgnoreCase) ||
+                !TryParseStageFiveQuarantineMarker(
+                    fullQuarantinePath,
+                    out _))
+            {
+                return false;
+            }
+
+            marker = new StageFiveTransactionMarker(
+                bytes.ToArray(),
+                fullQuarantinePath,
+                fields[2],
+                fields[3]);
+            return true;
+        }
+
+        private static byte[] CreateStageFiveTransactionMarkerBytes(
+            string quarantinePath,
+            byte[] backupBytes,
+            byte[] invalidPrimaryBytes)
+        {
+            string contents =
+                $"AL-STAGE5|1|{ComputeSha256Base64Url(backupBytes)}|" +
+                $"{ComputeSha256Base64Url(invalidPrimaryBytes)}|" +
+                Path.GetFileName(quarantinePath);
+            return StrictUtf8.GetBytes(contents);
+        }
+
+        private string CreateStageFiveQuarantinePath()
+        {
+            string transactionIdentity =
+                ToBase64Url(Guid.NewGuid().ToByteArray());
+            string fileName =
+                $"{SaveFileName}.corrupt-{DateTime.UtcNow:yyyyMMddHHmmss}" +
+                $"-stage5-t{transactionIdentity}";
+            return Path.Combine(PersistencePath, fileName);
+        }
+
+        private static string ComputeSha256Base64Url(byte[] bytes)
+        {
+            using SHA256 sha256 = SHA256.Create();
+            return ToBase64Url(sha256.ComputeHash(bytes ?? Array.Empty<byte>()));
+        }
+
+        private static string ToBase64Url(byte[] bytes) =>
+            Convert.ToBase64String(bytes)
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
+
+        private static bool IsBase64UrlIdentity(string value, int expectedLength) =>
+            value != null &&
+            value.Length == expectedLength &&
+            value.All(character =>
+                (character >= 'A' && character <= 'Z') ||
+                (character >= 'a' && character <= 'z') ||
+                (character >= '0' && character <= '9') ||
+                character == '-' ||
+                character == '_');
+
+        private static bool TryGetExactUtf8(
+            byte[] bytes,
+            out string exactText,
+            out string error)
+        {
+            exactText = null;
+            error = string.Empty;
+            try
+            {
+                exactText = StrictUtf8.GetString(bytes);
+                if (!BytesEqual(StrictUtf8.GetBytes(exactText), bytes))
+                {
+                    error = "SAVE_EXACT_UTF8_ROUND_TRIP_FAILED";
+                    exactText = null;
+                    return false;
+                }
+
+                return true;
+            }
+            catch (Exception ex) when (
+                ex is DecoderFallbackException ||
+                ex is EncoderFallbackException)
+            {
+                error = ex.GetType().Name;
+                exactText = null;
+                return false;
+            }
+        }
 
         private bool CanAttemptExactBackupRecovery(
             IReadOnlyList<SaveCandidateInventoryEntry> inventory,
@@ -1356,6 +2584,168 @@ namespace AL.Services.Local
                 out recoveredSave);
         }
 
+        private bool TryVerifyCommittedRecoveryWitnessTargetTwice(
+            byte[] backupBytes,
+            out SaveGameData recoveredSave,
+            out bool observedCompleteTarget)
+        {
+            if (_committedInvalidPrimaryWitnessBytes == null &&
+                string.IsNullOrWhiteSpace(
+                    _committedInvalidPrimaryQuarantinePath) &&
+                _committedInvalidPrimaryRecoveryMarkerBytes == null)
+            {
+                return TryVerifyExactBackupRecoveryTargetTwice(
+                    backupBytes,
+                    out recoveredSave,
+                    out observedCompleteTarget);
+            }
+
+            if (_committedInvalidPrimaryWitnessBytes == null ||
+                string.IsNullOrWhiteSpace(
+                    _committedInvalidPrimaryQuarantinePath) ||
+                _committedInvalidPrimaryRecoveryMarkerBytes == null)
+            {
+                recoveredSave = null;
+                observedCompleteTarget = false;
+                return false;
+            }
+
+            return TryVerifyInvalidPrimaryRecoveryTargetTwice(
+                backupBytes,
+                _committedInvalidPrimaryWitnessBytes,
+                _committedInvalidPrimaryQuarantinePath,
+                _committedInvalidPrimaryRecoveryMarkerBytes,
+                out recoveredSave,
+                out observedCompleteTarget);
+        }
+
+        private bool IsCommittedRecoveryWitnessTarget(
+            SaveCanonicalLedger ledger,
+            byte[] backupBytes,
+            out SaveGameData recoveredSave)
+        {
+            if (_committedInvalidPrimaryWitnessBytes == null &&
+                string.IsNullOrWhiteSpace(
+                    _committedInvalidPrimaryQuarantinePath) &&
+                _committedInvalidPrimaryRecoveryMarkerBytes == null)
+            {
+                return IsExactBackupRecoveryTarget(
+                    ledger,
+                    backupBytes,
+                    out recoveredSave);
+            }
+
+            if (_committedInvalidPrimaryWitnessBytes == null ||
+                string.IsNullOrWhiteSpace(
+                    _committedInvalidPrimaryQuarantinePath) ||
+                _committedInvalidPrimaryRecoveryMarkerBytes == null)
+            {
+                recoveredSave = null;
+                return false;
+            }
+
+            return IsExactInvalidPrimaryRecoveryTarget(
+                ledger,
+                backupBytes,
+                _committedInvalidPrimaryWitnessBytes,
+                _committedInvalidPrimaryQuarantinePath,
+                _committedInvalidPrimaryRecoveryMarkerBytes,
+                out recoveredSave);
+        }
+
+        private bool IsCommittedInvalidPrimaryQuarantineIntact()
+        {
+            bool hasBytes = _committedInvalidPrimaryWitnessBytes != null;
+            bool hasPath = !string.IsNullOrWhiteSpace(
+                _committedInvalidPrimaryQuarantinePath);
+            if (!hasBytes && !hasPath)
+            {
+                return true;
+            }
+
+            return hasBytes &&
+                   hasPath &&
+                   IsExactInvalidGeneration(
+                       ReadCanonicalPath(
+                           _committedInvalidPrimaryQuarantinePath),
+                       _committedInvalidPrimaryWitnessBytes,
+                       SaveCandidateSourceGeneration.Primary);
+        }
+
+        private bool TryArchiveCommittedInvalidPrimaryRecoveryMarker()
+        {
+            if (_committedInvalidPrimaryRecoveryMarkerBytes == null)
+            {
+                return true;
+            }
+
+            if (string.IsNullOrWhiteSpace(
+                    _committedInvalidPrimaryRecoveryMarkerPath) ||
+                string.IsNullOrWhiteSpace(
+                    _committedInvalidPrimaryQuarantinePath))
+            {
+                return false;
+            }
+
+            string sourcePath =
+                _committedInvalidPrimaryRecoveryMarkerPath;
+            string archivePath =
+                _committedInvalidPrimaryQuarantinePath + ".txn";
+            SaveFileReadResult sourceBefore =
+                ReadCanonicalPath(sourcePath);
+            SaveFileReadResult archiveBefore =
+                ReadCanonicalPath(archivePath);
+            if (!MatchesExactBytes(
+                    sourceBefore,
+                    _committedInvalidPrimaryRecoveryMarkerBytes) ||
+                archiveBefore.Disposition !=
+                    SaveFileReadDisposition.Missing)
+            {
+                return false;
+            }
+
+            try
+            {
+                _fileOperations.Move(sourcePath, archivePath);
+            }
+            catch (Exception)
+            {
+                // Reconcile below. A move that threw after mutation may still
+                // have preserved the exact marker at the archive path.
+            }
+
+            SaveFileReadResult sourceAfter =
+                ReadCanonicalPath(sourcePath);
+            SaveFileReadResult archiveAfter =
+                ReadCanonicalPath(archivePath);
+            if (sourceAfter.Disposition ==
+                    SaveFileReadDisposition.Missing &&
+                MatchesExactBytes(
+                    archiveAfter,
+                    _committedInvalidPrimaryRecoveryMarkerBytes))
+            {
+                _committedInvalidPrimaryRecoveryMarkerPath =
+                    archivePath;
+                return true;
+            }
+
+            return false;
+        }
+
+        private bool IsCommittedRecoveryMarkerCleanupVerified() =>
+            _committedInvalidPrimaryRecoveryMarkerBytes == null ||
+            (!string.IsNullOrWhiteSpace(
+                 _committedInvalidPrimaryRecoveryMarkerPath) &&
+             _committedInvalidPrimaryRecoveryMarkerPath.EndsWith(
+                 ".txn",
+                 StringComparison.OrdinalIgnoreCase) &&
+             MatchesExactBytes(
+                 ReadCanonicalPath(
+                     _committedInvalidPrimaryRecoveryMarkerPath),
+                 _committedInvalidPrimaryRecoveryMarkerBytes) &&
+             ReadCanonicalPath(StageFiveRecoveryMarkerPath).Disposition ==
+                 SaveFileReadDisposition.Missing);
+
         private bool IsExactBackupRecoveryTarget(
             SaveCanonicalLedger ledger,
             byte[] backupBytes,
@@ -1423,12 +2813,21 @@ namespace AL.Services.Local
                        requiredBackupBytes,
                        out _) &&
                    verification.Temp.Disposition == SaveFileReadDisposition.Missing &&
-                   verification.Previous.Disposition == SaveFileReadDisposition.Missing;
+                   verification.Previous.Disposition == SaveFileReadDisposition.Missing &&
+                   IsCommittedRecoveryMarkerCleanupVerified() &&
+                   IsCommittedInvalidPrimaryQuarantineIntact();
         }
 
         private static bool BytesEqual(byte[] left, byte[] right) =>
             ReferenceEquals(left, right) ||
             (left != null && right != null && left.SequenceEqual(right));
+
+        private static bool MatchesExactBytes(
+            SaveFileReadResult actual,
+            byte[] expectedBytes) =>
+            actual != null &&
+            actual.Disposition == SaveFileReadDisposition.Read &&
+            BytesEqual(actual.Bytes, expectedBytes);
 
         private static SaveOperationDisposition CreateSaveDisposition(
             SaveOperationStatus status,
@@ -2545,22 +3944,72 @@ namespace AL.Services.Local
             outcome == SaveSemanticCandidateOutcome.Valid ||
             outcome == SaveSemanticCandidateOutcome.CompatiblePreservedUnknown;
 
-        private void PruneQuarantines(string sourceFileName)
+        private void PruneQuarantines(
+            string sourceFileName,
+            params string[] protectedPaths)
         {
             var quarantines = EnumerateQuarantines(sourceFileName)
                 .Select(path => new FileInfo(path))
                 .OrderByDescending(info => info.CreationTimeUtc)
                 .ToList();
 
-            foreach (var old in quarantines.Skip(MaxQuarantinesPerSource))
+            var retained = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string protectedPath in protectedPaths ??
+                         Array.Empty<string>())
+            {
+                if (!string.IsNullOrWhiteSpace(protectedPath) &&
+                    quarantines.Any(info => string.Equals(
+                        info.FullName,
+                        protectedPath,
+                        StringComparison.OrdinalIgnoreCase)))
+                {
+                    retained.Add(protectedPath);
+                }
+            }
+
+            foreach (FileInfo candidate in quarantines)
+            {
+                if (retained.Count >= MaxQuarantinesPerSource)
+                {
+                    break;
+                }
+
+                retained.Add(candidate.FullName);
+            }
+
+            foreach (FileInfo old in quarantines.Where(info =>
+                         !retained.Contains(info.FullName)))
             {
                 TryDelete(old.FullName);
-                Debug.LogWarning($"AL-SAVE-QUARANTINE-PRUNED: Pruned old quarantine {old.FullName}.");
+                Debug.LogWarning(
+                    "AL-SAVE-QUARANTINE-PRUNED: Pruned an old bounded quarantine artifact.");
             }
         }
 
         private IEnumerable<string> EnumerateQuarantines(string sourceFileName) =>
             _fileOperations.EnumerateFiles(PersistencePath, $"{sourceFileName}.corrupt-*");
+
+        private bool HasStageFiveTransactionArchiveEvidence()
+        {
+            try
+            {
+                return EnumerateQuarantines(SaveFileName).Any(path =>
+                {
+                    string fileName = Path.GetFileName(path);
+                    return fileName != null &&
+                           fileName.IndexOf(
+                               "-stage5-",
+                               StringComparison.OrdinalIgnoreCase) >= 0 &&
+                           fileName.EndsWith(
+                               ".txn",
+                               StringComparison.OrdinalIgnoreCase);
+                });
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+        }
 
         private bool TryDelete(string path)
         {
