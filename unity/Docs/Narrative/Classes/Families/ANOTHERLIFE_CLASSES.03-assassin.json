@@ -1,0 +1,704 @@
+{
+  "schemaVersion": 1,
+  "parentPacketVersion": "anotherlife-class-identity-skill-trees-2026-07-24-v001",
+  "componentId": "CLASS_FAMILY_ASSASSIN",
+  "family": {
+    "id": "family_assassin",
+    "legacyEnum": {
+      "name": "Assassin",
+      "value": 3
+    },
+    "name": {
+      "key": "class_family.assassin.name",
+      "text": "Assassin"
+    },
+    "identity": "Assassins convert information, mobility, dread, and earned openings into decisive pressure without relying on permanent invisibility or unavoidable execution.",
+    "realmAvailability": [
+      "STONEHOLD",
+      "ELDERGROVE",
+      "CROWNLANDS",
+      "UMBRAL"
+    ],
+    "classIds": [
+      "class_shadowblade",
+      "class_infiltrator",
+      "class_nightstalker",
+      "class_slayer"
+    ],
+    "classes": [
+      {
+        "id": "class_shadowblade",
+        "legacySubclass": {
+          "name": "Shadowblade",
+          "value": 10
+        },
+        "name": {
+          "key": "class.shadowblade.name",
+          "text": "Shadowblade"
+        },
+        "identity": "A burst skirmisher who converts veil movement and positional deception into a decisive blade strike.",
+        "roles": {
+          "primary": "burst_melee_damage",
+          "secondary": [
+            "mobility",
+            "skirmisher"
+          ],
+          "contribution": [
+            "damage",
+            "mobility_pressure",
+            "interruption",
+            "priority_target_pressure"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "low_profile_leathers",
+          "mainHand": [
+            "dagger",
+            "short_blade"
+          ],
+          "offHand": [
+            "shuriken",
+            "second_blade"
+          ],
+          "silhouette": "Low-profile armor, a close blade, and a visible throwing-weapon or second-blade profile."
+        },
+        "resource": {
+          "id": "class_resource_shadowblade_veil",
+          "name": {
+            "key": "class_resource.shadowblade.veil.name",
+            "text": "Veil"
+          },
+          "gain": "Earned through flanks, evasive steps, leaving threatened space, and successful positional deception.",
+          "spend": "Spent on rift movement, shadow echoes, ambush, and bounded execution pressure."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_shadowblade_veilstep",
+            "name": {
+              "key": "skill_branch.shadowblade.veilstep.name",
+              "text": "Veilstep"
+            },
+            "identity": "Mobility, evasion, and temporary concealment with clear reveal rules."
+          },
+          {
+            "id": "skill_branch_shadowblade_nightsteel",
+            "name": {
+              "key": "skill_branch.shadowblade.nightsteel.name",
+              "text": "Nightsteel"
+            },
+            "identity": "Blade combinations, marked targets, and precise burst."
+          },
+          {
+            "id": "skill_branch_shadowblade_event_horizon",
+            "name": {
+              "key": "skill_branch.shadowblade.event_horizon.name",
+              "text": "Event Horizon"
+            },
+            "identity": "Shadow geometry, bounded isolation, and rift control."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_shadowblade_veil_ambush",
+            "name": {
+              "key": "skill.shadowblade.veil_ambush.name",
+              "text": "Veil Ambush"
+            },
+            "identity": "Enter a short concealment window and commit to a readable positional attack."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_shadowblade_marked_riftstep",
+            "name": {
+              "key": "skill.shadowblade.marked_riftstep.name",
+              "text": "Marked Riftstep"
+            },
+            "identity": "Step through a marked target with range, line, and reveal constraints."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_shadowblade_shadow_echo",
+            "name": {
+              "key": "skill.shadowblade.shadow_echo.name",
+              "text": "Shadow Echo"
+            },
+            "identity": "Leave a short-lived decoy that copies intent, not full damage or authority."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_shadowblade_event_horizon_field",
+            "name": {
+              "key": "skill.shadowblade.event_horizon_field.name",
+              "text": "Event-Horizon Field"
+            },
+            "identity": "Shape a visible shadow boundary that creates an earned isolation opportunity."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_shadowblade_event_horizon",
+            "name": {
+              "key": "skill.shadowblade.event_horizon.name",
+              "text": "Event Horizon"
+            },
+            "identity": "Become one with the Celestial Gate's shadow for a bounded sequence of positional strikes."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_shadowblade_event_horizon",
+          "legacyAlias": "SQ_Shadowblade",
+          "name": {
+            "key": "class_trial.shadowblade.event_horizon.name",
+            "text": "Event Horizon"
+          },
+          "summary": "Become one with the shadow cast by the Celestial Gate.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_shadowblade_eventide_blade",
+          "title": {
+            "key": "warmaster_title.shadowblade.eventide_blade.name",
+            "text": "Eventide Blade"
+          },
+          "setId": "warmaster_set_shadowblade_harness_event_horizon",
+          "setName": {
+            "key": "warmaster_set.shadowblade.harness_event_horizon.name",
+            "text": "Harness of the Event Horizon"
+          },
+          "relicId": "warmaster_relic_shadowblade_edge_gate_shadow",
+          "relicName": {
+            "key": "warmaster_relic.shadowblade.edge_gate_shadow.name",
+            "text": "Edge of the Gate's Shadow"
+          },
+          "ultimateSkillId": "skill_shadowblade_true_warmaster_event_horizon_severance",
+          "ultimateName": {
+            "key": "skill.shadowblade.true_warmaster.event_horizon_severance.name",
+            "text": "Event Horizon Severance"
+          },
+          "identity": "Create a bounded pull-and-isolation moment followed by a decisive strike.",
+          "counterplay": "The boundary and strike direction are telegraphed, displacement resistance applies, and the final strike can be dodged or interrupted.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_infiltrator",
+        "legacySubclass": {
+          "name": "Infiltrator",
+          "value": 11
+        },
+        "name": {
+          "key": "class.infiltrator.name",
+          "text": "Infiltrator"
+        },
+        "identity": "A tactical saboteur who observes enemy systems, plants false information, and collapses defenses from within.",
+        "roles": {
+          "primary": "tactical_damage",
+          "secondary": [
+            "debuffer",
+            "intelligence",
+            "control"
+          ],
+          "contribution": [
+            "damage",
+            "debuffing",
+            "scouting",
+            "control",
+            "objective_sabotage"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "hooded_tactical_leathers",
+          "mainHand": [
+            "dagger",
+            "twin_daggers"
+          ],
+          "offHand": [
+            "throwing_tools",
+            "sabotage_relic"
+          ],
+          "silhouette": "Hooded tactical leathers, compact blades, and visible sabotage tools."
+        },
+        "resource": {
+          "id": "class_resource_infiltrator_intel",
+          "name": {
+            "key": "class_resource.infiltrator.intel.name",
+            "text": "Intel"
+          },
+          "gain": "Acquired by observing, exposing, bypassing, and successfully sabotaging declared enemy functions.",
+          "spend": "Spent on debuffs, decoys, silent entry, tactical sharing, and objective disruption."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_infiltrator_ghostcraft",
+            "name": {
+              "key": "skill_branch.infiltrator.ghostcraft.name",
+              "text": "Ghostcraft"
+            },
+            "identity": "Observation, temporary concealment, entry, and extraction."
+          },
+          {
+            "id": "skill_branch_infiltrator_sabotage",
+            "name": {
+              "key": "skill_branch.infiltrator.sabotage.name",
+              "text": "Sabotage"
+            },
+            "identity": "Visible planted tools, debuffs, and bounded objective disruption."
+          },
+          {
+            "id": "skill_branch_infiltrator_false_flag",
+            "name": {
+              "key": "skill_branch.infiltrator.false_flag.name",
+              "text": "False Flag"
+            },
+            "identity": "Decoys, misinformation, and party intelligence without spoofing protected realm identity."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_infiltrator_expose_weakness",
+            "name": {
+              "key": "skill.infiltrator.expose_weakness.name",
+              "text": "Expose Weakness"
+            },
+            "identity": "Observe a target and reveal one actionable weakness to the party."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_infiltrator_silent_sabotage",
+            "name": {
+              "key": "skill.infiltrator.silent_sabotage.name",
+              "text": "Silent Sabotage"
+            },
+            "identity": "Plant a visible, destructible device that disrupts one declared function."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_infiltrator_false_presence",
+            "name": {
+              "key": "skill.infiltrator.false_presence.name",
+              "text": "False Presence"
+            },
+            "identity": "Create a decoy signature and disengage without impersonating another realm or player."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_infiltrator_shared_intelligence",
+            "name": {
+              "key": "skill.infiltrator.shared_intelligence.name",
+              "text": "Shared Intelligence"
+            },
+            "identity": "Convert gathered Intel into party-visible target and objective information."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_infiltrator_heavens_ghost",
+            "name": {
+              "key": "skill.infiltrator.heavens_ghost.name",
+              "text": "Heaven's Ghost"
+            },
+            "identity": "Bypass a defended route through observation and timing rather than permanent invisibility."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_infiltrator_heavens_ghost",
+          "legacyAlias": "SQ_Infiltrator",
+          "name": {
+            "key": "class_trial.infiltrator.heavens_ghost.name",
+            "text": "Heaven's Ghost"
+          },
+          "summary": "Bypass the divine sentinels without being detected.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_infiltrator_heavens_ghost",
+          "title": {
+            "key": "warmaster_title.infiltrator.heavens_ghost.name",
+            "text": "Heaven's Ghost"
+          },
+          "setId": "warmaster_set_infiltrator_raiment_unseen_siege",
+          "setName": {
+            "key": "warmaster_set.infiltrator.raiment_unseen_siege.name",
+            "text": "Raiment of the Unseen Siege"
+          },
+          "relicId": "warmaster_relic_infiltrator_cipher_divine_sentinels",
+          "relicName": {
+            "key": "warmaster_relic.infiltrator.cipher_divine_sentinels.name",
+            "text": "Cipher of the Divine Sentinels"
+          },
+          "ultimateSkillId": "skill_infiltrator_true_warmaster_silent_collapse",
+          "ultimateName": {
+            "key": "skill.infiltrator.true_warmaster.silent_collapse.name",
+            "text": "Silent Collapse"
+          },
+          "identity": "Temporarily disrupt formation utilities through a network of planted tactical nodes.",
+          "counterplay": "Every node is visible at close range, destructible, bounded to one function, and unable to erase core controls or realm identity.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_nightstalker",
+        "legacySubclass": {
+          "name": "Nightstalker",
+          "value": 12
+        },
+        "name": {
+          "key": "class.nightstalker.name",
+          "text": "Nightstalker"
+        },
+        "identity": "A sustained melee hunter who turns supernatural dread, bleed pressure, and twin-scythe reach into disruption and bounded lifesteal.",
+        "roles": {
+          "primary": "sustained_melee_damage",
+          "secondary": [
+            "fear_control",
+            "lifesteal_disruptor"
+          ],
+          "contribution": [
+            "damage",
+            "debuffing",
+            "control",
+            "disruption",
+            "objective_pressure"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "predatory_dark_armor",
+          "mainHand": [
+            "twin_scythes",
+            "scythe"
+          ],
+          "offHand": [
+            "second_scythe",
+            "none"
+          ],
+          "silhouette": "A distinct crescent-shaped twin-scythe profile with fear and lifesteal accents."
+        },
+        "resource": {
+          "id": "class_resource_nightstalker_dread",
+          "name": {
+            "key": "class_resource.nightstalker.dread.name",
+            "text": "Dread"
+          },
+          "gain": "Built through bleed pressure, pursuit, displacement, and maintaining threatening proximity.",
+          "spend": "Spent on fear, harvesting attacks, bounded lifesteal, and starless-night pressure."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_nightstalker_dread",
+            "name": {
+              "key": "skill_branch.nightstalker.dread.name",
+              "text": "Dread"
+            },
+            "identity": "Fear, displacement, and pressure that respects control resistance."
+          },
+          {
+            "id": "skill_branch_nightstalker_bloodmoon",
+            "name": {
+              "key": "skill_branch.nightstalker.bloodmoon.name",
+              "text": "Bloodmoon"
+            },
+            "identity": "Bleed pressure and bounded lifesteal that cannot replace a healer."
+          },
+          {
+            "id": "skill_branch_nightstalker_void_reaper",
+            "name": {
+              "key": "skill_branch.nightstalker.void_reaper.name",
+              "text": "Void Reaper"
+            },
+            "identity": "Twin-scythe reach, sweeping harvests, and starless zones."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_nightstalker_dread_mark",
+            "name": {
+              "key": "skill.nightstalker.dread_mark.name",
+              "text": "Dread Mark"
+            },
+            "identity": "Establish Dread and a visible bleed-pressure relationship."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_nightstalker_bloodmoon_sustain",
+            "name": {
+              "key": "skill.nightstalker.bloodmoon_sustain.name",
+              "text": "Bloodmoon Sustain"
+            },
+            "identity": "Recover through earned pressure with strict caps and anti-abuse rules."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_nightstalker_twin_harvest",
+            "name": {
+              "key": "skill.nightstalker.twin_harvest.name",
+              "text": "Twin Harvest"
+            },
+            "identity": "Sweep both scythes through a readable arc and reward positioning."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_nightstalker_starless_garden",
+            "name": {
+              "key": "skill.nightstalker.starless_garden.name",
+              "text": "Starless Garden"
+            },
+            "identity": "Create a bounded darkness field whose occupants retain readable silhouettes and exits."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_nightstalker_void_reaper",
+            "name": {
+              "key": "skill.nightstalker.void_reaper.name",
+              "text": "Void Reaper"
+            },
+            "identity": "Harvest shadow pressure across a celestial garden without becoming untargetable."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_nightstalker_void_reaper",
+          "legacyAlias": "SQ_Nightstalker",
+          "name": {
+            "key": "class_trial.nightstalker.void_reaper.name",
+            "text": "Void Reaper"
+          },
+          "summary": "Execute the shadows lurking in the celestial gardens.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_nightstalker_void_reaper",
+          "title": {
+            "key": "warmaster_title.nightstalker.void_reaper.name",
+            "text": "Void Reaper"
+          },
+          "setId": "warmaster_set_nightstalker_shroud_starless_garden",
+          "setName": {
+            "key": "warmaster_set.nightstalker.shroud_starless_garden.name",
+            "text": "Shroud of the Starless Garden"
+          },
+          "relicId": "warmaster_relic_nightstalker_twin_moons_void",
+          "relicName": {
+            "key": "warmaster_relic.nightstalker.twin_moons_void.name",
+            "text": "Twin Moons of the Void"
+          },
+          "ultimateSkillId": "skill_nightstalker_true_warmaster_midnight_harvest",
+          "ultimateName": {
+            "key": "skill.nightstalker.true_warmaster.midnight_harvest.name",
+            "text": "Midnight Harvest"
+          },
+          "identity": "Sweep a bounded lifesteal field through an enemy formation.",
+          "counterplay": "Opponents can leave, illuminate, cleanse, or interrupt the field, and all units retain non-color silhouette cues.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_slayer",
+        "legacySubclass": {
+          "name": "Slayer",
+          "value": 15
+        },
+        "name": {
+          "key": "class.slayer.name",
+          "text": "Slayer"
+        },
+        "identity": "An anti-elite execution specialist who reads powerful opponents, survives signature attacks, and creates earned party execution windows.",
+        "roles": {
+          "primary": "boss_elite_damage",
+          "secondary": [
+            "interrupt",
+            "anti_caster",
+            "execution_support"
+          ],
+          "contribution": [
+            "damage",
+            "interruption",
+            "break_pressure",
+            "priority_target_marking",
+            "party_execution_window"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "trophy_marked_medium_armor",
+          "mainHand": [
+            "greatsword",
+            "heavy_spear",
+            "two_handed_weapon"
+          ],
+          "offHand": [
+            "none"
+          ],
+          "silhouette": "A large two-handed weapon, a committed stance, and readable trophies from defeated threats."
+        },
+        "resource": {
+          "id": "class_resource_slayer_ruin_marks",
+          "name": {
+            "key": "class_resource.slayer.ruin_marks.name",
+            "text": "Ruin Marks"
+          },
+          "gain": "Earned by reading telegraphs, interrupting abilities, and exploiting elite weaknesses rather than landing killing blows.",
+          "spend": "Spent on breaks, anti-caster pressure, survival against signature attacks, and shared execution windows."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_slayer_godhunter",
+            "name": {
+              "key": "skill_branch.slayer.godhunter.name",
+              "text": "Godhunter"
+            },
+            "identity": "Threat reading, elite weakness discovery, and pursuit."
+          },
+          {
+            "id": "skill_branch_slayer_executioner",
+            "name": {
+              "key": "skill_branch.slayer.executioner.name",
+              "text": "Executioner"
+            },
+            "identity": "Break pressure and earned finishing windows, never unconditional instant death."
+          },
+          {
+            "id": "skill_branch_slayer_iron_will",
+            "name": {
+              "key": "skill_branch.slayer.iron_will.name",
+              "text": "Iron Will"
+            },
+            "identity": "Survival, interruption, and resistance to elite signature mechanics."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_slayer_read_the_mighty",
+            "name": {
+              "key": "skill.slayer.read_the_mighty.name",
+              "text": "Read the Mighty"
+            },
+            "identity": "Identify one elite weakness and make its interaction visible to the party."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_slayer_spellbreaker",
+            "name": {
+              "key": "skill.slayer.spellbreaker.name",
+              "text": "Spellbreaker"
+            },
+            "identity": "Interrupt or pressure a declared cast without erasing casting as a system."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_slayer_iron_will",
+            "name": {
+              "key": "skill.slayer.iron_will.name",
+              "text": "Iron Will"
+            },
+            "identity": "Survive a correctly read signature attack and preserve an earned counterattack."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_slayer_execution_window",
+            "name": {
+              "key": "skill.slayer.execution_window.name",
+              "text": "Execution Window"
+            },
+            "identity": "Open a short party-visible damage and break opportunity after correct preparation."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_slayer_god_killer",
+            "name": {
+              "key": "skill.slayer.god_killer.name",
+              "text": "God-Killer"
+            },
+            "identity": "Defeat an apparently immortal guardian through mastery of its mechanics, never a universal instant-kill effect."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_slayer_god_killer",
+          "legacyAlias": "SQ_Slayer",
+          "name": {
+            "key": "class_trial.slayer.god_killer.name",
+            "text": "God-Killer"
+          },
+          "summary": "Defeat the guardian of the Forbidden Island.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_slayer_god_killer",
+          "title": {
+            "key": "warmaster_title.slayer.god_killer.name",
+            "text": "God-Killer"
+          },
+          "setId": "warmaster_set_slayer_panoply_forbidden_hunt",
+          "setName": {
+            "key": "warmaster_set.slayer.panoply_forbidden_hunt.name",
+            "text": "Panoply of the Forbidden Hunt"
+          },
+          "relicId": "warmaster_relic_slayer_shard_fallen_guardian",
+          "relicName": {
+            "key": "warmaster_relic.slayer.shard_fallen_guardian.name",
+            "text": "Shard of the Fallen Guardian"
+          },
+          "ultimateSkillId": "skill_slayer_true_warmaster_end_the_immortal",
+          "ultimateName": {
+            "key": "skill.slayer.true_warmaster.end_the_immortal.name",
+            "text": "End the Immortal"
+          },
+          "identity": "Amplify an earned party execution window against a commander, elite, or fortified objective defender.",
+          "counterplay": "The strike is highly telegraphed, requires prior weakness preparation, can be interrupted or avoided, and is explicitly never an instant kill.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      }
+    ]
+  }
+}

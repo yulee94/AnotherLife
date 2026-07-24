@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "parentPacketVersion": "anotherlife-class-identity-skill-trees-2026-07-24-v001",
+  "componentId": "CLASS_FAMILY_WARRIOR",
+  "family": {
+    "id": "family_warrior",
+    "legacyEnum": {
+      "name": "Warrior",
+      "value": 0
+    },
+    "name": {
+      "key": "class_family.warrior.name",
+      "text": "Warrior"
+    },
+    "identity": "Warriors turn proximity, protection, pressure, and sworn duty into control of the frontline.",
+    "realmAvailability": [
+      "STONEHOLD",
+      "ELDERGROVE",
+      "CROWNLANDS",
+      "UMBRAL"
+    ],
+    "classIds": [
+      "class_vanguard",
+      "class_guardian",
+      "class_berserker",
+      "class_paladin"
+    ],
+    "classes": [
+      {
+        "id": "class_vanguard",
+        "legacySubclass": {
+          "name": "Vanguard",
+          "value": 1
+        },
+        "name": {
+          "key": "class.vanguard.name",
+          "text": "Vanguard"
+        },
+        "identity": "A frontline commander who makes the party's advance safer and more forceful by holding formation under pressure.",
+        "roles": {
+          "primary": "frontline_bruiser",
+          "secondary": [
+            "off_tank",
+            "party_buffer"
+          ],
+          "contribution": [
+            "damage",
+            "mitigation",
+            "shielding",
+            "buffing",
+            "objective_presence"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "heavy_command_plate",
+          "mainHand": [
+            "sword",
+            "spear"
+          ],
+          "offHand": [
+            "shield",
+            "banner"
+          ],
+          "silhouette": "Broad plate, a readable shield, and a visible command standard."
+        },
+        "resource": {
+          "id": "class_resource_vanguard_command",
+          "name": {
+            "key": "class_resource.vanguard.command.name",
+            "text": "Command"
+          },
+          "gain": "Earned by advancing into contact, holding formation, and protecting nearby allies.",
+          "spend": "Spent on formations, rally effects, interception, and coordinated movement."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_vanguard_linebreaker",
+            "name": {
+              "key": "skill_branch.vanguard.linebreaker.name",
+              "text": "Linebreaker"
+            },
+            "identity": "Aggressive shield-and-weapon pressure that opens a route for the party."
+          },
+          {
+            "id": "skill_branch_vanguard_war_banner",
+            "name": {
+              "key": "skill_branch.vanguard.war_banner.name",
+              "text": "War Banner"
+            },
+            "identity": "Rallies, formation commands, and contribution-focused party support."
+          },
+          {
+            "id": "skill_branch_vanguard_iron_march",
+            "name": {
+              "key": "skill_branch.vanguard.iron_march.name",
+              "text": "Iron March"
+            },
+            "identity": "Sustained advance, interception, and resistance to displacement."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_vanguard_shieldline_advance",
+            "name": {
+              "key": "skill.vanguard.shieldline_advance.name",
+              "text": "Shieldline Advance"
+            },
+            "identity": "Advance while protecting the lane immediately behind the Vanguard."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_vanguard_rallying_standard",
+            "name": {
+              "key": "skill.vanguard.rallying_standard.name",
+              "text": "Rallying Standard"
+            },
+            "identity": "Plant a visible rally point that rewards allies who maintain formation."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_vanguard_intercept",
+            "name": {
+              "key": "skill.vanguard.intercept.name",
+              "text": "Vanguard's Intercept"
+            },
+            "identity": "Cross danger to protect an ally and preserve the party's advance."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_vanguard_iron_march",
+            "name": {
+              "key": "skill.vanguard.iron_march.name",
+              "text": "Iron March"
+            },
+            "identity": "Project a moving formation that turns coordinated pressure into party momentum."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_vanguard_frontline_eternity",
+            "name": {
+              "key": "skill.vanguard.frontline_eternity.name",
+              "text": "Frontline Eternity"
+            },
+            "identity": "Become the moving center of the line without becoming permanently immovable."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_vanguard_frontline_eternity",
+          "legacyAlias": "SQ_Vanguard",
+          "name": {
+            "key": "class_trial.vanguard.frontline_eternity.name",
+            "text": "Frontline Eternity"
+          },
+          "summary": "Stand as the immovable object against the Celestial Tide.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_vanguard_grand_marshal",
+          "title": {
+            "key": "warmaster_title.vanguard.grand_marshal.name",
+            "text": "Grand Marshal"
+          },
+          "setId": "warmaster_set_vanguard_regalia_first_line",
+          "setName": {
+            "key": "warmaster_set.vanguard.regalia_first_line.name",
+            "text": "Regalia of the First Line"
+          },
+          "relicId": "warmaster_relic_vanguard_standard_unbroken_realms",
+          "relicName": {
+            "key": "warmaster_relic.vanguard.standard_unbroken_realms.name",
+            "text": "Standard of Unbroken Realms"
+          },
+          "ultimateSkillId": "skill_vanguard_true_warmaster_march_ten_thousand",
+          "ultimateName": {
+            "key": "skill.vanguard.true_warmaster.march_ten_thousand.name",
+            "text": "March of Ten Thousand"
+          },
+          "identity": "A banner-led formation advance that lets an organized squad push through contested ground.",
+          "counterplay": "The formation is tied to a highly visible, attackable banner anchor and a bounded route that opponents can destroy, avoid, or outmaneuver.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_guardian",
+        "legacySubclass": {
+          "name": "Guardian",
+          "value": 2
+        },
+        "name": {
+          "key": "class.guardian.name",
+          "text": "Guardian"
+        },
+        "identity": "A mobile fortress who redirects danger, preserves allies, and controls space through sworn protection.",
+        "roles": {
+          "primary": "main_tank",
+          "secondary": [
+            "protector",
+            "control"
+          ],
+          "contribution": [
+            "mitigation",
+            "shielding",
+            "interception",
+            "control",
+            "objective_presence"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "fortress_plate",
+          "mainHand": [
+            "mace",
+            "hammer",
+            "sword"
+          ],
+          "offHand": [
+            "tower_shield"
+          ],
+          "silhouette": "A tower shield readable from the front and side, with a grounded fortress stance."
+        },
+        "resource": {
+          "id": "class_resource_guardian_resolve",
+          "name": {
+            "key": "class_resource.guardian.resolve.name",
+            "text": "Resolve"
+          },
+          "gain": "Earned by blocking, intercepting, maintaining wards, and remaining near threatened allies.",
+          "spend": "Spent on intercession, fortress control, and converting defended pressure into judgment."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_guardian_bastion",
+            "name": {
+              "key": "skill_branch.guardian.bastion.name",
+              "text": "Bastion"
+            },
+            "identity": "Personal durability, shield discipline, and objective anchoring."
+          },
+          {
+            "id": "skill_branch_guardian_oathward",
+            "name": {
+              "key": "skill_branch.guardian.oathward.name",
+              "text": "Oathward"
+            },
+            "identity": "Interception, ally wards, and rescue under pressure."
+          },
+          {
+            "id": "skill_branch_guardian_judicator",
+            "name": {
+              "key": "skill_branch.guardian.judicator.name",
+              "text": "Judicator"
+            },
+            "identity": "Turns absorbed force into measured control and counterpressure."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_guardian_interpose",
+            "name": {
+              "key": "skill.guardian.interpose.name",
+              "text": "Interpose"
+            },
+            "identity": "Move into a threatened ally's path and take responsibility for the next impact."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_guardian_oathward",
+            "name": {
+              "key": "skill.guardian.oathward.name",
+              "text": "Oathward"
+            },
+            "identity": "Extend a visible protective ward to one ally without erasing positioning risk."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_guardian_judgment_reversal",
+            "name": {
+              "key": "skill.guardian.judgment_reversal.name",
+              "text": "Judgment Reversal"
+            },
+            "identity": "Convert correctly blocked force into displacement or interruption."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_guardian_citadel_stance",
+            "name": {
+              "key": "skill.guardian.citadel_stance.name",
+              "text": "Citadel Stance"
+            },
+            "identity": "Anchor a bounded fortress zone that allies can deliberately rally around."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_guardian_unbreakable_vow",
+            "name": {
+              "key": "skill.guardian.unbreakable_vow.name",
+              "text": "The Unbreakable Vow"
+            },
+            "identity": "Swear a visible protection oath that holds only while the Guardian honors its conditions."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_guardian_unbreakable_vow",
+          "legacyAlias": "SQ_Guardian",
+          "name": {
+            "key": "class_trial.guardian.unbreakable_vow.name",
+            "text": "The Unbreakable Vow"
+          },
+          "summary": "Protect the Celestial Gate from an infinite onslaught.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_guardian_first_bastion",
+          "title": {
+            "key": "warmaster_title.guardian.first_bastion.name",
+            "text": "The First Bastion"
+          },
+          "setId": "warmaster_set_guardian_citadel_eternal",
+          "setName": {
+            "key": "warmaster_set.guardian.citadel_eternal.name",
+            "text": "Citadel Eternal"
+          },
+          "relicId": "warmaster_relic_guardian_heartwall_bulwark",
+          "relicName": {
+            "key": "warmaster_relic.guardian.heartwall_bulwark.name",
+            "text": "Heartwall Bulwark"
+          },
+          "ultimateSkillId": "skill_guardian_true_warmaster_realm_unbroken",
+          "ultimateName": {
+            "key": "skill.guardian.true_warmaster.realm_unbroken.name",
+            "text": "Realm Unbroken"
+          },
+          "identity": "Raise a temporary objective fortress that lets a squad survive a concentrated assault.",
+          "counterplay": "The fortress has a rooted, visible center with bounded coverage that can be focused, bypassed, or waited out.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_berserker",
+        "legacySubclass": {
+          "name": "Berserker",
+          "value": 3
+        },
+        "name": {
+          "key": "class.berserker.name",
+          "text": "Berserker"
+        },
+        "identity": "A controlled engine of primal violence who accepts danger to create pressure without depending on death.",
+        "roles": {
+          "primary": "melee_damage",
+          "secondary": [
+            "off_tank",
+            "disruptor"
+          ],
+          "contribution": [
+            "damage",
+            "disruption",
+            "interruption",
+            "objective_pressure"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "aggressive_medium_heavy",
+          "mainHand": [
+            "dual_axes",
+            "two_handed_axe",
+            "two_handed_hammer"
+          ],
+          "offHand": [
+            "second_weapon",
+            "none"
+          ],
+          "silhouette": "Aggressive shoulders and an intentionally unrestrained dual-weapon or two-handed profile."
+        },
+        "resource": {
+          "id": "class_resource_berserker_fury",
+          "name": {
+            "key": "class_resource.berserker.fury.name",
+            "text": "Fury"
+          },
+          "gain": "Earned by sustaining combat pressure, taking survivable risks, and interrupting powerful attacks.",
+          "spend": "Spent deliberately on burst, disruption, mobility, and refusal-to-fall effects."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_berserker_bloodfury",
+            "name": {
+              "key": "skill_branch.berserker.bloodfury.name",
+              "text": "Bloodfury"
+            },
+            "identity": "Rapid pressure and deliberate Fury cycling."
+          },
+          {
+            "id": "skill_branch_berserker_stormbreaker",
+            "name": {
+              "key": "skill_branch.berserker.stormbreaker.name",
+              "text": "Stormbreaker"
+            },
+            "identity": "Leaps, cleaves, shockfronts, and disruption."
+          },
+          {
+            "id": "skill_branch_berserker_unyielding",
+            "name": {
+              "key": "skill_branch.berserker.unyielding.name",
+              "text": "Unyielding"
+            },
+            "identity": "Survival under pressure without replacing a dedicated tank or healer."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_berserker_bloodfury",
+            "name": {
+              "key": "skill.berserker.bloodfury.name",
+              "text": "Bloodfury"
+            },
+            "identity": "Establish the Fury cycle and reward committed melee pressure."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_berserker_storm_lion_roar",
+            "name": {
+              "key": "skill.berserker.storm_lion_roar.name",
+              "text": "Storm-Lion Roar"
+            },
+            "identity": "Disrupt nearby enemies and rally allies through a readable battle cry."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_berserker_skybreaker_leap",
+            "name": {
+              "key": "skill.berserker.skybreaker_leap.name",
+              "text": "Skybreaker Leap"
+            },
+            "identity": "Commit to a telegraphed leap that opens a cleaving engagement."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_berserker_refuse_the_fall",
+            "name": {
+              "key": "skill.berserker.refuse_the_fall.name",
+              "text": "Refuse the Fall"
+            },
+            "identity": "Turn a bounded survival window into pressure while remaining healable and counterable."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_berserker_primal_rage",
+            "name": {
+              "key": "skill.berserker.primal_rage.name",
+              "text": "Primal Rage"
+            },
+            "identity": "Enter a disciplined star-lion state that rewards timing rather than permanent maximum Fury."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_berserker_primal_rage",
+          "legacyAlias": "SQ_Berserker",
+          "name": {
+            "key": "class_trial.berserker.primal_rage.name",
+            "text": "Primal Rage"
+          },
+          "summary": "Tame a legendary star-lion in a cosmic storm.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_berserker_worldreaver",
+          "title": {
+            "key": "warmaster_title.berserker.worldreaver.name",
+            "text": "Worldreaver"
+          },
+          "setId": "warmaster_set_berserker_warhide_star_lion",
+          "setName": {
+            "key": "warmaster_set.berserker.warhide_star_lion.name",
+            "text": "Warhide of the Star-Lion"
+          },
+          "relicId": "warmaster_relic_berserker_fang_celestial_lion",
+          "relicName": {
+            "key": "warmaster_relic.berserker.fang_celestial_lion.name",
+            "text": "Fang of the Celestial Lion"
+          },
+          "ultimateSkillId": "skill_berserker_true_warmaster_primal_cataclysm",
+          "ultimateName": {
+            "key": "skill.berserker.true_warmaster.primal_cataclysm.name",
+            "text": "Primal Cataclysm"
+          },
+          "identity": "A telegraphed rampage that drives a shockfront through an enemy formation.",
+          "counterplay": "The route and shockfront are visible, control resistance is not immunity, and the Berserker enters an exploitable recovery state.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_paladin",
+        "legacySubclass": {
+          "name": "Paladin",
+          "value": 13
+        },
+        "name": {
+          "key": "class.paladin.name",
+          "text": "Paladin"
+        },
+        "identity": "A protector-support who binds sacred oaths, shields allies, restores the wounded, and answers pressure with judgment.",
+        "roles": {
+          "primary": "protector_support",
+          "secondary": [
+            "healer",
+            "buffer",
+            "off_tank"
+          ],
+          "contribution": [
+            "healing",
+            "shielding",
+            "cleansing",
+            "buffing",
+            "damage",
+            "objective_presence"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "ceremonial_heavy_plate",
+          "mainHand": [
+            "longsword",
+            "mace"
+          ],
+          "offHand": [
+            "shield",
+            "sacred_tome"
+          ],
+          "silhouette": "Ceremonial plate, an oath-bearing shield or tome, and a restrained protective aura."
+        },
+        "resource": {
+          "id": "class_resource_paladin_conviction",
+          "name": {
+            "key": "class_resource.paladin.conviction.name",
+            "text": "Conviction"
+          },
+          "gain": "Earned by honoring a chosen oath through protection, recovery, judgment, or disciplined objective play.",
+          "spend": "Spent on barriers, cleansing, recovery, and measured verdicts."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_paladin_aegis_oath",
+            "name": {
+              "key": "skill_branch.paladin.aegis_oath.name",
+              "text": "Aegis Oath"
+            },
+            "identity": "Protection, interception, and oath-bound durability."
+          },
+          {
+            "id": "skill_branch_paladin_radiant_verdict",
+            "name": {
+              "key": "skill_branch.paladin.radiant_verdict.name",
+              "text": "Radiant Verdict"
+            },
+            "identity": "Measured damage, interruption, and anti-corruption pressure."
+          },
+          {
+            "id": "skill_branch_paladin_sacred_chorus",
+            "name": {
+              "key": "skill_branch.paladin.sacred_chorus.name",
+              "text": "Sacred Chorus"
+            },
+            "identity": "Party healing, cleansing, and coordinated support."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_paladin_bind_the_oath",
+            "name": {
+              "key": "skill.paladin.bind_the_oath.name",
+              "text": "Bind the Oath"
+            },
+            "identity": "Choose a visible oath that changes how Conviction is earned and spent."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_paladin_aegis_benediction",
+            "name": {
+              "key": "skill.paladin.aegis_benediction.name",
+              "text": "Aegis Benediction"
+            },
+            "identity": "Protect and cleanse a party member without replacing sustained healing."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_paladin_radiant_verdict",
+            "name": {
+              "key": "skill.paladin.radiant_verdict.name",
+              "text": "Radiant Verdict"
+            },
+            "identity": "Convert earned Conviction into a readable judgment against a chosen threat."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_paladin_sacred_chorus",
+            "name": {
+              "key": "skill.paladin.sacred_chorus.name",
+              "text": "Sacred Chorus"
+            },
+            "identity": "Sustain and rally the party through an interruptible shared hymn."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_paladin_divine_resonance",
+            "name": {
+              "key": "skill.paladin.divine_resonance.name",
+              "text": "Divine Resonance"
+            },
+            "identity": "Synchronize armor, oath, and party rhythm into a powerful but bounded protector state."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_paladin_divine_resonance",
+          "legacyAlias": "SQ_Paladin",
+          "name": {
+            "key": "class_trial.paladin.divine_resonance.name",
+            "text": "Divine Resonance"
+          },
+          "summary": "Synchronize your armor with the High Celestial's song.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_paladin_dawn_justicar",
+          "title": {
+            "key": "warmaster_title.paladin.dawn_justicar.name",
+            "text": "Dawn Justicar"
+          },
+          "setId": "warmaster_set_paladin_covenant_high_chorus",
+          "setName": {
+            "key": "warmaster_set.paladin.covenant_high_chorus.name",
+            "text": "Covenant of the High Chorus"
+          },
+          "relicId": "warmaster_relic_paladin_resonant_aegis",
+          "relicName": {
+            "key": "warmaster_relic.paladin.resonant_aegis.name",
+            "text": "Resonant Aegis"
+          },
+          "ultimateSkillId": "skill_paladin_true_warmaster_anthem_last_dawn",
+          "ultimateName": {
+            "key": "skill.paladin.true_warmaster.anthem_last_dawn.name",
+            "text": "Anthem of the Last Dawn"
+          },
+          "identity": "An oath-chorus combining cleansing, barrier support, rallying, and measured judgment pressure.",
+          "counterplay": "The chorus is interruptible, its area is clearly marked, and its strongest judgment requires allies to remain coordinated rather than granting unconditional invulnerability.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      }
+    ]
+  }
+}

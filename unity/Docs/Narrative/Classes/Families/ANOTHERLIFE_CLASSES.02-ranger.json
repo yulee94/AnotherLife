@@ -1,0 +1,703 @@
+{
+  "schemaVersion": 1,
+  "parentPacketVersion": "anotherlife-class-identity-skill-trees-2026-07-24-v001",
+  "componentId": "CLASS_FAMILY_RANGER",
+  "family": {
+    "id": "family_ranger",
+    "legacyEnum": {
+      "name": "Ranger",
+      "value": 2
+    },
+    "name": {
+      "key": "class_family.ranger.name",
+      "text": "Ranger"
+    },
+    "identity": "Rangers turn preparation, positioning, living bonds, and knowledge of terrain into ranged pressure and party survival.",
+    "realmAvailability": [
+      "STONEHOLD",
+      "ELDERGROVE",
+      "CROWNLANDS",
+      "UMBRAL"
+    ],
+    "classIds": [
+      "class_sharpshooter",
+      "class_stalker",
+      "class_beastmaster",
+      "class_druid"
+    ],
+    "classes": [
+      {
+        "id": "class_sharpshooter",
+        "legacySubclass": {
+          "name": "Sharpshooter",
+          "value": 7
+        },
+        "name": {
+          "key": "class.sharpshooter.name",
+          "text": "Sharpshooter"
+        },
+        "identity": "A precision archer who wins through preparation, firing-lane control, and impossible celestial shots.",
+        "roles": {
+          "primary": "ranged_single_target_damage",
+          "secondary": [
+            "suppression",
+            "overwatch"
+          ],
+          "contribution": [
+            "damage",
+            "suppression",
+            "priority_target_marking",
+            "objective_overwatch"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "fitted_light_armor",
+          "mainHand": [
+            "longbow"
+          ],
+          "offHand": [
+            "mana_focus",
+            "none"
+          ],
+          "silhouette": "A longbow, no physical quiver, and a readable mana-arrow focus."
+        },
+        "resource": {
+          "id": "class_resource_sharpshooter_focus",
+          "name": {
+            "key": "class_resource.sharpshooter.focus.name",
+            "text": "Focus"
+          },
+          "gain": "Built through aim, precision, line-of-sight discipline, and maintaining a declared firing position.",
+          "spend": "Spent on piercing shots, rapid repositioning, suppression, and priority-target execution."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_sharpshooter_deadeye",
+            "name": {
+              "key": "skill_branch.sharpshooter.deadeye.name",
+              "text": "Deadeye"
+            },
+            "identity": "Prepared single-target pressure and precision payoff."
+          },
+          {
+            "id": "skill_branch_sharpshooter_mana_ballistics",
+            "name": {
+              "key": "skill_branch.sharpshooter.mana_ballistics.name",
+              "text": "Mana Ballistics"
+            },
+            "identity": "Piercing arrows, trajectory control, and magical ammunition."
+          },
+          {
+            "id": "skill_branch_sharpshooter_overwatch",
+            "name": {
+              "key": "skill_branch.sharpshooter.overwatch.name",
+              "text": "Overwatch"
+            },
+            "identity": "Firing-lane control, suppression, and party target designation."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_sharpshooter_steady_aim",
+            "name": {
+              "key": "skill.sharpshooter.steady_aim.name",
+              "text": "Steady Aim"
+            },
+            "identity": "Declare a firing position and establish the Focus cycle without permanently rooting the player."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_sharpshooter_mana_piercing_arrow",
+            "name": {
+              "key": "skill.sharpshooter.mana_piercing_arrow.name",
+              "text": "Mana-Piercing Arrow"
+            },
+            "identity": "Fire through a clearly telegraphed line and reward correct target alignment."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_sharpshooter_overwatch_step",
+            "name": {
+              "key": "skill.sharpshooter.overwatch_step.name",
+              "text": "Overwatch Step"
+            },
+            "identity": "Reposition between prepared firing points while preserving only valid Focus."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_sharpshooter_priority_designation",
+            "name": {
+              "key": "skill.sharpshooter.priority_designation.name",
+              "text": "Priority Designation"
+            },
+            "identity": "Mark one high-value target so party pressure becomes coordinated and contribution-aware."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_sharpshooter_star_piercer",
+            "name": {
+              "key": "skill.sharpshooter.star_piercer.name",
+              "text": "Star-Piercer"
+            },
+            "identity": "Commit to an extreme-range celestial shot with clear warning, line, and cover counterplay."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_sharpshooter_star_piercer",
+          "legacyAlias": "SQ_Sharpshooter",
+          "name": {
+            "key": "class_trial.sharpshooter.star_piercer.name",
+            "text": "Star-Piercer"
+          },
+          "summary": "Strike a target on the furthest floating island.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_sharpshooter_horizon_marshal",
+          "title": {
+            "key": "warmaster_title.sharpshooter.horizon_marshal.name",
+            "text": "Horizon Marshal"
+          },
+          "setId": "warmaster_set_sharpshooter_panoply_far_star",
+          "setName": {
+            "key": "warmaster_set.sharpshooter.panoply_far_star.name",
+            "text": "Panoply of the Far Star"
+          },
+          "relicId": "warmaster_relic_sharpshooter_sight_last_horizon",
+          "relicName": {
+            "key": "warmaster_relic.sharpshooter.sight_last_horizon.name",
+            "text": "Sight of the Last Horizon"
+          },
+          "ultimateSkillId": "skill_sharpshooter_true_warmaster_star_piercer_salvo",
+          "ultimateName": {
+            "key": "skill.sharpshooter.true_warmaster.star_piercer_salvo.name",
+            "text": "Star-Piercer Salvo"
+          },
+          "identity": "Establish a long-range firing lane against a marked squad route or objective.",
+          "counterplay": "Cover, lateral movement, line-of-sight breaks, and interruption are effective; the lane and target sequence are visible before impact.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_stalker",
+        "legacySubclass": {
+          "name": "Stalker",
+          "value": 8
+        },
+        "name": {
+          "key": "class.stalker.name",
+          "text": "Stalker"
+        },
+        "identity": "A mobile hunter who reads celestial trails, shapes pursuit routes, and shares quarry knowledge with the party.",
+        "roles": {
+          "primary": "mobile_ranged_damage",
+          "secondary": [
+            "scout",
+            "trap_control",
+            "debuffer"
+          ],
+          "contribution": [
+            "damage",
+            "scouting",
+            "debuffing",
+            "control",
+            "target_reveal"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "trail_light_armor",
+          "mainHand": [
+            "shortbow"
+          ],
+          "offHand": [
+            "short_sword",
+            "dagger",
+            "trap_tool"
+          ],
+          "silhouette": "A shortbow, mobility cloak, compact blade, and visible trail tools."
+        },
+        "resource": {
+          "id": "class_resource_stalker_quarry_marks",
+          "name": {
+            "key": "class_resource.stalker.quarry_marks.name",
+            "text": "Quarry Marks"
+          },
+          "gain": "Established through tracking, observation, movement, and maintaining contact with a declared quarry.",
+          "spend": "Consumed for ambush, pursuit, traps, reveal, and party hunt coordination."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_stalker_trailcraft",
+            "name": {
+              "key": "skill_branch.stalker.trailcraft.name",
+              "text": "Trailcraft"
+            },
+            "identity": "Tracking, scouting, traps, and route knowledge."
+          },
+          {
+            "id": "skill_branch_stalker_ambush",
+            "name": {
+              "key": "skill_branch.stalker.ambush.name",
+              "text": "Ambush"
+            },
+            "identity": "Concealment, skirmishing, and prepared burst."
+          },
+          {
+            "id": "skill_branch_stalker_celestial_hunt",
+            "name": {
+              "key": "skill_branch.stalker.celestial_hunt.name",
+              "text": "Celestial Hunt"
+            },
+            "identity": "Persistent quarry pressure and party-wide hunt information."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_stalker_mark_the_quarry",
+            "name": {
+              "key": "skill.stalker.mark_the_quarry.name",
+              "text": "Mark the Quarry"
+            },
+            "identity": "Declare one quarry and make its tracking relationship visible."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_stalker_trail_snare",
+            "name": {
+              "key": "skill.stalker.trail_snare.name",
+              "text": "Trail Snare"
+            },
+            "identity": "Shape a pursuit route with a visible, avoidable trap."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_stalker_ghost_pursuit",
+            "name": {
+              "key": "skill.stalker.ghost_pursuit.name",
+              "text": "Ghost Pursuit"
+            },
+            "identity": "Use camouflage and movement to maintain pursuit without permanent invisibility."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_stalker_shared_hunt",
+            "name": {
+              "key": "skill.stalker.shared_hunt.name",
+              "text": "Shared Hunt"
+            },
+            "identity": "Share quarry information so party members earn coordinated pressure and contribution."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_stalker_celestial_hunt",
+            "name": {
+              "key": "skill.stalker.celestial_hunt.name",
+              "text": "The Celestial Hunt"
+            },
+            "identity": "Perfect the pursuit of supernatural quarry through reveal, route control, and patience."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_stalker_celestial_hunt",
+          "legacyAlias": "SQ_Stalker",
+          "name": {
+            "key": "class_trial.stalker.celestial_hunt.name",
+            "text": "The Celestial Hunt"
+          },
+          "summary": "Track a creature made of pure starlight.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_stalker_astral_huntsmaster",
+          "title": {
+            "key": "warmaster_title.stalker.astral_huntsmaster.name",
+            "text": "Astral Huntsmaster"
+          },
+          "setId": "warmaster_set_stalker_mantle_unseen_trail",
+          "setName": {
+            "key": "warmaster_set.stalker.mantle_unseen_trail.name",
+            "text": "Mantle of the Unseen Trail"
+          },
+          "relicId": "warmaster_relic_stalker_compass_starlight",
+          "relicName": {
+            "key": "warmaster_relic.stalker.compass_starlight.name",
+            "text": "Compass of Starlight"
+          },
+          "ultimateSkillId": "skill_stalker_true_warmaster_constellation_hunt",
+          "ultimateName": {
+            "key": "skill.stalker.true_warmaster.constellation_hunt.name",
+            "text": "Constellation Hunt"
+          },
+          "identity": "Reveal and mark coordinated enemy movement across a bounded warzone route.",
+          "counterplay": "Line-of-sight breaks, cleanses, decoys, and leaving the marked route reduce or end the hunt.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_beastmaster",
+        "legacySubclass": {
+          "name": "Beastmaster",
+          "value": 9
+        },
+        "name": {
+          "key": "class.beastmaster.name",
+          "text": "Beastmaster"
+        },
+        "identity": "A bonded fighter who treats a celestial companion as a partner rather than disposable equipment.",
+        "roles": {
+          "primary": "companion_damage",
+          "secondary": [
+            "off_tank",
+            "party_support"
+          ],
+          "contribution": [
+            "damage",
+            "companion_support",
+            "interception",
+            "buffing",
+            "rescue"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "reinforced_leathers",
+          "mainHand": [
+            "shortbow",
+            "spear"
+          ],
+          "offHand": [
+            "beast_charm",
+            "command_focus"
+          ],
+          "silhouette": "A compact ranged or spear profile, a visible command charm, and a distinct companion anchor."
+        },
+        "resource": {
+          "id": "class_resource_beastmaster_bond",
+          "name": {
+            "key": "class_resource.beastmaster.bond.name",
+            "text": "Bond"
+          },
+          "gain": "Earned by alternating champion and companion actions, protecting one another, and completing coordinated commands.",
+          "spend": "Spent on paired attacks, companion role actions, rescue, and sky-bond movement."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_beastmaster_packbond",
+            "name": {
+              "key": "skill_branch.beastmaster.packbond.name",
+              "text": "Packbond"
+            },
+            "identity": "Companion durability, shared recovery, and mutual protection."
+          },
+          {
+            "id": "skill_branch_beastmaster_primal_command",
+            "name": {
+              "key": "skill_branch.beastmaster.primal_command.name",
+              "text": "Primal Command"
+            },
+            "identity": "Coordinated attacks, declared companion roles, and party support."
+          },
+          {
+            "id": "skill_branch_beastmaster_sky_rider",
+            "name": {
+              "key": "skill_branch.beastmaster.sky_rider.name",
+              "text": "Sky Rider"
+            },
+            "identity": "Mobility, rescue, celestial companions, and bounded aerial expression."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_beastmaster_bond_command",
+            "name": {
+              "key": "skill.beastmaster.bond_command.name",
+              "text": "Bond Command"
+            },
+            "identity": "Direct a bonded companion through one clear combat role."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_beastmaster_companion_calling",
+            "name": {
+              "key": "skill.beastmaster.companion_calling.name",
+              "text": "Companion Calling"
+            },
+            "identity": "Specialize the companion toward protection, damage, or support without creating separate permanent pets."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_beastmaster_paired_assault",
+            "name": {
+              "key": "skill.beastmaster.paired_assault.name",
+              "text": "Paired Assault"
+            },
+            "identity": "Execute an alternating champion-and-companion combination."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_beastmaster_pack_rescue",
+            "name": {
+              "key": "skill.beastmaster.pack_rescue.name",
+              "text": "Pack Rescue"
+            },
+            "identity": "Use the bond to intercept danger or extract an ally from a readable threat."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_beastmaster_sky_bond",
+            "name": {
+              "key": "skill.beastmaster.sky_bond.name",
+              "text": "Sky-Bond"
+            },
+            "identity": "Form a High Celestial Gryphon bond that expands mobility and coordination without permanent unrestricted flight."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_beastmaster_sky_bond",
+          "legacyAlias": "SQ_Beastmaster",
+          "name": {
+            "key": "class_trial.beastmaster.sky_bond.name",
+            "text": "Sky-Bond"
+          },
+          "summary": "Tame a High Celestial Gryphon.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_beastmaster_sky_pact_highlord",
+          "title": {
+            "key": "warmaster_title.beastmaster.sky_pact_highlord.name",
+            "text": "Sky-Pact Highlord"
+          },
+          "setId": "warmaster_set_beastmaster_harness_high_gryphon",
+          "setName": {
+            "key": "warmaster_set.beastmaster.harness_high_gryphon.name",
+            "text": "Harness of the High Gryphon"
+          },
+          "relicId": "warmaster_relic_beastmaster_sky_bond_totem",
+          "relicName": {
+            "key": "warmaster_relic.beastmaster.sky_bond_totem.name",
+            "text": "Sky-Bond Totem"
+          },
+          "ultimateSkillId": "skill_beastmaster_true_warmaster_celestial_pack_ascendant",
+          "ultimateName": {
+            "key": "skill.beastmaster.true_warmaster.celestial_pack_ascendant.name",
+            "text": "Celestial Pack Ascendant"
+          },
+          "identity": "Coordinate a champion-and-companion charge through a contested formation.",
+          "counterplay": "The companion route is visible, the companion component can be disrupted, and summon counts remain strictly bounded.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_druid",
+        "legacySubclass": {
+          "name": "Druid",
+          "value": 16
+        },
+        "name": {
+          "key": "class.druid.name",
+          "text": "Druid"
+        },
+        "identity": "The primary sustained healer who cycles restoration, control, and spectral wild aspects while linking the party through the Worldroot.",
+        "roles": {
+          "primary": "healer",
+          "secondary": [
+            "buffer",
+            "battlefield_control",
+            "aspect_damage"
+          ],
+          "contribution": [
+            "healing",
+            "cleansing",
+            "buffing",
+            "control",
+            "damage",
+            "rescue"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "natural_robes_and_leather",
+          "mainHand": [
+            "nature_staff"
+          ],
+          "offHand": [
+            "totem",
+            "orb"
+          ],
+          "silhouette": "Layered natural robes, a Worldroot focus, and spectral aspects rather than mandatory full-body shapeshifts."
+        },
+        "resource": {
+          "id": "class_resource_druid_harmony",
+          "name": {
+            "key": "class_resource.druid.harmony.name",
+            "text": "Harmony"
+          },
+          "gain": "Maintained by cycling restorative, controlling, and wild-aspect actions instead of repeating only one category.",
+          "spend": "Spent on sustained healing, Worldroot links, seasonal transitions, and bounded aspect transformations."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_druid_worldroot",
+            "name": {
+              "key": "skill_branch.druid.worldroot.name",
+              "text": "Worldroot"
+            },
+            "identity": "Primary healing, cleansing, linked recovery, and rescue."
+          },
+          {
+            "id": "skill_branch_druid_wild_aspect",
+            "name": {
+              "key": "skill_branch.druid.wild_aspect.name",
+              "text": "Wild Aspect"
+            },
+            "identity": "Spectral animal aspects for mobility, defense, or damage without requiring a full launch roster of transformed models."
+          },
+          {
+            "id": "skill_branch_druid_seasons",
+            "name": {
+              "key": "skill_branch.druid.seasons.name",
+              "text": "Seasons"
+            },
+            "identity": "Rotating support, control, and regeneration states."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_druid_harmony_cycle",
+            "name": {
+              "key": "skill.druid.harmony_cycle.name",
+              "text": "Harmony Cycle"
+            },
+            "identity": "Establish the class's healing-and-support cycle and make its next state readable."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_druid_first_wild_aspect",
+            "name": {
+              "key": "skill.druid.first_wild_aspect.name",
+              "text": "First Wild Aspect"
+            },
+            "identity": "Adopt a bounded spectral aspect for recovery, protection, or movement."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_druid_turning_seasons",
+            "name": {
+              "key": "skill.druid.turning_seasons.name",
+              "text": "Turning Seasons"
+            },
+            "identity": "Rotate through declared seasonal support states rather than stacking every benefit."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_druid_worldroot_communion",
+            "name": {
+              "key": "skill.druid.worldroot_communion.name",
+              "text": "Worldroot Communion"
+            },
+            "identity": "Link party members for distributed healing and rescue with visible break conditions."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_druid_world_root_reach",
+            "name": {
+              "key": "skill.druid.world_root_reach.name",
+              "text": "World-Root Reach"
+            },
+            "identity": "Connect the World Tree to the floating islands through a powerful but bounded healing-and-control network."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_druid_world_root_reach",
+          "legacyAlias": "SQ_Druid",
+          "name": {
+            "key": "class_trial.druid.world_root_reach.name",
+            "text": "World-Root Reach"
+          },
+          "summary": "Connect the World Tree to the floating islands.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_druid_worldroot_archdruid",
+          "title": {
+            "key": "warmaster_title.druid.worldroot_archdruid.name",
+            "text": "Worldroot Archdruid"
+          },
+          "setId": "warmaster_set_druid_star_grown_bough",
+          "setName": {
+            "key": "warmaster_set.druid.star_grown_bough.name",
+            "text": "Regalia of the Star-Grown Bough"
+          },
+          "relicId": "warmaster_relic_druid_seed_upper_world",
+          "relicName": {
+            "key": "warmaster_relic.druid.seed_upper_world.name",
+            "text": "Seed of the Upper World"
+          },
+          "ultimateSkillId": "skill_druid_true_warmaster_world_root_ascension",
+          "ultimateName": {
+            "key": "skill.druid.true_warmaster.world_root_ascension.name",
+            "text": "World-Root Ascension"
+          },
+          "identity": "Grow a healing-and-control root network through a contested objective area.",
+          "counterplay": "The exposed roots are targetable, the network has bounded links and range, and breaking key roots collapses its strongest effects.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,564 @@
+{
+  "schemaVersion": 1,
+  "packetVersion": "anotherlife-class-identity-skill-trees-2026-07-24-v001",
+  "packetId": "ANOTHERLIFE_CLASS_IDENTITY_SKILL_TREES",
+  "trackedIssues": [
+    160,
+    171,
+    180,
+    183,
+    184
+  ],
+  "primaryMode": "codex_narrative_content",
+  "sourceStatus": "codex_authored_canonical_candidate_ready_for_user_creative_acceptance_runtime_not_wired",
+  "userDecision": {
+    "date": "2026-07-24",
+    "request": "Codex should decide and create the narrative/content roster-and-class-identity packet, followed by a coordination specification before engineering.",
+    "authority": "This request authorizes Codex to make and record the creative proposal. The user retains final creative, product, visual, balance, irreversible-profile, playtest, milestone, and release approval."
+  },
+  "authorities": {
+    "ownership": "unity/Docs/Ownership_Decision_Record.md",
+    "roadmap": "unity/Docs/Project_Progression_Roadmap.md",
+    "productDirection": "unity/Docs/Product_Direction.md",
+    "progressionContract": "unity/Docs/Player_Launch_Progression_Contract.md",
+    "mainQuestPacket": {
+      "path": "unity/Docs/Narrative/MainQuestLine/ANOTHERLIFE_MAIN_QUEST_LINE.packet.json",
+      "packetVersion": "anotherlife-main-quest-line-2026-07-23-v001",
+      "policy": "Reference CH11 High Sky Trials and CH12 Eight Lights without editing or duplicating their critical path."
+    },
+    "legacyRoster": "unity/Assets/AL/Scripts/Core/Enums/Enums.cs",
+    "legacyTrialInventory": "unity/Docs/Game_Data_Source_Inventory.md",
+    "legacySilhouettes": "unity/Assets/AL/Art/Designs/ModularChampionCustomization.md",
+    "realmWarmasterPresentation": "unity/Assets/AL/Art/Designs/SkillEffectsAndWeather.md",
+    "catalogBoundary": "unity/Docs/Narrative/GameData/Phase_C_Six_Family_Source_Packet.md"
+  },
+  "canonicalDecisions": {
+    "terminology": "The four inherited ClassFamily values are class families. The sixteen inherited non-None SubclassId values are the sixteen playable classes. The three branches inside each class are skill-tree specializations, not additional classes.",
+    "classSelection": "A character selects one of the sixteen playable classes directly. Family is derived from the explicit mapping and is never selected or persisted independently. Class choice is character-scoped; same-realm subcharacters may choose different classes. Ordinary skill respec cannot change class.",
+    "realmAvailability": "All sixteen classes are available to Stonehold, Eldergrove, Crownlands, and Umbral. Realm changes culture, materials, language, heraldry, animation flavor, and VFX palette, but not class mechanics, role eligibility, or skill-tree topology.",
+    "familyMapping": {
+      "family_warrior": [
+        "class_vanguard",
+        "class_guardian",
+        "class_berserker",
+        "class_paladin"
+      ],
+      "family_mage": [
+        "class_pyromancer",
+        "class_cryomancer",
+        "class_archmage",
+        "class_necromancer"
+      ],
+      "family_ranger": [
+        "class_sharpshooter",
+        "class_stalker",
+        "class_beastmaster",
+        "class_druid"
+      ],
+      "family_assassin": [
+        "class_shadowblade",
+        "class_infiltrator",
+        "class_nightstalker",
+        "class_slayer"
+      ]
+    },
+    "supportCoverage": {
+      "primaryHealer": "class_druid",
+      "secondaryHealers": [
+        "class_paladin"
+      ],
+      "primaryMainTank": "class_guardian",
+      "frontlineSupport": [
+        "class_vanguard",
+        "class_paladin"
+      ],
+      "policy": "Healing, shielding, cleansing, buffing, debuffing, control, scouting, interruption, rescue, and objective support are valid contribution identities and must not be treated as inferior to killing blows."
+    },
+    "treeTopology": {
+      "visibleFromLevel": 1,
+      "branchesPerClass": 3,
+      "branchAccess": "Branches are non-exclusive identity paths. A player may invest across all three. Later keystone choice groups may be mutually exclusive only when explicitly authored and validated.",
+      "milestoneLevels": [
+        10,
+        20,
+        30,
+        40,
+        50
+      ],
+      "level50Meaning": "The level-50 milestone is the normal class-tree capstone. It is not a True Warmaster skill.",
+      "equippedActiveSlots": 4,
+      "slotPolicy": "The initial production loadout remains four active slots. Passive nodes are not slotted. True Warmaster skills use the same loadout surface unless a later approved input contract creates another surface.",
+      "fullNodeCatalogStatus": "Only class identity, three branches, and five defining milestone skills are authored here. Non-milestone nodes, ranks, point costs, prerequisite edges, numeric behavior, and balance remain a later source-and-balance completion."
+    },
+    "masteryTrialPolicy": {
+      "legacyDisposition": "The sixteen discarded level-100 soul-quest concepts are superseded as level-50 class mastery trials with new stable IDs and preserved SQ_* aliases.",
+      "storyWindow": "Available after level 50 within the High Sky Trials and Eight Lights era.",
+      "criticalPath": false,
+      "mechanicalGate": "A mastery trial does not grant or gate the level-50 capstone, required level progress, Warmaster eligibility, True Warmaster eligibility, gem custody, final-wish access, or the canonical ending.",
+      "rewardBoundary": "Narrative recognition, class title presentation, cosmetic remembrance, or optional lore only until a separately approved reward packet exists.",
+      "failure": "Failure is recoverable and nonterminal; retry begins at the latest safe objective without consuming eligibility.",
+      "abandonment": "The trial may be paused or abandoned and reaccepted without changing class, tree allocation, Warmaster state, or critical-path progress.",
+      "resume": "Reload restores the current trial and safe objective when runtime support exists; any one-time recognition is duplicate-safe."
+    },
+    "trueWarmasterPolicy": {
+      "campaignMeaning": "CH11 establishes Warmaster purpose; CH12 carries level 50, Warzone points, Warmaster gear, and True Warmaster progression.",
+      "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of the selected class's Warmaster set.",
+      "classSpecificity": "Every class has one named title, one named set, one unique class relic, and one True Warmaster RvR skill identity.",
+      "pieceSlots": [
+        "weapon",
+        "helm",
+        "chest",
+        "gloves",
+        "boots",
+        "cape",
+        "ring",
+        "amulet",
+        "mount_armor",
+        "class_relic"
+      ],
+      "counterplay": "Every True Warmaster skill requires a visible telegraph, bounded area or duration, explicit escape, interruption, destruction, resistance, or preparation counterplay, scalable VFX, and no instant-kill or unconditional invulnerability.",
+      "sideQuestBoundary": "Optional side quests and class mastery trials cannot grant or gate Warmaster or True Warmaster eligibility."
+    },
+    "visualPerformanceBoundary": {
+      "classReadability": "Class must read through posture, equipment silhouette, major shapes, and animation intent rather than color alone.",
+      "realmExpression": "Realm VFX and materials overlay class identity without changing skill behavior.",
+      "summonsAndTransformation": "Companions, servants, anchors, roots, and decoys are explicitly bounded. Druid launch identity uses spectral Wild Aspects rather than requiring a full separate transformed-model roster.",
+      "qualityTiers": [
+        "hero",
+        "nearby",
+        "distant"
+      ],
+      "accessibility": "Telegraphs retain shape, icon, motion, text, or silhouette cues independent of color and support reduced-motion and reduced-flash presentation."
+    }
+  },
+  "legacyDispositions": {
+    "visualClassLabels": [
+      {
+        "legacyLabel": "Guardian",
+        "disposition": "adopted_exact_name_and_silhouette_reference",
+        "canonicalClassIds": [
+          "class_guardian"
+        ]
+      },
+      {
+        "legacyLabel": "Barbarian",
+        "disposition": "legacy_alias",
+        "canonicalClassIds": [
+          "class_berserker"
+        ]
+      },
+      {
+        "legacyLabel": "Swordsman",
+        "disposition": "visual_reference_only",
+        "canonicalClassIds": [
+          "class_vanguard",
+          "class_slayer"
+        ]
+      },
+      {
+        "legacyLabel": "Enchanter",
+        "disposition": "visual_reference_only",
+        "canonicalClassIds": [
+          "class_archmage"
+        ]
+      },
+      {
+        "legacyLabel": "Warlock",
+        "disposition": "visual_reference_only",
+        "canonicalClassIds": [
+          "class_necromancer"
+        ]
+      },
+      {
+        "legacyLabel": "Healer",
+        "disposition": "role_label_superseded",
+        "canonicalClassIds": [
+          "class_druid",
+          "class_paladin"
+        ]
+      },
+      {
+        "legacyLabel": "Hunter",
+        "disposition": "visual_reference_only",
+        "canonicalClassIds": [
+          "class_beastmaster",
+          "class_stalker"
+        ]
+      },
+      {
+        "legacyLabel": "Marksman",
+        "disposition": "legacy_alias",
+        "canonicalClassIds": [
+          "class_sharpshooter"
+        ]
+      },
+      {
+        "legacyLabel": "Forest Ranger",
+        "disposition": "visual_reference_only",
+        "canonicalClassIds": [
+          "class_stalker",
+          "class_druid"
+        ]
+      },
+      {
+        "legacyLabel": "Nightmare",
+        "disposition": "legacy_visual_alias",
+        "canonicalClassIds": [
+          "class_nightstalker"
+        ]
+      },
+      {
+        "legacyLabel": "Shadow Assassin",
+        "disposition": "legacy_alias",
+        "canonicalClassIds": [
+          "class_shadowblade"
+        ]
+      },
+      {
+        "legacyLabel": "Cursor",
+        "disposition": "rejected_or_superseded",
+        "canonicalClassIds": [
+          "class_necromancer",
+          "class_infiltrator",
+          "class_nightstalker"
+        ],
+        "decision": "Cursor is not a playable class and is not silently corrected to Curser. Its curse and debuff motifs are distributed among the listed canonical classes."
+      }
+    ],
+    "forgePresets": [
+      {
+        "presetId": "vanguard",
+        "displayName": "Vanguard",
+        "disposition": "same_name_independent_appearance_preset",
+        "recommendedClassTags": [
+          "class_vanguard",
+          "class_guardian",
+          "class_paladin"
+        ]
+      },
+      {
+        "presetId": "arcanist",
+        "displayName": "Arcanist",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_archmage",
+          "class_pyromancer",
+          "class_cryomancer"
+        ]
+      },
+      {
+        "presetId": "nightblade",
+        "displayName": "Nightblade",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_shadowblade",
+          "class_infiltrator"
+        ]
+      },
+      {
+        "presetId": "dreadknight",
+        "displayName": "Dreadknight",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_berserker",
+          "class_guardian",
+          "class_paladin"
+        ]
+      },
+      {
+        "presetId": "oracle",
+        "displayName": "Oracle",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_druid",
+          "class_paladin",
+          "class_archmage"
+        ]
+      },
+      {
+        "presetId": "duelist",
+        "displayName": "Duelist",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_slayer",
+          "class_infiltrator",
+          "class_shadowblade"
+        ]
+      },
+      {
+        "presetId": "inquisitor",
+        "displayName": "Inquisitor",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_paladin",
+          "class_necromancer"
+        ]
+      },
+      {
+        "presetId": "warden",
+        "displayName": "Warden",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_guardian",
+          "class_beastmaster",
+          "class_druid"
+        ]
+      },
+      {
+        "presetId": "spellblade",
+        "displayName": "Spellblade",
+        "disposition": "visual_reference_only",
+        "recommendedClassTags": [
+          "class_archmage",
+          "class_shadowblade",
+          "class_paladin"
+        ]
+      }
+    ],
+    "prototypeSkills": [
+      {
+        "id": "realm_strike",
+        "displayName": "Realm Strike",
+        "disposition": "prototype_only_not_class_source"
+      },
+      {
+        "id": "renewing_guard",
+        "displayName": "Renewing Guard",
+        "disposition": "prototype_only_not_class_source"
+      },
+      {
+        "id": "warzone_burst",
+        "displayName": "Warzone Burst",
+        "disposition": "prototype_only_not_class_source"
+      },
+      {
+        "id": "warmaster_breaker",
+        "displayName": "Warmaster Breaker",
+        "disposition": "prototype_only_not_class_or_true_warmaster_source"
+      }
+    ],
+    "prototypeWarmaster": {
+      "setId": "prototype_true_warmaster",
+      "pieceIds": [
+        "warmaster_weapon",
+        "warmaster_helm",
+        "warmaster_chest",
+        "warmaster_gloves",
+        "warmaster_boots",
+        "warmaster_cape",
+        "warmaster_ring",
+        "warmaster_amulet",
+        "warmaster_mount_armor",
+        "warmaster_class_relic"
+      ],
+      "disposition": "migration_and_history_only",
+      "decision": "The generic set, caller-supplied price, raw ten-item count, and generic class relic do not define any canonical class set or entitlement."
+    }
+  },
+  "components": [
+    {
+      "componentId": "CLASS_FAMILY_WARRIOR",
+      "familyId": "family_warrior",
+      "path": "unity/Docs/Narrative/Classes/Families/ANOTHERLIFE_CLASSES.00-warrior.json",
+      "sha256": "f7198c0a64f815c467a417f5bc7c04fccb1dc55b4ce874d86d57ee94dd89875e"
+    },
+    {
+      "componentId": "CLASS_FAMILY_MAGE",
+      "familyId": "family_mage",
+      "path": "unity/Docs/Narrative/Classes/Families/ANOTHERLIFE_CLASSES.01-mage.json",
+      "sha256": "3379253bd321658476347bbec987f30551d15a6c74d05187d764552a57d36637"
+    },
+    {
+      "componentId": "CLASS_FAMILY_RANGER",
+      "familyId": "family_ranger",
+      "path": "unity/Docs/Narrative/Classes/Families/ANOTHERLIFE_CLASSES.02-ranger.json",
+      "sha256": "1acfed117da4ecd7c2a92d6347e433254516f464e9a64f8cbeefcaea6d664792"
+    },
+    {
+      "componentId": "CLASS_FAMILY_ASSASSIN",
+      "familyId": "family_assassin",
+      "path": "unity/Docs/Narrative/Classes/Families/ANOTHERLIFE_CLASSES.03-assassin.json",
+      "sha256": "7a368c0937a37ad9498057b487f36f42d36eb501e857f52a3b03cadbd2274fe9"
+    }
+  ],
+  "classIndex": [
+    {
+      "order": 0,
+      "id": "class_vanguard",
+      "displayName": "Vanguard",
+      "familyId": "family_warrior",
+      "legacyEnumName": "Vanguard",
+      "legacyEnumValue": 1,
+      "componentId": "CLASS_FAMILY_WARRIOR"
+    },
+    {
+      "order": 1,
+      "id": "class_guardian",
+      "displayName": "Guardian",
+      "familyId": "family_warrior",
+      "legacyEnumName": "Guardian",
+      "legacyEnumValue": 2,
+      "componentId": "CLASS_FAMILY_WARRIOR"
+    },
+    {
+      "order": 2,
+      "id": "class_berserker",
+      "displayName": "Berserker",
+      "familyId": "family_warrior",
+      "legacyEnumName": "Berserker",
+      "legacyEnumValue": 3,
+      "componentId": "CLASS_FAMILY_WARRIOR"
+    },
+    {
+      "order": 3,
+      "id": "class_pyromancer",
+      "displayName": "Pyromancer",
+      "familyId": "family_mage",
+      "legacyEnumName": "Pyromancer",
+      "legacyEnumValue": 4,
+      "componentId": "CLASS_FAMILY_MAGE"
+    },
+    {
+      "order": 4,
+      "id": "class_cryomancer",
+      "displayName": "Cryomancer",
+      "familyId": "family_mage",
+      "legacyEnumName": "Cryomancer",
+      "legacyEnumValue": 5,
+      "componentId": "CLASS_FAMILY_MAGE"
+    },
+    {
+      "order": 5,
+      "id": "class_archmage",
+      "displayName": "Archmage",
+      "familyId": "family_mage",
+      "legacyEnumName": "Archmage",
+      "legacyEnumValue": 6,
+      "componentId": "CLASS_FAMILY_MAGE"
+    },
+    {
+      "order": 6,
+      "id": "class_sharpshooter",
+      "displayName": "Sharpshooter",
+      "familyId": "family_ranger",
+      "legacyEnumName": "Sharpshooter",
+      "legacyEnumValue": 7,
+      "componentId": "CLASS_FAMILY_RANGER"
+    },
+    {
+      "order": 7,
+      "id": "class_stalker",
+      "displayName": "Stalker",
+      "familyId": "family_ranger",
+      "legacyEnumName": "Stalker",
+      "legacyEnumValue": 8,
+      "componentId": "CLASS_FAMILY_RANGER"
+    },
+    {
+      "order": 8,
+      "id": "class_beastmaster",
+      "displayName": "Beastmaster",
+      "familyId": "family_ranger",
+      "legacyEnumName": "Beastmaster",
+      "legacyEnumValue": 9,
+      "componentId": "CLASS_FAMILY_RANGER"
+    },
+    {
+      "order": 9,
+      "id": "class_shadowblade",
+      "displayName": "Shadowblade",
+      "familyId": "family_assassin",
+      "legacyEnumName": "Shadowblade",
+      "legacyEnumValue": 10,
+      "componentId": "CLASS_FAMILY_ASSASSIN"
+    },
+    {
+      "order": 10,
+      "id": "class_infiltrator",
+      "displayName": "Infiltrator",
+      "familyId": "family_assassin",
+      "legacyEnumName": "Infiltrator",
+      "legacyEnumValue": 11,
+      "componentId": "CLASS_FAMILY_ASSASSIN"
+    },
+    {
+      "order": 11,
+      "id": "class_nightstalker",
+      "displayName": "Nightstalker",
+      "familyId": "family_assassin",
+      "legacyEnumName": "Nightstalker",
+      "legacyEnumValue": 12,
+      "componentId": "CLASS_FAMILY_ASSASSIN"
+    },
+    {
+      "order": 12,
+      "id": "class_paladin",
+      "displayName": "Paladin",
+      "familyId": "family_warrior",
+      "legacyEnumName": "Paladin",
+      "legacyEnumValue": 13,
+      "componentId": "CLASS_FAMILY_WARRIOR"
+    },
+    {
+      "order": 13,
+      "id": "class_necromancer",
+      "displayName": "Necromancer",
+      "familyId": "family_mage",
+      "legacyEnumName": "Necromancer",
+      "legacyEnumValue": 14,
+      "componentId": "CLASS_FAMILY_MAGE"
+    },
+    {
+      "order": 14,
+      "id": "class_slayer",
+      "displayName": "Slayer",
+      "familyId": "family_assassin",
+      "legacyEnumName": "Slayer",
+      "legacyEnumValue": 15,
+      "componentId": "CLASS_FAMILY_ASSASSIN"
+    },
+    {
+      "order": 15,
+      "id": "class_druid",
+      "displayName": "Druid",
+      "familyId": "family_ranger",
+      "legacyEnumName": "Druid",
+      "legacyEnumValue": 16,
+      "componentId": "CLASS_FAMILY_RANGER"
+    }
+  ],
+  "expectedCounts": {
+    "components": 4,
+    "families": 4,
+    "classes": 16,
+    "branches": 48,
+    "milestoneSkills": 80,
+    "masteryTrials": 16,
+    "warmasterSets": 16,
+    "warmasterRelics": 16,
+    "trueWarmasterSkills": 16,
+    "localizedNames": 244,
+    "legacyVisualLabels": 12,
+    "forgePresets": 9,
+    "prototypeSkills": 4
+  },
+  "externalCapabilityRequests": [
+    "A versioned class catalog that maps each canonical class ID to exactly one family and all four realms.",
+    "Character-scoped class selection with same-realm subcharacter support and no ordinary class change through skill respec.",
+    "Versioned class resource and mechanic profiles with visible gain, spend, cap, recovery, and unavailable-state behavior.",
+    "Three-branch skill trees visible from level 1 with durable point grants, allocation, respec, recovery, and four-slot loadouts.",
+    "Contribution accounting for healing, shielding, cleansing, buffing, debuffing, control, scouting, interruption, rescue, companion support, and objective play.",
+    "Recoverable, non-gating level-50 class mastery trials using the preserved celestial themes.",
+    "Sixteen class-specific Warmaster sets, unique class relics, and True Warmaster skills with authoritative eligibility, ledgers, transactions, counterplay, accessibility, and quality tiers."
+  ],
+  "unresolvedDecisions": [
+    "User final creative and visual approval of this Codex-authored roster and all new names.",
+    "Full non-milestone node inventory, node ranks, prerequisites, keystone choices, point costs, and respec policy.",
+    "Numerical stats, resource caps and rates, cooldowns, cast/channel times, ranges, scaling, power, contribution weights, and PvE/PvP/RvR balance.",
+    "Exact weapon and armor catalog categories, animations, icons, audio, models, VFX profiles, and class-specific realm presentation.",
+    "Warmaster prices, exact Warzone-point threshold, whether points are lifetime qualification or spendable currency, gear acquisition sources, and historical entitlement migration.",
+    "Production reward copy and optional cosmetic outcomes for the sixteen class mastery trials."
+  ],
+  "runtimeAuthority": "unchanged",
+  "engineeringActivation": "blocked_until_user_source_acceptance_coordination_specification_numeric_source_and_dependency_gates"
+}

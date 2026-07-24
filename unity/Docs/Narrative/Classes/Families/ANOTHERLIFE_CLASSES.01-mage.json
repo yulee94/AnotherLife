@@ -1,0 +1,700 @@
+{
+  "schemaVersion": 1,
+  "parentPacketVersion": "anotherlife-class-identity-skill-trees-2026-07-24-v001",
+  "componentId": "CLASS_FAMILY_MAGE",
+  "family": {
+    "id": "family_mage",
+    "legacyEnum": {
+      "name": "Mage",
+      "value": 1
+    },
+    "name": {
+      "key": "class_family.mage.name",
+      "text": "Mage"
+    },
+    "identity": "Mages shape the battlefield through disciplined magical states, rituals, and visible commitments rather than undifferentiated spell damage.",
+    "realmAvailability": [
+      "STONEHOLD",
+      "ELDERGROVE",
+      "CROWNLANDS",
+      "UMBRAL"
+    ],
+    "classIds": [
+      "class_pyromancer",
+      "class_cryomancer",
+      "class_archmage",
+      "class_necromancer"
+    ],
+    "classes": [
+      {
+        "id": "class_pyromancer",
+        "legacySubclass": {
+          "name": "Pyromancer",
+          "value": 4
+        },
+        "name": {
+          "key": "class.pyromancer.name",
+          "text": "Pyromancer"
+        },
+        "identity": "A ranged area-damage caster who cultivates living celestial fire and chooses when to intensify or safely vent it.",
+        "roles": {
+          "primary": "ranged_area_damage",
+          "secondary": [
+            "zone_control",
+            "debuffer"
+          ],
+          "contribution": [
+            "damage",
+            "debuffing",
+            "control",
+            "objective_denial"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "furnace_robes",
+          "mainHand": [
+            "staff"
+          ],
+          "offHand": [
+            "ember_orb",
+            "tome"
+          ],
+          "silhouette": "Layered robes, a furnace-like mantle, and a contained ember focus."
+        },
+        "resource": {
+          "id": "class_resource_pyromancer_heat",
+          "name": {
+            "key": "class_resource.pyromancer.heat.name",
+            "text": "Heat"
+          },
+          "gain": "Built through fire spells, burning zones, and deliberate spell sequences rather than idle waiting.",
+          "spend": "Vented or committed to stronger fire states, battlefield zones, and rebirth effects."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_pyromancer_living_flame",
+            "name": {
+              "key": "skill_branch.pyromancer.living_flame.name",
+              "text": "Living Flame"
+            },
+            "identity": "Single-target ignition, controlled Heat generation, and persistent fire."
+          },
+          {
+            "id": "skill_branch_pyromancer_cinderstorm",
+            "name": {
+              "key": "skill_branch.pyromancer.cinderstorm.name",
+              "text": "Cinderstorm"
+            },
+            "identity": "Area pressure, spreading fire, and escapable objective denial."
+          },
+          {
+            "id": "skill_branch_pyromancer_sunheart",
+            "name": {
+              "key": "skill_branch.pyromancer.sunheart.name",
+              "text": "Sunheart"
+            },
+            "identity": "Heat control, defensive venting, and celestial-fire transformation."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_pyromancer_living_ember",
+            "name": {
+              "key": "skill.pyromancer.living_ember.name",
+              "text": "Living Ember"
+            },
+            "identity": "Ignite a durable ember that establishes the class's Heat cycle."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_pyromancer_cinderstorm",
+            "name": {
+              "key": "skill.pyromancer.cinderstorm.name",
+              "text": "Cinderstorm"
+            },
+            "identity": "Spread fire through a clearly bounded area that opponents can leave."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_pyromancer_controlled_burn",
+            "name": {
+              "key": "skill.pyromancer.controlled_burn.name",
+              "text": "Controlled Burn"
+            },
+            "identity": "Choose between safe Heat venting and a stronger, riskier commitment."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_pyromancer_sunheart_dominion",
+            "name": {
+              "key": "skill.pyromancer.sunheart_dominion.name",
+              "text": "Sunheart Dominion"
+            },
+            "identity": "Reshape a battlefield section with celestial fire without obscuring hostile telegraphs."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_pyromancer_sun_fire_ascension",
+            "name": {
+              "key": "skill.pyromancer.sun_fire_ascension.name",
+              "text": "Sun-Fire Ascension"
+            },
+            "identity": "Enter a bounded living-flame state that rewards controlled Heat rather than permanent overheat."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_pyromancer_sun_fire_ascension",
+          "legacyAlias": "SQ_Pyromancer",
+          "name": {
+            "key": "class_trial.pyromancer.sun_fire_ascension.name",
+            "text": "Sun-Fire Ascension"
+          },
+          "summary": "Absorb the heat of the celestial sun into your core.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_pyromancer_sunfire_exarch",
+          "title": {
+            "key": "warmaster_title.pyromancer.sunfire_exarch.name",
+            "text": "Sunfire Exarch"
+          },
+          "setId": "warmaster_set_pyromancer_celestial_furnace",
+          "setName": {
+            "key": "warmaster_set.pyromancer.celestial_furnace.name",
+            "text": "Raiment of the Celestial Furnace"
+          },
+          "relicId": "warmaster_relic_pyromancer_unsetting_sun",
+          "relicName": {
+            "key": "warmaster_relic.pyromancer.unsetting_sun.name",
+            "text": "Core of the Unsetting Sun"
+          },
+          "ultimateSkillId": "skill_pyromancer_true_warmaster_heavenfall_conflagration",
+          "ultimateName": {
+            "key": "skill.pyromancer.true_warmaster.heavenfall_conflagration.name",
+            "text": "Heavenfall Conflagration"
+          },
+          "identity": "Call delayed celestial fire onto a contested objective zone.",
+          "counterplay": "The impact area, timing, and safe routes are unmistakable; interruption or evacuation prevents the strongest result.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_cryomancer",
+        "legacySubclass": {
+          "name": "Cryomancer",
+          "value": 5
+        },
+        "name": {
+          "key": "class.cryomancer.name",
+          "text": "Cryomancer"
+        },
+        "identity": "A battlefield controller who converts accumulating cold into either protective stillness or shattering offense.",
+        "roles": {
+          "primary": "battlefield_control",
+          "secondary": [
+            "defensive_support",
+            "area_damage"
+          ],
+          "contribution": [
+            "control",
+            "shielding",
+            "damage",
+            "debuffing",
+            "objective_denial"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "layered_rime_robes",
+          "mainHand": [
+            "staff"
+          ],
+          "offHand": [
+            "crystal_focus",
+            "orb"
+          ],
+          "silhouette": "Layered robes, an ice mantle, and geometric crystal anchors."
+        },
+        "resource": {
+          "id": "class_resource_cryomancer_rime",
+          "name": {
+            "key": "class_resource.cryomancer.rime.name",
+            "text": "Rime"
+          },
+          "gain": "Built by applying chill, maintaining barriers, and controlling movement.",
+          "spend": "Spent to freeze, shatter, create paths or walls, and reinforce defensive stillness."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_cryomancer_rimebinder",
+            "name": {
+              "key": "skill_branch.cryomancer.rimebinder.name",
+              "text": "Rimebinder"
+            },
+            "identity": "Chill, movement control, and setup for the party."
+          },
+          {
+            "id": "skill_branch_cryomancer_shatter",
+            "name": {
+              "key": "skill_branch.cryomancer.shatter.name",
+              "text": "Shatter"
+            },
+            "identity": "Consumes prepared cold for readable burst and break pressure."
+          },
+          {
+            "id": "skill_branch_cryomancer_winterguard",
+            "name": {
+              "key": "skill_branch.cryomancer.winterguard.name",
+              "text": "Winterguard"
+            },
+            "identity": "Barriers, safe routes, and defensive battlefield shaping."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_cryomancer_rimebind",
+            "name": {
+              "key": "skill.cryomancer.rimebind.name",
+              "text": "Rimebind"
+            },
+            "identity": "Establish chill and the Rime cycle through a readable binding effect."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_cryomancer_shatterglass",
+            "name": {
+              "key": "skill.cryomancer.shatterglass.name",
+              "text": "Shatterglass"
+            },
+            "identity": "Consume prepared cold to break control or pressure a frozen target."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_cryomancer_winter_path",
+            "name": {
+              "key": "skill.cryomancer.winter_path.name",
+              "text": "Winter Path"
+            },
+            "identity": "Create a temporary protective route and obstruction with clear collision rules."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_cryomancer_still_sky",
+            "name": {
+              "key": "skill.cryomancer.still_sky.name",
+              "text": "Still Sky"
+            },
+            "identity": "Establish a bounded field that rewards deliberate positioning and defensive timing."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_cryomancer_absolute_zero",
+            "name": {
+              "key": "skill.cryomancer.absolute_zero.name",
+              "text": "Absolute Zero"
+            },
+            "identity": "Command a brief state of total stillness without creating unavoidable permanent control."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_cryomancer_absolute_zero",
+          "legacyAlias": "SQ_Cryomancer",
+          "name": {
+            "key": "class_trial.cryomancer.absolute_zero.name",
+            "text": "Absolute Zero"
+          },
+          "summary": "Freeze the floating waterfalls of the Sky Castle.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_cryomancer_sovereign_stillness",
+          "title": {
+            "key": "warmaster_title.cryomancer.sovereign_stillness.name",
+            "text": "Sovereign of Stillness"
+          },
+          "setId": "warmaster_set_cryomancer_vestments_still_sky",
+          "setName": {
+            "key": "warmaster_set.cryomancer.vestments_still_sky.name",
+            "text": "Vestments of the Still Sky"
+          },
+          "relicId": "warmaster_relic_cryomancer_frozen_waterfall",
+          "relicName": {
+            "key": "warmaster_relic.cryomancer.frozen_waterfall.name",
+            "text": "Heart of the Frozen Waterfall"
+          },
+          "ultimateSkillId": "skill_cryomancer_true_warmaster_absolute_zero_dominion",
+          "ultimateName": {
+            "key": "skill.cryomancer.true_warmaster.absolute_zero_dominion.name",
+            "text": "Absolute Zero Dominion"
+          },
+          "identity": "Expand a defensive-control freeze field around a contested route.",
+          "counterplay": "Its edge is clear, its magical anchors are breakable, and repeated control must respect resistance and immunity rules.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_archmage",
+        "legacySubclass": {
+          "name": "Archmage",
+          "value": 6
+        },
+        "name": {
+          "key": "class.archmage.name",
+          "text": "Archmage"
+        },
+        "identity": "A versatile ritual caster who assembles ordered spell sequences and reconciles celestial light with rift shadow.",
+        "roles": {
+          "primary": "ranged_burst_damage",
+          "secondary": [
+            "utility",
+            "buffer",
+            "control"
+          ],
+          "contribution": [
+            "damage",
+            "buffing",
+            "control",
+            "shielding",
+            "objective_utility"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "runic_grand_robes",
+          "mainHand": [
+            "grand_staff"
+          ],
+          "offHand": [
+            "tome",
+            "orb"
+          ],
+          "silhouette": "A grand staff, asymmetric tome or orb, and highly readable ordered sigils."
+        },
+        "resource": {
+          "id": "class_resource_archmage_arcane_sigils",
+          "name": {
+            "key": "class_resource.archmage.arcane_sigils.name",
+            "text": "Arcane Sigils"
+          },
+          "gain": "Assembled through intentional spell order, successful utility, and completed invocations.",
+          "spend": "Combined into altered spell outcomes, convergence effects, and grand rituals."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_archmage_celestial_weave",
+            "name": {
+              "key": "skill_branch.archmage.celestial_weave.name",
+              "text": "Celestial Weave"
+            },
+            "identity": "Ordered spell sequences, protective light, and party enhancement."
+          },
+          {
+            "id": "skill_branch_archmage_rift_calculus",
+            "name": {
+              "key": "skill_branch.archmage.rift_calculus.name",
+              "text": "Rift Calculus"
+            },
+            "identity": "Spatial exchange, dangerous shadow geometry, and controlled disruption."
+          },
+          {
+            "id": "skill_branch_archmage_grand_invocation",
+            "name": {
+              "key": "skill_branch.archmage.grand_invocation.name",
+              "text": "Grand Invocation"
+            },
+            "identity": "Longer, readable rituals with party-scale consequences."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_archmage_first_sigil",
+            "name": {
+              "key": "skill.archmage.first_sigil.name",
+              "text": "First Sigil"
+            },
+            "identity": "Begin an ordered sigil sequence that makes future spell intent visible."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_archmage_spell_sequence",
+            "name": {
+              "key": "skill.archmage.spell_sequence.name",
+              "text": "Spell Sequence"
+            },
+            "identity": "Reward intentional combinations without forcing one mandatory rotation."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_archmage_twin_horizon_weave",
+            "name": {
+              "key": "skill.archmage.twin_horizon_weave.name",
+              "text": "Twin-Horizon Weave"
+            },
+            "identity": "Converge celestial and rift magic into a chosen utility or attack form."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_archmage_grand_invocation",
+            "name": {
+              "key": "skill.archmage.grand_invocation.name",
+              "text": "Grand Invocation"
+            },
+            "identity": "Lead a party-scale ritual with a long, visible preparation window."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_archmage_void_ascension",
+            "name": {
+              "key": "skill.archmage.void_ascension.name",
+              "text": "Void Ascension"
+            },
+            "identity": "Master the union of celestial light and rift shadow without surrendering identity to either."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_archmage_void_ascension",
+          "legacyAlias": "SQ_Archmage",
+          "name": {
+            "key": "class_trial.archmage.void_ascension.name",
+            "text": "Void Ascension"
+          },
+          "summary": "Merge celestial light with shadow-rift magic.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_archmage_astral_hierophant",
+          "title": {
+            "key": "warmaster_title.archmage.astral_hierophant.name",
+            "text": "Astral Hierophant"
+          },
+          "setId": "warmaster_set_archmage_convergent_void",
+          "setName": {
+            "key": "warmaster_set.archmage.convergent_void.name",
+            "text": "Mantle of the Convergent Void"
+          },
+          "relicId": "warmaster_relic_archmage_lens_twin_horizons",
+          "relicName": {
+            "key": "warmaster_relic.archmage.lens_twin_horizons.name",
+            "text": "Lens of Twin Horizons"
+          },
+          "ultimateSkillId": "skill_archmage_true_warmaster_heaven_rift_convergence",
+          "ultimateName": {
+            "key": "skill.archmage.true_warmaster.heaven_rift_convergence.name",
+            "text": "Convergence of Heaven and Rift"
+          },
+          "identity": "Assemble a configurable grand spell from the Archmage's current sigil sequence.",
+          "counterplay": "The invocation is long and visible, its configuration is telegraphed, and interruption cancels the strongest outcome.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      },
+      {
+        "id": "class_necromancer",
+        "legacySubclass": {
+          "name": "Necromancer",
+          "value": 14
+        },
+        "name": {
+          "key": "class.necromancer.name",
+          "text": "Necromancer"
+        },
+        "identity": "A ritual caster who studies death as part of the celestial life cycle and fights through remembered echoes rather than disposable corpses.",
+        "roles": {
+          "primary": "sustained_summon_damage",
+          "secondary": [
+            "debuffer",
+            "attrition_support"
+          ],
+          "contribution": [
+            "damage",
+            "debuffing",
+            "summon_support",
+            "control",
+            "ally_sustain"
+          ]
+        },
+        "equipmentIdentity": {
+          "armor": "ritual_robes",
+          "mainHand": [
+            "two_handed_staff",
+            "scythe"
+          ],
+          "offHand": [
+            "reliquary",
+            "tome"
+          ],
+          "silhouette": "Dark ritual robes, a reliquary or heavy staff, and a restrained bone-frame motif."
+        },
+        "resource": {
+          "id": "class_resource_necromancer_grave_echoes",
+          "name": {
+            "key": "class_resource.necromancer.grave_echoes.name",
+            "text": "Grave Echoes"
+          },
+          "gain": "Gathered from marked pressure, completed rituals, expiring summons, and ally-supported combat rather than requiring killing blows.",
+          "spend": "Spent on bounded servants, decay, sacrifice, protective remembrance, and ritual fields."
+        },
+        "branches": [
+          {
+            "id": "skill_branch_necromancer_grave_covenant",
+            "name": {
+              "key": "skill_branch.necromancer.grave_covenant.name",
+              "text": "Grave Covenant"
+            },
+            "identity": "Marks, echo gathering, remembered protection, and attrition support."
+          },
+          {
+            "id": "skill_branch_necromancer_bone_legion",
+            "name": {
+              "key": "skill_branch.necromancer.bone_legion.name",
+              "text": "Bone Legion"
+            },
+            "identity": "A small bounded servant roster and coordinated summon pressure."
+          },
+          {
+            "id": "skill_branch_necromancer_celestial_decay",
+            "name": {
+              "key": "skill_branch.necromancer.celestial_decay.name",
+              "text": "Celestial Decay"
+            },
+            "identity": "Debuffs, ritual zones, and the controlled ending of hostile magic."
+          }
+        ],
+        "milestones": [
+          {
+            "level": 10,
+            "skillId": "skill_necromancer_grave_mark",
+            "name": {
+              "key": "skill.necromancer.grave_mark.name",
+              "text": "Grave Mark"
+            },
+            "identity": "Mark a target so sustained pressure gathers Grave Echoes."
+          },
+          {
+            "level": 20,
+            "skillId": "skill_necromancer_covenant_servant",
+            "name": {
+              "key": "skill.necromancer.covenant_servant.name",
+              "text": "Covenant Servant"
+            },
+            "identity": "Bind one persistent, bounded servant with a declared party role."
+          },
+          {
+            "level": 30,
+            "skillId": "skill_necromancer_sacrifice_of_echoes",
+            "name": {
+              "key": "skill.necromancer.sacrifice_of_echoes.name",
+              "text": "Sacrifice of Echoes"
+            },
+            "identity": "End a summon or ritual deliberately to create damage, protection, or recovery."
+          },
+          {
+            "level": 40,
+            "skillId": "skill_necromancer_procession_of_the_last",
+            "name": {
+              "key": "skill.necromancer.procession_of_the_last.name",
+              "text": "Procession of the Last"
+            },
+            "identity": "Lead a bounded procession of remembered echoes that supports party attrition."
+          },
+          {
+            "level": 50,
+            "skillId": "skill_necromancer_celestial_decay",
+            "name": {
+              "key": "skill.necromancer.celestial_decay.name",
+              "text": "Celestial Decay"
+            },
+            "identity": "Reveal and accelerate the ending of hostile celestial cycles without erasing ordinary counterplay."
+          }
+        ],
+        "masteryTrial": {
+          "id": "class_trial_necromancer_celestial_decay",
+          "legacyAlias": "SQ_Necromancer",
+          "name": {
+            "key": "class_trial.necromancer.celestial_decay.name",
+            "text": "Celestial Decay"
+          },
+          "summary": "Study the life-cycles of the eternal sky-beings.",
+          "availability": "After level 50 and the High Sky Trials framing.",
+          "boundary": "Narrative mastery recognition only; it does not grant or gate the level-50 skill, Warmaster eligibility, True Warmaster eligibility, or the critical path."
+        },
+        "warmaster": {
+          "titleId": "warmaster_title_necromancer_keeper_last_cycle",
+          "title": {
+            "key": "warmaster_title.necromancer.keeper_last_cycle.name",
+            "text": "Keeper of the Last Cycle"
+          },
+          "setId": "warmaster_set_necromancer_eternal_cycle",
+          "setName": {
+            "key": "warmaster_set.necromancer.eternal_cycle.name",
+            "text": "Vestments of the Eternal Cycle"
+          },
+          "relicId": "warmaster_relic_necromancer_ossuary_last_star",
+          "relicName": {
+            "key": "warmaster_relic.necromancer.ossuary_last_star.name",
+            "text": "Ossuary of the Last Star"
+          },
+          "ultimateSkillId": "skill_necromancer_true_warmaster_celestial_requiem",
+          "ultimateName": {
+            "key": "skill.necromancer.true_warmaster.celestial_requiem.name",
+            "text": "Celestial Requiem"
+          },
+          "identity": "Call an echo host around a visible decay ritual to exhaust a fortified position.",
+          "counterplay": "The ritual depends on destroyable anchors and a bounded summon budget; dispelling or breaking the anchors ends its strongest effects.",
+          "pieceSlots": [
+            "weapon",
+            "helm",
+            "chest",
+            "gloves",
+            "boots",
+            "cape",
+            "ring",
+            "amulet",
+            "mount_armor",
+            "class_relic"
+          ],
+          "eligibility": "Level 50, the approved realm contract, sufficient committed Warzone points, and all ten unique valid pieces of this class set."
+        }
+      }
+    ]
+  }
+}
