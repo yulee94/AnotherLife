@@ -1,0 +1,48 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 65d8689fb390249039efc23c0c951057, type: 3}
+  m_Name: Crownlands_Stormwright_ConstructionProfile
+  m_EditorClassIdentifier: 
+  profileId: crownlands.stormwright
+  realmId: crownlands
+  buildingArchetype: stormwright_atelier
+  presentationDuration: 16
+  stageDuration: 1.55
+  operationalActivityStart: 9.1
+  cutawayStageIndex: 3
+  previewCutawayWindow: {x: 13.35, y: 14.8}
+  stageMotions:
+  - entryOffset: {x: 0, y: -0.24, z: 0}
+    perPartOffset: {x: 0, y: 0, z: 0}
+    entryEuler: {x: 0, y: 0, z: 0}
+    alternatingEuler: {x: 0, y: 0, z: 0}
+    entryScaleMultiplier: {x: 1, y: 0.08, z: 1}
+  - entryOffset: {x: 0, y: -1.45, z: 0}
+    perPartOffset: {x: 0, y: -0.08, z: 0}
+    entryEuler: {x: 0, y: 0, z: 0}
+    alternatingEuler: {x: 0, y: 0, z: 0}
+    entryScaleMultiplier: {x: 1, y: 0.12, z: 1}
+  - entryOffset: {x: 0, y: -0.32, z: 0}
+    perPartOffset: {x: 0, y: 0, z: 0}
+    entryEuler: {x: 0, y: 0, z: 0}
+    alternatingEuler: {x: 0, y: 0, z: -48}
+    entryScaleMultiplier: {x: 1, y: 1, z: 1}
+  - entryOffset: {x: 0, y: 1.15, z: 0}
+    perPartOffset: {x: 0, y: 0.08, z: 0}
+    entryEuler: {x: 0, y: 0, z: 0}
+    alternatingEuler: {x: 0, y: 0, z: 0}
+    entryScaleMultiplier: {x: 1, y: 1, z: 1}
+  - entryOffset: {x: 0, y: -0.3, z: 0}
+    perPartOffset: {x: 0, y: 0, z: 0}
+    entryEuler: {x: 0, y: 0, z: 0}
+    alternatingEuler: {x: 0, y: 0, z: 0}
+    entryScaleMultiplier: {x: 0.65, y: 0.65, z: 0.65}
