@@ -57,6 +57,7 @@ This guide consolidates the active project direction in:
 - [Four-Realm Heraldry — Arcane Axis](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
+- [Android Adaptive Icon Packet](unity/Docs/Branding/AndroidAdaptive/README.md)
 - [Skill Effects and Weather Design](unity/Assets/AL/Art/Designs/SkillEffectsAndWeather.md)
 - GitHub issue `#259`, which establishes the active realistic, high-end dark-fantasy direction for realm bosses and elites.
 - The approved mystical medieval [`AL` application icon](unity/Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png), shared on `main` for iOS, Android, and Windows derivatives.
@@ -603,6 +604,7 @@ Never overwrite an approved source version. Create a new version and preserve th
 - Shared design handoffs must remain usable from Android and Windows checkouts: preserve committed Unity metadata, portable paths, and Git LFS assets; do not require a macOS-only path or an iOS-only branch to recover approved source.
 - Concept sheets and review images are production reference, not runtime textures. A Player-ready use requires an explicit derivative, import contract, and measured budget.
 - The approved Arcane Axis runtime derivatives are white-alpha PNG Sprites with exact Android and Standalone overrides; consuming UI owns tint while final realm colors remain open.
+- Android adaptive launcher derivatives must keep their primary mark inside the centered `66/108` safe-zone ratio, use an independent transparent foreground and opaque full-bleed background, remain legible under circle/squircle/rounded-square masks, and preserve the approved full square application icon as immutable brand authority.
 
 A render-pipeline migration, a change to the target device floor, or a material-system replacement is a broad technical/design decision and requires an explicit migration plan.
 
