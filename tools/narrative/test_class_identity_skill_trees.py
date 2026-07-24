@@ -91,6 +91,37 @@ EXPECTED_COUNTS = {
     "forgePresets": 9,
     "prototypeSkills": 4,
 }
+EXPECTED_VISUAL_LABELS = {
+    "Guardian",
+    "Barbarian",
+    "Swordsman",
+    "Enchanter",
+    "Warlock",
+    "Healer",
+    "Hunter",
+    "Marksman",
+    "Forest Ranger",
+    "Nightmare",
+    "Shadow Assassin",
+    "Cursor",
+}
+EXPECTED_FORGE_PRESET_IDS = {
+    "vanguard",
+    "arcanist",
+    "nightblade",
+    "dreadknight",
+    "oracle",
+    "duelist",
+    "inquisitor",
+    "warden",
+    "spellblade",
+}
+EXPECTED_PROTOTYPE_SKILL_IDS = {
+    "realm_strike",
+    "renewing_guard",
+    "warzone_burst",
+    "warmaster_breaker",
+}
 STABLE_ID = re.compile(r"^[a-z][a-z0-9_]*$")
 ALLOWED_COMPONENT_NUMBER_PATHS = {
     "components.[].schemaVersion",
@@ -184,11 +215,11 @@ def require_localized_key(value: dict[str, Any], expected: str, context: str) ->
     nonblank(value["text"], f"{context} localization text")
 
 
-def require_prefixed_localized_key(
-    value: dict[str, Any], prefix: str, context: str
-) -> None:
-    key = nonblank(value["key"], f"{context} localization key")
-    require(key.startswith(prefix) and key.endswith(".name"), f"{context} localization ownership drift")
+def owned_suffix(identifier: str, prefix: str, context: str) -> str:
+    require(identifier.startswith(prefix), f"{context} ID ownership drift")
+    suffix = identifier[len(prefix) :]
+    require(bool(suffix), f"{context} ID has no owned suffix")
+    return suffix
 
 
 def require_true_warmaster_eligibility(value: Any, context: str) -> str:
@@ -347,13 +378,14 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
             resource = class_record["resource"]
             resource_id = stable_id(resource["id"], f"resource ID {class_id}")
             resource_ids.append(resource_id)
-            require(
-                resource_id.startswith(f"class_resource_{class_token}_"),
-                f"resource ID ownership drift: {class_id}",
+            resource_suffix = owned_suffix(
+                resource_id,
+                f"class_resource_{class_token}_",
+                f"resource {class_id}",
             )
-            require_prefixed_localized_key(
+            require_localized_key(
                 resource["name"],
-                f"class_resource.{class_token}.",
+                f"class_resource.{class_token}.{resource_suffix}.name",
                 f"resource {resource_id}",
             )
             nonblank(resource["gain"], f"resource gain {class_id}")
@@ -364,13 +396,14 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
             for branch in branches:
                 branch_id = stable_id(branch["id"], f"branch ID {class_id}")
                 branch_ids.append(branch_id)
-                require(
-                    branch_id.startswith(f"skill_branch_{class_token}_"),
-                    f"branch ID ownership drift: {class_id}",
+                branch_suffix = owned_suffix(
+                    branch_id,
+                    f"skill_branch_{class_token}_",
+                    f"branch {class_id}",
                 )
-                require_prefixed_localized_key(
+                require_localized_key(
                     branch["name"],
-                    f"skill_branch.{class_token}.",
+                    f"skill_branch.{class_token}.{branch_suffix}.name",
                     f"branch {branch_id}",
                 )
                 nonblank(branch["identity"], f"branch identity {class_id}")
@@ -380,13 +413,14 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
             for milestone in milestones:
                 skill_id = stable_id(milestone["skillId"], f"milestone skill ID {class_id}")
                 skill_ids.append(skill_id)
-                require(
-                    skill_id.startswith(f"skill_{class_token}_"),
-                    f"milestone skill ID ownership drift: {class_id}",
+                skill_suffix = owned_suffix(
+                    skill_id,
+                    f"skill_{class_token}_",
+                    f"milestone skill {class_id}",
                 )
-                require_prefixed_localized_key(
+                require_localized_key(
                     milestone["name"],
-                    f"skill.{class_token}.",
+                    f"skill.{class_token}.{skill_suffix}.name",
                     f"milestone skill {skill_id}",
                 )
                 nonblank(milestone["identity"], f"milestone identity {class_id}")
@@ -394,13 +428,14 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
             trial = class_record["masteryTrial"]
             trial_id = stable_id(trial["id"], f"trial ID {class_id}")
             trial_ids.append(trial_id)
-            require(
-                trial_id.startswith(f"class_trial_{class_token}_"),
-                f"trial ID ownership drift: {class_id}",
+            trial_suffix = owned_suffix(
+                trial_id,
+                f"class_trial_{class_token}_",
+                f"mastery trial {class_id}",
             )
-            require_prefixed_localized_key(
+            require_localized_key(
                 trial["name"],
-                f"class_trial.{class_token}.",
+                f"class_trial.{class_token}.{trial_suffix}.name",
                 f"mastery trial {trial_id}",
             )
             expected_alias = f"SQ_{CLASS_ENUMS[class_id][0]}"
@@ -418,40 +453,44 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
             set_ids.append(set_id)
             relic_ids.append(relic_id)
             ultimate_ids.append(ultimate_id)
-            require(
-                title_id.startswith(f"warmaster_title_{class_token}_"),
-                f"Warmaster title ID ownership drift: {class_id}",
+            title_suffix = owned_suffix(
+                title_id,
+                f"warmaster_title_{class_token}_",
+                f"Warmaster title {class_id}",
             )
-            require(
-                set_id.startswith(f"warmaster_set_{class_token}_"),
-                f"Warmaster set ID ownership drift: {class_id}",
+            set_suffix = owned_suffix(
+                set_id,
+                f"warmaster_set_{class_token}_",
+                f"Warmaster set {class_id}",
             )
-            require(
-                relic_id.startswith(f"warmaster_relic_{class_token}_"),
-                f"Warmaster relic ID ownership drift: {class_id}",
+            relic_suffix = owned_suffix(
+                relic_id,
+                f"warmaster_relic_{class_token}_",
+                f"Warmaster relic {class_id}",
             )
-            require(
-                ultimate_id.startswith(f"skill_{class_token}_true_warmaster_"),
-                f"Warmaster skill ID ownership drift: {class_id}",
+            ultimate_suffix = owned_suffix(
+                ultimate_id,
+                f"skill_{class_token}_true_warmaster_",
+                f"Warmaster skill {class_id}",
             )
-            require_prefixed_localized_key(
+            require_localized_key(
                 warmaster["title"],
-                f"warmaster_title.{class_token}.",
+                f"warmaster_title.{class_token}.{title_suffix}.name",
                 f"Warmaster title {title_id}",
             )
-            require_prefixed_localized_key(
+            require_localized_key(
                 warmaster["setName"],
-                f"warmaster_set.{class_token}.",
+                f"warmaster_set.{class_token}.{set_suffix}.name",
                 f"Warmaster set {set_id}",
             )
-            require_prefixed_localized_key(
+            require_localized_key(
                 warmaster["relicName"],
-                f"warmaster_relic.{class_token}.",
+                f"warmaster_relic.{class_token}.{relic_suffix}.name",
                 f"Warmaster relic {relic_id}",
             )
-            require_prefixed_localized_key(
+            require_localized_key(
                 warmaster["ultimateName"],
-                f"skill.{class_token}.true_warmaster.",
+                f"skill.{class_token}.true_warmaster.{ultimate_suffix}.name",
                 f"Warmaster skill {ultimate_id}",
             )
             require(warmaster["pieceSlots"] == PIECE_SLOTS, f"Warmaster piece slots drift: {class_id}")
@@ -480,7 +519,17 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
     require(set(class_ids) == set(CLASS_ENUMS), "class inventory drift")
     require(class_by_id["class_druid"]["roles"]["primary"] == "healer", "Druid primary-healer decision drift")
     require("healer" in class_by_id["class_paladin"]["roles"]["secondary"], "Paladin healer role drift")
+    require(
+        class_by_id["class_necromancer"]["roles"]["primary"] != "healer"
+        and "healer" not in class_by_id["class_necromancer"]["roles"]["secondary"],
+        "Necromancer non-healer decision drift",
+    )
     require(manifest["canonicalDecisions"]["supportCoverage"]["primaryHealer"] == "class_druid", "healer policy drift")
+    require(
+        manifest["canonicalDecisions"]["supportCoverage"]["secondaryHealers"]
+        == ["class_paladin"],
+        "secondary-healer policy drift",
+    )
 
     visual_labels = manifest["legacyDispositions"]["visualClassLabels"]
     forge_presets = manifest["legacyDispositions"]["forgePresets"]
@@ -491,6 +540,18 @@ def validate_model(manifest: dict[str, Any], components: list[dict[str, Any]]) -
     unique([item["legacyLabel"] for item in visual_labels], "legacy visual labels")
     unique([item["presetId"] for item in forge_presets], "Forge preset IDs")
     unique([item["id"] for item in prototype_skills], "prototype skill IDs")
+    require(
+        {item["legacyLabel"] for item in visual_labels} == EXPECTED_VISUAL_LABELS,
+        "legacy visual-label inventory drift",
+    )
+    require(
+        {item["presetId"] for item in forge_presets} == EXPECTED_FORGE_PRESET_IDS,
+        "Forge preset inventory drift",
+    )
+    require(
+        {item["id"] for item in prototype_skills} == EXPECTED_PROTOTYPE_SKILL_IDS,
+        "prototype skill inventory drift",
+    )
     require(
         next(item for item in visual_labels if item["legacyLabel"] == "Cursor")["disposition"]
         == "rejected_or_superseded",
@@ -590,9 +651,9 @@ def run_negative_fixtures(manifest: dict[str, Any], components: list[dict[str, A
             ),
         ),
         (
-            "wrong localization owner",
+            "localization key does not match owned ID",
             lambda m, c: c[0]["family"]["classes"][0]["resource"]["name"].__setitem__(
-                "key", "class_resource.guardian.command.name"
+                "key", "class_resource.vanguard.orders.name"
             ),
         ),
         (
@@ -607,6 +668,33 @@ def run_negative_fixtures(manifest: dict[str, Any], components: list[dict[str, A
             lambda m, c: c[0]["family"]["classes"][0]["warmaster"].__setitem__(
                 "counterplay",
                 "The effect has a visible presentation and a clearly marked area for every participant.",
+            ),
+        ),
+        (
+            "secondary healer policy drift",
+            lambda m, c: m["canonicalDecisions"]["supportCoverage"][
+                "secondaryHealers"
+            ].append("class_necromancer"),
+        ),
+        (
+            "legacy visual-label inventory drift",
+            lambda m, c: c
+            and m["legacyDispositions"]["visualClassLabels"][0].__setitem__(
+                "legacyLabel", "Guard"
+            ),
+        ),
+        (
+            "Forge preset inventory drift",
+            lambda m, c: c
+            and m["legacyDispositions"]["forgePresets"][0].__setitem__(
+                "presetId", "fighter"
+            ),
+        ),
+        (
+            "prototype skill inventory drift",
+            lambda m, c: c
+            and m["legacyDispositions"]["prototypeSkills"][0].__setitem__(
+                "id", "starter_strike"
             ),
         ),
     ]

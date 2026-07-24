@@ -183,7 +183,7 @@ C:\Users\MY\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\pyth
 Recorded result:
 
 ```text
-Class identity packet accepted: components=4, families=4, classes=16, branches=48, milestoneSkills=80, masteryTrials=16, warmasterSets=16, warmasterRelics=16, trueWarmasterSkills=16, localizedNames=244, legacyVisualLabels=12, forgePresets=9, prototypeSkills=4, negativeFixtures=15
+Class identity packet accepted: components=4, families=4, classes=16, branches=48, milestoneSkills=80, masteryTrials=16, warmasterSets=16, warmasterRelics=16, trueWarmasterSkills=16, localizedNames=244, legacyVisualLabels=12, forgePresets=9, prototypeSkills=4, negativeFixtures=19
 ```
 
 The validator checks component hashes, packet/component parity, exact legacy enum mappings, explicit four-by-four family membership, all-realm availability, unique stable IDs and localization ownership, three branches per class, five milestone levels, mastery-trial aliases and non-gating boundaries, Druid/Paladin healer coverage, ten unique Warmaster piece slots, eligibility wording, counterplay prose with an explicit response mechanism, localization authority, legacy dispositions, and absence of gameplay tuning numbers from family components. Deliberately invalid fixtures are rejected.
