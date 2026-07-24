@@ -18,6 +18,7 @@ This handoff does not redesign any approved source. It distinguishes production 
 | --- | --- | --- |
 | [`DESIGN.md`](../../DESIGN.md) | Canonical style and production contract | Read before creating or integrating visual work |
 | [`App_Icon_Mystic_Medieval_AL.png`](../Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png) | Approved 1024 × 1024 RGB application icon | Assigned to Windows Standalone and Android single-layer launcher slots |
+| [`AndroidAdaptive`](Branding/AndroidAdaptive/README.md) | Android-specific foreground, background, monochrome, mask review, and provenance | Colored layers assigned to Android adaptive slots; monochrome retained for a later themed-icon integration path |
 | [`App_Icon_Mystic_Medieval_AL_Source_1254.png`](Branding/README.md) | Retained owner-supplied source and provenance | Source/archive only; never reference from a Player build |
 | [`FourRealmChampionAnchor.md`](../Assets/AL/Art/Designs/FourRealmChampionAnchor.md) and its sheets | Approved Champion model direction | Modeling reference only; not a runtime texture or finished model |
 | [`FourRealmHeraldry.md`](../Assets/AL/Art/Designs/FourRealmHeraldry.md) | Approved realm-symbol direction | Apply through the committed tintable PNG sprites |
@@ -55,9 +56,12 @@ The uncompressed override is intentional for this first eight-glyph set. It avoi
 - Shared Unity icon: `1024 × 1024`, RGB, no alpha, mipmaps disabled.
 - Windows: assigned to every Standalone application-icon size; Unity derives the executable icon during the Windows build.
 - Android: assigned to every supported single-layer legacy and round slot in Unity `2022.3.62f3`.
-- Android adaptive slots remain empty because they require separately approved foreground and background layers with an adaptive safe-zone composition. Stretching or duplicating the full ornate icon into both layers is prohibited.
+- Android adaptive foreground: `432 × 432` RGBA, transparent outside the engraved `AL`, with a `258 × 228` visible mark inside the centered `264 × 264` safe zone.
+- Android adaptive background: `432 × 432` opaque RGB, full-bleed midnight-indigo stone and restrained celestial geometry.
+- Android monochrome: `432 × 432` white-alpha source matching the foreground silhouette. It is not assigned because Unity `2022.3` exposes only the two colored adaptive layers.
+- Stretching or duplicating the full ornate square icon into both adaptive layers remains prohibited.
 
-The current single-layer assignment is compatible with the repository's Android baseline. A production adaptive icon is the next critical branding decision for modern Android launchers.
+The adaptive packet is integrated as a runtime candidate. Its committed circle, squircle, and rounded-square preview is the project-owner approval checkpoint before promotion to the approved brand set.
 
 ## Compatibility and performance boundary
 
@@ -66,7 +70,7 @@ The current single-layer assignment is compatible with the repository's Android 
 - PNG and `.meta` paths use portable casing and separators; no machine-local path is committed.
 - Large Champion, terrestrial, heraldry-review, and provenance images remain unreferenced source art and therefore are not included in a Player merely because they are stored under `Assets`.
 - The eight heraldry PNGs add approximately `31 KB` of LFS source data and at most `1.02 MiB` of uncompressed texture memory if a future surface loads every sprite simultaneously.
-- Application icon source adds no per-frame runtime texture or draw-call cost.
+- Application icon and adaptive launcher sources add no per-frame runtime texture or draw-call cost.
 
 ## Validation contract
 
@@ -74,21 +78,24 @@ The EditMode fixture `AL.Tests.EditMode.DesignAssets.CrossPlatformDesignAssetTes
 
 - the approved 1024px icon is present, no-alpha, non-readable, and assigned to Standalone;
 - all supported single-layer Android icon slots use the approved icon;
-- Android adaptive icon slots remain empty until separate foreground/background art is approved;
+- all two-layer Android adaptive slots use the mask-safe foreground and full-bleed background in Unity's expected layer order;
+- Android adaptive source dimensions, safe-zone bounds, background opacity, monochrome silhouette, and importer settings remain valid;
 - all eight heraldry sprites have the required dimensions, white-alpha pixels, sprite settings, and Android/Standalone RGBA32 overrides.
 
 Before production release, additionally validate:
 
 - a Windows x64 Player build and executable icon on Windows;
 - an Android APK/AAB launcher icon on representative launchers;
-- a separately approved Android adaptive icon;
+- project-owner approval of the Android adaptive mask preview;
+- Android themed-icon behavior after the build pipeline explicitly consumes the monochrome source;
 - the first real heraldry surface at compact Android and Windows UI sizes;
 - final realm colors in grayscale and common color-vision simulations;
 - measured atlas, memory, loading, and overdraw behavior.
 
 ## Critical direction choices still open
 
-- Android adaptive foreground/background design and safe-zone crop.
+- Project-owner promotion of the Android adaptive runtime candidate after mask review.
+- The Unity upgrade or Android launcher-template route that will consume the monochrome themed-icon source.
 - Final realm color tokens and accessibility alternatives.
 - First heraldry runtime surface and realm-catalog mapping.
 - Sprite atlas grouping after a real consumer exists.
