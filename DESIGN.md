@@ -1,8 +1,8 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.3
-**Last updated:** 2026-07-23
+**Version:** 1.11
+**Last updated:** 2026-07-24
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
 
@@ -55,6 +55,15 @@ This guide consolidates the active project direction in:
 - [Customization Design](unity/Assets/AL/Art/Designs/ModularChampionCustomization.md)
 - [Four-Realm Champion Anchor](unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md)
 - [Four-Realm Heraldry — Arcane Axis](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md)
+- [Four-Realm Architecture](unity/Assets/AL/Art/Designs/FourRealmArchitecture.md)
+- [Stonehold Architecture Animation Contract](unity/Docs/Architecture/Stonehold_Architecture_Animation_Contract.md)
+- [Eldergrove Architecture Animation Contract](unity/Docs/Architecture/Eldergrove_Architecture_Animation_Contract.md)
+- [Crownlands Architecture Animation Contract](unity/Docs/Architecture/Crownlands_Architecture_Animation_Contract.md)
+- [Umbral Architecture Animation Contract](unity/Docs/Architecture/Umbral_Architecture_Animation_Contract.md)
+- [Crownlands Animation Prototype Handoff](unity/Docs/Architecture/Crownlands_Animation_Prototype_Handoff.md)
+- [Umbral Animation Prototype Handoff](unity/Docs/Architecture/Umbral_Animation_Prototype_Handoff.md)
+- [Reusable Architecture Construction-State System](unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md)
+- [Architecture Android and iOS Compatibility Handoff](unity/Docs/Architecture/Architecture_Mobile_Compatibility_Handoff.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
 - [Android Adaptive Icon Packet](unity/Docs/Branding/AndroidAdaptive/README.md)
@@ -402,6 +411,18 @@ Prefer physically plausible values and controlled variation. Avoid:
 - Limit layered transparency and full-screen effects, especially on mobile.
 - Boss spectacle may increase intensity, but the underlying silhouette and attack read must remain visible.
 
+### Motion
+
+- Motion must express anatomy, construction, material, function, and realm identity rather than decorate every visible asset.
+- A structure's load-bearing mass remains stable during ordinary idle states. Put ambient life in functional elements such as doors, shutters, machinery, cloth, foliage, smoke, light, water, workers, and activity props.
+- Construction and repair motion must follow the approved modular hierarchy, pivots, sockets, and load paths. Do not scale a complete building from zero, stretch rigid masonry, or use unexplained floating assembly.
+- Use state-driven construction that can resume at a credible persistent stage after streaming, reconnecting, or returning from offline progress.
+- Use one shared six-state architecture lifecycle across realms. Realm profiles define construction motion character and optional bounded activity components define stable-state behavior; do not create independent realm state machines.
+- Separate a major state transition from its stable loop: the transition may use a short readable action, while the finished state must settle into a long quiet hold.
+- Apply realm motion grammar before VFX. Stonehold uses pressure, leverage, impact, and short forceful actions. Eldergrove uses guided growth, flowing arcs, biological circulation, and one damped recovery into stable structure. Crownlands uses synchronized placement, ordered arcs, measured calibration, controlled radiant lines, and long precise holds. Magic may support or confirm a functional state but does not replace physical construction.
+- Reduce loop count, character activity, particles, secondary motion, and update frequency with camera distance. Far proxies remain static.
+- Give every major transition and ambient loop a reduced-motion version. State meaning must survive without camera shake, repeated impacts, flashing, or continuous particles.
+
 ### Reference quality bar
 
 The approved Basalt Grazer, Grove Strider, and Mire Lumenback concept sheets are the current creature-design quality anchors. Match their relationship between form, ecology, material, and restrained fantasy:
@@ -744,6 +765,12 @@ Color may be one channel, never the only one.
 - Use depth, value, and spacing to separate interactable structures from scenery.
 - Avoid fine façade detail as the only indicator of upgrade or damage.
 - Keep important effects contained enough that neighboring structures remain selectable.
+- Let players continuously pinch-zoom and drag-pan across the bounded inner kingdom rather than exposing a small set of visible zoom stages.
+- Rendering may use hidden LOD, culling, label-density, and effect thresholds, but transitions must preserve the feeling of one continuous explorable place.
+- A tap selects a building, plot, gate, activity node, or approved character anchor and reveals a compact local action surface; persistent action bubbles must not cover neighboring targets.
+- Dragging empty ground pans the camera. Moving, rotating, demolishing, or otherwise transforming a selected element requires an explicit interaction mode so ordinary navigation cannot trigger a destructive or positional action.
+- Selected and occluded targets need readable ground bounds, outlines, or temporary obstruction treatment that does not depend on realm color or heavy glow.
+- Keep camera tilt and orbit behavior controlled until an asset-completeness and occlusion review proves that unrestricted rotation is supportable.
 
 ## Interaction states
 
