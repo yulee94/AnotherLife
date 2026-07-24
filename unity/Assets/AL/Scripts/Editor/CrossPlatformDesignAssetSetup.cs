@@ -11,6 +11,18 @@ namespace AL.EditorTools
         public const string BrandIconAssetPath =
             "Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png";
 
+        public const string AndroidAdaptiveForegroundAssetPath =
+            "Assets/AL/Art/Branding/AndroidAdaptive/" +
+            "App_Icon_Android_Adaptive_Foreground_AL_432_v001.png";
+
+        public const string AndroidAdaptiveBackgroundAssetPath =
+            "Assets/AL/Art/Branding/AndroidAdaptive/" +
+            "App_Icon_Android_Adaptive_Background_432_v001.png";
+
+        public const string AndroidMonochromeAssetPath =
+            "Assets/AL/Art/Branding/AndroidAdaptive/" +
+            "App_Icon_Android_Monochrome_AL_432_v001.png";
+
         private const string RuntimeExportFolder =
             "Assets/AL/Art/Heraldry/RuntimeExports";
 
@@ -26,14 +38,16 @@ namespace AL.EditorTools
         public static void Apply()
         {
             ConfigureBrandIcon();
+            ConfigureAndroidAdaptiveIcons();
             ConfigureHeraldrySprites();
             AssignWindowsIcon();
             AssignCompatibleAndroidIcons();
+            AssignAndroidAdaptiveIcons();
 
             AssetDatabase.SaveAssets();
             Debug.Log(
-                "[AL-DESIGN-ASSETS] Applied shared Android/Windows import settings. " +
-                "Android adaptive foreground/background art remains intentionally unassigned.");
+                "[AL-DESIGN-ASSETS] Applied shared Android/Windows import settings, " +
+                "including Android adaptive foreground/background layers.");
         }
 
         private static void ConfigureBrandIcon()
@@ -50,6 +64,37 @@ namespace AL.EditorTools
             importer.filterMode = FilterMode.Bilinear;
             importer.maxTextureSize = 1024;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SaveAndReimport();
+        }
+
+        private static void ConfigureAndroidAdaptiveIcons()
+        {
+            ConfigureAndroidIconLayer(AndroidAdaptiveForegroundAssetPath, true);
+            ConfigureAndroidIconLayer(AndroidAdaptiveBackgroundAssetPath, false);
+            ConfigureAndroidIconLayer(AndroidMonochromeAssetPath, true);
+        }
+
+        private static void ConfigureAndroidIconLayer(string assetPath, bool hasAlpha)
+        {
+            TextureImporter importer = RequireTextureImporter(assetPath);
+            importer.textureType = TextureImporterType.Default;
+            importer.sRGBTexture = true;
+            importer.alphaSource = hasAlpha
+                ? TextureImporterAlphaSource.FromInput
+                : TextureImporterAlphaSource.None;
+            importer.alphaIsTransparency = hasAlpha;
+            importer.mipmapEnabled = false;
+            importer.isReadable = false;
+            importer.npotScale = TextureImporterNPOTScale.None;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.maxTextureSize = 512;
+            importer.textureCompression = TextureImporterCompression.Uncompressed;
+            importer.SetPlatformTextureSettings(
+                CreatePlatformSettings(
+                    "Android",
+                    512,
+                    hasAlpha ? TextureImporterFormat.RGBA32 : TextureImporterFormat.RGB24));
             importer.SaveAndReimport();
         }
 
@@ -95,14 +140,15 @@ namespace AL.EditorTools
 
         private static TextureImporterPlatformSettings CreatePlatformSettings(
             string platformName,
-            int maxSize)
+            int maxSize,
+            TextureImporterFormat format = TextureImporterFormat.RGBA32)
         {
             return new TextureImporterPlatformSettings
             {
                 name = platformName,
                 overridden = true,
                 maxTextureSize = maxSize,
-                format = TextureImporterFormat.RGBA32,
+                format = format,
                 textureCompression = TextureImporterCompression.Uncompressed,
                 compressionQuality = 100,
                 crunchedCompression = false,
@@ -141,6 +187,29 @@ namespace AL.EditorTools
             }
         }
 
+        private static void AssignAndroidAdaptiveIcons()
+        {
+            Texture2D foreground = RequireTexture(AndroidAdaptiveForegroundAssetPath);
+            Texture2D background = RequireTexture(AndroidAdaptiveBackgroundAssetPath);
+
+            foreach (PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            {
+                PlatformIcon[] slots = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind);
+                if (slots.Length == 0 || slots.Any(slot => slot.maxLayerCount != 2))
+                {
+                    continue;
+                }
+
+                foreach (PlatformIcon slot in slots)
+                {
+                    slot.SetTexture(background, 0);
+                    slot.SetTexture(foreground, 1);
+                }
+
+                PlayerSettings.SetPlatformIcons(NamedBuildTarget.Android, kind, slots);
+            }
+        }
+
         private static TextureImporter RequireTextureImporter(string assetPath)
         {
             TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
@@ -154,14 +223,19 @@ namespace AL.EditorTools
 
         private static Texture2D RequireBrandIcon()
         {
-            Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(BrandIconAssetPath);
-            if (icon == null)
+            return RequireTexture(BrandIconAssetPath);
+        }
+
+        private static Texture2D RequireTexture(string assetPath)
+        {
+            Texture2D texture = AssetDatabase.LoadAssetAtPath<Texture2D>(assetPath);
+            if (texture == null)
             {
                 throw new InvalidOperationException(
-                    $"Approved brand icon is missing at {BrandIconAssetPath}.");
+                    $"Required design texture is missing at {assetPath}.");
             }
 
-            return icon;
+            return texture;
         }
     }
 }
