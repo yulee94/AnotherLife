@@ -8,6 +8,7 @@
 
 - `App_Icon_Mystic_Medieval_AL_Source_1254.png` is the retained `1254 × 1254` owner-supplied source.
 - [`../../Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png`](../../Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png) is the `1024 × 1024` RGB, no-alpha Unity application icon.
+- [`AndroidAdaptive/README.md`](AndroidAdaptive/README.md) records the Android-specific foreground, background, monochrome source, mask previews, and generation provenance.
 
 ## Approved use
 
@@ -15,7 +16,7 @@ The icon is the shared application identity and the strongest finish reference f
 
 Do not use the monogram, exact arch, filigree, or palette as a universal template for realm marks, creatures, characters, or environments.
 
-The shared Unity derivative is assigned to Windows Standalone and Android single-layer launcher icon slots. Android adaptive foreground/background layers remain a separate owner-approved design decision.
+The shared Unity derivative is assigned to Windows Standalone and Android single-layer launcher icon slots. The Android adaptive packet keeps the approved monogram inside the `66/108` safe-zone ratio and supplies independent foreground/background layers for modern launchers. Its first mask review remains a project-owner approval checkpoint before the packet is promoted from runtime candidate to approved.
 
 ## Integrity
 
