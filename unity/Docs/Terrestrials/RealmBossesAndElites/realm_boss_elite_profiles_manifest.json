@@ -1,0 +1,3459 @@
+{
+  "schemaVersion": 2,
+  "packetId": "anotherlife-terrestrial-realm-boss-elite-source",
+  "sourceVersion": "tdf-rbe-2026-07-24-v001",
+  "createdAtUtc": "2026-07-24T00:17:51Z",
+  "authority": {
+    "sourceOwnerMode": "Codex terrestrial-design",
+    "technicalReviewOwnerMode": "Codex coordination/review",
+    "narrativeOwnerMode": "Codex narrative/content",
+    "engineeringOwnerMode": "Codex engineering",
+    "finalCreativeApprover": "user",
+    "issue": 259,
+    "runtimeAuthority": false,
+    "narrativeAuthority": false,
+    "gameplayAuthority": false,
+    "purchaseAuthority": false,
+    "requiresUserCreativeApprovalBeforeIntegration": true
+  },
+  "readiness": {
+    "technicalPacketState": "SourceIncomplete",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "narrativeNamingState": "WorkingLabelsOnly"
+  },
+  "qualityTarget": {
+    "audience": "adult",
+    "visualStyle": "photographed realistic high-end dark fantasy",
+    "silhouetteRequiredWithoutColorOrVfx": true,
+    "normalSpeedMotionReviewRequired": true,
+    "neutralLightAnatomyReviewRequired": true,
+    "marketplaceIdentityMayShipUnchanged": false,
+    "paletteSwapCountsAsUnique": false
+  },
+  "presentationBudgets": {
+    "boss": {
+      "low_mobile": {
+        "maximumSkinnedTriangles": 45000,
+        "maximumDeformBones": 96,
+        "maximumMaterialSlots": 3,
+        "maximumActiveParticles": 180,
+        "maximumDynamicLights": 0,
+        "maximumCompressedContentBytes": 24000000,
+        "packagedInPlayer": true,
+        "textureIntent": "one 2K color, normal, and packed-mask set with target compression"
+      },
+      "balanced": {
+        "maximumSkinnedTriangles": 80000,
+        "maximumDeformBones": 128,
+        "maximumMaterialSlots": 4,
+        "maximumActiveParticles": 350,
+        "maximumDynamicLights": 1,
+        "maximumCompressedContentBytes": 48000000,
+        "packagedInPlayer": true,
+        "textureIntent": "up to two 2K sets with shared and packed channels"
+      },
+      "high_pc": {
+        "maximumSkinnedTriangles": 130000,
+        "maximumDeformBones": 180,
+        "maximumMaterialSlots": 4,
+        "maximumActiveParticles": 700,
+        "maximumDynamicLights": 2,
+        "maximumCompressedContentBytes": 96000000,
+        "packagedInPlayer": true,
+        "textureIntent": "selective 4K hero maps with remaining maps at 2K"
+      },
+      "cinematic_offline": {
+        "maximumSkinnedTriangles": 350000,
+        "maximumDeformBones": 256,
+        "maximumMaterialSlots": 8,
+        "maximumActiveParticles": 5000,
+        "maximumDynamicLights": 8,
+        "maximumCompressedContentBytes": 0,
+        "packagedInPlayer": false,
+        "textureIntent": "selective 4K-8K source only where final pixel coverage proves need"
+      }
+    },
+    "elite": {
+      "low_mobile": {
+        "maximumSkinnedTriangles": 22000,
+        "maximumDeformBones": 64,
+        "maximumMaterialSlots": 2,
+        "maximumActiveParticles": 80,
+        "maximumDynamicLights": 0,
+        "maximumCompressedContentBytes": 10000000,
+        "packagedInPlayer": true,
+        "textureIntent": "one 1K-2K color, normal, and packed-mask set with target compression"
+      },
+      "balanced": {
+        "maximumSkinnedTriangles": 45000,
+        "maximumDeformBones": 96,
+        "maximumMaterialSlots": 3,
+        "maximumActiveParticles": 160,
+        "maximumDynamicLights": 1,
+        "maximumCompressedContentBytes": 20000000,
+        "packagedInPlayer": true,
+        "textureIntent": "one 2K shared and packed set"
+      },
+      "high_pc": {
+        "maximumSkinnedTriangles": 75000,
+        "maximumDeformBones": 128,
+        "maximumMaterialSlots": 4,
+        "maximumActiveParticles": 320,
+        "maximumDynamicLights": 1,
+        "maximumCompressedContentBytes": 40000000,
+        "packagedInPlayer": true,
+        "textureIntent": "selective 4K hero map with remaining maps at 2K"
+      },
+      "cinematic_offline": {
+        "maximumSkinnedTriangles": 180000,
+        "maximumDeformBones": 180,
+        "maximumMaterialSlots": 6,
+        "maximumActiveParticles": 2200,
+        "maximumDynamicLights": 4,
+        "maximumCompressedContentBytes": 0,
+        "packagedInPlayer": false,
+        "textureIntent": "selective 4K source only where final pixel coverage proves need"
+      }
+    },
+    "cinematicSourcePackagedInPlayer": false,
+    "lod1TriangleRatio": [
+      0.55,
+      0.65
+    ],
+    "lod2TriangleRatio": [
+      0.2,
+      0.3
+    ],
+    "distantTriangleRatioOrImpostor": [
+      0.05,
+      0.1
+    ]
+  },
+  "optimizationIntent": {
+    "playerPackageIncludesOfflineSource": false,
+    "playerPackageIncludesMarketplaceArchives": false,
+    "defaultRuntimeTierRequiresOnlyOneSelectedPresentation": true,
+    "sharedMaterialAndPackedTextureChannelsRequired": true,
+    "pooledBoundedVfxRequired": true,
+    "lodAndCullingRequiredBeforeRuntimeAcceptance": true,
+    "lowTierThreatAndObjectiveReadMustMatchHigherTiers": true,
+    "representativeLowTierMobileAndPcProfilingRequired": true
+  },
+  "profiles": [
+    {
+      "terrestrialProfileId": "tdf_boss_stonehold_fault_crowned_colossus",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Fault-Crowned Colossus",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:stonehold",
+        "biome:tectonic_escarpment_and_broken_siege_road",
+        "role:outer_warzone_boss",
+        "budget:boss"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "outer_warzone_boss",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 5.8,
+          "length": 12.5
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "siege",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "six_limb_low_shielded_behemoth",
+      "anatomyIntent": [
+        "six load-bearing pillar limbs",
+        "shield chest and compact protected eyes",
+        "single broad plow horn with fractured crown",
+        "mineralized keratin lamellae attached to dorsal anatomy"
+      ],
+      "materialSlotIntent": [
+        "charcoal_slate_lamellae",
+        "iron_brown_scarred_hide",
+        "pale_worn_horn",
+        "localized_forge_amber_stress_seams"
+      ],
+      "motionIntent": [
+        "anticipatory_weight_transfer",
+        "ground_searching_front_step",
+        "lateral_shoulder_shove",
+        "horn_plow",
+        "full_body_charge_recovery"
+      ],
+      "effectIntent": [
+        "directional_gravel_displacement",
+        "contact_driven_dust_curtain",
+        "stone_chip_contact",
+        "localized_plate_root_heat_shimmer"
+      ],
+      "rigOrSkeletonIntent": "Six-limb terrestrial behemoth skeleton with separate front brace, middle support, and rear drive pairs; layered dorsal lamellae follow the spine with bounded secondary controls; horn and chest mass must transfer visibly through the shoulder girdles.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "anticipatory_weight_transfer",
+        "ground_searching_front_step",
+        "lateral_shoulder_shove",
+        "horn_plow",
+        "full_body_charge_recovery",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve six-leg footprint, shield chest, broken horn crown through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Compound primitive envelope for chest, abdomen, six limb columns, and plow-horn obstruction; dorsal lamellae remain visual-only unless a later combat specification requires otherwise.",
+      "vfxAnchorIntent": [
+        "forefoot_contact_left",
+        "forefoot_contact_right",
+        "middle_foot_contact_left",
+        "middle_foot_contact_right",
+        "rear_foot_contact_left",
+        "rear_foot_contact_right",
+        "plow_horn_contact",
+        "thorax_dust_displacement",
+        "dorsal_plate_root_stress"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through six-leg footprint, shield chest, broken horn crown in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_boss_stonehold_fault_crowned_colossus_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_boss_stonehold_fault_crowned_colossus_base",
+          "profileId": "tdf_boss_stonehold_fault_crowned_colossus",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_boss_stonehold_fault_crowned_colossus_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_boss_eldergrove_mere_root_leviathan",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Mere-Root Leviathan",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:eldergrove",
+        "biome:deep_lake_and_flooded_old_growth_roots",
+        "role:outer_warzone_boss",
+        "budget:boss"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "outer_warzone_boss",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "backHeight": 2.8,
+          "length": 15.0
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "leviathan",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "semi_aquatic_barge_body_root_fan_leviathan",
+      "anatomyIntent": [
+        "broad salamander-crocodilian skull",
+        "two dominant anchoring forelimbs",
+        "reduced steering rear paddles",
+        "eel tail and water-aligned root fan"
+      ],
+      "materialSlotIntent": [
+        "wet_umber_black_hide",
+        "water_worn_throat_scutes",
+        "bark_keratin_root_ridges",
+        "sparse_green_gold_root_tissue"
+      ],
+      "motionIntent": [
+        "submerged_body_roll",
+        "delayed_tail_wave",
+        "forelimb_bank_pull",
+        "jaw_led_lunge",
+        "water_surface_breath"
+      ],
+      "effectIntent": [
+        "opaque_wake",
+        "mud_plume",
+        "reed_displacement",
+        "root_tip_droplets",
+        "subsurface_refraction"
+      ],
+      "rigOrSkeletonIntent": "Semi-aquatic axial skeleton with a dense neck base, two dominant pulling forelimbs, reduced steering paddles, and a long segmented swimming tail; the swept root fan uses low-cost secondary chains rooted to the skull and cervical mass.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "submerged_body_roll",
+        "delayed_tail_wave",
+        "forelimb_bank_pull",
+        "jaw_led_lunge",
+        "water_surface_breath",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve broad skull, dominant forelimbs, swept root fan, long rudder tail through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Compound primitive envelope for skull, barge torso, dominant forelimbs, and broad tail base; root-fan tips and distal tail remain visual-only.",
+      "vfxAnchorIntent": [
+        "jaw_lunge_origin",
+        "forelimb_contact_left",
+        "forelimb_contact_right",
+        "thorax_waterline",
+        "root_fan_droplet_line",
+        "tail_wake_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through broad skull, dominant forelimbs, swept root fan, long rudder tail in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_boss_eldergrove_mere_root_leviathan_base",
+          "profileId": "tdf_boss_eldergrove_mere_root_leviathan",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_boss_crownlands_meridian_tempest_roc",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Meridian Tempest Roc",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:crownlands",
+        "biome:high_storm_shelf_above_outer_trade_roads",
+        "role:outer_warzone_boss",
+        "budget:boss"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "outer_warzone_boss",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "standingHeight": 5.5,
+          "wingspan": 18.0
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "colossal_avian",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "colossal_long_legged_blade_primary_avian",
+      "anatomyIntent": [
+        "deep sternum and heavy flight muscle",
+        "long load-bearing legs",
+        "blade-grouped primary feathers",
+        "split double tail fan"
+      ],
+      "materialSlotIntent": [
+        "charcoal_storm_gray_feathers",
+        "weathered_pale_keratin",
+        "midnight_blue_secondary_feathers",
+        "localized_blue_white_pinion_static"
+      ],
+      "motionIntent": [
+        "ground_appraisal",
+        "chest_compression_before_launch",
+        "violent_first_downstroke",
+        "banked_stoop",
+        "talon_rake",
+        "wing_assisted_ground_turn"
+      ],
+      "effectIntent": [
+        "grass_and_banner_downwash",
+        "rain_shear",
+        "pressure_condensation",
+        "pinion_local_static_illumination"
+      ],
+      "rigOrSkeletonIntent": "Colossal avian skeleton with a deep sternum, long load-bearing legs, full wing-fold hierarchy, grouped primary-feather controls, and a split tail fan; flight deformation must preserve shoulder volume and believable feather overlap.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "ground_appraisal",
+        "chest_compression_before_launch",
+        "violent_first_downstroke",
+        "banked_stoop",
+        "talon_rake",
+        "wing_assisted_ground_turn",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve deep sternum, long legs, split tail, blade-primary wing through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Compound primitive envelope for sternum, pelvis, legs, and folded wing mass; spread wings use coarse query volumes only if later navigation or encounter work requires them.",
+      "vfxAnchorIntent": [
+        "talon_contact_left",
+        "talon_contact_right",
+        "sternum_pressure_origin",
+        "wingtip_static_left",
+        "wingtip_static_right",
+        "tail_downwash_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through deep sternum, long legs, split tail, blade-primary wing in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_boss_crownlands_meridian_tempest_roc_base",
+          "profileId": "tdf_boss_crownlands_meridian_tempest_roc",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_boss_umbral_ashvein_triarch",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Ashvein Triarch",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:umbral",
+        "biome:three_fault_volcanic_rift",
+        "role:outer_warzone_boss",
+        "budget:boss"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "outer_warzone_boss",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 4.5,
+          "length": 13.0,
+          "wingspan": 15.0
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "colossal_winged",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "three_neck_four_limb_winged_rift_predator",
+      "anatomyIntent": [
+        "heavy central crusher head",
+        "two asymmetrical lateral hunter heads",
+        "separate neck musculature into reinforced thorax",
+        "four walking limbs and structurally clear wing roots"
+      ],
+      "materialSlotIntent": [
+        "black_volcanic_osteoderm",
+        "ash_gray_wing_membrane",
+        "pale_healed_scar_tissue",
+        "localized_ember_throat_and_cold_violet_thorax_fracture"
+      ],
+      "motionIntent": [
+        "independent_nonmirrored_head_tracking",
+        "coordinated_torso_intent",
+        "alternating_neck_recoil",
+        "heavy_crawl",
+        "assisted_launch",
+        "off_balance_landing_recovery"
+      ],
+      "effectIntent": [
+        "breath_specific_heat_distortion",
+        "ash_ingestion_and_expulsion",
+        "contact_glass_fragments",
+        "localized_mouth_light",
+        "short_thorax_rift_refraction"
+      ],
+      "rigOrSkeletonIntent": "Four-limb winged reptile skeleton with three independently controlled neck chains resolved into one reinforced thorax, structurally separate wing roots, and asymmetric head controls; shared torso intent must prevent mirrored three-head motion.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "independent_nonmirrored_head_tracking",
+        "coordinated_torso_intent",
+        "alternating_neck_recoil",
+        "heavy_crawl",
+        "assisted_launch",
+        "off_balance_landing_recovery",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve central-versus-lateral head hierarchy, clear wing roots, four-limb stance through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Compound primitive envelope for thorax, pelvis, four limbs, three neck bases, and folded wing mass; heads and wing tips remain separate source anchors, not authorized hit boxes.",
+      "vfxAnchorIntent": [
+        "central_mouth_origin",
+        "left_mouth_origin",
+        "right_mouth_origin",
+        "forelimb_contact_left",
+        "forelimb_contact_right",
+        "wingtip_left",
+        "wingtip_right",
+        "thorax_fracture_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through central-versus-lateral head hierarchy, clear wing roots, four-limb stance in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_concept_v002"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_boss_umbral_ashvein_triarch_base",
+          "profileId": "tdf_boss_umbral_ashvein_triarch",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_boss_umbral_ashvein_triarch_concept_v002"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": [
+        "tdf_research_superhive_hydra_dragon"
+      ]
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_stonehold_rimehorn_breaker",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Rimehorn Breaker",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:stonehold",
+        "biome:glacial_shelf_and_wind_cut_pass",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 2.4,
+          "length": 3.8
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "heavy",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "high_shoulder_split_shovel_horn_ungulate",
+      "anatomyIntent": [
+        "high shoulder hump",
+        "low mature skull",
+        "split shovel horn",
+        "narrower rear-leg drive"
+      ],
+      "materialSlotIntent": [
+        "ice_clumped_dark_guard_hair",
+        "pale_scarred_horn",
+        "slate_brow_scales"
+      ],
+      "motionIntent": [
+        "uphill_weighted_step",
+        "horn_led_snow_clear",
+        "short_shoulder_drive",
+        "heavy_braking"
+      ],
+      "effectIntent": [
+        "compressed_snow_slab",
+        "breath_vapor",
+        "ice_granules"
+      ],
+      "rigOrSkeletonIntent": "Heavy ungulate skeleton biased toward the shoulder hump and forequarter drive; the split shovel horn is rigidly rooted to the skull while beard and guard hair use bounded secondary motion.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "uphill_weighted_step",
+        "horn_led_snow_clear",
+        "short_shoulder_drive",
+        "heavy_braking",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve shoulder hump, split shovel horn through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Body capsule plus forequarter and horn obstruction primitives; beard, hair, and frost remain visual-only.",
+      "vfxAnchorIntent": [
+        "forehoof_contact_left",
+        "forehoof_contact_right",
+        "rearhoof_contact_left",
+        "rearhoof_contact_right",
+        "split_horn_contact",
+        "breath_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through shoulder hump, split shovel horn in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_stonehold_rimehorn_breaker_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_stonehold_rimehorn_breaker_base",
+          "profileId": "tdf_elite_stonehold_rimehorn_breaker",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_stonehold_rimehorn_breaker_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_stonehold_oreblind_delver",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Oreblind Delver",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:stonehold",
+        "biome:deep_ore_gallery_and_collapsed_mine_throat",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 1.2,
+          "length": 4.0
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "medium_long",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "six_limb_eyeless_wedge_skull_delver",
+      "anatomyIntent": [
+        "six digging limbs",
+        "wedge skull",
+        "no visible eyes",
+        "broad sensory jaw plates"
+      ],
+      "materialSlotIntent": [
+        "matte_charcoal_hide",
+        "iron_polished_claws",
+        "pale_scar_tissue",
+        "metallic_sensory_whisker_plates"
+      ],
+      "motionIntent": [
+        "jaw_wall_sweep",
+        "paired_dig_cycle",
+        "vibration_freeze",
+        "low_tunnel_sprint",
+        "debris_backed_emergence"
+      ],
+      "effectIntent": [
+        "pre_emergence_dust_fall",
+        "loose_stone_displacement",
+        "ore_contact_claw_sparks"
+      ],
+      "rigOrSkeletonIntent": "Low six-limb digging skeleton with paired excavation controls, a rigid wedge skull, broad jaw sensory plates, and a short counterweight tail; locomotion must remain readable in narrow tunnels.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "jaw_wall_sweep",
+        "paired_dig_cycle",
+        "vibration_freeze",
+        "low_tunnel_sprint",
+        "debris_backed_emergence",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve six low limbs, eyeless wedge skull, short counterweight tail through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Low body capsule with a wedge-skull blocker and coarse limb footprint; whisker plates and claws remain visual-only.",
+      "vfxAnchorIntent": [
+        "dig_claw_pair_front",
+        "dig_claw_pair_middle",
+        "dig_claw_pair_rear",
+        "jaw_sensor_origin",
+        "emergence_body_center"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through six low limbs, eyeless wedge skull, short counterweight tail in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_stonehold_oreblind_delver_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_stonehold_oreblind_delver_base",
+          "profileId": "tdf_elite_stonehold_oreblind_delver",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_stonehold_oreblind_delver_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_stonehold_slaghide_gorer",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Slaghide Gorer",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:stonehold",
+        "biome:cooled_slag_field_and_abandoned_forge_quarry",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 1.6,
+          "length": 3.2
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "heavy_fast",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "low_fast_suid_vitrified_dorsal_shield",
+      "anatomyIntent": [
+        "low suid frame",
+        "long asymmetric tusks",
+        "raised vitrified dorsal shield",
+        "small protected eyes"
+      ],
+      "materialSlotIntent": [
+        "heat_scarred_hide",
+        "glossy_black_slag_shield",
+        "iron_gray_tusks",
+        "dull_red_old_shield_cracks"
+      ],
+      "motionIntent": [
+        "restless_weight_shift",
+        "side_scrape",
+        "low_acceleration",
+        "tusk_hook",
+        "sliding_recovery"
+      ],
+      "effectIntent": [
+        "glassy_flakes",
+        "tusk_contact_sparks",
+        "dark_dust",
+        "brief_residual_heat"
+      ],
+      "rigOrSkeletonIntent": "Low, fast suid-derived skeleton with compact spine compression, asymmetric rigid tusks, and a raised dorsal shield following thoracic flexion without behaving as loose armor.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "restless_weight_shift",
+        "side_scrape",
+        "low_acceleration",
+        "tusk_hook",
+        "sliding_recovery",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve asymmetric tusks, raised slag shield, low fast frame through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Low body capsule with dorsal-shield and tusk obstruction primitives; precise tusk combat volumes are deferred.",
+      "vfxAnchorIntent": [
+        "forehoof_contact_left",
+        "forehoof_contact_right",
+        "left_tusk_contact",
+        "right_tusk_contact",
+        "dorsal_shield_contact"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through asymmetric tusks, raised slag shield, low fast frame in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_stonehold_slaghide_gorer_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_stonehold_slaghide_gorer_base",
+          "profileId": "tdf_elite_stonehold_slaghide_gorer",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_stonehold_slaghide_gorer_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_eldergrove_hollowbark_stalker",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Hollowbark Stalker",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:eldergrove",
+        "biome:old_growth_forest_and_fallen_trunk_corridor",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 1.4,
+          "length": 4.2
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "lean_predator",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "long_mustelid_feline_split_bark_tail",
+      "anatomyIntent": [
+        "long flexible torso",
+        "high shoulders",
+        "large gripping feet",
+        "split bark tail fan"
+      ],
+      "materialSlotIntent": [
+        "short_dark_fur",
+        "growth_aligned_bark_keratin",
+        "restrained_lichen",
+        "exposed_joint_muscle"
+      ],
+      "motionIntent": [
+        "shoulder_led_silent_walk",
+        "trunk_hugging_body_bend",
+        "precise_rear_foot_placement",
+        "low_pounce",
+        "tail_counterbalance"
+      ],
+      "effectIntent": [
+        "compressed_leaf_litter",
+        "contact_bark_dust",
+        "branch_displacement",
+        "natural_occlusion_value_shift"
+      ],
+      "rigOrSkeletonIntent": "Long flexible mustelid-feline skeleton with high scapular travel, gripping feet, and a split tail fan used for counterbalance; bark keratin follows joint-safe growth lines.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "shoulder_led_silent_walk",
+        "trunk_hugging_body_bend",
+        "precise_rear_foot_placement",
+        "low_pounce",
+        "tail_counterbalance",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve long torso, high shoulders, split tail fan through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Flexible body capsule with coarse shoulder, pelvis, and gripping-foot footprint; split tail plates remain visual-only.",
+      "vfxAnchorIntent": [
+        "forepaw_contact_left",
+        "forepaw_contact_right",
+        "rearpaw_contact_left",
+        "rearpaw_contact_right",
+        "tail_fan_contact",
+        "shoulder_occlusion_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through long torso, high shoulders, split tail fan in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_eldergrove_hollowbark_stalker_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_eldergrove_hollowbark_stalker_base",
+          "profileId": "tdf_elite_eldergrove_hollowbark_stalker",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_eldergrove_hollowbark_stalker_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_eldergrove_mirrorfin_lurker",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Mirrorfin Lurker",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:eldergrove",
+        "biome:clear_lake_margin_and_flooded_root_shelf",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "backHeight": 0.9,
+          "length": 3.6
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "broad_amphibious",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "broad_flat_amphibian_lateral_fin_mantle",
+      "anatomyIntent": [
+        "broad flat torso",
+        "shovel jaw",
+        "four splayed limbs",
+        "lateral fin mantle and rudder tail"
+      ],
+      "materialSlotIntent": [
+        "dark_wet_hide",
+        "silver_green_scale_islands",
+        "thick_translucent_fin_margin",
+        "pale_underbody"
+      ],
+      "motionIntent": [
+        "surface_breathing",
+        "fin_ripple",
+        "mud_suction_release",
+        "sideways_burst",
+        "tail_driven_retreat"
+      ],
+      "effectIntent": [
+        "water_specular_breakup",
+        "mud_fan",
+        "reed_displacement",
+        "angle_driven_fin_reflection"
+      ],
+      "rigOrSkeletonIntent": "Broad amphibious skeleton with four splayed load-bearing limbs, a shovel-jaw head block, lateral fin-mantle controls, and a tapering rudder tail for water and mud locomotion.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "surface_breathing",
+        "fin_ripple",
+        "mud_suction_release",
+        "sideways_burst",
+        "tail_driven_retreat",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve flat broad body, lateral fin mantle, shovel jaw through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Broad low capsule with coarse splayed-limb footprint and tail-base volume; fin margins remain visual-only.",
+      "vfxAnchorIntent": [
+        "jaw_scoop_origin",
+        "forelimb_contact_left",
+        "forelimb_contact_right",
+        "fin_mantle_left",
+        "fin_mantle_right",
+        "tail_mud_fan_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through flat broad body, lateral fin mantle, shovel jaw in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_eldergrove_mirrorfin_lurker_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_eldergrove_mirrorfin_lurker_base",
+          "profileId": "tdf_elite_eldergrove_mirrorfin_lurker",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_eldergrove_mirrorfin_lurker_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_eldergrove_sunmane_thornstag",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Sunmane Thornstag",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:eldergrove",
+        "biome:open_grassland_and_forest_edge_meadow",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 2.3,
+          "headHeight": 3.0,
+          "length": 3.4
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "tall_heavy",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "tall_cervid_backward_thorn_antler",
+      "anatomyIntent": [
+        "mature scarred cervid skull",
+        "deep chest",
+        "backward thorn antlers",
+        "coarse dorsal mane"
+      ],
+      "materialSlotIntent": [
+        "dun_hide",
+        "dark_bark_keratin_antler",
+        "sun_bleached_mane_tip",
+        "scar_tissue"
+      ],
+      "motionIntent": [
+        "lateral_appraisal",
+        "ground_rake",
+        "mane_bristle",
+        "antler_feint",
+        "wide_inertia_turn"
+      ],
+      "effectIntent": [
+        "grass_wake",
+        "seed_release",
+        "earth_gouge",
+        "natural_warm_backscatter"
+      ],
+      "rigOrSkeletonIntent": "Tall mature cervid skeleton with a deep chest, long lower legs, backward thorn-antler inertia, and a coarse dorsal mane using bounded secondary controls.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "lateral_appraisal",
+        "ground_rake",
+        "mane_bristle",
+        "antler_feint",
+        "wide_inertia_turn",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve backward antlers, deep chest, dorsal mane through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Tall body capsule with leg footprint and conservative antler obstruction volume; mane and individual tines remain visual-only.",
+      "vfxAnchorIntent": [
+        "forehoof_contact_left",
+        "forehoof_contact_right",
+        "rearhoof_contact_left",
+        "rearhoof_contact_right",
+        "antler_ground_contact",
+        "dorsal_mane_root"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through backward antlers, deep chest, dorsal mane in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_eldergrove_sunmane_thornstag_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_eldergrove_sunmane_thornstag_base",
+          "profileId": "tdf_elite_eldergrove_sunmane_thornstag",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_eldergrove_sunmane_thornstag_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_crownlands_crownstep_lion",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Crownstep Lion",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:crownlands",
+        "biome:central_plains_and_abandoned_royal_hunting_reserve",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 1.7,
+          "length": 3.8
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "large_predator",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "long_felid_layered_keratin_mane",
+      "anatomyIntent": [
+        "long adult felid frame",
+        "deep chest and low hips",
+        "layered keratin mane shields",
+        "heavy tuftless tail"
+      ],
+      "materialSlotIntent": [
+        "smoke_tan_short_fur",
+        "weathered_pale_mane_plate",
+        "dark_muzzle",
+        "scarred_paw"
+      ],
+      "motionIntent": [
+        "low_stalk",
+        "scapular_roll",
+        "mane_plate_lift",
+        "full_weight_pounce",
+        "breath_recovery"
+      ],
+      "effectIntent": [
+        "flattened_grass",
+        "paw_dust",
+        "plate_clatter",
+        "sun_angle_rim"
+      ],
+      "rigOrSkeletonIntent": "Long adult felid skeleton with visible scapular roll, low hips, a heavy tail, and layered keratin mane shields that lift from anatomically attached roots without reading as worn armor.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "low_stalk",
+        "scapular_roll",
+        "mane_plate_lift",
+        "full_weight_pounce",
+        "breath_recovery",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve long felid frame, keratin mane shield, heavy tail through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Long felid body capsule with head and shoulder volumes; mane plates and tail remain visual-only unless separately mapped.",
+      "vfxAnchorIntent": [
+        "forepaw_contact_left",
+        "forepaw_contact_right",
+        "rearpaw_contact_left",
+        "rearpaw_contact_right",
+        "mane_plate_root",
+        "chest_breath_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through long felid frame, keratin mane shield, heavy tail in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_crownlands_crownstep_lion_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_crownlands_crownstep_lion_base",
+          "profileId": "tdf_elite_crownlands_crownstep_lion",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_crownlands_crownstep_lion_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_crownlands_galeclaw_courser",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Galeclaw Courser",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:crownlands",
+        "biome:exposed_trade_road_and_storm_swept_grain_field",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "hipHeight": 2.0,
+          "headHeight": 2.7,
+          "length": 3.0
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "fast_avian",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "flightless_predatory_bird_short_forewing",
+      "anatomyIntent": [
+        "low spear head",
+        "deep running pelvis",
+        "long elastic legs",
+        "short balancing forewings and rigid tail fan"
+      ],
+      "materialSlotIntent": [
+        "blue_gray_coarse_feather",
+        "dark_scaled_leg",
+        "pale_hooked_beak",
+        "worn_cream_tail_bar"
+      ],
+      "motionIntent": [
+        "head_stable_pursuit",
+        "long_stride",
+        "forewing_balance",
+        "skid_turn",
+        "heel_claw_kick"
+      ],
+      "effectIntent": [
+        "directional_grain_wake",
+        "road_grit",
+        "feather_loss",
+        "vegetation_pressure_ripple"
+      ],
+      "rigOrSkeletonIntent": "Flightless predatory-avian skeleton with a deep running pelvis, elastic long legs, short balancing forewings, stable head controls, and a rigid tail fan.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "head_stable_pursuit",
+        "long_stride",
+        "forewing_balance",
+        "skid_turn",
+        "heel_claw_kick",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve long running legs, short forewings, rigid tail fan through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Narrow torso capsule with long-leg footprint, head block, and coarse tail balance volume; feathers remain visual-only.",
+      "vfxAnchorIntent": [
+        "foot_contact_left",
+        "foot_contact_right",
+        "heel_claw_left",
+        "heel_claw_right",
+        "forewing_left",
+        "forewing_right",
+        "tail_pressure_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through long running legs, short forewings, rigid tail fan in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_crownlands_galeclaw_courser_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_crownlands_galeclaw_courser_base",
+          "profileId": "tdf_elite_crownlands_galeclaw_courser",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_crownlands_galeclaw_courser_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_crownlands_reliquary_basilisk",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Reliquary Basilisk",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:crownlands",
+        "biome:collapsed_cathedral_close_and_mineral_crypt_garden",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "shoulderHeight": 1.1,
+          "length": 4.5
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "armored_long",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "long_six_limb_reptile_stiff_segmented_tail",
+      "anatomyIntent": [
+        "six-limb alternating gait",
+        "narrow armored skull",
+        "high shoulder scutes",
+        "stiff segmented tail"
+      ],
+      "materialSlotIntent": [
+        "gray_green_pebbled_hide",
+        "pale_mineral_scute",
+        "dark_eye_shield",
+        "soil_stained_claw"
+      ],
+      "motionIntent": [
+        "alternating_three_pair_gait",
+        "head_lock_observation",
+        "tail_brace",
+        "low_rush",
+        "crypt_wall_climb"
+      ],
+      "effectIntent": [
+        "masonry_grit",
+        "mineral_scute_chip",
+        "dust_shafts",
+        "eye_shield_reflection"
+      ],
+      "rigOrSkeletonIntent": "Long six-limb reptile skeleton with alternating three-pair gait controls, high shoulder scutes, a narrow armored skull, and a stiff segmented tail capable of bracing.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "alternating_three_pair_gait",
+        "head_lock_observation",
+        "tail_brace",
+        "low_rush",
+        "crypt_wall_climb",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve six limbs, high shoulder scutes, stiff segmented tail through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Long low capsule with three paired limb footprints and tail-base brace volume; scute detail remains visual-only.",
+      "vfxAnchorIntent": [
+        "limb_pair_front_contact",
+        "limb_pair_middle_contact",
+        "limb_pair_rear_contact",
+        "shoulder_scute_contact",
+        "tail_brace_contact",
+        "eye_shield_reflection"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through six limbs, high shoulder scutes, stiff segmented tail in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_crownlands_reliquary_basilisk_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_crownlands_reliquary_basilisk_base",
+          "profileId": "tdf_elite_crownlands_reliquary_basilisk",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_crownlands_reliquary_basilisk_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_umbral_cindermaw_salamander",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Cindermaw Salamander",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:umbral",
+        "biome:volcanic_runoff_channel_and_cooling_lava_shelf",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "backHeight": 1.0,
+          "length": 4.2
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "broad_amphibious",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "broad_low_amphibian_dorsal_heat_fin",
+      "anatomyIntent": [
+        "broad low amphibian",
+        "wedge mouth",
+        "powerful lateral limbs",
+        "flattened tail and dorsal heat fins"
+      ],
+      "materialSlotIntent": [
+        "soot_black_wet_skin",
+        "obsidian_dorsal_scute",
+        "pale_heat_scar",
+        "localized_dull_ember_mouth_tissue"
+      ],
+      "motionIntent": [
+        "belly_drag",
+        "lateral_limb_push",
+        "throat_expansion",
+        "tail_slap",
+        "jaw_surge"
+      ],
+      "effectIntent": [
+        "wet_contact_steam",
+        "ash_paste",
+        "mouth_heat_distortion",
+        "cooled_glass_flake"
+      ],
+      "rigOrSkeletonIntent": "Broad low amphibian skeleton with powerful lateral limb pushes, a flattened tail, throat expansion controls, and dorsal heat fins rooted to the spine.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "belly_drag",
+        "lateral_limb_push",
+        "throat_expansion",
+        "tail_slap",
+        "jaw_surge",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve broad wedge mouth, lateral limbs, dorsal heat fins through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Broad low capsule with lateral-limb footprint and tail-base volume; heat fins remain visual-only.",
+      "vfxAnchorIntent": [
+        "jaw_heat_origin",
+        "throat_expansion_origin",
+        "forelimb_contact_left",
+        "forelimb_contact_right",
+        "tail_slap_contact",
+        "dorsal_fin_root"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through broad wedge mouth, lateral limbs, dorsal heat fins in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_umbral_cindermaw_salamander_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_umbral_cindermaw_salamander_base",
+          "profileId": "tdf_elite_umbral_cindermaw_salamander",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_umbral_cindermaw_salamander_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_umbral_veilspine_widow",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Veilspine Widow",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:umbral",
+        "biome:ashwood_canyon_and_suspended_web_ravine",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "bodyHeight": 1.4,
+          "legSpan": 4.0
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "high_invertebrate",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "high_narrow_spider_vertical_veil_spine",
+      "anatomyIntent": [
+        "narrow high stance",
+        "small armored abdomen",
+        "long unequal legs",
+        "vertical dorsal veil spines"
+      ],
+      "materialSlotIntent": [
+        "matte_black_chitin",
+        "ash_gray_joint_membrane",
+        "glass_dark_spine",
+        "tiny_crimson_sensory_pit"
+      ],
+      "motionIntent": [
+        "alternating_high_step",
+        "wind_braced_crouch",
+        "leg_tap_sensing",
+        "diagonal_sprint",
+        "controlled_drop"
+      ],
+      "effectIntent": [
+        "ash_caught_in_web",
+        "chitin_scrape",
+        "falling_dust",
+        "restrained_thread_specular"
+      ],
+      "rigOrSkeletonIntent": "Eight-leg arachnid skeleton with unequal limb proportions, a small armored abdomen, forward sensory palps, and vertical veil spines; gait controls must support asymmetric recovery.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "alternating_high_step",
+        "wind_braced_crouch",
+        "leg_tap_sensing",
+        "diagonal_sprint",
+        "controlled_drop",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve high narrow stance, unequal legs, vertical veil spines through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Small core-body capsule with coarse eight-leg navigation footprint; distal legs, palps, web, and veil spines remain visual-only.",
+      "vfxAnchorIntent": [
+        "leg_contact_front_left",
+        "leg_contact_front_right",
+        "leg_contact_rear_left",
+        "leg_contact_rear_right",
+        "palp_sensor_origin",
+        "veil_spine_root",
+        "web_release_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through high narrow stance, unequal legs, vertical veil spines in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_umbral_veilspine_widow_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_umbral_veilspine_widow_base",
+          "profileId": "tdf_elite_umbral_veilspine_widow",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_umbral_veilspine_widow_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    },
+    {
+      "terrestrialProfileId": "tdf_elite_umbral_gravewing_siphon",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "workingReviewLabel": "Gravewing Siphon",
+      "workingLabelStatus": "nonlocalized_review_only",
+      "designIntentTags": [
+        "realm-source:umbral",
+        "biome:obsidian_cave_mouth_and_shadow_valley_crypt",
+        "role:inner_realm_field_elite",
+        "budget:elite"
+      ],
+      "designIntentStatus": "source_design_only",
+      "profileRole": "inner_realm_field_elite",
+      "approximateWorldScale": {
+        "referenceBasis": "adult_champion_body_height_equals_1_0",
+        "measurements": {
+          "standingHeight": 1.8,
+          "wingspan": 5.2
+        },
+        "units": "champion_body_height_multiples",
+        "massClass": "large_flying_mammal",
+        "measurementStatus": "source_estimate_pending_user_approval_and_engineering_mapping"
+      },
+      "silhouetteClass": "massive_bat_folded_cloak_rest_shape",
+      "anatomyIntent": [
+        "folded-cloak resting silhouette",
+        "long thumb claws",
+        "narrow pale sensory face",
+        "deep chest and trailing membrane tabs"
+      ],
+      "materialSlotIntent": [
+        "charcoal_fur",
+        "thin_scarred_membrane",
+        "pale_cartilage",
+        "backlit_dark_violet_vascular_undertone"
+      ],
+      "motionIntent": [
+        "hanging_breath",
+        "membrane_tension",
+        "quadrupedal_cave_crawl",
+        "drop_launch",
+        "close_bank",
+        "heavy_landing_fold"
+      ],
+      "effectIntent": [
+        "cave_dust",
+        "displaced_ash",
+        "physical_membrane_translucency",
+        "condensation",
+        "reflected_rift_violet"
+      ],
+      "rigOrSkeletonIntent": "Large flying-mammal skeleton supporting quadrupedal cave crawl, folded-cloak rest, drop launch, long thumb claws, and membrane tension controls with scalable secondary deformation.",
+      "requiredAnimationIntent": [
+        "idle_breath_or_weight_shift",
+        "contact_verified_primary_locomotion",
+        "hanging_breath",
+        "membrane_tension",
+        "quadrupedal_cave_crawl",
+        "drop_launch",
+        "close_bank",
+        "heavy_landing_fold",
+        "full_body_recovery_to_neutral"
+      ],
+      "lodIntent": "Preserve folded-cloak rest shape, long thumb claws, narrow sensory face through every presentation tier. Merge micro-surface detail before changing body proportion; reduce secondary appendage controls before primary contact motion; distant representation must retain the same threat read without glow.",
+      "colliderIntent": "Chest capsule with folded-wing mass and quadrupedal footprint; spread membrane and thumb claws use coarse query volumes only when separately authorized.",
+      "vfxAnchorIntent": [
+        "thumb_claw_left",
+        "thumb_claw_right",
+        "hindfoot_contact_left",
+        "hindfoot_contact_right",
+        "wing_membrane_left",
+        "wing_membrane_right",
+        "breath_condensation_origin"
+      ],
+      "accessibilityNotes": "Identification and threat must remain readable through folded-cloak rest shape, long thumb claws, narrow sensory face in black silhouette and grayscale. Realm palette, particles, emissive detail, audio, and camera shake are supplementary and cannot carry the only state signal.",
+      "reducedMotionIntent": "Disable looping decorative secondary motion, persistent emission, camera impulse, and rapid material pulsing. Preserve the same anticipation pose, directional contact, recovery pose, and objective/threat state at normal gameplay timing.",
+      "explicitExclusions": [
+        "no_palette_swap_identity",
+        "no_cartoon_mascot_or_juvenile_eye_proportions",
+        "no_literal_realm_armor_heraldry_runes_or_costume",
+        "no_permanent_full_body_emissive_outline",
+        "no_marketplace_or_generated_identity_shipped_unchanged",
+        "no_gameplay_ai_spawn_reward_save_or_narrative_authority"
+      ],
+      "unresolvedDecisions": [
+        "user_creative_approval_of_exact_source_version",
+        "final_player_facing_name_and_lore",
+        "production_model_source_or_original_sculpt_path",
+        "runtime_scale_and_source_to_catalog_mapping",
+        "profiled_mesh_texture_animation_vfx_and_memory_budgets"
+      ],
+      "primarySourceAssetIds": [
+        "tdf_asset_elite_umbral_gravewing_siphon_concept_v001"
+      ],
+      "conceptSourceState": "GeneratedUnreviewed",
+      "variants": [
+        {
+          "variantId": "tdf_elite_umbral_gravewing_siphon_base",
+          "profileId": "tdf_elite_umbral_gravewing_siphon",
+          "sourceVersion": "tdf-rbe-2026-07-24-v001",
+          "status": "DeliveredReference",
+          "variantKind": "base_visual_direction",
+          "intent": "Base silhouette, anatomy, material, motion, and effect direction described by the profile; no reviewable concept pixels exist in this source version yet.",
+          "sourceAssetIds": [
+            "tdf_asset_elite_umbral_gravewing_siphon_concept_v001"
+          ],
+          "changedDesignDimensions": [
+            "silhouette",
+            "anatomy",
+            "materials",
+            "motion",
+            "environmental_effect_response"
+          ],
+          "requiresSeparateEngineeringSource": true,
+          "userCreativeDecision": "NotRequested"
+        }
+      ],
+      "acquisitionResearchIds": []
+    }
+  ],
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_crownlands_meridian_tempest_roc"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_crownlands_meridian_tempest_roc_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2668113,
+      "sha256": "58cece0fbf582232eb6b551df7d97d4f5e15116b528e3300c254ccdd1b4e801b",
+      "gitLfsOid": "58cece0fbf582232eb6b551df7d97d4f5e15116b528e3300c254ccdd1b4e801b",
+      "gitLfsSize": 2668113,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_refinement_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_refinement_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_crownlands_meridian_tempest_roc"
+      ],
+      "variantIds": [
+        "tdf_boss_crownlands_meridian_tempest_roc_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_crownlands_meridian_tempest_roc_concept_sheet_v002.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2648116,
+      "sha256": "99d2bc5afed49937cf86cb56b5c7318e4a7f54ff4003efa0dc21148546d1af21",
+      "gitLfsOid": "99d2bc5afed49937cf86cb56b5c7318e4a7f54ff4003efa0dc21148546d1af21",
+      "gitLfsSize": 2648116,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_identity_refinement_v002",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_identity_refinement_v002",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_boss_crownlands_meridian_tempest_roc_generation_input_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_crownlands_meridian_tempest_roc"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/GenerationInputs/tdf_input_boss_crownlands_meridian_tempest_roc_base_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2637858,
+      "sha256": "7f69b9dd438929d3b9aa496c34c32e341d4205be8e0183f43276c6e6402b35a0",
+      "gitLfsOid": "7f69b9dd438929d3b9aa496c34c32e341d4205be8e0183f43276c6e6402b35a0",
+      "gitLfsSize": 2637858,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_base_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_base_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_eldergrove_mere_root_leviathan"
+      ],
+      "variantIds": [
+        "tdf_boss_eldergrove_mere_root_leviathan_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_eldergrove_mere_root_leviathan_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2812893,
+      "sha256": "f0549c3d37c481beb11652f3c815221ee2e31fdf8aaf7e3529090d356f707a74",
+      "gitLfsOid": "f0549c3d37c481beb11652f3c815221ee2e31fdf8aaf7e3529090d356f707a74",
+      "gitLfsSize": 2812893,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_eldergrove_mere_root_leviathan_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_eldergrove_mere_root_leviathan_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_boss_stonehold_fault_crowned_colossus_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_stonehold_fault_crowned_colossus"
+      ],
+      "variantIds": [
+        "tdf_boss_stonehold_fault_crowned_colossus_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_stonehold_fault_crowned_colossus_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2792951,
+      "sha256": "c949d4c95e00ca665f3b4e3e56cbc949810113ac4c2c936ff815af23e3519b50",
+      "gitLfsOid": "c949d4c95e00ca665f3b4e3e56cbc949810113ac4c2c936ff815af23e3519b50",
+      "gitLfsSize": 2792951,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_stonehold_fault_crowned_colossus_refinement_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_stonehold_fault_crowned_colossus_refinement_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_boss_stonehold_fault_crowned_colossus_generation_input_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_stonehold_fault_crowned_colossus"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/GenerationInputs/tdf_input_boss_stonehold_fault_crowned_colossus_base_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2874617,
+      "sha256": "183da09412593b8014331910c0ef235d139ec88c4af66f67404597d41b553821",
+      "gitLfsOid": "183da09412593b8014331910c0ef235d139ec88c4af66f67404597d41b553821",
+      "gitLfsSize": 2874617,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_stonehold_fault_crowned_colossus_base_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_stonehold_fault_crowned_colossus_base_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_boss_umbral_ashvein_triarch_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_umbral_ashvein_triarch"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_umbral_ashvein_triarch_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2677462,
+      "sha256": "07a1889a9097f3efd9af2a77a43faae1303d8fb1a882208424e8280abd680282",
+      "gitLfsOid": "07a1889a9097f3efd9af2a77a43faae1303d8fb1a882208424e8280abd680282",
+      "gitLfsSize": 2677462,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_refinement_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_refinement_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_boss_umbral_ashvein_triarch_concept_v002",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_umbral_ashvein_triarch"
+      ],
+      "variantIds": [
+        "tdf_boss_umbral_ashvein_triarch_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_boss_umbral_ashvein_triarch_concept_sheet_v002.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2601404,
+      "sha256": "c627ff27abc62a8d52720a6beb20e3031a03d36cc6060c3c13f95fdc6a05b72a",
+      "gitLfsOid": "c627ff27abc62a8d52720a6beb20e3031a03d36cc6060c3c13f95fdc6a05b72a",
+      "gitLfsSize": 2601404,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_head_refinement_v003",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_head_refinement_v003",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_boss_umbral_ashvein_triarch_generation_input_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_umbral_ashvein_triarch"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/GenerationInputs/tdf_input_boss_umbral_ashvein_triarch_base_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2693694,
+      "sha256": "8d7e8caf2a78d4bd744c47800836f1353016917781dd04e719a3b89ca99fa822",
+      "gitLfsOid": "8d7e8caf2a78d4bd744c47800836f1353016917781dd04e719a3b89ca99fa822",
+      "gitLfsSize": 2693694,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_base_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_base_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_boss_umbral_ashvein_triarch_identity_refinement_input_v002",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_boss_umbral_ashvein_triarch"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/GenerationInputs/tdf_input_boss_umbral_ashvein_triarch_identity_refinement_v002.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2642983,
+      "sha256": "80aee0cbe1046b5921f7d06da2c82aa0213ef4ed006bb99bf24dd5f459547e87",
+      "gitLfsOid": "80aee0cbe1046b5921f7d06da2c82aa0213ef4ed006bb99bf24dd5f459547e87",
+      "gitLfsSize": 2642983,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_identity_refinement_v002",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_identity_refinement_v002",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_elite_crownlands_crownstep_lion_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_crownlands_crownstep_lion"
+      ],
+      "variantIds": [
+        "tdf_elite_crownlands_crownstep_lion_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_crownlands_crownstep_lion_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2883033,
+      "sha256": "b2ad0b4e336325f86d8f7de044447d18bbee654703b6d9b1ef72fc9c0511c040",
+      "gitLfsOid": "b2ad0b4e336325f86d8f7de044447d18bbee654703b6d9b1ef72fc9c0511c040",
+      "gitLfsSize": 2883033,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_crownlands_crownstep_lion_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_crownstep_lion_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_crownlands_galeclaw_courser_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_crownlands_galeclaw_courser"
+      ],
+      "variantIds": [
+        "tdf_elite_crownlands_galeclaw_courser_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_crownlands_galeclaw_courser_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2586229,
+      "sha256": "bb55cc491b8162220d8a16e1238ea1f3e6a9ce6324149c742c618771d3d1b7a7",
+      "gitLfsOid": "bb55cc491b8162220d8a16e1238ea1f3e6a9ce6324149c742c618771d3d1b7a7",
+      "gitLfsSize": 2586229,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_crownlands_galeclaw_courser_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_galeclaw_courser_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_crownlands_reliquary_basilisk_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_crownlands_reliquary_basilisk"
+      ],
+      "variantIds": [
+        "tdf_elite_crownlands_reliquary_basilisk_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_crownlands_reliquary_basilisk_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2640177,
+      "sha256": "a4c4385a7ad444ccb1926163b6ca9ff663cca9563cb5773fd0a245aef5c6a6d1",
+      "gitLfsOid": "a4c4385a7ad444ccb1926163b6ca9ff663cca9563cb5773fd0a245aef5c6a6d1",
+      "gitLfsSize": 2640177,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_crownlands_reliquary_basilisk_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_reliquary_basilisk_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_eldergrove_hollowbark_stalker_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_eldergrove_hollowbark_stalker"
+      ],
+      "variantIds": [
+        "tdf_elite_eldergrove_hollowbark_stalker_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_hollowbark_stalker_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2658021,
+      "sha256": "8aa0e974fac00a2f6a0ea7d23eb8056c75e8a20f69dba6cb2153ba6501fbe6cb",
+      "gitLfsOid": "8aa0e974fac00a2f6a0ea7d23eb8056c75e8a20f69dba6cb2153ba6501fbe6cb",
+      "gitLfsSize": 2658021,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_eldergrove_hollowbark_stalker_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_hollowbark_stalker_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_eldergrove_mirrorfin_lurker_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_eldergrove_mirrorfin_lurker"
+      ],
+      "variantIds": [
+        "tdf_elite_eldergrove_mirrorfin_lurker_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_mirrorfin_lurker_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 3149583,
+      "sha256": "693e7c9d62322082ac7b5375668b5f9da83cd19fb45a883be39130fe5f393f8c",
+      "gitLfsOid": "693e7c9d62322082ac7b5375668b5f9da83cd19fb45a883be39130fe5f393f8c",
+      "gitLfsSize": 3149583,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_eldergrove_mirrorfin_lurker_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_mirrorfin_lurker_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_eldergrove_sunmane_thornstag_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_eldergrove_sunmane_thornstag"
+      ],
+      "variantIds": [
+        "tdf_elite_eldergrove_sunmane_thornstag_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_eldergrove_sunmane_thornstag_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2762990,
+      "sha256": "85145107eb5f229e721ddb634d094840d41b9043c2d6b349bfcd68d1e03f9afb",
+      "gitLfsOid": "85145107eb5f229e721ddb634d094840d41b9043c2d6b349bfcd68d1e03f9afb",
+      "gitLfsSize": 2762990,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_eldergrove_sunmane_thornstag_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_sunmane_thornstag_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_stonehold_oreblind_delver_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_stonehold_oreblind_delver"
+      ],
+      "variantIds": [
+        "tdf_elite_stonehold_oreblind_delver_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_oreblind_delver_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2609153,
+      "sha256": "86ef99a99539d6d8fdce1dbac410e0dae4b7ab0e6735dab39f37805d624c0f23",
+      "gitLfsOid": "86ef99a99539d6d8fdce1dbac410e0dae4b7ab0e6735dab39f37805d624c0f23",
+      "gitLfsSize": 2609153,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_stonehold_oreblind_delver_refinement_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_oreblind_delver_refinement_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_stonehold_oreblind_delver_generation_input_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_stonehold_oreblind_delver"
+      ],
+      "variantIds": [],
+      "roles": [
+        "export_preview"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/GenerationInputs/tdf_input_elite_stonehold_oreblind_delver_base_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2714383,
+      "sha256": "2fcbb950f75d1b381e2a8b549f682133326f50b807cad08c850658dedbfd8bd8",
+      "gitLfsOid": "2fcbb950f75d1b381e2a8b549f682133326f50b807cad08c850658dedbfd8bd8",
+      "gitLfsSize": 2714383,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_stonehold_oreblind_delver_base_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_oreblind_delver_base_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "Superseded"
+    },
+    {
+      "assetId": "tdf_asset_elite_stonehold_rimehorn_breaker_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_stonehold_rimehorn_breaker"
+      ],
+      "variantIds": [
+        "tdf_elite_stonehold_rimehorn_breaker_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_rimehorn_breaker_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2694431,
+      "sha256": "f05cb4102528f430ccf1173f6dee5d0824cfcbcb9e1c858b20b731cc2ecc3bf3",
+      "gitLfsOid": "f05cb4102528f430ccf1173f6dee5d0824cfcbcb9e1c858b20b731cc2ecc3bf3",
+      "gitLfsSize": 2694431,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_stonehold_rimehorn_breaker_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_rimehorn_breaker_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_stonehold_slaghide_gorer_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_stonehold_slaghide_gorer"
+      ],
+      "variantIds": [
+        "tdf_elite_stonehold_slaghide_gorer_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_stonehold_slaghide_gorer_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2654859,
+      "sha256": "631710d869831cc8fc532f5ec67b759d6ca539d7b77c55d150cdf58d70f77f09",
+      "gitLfsOid": "631710d869831cc8fc532f5ec67b759d6ca539d7b77c55d150cdf58d70f77f09",
+      "gitLfsSize": 2654859,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_stonehold_slaghide_gorer_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_slaghide_gorer_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_umbral_cindermaw_salamander_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_umbral_cindermaw_salamander"
+      ],
+      "variantIds": [
+        "tdf_elite_umbral_cindermaw_salamander_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_cindermaw_salamander_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2804083,
+      "sha256": "61a5ea43950826a19dc344c3e8f0413cd78457b33cb85c0aeff52a2e9eb872ee",
+      "gitLfsOid": "61a5ea43950826a19dc344c3e8f0413cd78457b33cb85c0aeff52a2e9eb872ee",
+      "gitLfsSize": 2804083,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_umbral_cindermaw_salamander_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_cindermaw_salamander_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_umbral_gravewing_siphon_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_umbral_gravewing_siphon"
+      ],
+      "variantIds": [
+        "tdf_elite_umbral_gravewing_siphon_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_gravewing_siphon_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2538150,
+      "sha256": "a0f0318d8658a8e0f90cccbfa208775889463d55ee35e413c72b169c3e230775",
+      "gitLfsOid": "a0f0318d8658a8e0f90cccbfa208775889463d55ee35e413c72b169c3e230775",
+      "gitLfsSize": 2538150,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_umbral_gravewing_siphon_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_gravewing_siphon_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    },
+    {
+      "assetId": "tdf_asset_elite_umbral_veilspine_widow_concept_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "profileIds": [
+        "tdf_elite_umbral_veilspine_widow"
+      ],
+      "variantIds": [
+        "tdf_elite_umbral_veilspine_widow_base"
+      ],
+      "roles": [
+        "concept_turnaround",
+        "silhouette_sheet",
+        "scale_chart",
+        "material_callout",
+        "pose_motion_sheet"
+      ],
+      "path": "unity/Docs/Terrestrials/RealmBossesAndElites/ConceptSheets/tdf_elite_umbral_veilspine_widow_concept_sheet_v001.png",
+      "repositoryStorage": "git_lfs",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "byteLength": 2285521,
+      "sha256": "8432d1b562689dbe55258b7213ee3ccc1baa01fbe83937c7c7ddd6ff1170590d",
+      "gitLfsOid": "8432d1b562689dbe55258b7213ee3ccc1baa01fbe83937c7c7ddd6ff1170590d",
+      "gitLfsSize": 2285521,
+      "unityAssetGuid": null,
+      "editableSourceAvailable": false,
+      "editableSourcePath": null,
+      "editableSourceReason": "Codex built-in image generation exposed a raster PNG only; no layered or model-native editable source was available.",
+      "generationRecordId": "tdf_generation_elite_umbral_veilspine_widow_v001",
+      "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_veilspine_widow_v001",
+      "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
+      "reviewSurfaceUrlOrPrAnchor": null,
+      "status": "GeneratedUnreviewed"
+    }
+  ],
+  "generationRecords": [
+    {
+      "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_base_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T00:59:32Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_base_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained GenerationInputs path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_crownlands_meridian_tempest_roc_generation_input_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_identity_refinement_v002",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:43:47Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_identity_refinement_v002",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v001"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_refinement_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:02:04Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_refinement_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_boss_crownlands_meridian_tempest_roc_generation_input_v001"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained evidence path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_eldergrove_mere_root_leviathan_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T00:58:10Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_eldergrove_mere_root_leviathan_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_stonehold_fault_crowned_colossus_base_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T00:55:35Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_stonehold_fault_crowned_colossus_base_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained GenerationInputs path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_stonehold_fault_crowned_colossus_generation_input_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_stonehold_fault_crowned_colossus_refinement_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T00:56:54Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_stonehold_fault_crowned_colossus_refinement_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_boss_stonehold_fault_crowned_colossus_generation_input_v001"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_stonehold_fault_crowned_colossus_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_base_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:04:45Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_base_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained GenerationInputs path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_generation_input_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_head_refinement_v003",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:50:31Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_head_refinement_v003",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_identity_refinement_input_v002"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_concept_v002"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_identity_refinement_v002",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:47:03Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_identity_refinement_v002",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_concept_v001"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained evidence path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_identity_refinement_input_v002"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_refinement_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:07:36Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_refinement_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_generation_input_v001"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained evidence path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_boss_umbral_ashvein_triarch_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_crownlands_crownstep_lion_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:45:15Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_crownstep_lion_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_crownlands_crownstep_lion_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_crownlands_galeclaw_courser_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:05:24Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_galeclaw_courser_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_crownlands_galeclaw_courser_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_crownlands_reliquary_basilisk_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:12:05Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_reliquary_basilisk_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_crownlands_reliquary_basilisk_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_eldergrove_hollowbark_stalker_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:37:13Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_hollowbark_stalker_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_eldergrove_hollowbark_stalker_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_eldergrove_mirrorfin_lurker_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:39:09Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_mirrorfin_lurker_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_eldergrove_mirrorfin_lurker_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_eldergrove_sunmane_thornstag_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:42:24Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_sunmane_thornstag_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_eldergrove_sunmane_thornstag_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_stonehold_oreblind_delver_base_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:28:41Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_oreblind_delver_base_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained GenerationInputs path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_stonehold_oreblind_delver_generation_input_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_stonehold_oreblind_delver_refinement_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:30:10Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_oreblind_delver_refinement_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [
+        "tdf_asset_elite_stonehold_oreblind_delver_generation_input_v001"
+      ],
+      "externalInputIds": [],
+      "editingSteps": [
+        "Codex built-in image edit used only the retained generated-original input asset.",
+        "The exact refinement prompt is retained in Executed_Generation_Prompts.md.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_stonehold_oreblind_delver_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_stonehold_rimehorn_breaker_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:27:04Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_rimehorn_breaker_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_stonehold_rimehorn_breaker_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_stonehold_slaghide_gorer_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T01:31:51Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_slaghide_gorer_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_stonehold_slaghide_gorer_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_umbral_cindermaw_salamander_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:15:52Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_cindermaw_salamander_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_umbral_cindermaw_salamander_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_umbral_gravewing_siphon_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:21:22Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_gravewing_siphon_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_umbral_gravewing_siphon_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    },
+    {
+      "generationRecordId": "tdf_generation_elite_umbral_veilspine_widow_v001",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "generatorProduct": "Codex built-in image generation",
+      "generatorVersionOrModelWhenAvailable": "unavailable_to_operator",
+      "generatedAtUtc": "2026-07-24T02:17:32Z",
+      "promptTextOrPromptPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_veilspine_widow_v001",
+      "negativeConstraints": [
+        "no_named_ip_or_copied_franchise_identity",
+        "no_marketplace_preview_or_existing_game_art_input",
+        "no_cartoon_mascot_childlike_or_toy_anatomy",
+        "no_literal_armor_heraldry_runes_or_costume",
+        "no_full_body_neon_emissive_outline_or_color_only_identity",
+        "no_inconsistent_limb_head_wing_tail_or_material_identity_between_views",
+        "no_text_labels_logo_signature_or_watermark"
+      ],
+      "inputAssetIds": [],
+      "externalInputIds": [],
+      "editingSteps": [
+        "No image input was supplied.",
+        "Generated PNG was copied byte-for-byte into the retained ConceptSheets path."
+      ],
+      "outputAssetIds": [
+        "tdf_asset_elite_umbral_veilspine_widow_concept_v001"
+      ],
+      "operatorMode": "Codex terrestrial-design"
+    }
+  ],
+  "externalInputs": [
+    {
+      "externalInputId": "tdf_license_codex_imagegen_generated_original_v001",
+      "kind": "project_internal_generation_provenance_record",
+      "sourceUrlOrRepositoryPath": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md",
+      "creatorOrPublisher": "Codex built-in image generation",
+      "license": "project_use_pending_user_creative_approval",
+      "licenseEvidence": "Executed_Generation_Prompts.md#provenance-statement",
+      "retrievedAtUtc": "2026-07-24T02:51:00Z",
+      "sha256": "e102f97d3296dc61272aa17a5785a6b72503b65925a8e033d669793c0942cc70",
+      "usage": "Provenance and project-use statement only; this record was not supplied as a visual generation input."
+    }
+  ],
+  "acquisitionResearch": [
+    {
+      "researchId": "tdf_research_superhive_hydra_dragon",
+      "profileIds": [
+        "tdf_boss_umbral_ashvein_triarch"
+      ],
+      "creatorOrPublisher": "HuyKhoi",
+      "listingUrl": "https://superhivemarket.com/products/hydra-dragon",
+      "listingPriceUsdObserved": 69,
+      "observedAtUtc": "2026-07-23T00:00:00Z",
+      "status": "provisional_technical_base_not_approved_or_purchased",
+      "intendedUse": "topology_rig_animation_and_format_evaluation_only_after_explicit_purchase_approval",
+      "usedAsGenerationInput": false,
+      "unchangedIdentityAllowed": false,
+      "purchaseApproved": false,
+      "technicalFacts": {
+        "polygonCountReported": 90762,
+        "materialCountReported": 8,
+        "textureResolutionReported": "4K",
+        "animationCountReported": 13,
+        "formatsReported": [
+          "blend",
+          "fbx",
+          "spp",
+          "ztl"
+        ]
+      },
+      "knownRedesignNeeds": [
+        "neck_to_body_junctions",
+        "surface_repetition",
+        "wing_anatomy",
+        "silhouette_and_head_identity",
+        "material_language"
+      ]
+    }
+  ],
+  "supersedesSourceVersion": null
+}

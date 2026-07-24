@@ -1,0 +1,1013 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.invalid/schemas/realm-boss-elite-source-packet-v2.schema.json",
+  "title": "AnotherLife Realm Boss And Elite Terrestrial Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "sourceVersion",
+    "createdAtUtc",
+    "authority",
+    "readiness",
+    "qualityTarget",
+    "presentationBudgets",
+    "optimizationIntent",
+    "profiles",
+    "sourceAssets",
+    "generationRecords",
+    "externalInputs",
+    "acquisitionResearch",
+    "supersedesSourceVersion"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 2
+    },
+    "packetId": {
+      "const": "anotherlife-terrestrial-realm-boss-elite-source"
+    },
+    "sourceVersion": {
+      "$ref": "#/$defs/sourceVersion"
+    },
+    "createdAtUtc": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "authority": {
+      "$ref": "#/$defs/authority"
+    },
+    "readiness": {
+      "$ref": "#/$defs/readiness"
+    },
+    "qualityTarget": {
+      "$ref": "#/$defs/qualityTarget"
+    },
+    "presentationBudgets": {
+      "$ref": "#/$defs/presentationBudgets"
+    },
+    "optimizationIntent": {
+      "$ref": "#/$defs/optimizationIntent"
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/profile"
+      }
+    },
+    "sourceAssets": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/sourceAsset"
+      }
+    },
+    "generationRecords": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/generationRecord"
+      }
+    },
+    "externalInputs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/externalInput"
+      }
+    },
+    "acquisitionResearch": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/acquisitionResearch"
+      }
+    },
+    "supersedesSourceVersion": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/sourceVersion"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "nonBlankString": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "\\S"
+    },
+    "sourceVersion": {
+      "type": "string",
+      "pattern": "^tdf-rbe-[0-9]{4}-[0-9]{2}-[0-9]{2}-v[0-9]{3}$"
+    },
+    "sourceId": {
+      "type": "string",
+      "pattern": "^tdf_[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceOwnerMode",
+        "technicalReviewOwnerMode",
+        "narrativeOwnerMode",
+        "engineeringOwnerMode",
+        "finalCreativeApprover",
+        "issue",
+        "runtimeAuthority",
+        "narrativeAuthority",
+        "gameplayAuthority",
+        "purchaseAuthority",
+        "requiresUserCreativeApprovalBeforeIntegration"
+      ],
+      "properties": {
+        "sourceOwnerMode": {
+          "const": "Codex terrestrial-design"
+        },
+        "technicalReviewOwnerMode": {
+          "const": "Codex coordination/review"
+        },
+        "narrativeOwnerMode": {
+          "const": "Codex narrative/content"
+        },
+        "engineeringOwnerMode": {
+          "const": "Codex engineering"
+        },
+        "finalCreativeApprover": {
+          "const": "user"
+        },
+        "issue": {
+          "const": 259
+        },
+        "runtimeAuthority": {
+          "const": false
+        },
+        "narrativeAuthority": {
+          "const": false
+        },
+        "gameplayAuthority": {
+          "const": false
+        },
+        "purchaseAuthority": {
+          "const": false
+        },
+        "requiresUserCreativeApprovalBeforeIntegration": {
+          "const": true
+        }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "technicalPacketState",
+        "userCreativeState",
+        "runtimeIntegrationState",
+        "narrativeNamingState"
+      ],
+      "properties": {
+        "technicalPacketState": {
+          "enum": [
+            "Draft",
+            "SourceIncomplete",
+            "ValidationFailed",
+            "TechnicalReviewReady",
+            "TechnicalHandoffComplete",
+            "Superseded"
+          ]
+        },
+        "userCreativeState": {
+          "enum": [
+            "NotRequested",
+            "ReadyForReview",
+            "ChangesRequested",
+            "ApprovedSourceVersion",
+            "Rejected",
+            "Superseded"
+          ]
+        },
+        "runtimeIntegrationState": {
+          "const": "Blocked"
+        },
+        "narrativeNamingState": {
+          "const": "WorkingLabelsOnly"
+        }
+      }
+    },
+    "qualityTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "audience",
+        "visualStyle",
+        "silhouetteRequiredWithoutColorOrVfx",
+        "normalSpeedMotionReviewRequired",
+        "neutralLightAnatomyReviewRequired",
+        "marketplaceIdentityMayShipUnchanged",
+        "paletteSwapCountsAsUnique"
+      ],
+      "properties": {
+        "audience": {
+          "const": "adult"
+        },
+        "visualStyle": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "silhouetteRequiredWithoutColorOrVfx": {
+          "const": true
+        },
+        "normalSpeedMotionReviewRequired": {
+          "const": true
+        },
+        "neutralLightAnatomyReviewRequired": {
+          "const": true
+        },
+        "marketplaceIdentityMayShipUnchanged": {
+          "const": false
+        },
+        "paletteSwapCountsAsUnique": {
+          "const": false
+        }
+      }
+    },
+    "budgetTier": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maximumSkinnedTriangles",
+        "maximumDeformBones",
+        "maximumMaterialSlots",
+        "maximumActiveParticles",
+        "maximumDynamicLights",
+        "maximumCompressedContentBytes",
+        "packagedInPlayer",
+        "textureIntent"
+      ],
+      "properties": {
+        "maximumSkinnedTriangles": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximumDeformBones": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximumMaterialSlots": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximumActiveParticles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumDynamicLights": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumCompressedContentBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "packagedInPlayer": {
+          "type": "boolean"
+        },
+        "textureIntent": {
+          "$ref": "#/$defs/nonBlankString"
+        }
+      }
+    },
+    "roleBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "low_mobile",
+        "balanced",
+        "high_pc",
+        "cinematic_offline"
+      ],
+      "properties": {
+        "low_mobile": {
+          "$ref": "#/$defs/budgetTier"
+        },
+        "balanced": {
+          "$ref": "#/$defs/budgetTier"
+        },
+        "high_pc": {
+          "$ref": "#/$defs/budgetTier"
+        },
+        "cinematic_offline": {
+          "$ref": "#/$defs/budgetTier"
+        }
+      }
+    },
+    "ratioRange": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "prefixItems": [
+        {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      ]
+    },
+    "presentationBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boss",
+        "elite",
+        "cinematicSourcePackagedInPlayer",
+        "lod1TriangleRatio",
+        "lod2TriangleRatio",
+        "distantTriangleRatioOrImpostor"
+      ],
+      "properties": {
+        "boss": {
+          "$ref": "#/$defs/roleBudgets"
+        },
+        "elite": {
+          "$ref": "#/$defs/roleBudgets"
+        },
+        "cinematicSourcePackagedInPlayer": {
+          "const": false
+        },
+        "lod1TriangleRatio": {
+          "$ref": "#/$defs/ratioRange"
+        },
+        "lod2TriangleRatio": {
+          "$ref": "#/$defs/ratioRange"
+        },
+        "distantTriangleRatioOrImpostor": {
+          "$ref": "#/$defs/ratioRange"
+        }
+      }
+    },
+    "optimizationIntent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "playerPackageIncludesOfflineSource",
+        "playerPackageIncludesMarketplaceArchives",
+        "defaultRuntimeTierRequiresOnlyOneSelectedPresentation",
+        "sharedMaterialAndPackedTextureChannelsRequired",
+        "pooledBoundedVfxRequired",
+        "lodAndCullingRequiredBeforeRuntimeAcceptance",
+        "lowTierThreatAndObjectiveReadMustMatchHigherTiers",
+        "representativeLowTierMobileAndPcProfilingRequired"
+      ],
+      "properties": {
+        "playerPackageIncludesOfflineSource": {
+          "const": false
+        },
+        "playerPackageIncludesMarketplaceArchives": {
+          "const": false
+        },
+        "defaultRuntimeTierRequiresOnlyOneSelectedPresentation": {
+          "const": true
+        },
+        "sharedMaterialAndPackedTextureChannelsRequired": {
+          "const": true
+        },
+        "pooledBoundedVfxRequired": {
+          "const": true
+        },
+        "lodAndCullingRequiredBeforeRuntimeAcceptance": {
+          "const": true
+        },
+        "lowTierThreatAndObjectiveReadMustMatchHigherTiers": {
+          "const": true
+        },
+        "representativeLowTierMobileAndPcProfilingRequired": {
+          "const": true
+        }
+      }
+    },
+    "scale": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referenceBasis",
+        "measurements",
+        "units",
+        "massClass",
+        "measurementStatus"
+      ],
+      "properties": {
+        "referenceBasis": {
+          "const": "adult_champion_body_height_equals_1_0"
+        },
+        "measurements": {
+          "type": "object",
+          "minProperties": 2,
+          "additionalProperties": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        },
+        "units": {
+          "const": "champion_body_height_multiples"
+        },
+        "massClass": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "measurementStatus": {
+          "const": "source_estimate_pending_user_approval_and_engineering_mapping"
+        }
+      }
+    },
+    "stringList": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nonBlankString"
+      },
+      "uniqueItems": true
+    },
+    "variant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "variantId",
+        "profileId",
+        "sourceVersion",
+        "status",
+        "variantKind",
+        "intent",
+        "sourceAssetIds",
+        "changedDesignDimensions",
+        "requiresSeparateEngineeringSource",
+        "userCreativeDecision"
+      ],
+      "properties": {
+        "variantId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "profileId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "sourceVersion": {
+          "$ref": "#/$defs/sourceVersion"
+        },
+        "status": {
+          "enum": [
+            "DeliveredReference",
+            "ProposedTextOnly",
+            "ReadyForUserReview",
+            "ChangesRequested",
+            "UserApproved",
+            "Rejected",
+            "Superseded"
+          ]
+        },
+        "variantKind": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "intent": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "sourceAssetIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "changedDesignDimensions": {
+          "$ref": "#/$defs/stringList"
+        },
+        "requiresSeparateEngineeringSource": {
+          "type": "boolean"
+        },
+        "userCreativeDecision": {
+          "enum": [
+            "NotRequested",
+            "ChangesRequested",
+            "Approved",
+            "Rejected",
+            "Deferred"
+          ]
+        }
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terrestrialProfileId",
+        "sourceVersion",
+        "workingReviewLabel",
+        "workingLabelStatus",
+        "designIntentTags",
+        "designIntentStatus",
+        "profileRole",
+        "approximateWorldScale",
+        "silhouetteClass",
+        "anatomyIntent",
+        "materialSlotIntent",
+        "motionIntent",
+        "effectIntent",
+        "rigOrSkeletonIntent",
+        "requiredAnimationIntent",
+        "lodIntent",
+        "colliderIntent",
+        "vfxAnchorIntent",
+        "accessibilityNotes",
+        "reducedMotionIntent",
+        "explicitExclusions",
+        "unresolvedDecisions",
+        "primarySourceAssetIds",
+        "conceptSourceState",
+        "variants",
+        "acquisitionResearchIds"
+      ],
+      "properties": {
+        "terrestrialProfileId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "sourceVersion": {
+          "$ref": "#/$defs/sourceVersion"
+        },
+        "workingReviewLabel": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "workingLabelStatus": {
+          "const": "nonlocalized_review_only"
+        },
+        "designIntentTags": {
+          "$ref": "#/$defs/stringList"
+        },
+        "designIntentStatus": {
+          "const": "source_design_only"
+        },
+        "profileRole": {
+          "enum": [
+            "outer_warzone_boss",
+            "inner_realm_field_elite"
+          ]
+        },
+        "approximateWorldScale": {
+          "$ref": "#/$defs/scale"
+        },
+        "silhouetteClass": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "anatomyIntent": {
+          "$ref": "#/$defs/stringList"
+        },
+        "materialSlotIntent": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stringList"
+            },
+            {
+              "minItems": 2
+            }
+          ]
+        },
+        "motionIntent": {
+          "$ref": "#/$defs/stringList"
+        },
+        "effectIntent": {
+          "$ref": "#/$defs/stringList"
+        },
+        "rigOrSkeletonIntent": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "requiredAnimationIntent": {
+          "$ref": "#/$defs/stringList"
+        },
+        "lodIntent": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "colliderIntent": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "vfxAnchorIntent": {
+          "$ref": "#/$defs/stringList"
+        },
+        "accessibilityNotes": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "reducedMotionIntent": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "explicitExclusions": {
+          "$ref": "#/$defs/stringList"
+        },
+        "unresolvedDecisions": {
+          "$ref": "#/$defs/stringList"
+        },
+        "primarySourceAssetIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "conceptSourceState": {
+          "enum": [
+            "NotGenerated",
+            "GeneratedUnreviewed",
+            "ReadyForUserReview",
+            "ChangesRequested",
+            "UserApproved",
+            "Rejected",
+            "Superseded"
+          ]
+        },
+        "variants": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/variant"
+          }
+        },
+        "acquisitionResearchIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        }
+      }
+    },
+    "sourceAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "sourceVersion",
+        "profileIds",
+        "variantIds",
+        "roles",
+        "path",
+        "repositoryStorage",
+        "mediaType",
+        "pixelWidth",
+        "pixelHeight",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "unityAssetGuid",
+        "editableSourceAvailable",
+        "editableSourcePath",
+        "editableSourceReason",
+        "generationRecordId",
+        "promptSectionReference",
+        "licenseRecordId",
+        "reviewSurfaceUrlOrPrAnchor",
+        "status"
+      ],
+      "properties": {
+        "assetId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "sourceVersion": {
+          "$ref": "#/$defs/sourceVersion"
+        },
+        "profileIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "variantIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "concept_turnaround",
+              "silhouette_sheet",
+              "scale_chart",
+              "material_callout",
+              "variant_sheet",
+              "pose_motion_sheet",
+              "paintover",
+              "editable_source",
+              "export_preview"
+            ]
+          },
+          "uniqueItems": true
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^unity/(Assets|Docs)/",
+          "not": {
+            "pattern": "(^|/)\\.\\.?(/|$)"
+          }
+        },
+        "repositoryStorage": {
+          "enum": [
+            "git_lfs",
+            "git"
+          ]
+        },
+        "mediaType": {
+          "enum": [
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+          ]
+        },
+        "pixelWidth": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pixelHeight": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "gitLfsOid": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "gitLfsSize": {
+          "oneOf": [
+            {
+              "type": "integer",
+              "minimum": 1
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unityAssetGuid": {
+          "oneOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-f0-9]{32}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "editableSourceAvailable": {
+          "type": "boolean"
+        },
+        "editableSourcePath": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "editableSourceReason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generationRecordId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "promptSectionReference": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "licenseRecordId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "reviewSurfaceUrlOrPrAnchor": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "enum": [
+            "GeneratedUnreviewed",
+            "ReadyForUserReview",
+            "ChangesRequested",
+            "UserApproved",
+            "Rejected",
+            "Superseded"
+          ]
+        }
+      }
+    },
+    "generationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationRecordId",
+        "sourceVersion",
+        "generatorProduct",
+        "generatorVersionOrModelWhenAvailable",
+        "generatedAtUtc",
+        "promptTextOrPromptPath",
+        "negativeConstraints",
+        "inputAssetIds",
+        "externalInputIds",
+        "editingSteps",
+        "outputAssetIds",
+        "operatorMode"
+      ],
+      "properties": {
+        "generationRecordId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "sourceVersion": {
+          "$ref": "#/$defs/sourceVersion"
+        },
+        "generatorProduct": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "generatorVersionOrModelWhenAvailable": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "generatedAtUtc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "promptTextOrPromptPath": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "negativeConstraints": {
+          "$ref": "#/$defs/stringList"
+        },
+        "inputAssetIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "externalInputIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "editingSteps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nonBlankString"
+          }
+        },
+        "outputAssetIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "operatorMode": {
+          "const": "Codex terrestrial-design"
+        }
+      }
+    },
+    "externalInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "externalInputId",
+        "kind",
+        "sourceUrlOrRepositoryPath",
+        "creatorOrPublisher",
+        "license",
+        "licenseEvidence",
+        "retrievedAtUtc",
+        "sha256",
+        "usage"
+      ],
+      "properties": {
+        "externalInputId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "kind": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "sourceUrlOrRepositoryPath": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "creatorOrPublisher": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "license": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "licenseEvidence": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "retrievedAtUtc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "usage": {
+          "$ref": "#/$defs/nonBlankString"
+        }
+      }
+    },
+    "acquisitionResearch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "researchId",
+        "profileIds",
+        "creatorOrPublisher",
+        "listingUrl",
+        "listingPriceUsdObserved",
+        "observedAtUtc",
+        "status",
+        "intendedUse",
+        "usedAsGenerationInput",
+        "unchangedIdentityAllowed",
+        "purchaseApproved",
+        "technicalFacts",
+        "knownRedesignNeeds"
+      ],
+      "properties": {
+        "researchId": {
+          "$ref": "#/$defs/sourceId"
+        },
+        "profileIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/sourceId"
+          },
+          "uniqueItems": true
+        },
+        "creatorOrPublisher": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "listingUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "listingPriceUsdObserved": {
+          "type": "number",
+          "minimum": 0
+        },
+        "observedAtUtc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "const": "provisional_technical_base_not_approved_or_purchased"
+        },
+        "intendedUse": {
+          "$ref": "#/$defs/nonBlankString"
+        },
+        "usedAsGenerationInput": {
+          "const": false
+        },
+        "unchangedIdentityAllowed": {
+          "const": false
+        },
+        "purchaseApproved": {
+          "const": false
+        },
+        "technicalFacts": {
+          "type": "object",
+          "minProperties": 1
+        },
+        "knownRedesignNeeds": {
+          "$ref": "#/$defs/stringList"
+        }
+      }
+    }
+  }
+}
