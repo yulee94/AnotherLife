@@ -59,4 +59,4 @@ This is a direct pixel review of the retained 1536 x 1024 PNG source sheets. The
 
 ## Disposition
 
-The sixteen final sheets are retained as `GeneratedUnreviewed` and are coherent user-review candidates. No source is `ReadyForUserReview` until a direct review surface exists, the manifest references that surface, and the technical packet passes its schema, semantic, provenance, Git LFS, and retrieval checks. The user remains the final creative approver.
+The sixteen final sheets are retained as `ReadyForUserReview` and linked to draft PR #285, which is their direct review surface. Schema, semantic, provenance, Git LFS, and retrieval checks passed before this transition. No source is `UserApproved`; the user remains the final creative approver.

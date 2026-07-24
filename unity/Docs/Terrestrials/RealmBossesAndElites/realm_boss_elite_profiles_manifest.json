@@ -17,7 +17,7 @@
     "requiresUserCreativeApprovalBeforeIntegration": true
   },
   "readiness": {
-    "technicalPacketState": "SourceIncomplete",
+    "technicalPacketState": "TechnicalReviewReady",
     "userCreativeState": "NotRequested",
     "runtimeIntegrationState": "Blocked",
     "narrativeNamingState": "WorkingLabelsOnly"
@@ -234,7 +234,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_boss_stonehold_fault_crowned_colossus_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_boss_stonehold_fault_crowned_colossus_base",
@@ -276,7 +276,7 @@
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
           "backHeight": 2.8,
-          "length": 15.0
+          "length": 15
         },
         "units": "champion_body_height_multiples",
         "massClass": "leviathan",
@@ -350,7 +350,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_boss_eldergrove_mere_root_leviathan_base",
@@ -392,7 +392,7 @@
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
           "standingHeight": 5.5,
-          "wingspan": 18.0
+          "wingspan": 18
         },
         "units": "champion_body_height_multiples",
         "massClass": "colossal_avian",
@@ -467,7 +467,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_boss_crownlands_meridian_tempest_roc_base",
@@ -509,8 +509,8 @@
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
           "shoulderHeight": 4.5,
-          "length": 13.0,
-          "wingspan": 15.0
+          "length": 13,
+          "wingspan": 15
         },
         "units": "champion_body_height_multiples",
         "massClass": "colossal_winged",
@@ -588,7 +588,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_boss_umbral_ashvein_triarch_concept_v002"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_boss_umbral_ashvein_triarch_base",
@@ -701,7 +701,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_stonehold_rimehorn_breaker_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_stonehold_rimehorn_breaker_base",
@@ -743,7 +743,7 @@
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
           "shoulderHeight": 1.2,
-          "length": 4.0
+          "length": 4
         },
         "units": "champion_body_height_multiples",
         "massClass": "medium_long",
@@ -814,7 +814,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_stonehold_oreblind_delver_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_stonehold_oreblind_delver_base",
@@ -928,7 +928,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_stonehold_slaghide_gorer_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_stonehold_slaghide_gorer_base",
@@ -1043,7 +1043,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_eldergrove_hollowbark_stalker_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_eldergrove_hollowbark_stalker_base",
@@ -1158,7 +1158,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_eldergrove_mirrorfin_lurker_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_eldergrove_mirrorfin_lurker_base",
@@ -1200,7 +1200,7 @@
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
           "shoulderHeight": 2.3,
-          "headHeight": 3.0,
+          "headHeight": 3,
           "length": 3.4
         },
         "units": "champion_body_height_multiples",
@@ -1274,7 +1274,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_eldergrove_sunmane_thornstag_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_eldergrove_sunmane_thornstag_base",
@@ -1389,7 +1389,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_crownlands_crownstep_lion_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_crownlands_crownstep_lion_base",
@@ -1430,9 +1430,9 @@
       "approximateWorldScale": {
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
-          "hipHeight": 2.0,
+          "hipHeight": 2,
           "headHeight": 2.7,
-          "length": 3.0
+          "length": 3
         },
         "units": "champion_body_height_multiples",
         "massClass": "fast_avian",
@@ -1506,7 +1506,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_crownlands_galeclaw_courser_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_crownlands_galeclaw_courser_base",
@@ -1621,7 +1621,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_crownlands_reliquary_basilisk_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_crownlands_reliquary_basilisk_base",
@@ -1662,7 +1662,7 @@
       "approximateWorldScale": {
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
-          "backHeight": 1.0,
+          "backHeight": 1,
           "length": 4.2
         },
         "units": "champion_body_height_multiples",
@@ -1736,7 +1736,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_umbral_cindermaw_salamander_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_umbral_cindermaw_salamander_base",
@@ -1778,7 +1778,7 @@
         "referenceBasis": "adult_champion_body_height_equals_1_0",
         "measurements": {
           "bodyHeight": 1.4,
-          "legSpan": 4.0
+          "legSpan": 4
         },
         "units": "champion_body_height_multiples",
         "massClass": "high_invertebrate",
@@ -1852,7 +1852,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_umbral_veilspine_widow_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_umbral_veilspine_widow_base",
@@ -1971,7 +1971,7 @@
       "primarySourceAssetIds": [
         "tdf_asset_elite_umbral_gravewing_siphon_concept_v001"
       ],
-      "conceptSourceState": "GeneratedUnreviewed",
+      "conceptSourceState": "ReadyForUserReview",
       "variants": [
         {
           "variantId": "tdf_elite_umbral_gravewing_siphon_base",
@@ -2059,8 +2059,8 @@
       "generationRecordId": "tdf_generation_boss_crownlands_meridian_tempest_roc_identity_refinement_v002",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_crownlands_meridian_tempest_roc_identity_refinement_v002",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_boss_crownlands_meridian_tempest_roc_generation_input_v001",
@@ -2123,8 +2123,8 @@
       "generationRecordId": "tdf_generation_boss_eldergrove_mere_root_leviathan_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_eldergrove_mere_root_leviathan_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_boss_stonehold_fault_crowned_colossus_concept_v001",
@@ -2158,8 +2158,8 @@
       "generationRecordId": "tdf_generation_boss_stonehold_fault_crowned_colossus_refinement_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_stonehold_fault_crowned_colossus_refinement_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_boss_stonehold_fault_crowned_colossus_generation_input_v001",
@@ -2251,8 +2251,8 @@
       "generationRecordId": "tdf_generation_boss_umbral_ashvein_triarch_head_refinement_v003",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_boss_umbral_ashvein_triarch_head_refinement_v003",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_boss_umbral_ashvein_triarch_generation_input_v001",
@@ -2344,8 +2344,8 @@
       "generationRecordId": "tdf_generation_elite_crownlands_crownstep_lion_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_crownstep_lion_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_crownlands_galeclaw_courser_concept_v001",
@@ -2379,8 +2379,8 @@
       "generationRecordId": "tdf_generation_elite_crownlands_galeclaw_courser_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_galeclaw_courser_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_crownlands_reliquary_basilisk_concept_v001",
@@ -2414,8 +2414,8 @@
       "generationRecordId": "tdf_generation_elite_crownlands_reliquary_basilisk_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_crownlands_reliquary_basilisk_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_eldergrove_hollowbark_stalker_concept_v001",
@@ -2449,8 +2449,8 @@
       "generationRecordId": "tdf_generation_elite_eldergrove_hollowbark_stalker_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_hollowbark_stalker_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_eldergrove_mirrorfin_lurker_concept_v001",
@@ -2484,8 +2484,8 @@
       "generationRecordId": "tdf_generation_elite_eldergrove_mirrorfin_lurker_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_mirrorfin_lurker_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_eldergrove_sunmane_thornstag_concept_v001",
@@ -2519,8 +2519,8 @@
       "generationRecordId": "tdf_generation_elite_eldergrove_sunmane_thornstag_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_eldergrove_sunmane_thornstag_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_stonehold_oreblind_delver_concept_v001",
@@ -2554,8 +2554,8 @@
       "generationRecordId": "tdf_generation_elite_stonehold_oreblind_delver_refinement_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_oreblind_delver_refinement_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_stonehold_oreblind_delver_generation_input_v001",
@@ -2618,8 +2618,8 @@
       "generationRecordId": "tdf_generation_elite_stonehold_rimehorn_breaker_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_rimehorn_breaker_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_stonehold_slaghide_gorer_concept_v001",
@@ -2653,8 +2653,8 @@
       "generationRecordId": "tdf_generation_elite_stonehold_slaghide_gorer_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_stonehold_slaghide_gorer_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_umbral_cindermaw_salamander_concept_v001",
@@ -2688,8 +2688,8 @@
       "generationRecordId": "tdf_generation_elite_umbral_cindermaw_salamander_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_cindermaw_salamander_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_umbral_gravewing_siphon_concept_v001",
@@ -2723,8 +2723,8 @@
       "generationRecordId": "tdf_generation_elite_umbral_gravewing_siphon_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_gravewing_siphon_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     },
     {
       "assetId": "tdf_asset_elite_umbral_veilspine_widow_concept_v001",
@@ -2758,8 +2758,8 @@
       "generationRecordId": "tdf_generation_elite_umbral_veilspine_widow_v001",
       "promptSectionReference": "unity/Docs/Terrestrials/RealmBossesAndElites/Executed_Generation_Prompts.md#tdf_generation_elite_umbral_veilspine_widow_v001",
       "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001",
-      "reviewSurfaceUrlOrPrAnchor": null,
-      "status": "GeneratedUnreviewed"
+      "reviewSurfaceUrlOrPrAnchor": "https://github.com/yulee94/AnotherLife/pull/285",
+      "status": "ReadyForUserReview"
     }
   ],
   "generationRecords": [

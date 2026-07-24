@@ -5,7 +5,7 @@
 - Issue: #259
 - Primary Codex mode: Terrestrial-design
 - Source version: `tdf-rbe-2026-07-24-v001`
-- State: generated source proposal pending direct review surface and user creative approval
+- State: source proposal ready for user review in draft PR #285; user creative approval pending
 - Runtime authority: none
 - Narrative authority: none
 
@@ -377,7 +377,7 @@ This source does not approve:
 - Realm and biome differentiation: source-complete.
 - Silhouette, anatomy, material, motion, and effect intent: source-complete.
 - Scalability intent: source-complete, pending coordination review and profiling.
-- Concept sheets: 16 final candidates generated and directly inspected; all remain `GeneratedUnreviewed`.
+- Concept sheets: 16 final candidates generated, directly inspected, and linked to draft PR #285 as `ReadyForUserReview`.
 - Prompt provenance and immutable source identity: complete for 23 generated outputs, including seven retained refinement inputs or superseded candidates.
 - Same-source production fidelity: blocked until approved models, rigs, materials, and normal-speed motion exist.
 - Marketplace acquisition: blocked pending role selection and explicit purchase approval.
