@@ -1,5 +1,6 @@
 package com.example.anotherlife.ui.shell
 
+import android.util.Log
 import com.example.anotherlife.BuildConfig
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -24,6 +25,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -40,6 +42,7 @@ import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
 import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.DialogueChoice
+import com.example.anotherlife.data.contracts.AndroidSharedCatalogLoader
 
 /**
  * The core adaptive shell of "Another Life".
@@ -51,6 +54,17 @@ import com.example.anotherlife.data.simulation.DialogueChoice
 @Composable
 fun AnotherLifeShell() {
     val debugToolsEnabled = BuildConfig.DEBUG
+    val appContext = LocalContext.current.applicationContext
+    val sharedCatalogLoader = remember(appContext) {
+        AndroidSharedCatalogLoader.shared(appContext)
+    }
+    LaunchedEffect(sharedCatalogLoader) {
+        runCatching { sharedCatalogLoader.load() }
+            .onFailure { error ->
+                Log.e("AnotherLifeShell", "Shared catalog validation failed.", error)
+            }
+    }
+
     // Shared state for the simulation
     val kingdomState = remember { KingdomState() }
     val narrativeState = remember { 

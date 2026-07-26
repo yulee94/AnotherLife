@@ -39,6 +39,16 @@ class AndroidSharedCatalogLoader(context: Context) {
         const val CHARACTER_CUSTOMIZATION_ASSET = "al_character_customization_catalog.json"
         const val SKILL_WEATHER_ASSET = "al_skill_weather_catalog.json"
         const val REALM_CATALOG_ASSET = "al_realm_catalog.json"
+
+        @Volatile
+        private var sharedInstance: AndroidSharedCatalogLoader? = null
+
+        fun shared(context: Context): AndroidSharedCatalogLoader {
+            sharedInstance?.let { return it }
+            return synchronized(this) {
+                sharedInstance ?: AndroidSharedCatalogLoader(context).also { sharedInstance = it }
+            }
+        }
     }
 }
 
