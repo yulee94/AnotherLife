@@ -18,6 +18,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import java.lang.reflect.Method
 import org.json.JSONObject
 
 /**
@@ -44,12 +45,12 @@ fun UnityView(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 hostState.value = this
-                setRoute(currentRouteTag.value) { currentOnOutcome.value(it) }
+                setRoute(currentRouteTag.value, currentOnOutcome.value)
                 currentOnReady.value()
             }
         },
         update = { host ->
-            host.setRoute(routeTag) { currentOnOutcome.value(it) }
+            host.setRoute(routeTag, currentOnOutcome.value)
         },
         modifier = modifier.fillMaxSize()
     )
@@ -210,39 +211,38 @@ private class ReflectionUnityPlayer private constructor(
     private val instance: Any,
     private val playerClass: Class<*>
 ) {
+    private val resumeMethod = playerClass.noArgMethod("resume")
+    private val pauseMethod = playerClass.noArgMethod("pause")
+    private val destroyMethod = playerClass.noArgMethod("destroy")
+    private val windowFocusChangedMethod = playerClass.methods.firstOrNull { method ->
+        method.name == "windowFocusChanged" &&
+            method.parameterTypes.contentEquals(arrayOf(java.lang.Boolean.TYPE))
+    }
+    private val sendMessageMethod = playerClass.methods.firstOrNull { method ->
+        method.name == "UnitySendMessage" &&
+            method.parameterTypes.contentEquals(
+                arrayOf(String::class.java, String::class.java, String::class.java)
+            )
+    }
+
     val view: View = instance as View
 
-    fun resume() = invokeNoArgs("resume")
+    fun resume() = resumeMethod.invokeSafely()
 
-    fun pause() = invokeNoArgs("pause")
+    fun pause() = pauseMethod.invokeSafely()
 
-    fun destroy() = invokeNoArgs("destroy")
+    fun destroy() = destroyMethod.invokeSafely()
 
     fun windowFocusChanged(hasFocus: Boolean) {
-        playerClass.methods
-            .firstOrNull { method ->
-                method.name == "windowFocusChanged" &&
-                    method.parameterTypes.size == 1 &&
-                    method.parameterTypes[0] == java.lang.Boolean.TYPE
-            }
-            ?.invoke(instance, hasFocus)
+        runCatching { windowFocusChangedMethod?.invoke(instance, hasFocus) }
     }
 
     fun sendMessage(gameObject: String, method: String, payload: String) {
-        playerClass.methods
-            .firstOrNull { candidate ->
-                candidate.name == "UnitySendMessage" &&
-                    candidate.parameterTypes.contentEquals(
-                        arrayOf(String::class.java, String::class.java, String::class.java)
-                    )
-            }
-            ?.invoke(instance, gameObject, method, payload)
+        runCatching { sendMessageMethod?.invoke(instance, gameObject, method, payload) }
     }
 
-    private fun invokeNoArgs(name: String) {
-        playerClass.methods
-            .firstOrNull { method -> method.name == name && method.parameterTypes.isEmpty() }
-            ?.invoke(instance)
+    private fun Method?.invokeSafely() {
+        runCatching { this?.invoke(instance) }
     }
 
     companion object {
@@ -257,5 +257,11 @@ private class ReflectionUnityPlayer private constructor(
                 ReflectionUnityPlayer(instance, playerClass)
             }.getOrNull()
         }
+    }
+}
+
+private fun Class<*>.noArgMethod(name: String): Method? {
+    return methods.firstOrNull { method ->
+        method.name == name && method.parameterTypes.isEmpty()
     }
 }
