@@ -110,6 +110,21 @@ namespace AL.RealmSelection
             return new RealmCatalogLoadResult(new RealmCatalogSnapshot(document.version, entries), "AL-REALM-CATALOG-READY");
         }
 
+        internal static void MarkLoading()
+        {
+            Status = RealmCatalogRuntimeStatus.Loading;
+            TechnicalCode = "AL-REALM-CATALOG-LOADING";
+        }
+
+        internal static void Publish(RealmCatalogLoadResult result)
+        {
+            Current = result.Snapshot;
+            TechnicalCode = result.TechnicalCode;
+            Status = Current == null ? RealmCatalogRuntimeStatus.Unavailable : RealmCatalogRuntimeStatus.Ready;
+        }
+
+        internal static RealmCatalogLoadResult ReadFailure() => Reject("AL-REALM-CATALOG-READ-FAILED");
+
         private static bool TryRuntimeId(string value, out RealmId id)
         {
             return Enum.TryParse(value, false, out id) && id != RealmId.None && Enum.IsDefined(typeof(RealmId), id);
@@ -126,17 +141,16 @@ namespace AL.RealmSelection
     {
         private IEnumerator Start()
         {
-            Status = RealmCatalogRuntimeStatus.Loading;
-            TechnicalCode = "AL-REALM-CATALOG-LOADING";
-            string path = System.IO.Path.Combine(Application.streamingAssetsPath, RelativePath);
+            RealmCatalogRuntime.MarkLoading();
+            string path = System.IO.Path.Combine(Application.streamingAssetsPath, RealmCatalogRuntime.RelativePath);
             using (UnityWebRequest request = UnityWebRequest.Get(path))
             {
                 request.timeout = 10;
                 yield return request.SendWebRequest();
-                RealmCatalogLoadResult result = request.result == UnityWebRequest.Result.Success ? Parse(request.downloadHandler.text) : Reject("AL-REALM-CATALOG-READ-FAILED");
-                Current = result.Snapshot;
-                TechnicalCode = result.TechnicalCode;
-                Status = Current == null ? RealmCatalogRuntimeStatus.Unavailable : RealmCatalogRuntimeStatus.Ready;
+                RealmCatalogLoadResult result = request.result == UnityWebRequest.Result.Success
+                    ? RealmCatalogRuntime.Parse(request.downloadHandler.text)
+                    : RealmCatalogRuntime.ReadFailure();
+                RealmCatalogRuntime.Publish(result);
             }
             Destroy(gameObject);
         }
