@@ -3,6 +3,7 @@ using UnityEngine.SceneManagement;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
+using AL.RealmSelection;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
@@ -64,7 +65,15 @@ namespace AL.UI.RealmSelection
         {
             _selectionInProgress = true;
             var realmService = ServiceLocator.Get<IRealmService>();
-            realmService.SelectRealm(id);
+            RealmSelectionResult result = realmService.TrySelectRealm(
+                new RealmSelectionRequest(System.Guid.NewGuid().ToString("N"), id));
+            if (!result.AllowsNavigation)
+            {
+                _selectionInProgress = false;
+                Debug.LogError(result.TechnicalCode);
+                yield break;
+            }
+
             ShowCommitOverlay(id);
 
             const float duration = 0.72f;
