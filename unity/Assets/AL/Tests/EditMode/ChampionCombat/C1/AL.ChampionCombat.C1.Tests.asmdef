@@ -1,0 +1,23 @@
+{
+    "name": "AL.ChampionCombat.C1.Tests",
+    "rootNamespace": "AL.Tests.EditMode.ChampionCombat.C1",
+    "references": [
+        "AL.ChampionCombat.C1"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": true,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
