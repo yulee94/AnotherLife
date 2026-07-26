@@ -120,24 +120,26 @@ namespace AL.RealmSelection
         [Serializable] private sealed class RealmCatalogSelectionPolicy { public string selectionMode; public string realmLockScope; public string subCharacterPolicy; public string crossRealmCreationPolicy; }
         [Serializable] private sealed class RealmCatalogRealm { public string id; public string legacyRuntimeId; public string displayName; public string[] realmGemIds; }
 
-        private sealed class RealmCatalogRuntimeHost : MonoBehaviour
+    }
+
+    public sealed class RealmCatalogRuntimeHost : MonoBehaviour
+    {
+        private IEnumerator Start()
         {
-            private IEnumerator Start()
+            Status = RealmCatalogRuntimeStatus.Loading;
+            TechnicalCode = "AL-REALM-CATALOG-LOADING";
+            string path = System.IO.Path.Combine(Application.streamingAssetsPath, RelativePath);
+            using (UnityWebRequest request = UnityWebRequest.Get(path))
             {
-                Status = RealmCatalogRuntimeStatus.Loading;
-                TechnicalCode = "AL-REALM-CATALOG-LOADING";
-                string path = System.IO.Path.Combine(Application.streamingAssetsPath, RelativePath);
-                using (UnityWebRequest request = UnityWebRequest.Get(path))
-                {
-                    request.timeout = 10;
-                    yield return request.SendWebRequest();
-                    RealmCatalogLoadResult result = request.result == UnityWebRequest.Result.Success ? Parse(request.downloadHandler.text) : Reject("AL-REALM-CATALOG-READ-FAILED");
-                    Current = result.Snapshot;
-                    TechnicalCode = result.TechnicalCode;
-                    Status = Current == null ? RealmCatalogRuntimeStatus.Unavailable : RealmCatalogRuntimeStatus.Ready;
-                }
-                Destroy(gameObject);
+                request.timeout = 10;
+                yield return request.SendWebRequest();
+                RealmCatalogLoadResult result = request.result == UnityWebRequest.Result.Success ? Parse(request.downloadHandler.text) : Reject("AL-REALM-CATALOG-READ-FAILED");
+                Current = result.Snapshot;
+                TechnicalCode = result.TechnicalCode;
+                Status = Current == null ? RealmCatalogRuntimeStatus.Unavailable : RealmCatalogRuntimeStatus.Ready;
             }
+            Destroy(gameObject);
         }
     }
+
 }
