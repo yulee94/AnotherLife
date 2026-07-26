@@ -11,6 +11,70 @@ namespace AL.Core.Interfaces
         IEnumerable<OwnedEquipmentState> GetOwnedEquipment();
     }
 
+    public enum BossLootApplicationValidationStatus
+    {
+        None = 0,
+        Valid = 1,
+        InvalidEncounterId = 2,
+        InvalidRewardResultId = 3,
+        InvalidBossId = 4
+    }
+
+    [Serializable]
+    public sealed class BossLootApplicationIdentity
+    {
+        public string EncounterId;
+        public string RewardResultId;
+        public string BossId;
+    }
+
+    public sealed class BossLootApplicationValidationResult
+    {
+        public BossLootApplicationValidationResult(
+            BossLootApplicationValidationStatus status,
+            string diagnosticCode)
+        {
+            Status = status;
+            DiagnosticCode = diagnosticCode ?? string.Empty;
+        }
+
+        public BossLootApplicationValidationStatus Status { get; }
+        public string DiagnosticCode { get; }
+        public bool IsValid => Status == BossLootApplicationValidationStatus.Valid;
+    }
+
+    public static class BossLootApplicationIdentityValidator
+    {
+        public static BossLootApplicationValidationResult Validate(
+            BossLootApplicationIdentity identity)
+        {
+            if (identity == null || string.IsNullOrWhiteSpace(identity.EncounterId))
+            {
+                return new BossLootApplicationValidationResult(
+                    BossLootApplicationValidationStatus.InvalidEncounterId,
+                    "AL-BOSS-LOOT-ENCOUNTER-ID-INVALID");
+            }
+
+            if (string.IsNullOrWhiteSpace(identity.RewardResultId))
+            {
+                return new BossLootApplicationValidationResult(
+                    BossLootApplicationValidationStatus.InvalidRewardResultId,
+                    "AL-BOSS-LOOT-RESULT-ID-INVALID");
+            }
+
+            if (string.IsNullOrWhiteSpace(identity.BossId))
+            {
+                return new BossLootApplicationValidationResult(
+                    BossLootApplicationValidationStatus.InvalidBossId,
+                    "AL-BOSS-LOOT-BOSS-ID-INVALID");
+            }
+
+            return new BossLootApplicationValidationResult(
+                BossLootApplicationValidationStatus.Valid,
+                string.Empty);
+        }
+    }
+
     [Serializable]
     public class BossLootRequest
     {

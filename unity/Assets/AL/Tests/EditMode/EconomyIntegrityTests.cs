@@ -1149,6 +1149,36 @@ namespace AL.Tests.EditMode
             }
         }
 
+        [TestCase(null, "result_a", "boss_a", "InvalidEncounterId", "AL-BOSS-LOOT-ENCOUNTER-ID-INVALID")]
+        [TestCase(" ", "result_a", "boss_a", "InvalidEncounterId", "AL-BOSS-LOOT-ENCOUNTER-ID-INVALID")]
+        [TestCase("encounter_a", null, "boss_a", "InvalidRewardResultId", "AL-BOSS-LOOT-RESULT-ID-INVALID")]
+        [TestCase("encounter_a", "result_a", "", "InvalidBossId", "AL-BOSS-LOOT-BOSS-ID-INVALID")]
+        [TestCase("encounter_a", "result_a", "boss_a", "Valid", "")]
+        public void BossLootApplicationIdentityRequiresStableNonblankIds(
+            string encounterId,
+            string rewardResultId,
+            string bossId,
+            string expectedStatus,
+            string expectedDiagnostic)
+        {
+            Type identityType = GetRuntimeType("AL.Core.Interfaces.BossLootApplicationIdentity");
+            object identity = Activator.CreateInstance(identityType);
+            SetField(identity, "EncounterId", encounterId);
+            SetField(identity, "RewardResultId", rewardResultId);
+            SetField(identity, "BossId", bossId);
+
+            Type validatorType = GetRuntimeType("AL.Core.Interfaces.BossLootApplicationIdentityValidator");
+            MethodInfo validate = validatorType.GetMethod(
+                "Validate",
+                BindingFlags.Static | BindingFlags.Public);
+            Assert.NotNull(validate);
+            object result = validate.Invoke(null, new[] { identity });
+
+            Assert.AreEqual(expectedStatus, GetProperty(result, "Status").ToString());
+            Assert.AreEqual(expectedDiagnostic, GetProperty(result, "DiagnosticCode"));
+            Assert.AreEqual(expectedStatus == "Valid", GetProperty(result, "IsValid"));
+        }
+
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
         {
             object[] args = { realm, null };
