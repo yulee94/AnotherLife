@@ -36,7 +36,7 @@ function Test-Packet($packet) {
     }
     Assert (($packet.externalCapabilities | Where-Object status -ne 'requested').Count -eq 0) 'external capability falsely verified'
     Assert (($packet.consequences | Group-Object id | Where-Object Count -gt 1).Count -eq 0) 'conflicting consequence trigger'
-    Assert (($packet.transitions | Where-Object from -eq 'OFFERED').Count -gt 0) 'unreachable start state'
+    Assert (@($packet.transitions | Where-Object { $_.from -eq 'OFFERED' }).Count -gt 0) 'unreachable start state'
     $reachable = @{ OFFERED = $true }
     do {
         $before = $reachable.Count
