@@ -12,6 +12,7 @@ namespace AL.Services.Local
         private readonly ISaveGameService _saveGameService;
         private readonly IGameDataService _gameDataService;
         private readonly RealmCatalogSnapshot _catalog;
+        private RealmCatalogSnapshot Catalog => _catalog ?? RealmCatalogRuntime.Current;
 
         public RealmId CurrentRealmId => Identity.IsCommittedValid ? Identity.RealmId : RealmId.None;
         public RealmDefinition CurrentRealm => Identity.IsCommittedValid ? _gameDataService.GetRealm(Identity.RealmId) : null;
@@ -28,7 +29,7 @@ namespace AL.Services.Local
                 if (!IsDefinedPlayable(selected))
                     return Snapshot(RealmIdentityStatus.InvalidPersistedIdentity, selected, "AL-REALM-PERSISTED-ID-INVALID");
                 RealmCatalogEntry ignored;
-                if (_catalog == null || !_catalog.TryGet(selected, out ignored))
+                if (Catalog == null || !Catalog.TryGet(selected, out ignored))
                     return Snapshot(RealmIdentityStatus.CatalogUnavailable, selected, "AL-REALM-DEFINITION-UNAVAILABLE");
                 return Snapshot(RealmIdentityStatus.CommittedValid, selected, "AL-REALM-COMMITTED-VALID");
             }
@@ -57,7 +58,7 @@ namespace AL.Services.Local
             if (!IsDefinedPlayable(request.RequestedRealmId))
                 return Result(RealmSelectionStatus.InvalidRealm, request.RequestedRealmId, false, false, "AL-REALM-REQUEST-INVALID");
             RealmCatalogEntry ignored;
-            if (_catalog == null || !_catalog.TryGet(request.RequestedRealmId, out ignored))
+            if (Catalog == null || !Catalog.TryGet(request.RequestedRealmId, out ignored))
                 return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, "AL-REALM-DEFINITION-UNAVAILABLE");
             if (_saveGameService == null)
                 return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PROFILE-UNAVAILABLE");
@@ -65,7 +66,7 @@ namespace AL.Services.Local
             RealmId existing = _saveGameService.CurrentSave == null ? RealmId.None : _saveGameService.CurrentSave.SelectedRealm;
             if (existing != RealmId.None)
             {
-                if (!IsDefinedPlayable(existing) || !_catalog.TryGet(existing, out ignored))
+                if (!IsDefinedPlayable(existing) || !Catalog.TryGet(existing, out ignored))
                     return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PERSISTED-ID-INVALID");
                 return existing == request.RequestedRealmId
                     ? Result(RealmSelectionStatus.AlreadyCommittedSameRealm, request.RequestedRealmId, false, true, "AL-REALM-ALREADY-COMMITTED")
@@ -94,7 +95,7 @@ namespace AL.Services.Local
 
         private RealmIdentitySnapshot Snapshot(RealmIdentityStatus status, RealmId id, string code)
         {
-            return new RealmIdentitySnapshot(status, id, _catalog == null ? string.Empty : _catalog.Version, code);
+            return new RealmIdentitySnapshot(status, id, Catalog == null ? string.Empty : Catalog.Version, code);
         }
 
         private RealmSelectionResult Result(RealmSelectionStatus status, RealmId requested, bool mutated, bool persisted, string code)
