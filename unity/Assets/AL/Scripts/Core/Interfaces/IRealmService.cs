@@ -1,5 +1,6 @@
 using AL.Core;
 using AL.Data.Definitions;
+using AL.RealmSelection;
 
 namespace AL.Core.Interfaces
 {
@@ -7,6 +8,8 @@ namespace AL.Core.Interfaces
     {
         RealmId CurrentRealmId { get; }
         RealmDefinition CurrentRealm { get; }
+        RealmIdentitySnapshot Identity { get; }
+        RealmSelectionResult TrySelectRealm(RealmSelectionRequest request);
         void SelectRealm(RealmId id);
     }
 }
