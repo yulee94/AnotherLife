@@ -40,7 +40,6 @@ import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
 import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.DialogueChoice
-import com.example.anotherlife.ui.unity.UnityView
 
 /**
  * The core adaptive shell of "Another Life".

@@ -1,4 +1,7 @@
 <resources>
 
-    <style name="Theme.AnotherLife" parent="Theme.MaterialComponents.Light" />
+    <style name="Theme.AnotherLife" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowActionModeOverlay">true</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
 </resources>
