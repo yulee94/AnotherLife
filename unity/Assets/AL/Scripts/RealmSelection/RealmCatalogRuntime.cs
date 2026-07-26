@@ -129,6 +129,7 @@ namespace AL.RealmSelection
                 string path = System.IO.Path.Combine(Application.streamingAssetsPath, RelativePath);
                 using (UnityWebRequest request = UnityWebRequest.Get(path))
                 {
+                    request.timeout = 10;
                     yield return request.SendWebRequest();
                     RealmCatalogLoadResult result = request.result == UnityWebRequest.Result.Success ? Parse(request.downloadHandler.text) : Reject("AL-REALM-CATALOG-READ-FAILED");
                     Current = result.Snapshot;
