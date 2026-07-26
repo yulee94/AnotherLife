@@ -64,6 +64,13 @@ namespace AL.UI.RealmSelection
         private IEnumerator RealmSelectionCommitRoutine(RealmId id)
         {
             _selectionInProgress = true;
+            float catalogWait = 0f;
+            while (RealmCatalogRuntime.Status == RealmCatalogRuntimeStatus.Loading && catalogWait < 10f)
+            {
+                catalogWait += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
             var realmService = ServiceLocator.Get<IRealmService>();
             RealmSelectionResult result = realmService.TrySelectRealm(
                 new RealmSelectionRequest(System.Guid.NewGuid().ToString("N"), id));
