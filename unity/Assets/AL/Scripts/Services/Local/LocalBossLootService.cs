@@ -31,7 +31,22 @@ namespace AL.Services.Local
 
         public IEnumerable<OwnedEquipmentState> GetOwnedEquipment()
         {
-            return _saveGameService.CurrentSave?.OwnedEquipment ?? new List<OwnedEquipmentState>();
+            var ownedEquipment = _saveGameService.CurrentSave?.OwnedEquipment;
+            if (ownedEquipment == null || ownedEquipment.Count == 0)
+            {
+                return Array.Empty<OwnedEquipmentState>();
+            }
+
+            var snapshot = new List<OwnedEquipmentState>(ownedEquipment.Count);
+            foreach (OwnedEquipmentState owned in ownedEquipment)
+            {
+                if (owned != null)
+                {
+                    snapshot.Add(CloneOwnedEquipment(owned));
+                }
+            }
+
+            return snapshot.AsReadOnly();
         }
 
         public BossLootResult RollLoot(BossLootRequest request)
@@ -57,11 +72,13 @@ namespace AL.Services.Local
             List<BossLootDrop> drops = RollDrops(request, bossId);
             foreach (var drop in drops)
             {
-                result.Drops.Add(drop);
-                AddOwnedEquipment(drop, bossId);
+                if (TryAddOwnedEquipment(drop, bossId))
+                {
+                    result.Drops.Add(drop);
+                }
             }
 
-            if (drops.Count > 0)
+            if (result.Drops.Count > 0)
             {
                 _saveGameService.Save();
             }
@@ -145,29 +162,57 @@ namespace AL.Services.Local
             };
         }
 
-        private void AddOwnedEquipment(BossLootDrop drop, string bossId)
+        private bool TryAddOwnedEquipment(BossLootDrop drop, string bossId)
         {
             var save = _saveGameService.CurrentSave;
-            if (save == null)
+            if (save == null ||
+                drop == null ||
+                string.IsNullOrWhiteSpace(drop.EquipmentId) ||
+                drop.Quantity <= 0)
             {
-                return;
+                return false;
             }
 
             save.OwnedEquipment ??= new List<OwnedEquipmentState>();
 
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            foreach (var owned in save.OwnedEquipment)
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            OwnedEquipmentState matching = null;
+            foreach (OwnedEquipmentState owned in save.OwnedEquipment)
             {
-                if (owned.EquipmentId != drop.EquipmentId)
+                if (owned == null ||
+                    string.IsNullOrWhiteSpace(owned.EquipmentId) ||
+                    owned.Quantity <= 0 ||
+                    owned.FirstAcquiredTimestamp <= 0 ||
+                    owned.LastAcquiredTimestamp < owned.FirstAcquiredTimestamp ||
+                    !ids.Add(owned.EquipmentId))
                 {
-                    continue;
+                    Debug.LogError("AL-EQUIPMENT-INVENTORY-MALFORMED: Owned equipment mutation was rejected without changing persisted state.");
+                    return false;
                 }
 
-                owned.Quantity += drop.Quantity;
-                owned.LastAcquiredTimestamp = now;
-                owned.SourceBossId = bossId;
-                owned.AnnounceWorldDrop |= drop.AnnounceWorldDrop;
-                return;
+                if (string.Equals(owned.EquipmentId, drop.EquipmentId, StringComparison.Ordinal))
+                {
+                    matching = owned;
+                }
+            }
+
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (matching != null)
+            {
+                try
+                {
+                    matching.Quantity = checked(matching.Quantity + drop.Quantity);
+                }
+                catch (OverflowException)
+                {
+                    Debug.LogError("AL-EQUIPMENT-QUANTITY-OVERFLOW: Owned equipment mutation was rejected without changing persisted state.");
+                    return false;
+                }
+
+                matching.LastAcquiredTimestamp = now;
+                matching.SourceBossId = bossId;
+                matching.AnnounceWorldDrop |= drop.AnnounceWorldDrop;
+                return true;
             }
 
             save.OwnedEquipment.Add(new OwnedEquipmentState
@@ -184,6 +229,25 @@ namespace AL.Services.Local
                 FirstAcquiredTimestamp = now,
                 LastAcquiredTimestamp = now
             });
+            return true;
+        }
+
+        private static OwnedEquipmentState CloneOwnedEquipment(OwnedEquipmentState source)
+        {
+            return new OwnedEquipmentState
+            {
+                EquipmentId = source.EquipmentId,
+                DisplayName = source.DisplayName,
+                Slot = source.Slot,
+                AttackBonus = source.AttackBonus,
+                DefenseBonus = source.DefenseBonus,
+                HealthBonus = source.HealthBonus,
+                Quantity = source.Quantity,
+                SourceBossId = source.SourceBossId,
+                AnnounceWorldDrop = source.AnnounceWorldDrop,
+                FirstAcquiredTimestamp = source.FirstAcquiredTimestamp,
+                LastAcquiredTimestamp = source.LastAcquiredTimestamp
+            };
         }
 
         private void NotifyResult(BossLootRequest request, BossLootResult result)

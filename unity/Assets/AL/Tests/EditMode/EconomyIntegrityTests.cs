@@ -1086,6 +1086,69 @@ namespace AL.Tests.EditMode
             }
         }
 
+        [Test]
+        public void BossLootOwnedEquipmentViewIsDetachedFromPersistedState()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                object save = GetProperty(saveService, "CurrentSave");
+                IList inventory = (IList)GetField(save, "OwnedEquipment");
+                object persisted = CreateOwnedEquipment("equipment_snapshot", 2);
+                inventory.Add(persisted);
+
+                object bossLoot = CreateBossLootService(saveService);
+                IEnumerable snapshot = (IEnumerable)Invoke(bossLoot, "GetOwnedEquipment");
+                object detached = snapshot.Cast<object>().Single();
+                Assert.AreNotSame(persisted, detached);
+
+                SetField(detached, "Quantity", 999);
+                Assert.AreEqual(2, GetField(persisted, "Quantity"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void BossLootRejectsAmbiguousOrOverflowingPersistedInventory()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                object save = GetProperty(saveService, "CurrentSave");
+                IList inventory = (IList)GetField(save, "OwnedEquipment");
+                object first = CreateOwnedEquipment("equipment_duplicate", 1);
+                object duplicate = CreateOwnedEquipment("equipment_duplicate", 3);
+                inventory.Add(first);
+                inventory.Add(duplicate);
+
+                object bossLoot = CreateBossLootService(saveService);
+                object drop = CreateBossLootDrop("equipment_duplicate", 1);
+                LogAssert.Expect(LogType.Error, "AL-EQUIPMENT-INVENTORY-MALFORMED: Owned equipment mutation was rejected without changing persisted state.");
+                Assert.False((bool)Invoke(bossLoot, "TryAddOwnedEquipment", drop, "boss_a"));
+                Assert.AreEqual(1, GetField(first, "Quantity"));
+                Assert.AreEqual(3, GetField(duplicate, "Quantity"));
+
+                inventory.Clear();
+                object maximum = CreateOwnedEquipment("equipment_maximum", int.MaxValue);
+                inventory.Add(maximum);
+                object overflow = CreateBossLootDrop("equipment_maximum", 1);
+                LogAssert.Expect(LogType.Error, "AL-EQUIPMENT-QUANTITY-OVERFLOW: Owned equipment mutation was rejected without changing persisted state.");
+                Assert.False((bool)Invoke(bossLoot, "TryAddOwnedEquipment", overflow, "boss_a"));
+                Assert.AreEqual(int.MaxValue, GetField(maximum, "Quantity"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
         {
             object[] args = { realm, null };
@@ -1433,6 +1496,37 @@ namespace AL.Tests.EditMode
             ConstructorInfo constructor = serviceType.GetConstructor(new[] { GetRuntimeType(argumentTypeName) });
             Assert.NotNull(constructor);
             return constructor.Invoke(new[] { argument });
+        }
+
+        private static object CreateBossLootService(object saveService)
+        {
+            Type serviceType = GetRuntimeType("AL.Services.Local.LocalBossLootService");
+            ConstructorInfo constructor = serviceType.GetConstructor(new[]
+            {
+                GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
+                GetRuntimeType("AL.Core.Interfaces.IWarzoneCreditService"),
+                GetRuntimeType("AL.Core.Interfaces.INotificationService")
+            });
+            Assert.NotNull(constructor);
+            return constructor.Invoke(new[] { saveService, null, null });
+        }
+
+        private static object CreateOwnedEquipment(string equipmentId, int quantity)
+        {
+            object equipment = Activator.CreateInstance(GetRuntimeType("AL.Data.Runtime.OwnedEquipmentState"));
+            SetField(equipment, "EquipmentId", equipmentId);
+            SetField(equipment, "Quantity", quantity);
+            SetField(equipment, "FirstAcquiredTimestamp", 1L);
+            SetField(equipment, "LastAcquiredTimestamp", 1L);
+            return equipment;
+        }
+
+        private static object CreateBossLootDrop(string equipmentId, int quantity)
+        {
+            object drop = Activator.CreateInstance(GetRuntimeType("AL.Core.Interfaces.BossLootDrop"));
+            SetField(drop, "EquipmentId", equipmentId);
+            SetField(drop, "Quantity", quantity);
+            return drop;
         }
 
         private static string CreateTempRoot()
