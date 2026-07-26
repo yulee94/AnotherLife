@@ -75,6 +75,16 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.Uncommitted));
         }
 
+        [Test]
+        public void SubCharactersMustMatchCommittedAccountRealm()
+        {
+            var committed = new RealmIdentitySnapshot(RealmIdentityStatus.CommittedValid, RealmId.Umbral, "0.1.0", "test");
+            var uncommitted = new RealmIdentitySnapshot(RealmIdentityStatus.Uncommitted, RealmId.None, "0.1.0", "test");
+            Assert.That(RealmCharacterConstraint.Evaluate(committed, RealmId.Umbral), Is.EqualTo(RealmCharacterEligibility.Allowed));
+            Assert.That(RealmCharacterConstraint.Evaluate(committed, RealmId.Crownlands), Is.EqualTo(RealmCharacterEligibility.RejectedDifferentRealm));
+            Assert.That(RealmCharacterConstraint.Evaluate(uncommitted, RealmId.Umbral), Is.EqualTo(RealmCharacterEligibility.AccountRealmUnavailable));
+        }
+
         private sealed class FakeSaveService : ISaveGameService
         {
             public SaveGameData CurrentSave { get; private set; } = NewSave();
