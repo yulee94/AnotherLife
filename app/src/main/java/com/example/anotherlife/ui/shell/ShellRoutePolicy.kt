@@ -6,7 +6,12 @@ object ShellRoutePolicy {
     const val DEBUG_ROUTE_UNAVAILABLE_MESSAGE =
         "Developer preview is unavailable in this build. Returned to a safe screen."
     const val QUEST_ROUTE_UNAVAILABLE_MESSAGE =
-        "Quest preview is unavailable until authoritative runtime sync is ready. Returned to Kingdom."
+        "Quest preview is unavailable in this build. Returned to Kingdom."
+
+    private val debugOnlyRoutes: Set<Route> = setOf(
+        Route.Quest,
+        Route.NarrativeDebug
+    )
 
     val primaryRoutes: List<Route> = listOf(
         Route.Kingdom,
@@ -25,21 +30,19 @@ object ShellRoutePolicy {
 
     fun resolveRoute(route: Any?, debugToolsEnabled: Boolean): RouteResolution {
         return when (route) {
-            Route.NarrativeDebug -> if (debugToolsEnabled) {
-                RouteResolution.Allowed(Route.NarrativeDebug)
+            is Route -> if (route !in debugOnlyRoutes || debugToolsEnabled) {
+                RouteResolution.Allowed(route)
             } else {
                 RouteResolution.Rejected(
-                    requestedRoute = Route.NarrativeDebug,
+                    requestedRoute = route,
                     fallbackRoute = Route.Kingdom,
-                    message = DEBUG_ROUTE_UNAVAILABLE_MESSAGE
+                    message = if (route == Route.Quest) {
+                        QUEST_ROUTE_UNAVAILABLE_MESSAGE
+                    } else {
+                        DEBUG_ROUTE_UNAVAILABLE_MESSAGE
+                    }
                 )
             }
-            Route.Quest -> RouteResolution.Rejected(
-                requestedRoute = Route.Quest,
-                fallbackRoute = Route.Kingdom,
-                message = QUEST_ROUTE_UNAVAILABLE_MESSAGE
-            )
-            is Route -> RouteResolution.Allowed(route)
             else -> RouteResolution.Rejected(
                 requestedRoute = null,
                 fallbackRoute = Route.Kingdom,

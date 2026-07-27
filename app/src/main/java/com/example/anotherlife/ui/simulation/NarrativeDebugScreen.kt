@@ -4,19 +4,25 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.example.anotherlife.R
 import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.NVS_01_Packet
 import com.example.anotherlife.data.simulation.NarrativeState
 
 @Composable
-fun NarrativeDebugScreen(state: NarrativeState) {
+fun NarrativeDebugScreen(
+    state: NarrativeState,
+    onOpenQuestPreview: () -> Unit = {}
+) {
     val errorMessage = remember { mutableStateOf<String?>(null) }
 
     Column(
@@ -36,6 +42,18 @@ fun NarrativeDebugScreen(state: NarrativeState) {
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 12.dp)
         )
+
+        OutlinedButton(
+            onClick = onOpenQuestPreview,
+            modifier = Modifier.padding(bottom = 12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.List,
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = stringResource(R.string.quest_preview_open))
+        }
 
         errorMessage.value?.let { message ->
             Text(
