@@ -206,6 +206,80 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void NullQuestRowRemainsExactRawEvidenceAcrossLoadAndRejectedSave()
+        {
+            string root = CreateRoot();
+
+            try
+            {
+                CreateCurrentProfile(root);
+                string primaryPath = Path.Combine(root, "save.json");
+                File.Delete(Path.Combine(root, "save.backup.json"));
+
+                string currentJson = StrictUtf8.GetString(File.ReadAllBytes(primaryPath));
+                var questsPattern = new Regex("\"Quests\"\\s*:\\s*\\[\\]");
+                Assert.True(
+                    questsPattern.IsMatch(currentJson),
+                    "Expected the generated current save to contain an empty quest array.");
+                byte[] rawNullQuestPrimary = StrictUtf8.GetBytes(
+                    questsPattern.Replace(
+                        currentJson,
+                        "\"Quests\": [null]",
+                        1));
+                File.WriteAllBytes(primaryPath, rawNullQuestPrimary);
+                Dictionary<string, byte[]> originalDirectory = SnapshotDirectory(root);
+
+                object service = CreateSaveService(root);
+                Invoke(service, "Load");
+
+                Assert.AreEqual(
+                    "LoadedPrimaryDegraded",
+                    GetProperty(service, "LastLoadStatus").ToString());
+                Assert.Null(GetProperty(service, "CurrentSave"));
+                object disposition = GetProperty(service, "LastLoadDisposition");
+                Assert.AreEqual(
+                    "Primary",
+                    GetProperty(disposition, "SelectedSource").ToString());
+                Assert.False((bool)GetProperty(disposition, "IsWritable"));
+                Assert.False((bool)GetProperty(disposition, "IsRuntimeUsable"));
+                Assert.False((bool)GetProperty(disposition, "DiskChanged"));
+                Assert.True((bool)GetProperty(disposition, "RawEvidencePreserved"));
+
+                object primarySummary = FindSummary(disposition, "Primary");
+                Assert.AreEqual(
+                    "DegradedMalformed",
+                    GetProperty(primarySummary, "SemanticOutcome").ToString());
+                Assert.That(
+                    GetProperty(primarySummary, "DisabledDomains").ToString(),
+                    Does.Contain("Quests"));
+                CollectionAssert.Contains(
+                    ((IEnumerable)GetProperty(primarySummary, "DiagnosticCodes"))
+                        .Cast<object>()
+                        .Select(code => code.ToString())
+                        .ToArray(),
+                    "SAVE_QUEST_ROW_NULL");
+                AssertDirectoryUnchanged(root, originalDirectory);
+
+                LogAssert.Expect(
+                    LogType.Error,
+                    new Regex("^AL-SAVE-READ-ONLY-DISPOSITION:"));
+                Invoke(service, "Save");
+
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(service, "LastSaveStatus").ToString());
+                CollectionAssert.AreEqual(
+                    rawNullQuestPrimary,
+                    File.ReadAllBytes(primaryPath));
+                AssertDirectoryUnchanged(root, originalDirectory);
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
         public void ForwardBackupUsesSourceNeutralReadOnlyDisposition()
         {
             string root = CreateRoot();
@@ -811,12 +885,9 @@ namespace AL.Tests.EditMode
         private static Type GetRuntimeType(string typeName)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(assembly =>
-                    assembly.GetName().Name == "Assembly-CSharp")
-                ?.GetType(typeName);
-            Assert.NotNull(
-                type,
-                $"Expected runtime type {typeName} in Assembly-CSharp.");
+                .Select(assembly => assembly.GetType(typeName))
+                .FirstOrDefault(candidate => candidate != null);
+            Assert.NotNull(type, $"Expected loaded runtime type {typeName}.");
             return type;
         }
 
