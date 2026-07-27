@@ -23,7 +23,7 @@ namespace AL.ChampionMode.AI
         [Header("References")]
         [SerializeField] private Transform _player;
         [SerializeField] private Transform _fallbackObjective;
-        [SerializeField] private RealmId _playerRealm = RealmId.Crownlands;
+        [SerializeField] private RealmId _playerRealm = RealmId.None;
 
         private bool _spawned;
 
@@ -31,7 +31,7 @@ namespace AL.ChampionMode.AI
         {
             _player = player;
             _fallbackObjective = fallbackObjective;
-            _playerRealm = playerRealm == RealmId.None ? RealmId.Crownlands : playerRealm;
+            _playerRealm = playerRealm;
             _botCount = Mathf.Clamp(botCount, 10, 100);
             Spawn();
         }
@@ -39,6 +39,14 @@ namespace AL.ChampionMode.AI
         public void Spawn()
         {
             if (_spawned)
+            {
+                return;
+            }
+
+            // A committed realm is required before realm-sensitive combatants can
+            // classify the player as an ally or enemy. Keep the spawner retryable
+            // so a later valid configuration can proceed.
+            if (_playerRealm == RealmId.None)
             {
                 return;
             }
