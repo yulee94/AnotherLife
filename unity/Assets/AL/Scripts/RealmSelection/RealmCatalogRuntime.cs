@@ -124,6 +124,7 @@ namespace AL.RealmSelection
         }
 
         internal static RealmCatalogLoadResult ReadFailure() => Reject("AL-REALM-CATALOG-READ-FAILED");
+        internal static RealmCatalogLoadResult OversizeFailure() => Reject("AL-REALM-CATALOG-OVERSIZE");
 
         private static bool TryRuntimeId(string value, out RealmId id)
         {
@@ -143,16 +144,60 @@ namespace AL.RealmSelection
         {
             RealmCatalogRuntime.MarkLoading();
             string path = System.IO.Path.Combine(Application.streamingAssetsPath, RealmCatalogRuntime.RelativePath);
-            using (UnityWebRequest request = UnityWebRequest.Get(path))
+            var handler = new BoundedRealmCatalogDownloadHandler(RealmCatalogRuntime.MaximumByteLength);
+            using (var request = new UnityWebRequest(path, "GET", handler, null))
             {
                 request.timeout = 10;
                 yield return request.SendWebRequest();
-                RealmCatalogLoadResult result = request.result == UnityWebRequest.Result.Success
-                    ? RealmCatalogRuntime.Parse(request.downloadHandler.text)
-                    : RealmCatalogRuntime.ReadFailure();
+                RealmCatalogLoadResult result;
+                if (handler.IsOversize)
+                    result = RealmCatalogRuntime.OversizeFailure();
+                else if (request.result == UnityWebRequest.Result.Success)
+                    result = RealmCatalogRuntime.Parse(handler.GetUtf8Text());
+                else
+                    result = RealmCatalogRuntime.ReadFailure();
                 RealmCatalogRuntime.Publish(result);
             }
             Destroy(gameObject);
+        }
+    }
+
+    internal sealed class BoundedRealmCatalogDownloadHandler : DownloadHandlerScript
+    {
+        private readonly byte[] _buffer;
+        private int _length;
+
+        internal BoundedRealmCatalogDownloadHandler(int maximumByteLength)
+            : base(CreateReceiveBuffer(maximumByteLength))
+        {
+            _buffer = new byte[maximumByteLength];
+        }
+
+        internal bool IsOversize { get; private set; }
+
+        protected override bool ReceiveData(byte[] data, int dataLength)
+        {
+            if (data == null || dataLength <= 0) return true;
+            if (dataLength > _buffer.Length - _length)
+            {
+                IsOversize = true;
+                return false;
+            }
+
+            Buffer.BlockCopy(data, 0, _buffer, _length, dataLength);
+            _length += dataLength;
+            return true;
+        }
+
+        internal string GetUtf8Text()
+        {
+            return Encoding.UTF8.GetString(_buffer, 0, _length);
+        }
+
+        private static byte[] CreateReceiveBuffer(int maximumByteLength)
+        {
+            if (maximumByteLength <= 0) throw new ArgumentOutOfRangeException(nameof(maximumByteLength));
+            return new byte[Math.Min(maximumByteLength, 8192)];
         }
     }
 
