@@ -1,3 +1,4 @@
+using System;
 using AL.Core;
 
 namespace AL.RealmSelection
@@ -49,7 +50,9 @@ namespace AL.RealmSelection
         public RealmId RealmId { get; }
         public string CatalogVersion { get; }
         public string TechnicalCode { get; }
-        public bool IsCommittedValid => Status == RealmIdentityStatus.CommittedValid;
+        public bool IsCommittedValid =>
+            Status == RealmIdentityStatus.CommittedValid &&
+            RealmId != RealmId.None && Enum.IsDefined(typeof(RealmId), RealmId);
     }
 
     public readonly struct RealmSelectionResult
