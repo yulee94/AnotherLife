@@ -1,6 +1,6 @@
 # Four-Realm Architecture
 
-**Status:** All four peer-realm detail and motion directions owner-approved; shared runtime implemented; Umbral graybox in development
+**Status:** All four peer-realm detail and motion directions owner-approved; shared runtime and four isolated graybox prototypes implemented; final-model and live-kingdom integration pending
 
 **Version:** 0.1
 
