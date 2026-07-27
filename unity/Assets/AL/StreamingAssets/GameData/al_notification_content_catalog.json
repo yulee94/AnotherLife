@@ -1,0 +1,260 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_notification_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_notification_content_source_v001",
+  "idFormat": "al_notify_lowercase_snake_case",
+  "sourceAuthorities": {
+    "primaryMode": "codex_narrative_content",
+    "consumerIssue": 177,
+    "technicalSpec": "unity/Docs/Notification_Delivery_Contract_Spec.md",
+    "catalogFoundationIssue": 183
+  },
+  "contentPolicy": {
+    "releaseCopyApproval": "user_final_product_gate",
+    "rawStringMethods": "temporary_compatibility_only",
+    "missingLocalizationBehavior": "typed_content_resolution_failure",
+    "internalIdExposure": "debug_only",
+    "privacyRules": [
+      "No player-facing notification includes local file paths.",
+      "No player-facing notification includes raw exception text or stack traces.",
+      "No player-facing notification includes emails, tokens, access paths, or raw internal IDs.",
+      "String parameters are bounded data and not rich text."
+    ],
+    "nonGoals": [
+      "notification queue implementation",
+      "visible presenter UI",
+      "save outbox or history",
+      "caller migration",
+      "Bootloader edit",
+      "Android bridge implementation",
+      "reward or save mutation"
+    ]
+  },
+  "sources": [
+    { "id": "al_source_save", "displayNameKey": "notification.source.save.name" },
+    { "id": "al_source_boss_loot", "displayNameKey": "notification.source.boss_loot.name" },
+    { "id": "al_source_world_state", "displayNameKey": "notification.source.world_state.name" },
+    { "id": "al_source_nvs", "displayNameKey": "notification.source.nvs.name" },
+    { "id": "al_source_bridge", "displayNameKey": "notification.source.bridge.name" },
+    { "id": "al_source_catalog", "displayNameKey": "notification.source.catalog.name" }
+  ],
+  "actions": [
+    {
+      "id": "al_notify_action_acknowledge",
+      "labelKey": "notification.action.acknowledge.label",
+      "kind": "acknowledge"
+    },
+    {
+      "id": "al_notify_action_retry_operation",
+      "labelKey": "notification.action.retry_operation.label",
+      "kind": "retry_operation"
+    },
+    {
+      "id": "al_notify_action_open_recovery_details",
+      "labelKey": "notification.action.open_recovery_details.label",
+      "kind": "open_recovery_details"
+    }
+  ],
+  "definitions": [
+    {
+      "id": "al_notify_save_recovered_backup",
+      "sourceId": "al_source_save",
+      "severity": "warning",
+      "category": "save_recovery",
+      "channel": "acknowledgement",
+      "titleKey": "notification.save.recovered_backup.title",
+      "bodyKey": "notification.save.recovered_backup.body",
+      "parameterNames": [ "profile_label" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": true,
+      "durability": "future_durable_outbox"
+    },
+    {
+      "id": "al_notify_save_profile_degraded",
+      "sourceId": "al_source_save",
+      "severity": "recoverable_error",
+      "category": "save_recovery",
+      "channel": "acknowledgement",
+      "titleKey": "notification.save.profile_degraded.title",
+      "bodyKey": "notification.save.profile_degraded.body",
+      "parameterNames": [ "profile_label" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": true,
+      "durability": "future_durable_outbox"
+    },
+    {
+      "id": "al_notify_save_unrecoverable",
+      "sourceId": "al_source_save",
+      "severity": "blocking_error",
+      "category": "save_recovery",
+      "channel": "acknowledgement",
+      "titleKey": "notification.save.unrecoverable.title",
+      "bodyKey": "notification.save.unrecoverable.body",
+      "parameterNames": [ "profile_label" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": true,
+      "durability": "future_durable_outbox"
+    },
+    {
+      "id": "al_notify_operation_unavailable",
+      "sourceId": "al_source_nvs",
+      "severity": "warning",
+      "category": "operation_availability",
+      "channel": "toast",
+      "titleKey": "notification.operation.unavailable.title",
+      "bodyKey": "notification.operation.unavailable.body",
+      "parameterNames": [ "operation_name" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": false,
+      "durability": "session_only"
+    },
+    {
+      "id": "al_notify_reward_committed",
+      "sourceId": "al_source_boss_loot",
+      "severity": "success",
+      "category": "reward_result",
+      "channel": "toast",
+      "titleKey": "notification.reward.committed.title",
+      "bodyKey": "notification.reward.committed.body",
+      "parameterNames": [ "reward_summary" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": false,
+      "durability": "session_only"
+    },
+    {
+      "id": "al_notify_reward_failed",
+      "sourceId": "al_source_boss_loot",
+      "severity": "recoverable_error",
+      "category": "reward_result",
+      "channel": "acknowledgement",
+      "titleKey": "notification.reward.failed.title",
+      "bodyKey": "notification.reward.failed.body",
+      "parameterNames": [ "reward_summary" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": true,
+      "durability": "future_durable_outbox"
+    },
+    {
+      "id": "al_notify_world_event_started",
+      "sourceId": "al_source_world_state",
+      "severity": "info",
+      "category": "world_state",
+      "channel": "toast",
+      "titleKey": "notification.world_event.started.title",
+      "bodyKey": "notification.world_event.started.body",
+      "parameterNames": [ "event_name" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": false,
+      "durability": "session_only"
+    },
+    {
+      "id": "al_notify_world_event_ended",
+      "sourceId": "al_source_world_state",
+      "severity": "info",
+      "category": "world_state",
+      "channel": "toast",
+      "titleKey": "notification.world_event.ended.title",
+      "bodyKey": "notification.world_event.ended.body",
+      "parameterNames": [ "event_name" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": false,
+      "durability": "session_only"
+    },
+    {
+      "id": "al_notify_bridge_unavailable",
+      "sourceId": "al_source_bridge",
+      "severity": "warning",
+      "category": "bridge",
+      "channel": "toast",
+      "titleKey": "notification.bridge.unavailable.title",
+      "bodyKey": "notification.bridge.unavailable.body",
+      "parameterNames": [ "route_label" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": false,
+      "durability": "session_only"
+    },
+    {
+      "id": "al_notify_catalog_unavailable",
+      "sourceId": "al_source_catalog",
+      "severity": "blocking_error",
+      "category": "catalog",
+      "channel": "acknowledgement",
+      "titleKey": "notification.catalog.unavailable.title",
+      "bodyKey": "notification.catalog.unavailable.body",
+      "parameterNames": [ "catalog_label" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": true,
+      "durability": "future_durable_outbox"
+    },
+    {
+      "id": "al_notify_content_unavailable",
+      "sourceId": "al_source_catalog",
+      "severity": "warning",
+      "category": "content_resolution",
+      "channel": "toast",
+      "titleKey": "notification.content.unavailable.title",
+      "bodyKey": "notification.content.unavailable.body",
+      "parameterNames": [ "content_label" ],
+      "requiresCorrelation": true,
+      "requiresAcknowledgement": false,
+      "durability": "session_only"
+    }
+  ],
+  "draftLocalization": [
+    { "key": "notification.source.save.name", "text": "Save System" },
+    { "key": "notification.source.boss_loot.name", "text": "Rewards" },
+    { "key": "notification.source.world_state.name", "text": "World State" },
+    { "key": "notification.source.nvs.name", "text": "Quest Flow" },
+    { "key": "notification.source.bridge.name", "text": "Runtime Bridge" },
+    { "key": "notification.source.catalog.name", "text": "Game Data" },
+    { "key": "notification.action.acknowledge.label", "text": "Acknowledge" },
+    { "key": "notification.action.retry_operation.label", "text": "Try Again" },
+    { "key": "notification.action.open_recovery_details.label", "text": "Review Details" },
+    { "key": "notification.save.recovered_backup.title", "text": "Save Restored" },
+    { "key": "notification.save.recovered_backup.body", "text": "{profile_label} was restored from a safe backup. Review your progress before continuing." },
+    { "key": "notification.save.profile_degraded.title", "text": "Profile Opened Read-Only" },
+    { "key": "notification.save.profile_degraded.body", "text": "{profile_label} contains data that cannot be changed safely yet. Progress is protected until recovery is available." },
+    { "key": "notification.save.unrecoverable.title", "text": "Profile Cannot Be Loaded" },
+    { "key": "notification.save.unrecoverable.body", "text": "{profile_label} cannot be recovered automatically. No private file details are shown here." },
+    { "key": "notification.operation.unavailable.title", "text": "Action Unavailable" },
+    { "key": "notification.operation.unavailable.body", "text": "{operation_name} is not ready in this build. No progress was changed." },
+    { "key": "notification.reward.committed.title", "text": "Reward Secured" },
+    { "key": "notification.reward.committed.body", "text": "{reward_summary} has been added after a confirmed result." },
+    { "key": "notification.reward.failed.title", "text": "Reward Not Applied" },
+    { "key": "notification.reward.failed.body", "text": "{reward_summary} could not be applied safely. Your previous state was preserved." },
+    { "key": "notification.world_event.started.title", "text": "World Event Started" },
+    { "key": "notification.world_event.started.body", "text": "{event_name} is now affecting the realm." },
+    { "key": "notification.world_event.ended.title", "text": "World Event Ended" },
+    { "key": "notification.world_event.ended.body", "text": "{event_name} has ended." },
+    { "key": "notification.bridge.unavailable.title", "text": "Gameplay Route Unavailable" },
+    { "key": "notification.bridge.unavailable.body", "text": "{route_label} cannot open yet. Your current progress was not changed." },
+    { "key": "notification.catalog.unavailable.title", "text": "Game Data Unavailable" },
+    { "key": "notification.catalog.unavailable.body", "text": "{catalog_label} could not be loaded safely. The affected feature is paused." },
+    { "key": "notification.content.unavailable.title", "text": "Content Unavailable" },
+    { "key": "notification.content.unavailable.body", "text": "{content_label} has no approved display content yet." }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 177,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "definition IDs are unique and match al_notify lowercase snake case",
+      "source IDs are unique and referenced by definitions",
+      "action IDs are unique",
+      "all title, body, source display, and action label keys resolve in draftLocalization",
+      "definition parameter names match placeholders used by draft body text",
+      "blocking definitions require acknowledgement",
+      "future durable definitions remain blocked on save/outbox engineering"
+    ],
+    "blockedRuntimeClaims": [
+      "queue acceptance",
+      "visible presentation",
+      "accessibility announcement",
+      "durable outbox",
+      "save migration",
+      "caller migration",
+      "Android bridge delivery",
+      "user-approved release copy"
+    ]
+  }
+}
