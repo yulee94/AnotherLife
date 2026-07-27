@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.12
+**Version:** 1.13
 **Last updated:** 2026-07-27
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -66,6 +66,7 @@ This guide consolidates the active project direction in:
 - [Umbral Animation Prototype Handoff](unity/Docs/Architecture/Umbral_Animation_Prototype_Handoff.md)
 - [Reusable Architecture Construction-State System](unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md)
 - [Kingdom Building Level, Placement, and Presentation Design](unity/Docs/Architecture/Kingdom_Building_Level_And_Placement_Design.md)
+- [Eldergrove Workshop Level Progression — review candidate](unity/Assets/AL/Art/Designs/EldergroveWorkshopLevelProgression.md)
 - [Architecture Android and iOS Compatibility Handoff](unity/Docs/Architecture/Architecture_Mobile_Compatibility_Handoff.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
@@ -628,6 +629,7 @@ Never overwrite an approved source version. Create a new version and preserve th
 - Unity `2022.3.62f3`.
 - Built-in Render Pipeline at the time of this guide.
 - Target experiences include mobile and PC.
+- iOS `15.0` is the approved minimum deployment target; compatibility claims still distinguish build-level validation from an actual iOS 15 runtime or device pass.
 - Current generated prefabs and materials are blockouts/reference implementations, not a final quality bar.
 - Production models must use Unity's meter scale: `1 Unity unit = 1 meter`.
 - Shared design handoffs must remain usable from Android and Windows checkouts: preserve committed Unity metadata, portable paths, and Git LFS assets; do not require a macOS-only path or an iOS-only branch to recover approved source.
@@ -888,7 +890,7 @@ Do not stop for ordinary reversible interpretation inside the approved brief. Re
 
 These questions do not block concept exploration, but they must be resolved before the affected production gate:
 
-- What are the final minimum supported iPhone, iPad, Android, and PC hardware targets?
+- Which minimum iPhone and iPad hardware models within the approved iOS 15 software floor, and which Android and PC hardware targets, define the lowest production tier?
 - What frame-rate, memory, download-size, and scene-complexity budgets define each quality tier?
 - Will the project remain on the Built-in Render Pipeline through first production art, or adopt a planned rendering migration?
 - Which exact realm palette values and shared material tokens pass representative character, creature, architecture, UI, and VFX tests?

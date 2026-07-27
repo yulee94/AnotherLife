@@ -28,6 +28,8 @@
 
 **Approved Eldergrove workshop detail:** [Eldergrove modular workshop detail v001](../Architecture/ConceptSheets/architecture_eldergrove_modular_workshop_detail_v001.png)
 
+**Eldergrove Level 0–10 review candidate:** [Eldergrove Workshop Level Progression](EldergroveWorkshopLevelProgression.md)
+
 **Approved Eldergrove motion reference:** [Eldergrove animation reference v001](../Architecture/ConceptSheets/architecture_eldergrove_animation_reference_v001.png)
 
 **Eldergrove motion contract:** [Eldergrove Architecture Animation Contract](../../../../Docs/Architecture/Eldergrove_Architecture_Animation_Contract.md)
@@ -86,6 +88,7 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - 2026-07-24: Project owner directed Umbral realm-detail design to follow the established Stonehold, Eldergrove, and Crownlands workshop-sheet structure.
 - 2026-07-24: Project owner approved the Umbral veilwright architecture and directed development of a distinctive fourth-realm construction and stable-state animation while retaining a visual-safety score above `90 / 100`.
 - 2026-07-24: Project owner clarified that Umbral is the fourth peer realm, not a progression tier or more advanced era. Realm identity may differ in intensity and mood, but no realm is inherently an upgrade over another.
+- 2026-07-27 review candidate: an Eldergrove Workshop Level `0`–`10` progression sheet passed the visual gate at `93 / 100`. It is packaged for owner review and does not become production-model authority until explicitly approved.
 - Not yet approved: exact gameplay animation timing, final-model calibration binding, worker rules, damage and repair motion, live kingdom integration, element relocation rules, exact grid dimensions, production meshes, topology, materials, colliders, LOD thresholds, atlases, lighting exposure, or measured device performance. The linked envelope, animation contracts, and graybox handoff contain provisional implementation guidance.
 
 ## Shared construction rules
@@ -135,6 +138,14 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - Root-growth tips, attendants, water, leaves, herbs, guide frames, and repair effects are removable distance and quality layers.
 - Roof, lantern, and high-root occlusion groups fade or hide for inspection; they do not hover in-world.
 - The full state, guided-growth, hierarchy, mobile reduction, reduced-motion, and acceptance rules are defined in the linked Eldergrove animation contract.
+
+#### Eldergrove Workshop level-production candidate
+
+- The linked Level `0`–`10` packet is the first production-readable building-family proposal to consume the approved shared level ladder.
+- It preserves one stable Workshop footprint and entrance, then adds cumulative root-brace, annex, roof, district, signature, logistics, and capstone modules.
+- Level changes remain readable through form without particles, continuous foliage motion, or green emission.
+- The candidate retains the common-building mobile envelope at Level `10`; progression does not silently grant a hero-building budget.
+- The sheet is source-only and passed a `93 / 100` visual gate. Owner approval, DCC blockout, exact metrics, model pivots, LODs, materials, colliders, and device profiling remain open.
 
 ### Crownlands
 

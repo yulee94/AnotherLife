@@ -36,6 +36,10 @@ namespace AL.Tests.EditMode.Architecture
         private const string ConceptSheetFolder =
             "Assets/AL/Art/Architecture/ConceptSheets";
 
+        private const string EldergroveWorkshopLevelProgressionPath =
+            ConceptSheetFolder +
+            "/architecture_eldergrove_workshop_level_progression_v001.png";
+
         [TestCaseSource(nameof(PrototypePrefabPaths))]
         public void PrototypeUsesBoundedPlatformNeutralRendering(
             string prefabPath)
@@ -160,6 +164,43 @@ namespace AL.Tests.EditMode.Architecture
                     Is.EqualTo(TextureImporterNPOTScale.None),
                     assetPath);
             }
+        }
+
+        [Test]
+        public void EldergroveWorkshopLevelProgressionRemainsAValidatedSourceOnlyAsset()
+        {
+            Texture2D sheet =
+                AssetDatabase.LoadAssetAtPath<Texture2D>(
+                    EldergroveWorkshopLevelProgressionPath);
+            Assert.That(sheet, Is.Not.Null, EldergroveWorkshopLevelProgressionPath);
+            Assert.That(sheet.width, Is.EqualTo(1773));
+            Assert.That(sheet.height, Is.EqualTo(887));
+
+            var importer =
+                AssetImporter.GetAtPath(EldergroveWorkshopLevelProgressionPath)
+                    as TextureImporter;
+            Assert.That(importer, Is.Not.Null);
+            Assert.That(importer.isReadable, Is.False);
+            Assert.That(importer.mipmapEnabled, Is.False);
+            Assert.That(
+                importer.npotScale,
+                Is.EqualTo(TextureImporterNPOTScale.None));
+            Assert.That(importer.assetBundleName, Is.Null.Or.Empty);
+
+            string[] playerDependencies = EditorBuildSettings.scenes
+                .Where(scene => scene.enabled)
+                .SelectMany(
+                    scene => AssetDatabase.GetDependencies(scene.path, true))
+                .Concat(
+                    PrototypePrefabPaths.SelectMany(
+                        prefabPath =>
+                            AssetDatabase.GetDependencies(prefabPath, true)))
+                .Distinct()
+                .ToArray();
+            Assert.That(
+                playerDependencies,
+                Has.None.EqualTo(EldergroveWorkshopLevelProgressionPath),
+                "The review sheet must not become a runtime texture dependency.");
         }
 
         private static IEnumerable<Texture> GetAssignedTextures(

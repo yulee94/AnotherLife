@@ -436,3 +436,38 @@ Constraints: one consistent building; no text, labels, numbers, logo, AL monogra
 - Runtime authority: Graybox proof for state ownership, fixed four-anchor convergence, one localized light, stable-state sleep, reduced motion, and deterministic roof cutaway only. Gameplay timing, production art, live integration, and measured device performance remain open.
 
 The graybox preserves Umbral as a fourth peer realm rather than a progression tier. Its distinctiveness comes from offset construction, protected negative space, inward direction, and controlled closure—not from greater power, broader effects, or higher systemic status.
+
+## Eldergrove Workshop Level 0–10 review candidate
+
+- File: `architecture_eldergrove_workshop_level_progression_v001.png`
+- Status: Review candidate; project-owner production-source approval pending
+- Generated: 2026-07-27
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted level-progression proposal derived from approved project sources
+- Source references: `architecture_eldergrove_modular_workshop_detail_v001.png` and `architecture_four_realm_modular_construction_master_v001.png`
+- Dimensions: `1773 x 887`
+- SHA-256: `115ef09a1bbac56d7dfe330cac8a96cd5b446c81d294ec6b85d28a494135c20c`
+- Visual-verdict score: `93 / 100`
+- Runtime authority: None. The sheet is source-only and does not establish gameplay levels, costs, durations, save fields, transactions, exact dimensions, topology, pivots, materials, colliders, LOD thresholds, or measured device performance.
+
+### Recorded level-progression generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production model progression concept sheet for the Another Life Unity game
+Primary request: Create one original, production-readable Eldergrove Workshop Level 0 through Level 10 visual progression sheet, derived from the two approved architecture reference sheets. Show exactly eleven distinct isometric stages of the same building family and the same stable footprint. Arrange six stages left-to-right on the top row (Level 0–5) and five stages left-to-right on the bottom row (Level 6–10), with equal framing and generous separation. Do not add written labels; the progression order is purely spatial.
+Level progression: Level 0 is an unbuilt reserved plot with stone footprint boundary, realm ground treatment, entrance orientation, and restrained root-guide marker. Level 1 is the first complete operational workshop with credible enclosure, roof, open entrance, and one cultivation work area. Level 2 adds structural root braces and weather protection. Level 3 adds a visible functional annex or storage bay. Level 4 strengthens the roofline and adds one modest vertical cultivation vent. Level 5 adds a district-facing coordination or public work module. Level 6 adds an upper structural mass or second functional bay. Level 7 fully expresses the signature Eldergrove guided-growth mechanism through structure, not effects. Level 8 refines the envelope with durable bronze joinery, repair history, and restrained craft. Level 9 integrates logistics, storage, and civic approach. Level 10 adds one landmark capstone silhouette while remaining the same Workshop function and footprint family.
+Style/medium: premium realistic high-fantasy 3D environment concept sheet, mystical medieval naturalism, believable modular construction, tactile physically plausible materials, adult serious tone, suitable for later game modeling.
+Camera/composition: fixed three-quarter isometric strategic camera for all eleven stages; consistent scale, entrance direction, ground plane, lighting, and crop. Each adjacent level must read through primary or secondary form, not color or glow. Preserve strategic readability on a compact mobile screen.
+Materials: aged masonry foundation, load-bearing living roots and dark timber, moss and lichen used selectively, weathered bronze joints and cultivation hardware, muted green and bark umber, small warm living accents. Roots follow credible load paths and never float. Roofs and walls remain physically assembled; later levels are cumulative modular deltas rather than unrelated replacements.
+Motion/model readiness cues: clear separable foundation, entrance, wall bay, root brace, roof, annex, workbench/storage, cultivation mechanism, and capstone modules; believable pivots and sockets; quiet stable operational pose.
+Accessibility and mobile constraints: silhouettes and level differences survive grayscale and reduced effects; no particles, no transparent magical fog, no tiny repeated props as the only upgrade cue; simplified primary masses; maximum two obvious material families plus restrained bronze accents per stage.
+Avoid: cartoon, chibi, miniature-diorama cuteness, low-poly final look, bright green palette-swap identity, uncontrolled foliage noise, glow on every edge, floating assembly, stretching rigid masonry, palette-only level differences, random runes, pseudo-text, logos, watermark, people, creatures, UI, duplicated panels, inconsistent camera, changing footprint orientation, or a different building category at higher levels.
+```
+
+### Visual review
+
+- Verdict: `pass` at `93 / 100` for owner review
+- Strengths: exactly eleven cumulative presentations; preserved entrance and footprint identity; clear roof, annex, upper-mass, and capstone progression; restrained material hierarchy; no effect-dependent level distinction
+- Production cautions: treat the written module matrix as scale authority because the five-panel upper row receives slightly larger cells; protect the subtle Level `2` root-brace delta; merge or remove Level `9`–`10` bronze and loose-prop detail on mobile-low
+- Approval boundary: the project owner must approve, revise, or reject the sheet before it becomes production-model source
