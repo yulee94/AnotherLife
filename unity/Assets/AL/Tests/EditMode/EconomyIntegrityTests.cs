@@ -1255,6 +1255,138 @@ namespace AL.Tests.EditMode
             Assert.IsEmpty(notifications.State.Messages);
         }
 
+        [Test]
+        public void WarmasterStateSnapshotIsDetachedFromPersistedState()
+        {
+            object save = CreateValidSave();
+            object warmaster = GetField(save, "Warmaster");
+            ((IList)GetField(warmaster, "UnlockedSetIds")).Add("prototype_true_warmaster");
+            ((IList)GetField(warmaster, "PurchasedPieceIds")).Add("warmaster_piece_01");
+            SetField(warmaster, "Level", 1);
+            SetField(warmaster, "Experience", 25);
+            var fixture = CreateSaveFixture(save);
+            object service = CreateWarmasterService(fixture);
+
+            object snapshot = Invoke(service, "GetState");
+            ((IList)GetField(snapshot, "UnlockedSetIds")).Clear();
+            ((IList)GetField(snapshot, "PurchasedPieceIds")).Add("warmaster_piece_02");
+            SetField(snapshot, "Experience", 999);
+
+            Assert.AreEqual(1, ((IList)GetField(warmaster, "UnlockedSetIds")).Count);
+            Assert.AreEqual(1, ((IList)GetField(warmaster, "PurchasedPieceIds")).Count);
+            Assert.AreEqual(25, GetField(warmaster, "Experience"));
+            Assert.AreEqual(0, fixture.State.SaveCount);
+        }
+
+        [TestCase(null, 10)]
+        [TestCase("", 10)]
+        [TestCase("unknown_piece", 10)]
+        [TestCase("warmaster_piece_01", 0)]
+        [TestCase("warmaster_piece_01", -10)]
+        public void WarmasterPurchaseRejectsInvalidIdentityOrPrice(string pieceId, int cost)
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 100);
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object service = CreateWarmasterService(fixture);
+
+            Assert.False((bool)Invoke(service, "PurchasePiece", pieceId, cost));
+
+            object warmaster = GetField(save, "Warmaster");
+            Assert.AreEqual(100, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(warmaster, "PurchasedPieceIds")).Count);
+            Assert.AreEqual(0, GetField(warmaster, "Experience"));
+            Assert.AreEqual(0, fixture.State.SaveCount);
+        }
+
+        [Test]
+        public void WarmasterPurchaseCommitsOnceAndDuplicateIsFree()
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 100);
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object service = CreateWarmasterService(fixture);
+
+            Assert.True((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
+            Assert.True((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
+
+            object warmaster = GetField(save, "Warmaster");
+            Assert.AreEqual(90, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(1, ((IList)GetField(warmaster, "PurchasedPieceIds")).Count);
+            Assert.AreEqual(1, GetField(warmaster, "Level"));
+            Assert.AreEqual(25, GetField(warmaster, "Experience"));
+            Assert.AreEqual(1, fixture.State.SaveCount);
+        }
+
+        [Test]
+        public void WarmasterPurchaseRollsBackCreditAndStateWhenSaveFails()
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 100);
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SaveFailedPreviousPreserved";
+            object service = CreateWarmasterService(fixture);
+
+            Assert.False((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
+
+            object warmaster = GetField(save, "Warmaster");
+            Assert.AreEqual(100, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(warmaster, "PurchasedPieceIds")).Count);
+            Assert.AreEqual(0, GetField(warmaster, "Level"));
+            Assert.AreEqual(0, GetField(warmaster, "Experience"));
+            Assert.False((bool)GetField(warmaster, "IsTrueWarmaster"));
+            Assert.AreEqual(1, fixture.State.SaveCount);
+        }
+
+        [Test]
+        public void WarmasterThresholdUsesValidUniqueCatalogPieces()
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 1000);
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object service = CreateWarmasterService(fixture);
+
+            for (int index = 1; index <= 10; index++)
+            {
+                Assert.True((bool)Invoke(service, "PurchasePiece", $"warmaster_piece_{index:00}", 10));
+            }
+
+            object warmaster = GetField(save, "Warmaster");
+            Assert.AreEqual(900, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(10, Invoke(service, "GetPurchasedPieceCount"));
+            Assert.True((bool)Invoke(service, "IsTrueWarmaster"));
+            Assert.True((bool)GetField(warmaster, "IsTrueWarmaster"));
+            Assert.Contains("prototype_true_warmaster", (IList)GetField(warmaster, "UnlockedSetIds"));
+            Assert.AreEqual("prototype_true_warmaster", GetField(warmaster, "EquippedSetId"));
+        }
+
+        [Test]
+        public void WarmasterMalformedStateCannotGrantThresholdOrMutate()
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 100);
+            object warmaster = GetField(save, "Warmaster");
+            IList purchased = (IList)GetField(warmaster, "PurchasedPieceIds");
+            for (int index = 0; index < 10; index++)
+            {
+                purchased.Add("warmaster_piece_01");
+            }
+
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object service = CreateWarmasterService(fixture);
+
+            Assert.False((bool)Invoke(service, "IsTrueWarmaster"));
+            Assert.AreEqual(0, Invoke(service, "GetPurchasedPieceCount"));
+            Assert.False((bool)Invoke(service, "PurchasePiece", "warmaster_piece_02", 10));
+            Assert.AreEqual(100, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(10, purchased.Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+        }
+
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
         {
             object[] args = { realm, null };
@@ -1457,6 +1589,18 @@ namespace AL.Tests.EditMode
                 null);
             Assert.NotNull(constructor);
             return constructor.Invoke(new object[] { save.Proxy, writable ?? new Func<bool>(() => true) });
+        }
+
+        private static object CreateWarmasterService(SaveFixture save)
+        {
+            Type serviceType = GetRuntimeType("AL.Services.Local.LocalWarmasterService");
+            ConstructorInfo constructor = serviceType.GetConstructor(new[]
+            {
+                GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
+                GetRuntimeType("AL.Core.Interfaces.IWarzoneCreditService")
+            });
+            Assert.NotNull(constructor);
+            return constructor.Invoke(new[] { save.Proxy, CreateCreditService(save) });
         }
 
         private static ProductionProviderFixture CreateProductionProvider(object snapshot, bool throws = false)
