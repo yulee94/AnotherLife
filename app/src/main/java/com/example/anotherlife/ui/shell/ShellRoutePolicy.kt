@@ -5,6 +5,8 @@ import com.example.anotherlife.ui.navigation.Route
 object ShellRoutePolicy {
     const val DEBUG_ROUTE_UNAVAILABLE_MESSAGE =
         "Developer preview is unavailable in this build. Returned to a safe screen."
+    const val QUEST_ROUTE_UNAVAILABLE_MESSAGE =
+        "Quest preview is unavailable until authoritative runtime sync is ready. Returned to Kingdom."
 
     val primaryRoutes: List<Route> = listOf(
         Route.Kingdom,
@@ -32,6 +34,11 @@ object ShellRoutePolicy {
                     message = DEBUG_ROUTE_UNAVAILABLE_MESSAGE
                 )
             }
+            Route.Quest -> RouteResolution.Rejected(
+                requestedRoute = Route.Quest,
+                fallbackRoute = Route.Kingdom,
+                message = QUEST_ROUTE_UNAVAILABLE_MESSAGE
+            )
             is Route -> RouteResolution.Allowed(route)
             else -> RouteResolution.Rejected(
                 requestedRoute = null,

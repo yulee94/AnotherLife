@@ -1,14 +1,29 @@
 package com.example.anotherlife.ui.simulation
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.*
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,7 +36,7 @@ import com.example.anotherlife.data.simulation.QuestMode
 
 @Composable
 fun QuestScreen(
-    state: KingdomState, 
+    state: KingdomState,
     onLocate: (String) -> Unit,
     onStartQuest: (String) -> Unit = {}
 ) {
@@ -40,14 +55,11 @@ fun QuestScreen(
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(state.quests) { quest ->
+            itemsIndexed(state.quests, key = { index, quest -> "${quest.id}:$index" }) { _, quest ->
                 QuestCard(
-                    quest = quest, 
-                    onClaim = {
-                        // Simulation logic
-                    }, 
-                    onLocate = { onLocate(quest.mapMarkerId ?: "") },
-                    onStart = { onStartQuest(quest.id) }
+                    quest = quest,
+                    onLocate = { markerId -> onLocate(markerId) },
+                    onStart = { questId -> onStartQuest(questId) }
                 )
             }
         }
@@ -55,14 +67,22 @@ fun QuestScreen(
 }
 
 @Composable
-fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit, onStart: () -> Unit) {
-    val progressPercent = quest.progress.toFloat() / quest.target.toFloat()
+fun QuestCard(
+    quest: Quest,
+    onLocate: (String) -> Unit,
+    onStart: (String) -> Unit
+) {
+    val preview = QuestPreviewState.from(quest)
 
     OutlinedCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = if (quest.isCompleted && !quest.isClaimed) 
-            CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f))
-            else CardDefaults.outlinedCardColors()
+        colors = if (preview.isCompleted && !preview.isInvalid) {
+            CardDefaults.outlinedCardColors(
+                containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.2f)
+            )
+        } else {
+            CardDefaults.outlinedCardColors()
+        }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -76,9 +96,18 @@ fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit, onStart: 
                     Text(text = quest.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Text(text = quest.description, style = MaterialTheme.typography.bodyMedium)
                 }
-                
+
                 Column(horizontalAlignment = Alignment.End) {
-                    val modeColor = if (quest.mode == QuestMode.Arena3D) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
+                    val modeColor = if (quest.mode == QuestMode.Arena3D) {
+                        MaterialTheme.colorScheme.tertiary
+                    } else {
+                        MaterialTheme.colorScheme.secondary
+                    }
+                    val modeContentColor = if (quest.mode == QuestMode.Arena3D) {
+                        MaterialTheme.colorScheme.onTertiary
+                    } else {
+                        MaterialTheme.colorScheme.onSecondary
+                    }
                     Surface(
                         color = modeColor,
                         shape = RoundedCornerShape(4.dp)
@@ -87,11 +116,11 @@ fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit, onStart: 
                             text = if (quest.mode == QuestMode.Arena3D) "3D ARENA" else "KINGDOM",
                             modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSecondary
+                            color = modeContentColor
                         )
                     }
 
-                    if (quest.isCompleted) {
+                    if (preview.isCompleted && !preview.isInvalid) {
                         Icon(
                             Icons.Default.CheckCircle,
                             contentDescription = "Completed",
@@ -102,64 +131,108 @@ fun QuestCard(quest: Quest, onClaim: () -> Unit, onLocate: () -> Unit, onStart: 
                 }
             }
 
-            if (quest.mapMarkerId != null) {
+            preview.markerId?.let { markerId ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AssistChip(
-                        onClick = onLocate,
-                        label = { Text("Locate: ${quest.mapMarkerId}") },
-                        leadingIcon = { Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                        onClick = { onLocate(markerId) },
+                        label = { Text("Location available") },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.LocationOn,
+                                contentDescription = null,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        },
+                        enabled = !preview.isInvalid
                     )
-                    
-                    if (!quest.isCompleted) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
-                            onClick = onStart,
-                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                            modifier = Modifier.height(32.dp)
-                        ) {
-                            Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(16.dp))
-                            Spacer(Modifier.width(4.dp))
-                            Text("Start Story", style = MaterialTheme.typography.labelMedium)
-                        }
-                    }
                 }
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                LinearProgressIndicator(
-                    progress = { progressPercent },
-                    modifier = Modifier.weight(1f).height(8.dp),
-                    color = if (quest.isCompleted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                if (preview.progressRatio != null) {
+                    LinearProgressIndicator(
+                        progress = { preview.progressRatio },
+                        modifier = Modifier.weight(1f).height(8.dp),
+                        color = if (preview.isCompleted) Color(0xFF4CAF50) else MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                } else {
+                    Text(
+                        text = "Progress unavailable",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = "${quest.progress} / ${quest.target}",
-                    style = MaterialTheme.typography.labelLarge
+                    text = preview.progressText,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (preview.isInvalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
                 )
             }
 
-            if (quest.isCompleted && !quest.isClaimed) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(
-                    onClick = onClaim,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFFC107), contentColor = Color.Black)
-                ) {
-                    Text("CLAIM REWARD: 500 GOLD", fontWeight = FontWeight.Bold)
-                }
-            } else if (quest.isClaimed) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = "REWARD CLAIMED",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.Gray,
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = preview.statusText,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (preview.isInvalid) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+        }
+    }
+}
+
+private data class QuestPreviewState(
+    val progressRatio: Float?,
+    val progressText: String,
+    val statusText: String,
+    val markerId: String?,
+    val isCompleted: Boolean,
+    val isInvalid: Boolean
+) {
+    companion object {
+        fun from(quest: Quest): QuestPreviewState {
+            val trimmedMarker = quest.mapMarkerId?.trim()?.takeIf { it.isNotEmpty() }
+            val invalidReason = when {
+                quest.id.isBlank() -> "Invalid quest identity"
+                quest.target <= 0 -> "Invalid objective target"
+                quest.progress < 0 -> "Invalid objective progress"
+                quest.progress > quest.target -> "Objective progress exceeds target"
+                quest.isClaimed && !quest.isCompleted -> "Reward state conflicts with completion"
+                else -> null
+            }
+
+            if (invalidReason != null) {
+                return QuestPreviewState(
+                    progressRatio = null,
+                    progressText = "${quest.progress} / ${quest.target}",
+                    statusText = invalidReason,
+                    markerId = trimmedMarker,
+                    isCompleted = false,
+                    isInvalid = true
                 )
             }
+
+            val ratio = quest.progress.toFloat() / quest.target.toFloat()
+            val status = when {
+                quest.isClaimed -> "Reward already committed"
+                quest.isCompleted -> "Completion awaiting authoritative runtime result"
+                quest.mode == QuestMode.Arena3D -> "Story launch unavailable in preview"
+                else -> "Preview only"
+            }
+
+            return QuestPreviewState(
+                progressRatio = ratio,
+                progressText = "${quest.progress} / ${quest.target}",
+                statusText = status,
+                markerId = trimmedMarker,
+                isCompleted = quest.isCompleted,
+                isInvalid = false
+            )
         }
     }
 }
