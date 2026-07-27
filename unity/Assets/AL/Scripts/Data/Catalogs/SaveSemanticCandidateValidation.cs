@@ -673,6 +673,7 @@ namespace AL.Data.Catalogs
                     "Warmaster",
                     "ChampionCustomization",
                     "OwnedEquipment",
+                    "AppliedBossLootRewards",
                     "WarzoneCredits",
                     "LastSavedTimestamp"
                 },
@@ -770,6 +771,14 @@ namespace AL.Data.Catalogs
                 "AnnounceWorldDrop",
                 "FirstAcquiredTimestamp",
                 "LastAcquiredTimestamp");
+
+        private static readonly HashSet<string> AppliedBossLootRewardRowFields =
+            Fields(
+                "EncounterId",
+                "RewardResultId",
+                "BossId",
+                "RewardDigest",
+                "CommittedTimestamp");
 
         public static SaveSemanticCandidate Validate(
             byte[] rawBytes,
@@ -1110,6 +1119,7 @@ namespace AL.Data.Catalogs
                 collector,
                 state);
             ValidateEquipmentRows(root, policy.Authority, collector, state);
+            ValidateAppliedBossLootRewardRows(root, policy.Authority, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -1263,6 +1273,13 @@ namespace AL.Data.Catalogs
                 root,
                 "OwnedEquipment",
                 SaveSemanticDomain.Equipment,
+                isLegacySchema,
+                collector,
+                state);
+            RequireArray(
+                root,
+                "AppliedBossLootRewards",
+                SaveSemanticDomain.Envelope,
                 isLegacySchema,
                 collector,
                 state);
@@ -3070,6 +3087,91 @@ namespace AL.Data.Catalogs
                             "SAVE_EQUIPMENT_TIMESTAMPS_INVALID",
                             path,
                             SaveSemanticDomain.Equipment);
+                    }
+                });
+        }
+
+        private static void ValidateAppliedBossLootRewardRows(
+            StrictJsonObject root,
+            SaveSemanticValidationAuthority authority,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            var firstPathByEncounterId = new Dictionary<string, string>(StringComparer.Ordinal);
+            var firstPathByResultId = new Dictionary<string, string>(StringComparer.Ordinal);
+            ValidateObjectRows(
+                root,
+                "AppliedBossLootRewards",
+                SaveSemanticDomain.Envelope,
+                AppliedBossLootRewardRowFields,
+                collector,
+                state,
+                (row, path) =>
+                {
+                    ValidateUniqueStableId(
+                        row,
+                        "EncounterId",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        firstPathByEncounterId,
+                        collector,
+                        state);
+                    ValidateUniqueStableId(
+                        row,
+                        "RewardResultId",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        firstPathByResultId,
+                        collector,
+                        state);
+                    string bossId;
+                    if (TryReadRequiredString(
+                        row,
+                        "BossId",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        allowBlank: false,
+                        collector,
+                        state,
+                        out bossId))
+                    {
+                        MarkUnsupportedStableId(
+                            authority,
+                            SaveSemanticStableIdKind.Boss,
+                            bossId,
+                            path + ".BossId",
+                            SaveSemanticDomain.Envelope,
+                            collector,
+                            state);
+                    }
+
+                    string ignoredDigest;
+                    TryReadRequiredOpaqueString(
+                        row,
+                        "RewardDigest",
+                        path,
+                        SaveSemanticDomain.Envelope,
+                        allowBlank: false,
+                        collector,
+                        state,
+                        out ignoredDigest);
+                    long committedTimestamp;
+                    if (TryReadRequiredInt64(
+                            row,
+                            "CommittedTimestamp",
+                            path,
+                            SaveSemanticDomain.Envelope,
+                            collector,
+                            state,
+                            out committedTimestamp) &&
+                        committedTimestamp <= 0)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_BOSS_LOOT_COMMIT_TIMESTAMP_INVALID",
+                            path + ".CommittedTimestamp",
+                            SaveSemanticDomain.Envelope);
                     }
                 });
         }
