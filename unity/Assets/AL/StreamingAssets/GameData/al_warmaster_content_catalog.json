@@ -1,0 +1,268 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_warmaster_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_warmaster_content_source_v001",
+  "idFormat": "lowercase_snake_case_for_catalog_ids",
+  "authority": {
+    "primaryMode": "codex_narrative_content",
+    "consumerIssue": 171,
+    "currentRuntimeSetId": "prototype_true_warmaster",
+    "currentRuntimePiecePrefix": "warmaster_piece_",
+    "contentScope": [
+      "set display name",
+      "set summary",
+      "piece display names",
+      "piece summaries",
+      "localization keys",
+      "entitlement meaning guardrails"
+    ],
+    "nonGoals": [
+      "purchase price",
+      "required piece count",
+      "Warzone Credit mutation",
+      "save migration",
+      "idempotency contract",
+      "combat stats",
+      "equipment mesh authority",
+      "VFX intensity",
+      "unlock entitlement"
+    ]
+  },
+  "warmasterPolicy": {
+    "releaseCopyApproval": "user_final_product_gate",
+    "internalIdExposure": "debug_only",
+    "missingContentBehavior": "technical_unavailable_status",
+    "purchaseAuthority": "codex_engineering_future_contract",
+    "thresholdAuthority": "codex_engineering_future_contract",
+    "setIdMigrationPolicy": "retain_current_runtime_id_until_engineering_migration",
+    "meaningGuardrails": [
+      "Warmaster names describe prestige identity only.",
+      "Piece names do not grant stats, prices, ownership, or completed purchases.",
+      "The complete set does not imply realm transfer, cross-realm entitlement, or final release balance.",
+      "Unknown future piece IDs must not be rendered as player-facing text without content authority."
+    ]
+  },
+  "sets": [
+    {
+      "id": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.set.true_warmaster.name",
+      "summaryKey": "warmaster.set.true_warmaster.summary",
+      "status": "source_ready_runtime_id_legacy",
+      "pieceIds": [
+        "warmaster_piece_01",
+        "warmaster_piece_02",
+        "warmaster_piece_03",
+        "warmaster_piece_04",
+        "warmaster_piece_05",
+        "warmaster_piece_06",
+        "warmaster_piece_07",
+        "warmaster_piece_08",
+        "warmaster_piece_09",
+        "warmaster_piece_10"
+      ]
+    }
+  ],
+  "pieces": [
+    {
+      "id": "warmaster_piece_01",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.oathbound_helm.name",
+      "summaryKey": "warmaster.piece.oathbound_helm.summary"
+    },
+    {
+      "id": "warmaster_piece_02",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.vanguard_pauldrons.name",
+      "summaryKey": "warmaster.piece.vanguard_pauldrons.summary"
+    },
+    {
+      "id": "warmaster_piece_03",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.command_breastplate.name",
+      "summaryKey": "warmaster.piece.command_breastplate.summary"
+    },
+    {
+      "id": "warmaster_piece_04",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.siege_gauntlets.name",
+      "summaryKey": "warmaster.piece.siege_gauntlets.summary"
+    },
+    {
+      "id": "warmaster_piece_05",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.standard_bearer_sash.name",
+      "summaryKey": "warmaster.piece.standard_bearer_sash.summary"
+    },
+    {
+      "id": "warmaster_piece_06",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.war_council_belt.name",
+      "summaryKey": "warmaster.piece.war_council_belt.summary"
+    },
+    {
+      "id": "warmaster_piece_07",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.marchwarden_greaves.name",
+      "summaryKey": "warmaster.piece.marchwarden_greaves.summary"
+    },
+    {
+      "id": "warmaster_piece_08",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.bannercloak.name",
+      "summaryKey": "warmaster.piece.bannercloak.summary"
+    },
+    {
+      "id": "warmaster_piece_09",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.conquest_medallion.name",
+      "summaryKey": "warmaster.piece.conquest_medallion.summary"
+    },
+    {
+      "id": "warmaster_piece_10",
+      "setId": "prototype_true_warmaster",
+      "displayNameKey": "warmaster.piece.final_war_plate.name",
+      "summaryKey": "warmaster.piece.final_war_plate.summary"
+    }
+  ],
+  "statusCopy": [
+    {
+      "id": "status_warmaster_content_unavailable",
+      "displayNameKey": "warmaster.status.content_unavailable.name",
+      "summaryKey": "warmaster.status.content_unavailable.summary"
+    },
+    {
+      "id": "status_warmaster_purchase_unavailable",
+      "displayNameKey": "warmaster.status.purchase_unavailable.name",
+      "summaryKey": "warmaster.status.purchase_unavailable.summary"
+    }
+  ],
+  "draftLocalization": [
+    {
+      "key": "warmaster.set.true_warmaster.name",
+      "text": "True Warmaster Regalia"
+    },
+    {
+      "key": "warmaster.set.true_warmaster.summary",
+      "text": "A prestige command set for a Champion proven through warzone pressure. It signals earned authority, not a stat grant by itself."
+    },
+    {
+      "key": "warmaster.piece.oathbound_helm.name",
+      "text": "Oathbound Helm"
+    },
+    {
+      "key": "warmaster.piece.oathbound_helm.summary",
+      "text": "A severe helm for commanders who carry the weight of a realm's vow."
+    },
+    {
+      "key": "warmaster.piece.vanguard_pauldrons.name",
+      "text": "Vanguard Pauldrons"
+    },
+    {
+      "key": "warmaster.piece.vanguard_pauldrons.summary",
+      "text": "Layered shoulders that make the Champion readable as the front of the advance."
+    },
+    {
+      "key": "warmaster.piece.command_breastplate.name",
+      "text": "Command Breastplate"
+    },
+    {
+      "key": "warmaster.piece.command_breastplate.summary",
+      "text": "A dark-fantasy command plate built around steadiness, pressure, and visible rank."
+    },
+    {
+      "key": "warmaster.piece.siege_gauntlets.name",
+      "text": "Siege Gauntlets"
+    },
+    {
+      "key": "warmaster.piece.siege_gauntlets.summary",
+      "text": "Heavy handguards that suggest holding a line under impact."
+    },
+    {
+      "key": "warmaster.piece.standard_bearer_sash.name",
+      "text": "Standard Bearer Sash"
+    },
+    {
+      "key": "warmaster.piece.standard_bearer_sash.summary",
+      "text": "A battlefield sash that frames the Champion as the rally point of the formation."
+    },
+    {
+      "key": "warmaster.piece.war_council_belt.name",
+      "text": "War Council Belt"
+    },
+    {
+      "key": "warmaster.piece.war_council_belt.summary",
+      "text": "A reinforced belt carrying the visual language of maps, orders, and hard decisions."
+    },
+    {
+      "key": "warmaster.piece.marchwarden_greaves.name",
+      "text": "Marchwarden Greaves"
+    },
+    {
+      "key": "warmaster.piece.marchwarden_greaves.summary",
+      "text": "Grounded leg armor for a commander expected to survive long campaigns."
+    },
+    {
+      "key": "warmaster.piece.bannercloak.name",
+      "text": "Bannercloak"
+    },
+    {
+      "key": "warmaster.piece.bannercloak.summary",
+      "text": "A restrained command cloak that turns movement into a visible standard."
+    },
+    {
+      "key": "warmaster.piece.conquest_medallion.name",
+      "text": "Conquest Medallion"
+    },
+    {
+      "key": "warmaster.piece.conquest_medallion.summary",
+      "text": "A medal of warzone recognition that should only appear after a valid entitlement."
+    },
+    {
+      "key": "warmaster.piece.final_war_plate.name",
+      "text": "Final War Plate"
+    },
+    {
+      "key": "warmaster.piece.final_war_plate.summary",
+      "text": "The last visible plate of the set, reserved for the completed Warmaster identity."
+    },
+    {
+      "key": "warmaster.status.content_unavailable.name",
+      "text": "Warmaster content unavailable"
+    },
+    {
+      "key": "warmaster.status.content_unavailable.summary",
+      "text": "This Warmaster ID has no approved player-facing content in the current catalog."
+    },
+    {
+      "key": "warmaster.status.purchase_unavailable.name",
+      "text": "Warmaster purchase unavailable"
+    },
+    {
+      "key": "warmaster.status.purchase_unavailable.summary",
+      "text": "Warmaster purchases require the future validated Warzone Credit and save contract before release."
+    }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 171,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "set IDs are unique",
+      "piece IDs are unique",
+      "each piece setId resolves to a set",
+      "each set pieceIds entry resolves to a piece",
+      "all displayNameKey and summaryKey values resolve in draftLocalization",
+      "current runtime IDs remain mapped without exposing internal IDs as release copy"
+    ],
+    "blockedRuntimeClaims": [
+      "purchase price validation",
+      "credit spending",
+      "save rollback",
+      "True Warmaster threshold",
+      "equipment stats",
+      "asset mesh selection",
+      "notification delivery",
+      "user-approved release copy"
+    ]
+  }
+}
