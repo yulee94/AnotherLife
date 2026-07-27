@@ -4,6 +4,8 @@
 
 **Date:** 2026-07-24
 
+**Platform baseline updated:** 2026-07-27
+
 **Unity baseline:** `2022.3.62f3`
 
 **Scope:** Four-realm settlement design source, shared construction-state runtime, Stonehold Workshop graybox, Eldergrove Atelier graybox, Crownlands Stormwright graybox, and Umbral Veilwright graybox
@@ -40,6 +42,27 @@ This is a prototype-readiness statement, not final-device performance approval. 
 | Production requirement | Validate GLES3/Vulkan target devices after final meshes, LODs, materials, and district density exist | Validate Metal target devices after final meshes, LODs, materials, and district density exist |
 
 No platform-specific package, native plugin, save change, catalog change, or build-setting mutation is required by this architecture package.
+
+## iOS platform evaluation baseline
+
+The approved product support floor is now **iOS 15.0**. Unity Player Settings
+persist that deployment target, and local Simulator exports use the Apple
+silicon `arm64` architecture rather than the legacy `x86_64` default.
+
+The evaluation matrix separates compatibility from runtime coverage:
+
+| Evidence | iOS 15 baseline | Current iOS runtime |
+| --- | --- | --- |
+| Unity compile and Player export | Required with deployment target `15.0` | Required |
+| Xcode native build | Required with every application target at or above `15.0` | Required |
+| Runtime launch and visual smoke | Required when an iOS 15 runtime or device is available | Required on the installed current Simulator |
+
+Xcode 26.6 supports an iOS 15 deployment target and iOS 15 Simulator testing,
+but this workstation currently has only the iOS 26.5 runtime installed. The
+Xcode component service no longer offers iOS 15.0 through 15.5 for direct
+download on this installation. Until an archived compatible runtime or
+physical iOS 15 device is attached, the iOS 15 claim is limited to deployment-
+target compilation and native linking; it is not yet an iOS 15 runtime pass.
 
 ## Static readiness score
 
