@@ -188,9 +188,28 @@ namespace AL.RealmSelection
 
     public sealed class RealmCatalogRuntimeHost : MonoBehaviour
     {
+        public static string BuildRequestUri(string streamingAssetsRoot)
+        {
+            if (string.IsNullOrWhiteSpace(streamingAssetsRoot))
+            {
+                throw new ArgumentException("A StreamingAssets root is required.", nameof(streamingAssetsRoot));
+            }
+
+            string relativePath = RealmCatalogRuntime.RelativePath.Replace('\\', '/');
+            if (streamingAssetsRoot.IndexOf("://", StringComparison.Ordinal) >= 0 ||
+                streamingAssetsRoot.StartsWith("jar:", StringComparison.OrdinalIgnoreCase))
+            {
+                return streamingAssetsRoot.TrimEnd('/', '\\') + "/" + relativePath;
+            }
+
+            string filePath = System.IO.Path.GetFullPath(
+                System.IO.Path.Combine(streamingAssetsRoot, RealmCatalogRuntime.RelativePath));
+            return new Uri(filePath).AbsoluteUri;
+        }
+
         private IEnumerator Start()
         {
-            string path = System.IO.Path.Combine(Application.streamingAssetsPath, RealmCatalogRuntime.RelativePath);
+            string path = BuildRequestUri(Application.streamingAssetsPath);
             var handler = new BoundedRealmCatalogDownloadHandler(RealmCatalogRuntime.MaximumByteLength);
             using (var request = new UnityWebRequest(path, "GET", handler, null))
             {

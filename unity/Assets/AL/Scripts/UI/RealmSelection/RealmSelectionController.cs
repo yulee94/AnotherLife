@@ -120,28 +120,51 @@ namespace AL.UI.RealmSelection
             var atmosphere = canvasObject.AddComponent<RealmSelectionFallbackAtmosphere>();
             atmosphere.Bind(BuildAtmosphericBackdrop(canvasObject.transform));
 
+            var safeAreaObject = new GameObject("SafeArea", typeof(RectTransform));
+            safeAreaObject.transform.SetParent(canvasObject.transform, false);
+            var safeAreaRect = safeAreaObject.GetComponent<RectTransform>();
+            safeAreaRect.anchorMin = Vector2.zero;
+            safeAreaRect.anchorMax = Vector2.one;
+            safeAreaRect.offsetMin = Vector2.zero;
+            safeAreaRect.offsetMax = Vector2.zero;
+
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
                        Resources.GetBuiltinResource<Font>("Arial.ttf");
 
-            var topRule = CreatePanel(canvasObject.transform, "TopRule", new Color(0.88f, 0.62f, 0.24f, 0.72f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -118f), new Vector2(980f, 4f));
-            var bottomRule = CreatePanel(canvasObject.transform, "BottomRule", new Color(0.22f, 0.45f, 0.72f, 0.42f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -946f), new Vector2(760f, 3f));
+            var topRule = CreatePanel(safeAreaObject.transform, "TopRule", new Color(0.88f, 0.62f, 0.24f, 0.72f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -118f), new Vector2(-96f, 4f));
+            var bottomRule = CreatePanel(safeAreaObject.transform, "BottomRule", new Color(0.22f, 0.45f, 0.72f, 0.42f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 58f), new Vector2(-160f, 3f));
             atmosphere.AddPulseTarget(topRule, 0.72f, 0.96f, 0.52f);
             atmosphere.AddPulseTarget(bottomRule, 0.36f, 0.62f, 0.33f);
 
-            var title = CreateText(canvasObject.transform, "Title", font, "ANOTHER LIFE", 42, new Vector2(0f, -42f), new Vector2(900f, 52f));
+            var title = CreateText(safeAreaObject.transform, "Title", font, "ANOTHER LIFE", 42, new Vector2(0f, -18f), new Vector2(-48f, 52f));
+            StretchAcrossTop(title);
             title.color = new Color(1f, 0.88f, 0.62f);
-            var subtitle = CreateText(canvasObject.transform, "Subtitle", font, "Choose the realm that will define your command style.", 21, new Vector2(0f, -92f), new Vector2(980f, 34f));
+            var subtitle = CreateText(safeAreaObject.transform, "Subtitle", font, "Choose the realm that will define your command style.", 21, new Vector2(0f, -70f), new Vector2(-48f, 34f));
+            StretchAcrossTop(subtitle);
             subtitle.color = new Color(0.78f, 0.86f, 0.94f);
 
-            int index = 0;
+            var cardsObject = new GameObject("RealmCards", typeof(RectTransform));
+            cardsObject.transform.SetParent(safeAreaObject.transform, false);
+            var cardsRect = cardsObject.GetComponent<RectTransform>();
+            cardsRect.anchorMin = Vector2.zero;
+            cardsRect.anchorMax = Vector2.one;
+            cardsRect.offsetMin = new Vector2(24f, 88f);
+            cardsRect.offsetMax = new Vector2(-24f, -148f);
+            var grid = cardsObject.AddComponent<GridLayoutGroup>();
+            grid.childAlignment = TextAnchor.UpperCenter;
+            grid.startCorner = GridLayoutGroup.Corner.UpperLeft;
+            grid.startAxis = GridLayoutGroup.Axis.Horizontal;
+
             foreach (var realm in realms)
             {
-                CreateRealmButton(canvasObject.transform, font, realm, index);
-                index++;
+                CreateRealmButton(cardsObject.transform, font, realm);
             }
+
+            var safeAreaDriver = canvasObject.AddComponent<RealmSelectionSafeAreaDriver>();
+            safeAreaDriver.Bind(safeAreaRect, cardsRect, grid);
         }
 
-        private void CreateRealmButton(Transform parent, Font font, RealmDefinition realm, int index)
+        private void CreateRealmButton(Transform parent, Font font, RealmDefinition realm)
         {
             var buttonObject = new GameObject(realm.RealmName);
             buttonObject.transform.SetParent(parent, false);
@@ -165,15 +188,11 @@ namespace AL.UI.RealmSelection
             rect.anchorMin = new Vector2(0.5f, 1f);
             rect.anchorMax = new Vector2(0.5f, 1f);
             rect.pivot = new Vector2(0.5f, 1f);
-            int column = index % 2;
-            int row = index / 2;
-            rect.anchoredPosition = new Vector2(column == 0 ? -430f : 430f, -190f - row * 184f);
-            rect.sizeDelta = new Vector2(790f, 148f);
 
             CreateGradientPanel(buttonObject.transform, "CardDepth", new Color(0.055f, 0.067f, 0.086f, 0.88f), new Color(0.014f, 0.018f, 0.026f, 0.62f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             CreatePanel(buttonObject.transform, "CardTopTrace", new Color(1f, 0.90f, 0.66f, 0.18f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-34f, 1.8f));
             CreatePanel(buttonObject.transform, "CardBottomTrace", new Color(realmColor.r, realmColor.g, realmColor.b, 0.20f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 1f), new Vector2(-34f, 1.5f));
-            CreatePanel(buttonObject.transform, "RealmAccent", realmColor, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(8f, 148f));
+            CreatePanel(buttonObject.transform, "RealmAccent", realmColor, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 0f));
             CreateRealmSigil(buttonObject.transform, realmColor);
 
             var profile = CreateText(buttonObject.transform, realm.RealmName + "_Profile", font, GetRealmCommandProfile(realm.Id), 13, new Vector2(30f, -16f), new Vector2(260f, 18f));
@@ -182,17 +201,17 @@ namespace AL.UI.RealmSelection
             profile.color = new Color(1f, 0.84f, 0.52f);
 
             var realmName = CreateText(buttonObject.transform, realm.RealmName + "_Name", font, realm.RealmName.ToUpperInvariant(), 25, new Vector2(30f, -38f), new Vector2(500f, 32f));
-            AnchorTopLeft(realmName, new Vector2(30f, -38f), new Vector2(500f, 32f));
+            AnchorTopStretch(realmName, new Vector2(30f, -38f), 210f, 32f);
             realmName.alignment = TextAnchor.UpperLeft;
             realmName.color = Color.Lerp(realmColor, Color.white, 0.46f);
 
-            var selectText = CreateText(buttonObject.transform, realm.RealmName + "_Select", font, "SELECT", 14, new Vector2(622f, -110f), new Vector2(126f, 24f));
-            AnchorTopLeft(selectText, new Vector2(622f, -110f), new Vector2(126f, 24f));
+            var selectText = CreateText(buttonObject.transform, realm.RealmName + "_Select", font, "SELECT", 14, new Vector2(-30f, 16f), new Vector2(126f, 24f));
+            AnchorBottomRight(selectText, new Vector2(-30f, 16f), new Vector2(126f, 24f));
             selectText.alignment = TextAnchor.UpperRight;
             selectText.color = new Color(1f, 0.84f, 0.52f);
 
-            var text = CreateText(buttonObject.transform, realm.RealmName + "_Text", font, realm.Description, 17, new Vector2(30f, -76f), new Vector2(585f, 58f));
-            AnchorTopLeft(text, new Vector2(30f, -76f), new Vector2(585f, 58f));
+            var text = CreateText(buttonObject.transform, realm.RealmName + "_Text", font, realm.Description, 17, new Vector2(30f, -76f), new Vector2(585f, 70f));
+            AnchorTopStretch(text, new Vector2(30f, -76f), 175f, 70f);
             text.alignment = TextAnchor.UpperLeft;
             text.color = new Color(0.84f, 0.88f, 0.92f);
         }
@@ -343,6 +362,49 @@ namespace AL.UI.RealmSelection
             rect.pivot = new Vector2(0f, 1f);
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta;
+        }
+
+        private static void AnchorTopStretch(Text text, Vector2 anchoredPosition, float rightInset, float height)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = new Vector2(-anchoredPosition.x - rightInset, height);
+        }
+
+        private static void AnchorBottomRight(Text text, Vector2 anchoredPosition, Vector2 sizeDelta)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.pivot = new Vector2(1f, 0f);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
+        }
+
+        private static void StretchAcrossTop(Text text)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 1f);
         }
 
         private static Image CreatePanel(Transform parent, string name, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)

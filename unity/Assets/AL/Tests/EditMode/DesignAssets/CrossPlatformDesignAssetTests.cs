@@ -81,6 +81,26 @@ namespace AL.Tests.EditMode.DesignAssets
         }
 
         [Test]
+        public void ApprovedBrandIconFillsEveryIosSlot()
+        {
+            Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(BrandIconPath);
+            var verifiedSlots = new List<string>();
+
+            foreach (PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.iOS))
+            {
+                PlatformIcon[] slots = PlayerSettings.GetPlatformIcons(NamedBuildTarget.iOS, kind);
+                foreach (PlatformIcon slot in slots)
+                {
+                    verifiedSlots.Add($"{kind}:{slot.width}x{slot.height}");
+                    Assert.That(slot.maxLayerCount, Is.EqualTo(1));
+                    Assert.That(slot.GetTexture(0), Is.SameAs(icon));
+                }
+            }
+
+            Assert.That(verifiedSlots, Is.Not.Empty);
+        }
+
+        [Test]
         public void AndroidAdaptiveIconLayersAreAssignedAndMaskSafe()
         {
             Texture2D foreground =
