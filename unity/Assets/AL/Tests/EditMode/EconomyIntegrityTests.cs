@@ -1022,7 +1022,7 @@ namespace AL.Tests.EditMode
             try
             {
                 object saveService = CreateActualSaveService(root);
-                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
                 object currentSave = GetProperty(saveService, "CurrentSave");
                 SetField(currentSave, "WarzoneCredits", 10);
                 Invoke(saveService, "Save");
@@ -1060,10 +1060,8 @@ namespace AL.Tests.EditMode
             string[] creditCallers = FindCallers(scriptsRoot, ".AddCredits(", ".SpendCredits(");
             string[] expectedCreditCallers =
             {
-                "ChampionMode/AI/BossDummyAI.cs",
                 "Kingdom/Quests/LocalQuestService.cs",
                 "RealmWar/Warzone/WarzoneService.cs",
-                "Services/Local/LocalBossLootService.cs",
                 "Services/Local/LocalWarmasterService.cs",
                 "Utilities/DemoInitializer.cs"
             };
@@ -1093,7 +1091,7 @@ namespace AL.Tests.EditMode
             try
             {
                 object saveService = CreateActualSaveService(root);
-                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
                 object save = GetProperty(saveService, "CurrentSave");
                 IList inventory = (IList)GetField(save, "OwnedEquipment");
                 object persisted = CreateOwnedEquipment("equipment_snapshot", 2);
@@ -1120,7 +1118,7 @@ namespace AL.Tests.EditMode
             try
             {
                 object saveService = CreateActualSaveService(root);
-                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
                 object save = GetProperty(saveService, "CurrentSave");
                 IList inventory = (IList)GetField(save, "OwnedEquipment");
                 object first = CreateOwnedEquipment("equipment_duplicate", 1);
@@ -1179,6 +1177,84 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(expectedStatus == "Valid", GetProperty(result, "IsValid"));
         }
 
+        [Test]
+        public void BossLootApplicationCommitsOnceAndReplayIsNotificationFree()
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object credits = CreateCreditService(fixture);
+            var notifications = CreateNotificationFixture();
+            object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
+            object request = CreateBossLootRequest("encounter_a", "result_a", "boss_a", 25);
+
+            object first = Invoke(service, "RollLoot", request);
+            object replay = Invoke(service, "RollLoot", request);
+
+            AssertApplicationStatus(first, "Committed");
+            AssertApplicationStatus(replay, "AlreadyCommitted");
+            Assert.AreEqual(25, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(1, notifications.State.Messages.Count);
+        }
+
+        [TestCase("SaveFailedPreviousPreserved", "SaveFailedRolledBack", false)]
+        [TestCase("CommitUncertain", "CommitUncertain", true)]
+        public void BossLootSaveBoundaryRollsBackOnlyWhenPreviousFileIsConfirmedPreserved(
+            string saveStatus,
+            string expectedApplicationStatus,
+            bool retainsPendingMutation)
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = saveStatus;
+            object credits = CreateCreditService(fixture);
+            var notifications = CreateNotificationFixture();
+            object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
+            object request = CreateBossLootRequest("encounter_b", "result_b", "boss_b", 10);
+
+            object result = Invoke(service, "RollLoot", request);
+
+            AssertApplicationStatus(result, expectedApplicationStatus);
+            Assert.AreEqual(retainsPendingMutation ? 10 : 0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(
+                retainsPendingMutation ? 1 : 0,
+                ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.IsEmpty(notifications.State.Messages);
+        }
+
+        [Test]
+        public void BossLootRejectsConflictingEncounterWithoutMutation()
+        {
+            object save = CreateValidSave();
+            IList ledger = (IList)GetField(save, "AppliedBossLootRewards");
+            object applied = Activator.CreateInstance(GetRuntimeType("AL.Data.Runtime.AppliedBossLootRewardState"));
+            SetField(applied, "EncounterId", "encounter_c");
+            SetField(applied, "RewardResultId", "prior_result");
+            SetField(applied, "BossId", "boss_c");
+            SetField(applied, "RewardDigest", "sha256:prior");
+            SetField(applied, "CommittedTimestamp", 1L);
+            ledger.Add(applied);
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object credits = CreateCreditService(fixture);
+            var notifications = CreateNotificationFixture();
+            object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
+
+            object result = Invoke(
+                service,
+                "RollLoot",
+                CreateBossLootRequest("encounter_c", "new_result", "boss_c", 5));
+
+            AssertApplicationStatus(result, "RejectedMalformedState");
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(1, ledger.Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.IsEmpty(notifications.State.Messages);
+        }
+
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
         {
             object[] args = { realm, null };
@@ -1200,6 +1276,12 @@ namespace AL.Tests.EditMode
         {
             Assert.NotNull(result);
             Assert.AreEqual(expected, GetProperty(result, "Status").ToString());
+        }
+
+        private static void AssertApplicationStatus(object result, string expected)
+        {
+            Assert.NotNull(result);
+            Assert.AreEqual(expected, GetField(result, "ApplicationStatus").ToString());
         }
 
         private static void AssertMutation(
@@ -1528,7 +1610,13 @@ namespace AL.Tests.EditMode
             return constructor.Invoke(new[] { argument });
         }
 
-        private static object CreateBossLootService(object saveService)
+        private static object CreateBossLootService(object saveService) =>
+            CreateBossLootService(saveService, null, null);
+
+        private static object CreateBossLootService(
+            object saveService,
+            object creditService,
+            object notificationService)
         {
             Type serviceType = GetRuntimeType("AL.Services.Local.LocalBossLootService");
             ConstructorInfo constructor = serviceType.GetConstructor(new[]
@@ -1538,7 +1626,32 @@ namespace AL.Tests.EditMode
                 GetRuntimeType("AL.Core.Interfaces.INotificationService")
             });
             Assert.NotNull(constructor);
-            return constructor.Invoke(new[] { saveService, null, null });
+            return constructor.Invoke(new[] { saveService, creditService, notificationService });
+        }
+
+        private static object CreateBossLootRequest(
+            string encounterId,
+            string resultId,
+            string bossId,
+            int credits)
+        {
+            object request = Activator.CreateInstance(GetRuntimeType("AL.Core.Interfaces.BossLootRequest"));
+            SetField(request, "EncounterId", encounterId);
+            SetField(request, "RewardResultId", resultId);
+            SetField(request, "BossId", bossId);
+            SetField(request, "BossName", "Test Boss");
+            SetField(request, "WarzoneCreditReward", credits);
+            SetField(request, "RandomSeed", 12345);
+            return request;
+        }
+
+        private static NotificationFixture CreateNotificationFixture()
+        {
+            Type interfaceType = GetRuntimeType("AL.Core.Interfaces.INotificationService");
+            object proxy = CreateDispatchProxy(interfaceType, typeof(ScriptedNotificationServiceProxy));
+            var state = new ScriptedNotificationService();
+            ((ScriptedNotificationServiceProxy)proxy).State = state;
+            return new NotificationFixture(proxy, state);
         }
 
         private static object CreateOwnedEquipment(string equipmentId, int quantity)
@@ -1664,6 +1777,18 @@ namespace AL.Tests.EditMode
             public ScriptedProductionProvider State { get; }
         }
 
+        private sealed class NotificationFixture
+        {
+            public NotificationFixture(object proxy, ScriptedNotificationService state)
+            {
+                Proxy = proxy;
+                State = state;
+            }
+
+            public object Proxy { get; }
+            public ScriptedNotificationService State { get; }
+        }
+
         private sealed class ContributionSpec
         {
             public ContributionSpec(string resourceName, double amount)
@@ -1706,6 +1831,7 @@ namespace AL.Tests.EditMode
         {
             public object CurrentSave;
             public int SaveCount;
+            public string LastSaveStatus = "None";
 
             public object Invoke(MethodInfo method, object[] args)
             {
@@ -1721,6 +1847,8 @@ namespace AL.Tests.EditMode
                     case "get_LastLoadMessage":
                     case "get_LastSaveMessage":
                         return string.Empty;
+                    case "get_LastSaveStatus":
+                        return Enum.Parse(method.ReturnType, LastSaveStatus);
                     default:
                         return method.ReturnType == typeof(void)
                             ? null
@@ -1728,6 +1856,29 @@ namespace AL.Tests.EditMode
                                 ? Activator.CreateInstance(method.ReturnType)
                                 : null;
                 }
+            }
+        }
+
+        public class ScriptedNotificationServiceProxy : DispatchProxy
+        {
+            public ScriptedNotificationService State { get; set; }
+
+            protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+                State.Invoke(targetMethod, args);
+        }
+
+        public sealed class ScriptedNotificationService
+        {
+            public readonly List<string> Messages = new List<string>();
+
+            public object Invoke(MethodInfo method, object[] args)
+            {
+                if (method.Name == "ShowMessage")
+                {
+                    Messages.Add((string)args[0]);
+                }
+
+                return null;
             }
         }
 

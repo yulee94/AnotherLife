@@ -11,6 +11,20 @@ namespace AL.Core.Interfaces
         IEnumerable<OwnedEquipmentState> GetOwnedEquipment();
     }
 
+    public enum BossLootApplicationStatus
+    {
+        None = 0,
+        Committed = 1,
+        AlreadyCommitted = 2,
+        RejectedInvalidRequest = 3,
+        RejectedInvalidDefinition = 4,
+        RejectedNoCurrentSave = 5,
+        RejectedMalformedState = 6,
+        RejectedCreditMutation = 7,
+        SaveFailedRolledBack = 8,
+        CommitUncertain = 9
+    }
+
     public enum BossLootApplicationValidationStatus
     {
         None = 0,
@@ -78,6 +92,8 @@ namespace AL.Core.Interfaces
     [Serializable]
     public class BossLootRequest
     {
+        public string EncounterId;
+        public string RewardResultId;
         public string BossId;
         public string BossName;
         public string PlayerDisplayName = "Anonymous player";
@@ -89,10 +105,17 @@ namespace AL.Core.Interfaces
     [Serializable]
     public class BossLootResult
     {
+        public BossLootApplicationStatus ApplicationStatus;
+        public string DiagnosticCode;
+        public string EncounterId;
+        public string RewardResultId;
         public string BossId;
         public string BossName;
         public int WarzoneCreditsAwarded;
         public List<BossLootDrop> Drops = new List<BossLootDrop>();
+        public bool IsCommitted =>
+            ApplicationStatus == BossLootApplicationStatus.Committed ||
+            ApplicationStatus == BossLootApplicationStatus.AlreadyCommitted;
     }
 
     [Serializable]
