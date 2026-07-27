@@ -437,10 +437,10 @@ Constraints: one consistent building; no text, labels, numbers, logo, AL monogra
 
 The graybox preserves Umbral as a fourth peer realm rather than a progression tier. Its distinctiveness comes from offset construction, protected negative space, inward direction, and controlled closure—not from greater power, broader effects, or higher systemic status.
 
-## Eldergrove Workshop Level 0–10 review candidate
+## Approved Eldergrove Workshop Level 0–10 production source
 
 - File: `architecture_eldergrove_workshop_level_progression_v001.png`
-- Status: Review candidate; project-owner production-source approval pending
+- Status: Owner-approved production source; Level 1/6/10 Unity blockout gate passed; runtime candidate not yet approved
 - Generated: 2026-07-27
 - Tool path: Codex built-in image generation
 - Source type: AI-assisted level-progression proposal derived from approved project sources
@@ -449,6 +449,8 @@ The graybox preserves Umbral as a fourth peer realm rather than a progression ti
 - SHA-256: `115ef09a1bbac56d7dfe330cac8a96cd5b446c81d294ec6b85d28a494135c20c`
 - Visual-verdict score: `93 / 100`
 - Runtime authority: None. The sheet is source-only and does not establish gameplay levels, costs, durations, save fields, transactions, exact dimensions, topology, pivots, materials, colliders, LOD thresholds, or measured device performance.
+
+Owner decision recorded 2026-07-27: the level-progression source was approved and production work was directed to continue.
 
 ### Recorded level-progression generation specification
 
@@ -467,7 +469,17 @@ Avoid: cartoon, chibi, miniature-diorama cuteness, low-poly final look, bright g
 
 ### Visual review
 
-- Verdict: `pass` at `93 / 100` for owner review
+- Verdict: `pass` at `93 / 100`; subsequently owner-approved
 - Strengths: exactly eleven cumulative presentations; preserved entrance and footprint identity; clear roof, annex, upper-mass, and capstone progression; restrained material hierarchy; no effect-dependent level distinction
 - Production cautions: treat the written module matrix as scale authority because the five-panel upper row receives slightly larger cells; protect the subtle Level `2` root-brace delta; merge or remove Level `9`–`10` bronze and loose-prop detail on mobile-low
-- Approval boundary: the project owner must approve, revise, or reject the sheet before it becomes production-model source
+- Approval boundary: the sheet is approved visual/model-source direction and its three Unity blockout anchors have passed; runtime-candidate approval still requires final modeling, import, LOD, and device evidence
+
+### Unity blockout verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `92 / 100`
+- Static mobile-readiness result: `94 / 100` retained
+- Renderer counts: `57`, `85`, and `115`
+- Runtime boundary: isolated review prefabs and scene only; no save, economy, progression, catalog, build-setting, or live-kingdom binding
+- Handoff: `Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md`
+- Remaining runtime-candidate evidence: final topology and materials, LODs, metric/footprint validation, populated-district profiling, and representative Android/iOS device results

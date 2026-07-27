@@ -8,11 +8,11 @@
 
 **Unity baseline:** `2022.3.62f3`
 
-**Scope:** Four-realm settlement design source, shared construction-state runtime, Stonehold Workshop graybox, Eldergrove Atelier graybox, Crownlands Stormwright graybox, and Umbral Veilwright graybox
+**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, and the Eldergrove Workshop Level 1/6/10 production blockouts
 
 ## Outcome
 
-The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all four prototype scenes remain outside Player build settings, and the shared animation code uses only Unity APIs supported by Android and iOS Player builds.
+The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all prototype and production-review scenes remain outside Player build settings, and the shared animation code uses only Unity APIs supported by Android and iOS Player builds.
 
 This is a prototype-readiness statement, not final-device performance approval. The grayboxes prove the control pattern and visual direction; production meshes, textures, LODs, shaders, simultaneous-building density, and real devices still require profiling.
 
@@ -26,6 +26,8 @@ This is a prototype-readiness statement, not final-device performance approval. 
 - Static modules use no per-object `Animator`, particles, audio sources, or colliders.
 - Eldergrove structural roots use fixed authored segments and stop moving after
   their construction stage settles.
+- Eldergrove Level 1, 6, and 10 blockouts grow cumulatively and remain beneath
+  a `120`-renderer graybox ceiling.
 - Each prototype uses at most one localized, shadowless activity light.
 - Concept sheets remain non-readable source references with mipmaps disabled.
 - Concept sheets, contact sheets, and videos are not referenced by runtime prefabs.
@@ -74,7 +76,8 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 
 ## Automated acceptance
 
-`AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests` verifies:
+`AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests` and
+`AL.Tests.EditMode.Architecture.EldergroveWorkshopLevelBlockoutTests` verify:
 
 - renderer and material ceilings;
 - instancing on every shared prototype material;
@@ -85,17 +88,21 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 - no prototype scene in enabled Player build settings;
 - no concept-sheet dependency from any prototype prefab;
 - non-readable concept-sheet imports with mipmaps disabled and native NPOT sizing.
+- exact cumulative level-group ownership for Level 1, 6, and 10;
+- monotonic geometry growth beneath the Eldergrove graybox ceiling;
+- static review prefabs with no gameplay component or prefab light;
+- the repaired Eldergrove eave-to-ridge roof direction.
 
-The expanded `31 / 31` Architecture suite passed on the local Unity
+The expanded `44 / 44` Architecture suite passed on the local Unity
 2022.3.62f3 editor. It verifies the six-state shared lifecycle, direct
 persistent-state initialization, stable-state sleep, reduced motion, Stonehold
 rigid-stage and functional-activity ownership, correct eave-to-ridge roof
 pitch, Eldergrove authored grounded roots and contained cultivation ownership,
-cutaway isolation, fixed Umbral convergence, and visual renderer ceilings. PR
-#287 retains the prior Android/iOS-targeted `17 / 17` evidence for the shared,
-Crownlands, and Umbral baseline; the Stonehold and Eldergrove extensions still
-require their next representative Android/iOS target run before production
-approval.
+cutaway isolation, fixed Umbral convergence, cumulative Eldergrove level
+anchors, source/build isolation, and visual renderer ceilings. PR #287 retains
+the prior Android/iOS-targeted `17 / 17` evidence for the shared, Crownlands,
+and Umbral baseline; the Stonehold and Eldergrove extensions still require
+their next representative Android/iOS target run before production approval.
 
 ## Production handoff
 

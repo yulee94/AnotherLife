@@ -1,6 +1,6 @@
 # Eldergrove Workshop Level Progression
 
-**Status:** Review candidate; visual gate passed at `93 / 100`; project-owner production-source approval pending
+**Status:** Owner-approved production source; source gate passed at `93 / 100`; Unity Level 1/6/10 blockout gate passed at `92 / 100`
 
 **Asset ID:** `building_eldergrove_workshop_v001`
 
@@ -18,6 +18,8 @@
 
 **Review sheet:** [`architecture_eldergrove_workshop_level_progression_v001.png`](../Architecture/ConceptSheets/architecture_eldergrove_workshop_level_progression_v001.png)
 
+**Unity handoff:** [`Eldergrove_Workshop_Level_Blockout_Handoff.md`](../../../../Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md)
+
 ## Purpose
 
 Define the first production-readable Level `0` through Level `10` model ladder for the Eldergrove Workshop while preserving the approved stable slot, shared building-level contract, Eldergrove motion grammar, and mobile-safety target above `90 / 100`.
@@ -26,7 +28,7 @@ The packet controls visual progression and model handoff only. It does not set c
 
 ## Approval boundary
 
-The linked sheet is an AI-assisted review candidate. It passed the visual gate but is not final model authority until the project owner approves it as a production source.
+The linked sheet is an AI-assisted visual source approved by the project owner on 2026-07-27. It is now visual authority for the Eldergrove Workshop level family, but it is not topology, metric, material, collider, LOD, animation-timing, save, economy, or gameplay authority.
 
 The following are proposed production decisions:
 
@@ -36,7 +38,7 @@ The following are proposed production decisions:
 4. Use a root-vault opening, cultivated central work area, and restrained lantern/capstone rhythm as protected identity cues.
 5. Keep the Workshop within the common-building mobile envelope even at Level `10`.
 
-Promoting this candidate to production source is the next project-owner decision. Changing the shared level ladder, realm construction grammar, stable placement contract, or common-building performance class is a major design-direction change.
+The project owner approved the candidate with “Like this! Lets keep going” on 2026-07-27. Changing the approved silhouette ladder, shared level ladder, realm construction grammar, stable placement contract, or common-building performance class is now a major design-direction change.
 
 ## Production brief
 
@@ -46,7 +48,7 @@ Promoting this candidate to production source is the next project-owner decision
 | Realm | Eldergrove |
 | Stable building identity | `Workshop` |
 | Stable slot identity | `kingdom.slot.workshop` in layout version `kingdom.layout.v1` |
-| Approval state | Review candidate |
+| Approval state | Owner-approved production source; runtime candidate not yet approved |
 | Scale | Medium common-building family; exact meter footprint remains `OPEN` |
 | Camera use | Strategic 2.5D kingdom, normal gameplay, selected cutaway, limited inspection |
 | Primary silhouette | Broad stone plinth beneath one load-bearing living-root entrance vault, a layered roof, and a restrained vertical lantern/capstone |
@@ -166,7 +168,8 @@ Additional constraints:
 
 ## Open production decisions
 
-- [ ] Project owner approves, revises, or rejects the review sheet as production source.
+- [x] Project owner approved the review sheet as production source on 2026-07-27.
+- [x] Deterministic Level `1`, `6`, and `10` Unity blockouts passed the visual gate at `92 / 100`.
 - [ ] Exact metric footprint and height envelope.
 - [ ] Final module pivots, sockets, and naming after DCC blockout.
 - [ ] Final shared trim/atlas layout and material-slot plan.

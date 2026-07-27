@@ -18,7 +18,13 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Art/Generated/Architecture/Crownlands/" +
                 "Crownlands_Stormwright_AnimationPrototype.prefab",
             "Assets/AL/Art/Generated/Architecture/Umbral/" +
-                "Umbral_Veilwright_AnimationPrototype.prefab"
+                "Umbral_Veilwright_AnimationPrototype.prefab",
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/" +
+                "Eldergrove_Workshop_Level01_Blockout.prefab",
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/" +
+                "Eldergrove_Workshop_Level06_Blockout.prefab",
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/" +
+                "Eldergrove_Workshop_Level10_Blockout.prefab"
         };
 
         private static readonly string[] PrototypeScenePaths =
@@ -30,7 +36,9 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Scenes/Prototypes/" +
                 "CrownlandsStormwrightAnimationPrototype.unity",
             "Assets/AL/Scenes/Prototypes/" +
-                "UmbralVeilwrightAnimationPrototype.unity"
+                "UmbralVeilwrightAnimationPrototype.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "EldergroveWorkshopLevelBlockout.unity"
         };
 
         private const string ConceptSheetFolder =
