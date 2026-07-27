@@ -1,0 +1,257 @@
+{
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_mirrorroot_littoral_visual_source_v001",
+  "sourceVersion": "tdf-eco-mirrorroot-2026-07-27-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-27",
+  "promptDocument": {
+    "path": "unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/Executed_Generation_Prompts_And_Provenance.md",
+    "sha256": "88ca650889f958246dc2ca8cc672d6c7c6c2cdf3acdbcb74b9e2d0ae0c817701"
+  },
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "narrativeNamingState": "WorkingLabelsOnly",
+    "visualQaState": "PassWithConcern"
+  },
+  "generator": {
+    "product": "Codex built-in image generation",
+    "versionOrModel": "unavailable_to_operator",
+    "externalInputsSupplied": false,
+    "existingProjectReferenceSupplied": true,
+    "editableSourceAvailable": false,
+    "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001"
+  },
+  "sourceBudgets": {
+    "image": {
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorSpace": "sRGB",
+      "bitDepth": 8,
+      "alphaPolicy": "opaque_rgb",
+      "maximumCompressedBytes": 4194304,
+      "estimatedDecodedRgbBytes": 4718592,
+      "maximumDecodedRgbaBytes": 6291456,
+      "maximumSimultaneousReviewImages": 3,
+      "maximumSimultaneousDecodedBytes": 18874368
+    },
+    "ceilings": {
+      "finalCount": 3,
+      "finalBytes": 12582912,
+      "retainedInputCount": 0,
+      "retainedInputBytes": 0,
+      "waveBytes": 12582912
+    },
+    "actual": {
+      "finalCount": 3,
+      "finalBytes": 9330072,
+      "retainedInputCount": 0,
+      "retainedInputBytes": 0,
+      "totalCount": 3,
+      "totalBytes": 9330072,
+      "referencedExistingAssetCount": 1,
+      "referencedExistingBytes": 2370432,
+      "duplicatedExistingBytes": 0,
+      "playerBuildBytes": 0,
+      "runtimeResidentBytes": 0
+    }
+  },
+  "habitat": {
+    "habitatId": "tdf_habitat_eldergrove_mirrorroot_littoral",
+    "realmId": "eldergrove",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "userDecision": "NotRequested",
+    "environmentKitId": "tdf_envkit_eldergrove_mirrorroot_littoral",
+    "protectedIdentity": [
+      "low_water_horizon",
+      "irregular_shoreline",
+      "stable_dry_shallow_deep_value_bands",
+      "flooded_root_shelf",
+      "open_shoreline_sight_gaps",
+      "effects_independent_depth_read"
+    ],
+    "neighborHabitatIds": [
+      "tdf_habitat_eldergrove_moonroot_floodbasin",
+      "tdf_habitat_eldergrove_sunmane_edge_meadow"
+    ],
+    "sharedTransitionIds": [
+      "tdf_transition_eldergrove_moonroot_floodbasin_to_mirrorroot_littoral"
+    ],
+    "materialFamilyIds": [
+      "tdf_matfam_eldergrove_wet_bark_root",
+      "tdf_matfam_wet_hide"
+    ],
+    "primaryAssetIds": [
+      "tdf_asset_habitat_eldergrove_mirrorroot_littoral_establishing_master_v001",
+      "tdf_asset_habitat_eldergrove_mirrorroot_littoral_layout_transition_depth_v001",
+      "tdf_asset_habitat_eldergrove_mirrorroot_littoral_material_lod_v001"
+    ]
+  },
+  "placementReference": {
+    "profileId": "tdf_mire_lumenback",
+    "sourceVersion": "tdf-foundation-fauna-normalization-2026-07-27-v001",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "picturedVariantId": "tdf_mire_lumenback_standard",
+    "unpicturedVariantIds": [
+      "tdf_mire_lumenback_clay",
+      "tdf_mire_lumenback_night"
+    ],
+    "assetId": "tdf_asset_mire_lumenback_concept_sheet_v001",
+    "assetPath": "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png",
+    "assetGuid": "0b4bdfc958764792ac78c88987e46133",
+    "assetByteLength": 2370432,
+    "assetSha256": "39154a3ea94394efabac558e704a54a630e005371123b32ec9dd3803ec2235b0",
+    "assetGitLfsOid": "39154a3ea94394efabac558e704a54a630e005371123b32ec9dd3803ec2235b0",
+    "assetGitLfsSize": 2370432,
+    "protectedIdentity": "low_rounded_torso_paddle_feet_throat_pouch",
+    "scaleChampionUnits": {
+      "shoulderHeight": 0.45,
+      "length": 1.2
+    },
+    "usage": "identity_scale_contact_reference_only_no_spawn_or_variant_authority"
+  },
+  "environmentKit": {
+    "kitId": "tdf_envkit_eldergrove_mirrorroot_littoral",
+    "propFamilyIds": [
+      "tdf_prop_eldergrove_mirrorroot_flooded_root_shelf",
+      "tdf_prop_eldergrove_mirrorroot_shallow_mud_fan",
+      "tdf_prop_eldergrove_mirrorroot_sparse_reed_island",
+      "tdf_prop_eldergrove_mirrorroot_waterworn_stone_cluster",
+      "tdf_prop_eldergrove_mirrorroot_submerged_stem_cluster",
+      "tdf_prop_eldergrove_mirrorroot_broad_low_leaf_clump",
+      "tdf_prop_eldergrove_mirrorroot_floating_growth_cluster",
+      "tdf_prop_eldergrove_mirrorroot_distant_shoreline_proxy"
+    ],
+    "requiredParticles": 0,
+    "requiredDynamicLights": 0,
+    "requiredWaterFamilies": 1,
+    "requiredEmissionFamilies": 0
+  },
+  "productionEnvelope": {
+    "status": "ProvisionalSourceTarget",
+    "reviewCellMeters": {
+      "width": 128,
+      "length": 128
+    },
+    "lowMobileUniqueCompressedTargetMiB": {
+      "minimum": 6,
+      "maximum": 8
+    },
+    "hardParentCeilingMiB": 12,
+    "preferredSharedMaterialInstances": 2,
+    "maximumSimultaneousMaterialFamilies": 4,
+    "maximumDominantFloodedRootMassesLowMobileView": 5,
+    "maximumSecondaryOrganicClumpsLowMobileView": 12,
+    "inheritedCreatureBudgetConflictState": "UnresolvedForCoordinationAfterUserApproval",
+    "lod1RatioPercent": {
+      "minimum": 50,
+      "maximum": 60
+    },
+    "lod2RatioPercent": {
+      "minimum": 18,
+      "maximum": 25
+    },
+    "distantRatioPercent": {
+      "minimum": 5,
+      "maximum": 8
+    }
+  },
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_habitat_eldergrove_mirrorroot_littoral_establishing_master_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/ConceptSheets/tdf_habitat_eldergrove_mirrorroot_littoral_establishing_master_v001.png",
+      "roles": [
+        "establishing",
+        "shoreline_depth_value",
+        "grayscale",
+        "static_water_reduction",
+        "mire_lumenback_contact"
+      ],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 3257770,
+      "sha256": "bf06c34c34ce56aa18d888238b3e08fc11d40bc8738938c3f656846014d9e6e5",
+      "gitLfsOid": "bf06c34c34ce56aa18d888238b3e08fc11d40bc8738938c3f656846014d9e6e5",
+      "gitLfsSize": 3257770,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_mirrorroot_establishing_master_v001"
+    },
+    {
+      "assetId": "tdf_asset_habitat_eldergrove_mirrorroot_littoral_layout_transition_depth_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/ConceptSheets/tdf_habitat_eldergrove_mirrorroot_littoral_layout_transition_depth_v001.png",
+      "roles": [
+        "illustrative_spatial_grammar",
+        "dry_shallow_deep_value_bands",
+        "neighbor_transition_intent",
+        "waterline_comparison",
+        "effects_off"
+      ],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 3053608,
+      "sha256": "9728323783f12418a4c25347c260b1ad9e9df8665545c1d5ff3977c20d9ed762",
+      "gitLfsOid": "9728323783f12418a4c25347c260b1ad9e9df8665545c1d5ff3977c20d9ed762",
+      "gitLfsSize": 3053608,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_mirrorroot_layout_transition_depth_v001"
+    },
+    {
+      "assetId": "tdf_asset_habitat_eldergrove_mirrorroot_littoral_material_lod_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/ConceptSheets/tdf_habitat_eldergrove_mirrorroot_littoral_material_lod_v001.png",
+      "roles": [
+        "environment_kit",
+        "materials",
+        "static_water",
+        "progressive_quality_reduction",
+        "distant_habitat_fauna_silhouette"
+      ],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 3018694,
+      "sha256": "3b29256af1b852ef9ba948d5a7af39a88361b6777154e9439b4fff13b36512a4",
+      "gitLfsOid": "3b29256af1b852ef9ba948d5a7af39a88361b6777154e9439b4fff13b36512a4",
+      "gitLfsSize": 3018694,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_mirrorroot_material_lod_v001"
+    }
+  ],
+  "generationRecords": [
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_mirrorroot_establishing_master_v001",
+      "outputAssetId": "tdf_asset_habitat_eldergrove_mirrorroot_littoral_establishing_master_v001",
+      "inputAssetIds": [
+        "tdf_asset_mire_lumenback_concept_sheet_v001"
+      ],
+      "promptSection": "Record 1 — Establishing And Placement Master"
+    },
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_mirrorroot_layout_transition_depth_v001",
+      "outputAssetId": "tdf_asset_habitat_eldergrove_mirrorroot_littoral_layout_transition_depth_v001",
+      "inputAssetIds": [
+        "tdf_asset_habitat_eldergrove_mirrorroot_littoral_establishing_master_v001",
+        "tdf_asset_mire_lumenback_concept_sheet_v001"
+      ],
+      "promptSection": "Record 2 — Spatial, Depth, And Transition Intent"
+    },
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_mirrorroot_material_lod_v001",
+      "outputAssetId": "tdf_asset_habitat_eldergrove_mirrorroot_littoral_material_lod_v001",
+      "inputAssetIds": [
+        "tdf_asset_habitat_eldergrove_mirrorroot_littoral_establishing_master_v001",
+        "tdf_asset_habitat_eldergrove_mirrorroot_littoral_layout_transition_depth_v001",
+        "tdf_asset_mire_lumenback_concept_sheet_v001"
+      ],
+      "promptSection": "Record 3 — Materials, Kit, And Reduction"
+    }
+  ],
+  "externalInputs": []
+}

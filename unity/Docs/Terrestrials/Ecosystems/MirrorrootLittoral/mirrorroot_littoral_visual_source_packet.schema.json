@@ -1,0 +1,524 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/mirrorroot-littoral-visual-source-packet-v001.schema.json",
+  "title": "AnotherLife Mirrorroot Littoral Visual Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "sourceVersion",
+    "parentRosterSourceVersion",
+    "createdDate",
+    "promptDocument",
+    "authority",
+    "readiness",
+    "generator",
+    "sourceBudgets",
+    "habitat",
+    "placementReference",
+    "environmentKit",
+    "productionEnvelope",
+    "sourceAssets",
+    "generationRecords",
+    "externalInputs"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "packetId": {"const": "tdf_packet_mirrorroot_littoral_visual_source_v001"},
+    "sourceVersion": {"const": "tdf-eco-mirrorroot-2026-07-27-v001"},
+    "parentRosterSourceVersion": {"const": "tdf-eco-2026-07-27-v001"},
+    "createdDate": {"const": "2026-07-27"},
+    "promptDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/Executed_Generation_Prompts_And_Provenance.md"
+        },
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terrestrialDesignSource",
+        "runtime",
+        "gameplay",
+        "narrative",
+        "save",
+        "userCreativeApproval"
+      ],
+      "properties": {
+        "terrestrialDesignSource": {"const": true},
+        "runtime": {"const": false},
+        "gameplay": {"const": false},
+        "narrative": {"const": false},
+        "save": {"const": false},
+        "userCreativeApproval": {"const": false}
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "technicalPacketState",
+        "userCreativeState",
+        "runtimeIntegrationState",
+        "narrativeNamingState",
+        "visualQaState"
+      ],
+      "properties": {
+        "technicalPacketState": {"const": "TechnicalReviewReady"},
+        "userCreativeState": {"const": "NotRequested"},
+        "runtimeIntegrationState": {"const": "Blocked"},
+        "narrativeNamingState": {"const": "WorkingLabelsOnly"},
+        "visualQaState": {"const": "PassWithConcern"}
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "product",
+        "versionOrModel",
+        "externalInputsSupplied",
+        "existingProjectReferenceSupplied",
+        "editableSourceAvailable",
+        "licenseRecordId"
+      ],
+      "properties": {
+        "product": {"const": "Codex built-in image generation"},
+        "versionOrModel": {"const": "unavailable_to_operator"},
+        "externalInputsSupplied": {"const": false},
+        "existingProjectReferenceSupplied": {"const": true},
+        "editableSourceAvailable": {"const": false},
+        "licenseRecordId": {
+          "const": "tdf_license_codex_imagegen_generated_original_v001"
+        }
+      }
+    },
+    "sourceBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "ceilings", "actual"],
+      "properties": {
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mediaType",
+            "pixelWidth",
+            "pixelHeight",
+            "colorSpace",
+            "bitDepth",
+            "alphaPolicy",
+            "maximumCompressedBytes",
+            "estimatedDecodedRgbBytes",
+            "maximumDecodedRgbaBytes",
+            "maximumSimultaneousReviewImages",
+            "maximumSimultaneousDecodedBytes"
+          ],
+          "properties": {
+            "mediaType": {"const": "image/png"},
+            "pixelWidth": {"const": 1536},
+            "pixelHeight": {"const": 1024},
+            "colorSpace": {"const": "sRGB"},
+            "bitDepth": {"const": 8},
+            "alphaPolicy": {"const": "opaque_rgb"},
+            "maximumCompressedBytes": {"const": 4194304},
+            "estimatedDecodedRgbBytes": {"const": 4718592},
+            "maximumDecodedRgbaBytes": {"const": 6291456},
+            "maximumSimultaneousReviewImages": {"const": 3},
+            "maximumSimultaneousDecodedBytes": {"const": 18874368}
+          }
+        },
+        "ceilings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "finalCount",
+            "finalBytes",
+            "retainedInputCount",
+            "retainedInputBytes",
+            "waveBytes"
+          ],
+          "properties": {
+            "finalCount": {"const": 3},
+            "finalBytes": {"const": 12582912},
+            "retainedInputCount": {"const": 0},
+            "retainedInputBytes": {"const": 0},
+            "waveBytes": {"const": 12582912}
+          }
+        },
+        "actual": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "finalCount",
+            "finalBytes",
+            "retainedInputCount",
+            "retainedInputBytes",
+            "totalCount",
+            "totalBytes",
+            "referencedExistingAssetCount",
+            "referencedExistingBytes",
+            "duplicatedExistingBytes",
+            "playerBuildBytes",
+            "runtimeResidentBytes"
+          ],
+          "properties": {
+            "finalCount": {"const": 3},
+            "finalBytes": {"const": 9330072},
+            "retainedInputCount": {"const": 0},
+            "retainedInputBytes": {"const": 0},
+            "totalCount": {"const": 3},
+            "totalBytes": {"const": 9330072},
+            "referencedExistingAssetCount": {"const": 1},
+            "referencedExistingBytes": {"const": 2370432},
+            "duplicatedExistingBytes": {"const": 0},
+            "playerBuildBytes": {"const": 0},
+            "runtimeResidentBytes": {"const": 0}
+          }
+        }
+      }
+    },
+    "habitat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "habitatId",
+        "realmId",
+        "state",
+        "qaDisposition",
+        "userDecision",
+        "environmentKitId",
+        "protectedIdentity",
+        "neighborHabitatIds",
+        "sharedTransitionIds",
+        "materialFamilyIds",
+        "primaryAssetIds"
+      ],
+      "properties": {
+        "habitatId": {"const": "tdf_habitat_eldergrove_mirrorroot_littoral"},
+        "realmId": {"const": "eldergrove"},
+        "state": {"const": "ReadyForUserReview"},
+        "qaDisposition": {"const": "PassWithConcern"},
+        "userDecision": {"const": "NotRequested"},
+        "environmentKitId": {"const": "tdf_envkit_eldergrove_mirrorroot_littoral"},
+        "protectedIdentity": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "low_water_horizon"},
+            {"const": "irregular_shoreline"},
+            {"const": "stable_dry_shallow_deep_value_bands"},
+            {"const": "flooded_root_shelf"},
+            {"const": "open_shoreline_sight_gaps"},
+            {"const": "effects_independent_depth_read"}
+          ],
+          "items": false,
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true
+        },
+        "neighborHabitatIds": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "tdf_habitat_eldergrove_moonroot_floodbasin"},
+            {"const": "tdf_habitat_eldergrove_sunmane_edge_meadow"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "sharedTransitionIds": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "tdf_transition_eldergrove_moonroot_floodbasin_to_mirrorroot_littoral"}
+          ],
+          "items": false,
+          "minItems": 1,
+          "maxItems": 1
+        },
+        "materialFamilyIds": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "tdf_matfam_eldergrove_wet_bark_root"},
+            {"const": "tdf_matfam_wet_hide"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "primaryAssetIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^tdf_asset_habitat_eldergrove_mirrorroot_littoral_"
+          }
+        }
+      }
+    },
+    "placementReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "sourceVersion",
+        "state",
+        "qaDisposition",
+        "picturedVariantId",
+        "unpicturedVariantIds",
+        "assetId",
+        "assetPath",
+        "assetGuid",
+        "assetByteLength",
+        "assetSha256",
+        "assetGitLfsOid",
+        "assetGitLfsSize",
+        "protectedIdentity",
+        "scaleChampionUnits",
+        "usage"
+      ],
+      "properties": {
+        "profileId": {"const": "tdf_mire_lumenback"},
+        "sourceVersion": {"const": "tdf-foundation-fauna-normalization-2026-07-27-v001"},
+        "state": {"const": "ReadyForUserReview"},
+        "qaDisposition": {"const": "PassWithConcern"},
+        "picturedVariantId": {"const": "tdf_mire_lumenback_standard"},
+        "unpicturedVariantIds": {
+          "type": "array",
+          "prefixItems": [
+            {"const": "tdf_mire_lumenback_clay"},
+            {"const": "tdf_mire_lumenback_night"}
+          ],
+          "items": false,
+          "minItems": 2,
+          "maxItems": 2
+        },
+        "assetId": {"const": "tdf_asset_mire_lumenback_concept_sheet_v001"},
+        "assetPath": {
+          "const": "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png"
+        },
+        "assetGuid": {"const": "0b4bdfc958764792ac78c88987e46133"},
+        "assetByteLength": {"const": 2370432},
+        "assetSha256": {"const": "39154a3ea94394efabac558e704a54a630e005371123b32ec9dd3803ec2235b0"},
+        "assetGitLfsOid": {"const": "39154a3ea94394efabac558e704a54a630e005371123b32ec9dd3803ec2235b0"},
+        "assetGitLfsSize": {"const": 2370432},
+        "protectedIdentity": {"const": "low_rounded_torso_paddle_feet_throat_pouch"},
+        "scaleChampionUnits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["shoulderHeight", "length"],
+          "properties": {
+            "shoulderHeight": {"const": 0.45},
+            "length": {"const": 1.2}
+          }
+        },
+        "usage": {"const": "identity_scale_contact_reference_only_no_spawn_or_variant_authority"}
+      }
+    },
+    "environmentKit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kitId",
+        "propFamilyIds",
+        "requiredParticles",
+        "requiredDynamicLights",
+        "requiredWaterFamilies",
+        "requiredEmissionFamilies"
+      ],
+      "properties": {
+        "kitId": {"const": "tdf_envkit_eldergrove_mirrorroot_littoral"},
+        "propFamilyIds": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^tdf_prop_eldergrove_mirrorroot_"
+          }
+        },
+        "requiredParticles": {"const": 0},
+        "requiredDynamicLights": {"const": 0},
+        "requiredWaterFamilies": {"const": 1},
+        "requiredEmissionFamilies": {"const": 0}
+      }
+    },
+    "productionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "reviewCellMeters",
+        "lowMobileUniqueCompressedTargetMiB",
+        "hardParentCeilingMiB",
+        "preferredSharedMaterialInstances",
+        "maximumSimultaneousMaterialFamilies",
+        "maximumDominantFloodedRootMassesLowMobileView",
+        "maximumSecondaryOrganicClumpsLowMobileView",
+        "inheritedCreatureBudgetConflictState",
+        "lod1RatioPercent",
+        "lod2RatioPercent",
+        "distantRatioPercent"
+      ],
+      "properties": {
+        "status": {"const": "ProvisionalSourceTarget"},
+        "reviewCellMeters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["width", "length"],
+          "properties": {
+            "width": {"const": 128},
+            "length": {"const": 128}
+          }
+        },
+        "lowMobileUniqueCompressedTargetMiB": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum", "maximum"],
+          "properties": {
+            "minimum": {"const": 6},
+            "maximum": {"const": 8}
+          }
+        },
+        "hardParentCeilingMiB": {"const": 12},
+        "preferredSharedMaterialInstances": {"const": 2},
+        "maximumSimultaneousMaterialFamilies": {"const": 4},
+        "maximumDominantFloodedRootMassesLowMobileView": {"const": 5},
+        "maximumSecondaryOrganicClumpsLowMobileView": {"const": 12},
+        "inheritedCreatureBudgetConflictState": {
+          "const": "UnresolvedForCoordinationAfterUserApproval"
+        },
+        "lod1RatioPercent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum", "maximum"],
+          "properties": {
+            "minimum": {"const": 50},
+            "maximum": {"const": 60}
+          }
+        },
+        "lod2RatioPercent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum", "maximum"],
+          "properties": {
+            "minimum": {"const": 18},
+            "maximum": {"const": 25}
+          }
+        },
+        "distantRatioPercent": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["minimum", "maximum"],
+          "properties": {
+            "minimum": {"const": 5},
+            "maximum": {"const": 8}
+          }
+        }
+      }
+    },
+    "sourceAssets": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/sourceAsset"}
+    },
+    "generationRecords": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/generationRecord"}
+    },
+    "externalInputs": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "sourceAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "roles",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationRecordId"
+      ],
+      "properties": {
+        "assetId": {
+          "type": "string",
+          "pattern": "^tdf_asset_habitat_eldergrove_mirrorroot_littoral_"
+        },
+        "path": {
+          "type": "string",
+          "pattern": "^unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/ConceptSheets/.+\\.png$"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 5,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "state": {"const": "ReadyForUserReview"},
+        "qaDisposition": {"const": "PassWithConcern"},
+        "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "gitLfsOid": {"$ref": "#/$defs/sha256"},
+        "gitLfsSize": {"type": "integer", "minimum": 1, "maximum": 4194304},
+        "generationRecordId": {
+          "type": "string",
+          "pattern": "^tdf_generation_habitat_eldergrove_mirrorroot_"
+        }
+      }
+    },
+    "generationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationRecordId",
+        "outputAssetId",
+        "inputAssetIds",
+        "promptSection"
+      ],
+      "properties": {
+        "generationRecordId": {
+          "type": "string",
+          "pattern": "^tdf_generation_habitat_eldergrove_mirrorroot_"
+        },
+        "outputAssetId": {
+          "type": "string",
+          "pattern": "^tdf_asset_habitat_eldergrove_mirrorroot_littoral_"
+        },
+        "inputAssetIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^tdf_asset_"}
+        },
+        "promptSection": {
+          "type": "string",
+          "pattern": "^Record [1-3] — "
+        }
+      }
+    }
+  }
+}

@@ -10,6 +10,7 @@
   `tdf-foundation-fauna-normalization-2026-07-27-v001`
 - Stonehold habitat companion: `tdf-eco-faultroad-2026-07-27-v001`
 - Eldergrove habitat companion: `tdf-eco-hollowbark-2026-07-27-v001`
+- Eldergrove littoral companion: `tdf-eco-mirrorroot-2026-07-27-v001`
 - Primary Codex mode: `terrestrial-design`
 - Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
@@ -36,7 +37,7 @@ family.
 ## Habitat Matrix
 
 All sixteen habitat entries have stable design IDs and connected transition
-intent. Three now have exact companion concept source; thirteen remain
+intent. Four now have exact companion concept source; twelve remain
 roster-only. None has authored production terrain, runtime integration, or
 user approval.
 
@@ -47,7 +48,7 @@ user approval.
 | `tdf_habitat_stonehold_ore_gallery_mouths` | `RosterProposed` | none | Do cave mouths, columns, and ground plane remain readable without colored fog or glowing ore? |
 | `tdf_habitat_stonehold_slagfall_quarry` | `RosterProposed` | none | Do cooled slag terraces look physically settled rather than like a permanent lava theme? |
 | `tdf_habitat_eldergrove_hollowbark_oldgrowth` | `ReadyForUserReview` | establishing/placement/reduction, illustrative spatial/transition, and material/kit/LOD-intent sheets | Break portal-like root arches and repeated cavities; replace illustrative layout/scale/LOD with measured evidence; preserve a clear open understory and exact Grove Strider identity. |
-| `tdf_habitat_eldergrove_mirrorroot_littoral` | `RosterProposed` | none | Are shore depth, roots, and water legible when reflection and reed motion are reduced? |
+| `tdf_habitat_eldergrove_mirrorroot_littoral` | `ReadyForUserReview` | establishing/placement, illustrative depth/transition, and material/kit/reduction sheets | Strengthen realm-specific shoreline identity; prove both named transitions and dry/shallow/deep recognition in measured views with reflection, ripple, flicker, specular response, and emission disabled; correct root-engineering and creature-reduction concerns. |
 | `tdf_habitat_eldergrove_sunmane_edge_meadow` | `RosterProposed` | none | Does the meadow remain adult and naturalistic without flower/pollen spectacle? |
 | `tdf_habitat_eldergrove_moonroot_floodbasin` | `ReadyForUserReview` | Moonroot establishing, layout/transition/depth, material/reduced-atmosphere/LOD, and shared contact sheets | Resolve constructed-shelf and gate-like split-buttress concerns while preserving depth and route read without effects. |
 | `tdf_habitat_crownlands_crownstep_chalkland` | `RosterProposed` | none | Does disciplined landform rhythm carry Crownlands identity without gold paint or banners? |
@@ -68,7 +69,7 @@ user approval.
 | `tdf_fauna_stonehold_oreveil_isopod` | `ProposedTextOnly` | none | not requested | top/side/front anatomy, plate count, curl, locomotion/contact sheet |
 | `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
 | `tdf_grove_strider` | `ReadyForUserReview` | normalized immutable base sheet plus exact Hollowbark placement/reduction evidence | not requested | rear/top/underside, hoof/ear/tendril roots, motion/contact, measured scale/LOD, and correction of generated crown/armor/proportion drift; no juvenile or variant authority |
-| `tdf_mire_lumenback` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, pouch/feeler/swim contact, emission-off measured LOD, and habitat-placement review |
+| `tdf_mire_lumenback` | `ReadyForUserReview` | normalized immutable base sheet plus concerned Mirrorroot placement/reduction evidence | not requested | rear/top/underside, pouch/feeler/swim contact, motion, and emission-off measured LOD; preserve feet/contact before ring detail and grant no juvenile, population, or unpictured-variant authority |
 | `tdf_fauna_eldergrove_thornburrow_hare` | `ProposedTextOnly` | none | not requested | adult proportion turnaround, tusk/root contact, bound/landing sheet |
 | `tdf_fauna_eldergrove_moonshell_cicada` | `ReadyForUserReview` | flood-season turnaround, motion/material, and shared contact/scale sheets | not requested | resolve rostrum, unobstructed six-leg/four-wing continuity, and distant presence-proxy concerns; dry-season ecotype remains text-only |
 | `tdf_fauna_crownlands_broadcrest_aurochs` | `ProposedTextOnly` | none | not requested | original skull/horn-root turnaround, herd turn, shoulder-load sheet |
@@ -95,11 +96,11 @@ The three normalized foundation bases are governed by
 `unity/Docs/Terrestrials/Ecosystems/FoundationFauna/`. Their exact existing
 sheets are `ReadyForUserReview` with `PassWithConcern`; no raster is copied or
 regenerated. Six unpictured palette-led variants remain `ProposedTextOnly`.
-Missing orthographic, attachment, motion/contact, measured LOD, habitat
-placement, and Player dependency evidence remain production blocks. Faultroad
-and Hollowbark now provide concerned placement evidence for Basalt Grazer and
-Grove Strider respectively; Mire Lumenback placement remains absent, and no
-companion closes the other missing evidence.
+Missing orthographic, attachment, motion/contact, measured LOD, and Player
+dependency evidence remain production blocks. Faultroad, Hollowbark, and
+Mirrorroot now provide concerned placement evidence for Basalt Grazer, Grove
+Strider, and Mire Lumenback respectively; no companion closes the other
+missing evidence.
 
 The Faultroad habitat and Basalt Grazer placement evidence are governed by
 `unity/Docs/Terrestrials/Ecosystems/FaultroadEscarpment/`. The habitat is
@@ -116,6 +117,15 @@ raster bytes. Portal-like root arches, dense foreground clutter, incomplete
 Sunmane transition evidence, generated scale/anatomy/life-stage ambiguity,
 illustrative rather than measured layout/LOD, camera coverage, and production
 measurements remain blocking.
+
+The Mirrorroot habitat and Mire Lumenback placement evidence are governed by
+`unity/Docs/Terrestrials/Ecosystems/MirrorrootLittoral/`. The habitat is
+`ReadyForUserReview` with `PassWithConcern`; the canonical Lumenback identity
+remains governed by `FoundationFauna/` and is referenced without duplicated
+raster bytes. Generic boreal-lake risk, unproved Moonroot/Sunmane identities,
+reflection/specular dependency, engineered-looking root bundles, same-adult
+perspective ambiguity, incorrect lowest-proxy detail priority, missing measured
+depth/scale/LOD, and production measurements remain blocking.
 
 ## Inherited Boss And Elite Anchors
 
