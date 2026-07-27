@@ -11,7 +11,7 @@ namespace AL.UI
     public class BootController : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float _minSplashScreenTime = 2f;
+        [SerializeField] private float _minSplashScreenTime = 0.8f;
         [SerializeField] private string _realmSelectionScene = "RealmSelection";
         [SerializeField] private string _kingdomScene = "Kingdom";
 
@@ -31,10 +31,12 @@ namespace AL.UI
         private RectTransform _scanLine;
         private RectTransform _leftGate;
         private RectTransform _rightGate;
+        private LaunchCinematicLifecycle _launchLifecycle;
 
         private IEnumerator Start()
         {
             Debug.Log("AL Boot Sequence Started...");
+            _launchLifecycle = new LaunchCinematicLifecycle();
             Bootloader.InitializeIfMissing();
 
             if (_buildRuntimeSplash)
@@ -42,7 +44,7 @@ namespace AL.UI
                 BuildRuntimeSplash();
             }
 
-            yield return RunSplashSequence();
+            yield return RunLaunchFallbackSequence();
 
             var realmService = ServiceLocator.Get<IRealmService>();
 
@@ -58,8 +60,9 @@ namespace AL.UI
             }
         }
 
-        private IEnumerator RunSplashSequence()
+        private IEnumerator RunLaunchFallbackSequence()
         {
+            _launchLifecycle.MarkPreparing();
             float duration = Mathf.Max(0.8f, _minSplashScreenTime);
             float elapsed = 0f;
 
@@ -73,6 +76,7 @@ namespace AL.UI
 
             UpdateSplash(1f, duration);
             yield return new WaitForSecondsRealtime(0.12f);
+            _launchLifecycle.FailToFallback("approved-media-unavailable");
         }
 
         private void BuildRuntimeSplash()
@@ -80,7 +84,7 @@ namespace AL.UI
             _particles.Clear();
             _pulseTargets.Clear();
 
-            var canvasObject = new GameObject("BootSplashCanvas");
+            var canvasObject = new GameObject("LaunchFallbackCanvas");
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
@@ -98,37 +102,22 @@ namespace AL.UI
             var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
                        Resources.GetBuiltinResource<Font>("Arial.ttf");
 
-            CreateGradientPanel(canvasObject.transform, "AtmosphereGradient", new Color(0.035f, 0.052f, 0.069f, 1f), new Color(0.006f, 0.008f, 0.012f, 1f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            CreateGradientPanel(canvasObject.transform, "LowerCommandGlow", new Color(0.020f, 0.030f, 0.040f, 0.08f), new Color(0.82f, 0.48f, 0.19f, 0.22f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), Vector2.zero, new Vector2(0f, 440f));
-
-            var leftGlow = CreatePanel(canvasObject.transform, "LeftSignalGlow", new Color(0.25f, 0.53f, 0.72f, 0.32f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(210f, -40f), new Vector2(620f, 620f));
-            leftGlow.sprite = CreateRadialGlowSprite("BootBlueGlow", new Color(0.25f, 0.53f, 0.72f, 0.50f), new Color(0.25f, 0.53f, 0.72f, 0f));
-            var rightGlow = CreatePanel(canvasObject.transform, "RightSignalGlow", new Color(0.92f, 0.55f, 0.22f, 0.28f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(-160f, 100f), new Vector2(680f, 680f));
-            rightGlow.sprite = CreateRadialGlowSprite("BootGoldGlow", new Color(0.92f, 0.55f, 0.22f, 0.46f), new Color(0.92f, 0.55f, 0.22f, 0f));
-
-            BuildCitadelSilhouette(canvasObject.transform);
-            BuildGateSigil(canvasObject.transform);
-            BuildParticleField(canvasObject.transform);
+            CreatePanel(canvasObject.transform, "FallbackBackground", new Color(0.006f, 0.008f, 0.012f, 1f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
 
             var title = CreateText(canvasObject.transform, "Title", font, "ANOTHER LIFE", 54, new Vector2(0f, -318f), new Vector2(980f, 74f), TextAnchor.MiddleCenter);
-            title.color = new Color(1f, 0.88f, 0.62f, 1f);
+            title.color = new Color(0.88f, 0.88f, 0.86f, 1f);
             title.resizeTextForBestFit = true;
             title.resizeTextMinSize = 32;
             title.resizeTextMaxSize = 54;
 
-            var subtitle = CreateText(canvasObject.transform, "Subtitle", font, "REALM COMMAND SYSTEM", 18, new Vector2(0f, -374f), new Vector2(660f, 30f), TextAnchor.MiddleCenter);
-            subtitle.color = new Color(0.74f, 0.84f, 0.93f, 0.90f);
+            var subtitle = CreateText(canvasObject.transform, "Subtitle", font, "Preparing launch", 18, new Vector2(0f, -374f), new Vector2(660f, 30f), TextAnchor.MiddleCenter);
+            subtitle.color = new Color(0.70f, 0.76f, 0.82f, 0.90f);
 
             var buildLabel = CreateText(canvasObject.transform, "BuildLabel", font, _buildLabel, 13, new Vector2(0f, -409f), new Vector2(520f, 22f), TextAnchor.MiddleCenter);
-            buildLabel.color = new Color(0.96f, 0.72f, 0.40f, 0.78f);
+            buildLabel.color = new Color(0.70f, 0.70f, 0.66f, 0.78f);
 
-            CreatePanel(canvasObject.transform, "UpperGoldRule", new Color(1f, 0.78f, 0.36f, 0.62f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -282f), new Vector2(780f, 3f));
-            CreatePanel(canvasObject.transform, "UpperBlueRule", new Color(0.24f, 0.50f, 0.72f, 0.38f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -288f), new Vector2(560f, 2f));
-
-            _statusText = CreateText(canvasObject.transform, "Status", font, "INITIALIZING RUNTIME SERVICES", 16, new Vector2(-270f, -948f), new Vector2(520f, 30f), TextAnchor.MiddleLeft);
+            _statusText = CreateText(canvasObject.transform, "Status", font, "Initializing required services", 16, new Vector2(-270f, -948f), new Vector2(520f, 30f), TextAnchor.MiddleLeft);
             _statusText.color = new Color(0.80f, 0.88f, 0.94f, 0.92f);
-            _percentText = CreateText(canvasObject.transform, "Percent", font, "0%", 16, new Vector2(346f, -948f), new Vector2(120f, 30f), TextAnchor.MiddleRight);
-            _percentText.color = new Color(1f, 0.82f, 0.46f, 0.92f);
 
             BuildProgressBar(canvasObject.transform);
         }
@@ -179,9 +168,9 @@ namespace AL.UI
         private void BuildProgressBar(Transform parent)
         {
             CreatePanel(parent, "ProgressOuter", new Color(0.006f, 0.009f, 0.014f, 0.94f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 112f), new Vector2(ProgressWidth + 36f, 26f));
-            CreatePanel(parent, "ProgressTopTrace", new Color(1f, 0.78f, 0.38f, 0.46f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 126f), new Vector2(ProgressWidth + 20f, 2f));
+            CreatePanel(parent, "ProgressTopTrace", new Color(0.60f, 0.66f, 0.72f, 0.46f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 126f), new Vector2(ProgressWidth + 20f, 2f));
             CreatePanel(parent, "ProgressTrack", new Color(0.035f, 0.046f, 0.058f, 0.95f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 112f), new Vector2(ProgressWidth, ProgressHeight));
-            _progressFill = CreateGradientPanel(parent, "ProgressFill", new Color(1f, 0.82f, 0.44f, 0.98f), new Color(0.24f, 0.58f, 0.82f, 0.98f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0.5f), new Vector2(-ProgressWidth * 0.5f, 112f), new Vector2(1f, ProgressHeight));
+            _progressFill = CreatePanel(parent, "ProgressFill", new Color(0.74f, 0.80f, 0.86f, 0.98f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0.5f), new Vector2(-ProgressWidth * 0.5f, 112f), new Vector2(1f, ProgressHeight));
             _pulseTargets.Add(_progressFill);
         }
 
@@ -223,7 +212,7 @@ namespace AL.UI
 
             if (_percentText != null)
             {
-                _percentText.text = Mathf.RoundToInt(easedProgress * 100f) + "%";
+                _percentText.text = string.Empty;
             }
 
             if (_statusText != null)
@@ -301,20 +290,20 @@ namespace AL.UI
         {
             if (normalizedTime < 0.34f)
             {
-                return "INITIALIZING RUNTIME SERVICES";
+                return "Initializing required services";
             }
 
             if (normalizedTime < 0.66f)
             {
-                return "SYNCING SHARED CATALOGS";
+                return "Checking launch media availability";
             }
 
             if (normalizedTime < 0.92f)
             {
-                return "PREPARING COMMAND ENTRY";
+                return "Using fallback launch path";
             }
 
-            return "ENTERING REALM";
+            return "Entering realm flow";
         }
 
         private static Image CreatePanel(Transform parent, string name, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
