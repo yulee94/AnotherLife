@@ -20,7 +20,7 @@ namespace AL.Tests.EditMode.RealmSelection
         [SetUp]
         public void SetUp()
         {
-            string path = Path.Combine(TestContext.CurrentContext.TestDirectory, "Assets", "AL", "StreamingAssets", "GameData", "al_realm_catalog.json");
+            string path = Path.Combine(Application.dataPath, "AL", "StreamingAssets", "GameData", "al_realm_catalog.json");
             _json = File.ReadAllText(path);
             RealmCatalogLoadResult result = RealmCatalogRuntime.Parse(_json);
             Assert.That(result.IsSuccess, Is.True, result.TechnicalCode);
