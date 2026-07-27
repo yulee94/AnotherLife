@@ -20,12 +20,12 @@ This record inventories every production call to the legacy `AddResource`, `Cons
 
 | Caller | Legacy operation | Owning migration | Required disposition |
 | --- | --- | --- | --- |
-| `unity/Assets/AL/Scripts/ChampionMode/AI/BossDummyAI.cs` | `AddCredits` | #168 / #180 | Remove the exception fallback grant; only an authoritative encounter reward transaction may apply credits. |
 | `unity/Assets/AL/Scripts/Kingdom/Quests/LocalQuestService.cs` | `AddCredits` | #152 / #133 | Use the typed no-save primitive inside the quest/report transaction; avoid a nested save. |
 | `unity/Assets/AL/Scripts/RealmWar/Warzone/WarzoneService.cs` | `AddCredits` | #166 | Use the typed no-save primitive only after a validated, duplicate-safe ownership transition. |
-| `unity/Assets/AL/Scripts/Services/Local/LocalBossLootService.cs` | `AddCredits` | #168 | Apply credits with equipment and the reward ledger in one recoverable boundary. |
 | `unity/Assets/AL/Scripts/Services/Local/LocalWarmasterService.cs` | `SpendCredits` | #171 | Stage typed spend and piece-state mutation, then persist once or recover visibly. |
 | `unity/Assets/AL/Scripts/Utilities/DemoInitializer.cs` | `AddCredits` | #178 / #150 | Keep test/demo-only and excluded from the ShellFoundation production profile. |
+
+`#168` removed the BossDummyAI fallback credit grant and the LocalBossLootService nested `AddCredits` call. Boss loot now uses the typed no-save credit primitive inside its reward ledger transaction and persists once after credits, equipment, and the applied-result identity are prepared.
 
 ## Phase 1 compatibility rules
 

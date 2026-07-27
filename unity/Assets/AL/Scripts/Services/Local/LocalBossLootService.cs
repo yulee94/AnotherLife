@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
@@ -10,11 +13,6 @@ namespace AL.Services.Local
 {
     public class LocalBossLootService : IBossLootService
     {
-        private const string FallbackBossId = "boss_dummy";
-        private const string FallbackBossName = "Boss Dummy";
-        private const string FallbackItemId = "ember_crown_shard";
-        private const string FallbackItemName = "Ember Crown Shard";
-
         private readonly ISaveGameService _saveGameService;
         private readonly IWarzoneCreditService _warzoneCreditService;
         private readonly INotificationService _notificationService;
@@ -53,61 +51,171 @@ namespace AL.Services.Local
         {
             request ??= new BossLootRequest();
 
-            string bossId = string.IsNullOrWhiteSpace(request.BossId) ? FallbackBossId : request.BossId;
-            string bossName = string.IsNullOrWhiteSpace(request.BossName) ? FallbackBossName : request.BossName;
-            int creditReward = Mathf.Max(0, request.WarzoneCreditReward);
+            var identity = new BossLootApplicationIdentity
+            {
+                EncounterId = request.EncounterId,
+                RewardResultId = request.RewardResultId,
+                BossId = request.BossId
+            };
+
+            BossLootApplicationValidationResult identityValidation =
+                BossLootApplicationIdentityValidator.Validate(identity);
+
+            string bossId = request.BossId ?? string.Empty;
+            string bossName = string.IsNullOrWhiteSpace(request.BossName) ? bossId : request.BossName;
 
             var result = new BossLootResult
             {
                 BossId = bossId,
                 BossName = bossName,
-                WarzoneCreditsAwarded = creditReward
+                EncounterId = request.EncounterId ?? string.Empty,
+                RewardResultId = request.RewardResultId ?? string.Empty,
+                DiagnosticCode = identityValidation.DiagnosticCode
             };
 
-            if (creditReward > 0)
+            if (!identityValidation.IsValid)
             {
-                _warzoneCreditService.AddCredits(creditReward);
+                result.CommitStatus = BossLootCommitStatus.RejectedInvalidIdentity;
+                return result;
             }
 
-            List<BossLootDrop> drops = RollDrops(request, bossId);
-            foreach (var drop in drops)
+            if (!TryPrepareResult(request, bossId, bossName, result))
             {
-                if (TryAddOwnedEquipment(drop, bossId))
+                return result;
+            }
+
+            result.RewardDigest = ComputeRewardDigest(result);
+
+            SaveGameData save = _saveGameService.CurrentSave;
+            if (save == null)
+            {
+                result.CommitStatus = BossLootCommitStatus.SaveFailedRolledBack;
+                result.DiagnosticCode = "AL-BOSS-LOOT-NO-CURRENT-SAVE";
+                return result;
+            }
+
+            save.AppliedBossLootRewards ??= new List<AppliedBossLootRewardState>();
+            if (TryFindAppliedReward(save, result, out AppliedBossLootRewardState applied, out string conflictDiagnostic))
+            {
+                if (IsExactReplay(applied, result))
                 {
-                    result.Drops.Add(drop);
+                    result.CommitStatus = BossLootCommitStatus.Duplicate;
+                    return result;
                 }
+
+                result.CommitStatus = BossLootCommitStatus.RejectedInvalidIdentity;
+                result.DiagnosticCode = conflictDiagnostic;
+                return result;
             }
 
-            if (result.Drops.Count > 0)
+            int previousCredits = save.WarzoneCredits;
+            List<OwnedEquipmentState> previousEquipment = CloneOwnedEquipmentList(save.OwnedEquipment);
+            List<AppliedBossLootRewardState> previousLedger = CloneAppliedRewardList(save.AppliedBossLootRewards);
+
+            if (!TryApplyPreparedResult(save, result))
+            {
+                RestoreSaveState(save, previousCredits, previousEquipment, previousLedger);
+                return result;
+            }
+
+            try
             {
                 _saveGameService.Save();
             }
+            catch (Exception)
+            {
+                RestoreSaveState(save, previousCredits, previousEquipment, previousLedger);
+                result.CommitStatus = BossLootCommitStatus.SaveFailedRolledBack;
+                result.DiagnosticCode = "AL-BOSS-LOOT-SAVE-THREW";
+                return result;
+            }
 
-            NotifyResult(request, result);
+            if (_saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
+            {
+                RestoreSaveState(save, previousCredits, previousEquipment, previousLedger);
+                result.CommitStatus = BossLootCommitStatus.SaveFailedRolledBack;
+                result.DiagnosticCode = "AL-BOSS-LOOT-SAVE-FAILED";
+                return result;
+            }
+
+            result.CommitStatus = result.WarzoneCreditsAwarded == 0 && result.Drops.Count == 0
+                ? BossLootCommitStatus.NoReward
+                : BossLootCommitStatus.Committed;
+            TryNotifyResult(request, result);
             return result;
         }
 
-        private static List<BossLootDrop> RollDrops(BossLootRequest request, string bossId)
+        private static bool TryPrepareResult(
+            BossLootRequest request,
+            string bossId,
+            string bossName,
+            BossLootResult result)
         {
-            var drops = new List<BossLootDrop>();
+            if (request.WarzoneCreditReward < 0)
+            {
+                result.CommitStatus = BossLootCommitStatus.RejectedInvalidDefinition;
+                result.DiagnosticCode = "AL-BOSS-LOOT-CREDITS-INVALID";
+                return false;
+            }
+
+            if (!TryRollDrops(request, bossId, out List<BossLootDrop> drops, out string diagnosticCode))
+            {
+                result.CommitStatus = BossLootCommitStatus.RejectedInvalidDefinition;
+                result.DiagnosticCode = diagnosticCode;
+                return false;
+            }
+
+            result.BossId = bossId;
+            result.BossName = bossName;
+            result.WarzoneCreditsAwarded = request.WarzoneCreditReward;
+            result.Drops.AddRange(drops);
+            return true;
+        }
+
+        private static bool TryRollDrops(
+            BossLootRequest request,
+            string bossId,
+            out List<BossLootDrop> drops,
+            out string diagnosticCode)
+        {
+            drops = new List<BossLootDrop>();
+            diagnosticCode = string.Empty;
             var lootTable = request.LootTable ?? new List<EquipmentDefinition>();
 
             if (lootTable.Count == 0)
             {
-                drops.Add(CreateFallbackDrop());
-                return drops;
+                return true;
             }
 
             var rng = new System.Random(ResolveSeed(request, bossId));
+            var itemIds = new HashSet<string>(StringComparer.Ordinal);
             foreach (var item in lootTable)
             {
                 if (item == null)
                 {
-                    continue;
+                    diagnosticCode = "AL-BOSS-LOOT-TABLE-NULL-ITEM";
+                    return false;
                 }
 
-                float dropRate = Mathf.Clamp01(item.DropRate);
-                if (dropRate <= 0f || rng.NextDouble() > dropRate)
+                if (string.IsNullOrWhiteSpace(item.Id))
+                {
+                    diagnosticCode = "AL-BOSS-LOOT-ITEM-ID-INVALID";
+                    return false;
+                }
+
+                if (!itemIds.Add(item.Id))
+                {
+                    diagnosticCode = "AL-BOSS-LOOT-ITEM-ID-DUPLICATE";
+                    return false;
+                }
+
+                if (item.DropRate < 0f || item.DropRate > 1f)
+                {
+                    diagnosticCode = "AL-BOSS-LOOT-DROP-RATE-INVALID";
+                    return false;
+                }
+
+                if (item.DropRate <= 0f || rng.NextDouble() > item.DropRate)
                 {
                     continue;
                 }
@@ -115,7 +223,7 @@ namespace AL.Services.Local
                 drops.Add(CreateDrop(item));
             }
 
-            return drops;
+            return true;
         }
 
         private static int ResolveSeed(BossLootRequest request, string bossId)
@@ -128,9 +236,9 @@ namespace AL.Services.Local
             unchecked
             {
                 int seed = 17;
-                seed = seed * 31 + bossId.GetHashCode();
-                seed = seed * 31 + Environment.TickCount;
-                seed = seed * 31 + DateTimeOffset.UtcNow.Millisecond;
+                seed = seed * 31 + DeterministicHash(bossId);
+                seed = seed * 31 + DeterministicHash(request.EncounterId);
+                seed = seed * 31 + DeterministicHash(request.RewardResultId);
                 return seed;
             }
         }
@@ -139,7 +247,7 @@ namespace AL.Services.Local
         {
             return new BossLootDrop
             {
-                EquipmentId = string.IsNullOrWhiteSpace(item.Id) ? item.name : item.Id,
+                EquipmentId = item.Id,
                 DisplayName = string.IsNullOrWhiteSpace(item.DisplayName) ? item.name : item.DisplayName,
                 Slot = item.Slot,
                 AttackBonus = item.AttackBonus,
@@ -150,16 +258,57 @@ namespace AL.Services.Local
             };
         }
 
-        private static BossLootDrop CreateFallbackDrop()
+        private bool TryApplyPreparedResult(SaveGameData save, BossLootResult result)
         {
-            return new BossLootDrop
+            if (result.WarzoneCreditsAwarded > 0)
             {
-                EquipmentId = FallbackItemId,
-                DisplayName = FallbackItemName,
-                Slot = EquipmentSlot.Trinket,
-                AnnounceWorldDrop = true,
-                Quantity = 1
-            };
+                if (_warzoneCreditService is IWarzoneCreditIntegrityService integrityService)
+                {
+                    EconomyMutationResult creditResult =
+                        integrityService.TryAddCredits(result.WarzoneCreditsAwarded);
+                    if (creditResult.Status != EconomyMutationStatus.Applied)
+                    {
+                        result.CommitStatus = BossLootCommitStatus.RejectedEconomy;
+                        result.DiagnosticCode = string.IsNullOrWhiteSpace(creditResult.DiagnosticCode)
+                            ? "AL-BOSS-LOOT-CREDITS-REJECTED"
+                            : creditResult.DiagnosticCode;
+                        return false;
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        save.WarzoneCredits = checked(save.WarzoneCredits + result.WarzoneCreditsAwarded);
+                    }
+                    catch (OverflowException)
+                    {
+                        result.CommitStatus = BossLootCommitStatus.RejectedEconomy;
+                        result.DiagnosticCode = "AL-BOSS-LOOT-CREDITS-OVERFLOW";
+                        return false;
+                    }
+                }
+            }
+
+            foreach (var drop in result.Drops)
+            {
+                if (!TryAddOwnedEquipment(drop, result.BossId))
+                {
+                    result.CommitStatus = BossLootCommitStatus.RejectedMalformedInventory;
+                    result.DiagnosticCode = "AL-BOSS-LOOT-EQUIPMENT-REJECTED";
+                    return false;
+                }
+            }
+
+            save.AppliedBossLootRewards.Add(new AppliedBossLootRewardState
+            {
+                EncounterId = result.EncounterId,
+                RewardResultId = result.RewardResultId,
+                BossId = result.BossId,
+                RewardDigest = result.RewardDigest,
+                CommittedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            });
+            return true;
         }
 
         private bool TryAddOwnedEquipment(BossLootDrop drop, string bossId)
@@ -250,25 +399,166 @@ namespace AL.Services.Local
             };
         }
 
-        private void NotifyResult(BossLootRequest request, BossLootResult result)
+        private void TryNotifyResult(BossLootRequest request, BossLootResult result)
         {
-            if (result.WarzoneCreditsAwarded > 0)
+            if (_notificationService == null)
             {
-                _notificationService.ShowMessage($"Defeated {result.BossName}. +{result.WarzoneCreditsAwarded} Warzone Credits.");
+                return;
             }
 
-            foreach (var drop in result.Drops)
+            if (result.CommitStatus != BossLootCommitStatus.Committed &&
+                result.CommitStatus != BossLootCommitStatus.NoReward)
             {
-                if (drop.AnnounceWorldDrop)
+                return;
+            }
+
+            try
+            {
+                if (result.WarzoneCreditsAwarded > 0)
                 {
-                    string playerName = string.IsNullOrWhiteSpace(request.PlayerDisplayName) ? "Anonymous player" : request.PlayerDisplayName;
-                    _notificationService.ShowMessage($"{playerName} has acquired {drop.DisplayName} from {result.BossName}.");
+                    _notificationService.ShowMessage($"Defeated {result.BossName}. +{result.WarzoneCreditsAwarded} Warzone Credits.");
                 }
-                else
+
+                foreach (var drop in result.Drops)
                 {
-                    _notificationService.ShowMessage($"Loot acquired: {drop.DisplayName}.");
+                    if (drop.AnnounceWorldDrop)
+                    {
+                        string playerName = string.IsNullOrWhiteSpace(request.PlayerDisplayName) ? "Anonymous player" : request.PlayerDisplayName;
+                        _notificationService.ShowMessage($"{playerName} has acquired {drop.DisplayName} from {result.BossName}.");
+                    }
+                    else
+                    {
+                        _notificationService.ShowMessage($"Loot acquired: {drop.DisplayName}.");
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"AL-BOSS-LOOT-NOTIFICATION-FAILED: Reward remained committed but notification failed: {ex.Message}");
+            }
+        }
+
+        private static bool TryFindAppliedReward(
+            SaveGameData save,
+            BossLootResult result,
+            out AppliedBossLootRewardState applied,
+            out string conflictDiagnostic)
+        {
+            applied = null;
+            conflictDiagnostic = string.Empty;
+            if (save.AppliedBossLootRewards == null)
+            {
+                return false;
+            }
+
+            foreach (AppliedBossLootRewardState reward in save.AppliedBossLootRewards)
+            {
+                if (reward == null)
+                {
+                    continue;
+                }
+
+                if (string.Equals(reward.RewardResultId, result.RewardResultId, StringComparison.Ordinal))
+                {
+                    applied = reward;
+                    conflictDiagnostic = "AL-BOSS-LOOT-RESULT-ID-CONFLICT";
+                    return true;
+                }
+
+                if (string.Equals(reward.EncounterId, result.EncounterId, StringComparison.Ordinal))
+                {
+                    applied = reward;
+                    conflictDiagnostic = "AL-BOSS-LOOT-ENCOUNTER-ID-CONFLICT";
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsExactReplay(
+            AppliedBossLootRewardState applied,
+            BossLootResult result) =>
+            string.Equals(applied.EncounterId, result.EncounterId, StringComparison.Ordinal) &&
+            string.Equals(applied.BossId, result.BossId, StringComparison.Ordinal) &&
+            string.Equals(applied.RewardDigest, result.RewardDigest, StringComparison.Ordinal);
+
+        private static string ComputeRewardDigest(BossLootResult result)
+        {
+            var builder = new StringBuilder();
+            builder.Append(result.BossId).Append('|')
+                .Append(result.EncounterId).Append('|')
+                .Append(result.RewardResultId).Append('|')
+                .Append(result.WarzoneCreditsAwarded);
+
+            foreach (BossLootDrop drop in result.Drops.OrderBy(drop => drop.EquipmentId, StringComparer.Ordinal))
+            {
+                builder.Append('|')
+                    .Append(drop.EquipmentId).Append(':')
+                    .Append(drop.Quantity).Append(':')
+                    .Append((int)drop.Slot).Append(':')
+                    .Append(drop.AttackBonus).Append(':')
+                    .Append(drop.DefenseBonus).Append(':')
+                    .Append(drop.HealthBonus).Append(':')
+                    .Append(drop.AnnounceWorldDrop ? "1" : "0");
+            }
+
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] digest = sha256.ComputeHash(Encoding.UTF8.GetBytes(builder.ToString()));
+                return BitConverter.ToString(digest).Replace("-", string.Empty).ToLowerInvariant();
+            }
+        }
+
+        private static int DeterministicHash(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                return 0;
+            }
+
+            unchecked
+            {
+                int hash = 23;
+                foreach (char c in value)
+                {
+                    hash = hash * 31 + c;
+                }
+
+                return hash;
+            }
+        }
+
+        private static List<OwnedEquipmentState> CloneOwnedEquipmentList(
+            List<OwnedEquipmentState> source) =>
+            source?.Select(item => item == null ? null : CloneOwnedEquipment(item)).ToList();
+
+        private static List<AppliedBossLootRewardState> CloneAppliedRewardList(
+            List<AppliedBossLootRewardState> source) =>
+            source?.Select(CloneAppliedReward).ToList();
+
+        private static AppliedBossLootRewardState CloneAppliedReward(
+            AppliedBossLootRewardState source) =>
+            source == null
+                ? null
+                : new AppliedBossLootRewardState
+                {
+                    EncounterId = source.EncounterId,
+                    RewardResultId = source.RewardResultId,
+                    BossId = source.BossId,
+                    RewardDigest = source.RewardDigest,
+                    CommittedTimestamp = source.CommittedTimestamp
+                };
+
+        private static void RestoreSaveState(
+            SaveGameData save,
+            int previousCredits,
+            List<OwnedEquipmentState> previousEquipment,
+            List<AppliedBossLootRewardState> previousLedger)
+        {
+            save.WarzoneCredits = previousCredits;
+            save.OwnedEquipment = previousEquipment;
+            save.AppliedBossLootRewards = previousLedger;
         }
     }
 }

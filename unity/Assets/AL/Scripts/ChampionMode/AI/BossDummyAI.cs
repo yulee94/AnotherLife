@@ -49,6 +49,7 @@ namespace AL.ChampionMode.AI
         private Vector3 _baseScale;
         private Coroutine _hitReactRoutine;
         private BossVisualFeedback _visualFeedback;
+        private string _encounterId;
 
         public event Action<BossLootResult> LootRolled;
 
@@ -77,6 +78,7 @@ namespace AL.ChampionMode.AI
         private void Start()
         {
             ApplyBossDefinition();
+            _encounterId = $"{_bossId}:{Guid.NewGuid():N}";
             _currentHealth = _maxHealth;
             _currentBreak = _breakBarMax;
             _fightStartTime = Time.time;
@@ -361,9 +363,8 @@ namespace AL.ChampionMode.AI
             }
             catch (Exception ex)
             {
-                Debug.LogWarning($"Boss loot service unavailable. Falling back to simple reward. {ex.Message}");
-                GrantFallbackLoot();
-                LootRolled?.Invoke(CreateFallbackLootResult());
+                Debug.LogWarning($"Boss loot service unavailable. Reward was not committed. {ex.Message}");
+                LootRolled?.Invoke(CreateUnavailableLootResult("AL-BOSS-LOOT-SERVICE-UNAVAILABLE"));
             }
 
             Destroy(gameObject);
@@ -375,41 +376,43 @@ namespace AL.ChampionMode.AI
             {
                 BossId = _bossId,
                 BossName = _bossName,
+                EncounterId = _encounterId,
+                RewardResultId = $"{_encounterId}:loot",
                 WarzoneCreditReward = _warzoneCreditReward,
-                RandomSeed = unchecked(_bossId.GetHashCode() ^ Mathf.RoundToInt(Time.time * 1000f)),
+                RandomSeed = DeterministicSeed(_encounterId),
                 LootTable = _possibleLoot ?? new List<EquipmentDefinition>()
             };
         }
 
-        private BossLootResult CreateFallbackLootResult()
+        private BossLootResult CreateUnavailableLootResult(string diagnosticCode)
         {
-            var result = new BossLootResult
+            return new BossLootResult
             {
                 BossId = _bossId,
                 BossName = _bossName,
-                WarzoneCreditsAwarded = _warzoneCreditReward
+                EncounterId = _encounterId ?? string.Empty,
+                RewardResultId = string.IsNullOrWhiteSpace(_encounterId) ? string.Empty : $"{_encounterId}:loot",
+                CommitStatus = BossLootCommitStatus.SaveFailedRolledBack,
+                DiagnosticCode = diagnosticCode ?? string.Empty
             };
-            result.Drops.Add(new BossLootDrop
-            {
-                EquipmentId = "ember_crown_shard",
-                DisplayName = "Ember Crown Shard",
-                Slot = EquipmentSlot.Trinket,
-                AnnounceWorldDrop = true,
-                Quantity = 1
-            });
-            return result;
         }
 
-        private void GrantFallbackLoot()
+        private static int DeterministicSeed(string value)
         {
-            try
+            if (string.IsNullOrEmpty(value))
             {
-                ServiceLocator.Get<IWarzoneCreditService>().AddCredits(_warzoneCreditReward);
-                ServiceLocator.Get<INotificationService>().ShowMessage($"Anonymous player has acquired Ember Crown Shard from {_bossName}.");
+                return 0;
             }
-            catch (Exception)
+
+            unchecked
             {
-                // Services are optional in isolated tests.
+                int hash = 23;
+                foreach (char c in value)
+                {
+                    hash = hash * 31 + c;
+                }
+
+                return hash;
             }
         }
 

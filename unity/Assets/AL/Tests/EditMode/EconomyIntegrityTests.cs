@@ -1060,10 +1060,8 @@ namespace AL.Tests.EditMode
             string[] creditCallers = FindCallers(scriptsRoot, ".AddCredits(", ".SpendCredits(");
             string[] expectedCreditCallers =
             {
-                "ChampionMode/AI/BossDummyAI.cs",
                 "Kingdom/Quests/LocalQuestService.cs",
                 "RealmWar/Warzone/WarzoneService.cs",
-                "Services/Local/LocalBossLootService.cs",
                 "Services/Local/LocalWarmasterService.cs",
                 "Utilities/DemoInitializer.cs"
             };
@@ -1177,6 +1175,145 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(expectedStatus, GetProperty(result, "Status").ToString());
             Assert.AreEqual(expectedDiagnostic, GetProperty(result, "DiagnosticCode"));
             Assert.AreEqual(expectedStatus == "Valid", GetProperty(result, "IsValid"));
+        }
+
+        [Test]
+        public void BossLootApplicationCommitsLedgerAndRejectsDuplicateReplay()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                var notifications = new ScriptedNotificationService();
+                object bossLoot = CreateBossLootService(saveService, notifications);
+                object request = CreateBossLootRequest(
+                    "boss_a",
+                    "encounter_a",
+                    "result_a",
+                    25,
+                    CreateEquipmentDefinition("equipment_a", 1f, true));
+
+                object first = Invoke(bossLoot, "RollLoot", request);
+                Assert.AreEqual("Committed", GetField(first, "CommitStatus").ToString());
+                Assert.AreEqual(25, GetField(GetProperty(saveService, "CurrentSave"), "WarzoneCredits"));
+                Assert.AreEqual(2, notifications.Messages.Count);
+
+                IList ledger = (IList)GetField(GetProperty(saveService, "CurrentSave"), "AppliedBossLootRewards");
+                Assert.AreEqual(1, ledger.Count);
+                Assert.AreEqual("result_a", GetField(ledger[0], "RewardResultId"));
+                string digest = (string)GetField(ledger[0], "RewardDigest");
+                Assert.False(string.IsNullOrWhiteSpace(digest));
+
+                object duplicate = Invoke(bossLoot, "RollLoot", request);
+                Assert.AreEqual("Duplicate", GetField(duplicate, "CommitStatus").ToString());
+                Assert.AreEqual(25, GetField(GetProperty(saveService, "CurrentSave"), "WarzoneCredits"));
+                Assert.AreEqual(1, ledger.Count);
+                Assert.AreEqual(2, notifications.Messages.Count);
+
+                IList inventory = (IList)GetField(GetProperty(saveService, "CurrentSave"), "OwnedEquipment");
+                Assert.AreEqual(1, inventory.Count);
+                Assert.AreEqual(1, GetField(inventory[0], "Quantity"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void BossLootApplicationRejectsConflictingResultIdentityWithoutMutation()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                var notifications = new ScriptedNotificationService();
+                object bossLoot = CreateBossLootService(saveService, notifications);
+
+                object firstRequest = CreateBossLootRequest(
+                    "boss_a",
+                    "encounter_a",
+                    "result_a",
+                    10,
+                    CreateEquipmentDefinition("equipment_a", 1f, false));
+                object first = Invoke(bossLoot, "RollLoot", firstRequest);
+                Assert.AreEqual("Committed", GetField(first, "CommitStatus").ToString());
+
+                object conflictingRequest = CreateBossLootRequest(
+                    "boss_a",
+                    "encounter_b",
+                    "result_a",
+                    10,
+                    CreateEquipmentDefinition("equipment_a", 1f, false));
+                object conflict = Invoke(bossLoot, "RollLoot", conflictingRequest);
+                Assert.AreEqual("RejectedInvalidIdentity", GetField(conflict, "CommitStatus").ToString());
+                Assert.AreEqual("AL-BOSS-LOOT-RESULT-ID-CONFLICT", GetField(conflict, "DiagnosticCode"));
+                Assert.AreEqual(10, GetField(GetProperty(saveService, "CurrentSave"), "WarzoneCredits"));
+                Assert.AreEqual(1, ((IList)GetField(GetProperty(saveService, "CurrentSave"), "AppliedBossLootRewards")).Count);
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void BossLootInvalidRequestDoesNotFabricateFallbackReward()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "None"));
+                var notifications = new ScriptedNotificationService();
+                object bossLoot = CreateBossLootService(saveService, notifications);
+                object request = CreateBossLootRequest(
+                    string.Empty,
+                    "encounter_a",
+                    "result_a",
+                    25,
+                    CreateEquipmentDefinition("equipment_a", 1f, true));
+
+                object result = Invoke(bossLoot, "RollLoot", request);
+                Assert.AreEqual("RejectedInvalidIdentity", GetField(result, "CommitStatus").ToString());
+                Assert.AreEqual("AL-BOSS-LOOT-BOSS-ID-INVALID", GetField(result, "DiagnosticCode"));
+                Assert.AreEqual(0, GetField(GetProperty(saveService, "CurrentSave"), "WarzoneCredits"));
+                Assert.AreEqual(0, ((IList)GetField(GetProperty(saveService, "CurrentSave"), "OwnedEquipment")).Count);
+                Assert.AreEqual(0, notifications.Messages.Count);
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void BossLootSaveFailureRollsBackPreparedMutationAndLedger()
+        {
+            object save = Activator.CreateInstance(GetRuntimeType("AL.Data.Runtime.SaveGameData"));
+            SetField(save, "OwnedEquipment", CreateRuntimeList(GetRuntimeType("AL.Data.Runtime.OwnedEquipmentState")));
+            SetField(save, "AppliedBossLootRewards", CreateRuntimeList(GetRuntimeType("AL.Data.Runtime.AppliedBossLootRewardState")));
+            SaveFixture fixture = CreateSaveFixture(save);
+            var notifications = new ScriptedNotificationService();
+            object bossLoot = CreateBossLootService(fixture.Proxy, notifications);
+            object request = CreateBossLootRequest(
+                "boss_a",
+                "encounter_a",
+                "result_a",
+                25,
+                CreateEquipmentDefinition("equipment_a", 1f, true));
+
+            object result = Invoke(bossLoot, "RollLoot", request);
+
+            Assert.AreEqual("SaveFailedRolledBack", GetField(result, "CommitStatus").ToString());
+            Assert.AreEqual("AL-BOSS-LOOT-SAVE-FAILED", GetField(result, "DiagnosticCode"));
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "OwnedEquipment")).Count);
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, notifications.Messages.Count);
         }
 
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
@@ -1528,7 +1665,12 @@ namespace AL.Tests.EditMode
             return constructor.Invoke(new[] { argument });
         }
 
-        private static object CreateBossLootService(object saveService)
+        private static object CreateBossLootService(object saveService) =>
+            CreateBossLootService(saveService, new ScriptedNotificationService());
+
+        private static object CreateBossLootService(
+            object saveService,
+            ScriptedNotificationService notificationService)
         {
             Type serviceType = GetRuntimeType("AL.Services.Local.LocalBossLootService");
             ConstructorInfo constructor = serviceType.GetConstructor(new[]
@@ -1538,7 +1680,55 @@ namespace AL.Tests.EditMode
                 GetRuntimeType("AL.Core.Interfaces.INotificationService")
             });
             Assert.NotNull(constructor);
-            return constructor.Invoke(new[] { saveService, null, null });
+            object warzoneCredits = CreateRuntimeService(
+                "AL.Services.Local.LocalWarzoneCreditService",
+                "AL.Core.Interfaces.ISaveGameService",
+                saveService);
+            object notifications = CreateNotificationProxy(notificationService);
+            return constructor.Invoke(new[] { saveService, warzoneCredits, notifications });
+        }
+
+        private static object CreateBossLootRequest(
+            string bossId,
+            string encounterId,
+            string rewardResultId,
+            int credits,
+            params object[] equipmentDefinitions)
+        {
+            object request = Activator.CreateInstance(GetRuntimeType("AL.Core.Interfaces.BossLootRequest"));
+            SetField(request, "BossId", bossId);
+            SetField(request, "BossName", "Boss A");
+            SetField(request, "EncounterId", encounterId);
+            SetField(request, "RewardResultId", rewardResultId);
+            SetField(request, "WarzoneCreditReward", credits);
+            SetField(request, "RandomSeed", 7);
+            IList lootTable = CreateRuntimeList(GetRuntimeType("AL.Data.Definitions.EquipmentDefinition"));
+            foreach (object equipment in equipmentDefinitions)
+            {
+                lootTable.Add(equipment);
+            }
+
+            SetField(request, "LootTable", lootTable);
+            return request;
+        }
+
+        private static object CreateEquipmentDefinition(string equipmentId, float dropRate, bool announce)
+        {
+            Type definitionType = GetRuntimeType("AL.Data.Definitions.EquipmentDefinition");
+            object definition = ScriptableObject.CreateInstance(definitionType);
+            SetField(definition, "Id", equipmentId);
+            SetField(definition, "DisplayName", "Equipment " + equipmentId);
+            SetField(definition, "DropRate", dropRate);
+            SetField(definition, "AnnounceWorldDrop", announce);
+            return definition;
+        }
+
+        private static object CreateNotificationProxy(ScriptedNotificationService notificationService)
+        {
+            Type interfaceType = GetRuntimeType("AL.Core.Interfaces.INotificationService");
+            object proxy = CreateDispatchProxy(interfaceType, typeof(ScriptedNotificationServiceProxy));
+            ((ScriptedNotificationServiceProxy)proxy).State = notificationService;
+            return proxy;
         }
 
         private static object CreateOwnedEquipment(string equipmentId, int quantity)
@@ -1587,8 +1777,11 @@ namespace AL.Tests.EditMode
         private static Type GetRuntimeType(string typeName)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(assembly => assembly.GetName().Name == "Assembly-CSharp")
-                ?.GetType(typeName);
+                .Where(assembly => !assembly.IsDynamic &&
+                                   (assembly.GetName().Name == "AL.Runtime" ||
+                                    assembly.GetName().Name == "Assembly-CSharp"))
+                .Select(assembly => assembly.GetType(typeName))
+                .FirstOrDefault(candidate => candidate != null);
             Assert.NotNull(type, $"Expected runtime type {typeName} in Assembly-CSharp.");
             return type;
         }
@@ -1702,6 +1895,14 @@ namespace AL.Tests.EditMode
                 State.Invoke(targetMethod, args);
         }
 
+        public class ScriptedNotificationServiceProxy : DispatchProxy
+        {
+            public ScriptedNotificationService State { get; set; }
+
+            protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+                State.Invoke(targetMethod, args);
+        }
+
         public sealed class ScriptedSaveService
         {
             public object CurrentSave;
@@ -1721,12 +1922,40 @@ namespace AL.Tests.EditMode
                     case "get_LastLoadMessage":
                     case "get_LastSaveMessage":
                         return string.Empty;
+                    case "get_LastSaveStatus":
+                        return EnumValue(
+                            GetRuntimeType("AL.Core.Interfaces.SaveOperationStatus"),
+                            "SaveFailedPreviousPreserved");
                     default:
                         return method.ReturnType == typeof(void)
                             ? null
                             : method.ReturnType.IsValueType
                                 ? Activator.CreateInstance(method.ReturnType)
                                 : null;
+                }
+            }
+        }
+
+        public sealed class ScriptedNotificationService
+        {
+            public readonly List<string> Messages = new List<string>();
+            public readonly List<string> Errors = new List<string>();
+
+            public object Invoke(MethodInfo method, object[] args)
+            {
+                switch (method.Name)
+                {
+                    case "ShowMessage":
+                        Messages.Add((string)args[0]);
+                        return null;
+                    case "ShowError":
+                        Errors.Add((string)args[0]);
+                        return null;
+                    case "ShowResourceGain":
+                        Messages.Add($"{args[0]}:{args[1]}");
+                        return null;
+                    default:
+                        return null;
                 }
             }
         }

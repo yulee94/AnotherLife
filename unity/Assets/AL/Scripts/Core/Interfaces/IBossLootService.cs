@@ -80,10 +80,25 @@ namespace AL.Core.Interfaces
     {
         public string BossId;
         public string BossName;
+        public string EncounterId;
+        public string RewardResultId;
         public string PlayerDisplayName = "Anonymous player";
         public int WarzoneCreditReward = 500;
         public int RandomSeed;
         public List<EquipmentDefinition> LootTable = new List<EquipmentDefinition>();
+    }
+
+    public enum BossLootCommitStatus
+    {
+        None = 0,
+        Committed = 1,
+        Duplicate = 2,
+        RejectedInvalidIdentity = 3,
+        RejectedInvalidDefinition = 4,
+        RejectedMalformedInventory = 5,
+        RejectedEconomy = 6,
+        SaveFailedRolledBack = 7,
+        NoReward = 8
     }
 
     [Serializable]
@@ -91,6 +106,11 @@ namespace AL.Core.Interfaces
     {
         public string BossId;
         public string BossName;
+        public string EncounterId;
+        public string RewardResultId;
+        public string RewardDigest;
+        public BossLootCommitStatus CommitStatus;
+        public string DiagnosticCode;
         public int WarzoneCreditsAwarded;
         public List<BossLootDrop> Drops = new List<BossLootDrop>();
     }
