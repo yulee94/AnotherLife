@@ -9,6 +9,7 @@
 - Foundation normalization source:
   `tdf-foundation-fauna-normalization-2026-07-27-v001`
 - Stonehold habitat companion: `tdf-eco-faultroad-2026-07-27-v001`
+- Eldergrove habitat companion: `tdf-eco-hollowbark-2026-07-27-v001`
 - Primary Codex mode: `terrestrial-design`
 - Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
@@ -28,11 +29,16 @@ This matrix prevents a merged roster proposal from being mistaken for approved v
 | `TechnicalHandoffReady` | Coordination specification accepts approved source for bounded engineering |
 | `RuntimeIntegrated` | Engineering mapping exists and has passed technical plus A2 fidelity review |
 
-Only `RosterProposed`, `ProposedTextOnly`, `LegacyMergedProposal`, and inherited `ReadyForUserReview` states occur in this packet.
+Only `RosterProposed`, `ProposedTextOnly`, `LegacyMergedProposal`, and
+companion/inherited `ReadyForUserReview` states occur in the current source
+family.
 
 ## Habitat Matrix
 
-All sixteen habitat entries have stable design IDs and connected transition intent. None has a concept sheet, authored terrain source, production asset, or user approval.
+All sixteen habitat entries have stable design IDs and connected transition
+intent. Three now have exact companion concept source; thirteen remain
+roster-only. None has authored production terrain, runtime integration, or
+user approval.
 
 | Habitat ID | State | Exact visual source | Primary future review question |
 | --- | --- | --- | --- |
@@ -40,7 +46,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 | `tdf_habitat_stonehold_rimecut_pass` | `RosterProposed` | none | Is the pass notch navigable and distinctive without a whiteout or ice sparkle? |
 | `tdf_habitat_stonehold_ore_gallery_mouths` | `RosterProposed` | none | Do cave mouths, columns, and ground plane remain readable without colored fog or glowing ore? |
 | `tdf_habitat_stonehold_slagfall_quarry` | `RosterProposed` | none | Do cooled slag terraces look physically settled rather than like a permanent lava theme? |
-| `tdf_habitat_eldergrove_hollowbark_oldgrowth` | `RosterProposed` | none | Does old-growth scale coexist with a clear traversable understory? |
+| `tdf_habitat_eldergrove_hollowbark_oldgrowth` | `ReadyForUserReview` | establishing/placement/reduction, illustrative spatial/transition, and material/kit/LOD-intent sheets | Break portal-like root arches and repeated cavities; replace illustrative layout/scale/LOD with measured evidence; preserve a clear open understory and exact Grove Strider identity. |
 | `tdf_habitat_eldergrove_mirrorroot_littoral` | `RosterProposed` | none | Are shore depth, roots, and water legible when reflection and reed motion are reduced? |
 | `tdf_habitat_eldergrove_sunmane_edge_meadow` | `RosterProposed` | none | Does the meadow remain adult and naturalistic without flower/pollen spectacle? |
 | `tdf_habitat_eldergrove_moonroot_floodbasin` | `ReadyForUserReview` | Moonroot establishing, layout/transition/depth, material/reduced-atmosphere/LOD, and shared contact sheets | Resolve constructed-shelf and gate-like split-buttress concerns while preserving depth and route read without effects. |
@@ -61,7 +67,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 | `tdf_fauna_stonehold_rimefan_kite` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | resolve `PassWithConcern` skull, wing-group, and wedge-tail consistency |
 | `tdf_fauna_stonehold_oreveil_isopod` | `ProposedTextOnly` | none | not requested | top/side/front anatomy, plate count, curl, locomotion/contact sheet |
 | `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
-| `tdf_grove_strider` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, hoof/ear/tendril roots, motion/contact, measured LOD, and habitat-placement review |
+| `tdf_grove_strider` | `ReadyForUserReview` | normalized immutable base sheet plus exact Hollowbark placement/reduction evidence | not requested | rear/top/underside, hoof/ear/tendril roots, motion/contact, measured scale/LOD, and correction of generated crown/armor/proportion drift; no juvenile or variant authority |
 | `tdf_mire_lumenback` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, pouch/feeler/swim contact, emission-off measured LOD, and habitat-placement review |
 | `tdf_fauna_eldergrove_thornburrow_hare` | `ProposedTextOnly` | none | not requested | adult proportion turnaround, tusk/root contact, bound/landing sheet |
 | `tdf_fauna_eldergrove_moonshell_cicada` | `ReadyForUserReview` | flood-season turnaround, motion/material, and shared contact/scale sheets | not requested | resolve rostrum, unobstructed six-leg/four-wing continuity, and distant presence-proxy concerns; dry-season ecotype remains text-only |
@@ -90,7 +96,10 @@ The three normalized foundation bases are governed by
 sheets are `ReadyForUserReview` with `PassWithConcern`; no raster is copied or
 regenerated. Six unpictured palette-led variants remain `ProposedTextOnly`.
 Missing orthographic, attachment, motion/contact, measured LOD, habitat
-placement, and Player dependency evidence remain production blocks.
+placement, and Player dependency evidence remain production blocks. Faultroad
+and Hollowbark now provide concerned placement evidence for Basalt Grazer and
+Grove Strider respectively; Mire Lumenback placement remains absent, and no
+companion closes the other missing evidence.
 
 The Faultroad habitat and Basalt Grazer placement evidence are governed by
 `unity/Docs/Terrestrials/Ecosystems/FaultroadEscarpment/`. The habitat is
@@ -98,6 +107,15 @@ The Faultroad habitat and Basalt Grazer placement evidence are governed by
 remains governed by `FoundationFauna/`. Remaining masonry-like joints,
 illustrative rather than measured section evidence, prop modularity/repetition,
 camera coverage, and production measurements remain blocking.
+
+The Hollowbark habitat and Grove Strider placement evidence are governed by
+`unity/Docs/Terrestrials/Ecosystems/HollowbarkOldgrowth/`. The habitat is
+`ReadyForUserReview` with `PassWithConcern`; the canonical Strider identity
+remains governed by `FoundationFauna/` and is referenced without duplicated
+raster bytes. Portal-like root arches, dense foreground clutter, incomplete
+Sunmane transition evidence, generated scale/anatomy/life-stage ambiguity,
+illustrative rather than measured layout/LOD, camera coverage, and production
+measurements remain blocking.
 
 ## Inherited Boss And Elite Anchors
 
