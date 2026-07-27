@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
 using AL.Core;
@@ -14,9 +15,13 @@ namespace AL.Services.Local
 {
     public class LocalBossLootService : IBossLootService
     {
+        private static readonly ConditionalWeakTable<ISaveGameService, object> TransactionGates =
+            new ConditionalWeakTable<ISaveGameService, object>();
+
         private readonly ISaveGameService _saveGameService;
         private readonly IWarzoneCreditService _warzoneCreditService;
         private readonly INotificationService _notificationService;
+        private readonly object _transactionGate;
 
         public LocalBossLootService(
             ISaveGameService saveGameService,
@@ -26,6 +31,9 @@ namespace AL.Services.Local
             _saveGameService = saveGameService;
             _warzoneCreditService = warzoneCreditService;
             _notificationService = notificationService;
+            _transactionGate = saveGameService == null
+                ? new object()
+                : TransactionGates.GetValue(saveGameService, _ => new object());
         }
 
         public IEnumerable<OwnedEquipmentState> GetOwnedEquipment()
@@ -49,6 +57,14 @@ namespace AL.Services.Local
         }
 
         public BossLootResult RollLoot(BossLootRequest request)
+        {
+            lock (_transactionGate)
+            {
+                return RollLootSerialized(request);
+            }
+        }
+
+        private BossLootResult RollLootSerialized(BossLootRequest request)
         {
             BossLootApplicationValidationResult identityValidation =
                 BossLootApplicationIdentityValidator.Validate(request == null
@@ -91,6 +107,14 @@ namespace AL.Services.Local
                 return Reject(request, BossLootApplicationStatus.RejectedNoCurrentSave, "AL-BOSS-LOOT-NO-CURRENT-SAVE");
             }
 
+            if (_saveGameService.LastSaveStatus == SaveOperationStatus.CommitUncertain)
+            {
+                return Reject(
+                    request,
+                    BossLootApplicationStatus.CommitUncertain,
+                    "AL-BOSS-LOOT-COMMIT-UNCERTAIN-RECONCILIATION-REQUIRED");
+            }
+
             save.OwnedEquipment ??= new List<OwnedEquipmentState>();
             save.AppliedBossLootRewards ??= new List<AppliedBossLootRewardState>();
             foreach (AppliedBossLootRewardState applied in save.AppliedBossLootRewards)
@@ -123,6 +147,7 @@ namespace AL.Services.Local
             int previousCredits = save.WarzoneCredits;
             List<OwnedEquipmentState> previousEquipment = CloneOwnedEquipment(save.OwnedEquipment);
             List<AppliedBossLootRewardState> previousLedger = CloneLedger(save.AppliedBossLootRewards);
+            bool persistenceStarted = false;
             try
             {
                 if (request.WarzoneCreditReward > 0)
@@ -162,6 +187,7 @@ namespace AL.Services.Local
                     RewardDigest = digest,
                     CommittedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds()
                 });
+                persistenceStarted = true;
                 _saveGameService.Save();
                 if (_saveGameService.LastSaveStatus == SaveOperationStatus.CommitUncertain)
                 {
@@ -176,6 +202,24 @@ namespace AL.Services.Local
             }
             catch (Exception)
             {
+                if (!persistenceStarted)
+                {
+                    Restore(save, previousCredits, previousEquipment, previousLedger);
+                    return Reject(
+                        request,
+                        BossLootApplicationStatus.MutationFailedRolledBack,
+                        "AL-BOSS-LOOT-MUTATION-FAILED-ROLLED-BACK");
+                }
+
+                if (_saveGameService.LastSaveStatus == SaveOperationStatus.SaveFailedPreviousPreserved)
+                {
+                    Restore(save, previousCredits, previousEquipment, previousLedger);
+                    return Reject(
+                        request,
+                        BossLootApplicationStatus.SaveFailedRolledBack,
+                        "AL-BOSS-LOOT-SAVE-FAILED");
+                }
+
                 return Reject(request, BossLootApplicationStatus.CommitUncertain, "AL-BOSS-LOOT-SAVE-EXCEPTION");
             }
 
@@ -375,18 +419,21 @@ namespace AL.Services.Local
 
         private static List<OwnedEquipmentState> CloneOwnedEquipment(
             IEnumerable<OwnedEquipmentState> equipment) =>
-            equipment?.Select(CloneOwnedEquipment).ToList() ?? new List<OwnedEquipmentState>();
+            equipment?.Select(entry => entry == null ? null : CloneOwnedEquipment(entry)).ToList() ??
+            new List<OwnedEquipmentState>();
 
         private static List<AppliedBossLootRewardState> CloneLedger(
             IEnumerable<AppliedBossLootRewardState> ledger) =>
-            ledger?.Select(entry => new AppliedBossLootRewardState
-            {
-                EncounterId = entry.EncounterId,
-                RewardResultId = entry.RewardResultId,
-                BossId = entry.BossId,
-                RewardDigest = entry.RewardDigest,
-                CommittedTimestamp = entry.CommittedTimestamp
-            }).ToList() ?? new List<AppliedBossLootRewardState>();
+            ledger?.Select(entry => entry == null
+                ? null
+                : new AppliedBossLootRewardState
+                {
+                    EncounterId = entry.EncounterId,
+                    RewardResultId = entry.RewardResultId,
+                    BossId = entry.BossId,
+                    RewardDigest = entry.RewardDigest,
+                    CommittedTimestamp = entry.CommittedTimestamp
+                }).ToList() ?? new List<AppliedBossLootRewardState>();
 
         private static void Restore(
             SaveGameData save,
