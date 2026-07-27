@@ -44,6 +44,12 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"0.1.0\"", "\"9.0.0\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-UNSUPPORTED"));
             Assert.That(RealmCatalogRuntime.Parse(_json.Replace("same_realm_only", "cross_realm")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-POLICY-MISMATCH"));
             Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"id\": \"stonehold\"", "\"id\": \"crownlands\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-INVALID-REALM"));
+
+            string swappedRuntimeIds = _json
+                .Replace("\"legacyRuntimeId\": \"Crownlands\"", "\"legacyRuntimeId\": \"SwapTemporary\"")
+                .Replace("\"legacyRuntimeId\": \"Umbral\"", "\"legacyRuntimeId\": \"Crownlands\"")
+                .Replace("\"legacyRuntimeId\": \"SwapTemporary\"", "\"legacyRuntimeId\": \"Umbral\"");
+            Assert.That(RealmCatalogRuntime.Parse(swappedRuntimeIds).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-INVALID-REALM"));
         }
 
         [Test]
