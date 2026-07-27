@@ -126,15 +126,15 @@ namespace AL.Tests.EditMode
                 withTestFixture,
                 "A QuestDefinition fixture declared in the EditMode test assembly must not count as production.");
 
-            Type editorShaped = EmitScriptableObjectType("Assembly-CSharp", "AL.Editor.Validation.Fixtures.QuestDefinition");
-            Type testShaped = EmitScriptableObjectType("Assembly-CSharp", "AL.Gameplay.Tests.QuestDefinition");
+            Type editorShaped = EmitScriptableObjectType("AL.Runtime", "AL.Editor.Validation.Fixtures.QuestDefinition");
+            Type testShaped = EmitScriptableObjectType("AL.Runtime", "AL.Gameplay.Tests.QuestDefinition");
             string[] withExcludedNamespaces = FilterProductionTypeNames(new[] { authoritative, editorShaped, testShaped });
             CollectionAssert.AreEqual(
                 new[] { "AL.Data.Definitions.Narrative.QuestDefinition" },
                 withExcludedNamespaces,
                 "AL.Editor* and *.Tests namespaces in the production assembly must not count as production.");
 
-            Type secondProduction = EmitScriptableObjectType("Assembly-CSharp", "AL.Gameplay.QuestDefinition");
+            Type secondProduction = EmitScriptableObjectType("AL.Runtime", "AL.Gameplay.QuestDefinition");
             string[] withSecondProduction = FilterProductionTypeNames(new[] { authoritative, secondProduction, editorShaped, testShaped, typeof(QuestDefinition) });
             CollectionAssert.AreEqual(
                 new[] { "AL.Data.Definitions.Narrative.QuestDefinition", "AL.Gameplay.QuestDefinition" },
@@ -383,13 +383,17 @@ namespace AL.Tests.EditMode
         private static Type ValidatorType() =>
             RuntimeType("AL.Editor.Validation.QuestDefinitionAssetAuthorityValidator", "Assembly-CSharp-Editor");
 
-        private static Type RuntimeType(string fullName, string assemblyName = "Assembly-CSharp")
+        private static Type RuntimeType(string fullName, string assemblyName = null)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(assembly => !assembly.IsDynamic && string.Equals(assembly.GetName().Name, assemblyName, StringComparison.Ordinal))
+                .Where(assembly =>
+                    !assembly.IsDynamic &&
+                    (assemblyName == null ||
+                     string.Equals(assembly.GetName().Name, assemblyName, StringComparison.Ordinal)))
                 .Select(assembly => assembly.GetType(fullName))
                 .FirstOrDefault(candidate => candidate != null);
-            Assert.NotNull(type, $"Expected type {fullName} in {assemblyName}.");
+            string location = assemblyName == null ? "loaded assemblies" : assemblyName;
+            Assert.NotNull(type, $"Expected type {fullName} in {location}.");
             return type;
         }
 

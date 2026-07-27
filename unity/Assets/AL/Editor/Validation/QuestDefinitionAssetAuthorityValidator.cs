@@ -177,7 +177,7 @@ namespace AL.Editor.Validation
 
             if (!IsProductionRuntimeQuestDefinitionType(definitionType))
             {
-                snapshot.AddDiagnostic("AL-QDA-AUTHORITATIVE-ASSEMBLY-MISMATCH", AuthoritativePath, null, "Authoritative QuestDefinition type must live in the production runtime assembly.", "Assembly-CSharp", definitionType.Assembly.GetName().Name);
+                snapshot.AddDiagnostic("AL-QDA-AUTHORITATIVE-ASSEMBLY-MISMATCH", AuthoritativePath, null, "Authoritative QuestDefinition type must live in the production runtime assembly.", "AL.Runtime", definitionType.Assembly.GetName().Name);
             }
 
             var menu = definitionType.GetCustomAttribute<CreateAssetMenuAttribute>();
@@ -626,7 +626,7 @@ namespace AL.Editor.Validation
         private static bool IsProductionRuntimeQuestDefinitionType(Type type) =>
             type != null &&
             string.Equals(type.Name, "QuestDefinition", StringComparison.Ordinal) &&
-            string.Equals(type.Assembly.GetName().Name, "Assembly-CSharp", StringComparison.Ordinal) &&
+            string.Equals(type.Assembly.GetName().Name, "AL.Runtime", StringComparison.Ordinal) &&
             !string.IsNullOrEmpty(type.Namespace) &&
             !type.Namespace.StartsWith("AL.Editor", StringComparison.Ordinal) &&
             !type.Namespace.Contains(".Tests", StringComparison.Ordinal);
