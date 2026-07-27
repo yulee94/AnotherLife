@@ -1328,6 +1328,7 @@ namespace AL.Tests.EditMode
                    "\"ChampionCustomization\":" +
                    (championCustomization ?? CurrentChampionCustomizationJson) + "," +
                    "\"OwnedEquipment\":" + (ownedEquipment ?? "[]") + "," +
+                   "\"AppliedBossLootRewards\":[]," +
                    "\"WarzoneCredits\":0," +
                    "\"LastSavedTimestamp\":" + lastSavedTimestamp +
                    extraTopLevel +
