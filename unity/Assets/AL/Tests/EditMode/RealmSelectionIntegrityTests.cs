@@ -19,14 +19,18 @@ namespace AL.Tests.EditMode
     ""selectionMode"": ""one_realm_per_account"",
     ""realmLockScope"": ""account"",
     ""subCharacterPolicy"": ""same_realm_only"",
-    ""crossRealmCreationPolicy"": ""reject""
+    ""sharedStoragePolicy"": ""same_realm_account_storage"",
+    ""crossRealmCreationPolicy"": ""reject"",
+    ""realmChangePolicy"": ""not_supported_after_commit"",
+    ""uncommittedProfileState"": ""realm_unselected"",
+    ""committedProfileState"": ""realm_locked""
   },
   ""realmOrder"": [""crownlands"", ""stonehold"", ""eldergrove"", ""umbral""],
   ""realms"": [
-    { ""id"": ""crownlands"", ""legacyRuntimeId"": ""Crownlands"", ""displayName"": ""Crownlands"", ""realmGemIds"": [""GEM_CL_A"", ""GEM_CL_B""] },
-    { ""id"": ""stonehold"", ""legacyRuntimeId"": ""Stonehold"", ""displayName"": ""Stonehold"", ""realmGemIds"": [""GEM_SH_A"", ""GEM_SH_B""] },
-    { ""id"": ""eldergrove"", ""legacyRuntimeId"": ""Eldergrove"", ""displayName"": ""Eldergrove"", ""realmGemIds"": [""GEM_EG_A"", ""GEM_EG_B""] },
-    { ""id"": ""umbral"", ""legacyRuntimeId"": ""Umbral"", ""displayName"": ""Umbral"", ""realmGemIds"": [""GEM_UM_A"", ""GEM_UM_B""] }
+    { ""id"": ""crownlands"", ""legacyRuntimeId"": ""Crownlands"", ""displayName"": ""Crownlands"", ""realmGemIds"": [""gem_crownlands_sun"", ""gem_crownlands_oath""] },
+    { ""id"": ""stonehold"", ""legacyRuntimeId"": ""Stonehold"", ""displayName"": ""Stonehold"", ""realmGemIds"": [""gem_stonehold_forge"", ""gem_stonehold_depth""] },
+    { ""id"": ""eldergrove"", ""legacyRuntimeId"": ""Eldergrove"", ""displayName"": ""Eldergrove"", ""realmGemIds"": [""gem_eldergrove_root"", ""gem_eldergrove_moon""] },
+    { ""id"": ""umbral"", ""legacyRuntimeId"": ""Umbral"", ""displayName"": ""Umbral"", ""realmGemIds"": [""gem_umbral_veil"", ""gem_umbral_ember""] }
   ]
 }";
 
