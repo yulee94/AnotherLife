@@ -145,7 +145,7 @@ namespace AL.RealmSelection
             RealmCatalogRuntime.MarkLoading();
             string path = System.IO.Path.Combine(Application.streamingAssetsPath, RealmCatalogRuntime.RelativePath);
             var handler = new BoundedRealmCatalogDownloadHandler(RealmCatalogRuntime.MaximumByteLength);
-            using (var request = new UnityWebRequest(path, UnityWebRequest.kHttpVerbGET, handler, null))
+            using (var request = new UnityWebRequest(path, "GET", handler, null))
             {
                 request.timeout = 10;
                 yield return request.SendWebRequest();
@@ -168,8 +168,8 @@ namespace AL.RealmSelection
         private int _length;
 
         internal BoundedRealmCatalogDownloadHandler(int maximumByteLength)
+            : base(CreateReceiveBuffer(maximumByteLength))
         {
-            if (maximumByteLength <= 0) throw new ArgumentOutOfRangeException(nameof(maximumByteLength));
             _buffer = new byte[maximumByteLength];
         }
 
@@ -192,6 +192,12 @@ namespace AL.RealmSelection
         internal string GetUtf8Text()
         {
             return Encoding.UTF8.GetString(_buffer, 0, _length);
+        }
+
+        private static byte[] CreateReceiveBuffer(int maximumByteLength)
+        {
+            if (maximumByteLength <= 0) throw new ArgumentOutOfRangeException(nameof(maximumByteLength));
+            return new byte[Math.Min(maximumByteLength, 8192)];
         }
     }
 
