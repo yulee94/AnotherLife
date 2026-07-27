@@ -26,12 +26,17 @@ This folder contains the A2 terrestrial-design proposal for coherent fauna and h
 - `MoonrootFloodbasin/` — companion source
   `tdf-eco-moonroot-2026-07-27-v001` with exact habitat, environment-kit,
   flood-season Moonshell Cicada, provenance, QA, schema, and manifest evidence.
+- `FoundationFauna/` — normalization source
+  `tdf-foundation-fauna-normalization-2026-07-27-v001` for the three exact
+  legacy foundation sheets without copying or regenerating their pixels.
 
 The parent roster adds no concept art or runtime asset. Its companion packets
 advance one habitat, one pictured Moonshell ecotype, and three avian-soarer
-identities to `ReadyForUserReview`. The Moonshell dry-season ecotype and nine
-other new fauna families remain `ProposedTextOnly`. Foundation proposals remain
-unapproved.
+identities to `ReadyForUserReview`. The normalization companion advances the
+exact pictured bases for Basalt Grazer, Grove Strider, and Mire Lumenback to
+`ReadyForUserReview` with concerns and zero duplicated raster bytes. The
+Moonshell dry-season ecotype, six unpictured foundation variants, and nine
+other new fauna families remain `ProposedTextOnly`. No source is user-approved.
 
 ## Upstream Sources Consumed
 
@@ -53,11 +58,15 @@ Habitat suitability links to existing creatures are visual/ecological design ref
 - New exact visual-review family IDs: `3`
 - New exact habitat visual-review IDs: `1`
 - New exact flood-season fauna visual-review IDs: `1`
+- Normalized legacy exact visual-review family IDs: `3`
 - Remaining new text-only family IDs: `9`
+- Remaining foundation text-only variant IDs: `6`
 - Avian-soarer finals/retained inputs: `8 / 3`
 - Moonroot finals/retained inputs: `6 / 3`
+- Foundation exact sheets referenced/new copies: `3 / 0`
 - Avian-soarer Player/install bytes: `0`
 - Moonroot Player/install bytes: `0`
+- Foundation normalization new Player/install bytes: `0`
 - Existing boss/elite anchors referenced: `16`
 - Runtime or shared-file changes: `0`
 

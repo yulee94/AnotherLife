@@ -1,0 +1,187 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/terrestrial/foundation-fauna-normalization/1.0.0",
+  "title": "AnotherLife Foundation Fauna Normalization Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "sourceVersion",
+    "legacySourceVersion",
+    "parentRosterSourceVersion",
+    "createdDate",
+    "authority",
+    "readiness",
+    "sourceImpact",
+    "profiles",
+    "sourceAssets"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "packetId": {"const": "tdf_packet_foundation_fauna_normalization_v001"},
+    "sourceVersion": {"const": "tdf-foundation-fauna-normalization-2026-07-27-v001"},
+    "legacySourceVersion": {"const": "tdf-2026-07-15-v001"},
+    "parentRosterSourceVersion": {"const": "tdf-eco-2026-07-27-v001"},
+    "createdDate": {"type": "string", "format": "date"},
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["terrestrialDesignSource", "runtime", "gameplay", "narrative", "save", "userCreativeApproval"],
+      "properties": {
+        "terrestrialDesignSource": {"const": true},
+        "runtime": {"const": false},
+        "gameplay": {"const": false},
+        "narrative": {"const": false},
+        "save": {"const": false},
+        "userCreativeApproval": {"const": false}
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["technicalPacketState", "userCreativeState", "runtimeIntegrationState", "visualQaState"],
+      "properties": {
+        "technicalPacketState": {"const": "TechnicalReviewReady"},
+        "userCreativeState": {"const": "NotRequested"},
+        "runtimeIntegrationState": {"const": "Blocked"},
+        "visualQaState": {"const": "PassWithConcern"}
+      }
+    },
+    "sourceImpact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "referencedExistingAssetCount",
+        "referencedExistingBytes",
+        "newRasterCount",
+        "newRasterBytes",
+        "newPlayerBuildBytes",
+        "newRuntimeResidentBytes",
+        "unityGuidReferenceCountOutsideOwnMeta",
+        "playerBuildExclusionMeasured"
+      ],
+      "properties": {
+        "referencedExistingAssetCount": {"const": 3},
+        "referencedExistingBytes": {"const": 7381817},
+        "newRasterCount": {"const": 0},
+        "newRasterBytes": {"const": 0},
+        "newPlayerBuildBytes": {"const": 0},
+        "newRuntimeResidentBytes": {"const": 0},
+        "unityGuidReferenceCountOutsideOwnMeta": {"const": 0},
+        "playerBuildExclusionMeasured": {"const": false}
+      }
+    },
+    "profiles": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/profile"}
+    },
+    "sourceAssets": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": {"$ref": "#/$defs/sourceAsset"}
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "realmId",
+        "primaryHabitatId",
+        "state",
+        "qaDisposition",
+        "picturedVariantId",
+        "unpicturedVariantIds",
+        "protectedIdentity",
+        "scaleChampionUnits",
+        "assetId",
+        "requiredFutureEvidence"
+      ],
+      "properties": {
+        "profileId": {"$ref": "#/$defs/stableId"},
+        "realmId": {"enum": ["stonehold", "eldergrove"]},
+        "primaryHabitatId": {"$ref": "#/$defs/stableId"},
+        "state": {"const": "ReadyForUserReview"},
+        "qaDisposition": {"const": "PassWithConcern"},
+        "picturedVariantId": {"$ref": "#/$defs/stableId"},
+        "unpicturedVariantIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stableId"}
+        },
+        "protectedIdentity": {"$ref": "#/$defs/stableId"},
+        "scaleChampionUnits": {
+          "type": "object",
+          "additionalProperties": false,
+          "minProperties": 2,
+          "required": ["shoulderHeight", "length"],
+          "properties": {
+            "headHeight": {"type": "number", "exclusiveMinimum": 0},
+            "shoulderHeight": {"type": "number", "exclusiveMinimum": 0},
+            "length": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "assetId": {"$ref": "#/$defs/stableId"},
+        "requiredFutureEvidence": {
+          "type": "array",
+          "minItems": 4,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/stableId"}
+        }
+      }
+    },
+    "sourceAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "profileId",
+        "path",
+        "unityGuid",
+        "mediaType",
+        "pixelWidth",
+        "pixelHeight",
+        "colorMode",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize"
+      ],
+      "properties": {
+        "assetId": {"$ref": "#/$defs/stableId"},
+        "profileId": {"$ref": "#/$defs/stableId"},
+        "path": {
+          "type": "string",
+          "pattern": "^unity/Assets/AL/Art/Terrestrials/ConceptSheets/[a-z0-9_]+\\.png$"
+        },
+        "unityGuid": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "mediaType": {"const": "image/png"},
+        "pixelWidth": {"const": 1536},
+        "pixelHeight": {"const": 1024},
+        "colorMode": {"const": "RGB"},
+        "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "gitLfsOid": {"$ref": "#/$defs/sha256"},
+        "gitLfsSize": {"type": "integer", "minimum": 1, "maximum": 4194304}
+      }
+    }
+  }
+}

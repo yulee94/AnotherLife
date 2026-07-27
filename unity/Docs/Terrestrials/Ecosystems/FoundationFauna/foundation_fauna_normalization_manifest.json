@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_foundation_fauna_normalization_v001",
+  "sourceVersion": "tdf-foundation-fauna-normalization-2026-07-27-v001",
+  "legacySourceVersion": "tdf-2026-07-15-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-27",
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "visualQaState": "PassWithConcern"
+  },
+  "sourceImpact": {
+    "referencedExistingAssetCount": 3,
+    "referencedExistingBytes": 7381817,
+    "newRasterCount": 0,
+    "newRasterBytes": 0,
+    "newPlayerBuildBytes": 0,
+    "newRuntimeResidentBytes": 0,
+    "unityGuidReferenceCountOutsideOwnMeta": 0,
+    "playerBuildExclusionMeasured": false
+  },
+  "profiles": [
+    {
+      "profileId": "tdf_basalt_grazer",
+      "realmId": "stonehold",
+      "primaryHabitatId": "tdf_habitat_stonehold_faultroad_escarpment",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "picturedVariantId": "tdf_basalt_grazer_standard",
+      "unpicturedVariantIds": [
+        "tdf_basalt_grazer_ashen",
+        "tdf_basalt_grazer_mineral"
+      ],
+      "protectedIdentity": "broad_shoulder_plate_low_head_short_weight_bearing_legs",
+      "scaleChampionUnits": {
+        "shoulderHeight": 1.4,
+        "length": 3.0
+      },
+      "assetId": "tdf_asset_basalt_grazer_concept_sheet_v001",
+      "requiredFutureEvidence": [
+        "rear_top_underside_orthographic",
+        "plate_root_and_limb_origin",
+        "motion_contact_recovery",
+        "measured_lod_distance"
+      ]
+    },
+    {
+      "profileId": "tdf_grove_strider",
+      "realmId": "eldergrove",
+      "primaryHabitatId": "tdf_habitat_eldergrove_hollowbark_oldgrowth",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "picturedVariantId": "tdf_grove_strider_standard",
+      "unpicturedVariantIds": [
+        "tdf_grove_strider_late_autumn",
+        "tdf_grove_strider_mist"
+      ],
+      "protectedIdentity": "long_neck_narrow_legs_leaf_like_ear_fins",
+      "scaleChampionUnits": {
+        "headHeight": 1.8,
+        "shoulderHeight": 1.4,
+        "length": 1.9
+      },
+      "assetId": "tdf_asset_grove_strider_concept_sheet_v001",
+      "requiredFutureEvidence": [
+        "rear_top_underside_orthographic",
+        "hoof_ear_fin_tendril_roots",
+        "motion_contact_recovery",
+        "measured_lod_distance"
+      ]
+    },
+    {
+      "profileId": "tdf_mire_lumenback",
+      "realmId": "eldergrove",
+      "primaryHabitatId": "tdf_habitat_eldergrove_mirrorroot_littoral",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "picturedVariantId": "tdf_mire_lumenback_standard",
+      "unpicturedVariantIds": [
+        "tdf_mire_lumenback_clay",
+        "tdf_mire_lumenback_night"
+      ],
+      "protectedIdentity": "low_rounded_torso_paddle_feet_throat_pouch",
+      "scaleChampionUnits": {
+        "shoulderHeight": 0.45,
+        "length": 1.2
+      },
+      "assetId": "tdf_asset_mire_lumenback_concept_sheet_v001",
+      "requiredFutureEvidence": [
+        "rear_top_underside_orthographic",
+        "pouch_feeler_and_swim_contact",
+        "motion_contact_recovery",
+        "emission_off_measured_lod_distance"
+      ]
+    }
+  ],
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_basalt_grazer_concept_sheet_v001",
+      "profileId": "tdf_basalt_grazer",
+      "path": "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_basalt_grazer_concept_sheet_v001.png",
+      "unityGuid": "5a09cbefdf2d47cfbad7c4e6eecfe96f",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorMode": "RGB",
+      "byteLength": 2520786,
+      "sha256": "2e14484df86f685f16b0cf00db9de85bb132651b0f83354dabea0b451bfdc354",
+      "gitLfsOid": "2e14484df86f685f16b0cf00db9de85bb132651b0f83354dabea0b451bfdc354",
+      "gitLfsSize": 2520786
+    },
+    {
+      "assetId": "tdf_asset_grove_strider_concept_sheet_v001",
+      "profileId": "tdf_grove_strider",
+      "path": "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_grove_strider_concept_sheet_v001.png",
+      "unityGuid": "5dfff38537dd469aa7c2a431c7294830",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorMode": "RGB",
+      "byteLength": 2490599,
+      "sha256": "4e7864cc02c571357ad3faf8c77631bd9fa1c08944d18e89ad36a6b9dac89920",
+      "gitLfsOid": "4e7864cc02c571357ad3faf8c77631bd9fa1c08944d18e89ad36a6b9dac89920",
+      "gitLfsSize": 2490599
+    },
+    {
+      "assetId": "tdf_asset_mire_lumenback_concept_sheet_v001",
+      "profileId": "tdf_mire_lumenback",
+      "path": "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png",
+      "unityGuid": "0b4bdfc958764792ac78c88987e46133",
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorMode": "RGB",
+      "byteLength": 2370432,
+      "sha256": "39154a3ea94394efabac558e704a54a630e005371123b32ec9dd3803ec2235b0",
+      "gitLfsOid": "39154a3ea94394efabac558e704a54a630e005371123b32ec9dd3803ec2235b0",
+      "gitLfsSize": 2370432
+    }
+  ]
+}

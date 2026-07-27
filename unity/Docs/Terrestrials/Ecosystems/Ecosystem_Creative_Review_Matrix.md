@@ -6,6 +6,8 @@
 - Source version: `tdf-eco-2026-07-27-v001`
 - Companion visual source: `tdf-eco-soarer-2026-07-27-v001`
 - Companion habitat/fauna source: `tdf-eco-moonroot-2026-07-27-v001`
+- Foundation normalization source:
+  `tdf-foundation-fauna-normalization-2026-07-27-v001`
 - Primary Codex mode: `terrestrial-design`
 - Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
@@ -54,12 +56,12 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 
 | Family ID | State | Existing exact source | User approval | Required next source |
 | --- | --- | --- | --- | --- |
-| `tdf_basalt_grazer` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
+| `tdf_basalt_grazer` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, plate/limb roots, motion/contact, measured LOD, and habitat-placement review |
 | `tdf_fauna_stonehold_rimefan_kite` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | resolve `PassWithConcern` skull, wing-group, and wedge-tail consistency |
 | `tdf_fauna_stonehold_oreveil_isopod` | `ProposedTextOnly` | none | not requested | top/side/front anatomy, plate count, curl, locomotion/contact sheet |
 | `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
-| `tdf_grove_strider` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
-| `tdf_mire_lumenback` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
+| `tdf_grove_strider` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, hoof/ear/tendril roots, motion/contact, measured LOD, and habitat-placement review |
+| `tdf_mire_lumenback` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, pouch/feeler/swim contact, emission-off measured LOD, and habitat-placement review |
 | `tdf_fauna_eldergrove_thornburrow_hare` | `ProposedTextOnly` | none | not requested | adult proportion turnaround, tusk/root contact, bound/landing sheet |
 | `tdf_fauna_eldergrove_moonshell_cicada` | `ReadyForUserReview` | flood-season turnaround, motion/material, and shared contact/scale sheets | not requested | resolve rostrum, unobstructed six-leg/four-wing continuity, and distant presence-proxy concerns; dry-season ecotype remains text-only |
 | `tdf_fauna_crownlands_broadcrest_aurochs` | `ProposedTextOnly` | none | not requested | original skull/horn-root turnaround, herd turn, shoulder-load sheet |
@@ -81,6 +83,13 @@ by `unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/`. Both are
 `moonshell_dry_season` ecotype remains `ProposedTextOnly`; constructed-shelf,
 gate-like landmark, rostrum, and distant-proxy concerns remain production
 blocks.
+
+The three normalized foundation bases are governed by
+`unity/Docs/Terrestrials/Ecosystems/FoundationFauna/`. Their exact existing
+sheets are `ReadyForUserReview` with `PassWithConcern`; no raster is copied or
+regenerated. Six unpictured palette-led variants remain `ProposedTextOnly`.
+Missing orthographic, attachment, motion/contact, measured LOD, habitat
+placement, and Player dependency evidence remain production blocks.
 
 ## Inherited Boss And Elite Anchors
 
