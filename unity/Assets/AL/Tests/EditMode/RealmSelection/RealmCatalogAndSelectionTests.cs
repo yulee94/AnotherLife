@@ -161,9 +161,15 @@ namespace AL.Tests.EditMode.RealmSelection
         {
             var committed = new RealmIdentitySnapshot(RealmIdentityStatus.CommittedValid, RealmId.Umbral, "0.1.0", "test");
             var uncommitted = new RealmIdentitySnapshot(RealmIdentityStatus.Uncommitted, RealmId.None, "0.1.0", "test");
+            var invalidNone = new RealmIdentitySnapshot(RealmIdentityStatus.CommittedValid, RealmId.None, "0.1.0", "test");
+            var invalidUndefined = new RealmIdentitySnapshot(RealmIdentityStatus.CommittedValid, (RealmId)999, "0.1.0", "test");
             Assert.That(RealmCharacterConstraint.Evaluate(committed, RealmId.Umbral), Is.EqualTo(RealmCharacterEligibility.Allowed));
             Assert.That(RealmCharacterConstraint.Evaluate(committed, RealmId.Crownlands), Is.EqualTo(RealmCharacterEligibility.RejectedDifferentRealm));
             Assert.That(RealmCharacterConstraint.Evaluate(uncommitted, RealmId.Umbral), Is.EqualTo(RealmCharacterEligibility.AccountRealmUnavailable));
+            Assert.That(invalidNone.IsCommittedValid, Is.False);
+            Assert.That(invalidUndefined.IsCommittedValid, Is.False);
+            Assert.That(RealmCharacterConstraint.Evaluate(invalidNone, RealmId.Umbral), Is.EqualTo(RealmCharacterEligibility.AccountRealmUnavailable));
+            Assert.That(RealmCharacterConstraint.Evaluate(invalidUndefined, RealmId.Umbral), Is.EqualTo(RealmCharacterEligibility.AccountRealmUnavailable));
         }
 
         private sealed class FakeSaveService : ISaveGameService
