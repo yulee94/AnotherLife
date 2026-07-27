@@ -1,6 +1,6 @@
 # Umbral Veilwright Animation Prototype Handoff
 
-**Status:** Owner-approved fourth-realm motion direction implemented as an isolated Unity graybox
+**Status:** Owner-approved fourth-realm motion direction implemented as an isolated Unity graybox; production successor delivered
 
 **Date:** 2026-07-24
 
@@ -12,7 +12,9 @@
 
 **Motion contract:** `Docs/Architecture/Umbral_Architecture_Animation_Contract.md`
 
-Umbral is the fourth peer realm, not a progression tier or later era. This package proves its distinctive offset construction, grounded four-anchor convergence, stable-state behavior, roof cutaway ownership, reduced-motion behavior, and mobile control pattern. It is a graybox validation asset, not final production art and not yet connected to the live kingdom building system.
+Umbral is the fourth peer realm, not a progression tier or later era. This package proves its distinctive offset construction, grounded four-anchor convergence, stable-state behavior, roof cutaway ownership, reduced-motion behavior, and mobile control pattern. It remains the motion-grammar validation asset rather than final production art.
+
+The delivered production successor, its exact measured budgets, and its direct live-kingdom binding are governed by `Umbral_Workshop_Final_Model_And_Runtime_Binding.md`.
 
 ## Delivered assets
 
@@ -100,9 +102,9 @@ Open:
 
 Enter Play Mode to loop the review presentation. Production use should keep looping disabled and trigger construction or veil convergence through explicit building states.
 
-## Final-model binding rules
+## Production-successor binding rules
 
-When the production veilwright model arrives:
+The delivered production veilwright model preserves these rules:
 
 1. Preserve the same state ownership: boundary, offset shell, bound anchors, split roofs and chimney, grounded fit-out, and operational convergence.
 2. Replace graybox transforms with production pivots without changing the shared footprint, sheltered entrance, four anchor sockets, core point, or chimney destination.
@@ -112,13 +114,11 @@ When the production veilwright model arrives:
 6. Add technicians only through approved activity sockets and a district scheduler.
 7. Profile the final mesh, materials, emission, light, overdraw, and multiple visible ateliers on representative iOS hardware.
 
-## Not yet production-authorized
+## Still not production-authorized
 
-- Live kingdom integration or gameplay construction triggers.
-- Final production mesh, topology, pivots, colliders, LODs, materials, textures, or measured budgets.
 - Exact gameplay timing, activity frequency, audio, haptics, or lighting exposure.
 - Technician population ownership.
 - Damage, disruption, repair, or resealing behavior.
-- Device performance claims.
+- Measured device-performance claims beyond the documented static safety contract.
 
 Changing Umbral into a progression tier, replacing the fixed convergence with procedural effects, darkening the whole screen, making the building continuously active, or moving load-bearing structure during stable operation is a critical direction change requiring owner approval.

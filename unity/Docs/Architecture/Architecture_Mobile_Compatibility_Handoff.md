@@ -8,13 +8,13 @@
 
 **Unity baseline:** `2022.3.62f3`
 
-**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, the Eldergrove, Stonehold, and Crownlands Workshop Level 1–10 production models, and their direct live-kingdom bindings
+**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, all four Workshop Level 1–10 production models, and their direct live-kingdom bindings
 
 ## Outcome
 
 The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all prototype and production-review scenes remain outside Player build settings, and the shared animation and production-model code uses only Unity APIs supported by Android and iOS Player builds.
 
-This is a static production-readiness statement, not final-device performance approval. The Eldergrove, Stonehold, and Crownlands Workshops now supply production meshes, atlas materials, LODs, colliders, and direct binding; simultaneous-building density and representative devices still require profiling.
+This is a static production-readiness statement, not final-device performance approval. The Eldergrove, Stonehold, Crownlands, and Umbral Workshops now supply production meshes, atlas materials, LODs, colliders, and direct binding; simultaneous-building density and representative devices still require profiling.
 
 ## Applied mobile optimizations
 
@@ -37,6 +37,8 @@ This is a static production-readiness statement, not final-device performance ap
   structure and measures `1,872 / 912 / 504 / 276` triangles across LOD0–3.
 - The Crownlands live production model uses the same cumulative renderer
   structure and measures `2,400 / 1,420 / 828 / 316` triangles across LOD0–3.
+- The Umbral live production model uses the same cumulative renderer structure
+  and measures `1,476 / 816 / 396 / 180` triangles across LOD0–3.
 - Each production family uses one non-readable mipmapped RGB 1024 atlas, one
   localized opaque accent material, and exactly two root box colliders.
 - The packaged model catalog loads once per city layout engine and binds the
@@ -55,7 +57,7 @@ This is a static production-readiness statement, not final-device performance ap
 | Rendering | Shared opaque instanced materials, one RGB atlas, four static LODs, no source texture dependency | Shared opaque instanced materials, one RGB atlas, four static LODs, no source texture dependency |
 | Animation | One deterministic controller active only during an authored transition; reduced-motion supported | One deterministic controller active only during an authored transition; reduced-motion supported |
 | Packaging | Prototype scenes and design references are not in build settings or prefab dependencies | Prototype scenes and design references are not in build settings or prefab dependencies |
-| Production requirement | Validate GLES3/Vulkan target devices after final meshes, LODs, materials, and district density exist | Validate Metal target devices after final meshes, LODs, materials, and district density exist |
+| Production requirement | Validate GLES3/Vulkan target devices with the final Workshop assets at representative district density | Validate Metal target devices with the final Workshop assets at representative district density |
 
 No platform-specific package, native plugin, save-schema change, or build-setting mutation is required by this architecture package. The new packaged ScriptableObject catalog contains direct prefab references only and does not own gameplay progress.
 
@@ -86,14 +88,14 @@ target compilation and native linking; it is not yet an iOS 15 runtime pass.
 
 The score covers platform-neutral code, stable-state sleep, reduced motion, bounded renderers/materials/lights, GPU-instancing eligibility, unused-render-feature removal, build exclusion, source/runtime separation, and automated regression coverage.
 
-The focused Architecture EditMode suite was re-imported and passed with Unity actively targeting Android and iOS. The remaining six points are withheld because full Player packaging and representative-device profiling cannot be meaningful until production geometry and district density exist. Do not reinterpret `94 / 100` as a measured frame-rate, memory, thermal, or battery result.
+The focused Architecture EditMode suite was re-imported and passed with Unity actively targeting Android and iOS. The remaining six points are withheld until populated-district Player packaging and representative-device profiling are complete. Do not reinterpret `94 / 100` as a measured frame-rate, memory, thermal, or battery result.
 
 ## Automated acceptance
 
 `AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests`,
 `AL.Tests.EditMode.Architecture.EldergroveWorkshopLevelBlockoutTests`, and
-the Eldergrove, Stonehold, and Crownlands Workshop production-model suites
-verify:
+the Eldergrove, Stonehold, Crownlands, and Umbral Workshop production-model
+suites verify:
 
 - renderer and material ceilings;
 - instancing on every shared prototype material;
@@ -115,10 +117,11 @@ verify:
 
 The focused Eldergrove production suite passes `18 / 18` and the focused
 Stonehold production suite passes `19 / 19`. The Crownlands production suite
-passes `19 / 19`. The expanded Architecture suite passes `100 / 100` in Unity
-2022.3.62f3 while actively targeting Android and again while actively targeting
-iOS. All three final Workshop models still require populated-kingdom profiling
-on representative Android and iOS devices before measured performance approval.
+passes `19 / 19`, and the Umbral production suite passes `19 / 19`. The
+expanded Architecture suite passes `119 / 119` in Unity 2022.3.62f3 while
+actively targeting Android and again while actively targeting iOS. All four
+final Workshop models still require populated-kingdom profiling on
+representative Android and iOS devices before measured performance approval.
 
 ## Production handoff
 

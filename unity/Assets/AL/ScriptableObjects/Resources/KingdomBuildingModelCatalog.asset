@@ -34,3 +34,10 @@ MonoBehaviour:
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.umbral.workshop.production.v1
+    realmId: 4
+    buildingId: Workshop
+    prefab: {fileID: 2170986007990784864, guid: 197149fd997cd4a59b110b4722bc7e68, type: 3}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10

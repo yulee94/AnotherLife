@@ -44,7 +44,9 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Scenes/Prototypes/" +
                 "StoneholdWorkshopProductionModel.unity",
             "Assets/AL/Scenes/Prototypes/" +
-                "CrownlandsStormwrightProductionModel.unity"
+                "CrownlandsStormwrightProductionModel.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "UmbralVeilwrightProductionModel.unity"
         };
 
         private const string ConceptSheetFolder =

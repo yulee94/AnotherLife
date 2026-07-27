@@ -190,7 +190,7 @@ Still required:
 - final damaged, destroyed, repairing, selected, and unavailable art
   treatments;
 - exact operational activity scheduling and effect budgets;
-- production models for the remaining realm/building families.
+- production models for the remaining building families.
 
 Changing the stable footprint, entrance, paired-pier and silver-arch identity,
 Level `10` Meridian Crown Lantern, direct gameplay-level authority,

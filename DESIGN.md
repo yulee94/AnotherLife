@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.15
+**Version:** 1.16
 **Last updated:** 2026-07-27
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -68,6 +68,8 @@ This guide consolidates the active project direction in:
 - [Crownlands Workshop Level Progression](unity/Assets/AL/Art/Designs/CrownlandsWorkshopLevelProgression.md)
 - [Crownlands Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Crownlands_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Umbral Animation Prototype Handoff](unity/Docs/Architecture/Umbral_Animation_Prototype_Handoff.md)
+- [Umbral Workshop Level Progression](unity/Assets/AL/Art/Designs/UmbralWorkshopLevelProgression.md)
+- [Umbral Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Umbral_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Reusable Architecture Construction-State System](unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md)
 - [Kingdom Building Level, Placement, and Presentation Design](unity/Docs/Architecture/Kingdom_Building_Level_And_Placement_Design.md)
 - [Eldergrove Workshop Level Progression — approved production source](unity/Assets/AL/Art/Designs/EldergroveWorkshopLevelProgression.md)
@@ -509,7 +511,7 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - Use stable building-slot identity for placement. Save-list or enumeration order must never determine a building's grid position, footprint, rotation, or entrance orientation.
 - Use the approved `Level 0` through `Level 10` visual progression in the kingdom-building level design. `Level 0` is an unbuilt reserved plot, `Level 1` is the first complete operational building and current baseline, and later levels add cumulative modular changes without replacing the building's function.
 - Production models bind from stable `RealmId + BuildingId` identity and derive their cumulative visual level directly from confirmed gameplay state. Never persist a parallel visual stage that can disagree with gameplay.
-- Realm Level `10` capstones remain grounded extensions of approved building identity: Eldergrove uses a seed lantern, Stonehold an anvil-crown chimney, and Crownlands a Meridian Crown Lantern. Replacing them with unsupported, continuously active, or function-changing spectacle is a major design-direction decision.
+- Realm Level `10` capstones remain grounded extensions of approved building identity: Eldergrove uses a seed lantern, Stonehold an anvil-crown chimney, Crownlands a Meridian Crown Lantern, and Umbral a Bound Eclipse Yoke framing protected negative space. Replacing them with unsupported, continuously active, or function-changing spectacle is a major design-direction decision.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
 - Avoid miniature-diorama cuteness as the default 2.5D solution.
 

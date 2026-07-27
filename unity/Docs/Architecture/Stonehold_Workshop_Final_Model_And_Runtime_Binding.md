@@ -187,7 +187,7 @@ required:
 - final damaged, destroyed, repairing, selected, and unavailable art
   treatments;
 - exact operational activity scheduling and effect budgets;
-- production models for the remaining realm/building families.
+- production models for the remaining building families.
 
 Changing the stable footprint, entrance, Level `10` anvil crown, direct
 gameplay-level authority, two-material ceiling, two-collider strategy, or
