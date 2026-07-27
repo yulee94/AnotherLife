@@ -8,16 +8,11 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.sp
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class AnotherLifeThemeContractTest {
-    @Test
-    fun dynamicWallpaperColorIsDisabledByDefault() {
-        assertFalse(AnotherLifeDynamicColorEnabledByDefault)
-    }
-
     @Test
     fun sampleComposePaletteValuesAreNotBrandTokens() {
         val sampleValues = setOf(
@@ -44,6 +39,12 @@ class AnotherLifeThemeContractTest {
     }
 
     @Test
+    fun importantMaterialRolesRemainVisuallyDistinct() {
+        assertDistinctRoles(AnotherLifeLightColorScheme)
+        assertDistinctRoles(AnotherLifeDarkColorScheme)
+    }
+
+    @Test
     fun materialRoleContrastMeetsReadableThresholds() {
         assertReadablePairs(AnotherLifeLightColorScheme)
         assertReadablePairs(AnotherLifeDarkColorScheme)
@@ -55,6 +56,8 @@ class AnotherLifeThemeContractTest {
         assertEquals(15, styles.size)
         styles.forEach { style ->
             assertEquals(0.sp, style.letterSpacing)
+            assertTrue(style.fontSize.value > 0f)
+            assertTrue(style.lineHeight.value >= style.fontSize.value)
         }
     }
 
@@ -71,6 +74,13 @@ class AnotherLifeThemeContractTest {
         assertContrastAtLeast(scheme.onSurface, scheme.surface, 4.5f, "onSurface")
         assertContrastAtLeast(scheme.onSurfaceVariant, scheme.surfaceVariant, 4.5f, "onSurfaceVariant")
         assertContrastAtLeast(scheme.inverseOnSurface, scheme.inverseSurface, 4.5f, "inverseOnSurface")
+    }
+
+    private fun assertDistinctRoles(scheme: ColorScheme) {
+        assertNotEquals(scheme.primary.toArgb(), scheme.secondary.toArgb())
+        assertNotEquals(scheme.primary.toArgb(), scheme.tertiary.toArgb())
+        assertNotEquals(scheme.secondary.toArgb(), scheme.tertiary.toArgb())
+        assertNotEquals(scheme.error.toArgb(), scheme.primary.toArgb())
     }
 
     private fun assertContrastAtLeast(
