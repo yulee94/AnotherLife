@@ -5,6 +5,7 @@
 - Issue: `#259`
 - Source version: `tdf-eco-2026-07-27-v001`
 - Companion visual source: `tdf-eco-soarer-2026-07-27-v001`
+- Companion habitat/fauna source: `tdf-eco-moonroot-2026-07-27-v001`
 - Primary Codex mode: `terrestrial-design`
 - Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
@@ -39,7 +40,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 | `tdf_habitat_eldergrove_hollowbark_oldgrowth` | `RosterProposed` | none | Does old-growth scale coexist with a clear traversable understory? |
 | `tdf_habitat_eldergrove_mirrorroot_littoral` | `RosterProposed` | none | Are shore depth, roots, and water legible when reflection and reed motion are reduced? |
 | `tdf_habitat_eldergrove_sunmane_edge_meadow` | `RosterProposed` | none | Does the meadow remain adult and naturalistic without flower/pollen spectacle? |
-| `tdf_habitat_eldergrove_moonroot_floodbasin` | `RosterProposed` | none | Can deep water, root islands, and openings read without magical glow? |
+| `tdf_habitat_eldergrove_moonroot_floodbasin` | `ReadyForUserReview` | Moonroot establishing, layout/transition/depth, material/reduced-atmosphere/LOD, and shared contact sheets | Resolve constructed-shelf and gate-like split-buttress concerns while preserving depth and route read without effects. |
 | `tdf_habitat_crownlands_crownstep_chalkland` | `RosterProposed` | none | Does disciplined landform rhythm carry Crownlands identity without gold paint or banners? |
 | `tdf_habitat_crownlands_galegrain_roadbelt` | `RosterProposed` | none | Do road, field, and shelter lines remain clear at reduced crop density? |
 | `tdf_habitat_crownlands_reliquary_crypt_garden` | `RosterProposed` | none | Can ruins and garden materials read distinctly without inventing religious meaning? |
@@ -60,7 +61,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 | `tdf_grove_strider` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
 | `tdf_mire_lumenback` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
 | `tdf_fauna_eldergrove_thornburrow_hare` | `ProposedTextOnly` | none | not requested | adult proportion turnaround, tusk/root contact, bound/landing sheet |
-| `tdf_fauna_eldergrove_moonshell_cicada` | `ProposedTextOnly` | none | not requested | wing-roof anatomy, scale, trunk contact, launch/fold sheet |
+| `tdf_fauna_eldergrove_moonshell_cicada` | `ReadyForUserReview` | flood-season turnaround, motion/material, and shared contact/scale sheets | not requested | resolve rostrum, unobstructed six-leg/four-wing continuity, and distant presence-proxy concerns; dry-season ecotype remains text-only |
 | `tdf_fauna_crownlands_broadcrest_aurochs` | `ProposedTextOnly` | none | not requested | original skull/horn-root turnaround, herd turn, shoulder-load sheet |
 | `tdf_fauna_crownlands_grainveil_covey` | `ProposedTextOnly` | none | not requested | group scale, wedge/fan silhouette, ground motion and scatter sheet |
 | `tdf_fauna_crownlands_reliquary_shellback` | `ProposedTextOnly` | none | not requested | shell/probe anatomy, clamp range, wall-step/contact sheet |
@@ -73,6 +74,13 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 The three new reviewable profiles are governed by
 `unity/Docs/Terrestrials/Ecosystems/AvianSoarers/`. Their unpictured ecotypes
 remain `ProposedTextOnly`; user and production states remain blocked.
+
+The Moonroot habitat and pictured `moonshell_flood_season` ecotype are governed
+by `unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/`. Both are
+`ReadyForUserReview` with an overall `PassWithConcern` disposition. The
+`moonshell_dry_season` ecotype remains `ProposedTextOnly`; constructed-shelf,
+gate-like landmark, rostrum, and distant-proxy concerns remain production
+blocks.
 
 ## Inherited Boss And Elite Anchors
 

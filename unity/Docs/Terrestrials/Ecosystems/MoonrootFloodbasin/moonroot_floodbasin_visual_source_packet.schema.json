@@ -1,0 +1,574 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/terrestrial/moonroot-floodbasin-visual-source/1.0.0",
+  "title": "AnotherLife Moonroot Floodbasin Visual Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "sourceVersion",
+    "parentRosterSourceVersion",
+    "createdAtUtc",
+    "promptDocument",
+    "authority",
+    "readiness",
+    "generator",
+    "comparisonAnchor",
+    "sourceBudgets",
+    "habitat",
+    "fauna",
+    "productionEnvelopes",
+    "sharedAssetIds",
+    "sourceAssets",
+    "generationRecords",
+    "externalInputs"
+  ],
+  "properties": {
+    "schemaVersion": {"const": "1.0.0"},
+    "packetId": {"const": "tdf_packet_moonroot_floodbasin_visual_source_v001"},
+    "sourceVersion": {"const": "tdf-eco-moonroot-2026-07-27-v001"},
+    "parentRosterSourceVersion": {"const": "tdf-eco-2026-07-27-v001"},
+    "createdAtUtc": {"type": "string", "format": "date-time"},
+    "promptDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/Executed_Generation_Prompts_And_Provenance.md"
+        },
+        "sha256": {"$ref": "#/$defs/sha256"}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terrestrialDesignSource",
+        "runtime",
+        "gameplay",
+        "narrative",
+        "save",
+        "userCreativeApproval"
+      ],
+      "properties": {
+        "terrestrialDesignSource": {"const": true},
+        "runtime": {"const": false},
+        "gameplay": {"const": false},
+        "narrative": {"const": false},
+        "save": {"const": false},
+        "userCreativeApproval": {"const": false}
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "technicalPacketState",
+        "userCreativeState",
+        "runtimeIntegrationState",
+        "narrativeNamingState",
+        "visualQaState"
+      ],
+      "properties": {
+        "technicalPacketState": {"const": "TechnicalReviewReady"},
+        "userCreativeState": {"const": "NotRequested"},
+        "runtimeIntegrationState": {"const": "Blocked"},
+        "narrativeNamingState": {"const": "WorkingLabelsOnly"},
+        "visualQaState": {"const": "PassWithConcern"}
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "product",
+        "versionOrModel",
+        "externalInputsSupplied",
+        "editableSourceAvailable",
+        "licenseRecordId"
+      ],
+      "properties": {
+        "product": {"const": "Codex built-in image generation"},
+        "versionOrModel": {"const": "unavailable_to_operator"},
+        "externalInputsSupplied": {"const": false},
+        "editableSourceAvailable": {"const": false},
+        "licenseRecordId": {"const": "tdf_license_codex_imagegen_generated_original_v001"}
+      }
+    },
+    "comparisonAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "sourceVersion",
+        "assetId",
+        "byteLength",
+        "sha256",
+        "usage"
+      ],
+      "properties": {
+        "profileId": {"const": "tdf_boss_eldergrove_mere_root_leviathan"},
+        "sourceVersion": {"const": "tdf-rbe-2026-07-24-v001"},
+        "assetId": {"const": "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001"},
+        "byteLength": {"const": 2812893},
+        "sha256": {
+          "const": "f0549c3d37c481beb11652f3c815221ee2e31fdf8aaf7e3529090d356f707a74"
+        },
+        "usage": {"const": "context_scale_and_clearance_only_not_supplied_to_generation"}
+      }
+    },
+    "sourceBudgets": {"$ref": "#/$defs/sourceBudgets"},
+    "habitat": {"$ref": "#/$defs/habitat"},
+    "fauna": {"$ref": "#/$defs/fauna"},
+    "productionEnvelopes": {"$ref": "#/$defs/productionEnvelopes"},
+    "sharedAssetIds": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "const": "tdf_asset_shared_eldergrove_moonroot_moonshell_contact_scale_readability_v001"
+      }
+    },
+    "sourceAssets": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "generationRecords": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "items": {"$ref": "#/$defs/record"}
+    },
+    "externalInputs": {
+      "type": "array",
+      "maxItems": 0
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "tdfId": {
+      "type": "string",
+      "pattern": "^tdf_[a-z0-9_]+$"
+    },
+    "stringSet": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "positiveRange": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "exclusiveMinimum": 0
+      }
+    },
+    "nonnegativeRange": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "number",
+        "minimum": 0
+      }
+    },
+    "sourceBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "ceilings", "actual"],
+      "properties": {
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mediaType",
+            "pixelWidth",
+            "pixelHeight",
+            "colorSpace",
+            "bitDepth",
+            "alphaPolicy",
+            "maximumCompressedBytes",
+            "estimatedDecodedRgbBytes",
+            "maximumDecodedRgbaBytes",
+            "maximumSimultaneousReviewImages",
+            "maximumSimultaneousDecodedBytes"
+          ],
+          "properties": {
+            "mediaType": {"const": "image/png"},
+            "pixelWidth": {"const": 1536},
+            "pixelHeight": {"const": 1024},
+            "colorSpace": {"const": "sRGB"},
+            "bitDepth": {"const": 8},
+            "alphaPolicy": {"const": "opaque_rgb"},
+            "maximumCompressedBytes": {"const": 4194304},
+            "estimatedDecodedRgbBytes": {"const": 4718592},
+            "maximumDecodedRgbaBytes": {"const": 6291456},
+            "maximumSimultaneousReviewImages": {"const": 4},
+            "maximumSimultaneousDecodedBytes": {"const": 25165824}
+          }
+        },
+        "ceilings": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "finalCount",
+            "finalBytes",
+            "retainedInputCount",
+            "retainedInputBytes",
+            "waveBytes"
+          ],
+          "properties": {
+            "finalCount": {"const": 6},
+            "finalBytes": {"const": 25165824},
+            "retainedInputCount": {"const": 3},
+            "retainedInputBytes": {"const": 12582912},
+            "waveBytes": {"const": 37748736}
+          }
+        },
+        "actual": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "finalCount",
+            "finalBytes",
+            "retainedInputCount",
+            "retainedInputBytes",
+            "totalCount",
+            "totalBytes",
+            "playerBuildBytes",
+            "runtimeResidentBytes"
+          ],
+          "properties": {
+            "finalCount": {"const": 6},
+            "finalBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 25165824
+            },
+            "retainedInputCount": {"const": 3},
+            "retainedInputBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 12582912
+            },
+            "totalCount": {"const": 9},
+            "totalBytes": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 37748736
+            },
+            "playerBuildBytes": {"const": 0},
+            "runtimeResidentBytes": {"const": 0}
+          }
+        }
+      }
+    },
+    "habitat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "habitatId",
+        "realmId",
+        "state",
+        "qaDisposition",
+        "userDecision",
+        "visualVariantId",
+        "environmentKitId",
+        "protectedIdentity",
+        "landmarkId",
+        "neighborHabitatIds",
+        "materialFamilyIds",
+        "primaryAssetIds"
+      ],
+      "properties": {
+        "habitatId": {"const": "tdf_habitat_eldergrove_moonroot_floodbasin"},
+        "realmId": {"const": "eldergrove"},
+        "state": {"const": "ReadyForUserReview"},
+        "qaDisposition": {"const": "PassWithConcern"},
+        "userDecision": {"const": "NotRequested"},
+        "visualVariantId": {"const": "moonroot_deep_flood"},
+        "environmentKitId": {"const": "tdf_envkit_eldergrove_moonroot_floodbasin"},
+        "protectedIdentity": {"$ref": "#/$defs/stringSet"},
+        "landmarkId": {"const": "tdf_landmark_eldergrove_moonroot_split_buttress"},
+        "neighborHabitatIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "tdf_habitat_eldergrove_hollowbark_oldgrowth",
+              "tdf_habitat_eldergrove_mirrorroot_littoral"
+            ]
+          }
+        },
+        "materialFamilyIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "tdf_matfam_eldergrove_wet_bark_root",
+              "tdf_matfam_wet_hide"
+            ]
+          }
+        },
+        "primaryAssetIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tdfId"}
+        }
+      }
+    },
+    "fauna": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "realmId",
+        "state",
+        "qaDisposition",
+        "userDecision",
+        "visualizedVariantId",
+        "pendingVariantIds",
+        "scale",
+        "protectedSilhouette",
+        "anatomyCounts",
+        "materials",
+        "motion",
+        "rigIntent",
+        "primaryAssetIds"
+      ],
+      "properties": {
+        "profileId": {"const": "tdf_fauna_eldergrove_moonshell_cicada"},
+        "realmId": {"const": "eldergrove"},
+        "state": {"const": "ReadyForUserReview"},
+        "qaDisposition": {"const": "PassWithConcern"},
+        "userDecision": {"const": "NotRequested"},
+        "visualizedVariantId": {"const": "moonshell_flood_season"},
+        "pendingVariantIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {"const": "moonshell_dry_season"}
+        },
+        "scale": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "bodyLength",
+            "wingspan",
+            "foldedRestHeight",
+            "foldedRoofWidth",
+            "basis"
+          ],
+          "properties": {
+            "bodyLength": {"const": 0.35},
+            "wingspan": {"const": 0.7},
+            "foldedRestHeight": {"$ref": "#/$defs/positiveRange"},
+            "foldedRoofWidth": {"$ref": "#/$defs/positiveRange"},
+            "basis": {"const": "adult_champion_height"}
+          }
+        },
+        "protectedSilhouette": {"$ref": "#/$defs/stringSet"},
+        "anatomyCounts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["legs", "forewings", "hindwings", "abdomenBands"],
+          "properties": {
+            "legs": {"const": 6},
+            "forewings": {"const": 2},
+            "hindwings": {"const": 2},
+            "abdomenBands": {"const": 6}
+          }
+        },
+        "materials": {"$ref": "#/$defs/stringSet"},
+        "motion": {"$ref": "#/$defs/stringSet"},
+        "rigIntent": {"const": "tdf_rig_invertebrate_winged"},
+        "primaryAssetIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tdfId"}
+        }
+      }
+    },
+    "productionEnvelopes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["implementationAuthority", "habitatLowMobile", "faunaLowMobile"],
+      "properties": {
+        "implementationAuthority": {"const": false},
+        "habitatLowMobile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "referenceCellMeters",
+            "uniquePropFamilies",
+            "organicFamilies",
+            "landmarkFamilies",
+            "terrainLayers",
+            "activeWaterFamilies",
+            "requiredParticles",
+            "dynamicLights",
+            "targetCompressedBytes",
+            "maximumCompressedBytes"
+          ],
+          "properties": {
+            "referenceCellMeters": {"const": 128},
+            "uniquePropFamilies": {"const": 8},
+            "organicFamilies": {"const": 2},
+            "landmarkFamilies": {"const": 1},
+            "terrainLayers": {"const": 4},
+            "activeWaterFamilies": {"const": 1},
+            "requiredParticles": {"const": 0},
+            "dynamicLights": {"const": 0},
+            "targetCompressedBytes": {"$ref": "#/$defs/positiveRange"},
+            "maximumCompressedBytes": {"const": 12582912}
+          }
+        },
+        "faunaLowMobile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "lowTriangles",
+            "deformBones",
+            "deformBonesMaximum",
+            "lod1Ratio",
+            "lod2Ratio",
+            "distantRatio",
+            "opaqueProxyAllowed",
+            "materialSlotsMaximum",
+            "lowTexture",
+            "coreClips",
+            "maximumCompressedAnimationBytes",
+            "targetCompressedBytes",
+            "maximumCompressedBytes",
+            "requiredParticles",
+            "dynamicLights"
+          ],
+          "properties": {
+            "lowTriangles": {"$ref": "#/$defs/positiveRange"},
+            "deformBones": {"$ref": "#/$defs/positiveRange"},
+            "deformBonesMaximum": {"const": 36},
+            "lod1Ratio": {"$ref": "#/$defs/nonnegativeRange"},
+            "lod2Ratio": {"$ref": "#/$defs/nonnegativeRange"},
+            "distantRatio": {"$ref": "#/$defs/nonnegativeRange"},
+            "opaqueProxyAllowed": {"const": true},
+            "materialSlotsMaximum": {"const": 2},
+            "lowTexture": {"const": "one_1k_color_normal_packed_set"},
+            "coreClips": {"$ref": "#/$defs/positiveRange"},
+            "maximumCompressedAnimationBytes": {"const": 1572864},
+            "targetCompressedBytes": {"$ref": "#/$defs/positiveRange"},
+            "maximumCompressedBytes": {"const": 6291456},
+            "requiredParticles": {"const": 0},
+            "dynamicLights": {"const": 0}
+          }
+        }
+      }
+    },
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "subjectIds",
+        "roles",
+        "path",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationRecordId",
+        "supersedes",
+        "supersededBy"
+      ],
+      "properties": {
+        "assetId": {"$ref": "#/$defs/tdfId"},
+        "subjectIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tdfId"}
+        },
+        "roles": {"$ref": "#/$defs/stringSet"},
+        "path": {
+          "type": "string",
+          "pattern": "^unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/(ConceptSheets|GenerationInputs)/[a-z0-9_]+\\.png$"
+        },
+        "state": {
+          "enum": ["ReadyForUserReview", "RetainedRefinementInput"]
+        },
+        "qaDisposition": {
+          "enum": ["ProvisionalPass", "PassWithConcern", "NotFinal"]
+        },
+        "byteLength": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4194304
+        },
+        "sha256": {"$ref": "#/$defs/sha256"},
+        "gitLfsOid": {"$ref": "#/$defs/sha256"},
+        "gitLfsSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 4194304
+        },
+        "generationRecordId": {"$ref": "#/$defs/tdfId"},
+        "supersedes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tdfId"}
+        },
+        "supersededBy": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tdfId"}
+        }
+      }
+    },
+    "record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "generationRecordId",
+        "generatedAtUtc",
+        "inputAssetIds",
+        "outputAssetId"
+      ],
+      "properties": {
+        "generationRecordId": {"$ref": "#/$defs/tdfId"},
+        "generatedAtUtc": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "inputAssetIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"$ref": "#/$defs/tdfId"}
+        },
+        "outputAssetId": {"$ref": "#/$defs/tdfId"}
+      }
+    }
+  }
+}

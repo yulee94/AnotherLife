@@ -1,0 +1,394 @@
+{
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_moonroot_floodbasin_visual_source_v001",
+  "sourceVersion": "tdf-eco-moonroot-2026-07-27-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdAtUtc": "2026-07-27T03:40:03.7630258Z",
+  "promptDocument": {
+    "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/Executed_Generation_Prompts_And_Provenance.md",
+    "sha256": "cfcc8e93ea712a65dea4fd8ed0794c904fe1c737d546bb64a2d6e038f6890b85"
+  },
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "narrativeNamingState": "WorkingLabelsOnly",
+    "visualQaState": "PassWithConcern"
+  },
+  "generator": {
+    "product": "Codex built-in image generation",
+    "versionOrModel": "unavailable_to_operator",
+    "externalInputsSupplied": false,
+    "editableSourceAvailable": false,
+    "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001"
+  },
+  "comparisonAnchor": {
+    "profileId": "tdf_boss_eldergrove_mere_root_leviathan",
+    "sourceVersion": "tdf-rbe-2026-07-24-v001",
+    "assetId": "tdf_asset_boss_eldergrove_mere_root_leviathan_concept_v001",
+    "byteLength": 2812893,
+    "sha256": "f0549c3d37c481beb11652f3c815221ee2e31fdf8aaf7e3529090d356f707a74",
+    "usage": "context_scale_and_clearance_only_not_supplied_to_generation"
+  },
+  "sourceBudgets": {
+    "image": {
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorSpace": "sRGB",
+      "bitDepth": 8,
+      "alphaPolicy": "opaque_rgb",
+      "maximumCompressedBytes": 4194304,
+      "estimatedDecodedRgbBytes": 4718592,
+      "maximumDecodedRgbaBytes": 6291456,
+      "maximumSimultaneousReviewImages": 4,
+      "maximumSimultaneousDecodedBytes": 25165824
+    },
+    "ceilings": {
+      "finalCount": 6,
+      "finalBytes": 25165824,
+      "retainedInputCount": 3,
+      "retainedInputBytes": 12582912,
+      "waveBytes": 37748736
+    },
+    "actual": {
+      "finalCount": 6,
+      "finalBytes": 16921209,
+      "retainedInputCount": 3,
+      "retainedInputBytes": 8758710,
+      "totalCount": 9,
+      "totalBytes": 25679919,
+      "playerBuildBytes": 0,
+      "runtimeResidentBytes": 0
+    }
+  },
+  "habitat": {
+    "habitatId": "tdf_habitat_eldergrove_moonroot_floodbasin",
+    "realmId": "eldergrove",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "userDecision": "NotRequested",
+    "visualVariantId": "moonroot_deep_flood",
+    "environmentKitId": "tdf_envkit_eldergrove_moonroot_floodbasin",
+    "protectedIdentity": [
+      "low_water_plane_high_root_canopy",
+      "asymmetric_root_islands",
+      "three_value_water_depth",
+      "large_root_openings",
+      "open_ground_negative_space"
+    ],
+    "landmarkId": "tdf_landmark_eldergrove_moonroot_split_buttress",
+    "neighborHabitatIds": [
+      "tdf_habitat_eldergrove_hollowbark_oldgrowth",
+      "tdf_habitat_eldergrove_mirrorroot_littoral"
+    ],
+    "materialFamilyIds": [
+      "tdf_matfam_eldergrove_wet_bark_root",
+      "tdf_matfam_wet_hide"
+    ],
+    "primaryAssetIds": [
+      "tdf_asset_habitat_eldergrove_moonroot_floodbasin_establishing_master_v001",
+      "tdf_asset_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_v001",
+      "tdf_asset_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001"
+    ]
+  },
+  "fauna": {
+    "profileId": "tdf_fauna_eldergrove_moonshell_cicada",
+    "realmId": "eldergrove",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "userDecision": "NotRequested",
+    "visualizedVariantId": "moonshell_flood_season",
+    "pendingVariantIds": [
+      "moonshell_dry_season"
+    ],
+    "scale": {
+      "bodyLength": 0.35,
+      "wingspan": 0.7,
+      "foldedRestHeight": [0.18, 0.22],
+      "foldedRoofWidth": [0.18, 0.22],
+      "basis": "adult_champion_height"
+    },
+    "protectedSilhouette": [
+      "heavy_high_thorax",
+      "pitched_opaque_roof_wings",
+      "short_six_band_abdomen",
+      "vertical_head_up_rest",
+      "six_leg_contact_footprint"
+    ],
+    "anatomyCounts": {
+      "legs": 6,
+      "forewings": 2,
+      "hindwings": 2,
+      "abdomenBands": 6
+    },
+    "materials": [
+      "wet_bark_brown_thorax",
+      "deep_umber_abdomen",
+      "opaque_mica_chitin_wing",
+      "pale_joint_membrane",
+      "restrained_edge_wear"
+    ],
+    "motion": [
+      "shell_still_rest",
+      "vertical_climb",
+      "three_contact_turn",
+      "rostrum_feed",
+      "decisive_launch",
+      "low_canopy_arc",
+      "forehook_landing",
+      "roof_fold_recovery"
+    ],
+    "rigIntent": "tdf_rig_invertebrate_winged",
+    "primaryAssetIds": [
+      "tdf_asset_fauna_eldergrove_moonshell_cicada_turnaround_v001",
+      "tdf_asset_fauna_eldergrove_moonshell_cicada_motion_material_v001"
+    ]
+  },
+  "productionEnvelopes": {
+    "implementationAuthority": false,
+    "habitatLowMobile": {
+      "referenceCellMeters": 128,
+      "uniquePropFamilies": 8,
+      "organicFamilies": 2,
+      "landmarkFamilies": 1,
+      "terrainLayers": 4,
+      "activeWaterFamilies": 1,
+      "requiredParticles": 0,
+      "dynamicLights": 0,
+      "targetCompressedBytes": [6291456, 8388608],
+      "maximumCompressedBytes": 12582912
+    },
+    "faunaLowMobile": {
+      "lowTriangles": [6000, 8000],
+      "deformBones": [24, 32],
+      "deformBonesMaximum": 36,
+      "lod1Ratio": [0.55, 0.6],
+      "lod2Ratio": [0.2, 0.25],
+      "distantRatio": [0.05, 0.08],
+      "opaqueProxyAllowed": true,
+      "materialSlotsMaximum": 2,
+      "lowTexture": "one_1k_color_normal_packed_set",
+      "coreClips": [6, 8],
+      "maximumCompressedAnimationBytes": 1572864,
+      "targetCompressedBytes": [3145728, 4194304],
+      "maximumCompressedBytes": 6291456,
+      "requiredParticles": 0,
+      "dynamicLights": 0
+    }
+  },
+  "sharedAssetIds": [
+    "tdf_asset_shared_eldergrove_moonroot_moonshell_contact_scale_readability_v001"
+  ],
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_habitat_eldergrove_moonroot_floodbasin_establishing_master_v001",
+      "subjectIds": ["tdf_habitat_eldergrove_moonroot_floodbasin"],
+      "roles": ["establishing", "horizon", "scale", "grayscale", "reduced_motion"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/ConceptSheets/tdf_habitat_eldergrove_moonroot_floodbasin_establishing_master_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2860188,
+      "sha256": "f03b1d1621e32d0186023c2bb3ce95b8c95573b1dcd4dd785aafbee398d334d3",
+      "gitLfsOid": "f03b1d1621e32d0186023c2bb3ce95b8c95573b1dcd4dd785aafbee398d334d3",
+      "gitLfsSize": 2860188,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_establishing_master_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_v001",
+      "subjectIds": ["tdf_habitat_eldergrove_moonroot_floodbasin"],
+      "roles": ["layout", "elevated_plan", "section", "water_depth", "neighbor_transitions"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/ConceptSheets/tdf_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 3421295,
+      "sha256": "40b892aef865f15f8deebe9115c3866c1bc8945ba063cd4c343566ac24f9205f",
+      "gitLfsOid": "40b892aef865f15f8deebe9115c3866c1bc8945ba063cd4c343566ac24f9205f",
+      "gitLfsSize": 3421295,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_refinement_v001",
+      "supersedes": ["tdf_asset_input_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001"],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001",
+      "subjectIds": ["tdf_habitat_eldergrove_moonroot_floodbasin"],
+      "roles": ["environment_kit", "materials", "split_buttress", "lod", "low_mobile"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/ConceptSheets/tdf_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2759646,
+      "sha256": "80209ebc50dfe9bd07f085ab295058b4cf24a3f944adc4d53f165632596a59b7",
+      "gitLfsOid": "80209ebc50dfe9bd07f085ab295058b4cf24a3f944adc4d53f165632596a59b7",
+      "gitLfsSize": 2759646,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_eldergrove_moonshell_cicada_turnaround_v001",
+      "subjectIds": ["tdf_fauna_eldergrove_moonshell_cicada"],
+      "roles": ["turnaround", "anatomy", "scale", "silhouette", "trunk_contact"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/ConceptSheets/tdf_fauna_eldergrove_moonshell_cicada_turnaround_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "ProvisionalPass",
+      "byteLength": 2571712,
+      "sha256": "e9f4a8fdb08f094ae50e6ed76b837051b6f1ba2240fe59d68499528a992d1d27",
+      "gitLfsOid": "e9f4a8fdb08f094ae50e6ed76b837051b6f1ba2240fe59d68499528a992d1d27",
+      "gitLfsSize": 2571712,
+      "generationRecordId": "tdf_generation_fauna_eldergrove_moonshell_cicada_turnaround_refinement_v001",
+      "supersedes": ["tdf_asset_input_fauna_eldergrove_moonshell_cicada_turnaround_base_v001"],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_eldergrove_moonshell_cicada_motion_material_v001",
+      "subjectIds": ["tdf_fauna_eldergrove_moonshell_cicada"],
+      "roles": ["motion", "contact", "material", "reduced_motion"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/ConceptSheets/tdf_fauna_eldergrove_moonshell_cicada_motion_material_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2742444,
+      "sha256": "3feac8306d159e92f019f0cfa247298bfe47061fe55e2bd76b2b2193a7fbff40",
+      "gitLfsOid": "3feac8306d159e92f019f0cfa247298bfe47061fe55e2bd76b2b2193a7fbff40",
+      "gitLfsSize": 2742444,
+      "generationRecordId": "tdf_generation_fauna_eldergrove_moonshell_cicada_motion_material_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_shared_eldergrove_moonroot_moonshell_contact_scale_readability_v001",
+      "subjectIds": [
+        "tdf_habitat_eldergrove_moonroot_floodbasin",
+        "tdf_fauna_eldergrove_moonshell_cicada"
+      ],
+      "roles": ["habitat_contact", "corrected_scale", "lod_readability", "distance_silhouette", "reduced_quality"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/ConceptSheets/tdf_shared_eldergrove_moonroot_moonshell_contact_scale_readability_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2565924,
+      "sha256": "3ca1c40b01d5a8de65dcd7c5ac91a9b5cf81d0affb1947f61e5c964f42b2b01c",
+      "gitLfsOid": "3ca1c40b01d5a8de65dcd7c5ac91a9b5cf81d0affb1947f61e5c964f42b2b01c",
+      "gitLfsSize": 2565924,
+      "generationRecordId": "tdf_generation_shared_eldergrove_moonroot_moonshell_contact_scale_readability_refinement_v001",
+      "supersedes": ["tdf_asset_input_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001"],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_input_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001",
+      "subjectIds": ["tdf_habitat_eldergrove_moonroot_floodbasin"],
+      "roles": ["retained_refinement_input"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/GenerationInputs/tdf_input_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "byteLength": 3463178,
+      "sha256": "d1208b5f089df8022e1b148958baae88e544fd65b8d2d203b051532c429f12cf",
+      "gitLfsOid": "d1208b5f089df8022e1b148958baae88e544fd65b8d2d203b051532c429f12cf",
+      "gitLfsSize": 3463178,
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001",
+      "supersedes": [],
+      "supersededBy": ["tdf_asset_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_v001"]
+    },
+    {
+      "assetId": "tdf_asset_input_fauna_eldergrove_moonshell_cicada_turnaround_base_v001",
+      "subjectIds": ["tdf_fauna_eldergrove_moonshell_cicada"],
+      "roles": ["retained_refinement_input"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/GenerationInputs/tdf_input_fauna_eldergrove_moonshell_cicada_turnaround_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "byteLength": 2625654,
+      "sha256": "8ea7c44cc6b84dc46090f2c48b3b231bfb7312575653e0530a5a88da1724ae13",
+      "gitLfsOid": "8ea7c44cc6b84dc46090f2c48b3b231bfb7312575653e0530a5a88da1724ae13",
+      "gitLfsSize": 2625654,
+      "generationRecordId": "tdf_generation_fauna_eldergrove_moonshell_cicada_turnaround_base_v001",
+      "supersedes": [],
+      "supersededBy": ["tdf_asset_fauna_eldergrove_moonshell_cicada_turnaround_v001"]
+    },
+    {
+      "assetId": "tdf_asset_input_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001",
+      "subjectIds": [
+        "tdf_habitat_eldergrove_moonroot_floodbasin",
+        "tdf_fauna_eldergrove_moonshell_cicada"
+      ],
+      "roles": ["retained_refinement_input"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/MoonrootFloodbasin/GenerationInputs/tdf_input_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "byteLength": 2669878,
+      "sha256": "d82f6746168ee1b9ede41f07d65cf88acc3757d59f03bfd6245b51f20e517a14",
+      "gitLfsOid": "d82f6746168ee1b9ede41f07d65cf88acc3757d59f03bfd6245b51f20e517a14",
+      "gitLfsSize": 2669878,
+      "generationRecordId": "tdf_generation_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001",
+      "supersedes": [],
+      "supersededBy": ["tdf_asset_shared_eldergrove_moonroot_moonshell_contact_scale_readability_v001"]
+    }
+  ],
+  "generationRecords": [
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_establishing_master_v001",
+      "generatedAtUtc": "2026-07-27T03:10:32.1831073Z",
+      "inputAssetIds": [],
+      "outputAssetId": "tdf_asset_habitat_eldergrove_moonroot_floodbasin_establishing_master_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001",
+      "generatedAtUtc": "2026-07-27T03:13:07.9438022Z",
+      "inputAssetIds": [],
+      "outputAssetId": "tdf_asset_input_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_refinement_v001",
+      "generatedAtUtc": "2026-07-27T03:14:41.7363819Z",
+      "inputAssetIds": ["tdf_asset_input_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_base_v001"],
+      "outputAssetId": "tdf_asset_habitat_eldergrove_moonroot_floodbasin_layout_transition_depth_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001",
+      "generatedAtUtc": "2026-07-27T03:17:27.2921247Z",
+      "inputAssetIds": [],
+      "outputAssetId": "tdf_asset_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_fauna_eldergrove_moonshell_cicada_turnaround_base_v001",
+      "generatedAtUtc": "2026-07-27T03:19:56.4542657Z",
+      "inputAssetIds": [],
+      "outputAssetId": "tdf_asset_input_fauna_eldergrove_moonshell_cicada_turnaround_base_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_fauna_eldergrove_moonshell_cicada_turnaround_refinement_v001",
+      "generatedAtUtc": "2026-07-27T03:22:06.3477610Z",
+      "inputAssetIds": ["tdf_asset_input_fauna_eldergrove_moonshell_cicada_turnaround_base_v001"],
+      "outputAssetId": "tdf_asset_fauna_eldergrove_moonshell_cicada_turnaround_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_fauna_eldergrove_moonshell_cicada_motion_material_v001",
+      "generatedAtUtc": "2026-07-27T03:26:30.6469470Z",
+      "inputAssetIds": ["tdf_asset_fauna_eldergrove_moonshell_cicada_turnaround_v001"],
+      "outputAssetId": "tdf_asset_fauna_eldergrove_moonshell_cicada_motion_material_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001",
+      "generatedAtUtc": "2026-07-27T03:35:20.4887002Z",
+      "inputAssetIds": [
+        "tdf_asset_fauna_eldergrove_moonshell_cicada_turnaround_v001",
+        "tdf_asset_habitat_eldergrove_moonroot_floodbasin_material_reduced_atmosphere_lod_v001"
+      ],
+      "outputAssetId": "tdf_asset_input_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001"
+    },
+    {
+      "generationRecordId": "tdf_generation_shared_eldergrove_moonroot_moonshell_contact_scale_readability_refinement_v001",
+      "generatedAtUtc": "2026-07-27T03:40:03.7630258Z",
+      "inputAssetIds": ["tdf_asset_input_shared_eldergrove_moonroot_moonshell_contact_scale_readability_base_v001"],
+      "outputAssetId": "tdf_asset_shared_eldergrove_moonroot_moonshell_contact_scale_readability_v001"
+    }
+  ],
+  "externalInputs": []
+}
