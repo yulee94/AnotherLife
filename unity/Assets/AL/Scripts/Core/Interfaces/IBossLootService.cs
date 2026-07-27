@@ -22,7 +22,8 @@ namespace AL.Core.Interfaces
         RejectedMalformedState = 6,
         RejectedCreditMutation = 7,
         SaveFailedRolledBack = 8,
-        CommitUncertain = 9
+        CommitUncertain = 9,
+        MutationFailedRolledBack = 10
     }
 
     public enum BossLootApplicationValidationStatus
