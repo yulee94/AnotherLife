@@ -1,0 +1,172 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_world_event_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_world_event_source_v001",
+  "idFormat": "lowercase_snake_case",
+  "sourceAuthorities": {
+    "primaryMode": "codex_narrative_content",
+    "consumerIssue": 172,
+    "notificationIssue": 177,
+    "relationshipIssue": 176,
+    "worldAtlasCatalog": "al_world_atlas_narrative_catalog",
+    "notificationCatalog": "al_notification_content_catalog",
+    "legacyRuntimeService": "WorldStateService"
+  },
+  "contentPolicy": {
+    "eventCopyRule": "World-state player-facing copy belongs to this catalog or later approved localization content, not to WorldStateService hard-coded strings.",
+    "technicalEffectRule": "A world event may describe narrative pressure immediately, but it must not claim production, training, defense, decay, enemy-strength, reward, PvP, or save effects are applied until future engineering verifies a committed consumer.",
+    "notificationRule": "Notification IDs are source references only. Delivery, acknowledgement, deduplication, persistence, and accessibility remain #177 engineering work.",
+    "durationRule": "Durations, expiration, replacement, cancellation, priority, and offline resume are future #172 lifecycle contract behavior.",
+    "nonGoals": [
+      "runtime lifecycle implementation",
+      "save persistence",
+      "effect consumer implementation",
+      "notification delivery",
+      "duration validation",
+      "event priority or stacking",
+      "resource production mutation",
+      "training cost mutation",
+      "enemy strength mutation",
+      "world-event balance values"
+    ]
+  },
+  "eventDefinitions": [
+    {
+      "id": "world_event_siege",
+      "legacyEffect": "Siege",
+      "displayNameKey": "world_event.siege.name",
+      "summaryKey": "world_event.siege.summary",
+      "startMessageKey": "world_event.siege.start",
+      "endMessageKey": "world_event.siege.end",
+      "unavailableMessageKey": "world_event.siege.unavailable",
+      "notificationDefinitionId": "notification.world_event.siege",
+      "narrativeIntent": "public danger at a defended settlement or gate",
+      "technicalEffectClaims": [
+        "defense_modifier_requested",
+        "production_modifier_requested"
+      ],
+      "consumerStatus": "requested_unverified"
+    },
+    {
+      "id": "world_event_festival",
+      "legacyEffect": "Festival",
+      "displayNameKey": "world_event.festival.name",
+      "summaryKey": "world_event.festival.summary",
+      "startMessageKey": "world_event.festival.start",
+      "endMessageKey": "world_event.festival.end",
+      "unavailableMessageKey": "world_event.festival.unavailable",
+      "notificationDefinitionId": "notification.world_event.festival",
+      "narrativeIntent": "temporary realm morale and public gathering",
+      "technicalEffectClaims": [
+        "training_cost_modifier_requested",
+        "morale_modifier_requested"
+      ],
+      "consumerStatus": "requested_unverified"
+    },
+    {
+      "id": "world_event_veil_omen",
+      "legacyEffect": "Omen",
+      "displayNameKey": "world_event.veil_omen.name",
+      "summaryKey": "world_event.veil_omen.summary",
+      "startMessageKey": "world_event.veil_omen.start",
+      "endMessageKey": "world_event.veil_omen.end",
+      "unavailableMessageKey": "world_event.veil_omen.unavailable",
+      "notificationDefinitionId": "notification.world_event.veil_omen",
+      "narrativeIntent": "foreshadowing and visible Veil instability without automatic reward or stat change",
+      "technicalEffectClaims": [
+        "presentation_only_until_consumer_contract"
+      ],
+      "consumerStatus": "presentation_source_ready"
+    },
+    {
+      "id": "world_event_void_corruption",
+      "legacyEffect": "Corruption",
+      "displayNameKey": "world_event.void_corruption.name",
+      "summaryKey": "world_event.void_corruption.summary",
+      "startMessageKey": "world_event.void_corruption.start",
+      "endMessageKey": "world_event.void_corruption.end",
+      "unavailableMessageKey": "world_event.void_corruption.unavailable",
+      "notificationDefinitionId": "notification.world_event.void_corruption",
+      "narrativeIntent": "dangerous Void pressure that must remain visible without fabricated decay or enemy-strength mutation",
+      "technicalEffectClaims": [
+        "resource_decay_requested",
+        "enemy_strength_modifier_requested"
+      ],
+      "consumerStatus": "requested_unverified"
+    }
+  ],
+  "lifecycleStatusCopy": [
+    {
+      "id": "world_event_unavailable",
+      "displayNameKey": "world_event.status.unavailable.name",
+      "bodyKey": "world_event.status.unavailable.body"
+    },
+    {
+      "id": "world_event_effect_unverified",
+      "displayNameKey": "world_event.status.effect_unverified.name",
+      "bodyKey": "world_event.status.effect_unverified.body"
+    },
+    {
+      "id": "world_event_expired",
+      "displayNameKey": "world_event.status.expired.name",
+      "bodyKey": "world_event.status.expired.body"
+    }
+  ],
+  "draftLocalization": [
+    { "key": "world_event.siege.name", "text": "Siege" },
+    { "key": "world_event.siege.summary", "text": "A settlement or gate is under direct threat and the realm must rally defenders." },
+    { "key": "world_event.siege.start", "text": "Siege warnings are sounding. Defenders are needed, but gameplay effects are unavailable until the world-state contract verifies them." },
+    { "key": "world_event.siege.end", "text": "The siege pressure has lifted. Confirmed recovery effects will appear only after the lifecycle contract exists." },
+    { "key": "world_event.siege.unavailable", "text": "Siege state is not available yet; no defense, production, reward, or save effect has been applied." },
+    { "key": "world_event.festival.name", "text": "Realm Festival" },
+    { "key": "world_event.festival.summary", "text": "A temporary public gathering raises morale and makes the realm feel alive between conflicts." },
+    { "key": "world_event.festival.start", "text": "A realm festival has begun. Morale is high, but training or economy effects remain unavailable until verified by engineering." },
+    { "key": "world_event.festival.end", "text": "The festival has ended. Any future benefits must close through the committed lifecycle contract." },
+    { "key": "world_event.festival.unavailable", "text": "Festival state is not available yet; no training, economy, reward, or save effect has been applied." },
+    { "key": "world_event.veil_omen.name", "text": "Veil Omen" },
+    { "key": "world_event.veil_omen.summary", "text": "A visible disturbance in the Veil foreshadows story pressure without automatically changing stats or rewards." },
+    { "key": "world_event.veil_omen.start", "text": "A Veil omen is visible in the sky. Treat it as a warning, not a completed gameplay effect." },
+    { "key": "world_event.veil_omen.end", "text": "The omen has faded, but its meaning remains in the story record." },
+    { "key": "world_event.veil_omen.unavailable", "text": "Veil omen presentation is not available yet; no quest, reward, save, or world-state mutation has been applied." },
+    { "key": "world_event.void_corruption.name", "text": "Void Corruption" },
+    { "key": "world_event.void_corruption.summary", "text": "Void pressure spreads through the realm and must be treated as danger until a safe consumer contract applies effects." },
+    { "key": "world_event.void_corruption.start", "text": "Void corruption is spreading. Resource decay or enemy-strength effects remain unavailable until verified by engineering." },
+    { "key": "world_event.void_corruption.end", "text": "The corruption has receded. Recovery claims require the future committed lifecycle contract." },
+    { "key": "world_event.void_corruption.unavailable", "text": "Void corruption state is not available yet; no decay, enemy-strength, reward, or save effect has been applied." },
+    { "key": "world_event.status.unavailable.name", "text": "World Event Unavailable" },
+    { "key": "world_event.status.unavailable.body", "text": "World events need the lifecycle contract before they can persist, expire, or change gameplay state." },
+    { "key": "world_event.status.effect_unverified.name", "text": "Effect Unverified" },
+    { "key": "world_event.status.effect_unverified.body", "text": "This event has narrative copy, but its gameplay consumer is not verified yet." },
+    { "key": "world_event.status.expired.name", "text": "World Event Ended" },
+    { "key": "world_event.status.expired.body", "text": "The event has ended according to future lifecycle authority; no extra reward or penalty is implied by this copy." }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 172,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "event IDs are unique and lowercase snake-case",
+      "legacyEffect values map only to supported WorldStateEffect enum names except None",
+      "all displayNameKey, summaryKey, startMessageKey, endMessageKey, unavailableMessageKey, and status keys resolve in draftLocalization",
+      "notificationDefinitionId values are treated as source references until #177 delivery exists",
+      "events with requested_unverified consumers cannot announce applied gameplay effects",
+      "duration, persistence, expiration, replacement, cancellation, and duplicate behavior fail closed until #172 engineering owns them"
+    ],
+    "blockedRuntimeClaims": [
+      "world event persisted",
+      "world event expired",
+      "world event notification delivered",
+      "production multiplier applied",
+      "training cost modifier applied",
+      "resource decay applied",
+      "enemy strength modifier applied",
+      "duplicate world event delivery is idempotent"
+    ],
+    "optimizationImpact": {
+      "performance": "source-only JSON; no runtime service loop, ECS entity, scene, VFX, or allocation behavior added",
+      "memory": "bounded catalog for four world events and three status-copy records",
+      "buildSize": "small text-only addition; no binary assets",
+      "deviceCompatibility": "no device-specific runtime requirement"
+    }
+  }
+}
