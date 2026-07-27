@@ -38,13 +38,14 @@ namespace AL.Services.Local
 
         public bool PickUpGem(string gemId, string carrierId)
         {
-            var gem = GetGem(gemId);
-            if (gem == null || string.IsNullOrWhiteSpace(carrierId))
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (!TryGetMutableGem(gemId, now, out RealmGemState gem) ||
+                string.IsNullOrWhiteSpace(carrierId) ||
+                IsCarried(gem))
             {
                 return false;
             }
 
-            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (gem.IsDropped && now - gem.LastDroppedTimestamp < 10)
             {
                 return false;
@@ -60,8 +61,9 @@ namespace AL.Services.Local
 
         public void DropGem(string gemId)
         {
-            var gem = GetGem(gemId);
-            if (gem == null)
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (!TryGetMutableGem(gemId, now, out RealmGemState gem) ||
+                !IsCarried(gem))
             {
                 return;
             }
@@ -69,14 +71,15 @@ namespace AL.Services.Local
             gem.IsAtHome = false;
             gem.IsDropped = true;
             gem.CarrierId = null;
-            gem.LastDroppedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            gem.LastDroppedTimestamp = now;
             _saveGameService.Save();
         }
 
         public void ReturnGemHome(string gemId)
         {
-            var gem = GetGem(gemId);
-            if (gem == null)
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (!TryGetMutableGem(gemId, now, out RealmGemState gem) ||
+                gem.IsAtHome)
             {
                 return;
             }
@@ -84,12 +87,12 @@ namespace AL.Services.Local
             gem.IsAtHome = true;
             gem.IsDropped = false;
             gem.CarrierId = null;
+            gem.LastDroppedTimestamp = 0;
             _saveGameService.Save();
         }
 
         public void MarkWishgateEarned(string reason)
         {
-            EnsureGemState();
             var wishgate = _saveGameService.CurrentSave?.Wishgate;
             if (wishgate == null || string.IsNullOrWhiteSpace(reason))
             {
@@ -103,7 +106,6 @@ namespace AL.Services.Local
 
         public void ChooseWishReward(string rewardId)
         {
-            EnsureGemState();
             var wishgate = _saveGameService.CurrentSave?.Wishgate;
             if (wishgate == null || !wishgate.IsEarned || string.IsNullOrWhiteSpace(rewardId))
             {
@@ -146,43 +148,56 @@ namespace AL.Services.Local
             };
         }
 
-        private RealmGemState GetGem(string gemId)
+        private bool TryGetMutableGem(
+            string gemId,
+            long now,
+            out RealmGemState gem)
         {
+            gem = null;
             if (string.IsNullOrWhiteSpace(gemId))
             {
-                return null;
+                return false;
             }
 
-            EnsureGemState();
-            return _saveGameService.CurrentSave?.RealmGems.FirstOrDefault(g => g != null && g.GemId == gemId);
-        }
-
-        private void EnsureGemState()
-        {
-            if (_saveGameService.CurrentSave == null)
+            List<RealmGemState> gems = _saveGameService.CurrentSave?.RealmGems;
+            if (gems == null)
             {
-                return;
+                return false;
             }
 
-            _saveGameService.CurrentSave.RealmGems ??= new List<RealmGemState>();
-            _saveGameService.CurrentSave.Wishgate ??= new WishgateState();
-
-            if (_saveGameService.CurrentSave.RealmGems.Count > 0)
+            RealmGemState[] matches = gems
+                .Where(candidate =>
+                    candidate != null &&
+                    string.Equals(candidate.GemId, gemId, StringComparison.Ordinal))
+                .Take(2)
+                .ToArray();
+            if (matches.Length != 1 || !HasValidCustody(matches[0], now))
             {
-                return;
+                return false;
             }
 
-            AddRealmGems(RealmId.Stonehold);
-            AddRealmGems(RealmId.Eldergrove);
-            AddRealmGems(RealmId.Crownlands);
-            AddRealmGems(RealmId.Umbral);
+            gem = matches[0];
+            return true;
         }
 
-        private void AddRealmGems(RealmId realm)
-        {
-            _saveGameService.CurrentSave.RealmGems.Add(new RealmGemState { GemId = $"{realm}_Gem_1", HomeRealm = realm, GemIndex = 1 });
-            _saveGameService.CurrentSave.RealmGems.Add(new RealmGemState { GemId = $"{realm}_Gem_2", HomeRealm = realm, GemIndex = 2 });
-        }
+        private static bool HasValidCustody(RealmGemState gem, long now) =>
+            gem != null &&
+            gem.HomeRealm != RealmId.None &&
+            gem.GemIndex > 0 &&
+            gem.LastDroppedTimestamp >= 0 &&
+            ((!gem.IsDropped &&
+              ((gem.IsAtHome && string.IsNullOrWhiteSpace(gem.CarrierId)) ||
+               (!gem.IsAtHome && !string.IsNullOrWhiteSpace(gem.CarrierId)))) ||
+             (!gem.IsAtHome &&
+              gem.IsDropped &&
+              string.IsNullOrWhiteSpace(gem.CarrierId) &&
+              gem.LastDroppedTimestamp > 0 &&
+              gem.LastDroppedTimestamp <= now));
+
+        private static bool IsCarried(RealmGemState gem) =>
+            !gem.IsAtHome &&
+            !gem.IsDropped &&
+            !string.IsNullOrWhiteSpace(gem.CarrierId);
     }
 }
 

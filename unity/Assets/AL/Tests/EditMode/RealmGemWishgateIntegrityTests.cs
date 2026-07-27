@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
@@ -69,7 +70,8 @@ namespace AL.Tests.EditMode
                 GemId = "gem_crownlands_sun",
                 HomeRealm = RealmId.Crownlands,
                 GemIndex = 1,
-                IsAtHome = true
+                IsAtHome = false,
+                CarrierId = "carrier_a"
             });
             var fixture = new FakeSaveService(save);
             var service = new LocalRealmGemService(fixture);
@@ -82,6 +84,102 @@ namespace AL.Tests.EditMode
             Assert.That(backing.CarrierId, Is.Null);
             Assert.That(backing.LastDroppedTimestamp, Is.GreaterThan(0));
             Assert.That(fixture.SaveCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void RealmGemMutationsDoNotSeedEmptyOrNullCollections()
+        {
+            var save = NewSave();
+            var fixture = new FakeSaveService(save);
+            var service = new LocalRealmGemService(fixture);
+
+            Assert.That(service.PickUpGem("missing", "carrier"), Is.False);
+            service.DropGem("missing");
+            service.ReturnGemHome("missing");
+            Assert.That(save.RealmGems, Is.Empty);
+
+            save.RealmGems = null;
+            Assert.That(service.PickUpGem("missing", "carrier"), Is.False);
+            service.DropGem("missing");
+            service.ReturnGemHome("missing");
+            Assert.That(save.RealmGems, Is.Null);
+            Assert.That(fixture.SaveCount, Is.Zero);
+        }
+
+        [Test]
+        public void RealmGemCustodyTransitionsAreCoherentAndDuplicateSafe()
+        {
+            var save = NewSave();
+            var gem = new RealmGemState
+            {
+                GemId = "gem_crownlands_sun",
+                HomeRealm = RealmId.Crownlands,
+                GemIndex = 1,
+                IsAtHome = true
+            };
+            save.RealmGems.Add(gem);
+            var fixture = new FakeSaveService(save);
+            var service = new LocalRealmGemService(fixture);
+
+            Assert.That(service.PickUpGem(gem.GemId, "carrier_a"), Is.True);
+            Assert.That(service.PickUpGem(gem.GemId, "carrier_a"), Is.False);
+            Assert.That(service.PickUpGem(gem.GemId, "carrier_b"), Is.False);
+            Assert.That(fixture.SaveCount, Is.EqualTo(1));
+
+            service.DropGem(gem.GemId);
+            long droppedAt = gem.LastDroppedTimestamp;
+            service.DropGem(gem.GemId);
+            Assert.That(gem.IsDropped, Is.True);
+            Assert.That(gem.LastDroppedTimestamp, Is.EqualTo(droppedAt));
+            Assert.That(fixture.SaveCount, Is.EqualTo(2));
+
+            Assert.That(service.PickUpGem(gem.GemId, "carrier_b"), Is.False);
+            gem.LastDroppedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 10;
+            Assert.That(service.PickUpGem(gem.GemId, "carrier_b"), Is.True);
+            service.ReturnGemHome(gem.GemId);
+            service.ReturnGemHome(gem.GemId);
+
+            Assert.That(gem.IsAtHome, Is.True);
+            Assert.That(gem.IsDropped, Is.False);
+            Assert.That(gem.CarrierId, Is.Null);
+            Assert.That(gem.LastDroppedTimestamp, Is.Zero);
+            Assert.That(fixture.SaveCount, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void RealmGemRejectsDuplicateContradictoryAndFutureTimestampState()
+        {
+            var save = NewSave();
+            var first = new RealmGemState
+            {
+                GemId = "gem_duplicate",
+                HomeRealm = RealmId.Crownlands,
+                GemIndex = 1,
+                IsAtHome = true
+            };
+            save.RealmGems.Add(first);
+            save.RealmGems.Add(new RealmGemState
+            {
+                GemId = "gem_duplicate",
+                HomeRealm = RealmId.Crownlands,
+                GemIndex = 1,
+                IsAtHome = true
+            });
+            var fixture = new FakeSaveService(save);
+            var service = new LocalRealmGemService(fixture);
+
+            Assert.That(service.PickUpGem("gem_duplicate", "carrier"), Is.False);
+            save.RealmGems.RemoveAt(1);
+
+            first.IsDropped = true;
+            Assert.That(service.PickUpGem(first.GemId, "carrier"), Is.False);
+
+            first.IsAtHome = false;
+            first.LastDroppedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60;
+            Assert.That(service.PickUpGem(first.GemId, "carrier"), Is.False);
+            service.ReturnGemHome(first.GemId);
+
+            Assert.That(fixture.SaveCount, Is.Zero);
         }
 
         [Test]
