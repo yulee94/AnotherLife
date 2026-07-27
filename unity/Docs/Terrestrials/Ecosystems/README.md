@@ -20,8 +20,13 @@ This folder contains the A2 terrestrial-design proposal for coherent fauna and h
 - `Ecosystem_Creative_Review_Matrix.md` — exact readiness and user-review state for habitats, supporting fauna, and inherited boss/elite anchors.
 - `ecosystem_habitat_profiles_manifest.json` — stable design IDs, references, state, asset-family intent, and numeric source budgets.
 - `ecosystem_habitat_source_packet.schema.json` — retained structural schema for the manifest.
+- `AvianSoarers/` — companion source `tdf-eco-soarer-2026-07-27-v001`
+  with exact visual, provenance, QA, schema, and manifest evidence for three
+  shared-rig supporting fauna.
 
-No concept image, editable art source, marketplace package, model, texture set, rig, animation, VFX, or runtime asset is added by this packet. Thirteen new fauna identities are `ProposedTextOnly`. The three reused foundation IDs remain legacy merged proposals and are not promoted to user-approved or engineering-ready source.
+The parent roster adds no concept art or runtime asset. Its avian-soarer
+companion advances three new identities to `ReadyForUserReview`; ten remain
+`ProposedTextOnly`. Foundation proposals remain unapproved.
 
 ## Upstream Sources Consumed
 
@@ -40,7 +45,10 @@ Habitat suitability links to existing creatures are visual/ecological design ref
 - Connected realm habitat loops: `4`
 - Supporting fauna families: `16` (`4` per realm)
 - Reused foundation family IDs: `3`
-- New text-only family IDs: `13`
+- New exact visual-review family IDs: `3`
+- Remaining new text-only family IDs: `10`
+- Avian-soarer finals/retained inputs: `8 / 3`
+- Avian-soarer Player/install bytes: `0`
 - Existing boss/elite anchors referenced: `16`
 - Runtime or shared-file changes: `0`
 
