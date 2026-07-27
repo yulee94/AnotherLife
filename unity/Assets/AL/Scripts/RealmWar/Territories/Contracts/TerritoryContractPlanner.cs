@@ -414,16 +414,37 @@ namespace AL.RealmWar.Territories.Contracts
             return new TerritoryCapturePlan(TerritoryCaptureStatus.Planned, request.OperationId, request.TerritoryId, snapshot.State.Owner, request.CommittedProfileRealm, snapshot.State.Revision, newRevision, CaptureWarzoneCreditReward, CaptureQuestProgressReward, diagnostics);
         }
 
-        public TerritoryIncomeSnapshot PlanIncome(TerritoryQueryResult query, RealmId selectedRealm)
+        public TerritoryIncomeSnapshot PlanIncome(TerritoryQueryResult query, RealmId expectedProfileRealm)
         {
             if (query == null || query.Status != TerritoryQueryStatus.Available)
             {
                 return new TerritoryIncomeSnapshot(TerritoryIncomeStatus.Unavailable, query?.StateRevisionHash ?? string.Empty, Array.Empty<TerritoryIncomeContribution>(), new[] { Error("DomainUnavailable", string.Empty, "Territory domain is unavailable.") });
             }
 
+            RealmId committedProfileRealm = query.CommittedProfileRealm;
+            if (committedProfileRealm == RealmId.None)
+            {
+                return IncomeUnavailable(query, "NoCommittedRealm", "Territory income requires a committed profile realm.");
+            }
+
+            if (!IsDefinedRealm(committedProfileRealm))
+            {
+                return IncomeUnavailable(query, "InvalidCommittedRealm", "Committed profile realm enum is undefined.");
+            }
+
+            if (expectedProfileRealm == RealmId.None || !IsDefinedRealm(expectedProfileRealm))
+            {
+                return IncomeUnavailable(query, "InvalidExpectedRealm", "Expected profile realm must be a defined committed realm.");
+            }
+
+            if (expectedProfileRealm != committedProfileRealm)
+            {
+                return IncomeUnavailable(query, "ProfileRealmMismatch", "Expected profile realm does not match the committed query realm.");
+            }
+
             var diagnostics = new List<TerritoryDiagnostic>();
             var contributions = new List<TerritoryIncomeContribution>();
-            foreach (var snapshot in query.Territories.Where(snapshot => snapshot.IsSupported && snapshot.Definition != null && snapshot.State.Owner == selectedRealm).OrderBy(snapshot => snapshot.State.Id, StringComparer.Ordinal))
+            foreach (var snapshot in query.Territories.Where(snapshot => snapshot.IsSupported && snapshot.Definition != null && snapshot.State.Owner == committedProfileRealm).OrderBy(snapshot => snapshot.State.Id, StringComparer.Ordinal))
             {
                 if (snapshot.Definition.BonusAmount < 0)
                 {
@@ -533,6 +554,15 @@ namespace AL.RealmWar.Territories.Contracts
         {
             diagnostics.Add(Error(code, diagnosticTerritoryId, message));
             return new TerritoryCapturePlan(status, operationId, territoryId, previousOwner, newOwner, previousRevision, newRevision, 0, 0, diagnostics);
+        }
+
+        private static TerritoryIncomeSnapshot IncomeUnavailable(TerritoryQueryResult query, string code, string message)
+        {
+            return new TerritoryIncomeSnapshot(
+                TerritoryIncomeStatus.Unavailable,
+                query.StateRevisionHash,
+                Array.Empty<TerritoryIncomeContribution>(),
+                new[] { Error(code, string.Empty, message) });
         }
 
         private static TerritoryDiagnostic Error(string code, string territoryId, string message)
