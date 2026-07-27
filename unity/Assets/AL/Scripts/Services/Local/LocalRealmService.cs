@@ -31,6 +31,8 @@ namespace AL.Services.Local
                 RealmCatalogEntry ignored;
                 if (Catalog == null || !Catalog.TryGet(selected, out ignored))
                     return Snapshot(RealmIdentityStatus.CatalogUnavailable, selected, "AL-REALM-DEFINITION-UNAVAILABLE");
+                if (!HasRuntimeDefinition(selected))
+                    return Snapshot(RealmIdentityStatus.CatalogUnavailable, selected, "AL-REALM-DEFINITION-UNAVAILABLE");
                 return Snapshot(RealmIdentityStatus.CommittedValid, selected, "AL-REALM-COMMITTED-VALID");
             }
         }
@@ -59,6 +61,8 @@ namespace AL.Services.Local
                 return Result(RealmSelectionStatus.InvalidRealm, request.RequestedRealmId, false, false, "AL-REALM-REQUEST-INVALID");
             RealmCatalogEntry ignored;
             if (Catalog == null || !Catalog.TryGet(request.RequestedRealmId, out ignored))
+                return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, "AL-REALM-DEFINITION-UNAVAILABLE");
+            if (!HasRuntimeDefinition(request.RequestedRealmId))
                 return Result(RealmSelectionStatus.RealmDefinitionUnavailable, request.RequestedRealmId, false, false, "AL-REALM-DEFINITION-UNAVAILABLE");
             if (_saveGameService == null)
                 return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PROFILE-UNAVAILABLE");
@@ -107,6 +111,11 @@ namespace AL.Services.Local
         private static bool IsDefinedPlayable(RealmId id)
         {
             return id != RealmId.None && Enum.IsDefined(typeof(RealmId), id);
+        }
+
+        private bool HasRuntimeDefinition(RealmId id)
+        {
+            return _gameDataService != null && _gameDataService.GetRealm(id) != null;
         }
     }
 }

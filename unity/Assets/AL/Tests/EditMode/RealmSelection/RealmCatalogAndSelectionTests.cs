@@ -7,6 +7,7 @@ using AL.Data.Runtime;
 using AL.RealmSelection;
 using AL.Services.Local;
 using NUnit.Framework;
+using UnityEngine;
 
 namespace AL.Tests.EditMode.RealmSelection
 {
@@ -14,6 +15,7 @@ namespace AL.Tests.EditMode.RealmSelection
     {
         private string _json;
         private RealmCatalogSnapshot _catalog;
+        private readonly List<RealmDefinition> _definitions = new List<RealmDefinition>(4);
 
         [SetUp]
         public void SetUp()
@@ -23,6 +25,18 @@ namespace AL.Tests.EditMode.RealmSelection
             RealmCatalogLoadResult result = RealmCatalogRuntime.Parse(_json);
             Assert.That(result.IsSuccess, Is.True, result.TechnicalCode);
             _catalog = result.Snapshot;
+            _definitions.Add(CreateDefinition(RealmId.Crownlands));
+            _definitions.Add(CreateDefinition(RealmId.Stonehold));
+            _definitions.Add(CreateDefinition(RealmId.Eldergrove));
+            _definitions.Add(CreateDefinition(RealmId.Umbral));
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            for (int i = 0; i < _definitions.Count; i++)
+                Object.DestroyImmediate(_definitions[i]);
+            _definitions.Clear();
         }
 
         [Test]
@@ -56,7 +70,7 @@ namespace AL.Tests.EditMode.RealmSelection
         public void FirstCommitPersistsAndDifferentRealmIsRejectedWithoutSecondSave()
         {
             var save = new FakeSaveService();
-            var service = new LocalRealmService(save, new FakeGameDataService(), _catalog);
+            var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
             RealmSelectionResult first = service.TrySelectRealm(new RealmSelectionRequest("tx_first", RealmId.Stonehold));
             RealmSelectionResult repeated = service.TrySelectRealm(new RealmSelectionRequest("tx_same", RealmId.Stonehold));
             RealmSelectionResult different = service.TrySelectRealm(new RealmSelectionRequest("tx_other", RealmId.Umbral));
@@ -72,13 +86,54 @@ namespace AL.Tests.EditMode.RealmSelection
         public void InvalidRequestsAndSaveFailureNeverBecomeAuthoritative()
         {
             var save = new FakeSaveService { FailSave = true };
-            var service = new LocalRealmService(save, new FakeGameDataService(), _catalog);
+            var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
             Assert.That(service.TrySelectRealm(new RealmSelectionRequest("", RealmId.Crownlands)).Status, Is.EqualTo(RealmSelectionStatus.InvalidTransaction));
             Assert.That(service.TrySelectRealm(new RealmSelectionRequest("tx_none", RealmId.None)).Status, Is.EqualTo(RealmSelectionStatus.InvalidRealm));
             RealmSelectionResult failed = service.TrySelectRealm(new RealmSelectionRequest("tx_fail", RealmId.Eldergrove));
             Assert.That(failed.Status, Is.EqualTo(RealmSelectionStatus.SaveFailedPreviousPreserved));
             Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
             Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.Uncommitted));
+        }
+
+        [Test]
+        public void MissingRuntimeDefinitionCannotCommitOrProduceSplitCurrentRealmProperties()
+        {
+            var uncommitted = new FakeSaveService();
+            var missingDefinitionService = new LocalRealmService(
+                uncommitted,
+                new FakeGameDataService(_definitions, RealmId.Umbral),
+                _catalog);
+
+            RealmSelectionResult missing = missingDefinitionService.TrySelectRealm(
+                new RealmSelectionRequest("tx_missing_definition", RealmId.Umbral));
+
+            Assert.That(missing.Status, Is.EqualTo(RealmSelectionStatus.RealmDefinitionUnavailable));
+            Assert.That(uncommitted.SaveCount, Is.Zero);
+            Assert.That(uncommitted.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
+
+            var committed = new FakeSaveService(RealmId.Umbral);
+            var inconsistentService = new LocalRealmService(
+                committed,
+                new FakeGameDataService(_definitions, RealmId.Umbral),
+                _catalog);
+
+            Assert.That(inconsistentService.Identity.Status, Is.EqualTo(RealmIdentityStatus.CatalogUnavailable));
+            Assert.That(inconsistentService.CurrentRealmId, Is.EqualTo(RealmId.None));
+            Assert.That(inconsistentService.CurrentRealm, Is.Null);
+        }
+
+        [Test]
+        public void NullGameDataServiceFailsClosedWithoutMutation()
+        {
+            var save = new FakeSaveService();
+            var service = new LocalRealmService(save, null, _catalog);
+
+            RealmSelectionResult result = service.TrySelectRealm(
+                new RealmSelectionRequest("tx_null_game_data", RealmId.Crownlands));
+
+            Assert.That(result.Status, Is.EqualTo(RealmSelectionStatus.RealmDefinitionUnavailable));
+            Assert.That(save.SaveCount, Is.Zero);
+            Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
         }
 
         [Test]
@@ -93,7 +148,13 @@ namespace AL.Tests.EditMode.RealmSelection
 
         private sealed class FakeSaveService : ISaveGameService
         {
-            public SaveGameData CurrentSave { get; private set; } = NewSave();
+            public FakeSaveService(RealmId selectedRealm = RealmId.None)
+            {
+                CurrentSave = NewSave();
+                CurrentSave.SelectedRealm = selectedRealm;
+            }
+
+            public SaveGameData CurrentSave { get; private set; }
             public SaveLoadStatus LastLoadStatus => SaveLoadStatus.LoadedPrimary;
             public string LastLoadMessage => string.Empty;
             public SaveOperationStatus LastSaveStatus { get; private set; }
@@ -110,12 +171,36 @@ namespace AL.Tests.EditMode.RealmSelection
 
         private sealed class FakeGameDataService : IGameDataService
         {
-            public RealmDefinition GetRealm(RealmId id) => null;
-            public IEnumerable<RealmDefinition> GetAllRealms() => new RealmDefinition[0];
+            private readonly IEnumerable<RealmDefinition> _definitions;
+            private readonly RealmId _missingRealm;
+
+            public FakeGameDataService(IEnumerable<RealmDefinition> definitions, RealmId missingRealm = RealmId.None)
+            {
+                _definitions = definitions;
+                _missingRealm = missingRealm;
+            }
+
+            public RealmDefinition GetRealm(RealmId id)
+            {
+                if (id == _missingRealm) return null;
+                foreach (RealmDefinition definition in _definitions)
+                    if (definition.Id == id) return definition;
+                return null;
+            }
+
+            public IEnumerable<RealmDefinition> GetAllRealms() => _definitions;
             public BuildingDefinition GetBuilding(string id) => null;
             public TroopDefinition GetTroop(string id) => null;
             public ChampionDefinition GetChampion(string id) => null;
             public SkillDefinition GetSkill(string id) => null;
+        }
+
+        private static RealmDefinition CreateDefinition(RealmId id)
+        {
+            var definition = ScriptableObject.CreateInstance<RealmDefinition>();
+            definition.Id = id;
+            definition.RealmName = id.ToString();
+            return definition;
         }
     }
 }
