@@ -30,6 +30,7 @@ namespace AL.Data.Runtime
         public WarmasterState Warmaster = new WarmasterState();
         public ChampionCustomizationState ChampionCustomization = new ChampionCustomizationState();
         public List<OwnedEquipmentState> OwnedEquipment = new List<OwnedEquipmentState>();
+        public List<AppliedBossLootRewardState> AppliedBossLootRewards = new List<AppliedBossLootRewardState>();
         public int WarzoneCredits;
         public long LastSavedTimestamp;
     }
@@ -63,6 +64,16 @@ namespace AL.Data.Runtime
         public bool AnnounceWorldDrop;
         public long FirstAcquiredTimestamp;
         public long LastAcquiredTimestamp;
+    }
+
+    [Serializable]
+    public class AppliedBossLootRewardState
+    {
+        public string EncounterId;
+        public string RewardResultId;
+        public string BossId;
+        public string RewardDigest;
+        public long CommittedTimestamp;
     }
 
     [Serializable]

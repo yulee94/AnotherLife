@@ -3326,10 +3326,56 @@ namespace AL.Services.Local
                 save.Wishgate == null ||
                 save.Warmaster == null ||
                 save.ChampionCustomization == null ||
-                save.OwnedEquipment == null)
+                save.OwnedEquipment == null ||
+                save.AppliedBossLootRewards == null)
             {
                 error = "Required top-level save collections or objects are null after normalization.";
                 return false;
+            }
+
+            var encounterIds = new Dictionary<string, string>(StringComparer.Ordinal);
+            var rewardResultIds = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var reward in save.AppliedBossLootRewards)
+            {
+                if (reward == null)
+                {
+                    error = "Applied boss-loot ledger contains a null entry.";
+                    return false;
+                }
+
+                if (string.IsNullOrWhiteSpace(reward.EncounterId) ||
+                    string.IsNullOrWhiteSpace(reward.RewardResultId) ||
+                    string.IsNullOrWhiteSpace(reward.BossId) ||
+                    string.IsNullOrWhiteSpace(reward.RewardDigest))
+                {
+                    error = "Applied boss-loot ledger contains a blank stable identity or digest.";
+                    return false;
+                }
+
+                if (reward.CommittedTimestamp <= 0)
+                {
+                    error = "Applied boss-loot ledger contains an invalid commit timestamp.";
+                    return false;
+                }
+
+                if (encounterIds.TryGetValue(reward.EncounterId, out var encounterResultId))
+                {
+                    error = encounterResultId == reward.RewardResultId
+                        ? "Applied boss-loot ledger contains a duplicate application identity."
+                        : "Applied boss-loot ledger maps one encounter to conflicting reward results.";
+                    return false;
+                }
+
+                if (rewardResultIds.TryGetValue(reward.RewardResultId, out var resultEncounterId))
+                {
+                    error = resultEncounterId == reward.EncounterId
+                        ? "Applied boss-loot ledger contains a duplicate application identity."
+                        : "Applied boss-loot ledger maps one reward result to conflicting encounters.";
+                    return false;
+                }
+
+                encounterIds.Add(reward.EncounterId, reward.RewardResultId);
+                rewardResultIds.Add(reward.RewardResultId, reward.EncounterId);
             }
 
             error = string.Empty;
@@ -3353,6 +3399,7 @@ namespace AL.Services.Local
             save.Territories = RemoveNullEntries(save.Territories);
             save.RealmGems = RemoveNullEntries(save.RealmGems);
             save.OwnedEquipment = RemoveNullEntries(save.OwnedEquipment);
+            save.AppliedBossLootRewards ??= new List<AppliedBossLootRewardState>();
             save.LordPersona ??= new PersonaData();
             save.Wishgate ??= new WishgateState();
             save.Warmaster ??= new WarmasterState();

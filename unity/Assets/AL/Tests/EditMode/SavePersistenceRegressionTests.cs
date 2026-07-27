@@ -195,6 +195,7 @@ namespace AL.Tests.EditMode
             IList buildings = (IList)GetField(save, "Buildings");
             IList quests = (IList)GetField(save, "Quests");
             IList ownedEquipment = (IList)GetField(save, "OwnedEquipment");
+            IList appliedBossLootRewards = (IList)GetField(save, "AppliedBossLootRewards");
 
             Assert.AreSame(deserializedReputation, reputation);
             Assert.AreSame(deserializedFactions, factions);
@@ -225,6 +226,7 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(19, GetField(ownedEquipment[0], "AttackBonus"));
             Assert.AreEqual(2, GetField(ownedEquipment[0], "Quantity"));
             Assert.AreEqual("BOSS_ARCHIVE", GetField(ownedEquipment[0], "SourceBossId"));
+            Assert.IsEmpty(appliedBossLootRewards);
 
             object resource = resources[0];
             object building = buildings[0];
@@ -240,6 +242,7 @@ namespace AL.Tests.EditMode
             Assert.AreSame(buildings, GetField(save, "Buildings"));
             Assert.AreSame(quests, GetField(save, "Quests"));
             Assert.AreSame(ownedEquipment, GetField(save, "OwnedEquipment"));
+            Assert.AreSame(appliedBossLootRewards, GetField(save, "AppliedBossLootRewards"));
             Assert.AreSame(resource, ((IList)GetField(save, "Resources"))[0]);
             Assert.AreSame(building, ((IList)GetField(save, "Buildings"))[0]);
             Assert.AreSame(quest, ((IList)GetField(save, "Quests"))[0]);
@@ -248,6 +251,99 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(7, GetField(building, "Level"));
             Assert.AreEqual(4, GetField(quest, "CurrentValue"));
             Assert.AreEqual(2, GetField(equipment, "Quantity"));
+        }
+
+        [Test]
+        public void AppliedBossLootLedgerRoundTripsStableApplicationIdentity()
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type rewardType = GetRuntimeType("AL.Data.Runtime.AppliedBossLootRewardState");
+            object save = Activator.CreateInstance(saveType);
+            object reward = Activator.CreateInstance(rewardType);
+            SetField(reward, "EncounterId", "ENCOUNTER_001");
+            SetField(reward, "RewardResultId", "REWARD_001");
+            SetField(reward, "BossId", "BOSS_001");
+            SetField(reward, "RewardDigest", "sha256:0123456789abcdef");
+            SetField(reward, "CommittedTimestamp", 1800000200L);
+            IList rewards = CreateRuntimeList(rewardType);
+            rewards.Add(reward);
+            SetField(save, "AppliedBossLootRewards", rewards);
+
+            InvokeEnsureSaveDefaults(save);
+            string json = JsonUtility.ToJson(save);
+            object roundTripped = JsonUtility.FromJson(json, saveType);
+            InvokeEnsureSaveDefaults(roundTripped);
+
+            Assert.True(InvokeValidateSaveSemantics(roundTripped, out string error), error);
+            IList reloaded = (IList)GetField(roundTripped, "AppliedBossLootRewards");
+            Assert.AreEqual(1, reloaded.Count);
+            Assert.AreEqual("ENCOUNTER_001", GetField(reloaded[0], "EncounterId"));
+            Assert.AreEqual("REWARD_001", GetField(reloaded[0], "RewardResultId"));
+            Assert.AreEqual("BOSS_001", GetField(reloaded[0], "BossId"));
+            Assert.AreEqual("sha256:0123456789abcdef", GetField(reloaded[0], "RewardDigest"));
+            Assert.AreEqual(1800000200L, GetField(reloaded[0], "CommittedTimestamp"));
+        }
+
+        [TestCase(null, "REWARD_001", "BOSS_001", "sha256:01", 1L)]
+        [TestCase("ENCOUNTER_001", "", "BOSS_001", "sha256:01", 1L)]
+        [TestCase("ENCOUNTER_001", "REWARD_001", " ", "sha256:01", 1L)]
+        [TestCase("ENCOUNTER_001", "REWARD_001", "BOSS_001", "", 1L)]
+        [TestCase("ENCOUNTER_001", "REWARD_001", "BOSS_001", "sha256:01", 0L)]
+        public void AppliedBossLootLedgerRejectsIncompleteEntries(
+            string encounterId,
+            string rewardResultId,
+            string bossId,
+            string rewardDigest,
+            long committedTimestamp)
+        {
+            object save = CreateSaveWithAppliedBossLootReward(
+                encounterId,
+                rewardResultId,
+                bossId,
+                rewardDigest,
+                committedTimestamp);
+
+            Assert.False(InvokeValidateSaveSemantics(save, out string error));
+            Assert.IsNotEmpty(error);
+        }
+
+        [Test]
+        public void AppliedBossLootLedgerRejectsDuplicateAndConflictingIdentities()
+        {
+            Type rewardType = GetRuntimeType("AL.Data.Runtime.AppliedBossLootRewardState");
+            object save = CreateSaveWithAppliedBossLootReward(
+                "ENCOUNTER_001",
+                "REWARD_001",
+                "BOSS_001",
+                "sha256:01",
+                1L);
+            IList rewards = (IList)GetField(save, "AppliedBossLootRewards");
+
+            object duplicate = Activator.CreateInstance(rewardType);
+            SetField(duplicate, "EncounterId", "ENCOUNTER_001");
+            SetField(duplicate, "RewardResultId", "REWARD_002");
+            SetField(duplicate, "BossId", "BOSS_001");
+            SetField(duplicate, "RewardDigest", "sha256:02");
+            SetField(duplicate, "CommittedTimestamp", 2L);
+            rewards.Add(duplicate);
+
+            Assert.False(InvokeValidateSaveSemantics(save, out string error));
+            Assert.That(error, Does.Contain("conflicting"));
+        }
+
+        [Test]
+        public void AppliedBossLootLedgerRejectsNullEntry()
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type rewardType = GetRuntimeType("AL.Data.Runtime.AppliedBossLootRewardState");
+            object save = Activator.CreateInstance(saveType);
+            IList rewards = CreateRuntimeList(rewardType);
+            rewards.Add(null);
+            SetField(save, "AppliedBossLootRewards", rewards);
+            InvokeEnsureSaveDefaults(save);
+
+            Assert.False(InvokeValidateSaveSemantics(save, out string error));
+            Assert.That(error, Does.Contain("null entry"));
         }
 
         private static SaveSemanticValidationPolicy CreateSemanticPolicy()
@@ -4320,6 +4416,42 @@ namespace AL.Tests.EditMode
                 BindingFlags.Static | BindingFlags.NonPublic);
             Assert.NotNull(method);
             method.Invoke(null, new[] { save });
+        }
+
+        private static bool InvokeValidateSaveSemantics(object save, out string error)
+        {
+            Type serviceType = GetRuntimeType("AL.Services.Local.LocalSaveGameService");
+            MethodInfo method = serviceType.GetMethod(
+                "ValidateSaveSemantics",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(method);
+            object[] arguments = { save, null };
+            bool result = (bool)method.Invoke(null, arguments);
+            error = (string)arguments[1];
+            return result;
+        }
+
+        private static object CreateSaveWithAppliedBossLootReward(
+            string encounterId,
+            string rewardResultId,
+            string bossId,
+            string rewardDigest,
+            long committedTimestamp)
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type rewardType = GetRuntimeType("AL.Data.Runtime.AppliedBossLootRewardState");
+            object save = Activator.CreateInstance(saveType);
+            object reward = Activator.CreateInstance(rewardType);
+            SetField(reward, "EncounterId", encounterId);
+            SetField(reward, "RewardResultId", rewardResultId);
+            SetField(reward, "BossId", bossId);
+            SetField(reward, "RewardDigest", rewardDigest);
+            SetField(reward, "CommittedTimestamp", committedTimestamp);
+            IList rewards = CreateRuntimeList(rewardType);
+            rewards.Add(reward);
+            SetField(save, "AppliedBossLootRewards", rewards);
+            InvokeEnsureSaveDefaults(save);
+            return save;
         }
 
         private static object Invoke(object target, string methodName, params object[] args)
