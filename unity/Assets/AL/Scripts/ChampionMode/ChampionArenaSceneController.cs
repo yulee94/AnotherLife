@@ -128,10 +128,22 @@ namespace AL.ChampionMode
         private RuntimePlatformQualityController _qualityController;
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
+        private RealmId _realmId = RealmId.None;
 
         private void Start()
         {
             Bootloader.InitializeIfMissing();
+            ChampionRealmContextResult realmContext = ChampionRealmContext.ResolveRegistered();
+            if (!realmContext.IsAvailable)
+            {
+                Debug.LogError(
+                    $"{realmContext.TechnicalCode}: Champion arena unavailable for realm identity status " +
+                    $"{realmContext.IdentityStatus}.");
+                enabled = false;
+                return;
+            }
+
+            _realmId = realmContext.RealmId;
             ApplyRuntimeQuality();
             BuildArena();
             BuildHud();
@@ -188,7 +200,7 @@ namespace AL.ChampionMode
         {
             ConfigureArenaLighting();
             BuildArenaEnvironment();
-            Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
+            Color realmAccent = GetRealmAccentColor(_realmId);
 
             var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Champion";
@@ -198,6 +210,7 @@ namespace AL.ChampionMode
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
             _playerController = player.AddComponent<ChampionController>();
+            _playerController.ConfigureRealmContext(_realmId);
             ProceduralChampionModelBuilder.EnsureModel(player);
             _playerCustomization = player.AddComponent<ChampionCustomizationController>();
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
@@ -223,6 +236,7 @@ namespace AL.ChampionMode
             ApplyMaterial(boss, new Color(0.20f, 0.03f, 0.05f), 0.2f, 0.42f);
             DressBossVisual(boss);
             _boss = boss.AddComponent<BossDummyAI>();
+            _boss.ConfigureRealmContext(_realmId);
             _boss.LootRolled += HandleBossLootRolled;
             _bossTransform = boss.transform;
             CreateIntroCinematicCues(player.transform, boss.transform, realmAccent);
@@ -277,7 +291,7 @@ namespace AL.ChampionMode
         {
             var environment = new GameObject("ChampionArena_ObsidianCitadel").transform;
             var atmospherePulse = environment.gameObject.AddComponent<ArenaAtmospherePulse>();
-            Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
+            Color realmAccent = GetRealmAccentColor(_realmId);
             Color riftRed = new Color(1f, 0.18f, 0.08f);
             Color coldBlue = new Color(0.24f, 0.56f, 1f);
 
@@ -584,7 +598,7 @@ namespace AL.ChampionMode
         {
             var spawnerObject = new GameObject("RvrBotSpawner");
             _rvrBotSpawner = spawnerObject.AddComponent<RvrBotSpawner>();
-            _rvrBotSpawner.Configure(_playerController.transform, _bossTransform, GetCurrentRealmId(), _botChampionCount);
+            _rvrBotSpawner.Configure(_playerController.transform, _bossTransform, _realmId, _botChampionCount);
         }
 
         private void CreateWeather()
@@ -592,7 +606,7 @@ namespace AL.ChampionMode
             var weatherObject = new GameObject("Warzone_BattleFog_Weather");
             weatherObject.transform.position = new Vector3(0f, 6f, 0f);
             var weather = weatherObject.AddComponent<RuntimeWeatherController>();
-            weather.ConfigureForRealm(GetCurrentRealmId());
+            weather.ConfigureForRealm(_realmId);
             if (_qualityController != null)
             {
                 weather.ApplyParticleBudgetMultiplier(_qualityController.GetWeatherParticleMultiplier());
@@ -712,7 +726,7 @@ namespace AL.ChampionMode
             var markerObject = new GameObject("WorldObjectiveMarkers");
             markerObject.transform.position = Vector3.zero;
             int markerBudget = _qualityController != null ? _qualityController.GetWorldMarkerBudget(8) : 8;
-            markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(GetCurrentRealmId(), markerBudget);
+            markerObject.AddComponent<WorldObjectiveMarkerSpawner>().Configure(_realmId, markerBudget);
         }
 
         private void CreateIntroCinematicCues(Transform player, Transform boss, Color realmAccent)
@@ -762,19 +776,6 @@ namespace AL.ChampionMode
             var cue = root.AddComponent<ChampionIntroCinematicCue>();
             cue.Configure(heroHalo.transform, heroInner.transform, bossHalo.transform, bossInner.transform);
             root.SetActive(false);
-        }
-
-        private RealmId GetCurrentRealmId()
-        {
-            try
-            {
-                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
-            }
-            catch (System.Exception)
-            {
-                return RealmId.Crownlands;
-            }
         }
 
         private static Color GetRealmAccentColor(RealmId realmId)
@@ -1705,7 +1706,7 @@ namespace AL.ChampionMode
                 return;
             }
 
-            Color realmAccent = GetRealmAccentColor(GetCurrentRealmId());
+            Color realmAccent = GetRealmAccentColor(_realmId);
             var root = new GameObject("ChampionClearShowcaseVfx");
             root.transform.position = _playerController.transform.position + Vector3.up * 0.035f;
             CreateArenaPrimitive(root.transform, "Clear_OuterHalo", PrimitiveType.Cylinder, Vector3.zero, new Vector3(3.35f, 0.018f, 3.35f), Vector3.zero, gradeColor, true, 0f, 0.90f);

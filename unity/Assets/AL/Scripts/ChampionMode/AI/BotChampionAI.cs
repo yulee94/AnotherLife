@@ -8,8 +8,8 @@ namespace AL.ChampionMode.AI
     public class BotChampionAI : MonoBehaviour
     {
         [Header("Realm")]
-        [SerializeField] private RealmId _realmId = RealmId.Crownlands;
-        [SerializeField] private RealmId _playerRealm = RealmId.Crownlands;
+        [SerializeField] private RealmId _realmId = RealmId.None;
+        [SerializeField] private RealmId _playerRealm = RealmId.None;
 
         [Header("Stats")]
         [SerializeField] private float _maxHealth = 260f;
@@ -34,7 +34,8 @@ namespace AL.ChampionMode.AI
         private bool _isDead;
 
         public RealmId RealmId => _realmId;
-        public bool IsAlive => !_isDead && gameObject.activeInHierarchy;
+        public bool IsAlive => HasRealmContext && enabled && !_isDead && gameObject.activeInHierarchy;
+        private bool HasRealmContext => _realmId != RealmId.None && _playerRealm != RealmId.None;
 
         private void Awake()
         {
@@ -44,6 +45,12 @@ namespace AL.ChampionMode.AI
 
         private void Start()
         {
+            if (!HasRealmContext)
+            {
+                enabled = false;
+                return;
+            }
+
             if (_fallbackObjective == null)
             {
                 var player = GameObject.FindGameObjectWithTag("Player");
@@ -58,11 +65,20 @@ namespace AL.ChampionMode.AI
 
         public void Configure(RealmId realmId, RealmId playerRealm, Transform fallbackObjective, Vector3 arenaCenter, float arenaRadius, float moveSpeedScale)
         {
-            _realmId = realmId;
-            _playerRealm = playerRealm == RealmId.None ? RealmId.Crownlands : playerRealm;
+            _realmId = ChampionRealmContext.Normalize(realmId);
+            _playerRealm = ChampionRealmContext.Normalize(playerRealm);
             _fallbackObjective = fallbackObjective;
             _arenaCenter = arenaCenter;
             _arenaRadius = Mathf.Max(8f, arenaRadius);
+            enabled = HasRealmContext;
+            if (!enabled)
+            {
+                _target = null;
+                _targetBot = null;
+                _targetPlayerCombat = null;
+                return;
+            }
+
             _moveSpeed *= Mathf.Max(0.5f, moveSpeedScale);
             _attackCooldown += Random.Range(-0.25f, 0.35f);
             _targetRefreshSeconds += Random.Range(-0.2f, 0.35f);
@@ -73,7 +89,7 @@ namespace AL.ChampionMode.AI
 
         public void TakeDamage(float amount, RealmId attackerRealm)
         {
-            if (_isDead || amount <= 0f)
+            if (!HasRealmContext || !enabled || _isDead || amount <= 0f)
             {
                 return;
             }
@@ -91,7 +107,7 @@ namespace AL.ChampionMode.AI
 
         private void Update()
         {
-            if (_isDead)
+            if (!HasRealmContext || _isDead)
             {
                 return;
             }
@@ -123,6 +139,14 @@ namespace AL.ChampionMode.AI
 
         private void ChooseTarget(bool force)
         {
+            if (!HasRealmContext)
+            {
+                _target = null;
+                _targetBot = null;
+                _targetPlayerCombat = null;
+                return;
+            }
+
             if (!force && _target != null && IsTargetAlive())
             {
                 _nextTargetRefreshTime = Time.time + _targetRefreshSeconds;
@@ -197,6 +221,11 @@ namespace AL.ChampionMode.AI
 
         private void AttackTarget()
         {
+            if (!HasRealmContext)
+            {
+                return;
+            }
+
             _nextAttackTime = Time.time + Mathf.Max(0.25f, _attackCooldown + Random.Range(-0.2f, 0.3f));
             SkillEffectFactory.SpawnRealmImpact(transform.position + Vector3.up, _realmId);
 
