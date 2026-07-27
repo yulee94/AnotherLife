@@ -1,0 +1,234 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_quest_preview_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_quest_preview_source_v001",
+  "idFormat": "lowercase_snake_case_for_catalog_ids",
+  "sourceAuthorities": {
+    "primaryMode": "codex_narrative_content",
+    "consumerIssue": 186,
+    "nvsCatalog": "unity/Assets/StreamingAssets/AL/Narrative/OMEN_1.catalog.json",
+    "nvsPacketVersion": "omen1-a1-2026-07-22-v002",
+    "worldAtlasCatalog": "al_world_atlas_narrative_catalog",
+    "routeBoundaryIssue": 133,
+    "notificationIssue": 177
+  },
+  "previewPolicy": {
+    "releaseRole": "unavailable_until_engineering_contract",
+    "approvedDebugRole": "read_only_catalog_preview",
+    "authoritativeProgressSource": "future_unity_quest_runtime",
+    "androidSimulationRows": "legacy_demo_input_only",
+    "internalIdsPlayerFacingPolicy": "debug_only",
+    "unavailableRuntimeBehavior": "visible_nonmutating_status",
+    "duplicateTapPolicy": "future_engineering_idempotent_request",
+    "nonGoals": [
+      "android_simulation_progress_authority",
+      "reward_claim_mutation",
+      "quest_state_persistence",
+      "unity_scene_launch",
+      "account_realm_mutation",
+      "save_migration",
+      "hard_coded_release_copy"
+    ]
+  },
+  "actions": [
+    {
+      "id": "action_preview_read",
+      "displayNameKey": "quest_preview.action.preview_read.name",
+      "status": "approved_debug_only",
+      "mutatesAuthoritativeState": false
+    },
+    {
+      "id": "action_deploy_champion",
+      "displayNameKey": "quest_preview.action.deploy_champion.name",
+      "sourceSemanticAction": "REQUEST_SKY_CASTLE_ARENA",
+      "requiredCapability": "HOOK_SKY_CASTLE_ARENA",
+      "status": "requested_unavailable",
+      "mutatesAuthoritativeState": false
+    },
+    {
+      "id": "action_retry_sky_castle_arena",
+      "displayNameKey": "quest_preview.action.retry_sky_castle_arena.name",
+      "sourceSemanticAction": "RETRY_SKY_CASTLE_ARENA",
+      "requiredCapability": "HOOK_SKY_CASTLE_ARENA",
+      "status": "requested_unavailable",
+      "mutatesAuthoritativeState": false
+    },
+    {
+      "id": "action_present_celestial_tear",
+      "displayNameKey": "quest_preview.action.present_celestial_tear.name",
+      "sourceSemanticAction": "DLG_OMEN_1_REPORT_CONCLUSION",
+      "requiredState": "REPORT_TO_VALERIUS",
+      "status": "future_runtime_only",
+      "mutatesAuthoritativeState": false
+    }
+  ],
+  "prohibitedReleaseActions": [
+    {
+      "id": "action_start_story",
+      "reason": "OMEN_1 source uses Deploy Champion through REQUEST_SKY_CASTLE_ARENA; generic Start Story is not approved release copy or behavior."
+    },
+    {
+      "id": "action_claim_generic_reward",
+      "reason": "OMEN_1 grants Gold and affinity only at DLG_OMEN_1_REPORT_CONCLUSION; a generic CLAIM REWARD: 500 GOLD button is not approved."
+    },
+    {
+      "id": "action_locate_internal_marker",
+      "reason": "Internal marker IDs such as SKY_CASTLE and ANCIENT_PORTAL are debug identifiers, not player-facing labels."
+    }
+  ],
+  "locationMarkers": [
+    {
+      "id": "location_sky_castle_marker",
+      "legacyMarkerId": "SKY_CASTLE",
+      "displayNameKey": "quest_preview.marker.sky_castle.name",
+      "summaryKey": "quest_preview.marker.sky_castle.summary",
+      "worldAtlasZoneId": "zone_sky_castle_marker",
+      "status": "requested_unavailable"
+    }
+  ],
+  "questPreviews": [
+    {
+      "id": "quest_preview_omen_1",
+      "questId": "OMEN_1",
+      "sourceVersion": "omen1-a1-2026-07-22-v002",
+      "previewRole": "read_only_catalog_preview",
+      "releaseAvailability": "hidden_until_engineering_contract",
+      "titleKey": "quest.omen1.title",
+      "descriptionKey": "quest.omen1.description",
+      "speakerId": "NPC_VALERIUS",
+      "locationMarkerId": "location_sky_castle_marker",
+      "progressModel": {
+        "kind": "authoritative_state_machine",
+        "validStates": [
+          "OFFERED",
+          "TALK_TO_VALERIUS",
+          "INVESTIGATE_SKY_CASTLE",
+          "FAILED",
+          "REPORT_TO_VALERIUS",
+          "COMPLETED"
+        ],
+        "rawIntegerProgressAllowed": false,
+        "androidProgressBarAuthority": "none_until_validated_runtime_snapshot"
+      },
+      "displayObjectives": [
+        {
+          "objectiveId": "OBJ_OMEN_1_TALK",
+          "textKey": "objective.omen1.talk"
+        },
+        {
+          "objectiveId": "OBJ_OMEN_1_ARENA",
+          "textKey": "objective.omen1.arena"
+        },
+        {
+          "objectiveId": "OBJ_OMEN_1_REPORT",
+          "textKey": "objective.omen1.report"
+        }
+      ],
+      "rewardSummaryKeys": [
+        "artifact.celestial_tear.name",
+        "reward.omen1.gold",
+        "reward.omen1.valerius_affinity"
+      ],
+      "rewardTiming": [
+        {
+          "rewardId": "ARTIFACT_CELESTIAL_TEAR",
+          "trigger": "EVENT_SKY_CASTLE_ARENA_SUCCESS",
+          "manualClaimAllowed": false
+        },
+        {
+          "rewardId": "GRANT_GOLD_500",
+          "trigger": "DLG_OMEN_1_REPORT_CONCLUSION",
+          "manualClaimAllowed": false
+        },
+        {
+          "rewardId": "GRANT_VALERIUS_AFFINITY_5",
+          "trigger": "DLG_OMEN_1_REPORT_CONCLUSION",
+          "manualClaimAllowed": false
+        }
+      ],
+      "availableActions": [
+        "action_preview_read",
+        "action_deploy_champion",
+        "action_retry_sky_castle_arena",
+        "action_present_celestial_tear"
+      ]
+    },
+    {
+      "id": "quest_preview_omen_2_legacy_demo",
+      "questId": "OMEN_2",
+      "previewRole": "legacy_demo_row_only",
+      "releaseAvailability": "hidden",
+      "status": "not_approved_source",
+      "reason": "No approved A1/G1 source packet or runtime capability exists for OMEN_2 in the current milestone."
+    },
+    {
+      "id": "quest_preview_android_kingdom_legacy_rows",
+      "questId": "android_kingdom_q1_q4",
+      "previewRole": "legacy_demo_rows_only",
+      "releaseAvailability": "hidden",
+      "status": "not_approved_source",
+      "reason": "Q1 through Q4 in KingdomState are Android simulation/demo rows until engineering consumes a validated quest catalog."
+    }
+  ],
+  "statusCopy": [
+    {
+      "id": "status_quest_preview_unavailable",
+      "displayNameKey": "quest_preview.status.unavailable.name",
+      "summaryKey": "quest_preview.status.unavailable.summary"
+    },
+    {
+      "id": "status_runtime_hook_requested",
+      "displayNameKey": "quest_preview.status.runtime_hook_requested.name",
+      "summaryKey": "quest_preview.status.runtime_hook_requested.summary"
+    },
+    {
+      "id": "status_invalid_runtime_snapshot",
+      "displayNameKey": "quest_preview.status.invalid_snapshot.name",
+      "summaryKey": "quest_preview.status.invalid_snapshot.summary"
+    }
+  ],
+  "draftLocalization": [
+    { "key": "quest_preview.action.preview_read.name", "text": "Preview packet" },
+    { "key": "quest_preview.action.deploy_champion.name", "text": "Deploy Champion" },
+    { "key": "quest_preview.action.retry_sky_castle_arena.name", "text": "Try again" },
+    { "key": "quest_preview.action.present_celestial_tear.name", "text": "Present the Celestial Tear" },
+    { "key": "quest_preview.marker.sky_castle.name", "text": "Sky Castle Anomaly" },
+    { "key": "quest_preview.marker.sky_castle.summary", "text": "The requested NVS-01 marker remains unavailable until the Sky Castle arena hook exists." },
+    { "key": "quest_preview.status.unavailable.name", "text": "Quest preview unavailable" },
+    { "key": "quest_preview.status.unavailable.summary", "text": "This route is not part of the release flow until a validated runtime contract is implemented." },
+    { "key": "quest_preview.status.runtime_hook_requested.name", "text": "Runtime hook requested" },
+    { "key": "quest_preview.status.runtime_hook_requested.summary", "text": "The approved source exists, but this action cannot change progress until Unity returns an authoritative result." },
+    { "key": "quest_preview.status.invalid_snapshot.name", "text": "Quest data unavailable" },
+    { "key": "quest_preview.status.invalid_snapshot.summary", "text": "The quest state cannot be shown as progress until the runtime snapshot validates cleanly." },
+    { "key": "quest.omen1.title", "text": "The First Signal" },
+    { "key": "quest.omen1.description", "text": "Investigate a celestial disturbance at the Sky Castle and report what you recover." },
+    { "key": "objective.omen1.talk", "text": "Speak with Captain Valerius." },
+    { "key": "objective.omen1.arena", "text": "Deploy your Champion and investigate the Sky Castle anomaly." },
+    { "key": "objective.omen1.report", "text": "Present the Celestial Tear to Valerius." },
+    { "key": "artifact.celestial_tear.name", "text": "Celestial Tear" },
+    { "key": "reward.omen1.gold", "text": "500 Gold" },
+    { "key": "reward.omen1.valerius_affinity", "text": "Valerius affinity +5" }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 186,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "quest preview IDs are unique",
+      "available action IDs resolve to actions",
+      "display, summary, title, description, objective, and reward keys resolve in draftLocalization or OMEN_1 catalog localization",
+      "OMEN_1 source version matches the approved NVS catalog",
+      "Start Story and generic manual reward claim remain prohibited in release",
+      "legacy Android simulation rows cannot publish as approved quest authority"
+    ],
+    "blockedRuntimeClaims": [
+      "authoritative quest progress",
+      "quest acceptance",
+      "Unity arena launch",
+      "reward claim",
+      "save mutation",
+      "notification emission",
+      "production navigation exposure"
+    ]
+  }
+}
