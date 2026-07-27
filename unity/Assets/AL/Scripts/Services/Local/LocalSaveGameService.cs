@@ -212,6 +212,7 @@ namespace AL.Services.Local
         private const string BackupFileName = "save.backup.json";
         private const string TempFileName = "save.tmp.json";
         private const string PreviousFileName = "save.previous.json";
+        private const string LegacyPreviousFileName = "save.json.previous";
         private const string StageFiveRecoveryMarkerFileName =
             "save.recovery.stage5";
         private const int MaxQuarantinesPerSource = 3;
@@ -313,6 +314,8 @@ namespace AL.Services.Local
         private string BackupPath => Path.Combine(PersistencePath, BackupFileName);
         private string TempPath => Path.Combine(PersistencePath, TempFileName);
         private string PreviousPath => Path.Combine(PersistencePath, PreviousFileName);
+        private string LegacyPreviousPath =>
+            Path.Combine(PersistencePath, LegacyPreviousFileName);
         private string StageFiveRecoveryMarkerPath =>
             Path.Combine(PersistencePath, StageFiveRecoveryMarkerFileName);
 
@@ -530,6 +533,7 @@ namespace AL.Services.Local
                         out bool quarantineEvidenceConflict);
                 if (ReadCanonicalPath(StageFiveRecoveryMarkerPath).Disposition !=
                         SaveFileReadDisposition.Missing ||
+                    HasSaveEvidence(LegacyPreviousPath) ||
                     !quarantineInventoryReadable ||
                     quarantineEvidenceConflict ||
                     orphanedStageFiveMarkers.Count != 0 ||
@@ -545,7 +549,7 @@ namespace AL.Services.Local
                         false);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveryRequired,
-                        "AL-SAVE-ORPHANED-STAGE5-EVIDENCE: A recovery marker, quarantine, or transaction archive survived without canonical generations; it was preserved for explicit recovery.",
+                        "AL-SAVE-ORPHANED-RECOVERY-EVIDENCE: A legacy previous file, recovery marker, quarantine, or transaction archive survived without canonical generations; it was preserved for explicit recovery.",
                         false);
                     return;
                 }
@@ -852,6 +856,7 @@ namespace AL.Services.Local
             if (HasSaveEvidence(SavePath) ||
                 HasSaveEvidence(BackupPath) ||
                 HasSaveEvidence(PreviousPath) ||
+                HasSaveEvidence(LegacyPreviousPath) ||
                 HasSaveEvidence(TempPath) ||
                 HasSaveEvidence(StageFiveRecoveryMarkerPath))
             {
@@ -887,6 +892,7 @@ namespace AL.Services.Local
                 BackupPath,
                 TempPath,
                 PreviousPath,
+                LegacyPreviousPath,
                 StageFiveRecoveryMarkerPath
             };
 
@@ -3600,7 +3606,8 @@ namespace AL.Services.Local
         {
             if (HasSaveEvidence(SavePath) ||
                 HasSaveEvidence(BackupPath) ||
-                HasSaveEvidence(PreviousPath))
+                HasSaveEvidence(PreviousPath) ||
+                HasSaveEvidence(LegacyPreviousPath))
             {
                 return false;
             }

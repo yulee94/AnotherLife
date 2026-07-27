@@ -915,6 +915,7 @@ namespace AL.Tests.EditMode
                 {
                     "save.tmp.json",
                     "save.previous.json",
+                    "save.json.previous",
                     "save.recovery.stage5",
                     $"save.json.corrupt-20260101000000-{Guid.NewGuid():N}",
                     $"save.backup.json.corrupt-20260101000000-{Guid.NewGuid():N}"
@@ -999,6 +1000,33 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(
                 "{ orphaned stage5 evidence",
                 fileSystem.ReadAllText(evidencePath));
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
+        }
+
+        [Test]
+        public void LegacyPreviousEvidenceCountsAsASaveAndBlocksCreation()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            string legacyPreviousPath = Path.Combine(root, "save.json.previous");
+            fileSystem.Files[legacyPreviousPath] = "{ legacy previous fallback";
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+
+            Assert.True((bool)Invoke(service, "HasSave"));
+            Invoke(service, "Load");
+
+            Assert.AreEqual(
+                "RecoveryRequired",
+                GetProperty(service, "LastLoadStatus").ToString());
+            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(
+                "{ legacy previous fallback",
+                fileSystem.ReadAllText(legacyPreviousPath));
             Assert.AreEqual(0, fileSystem.MutationLedger.Count);
         }
 
