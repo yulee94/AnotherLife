@@ -41,7 +41,7 @@ enum class QuestPreviewRole {
     ReadOnlyCatalog
 }
 
-data class QuestPreviewCatalog(
+data class Nvs01CanonicalQuest(
     val schemaVersion: Int,
     val sourceVersion: String,
     val milestoneId: String,
@@ -57,13 +57,35 @@ data class QuestPreviewCatalog(
     val hasRuntimeActions: Boolean = false
 )
 
+data class QuestPreviewCatalog(
+    val schemaVersion: Int,
+    val sourceVersion: String,
+    val presentationVersion: String,
+    val presentationSourceId: String,
+    val milestoneId: String,
+    val questId: String,
+    val title: String,
+    val description: String,
+    val speakerName: String,
+    val speakerRole: String,
+    val objectives: List<QuestPreviewObjective>,
+    val rewardSummaries: List<String>,
+    val locationName: String,
+    val locationSummary: String,
+    val runtimeStatusTitle: String,
+    val runtimeStatusSummary: String,
+    val role: QuestPreviewRole = QuestPreviewRole.ReadOnlyCatalog,
+    val hasAuthoritativeProgress: Boolean = false,
+    val hasRuntimeActions: Boolean = false
+)
+
 data class QuestPreviewObjective(
     val id: String,
     val text: String
 )
 
 object Nvs01PreviewParser {
-    fun parse(raw: String): QuestPreviewCatalog {
+    fun parse(raw: String): Nvs01CanonicalQuest {
         val bytes = raw.toByteArray(StandardCharsets.UTF_8)
         require(bytes.size <= MAX_NVS01_PREVIEW_CATALOG_BYTES) {
             "OMEN_1 catalog exceeds the $MAX_NVS01_PREVIEW_CATALOG_BYTES-byte Android limit."
@@ -237,7 +259,7 @@ object Nvs01PreviewParser {
             "OMEN_1 catalog content drifted from the approved canonical source."
         }
 
-        return QuestPreviewCatalog(
+        return Nvs01CanonicalQuest(
             schemaVersion = schemaVersion,
             sourceVersion = sourceVersion,
             milestoneId = milestoneId,

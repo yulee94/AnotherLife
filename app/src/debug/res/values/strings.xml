@@ -1,5 +1,6 @@
 <resources>
     <string name="quest_preview_screen_title">Quest source</string>
+    <string name="quest_preview_back">Back to narrative debug</string>
     <string name="quest_preview_source_identity">Source %1$s</string>
     <string name="quest_preview_read_only">Read-only catalog preview</string>
     <string name="quest_preview_role_description">This developer view cannot change quest progress, rewards, or saved game state.</string>
@@ -8,6 +9,7 @@
     <string name="quest_preview_unavailable_body">The preview is disabled because its canonical source did not pass validation.</string>
     <string name="quest_preview_debug_detail">Validation detail: %1$s</string>
     <string name="quest_preview_objectives">Objectives</string>
+    <string name="quest_preview_objective_description">Objective %1$d of %2$d: %3$s</string>
+    <string name="quest_preview_location">Location</string>
     <string name="quest_preview_rewards">Approved rewards</string>
-    <string name="quest_preview_runtime_unavailable">Progress and gameplay actions are available only in the authoritative Unity runtime.</string>
 </resources>

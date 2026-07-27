@@ -24,8 +24,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.listSaver
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -75,7 +81,9 @@ fun AnotherLifeShell() {
     }
 
     // Navigation 3 Backstack: snapshot-state backed list of keys
-    val backStack = remember { mutableStateListOf<Any>(Route.Kingdom) }
+    val backStack = rememberSaveable(saver = routeBackStackSaver) {
+        mutableStateListOf(Route.Kingdom)
+    }
     val routeNotice = remember { mutableStateOf<String?>(null) }
     LaunchedEffect(debugToolsEnabled, backStack.toList()) {
         val sanitized = ShellRoutePolicy.sanitizeBackStack(backStack, debugToolsEnabled)
@@ -87,13 +95,24 @@ fun AnotherLifeShell() {
     }
     val currentKey = backStack.lastOrNull() ?: Route.Kingdom
     val currentRoute = ShellRoutePolicy.resolveRoute(currentKey, debugToolsEnabled).route
+    val selectedNavigationRoute = ShellRoutePolicy.navigationSelection(currentRoute)
+    val useSelectedOnlyLabels = LocalDensity.current.fontScale >= 1.3f
+    val navigateBack: () -> Unit = {
+        if (backStack.size > 1) {
+            backStack.removeAt(backStack.lastIndex)
+        } else {
+            backStack.clear()
+            backStack.add(Route.Kingdom)
+        }
+    }
 
     Scaffold(
         bottomBar = {
             NavigationBar {
                 ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled).forEach { route ->
+                    val isSelected = selectedNavigationRoute == route
                     NavigationBarItem(
-                        selected = currentRoute == route,
+                        selected = isSelected,
                         onClick = {
                             if (route == Route.Kingdom) {
                                 backStack.clear()
@@ -103,7 +122,15 @@ fun AnotherLifeShell() {
                             }
                         },
                         icon = { Icon(iconForRoute(route), contentDescription = labelForRoute(route)) },
-                        label = { Text(labelForRoute(route)) }
+                        label = {
+                            Text(
+                                text = labelForRoute(route),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                softWrap = false
+                            )
+                        },
+                        alwaysShowLabel = !useSelectedOnlyLabels
                     )
                 }
             }
@@ -128,7 +155,7 @@ fun AnotherLifeShell() {
             // NavDisplay observes the backstack and reflects state changes in the UI
             NavDisplay(
                 backStack = backStack,
-                onBack = { if (backStack.size > 1) backStack.removeAt(backStack.size - 1) },
+                onBack = navigateBack,
                 modifier = Modifier
                     .fillMaxSize(),
                 entryProvider = { key ->
@@ -141,7 +168,7 @@ fun AnotherLifeShell() {
                             DossierScreen(state = kingdomState, narrative = narrativeState)
                         }
                         Route.Quest -> NavEntry(resolvedRoute) {
-                            QuestPreviewRoute()
+                            QuestPreviewRoute(onBack = navigateBack)
                         }
                         Route.Champion -> NavEntry(resolvedRoute) { AcademyScreen(state = kingdomState) }
                         Route.Battle -> NavEntry(resolvedRoute) { BattleSimulatorScreen(state = kingdomState) }
@@ -187,6 +214,18 @@ fun AnotherLifeShell() {
         )
     }
 }
+
+private val routeBackStackSaver = listSaver<SnapshotStateList<Route>, String>(
+    save = { backStack ->
+        backStack.map(ShellRoutePolicy::persistenceKey)
+    },
+    restore = { savedKeys ->
+        savedKeys
+            .mapNotNull(ShellRoutePolicy::routeFromPersistenceKey)
+            .ifEmpty { listOf(Route.Kingdom) }
+            .toMutableStateList()
+    }
+)
 
 /**
  * Helper to find dialogue nodes across authored packets.
