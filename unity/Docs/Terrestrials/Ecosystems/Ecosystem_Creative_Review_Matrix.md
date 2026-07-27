@@ -8,6 +8,7 @@
 - Companion habitat/fauna source: `tdf-eco-moonroot-2026-07-27-v001`
 - Foundation normalization source:
   `tdf-foundation-fauna-normalization-2026-07-27-v001`
+- Stonehold habitat companion: `tdf-eco-faultroad-2026-07-27-v001`
 - Primary Codex mode: `terrestrial-design`
 - Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
@@ -35,7 +36,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 
 | Habitat ID | State | Exact visual source | Primary future review question |
 | --- | --- | --- | --- |
-| `tdf_habitat_stonehold_faultroad_escarpment` | `RosterProposed` | none | Does the fault-road and compressed crown ridge read as Stonehold without dust, snow, or forge light? |
+| `tdf_habitat_stonehold_faultroad_escarpment` | `ReadyForUserReview` | establishing/scale/reduction, layout/transition, and material/kit/LOD sheets | Resolve remaining masonry-like joints, replace illustrative section/plinth with measured orthographic evidence, and lock prop dimension/repetition bands. |
 | `tdf_habitat_stonehold_rimecut_pass` | `RosterProposed` | none | Is the pass notch navigable and distinctive without a whiteout or ice sparkle? |
 | `tdf_habitat_stonehold_ore_gallery_mouths` | `RosterProposed` | none | Do cave mouths, columns, and ground plane remain readable without colored fog or glowing ore? |
 | `tdf_habitat_stonehold_slagfall_quarry` | `RosterProposed` | none | Do cooled slag terraces look physically settled rather than like a permanent lava theme? |
@@ -56,7 +57,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 
 | Family ID | State | Existing exact source | User approval | Required next source |
 | --- | --- | --- | --- | --- |
-| `tdf_basalt_grazer` | `ReadyForUserReview` | normalized immutable base sheet with exact hash/LFS/GUID evidence | not requested | rear/top/underside, plate/limb roots, motion/contact, measured LOD, and habitat-placement review |
+| `tdf_basalt_grazer` | `ReadyForUserReview` | normalized immutable base sheet plus exact Faultroad scale/contact/reduced-placement evidence | not requested | rear/top/underside, plate/limb roots, motion/contact, and measured fauna LOD; habitat placement concern now bounded by Faultroad QA |
 | `tdf_fauna_stonehold_rimefan_kite` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | resolve `PassWithConcern` skull, wing-group, and wedge-tail consistency |
 | `tdf_fauna_stonehold_oreveil_isopod` | `ProposedTextOnly` | none | not requested | top/side/front anatomy, plate count, curl, locomotion/contact sheet |
 | `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
@@ -90,6 +91,13 @@ sheets are `ReadyForUserReview` with `PassWithConcern`; no raster is copied or
 regenerated. Six unpictured palette-led variants remain `ProposedTextOnly`.
 Missing orthographic, attachment, motion/contact, measured LOD, habitat
 placement, and Player dependency evidence remain production blocks.
+
+The Faultroad habitat and Basalt Grazer placement evidence are governed by
+`unity/Docs/Terrestrials/Ecosystems/FaultroadEscarpment/`. The habitat is
+`ReadyForUserReview` with `PassWithConcern`; the existing Grazer identity
+remains governed by `FoundationFauna/`. Remaining masonry-like joints,
+illustrative rather than measured section evidence, prop modularity/repetition,
+camera coverage, and production measurements remain blocking.
 
 ## Inherited Boss And Elite Anchors
 
