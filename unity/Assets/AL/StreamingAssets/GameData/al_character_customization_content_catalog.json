@@ -1,0 +1,246 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_character_customization_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_character_customization_labels_v001",
+  "idFormat": "lowercase_snake_case",
+  "authority": {
+    "primaryMode": "codex_narrative_content",
+    "technicalCatalogId": "al_character_customization_catalog",
+    "technicalCatalogVersion": "0.5.0",
+    "contentScope": [
+      "option display names",
+      "forge preset display names",
+      "forge preset summaries",
+      "localization keys",
+      "identity meaning guardrails"
+    ],
+    "nonGoals": [
+      "appearance balance",
+      "body scale changes",
+      "RGB value changes",
+      "model capability authority",
+      "save migration",
+      "runtime mutation"
+    ]
+  },
+  "localizationPolicy": {
+    "keyPrefix": "customization",
+    "missingKeyBehavior": "technical_unavailable_status",
+    "releaseCopyApproval": "user_final_visual_and_product_gate",
+    "internalIdExposure": "debug_only"
+  },
+  "families": [
+    {
+      "id": "body_presets",
+      "displayNameKey": "customization.family.body_presets.name",
+      "optionKeys": [
+        { "id": "average", "displayNameKey": "customization.body.average.name" },
+        { "id": "slim", "displayNameKey": "customization.body.slim.name" },
+        { "id": "broad", "displayNameKey": "customization.body.broad.name" },
+        { "id": "tall", "displayNameKey": "customization.body.tall.name" },
+        { "id": "stout", "displayNameKey": "customization.body.stout.name" },
+        { "id": "duelist", "displayNameKey": "customization.body.duelist.name" },
+        { "id": "statuesque", "displayNameKey": "customization.body.statuesque.name" },
+        { "id": "massive", "displayNameKey": "customization.body.massive.name" },
+        { "id": "compact", "displayNameKey": "customization.body.compact.name" }
+      ]
+    },
+    {
+      "id": "hair_styles",
+      "displayNameKey": "customization.family.hair_styles.name",
+      "optionKeys": [
+        { "id": "short", "displayNameKey": "customization.hair.short.name" },
+        { "id": "long", "displayNameKey": "customization.hair.long.name" },
+        { "id": "braid", "displayNameKey": "customization.hair.braid.name" },
+        { "id": "mohawk", "displayNameKey": "customization.hair.mohawk.name" },
+        { "id": "topknot", "displayNameKey": "customization.hair.topknot.name" }
+      ]
+    },
+    {
+      "id": "armor_styles",
+      "displayNameKey": "customization.family.armor_styles.name",
+      "optionKeys": [
+        { "id": "realm_basic", "displayNameKey": "customization.armor.realm_basic.name" },
+        { "id": "light_scout", "displayNameKey": "customization.armor.light_scout.name" },
+        { "id": "heavy_plate", "displayNameKey": "customization.armor.heavy_plate.name" },
+        { "id": "warmaster_plate", "displayNameKey": "customization.armor.warmaster_plate.name" },
+        { "id": "arcane_robes", "displayNameKey": "customization.armor.arcane_robes.name" },
+        { "id": "assassin_leathers", "displayNameKey": "customization.armor.assassin_leathers.name" }
+      ]
+    },
+    {
+      "id": "face_marks",
+      "displayNameKey": "customization.family.face_marks.name",
+      "optionKeys": [
+        { "id": "none", "displayNameKey": "customization.face.none.name" },
+        { "id": "scar", "displayNameKey": "customization.face.scar.name" },
+        { "id": "warpaint", "displayNameKey": "customization.face.warpaint.name" },
+        { "id": "realm_mark", "displayNameKey": "customization.face.realm_mark.name" },
+        { "id": "rune", "displayNameKey": "customization.face.rune.name" },
+        { "id": "tattoo", "displayNameKey": "customization.face.tattoo.name" },
+        { "id": "beard", "displayNameKey": "customization.face.beard.name" },
+        { "id": "duelist_scar", "displayNameKey": "customization.face.duelist_scar.name" },
+        { "id": "ash_mask", "displayNameKey": "customization.face.ash_mask.name" }
+      ]
+    },
+    {
+      "id": "weapon_styles",
+      "displayNameKey": "customization.family.weapon_styles.name",
+      "optionKeys": [
+        { "id": "sword", "displayNameKey": "customization.weapon.sword.name" },
+        { "id": "axe", "displayNameKey": "customization.weapon.axe.name" },
+        { "id": "staff", "displayNameKey": "customization.weapon.staff.name" },
+        { "id": "bow", "displayNameKey": "customization.weapon.bow.name" },
+        { "id": "hammer", "displayNameKey": "customization.weapon.hammer.name" }
+      ]
+    },
+    {
+      "id": "offhand_styles",
+      "displayNameKey": "customization.family.offhand_styles.name",
+      "optionKeys": [
+        { "id": "shield", "displayNameKey": "customization.offhand.shield.name" },
+        { "id": "orb", "displayNameKey": "customization.offhand.orb.name" },
+        { "id": "dagger", "displayNameKey": "customization.offhand.dagger.name" },
+        { "id": "tome", "displayNameKey": "customization.offhand.tome.name" },
+        { "id": "none", "displayNameKey": "customization.offhand.none.name" }
+      ]
+    }
+  ],
+  "forgePresets": [
+    {
+      "id": "vanguard",
+      "displayNameKey": "customization.preset.vanguard.name",
+      "summaryKey": "customization.preset.vanguard.summary",
+      "identityMeaning": "frontline command and shield discipline"
+    },
+    {
+      "id": "arcanist",
+      "displayNameKey": "customization.preset.arcanist.name",
+      "summaryKey": "customization.preset.arcanist.summary",
+      "identityMeaning": "arcane control and staff-focused battlefield presence"
+    },
+    {
+      "id": "nightblade",
+      "displayNameKey": "customization.preset.nightblade.name",
+      "summaryKey": "customization.preset.nightblade.summary",
+      "identityMeaning": "stealth pressure and precise ranged initiation"
+    },
+    {
+      "id": "dreadknight",
+      "displayNameKey": "customization.preset.dreadknight.name",
+      "summaryKey": "customization.preset.dreadknight.summary",
+      "identityMeaning": "heavy intimidation and ash-dark assault posture"
+    },
+    {
+      "id": "oracle",
+      "displayNameKey": "customization.preset.oracle.name",
+      "summaryKey": "customization.preset.oracle.summary",
+      "identityMeaning": "ritual insight and luminous support presence"
+    },
+    {
+      "id": "duelist",
+      "displayNameKey": "customization.preset.duelist.name",
+      "summaryKey": "customization.preset.duelist.summary",
+      "identityMeaning": "single-target precision and restrained court combat"
+    },
+    {
+      "id": "inquisitor",
+      "displayNameKey": "customization.preset.inquisitor.name",
+      "summaryKey": "customization.preset.inquisitor.summary",
+      "identityMeaning": "severe command, judgment, and controlled pressure"
+    },
+    {
+      "id": "warden",
+      "displayNameKey": "customization.preset.warden.name",
+      "summaryKey": "customization.preset.warden.summary",
+      "identityMeaning": "guardianship, grounded resilience, and shielded advance"
+    },
+    {
+      "id": "spellblade",
+      "displayNameKey": "customization.preset.spellblade.name",
+      "summaryKey": "customization.preset.spellblade.summary",
+      "identityMeaning": "hybrid blade-and-arcana finesse"
+    }
+  ],
+  "draftLocalization": [
+    { "key": "customization.family.body_presets.name", "text": "Build" },
+    { "key": "customization.family.hair_styles.name", "text": "Hair" },
+    { "key": "customization.family.armor_styles.name", "text": "Armor" },
+    { "key": "customization.family.face_marks.name", "text": "Marks" },
+    { "key": "customization.family.weapon_styles.name", "text": "Main Hand" },
+    { "key": "customization.family.offhand_styles.name", "text": "Off Hand" },
+    { "key": "customization.body.average.name", "text": "Average" },
+    { "key": "customization.body.slim.name", "text": "Slim" },
+    { "key": "customization.body.broad.name", "text": "Broad" },
+    { "key": "customization.body.tall.name", "text": "Tall" },
+    { "key": "customization.body.stout.name", "text": "Stout" },
+    { "key": "customization.body.duelist.name", "text": "Duelist" },
+    { "key": "customization.body.statuesque.name", "text": "Statuesque" },
+    { "key": "customization.body.massive.name", "text": "Massive" },
+    { "key": "customization.body.compact.name", "text": "Compact" },
+    { "key": "customization.hair.short.name", "text": "Short" },
+    { "key": "customization.hair.long.name", "text": "Long" },
+    { "key": "customization.hair.braid.name", "text": "Braid" },
+    { "key": "customization.hair.mohawk.name", "text": "Mohawk" },
+    { "key": "customization.hair.topknot.name", "text": "Topknot" },
+    { "key": "customization.armor.realm_basic.name", "text": "Realm Basic" },
+    { "key": "customization.armor.light_scout.name", "text": "Light Scout" },
+    { "key": "customization.armor.heavy_plate.name", "text": "Heavy Plate" },
+    { "key": "customization.armor.warmaster_plate.name", "text": "Warmaster Plate" },
+    { "key": "customization.armor.arcane_robes.name", "text": "Arcane Robes" },
+    { "key": "customization.armor.assassin_leathers.name", "text": "Assassin Leathers" },
+    { "key": "customization.face.none.name", "text": "None" },
+    { "key": "customization.face.scar.name", "text": "Scar" },
+    { "key": "customization.face.warpaint.name", "text": "Warpaint" },
+    { "key": "customization.face.realm_mark.name", "text": "Realm Mark" },
+    { "key": "customization.face.rune.name", "text": "Rune" },
+    { "key": "customization.face.tattoo.name", "text": "Tattoo" },
+    { "key": "customization.face.beard.name", "text": "Beard" },
+    { "key": "customization.face.duelist_scar.name", "text": "Duelist Scar" },
+    { "key": "customization.face.ash_mask.name", "text": "Ash Mask" },
+    { "key": "customization.weapon.sword.name", "text": "Sword" },
+    { "key": "customization.weapon.axe.name", "text": "Axe" },
+    { "key": "customization.weapon.staff.name", "text": "Staff" },
+    { "key": "customization.weapon.bow.name", "text": "Bow" },
+    { "key": "customization.weapon.hammer.name", "text": "Hammer" },
+    { "key": "customization.offhand.shield.name", "text": "Shield" },
+    { "key": "customization.offhand.orb.name", "text": "Orb" },
+    { "key": "customization.offhand.dagger.name", "text": "Dagger" },
+    { "key": "customization.offhand.tome.name", "text": "Tome" },
+    { "key": "customization.offhand.none.name", "text": "None" },
+    { "key": "customization.preset.vanguard.name", "text": "Vanguard" },
+    { "key": "customization.preset.vanguard.summary", "text": "Front-line plate identity with shield discipline and a heavy command silhouette." },
+    { "key": "customization.preset.arcanist.name", "text": "Arcanist" },
+    { "key": "customization.preset.arcanist.summary", "text": "Tall arcane profile with robe volume, staff focus, and cool emissive accents." },
+    { "key": "customization.preset.nightblade.name", "text": "Nightblade" },
+    { "key": "customization.preset.nightblade.summary", "text": "Lean predatory profile with assassin leathers, bow pressure, and dagger offhand." },
+    { "key": "customization.preset.dreadknight.name", "text": "Dreadknight" },
+    { "key": "customization.preset.dreadknight.summary", "text": "Massive warmaster plate identity with hammer pressure, ash mask, shield wall posture, and blood ember accents." },
+    { "key": "customization.preset.oracle.name", "text": "Oracle" },
+    { "key": "customization.preset.oracle.summary", "text": "Statuesque ritual profile with braided hair, staff and orb focus, pale cloth, and luminous green accents." },
+    { "key": "customization.preset.duelist.name", "text": "Duelist" },
+    { "key": "customization.preset.duelist.summary", "text": "Lean precision frame with light scout armor, sword and dagger, copper hair, scar detail, and burnished gold accents." },
+    { "key": "customization.preset.inquisitor.name", "text": "Inquisitor" },
+    { "key": "customization.preset.inquisitor.summary", "text": "Controlled adult command profile with heavy plate, sword and tome, stark battlecloth, and severe gold-lit facial detail." },
+    { "key": "customization.preset.warden.name", "text": "Warden" },
+    { "key": "customization.preset.warden.summary", "text": "Grounded guardian profile with broad armor, braid detail, shield discipline, moss-dark cloth, and controlled green accents." },
+    { "key": "customization.preset.spellblade.name", "text": "Spellblade" },
+    { "key": "customization.preset.spellblade.summary", "text": "Elegant hybrid profile with duelist frame, arcane robes, sword and orb focus, silver hair, and blue-violet arcane accents." }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 184,
+    "requiredValidation": [
+      "content catalog parses as JSON",
+      "all option IDs resolve in al_character_customization_catalog version 0.5.0",
+      "all forge preset IDs resolve in al_character_customization_catalog version 0.5.0",
+      "all displayNameKey and summaryKey values resolve in draftLocalization",
+      "technical services expose keys/status rather than formatting internal IDs into player-facing text"
+    ],
+    "contentGuardrails": [
+      "preset names and summaries do not grant class, realm, combat, or item authority",
+      "future localization may replace draft text without changing technical IDs",
+      "missing localization is a visible unavailable state and not a silent hard-coded fallback"
+    ]
+  }
+}
