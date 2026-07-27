@@ -705,13 +705,17 @@ namespace AL.Tests.EditMode.Narrative
 
         private static Type ValidatorType() => RuntimeType(ValidatorTypeName);
 
-        private static Type RuntimeType(string fullName, string assemblyName = "Assembly-CSharp")
+        private static Type RuntimeType(string fullName, string assemblyName = null)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(assembly => !assembly.IsDynamic && string.Equals(assembly.GetName().Name, assemblyName, StringComparison.Ordinal))
+                .Where(assembly =>
+                    !assembly.IsDynamic &&
+                    (assemblyName == null ||
+                     string.Equals(assembly.GetName().Name, assemblyName, StringComparison.Ordinal)))
                 .Select(assembly => assembly.GetType(fullName))
                 .FirstOrDefault(candidate => candidate != null);
-            Assert.NotNull(type, "Expected runtime type " + fullName + " in " + assemblyName + ".");
+            string location = assemblyName == null ? "loaded assemblies" : assemblyName;
+            Assert.NotNull(type, "Expected runtime type " + fullName + " in " + location + ".");
             return type;
         }
 

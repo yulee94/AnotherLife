@@ -42,9 +42,9 @@ namespace AL.Tests.EditMode
         private static Type GetRuntimeType(string typeName)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(assembly => assembly.GetName().Name == "Assembly-CSharp")
-                ?.GetType(typeName);
-            Assert.NotNull(type, $"Expected runtime type {typeName} in Assembly-CSharp.");
+                .Select(assembly => assembly.GetType(typeName))
+                .FirstOrDefault(candidate => candidate != null);
+            Assert.NotNull(type, $"Expected loaded runtime type {typeName}.");
             return type;
         }
     }
