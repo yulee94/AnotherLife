@@ -68,6 +68,7 @@ This guide consolidates the active project direction in:
 - [Kingdom Building Level, Placement, and Presentation Design](unity/Docs/Architecture/Kingdom_Building_Level_And_Placement_Design.md)
 - [Eldergrove Workshop Level Progression — approved production source](unity/Assets/AL/Art/Designs/EldergroveWorkshopLevelProgression.md)
 - [Eldergrove Workshop Level Blockout Handoff](unity/Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md)
+- [Eldergrove Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Architecture Android and iOS Compatibility Handoff](unity/Docs/Architecture/Architecture_Mobile_Compatibility_Handoff.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)

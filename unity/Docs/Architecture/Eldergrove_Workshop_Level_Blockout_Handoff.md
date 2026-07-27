@@ -63,8 +63,11 @@ The pass confirms:
 - stone, timber, root, roof, and restrained living-accent separation at mobile
   review scale.
 
-Final curved roof meshes, carved root surfaces, workshop dressing, topology,
-metrics, UVs, atlas layout, colliders, and LODs remain final-model work.
+At this milestone, curved roof meshes, carved root surfaces, workshop dressing,
+topology, metrics, UVs, atlas layout, colliders, LODs, and direct live binding
+were deferred. The project owner subsequently approved those decisions and the
+implemented result is governed by
+`Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md`.
 
 ## Mobile-safety boundary
 
@@ -105,20 +108,22 @@ an unbuilt reserved plot; Level 1 remains the current first built state.
 
 ## Major direction gates
 
+The project owner closed the Eldergrove Workshop metric, topology, atlas,
+collider, LOD, loading, capstone, and direct-binding gates on 2026-07-27.
 Project-owner approval remains required before:
 
 - changing the approved Level 0–10 silhouette ladder or protected root-vault
   entrance;
 - changing the Workshop footprint, entrance orientation, or stable slot
   identity;
-- selecting final metric dimensions, DCC topology, material/atlas strategy,
-  collider boundaries, LOD thresholds, or model-loading strategy;
-- retaining or replacing the Level 10 seed-lantern capstone with a different
-  landmark;
+- replacing the final metric, topology, material/atlas, collider, LOD, or
+  packaged-loading decisions in the final-model/runtime contract;
+- replacing the approved Level 10 six-rib seed-lantern capstone;
 - raising the common-building mobile class or renderer/material/effect budget;
 - allowing visual state to mutate saves, economy, progression, or construction
   completion;
-- binding these review prefabs directly as final live-kingdom models.
+- binding the historical review prefabs directly instead of the packaged
+  production prefab.
 
 ## Rebuild and review
 

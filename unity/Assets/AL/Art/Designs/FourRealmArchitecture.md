@@ -32,6 +32,8 @@
 
 **Eldergrove level-blockout handoff:** [Eldergrove Workshop Level Blockout Handoff](../../../../Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md)
 
+**Eldergrove final model/runtime contract:** [Eldergrove Workshop Final Model and Runtime Binding](../../../../Docs/Architecture/Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md)
+
 **Approved Eldergrove motion reference:** [Eldergrove animation reference v001](../Architecture/ConceptSheets/architecture_eldergrove_animation_reference_v001.png)
 
 **Eldergrove motion contract:** [Eldergrove Architecture Animation Contract](../../../../Docs/Architecture/Eldergrove_Architecture_Animation_Contract.md)
@@ -91,8 +93,9 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - 2026-07-24: Project owner approved the Umbral veilwright architecture and directed development of a distinctive fourth-realm construction and stable-state animation while retaining a visual-safety score above `90 / 100`.
 - 2026-07-24: Project owner clarified that Umbral is the fourth peer realm, not a progression tier or more advanced era. Realm identity may differ in intensity and mood, but no realm is inherently an upgrade over another.
 - 2026-07-27: Project owner approved the Eldergrove Workshop Level `0`–`10` progression sheet after its `93 / 100` visual gate and directed production work to continue.
-- 2026-07-27: The deterministic Eldergrove Level `1`, `6`, and `10` Unity blockouts passed their visual gate at `92 / 100`; final models and live-kingdom binding remain unapproved.
-- Not yet approved: exact gameplay animation timing, final-model calibration binding, worker rules, damage and repair motion, live kingdom integration, element relocation rules, exact grid dimensions, production meshes, topology, materials, colliders, LOD thresholds, atlases, lighting exposure, or measured device performance. The linked envelope, animation contracts, and graybox handoff contain provisional implementation guidance.
+- 2026-07-27: The deterministic Eldergrove Level `1`, `6`, and `10` Unity blockouts passed their visual gate at `92 / 100`; final models and live-kingdom binding were deferred at that milestone.
+- 2026-07-27: Project owner approved final Eldergrove Workshop dimensions, topology, materials/atlas, colliders, LODs, packaged loading, the six-rib Level `10` seed lantern, and direct gameplay-authoritative live-kingdom model binding.
+- Eldergrove Workshop production decisions are now governed by the linked final-model/runtime contract. Still not approved across the broader four-realm set: exact gameplay animation timing, final-model calibration binding, worker rules, damage and repair motion, element relocation rules, production models for the remaining building families, lighting exposure, or measured device performance. The linked envelope, animation contracts, and handoffs remain authoritative for their stated scope.
 
 ## Shared construction rules
 

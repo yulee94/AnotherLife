@@ -1,6 +1,6 @@
 # Eldergrove Workshop Level Progression
 
-**Status:** Owner-approved production source; source gate passed at `93 / 100`; Unity Level 1/6/10 blockout gate passed at `92 / 100`
+**Status:** Owner-approved production source and live runtime model; source gate passed at `93 / 100`; production Level 1/6/10 gate passed at `92 / 100`
 
 **Asset ID:** `building_eldergrove_workshop_v001`
 
@@ -19,6 +19,8 @@
 **Review sheet:** [`architecture_eldergrove_workshop_level_progression_v001.png`](../Architecture/ConceptSheets/architecture_eldergrove_workshop_level_progression_v001.png)
 
 **Unity handoff:** [`Eldergrove_Workshop_Level_Blockout_Handoff.md`](../../../../Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md)
+
+**Final model/runtime contract:** [`Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md`](../../../../Docs/Architecture/Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md)
 
 ## Purpose
 
@@ -48,8 +50,8 @@ The project owner approved the candidate with “Like this! Lets keep going” o
 | Realm | Eldergrove |
 | Stable building identity | `Workshop` |
 | Stable slot identity | `kingdom.slot.workshop` in layout version `kingdom.layout.v1` |
-| Approval state | Owner-approved production source; runtime candidate not yet approved |
-| Scale | Medium common-building family; exact meter footprint remains `OPEN` |
+| Approval state | Owner-approved production source and gameplay-authoritative live runtime binding |
+| Scale | Medium common-building family; `10.0 m × 8.0 m` slot envelope with `9.2 m × 7.0 m × 6.8 m` maximum art bounds |
 | Camera use | Strategic 2.5D kingdom, normal gameplay, selected cutaway, limited inspection |
 | Primary silhouette | Broad stone plinth beneath one load-bearing living-root entrance vault, a layered roof, and a restrained vertical lantern/capstone |
 | Protected negative space | Open Workshop entrance beneath the root vault |
@@ -127,10 +129,10 @@ The common-building ceiling in `DESIGN.md` remains the maximum, not a target.
 
 | Tier | Protected content | Reduction direction |
 | --- | --- | --- |
-| Inspection / LOD0 | Root-vault opening, entrance, level delta, cultivation core, material separation | Start below `20k` triangles, two renderer material families, shared 1K trim/atlas strategy |
-| Normal / LOD1 | Footprint, roof rhythm, root braces, annex/upper mass, capstone | Approximately `50–60%` of approved LOD0 after silhouette review; merge bronze fittings and secondary roots |
-| Strategic / LOD2 | Root-vault opening, dominant roof/annex mass, level silhouette | Approximately `20–30%` of approved LOD0; remove loose props, fine foliage, interior hardware, and small railings |
-| Far proxy | Footprint, entrance notch, roof/capstone profile | Approximately `5–10%` of approved LOD0; static opaque proxy with no activity component |
+| Inspection / LOD0 | Root-vault opening, entrance, level delta, cultivation core, material separation | `4,984` triangles, `10` renderers, transition `0.60` |
+| Normal / LOD1 | Footprint, roof rhythm, root braces, annex/upper mass, capstone | `2,852` triangles (`57.2%` of LOD0), `10` renderers, transition `0.30` |
+| Strategic / LOD2 | Root-vault opening, dominant roof/annex mass, level silhouette | `1,200` triangles (`24.1%` of LOD0), `10` renderers, transition `0.12` |
+| Far proxy / LOD3 | Footprint, entrance notch, roof/capstone profile | `672` triangles (`13.5%` of LOD0), `3` renderers, transition `0.04` |
 
 Additional constraints:
 
@@ -170,9 +172,10 @@ Additional constraints:
 
 - [x] Project owner approved the review sheet as production source on 2026-07-27.
 - [x] Deterministic Level `1`, `6`, and `10` Unity blockouts passed the visual gate at `92 / 100`.
-- [ ] Exact metric footprint and height envelope.
-- [ ] Final module pivots, sockets, and naming after DCC blockout.
-- [ ] Final shared trim/atlas layout and material-slot plan.
-- [ ] Final LOD thresholds after representative iOS and Android profiling.
-- [ ] Whether Level `10` retains the proposed seed-lantern capstone or uses a quieter roof crown.
+- [x] Exact metric footprint, height envelope, pivot, and entrance clearance.
+- [x] Final module hierarchy, cumulative naming, and runtime root identity.
+- [x] One 1024 structural atlas plus one localized accent material.
+- [x] Four LOD bands and topology/renderer ceilings.
+- [x] Level `10` retains the six-rib seed-lantern capstone.
+- [x] Packaged catalog loading and gameplay-authoritative direct binding.
 - [ ] Final damaged, disabled, repairing, selected, and unavailable model treatments.

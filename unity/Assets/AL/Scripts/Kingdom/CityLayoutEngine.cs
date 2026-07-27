@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using AL.Core;
+using AL.Kingdom.Visuals.Architecture;
 
 namespace AL.Kingdom
 {
@@ -24,6 +25,9 @@ namespace AL.Kingdom
             new Dictionary<Vector2Int, KingdomBuildingPresentation>();
         private Transform _visualRoot;
         private RealmId _activeRealmId;
+        private KingdomBuildingModelCatalog _modelCatalog;
+        private bool _modelCatalogResolved;
+        private string _modelCatalogDiagnostic = string.Empty;
 
         public Vector3 GridToWorld(Vector2Int gridPos)
         {
@@ -38,6 +42,7 @@ namespace AL.Kingdom
             IReadOnlyList<KingdomBuildingPresentation> buildings)
         {
             _activeRealmId = realmId;
+            EnsureModelCatalog();
             _occupiedTiles.Clear();
             ClearExistingBuildingVisuals();
 
@@ -110,6 +115,15 @@ namespace AL.Kingdom
                 return;
             }
 
+            if (TrySpawnProductionModel(
+                    buildingRoot.transform,
+                    presentation,
+                    bodyColor,
+                    accentColor))
+            {
+                return;
+            }
+
             var baseObject = CreatePrimitive(buildingRoot.transform, "Base", PrimitiveType.Cube, new Vector3(0f, height * 0.5f, 0f), new Vector3(TileSize * 0.88f, height, TileSize * 0.88f), bodyColor);
             baseObject.AddComponent<KingdomBuildingSelectable>().Configure(
                 presentation.BuildingId,
@@ -167,6 +181,181 @@ namespace AL.Kingdom
             }
 
             CreateLevelBadge(buildingRoot.transform, presentation, height, accentColor);
+        }
+
+        public void ConfigureModelCatalog(
+            KingdomBuildingModelCatalog catalog)
+        {
+            _modelCatalog = catalog;
+            _modelCatalogResolved = true;
+            _modelCatalogDiagnostic = string.Empty;
+            if (_modelCatalog != null)
+            {
+                _modelCatalog.Validate(out _modelCatalogDiagnostic);
+            }
+        }
+
+        private void EnsureModelCatalog()
+        {
+            if (_modelCatalogResolved)
+            {
+                return;
+            }
+
+            _modelCatalogResolved = true;
+            _modelCatalog =
+                KingdomBuildingModelCatalog.LoadDefault();
+            _modelCatalogDiagnostic = string.Empty;
+            if (_modelCatalog != null)
+            {
+                _modelCatalog.Validate(out _modelCatalogDiagnostic);
+            }
+        }
+
+        private bool TrySpawnProductionModel(
+            Transform parent,
+            KingdomBuildingPresentation presentation,
+            Color bodyColor,
+            Color accentColor)
+        {
+            if (_modelCatalog == null ||
+                !_modelCatalog.TryGetEntry(
+                    _activeRealmId,
+                    presentation.BuildingId,
+                    out KingdomBuildingModelEntry entry))
+            {
+                return false;
+            }
+
+            string diagnosticCode = _modelCatalogDiagnostic;
+            KingdomBuildingLevelModel prefabModel =
+                entry?.Prefab == null
+                    ? null
+                    : entry.Prefab.GetComponent<
+                        KingdomBuildingLevelModel>();
+            if (string.IsNullOrEmpty(diagnosticCode) &&
+                (entry == null ||
+                    !entry.IsConfigured ||
+                    !entry.SupportsLevel(
+                        presentation.ConfirmedLevel) ||
+                    prefabModel == null ||
+                    !prefabModel.IsConfigured ||
+                    prefabModel.ModelId != entry.ModelId ||
+                    prefabModel.BuildingId !=
+                        presentation.BuildingId))
+            {
+                diagnosticCode =
+                    KingdomBuildingModelCatalog.InvalidBindingDiagnostic;
+            }
+
+            if (!string.IsNullOrEmpty(diagnosticCode))
+            {
+                CreateProductionModelUnavailable(
+                    parent,
+                    presentation,
+                    accentColor,
+                    diagnosticCode);
+                return true;
+            }
+
+            GameObject instance =
+                Instantiate(entry.Prefab, parent, false);
+            instance.name = "ProductionModel";
+            instance.transform.localPosition = Vector3.zero;
+            instance.transform.localRotation = Quaternion.identity;
+            instance.transform.localScale =
+                Vector3.one * entry.StrategicBoardScale;
+
+            KingdomBuildingLevelModel levelModel =
+                instance.GetComponent<KingdomBuildingLevelModel>();
+            if (!levelModel.ApplyConfirmedLevel(
+                    presentation.ConfirmedLevel))
+            {
+                Destroy(instance);
+                CreateProductionModelUnavailable(
+                    parent,
+                    presentation,
+                    accentColor,
+                    KingdomBuildingModelCatalog.InvalidBindingDiagnostic);
+                return true;
+            }
+
+            var selectable =
+                instance.GetComponent<KingdomBuildingSelectable>() ??
+                instance.AddComponent<KingdomBuildingSelectable>();
+            selectable.Configure(
+                presentation.BuildingId,
+                presentation.ConfirmedLevel,
+                bodyColor,
+                accentColor,
+                presentation.IsUpgrading,
+                GetUpgradeRemainingSeconds(presentation),
+                presentation.DiagnosticCode);
+
+            float boardHeight = Mathf.Lerp(
+                0.58f,
+                0.88f,
+                (presentation.ConfirmedLevel - 1) / 9f);
+            if (presentation.IsUpgrading)
+            {
+                CreateUpgradeIndicator(
+                    parent,
+                    boardHeight,
+                    accentColor,
+                    GetUpgradeRemainingSeconds(presentation));
+            }
+
+            CreateLevelBadge(
+                parent,
+                presentation,
+                boardHeight,
+                accentColor);
+            return true;
+        }
+
+        private void CreateProductionModelUnavailable(
+            Transform parent,
+            KingdomBuildingPresentation presentation,
+            Color accentColor,
+            string diagnosticCode)
+        {
+            Color unavailableColor = new Color(0.72f, 0.12f, 0.16f);
+            GameObject marker = CreatePrimitive(
+                parent,
+                "ProductionModelUnavailable",
+                PrimitiveType.Cylinder,
+                new Vector3(0f, 0.28f, 0f),
+                new Vector3(TileSize * 0.42f, 0.18f, TileSize * 0.42f),
+                unavailableColor,
+                null,
+                0.02f,
+                0.42f,
+                unavailableColor * 0.1f);
+            marker.AddComponent<KingdomBuildingSelectable>().Configure(
+                presentation.BuildingId,
+                presentation.ConfirmedLevel,
+                unavailableColor,
+                accentColor,
+                presentation.IsUpgrading,
+                GetUpgradeRemainingSeconds(presentation),
+                diagnosticCode);
+
+            var labelObject = new GameObject("UnavailableModelLabel");
+            labelObject.transform.SetParent(parent, false);
+            labelObject.transform.localPosition =
+                new Vector3(0f, 0.82f, -0.18f);
+            labelObject.transform.localRotation =
+                Quaternion.Euler(55f, 0f, 0f);
+            var label = labelObject.AddComponent<TextMesh>();
+            label.text = "MODEL!";
+            label.anchor = TextAnchor.MiddleCenter;
+            label.alignment = TextAlignment.Center;
+            label.fontSize = 48;
+            label.characterSize = 0.055f;
+            label.color = Color.Lerp(
+                unavailableColor,
+                Color.white,
+                0.45f);
         }
 
         private void SpawnRoadVisual(Vector2Int pos)

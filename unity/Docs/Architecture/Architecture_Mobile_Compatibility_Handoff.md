@@ -8,13 +8,13 @@
 
 **Unity baseline:** `2022.3.62f3`
 
-**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, and the Eldergrove Workshop Level 1/6/10 production blockouts
+**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, the Eldergrove Workshop Level 1–10 production model, and its direct live-kingdom binding
 
 ## Outcome
 
-The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all prototype and production-review scenes remain outside Player build settings, and the shared animation code uses only Unity APIs supported by Android and iOS Player builds.
+The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all prototype and production-review scenes remain outside Player build settings, and the shared animation and production-model code uses only Unity APIs supported by Android and iOS Player builds.
 
-This is a prototype-readiness statement, not final-device performance approval. The grayboxes prove the control pattern and visual direction; production meshes, textures, LODs, shaders, simultaneous-building density, and real devices still require profiling.
+This is a static production-readiness statement, not final-device performance approval. The Eldergrove Workshop now supplies production meshes, atlas materials, LODs, colliders, and direct binding; simultaneous-building density and representative devices still require profiling.
 
 ## Applied mobile optimizations
 
@@ -28,6 +28,15 @@ This is a prototype-readiness statement, not final-device performance approval. 
   their construction stage settles.
 - Eldergrove Level 1, 6, and 10 blockouts grow cumulatively and remain beneath
   a `120`-renderer graybox ceiling.
+- The Eldergrove live production model combines each Level 1–10 delta into one
+  renderer per active LOD band and uses `10 / 10 / 10 / 3` renderers across
+  LOD0–3.
+- Production topology measures `4,984 / 2,852 / 1,200 / 672` triangles across
+  LOD0–3, beneath every approved absolute and ratio ceiling.
+- One non-readable mipmapped RGB 1024 atlas, one localized opaque accent
+  material, and exactly two root box colliders cover the production model.
+- The packaged model catalog loads once per city layout engine and binds the
+  prefab from stable `RealmId + BuildingId`; no visual level is persisted.
 - Each prototype uses at most one localized, shadowless activity light.
 - Concept sheets remain non-readable source references with mipmaps disabled.
 - Concept sheets, contact sheets, and videos are not referenced by runtime prefabs.
@@ -38,12 +47,12 @@ This is a prototype-readiness statement, not final-device performance approval. 
 | Area | Android | iOS |
 | --- | --- | --- |
 | Runtime C# | Platform-neutral Unity API surface; no Java, Gradle, Android SDK, or conditional platform branch | Platform-neutral Unity API surface; no Objective-C, Swift, Xcode API, or conditional platform branch |
-| Rendering | Shared opaque materials, instancing enabled, bounded localized light, no prototype texture dependency | Shared opaque materials, instancing enabled, bounded localized light, no prototype texture dependency |
+| Rendering | Shared opaque instanced materials, one RGB atlas, four static LODs, no source texture dependency | Shared opaque instanced materials, one RGB atlas, four static LODs, no source texture dependency |
 | Animation | One deterministic controller active only during an authored transition; reduced-motion supported | One deterministic controller active only during an authored transition; reduced-motion supported |
 | Packaging | Prototype scenes and design references are not in build settings or prefab dependencies | Prototype scenes and design references are not in build settings or prefab dependencies |
 | Production requirement | Validate GLES3/Vulkan target devices after final meshes, LODs, materials, and district density exist | Validate Metal target devices after final meshes, LODs, materials, and district density exist |
 
-No platform-specific package, native plugin, save change, catalog change, or build-setting mutation is required by this architecture package.
+No platform-specific package, native plugin, save-schema change, or build-setting mutation is required by this architecture package. The new packaged ScriptableObject catalog contains direct prefab references only and does not own gameplay progress.
 
 ## iOS platform evaluation baseline
 
@@ -76,8 +85,10 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 
 ## Automated acceptance
 
-`AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests` and
-`AL.Tests.EditMode.Architecture.EldergroveWorkshopLevelBlockoutTests` verify:
+`AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests`,
+`AL.Tests.EditMode.Architecture.EldergroveWorkshopLevelBlockoutTests`, and
+`AL.Tests.EditMode.Architecture.EldergroveWorkshopProductionModelTests`
+verify:
 
 - renderer and material ceilings;
 - instancing on every shared prototype material;
@@ -92,26 +103,23 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 - monotonic geometry growth beneath the Eldergrove graybox ceiling;
 - static review prefabs with no gameplay component or prefab light;
 - the repaired Eldergrove eave-to-ridge roof direction.
+- exact atlas, material, collider, LOD, topology, and renderer contracts;
+- Level 1–10 cumulative activation from confirmed gameplay state;
+- direct live binding, Level 0 reserved plots, upgrade hold, and visible invalid
+  catalog failure.
 
-The expanded `44 / 44` Architecture suite passed on the local Unity
-2022.3.62f3 editor. It verifies the six-state shared lifecycle, direct
-persistent-state initialization, stable-state sleep, reduced motion, Stonehold
-rigid-stage and functional-activity ownership, correct eave-to-ridge roof
-pitch, Eldergrove authored grounded roots and contained cultivation ownership,
-cutaway isolation, fixed Umbral convergence, cumulative Eldergrove level
-anchors, source/build isolation, and visual renderer ceilings. PR #287 retains
-the prior Android/iOS-targeted `17 / 17` evidence for the shared, Crownlands,
-and Umbral baseline; the Stonehold and Eldergrove extensions still require
-their next representative Android/iOS target run before production approval.
+The focused Eldergrove production suite passes `18 / 18`. The expanded
+Architecture suite passes `62 / 62` in Unity 2022.3.62f3 while actively
+targeting Android and again while actively targeting iOS. The final Eldergrove
+model still requires populated-kingdom profiling on representative Android and
+iOS devices before measured performance approval.
 
 ## Production handoff
 
-1. Bind production meshes to the approved construction groups and preserve the protected realm silhouettes.
-2. Author LOD0 through far proxy using `FourRealm_Modular_Construction_Envelope.md`; normal mobile play should use LOD1 rather than inspection LOD0.
-3. Replace graybox material families with approved atlased or trim-sheet production materials and platform texture overrides.
-4. Schedule rare operational events at district level; off-screen and far-proxy buildings stay static.
-5. Profile multiple visible buildings on representative Android GLES3/Vulkan and iOS Metal devices.
-6. Record triangles, visible renderers, draw calls, material switches, texture memory, overdraw, shadow cost, CPU time, GPU time, thermals, and build-size change before production approval.
+1. Keep normal mobile play on LOD1 rather than inspection LOD0.
+2. Schedule rare operational events at district level; off-screen and far-proxy buildings stay static.
+3. Profile multiple visible buildings on representative Android GLES3/Vulkan and iOS Metal devices.
+4. Record triangles, visible renderers, draw calls, material switches, texture memory, overdraw, shadow cost, CPU time, GPU time, thermals, and build-size change before measured performance approval.
 
 ## Critical direction choices
 

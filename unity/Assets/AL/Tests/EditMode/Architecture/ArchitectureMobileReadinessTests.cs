@@ -38,7 +38,9 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Scenes/Prototypes/" +
                 "UmbralVeilwrightAnimationPrototype.unity",
             "Assets/AL/Scenes/Prototypes/" +
-                "EldergroveWorkshopLevelBlockout.unity"
+                "EldergroveWorkshopLevelBlockout.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "EldergroveWorkshopProductionModel.unity"
         };
 
         private const string ConceptSheetFolder =

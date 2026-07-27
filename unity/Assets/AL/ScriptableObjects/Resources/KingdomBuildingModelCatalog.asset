@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 076f13bab4264dbba054921ef1c9a7f6, type: 3}
+  m_Name: KingdomBuildingModelCatalog
+  m_EditorClassIdentifier: 
+  entries:
+  - modelId: building.eldergrove.workshop.production.v1
+    realmId: 2
+    buildingId: Workshop
+    prefab: {fileID: 955633731617476343, guid: 856e9f0cea18f4647812c4467a05d991, type: 3}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10
