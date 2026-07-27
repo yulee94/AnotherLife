@@ -27,3 +27,10 @@ MonoBehaviour:
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.crownlands.workshop.production.v1
+    realmId: 3
+    buildingId: Workshop
+    prefab: {fileID: 7794163945326938044, guid: af08230ec23a84ed59fe22cb35dc22df, type: 3}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10

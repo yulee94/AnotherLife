@@ -8,13 +8,13 @@
 
 **Unity baseline:** `2022.3.62f3`
 
-**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, the Eldergrove and Stonehold Workshop Level 1–10 production models, and their direct live-kingdom bindings
+**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, the Eldergrove, Stonehold, and Crownlands Workshop Level 1–10 production models, and their direct live-kingdom bindings
 
 ## Outcome
 
 The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all prototype and production-review scenes remain outside Player build settings, and the shared animation and production-model code uses only Unity APIs supported by Android and iOS Player builds.
 
-This is a static production-readiness statement, not final-device performance approval. The Eldergrove and Stonehold Workshops now supply production meshes, atlas materials, LODs, colliders, and direct binding; simultaneous-building density and representative devices still require profiling.
+This is a static production-readiness statement, not final-device performance approval. The Eldergrove, Stonehold, and Crownlands Workshops now supply production meshes, atlas materials, LODs, colliders, and direct binding; simultaneous-building density and representative devices still require profiling.
 
 ## Applied mobile optimizations
 
@@ -35,6 +35,8 @@ This is a static production-readiness statement, not final-device performance ap
   `4,984 / 2,852 / 1,200 / 672` triangles across LOD0–3.
 - The Stonehold live production model uses the same cumulative renderer
   structure and measures `1,872 / 912 / 504 / 276` triangles across LOD0–3.
+- The Crownlands live production model uses the same cumulative renderer
+  structure and measures `2,400 / 1,420 / 828 / 316` triangles across LOD0–3.
 - Each production family uses one non-readable mipmapped RGB 1024 atlas, one
   localized opaque accent material, and exactly two root box colliders.
 - The packaged model catalog loads once per city layout engine and binds the
@@ -90,7 +92,7 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 
 `AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests`,
 `AL.Tests.EditMode.Architecture.EldergroveWorkshopLevelBlockoutTests`, and
-the Eldergrove and Stonehold Workshop production-model suites
+the Eldergrove, Stonehold, and Crownlands Workshop production-model suites
 verify:
 
 - renderer and material ceilings;
@@ -112,11 +114,11 @@ verify:
   catalog failure.
 
 The focused Eldergrove production suite passes `18 / 18` and the focused
-Stonehold production suite passes `19 / 19`. The expanded Architecture suite
-passes `81 / 81` in Unity 2022.3.62f3 while actively targeting Android and
-again while actively targeting iOS. Both final Workshop models still require
-populated-kingdom profiling on representative Android and iOS devices before
-measured performance approval.
+Stonehold production suite passes `19 / 19`. The Crownlands production suite
+passes `19 / 19`. The expanded Architecture suite passes `100 / 100` in Unity
+2022.3.62f3 while actively targeting Android and again while actively targeting
+iOS. All three final Workshop models still require populated-kingdom profiling
+on representative Android and iOS devices before measured performance approval.
 
 ## Production handoff
 

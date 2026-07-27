@@ -1,6 +1,6 @@
 # Four-Realm Architecture
 
-**Status:** All four peer-realm detail and motion directions owner-approved; shared runtime and four isolated graybox prototypes implemented; Eldergrove and Stonehold Workshop production models directly integrated with the live kingdom
+**Status:** All four peer-realm detail and motion directions owner-approved; shared runtime and four isolated graybox prototypes implemented; Eldergrove, Stonehold, and Crownlands Workshop production models directly integrated with the live kingdom
 
 **Version:** 0.1
 
@@ -49,6 +49,10 @@
 **Crownlands motion contract:** [Crownlands Architecture Animation Contract](../../../../Docs/Architecture/Crownlands_Architecture_Animation_Contract.md)
 
 **Crownlands graybox handoff:** [Crownlands Animation Prototype Handoff](../../../../Docs/Architecture/Crownlands_Animation_Prototype_Handoff.md)
+
+**Crownlands Level 0–10 production source:** [Crownlands Workshop Level Progression](CrownlandsWorkshopLevelProgression.md)
+
+**Crownlands final model/runtime contract:** [Crownlands Workshop Final Model and Runtime Binding](../../../../Docs/Architecture/Crownlands_Workshop_Final_Model_And_Runtime_Binding.md)
 
 **Approved Umbral workshop detail:** [Umbral modular veilwright detail v001](../Architecture/ConceptSheets/architecture_umbral_modular_veilwright_detail_v001.png)
 
@@ -100,7 +104,8 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - 2026-07-27: The deterministic Eldergrove Level `1`, `6`, and `10` Unity blockouts passed their visual gate at `92 / 100`; final models and live-kingdom binding were deferred at that milestone.
 - 2026-07-27: Project owner approved final Eldergrove Workshop dimensions, topology, materials/atlas, colliders, LODs, packaged loading, the six-rib Level `10` seed lantern, and direct gameplay-authoritative live-kingdom model binding.
 - 2026-07-27: Project owner directed the same final-model, Level `0`–`10`, mobile LOD, packaged loading, and direct gameplay-authoritative binding process to continue across the other realms. Stonehold Workshop is the second completed production family; its grounded anvil-crown chimney is the approved Level `10` capstone interpretation of the existing workshop source.
-- Eldergrove and Stonehold Workshop production decisions are now governed by their linked final-model/runtime contracts. Still not approved across the broader four-realm set: exact gameplay animation timing, final-model calibration binding, worker rules, damage and repair motion, element relocation rules, Crownlands and Umbral production models, other building families, lighting exposure, or measured device performance. The linked envelope, animation contracts, and handoffs remain authoritative for their stated scope.
+- 2026-07-27: Project owner directed production work to continue into Crownlands. The grounded Meridian Crown Lantern is the Level `10` capstone interpretation of the approved paired-pier, broad-arch, stepped-roof, and raised-lantern stormwright source.
+- Eldergrove, Stonehold, and Crownlands Workshop production decisions are now governed by their linked final-model/runtime contracts. Still not approved across the broader four-realm set: exact gameplay animation timing, final-model activity scheduling, worker rules, damage and repair motion, element relocation rules, the Umbral production model, other building families, lighting exposure, or measured device performance. The linked envelope, animation contracts, and handoffs remain authoritative for their stated scope.
 
 ## Shared construction rules
 
@@ -184,6 +189,14 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - Technicians, fine instruments, scaffold detail, small conductors, sparks, and secondary indicators are removable distance and quality layers.
 - Roof wings and lantern occlusion groups fade or hide for inspection; they do not hover in-world.
 - The full state, authored calibration, hierarchy, mobile reduction, reduced-motion, and acceptance rules are defined in the linked Crownlands animation contract.
+
+#### Crownlands Workshop level-production source
+
+- The linked Level `0`–`10` family preserves one stable Workshop slot, fixed entrance, paired civic piers, broad silver arch, stepped blue roof wings, raised lantern, and grounded central calibration focus.
+- Growth is cumulative: ground locks, instrument annexes, layered entrance framing, calibration court, lantern drum, paired charting spaces, roof meridians, service circulation, and landmark finials add to one stormwright identity.
+- The Level `10` landmark is the grounded Meridian Crown Lantern: four fixed silver meridian ribs, paired conductor finials, and one contained indigo aperture.
+- Random lightning, levitating structure, continuous mechanisms, repeated flashes, and full-building emission remain excluded.
+- The production prefab derives its active cumulative deltas directly from confirmed gameplay level; exact runtime metrics and mobile evidence are recorded in the linked final contract.
 
 ### Umbral
 

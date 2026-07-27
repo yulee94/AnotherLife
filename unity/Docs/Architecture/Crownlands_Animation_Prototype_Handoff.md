@@ -1,6 +1,6 @@
 # Crownlands Stormwright Animation Prototype Handoff
 
-**Status:** Owner-approved motion direction implemented as an isolated Unity graybox
+**Status:** Owner-approved motion direction implemented as an isolated Unity graybox; production successor delivered
 
 **Date:** 2026-07-24
 
@@ -12,7 +12,18 @@
 
 **Motion contract:** `Docs/Architecture/Crownlands_Architecture_Animation_Contract.md`
 
-This package proves the Crownlands construction sequence, calibrated light treatment, stable-state behavior, roof cutaway ownership, and mobile control pattern before a final architecture model or rig exists. It is a graybox validation asset, not final production art and not yet connected to the live kingdom building system.
+This package proves the Crownlands construction sequence, calibrated light
+treatment, stable-state behavior, roof cutaway ownership, and mobile control
+pattern. It remains graybox validation evidence rather than live production
+art.
+
+The production successor is documented in
+`Docs/Architecture/Crownlands_Workshop_Final_Model_And_Runtime_Binding.md`.
+That separate prefab supplies the final dimensions, cumulative Level `1`–`10`
+geometry, atlas, colliders, LODs, Meridian Crown Lantern capstone, packaged
+catalog entry, and direct gameplay-authoritative live-kingdom binding. This
+prototype remains isolated animation evidence and is not used as the live
+model.
 
 ## Delivered assets
 
@@ -74,9 +85,9 @@ Open:
 
 Enter Play Mode to loop the review presentation. Production use should keep looping disabled and trigger construction or calibration through explicit building states.
 
-## Final-model binding rules
+## Production-successor binding rules
 
-When the production stormwright model arrives:
+The delivered production stormwright model preserves these rules:
 
 1. Preserve the same stage ownership: plot, civic frame, silver ribs, roof and lantern, instruments, and calibrated operation.
 2. Replace graybox transforms with production pivots without changing the shared footprint, entrance, or focus anchors.
@@ -86,13 +97,11 @@ When the production stormwright model arrives:
 6. Add technicians only through approved activity sockets and a district scheduler.
 7. Profile the final mesh, materials, light, overdraw, and multiple visible ateliers on representative iOS hardware.
 
-## Not yet production-authorized
+## Still not production-authorized
 
-- Live kingdom integration or gameplay construction triggers.
-- Final production mesh, topology, pivots, colliders, LODs, materials, or texture budgets.
 - Exact gameplay timing, activity frequency, audio, haptics, or lighting exposure.
 - Technician population ownership.
 - Damage, disconnection, repair, or recalibration behavior.
-- Device performance claims.
+- Measured device performance claims.
 
 Changing the authored pulse to procedural lightning, making the building continuously active, or moving load-bearing structure during stable operation remains a critical direction change requiring owner approval.
