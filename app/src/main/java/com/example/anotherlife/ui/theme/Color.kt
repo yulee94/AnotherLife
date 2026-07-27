@@ -2,70 +2,75 @@ package com.example.anotherlife.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Vibrant & Energetic Fantasy Palette for "Another Life"
+// Another Life global brand tokens: adult mystical-medieval naturalism.
+val AlObsidian = Color(0xFF10130F)
+val AlCharcoal = Color(0xFF191D18)
+val AlIronwood = Color(0xFF242A22)
+val AlParchment = Color(0xFFF1E7D0)
+val AlParchmentMuted = Color(0xFFD4C8AE)
+val AlWeatheredBone = Color(0xFFF8F1DF)
+val AlDeepInk = Color(0xFF1A1712)
+val AlOldGold = Color(0xFFC6A15B)
+val AlDullGold = Color(0xFF6E562D)
+val AlVerdigris = Color(0xFF6F8D82)
+val AlMoss = Color(0xFF34463C)
+val AlCelestialViolet = Color(0xFF8D7AB8)
+val AlVioletSmoke = Color(0xFF393347)
+val AlOxblood = Color(0xFFB36A5E)
+val AlOxbloodDeep = Color(0xFF5B241F)
 
-// Primary: Deep Royal Purple
-val PrimaryLight = Color(0xFF673AB7)
+val PrimaryLight = Color(0xFF5A441F)
 val OnPrimaryLight = Color(0xFFFFFFFF)
-val PrimaryContainerLight = Color(0xFFEADDFF)
-val OnPrimaryContainerLight = Color(0xFF21005D)
+val PrimaryContainerLight = Color(0xFFE8D3A2)
+val OnPrimaryContainerLight = Color(0xFF1F1608)
 
-// Secondary: Radiant Gold
-val SecondaryLight = Color(0xFFFFC107)
-val OnSecondaryLight = Color(0xFF000000)
-val SecondaryContainerLight = Color(0xFFFFECB3)
-val OnSecondaryContainerLight = Color(0xFF7F6000)
+val SecondaryLight = Color(0xFF40574C)
+val OnSecondaryLight = Color(0xFFFFFFFF)
+val SecondaryContainerLight = Color(0xFFC4D7CD)
+val OnSecondaryContainerLight = Color(0xFF102019)
 
-// Tertiary: Radiant Magenta / Arcane Pink
-val TertiaryLight = Color(0xFFE91E63)
+val TertiaryLight = Color(0xFF5B4D78)
 val OnTertiaryLight = Color(0xFFFFFFFF)
-val TertiaryContainerLight = Color(0xFFFFD8E4)
-val OnTertiaryContainerLight = Color(0xFF31111D)
+val TertiaryContainerLight = Color(0xFFD8CEEE)
+val OnTertiaryContainerLight = Color(0xFF1C162A)
 
-// Error: Crimson
-val ErrorLight = Color(0xFFB3261E)
+val ErrorLight = Color(0xFF8A382F)
 val OnErrorLight = Color(0xFFFFFFFF)
-val ErrorContainerLight = Color(0xFFF9DEDC)
-val OnErrorContainerLight = Color(0xFF410E0B)
+val ErrorContainerLight = Color(0xFFF2C7C0)
+val OnErrorContainerLight = Color(0xFF2F0B08)
 
-// Background & Surface
-val BackgroundLight = Color(0xFFFFFBFE)
-val OnBackgroundLight = Color(0xFF1C1B1F)
-val SurfaceLight = Color(0xFFFFFBFE)
-val OnSurfaceLight = Color(0xFF1C1B1F)
+val BackgroundLight = AlWeatheredBone
+val OnBackgroundLight = AlDeepInk
+val SurfaceLight = Color(0xFFF3E9D4)
+val OnSurfaceLight = AlDeepInk
+val SurfaceVariantLight = Color(0xFFE2D6BE)
+val OnSurfaceVariantLight = Color(0xFF4C4437)
+val OutlineLight = Color(0xFF746955)
 
-// Dark Theme (Mystic & Energetic)
-val PrimaryDark = Color(0xFFD0BCFF)
-val OnPrimaryDark = Color(0xFF381E72)
-val PrimaryContainerDark = Color(0xFF4F378B)
-val OnPrimaryContainerDark = Color(0xFFEADDFF)
+val PrimaryDark = AlOldGold
+val OnPrimaryDark = Color(0xFF241904)
+val PrimaryContainerDark = AlDullGold
+val OnPrimaryContainerDark = AlWeatheredBone
 
-val SecondaryDark = Color(0xFFFFD700) // True Gold
-val OnSecondaryDark = Color(0xFF452B00)
-val SecondaryContainerDark = Color(0xFF634D00)
-val OnSecondaryContainerDark = Color(0xFFFFE082)
+val SecondaryDark = AlVerdigris
+val OnSecondaryDark = Color(0xFF07140F)
+val SecondaryContainerDark = AlMoss
+val OnSecondaryContainerDark = Color(0xFFE1EFE8)
 
-val TertiaryDark = Color(0xFFFF80AB)
-val OnTertiaryDark = Color(0xFF560027)
-val TertiaryContainerDark = Color(0xFF880E4F)
-val OnTertiaryContainerDark = Color(0xFFFFD8E4)
+val TertiaryDark = AlCelestialViolet
+val OnTertiaryDark = Color(0xFF170F25)
+val TertiaryContainerDark = AlVioletSmoke
+val OnTertiaryContainerDark = Color(0xFFE7DEF8)
 
-val ErrorDark = Color(0xFFF2B8B5)
-val OnErrorDark = Color(0xFF601410)
-val ErrorContainerDark = Color(0xFF8C1D18)
-val OnErrorContainerDark = Color(0xFFF9DEDC)
+val ErrorDark = AlOxblood
+val OnErrorDark = Color(0xFF270806)
+val ErrorContainerDark = AlOxbloodDeep
+val OnErrorContainerDark = Color(0xFFFFDAD4)
 
-val BackgroundDark = Color(0xFF0F0F0F) // Deep obsidian
-val OnBackgroundDark = Color(0xFFE6E1E5)
-val SurfaceDark = Color(0xFF1C1B1F)
-val OnSurfaceDark = Color(0xFFE6E1E5)
-val SurfaceVariantDark = Color(0xFF49454F)
-val OnSurfaceVariantDark = Color(0xFFCAC4D0)
-
-// Legacy Aliases for compatibility
-val Purple80 = PrimaryDark
-val PurpleGrey80 = SecondaryDark
-val Pink80 = TertiaryDark
-val Purple40 = PrimaryLight
-val PurpleGrey40 = SecondaryLight
-val Pink40 = TertiaryLight
+val BackgroundDark = AlObsidian
+val OnBackgroundDark = AlParchment
+val SurfaceDark = AlCharcoal
+val OnSurfaceDark = AlParchment
+val SurfaceVariantDark = AlIronwood
+val OnSurfaceVariantDark = AlParchmentMuted
+val OutlineDark = Color(0xFF93866C)
