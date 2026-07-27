@@ -84,13 +84,18 @@ namespace AL.RealmSelection
                 return Reject("AL-REALM-CATALOG-UNSUPPORTED");
             if (document.selectionPolicy == null || document.selectionPolicy.selectionMode != "one_realm_per_account" ||
                 document.selectionPolicy.realmLockScope != "account" || document.selectionPolicy.subCharacterPolicy != "same_realm_only" ||
-                document.selectionPolicy.crossRealmCreationPolicy != "reject")
+                document.selectionPolicy.sharedStoragePolicy != "same_realm_account_storage" ||
+                document.selectionPolicy.crossRealmCreationPolicy != "reject" ||
+                document.selectionPolicy.realmChangePolicy != "not_supported_after_commit" ||
+                document.selectionPolicy.uncommittedProfileState != "realm_unselected" ||
+                document.selectionPolicy.committedProfileState != "realm_locked")
                 return Reject("AL-REALM-CATALOG-POLICY-MISMATCH");
             if (document.realms == null || document.realms.Length != 4 || document.realmOrder == null || document.realmOrder.Length != 4)
                 return Reject("AL-REALM-CATALOG-REALM-COUNT");
 
             var seenIds = new HashSet<string>(StringComparer.Ordinal);
             var seenRuntime = new HashSet<RealmId>();
+            var seenGemIds = new HashSet<string>(StringComparer.Ordinal);
             var entries = new List<RealmCatalogEntry>(4);
             for (int i = 0; i < document.realms.Length; i++)
             {
@@ -100,7 +105,8 @@ namespace AL.RealmSelection
                 if (realm == null || !TryStableRuntimeId(realm.id, out expectedRuntimeId) || !seenIds.Add(realm.id) || string.IsNullOrWhiteSpace(realm.displayName) ||
                     !TryRuntimeId(realm.legacyRuntimeId, out runtimeId) || runtimeId != expectedRuntimeId || !seenRuntime.Add(runtimeId) ||
                     realm.realmGemIds == null || realm.realmGemIds.Length != 2 ||
-                    string.IsNullOrWhiteSpace(realm.realmGemIds[0]) || string.IsNullOrWhiteSpace(realm.realmGemIds[1]))
+                    !IsStableId(realm.realmGemIds[0]) || !IsStableId(realm.realmGemIds[1]) ||
+                    !seenGemIds.Add(realm.realmGemIds[0]) || !seenGemIds.Add(realm.realmGemIds[1]))
                     return Reject("AL-REALM-CATALOG-INVALID-REALM");
                 entries.Add(new RealmCatalogEntry(realm.id, runtimeId, realm.displayName));
             }
@@ -144,10 +150,38 @@ namespace AL.RealmSelection
         {
             return Enum.TryParse(value, false, out id) && id != RealmId.None && Enum.IsDefined(typeof(RealmId), id);
         }
+
+        private static bool IsStableId(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value[0] < 'a' || value[0] > 'z') return false;
+            bool previousUnderscore = false;
+            for (int i = 1; i < value.Length; i++)
+            {
+                char character = value[i];
+                bool isLowercaseLetter = character >= 'a' && character <= 'z';
+                bool isDigit = character >= '0' && character <= '9';
+                bool isUnderscore = character == '_';
+                if (!isLowercaseLetter && !isDigit && !isUnderscore) return false;
+                if (isUnderscore && previousUnderscore) return false;
+                previousUnderscore = isUnderscore;
+            }
+            return !previousUnderscore;
+        }
+
         private static RealmCatalogLoadResult Reject(string code) => new RealmCatalogLoadResult(null, code);
 
         [Serializable] private sealed class RealmCatalogDocument { public string version; public string catalogId; public RealmCatalogSelectionPolicy selectionPolicy; public string[] realmOrder; public RealmCatalogRealm[] realms; }
-        [Serializable] private sealed class RealmCatalogSelectionPolicy { public string selectionMode; public string realmLockScope; public string subCharacterPolicy; public string crossRealmCreationPolicy; }
+        [Serializable] private sealed class RealmCatalogSelectionPolicy
+        {
+            public string selectionMode;
+            public string realmLockScope;
+            public string subCharacterPolicy;
+            public string sharedStoragePolicy;
+            public string crossRealmCreationPolicy;
+            public string realmChangePolicy;
+            public string uncommittedProfileState;
+            public string committedProfileState;
+        }
         [Serializable] private sealed class RealmCatalogRealm { public string id; public string legacyRuntimeId; public string displayName; public string[] realmGemIds; }
 
     }

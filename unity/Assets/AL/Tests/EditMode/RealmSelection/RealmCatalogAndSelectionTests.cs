@@ -67,6 +67,26 @@ namespace AL.Tests.EditMode.RealmSelection
         }
 
         [Test]
+        public void ParserRejectsContradictoryLockPolicyAndInvalidGemIdentifiers()
+        {
+            Assert.That(
+                RealmCatalogRuntime.Parse(_json.Replace("not_supported_after_commit", "allow_after_commit")).TechnicalCode,
+                Is.EqualTo("AL-REALM-CATALOG-POLICY-MISMATCH"));
+            Assert.That(
+                RealmCatalogRuntime.Parse(_json.Replace("same_realm_account_storage", "cross_realm_storage")).TechnicalCode,
+                Is.EqualTo("AL-REALM-CATALOG-POLICY-MISMATCH"));
+            Assert.That(
+                RealmCatalogRuntime.Parse(_json.Replace("realm_unselected", "realm_locked")).TechnicalCode,
+                Is.EqualTo("AL-REALM-CATALOG-POLICY-MISMATCH"));
+            Assert.That(
+                RealmCatalogRuntime.Parse(_json.Replace("gem_stonehold_forge", "gem_crownlands_sun")).TechnicalCode,
+                Is.EqualTo("AL-REALM-CATALOG-INVALID-REALM"));
+            Assert.That(
+                RealmCatalogRuntime.Parse(_json.Replace("gem_umbral_ember", "Gem_Umbral_Ember")).TechnicalCode,
+                Is.EqualTo("AL-REALM-CATALOG-INVALID-REALM"));
+        }
+
+        [Test]
         public void FirstCommitPersistsAndDifferentRealmIsRejectedWithoutSecondSave()
         {
             var save = new FakeSaveService();
