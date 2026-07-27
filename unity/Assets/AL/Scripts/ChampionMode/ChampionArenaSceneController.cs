@@ -269,23 +269,30 @@ namespace AL.ChampionMode
 
         private void ConfigureArenaLighting()
         {
-            RenderSettings.ambientLight = new Color(0.16f, 0.18f, 0.22f);
+            RenderSettings.ambientLight = new Color(0.20f, 0.23f, 0.29f);
             RenderSettings.fog = true;
             RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(0.035f, 0.04f, 0.055f);
-            RenderSettings.fogDensity = 0.018f;
+            RenderSettings.fogColor = new Color(0.060f, 0.078f, 0.105f);
+            RenderSettings.fogDensity = 0.0115f;
 
-            var lightObject = FindObjectOfType<Light>()?.gameObject ?? new GameObject("Key Light - Moonforge");
-            var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
-            light.name = "Key Light - Moonforge";
+            var lightObject = GameObject.Find("Key Light - Moonforge") ?? new GameObject("Key Light - Moonforge");
+            var light = lightObject.GetComponent<Light>();
+            if (light == null)
+            {
+                light = lightObject.AddComponent<Light>();
+            }
+
+            lightObject.name = "Key Light - Moonforge";
             light.type = LightType.Directional;
-            light.intensity = 1.35f;
-            light.color = new Color(0.74f, 0.82f, 1f);
+            light.intensity = 1.50f;
+            light.color = new Color(0.82f, 0.88f, 1f);
+            light.shadows = UsesReducedPresentationQuality() ? LightShadows.None : LightShadows.Soft;
+            light.shadowStrength = 0.72f;
             lightObject.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
 
             CreatePointLight("Boss Rift Light", new Vector3(0f, 3.2f, 8.4f), new Color(1f, 0.18f, 0.08f), 4.2f, 12f);
             CreatePointLight("Player Rim Light", new Vector3(0f, 3.4f, -6.8f), new Color(0.34f, 0.65f, 1f), 2.3f, 8f);
-            CreatePointLight("Arena Cold Fill", new Vector3(0f, 5f, 0f), new Color(0.24f, 0.36f, 0.58f), 1.6f, 18f);
+            CreatePointLight("Arena Cold Fill", new Vector3(0f, 5f, 0f), new Color(0.30f, 0.44f, 0.70f), 1.9f, 20f);
         }
 
         private void BuildArenaEnvironment()
@@ -304,9 +311,9 @@ namespace AL.ChampionMode
             atmospherePulse.RegisterRenderer(playerSigil, realmAccent, 1.2f, 0.42f);
             CreateArenaGroundDetails(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
 
-            for (int i = 0; i < 18; i++)
+            for (int i = 0; i < 16; i++)
             {
-                float angle = i * Mathf.PI * 2f / 18f;
+                float angle = i * Mathf.PI * 2f / 16f;
                 float yaw = -angle * Mathf.Rad2Deg;
                 Vector3 position = new Vector3(Mathf.Cos(angle) * 11.4f, 0.72f, Mathf.Sin(angle) * 11.4f);
                 CreateArenaPrimitive(environment, "OuterWall_" + i, PrimitiveType.Cube, position, new Vector3(1.7f, 1.4f, 0.36f), new Vector3(0f, yaw, 0f), new Color(0.072f, 0.08f, 0.095f), true, 0.04f, 0.28f);
@@ -324,10 +331,27 @@ namespace AL.ChampionMode
                 atmospherePulse.RegisterLight(pillarLight, i * 0.47f, 0.16f);
             }
 
-            for (int i = -2; i <= 2; i++)
+            for (int i = -1; i <= 1; i++)
             {
-                var lane = CreateArenaPrimitive(environment, "CombatLane_" + (i + 2), PrimitiveType.Cube, new Vector3(i * 1.15f, 0.035f, 0.4f), new Vector3(0.045f, 0.035f, 15.8f), Vector3.zero, new Color(0.12f, 0.25f, 0.36f), true, 0f, 0.72f);
-                atmospherePulse.RegisterRenderer(lane, i == 0 ? realmAccent : coldBlue, i * 0.38f, 0.28f);
+                Color laneColor = i == 0
+                    ? Color.Lerp(realmAccent, Color.white, 0.12f)
+                    : Color.Lerp(coldBlue, new Color(0.10f, 0.13f, 0.16f), 0.62f);
+                var lane = CreateArenaPrimitive(
+                    environment,
+                    "CombatLane_" + (i + 1),
+                    PrimitiveType.Cube,
+                    new Vector3(i * 1.9f, 0.035f, 0.4f),
+                    new Vector3(0.040f, 0.028f, 15.8f),
+                    Vector3.zero,
+                    laneColor,
+                    true,
+                    0f,
+                    0.62f);
+                atmospherePulse.RegisterRenderer(
+                    lane,
+                    i == 0 ? realmAccent : coldBlue,
+                    i * 0.38f,
+                    i == 0 ? 0.20f : 0.08f);
             }
 
             CreateArenaBoundaryDetails(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
@@ -335,10 +359,15 @@ namespace AL.ChampionMode
             CreateArenaDepthArchitecture(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
             RuntimeWorldPresentation.BuildArenaBackdrop(
                 environment,
-                _qualityController != null &&
-                _qualityController.CurrentProfile != null &&
-                (_qualityController.CurrentProfile.Tier == "mobile_low" ||
-                 _qualityController.CurrentProfile.Tier == "desktop_low"));
+                UsesReducedPresentationQuality());
+        }
+
+        private bool UsesReducedPresentationQuality()
+        {
+            return _qualityController != null &&
+                   _qualityController.CurrentProfile != null &&
+                   (_qualityController.CurrentProfile.Tier == "mobile_low" ||
+                    _qualityController.CurrentProfile.Tier == "desktop_low");
         }
 
         private void CreateArenaGroundDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
@@ -354,12 +383,24 @@ namespace AL.ChampionMode
                 atmospherePulse.RegisterRenderer(rune, color, i * 0.24f, 0.34f);
             }
 
-            for (int i = 0; i < 10; i++)
+            for (int i = 0; i < 7; i++)
             {
-                float x = -4.5f + i;
-                Color color = Color.Lerp(coldBlue, realmAccent, i / 9f);
-                var crossLine = CreateArenaPrimitive(environment, "Tactical_Crossline_" + i, PrimitiveType.Cube, new Vector3(x, 0.038f, -0.25f), new Vector3(0.028f, 0.020f, 9.2f), Vector3.zero, color, true, 0f, 0.70f);
-                atmospherePulse.RegisterRenderer(crossLine, color, i * 0.19f, 0.18f);
+                float z = -4.45f + i * 1.48f;
+                Color color = Color.Lerp(
+                    new Color(0.10f, 0.12f, 0.14f),
+                    coldBlue,
+                    i == 3 ? 0.18f : 0.07f);
+                CreateArenaPrimitive(
+                    environment,
+                    "Tactical_Crossline_" + i,
+                    PrimitiveType.Cube,
+                    new Vector3(0f, 0.034f, z),
+                    new Vector3(8.9f, 0.018f, 0.026f),
+                    Vector3.zero,
+                    color,
+                    true,
+                    0f,
+                    0.42f);
             }
 
             for (int i = 0; i < 18; i++)
@@ -380,9 +421,9 @@ namespace AL.ChampionMode
 
         private void CreateArenaBoundaryDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
         {
-            for (int i = 0; i < 24; i++)
+            for (int i = 0; i < 16; i++)
             {
-                float angle = i * Mathf.PI * 2f / 24f;
+                float angle = i * Mathf.PI * 2f / 16f;
                 float yaw = -angle * Mathf.Rad2Deg;
                 Vector3 position = new Vector3(Mathf.Cos(angle) * 12.35f, 1.58f, Mathf.Sin(angle) * 12.35f);
                 Color color = i % 2 == 0 ? new Color(0.10f, 0.11f, 0.13f) : new Color(0.075f, 0.085f, 0.105f);
@@ -421,8 +462,8 @@ namespace AL.ChampionMode
 
         private void CreateArenaDepthArchitecture(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
         {
-            Color deepStone = new Color(0.040f, 0.046f, 0.058f);
-            Color shadowStone = new Color(0.028f, 0.032f, 0.042f);
+            Color deepStone = new Color(0.075f, 0.088f, 0.112f);
+            Color shadowStone = new Color(0.052f, 0.060f, 0.078f);
             Color trim = Color.Lerp(realmAccent, new Color(0.92f, 0.76f, 0.42f), 0.16f);
 
             for (int i = 0; i < 5; i++)
@@ -542,6 +583,15 @@ namespace AL.ChampionMode
         {
             var obj = GameObject.CreatePrimitive(primitive);
             obj.name = name;
+            if (primitive == PrimitiveType.Cube)
+            {
+                var filter = obj.GetComponent<MeshFilter>();
+                if (filter != null)
+                {
+                    filter.sharedMesh = RuntimeWorldPresentation.GetBeveledCubeMesh();
+                }
+            }
+
             obj.transform.SetParent(parent, false);
             obj.transform.localPosition = localPosition;
             obj.transform.localRotation = Quaternion.Euler(localEulerAngles);
@@ -551,7 +601,14 @@ namespace AL.ChampionMode
                 var collider = obj.GetComponent<Collider>();
                 if (collider != null)
                 {
-                    Object.Destroy(collider);
+                    if (Application.isPlaying)
+                    {
+                        Object.Destroy(collider);
+                    }
+                    else
+                    {
+                        Object.DestroyImmediate(collider);
+                    }
                 }
             }
 
@@ -569,13 +626,17 @@ namespace AL.ChampionMode
 
             var shader = Shader.Find("Standard");
             var material = shader != null ? new Material(shader) : new Material(renderer.material);
-            material.color = color;
             if (material.HasProperty("_MainTex"))
             {
+                material.color = Color.white;
                 material.mainTexture = RuntimeWorldPresentation.GetSurfaceTexture(
                     color,
                     Color.Lerp(color, Color.white, 0.20f));
                 material.mainTextureScale = new Vector2(3.5f, 3.5f);
+            }
+            else
+            {
+                material.color = color;
             }
             if (material.HasProperty("_Metallic"))
             {
@@ -593,7 +654,7 @@ namespace AL.ChampionMode
                 material.SetColor("_EmissionColor", color * 0.75f);
             }
 
-            renderer.material = material;
+            renderer.sharedMaterial = material;
         }
 
         private static Light CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
@@ -3294,15 +3355,16 @@ namespace AL.ChampionMode
             }
 
             var renderer = target.GetComponent<Renderer>();
-            if (renderer == null || renderer.material == null || !renderer.material.HasProperty("_EmissionColor"))
+            var material = renderer != null ? renderer.sharedMaterial : null;
+            if (material == null || !material.HasProperty("_EmissionColor"))
             {
                 return;
             }
 
-            renderer.material.EnableKeyword("_EMISSION");
+            material.EnableKeyword("_EMISSION");
             _materials.Add(new PulsedMaterial
             {
-                Material = renderer.material,
+                Material = material,
                 Color = color,
                 Phase = phase,
                 Intensity = Mathf.Max(0f, intensity)

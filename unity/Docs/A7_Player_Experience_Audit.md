@@ -1,8 +1,8 @@
-# A7 Player-Experience Audit and First Production Slice
+# A7 Static Player-Experience Audit and First Visual Prototype
 
-**Status date:** 2026-07-27  
-**Primary mode:** Codex engineering (A7 visual experience)  
-**Evidence base:** current `origin/main`, open issues and PRs, production scene YAML, runtime UI/camera code, and a successful Unity 2022.3.62f3 editor import/assembly reload.  
+**Status date:** 2026-07-27
+**Primary mode:** Codex engineering (A7 visual experience)
+**Evidence base:** current `origin/main`, open issues and PRs, production scene YAML, runtime UI/camera code, focused Unity EditMode tests, and isolated renderer captures. This is a static first-pass audit, not a substitute for an integrated player playtest.
 **Scope:** Boot, Realm Selection, Kingdom, Champion Arena, UI architecture, camera architecture, feedback, accessibility, and presentation performance.
 
 ## Current-state assessment
@@ -54,54 +54,65 @@ The first safe improvement is therefore a presentation foundation around the pla
 19. UI architecture — runtime imperative Canvas construction, duplicated helpers, no central style authority.
 20. Camera architecture — board camera plus arena follow/cinematic mode; no general camera service or shot assets.
 
-## Implemented first task
+## Implemented first prototype
 
-**Player-facing outcome:** the Champion Arena now sits inside a textured atmospheric citadel basin rather than ending at a flat sandbox boundary, and the combat camera pulls inward before intersecting world geometry.
+**Player-facing outcome:** the Champion Arena prototype now sits inside a textured atmospheric citadel basin with a connected skyline, faceted geology, sparse wind-carved vegetation, and quality-tiered silhouette budgets rather than ending at a flat sandbox boundary. The combat camera pulls inward before intersecting world geometry.
 
 Acceptance criteria:
 
 - deterministic terrain geometry and set-dressing counts;
 - high and reduced-quality geometry budgets;
+- a shared chamfered-stone mesh replaces hard cube edges in arena architecture;
+- the high tier uses 2,401 terrain vertices, 34 rocks, 28 trees, 11 towers, and 10 curtain-wall spans;
+- the reduced tier uses 625 terrain vertices, 16 rocks, 14 trees, 7 towers, and 6 curtain-wall spans;
 - no quest, combat, reward, balance, save, or narrative mutation;
 - no new package or external runtime dependency;
 - camera obstruction resolution uses bounded sphere casts;
 - camera shake is reduced by default without removing event feedback;
-- project imports and reloads assemblies without compiler errors in Unity 2022.3.62f3;
-- broad redesign remains unmerged pending user/A1 review.
+- project imports, reloads assemblies, and runs the focused tests without compiler errors in Unity 2022.3.62f3;
+- broad redesign remains in a draft PR and is not production-approved pending A1 review.
 
 ## Original AnotherLife adaptation
 
 The implementation uses a dusk citadel basin, weathered monolith silhouettes, restrained blue/ember atmosphere, and AnotherLife’s existing realm-accent language. The reference principle is MMO-scale environmental depth and immediately readable combat space—not any World of Warcraft asset, map, UI layout, icon, texture, character, animation, terminology, or camera sequence.
 
+## Visual evidence
+
+- [Player-scale arena frame](Architecture/Previews/a7_champion_arena_gameplay_v001.png)
+- [Environment overview](Architecture/Previews/a7_champion_arena_world_foundation_v001.png)
+
+These are deterministic editor-rendered prototype captures using the production arena construction path and runtime lighting configuration. They are not claims of a finished authored-asset world, a representative HUD capture, or an integrated playtest.
+
 ## Validation and evidence limits
 
-- Passed: `git diff --check`.
-- Passed: Unity 2022.3.62f3 visible editor opened the isolated change, imported the new source, compiled scripts, and completed domain reload; editor log recorded `LogAssemblyErrors (0)`.
+- Passed: Unity 2022.3.62f3 headless import, script compilation, domain reload, and both evidence renders; process exited `0`.
+- Passed: focused EditMode suite `AL.Tests.EditMode.RuntimeWorldPresentationTests`: **5/5**.
+- Covered: texture caching/bounds, deterministic high/low scene budgets, idempotent backdrop construction, shared chamfered geometry, and a camera-obstruction pull-in case.
 - Passed: no shared-lock file is changed.
 - Passed: open PRs #334 and #335 were inspected; neither declared this file scope.
-- Blocked: command-line EditMode suite because the batch Licensing Client IPC timed out before project load. The visible editor subsequently licensed and compiled successfully.
-- Not yet performed: representative gameplay screenshot, GPU/CPU profiler capture, device matrix, controller pass, or integrated user playtest. Those remain required before merge acceptance.
+- Not yet performed: live production-arena gameplay capture with HUD, GPU/CPU profiler capture, device matrix, controller/touch pass, or integrated user playtest.
+- Known prototype risks: the presentation terrain collider still needs gameplay-boundary validation; runtime-generated materials need profiler evidence; camera collision layers need production tuning; and the procedural art remains a bridge to approved authored assets rather than final commercial world art.
 
 ## A7 status report
 
-**Current objective:** Replace the playable arena’s sandbox boundary with an original, scalable RPG world-presentation foundation.
+**Current objective:** Demonstrate an original, scalable fantasy RPG world-presentation direction that replaces the playable arena’s flat sandbox boundary.
 
 **Current problem:** Runtime primitives, flat surfaces, and a solid background undercut otherwise functional combat, UI, and feedback systems.
 
-**Proposed solution:** Review this isolated foundation, then—only after approval—continue with authored environment assets and a focused HUD/camera polish plan.
+**Proposed solution:** Review this isolated prototype and its evidence, then—only after approval—continue with authored environment assets and a separately scoped HUD/camera polish plan.
 
 **World of Warcraft reference principle:** readable fantasy combat space, layered environmental scale, contextual information, and stable third-person camera behavior.
 
 **Original AnotherLife adaptation:** realm-accented dusk citadel basin, procedural weathered geology, restrained arcane signals, and existing AnotherLife combat language.
 
-**Systems affected:** Champion Arena presentation, runtime surface generation, combat camera collision/comfort.
+**Systems affected:** Champion Arena presentation and lighting, deterministic runtime surface/mesh generation, combat camera collision/comfort, and focused EditMode coverage.
 
-**Risks:** runtime material cost, terrain collider cost, visual direction needing authored assets, and unperformed device profiling.
+**Risks:** runtime material and collider cost, production collision-layer tuning, procedural art remaining visibly simpler than authored assets, and unperformed device profiling.
 
 **Dependencies:** user/A1 visual approval; later approved environment/character source assets; no active shared-file lock.
 
-**Testing plan:** editor compilation, EditMode/PlayMode suites when licensing permits, arena playthrough, camera obstruction cases, four aspect ratios, controller/touch, and profiler comparison.
+**Testing plan:** completed focused EditMode tests and deterministic captures; still required are arena playthrough, camera obstruction cases against production layers, four aspect ratios, controller/touch, and high/low-tier profiler comparison.
 
-**Approval needed from A1:** approve the citadel-basin direction as the first original AnotherLife world identity and authorize a separately scoped authored-asset/HUD follow-up.
+**Approval needed from A1:** approve, revise, or reject the citadel-basin visual direction and decide whether it may remain connected to the production arena while authored environment assets are developed.
 
-**Current status:** Proposal and first production foundation ready for review; not approved or merged.
+**Current status:** Prototype complete and draft PR open; validation is current, but the visual direction is not approved or merged.
