@@ -1,6 +1,6 @@
 # Four-Realm Architecture
 
-**Status:** All four peer-realm detail and motion directions owner-approved; shared runtime and four isolated graybox prototypes implemented; final-model and live-kingdom integration pending
+**Status:** All four peer-realm detail and motion directions owner-approved; shared runtime and four isolated graybox prototypes implemented; Eldergrove and Stonehold Workshop production models directly integrated with the live kingdom
 
 **Version:** 0.1
 
@@ -25,6 +25,10 @@
 **Approved Stonehold motion reference:** [Stonehold animation reference v001](../Architecture/ConceptSheets/architecture_stonehold_animation_reference_v001.png)
 
 **Stonehold motion contract:** [Stonehold Architecture Animation Contract](../../../../Docs/Architecture/Stonehold_Architecture_Animation_Contract.md)
+
+**Stonehold Level 0–10 production source:** [Stonehold Workshop Level Progression](StoneholdWorkshopLevelProgression.md)
+
+**Stonehold final model/runtime contract:** [Stonehold Workshop Final Model and Runtime Binding](../../../../Docs/Architecture/Stonehold_Workshop_Final_Model_And_Runtime_Binding.md)
 
 **Approved Eldergrove workshop detail:** [Eldergrove modular workshop detail v001](../Architecture/ConceptSheets/architecture_eldergrove_modular_workshop_detail_v001.png)
 
@@ -95,7 +99,8 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - 2026-07-27: Project owner approved the Eldergrove Workshop Level `0`–`10` progression sheet after its `93 / 100` visual gate and directed production work to continue.
 - 2026-07-27: The deterministic Eldergrove Level `1`, `6`, and `10` Unity blockouts passed their visual gate at `92 / 100`; final models and live-kingdom binding were deferred at that milestone.
 - 2026-07-27: Project owner approved final Eldergrove Workshop dimensions, topology, materials/atlas, colliders, LODs, packaged loading, the six-rib Level `10` seed lantern, and direct gameplay-authoritative live-kingdom model binding.
-- Eldergrove Workshop production decisions are now governed by the linked final-model/runtime contract. Still not approved across the broader four-realm set: exact gameplay animation timing, final-model calibration binding, worker rules, damage and repair motion, element relocation rules, production models for the remaining building families, lighting exposure, or measured device performance. The linked envelope, animation contracts, and handoffs remain authoritative for their stated scope.
+- 2026-07-27: Project owner directed the same final-model, Level `0`–`10`, mobile LOD, packaged loading, and direct gameplay-authoritative binding process to continue across the other realms. Stonehold Workshop is the second completed production family; its grounded anvil-crown chimney is the approved Level `10` capstone interpretation of the existing workshop source.
+- Eldergrove and Stonehold Workshop production decisions are now governed by their linked final-model/runtime contracts. Still not approved across the broader four-realm set: exact gameplay animation timing, final-model calibration binding, worker rules, damage and repair motion, element relocation rules, Crownlands and Umbral production models, other building families, lighting exposure, or measured device performance. The linked envelope, animation contracts, and handoffs remain authoritative for their stated scope.
 
 ## Shared construction rules
 
@@ -127,6 +132,14 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - Roof occlusion groups fade or hide for inspection; they do not hover as an in-world idle animation.
 - The full state, hierarchy, mobile reduction, reduced-motion, and acceptance rules are defined in the linked Stonehold animation contract.
 
+#### Stonehold Workshop level-production source
+
+- The linked Level `0`–`10` production family preserves the approved low masonry mass, paired roof plates, fixed front work bay, off-center chimney, and localized forge focal point.
+- Level growth is cumulative: pressure buttresses, service annexes, portal reinforcement, district work apron, vent stack, storage, logistics, and crown locks add to one stable Workshop identity.
+- The Level `10` landmark is a grounded anvil-crown forge chimney with one contained ember slit and paired pressure locks; it does not levitate, animate continuously, or increase the building's magical authority.
+- The live model measures `9.18 m W × 6.64 m D × 6.48 m H` at Level `10`, uses two opaque materials and two root colliders, and binds directly from confirmed gameplay level.
+- The runtime model passed its reduced-reference visual gate at `91 / 100`; populated-kingdom device profiling remains open.
+
 ### Eldergrove
 
 - Tall but open structures; thick living-root frames used as credible beams and braces; breathable courtyards and crossings.
@@ -151,7 +164,7 @@ The landmark anchor controls grandeur and realm identity. It does not require or
 - It preserves one stable Workshop footprint and entrance, then adds cumulative root-brace, annex, roof, district, signature, logistics, and capstone modules.
 - Level changes remain readable through form without particles, continuous foliage motion, or green emission.
 - The production source retains the common-building mobile envelope at Level `10`; progression does not silently grant a hero-building budget.
-- The sheet is source-only and passed a `93 / 100` visual gate before owner approval. DCC blockout, exact metrics, model pivots, LODs, materials, colliders, and device profiling remain open.
+- The source sheet passed a `93 / 100` visual gate and the production translation passed at `92 / 100`. Exact pivots, topology, atlas, colliders, four LOD bands, Level `10` capstone, packaged loading, and direct live binding are closed by the linked final contract; populated-kingdom device profiling remains open.
 
 ### Crownlands
 

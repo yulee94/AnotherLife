@@ -20,3 +20,10 @@ MonoBehaviour:
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.stonehold.workshop.production.v1
+    realmId: 1
+    buildingId: Workshop
+    prefab: {fileID: 2707078820881950298, guid: fa8beffdd2c1045579a3fbd5c25ef181, type: 3}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10

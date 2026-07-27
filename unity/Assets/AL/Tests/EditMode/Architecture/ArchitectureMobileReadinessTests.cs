@@ -40,7 +40,9 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Scenes/Prototypes/" +
                 "EldergroveWorkshopLevelBlockout.unity",
             "Assets/AL/Scenes/Prototypes/" +
-                "EldergroveWorkshopProductionModel.unity"
+                "EldergroveWorkshopProductionModel.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "StoneholdWorkshopProductionModel.unity"
         };
 
         private const string ConceptSheetFolder =

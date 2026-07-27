@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.13
+**Version:** 1.14
 **Last updated:** 2026-07-27
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -58,6 +58,8 @@ This guide consolidates the active project direction in:
 - [Four-Realm Architecture](unity/Assets/AL/Art/Designs/FourRealmArchitecture.md)
 - [Stonehold Architecture Animation Contract](unity/Docs/Architecture/Stonehold_Architecture_Animation_Contract.md)
 - [Stonehold Animation Prototype Handoff](unity/Docs/Architecture/Stonehold_Animation_Prototype_Handoff.md)
+- [Stonehold Workshop Level Progression](unity/Assets/AL/Art/Designs/StoneholdWorkshopLevelProgression.md)
+- [Stonehold Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Stonehold_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Eldergrove Architecture Animation Contract](unity/Docs/Architecture/Eldergrove_Architecture_Animation_Contract.md)
 - [Eldergrove Animation Prototype Handoff](unity/Docs/Architecture/Eldergrove_Animation_Prototype_Handoff.md)
 - [Crownlands Architecture Animation Contract](unity/Docs/Architecture/Crownlands_Architecture_Animation_Contract.md)
@@ -504,6 +506,7 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - Use realm construction logic consistently across modular kits.
 - Use stable building-slot identity for placement. Save-list or enumeration order must never determine a building's grid position, footprint, rotation, or entrance orientation.
 - Use the approved `Level 0` through `Level 10` visual progression in the kingdom-building level design. `Level 0` is an unbuilt reserved plot, `Level 1` is the first complete operational building and current baseline, and later levels add cumulative modular changes without replacing the building's function.
+- Production models bind from stable `RealmId + BuildingId` identity and derive their cumulative visual level directly from confirmed gameplay state. Never persist a parallel visual stage that can disagree with gameplay.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
 - Avoid miniature-diorama cuteness as the default 2.5D solution.
 
