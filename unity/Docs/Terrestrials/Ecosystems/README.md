@@ -1,0 +1,59 @@
+# Four-Realm Ecosystem Source Packet
+
+## Status
+
+- Issue: `#259`
+- Primary Codex mode: `terrestrial-design`
+- Source version: `tdf-eco-2026-07-27-v001`
+- Packet state: `RosterProposed`
+- User creative approval: `NotRequested`
+- Runtime integration: `Blocked`
+- Narrative naming/localization: `WorkingLabelsOnly`
+
+This folder contains the A2 terrestrial-design proposal for coherent fauna and habitat identity across Stonehold, Eldergrove, Crownlands, and Umbral. It is source-design documentation and catalog metadata only. It does not authorize runtime zones, spawn tables, combat, AI, rewards, quests, save data, scenes, prefabs, shaders, Addressables, or bundle implementation.
+
+## Packet Contents
+
+- `Four_Realm_Ecosystem_And_Habitat_Source.md` — category decisions, connected habitat loops, habitat identity, and sixteen supporting-fauna briefs.
+- `Ecosystem_Source_Budgets_And_Asset_Layout.md` — mobile-to-PC source envelopes, memory targets, deduplication rules, and proposed source/package layout.
+- `Ecosystem_Creative_Review_Matrix.md` — exact readiness and user-review state for habitats, supporting fauna, and inherited boss/elite anchors.
+- `ecosystem_habitat_profiles_manifest.json` — stable design IDs, references, state, asset-family intent, and numeric source budgets.
+- `ecosystem_habitat_source_packet.schema.json` — retained structural schema for the manifest.
+
+No concept image, editable art source, marketplace package, model, texture set, rig, animation, VFX, or runtime asset is added by this packet. Thirteen new fauna identities are `ProposedTextOnly`. The three reused foundation IDs remain legacy merged proposals and are not promoted to user-approved or engineering-ready source.
+
+## Upstream Sources Consumed
+
+- Canonical realm IDs and realm identity: `unity/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json`
+- Existing boss and elite visual source: `unity/Docs/Terrestrials/RealmBossesAndElites/`
+- Existing foundation proposals: `unity/Docs/Terrestrials/Terrestrial_Design_Brief.md`
+- Approved architecture boundary: `unity/Assets/AL/Art/Designs/FourRealmArchitecture.md`
+- Product and optimization direction: `unity/Docs/Product_Direction.md`
+
+Habitat suitability links to existing creatures are visual/ecological design references only. They are not spawn, encounter, or gameplay authority.
+
+## Counts
+
+- Canonical realms: `4`
+- Habitat modules: `16` (`4` per realm)
+- Connected realm habitat loops: `4`
+- Supporting fauna families: `16` (`4` per realm)
+- Reused foundation family IDs: `3`
+- New text-only family IDs: `13`
+- Existing boss/elite anchors referenced: `16`
+- Runtime or shared-file changes: `0`
+
+## Required Handoff Sequence
+
+```text
+A2 roster and habitat proposal
+→ exact visual source for selected habitats/families
+→ A2 fidelity and source-package validation
+→ user approval of exact source version and IDs
+→ Codex coordination/review technical specification
+→ Codex engineering integration
+→ coordination plus A2 fidelity disposition
+→ user integrated approval
+```
+
+Merging this proposal does not skip any later gate.

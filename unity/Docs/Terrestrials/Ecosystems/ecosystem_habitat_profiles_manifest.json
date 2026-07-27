@@ -1,0 +1,987 @@
+{
+  "schemaVersion": 1,
+  "packetId": "tdf_four_realm_ecosystems",
+  "sourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-27",
+  "authority": {
+    "primaryCodexMode": "terrestrial-design",
+    "issue": 259,
+    "runtimeAuthority": false,
+    "narrativeAuthority": false,
+    "gameplayAuthority": false,
+    "finalCreativeApprover": "user"
+  },
+  "readiness": {
+    "packetState": "RosterProposed",
+    "userCreativeState": "NotRequested",
+    "technicalHandoffState": "BlockedPendingVisualSourceAndUserApproval",
+    "runtimeIntegrationState": "Blocked",
+    "narrativeNamingState": "WorkingLabelsOnly"
+  },
+  "canonicalSources": {
+    "realmCatalog": "unity/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json",
+    "realmCatalogVersion": "0.1.0",
+    "bossEliteManifest": "unity/Docs/Terrestrials/RealmBossesAndElites/realm_boss_elite_profiles_manifest.json",
+    "bossEliteSourceVersion": "tdf-rbe-2026-07-24-v001",
+    "foundationManifest": "unity/Docs/Terrestrials/terrestrial_profiles_manifest.json",
+    "foundationSourceVersion": "tdf-2026-07-15-v001",
+    "architectureSource": "unity/Assets/AL/Art/Designs/FourRealmArchitecture.md",
+    "productDirection": "unity/Docs/Product_Direction.md"
+  },
+  "identityRules": {
+    "idFormat": "lowercase_snake_case",
+    "habitatIdPattern": "tdf_habitat_<realm>_<slug>",
+    "newFaunaIdPattern": "tdf_fauna_<realm>_<slug>",
+    "existingIdsRenamed": false,
+    "workingLabelsAreLocalized": false,
+    "habitatLinksAreSpawnAuthority": false,
+    "paletteOnlyVariantsCountAsFamilies": false
+  },
+  "categoryDisposition": [
+    "natural_fauna_by_anatomy_locomotion_scale_and_ecological_guild",
+    "arcane_altered_states_require_anatomy_material_or_motion_change",
+    "dragons_and_singular_apex_remain_separate_source",
+    "elven_dark_elven_ecotypes_require_narrative_cultural_review",
+    "human_like_creatures_out_of_scope",
+    "pelagic_deep_sea_deferred_pending_geography",
+    "architecture_types_are_overlays_not_habitats",
+    "desert_oasis_deferred_pending_geography",
+    "real_world_voodoo_shorthand_replaced_by_fictional_ritual_overlay_pending_narrative"
+  ],
+  "qualityTiers": [
+    {
+      "tierId": "low_mobile",
+      "packagedInPlayer": true,
+      "mandatoryIdentityTier": true,
+      "maximumFaunaLod0Triangles": 16000,
+      "maximumFaunaBones": 56,
+      "maximumFaunaMaterialSlots": 2,
+      "maximumFaunaTextureDimension": 1024,
+      "maximumFaunaAnimationBytes": 2621440,
+      "maximumFaunaParticles": 24,
+      "maximumFaunaIncrementalCompressedBytes": 6291456,
+      "maximumHabitatIncrementalCompressedBytes": 12582912,
+      "referenceCellMeters": 128,
+      "maximumTerrainLayers": 4,
+      "maximumAmbientParticles": 140,
+      "maximumDynamicLights": 0,
+      "maximumShadowedLights": 0,
+      "maximumFullDetailCells": 1,
+      "maximumNeighborProxyCells": 4,
+      "maximumResidentArtBytes": 134217728,
+      "faunaDefaultValidationMeters": 100,
+      "habitatDefaultValidationMeters": 250
+    },
+    {
+      "tierId": "balanced",
+      "packagedInPlayer": true,
+      "mandatoryIdentityTier": false,
+      "maximumFaunaLod0Triangles": 32000,
+      "maximumFaunaBones": 72,
+      "maximumFaunaMaterialSlots": 2,
+      "maximumFaunaTextureDimension": 2048,
+      "maximumFaunaAnimationBytes": 5242880,
+      "maximumFaunaParticles": 48,
+      "maximumFaunaIncrementalCompressedBytes": 15728640,
+      "maximumHabitatIncrementalCompressedBytes": 37748736,
+      "referenceCellMeters": 128,
+      "maximumTerrainLayers": 6,
+      "maximumAmbientParticles": 240,
+      "maximumDynamicLights": 1,
+      "maximumShadowedLights": 0,
+      "maximumFullDetailCells": 2,
+      "maximumNeighborProxyCells": 8,
+      "maximumResidentArtBytes": 268435456,
+      "faunaDefaultValidationMeters": 170,
+      "habitatDefaultValidationMeters": 400
+    },
+    {
+      "tierId": "high_pc",
+      "packagedInPlayer": true,
+      "mandatoryIdentityTier": false,
+      "maximumFaunaLod0Triangles": 55000,
+      "maximumFaunaBones": 96,
+      "maximumFaunaMaterialSlots": 3,
+      "maximumFaunaTextureDimension": 4096,
+      "maximumFaunaAnimationBytes": 8388608,
+      "maximumFaunaParticles": 96,
+      "maximumFaunaIncrementalCompressedBytes": 33554432,
+      "maximumHabitatIncrementalCompressedBytes": 83886080,
+      "referenceCellMeters": 128,
+      "maximumTerrainLayers": 8,
+      "maximumAmbientParticles": 480,
+      "maximumDynamicLights": 2,
+      "maximumShadowedLights": 1,
+      "maximumFullDetailCells": 4,
+      "maximumNeighborProxyCells": 12,
+      "maximumResidentArtBytes": 536870912,
+      "faunaDefaultValidationMeters": 270,
+      "habitatDefaultValidationMeters": 625
+    },
+    {
+      "tierId": "cinematic_offline",
+      "packagedInPlayer": false,
+      "mandatoryIdentityTier": false,
+      "maximumFaunaLod0Triangles": 0,
+      "maximumFaunaBones": 160,
+      "maximumFaunaMaterialSlots": 6,
+      "maximumFaunaTextureDimension": 8192,
+      "maximumFaunaAnimationBytes": 0,
+      "maximumFaunaParticles": 0,
+      "maximumFaunaIncrementalCompressedBytes": 0,
+      "maximumHabitatIncrementalCompressedBytes": 0,
+      "referenceCellMeters": 128,
+      "maximumTerrainLayers": 0,
+      "maximumAmbientParticles": 0,
+      "maximumDynamicLights": 0,
+      "maximumShadowedLights": 0,
+      "maximumFullDetailCells": 0,
+      "maximumNeighborProxyCells": 0,
+      "maximumResidentArtBytes": 0,
+      "faunaDefaultValidationMeters": 0,
+      "habitatDefaultValidationMeters": 0
+    }
+  ],
+  "assetFamilies": {
+    "rigFamilyIds": [
+      "tdf_rig_quad_low_heavy",
+      "tdf_rig_avian_soarer",
+      "tdf_rig_multiped_low",
+      "tdf_rig_quad_burrower",
+      "tdf_rig_quad_tall_browser",
+      "tdf_rig_amphibious_low",
+      "tdf_rig_quad_hind_drive",
+      "tdf_rig_invertebrate_winged",
+      "tdf_rig_quad_tall_heavy",
+      "tdf_rig_avian_ground_small",
+      "tdf_rig_quad_low_shellback",
+      "tdf_rig_invertebrate_six_limb",
+      "tdf_rig_gastropod_shell"
+    ],
+    "materialFamilyIds": [
+      "tdf_matfam_opaque_hide_keratin",
+      "tdf_matfam_opaque_feather",
+      "tdf_matfam_opaque_chitin",
+      "tdf_matfam_wet_hide",
+      "tdf_matfam_opaque_shell",
+      "tdf_matfam_stonehold_slate_iron",
+      "tdf_matfam_eldergrove_wet_bark_root",
+      "tdf_matfam_crownlands_chalk_weathered",
+      "tdf_matfam_umbral_ash_obsidian"
+    ],
+    "environmentKitIds": [
+      "tdf_envkit_stonehold_faultroad_escarpment",
+      "tdf_envkit_stonehold_rimecut_pass",
+      "tdf_envkit_stonehold_ore_gallery_mouths",
+      "tdf_envkit_stonehold_slagfall_quarry",
+      "tdf_envkit_eldergrove_hollowbark_oldgrowth",
+      "tdf_envkit_eldergrove_mirrorroot_littoral",
+      "tdf_envkit_eldergrove_sunmane_edge_meadow",
+      "tdf_envkit_eldergrove_moonroot_floodbasin",
+      "tdf_envkit_crownlands_crownstep_chalkland",
+      "tdf_envkit_crownlands_galegrain_roadbelt",
+      "tdf_envkit_crownlands_reliquary_crypt_garden",
+      "tdf_envkit_crownlands_meridian_storm_shelf",
+      "tdf_envkit_umbral_ashvein_three_fault_rift",
+      "tdf_envkit_umbral_cinder_runoff_shelf",
+      "tdf_envkit_umbral_ashwood_veil_ravine",
+      "tdf_envkit_umbral_graveglass_cavern_vale"
+    ]
+  },
+  "habitats": [
+    {
+      "habitatId": "tdf_habitat_stonehold_faultroad_escarpment",
+      "realmId": "stonehold",
+      "workingLabel": "Faultroad Escarpment",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_stonehold_faultroad_escarpment",
+      "existingAnchorProfileId": "tdf_boss_stonehold_fault_crowned_colossus",
+      "supportingFamilyId": "tdf_basalt_grazer",
+      "neighborHabitatIds": [
+        "tdf_habitat_stonehold_rimecut_pass",
+        "tdf_habitat_stonehold_slagfall_quarry"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "fault_direction_broken_road_grade_fractured_crown_ridge",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_stonehold_rimecut_pass",
+      "realmId": "stonehold",
+      "workingLabel": "Rimecut Pass",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_stonehold_rimecut_pass",
+      "existingAnchorProfileId": "tdf_elite_stonehold_rimehorn_breaker",
+      "supportingFamilyId": "tdf_fauna_stonehold_rimefan_kite",
+      "neighborHabitatIds": [
+        "tdf_habitat_stonehold_faultroad_escarpment",
+        "tdf_habitat_stonehold_ore_gallery_mouths"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "pass_notch_safe_ledge_edge_stone_rib_direction",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_stonehold_ore_gallery_mouths",
+      "realmId": "stonehold",
+      "workingLabel": "Ore Gallery Mouths",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_stonehold_ore_gallery_mouths",
+      "existingAnchorProfileId": "tdf_elite_stonehold_oreblind_delver",
+      "supportingFamilyId": "tdf_fauna_stonehold_oreveil_isopod",
+      "neighborHabitatIds": [
+        "tdf_habitat_stonehold_rimecut_pass",
+        "tdf_habitat_stonehold_slagfall_quarry"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "gallery_mouth_load_bearing_columns_ground_plane_value",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_stonehold_slagfall_quarry",
+      "realmId": "stonehold",
+      "workingLabel": "Slagfall Quarry",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_stonehold_slagfall_quarry",
+      "existingAnchorProfileId": "tdf_elite_stonehold_slaghide_gorer",
+      "supportingFamilyId": "tdf_fauna_stonehold_slagwhistle_burrower",
+      "neighborHabitatIds": [
+        "tdf_habitat_stonehold_ore_gallery_mouths",
+        "tdf_habitat_stonehold_faultroad_escarpment"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "terrace_edges_runoff_channels_cooled_slag_plate_direction",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_eldergrove_hollowbark_oldgrowth",
+      "realmId": "eldergrove",
+      "workingLabel": "Hollowbark Oldgrowth",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_eldergrove_hollowbark_oldgrowth",
+      "existingAnchorProfileId": "tdf_elite_eldergrove_hollowbark_stalker",
+      "supportingFamilyId": "tdf_grove_strider",
+      "neighborHabitatIds": [
+        "tdf_habitat_eldergrove_sunmane_edge_meadow",
+        "tdf_habitat_eldergrove_moonroot_floodbasin"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_eldergrove_wet_bark_root"
+      ],
+      "protectedIdentity": "open_understory_trunk_spacing_root_arch_openings",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_eldergrove_mirrorroot_littoral",
+      "realmId": "eldergrove",
+      "workingLabel": "Mirrorroot Littoral",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_eldergrove_mirrorroot_littoral",
+      "existingAnchorProfileId": "tdf_elite_eldergrove_mirrorfin_lurker",
+      "supportingFamilyId": "tdf_mire_lumenback",
+      "neighborHabitatIds": [
+        "tdf_habitat_eldergrove_moonroot_floodbasin",
+        "tdf_habitat_eldergrove_sunmane_edge_meadow"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_eldergrove_wet_bark_root",
+        "tdf_matfam_wet_hide"
+      ],
+      "protectedIdentity": "shoreline_shallow_deep_value_root_shelf",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_eldergrove_sunmane_edge_meadow",
+      "realmId": "eldergrove",
+      "workingLabel": "Sunmane Edge Meadow",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_eldergrove_sunmane_edge_meadow",
+      "existingAnchorProfileId": "tdf_elite_eldergrove_sunmane_thornstag",
+      "supportingFamilyId": "tdf_fauna_eldergrove_thornburrow_hare",
+      "neighborHabitatIds": [
+        "tdf_habitat_eldergrove_mirrorroot_littoral",
+        "tdf_habitat_eldergrove_hollowbark_oldgrowth"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_eldergrove_wet_bark_root"
+      ],
+      "protectedIdentity": "forest_boundary_sightline_pockets_drainage_fold",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_eldergrove_moonroot_floodbasin",
+      "realmId": "eldergrove",
+      "workingLabel": "Moonroot Floodbasin",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_eldergrove_moonroot_floodbasin",
+      "existingAnchorProfileId": "tdf_boss_eldergrove_mere_root_leviathan",
+      "supportingFamilyId": "tdf_fauna_eldergrove_moonshell_cicada",
+      "neighborHabitatIds": [
+        "tdf_habitat_eldergrove_hollowbark_oldgrowth",
+        "tdf_habitat_eldergrove_mirrorroot_littoral"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_eldergrove_wet_bark_root",
+        "tdf_matfam_wet_hide"
+      ],
+      "protectedIdentity": "root_islands_water_depth_root_openings",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_crownlands_crownstep_chalkland",
+      "realmId": "crownlands",
+      "workingLabel": "Crownstep Chalkland",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_crownlands_crownstep_chalkland",
+      "existingAnchorProfileId": "tdf_elite_crownlands_crownstep_lion",
+      "supportingFamilyId": "tdf_fauna_crownlands_broadcrest_aurochs",
+      "neighborHabitatIds": [
+        "tdf_habitat_crownlands_meridian_storm_shelf",
+        "tdf_habitat_crownlands_galegrain_roadbelt"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_crownlands_chalk_weathered"
+      ],
+      "protectedIdentity": "ridgeline_route_cover_clump_spacing",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_crownlands_galegrain_roadbelt",
+      "realmId": "crownlands",
+      "workingLabel": "Galegrain Roadbelt",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_crownlands_galegrain_roadbelt",
+      "existingAnchorProfileId": "tdf_elite_crownlands_galeclaw_courser",
+      "supportingFamilyId": "tdf_fauna_crownlands_grainveil_covey",
+      "neighborHabitatIds": [
+        "tdf_habitat_crownlands_crownstep_chalkland",
+        "tdf_habitat_crownlands_reliquary_crypt_garden"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_crownlands_chalk_weathered"
+      ],
+      "protectedIdentity": "road_spine_field_boundary_shelter_line",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_crownlands_reliquary_crypt_garden",
+      "realmId": "crownlands",
+      "workingLabel": "Reliquary Crypt Garden",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_crownlands_reliquary_crypt_garden",
+      "existingAnchorProfileId": "tdf_elite_crownlands_reliquary_basilisk",
+      "supportingFamilyId": "tdf_fauna_crownlands_reliquary_shellback",
+      "neighborHabitatIds": [
+        "tdf_habitat_crownlands_galegrain_roadbelt",
+        "tdf_habitat_crownlands_meridian_storm_shelf"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_crownlands_chalk_weathered",
+        "tdf_matfam_opaque_shell"
+      ],
+      "protectedIdentity": "ground_route_rubble_hazard_ruin_silhouette",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_crownlands_meridian_storm_shelf",
+      "realmId": "crownlands",
+      "workingLabel": "Meridian Storm Shelf",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_crownlands_meridian_storm_shelf",
+      "existingAnchorProfileId": "tdf_boss_crownlands_meridian_tempest_roc",
+      "supportingFamilyId": "tdf_fauna_crownlands_stormglass_swift",
+      "neighborHabitatIds": [
+        "tdf_habitat_crownlands_reliquary_crypt_garden",
+        "tdf_habitat_crownlands_crownstep_chalkland"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_crownlands_chalk_weathered",
+        "tdf_matfam_opaque_feather"
+      ],
+      "protectedIdentity": "shelf_edge_safe_approach_open_sky_mass",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_umbral_ashvein_three_fault_rift",
+      "realmId": "umbral",
+      "workingLabel": "Ashvein Three-Fault Rift",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_umbral_ashvein_three_fault_rift",
+      "existingAnchorProfileId": "tdf_boss_umbral_ashvein_triarch",
+      "supportingFamilyId": "tdf_fauna_umbral_sootsail_carrioner",
+      "neighborHabitatIds": [
+        "tdf_habitat_umbral_ashwood_veil_ravine",
+        "tdf_habitat_umbral_cinder_runoff_shelf"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_umbral_ash_obsidian"
+      ],
+      "protectedIdentity": "three_fault_directions_walkable_terraces_obsidian_rib_spacing",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_umbral_cinder_runoff_shelf",
+      "realmId": "umbral",
+      "workingLabel": "Cinder Runoff Shelf",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_umbral_cinder_runoff_shelf",
+      "existingAnchorProfileId": "tdf_elite_umbral_cindermaw_salamander",
+      "supportingFamilyId": "tdf_fauna_umbral_cinderplate_scarab",
+      "neighborHabitatIds": [
+        "tdf_habitat_umbral_ashvein_three_fault_rift",
+        "tdf_habitat_umbral_graveglass_cavern_vale"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_umbral_ash_obsidian",
+        "tdf_matfam_wet_hide"
+      ],
+      "protectedIdentity": "hot_wet_cooled_shapes_runoff_direction_shelf_edges",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_umbral_ashwood_veil_ravine",
+      "realmId": "umbral",
+      "workingLabel": "Ashwood Veil Ravine",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_umbral_ashwood_veil_ravine",
+      "existingAnchorProfileId": "tdf_elite_umbral_veilspine_widow",
+      "supportingFamilyId": "tdf_fauna_umbral_ashstep_bounder",
+      "neighborHabitatIds": [
+        "tdf_habitat_umbral_graveglass_cavern_vale",
+        "tdf_habitat_umbral_ashvein_three_fault_rift"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_umbral_ash_obsidian"
+      ],
+      "protectedIdentity": "ledge_route_physical_web_obstruction",
+      "runtimeAuthority": false
+    },
+    {
+      "habitatId": "tdf_habitat_umbral_graveglass_cavern_vale",
+      "realmId": "umbral",
+      "workingLabel": "Graveglass Cavern Vale",
+      "sourceState": "RosterProposed",
+      "environmentKitId": "tdf_envkit_umbral_graveglass_cavern_vale",
+      "existingAnchorProfileId": "tdf_elite_umbral_gravewing_siphon",
+      "supportingFamilyId": "tdf_fauna_umbral_graveglass_sheller",
+      "neighborHabitatIds": [
+        "tdf_habitat_umbral_cinder_runoff_shelf",
+        "tdf_habitat_umbral_ashwood_veil_ravine"
+      ],
+      "materialFamilyIds": [
+        "tdf_matfam_umbral_ash_obsidian",
+        "tdf_matfam_opaque_shell"
+      ],
+      "protectedIdentity": "cave_opening_ledge_ground_plane_midtones",
+      "runtimeAuthority": false
+    }
+  ],
+  "faunaFamilies": [
+    {
+      "familyId": "tdf_basalt_grazer",
+      "realmId": "stonehold",
+      "workingLabel": "Basalt Grazer",
+      "sourceState": "LegacyMergedProposal",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "primaryHabitatId": "tdf_habitat_stonehold_faultroad_escarpment",
+      "ecologicalGuild": "large_mineral_lichen_grazer",
+      "scaleClass": "large",
+      "silhouetteClass": "heavy_low_shielded_quadruped",
+      "rigFamilyId": "tdf_rig_quad_low_heavy",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_hide_keratin",
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "broad_shoulder_plate_low_head_short_weight_bearing_legs",
+      "sourceAssetRefs": [
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_basalt_grazer_concept_sheet_v001.png"
+      ],
+      "provenanceState": "LegacyPacketRequiresNormalization",
+      "userCreativeState": "Pending",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_stonehold_rimefan_kite",
+      "realmId": "stonehold",
+      "workingLabel": "Rimefan Kite",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_stonehold_rimecut_pass",
+      "ecologicalGuild": "cliff_scavenger",
+      "scaleClass": "medium_aerial",
+      "silhouetteClass": "diamond_wing_short_wedge_tail",
+      "rigFamilyId": "tdf_rig_avian_soarer",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_feather",
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "diamond_wing_deep_chest_short_wedge_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_stonehold_oreveil_isopod",
+      "realmId": "stonehold",
+      "workingLabel": "Oreveil Isopod",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_stonehold_ore_gallery_mouths",
+      "ecologicalGuild": "cave_detritivore",
+      "scaleClass": "small",
+      "silhouetteClass": "low_oval_many_legged_plate_body",
+      "rigFamilyId": "tdf_rig_multiped_low",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_chitin",
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "overlapping_lateral_plates_recessed_head_sensory_front_edge",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_stonehold_slagwhistle_burrower",
+      "realmId": "stonehold",
+      "workingLabel": "Slagwhistle Burrower",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_stonehold_slagfall_quarry",
+      "ecologicalGuild": "ash_scrub_forager_and_soil_turner",
+      "scaleClass": "small",
+      "silhouetteClass": "compact_wedge_heavy_foreclaw_burrower",
+      "rigFamilyId": "tdf_rig_quad_burrower",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_hide_keratin",
+        "tdf_matfam_stonehold_slate_iron"
+      ],
+      "protectedIdentity": "paired_foreclaws_triangular_ear_folds_short_counterweight_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_grove_strider",
+      "realmId": "eldergrove",
+      "workingLabel": "Grove Strider",
+      "sourceState": "LegacyMergedProposal",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "primaryHabitatId": "tdf_habitat_eldergrove_hollowbark_oldgrowth",
+      "ecologicalGuild": "tall_forest_browser",
+      "scaleClass": "large_tall",
+      "silhouetteClass": "tall_browser_long_neck",
+      "rigFamilyId": "tdf_rig_quad_tall_browser",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_hide_keratin",
+        "tdf_matfam_eldergrove_wet_bark_root"
+      ],
+      "protectedIdentity": "long_neck_narrow_legs_leaf_like_ear_fins",
+      "sourceAssetRefs": [
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_grove_strider_concept_sheet_v001.png"
+      ],
+      "provenanceState": "LegacyPacketRequiresNormalization",
+      "userCreativeState": "Pending",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_mire_lumenback",
+      "realmId": "eldergrove",
+      "workingLabel": "Mire Lumenback",
+      "sourceState": "LegacyMergedProposal",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "primaryHabitatId": "tdf_habitat_eldergrove_mirrorroot_littoral",
+      "ecologicalGuild": "compact_amphibious_forager",
+      "scaleClass": "medium_low",
+      "silhouetteClass": "compact_low_amphibious_forager",
+      "rigFamilyId": "tdf_rig_amphibious_low",
+      "materialFamilyIds": [
+        "tdf_matfam_wet_hide",
+        "tdf_matfam_eldergrove_wet_bark_root"
+      ],
+      "protectedIdentity": "low_rounded_torso_paddle_feet_throat_pouch",
+      "sourceAssetRefs": [
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/tdf_mire_lumenback_concept_sheet_v001.png"
+      ],
+      "provenanceState": "LegacyPacketRequiresNormalization",
+      "userCreativeState": "Pending",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_eldergrove_thornburrow_hare",
+      "realmId": "eldergrove",
+      "workingLabel": "Thornburrow Hare",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_eldergrove_sunmane_edge_meadow",
+      "ecologicalGuild": "meadow_grazer_and_root_scraper",
+      "scaleClass": "small",
+      "silhouetteClass": "low_head_hind_leg_wedge_root_tusks",
+      "rigFamilyId": "tdf_rig_quad_hind_drive",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_hide_keratin",
+        "tdf_matfam_eldergrove_wet_bark_root"
+      ],
+      "protectedIdentity": "hind_leg_wedge_paired_root_tusks_flat_counterbalance_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_eldergrove_moonshell_cicada",
+      "realmId": "eldergrove",
+      "workingLabel": "Moonshell Cicada",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_eldergrove_moonroot_floodbasin",
+      "ecologicalGuild": "trunk_sap_feeder_and_canopy_recycler",
+      "scaleClass": "small_aerial",
+      "silhouetteClass": "heavy_thorax_broad_roof_fold_wings",
+      "rigFamilyId": "tdf_rig_invertebrate_winged",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_chitin",
+        "tdf_matfam_eldergrove_wet_bark_root"
+      ],
+      "protectedIdentity": "roof_fold_wing_vertical_rest_heavy_thorax",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_crownlands_broadcrest_aurochs",
+      "realmId": "crownlands",
+      "workingLabel": "Broadcrest Aurochs",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_crownlands_crownstep_chalkland",
+      "ecologicalGuild": "large_herd_grazer",
+      "scaleClass": "large",
+      "silhouetteClass": "high_back_horizontal_horn_plate_narrow_rear",
+      "rigFamilyId": "tdf_rig_quad_tall_heavy",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_hide_keratin",
+        "tdf_matfam_crownlands_chalk_weathered"
+      ],
+      "protectedIdentity": "horizontal_horn_plate_high_back_narrow_hips",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_crownlands_grainveil_covey",
+      "realmId": "crownlands",
+      "workingLabel": "Grainveil Covey",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_crownlands_galegrain_roadbelt",
+      "ecologicalGuild": "ground_seed_gleaner",
+      "scaleClass": "small_group",
+      "silhouetteClass": "wedge_ground_bird_flat_fan_tail",
+      "rigFamilyId": "tdf_rig_avian_ground_small",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_feather",
+        "tdf_matfam_crownlands_chalk_weathered"
+      ],
+      "protectedIdentity": "wedge_body_long_ground_toes_flat_fan_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_crownlands_reliquary_shellback",
+      "realmId": "crownlands",
+      "workingLabel": "Reliquary Shellback",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_crownlands_reliquary_crypt_garden",
+      "ecologicalGuild": "garden_insectivore",
+      "scaleClass": "small",
+      "silhouetteClass": "arched_shell_probe_snout_brace_tail",
+      "rigFamilyId": "tdf_rig_quad_low_shellback",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_shell",
+        "tdf_matfam_crownlands_chalk_weathered"
+      ],
+      "protectedIdentity": "arched_scute_back_probe_snout_blunt_brace_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_crownlands_stormglass_swift",
+      "realmId": "crownlands",
+      "workingLabel": "Stormglass Swift",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_crownlands_meridian_storm_shelf",
+      "ecologicalGuild": "aerial_insectivore_and_storm_front_follower",
+      "scaleClass": "small_aerial",
+      "silhouetteClass": "crescent_wing_compact_chest_rigid_fork_tail",
+      "rigFamilyId": "tdf_rig_avian_soarer",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_feather",
+        "tdf_matfam_crownlands_chalk_weathered"
+      ],
+      "protectedIdentity": "crescent_wing_compact_chest_rigid_fork_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_umbral_sootsail_carrioner",
+      "realmId": "umbral",
+      "workingLabel": "Sootsail Carrioner",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_umbral_ashvein_three_fault_rift",
+      "ecologicalGuild": "ash_terrace_scavenger",
+      "scaleClass": "medium_aerial",
+      "silhouetteClass": "plank_wing_hooded_head_long_split_tail",
+      "rigFamilyId": "tdf_rig_avian_soarer",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_feather",
+        "tdf_matfam_umbral_ash_obsidian"
+      ],
+      "protectedIdentity": "plank_wings_hooded_skull_long_split_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_umbral_cinderplate_scarab",
+      "realmId": "umbral",
+      "workingLabel": "Cinderplate Scarab",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_umbral_cinder_runoff_shelf",
+      "ecologicalGuild": "ash_and_mineral_detritivore",
+      "scaleClass": "small",
+      "silhouetteClass": "domed_six_leg_shovel_head_scarab",
+      "rigFamilyId": "tdf_rig_invertebrate_six_limb",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_chitin",
+        "tdf_matfam_umbral_ash_obsidian"
+      ],
+      "protectedIdentity": "domed_wingcase_broad_shovel_head_oversized_front_tibia",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_umbral_ashstep_bounder",
+      "realmId": "umbral",
+      "workingLabel": "Ashstep Bounder",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_umbral_ashwood_veil_ravine",
+      "ecologicalGuild": "ledge_forager_and_seed_root_consumer",
+      "scaleClass": "medium",
+      "silhouetteClass": "hind_limb_wedge_deep_pelvis_straight_tail",
+      "rigFamilyId": "tdf_rig_quad_hind_drive",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_hide_keratin",
+        "tdf_matfam_umbral_ash_obsidian"
+      ],
+      "protectedIdentity": "deep_pelvis_long_feet_straight_counterbalance_tail",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    },
+    {
+      "familyId": "tdf_fauna_umbral_graveglass_sheller",
+      "realmId": "umbral",
+      "workingLabel": "Graveglass Sheller",
+      "sourceState": "ProposedTextOnly",
+      "sourceVersion": "tdf-eco-2026-07-27-v001",
+      "primaryHabitatId": "tdf_habitat_umbral_graveglass_cavern_vale",
+      "ecologicalGuild": "mineral_film_grazer_and_cave_recycler",
+      "scaleClass": "small",
+      "silhouetteClass": "low_gastropod_asymmetric_shard_shell",
+      "rigFamilyId": "tdf_rig_gastropod_shell",
+      "materialFamilyIds": [
+        "tdf_matfam_opaque_shell",
+        "tdf_matfam_umbral_ash_obsidian"
+      ],
+      "protectedIdentity": "asymmetric_shard_shell_forward_sensory_shield_broad_low_foot",
+      "sourceAssetRefs": [],
+      "provenanceState": "NoVisualSource",
+      "userCreativeState": "NotRequested",
+      "runtimeIntegrationState": "Blocked"
+    }
+  ],
+  "existingSourceIndex": [
+    {
+      "profileId": "tdf_basalt_grazer",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "sourceState": "LegacyMergedProposal",
+      "reviewDisposition": "LegacyPacketRequiresNormalization"
+    },
+    {
+      "profileId": "tdf_grove_strider",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "sourceState": "LegacyMergedProposal",
+      "reviewDisposition": "LegacyPacketRequiresNormalization"
+    },
+    {
+      "profileId": "tdf_mire_lumenback",
+      "sourceVersion": "tdf-2026-07-15-v001",
+      "sourceState": "LegacyMergedProposal",
+      "reviewDisposition": "LegacyPacketRequiresNormalization"
+    },
+    {
+      "profileId": "tdf_boss_stonehold_fault_crowned_colossus",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    },
+    {
+      "profileId": "tdf_elite_stonehold_rimehorn_breaker",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_stonehold_oreblind_delver",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_stonehold_slaghide_gorer",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    },
+    {
+      "profileId": "tdf_boss_eldergrove_mere_root_leviathan",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    },
+    {
+      "profileId": "tdf_elite_eldergrove_hollowbark_stalker",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_eldergrove_mirrorfin_lurker",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_eldergrove_sunmane_thornstag",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    },
+    {
+      "profileId": "tdf_boss_crownlands_meridian_tempest_roc",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_crownlands_crownstep_lion",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    },
+    {
+      "profileId": "tdf_elite_crownlands_galeclaw_courser",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    },
+    {
+      "profileId": "tdf_elite_crownlands_reliquary_basilisk",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_boss_umbral_ashvein_triarch",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_umbral_cindermaw_salamander",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_umbral_veilspine_widow",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "ProvisionalPass"
+    },
+    {
+      "profileId": "tdf_elite_umbral_gravewing_siphon",
+      "sourceVersion": "tdf-rbe-2026-07-24-v001",
+      "sourceState": "ReadyForUserReview",
+      "reviewDisposition": "PassWithConcern"
+    }
+  ],
+  "packagingIntent": {
+    "implementationAuthority": false,
+    "proposedBoundaries": [
+      "terrestrial-common-low",
+      "terrestrial-realm-<realm>-low",
+      "terrestrial-habitat-<realm>-<habitat>-low",
+      "terrestrial-fauna-<realm>-<family>-low",
+      "terrestrial-<scope>-balanced-addon",
+      "terrestrial-<scope>-high-addon",
+      "cinematic-source-only"
+    ],
+    "sharedLowTargetCompressedBytes": 50331648,
+    "perRealmLowTargetCompressedBytes": 20971520,
+    "perHabitatLowTargetCompressedBytes": 8388608,
+    "perSupportingFamilyLowTargetCompressedBytes": 4194304,
+    "ecosystemSupportingFaunaLowPlanningSubtotalBytes": 335544320,
+    "cinematicSourcePackagedInPlayer": false,
+    "editableSourcePackagedInPlayer": false,
+    "marketplaceArchivePackagedInPlayer": false
+  },
+  "lodIntent": {
+    "lod1TriangleRatioMinimum": 0.55,
+    "lod1TriangleRatioMaximum": 0.65,
+    "lod2TriangleRatioMinimum": 0.2,
+    "lod2TriangleRatioMaximum": 0.3,
+    "distantTriangleRatioMinimum": 0.05,
+    "distantTriangleRatioMaximum": 0.1,
+    "distantImpostorAllowed": true,
+    "protectedIdentityDependsOnParticlesGlowAudioOrHighTierDetail": false
+  },
+  "deferredDirections": [
+    "exact_habitat_and_supporting_fauna_visual_source",
+    "user_approval_of_exact_source_version_ids_variants_and_hashes",
+    "narrative_names_lore_cultural_and_ritual_meaning",
+    "pelagic_deep_sea_desert_and_oasis_geography",
+    "altered_celestial_demonic_mutated_undead_vampiric_and_magical_ecotypes",
+    "runtime_zone_catalog_spawn_population_ai_combat_reward_and_quest_authority",
+    "final_device_frame_memory_thermal_view_distance_and_install_size_contracts",
+    "production_models_rigs_textures_materials_animation_vfx_scenes_prefabs_and_packaging"
+  ]
+}
