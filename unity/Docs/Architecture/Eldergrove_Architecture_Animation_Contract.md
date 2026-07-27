@@ -1,6 +1,6 @@
 # Eldergrove Architecture Animation Contract
 
-**Status:** Owner-approved motion direction; timing and runtime budgets require Unity graybox validation
+**Status:** Owner-approved motion direction; isolated Unity graybox implemented; production budgets require device validation
 
 **Date:** 2026-07-24
 

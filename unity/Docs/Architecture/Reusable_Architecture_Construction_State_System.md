@@ -29,6 +29,7 @@ The shared enum is a runtime persistence and presentation boundary. Player-facin
 
 - Shared state controller: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/ArchitectureConstructionAnimationController.cs`
 - Shared profile contract: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/ArchitectureConstructionAnimationProfile.cs`
+- Eldergrove operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/EldergroveAtelierStableActivity.cs`
 - Crownlands operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/CrownlandsStormwrightStableActivity.cs`
 - Umbral operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/UmbralVeilwrightStableActivity.cs`
 - Crownlands profile: `Assets/AL/Art/Generated/Architecture/Profiles/Crownlands_Stormwright_ConstructionProfile.asset`
@@ -37,8 +38,15 @@ The shared enum is a runtime persistence and presentation boundary. Player-facin
 - Umbral profile: `Assets/AL/Art/Generated/Architecture/Profiles/Umbral_Veilwright_ConstructionProfile.asset`
 - Umbral generated graybox: `Assets/AL/Art/Generated/Architecture/Umbral/Umbral_Veilwright_AnimationPrototype.prefab`
 - Umbral isolated preview: `Assets/AL/Scenes/Prototypes/UmbralVeilwrightAnimationPrototype.unity`
+- Stonehold generated graybox: `Assets/AL/Art/Generated/Architecture/Stonehold/Stonehold_Workshop_AnimationPrototype.prefab`
+- Stonehold isolated preview: `Assets/AL/Scenes/Prototypes/StoneholdWorkshopAnimationPrototype.unity`
+- Eldergrove generated graybox: `Assets/AL/Art/Generated/Architecture/Eldergrove/Eldergrove_Atelier_AnimationPrototype.prefab`
+- Eldergrove isolated preview: `Assets/AL/Scenes/Prototypes/EldergroveAtelierAnimationPrototype.unity`
 
-Stonehold and Eldergrove profile assets establish the data boundary for their upcoming grayboxes. The Umbral profile, activity, prefab, and isolated scene establish its approved fourth-realm motion direction and deterministic ownership proof. They do not claim that final model pivots, exact gameplay seconds, or device budgets are approved.
+The Stonehold, Eldergrove, Crownlands, and Umbral profiles, activities, prefabs,
+and isolated scenes now establish the approved motion direction and
+deterministic ownership proof for all four realms. They do not claim that final
+model pivots, exact gameplay seconds, or device budgets are approved.
 
 ## Shared responsibilities
 

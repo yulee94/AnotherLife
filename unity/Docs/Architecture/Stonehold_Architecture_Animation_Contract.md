@@ -1,6 +1,6 @@
 # Stonehold Architecture Animation Contract
 
-**Status:** Owner-approved motion direction; timing and runtime budgets require Unity graybox validation
+**Status:** Owner-approved motion direction; isolated Unity graybox implemented; production budgets require device validation
 
 **Date:** 2026-07-24
 
@@ -9,6 +9,8 @@
 **Approved model source:** `unity/Assets/AL/Art/Architecture/ConceptSheets/architecture_stonehold_modular_workshop_detail_v001.png`
 
 **Approved motion reference:** `unity/Assets/AL/Art/Architecture/ConceptSheets/architecture_stonehold_animation_reference_v001.png`
+
+**Implemented graybox:** `unity/Docs/Architecture/Stonehold_Animation_Prototype_Handoff.md`
 
 **Shared runtime system:** `unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md`
 
@@ -153,7 +155,9 @@ These ratios describe rhythm, not gameplay duration:
 - Activity loop: short action followed by a noticeably longer quiet hold.
 - Completion: one grounded beat; no repeating celebration loop.
 
-Exact seconds, easing curves, particle counts, smoke lifetime, and randomized idle intervals remain open until a representative Unity workshop is profiled.
+Exact production seconds, easing curves, particle counts, smoke lifetime, and
+randomized idle intervals remain open until production geometry, effects, and
+representative Android and iOS devices are profiled.
 
 ## Acceptance checks
 

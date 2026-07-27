@@ -1,6 +1,6 @@
 # Umbral Architecture Animation Contract
 
-**Status:** Owner-approved fourth-realm motion direction; isolated runtime activity implemented; graybox in development
+**Status:** Owner-approved fourth-realm motion direction; isolated Unity graybox implemented; production budgets require device validation
 
 **Date:** 2026-07-24
 
@@ -9,6 +9,8 @@
 **Approved model source:** `unity/Assets/AL/Art/Architecture/ConceptSheets/architecture_umbral_modular_veilwright_detail_v001.png`
 
 **Approved motion reference:** `unity/Assets/AL/Art/Architecture/ConceptSheets/architecture_umbral_animation_reference_v001.png`
+
+**Implemented graybox:** `unity/Docs/Architecture/Umbral_Animation_Prototype_Handoff.md`
 
 **Shared runtime system:** `unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md`
 

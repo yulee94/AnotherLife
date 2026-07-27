@@ -11,6 +11,10 @@ namespace AL.Tests.EditMode.Architecture
     {
         private static readonly string[] PrototypePrefabPaths =
         {
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/" +
+                "Eldergrove_Atelier_AnimationPrototype.prefab",
+            "Assets/AL/Art/Generated/Architecture/Stonehold/" +
+                "Stonehold_Workshop_AnimationPrototype.prefab",
             "Assets/AL/Art/Generated/Architecture/Crownlands/" +
                 "Crownlands_Stormwright_AnimationPrototype.prefab",
             "Assets/AL/Art/Generated/Architecture/Umbral/" +
@@ -19,6 +23,10 @@ namespace AL.Tests.EditMode.Architecture
 
         private static readonly string[] PrototypeScenePaths =
         {
+            "Assets/AL/Scenes/Prototypes/" +
+                "EldergroveAtelierAnimationPrototype.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "StoneholdWorkshopAnimationPrototype.unity",
             "Assets/AL/Scenes/Prototypes/" +
                 "CrownlandsStormwrightAnimationPrototype.unity",
             "Assets/AL/Scenes/Prototypes/" +
