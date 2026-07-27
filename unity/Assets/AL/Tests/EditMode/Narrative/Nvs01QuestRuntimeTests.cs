@@ -1060,10 +1060,10 @@ namespace AL.Tests.EditMode.Narrative
         private static Type RuntimeType(string fullName)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(assembly => !assembly.IsDynamic && assembly.GetName().Name == "Assembly-CSharp")
+                .Where(assembly => !assembly.IsDynamic)
                 .Select(assembly => assembly.GetType(fullName))
                 .FirstOrDefault(candidate => candidate != null);
-            Assert.NotNull(type, "Expected runtime type " + fullName + " in Assembly-CSharp.");
+            Assert.NotNull(type, "Expected loaded runtime type " + fullName + ".");
             return type;
         }
 
