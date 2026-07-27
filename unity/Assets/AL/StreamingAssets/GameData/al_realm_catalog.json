@@ -14,6 +14,15 @@
     "committedProfileState": "realm_locked",
     "narrativeWarningKey": "realm.lock.warning"
   },
+  "narrativeContinuity": {
+    "sourcePacketId": "al_narrative_four_realm_launch_source_v001",
+    "sourceMode": "codex_narrative_content",
+    "accountLockSummary": "A player account commits to exactly one realm identity for the current product phase. Sub-characters inherit that realm and share same-realm account storage.",
+    "selectionWarningMeaning": "The confirmation warning must communicate durable allegiance without implying a paid transfer, partial reset, or story-supported realm change exists.",
+    "uncommittedMeaning": "Before commitment, realm browsing is preview-only and must not grant resources, Realm Gems, territory, quest state, or chapter eligibility.",
+    "committedMeaning": "After commitment, the realm identity becomes the source for inner-realm presentation, sub-character filtering, realm-specific naming, and NVS eligibility checks.",
+    "handoffStatus": "ready_for_codex_unity_realm_hooks"
+  },
   "realmOrder": [
     "crownlands",
     "stonehold",
@@ -58,6 +67,13 @@
         ],
         "playerPromise": "A Crownlands account begins as a sworn banner-holder whose authority is measured by service, order, and the defense of realm roads."
       },
+      "continuityHooks": {
+        "accountIdentity": "sworn_banner_holder",
+        "subCharacterInheritance": "all sub-characters are Crownland retainers, officers, or oathbound specialists attached to the same banner.",
+        "innerRealmTone": "ordered roads, fortified courts, supply discipline, public vows, and border-watch command.",
+        "outerWarzoneMotif": "main-gate defense, banner lines, cavalry pressure, and contested trade roads.",
+        "realmGemMeaning": "the Sun and Oath gems represent public legitimacy and binding service."
+      },
       "startingHooks": {
         "realmSelectionLineKey": "realm.crownlands.selection.line",
         "firstQuestArcId": "quest_arc_crownlands_oathroad",
@@ -100,6 +116,13 @@
           "mountain law"
         ],
         "playerPromise": "A Stonehold account begins as a sworn keeper of forge and gate, expected to outlast any enemy that reaches the mountain road."
+      },
+      "continuityHooks": {
+        "accountIdentity": "forge_gate_keeper",
+        "subCharacterInheritance": "all sub-characters are Stonehold clan-bound heirs, shieldkin, or oath workers from the same hold.",
+        "innerRealmTone": "deep halls, forge rolls, clan ledgers, rune memory, and defensive preparation.",
+        "outerWarzoneMotif": "faultline gates, siege engines, stone redoubts, and attrition warfare.",
+        "realmGemMeaning": "the Forge and Depth gems represent made law and ancestral endurance."
       },
       "startingHooks": {
         "realmSelectionLineKey": "realm.stonehold.selection.line",
@@ -144,6 +167,13 @@
         ],
         "playerPromise": "An Eldergrove account begins as a guardian of living borders, balancing mercy, precision, and the cost of old promises."
       },
+      "continuityHooks": {
+        "accountIdentity": "living_border_guardian",
+        "subCharacterInheritance": "all sub-characters are Eldergrove wardens, oracles, hunters, or caretakers bound to the same living border.",
+        "innerRealmTone": "root sanctuaries, moonlit councils, healing vows, hidden paths, and guarded mercy.",
+        "outerWarzoneMotif": "greenveil ambushes, living defenses, archer lines, and contested sacred crossings.",
+        "realmGemMeaning": "the Root and Moon gems represent memory that survives and judgment made in quiet light."
+      },
       "startingHooks": {
         "realmSelectionLineKey": "realm.eldergrove.selection.line",
         "firstQuestArcId": "quest_arc_eldergrove_rootwatch",
@@ -187,6 +217,13 @@
         ],
         "playerPromise": "An Umbral account begins as a claimant beneath the veil, rewarded for patience, precision, and ruthless control of hidden knowledge."
       },
+      "continuityHooks": {
+        "accountIdentity": "veiled_claimant",
+        "subCharacterInheritance": "all sub-characters are Umbral claimants, agents, archivists, or blades belonging to the same hidden court.",
+        "innerRealmTone": "ash courts, veiled bargains, forbidden archives, rival masks, and quiet tests of control.",
+        "outerWarzoneMotif": "ashvein gates, ambush routes, curse craft, intelligence denial, and precision strikes.",
+        "realmGemMeaning": "the Veil and Ember gems represent secrecy preserved and power kept alive under ash."
+      },
       "startingHooks": {
         "realmSelectionLineKey": "realm.umbral.selection.line",
         "firstQuestArcId": "quest_arc_umbral_veilclaim",
@@ -200,6 +237,28 @@
     "realm.stonehold.selection.line",
     "realm.eldergrove.selection.line",
     "realm.umbral.selection.line"
+  ],
+  "localizationDrafts": [
+    {
+      "key": "realm.lock.warning",
+      "text": "This account will be bound to the chosen realm. Future characters on this account must belong to the same realm."
+    },
+    {
+      "key": "realm.crownlands.selection.line",
+      "text": "Take the banner road, hold the oath in public, and let no border storm break Crownlands order."
+    },
+    {
+      "key": "realm.stonehold.selection.line",
+      "text": "Keep forge and gate, remember the deep law, and make the mountain answer in iron."
+    },
+    {
+      "key": "realm.eldergrove.selection.line",
+      "text": "Guard the living border, listen where roots remember, and choose mercy only when it can survive."
+    },
+    {
+      "key": "realm.umbral.selection.line",
+      "text": "Claim the veil, keep power beneath ash, and let every oath cut before it is seen."
+    }
   ],
   "engineeringHandoff": {
     "consumer": "codex/unity-realm-hooks",
