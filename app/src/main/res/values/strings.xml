@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Another Life</string>
+    <string name="quest_preview_open">Open quest source</string>
 </resources>

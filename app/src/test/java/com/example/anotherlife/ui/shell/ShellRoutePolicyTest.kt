@@ -20,7 +20,7 @@ class ShellRoutePolicyTest {
     }
 
     @Test
-    fun releaseBuildHidesNarrativeDebugAndQuestEntries() {
+    fun releaseBuildHidesNarrativeDebugEntry() {
         val routes = ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled = false)
 
         assertFalse(routes.contains(Route.NarrativeDebug))
@@ -43,20 +43,27 @@ class ShellRoutePolicyTest {
     }
 
     @Test
-    fun questRouteResolutionAlwaysReturnsVisibleFallbackUntilRuntimeBoundaryExists() {
-        listOf(true, false).forEach { debugToolsEnabled ->
-            val resolution = ShellRoutePolicy.resolveRoute(Route.Quest, debugToolsEnabled)
+    fun questPreviewIsAllowedOnlyInDebugBuilds() {
+        val debugResolution = ShellRoutePolicy.resolveRoute(Route.Quest, debugToolsEnabled = true)
+        val releaseResolution = ShellRoutePolicy.resolveRoute(Route.Quest, debugToolsEnabled = false)
 
-            assertTrue(resolution is RouteResolution.Rejected)
-            assertEquals(Route.Kingdom, resolution.route)
-            assertEquals(Route.Quest, (resolution as RouteResolution.Rejected).requestedRoute)
-            assertEquals(ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE, resolution.message)
-        }
+        assertEquals(Route.Quest, debugResolution.route)
+        assertTrue(releaseResolution is RouteResolution.Rejected)
+        assertEquals(Route.Kingdom, releaseResolution.route)
+        assertEquals(
+            ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE,
+            (releaseResolution as RouteResolution.Rejected).message
+        )
     }
 
     @Test
     fun releaseStateRestorationRemovesHistoricalNarrativeDebug() {
-        val restored = listOf(Route.Kingdom, Route.NarrativeDebug, Route.Dossier)
+        val restored = listOf(
+            Route.Kingdom,
+            Route.NarrativeDebug,
+            Route.Quest,
+            Route.Dossier
+        )
 
         val sanitized = ShellRoutePolicy.sanitizeBackStack(restored, debugToolsEnabled = false)
 
@@ -79,17 +86,20 @@ class ShellRoutePolicyTest {
     }
 
     @Test
-    fun restoredQuestRouteFallsBackOnceAndReportsQuestBoundary() {
+    fun releaseStateRestorationFallsBackOnceWhenCurrentRouteIsQuestPreview() {
         val restored = listOf(Route.Kingdom, Route.Dossier, Route.Quest)
 
-        val sanitized = ShellRoutePolicy.sanitizeBackStack(restored, debugToolsEnabled = true)
+        val sanitized = ShellRoutePolicy.sanitizeBackStack(restored, debugToolsEnabled = false)
 
         assertEquals(
             listOf(Route.Kingdom, Route.Dossier, Route.Kingdom),
             sanitized.routes
         )
         assertEquals(Route.Quest, sanitized.rejectedTopRoute?.requestedRoute)
-        assertEquals(ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE, sanitized.rejectedTopRoute?.message)
+        assertEquals(
+            ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE,
+            sanitized.rejectedTopRoute?.message
+        )
     }
 
     @Test

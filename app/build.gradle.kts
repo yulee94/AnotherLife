@@ -33,6 +33,9 @@ android {
         getByName("main") {
             assets.directories.add("../unity/Assets/AL/StreamingAssets/GameData")
         }
+        getByName("debug") {
+            assets.directories.add("../unity/Assets/StreamingAssets/AL/Narrative")
+        }
     }
     androidResources {
         ignoreAssetsPatterns.add("!*.meta")

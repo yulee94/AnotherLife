@@ -36,12 +36,11 @@ import com.example.anotherlife.ui.simulation.DossierScreen
 import com.example.anotherlife.ui.simulation.KingdomDashboard
 import com.example.anotherlife.ui.simulation.NarrativeDebugScreen
 import com.example.anotherlife.ui.simulation.WarzoneMapScreen
-import com.example.anotherlife.ui.simulation.QuestScreen
+import com.example.anotherlife.ui.simulation.QuestPreviewRoute
 import com.example.anotherlife.ui.simulation.StoryDialogueScreen
+import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.KingdomState
 import com.example.anotherlife.data.simulation.NarrativeState
-import com.example.anotherlife.data.simulation.DialogueNode
-import com.example.anotherlife.data.simulation.DialogueChoice
 import com.example.anotherlife.data.contracts.AndroidSharedCatalogLoader
 
 /**
@@ -72,21 +71,6 @@ fun AnotherLifeShell() {
             advisors.addAll(com.example.anotherlife.data.simulation.AdvisorPersonas.allAdvisors)
             factions.addAll(com.example.anotherlife.data.simulation.FactionProfiles.allFactions)
             narrativeLog.add("The kingdom awakens to a new era.")
-        }
-    }
-
-    // Initial Dialogue trigger logic (Demo)
-    LaunchedEffect(Unit) {
-        if (narrativeState.currentDialogue.value == null) {
-            narrativeState.currentDialogue.value = DialogueNode(
-                id = "intro",
-                characterName = "Captain Valerius",
-                text = "The walls are rebuilt, but the spirit of the people is still fragile. Your decree will shape our future.",
-                choices = listOf(
-                    DialogueChoice("A new era begins today.", "end"),
-                    DialogueChoice("We must remain vigilant.", "end"),
-                )
-            )
         }
     }
 
@@ -157,14 +141,7 @@ fun AnotherLifeShell() {
                             DossierScreen(state = kingdomState, narrative = narrativeState)
                         }
                         Route.Quest -> NavEntry(resolvedRoute) {
-                            QuestScreen(
-                                state = kingdomState,
-                                onLocate = { /* Navigation logic */ }
-                            ) { questId ->
-                                if (questId == "OMEN_1") {
-                                    narrativeState.currentDialogue.value = findDialogueNode("DLG_OMEN_1_START")
-                                }
-                            }
+                            QuestPreviewRoute()
                         }
                         Route.Champion -> NavEntry(resolvedRoute) { AcademyScreen(state = kingdomState) }
                         Route.Battle -> NavEntry(resolvedRoute) { BattleSimulatorScreen(state = kingdomState) }
@@ -174,7 +151,16 @@ fun AnotherLifeShell() {
                                 backStack.add(Route.Battle)
                             })
                         }
-                        Route.NarrativeDebug -> NavEntry(resolvedRoute) { NarrativeDebugScreen(state = narrativeState) }
+                        Route.NarrativeDebug -> NavEntry(resolvedRoute) {
+                            NarrativeDebugScreen(
+                                state = narrativeState,
+                                onOpenQuestPreview = {
+                                    if (backStack.lastOrNull() != Route.Quest) {
+                                        backStack.add(Route.Quest)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             )
