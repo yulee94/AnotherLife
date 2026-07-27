@@ -6,6 +6,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -1255,7 +1257,8 @@ namespace AL.Tests.EditMode
         {
             object save = CreateValidSave();
             var fixture = CreateSaveFixture(save);
-            fixture.State.LastSaveStatus = saveStatus;
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            fixture.State.SaveStatusAfterSave = saveStatus;
             object credits = CreateCreditService(fixture);
             var notifications = CreateNotificationFixture();
             object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
@@ -1270,6 +1273,128 @@ namespace AL.Tests.EditMode
                 ((IList)GetField(save, "AppliedBossLootRewards")).Count);
             Assert.AreEqual(1, fixture.State.SaveCount);
             Assert.IsEmpty(notifications.State.Messages);
+        }
+
+        [Test]
+        public void BossLootCommitUncertainRetryNeverUpgradesPendingLedgerToCommitted()
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            fixture.State.SaveStatusAfterSave = "CommitUncertain";
+            object credits = CreateCreditService(fixture);
+            var notifications = CreateNotificationFixture();
+            object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
+            object request = CreateBossLootRequest(
+                "encounter_uncertain",
+                "result_uncertain",
+                "boss_uncertain",
+                10);
+
+            object first = Invoke(service, "RollLoot", request);
+            object retry = Invoke(service, "RollLoot", request);
+
+            AssertApplicationStatus(first, "CommitUncertain");
+            AssertApplicationStatus(retry, "CommitUncertain");
+            Assert.AreEqual(
+                "AL-BOSS-LOOT-COMMIT-UNCERTAIN-RECONCILIATION-REQUIRED",
+                GetField(retry, "DiagnosticCode"));
+            Assert.AreEqual(10, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.IsEmpty(notifications.State.Messages);
+        }
+
+        [Test]
+        public void BossLootPrePersistenceExceptionRestoresExactPriorState()
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            var notifications = CreateNotificationFixture();
+            object service = CreateBossLootService(
+                fixture.Proxy,
+                CreateThrowingCreditService(),
+                notifications.Proxy);
+
+            object result = Invoke(
+                service,
+                "RollLoot",
+                CreateBossLootRequest(
+                    "encounter_throw",
+                    "result_throw",
+                    "boss_throw",
+                    10));
+
+            AssertApplicationStatus(result, "MutationFailedRolledBack");
+            Assert.AreEqual(
+                "AL-BOSS-LOOT-MUTATION-FAILED-ROLLED-BACK",
+                GetField(result, "DiagnosticCode"));
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "OwnedEquipment")).Count);
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.IsEmpty(notifications.State.Messages);
+        }
+
+        [Test]
+        public void BossLootApplicationsSharingSaveServiceAreSerialized()
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            fixture.State.CurrentSaveDelayMilliseconds = 40;
+            object credits = CreateCreditService(fixture);
+            var firstNotifications = CreateNotificationFixture();
+            var secondNotifications = CreateNotificationFixture();
+            object firstService = CreateBossLootService(
+                fixture.Proxy,
+                credits,
+                firstNotifications.Proxy);
+            object secondService = CreateBossLootService(
+                fixture.Proxy,
+                credits,
+                secondNotifications.Proxy);
+            object request = CreateBossLootRequest(
+                "encounter_parallel",
+                "result_parallel",
+                "boss_parallel",
+                10);
+            using (var start = new ManualResetEventSlim(false))
+            {
+                Task<object> first = Task.Run(() =>
+                {
+                    start.Wait();
+                    return Invoke(firstService, "RollLoot", request);
+                });
+                Task<object> second = Task.Run(() =>
+                {
+                    start.Wait();
+                    return Invoke(secondService, "RollLoot", request);
+                });
+
+                start.Set();
+                Assert.True(
+                    Task.WaitAll(new Task[] { first, second }, TimeSpan.FromSeconds(10)),
+                    "Concurrent boss-loot applications did not complete.");
+
+                CollectionAssert.AreEquivalent(
+                    new[] { "Committed", "AlreadyCommitted" },
+                    new[]
+                    {
+                        GetField(first.Result, "ApplicationStatus").ToString(),
+                        GetField(second.Result, "ApplicationStatus").ToString()
+                    });
+            }
+
+            Assert.AreEqual(1, fixture.State.MaximumConcurrentCurrentSaveReads);
+            Assert.AreEqual(10, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(
+                1,
+                firstNotifications.State.Messages.Count +
+                secondNotifications.State.Messages.Count);
         }
 
         [Test]
@@ -1742,6 +1867,12 @@ namespace AL.Tests.EditMode
             return constructor.Invoke(new object[] { save.Proxy, writable ?? new Func<bool>(() => true) });
         }
 
+        private static object CreateThrowingCreditService()
+        {
+            Type interfaceType = GetRuntimeType("AL.Core.Interfaces.IWarzoneCreditIntegrityService");
+            return CreateDispatchProxy(interfaceType, typeof(ThrowingCreditServiceProxy));
+        }
+
         private static object CreateWarmasterService(SaveFixture save)
         {
             Type serviceType = GetRuntimeType("AL.Services.Local.LocalWarmasterService");
@@ -2127,15 +2258,49 @@ namespace AL.Tests.EditMode
             public object CurrentSave;
             public int SaveCount;
             public string LastSaveStatus = "None";
+            public string SaveStatusAfterSave;
+            public int CurrentSaveDelayMilliseconds;
+            public int MaximumConcurrentCurrentSaveReads;
+            private int _activeCurrentSaveReads;
 
             public object Invoke(MethodInfo method, object[] args)
             {
                 switch (method.Name)
                 {
                     case "get_CurrentSave":
-                        return CurrentSave;
+                        int active = Interlocked.Increment(ref _activeCurrentSaveReads);
+                        int observed;
+                        do
+                        {
+                            observed = MaximumConcurrentCurrentSaveReads;
+                            if (active <= observed)
+                            {
+                                break;
+                            }
+                        }
+                        while (Interlocked.CompareExchange(
+                                   ref MaximumConcurrentCurrentSaveReads,
+                                   active,
+                                   observed) != observed);
+                        try
+                        {
+                            if (CurrentSaveDelayMilliseconds > 0)
+                            {
+                                Thread.Sleep(CurrentSaveDelayMilliseconds);
+                            }
+
+                            return CurrentSave;
+                        }
+                        finally
+                        {
+                            Interlocked.Decrement(ref _activeCurrentSaveReads);
+                        }
                     case "Save":
                         SaveCount++;
+                        if (!string.IsNullOrEmpty(SaveStatusAfterSave))
+                        {
+                            LastSaveStatus = SaveStatusAfterSave;
+                        }
                         return null;
                     case "HasSave":
                         return CurrentSave != null;
@@ -2151,6 +2316,23 @@ namespace AL.Tests.EditMode
                                 ? Activator.CreateInstance(method.ReturnType)
                                 : null;
                 }
+            }
+        }
+
+        public class ThrowingCreditServiceProxy : DispatchProxy
+        {
+            protected override object Invoke(MethodInfo targetMethod, object[] args)
+            {
+                if (targetMethod.Name == "TryAddCredits")
+                {
+                    throw new InvalidOperationException("credit mutation");
+                }
+
+                return targetMethod.ReturnType == typeof(void)
+                    ? null
+                    : targetMethod.ReturnType.IsValueType
+                        ? Activator.CreateInstance(targetMethod.ReturnType)
+                        : null;
             }
         }
 
