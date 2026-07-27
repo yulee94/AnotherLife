@@ -1,7 +1,9 @@
 {
     "name": "AL.PlayMode.Tests",
     "rootNamespace": "AL.Tests.PlayMode",
-    "references": [],
+    "references": [
+        "AL.Runtime"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,

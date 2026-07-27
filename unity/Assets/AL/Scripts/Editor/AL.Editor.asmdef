@@ -1,6 +1,6 @@
 {
-    "name": "AL.EditMode.Tests",
-    "rootNamespace": "AL.Tests.EditMode",
+    "name": "AL.Editor",
+    "rootNamespace": "AL.Editor",
     "references": [
         "AL.Runtime",
         "AL.GameDataCatalog"
@@ -12,13 +12,8 @@
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
-    "autoReferenced": false,
-    "defineConstraints": [
-        "UNITY_INCLUDE_TESTS"
-    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false,
-    "optionalUnityReferences": [
-        "TestAssemblies"
-    ]
+    "noEngineReferences": false
 }
