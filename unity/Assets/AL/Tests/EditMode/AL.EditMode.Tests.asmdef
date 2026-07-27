@@ -2,6 +2,7 @@
     "name": "AL.EditMode.Tests",
     "rootNamespace": "AL.Tests.EditMode",
     "references": [
+        "AL.Runtime",
         "AL.GameDataCatalog"
     ],
     "includePlatforms": [
