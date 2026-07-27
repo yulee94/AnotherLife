@@ -22,8 +22,8 @@ namespace AL.Tests.EditMode
     //     seeds no profile state and never loads or saves (isolated real-service + controllable-save
     //     spy, save-state equality).
     //
-    // The test assembly cannot reference the predefined Assembly-CSharp, so all production types are
-    // reached by reflection, mirroring BootloaderServiceStackIntegrityTests.
+    // The test assembly does not reference every production assembly, so production types are reached
+    // by reflection, mirroring BootloaderServiceStackIntegrityTests.
     public sealed class KingdomReleaseContainmentTests
     {
         // GitHub issue state frozen at #178 containment implementation time (2026-07-21). This is a
@@ -518,10 +518,10 @@ namespace AL.Tests.EditMode
         private static Type GetRuntimeType(string typeName)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(assembly => assembly.GetName().Name == "Assembly-CSharp")
-                ?.GetType(typeName);
+                .Select(assembly => assembly.GetType(typeName))
+                .FirstOrDefault(candidate => candidate != null);
 
-            Assert.NotNull(type, $"Expected runtime type {typeName} in Assembly-CSharp.");
+            Assert.NotNull(type, $"Expected loaded runtime type {typeName}.");
             return type;
         }
     }

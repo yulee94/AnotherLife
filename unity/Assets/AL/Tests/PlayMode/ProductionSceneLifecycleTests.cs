@@ -102,7 +102,8 @@ namespace AL.Tests.PlayMode
             foreach (string typeName in ControllerTypeNames)
             {
                 Type type = AppDomain.CurrentDomain.GetAssemblies()
-                    .FirstOrDefault(a => a.GetName().Name == "Assembly-CSharp")?.GetType(typeName);
+                    .Select(assembly => assembly.GetType(typeName))
+                    .FirstOrDefault(candidate => candidate != null);
                 if (type == null)
                 {
                     continue;
@@ -328,9 +329,9 @@ namespace AL.Tests.PlayMode
         private static Type RuntimeType(string typeName)
         {
             Type type = AppDomain.CurrentDomain.GetAssemblies()
-                .FirstOrDefault(assembly => assembly.GetName().Name == "Assembly-CSharp")
-                ?.GetType(typeName);
-            Assert.NotNull(type, $"Expected runtime type {typeName} in Assembly-CSharp.");
+                .Select(assembly => assembly.GetType(typeName))
+                .FirstOrDefault(candidate => candidate != null);
+            Assert.NotNull(type, $"Expected loaded runtime type {typeName}.");
             return type;
         }
 
