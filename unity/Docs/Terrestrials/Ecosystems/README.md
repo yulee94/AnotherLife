@@ -38,9 +38,14 @@ This folder contains the A2 terrestrial-design proposal for coherent fauna and h
   organic kit, qualitative transition/spatial studies, Grove Strider placement,
   provenance, QA, schema, and manifest evidence without duplicating the
   canonical creature raster.
+- `MirrorrootLittoral/` — companion source
+  `tdf-eco-mirrorroot-2026-07-27-v001` with exact Eldergrove shoreline,
+  bounded natural kit, qualitative depth/transition studies, Mire Lumenback
+  placement, provenance, QA, schema, and manifest evidence without duplicating
+  the canonical creature raster.
 
 The parent roster adds no concept art or runtime asset. Its companion packets
-advance three habitats, one pictured Moonshell ecotype, and three avian-soarer
+advance four habitats, one pictured Moonshell ecotype, and three avian-soarer
 identities to `ReadyForUserReview`. The normalization companion advances the
 exact pictured bases for Basalt Grazer, Grove Strider, and Mire Lumenback to
 `ReadyForUserReview` with concerns and zero duplicated raster bytes. The
@@ -65,7 +70,7 @@ Habitat suitability links to existing creatures are visual/ecological design ref
 - Supporting fauna families: `16` (`4` per realm)
 - Reused foundation family IDs: `3`
 - New exact visual-review family IDs: `3`
-- New exact habitat visual-review IDs: `3`
+- New exact habitat visual-review IDs: `4`
 - New exact flood-season fauna visual-review IDs: `1`
 - Normalized legacy exact visual-review family IDs: `3`
 - Remaining new text-only family IDs: `9`
@@ -74,11 +79,13 @@ Habitat suitability links to existing creatures are visual/ecological design ref
 - Moonroot finals/retained inputs: `6 / 3`
 - Faultroad finals/retained inputs: `3 / 1`
 - Hollowbark finals/retained inputs: `3 / 0`
+- Mirrorroot finals/retained inputs: `3 / 0`
 - Foundation exact sheets referenced/new copies: `3 / 0`
 - Avian-soarer Player/install bytes: `0`
 - Moonroot Player/install bytes: `0`
 - Faultroad Player/install bytes: `0`
 - Hollowbark Player/install bytes: `0`
+- Mirrorroot Player/install bytes: `0`
 - Foundation normalization new Player/install bytes: `0`
 - Existing boss/elite anchors referenced: `16`
 - Runtime or shared-file changes: `0`
