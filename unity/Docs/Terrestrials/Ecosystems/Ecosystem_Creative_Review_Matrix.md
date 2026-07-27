@@ -4,8 +4,9 @@
 
 - Issue: `#259`
 - Source version: `tdf-eco-2026-07-27-v001`
+- Companion visual source: `tdf-eco-soarer-2026-07-27-v001`
 - Primary Codex mode: `terrestrial-design`
-- Review state: `RosterProposed`
+- Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
 - Runtime integration: blocked
 
@@ -53,7 +54,7 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 | Family ID | State | Existing exact source | User approval | Required next source |
 | --- | --- | --- | --- | --- |
 | `tdf_basalt_grazer` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
-| `tdf_fauna_stonehold_rimefan_kite` | `ProposedTextOnly` | none | not requested | silhouette, turnaround, scale, feather/material, flight/contact sheet |
+| `tdf_fauna_stonehold_rimefan_kite` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | resolve `PassWithConcern` skull, wing-group, and wedge-tail consistency |
 | `tdf_fauna_stonehold_oreveil_isopod` | `ProposedTextOnly` | none | not requested | top/side/front anatomy, plate count, curl, locomotion/contact sheet |
 | `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
 | `tdf_grove_strider` | `LegacyMergedProposal` | base concept sheet exists | pending | normalize packet identity/readiness, then exact habitat-placement review |
@@ -63,11 +64,15 @@ All sixteen habitat entries have stable design IDs and connected transition inte
 | `tdf_fauna_crownlands_broadcrest_aurochs` | `ProposedTextOnly` | none | not requested | original skull/horn-root turnaround, herd turn, shoulder-load sheet |
 | `tdf_fauna_crownlands_grainveil_covey` | `ProposedTextOnly` | none | not requested | group scale, wedge/fan silhouette, ground motion and scatter sheet |
 | `tdf_fauna_crownlands_reliquary_shellback` | `ProposedTextOnly` | none | not requested | shell/probe anatomy, clamp range, wall-step/contact sheet |
-| `tdf_fauna_crownlands_stormglass_swift` | `ProposedTextOnly` | none | not requested | crescent/fork flight plan, perch, bank/stoop sheet |
-| `tdf_fauna_umbral_sootsail_carrioner` | `ProposedTextOnly` | none | not requested | plank-wing/hooded skull turnaround, ground brace and launch sheet |
+| `tdf_fauna_crownlands_stormglass_swift` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | verify measured `0.95` span and final fork proportion |
+| `tdf_fauna_umbral_sootsail_carrioner` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | resolve `PassWithConcern` hood, wing-group, and terrace-toe consistency |
 | `tdf_fauna_umbral_cinderplate_scarab` | `ProposedTextOnly` | none | not requested | six-limb anatomy, wingcase/shovel callouts, push/burrow sheet |
 | `tdf_fauna_umbral_ashstep_bounder` | `ProposedTextOnly` | none | not requested | non-rabbit skull/body turnaround, ledge descent and landing sheet |
 | `tdf_fauna_umbral_graveglass_sheller` | `ProposedTextOnly` | none | not requested | opaque shell/body anatomy, compression, wall-turn sheet |
+
+The three new reviewable profiles are governed by
+`unity/Docs/Terrestrials/Ecosystems/AvianSoarers/`. Their unpictured ecotypes
+remain `ProposedTextOnly`; user and production states remain blocked.
 
 ## Inherited Boss And Elite Anchors
 

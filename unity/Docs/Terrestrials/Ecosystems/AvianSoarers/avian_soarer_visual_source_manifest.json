@@ -1,0 +1,317 @@
+{
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_avian_soarer_visual_source_v001",
+  "sourceVersion": "tdf-eco-soarer-2026-07-27-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdAtUtc": "2026-07-27T01:54:35.8772181Z",
+  "promptDocument": {
+    "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/Executed_Generation_Prompts_And_Provenance.md",
+    "sha256": "e4354ba5007b91f5a47bef57acc2e7299804c4f9f689e654f272eba5b799baaf"
+  },
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "narrativeNamingState": "WorkingLabelsOnly",
+    "visualQaState": "PassWithConcern"
+  },
+  "generator": {
+    "product": "Codex built-in image generation",
+    "versionOrModel": "unavailable_to_operator",
+    "externalInputsSupplied": false,
+    "editableSourceAvailable": false,
+    "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001"
+  },
+  "comparisonAnchor": {
+    "profileId": "tdf_boss_crownlands_meridian_tempest_roc",
+    "sourceVersion": "tdf-rbe-2026-07-24-v001",
+    "assetId": "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002",
+    "usage": "scale_and_no_reuse_comparison_only"
+  },
+  "sourceBudgets": {
+    "image": {
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorSpace": "sRGB",
+      "bitDepth": 8,
+      "alphaPolicy": "opaque_rgb",
+      "maximumCompressedBytes": 4194304,
+      "estimatedDecodedRgbBytes": 4718592,
+      "maximumDecodedRgbaBytes": 6291456,
+      "maximumSimultaneousReviewImages": 4,
+      "maximumSimultaneousDecodedBytes": 25165824
+    },
+    "ceilings": {
+      "finalCount": 8,
+      "finalBytes": 33554432,
+      "retainedInputCount": 4,
+      "retainedInputBytes": 16777216,
+      "waveBytes": 50331648
+    },
+    "actual": {
+      "finalCount": 8,
+      "finalBytes": 18328821,
+      "retainedInputCount": 3,
+      "retainedInputBytes": 7259584,
+      "totalCount": 11,
+      "totalBytes": 25588405,
+      "playerBuildBytes": 0,
+      "runtimeResidentBytes": 0
+    }
+  },
+  "profiles": [
+    {
+      "profileId": "tdf_fauna_stonehold_rimefan_kite",
+      "realmId": "stonehold",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "userDecision": "NotRequested",
+      "visualizedVariantId": "rimefan_open_shelf",
+      "pendingVariantIds": ["rimefan_gallery_edge"],
+      "scale": {"wingspan": 2.3, "standingHeight": [0.65, 0.75], "length": [0.9, 1.05], "basis": "adult_champion_height"},
+      "protectedSilhouette": ["diamond_wing", "deep_chest", "short_wedge_tail", "broad_cliff_feet"],
+      "materials": ["blue_gray_matte_feather", "dark_down", "pale_keratin", "iron_dust_wear"],
+      "motion": ["ridge_soar", "two_step_launch", "corrective_downstroke", "wind_hold", "cliff_brace", "hard_fold_recovery"],
+      "sharedRigIntent": "tdf_rig_avian_soarer",
+      "primaryAssetIds": [
+        "tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001",
+        "tdf_asset_fauna_stonehold_rimefan_kite_motion_material_v001"
+      ]
+    },
+    {
+      "profileId": "tdf_fauna_crownlands_stormglass_swift",
+      "realmId": "crownlands",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "ProvisionalPass",
+      "userDecision": "NotRequested",
+      "visualizedVariantId": "stormglass_high_shelf",
+      "pendingVariantIds": ["stormglass_calm_front"],
+      "scale": {"wingspan": 0.95, "standingHeight": [0.22, 0.3], "length": [0.3, 0.38], "basis": "adult_champion_height"},
+      "protectedSilhouette": ["continuous_crescent_wing", "compact_chest", "single_root_rigid_fork", "narrow_gripping_feet"],
+      "materials": ["charcoal_matte_feather", "opaque_metallic_blue_edge", "pale_keratin", "rain_dark_down"],
+      "motion": ["acceleration_strokes", "pressure_bank", "stoop", "fork_brake", "shelf_perch", "wind_brace_recovery"],
+      "sharedRigIntent": "tdf_rig_avian_soarer",
+      "primaryAssetIds": [
+        "tdf_asset_fauna_crownlands_stormglass_swift_turnaround_v001",
+        "tdf_asset_fauna_crownlands_stormglass_swift_motion_material_v001"
+      ]
+    },
+    {
+      "profileId": "tdf_fauna_umbral_sootsail_carrioner",
+      "realmId": "umbral",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "userDecision": "NotRequested",
+      "visualizedVariantId": "sootsail_rift",
+      "pendingVariantIds": ["sootsail_ravine"],
+      "scale": {"wingspan": 2.0, "standingHeight": [0.7, 0.85], "length": [1.0, 1.2], "basis": "adult_champion_height"},
+      "protectedSilhouette": ["straight_plank_wing", "hooded_skull", "deep_keel", "long_distal_split_tail", "heavy_terrace_feet"],
+      "materials": ["matte_charcoal_feather", "pale_facial_keratin", "glass_dark_beak", "ash_worn_leg"],
+      "motion": ["thermal_circle", "side_slip", "landing_brace", "ground_mantle", "running_launch", "forceful_downstroke", "recovery_glide"],
+      "sharedRigIntent": "tdf_rig_avian_soarer",
+      "primaryAssetIds": [
+        "tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001",
+        "tdf_asset_fauna_umbral_sootsail_carrioner_motion_material_v001"
+      ]
+    }
+  ],
+  "productionEnvelopes": [
+    {"profileId": "tdf_fauna_crownlands_stormglass_swift", "lowTriangles": [8000, 10000], "deformBones": [32, 40], "lowTexture": "one_1k_set", "materialSlotsMaximum": 2, "balancedTrianglesMaximum": 20000, "highTrianglesMaximum": 40000},
+    {"profileId": "tdf_fauna_stonehold_rimefan_kite", "lowTriangles": [14000, 16000], "deformBones": [44, 56], "lowTexture": "one_1k_set", "materialSlotsMaximum": 2, "balancedTrianglesMaximum": 30000, "highTrianglesMaximum": 55000},
+    {"profileId": "tdf_fauna_umbral_sootsail_carrioner", "lowTriangles": [14000, 16000], "deformBones": [48, 56], "lowTexture": "one_1k_set", "materialSlotsMaximum": 2, "balancedTrianglesMaximum": 30000, "highTrianglesMaximum": 55000}
+  ],
+  "sharedAssetIds": [
+    "tdf_asset_shared_avian_soarer_scale_silhouette_master_v001",
+    "tdf_asset_shared_avian_soarer_rig_lod_readability_v001"
+  ],
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001",
+      "subjectIds": ["tdf_fauna_stonehold_rimefan_kite"],
+      "roles": ["turnaround", "anatomy", "scale", "silhouette"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_stonehold_rimefan_kite_turnaround_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2385499,
+      "sha256": "459a3d9f34939d3c6d4ec71699e142807d234a61ba6c1bd20496963e25d5abae",
+      "gitLfsOid": "459a3d9f34939d3c6d4ec71699e142807d234a61ba6c1bd20496963e25d5abae",
+      "gitLfsSize": 2385499,
+      "generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_turnaround_refinement_v001",
+      "supersedes": ["tdf_asset_input_fauna_stonehold_rimefan_kite_turnaround_base_v001"],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_stonehold_rimefan_kite_motion_material_v001",
+      "subjectIds": ["tdf_fauna_stonehold_rimefan_kite"],
+      "roles": ["motion", "material", "reduced_motion"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_stonehold_rimefan_kite_motion_material_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2424547,
+      "sha256": "348d9ae7df2ec4ed2d988901010c0e20ef114f8c5bd8621e697d00e2fb50e0c9",
+      "gitLfsOid": "348d9ae7df2ec4ed2d988901010c0e20ef114f8c5bd8621e697d00e2fb50e0c9",
+      "gitLfsSize": 2424547,
+      "generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_motion_refinement_v001",
+      "supersedes": ["tdf_asset_input_fauna_stonehold_rimefan_kite_motion_base_v001"],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_crownlands_stormglass_swift_turnaround_v001",
+      "subjectIds": ["tdf_fauna_crownlands_stormglass_swift"],
+      "roles": ["turnaround", "anatomy", "scale", "silhouette"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_crownlands_stormglass_swift_turnaround_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "ProvisionalPass",
+      "byteLength": 2396151,
+      "sha256": "b7398aa265f00d1c0c71c54ed317b59fa057f7423f237b57eb5623b05b4e5db9",
+      "gitLfsOid": "b7398aa265f00d1c0c71c54ed317b59fa057f7423f237b57eb5623b05b4e5db9",
+      "gitLfsSize": 2396151,
+      "generationRecordId": "tdf_generation_fauna_crownlands_stormglass_swift_turnaround_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_crownlands_stormglass_swift_motion_material_v001",
+      "subjectIds": ["tdf_fauna_crownlands_stormglass_swift"],
+      "roles": ["motion", "material", "reduced_motion"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_crownlands_stormglass_swift_motion_material_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "ProvisionalPass",
+      "byteLength": 2440659,
+      "sha256": "35fb77f94108afb43fb6cf7736f26c7c610a870a2659279a14098c0b9de75ca7",
+      "gitLfsOid": "35fb77f94108afb43fb6cf7736f26c7c610a870a2659279a14098c0b9de75ca7",
+      "gitLfsSize": 2440659,
+      "generationRecordId": "tdf_generation_fauna_crownlands_stormglass_swift_motion_material_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001",
+      "subjectIds": ["tdf_fauna_umbral_sootsail_carrioner"],
+      "roles": ["turnaround", "anatomy", "scale", "silhouette"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_umbral_sootsail_carrioner_turnaround_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2299748,
+      "sha256": "075f1f7fde26631a70d7e1a1adf7683796d69caddd3753ebdada0b8fbfedfde4",
+      "gitLfsOid": "075f1f7fde26631a70d7e1a1adf7683796d69caddd3753ebdada0b8fbfedfde4",
+      "gitLfsSize": 2299748,
+      "generationRecordId": "tdf_generation_fauna_umbral_sootsail_carrioner_turnaround_refinement_v001",
+      "supersedes": ["tdf_asset_input_fauna_umbral_sootsail_carrioner_turnaround_base_v001"],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_fauna_umbral_sootsail_carrioner_motion_material_v001",
+      "subjectIds": ["tdf_fauna_umbral_sootsail_carrioner"],
+      "roles": ["motion", "material", "reduced_motion"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_umbral_sootsail_carrioner_motion_material_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2410277,
+      "sha256": "063e5582fe6a7d26b5a3890eafbe89e13c5cdd26db1e7e48a079bea33022e532",
+      "gitLfsOid": "063e5582fe6a7d26b5a3890eafbe89e13c5cdd26db1e7e48a079bea33022e532",
+      "gitLfsSize": 2410277,
+      "generationRecordId": "tdf_generation_fauna_umbral_sootsail_carrioner_motion_material_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_shared_avian_soarer_scale_silhouette_master_v001",
+      "subjectIds": ["tdf_fauna_stonehold_rimefan_kite", "tdf_fauna_crownlands_stormglass_swift", "tdf_fauna_umbral_sootsail_carrioner"],
+      "roles": ["scale_comparison", "normalized_silhouette", "anti_palette_swap"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_shared_avian_soarer_scale_silhouette_master_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "ProvisionalPass",
+      "byteLength": 1588133,
+      "sha256": "83aed2fbba2bee6d2b9962d4e86068dd250e16a7056b601b424b057900047a17",
+      "gitLfsOid": "83aed2fbba2bee6d2b9962d4e86068dd250e16a7056b601b424b057900047a17",
+      "gitLfsSize": 1588133,
+      "generationRecordId": "tdf_generation_shared_avian_soarer_scale_silhouette_master_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_shared_avian_soarer_rig_lod_readability_v001",
+      "subjectIds": ["tdf_fauna_stonehold_rimefan_kite", "tdf_fauna_crownlands_stormglass_swift", "tdf_fauna_umbral_sootsail_carrioner"],
+      "roles": ["shared_control_grammar", "fold_state", "lod_intent", "material_reuse"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_shared_avian_soarer_rig_lod_readability_v001.png",
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2383807,
+      "sha256": "d4fba9f806a418562e66585a1b26b33565e5ccf454e91a76f27d22196c2a4d6e",
+      "gitLfsOid": "d4fba9f806a418562e66585a1b26b33565e5ccf454e91a76f27d22196c2a4d6e",
+      "gitLfsSize": 2383807,
+      "generationRecordId": "tdf_generation_shared_avian_soarer_rig_lod_readability_v001",
+      "supersedes": [],
+      "supersededBy": []
+    },
+    {
+      "assetId": "tdf_asset_input_fauna_stonehold_rimefan_kite_turnaround_base_v001",
+      "subjectIds": ["tdf_fauna_stonehold_rimefan_kite"],
+      "roles": ["retained_refinement_input"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/GenerationInputs/tdf_input_fauna_stonehold_rimefan_kite_turnaround_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "byteLength": 2497673,
+      "sha256": "da3df35600539b5e4b01fa82e9329a6a4b6308750e0b1fc6b65468ec5f1ca4e0",
+      "gitLfsOid": "da3df35600539b5e4b01fa82e9329a6a4b6308750e0b1fc6b65468ec5f1ca4e0",
+      "gitLfsSize": 2497673,
+      "generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_turnaround_base_v001",
+      "supersedes": [],
+      "supersededBy": ["tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001"]
+    },
+    {
+      "assetId": "tdf_asset_input_fauna_stonehold_rimefan_kite_motion_base_v001",
+      "subjectIds": ["tdf_fauna_stonehold_rimefan_kite"],
+      "roles": ["retained_refinement_input"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/GenerationInputs/tdf_input_fauna_stonehold_rimefan_kite_motion_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "byteLength": 2435880,
+      "sha256": "4893060cff3a42cfb363baaa1225a5041133f2ca0e9fc5dd33baede63b7bd5e8",
+      "gitLfsOid": "4893060cff3a42cfb363baaa1225a5041133f2ca0e9fc5dd33baede63b7bd5e8",
+      "gitLfsSize": 2435880,
+      "generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_motion_base_v001",
+      "supersedes": [],
+      "supersededBy": ["tdf_asset_fauna_stonehold_rimefan_kite_motion_material_v001"]
+    },
+    {
+      "assetId": "tdf_asset_input_fauna_umbral_sootsail_carrioner_turnaround_base_v001",
+      "subjectIds": ["tdf_fauna_umbral_sootsail_carrioner"],
+      "roles": ["retained_refinement_input"],
+      "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/GenerationInputs/tdf_input_fauna_umbral_sootsail_carrioner_turnaround_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "byteLength": 2326031,
+      "sha256": "8803129a5ad0b6ae3ac6e7e08d7ce81b454b55af24a9bc789608a50eca8fd7aa",
+      "gitLfsOid": "8803129a5ad0b6ae3ac6e7e08d7ce81b454b55af24a9bc789608a50eca8fd7aa",
+      "gitLfsSize": 2326031,
+      "generationRecordId": "tdf_generation_fauna_umbral_sootsail_carrioner_turnaround_base_v001",
+      "supersedes": [],
+      "supersededBy": ["tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001"]
+    }
+  ],
+  "generationRecords": [
+    {"generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_turnaround_base_v001", "generatedAtUtc": "2026-07-27T01:35:46.8198891Z", "inputAssetIds": [], "outputAssetId": "tdf_asset_input_fauna_stonehold_rimefan_kite_turnaround_base_v001"},
+    {"generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_turnaround_refinement_v001", "generatedAtUtc": "2026-07-27T01:37:52.8186070Z", "inputAssetIds": ["tdf_asset_input_fauna_stonehold_rimefan_kite_turnaround_base_v001"], "outputAssetId": "tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001"},
+    {"generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_motion_base_v001", "generatedAtUtc": "2026-07-27T01:39:17.8398336Z", "inputAssetIds": ["tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001"], "outputAssetId": "tdf_asset_input_fauna_stonehold_rimefan_kite_motion_base_v001"},
+    {"generationRecordId": "tdf_generation_fauna_stonehold_rimefan_kite_motion_refinement_v001", "generatedAtUtc": "2026-07-27T01:42:21.9079861Z", "inputAssetIds": ["tdf_asset_input_fauna_stonehold_rimefan_kite_motion_base_v001"], "outputAssetId": "tdf_asset_fauna_stonehold_rimefan_kite_motion_material_v001"},
+    {"generationRecordId": "tdf_generation_fauna_crownlands_stormglass_swift_turnaround_v001", "generatedAtUtc": "2026-07-27T01:44:08.5267623Z", "inputAssetIds": [], "outputAssetId": "tdf_asset_fauna_crownlands_stormglass_swift_turnaround_v001"},
+    {"generationRecordId": "tdf_generation_fauna_crownlands_stormglass_swift_motion_material_v001", "generatedAtUtc": "2026-07-27T01:45:34.0576298Z", "inputAssetIds": ["tdf_asset_fauna_crownlands_stormglass_swift_turnaround_v001"], "outputAssetId": "tdf_asset_fauna_crownlands_stormglass_swift_motion_material_v001"},
+    {"generationRecordId": "tdf_generation_fauna_umbral_sootsail_carrioner_turnaround_base_v001", "generatedAtUtc": "2026-07-27T01:46:57.0902737Z", "inputAssetIds": [], "outputAssetId": "tdf_asset_input_fauna_umbral_sootsail_carrioner_turnaround_base_v001"},
+    {"generationRecordId": "tdf_generation_fauna_umbral_sootsail_carrioner_turnaround_refinement_v001", "generatedAtUtc": "2026-07-27T01:48:13.6855152Z", "inputAssetIds": ["tdf_asset_input_fauna_umbral_sootsail_carrioner_turnaround_base_v001"], "outputAssetId": "tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001"},
+    {"generationRecordId": "tdf_generation_fauna_umbral_sootsail_carrioner_motion_material_v001", "generatedAtUtc": "2026-07-27T01:49:45.6567798Z", "inputAssetIds": ["tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001"], "outputAssetId": "tdf_asset_fauna_umbral_sootsail_carrioner_motion_material_v001"},
+    {"generationRecordId": "tdf_generation_shared_avian_soarer_scale_silhouette_master_v001", "generatedAtUtc": "2026-07-27T01:52:43.4291898Z", "inputAssetIds": ["tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001", "tdf_asset_fauna_crownlands_stormglass_swift_turnaround_v001", "tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001", "tdf_asset_boss_crownlands_meridian_tempest_roc_concept_v002"], "outputAssetId": "tdf_asset_shared_avian_soarer_scale_silhouette_master_v001"},
+    {"generationRecordId": "tdf_generation_shared_avian_soarer_rig_lod_readability_v001", "generatedAtUtc": "2026-07-27T01:54:35.8772181Z", "inputAssetIds": ["tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001", "tdf_asset_fauna_crownlands_stormglass_swift_turnaround_v001", "tdf_asset_fauna_umbral_sootsail_carrioner_turnaround_v001"], "outputAssetId": "tdf_asset_shared_avian_soarer_rig_lod_readability_v001"}
+  ],
+  "externalInputs": []
+}
