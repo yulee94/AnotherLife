@@ -89,16 +89,17 @@ namespace AL.RealmSelection
             if (document.realms == null || document.realms.Length != 4 || document.realmOrder == null || document.realmOrder.Length != 4)
                 return Reject("AL-REALM-CATALOG-REALM-COUNT");
 
-            var expected = new HashSet<string>(StringComparer.Ordinal) { "crownlands", "stonehold", "eldergrove", "umbral" };
             var seenIds = new HashSet<string>(StringComparer.Ordinal);
             var seenRuntime = new HashSet<RealmId>();
             var entries = new List<RealmCatalogEntry>(4);
             for (int i = 0; i < document.realms.Length; i++)
             {
                 RealmCatalogRealm realm = document.realms[i];
+                RealmId expectedRuntimeId;
                 RealmId runtimeId;
-                if (realm == null || !expected.Contains(realm.id) || !seenIds.Add(realm.id) || string.IsNullOrWhiteSpace(realm.displayName) ||
-                    !TryRuntimeId(realm.legacyRuntimeId, out runtimeId) || !seenRuntime.Add(runtimeId) || realm.realmGemIds == null || realm.realmGemIds.Length != 2 ||
+                if (realm == null || !TryStableRuntimeId(realm.id, out expectedRuntimeId) || !seenIds.Add(realm.id) || string.IsNullOrWhiteSpace(realm.displayName) ||
+                    !TryRuntimeId(realm.legacyRuntimeId, out runtimeId) || runtimeId != expectedRuntimeId || !seenRuntime.Add(runtimeId) ||
+                    realm.realmGemIds == null || realm.realmGemIds.Length != 2 ||
                     string.IsNullOrWhiteSpace(realm.realmGemIds[0]) || string.IsNullOrWhiteSpace(realm.realmGemIds[1]))
                     return Reject("AL-REALM-CATALOG-INVALID-REALM");
                 entries.Add(new RealmCatalogEntry(realm.id, runtimeId, realm.displayName));
@@ -126,6 +127,18 @@ namespace AL.RealmSelection
 
         internal static RealmCatalogLoadResult ReadFailure() => Reject("AL-REALM-CATALOG-READ-FAILED");
         internal static RealmCatalogLoadResult OversizeFailure() => Reject("AL-REALM-CATALOG-OVERSIZE");
+
+        private static bool TryStableRuntimeId(string stableId, out RealmId id)
+        {
+            switch (stableId)
+            {
+                case "crownlands": id = RealmId.Crownlands; return true;
+                case "stonehold": id = RealmId.Stonehold; return true;
+                case "eldergrove": id = RealmId.Eldergrove; return true;
+                case "umbral": id = RealmId.Umbral; return true;
+                default: id = RealmId.None; return false;
+            }
+        }
 
         private static bool TryRuntimeId(string value, out RealmId id)
         {
