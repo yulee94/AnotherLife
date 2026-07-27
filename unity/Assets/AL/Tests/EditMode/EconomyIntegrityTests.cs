@@ -1387,6 +1387,110 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(0, fixture.State.SaveCount);
         }
 
+        [Test]
+        public void BossLootReplayAfterSaveReloadDoesNotRepeatRewardOrNotification()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object firstSaveService = CreateActualSaveService(root);
+                Invoke(
+                    firstSaveService,
+                    "CreateNewSave",
+                    EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+                object firstCredits = CreateRuntimeService(
+                    "AL.Services.Local.LocalWarzoneCreditService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    firstSaveService);
+                var firstNotifications = CreateNotificationFixture();
+                object firstBossLoot = CreateBossLootService(
+                    firstSaveService,
+                    firstCredits,
+                    firstNotifications.Proxy);
+                object request = CreateBossLootRequest(
+                    "encounter_reload",
+                    "result_reload",
+                    "boss_reload",
+                    25);
+
+                AssertApplicationStatus(Invoke(firstBossLoot, "RollLoot", request), "Committed");
+
+                object reloadedSaveService = CreateActualSaveService(root);
+                Invoke(reloadedSaveService, "Load");
+                object reloadedCredits = CreateRuntimeService(
+                    "AL.Services.Local.LocalWarzoneCreditService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    reloadedSaveService);
+                var replayNotifications = CreateNotificationFixture();
+                object reloadedBossLoot = CreateBossLootService(
+                    reloadedSaveService,
+                    reloadedCredits,
+                    replayNotifications.Proxy);
+
+                AssertApplicationStatus(
+                    Invoke(reloadedBossLoot, "RollLoot", request),
+                    "AlreadyCommitted");
+                object reloadedSave = GetProperty(reloadedSaveService, "CurrentSave");
+                Assert.AreEqual(25, GetField(reloadedSave, "WarzoneCredits"));
+                Assert.AreEqual(1, ((IList)GetField(reloadedSave, "AppliedBossLootRewards")).Count);
+                Assert.IsEmpty(replayNotifications.State.Messages);
+                Assert.AreEqual(1, firstNotifications.State.ShowMessageCount);
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void BossLootInvalidRequestAndExplicitNoLootAreDistinctFailClosedOutcomes()
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object credits = CreateCreditService(fixture);
+            var notifications = CreateNotificationFixture();
+            object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
+
+            AssertApplicationStatus(Invoke(service, "RollLoot", new object[] { null }), "RejectedInvalidRequest");
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+
+            object noLoot = CreateBossLootRequest(
+                "encounter_no_loot",
+                "result_no_loot",
+                "boss_no_loot",
+                0);
+            AssertApplicationStatus(Invoke(service, "RollLoot", noLoot), "Committed");
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.IsEmpty(notifications.State.Messages);
+        }
+
+        [Test]
+        public void BossLootNotificationFailureCannotUndoDurableCommit()
+        {
+            object save = CreateValidSave();
+            var fixture = CreateSaveFixture(save);
+            fixture.State.LastSaveStatus = "SavedPrimary";
+            object credits = CreateCreditService(fixture);
+            var notifications = CreateNotificationFixture();
+            notifications.State.ThrowOnMessage = true;
+            object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
+
+            LogAssert.Expect(LogType.Warning, new Regex("AL-BOSS-LOOT-NOTIFICATION-FAILED"));
+            object result = Invoke(
+                service,
+                "RollLoot",
+                CreateBossLootRequest("encounter_notify", "result_notify", "boss_notify", 5));
+
+            AssertApplicationStatus(result, "Committed");
+            Assert.AreEqual(5, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(1, notifications.State.ShowMessageCount);
+        }
+
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
         {
             object[] args = { realm, null };
@@ -2014,11 +2118,19 @@ namespace AL.Tests.EditMode
         public sealed class ScriptedNotificationService
         {
             public readonly List<string> Messages = new List<string>();
+            public bool ThrowOnMessage;
+            public int ShowMessageCount;
 
             public object Invoke(MethodInfo method, object[] args)
             {
                 if (method.Name == "ShowMessage")
                 {
+                    ShowMessageCount++;
+                    if (ThrowOnMessage)
+                    {
+                        throw new InvalidOperationException("notification");
+                    }
+
                     Messages.Add((string)args[0]);
                 }
 
