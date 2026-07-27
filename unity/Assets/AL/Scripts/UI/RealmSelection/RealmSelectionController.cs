@@ -17,10 +17,18 @@ namespace AL.UI.RealmSelection
         [SerializeField] private Transform _container;
         [SerializeField] private string _nextScene = "Kingdom";
 
+        [Header("Realm Heraldry")]
+        [SerializeField] private Sprite _stoneholdEmblem;
+        [SerializeField] private Sprite _eldergroveEmblem;
+        [SerializeField] private Sprite _crownlandsEmblem;
+        [SerializeField] private Sprite _umbralEmblem;
+
         private bool _selectionInProgress;
         private GameObject _commitOverlayObject;
         private Image _commitBackdrop;
         private Image _commitAccentLine;
+        private Image _commitEmblemGlow;
+        private Image _commitEmblem;
         private Image _commitProgressFill;
         private Text _commitTitleText;
         private Text _commitRealmText;
@@ -193,7 +201,7 @@ namespace AL.UI.RealmSelection
             CreatePanel(buttonObject.transform, "CardTopTrace", new Color(1f, 0.90f, 0.66f, 0.18f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-34f, 1.8f));
             CreatePanel(buttonObject.transform, "CardBottomTrace", new Color(realmColor.r, realmColor.g, realmColor.b, 0.20f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 1f), new Vector2(-34f, 1.5f));
             CreatePanel(buttonObject.transform, "RealmAccent", realmColor, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 0f));
-            CreateRealmSigil(buttonObject.transform, realmColor);
+            CreateRealmEmblem(buttonObject.transform, realm.Id, realmColor);
 
             var profile = CreateText(buttonObject.transform, realm.RealmName + "_Profile", font, GetRealmCommandProfile(realm.Id), 13, new Vector2(30f, -16f), new Vector2(260f, 18f));
             AnchorTopLeft(profile, new Vector2(30f, -16f), new Vector2(260f, 18f));
@@ -259,9 +267,10 @@ namespace AL.UI.RealmSelection
             CreatePanel(panel.transform, "CommitTopTrace", new Color(1f, 0.86f, 0.56f, 0.32f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-42f, 2f));
             _commitAccentLine = CreatePanel(panel.transform, "CommitAccentLine", Color.white, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 0f));
 
-            var sigil = CreatePanel(panel.transform, "CommitSigil", new Color(1f, 0.86f, 0.56f, 0.32f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(72f, 72f));
-            sigil.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            CreatePanel(panel.transform, "CommitSigilCore", new Color(0.012f, 0.018f, 0.026f, 0.95f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(42f, 42f)).rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            _commitEmblemGlow = CreatePanel(panel.transform, "CommitEmblemGlow", Color.clear, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(88f, 88f));
+            _commitEmblemGlow.preserveAspect = true;
+            _commitEmblem = CreatePanel(panel.transform, "CommitEmblem", Color.white, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(72f, 72f));
+            _commitEmblem.preserveAspect = true;
 
             _commitTitleText = CreateText(panel.transform, "CommitTitle", font, "COMMAND ACCEPTED", 15, new Vector2(0f, -30f), new Vector2(640f, 24f));
             _commitTitleText.color = new Color(1f, 0.84f, 0.52f);
@@ -289,6 +298,19 @@ namespace AL.UI.RealmSelection
             if (_commitAccentLine != null)
             {
                 _commitAccentLine.color = new Color(realmColor.r, realmColor.g, realmColor.b, Mathf.Lerp(0.68f, 1f, pulse));
+            }
+
+            Sprite emblem = GetRealmEmblem(id);
+            if (_commitEmblemGlow != null)
+            {
+                _commitEmblemGlow.sprite = emblem;
+                _commitEmblemGlow.color = new Color(realmColor.r, realmColor.g, realmColor.b, Mathf.Lerp(0.12f, 0.22f, pulse));
+            }
+
+            if (_commitEmblem != null)
+            {
+                _commitEmblem.sprite = emblem;
+                _commitEmblem.color = Color.Lerp(realmColor, Color.white, 0.52f);
             }
 
             if (_commitProgressFill != null)
@@ -337,16 +359,34 @@ namespace AL.UI.RealmSelection
             return animated;
         }
 
-        private static void CreateRealmSigil(Transform parent, Color realmColor)
+        private void CreateRealmEmblem(Transform parent, RealmId id, Color realmColor)
         {
-            var halo = CreatePanel(parent, "RealmSigilHalo", new Color(realmColor.r, realmColor.g, realmColor.b, 0.18f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -48f), new Vector2(86f, 86f));
-            halo.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            var frame = CreatePanel(parent, "RealmSigilFrame", Color.Lerp(realmColor, Color.white, 0.22f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -48f), new Vector2(54f, 54f));
-            frame.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            var core = CreatePanel(parent, "RealmSigilCore", new Color(0.018f, 0.024f, 0.032f, 0.96f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -48f), new Vector2(36f, 36f));
-            core.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            CreatePanel(parent, "RealmSigilCut", new Color(realmColor.r, realmColor.g, realmColor.b, 0.82f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -48f), new Vector2(6f, 52f));
-            CreatePanel(parent, "RealmSigilCross", new Color(1f, 0.90f, 0.66f, 0.42f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -48f), new Vector2(44f, 3f));
+            Sprite emblem = GetRealmEmblem(id);
+            if (emblem == null)
+            {
+                Debug.LogError($"Realm Selection is missing the approved emblem for {id}.");
+                return;
+            }
+
+            var glow = CreatePanel(parent, "RealmEmblemGlow", new Color(realmColor.r, realmColor.g, realmColor.b, 0.18f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -50f), new Vector2(98f, 98f));
+            glow.sprite = emblem;
+            glow.preserveAspect = true;
+
+            var image = CreatePanel(parent, "RealmEmblem", Color.Lerp(realmColor, Color.white, 0.52f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -50f), new Vector2(78f, 78f));
+            image.sprite = emblem;
+            image.preserveAspect = true;
+        }
+
+        private Sprite GetRealmEmblem(RealmId id)
+        {
+            return id switch
+            {
+                RealmId.Stonehold => _stoneholdEmblem,
+                RealmId.Eldergrove => _eldergroveEmblem,
+                RealmId.Crownlands => _crownlandsEmblem,
+                RealmId.Umbral => _umbralEmblem,
+                _ => null
+            };
         }
 
         private static void AnchorTopLeft(Text text, Vector2 anchoredPosition, Vector2 sizeDelta)
