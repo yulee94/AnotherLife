@@ -66,6 +66,7 @@ namespace AL.RealmSelection
         private static void BeginLoad()
         {
             if (Status == RealmCatalogRuntimeStatus.Loading || Status == RealmCatalogRuntimeStatus.Ready) return;
+            MarkLoading();
             var host = new GameObject("AL.RealmCatalogRuntime");
             UnityEngine.Object.DontDestroyOnLoad(host);
             host.hideFlags = HideFlags.HideAndDontSave;
@@ -142,7 +143,6 @@ namespace AL.RealmSelection
     {
         private IEnumerator Start()
         {
-            RealmCatalogRuntime.MarkLoading();
             string path = System.IO.Path.Combine(Application.streamingAssetsPath, RealmCatalogRuntime.RelativePath);
             var handler = new BoundedRealmCatalogDownloadHandler(RealmCatalogRuntime.MaximumByteLength);
             using (var request = new UnityWebRequest(path, "GET", handler, null))
