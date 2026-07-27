@@ -15,6 +15,7 @@ This folder contains the A2 terrestrial-design proposal for coherent fauna and h
 ## Packet Contents
 
 - `Four_Realm_Ecosystem_And_Habitat_Source.md` — category decisions, connected habitat loops, habitat identity, and sixteen supporting-fauna briefs.
+- `Creature_Diversity_And_Terrestrial_Optimization_Source.md` — user creature/environment reference consolidation, production-safe family lanes, sight-range intent, and next visual-source selection rules.
 - `Ecosystem_Source_Budgets_And_Asset_Layout.md` — mobile-to-PC source envelopes, memory targets, deduplication rules, and proposed source/package layout.
 - `Ecosystem_Creative_Review_Matrix.md` — exact readiness and user-review state for habitats, supporting fauna, and inherited boss/elite anchors.
 - `ecosystem_habitat_profiles_manifest.json` — stable design IDs, references, state, asset-family intent, and numeric source budgets.
