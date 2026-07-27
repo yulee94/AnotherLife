@@ -12,6 +12,7 @@ class ShellRoutePolicyTest {
         val routes = ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled = true)
 
         assertTrue(routes.contains(Route.NarrativeDebug))
+        assertFalse(routes.contains(Route.Quest))
         assertEquals(
             listOf(Route.Kingdom, Route.Dossier, Route.Champion, Route.Warzone, Route.NarrativeDebug),
             routes
@@ -19,10 +20,11 @@ class ShellRoutePolicyTest {
     }
 
     @Test
-    fun releaseBuildHidesNarrativeDebugEntry() {
+    fun releaseBuildHidesNarrativeDebugAndQuestEntries() {
         val routes = ShellRoutePolicy.bottomNavigationRoutes(debugToolsEnabled = false)
 
         assertFalse(routes.contains(Route.NarrativeDebug))
+        assertFalse(routes.contains(Route.Quest))
         assertEquals(listOf(Route.Kingdom, Route.Dossier, Route.Champion, Route.Warzone), routes)
     }
 
@@ -38,6 +40,18 @@ class ShellRoutePolicyTest {
     @Test
     fun debugRouteResolutionKeepsNarrativeDebug() {
         assertEquals(Route.NarrativeDebug, ShellRoutePolicy.resolveRoute(Route.NarrativeDebug, debugToolsEnabled = true).route)
+    }
+
+    @Test
+    fun questRouteResolutionAlwaysReturnsVisibleFallbackUntilRuntimeBoundaryExists() {
+        listOf(true, false).forEach { debugToolsEnabled ->
+            val resolution = ShellRoutePolicy.resolveRoute(Route.Quest, debugToolsEnabled)
+
+            assertTrue(resolution is RouteResolution.Rejected)
+            assertEquals(Route.Kingdom, resolution.route)
+            assertEquals(Route.Quest, (resolution as RouteResolution.Rejected).requestedRoute)
+            assertEquals(ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE, resolution.message)
+        }
     }
 
     @Test
@@ -62,6 +76,20 @@ class ShellRoutePolicyTest {
         )
         assertEquals(Route.NarrativeDebug, sanitized.rejectedTopRoute?.requestedRoute)
         assertEquals(ShellRoutePolicy.DEBUG_ROUTE_UNAVAILABLE_MESSAGE, sanitized.rejectedTopRoute?.message)
+    }
+
+    @Test
+    fun restoredQuestRouteFallsBackOnceAndReportsQuestBoundary() {
+        val restored = listOf(Route.Kingdom, Route.Dossier, Route.Quest)
+
+        val sanitized = ShellRoutePolicy.sanitizeBackStack(restored, debugToolsEnabled = true)
+
+        assertEquals(
+            listOf(Route.Kingdom, Route.Dossier, Route.Kingdom),
+            sanitized.routes
+        )
+        assertEquals(Route.Quest, sanitized.rejectedTopRoute?.requestedRoute)
+        assertEquals(ShellRoutePolicy.QUEST_ROUTE_UNAVAILABLE_MESSAGE, sanitized.rejectedTopRoute?.message)
     }
 
     @Test
