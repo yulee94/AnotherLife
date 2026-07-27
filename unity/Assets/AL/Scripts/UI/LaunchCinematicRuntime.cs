@@ -86,6 +86,14 @@ namespace AL.UI
 
     public static class LaunchCinematicRuntimeValidator
     {
+        private const int ApprovedFramesPerSecond = 24;
+        private const int DesktopWidth = 1920;
+        private const int DesktopHeight = 1080;
+        private const int AndroidWidth = 1280;
+        private const int AndroidHeight = 720;
+        private const long DesktopMaximumBytes = 95000000;
+        private const long AndroidMaximumBytes = 42000000;
+
         public static LaunchCinematicValidationResult Validate(
             LaunchCinematicRuntimeRecord record,
             LaunchCinematicPlatform buildPlatform,
@@ -114,8 +122,13 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-PLATFORM", "Launch cinematic runtime record does not match the current build platform."));
             }
 
+            if (string.IsNullOrWhiteSpace(record.CinematicId))
+            {
+                diagnostics.Add(Error("AL-LAUNCH-ID", "Launch cinematic identity is required."));
+            }
+
             ValidatePath(record.StreamingAssetsPath, diagnostics);
-            ValidateMediaShape(record, diagnostics);
+            ValidateMediaShape(record, buildPlatform, diagnostics);
 
             if (!record.ApprovedForProduction)
             {
@@ -127,9 +140,16 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-PROBE", "Launch cinematic probe evidence is missing or unapproved."));
             }
 
+            long maximumBytes = buildPlatform == LaunchCinematicPlatform.Android
+                ? AndroidMaximumBytes
+                : DesktopMaximumBytes;
             if (record.ByteLength <= 0)
             {
                 diagnostics.Add(Error("AL-LAUNCH-SIZE", "Launch cinematic byte length must be recorded after approval."));
+            }
+            else if (record.ByteLength > maximumBytes)
+            {
+                diagnostics.Add(Error("AL-LAUNCH-SIZE-CAP", "Launch cinematic byte length exceeds the approved platform package cap."));
             }
 
             if (!IsHexSha256(record.Sha256))
@@ -142,9 +162,10 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-PREPARE-TIMEOUT", "Prepare timeout must be finite and bounded."));
             }
 
-            if (record.SkipEligibilityFrame < 120)
+            if (record.SkipEligibilityFrame < 120 ||
+                record.FrameCount > 0 && record.SkipEligibilityFrame >= record.FrameCount)
             {
-                diagnostics.Add(Error("AL-LAUNCH-SKIP-FRAME", "Skip eligibility frame cannot be earlier than frame 120."));
+                diagnostics.Add(Error("AL-LAUNCH-SKIP-FRAME", "Skip eligibility must start at frame 120 or later and before the cinematic ends."));
             }
 
             bool isValid = diagnostics.Count == 0;
@@ -168,31 +189,55 @@ namespace AL.UI
             }
 
             string normalized = path.Replace('\\', '/');
+            string[] segments = normalized.Split('/');
+            bool hasDrivePrefix = normalized.Length >= 2 &&
+                                  char.IsLetter(normalized[0]) &&
+                                  normalized[1] == ':';
+            bool hasTraversalSegment = Array.Exists(
+                segments,
+                segment => string.Equals(segment, "..", StringComparison.Ordinal));
             if (normalized.StartsWith("/", StringComparison.Ordinal) ||
+                hasDrivePrefix ||
                 normalized.Contains("://", StringComparison.Ordinal) ||
-                normalized.Contains("../", StringComparison.Ordinal) ||
-                normalized.Equals("..", StringComparison.Ordinal) ||
-                normalized.StartsWith("../", StringComparison.Ordinal))
+                hasTraversalSegment)
             {
                 diagnostics.Add(Error("AL-LAUNCH-PATH", "StreamingAssets path must be relative and cannot traverse outside the package."));
             }
         }
 
-        private static void ValidateMediaShape(LaunchCinematicRuntimeRecord record, List<LaunchCinematicDiagnostic> diagnostics)
+        private static void ValidateMediaShape(
+            LaunchCinematicRuntimeRecord record,
+            LaunchCinematicPlatform buildPlatform,
+            List<LaunchCinematicDiagnostic> diagnostics)
         {
             if (!string.Equals(record.Container, "mp4", StringComparison.OrdinalIgnoreCase))
             {
                 diagnostics.Add(Error("AL-LAUNCH-CONTAINER", "Launch cinematic container must be mp4."));
             }
 
-            if (!record.CodecProfile.StartsWith("h264", StringComparison.OrdinalIgnoreCase))
+            string expectedCodecProfile = buildPlatform == LaunchCinematicPlatform.Android
+                ? "h264-main"
+                : "h264-high";
+            if (!string.Equals(record.CodecProfile, expectedCodecProfile, StringComparison.OrdinalIgnoreCase))
             {
-                diagnostics.Add(Error("AL-LAUNCH-CODEC", "Launch cinematic codec must be H.264."));
+                diagnostics.Add(Error("AL-LAUNCH-CODEC", "Launch cinematic codec profile does not match the approved platform profile."));
             }
 
             if (record.Width <= 0 || record.Height <= 0 || record.FramesPerSecond <= 0 || record.FrameCount <= 0)
             {
                 diagnostics.Add(Error("AL-LAUNCH-DIMENSIONS", "Launch cinematic dimensions, FPS, and frame count must be positive."));
+            }
+
+            int expectedWidth = buildPlatform == LaunchCinematicPlatform.Android ? AndroidWidth : DesktopWidth;
+            int expectedHeight = buildPlatform == LaunchCinematicPlatform.Android ? AndroidHeight : DesktopHeight;
+            if (record.Width != expectedWidth || record.Height != expectedHeight)
+            {
+                diagnostics.Add(Error("AL-LAUNCH-RESOLUTION", "Launch cinematic resolution does not match the approved platform container."));
+            }
+
+            if (record.FramesPerSecond != ApprovedFramesPerSecond)
+            {
+                diagnostics.Add(Error("AL-LAUNCH-FPS", "Launch cinematic frame rate must be 24 FPS."));
             }
 
             if (record.DurationSeconds < 59.5f || record.DurationSeconds > 60.5f || float.IsNaN(record.DurationSeconds) || float.IsInfinity(record.DurationSeconds))

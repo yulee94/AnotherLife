@@ -18,6 +18,24 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void ValidAndroidRuntimeRecordPassesForMatchingPlatform()
+        {
+            LaunchCinematicRuntimeRecord record = ValidRecord();
+            record.Platform = LaunchCinematicPlatform.Android;
+            record.CodecProfile = "h264-main";
+            record.Width = 1280;
+            record.Height = 720;
+            record.ByteLength = 42000000;
+
+            LaunchCinematicValidationResult result = LaunchCinematicRuntimeValidator.Validate(
+                record,
+                LaunchCinematicPlatform.Android,
+                releaseBuild: true);
+
+            Assert.IsTrue(result.IsValid, string.Join(", ", result.Diagnostics.Select(d => d.Code)));
+        }
+
+        [Test]
         public void MissingApprovedEncodeFailsClosed()
         {
             LaunchCinematicValidationResult result = LaunchCinematicRuntimeValidator.Validate(
@@ -32,6 +50,9 @@ namespace AL.Tests.EditMode
         [TestCase("../Movies/launch.mp4", "AL-LAUNCH-PATH")]
         [TestCase("/Movies/launch.mp4", "AL-LAUNCH-PATH")]
         [TestCase("file://Movies/launch.mp4", "AL-LAUNCH-PATH")]
+        [TestCase("C:/Movies/launch.mp4", "AL-LAUNCH-PATH")]
+        [TestCase("LaunchCinematic/../launch.mp4", "AL-LAUNCH-PATH")]
+        [TestCase("LaunchCinematic/..", "AL-LAUNCH-PATH")]
         public void TraversalOrAbsolutePathIsRejected(string path, string expectedCode)
         {
             LaunchCinematicRuntimeRecord record = ValidRecord();
@@ -44,6 +65,55 @@ namespace AL.Tests.EditMode
 
             Assert.IsFalse(result.IsValid);
             Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item(expectedCode));
+        }
+
+        [Test]
+        public void BlankIdentityAndNullCodecFailWithoutThrowing()
+        {
+            LaunchCinematicRuntimeRecord record = ValidRecord();
+            record.CinematicId = " ";
+            record.CodecProfile = null;
+
+            LaunchCinematicValidationResult result = null;
+            Assert.DoesNotThrow(() =>
+                result = LaunchCinematicRuntimeValidator.Validate(
+                    record,
+                    LaunchCinematicPlatform.Desktop,
+                    releaseBuild: true));
+
+            Assert.IsFalse(result.IsValid);
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-ID"));
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-CODEC"));
+        }
+
+        [Test]
+        public void PlatformResolutionCodecFrameRateAndSizeCapsAreEnforced()
+        {
+            LaunchCinematicRuntimeRecord record = ValidRecord();
+            record.Platform = LaunchCinematicPlatform.Android;
+            record.ByteLength = 42000001;
+
+            LaunchCinematicValidationResult result = LaunchCinematicRuntimeValidator.Validate(
+                record,
+                LaunchCinematicPlatform.Android,
+                releaseBuild: true);
+
+            Assert.IsFalse(result.IsValid);
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-CODEC"));
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-RESOLUTION"));
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-SIZE-CAP"));
+
+            record = ValidRecord();
+            record.FramesPerSecond = 30;
+            record.FrameCount = 1800;
+
+            result = LaunchCinematicRuntimeValidator.Validate(
+                record,
+                LaunchCinematicPlatform.Desktop,
+                releaseBuild: true);
+
+            Assert.IsFalse(result.IsValid);
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-FPS"));
         }
 
         [Test]
@@ -81,6 +151,21 @@ namespace AL.Tests.EditMode
 
             Assert.IsFalse(result.IsValid);
             Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-FRAME-COUNT"));
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-SKIP-FRAME"));
+        }
+
+        [Test]
+        public void SkipEligibilityAtOrAfterEndIsRejected()
+        {
+            LaunchCinematicRuntimeRecord record = ValidRecord();
+            record.SkipEligibilityFrame = record.FrameCount;
+
+            LaunchCinematicValidationResult result = LaunchCinematicRuntimeValidator.Validate(
+                record,
+                LaunchCinematicPlatform.Desktop,
+                releaseBuild: true);
+
+            Assert.IsFalse(result.IsValid);
             Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-SKIP-FRAME"));
         }
 
