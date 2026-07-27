@@ -1,0 +1,663 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/ecosystem_habitat_source_packet.schema.json",
+  "title": "AnotherLife Four-Realm Ecosystem Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "sourceVersion",
+    "createdDate",
+    "authority",
+    "readiness",
+    "canonicalSources",
+    "identityRules",
+    "categoryDisposition",
+    "qualityTiers",
+    "assetFamilies",
+    "habitats",
+    "faunaFamilies",
+    "existingSourceIndex",
+    "packagingIntent",
+    "lodIntent",
+    "deferredDirections"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "packetId": {
+      "const": "tdf_four_realm_ecosystems"
+    },
+    "sourceVersion": {
+      "type": "string",
+      "pattern": "^tdf-eco-[0-9]{4}-[0-9]{2}-[0-9]{2}-v[0-9]{3}$"
+    },
+    "createdDate": {
+      "type": "string",
+      "format": "date"
+    },
+    "authority": {
+      "type": "object",
+      "required": [
+        "primaryCodexMode",
+        "issue",
+        "runtimeAuthority",
+        "narrativeAuthority",
+        "gameplayAuthority",
+        "finalCreativeApprover"
+      ],
+      "properties": {
+        "primaryCodexMode": {
+          "const": "terrestrial-design"
+        },
+        "issue": {
+          "const": 259
+        },
+        "runtimeAuthority": {
+          "const": false
+        },
+        "narrativeAuthority": {
+          "const": false
+        },
+        "gameplayAuthority": {
+          "const": false
+        },
+        "finalCreativeApprover": {
+          "const": "user"
+        }
+      },
+      "additionalProperties": false
+    },
+    "readiness": {
+      "type": "object",
+      "required": [
+        "packetState",
+        "userCreativeState",
+        "technicalHandoffState",
+        "runtimeIntegrationState",
+        "narrativeNamingState"
+      ],
+      "properties": {
+        "packetState": {
+          "const": "RosterProposed"
+        },
+        "userCreativeState": {
+          "const": "NotRequested"
+        },
+        "technicalHandoffState": {
+          "const": "BlockedPendingVisualSourceAndUserApproval"
+        },
+        "runtimeIntegrationState": {
+          "const": "Blocked"
+        },
+        "narrativeNamingState": {
+          "const": "WorkingLabelsOnly"
+        }
+      },
+      "additionalProperties": false
+    },
+    "canonicalSources": {
+      "type": "object",
+      "minProperties": 8,
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "identityRules": {
+      "type": "object",
+      "required": [
+        "idFormat",
+        "habitatIdPattern",
+        "newFaunaIdPattern",
+        "existingIdsRenamed",
+        "workingLabelsAreLocalized",
+        "habitatLinksAreSpawnAuthority",
+        "paletteOnlyVariantsCountAsFamilies"
+      ],
+      "properties": {
+        "idFormat": {
+          "const": "lowercase_snake_case"
+        },
+        "habitatIdPattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "newFaunaIdPattern": {
+          "type": "string",
+          "minLength": 1
+        },
+        "existingIdsRenamed": {
+          "const": false
+        },
+        "workingLabelsAreLocalized": {
+          "const": false
+        },
+        "habitatLinksAreSpawnAuthority": {
+          "const": false
+        },
+        "paletteOnlyVariantsCountAsFamilies": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "categoryDisposition": {
+      "type": "array",
+      "minItems": 9,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    },
+    "qualityTiers": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "items": {
+        "$ref": "#/$defs/qualityTier"
+      }
+    },
+    "assetFamilies": {
+      "type": "object",
+      "required": [
+        "rigFamilyIds",
+        "materialFamilyIds",
+        "environmentKitIds"
+      ],
+      "properties": {
+        "rigFamilyIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        },
+        "materialFamilyIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        },
+        "environmentKitIds": {
+          "type": "array",
+          "minItems": 16,
+          "maxItems": 16,
+          "items": {
+            "type": "string",
+            "pattern": "^tdf_envkit_(crownlands|stonehold|eldergrove|umbral)_[a-z0-9_]+$"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "habitats": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/habitat"
+      }
+    },
+    "faunaFamilies": {
+      "type": "array",
+      "minItems": 16,
+      "maxItems": 16,
+      "items": {
+        "$ref": "#/$defs/faunaFamily"
+      }
+    },
+    "existingSourceIndex": {
+      "type": "array",
+      "minItems": 19,
+      "maxItems": 19,
+      "items": {
+        "$ref": "#/$defs/existingSource"
+      }
+    },
+    "packagingIntent": {
+      "type": "object",
+      "required": [
+        "implementationAuthority",
+        "proposedBoundaries",
+        "sharedLowTargetCompressedBytes",
+        "perRealmLowTargetCompressedBytes",
+        "perHabitatLowTargetCompressedBytes",
+        "perSupportingFamilyLowTargetCompressedBytes",
+        "ecosystemSupportingFaunaLowPlanningSubtotalBytes",
+        "cinematicSourcePackagedInPlayer",
+        "editableSourcePackagedInPlayer",
+        "marketplaceArchivePackagedInPlayer"
+      ],
+      "properties": {
+        "implementationAuthority": {
+          "const": false
+        },
+        "proposedBoundaries": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "sharedLowTargetCompressedBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "perRealmLowTargetCompressedBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "perHabitatLowTargetCompressedBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "perSupportingFamilyLowTargetCompressedBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "ecosystemSupportingFaunaLowPlanningSubtotalBytes": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "cinematicSourcePackagedInPlayer": {
+          "const": false
+        },
+        "editableSourcePackagedInPlayer": {
+          "const": false
+        },
+        "marketplaceArchivePackagedInPlayer": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "lodIntent": {
+      "type": "object",
+      "required": [
+        "lod1TriangleRatioMinimum",
+        "lod1TriangleRatioMaximum",
+        "lod2TriangleRatioMinimum",
+        "lod2TriangleRatioMaximum",
+        "distantTriangleRatioMinimum",
+        "distantTriangleRatioMaximum",
+        "distantImpostorAllowed",
+        "protectedIdentityDependsOnParticlesGlowAudioOrHighTierDetail"
+      ],
+      "properties": {
+        "lod1TriangleRatioMinimum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lod1TriangleRatioMaximum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lod2TriangleRatioMinimum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "lod2TriangleRatioMaximum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "distantTriangleRatioMinimum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "distantTriangleRatioMaximum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "distantImpostorAllowed": {
+          "const": true
+        },
+        "protectedIdentityDependsOnParticlesGlowAudioOrHighTierDetail": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "deferredDirections": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/stableId"
+      }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "realmId": {
+      "type": "string",
+      "enum": [
+        "crownlands",
+        "stonehold",
+        "eldergrove",
+        "umbral"
+      ]
+    },
+    "qualityTier": {
+      "type": "object",
+      "required": [
+        "tierId",
+        "packagedInPlayer",
+        "mandatoryIdentityTier",
+        "maximumFaunaLod0Triangles",
+        "maximumFaunaBones",
+        "maximumFaunaMaterialSlots",
+        "maximumFaunaTextureDimension",
+        "maximumFaunaAnimationBytes",
+        "maximumFaunaParticles",
+        "maximumFaunaIncrementalCompressedBytes",
+        "maximumHabitatIncrementalCompressedBytes",
+        "referenceCellMeters",
+        "maximumTerrainLayers",
+        "maximumAmbientParticles",
+        "maximumDynamicLights",
+        "maximumShadowedLights",
+        "maximumFullDetailCells",
+        "maximumNeighborProxyCells",
+        "maximumResidentArtBytes",
+        "faunaDefaultValidationMeters",
+        "habitatDefaultValidationMeters"
+      ],
+      "properties": {
+        "tierId": {
+          "type": "string",
+          "enum": [
+            "low_mobile",
+            "balanced",
+            "high_pc",
+            "cinematic_offline"
+          ]
+        },
+        "packagedInPlayer": {
+          "type": "boolean"
+        },
+        "mandatoryIdentityTier": {
+          "type": "boolean"
+        },
+        "maximumFaunaLod0Triangles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFaunaBones": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFaunaMaterialSlots": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFaunaTextureDimension": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFaunaAnimationBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFaunaParticles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFaunaIncrementalCompressedBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumHabitatIncrementalCompressedBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "referenceCellMeters": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maximumTerrainLayers": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumAmbientParticles": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumDynamicLights": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumShadowedLights": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumFullDetailCells": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumNeighborProxyCells": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "maximumResidentArtBytes": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "faunaDefaultValidationMeters": {
+          "type": "number",
+          "minimum": 0
+        },
+        "habitatDefaultValidationMeters": {
+          "type": "number",
+          "minimum": 0
+        }
+      },
+      "additionalProperties": false
+    },
+    "habitat": {
+      "type": "object",
+      "required": [
+        "habitatId",
+        "realmId",
+        "workingLabel",
+        "sourceState",
+        "environmentKitId",
+        "existingAnchorProfileId",
+        "supportingFamilyId",
+        "neighborHabitatIds",
+        "materialFamilyIds",
+        "protectedIdentity",
+        "runtimeAuthority"
+      ],
+      "properties": {
+        "habitatId": {
+          "type": "string",
+          "pattern": "^tdf_habitat_(crownlands|stonehold|eldergrove|umbral)_[a-z0-9_]+$"
+        },
+        "realmId": {
+          "$ref": "#/$defs/realmId"
+        },
+        "workingLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceState": {
+          "const": "RosterProposed"
+        },
+        "environmentKitId": {
+          "type": "string",
+          "pattern": "^tdf_envkit_(crownlands|stonehold|eldergrove|umbral)_[a-z0-9_]+$"
+        },
+        "existingAnchorProfileId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "supportingFamilyId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "neighborHabitatIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "string",
+            "pattern": "^tdf_habitat_(crownlands|stonehold|eldergrove|umbral)_[a-z0-9_]+$"
+          }
+        },
+        "materialFamilyIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        },
+        "protectedIdentity": {
+          "$ref": "#/$defs/stableId"
+        },
+        "runtimeAuthority": {
+          "const": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "faunaFamily": {
+      "type": "object",
+      "required": [
+        "familyId",
+        "realmId",
+        "workingLabel",
+        "sourceState",
+        "sourceVersion",
+        "primaryHabitatId",
+        "ecologicalGuild",
+        "scaleClass",
+        "silhouetteClass",
+        "rigFamilyId",
+        "materialFamilyIds",
+        "protectedIdentity",
+        "sourceAssetRefs",
+        "provenanceState",
+        "userCreativeState",
+        "runtimeIntegrationState"
+      ],
+      "properties": {
+        "familyId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "realmId": {
+          "$ref": "#/$defs/realmId"
+        },
+        "workingLabel": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceState": {
+          "type": "string",
+          "enum": [
+            "LegacyMergedProposal",
+            "ProposedTextOnly"
+          ]
+        },
+        "sourceVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "primaryHabitatId": {
+          "type": "string",
+          "pattern": "^tdf_habitat_(crownlands|stonehold|eldergrove|umbral)_[a-z0-9_]+$"
+        },
+        "ecologicalGuild": {
+          "$ref": "#/$defs/stableId"
+        },
+        "scaleClass": {
+          "$ref": "#/$defs/stableId"
+        },
+        "silhouetteClass": {
+          "$ref": "#/$defs/stableId"
+        },
+        "rigFamilyId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "materialFamilyIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/stableId"
+          }
+        },
+        "protectedIdentity": {
+          "$ref": "#/$defs/stableId"
+        },
+        "sourceAssetRefs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "provenanceState": {
+          "type": "string",
+          "enum": [
+            "LegacyPacketRequiresNormalization",
+            "NoVisualSource"
+          ]
+        },
+        "userCreativeState": {
+          "type": "string",
+          "enum": [
+            "Pending",
+            "NotRequested"
+          ]
+        },
+        "runtimeIntegrationState": {
+          "const": "Blocked"
+        }
+      },
+      "additionalProperties": false
+    },
+    "existingSource": {
+      "type": "object",
+      "required": [
+        "profileId",
+        "sourceVersion",
+        "sourceState",
+        "reviewDisposition"
+      ],
+      "properties": {
+        "profileId": {
+          "$ref": "#/$defs/stableId"
+        },
+        "sourceVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceState": {
+          "type": "string",
+          "enum": [
+            "LegacyMergedProposal",
+            "ReadyForUserReview"
+          ]
+        },
+        "reviewDisposition": {
+          "type": "string",
+          "enum": [
+            "LegacyPacketRequiresNormalization",
+            "ProvisionalPass",
+            "PassWithConcern"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
