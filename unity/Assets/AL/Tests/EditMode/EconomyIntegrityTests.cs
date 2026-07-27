@@ -1062,7 +1062,6 @@ namespace AL.Tests.EditMode
             {
                 "Kingdom/Quests/LocalQuestService.cs",
                 "RealmWar/Warzone/WarzoneService.cs",
-                "Services/Local/LocalWarmasterService.cs",
                 "Utilities/DemoInitializer.cs"
             };
             CollectionAssert.AreEqual(expectedCreditCallers, creditCallers);
