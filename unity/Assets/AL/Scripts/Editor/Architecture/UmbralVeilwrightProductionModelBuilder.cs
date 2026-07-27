@@ -33,6 +33,9 @@ namespace AL.Editor.Architecture
         public const string CatalogPath =
             "Assets/AL/ScriptableObjects/Resources/" +
             "KingdomBuildingModelCatalog.asset";
+        public const string MotionProfilePath =
+            "Assets/AL/Art/Generated/Architecture/Profiles/" +
+            "Umbral_Veilwright_ConstructionProfile.asset";
         public const string ScenePath =
             "Assets/AL/Scenes/Prototypes/" +
             "UmbralVeilwrightProductionModel.unity";
@@ -1409,6 +1412,16 @@ namespace AL.Editor.Architecture
 
         private static void CreateOrUpdateCatalog(GameObject prefab)
         {
+            ArchitectureConstructionAnimationProfile motionProfile =
+                AssetDatabase.LoadAssetAtPath<
+                    ArchitectureConstructionAnimationProfile>(
+                        MotionProfilePath);
+            if (motionProfile == null || !motionProfile.IsConfigured)
+            {
+                throw new InvalidOperationException(
+                    "The Umbral realm motion profile is missing or invalid.");
+            }
+
             KingdomBuildingModelCatalog catalog =
                 AssetDatabase.LoadAssetAtPath<
                     KingdomBuildingModelCatalog>(CatalogPath);
@@ -1434,6 +1447,7 @@ namespace AL.Editor.Architecture
                 RealmId.Umbral,
                 BuildingId,
                 prefab,
+                motionProfile,
                 StrategicBoardScale,
                 1,
                 10));

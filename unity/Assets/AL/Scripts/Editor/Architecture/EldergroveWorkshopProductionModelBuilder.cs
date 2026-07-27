@@ -36,6 +36,9 @@ namespace AL.Editor.Architecture
         public const string CatalogPath =
             "Assets/AL/ScriptableObjects/Resources/" +
             "KingdomBuildingModelCatalog.asset";
+        public const string MotionProfilePath =
+            "Assets/AL/Art/Generated/Architecture/Profiles/" +
+            "Eldergrove_Atelier_ConstructionProfile.asset";
         public const string ScenePath =
             "Assets/AL/Scenes/Prototypes/" +
             "EldergroveWorkshopProductionModel.unity";
@@ -1043,6 +1046,16 @@ namespace AL.Editor.Architecture
 
         private static void CreateOrUpdateCatalog(GameObject prefab)
         {
+            ArchitectureConstructionAnimationProfile motionProfile =
+                AssetDatabase.LoadAssetAtPath<
+                    ArchitectureConstructionAnimationProfile>(
+                        MotionProfilePath);
+            if (motionProfile == null || !motionProfile.IsConfigured)
+            {
+                throw new InvalidOperationException(
+                    "The Eldergrove realm motion profile is missing or invalid.");
+            }
+
             KingdomBuildingModelCatalog catalog =
                 AssetDatabase.LoadAssetAtPath<
                     KingdomBuildingModelCatalog>(CatalogPath);
@@ -1068,6 +1081,7 @@ namespace AL.Editor.Architecture
                 RealmId.Eldergrove,
                 BuildingId,
                 prefab,
+                motionProfile,
                 StrategicBoardScale,
                 1,
                 10));

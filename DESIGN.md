@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.16
+**Version:** 1.17
 **Last updated:** 2026-07-27
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -511,6 +511,7 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - Use stable building-slot identity for placement. Save-list or enumeration order must never determine a building's grid position, footprint, rotation, or entrance orientation.
 - Use the approved `Level 0` through `Level 10` visual progression in the kingdom-building level design. `Level 0` is an unbuilt reserved plot, `Level 1` is the first complete operational building and current baseline, and later levels add cumulative modular changes without replacing the building's function.
 - Production models bind from stable `RealmId + BuildingId` identity and derive their cumulative visual level directly from confirmed gameplay state. Never persist a parallel visual stage that can disagree with gameplay.
+- Live production construction motion is confirmation-driven and session-only: an active upgrade keeps the confirmed model settled with localized worksite feedback, a newly confirmed adjacent level may animate only its new delta, and first load or offline reconciliation never replays motion.
 - Realm Level `10` capstones remain grounded extensions of approved building identity: Eldergrove uses a seed lantern, Stonehold an anvil-crown chimney, Crownlands a Meridian Crown Lantern, and Umbral a Bound Eclipse Yoke framing protected negative space. Replacing them with unsupported, continuously active, or function-changing spectacle is a major design-direction decision.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
 - Avoid miniature-diorama cuteness as the default 2.5D solution.

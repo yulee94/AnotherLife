@@ -17,6 +17,7 @@ MonoBehaviour:
     realmId: 2
     buildingId: Workshop
     prefab: {fileID: 955633731617476343, guid: 856e9f0cea18f4647812c4467a05d991, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 6b478526cd4084f87a7b34095d9cc1cd, type: 2}
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
@@ -24,6 +25,7 @@ MonoBehaviour:
     realmId: 1
     buildingId: Workshop
     prefab: {fileID: 2707078820881950298, guid: fa8beffdd2c1045579a3fbd5c25ef181, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: f16c72f88ea9045b09dbeeb2e9f9e25a, type: 2}
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
@@ -31,6 +33,7 @@ MonoBehaviour:
     realmId: 3
     buildingId: Workshop
     prefab: {fileID: 7794163945326938044, guid: af08230ec23a84ed59fe22cb35dc22df, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 7d438dcf308ea4e1d943221428f1d250, type: 2}
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
@@ -38,6 +41,7 @@ MonoBehaviour:
     realmId: 4
     buildingId: Workshop
     prefab: {fileID: 2170986007990784864, guid: 197149fd997cd4a59b110b4722bc7e68, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: fe3a44a5e1ef4a06ac99d628640257af, type: 2}
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10

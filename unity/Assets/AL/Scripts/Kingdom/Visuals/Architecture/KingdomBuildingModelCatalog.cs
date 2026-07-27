@@ -12,6 +12,8 @@ namespace AL.Kingdom.Visuals.Architecture
         [SerializeField] private RealmId realmId;
         [SerializeField] private string buildingId = string.Empty;
         [SerializeField] private GameObject prefab;
+        [SerializeField]
+        private ArchitectureConstructionAnimationProfile realmMotionProfile;
         [SerializeField, Min(0.01f)] private float strategicBoardScale = 0.12f;
         [SerializeField, Range(1, 10)] private int minimumLevel = 1;
         [SerializeField, Range(1, 10)] private int maximumLevel = 10;
@@ -24,11 +26,33 @@ namespace AL.Kingdom.Visuals.Architecture
             float boardScale,
             int supportedMinimumLevel,
             int supportedMaximumLevel)
+            : this(
+                stableModelId,
+                stableRealmId,
+                stableBuildingId,
+                productionPrefab,
+                null,
+                boardScale,
+                supportedMinimumLevel,
+                supportedMaximumLevel)
+        {
+        }
+
+        public KingdomBuildingModelEntry(
+            string stableModelId,
+            RealmId stableRealmId,
+            string stableBuildingId,
+            GameObject productionPrefab,
+            ArchitectureConstructionAnimationProfile motionProfile,
+            float boardScale,
+            int supportedMinimumLevel,
+            int supportedMaximumLevel)
         {
             modelId = stableModelId ?? string.Empty;
             realmId = stableRealmId;
             buildingId = stableBuildingId ?? string.Empty;
             prefab = productionPrefab;
+            realmMotionProfile = motionProfile;
             strategicBoardScale = Mathf.Max(0.01f, boardScale);
             minimumLevel = Mathf.Clamp(supportedMinimumLevel, 1, 10);
             maximumLevel = Mathf.Clamp(
@@ -41,6 +65,15 @@ namespace AL.Kingdom.Visuals.Architecture
         public RealmId RealmId => realmId;
         public string BuildingId => buildingId;
         public GameObject Prefab => prefab;
+        public ArchitectureConstructionAnimationProfile RealmMotionProfile =>
+            realmMotionProfile;
+        public bool HasCompatibleRealmMotionProfile =>
+            realmMotionProfile != null &&
+            realmMotionProfile.IsConfigured &&
+            string.Equals(
+                realmMotionProfile.RealmId,
+                realmId.ToString(),
+                StringComparison.OrdinalIgnoreCase);
         public float StrategicBoardScale => strategicBoardScale;
         public int MinimumLevel => minimumLevel;
         public int MaximumLevel => maximumLevel;
@@ -68,6 +101,8 @@ namespace AL.Kingdom.Visuals.Architecture
                         buildingId,
                         levelModel.BuildingId,
                         StringComparison.Ordinal) &&
+                    (realmMotionProfile == null ||
+                        HasCompatibleRealmMotionProfile) &&
                     strategicBoardScale > 0f &&
                     minimumLevel >= 1 &&
                     maximumLevel <= levelModel.MaximumLevel &&

@@ -1,6 +1,6 @@
 # Reusable Architecture Construction-State System
 
-**Status:** Owner-approved technical direction; shared runtime foundation implemented
+**Status:** Owner-approved technical direction; shared runtime foundation and live confirmed-level production adapter implemented
 
 **Date:** 2026-07-24
 
@@ -31,6 +31,8 @@ stage. Player-facing labels remain realm-specific.
 
 - Shared state controller: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/ArchitectureConstructionAnimationController.cs`
 - Shared profile contract: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/ArchitectureConstructionAnimationProfile.cs`
+- Live confirmed-level adapter: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/KingdomBuildingConfirmedLevelTransition.cs`
+- Packaged production/profile manifest: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/KingdomBuildingModelCatalog.cs`
 - Eldergrove operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/EldergroveAtelierStableActivity.cs`
 - Crownlands operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/CrownlandsStormwrightStableActivity.cs`
 - Umbral operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/UmbralVeilwrightStableActivity.cs`
@@ -45,10 +47,11 @@ stage. Player-facing labels remain realm-specific.
 - Eldergrove generated graybox: `Assets/AL/Art/Generated/Architecture/Eldergrove/Eldergrove_Atelier_AnimationPrototype.prefab`
 - Eldergrove isolated preview: `Assets/AL/Scenes/Prototypes/EldergroveAtelierAnimationPrototype.unity`
 
-The Stonehold, Eldergrove, Crownlands, and Umbral profiles, activities, prefabs,
-and isolated scenes now establish the approved motion direction and
-deterministic ownership proof for all four realms. They do not claim that final
-model pivots, exact gameplay seconds, or device budgets are approved.
+The Stonehold, Eldergrove, Crownlands, and Umbral profiles, activities,
+grayboxes, and isolated scenes establish the approved motion direction and
+deterministic ownership proof for all four realms. The four Workshop production
+models now bind those profiles through the packaged model catalog. Exact
+gameplay seconds and measured device performance remain separate authorities.
 
 ## Shared responsibilities
 
@@ -78,10 +81,14 @@ Realm activity components may own only bounded distinctive behavior. They cannot
   building models.
 - A `0 → 1` construction may use the complete six-state grammar.
 - A later `N → N+1` upgrade keeps the confirmed Level N structure settled and
-  applies the grammar only to the target level's module delta.
-- A presentation adapter maps immutable gameplay level and active-order progress
-  into the controller. The controller never reads or writes saves, spends
-  resources, completes construction, or advances quests.
+  keeps the target delta hidden until gameplay confirms Level N+1.
+- A newly confirmed adjacent level in the current board session applies one
+  short realm-profile rigid settle to only the new production-model delta.
+- Fresh loads, stream-ins, reconnects, offline reconciliation, same-level
+  refreshes, and multi-level jumps appear settled and do not replay motion.
+- A presentation adapter maps immutable confirmed gameplay level and upgrade
+  status into live production presentation. The controller never reads or
+  writes saves, spends resources, completes construction, or advances quests.
 - Stable building-slot identity determines placement. Collection order never
   determines grid position, footprint, rotation, or entrance orientation.
 - Final model resolution uses realm, building definition, confirmed level, and
@@ -96,9 +103,13 @@ Realm activity components may own only bounded distinctive behavior. They cannot
 - Generated graybox materials enable GPU instancing, and prototype renderers opt out of unused motion-vector and probe work.
 - Static modules do not receive independent continuously updating `Animator` components.
 - Completed non-looping buildings disable their controller.
+- The live delta adapter adds one component only for a newly confirmed adjacent
+  level, caches at most four LOD transforms, and disables itself after at most
+  `1.25` seconds.
 - Reduced-motion, far-distance, and off-screen policies remain shared.
 - No package or dependency was added.
-- No save field, gameplay construction timer, economy value, navigation state, or live kingdom integration changed.
+- No save field, gameplay construction timer, economy value, or navigation
+  state changed.
 
 The Android/iOS compatibility proof and remaining device-validation boundary are recorded in `Architecture_Mobile_Compatibility_Handoff.md`.
 
@@ -109,7 +120,7 @@ Final device performance remains unmeasured until representative production mesh
 - **Stonehold:** retain rigid seating, leverage, restrained impact, forge cues, and immovable completed mass.
 - **Eldergrove:** use an authored root rig or staged meshes beside the shared lifecycle; unrestricted procedural root generation is not allowed.
 - **Crownlands:** retain the fixed conductor route and short calibrated pulse beside the shared lifecycle.
-- **Umbral:** retain offset grounded installation, four fixed anchors, one inward convergence, one local eclipse ring, one core-to-chimney confirmation, and a long silent hold. The direction is owner-approved; final-model binding still requires production geometry and device profiling.
+- **Umbral:** retain offset grounded installation, four fixed anchors, one inward convergence, one local eclipse ring, one core-to-chimney confirmation, and a long silent hold. Its Workshop production model is bound; populated-device profiling remains required.
 
 ## Critical direction changes
 
@@ -121,7 +132,8 @@ The following require project-owner approval:
 - procedural Umbral route generation, screen-wide darkness, or repeated chimney flashes;
 - continuously animating load-bearing completed structure;
 - adding an always-running `Animator` to every static building module;
-- binding this prototype system directly to production saves, economy, navigation, or live kingdom progression without the relevant engineering contract.
+- allowing presentation motion to mutate production saves, economy,
+  navigation, quests, timers, or live kingdom progression;
 - persisting the shared visual state separately from authoritative gameplay;
 - placing buildings from collection order instead of stable slot identity;
 - replaying full-building construction for every later level instead of animating the approved module delta.

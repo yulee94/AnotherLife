@@ -71,19 +71,34 @@ They are resolved presentation states, not saved progression.
 ### New construction: Level 0 → Level 1
 
 - The reserved plot becomes the localized work site.
-- The complete realm construction grammar may play across all six resolved presentation states.
-- Completion settles directly into the Level 1 operational model.
+- The current production binding keeps the final Level `1` delta hidden until
+  gameplay confirms Level `1`.
+- Confirmation may apply one short realm-profile settle to the Level `1`
+  delta. A first load, stream-in, reconnect, or offline reconciliation displays
+  the confirmed model settled and does not replay the transition.
+- A future order-progress contract may expand the localized work site across
+  all six resolved presentation states without persisting visual stage.
 
 ### Upgrade construction: Level N → Level N+1
 
 - The confirmed Level N structure remains visible and load-bearing.
-- Only the target level's approved module delta participates in the construction stages.
+- While the authoritative order is active, the current production binding
+  shows only the confirmed Level N model and localized worksite feedback. It
+  does not reveal the target delta early.
+- When gameplay confirms Level N+1 in the current live session, only the new
+  level delta performs one short rigid settle drawn from the realm motion
+  profile. Levels `1–2`, `3–4`, `5–6`, `7–8`, and `9–10` map to the five
+  persistent realm-motion bands.
 - `SitePrepared` means a localized work zone, access change, scaffold, root guide, conductor line, or ward boundary around that delta; it does not erase the building.
-- Returning after streaming, loading, reconnecting, or offline time initializes directly from the authoritative order progress without replaying completed work.
+- Returning after streaming, loading, reconnecting, or offline time initializes
+  directly at the confirmed settled level without replaying completed work.
 - When no valid active order exists, the building renders its last confirmed level in a settled state.
 - A failed, unavailable, or contradictory gameplay snapshot must not be visually presented as a completed upgrade.
 
-Realm profiles own the character of motion. Building definitions and final model packets own which modules change at each level. Presentation clip duration remains independent from gameplay construction duration.
+Realm profiles own the character of motion. Building definitions and final
+model packets own which modules change at each level. The current confirmation
+settle is clamped to `0.35–1.25` seconds and remains independent from gameplay
+construction duration.
 
 ## Stable placement contract
 
@@ -118,6 +133,9 @@ A missing or invalid production candidate uses an explicit placeholder/unavailab
 - Resource spend, level change, order/result identity, quest consequences, and persistence follow the owning atomic transaction contracts.
 - Presentation observes immutable results and never calls save, economy, quest, or completion services.
 - The exact save representation for slots, active orders, and migration remains owned by #137/#165; this design does not add fields.
+- The live confirmed-level transition tracker is session-only. It remembers
+  only the last observed level per stable realm/slot identity and is discarded
+  with the board; it is not a save field or gameplay order.
 
 ## Mobile and accessibility requirements
 
@@ -136,14 +154,16 @@ A missing or invalid production candidate uses an explicit placeholder/unavailab
 - Realm grammar and building model identity remain separate.
 - No persisted visual stage can disagree with gameplay.
 - Placement is stable and independent of collection order.
-- Later upgrades animate only their module delta.
+- Later upgrades animate only their newly confirmed module delta.
 - Missing definitions, models, slots, or snapshots fail visibly without mutating state.
 - Final assets preserve the mobile, LOD, reduced-motion, selection, entrance, and footprint contracts.
 
 ## Deferred production decisions
 
 - Exact costs, durations, prerequisites, production rates, cancellation, and refund rules.
-- Exact save fields and migration mechanics for slots and progression orders.
+- Exact save fields and migration mechanics for progression orders.
+- Whether a future authoritative order-progress snapshot should expose
+  in-progress target-delta construction before gameplay confirms the level.
 - Which building definitions support which footprints and level-specific module deltas.
 - Whether player relocation is included in the first production kingdom release.
 - Final model source format, loading strategy, asset bundle/addressable policy, and device-tier thresholds.

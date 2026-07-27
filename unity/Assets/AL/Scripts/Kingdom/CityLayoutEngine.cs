@@ -23,11 +23,21 @@ namespace AL.Kingdom
 
         private readonly Dictionary<Vector2Int, KingdomBuildingPresentation> _occupiedTiles =
             new Dictionary<Vector2Int, KingdomBuildingPresentation>();
+        private readonly KingdomBuildingConfirmedLevelTracker
+            _confirmedLevelTracker =
+                new KingdomBuildingConfirmedLevelTracker();
         private Transform _visualRoot;
         private RealmId _activeRealmId;
         private KingdomBuildingModelCatalog _modelCatalog;
         private bool _modelCatalogResolved;
         private string _modelCatalogDiagnostic = string.Empty;
+        [SerializeField] private bool reducedConstructionMotion;
+
+        public bool ReducedConstructionMotion
+        {
+            get => reducedConstructionMotion;
+            set => reducedConstructionMotion = value;
+        }
 
         public Vector3 GridToWorld(Vector2Int gridPos)
         {
@@ -69,13 +79,25 @@ namespace AL.Kingdom
                 _occupiedTiles.Add(pos, building);
 
                 SpawnRoadVisual(pos);
-                SpawnBuildingVisual(building, pos);
+                bool animateConfirmedLevel =
+                    _confirmedLevelTracker.Observe(
+                        realmId,
+                        building.Slot.SlotId,
+                        building.ConfirmedLevel,
+                        building.IsUpgrading,
+                        building.Status !=
+                            KingdomBuildingPresentationStatus.InvalidState);
+                SpawnBuildingVisual(
+                    building,
+                    pos,
+                    animateConfirmedLevel);
             }
         }
 
         private void SpawnBuildingVisual(
             KingdomBuildingPresentation presentation,
-            Vector2Int pos)
+            Vector2Int pos,
+            bool animateConfirmedLevel)
         {
             if (presentation?.Slot == null)
             {
@@ -119,7 +141,8 @@ namespace AL.Kingdom
                     buildingRoot.transform,
                     presentation,
                     bodyColor,
-                    accentColor))
+                    accentColor,
+                    animateConfirmedLevel))
             {
                 return;
             }
@@ -216,7 +239,8 @@ namespace AL.Kingdom
             Transform parent,
             KingdomBuildingPresentation presentation,
             Color bodyColor,
-            Color accentColor)
+            Color accentColor,
+            bool animateConfirmedLevel)
         {
             if (_modelCatalog == null ||
                 !_modelCatalog.TryGetEntry(
@@ -278,6 +302,19 @@ namespace AL.Kingdom
                     accentColor,
                     KingdomBuildingModelCatalog.InvalidBindingDiagnostic);
                 return true;
+            }
+
+            if (animateConfirmedLevel &&
+                entry.HasCompatibleRealmMotionProfile)
+            {
+                var transition =
+                    instance.AddComponent<
+                        KingdomBuildingConfirmedLevelTransition>();
+                transition.Configure(
+                    levelModel,
+                    entry.RealmMotionProfile,
+                    presentation.ConfirmedLevel,
+                    reducedConstructionMotion);
             }
 
             var selectable =
@@ -910,7 +947,15 @@ namespace AL.Kingdom
             Transform root = EnsureVisualRoot();
             for (int i = root.childCount - 1; i >= 0; i--)
             {
-                Destroy(root.GetChild(i).gameObject);
+                GameObject child = root.GetChild(i).gameObject;
+                if (Application.isPlaying)
+                {
+                    Destroy(child);
+                }
+                else
+                {
+                    DestroyImmediate(child);
+                }
             }
         }
     }

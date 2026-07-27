@@ -44,6 +44,11 @@ This is a static production-readiness statement, not final-device performance ap
 - The packaged model catalog loads once per city layout engine and binds the
   correct realm prefab from stable `RealmId + BuildingId`; no visual level is
   persisted.
+- The packaged catalog also binds one realm motion profile per Workshop. A
+  newly confirmed adjacent level animates only its new delta, uses at most four
+  cached LOD transforms, and sleeps after at most `1.25` seconds.
+- Initial load, stream-in, reconnect, offline reconciliation, same-level
+  refresh, and multi-level jump remain settled and do not replay motion.
 - Each prototype uses at most one localized, shadowless activity light.
 - Concept sheets remain non-readable source references with mipmaps disabled.
 - Concept sheets, contact sheets, and videos are not referenced by runtime prefabs.
@@ -114,11 +119,17 @@ suites verify:
 - Level 1–10 cumulative activation from confirmed gameplay state;
 - direct live binding, Level 0 reserved plots, upgrade hold, and visible invalid
   catalog failure.
+- one compatible realm motion profile per Workshop catalog binding;
+- no transition replay on initial load, invalid data, same-level refresh, or
+  multi-level reconciliation;
+- one-delta adjacent-level motion, immediate reduced-motion settling, and
+  automatic sleep after the bounded transition.
 
 The focused Eldergrove production suite passes `18 / 18` and the focused
 Stonehold production suite passes `19 / 19`. The Crownlands production suite
 passes `19 / 19`, and the Umbral production suite passes `19 / 19`. The
-expanded Architecture suite passes `119 / 119` in Unity 2022.3.62f3 while
+focused confirmed-level transition suite passes `14 / 14`. The
+expanded Architecture suite passes `133 / 133` in Unity 2022.3.62f3 while
 actively targeting Android and again while actively targeting iOS. All four
 final Workshop models still require populated-kingdom profiling on
 representative Android and iOS devices before measured performance approval.
