@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
@@ -12,25 +13,20 @@ namespace AL.Tests.EditMode
 {
     public class RealmSelectionIntegrityTests
     {
-        private const string ValidCatalogJson = @"{
-  ""version"": ""0.1.0"",
-  ""catalogId"": ""al_realm_catalog"",
-  ""selectionPolicy"": {
-    ""selectionMode"": ""one_realm_per_account"",
-    ""realmLockScope"": ""account"",
-    ""subCharacterPolicy"": ""same_realm_only"",
-    ""crossRealmCreationPolicy"": ""reject""
-  },
-  ""realmOrder"": [""crownlands"", ""stonehold"", ""eldergrove"", ""umbral""],
-  ""realms"": [
-    { ""id"": ""crownlands"", ""legacyRuntimeId"": ""Crownlands"", ""displayName"": ""Crownlands"", ""realmGemIds"": [""GEM_CL_A"", ""GEM_CL_B""] },
-    { ""id"": ""stonehold"", ""legacyRuntimeId"": ""Stonehold"", ""displayName"": ""Stonehold"", ""realmGemIds"": [""GEM_SH_A"", ""GEM_SH_B""] },
-    { ""id"": ""eldergrove"", ""legacyRuntimeId"": ""Eldergrove"", ""displayName"": ""Eldergrove"", ""realmGemIds"": [""GEM_EG_A"", ""GEM_EG_B""] },
-    { ""id"": ""umbral"", ""legacyRuntimeId"": ""Umbral"", ""displayName"": ""Umbral"", ""realmGemIds"": [""GEM_UM_A"", ""GEM_UM_B""] }
-  ]
-}";
-
         private readonly List<RealmDefinition> _createdRealms = new List<RealmDefinition>();
+        private string _catalogJson;
+
+        [SetUp]
+        public void SetUp()
+        {
+            string path = Path.Combine(
+                Application.dataPath,
+                "AL",
+                "StreamingAssets",
+                "GameData",
+                "al_realm_catalog.json");
+            _catalogJson = File.ReadAllText(path);
+        }
 
         [TearDown]
         public void TearDown()
@@ -49,7 +45,7 @@ namespace AL.Tests.EditMode
         [Test]
         public void CatalogParsesOneAccountRealmLockPolicy()
         {
-            RealmCatalogLoadResult result = RealmCatalogRuntime.Parse(ValidCatalogJson);
+            RealmCatalogLoadResult result = RealmCatalogRuntime.Parse(_catalogJson);
 
             Assert.True(result.IsSuccess);
             Assert.AreEqual("AL-REALM-CATALOG-READY", result.TechnicalCode);
@@ -179,6 +175,9 @@ namespace AL.Tests.EditMode
 
         private LocalRealmService Service(FakeSaveGameService save)
         {
+            RealmCatalogLoadResult catalogResult = RealmCatalogRuntime.Parse(_catalogJson);
+            Assert.True(catalogResult.IsSuccess, catalogResult.TechnicalCode);
+
             return new LocalRealmService(
                 save,
                 new FakeGameDataService(
@@ -186,7 +185,7 @@ namespace AL.Tests.EditMode
                     Realm(RealmId.Stonehold),
                     Realm(RealmId.Eldergrove),
                     Realm(RealmId.Umbral)),
-                RealmCatalogRuntime.Parse(ValidCatalogJson).Snapshot);
+                catalogResult.Snapshot);
         }
 
         private RealmDefinition Realm(RealmId id)
