@@ -1,0 +1,302 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_world_atlas_narrative_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_world_atlas_source_v001",
+  "idFormat": "lowercase_snake_case",
+  "sourceAuthorities": {
+    "primaryMode": "codex_narrative_content",
+    "realmCatalog": "al_realm_catalog",
+    "mainQuestPacket": "ANOTHERLIFE_MAIN_QUEST_LINE",
+    "nvsPacket": "OMEN_1",
+    "technicalConsumerIssue": 181
+  },
+  "atlasPolicy": {
+    "viewerRealmRule": "account_committed_realm_filters_default_copy_and inner_realm_focus",
+    "crossRealmRule": "outer_warzone_and_accordant_isle_entries_may_be_visible_when_story_or_objective_context_allows",
+    "unavailableRuntimeBehavior": "requested_hook_visible_nonmutating_status",
+    "queryAuthority": "read_only_narrative_source_until_codex_engineering_validates_runtime_catalog",
+    "nonGoals": [
+      "scene loading",
+      "territory mutation",
+      "resource mutation",
+      "realm gem custody mutation",
+      "combat spawning",
+      "save migration",
+      "pathfinding",
+      "balance values"
+    ]
+  },
+  "zones": [
+    {
+      "id": "zone_inner_crownlands",
+      "realmId": "crownlands",
+      "displayNameKey": "world.zone.inner_crownlands.name",
+      "summaryKey": "world.zone.inner_crownlands.summary",
+      "zoneType": "inner_realm",
+      "visibility": "committed_realm_focus",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "realm_specific_character_start",
+        "3d_inner_realm_champion_start",
+        "2_5d_inner_kingdom_progression",
+        "main_gate_approach"
+      ]
+    },
+    {
+      "id": "zone_inner_stonehold",
+      "realmId": "stonehold",
+      "displayNameKey": "world.zone.inner_stonehold.name",
+      "summaryKey": "world.zone.inner_stonehold.summary",
+      "zoneType": "inner_realm",
+      "visibility": "committed_realm_focus",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "realm_specific_character_start",
+        "3d_inner_realm_champion_start",
+        "2_5d_inner_kingdom_progression",
+        "main_gate_approach"
+      ]
+    },
+    {
+      "id": "zone_inner_eldergrove",
+      "realmId": "eldergrove",
+      "displayNameKey": "world.zone.inner_eldergrove.name",
+      "summaryKey": "world.zone.inner_eldergrove.summary",
+      "zoneType": "inner_realm",
+      "visibility": "committed_realm_focus",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "realm_specific_character_start",
+        "3d_inner_realm_champion_start",
+        "2_5d_inner_kingdom_progression",
+        "main_gate_approach"
+      ]
+    },
+    {
+      "id": "zone_inner_umbral",
+      "realmId": "umbral",
+      "displayNameKey": "world.zone.inner_umbral.name",
+      "summaryKey": "world.zone.inner_umbral.summary",
+      "zoneType": "inner_realm",
+      "visibility": "committed_realm_focus",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "realm_specific_character_start",
+        "3d_inner_realm_champion_start",
+        "2_5d_inner_kingdom_progression",
+        "main_gate_approach"
+      ]
+    },
+    {
+      "id": "zone_warzone_crownlands_gate",
+      "realmId": "crownlands",
+      "displayNameKey": "world.zone.warzone_crownlands_gate.name",
+      "summaryKey": "world.zone.warzone_crownlands_gate.summary",
+      "zoneType": "outer_warzone_gate",
+      "visibility": "story_unlocked_cross_realm",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "outer_warzone_entry",
+        "realm_v_realm_gate_conflict",
+        "all_eight_gems"
+      ]
+    },
+    {
+      "id": "zone_warzone_stonehold_gate",
+      "realmId": "stonehold",
+      "displayNameKey": "world.zone.warzone_stonehold_gate.name",
+      "summaryKey": "world.zone.warzone_stonehold_gate.summary",
+      "zoneType": "outer_warzone_gate",
+      "visibility": "story_unlocked_cross_realm",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "outer_warzone_entry",
+        "realm_v_realm_gate_conflict",
+        "all_eight_gems"
+      ]
+    },
+    {
+      "id": "zone_warzone_eldergrove_gate",
+      "realmId": "eldergrove",
+      "displayNameKey": "world.zone.warzone_eldergrove_gate.name",
+      "summaryKey": "world.zone.warzone_eldergrove_gate.summary",
+      "zoneType": "outer_warzone_gate",
+      "visibility": "story_unlocked_cross_realm",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "outer_warzone_entry",
+        "realm_v_realm_gate_conflict",
+        "all_eight_gems"
+      ]
+    },
+    {
+      "id": "zone_warzone_umbral_gate",
+      "realmId": "umbral",
+      "displayNameKey": "world.zone.warzone_umbral_gate.name",
+      "summaryKey": "world.zone.warzone_umbral_gate.summary",
+      "zoneType": "outer_warzone_gate",
+      "visibility": "story_unlocked_cross_realm",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "outer_warzone_entry",
+        "realm_v_realm_gate_conflict",
+        "all_eight_gems"
+      ]
+    },
+    {
+      "id": "zone_crossroads_bridges",
+      "realmId": "shared",
+      "displayNameKey": "world.zone.crossroads_bridges.name",
+      "summaryKey": "world.zone.crossroads_bridges.summary",
+      "zoneType": "outer_warzone_crossroads",
+      "visibility": "story_unlocked_cross_realm",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "connected_continents",
+        "crossroads_conflict",
+        "warzone_points"
+      ]
+    },
+    {
+      "id": "zone_accordant_isle",
+      "realmId": "shared",
+      "displayNameKey": "world.zone.accordant_isle.name",
+      "summaryKey": "world.zone.accordant_isle.summary",
+      "zoneType": "neutral_center_island",
+      "visibility": "eightfold_resonance_unlocked",
+      "sceneReferenceStatus": "requested",
+      "pvpPolicy": "forced_non_pvp",
+      "relatedQuestMilestones": [
+        "center_neutral_island",
+        "non_pvp",
+        "shared_language",
+        "cross_realm_trade",
+        "wish_dragon",
+        "final_wish"
+      ]
+    },
+    {
+      "id": "zone_sky_castle_marker",
+      "realmId": "shared",
+      "displayNameKey": "world.zone.sky_castle_marker.name",
+      "summaryKey": "world.zone.sky_castle_marker.summary",
+      "zoneType": "requested_anomaly_marker",
+      "visibility": "nvs_01_requested",
+      "sceneReferenceStatus": "requested",
+      "relatedQuestMilestones": [
+        "post_realm_prologue",
+        "main_questline_start",
+        "sky_castle_continuity"
+      ]
+    }
+  ],
+  "objectives": [
+    {
+      "id": "objective_realm_main_gate_defense",
+      "displayNameKey": "world.objective.realm_main_gate_defense.name",
+      "summaryKey": "world.objective.realm_main_gate_defense.summary",
+      "requiredZoneTypes": [
+        "outer_warzone_gate"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "objective_crossroads_control",
+      "displayNameKey": "world.objective.crossroads_control.name",
+      "summaryKey": "world.objective.crossroads_control.summary",
+      "requiredZoneIds": [
+        "zone_crossroads_bridges"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "objective_warzone_save_pillar",
+      "displayNameKey": "world.objective.warzone_save_pillar.name",
+      "summaryKey": "world.objective.warzone_save_pillar.summary",
+      "requiredZoneTypes": [
+        "outer_warzone_gate",
+        "outer_warzone_crossroads"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "objective_eight_gem_custody",
+      "displayNameKey": "world.objective.eight_gem_custody.name",
+      "summaryKey": "world.objective.eight_gem_custody.summary",
+      "requiredZoneTypes": [
+        "outer_warzone_gate",
+        "outer_warzone_crossroads",
+        "neutral_center_island"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "objective_accordant_isle_concordance",
+      "displayNameKey": "world.objective.accordant_isle_concordance.name",
+      "summaryKey": "world.objective.accordant_isle_concordance.summary",
+      "requiredZoneIds": [
+        "zone_accordant_isle"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    }
+  ],
+  "draftLocalization": [
+    { "key": "world.zone.inner_crownlands.name", "text": "Crownlands Inner Realm" },
+    { "key": "world.zone.inner_crownlands.summary", "text": "Oath roads, fortified courts, and disciplined markets for the committed Crownlands account path." },
+    { "key": "world.zone.inner_stonehold.name", "text": "Stonehold Inner Realm" },
+    { "key": "world.zone.inner_stonehold.summary", "text": "Deep halls, forge gates, and clan-led defenses for the committed Stonehold account path." },
+    { "key": "world.zone.inner_eldergrove.name", "text": "Eldergrove Inner Realm" },
+    { "key": "world.zone.inner_eldergrove.summary", "text": "Root sanctuaries, hidden paths, and moonlit councils for the committed Eldergrove account path." },
+    { "key": "world.zone.inner_umbral.name", "text": "Umbral Inner Realm" },
+    { "key": "world.zone.inner_umbral.summary", "text": "Ash courts, veiled archives, and rival masks for the committed Umbral account path." },
+    { "key": "world.zone.warzone_crownlands_gate.name", "text": "Crownlands Main Gate" },
+    { "key": "world.zone.warzone_crownlands_gate.summary", "text": "A contested outer-warzone gate where public oaths meet realm-vs-realm pressure." },
+    { "key": "world.zone.warzone_stonehold_gate.name", "text": "Stonehold Faultline Gate" },
+    { "key": "world.zone.warzone_stonehold_gate.summary", "text": "A mountain gate built for attrition, siege discipline, and contested gem routes." },
+    { "key": "world.zone.warzone_eldergrove_gate.name", "text": "Eldergrove Greenveil Gate" },
+    { "key": "world.zone.warzone_eldergrove_gate.summary", "text": "A living border gate where ambush paths and sanctuary vows meet open conflict." },
+    { "key": "world.zone.warzone_umbral_gate.name", "text": "Umbral Ashvein Gate" },
+    { "key": "world.zone.warzone_umbral_gate.summary", "text": "A veiled warzone gate shaped by ash routes, intelligence denial, and precision strikes." },
+    { "key": "world.zone.crossroads_bridges.name", "text": "Bridge Crossroads" },
+    { "key": "world.zone.crossroads_bridges.summary", "text": "The contested bridge network between realm continents, built for patrols, ambushes, and squad objectives." },
+    { "key": "world.zone.accordant_isle.name", "text": "Accordant Isle" },
+    { "key": "world.zone.accordant_isle.summary", "text": "The neutral center island where PvP is disabled and Vaeloryn permits willing speech across realm languages." },
+    { "key": "world.zone.sky_castle_marker.name", "text": "Sky Castle Anomaly" },
+    { "key": "world.zone.sky_castle_marker.summary", "text": "A requested NVS-01 marker for the first Sky Castle investigation; it remains unavailable until the runtime hook exists." },
+    { "key": "world.objective.realm_main_gate_defense.name", "text": "Main Gate Defense" },
+    { "key": "world.objective.realm_main_gate_defense.summary", "text": "Contest a realm's outer gate without changing realm sovereignty through narration alone." },
+    { "key": "world.objective.crossroads_control.name", "text": "Crossroads Control" },
+    { "key": "world.objective.crossroads_control.summary", "text": "Fight for route pressure at the bridge crossroads under a future duplicate-safe objective contract." },
+    { "key": "world.objective.warzone_save_pillar.name", "text": "Save Pillar" },
+    { "key": "world.objective.warzone_save_pillar.summary", "text": "Bind exactly one active warzone respawn point through direct future interaction." },
+    { "key": "world.objective.eight_gem_custody.name", "text": "Eight-Gem Custody" },
+    { "key": "world.objective.eight_gem_custody.summary", "text": "Track temporary contested gem custody without turning sacred realm objects into permanent conquest trophies." },
+    { "key": "world.objective.accordant_isle_concordance.name", "text": "Dragon's Concordance" },
+    { "key": "world.objective.accordant_isle_concordance.summary", "text": "Enable willing cross-realm speech only on Accordant Isle and only through the future Vaeloryn rule." }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 181,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "zone IDs are unique and lowercase snake-case",
+      "objective IDs are unique and lowercase snake-case",
+      "realmId values resolve to realm catalog IDs or shared",
+      "all displayNameKey and summaryKey values resolve in draftLocalization",
+      "requested hooks remain nonmutating until engineering contracts exist"
+    ],
+    "blockedRuntimeClaims": [
+      "scene references",
+      "territory ownership",
+      "warzone scoring",
+      "realm gem custody",
+      "neutral-zone PvP enforcement",
+      "Dragon's Concordance behavior"
+    ]
+  }
+}
