@@ -1146,6 +1146,54 @@ namespace AL.Tests.EditMode
             }
         }
 
+        [Test]
+        public void BossLootRejectsPersistedEquipmentDefinitionDriftWithoutMutation()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+                object save = GetProperty(saveService, "CurrentSave");
+                IList inventory = (IList)GetField(save, "OwnedEquipment");
+                object persisted = CreateOwnedEquipment("equipment_drift", 2);
+                SetField(persisted, "DisplayName", "Persisted Blade");
+                SetField(persisted, "Slot", EnumValue(GetRuntimeType("AL.Core.EquipmentSlot"), "MainHand"));
+                SetField(persisted, "AttackBonus", 5);
+                SetField(persisted, "DefenseBonus", 1);
+                SetField(persisted, "HealthBonus", 3);
+                SetField(persisted, "AnnounceWorldDrop", true);
+                inventory.Add(persisted);
+
+                object bossLoot = CreateBossLootService(saveService);
+                object driftedDrop = CreateBossLootDrop("equipment_drift", 1);
+                SetField(driftedDrop, "DisplayName", "Drifted Blade");
+                SetField(driftedDrop, "Slot", EnumValue(GetRuntimeType("AL.Core.EquipmentSlot"), "MainHand"));
+                SetField(driftedDrop, "AttackBonus", 6);
+                SetField(driftedDrop, "DefenseBonus", 1);
+                SetField(driftedDrop, "HealthBonus", 3);
+                SetField(driftedDrop, "AnnounceWorldDrop", true);
+
+                LogAssert.Expect(
+                    LogType.Error,
+                    "AL-EQUIPMENT-DEFINITION-DRIFT: Owned equipment mutation was rejected because the persisted definition does not match the awarded definition.");
+                Assert.False((bool)Invoke(bossLoot, "TryAddOwnedEquipment", driftedDrop, "boss_new"));
+                Assert.AreEqual(2, GetField(persisted, "Quantity"));
+                Assert.AreEqual(1L, GetField(persisted, "LastAcquiredTimestamp"));
+                Assert.IsNull(GetField(persisted, "SourceBossId"));
+
+                SetField(driftedDrop, "DisplayName", "Persisted Blade");
+                SetField(driftedDrop, "AttackBonus", 5);
+                Assert.True((bool)Invoke(bossLoot, "TryAddOwnedEquipment", driftedDrop, "boss_new"));
+                Assert.AreEqual(3, GetField(persisted, "Quantity"));
+                Assert.AreEqual("boss_new", GetField(persisted, "SourceBossId"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
         [TestCase(null, "result_a", "boss_a", "InvalidEncounterId", "AL-BOSS-LOOT-ENCOUNTER-ID-INVALID")]
         [TestCase(" ", "result_a", "boss_a", "InvalidEncounterId", "AL-BOSS-LOOT-ENCOUNTER-ID-INVALID")]
         [TestCase("encounter_a", null, "boss_a", "InvalidRewardResultId", "AL-BOSS-LOOT-RESULT-ID-INVALID")]

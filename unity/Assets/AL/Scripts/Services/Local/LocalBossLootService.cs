@@ -307,6 +307,12 @@ namespace AL.Services.Local
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (matching != null)
             {
+                if (!MatchesPersistedDefinition(matching, drop))
+                {
+                    Debug.LogError("AL-EQUIPMENT-DEFINITION-DRIFT: Owned equipment mutation was rejected because the persisted definition does not match the awarded definition.");
+                    return false;
+                }
+
                 try
                 {
                     matching.Quantity = checked(matching.Quantity + drop.Quantity);
@@ -319,7 +325,6 @@ namespace AL.Services.Local
 
                 matching.LastAcquiredTimestamp = now;
                 matching.SourceBossId = bossId;
-                matching.AnnounceWorldDrop |= drop.AnnounceWorldDrop;
                 return true;
             }
 
@@ -339,6 +344,16 @@ namespace AL.Services.Local
             });
             return true;
         }
+
+        private static bool MatchesPersistedDefinition(
+            OwnedEquipmentState owned,
+            BossLootDrop drop) =>
+            string.Equals(owned.DisplayName, drop.DisplayName, StringComparison.Ordinal) &&
+            owned.Slot == drop.Slot &&
+            owned.AttackBonus == drop.AttackBonus &&
+            owned.DefenseBonus == drop.DefenseBonus &&
+            owned.HealthBonus == drop.HealthBonus &&
+            owned.AnnounceWorldDrop == drop.AnnounceWorldDrop;
 
         private static OwnedEquipmentState CloneOwnedEquipment(OwnedEquipmentState source)
         {
