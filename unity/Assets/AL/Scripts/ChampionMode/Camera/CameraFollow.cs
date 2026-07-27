@@ -24,6 +24,13 @@ namespace AL.ChampionMode.Camera
         [SerializeField] private float _touchZoomSensitivity = 0.012f;
         [SerializeField] private float _touchOrbitScreenMinX = 0.42f;
 
+        [Header("Collision And Comfort")]
+        [SerializeField] private bool _collisionEnabled = true;
+        [SerializeField] private float _collisionRadius = 0.28f;
+        [SerializeField] private float _collisionPadding = 0.18f;
+        [SerializeField] private LayerMask _collisionMask = ~0;
+        [SerializeField, Range(0f, 1f)] private float _cameraShakeScale = 0.65f;
+
         private float _yaw = 0f;
         private float _pitch = 0f;
         private float _lastPinchDistance = -1f;
@@ -58,7 +65,7 @@ namespace AL.ChampionMode.Camera
 
         public void AddShake(float strength, float duration)
         {
-            _shakeStrength = Mathf.Max(_shakeStrength, Mathf.Max(0f, strength));
+            _shakeStrength = Mathf.Max(_shakeStrength, Mathf.Max(0f, strength) * _cameraShakeScale);
             _shakeDuration = Mathf.Max(_shakeDuration, Mathf.Max(0.01f, duration));
             _shakeTime = _shakeDuration;
         }
@@ -227,6 +234,7 @@ namespace AL.ChampionMode.Camera
                 Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0);
                 Vector3 negDistance = new Vector3(0.0f, 0.0f, -_distance);
                 Vector3 position = (rotation * negDistance) + _target.position + new Vector3(0, _heightOffset, 0);
+                position = ResolveCameraCollision(_target.position + new Vector3(0f, _heightOffset, 0f), position);
                 Vector3 shakeOffset = Vector3.zero;
                 if (_shakeTime > 0f)
                 {
@@ -247,6 +255,36 @@ namespace AL.ChampionMode.Camera
                     Debug.LogError("CAMERA ERROR: Still cannot find a Champion in the scene! Ensure WorldBuilder spawned the hero.");
                 }
             }
+        }
+
+        private Vector3 ResolveCameraCollision(Vector3 pivot, Vector3 desiredPosition)
+        {
+            if (!_collisionEnabled)
+            {
+                return desiredPosition;
+            }
+
+            Vector3 direction = desiredPosition - pivot;
+            float distance = direction.magnitude;
+            if (distance <= 0.01f)
+            {
+                return desiredPosition;
+            }
+
+            if (!Physics.SphereCast(
+                    pivot,
+                    Mathf.Max(0.05f, _collisionRadius),
+                    direction / distance,
+                    out var hit,
+                    distance,
+                    _collisionMask,
+                    QueryTriggerInteraction.Ignore))
+            {
+                return desiredPosition;
+            }
+
+            return pivot + direction.normalized *
+                Mathf.Max(0.55f, hit.distance - Mathf.Max(0.02f, _collisionPadding));
         }
 
         private void UpdateCinematicCamera()

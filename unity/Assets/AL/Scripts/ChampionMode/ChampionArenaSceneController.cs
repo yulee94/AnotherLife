@@ -4,6 +4,7 @@ using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
+using AL.ChampionMode.World;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.RealmWar.World;
@@ -223,7 +224,7 @@ namespace AL.ChampionMode
             camera.transform.position = new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
             camera.fieldOfView = 42f;
-            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.clearFlags = CameraClearFlags.Skybox;
             camera.backgroundColor = new Color(0.025f, 0.03f, 0.04f);
             cameraObject.AddComponent<AudioListener>();
             _cameraFollow = cameraObject.AddComponent<CameraFollow>();
@@ -332,6 +333,12 @@ namespace AL.ChampionMode
             CreateArenaBoundaryDetails(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
             CreateArenaBraziers(environment, atmospherePulse, realmAccent, riftRed);
             CreateArenaDepthArchitecture(environment, atmospherePulse, realmAccent, riftRed, coldBlue);
+            RuntimeWorldPresentation.BuildArenaBackdrop(
+                environment,
+                _qualityController != null &&
+                _qualityController.CurrentProfile != null &&
+                (_qualityController.CurrentProfile.Tier == "mobile_low" ||
+                 _qualityController.CurrentProfile.Tier == "desktop_low"));
         }
 
         private void CreateArenaGroundDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
@@ -563,6 +570,13 @@ namespace AL.ChampionMode
             var shader = Shader.Find("Standard");
             var material = shader != null ? new Material(shader) : new Material(renderer.material);
             material.color = color;
+            if (material.HasProperty("_MainTex"))
+            {
+                material.mainTexture = RuntimeWorldPresentation.GetSurfaceTexture(
+                    color,
+                    Color.Lerp(color, Color.white, 0.20f));
+                material.mainTextureScale = new Vector2(3.5f, 3.5f);
+            }
             if (material.HasProperty("_Metallic"))
             {
                 material.SetFloat("_Metallic", metallic);
