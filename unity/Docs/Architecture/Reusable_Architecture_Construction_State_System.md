@@ -6,7 +6,7 @@
 
 **Primary Codex mode:** Engineering
 
-**Upstream design authority:** Root `DESIGN.md`, `Assets/AL/Art/Designs/FourRealmArchitecture.md`, and the realm animation contracts in this folder
+**Upstream design authority:** Root `DESIGN.md`, `Assets/AL/Art/Designs/FourRealmArchitecture.md`, `Kingdom_Building_Level_And_Placement_Design.md`, and the realm animation contracts in this folder
 
 The architecture animation system uses one deterministic construction lifecycle for every realm. A realm-specific profile supplies motion character and timing, while a bounded optional activity component supplies distinctive operational behavior such as forge activity, guided sap, or calibrated energy.
 
@@ -23,12 +23,15 @@ This decision prevents four incompatible state machines without flattening Stone
 | `FitoutCompleted` | `FittedOut` | `RoofAndLanternSet` | `InstrumentsGrounded` | `ReliquariesGrounded` |
 | `Operational` | `Operational` | `CultivationOperational` | `CalibratedOperational` | `VeilConvergenceOperational` |
 
-The shared enum is a runtime persistence and presentation boundary. Player-facing labels remain realm-specific.
+The shared enum is a presentation boundary resolved from authoritative gameplay
+level and active-order progress. It is never persisted as a separate visual
+stage. Player-facing labels remain realm-specific.
 
 ## Implemented runtime boundary
 
 - Shared state controller: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/ArchitectureConstructionAnimationController.cs`
 - Shared profile contract: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/ArchitectureConstructionAnimationProfile.cs`
+- Eldergrove operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/EldergroveAtelierStableActivity.cs`
 - Crownlands operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/CrownlandsStormwrightStableActivity.cs`
 - Umbral operational activity: `Assets/AL/Scripts/Kingdom/Visuals/Architecture/UmbralVeilwrightStableActivity.cs`
 - Crownlands profile: `Assets/AL/Art/Generated/Architecture/Profiles/Crownlands_Stormwright_ConstructionProfile.asset`
@@ -37,14 +40,21 @@ The shared enum is a runtime persistence and presentation boundary. Player-facin
 - Umbral profile: `Assets/AL/Art/Generated/Architecture/Profiles/Umbral_Veilwright_ConstructionProfile.asset`
 - Umbral generated graybox: `Assets/AL/Art/Generated/Architecture/Umbral/Umbral_Veilwright_AnimationPrototype.prefab`
 - Umbral isolated preview: `Assets/AL/Scenes/Prototypes/UmbralVeilwrightAnimationPrototype.unity`
+- Stonehold generated graybox: `Assets/AL/Art/Generated/Architecture/Stonehold/Stonehold_Workshop_AnimationPrototype.prefab`
+- Stonehold isolated preview: `Assets/AL/Scenes/Prototypes/StoneholdWorkshopAnimationPrototype.unity`
+- Eldergrove generated graybox: `Assets/AL/Art/Generated/Architecture/Eldergrove/Eldergrove_Atelier_AnimationPrototype.prefab`
+- Eldergrove isolated preview: `Assets/AL/Scenes/Prototypes/EldergroveAtelierAnimationPrototype.unity`
 
-Stonehold and Eldergrove profile assets establish the data boundary for their upcoming grayboxes. The Umbral profile, activity, prefab, and isolated scene establish its approved fourth-realm motion direction and deterministic ownership proof. They do not claim that final model pivots, exact gameplay seconds, or device budgets are approved.
+The Stonehold, Eldergrove, Crownlands, and Umbral profiles, activities, prefabs,
+and isolated scenes now establish the approved motion direction and
+deterministic ownership proof for all four realms. They do not claim that final
+model pivots, exact gameplay seconds, or device budgets are approved.
 
 ## Shared responsibilities
 
 The reusable controller owns:
 
-- deterministic evaluation at any persistent construction state;
+- deterministic evaluation at any resolved construction state;
 - autoplay, explicit playback, looping for isolated review, and sleeping after non-looping completion;
 - reduced-motion stage snapping;
 - one profile-owned cutaway stage, optional supplemental inspection groups, and an authored review cutaway window;
@@ -61,6 +71,21 @@ Realm profiles own:
 - the handoff point for operational activity.
 
 Realm activity components may own only bounded distinctive behavior. They cannot create a parallel construction lifecycle or silently change the persistent state.
+
+## Production presentation boundary
+
+- The four prototypes define realm construction-motion grammars, not final
+  building models.
+- A `0 → 1` construction may use the complete six-state grammar.
+- A later `N → N+1` upgrade keeps the confirmed Level N structure settled and
+  applies the grammar only to the target level's module delta.
+- A presentation adapter maps immutable gameplay level and active-order progress
+  into the controller. The controller never reads or writes saves, spends
+  resources, completes construction, or advances quests.
+- Stable building-slot identity determines placement. Collection order never
+  determines grid position, footprint, rotation, or entrance orientation.
+- Final model resolution uses realm, building definition, confirmed level, and
+  quality tier while keeping realm motion profile identity separate.
 
 ## Mobile and compatibility impact
 
@@ -97,3 +122,6 @@ The following require project-owner approval:
 - continuously animating load-bearing completed structure;
 - adding an always-running `Animator` to every static building module;
 - binding this prototype system directly to production saves, economy, navigation, or live kingdom progression without the relevant engineering contract.
+- persisting the shared visual state separately from authoritative gameplay;
+- placing buildings from collection order instead of stable slot identity;
+- replaying full-building construction for every later level instead of animating the approved module delta.

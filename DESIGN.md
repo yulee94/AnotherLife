@@ -1,8 +1,8 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.11
-**Last updated:** 2026-07-24
+**Version:** 1.12
+**Last updated:** 2026-07-27
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
 
@@ -57,12 +57,15 @@ This guide consolidates the active project direction in:
 - [Four-Realm Heraldry — Arcane Axis](unity/Assets/AL/Art/Designs/FourRealmHeraldry.md)
 - [Four-Realm Architecture](unity/Assets/AL/Art/Designs/FourRealmArchitecture.md)
 - [Stonehold Architecture Animation Contract](unity/Docs/Architecture/Stonehold_Architecture_Animation_Contract.md)
+- [Stonehold Animation Prototype Handoff](unity/Docs/Architecture/Stonehold_Animation_Prototype_Handoff.md)
 - [Eldergrove Architecture Animation Contract](unity/Docs/Architecture/Eldergrove_Architecture_Animation_Contract.md)
+- [Eldergrove Animation Prototype Handoff](unity/Docs/Architecture/Eldergrove_Animation_Prototype_Handoff.md)
 - [Crownlands Architecture Animation Contract](unity/Docs/Architecture/Crownlands_Architecture_Animation_Contract.md)
 - [Umbral Architecture Animation Contract](unity/Docs/Architecture/Umbral_Architecture_Animation_Contract.md)
 - [Crownlands Animation Prototype Handoff](unity/Docs/Architecture/Crownlands_Animation_Prototype_Handoff.md)
 - [Umbral Animation Prototype Handoff](unity/Docs/Architecture/Umbral_Animation_Prototype_Handoff.md)
 - [Reusable Architecture Construction-State System](unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md)
+- [Kingdom Building Level, Placement, and Presentation Design](unity/Docs/Architecture/Kingdom_Building_Level_And_Placement_Design.md)
 - [Architecture Android and iOS Compatibility Handoff](unity/Docs/Architecture/Architecture_Mobile_Compatibility_Handoff.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
@@ -418,6 +421,9 @@ Prefer physically plausible values and controlled variation. Avoid:
 - Construction and repair motion must follow the approved modular hierarchy, pivots, sockets, and load paths. Do not scale a complete building from zero, stretch rigid masonry, or use unexplained floating assembly.
 - Use state-driven construction that can resume at a credible persistent stage after streaming, reconnecting, or returning from offline progress.
 - Use one shared six-state architecture lifecycle across realms. Realm profiles define construction motion character and optional bounded activity components define stable-state behavior; do not create independent realm state machines.
+- Treat the four realm prototypes as construction-motion grammars, not as final models or one-to-one building definitions. Building function and level own the modules being changed; realm identity owns how that change moves.
+- Derive construction presentation from the authoritative gameplay level and active order. Never persist a separate visual stage that can disagree with gameplay.
+- A `0 → 1` order may use the complete construction grammar. Later upgrades keep the existing building settled and animate only the approved module delta for the target level.
 - Separate a major state transition from its stable loop: the transition may use a short readable action, while the finished state must settle into a long quiet hold.
 - Apply realm motion grammar before VFX. Stonehold uses pressure, leverage, impact, and short forceful actions. Eldergrove uses guided growth, flowing arcs, biological circulation, and one damped recovery into stable structure. Crownlands uses synchronized placement, ordered arcs, measured calibration, controlled radiant lines, and long precise holds. Magic may support or confirm a functional state but does not replace physical construction.
 - Reduce loop count, character activity, particles, secondary motion, and update frequency with camera distance. Far proxies remain static.
@@ -493,6 +499,8 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - Author for both strategic readability and close-enough material credibility.
 - Make function visible through access points, production areas, storage, defenses, smoke, banners, traffic, or maintenance.
 - Use realm construction logic consistently across modular kits.
+- Use stable building-slot identity for placement. Save-list or enumeration order must never determine a building's grid position, footprint, rotation, or entrance orientation.
+- Use the approved `Level 0` through `Level 10` visual progression in the kingdom-building level design. `Level 0` is an unbuilt reserved plot, `Level 1` is the first complete operational building and current baseline, and later levels add cumulative modular changes without replacing the building's function.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
 - Avoid miniature-diorama cuteness as the default 2.5D solution.
 

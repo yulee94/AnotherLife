@@ -6,11 +6,11 @@
 
 **Unity baseline:** `2022.3.62f3`
 
-**Scope:** Four-realm settlement design source, shared construction-state runtime, Crownlands Stormwright graybox, and Umbral Veilwright graybox
+**Scope:** Four-realm settlement design source, shared construction-state runtime, Stonehold Workshop graybox, Eldergrove Atelier graybox, Crownlands Stormwright graybox, and Umbral Veilwright graybox
 
 ## Outcome
 
-The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, both prototype scenes remain outside Player build settings, and the shared animation code uses only Unity APIs supported by Android and iOS Player builds.
+The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all four prototype scenes remain outside Player build settings, and the shared animation code uses only Unity APIs supported by Android and iOS Player builds.
 
 This is a prototype-readiness statement, not final-device performance approval. The grayboxes prove the control pattern and visual direction; production meshes, textures, LODs, shaders, simultaneous-building density, and real devices still require profiling.
 
@@ -22,10 +22,12 @@ This is a prototype-readiness statement, not final-device performance approval. 
 - All generated graybox materials enable GPU instancing.
 - Generated graybox renderers opt out of motion vectors, light probes, and reflection probes that the isolated prototypes do not use.
 - Static modules use no per-object `Animator`, particles, audio sources, or colliders.
+- Eldergrove structural roots use fixed authored segments and stop moving after
+  their construction stage settles.
 - Each prototype uses at most one localized, shadowless activity light.
 - Concept sheets remain non-readable source references with mipmaps disabled.
 - Concept sheets, contact sheets, and videos are not referenced by runtime prefabs.
-- Crownlands and Umbral prototype scenes remain excluded from production build settings.
+- Stonehold, Eldergrove, Crownlands, and Umbral prototype scenes remain excluded from production build settings.
 
 ## Android and iOS compatibility boundary
 
@@ -58,10 +60,19 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 - no motion-vector, light-probe, or reflection-probe work;
 - at most one shadowless activity light;
 - no prototype scene in enabled Player build settings;
-- no concept-sheet dependency from either prefab;
+- no concept-sheet dependency from any prototype prefab;
 - non-readable concept-sheet imports with mipmaps disabled and native NPOT sizing.
 
-The `17 / 17` passing Architecture suite was run under both the Android and iOS Unity build targets. It also verifies the six-state shared lifecycle, direct persistent-state initialization, stable-state sleep, reduced motion, cutaway ownership, fixed Umbral convergence, and visual renderer ceilings.
+The expanded `31 / 31` Architecture suite passed on the local Unity
+2022.3.62f3 editor. It verifies the six-state shared lifecycle, direct
+persistent-state initialization, stable-state sleep, reduced motion, Stonehold
+rigid-stage and functional-activity ownership, correct eave-to-ridge roof
+pitch, Eldergrove authored grounded roots and contained cultivation ownership,
+cutaway isolation, fixed Umbral convergence, and visual renderer ceilings. PR
+#287 retains the prior Android/iOS-targeted `17 / 17` evidence for the shared,
+Crownlands, and Umbral baseline; the Stonehold and Eldergrove extensions still
+require their next representative Android/iOS target run before production
+approval.
 
 ## Production handoff
 
