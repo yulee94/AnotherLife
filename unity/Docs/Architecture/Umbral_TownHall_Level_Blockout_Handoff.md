@@ -1,6 +1,7 @@
 # Umbral Town Hall Level Blockout Handoff
 
-**Status:** Graybox proof passed; final production model not started
+**Status:** Graybox proof passed; final production model and live binding now
+implemented
 
 **Date:** 2026-07-28
 
@@ -13,6 +14,9 @@ deterministic Level `1`, `6`, and `10` Unity proof. It validates the shared
 Town Hall spatial and visual contracts without entering the runtime catalog or
 inventing gameplay progression, economy, save, timer, quest, worker, or
 narrative authority.
+
+The final production implementation is recorded in
+`Umbral_TownHall_Final_Model_And_Runtime_Binding.md`.
 
 ## Review assets
 
@@ -118,29 +122,31 @@ The score applies to graybox structure, not final runtime performance. The
 review assets are not bound into the packaged catalog, so this change adds no
 live district draw calls, texture residency, save data, or upgrade commands.
 
-## Open production work
+## Final production handoff
 
-- Author final Level `1`–`10` topology while preserving the offset protected
-  masses, fixed entrance, exactly four grounded piers, local roof braces, and
-  compact empty-slit yoke.
-- Create the Umbral Town Hall atlas and localized non-emissive darkglass
-  accent; violet color, glow, fog, and particles must remain nonessential.
-- Replace review volume previews with exactly two final root colliders.
-- Author the approved LOD0–3 hierarchy and validate the Town Hall triangle,
-  renderer, and material ceilings.
-- Measure compact iPhone and representative Android framing in the live
-  kingdom scene.
-- Profile populated-district memory, draw calls, triangles, texture residency,
-  and package-size impact on representative devices.
-- Bind the final model directly to confirmed `BuildingState.Level` only after
-  the production model and catalog entry pass.
-- Keep live upgrade commands blocked on the open progression, economy, save,
-  and game-data authority work.
+The final production pass now supplies:
+
+- ten cumulative Level `1`–`10` deltas plus three far-LOD milestones;
+- one Umbral Town Hall RGB atlas plus one restrained non-emissive darkglass
+  accent;
+- exactly two root box colliders and stable behavior-free anchors;
+- the protected four-pier load path, local roof braces, and compact double
+  Veiled Accord Yoke with truly empty council slits;
+- exact `RealmId.Umbral + BuildingId.TownHall` catalog identity;
+- direct confirmed-level binding with one-shot adjacent confirmation motion;
+- no parallel persisted visual stage, economy action, save mutation, or
+  upgrade command.
+
+Still open are populated-district profiling on representative devices, final
+damage/disabled/repair/selection states, bounded civic activity, and the
+progression, economy, save, and command authority required before live upgrade
+actions.
 
 ## Realm sequence status
 
 Stonehold, Eldergrove, Crownlands, and Umbral Town Hall source translations
 and Level `1`/`6`/`10` graybox gates have now passed under one shared civic
-ladder and center-slot contract. The next authorized branch is final
-production-model construction and direct live binding, not another realm
+ladder and center-slot contract. All four final production models and direct
+live bindings now pass; the next branch is integrated profiling and the
+explicitly deferred gameplay/economy/save authority work, not another realm
 graybox.

@@ -1,8 +1,7 @@
 # Four-Realm Town Hall Production Contract
 
-**Status:** Shared production direction approved; all four realm source designs
-and Level `1`/`6`/`10` graybox gates passed; Stonehold, Eldergrove, and
-Crownlands final production and live-binding proofs passed
+**Status:** Four-realm production, exact live-binding, and mobile-readiness
+proofs passed
 
 **Date:** 2026-07-28
 
@@ -17,8 +16,9 @@ construction-motion contracts
 This packet defines Town Hall as the four-realm production building family
 after Workshop parity. It records the shared scope proven by all four graybox
 gates without inventing economy, save, timer, quest, worker, or narrative
-rules. Exact final production-mesh measurements remain subject to live kingdom
-camera review and representative-device profiling.
+rules. All four final production-mesh implementations now pass their shared
+topology and mobile-readiness gates; representative-device profiling remains
+open.
 
 ## Approved Stonehold source
 
@@ -34,6 +34,8 @@ camera review and representative-device profiling.
   performance.
 - Graybox handoff:
   `Stonehold_TownHall_Level_Blockout_Handoff.md`
+- Final handoff:
+  `Stonehold_TownHall_Final_Model_And_Runtime_Binding.md`
 
 ## Approved Eldergrove source
 
@@ -82,12 +84,15 @@ camera review and representative-device profiling.
   public entrance; cumulative offset protected civic masses; exactly four
   grounded boundary piers with local roof braces; and the compact static
   Veiled Accord Yoke around a short truly empty upper council slit.
-- Authority boundary: source-only visual direction. It does not enter the
-  runtime catalog or establish gameplay costs, duration, save data, economy,
-  final mesh topology, collider implementation, LOD thresholds, or device
+- Production status: final dimensions, cumulative topology, Town Hall-specific
+  atlas, exactly two colliders, four LOD bands, Veiled Accord Yoke, and exact
+  `RealmId.Umbral + BuildingId.TownHall` live binding now pass. This does not
+  establish gameplay costs, duration, save data, economy, or measured device
   performance.
 - Graybox handoff:
   `Umbral_TownHall_Level_Blockout_Handoff.md`
+- Final handoff:
+  `Umbral_TownHall_Final_Model_And_Runtime_Binding.md`
 
 ## Major design-direction decisions
 
@@ -336,7 +341,7 @@ work around those blockers.
 
 ## Production sequence
 
-Stonehold, Eldergrove, and Crownlands now prove the final shared
+Stonehold, Eldergrove, Crownlands, and Umbral now prove the final shared
 implementation pattern:
 
 - ten cumulative deltas at LOD0–2 and three far milestones at LOD3;
@@ -346,15 +351,10 @@ implementation pattern:
 - the realm motion profile reused only as construction motion grammar;
 - confirmed gameplay level as the sole visual authority.
 
-Umbral remains separately gated. Its production model must translate its
-approved silhouette rather than copying Stonehold, Eldergrove, or Crownlands
-geometry or materials.
-
 ## Deferred decisions
 
-- Final measured dimensions for Umbral after its production camera pass.
 - Final production-model surface sheets and exact surface wear beyond the
-  current Stonehold, Eldergrove, and Crownlands atlas proofs.
+  current four-realm atlas proofs.
 - Final damage, disabled, repair, selected, and unavailable art.
 - Bounded civic workers and ambient activity scheduling.
 - Measured scene-residency threshold for replacing the packaged Resources

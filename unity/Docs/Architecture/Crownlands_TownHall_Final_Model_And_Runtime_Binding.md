@@ -218,6 +218,5 @@ The static score is not a physical performance claim. Still required:
 - final damaged, destroyed, repairing, selected, disabled, and unavailable
   art;
 - bounded civic activity design and measured effect budgets;
-- Umbral Town Hall production model and exact binding;
 - progression, economy, save, game-data, and command authority before enabling
   live Town Hall upgrade actions.

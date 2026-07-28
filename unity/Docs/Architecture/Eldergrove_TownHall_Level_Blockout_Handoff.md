@@ -130,5 +130,5 @@ commands.
 
 The Crownlands and Umbral Town Hall source translations and graybox gates have
 passed under the same shared civic ladder and center-slot contract. Stonehold,
-Eldergrove, and Crownlands final production models and live bindings now pass;
-Umbral remains separately gated.
+Eldergrove, Crownlands, and Umbral final production models and live bindings
+now pass.

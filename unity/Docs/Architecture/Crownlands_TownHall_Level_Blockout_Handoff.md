@@ -136,6 +136,5 @@ Still required:
 
 ## Realm sequence status
 
-All four realm graybox proofs are complete. Stonehold, Eldergrove, and
-Crownlands now also have final production models and direct live bindings;
-Umbral remains the final Town Hall production-model slice.
+All four realm graybox proofs, final production models, and direct live
+bindings are complete under the shared Town Hall contract.

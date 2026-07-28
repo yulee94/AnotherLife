@@ -69,3 +69,11 @@ MonoBehaviour:
     strategicBoardScale: 0.09
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.umbral.townhall.production.v1
+    realmId: 4
+    buildingId: TownHall
+    prefab: {fileID: 1554135779196789712, guid: 1a01ccaafe3d44864b31d30ef7091279, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: fe3a44a5e1ef4a06ac99d628640257af, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10
