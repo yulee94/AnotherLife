@@ -1,8 +1,8 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.20
-**Last updated:** 2026-07-27
+**Version:** 1.21
+**Last updated:** 2026-07-28
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
 
@@ -79,6 +79,7 @@ This guide consolidates the active project direction in:
 - [Four-Realm Town Hall Production Contract](unity/Docs/Architecture/FourRealm_TownHall_Production_Contract.md)
 - [Stonehold Town Hall Level Blockout Handoff](unity/Docs/Architecture/Stonehold_TownHall_Level_Blockout_Handoff.md)
 - [Eldergrove Town Hall Level Blockout Handoff](unity/Docs/Architecture/Eldergrove_TownHall_Level_Blockout_Handoff.md)
+- [Crownlands Town Hall Level Blockout Handoff](unity/Docs/Architecture/Crownlands_TownHall_Level_Blockout_Handoff.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
 - [Android Adaptive Icon Packet](unity/Docs/Branding/AndroidAdaptive/README.md)
@@ -515,7 +516,7 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - Use the approved `Level 0` through `Level 10` visual progression in the kingdom-building level design. `Level 0` is an unbuilt reserved plot, `Level 1` is the first complete operational building and current baseline, and later levels add cumulative modular changes without replacing the building's function.
 - Production models bind from stable `RealmId + BuildingId` identity and derive their cumulative visual level directly from confirmed gameplay state. Never persist a parallel visual stage that can disagree with gameplay.
 - Live production construction motion is confirmation-driven and session-only: an active upgrade keeps the confirmed model settled with localized worksite feedback, a newly confirmed adjacent level may animate only its new delta, and first load or offline reconciliation never replays motion.
-- The next production building family is the four-realm `TownHall`, using the existing stable center slot as a hero-scale civic anchor rather than replacing the castle keep or landmark layer. The Stonehold and Eldergrove production sources and Level `1`/`6`/`10` grayboxes are approved; Crownlands and Umbral Town Hall sources remain pending. Working Level `10` labels guide visual production but do not establish narrative canon, powers, institutions, or gameplay.
+- The next production building family is the four-realm `TownHall`, using the existing stable center slot as a hero-scale civic anchor rather than replacing the castle keep or landmark layer. The Stonehold, Eldergrove, and Crownlands production sources and Level `1`/`6`/`10` grayboxes are approved; the Umbral Town Hall source remains pending. Working Level `10` labels guide visual production but do not establish narrative canon, powers, institutions, or gameplay.
 - Town Hall Level `10` capstones remain grounded, static extensions of approved civic structure: Stonehold uses the **Oathstone Crown**, Eldergrove the **Open Crown Arbor**, Crownlands the **Concord Meridian**, and Umbral the **Veiled Accord Yoke**. They do not reuse the Workshop seed lantern, forge chimney, storm calibration device, or bound-eclipse apparatus. Replacing them with unsupported, continuously active, function-changing, or Workshop-specific spectacle is a major design-direction decision.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
 - Avoid miniature-diorama cuteness as the default 2.5D solution.

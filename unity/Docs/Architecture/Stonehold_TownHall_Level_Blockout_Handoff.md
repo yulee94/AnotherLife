@@ -119,10 +119,8 @@ live district draw calls, texture residency, save data, or upgrade commands.
 - Keep live upgrade commands blocked on the open progression, economy, save,
   and game-data authority work.
 
-## Next realm
+## Realm sequence status
 
-The next source-design translation is Eldergrove Town Hall using the same
-shared civic ladder and center-slot contract. It must replace Stonehold mass
-and iron load paths with the approved open pale-stone court, three authored
-living-root arches, bronze collars, and an open crown arbor without reusing the
-Workshop seed-lantern capstone.
+The Eldergrove and Crownlands Town Hall source translations and graybox gates
+have now passed under the same shared civic ladder and center-slot contract.
+Umbral Town Hall is the remaining realm source and graybox lane.

@@ -127,10 +127,8 @@ live district draw calls, texture residency, save data, or upgrade commands.
 - Keep live upgrade commands blocked on the open progression, economy, save,
   and game-data authority work.
 
-## Next realm
+## Realm sequence status
 
-The next source-design translation is Crownlands Town Hall using the same
-shared civic ladder and center-slot contract. It must establish the upright
-symmetrical civic hall, paired entrance piers, balanced galleries, blue-slate
-roof groups, and grounded Concord Meridian without reusing the Workshop storm
-calibration device.
+The Crownlands Town Hall source translation and graybox gate have now passed
+under the same shared civic ladder and center-slot contract. Umbral Town Hall
+is the remaining realm source and graybox lane.

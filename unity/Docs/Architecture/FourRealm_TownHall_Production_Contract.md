@@ -1,9 +1,9 @@
 # Four-Realm Town Hall Production Contract
 
-**Status:** Shared production direction approved; Stonehold and Eldergrove
-grayboxes passed; Crownlands source design is next
+**Status:** Shared production direction approved; Stonehold, Eldergrove, and
+Crownlands grayboxes passed; Umbral source design is next
 
-**Date:** 2026-07-27
+**Date:** 2026-07-28
 
 **Building identity:** `TownHall`
 
@@ -48,6 +48,22 @@ Stonehold graybox and mobile camera review.
   performance.
 - Graybox handoff:
   `Eldergrove_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Crownlands source
+
+- Source sheet:
+  `Assets/AL/Art/Architecture/ConceptSheets/architecture_crownlands_townhall_level_progression_v001.png`
+- Owner decision: approved on 2026-07-28 after a focused category correction
+  removed cathedral and royal-monument drift.
+- Approved anchors: Level `1`, `6`, and `10`; one fixed axial entrance and
+  broad civic mass; cumulative balanced wings; exactly two lower grounded
+  civic towers; and the shallow static Concord Meridian.
+- Authority boundary: source-only visual direction. It does not enter the
+  runtime catalog or establish gameplay costs, duration, save data, economy,
+  final mesh topology, collider implementation, LOD thresholds, or device
+  performance.
+- Graybox handoff:
+  `Crownlands_TownHall_Level_Blockout_Handoff.md`
 
 ## Major design-direction decisions
 

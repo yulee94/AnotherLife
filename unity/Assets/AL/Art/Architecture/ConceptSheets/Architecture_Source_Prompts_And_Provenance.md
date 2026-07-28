@@ -609,3 +609,74 @@ Avoid: workshop cultivation table, seed lantern, glowing seed, floating orb, mag
   progression, catalog, build-setting, or live-kingdom binding
 - Handoff:
   `Docs/Architecture/Eldergrove_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Crownlands Town Hall Level 1/6/10 production source
+
+- File: `architecture_crownlands_townhall_level_progression_v001.png`
+- Status: Owner-approved Crownlands Town Hall source; Unity graybox gate passed
+- Generated: 2026-07-27; owner-approved 2026-07-28
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Crownlands material and construction language
+- Source reference:
+  `architecture_crownlands_modular_stormwright_detail_v001.png`
+- Dimensions: `1535 x 1024`
+- Byte length: `2,325,623`
+- SHA-256:
+  `bc2dc8473f42e09151c82a66f6eff39fc80ad298364192238b1608947e303af1`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-28: approve the category-corrected candidate
+and continue into the deterministic Crownlands Town Hall Level `1`, `6`, and
+`10` Unity graybox.
+
+### Recorded Crownlands Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style, material, and construction-language reference only. Preserve Crownlands pale disciplined masonry, deep blue slate roof groups, silvered structural ribs, restrained worn gold repair, dark production board, and premium realistic mystical-medieval rendering. Do not copy the Stormwright Workshop layout, open calibration bay, celestial instrument, energy well, dome, props, exact arches, or exact geometry.
+Primary request: design the Crownlands Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is an upright symmetrical public council hall at the center of a working settlement, not a palace, throne room, temple, cathedral, castle keep, observatory, workshop, or royal monument.
+Subject and progression: Level 1 is a complete compact weatherproof civic hall with one clear centered public entrance facing the viewer, a strong axial approach, paired grounded entrance piers, pale limestone wall bays, correctly pitched blue-slate roof groups, visible drainage, and restrained silver structural ribs. Level 6 keeps that exact pivot, entrance, and fixed rectangular footprint, then adds balanced but not perfectly identical public-records and steward galleries, a broader sheltered assembly hall, paired civic tower bases, rear service circulation, and a clearly grounded central meridian load path. Level 10 keeps every earlier module and adds the grounded Concord Meridian: the same two civic towers rise from established wall and foundation loads to support one fixed silver meridian arch above the hall, with one restrained solid central dial physically mounted at the arch apex. The arch and dial are architectural and static. They do not rotate, levitate, emit lightning, tell time, or contain a glowing orb.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera, scale, entrance direction, and ground plane, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean solid-black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include one small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, believable modular construction, large readable forms, mobile-friendly simplification, crisp edges, restrained civic ornament, adult serious tone.
+Lighting/mood: neutral studio/gameplay lighting with readable limestone, slate, silvered metal, and dark timber midtones. Natural warm interior light may appear only as tiny window warmth. No broad blue or violet emission and no cinematic fog hiding structure.
+Color palette: pale warm-gray limestone, midnight blue slate, aged silver steel, dark weathered timber, sparse restrained gold repair, tiny warm interior amber.
+Materials/textures: credible masonry courses, direct vertical load paths, physical roof support and drainage, durable sheltered galleries, restrained repair history. Roof ridges are the highest lines and planes slope down to supported eaves. Later levels are cumulative additions, never unrelated replacements.
+Protected identity: upright civic symmetry; one centered axial public entrance; paired grounded entrance piers; disciplined wall bays; Level 10 meridian arch carried by exactly two grounded civic towers; restrained solid apex dial. Realm identity must survive with banners, particles, glow, tiny conductors, and small props removed.
+Constraints: fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: Stormwright Workshop calibration table, energy well, celestial machinery, observatory dome, lightning, magical beam, floating orb, levitating ring, giant clock, clock face, rotating instrument, throne, palace, cathedral, castle keep towers, unsupported arch, roof inversion, floating pieces, broad violet or blue emission, glowing cracks, banner clutter, excessive spires, weapons, giant bell, exaggerated royal ornament, miniature-diorama cuteness.
+```
+
+### Focused category correction
+
+- Rejected first draft: `85 / 100`; pointed portal, rose-window motif, narrow
+  towers, and oversized arch read as a cathedral or royal monument
+- Final source review: `93 / 100`, pass
+- Correction: broadened and lowered the civic mass; replaced religious
+  openings with clipped civic bays; shortened and thickened the paired towers;
+  lowered the meridian into a directly supported roof crown; retained one
+  solid unmarked apex block
+- Protected reads: fixed axial entrance, disciplined pale masonry, cumulative
+  balanced wings, exactly two lower grounded civic towers, and a shallow static
+  Concord Meridian
+- Production cautions: retain civic scale below the protected settlement
+  landmark; collapse fine slate ribs and courtyard detail before weakening the
+  primary mass; keep the apex free of clock or calibration-device language
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `92 / 100`
+- Static mobile-safety result: `95 / 100`
+- Renderer counts: `29`, `67`, and `101`
+- Focused verification: `17 / 17` Crownlands Town Hall EditMode tests passed
+- Platform verification: Android Architecture `183 / 183`; iOS Architecture
+  `183 / 183`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Crownlands_TownHall_Level_Blockout_Handoff.md`
