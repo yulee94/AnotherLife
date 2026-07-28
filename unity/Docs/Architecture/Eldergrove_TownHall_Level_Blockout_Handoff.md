@@ -129,6 +129,7 @@ live district draw calls, texture residency, save data, or upgrade commands.
 
 ## Realm sequence status
 
-The Crownlands Town Hall source translation and graybox gate have now passed
-under the same shared civic ladder and center-slot contract. Umbral Town Hall
-is the remaining realm source and graybox lane.
+The Crownlands and Umbral Town Hall source translations and graybox gates have
+now passed under the same shared civic ladder and center-slot contract. All
+four realm proofs are complete; final production-model and live-binding work
+remains separately gated.

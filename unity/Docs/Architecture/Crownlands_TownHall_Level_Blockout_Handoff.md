@@ -126,9 +126,9 @@ live district draw calls, texture residency, save data, or upgrade commands.
 - Keep live upgrade commands blocked on the open progression, economy, save,
   and game-data authority work.
 
-## Next realm
+## Realm sequence status
 
-The next source-design translation is Umbral Town Hall using the same shared
-civic ladder and center-slot contract. It must establish offset graphite civic
-masses, a readable protected entrance, four grounded boundary piers, and the
-fixed Veiled Accord Yoke without reusing the Workshop bound-eclipse apparatus.
+The Umbral Town Hall source translation and graybox gate have now passed under
+the same shared civic ladder and center-slot contract. All four realm proofs
+are complete; final production-model and live-binding work remains separately
+gated.

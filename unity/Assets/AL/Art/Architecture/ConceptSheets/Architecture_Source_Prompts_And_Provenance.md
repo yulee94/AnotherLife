@@ -680,3 +680,75 @@ Avoid: Stormwright Workshop calibration table, energy well, celestial machinery,
   progression, catalog, build-setting, or live-kingdom binding
 - Handoff:
   `Docs/Architecture/Crownlands_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Umbral Town Hall Level 1/6/10 production source
+
+- File: `architecture_umbral_townhall_level_progression_v001.png`
+- Status: Owner-approved Umbral Town Hall source; Unity graybox gate passed
+- Generated and owner-approved: 2026-07-28
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Umbral material and construction language
+- Source reference:
+  `architecture_umbral_modular_veilwright_detail_v001.png`
+- Dimensions: `1575 x 998`
+- Byte length: `2,211,316`
+- SHA-256:
+  `2088a8a20c5e189f9943f5fc8c6b0d5a51065ccc7f0ee69b7c3677dd62f780f0`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-28: approve the category-corrected candidate
+and continue into the deterministic Umbral Town Hall Level `1`, `6`, and `10`
+Unity graybox.
+
+### Recorded Umbral Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style, material, and construction-language reference only. Preserve Umbral graphite masonry, offset inhabitable masses, split roof planes, ash-dark timber, sparse weathered brass, localized darkglass, dark production board, and premium realistic mystical-medieval rendering. Do not copy the Veilwright Workshop layout, ritual work floor, bound-eclipse apparatus, violet pedestal, awnings, props, exact piers, or exact geometry.
+Primary request: design the Umbral Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is a practical protected public council hall at the center of a working settlement, not a portal, ritual shrine, temple, gallows, castle keep, palace, workshop, prison, throne room, or magical machine.
+Subject and progression: Level 1 is a complete compact weatherproof civic hall composed from two offset graphite masses around a protected central council chamber, one clear oblique-but-readable public entrance facing the viewer, safe steps, split physically supported roof planes, ash-timber galleries, drainage, sparse brass hierarchy, and one small contained non-emissive darkglass civic inset. Level 6 keeps that exact pivot, entrance, and fixed rectangular footprint, then adds unequal records and steward galleries, rear service circulation, a broader sheltered public threshold, and exactly four grounded thick boundary piers whose physical sheltering relationship is countable without forming a portal frame. Level 10 keeps every earlier module and adds the grounded Veiled Accord Yoke: the same four established offset boundary piers carry an asymmetrical fixed double crossframe integrated close above the roof around one narrow truly empty vertical council slit. The crossframe is architectural, static, visibly supported, and secondary to the building mass. There is no object, orb, crystal, flame, figure, doorway, portal surface, or glow inside the slit.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera, scale, entrance direction, and ground plane, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean solid-black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include one small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, believable modular construction, large readable forms, mobile-friendly simplification, crisp edges, restrained asymmetry, adult serious tone.
+Lighting/mood: neutral studio/gameplay lighting with readable graphite, charcoal timber, brass, and aubergine-darkglass midtones. Natural warm interior light may appear only as tiny window warmth. No broad violet emission, darkness cloud, or cinematic fog hiding structure.
+Color palette: graphite and blackened stone, charcoal ash timber, sparse aged brass, restrained aubergine undertones, one non-emissive darkglass inset, tiny warm interior amber.
+Materials/textures: credible masonry courses, direct grounded pier loads, physical split-roof support and drainage, durable sheltered galleries, restrained wear and repair. Roof ridges remain above supported eaves. Later levels are cumulative additions, never unrelated replacements.
+Protected identity: deliberate offset civic masses; one oblique but readable fixed public entrance; protected central chamber; exactly four grounded thick boundary piers at Level 6 and Level 10; Level 10 asymmetrical double crossframe close above the roof around a narrow empty council slit. Realm identity must survive with violet color, particles, glow, cloth, and small props removed.
+Constraints: fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: Veilwright Workshop ritual floor, bound-eclipse apparatus, circular altar, magic pedestal, floating orb, portal, doorway-shaped capstone, gallows, execution scaffold, prison, throne, shrine, cathedral, castle keep towers, unsupported crossframe, floating pieces, broad violet emission, glowing cracks, darkness fog, dense awnings, tent silhouette, excessive spikes, weapons, giant bell, exaggerated occult ornament, miniature-diorama cuteness.
+```
+
+### Focused silhouette correction
+
+- Rejected first draft: `87 / 100`; the tall Level `10` yoke and long vertical
+  void read as a keep, portal frame, or gallows
+- Final source review: `93 / 100`, pass
+- Correction: lowered and widened the yoke close to the occupied roof;
+  shortened the upper pier extensions; replaced the doorway-height opening
+  with a short narrow upper slit; retained four grounded piers and a static
+  asymmetrical double crossframe
+- Protected reads: fixed oblique entrance, offset graphite civic masses,
+  cumulative unequal galleries, exactly four grounded boundary piers, and a
+  compact empty-slit Veiled Accord Yoke
+- Production cautions: keep the yoke secondary to the occupied hall, leave the
+  slit truly empty, remove fine shingles and finials before weakening the
+  offset silhouette or pier count, and keep darkglass non-emissive
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `91 / 100`
+- Static mobile-safety result: `95 / 100`
+- Renderer counts: `23`, `60`, and `93`
+- Focused verification: `17 / 17` Umbral Town Hall EditMode tests passed
+- Platform verification: Android Architecture `200 / 200`; iOS Architecture
+  `200 / 200`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Local Apple toolchain: Xcode `26.6`; iOS `26.5` Simulator available
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Umbral_TownHall_Level_Blockout_Handoff.md`

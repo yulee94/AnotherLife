@@ -1,7 +1,7 @@
 # Four-Realm Town Hall Production Contract
 
-**Status:** Shared production direction approved; Stonehold, Eldergrove, and
-Crownlands grayboxes passed; Umbral source design is next
+**Status:** Shared production direction approved; all four realm source designs
+and Level `1`/`6`/`10` graybox gates passed
 
 **Date:** 2026-07-28
 
@@ -13,11 +13,11 @@ Crownlands grayboxes passed; Umbral source design is next
 `Assets/AL/Art/Designs/FourRealmArchitecture.md`, and the four approved realm
 construction-motion contracts
 
-This packet selects Town Hall as the next four-realm production building
-family after Workshop parity. It closes the shared scope needed to begin
-graybox work without inventing economy, save, timer, quest, worker, or
-narrative rules. Exact final mesh measurements remain subject to the first
-Stonehold graybox and mobile camera review.
+This packet defines Town Hall as the four-realm production building family
+after Workshop parity. It records the shared scope proven by all four graybox
+gates without inventing economy, save, timer, quest, worker, or narrative
+rules. Exact final production-mesh measurements remain subject to live kingdom
+camera review and representative-device profiling.
 
 ## Approved Stonehold source
 
@@ -65,6 +65,23 @@ Stonehold graybox and mobile camera review.
 - Graybox handoff:
   `Crownlands_TownHall_Level_Blockout_Handoff.md`
 
+## Approved Umbral source
+
+- Source sheet:
+  `Assets/AL/Art/Architecture/ConceptSheets/architecture_umbral_townhall_level_progression_v001.png`
+- Owner decision: approved on 2026-07-28 after a focused silhouette correction
+  removed portal, gallows, and oversized-cage drift.
+- Approved anchors: Level `1`, `6`, and `10`; one fixed oblique but readable
+  public entrance; cumulative offset protected civic masses; exactly four
+  grounded boundary piers with local roof braces; and the compact static
+  Veiled Accord Yoke around a short truly empty upper council slit.
+- Authority boundary: source-only visual direction. It does not enter the
+  runtime catalog or establish gameplay costs, duration, save data, economy,
+  final mesh topology, collider implementation, LOD thresholds, or device
+  performance.
+- Graybox handoff:
+  `Umbral_TownHall_Level_Blockout_Handoff.md`
+
 ## Major design-direction decisions
 
 1. Town Hall is a **hero-scale civic anchor**, not the castle keep, palace,
@@ -80,9 +97,10 @@ Stonehold graybox and mobile camera review.
    visual stage is added to saves.
 5. The working Level `10` capstone names below are visual-production labels,
    not narrative canon, powers, institutions, or progression promises.
-6. The first proof is Stonehold because its rigid construction grammar exposes
-   footprint, load-path, entrance, and occlusion errors most clearly. Approval
-   of that shared topology pattern precedes the other three realm translations.
+6. Stonehold was the first proof because its rigid construction grammar
+   exposed footprint, load-path, entrance, and occlusion errors most clearly.
+   Its approved topology pattern established the shared gate subsequently
+   passed by Eldergrove, Crownlands, and Umbral.
 
 Changing the civic-not-keep role, stable center slot, shared level ladder,
 gameplay-authoritative visual level, or grounded capstone rule requires owner
@@ -312,7 +330,7 @@ work around those blockers.
 ## Deferred decisions
 
 - Final measured dimensions after the Stonehold graybox.
-- Final Town Hall concept sheets and exact surface wear.
+- Final production-model surface sheets and exact surface wear.
 - Final damage, disabled, repair, selected, and unavailable art.
 - Bounded civic workers and ambient activity scheduling.
 - Measured scene-residency threshold for replacing the packaged Resources

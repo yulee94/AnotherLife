@@ -4,11 +4,14 @@
 
 **Date:** 2026-07-24
 
-**Platform baseline updated:** 2026-07-27
+**Platform baseline updated:** 2026-07-28
 
 **Unity baseline:** `2022.3.62f3`
 
-**Scope:** Four-realm settlement design source, shared construction-state runtime, four realm-motion grayboxes, all four Workshop Level 1–10 production models, and their direct live-kingdom bindings
+**Scope:** Four-realm settlement design source, shared construction-state
+runtime, four realm-motion grayboxes, all four Workshop Level 1–10 production
+models and direct live-kingdom bindings, plus all four Town Hall Level
+`1`/`6`/`10` production-direction grayboxes
 
 ## Outcome
 
@@ -53,6 +56,9 @@ This is a static production-readiness statement, not final-device performance ap
 - Concept sheets remain non-readable source references with mipmaps disabled.
 - Concept sheets, contact sheets, and videos are not referenced by runtime prefabs.
 - Stonehold, Eldergrove, Crownlands, and Umbral prototype scenes remain excluded from production build settings.
+- Stonehold, Eldergrove, Crownlands, and Umbral Town Hall grayboxes keep fixed
+  anchors, cumulative level groups, opaque instanced review materials, no
+  runtime behavior, and no concept-sheet prefab dependency.
 
 ## Android and iOS compatibility boundary
 
@@ -97,10 +103,9 @@ The focused Architecture EditMode suite was re-imported and passed with Unity ac
 
 ## Automated acceptance
 
-`AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests`,
-`AL.Tests.EditMode.Architecture.EldergroveWorkshopLevelBlockoutTests`, and
-the Eldergrove, Stonehold, Crownlands, and Umbral Workshop production-model
-suites verify:
+`AL.Tests.EditMode.Architecture.ArchitectureMobileReadinessTests`, the
+Workshop production-model suites, and the Stonehold, Eldergrove, Crownlands,
+and Umbral Town Hall blockout suites verify:
 
 - renderer and material ceilings;
 - instancing on every shared prototype material;
@@ -128,11 +133,12 @@ suites verify:
 The focused Eldergrove production suite passes `18 / 18` and the focused
 Stonehold production suite passes `19 / 19`. The Crownlands production suite
 passes `19 / 19`, and the Umbral production suite passes `19 / 19`. The
-focused confirmed-level transition suite passes `14 / 14`. The
-expanded Architecture suite passes `133 / 133` in Unity 2022.3.62f3 while
-actively targeting Android and again while actively targeting iOS. All four
-final Workshop models still require populated-kingdom profiling on
-representative Android and iOS devices before measured performance approval.
+focused confirmed-level transition suite passes `14 / 14`. The Umbral Town
+Hall suite passes `17 / 17`. The expanded Architecture suite passes
+`200 / 200` in Unity 2022.3.62f3 while actively targeting Android and again
+while actively targeting iOS. All four final Workshop models and every Town
+Hall graybox still require populated-kingdom profiling on representative
+Android and iOS devices before measured performance approval.
 
 ## Production handoff
 
