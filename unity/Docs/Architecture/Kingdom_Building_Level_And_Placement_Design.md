@@ -2,15 +2,15 @@
 
 **Status:** Owner-approved design direction
 
-**Date:** 2026-07-27
+**Date:** 2026-07-28
 
 **Primary owner:** Project owner / creative director
 
 **Design authority:** Root `DESIGN.md`
 
-**Runtime dependencies:** Save hardening #137, economy integrity #163, progression integrity #165, and game-data authority #183
+**Runtime dependencies:** Integrated local save hardening, economy integrity, progression authority, and game-data authority
 
-This document defines how live kingdom buildings occupy stable locations, progress from an unbuilt plot through Level 10, and consume the approved four-realm construction motion system. It is a visual and interaction contract. It does not approve costs, durations, production rates, prerequisites, save schema fields, or final model assets.
+This document defines how live kingdom buildings occupy stable locations, progress from an unbuilt plot through Level 10, and consume the approved four-realm construction motion system. It now also records the first gameplay-authoritative local construction transaction. Production rates, cross-building prerequisites, cancellation/refunds, network order identity, and unlisted final-model families remain outside this approval.
 
 ## Approved decisions
 
@@ -19,6 +19,9 @@ This document defines how live kingdom buildings occupy stable locations, progre
 3. Every kingdom location has stable slot identity. List order never determines placement.
 4. `Level 0` is an unbuilt reserved plot. `Level 1` is the first complete operational building and preserves the current built baseline. Existing Level 1 state does not visually regress.
 5. Final presentation resolves through stable realm, building-definition, level, and quality-tier identities while preserving the mobile-safety requirement above `90/100`.
+6. Building definitions own exact Level `1`–`10` recipes and durations. The building service is the only authority allowed to accept, persist, complete, or reject a construction order.
+7. One active order is allowed per building. Costs are paid in full at acceptance; a known save failure rolls back both wallet and building state, while commit uncertainty freezes additional orders for reconciliation.
+8. Missing rows remain Level `0` and query-safe. Existing rows—including the current Level `1` baseline—are never reseeded or silently promoted.
 
 ## Identity and ownership
 
@@ -129,13 +132,102 @@ A missing or invalid production candidate uses an explicit placeholder/unavailab
 
 - Existing Level 1 buildings remain Level 1 and built.
 - An unbuilt stable slot presents Level 0 without query-time creation of a Level 1 save row.
-- Only an accepted progression transaction may start, complete, cancel, or reconcile construction.
+- Only an accepted progression transaction may start, complete, or reconcile construction.
 - Resource spend, level change, order/result identity, quest consequences, and persistence follow the owning atomic transaction contracts.
 - Presentation observes immutable results and never calls save, economy, quest, or completion services.
-- The exact save representation for slots, active orders, and migration remains owned by #137/#165; this design does not add fields.
+- The first local transaction intentionally reuses the existing `BuildingState.Level`, `IsUpgrading`, and `UpgradeCompleteTimestamp` fields. It adds no save field or schema migration and never persists presentation stage.
 - The live confirmed-level transition tracker is session-only. It remembers
   only the last observed level per stable realm/slot identity and is discarded
   with the board; it is not a save field or gameplay order.
+
+## Gameplay-authoritative live construction
+
+The accepted local transaction is:
+
+```text
+stable BuildingId
++ confirmed BuildingState.Level (missing row = 0)
++ exact next-level definition
++ authoritative wallet snapshot
++ accepted UTC completion timestamp
+→ one persisted active construction order
+→ runtime-owner reconciliation
+→ one persisted confirmed level
+→ presentation observes the result
+```
+
+- Quotes are read-only and never seed a save row.
+- A start request validates the building definition, exact next-level recipe,
+  current state, maximum level, wallet integrity, and save writability before
+  it can become visible as active work.
+- Resource costs and the active-order state are committed in one save attempt.
+  A known failed save restores both. A commit-uncertain result is not guessed
+  backward or forward; the candidate remains and further orders fail closed.
+- The single Bootloader runtime owner reconciles due orders once per UTC second.
+  It also reconciles immediately after load and before the ready-profile marker
+  is published, so completed offline work first appears at its settled
+  confirmed level and does not replay the session-only construction settle.
+- Completion increments exactly one level, clears the active timer, and saves.
+  It never derives or stores an independent visual level.
+- The live command deck issues orders only for `TownHall`, `Farm`,
+  `LumberMill`, `Quarry`, `GoldMine`, and `Barracks`. `ManaShrine` and `Mine`
+  remain stable reserved slots with explicit unavailable state because the
+  game-data catalog does not define them.
+
+### Initial Level 1–10 tuning baseline
+
+The following exact base budgets and UTC durations are now definition data.
+They are balance-tuning values, not visual timing; the short realm settle still
+uses its separate `0.35–1.25` second presentation envelope.
+
+| Target level | Base budget | Duration |
+| ---: | ---: | ---: |
+| 1 | 100 | 10 seconds |
+| 2 | 175 | 30 seconds |
+| 3 | 300 | 2 minutes |
+| 4 | 475 | 5 minutes |
+| 5 | 700 | 15 minutes |
+| 6 | 1,000 | 30 minutes |
+| 7 | 1,400 | 1 hour |
+| 8 | 1,900 | 2 hours |
+| 9 | 2,500 | 4 hours |
+| 10 | 3,250 | 8 hours |
+
+Each building applies an authored cost scale and resource mix. Town Hall uses
+Stone/Wood/Gold at `45/35/20`; Farm and Lumber Mill use Wood/Stone at `70/30`;
+Quarry and Gold Mine use Wood/Stone at `40/60`; Barracks uses
+Stone/Wood/Gold at `55/30/15`. Other supported definitions already carry
+their own exact recipes for later UI exposure.
+
+### Major design-direction flags
+
+The following are deliberately not inferred from this slice and require an
+explicit owner decision before implementation:
+
+- cancellation or partial/full refunds after an accepted spend;
+- global builders, parallel-build limits, or queued orders across buildings;
+- prerequisite graphs, district locks, or Town Hall gating;
+- premium currency speedups or time purchases;
+- server-issued order IDs, cross-device conflict resolution, or live-service
+  catalog retuning of an already active order;
+- demolition, relocation, rotation, or slot swapping.
+
+## Implementation validation
+
+| Gate | Result |
+| --- | --- |
+| Gameplay-authoritative construction EditMode | `11 / 11`, pass |
+| Related command, containment, save-semantic, and economy EditMode | `170 / 170`, pass |
+| Android-targeted Architecture EditMode | `286 / 286`, pass |
+| iOS-targeted Architecture EditMode | `286 / 286`, pass |
+| Static architecture mobile safety | `94 / 100`, pass |
+| Unity iOS Player export | pass |
+| Xcode 26.6 unsigned ARM64 native build | pass |
+| Native deployment floor | `arm64-apple-ios15.0` |
+
+The static score is unchanged because this slice adds platform-neutral
+gameplay/UI logic and no renderer, material, texture, light, collider, LOD, or
+loading-budget expansion. It is not a physical-device performance claim.
 
 ## Mobile and accessibility requirements
 
@@ -160,8 +252,9 @@ A missing or invalid production candidate uses an explicit placeholder/unavailab
 
 ## Deferred production decisions
 
-- Exact costs, durations, prerequisites, production rates, cancellation, and refund rules.
-- Exact save fields and migration mechanics for progression orders.
+- Cross-building prerequisites, production rates, cancellation, and refund rules.
+- Network order identity, cross-device conflict resolution, and any migration
+  required by a future server-authoritative construction record.
 - Whether a future authoritative order-progress snapshot should expose
   in-progress target-delta construction before gameplay confirms the level.
 - Which building definitions support which footprints and level-specific module deltas.

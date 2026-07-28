@@ -13,6 +13,7 @@ namespace AL.UI.Kingdom
         public const string GoldMineUpgrade = "building.gold_mine.upgrade";
         public const string ManaShrineUpgrade = "building.mana_shrine.upgrade";
         public const string MineUpgrade = "building.mine.upgrade";
+        public const string BarracksUpgrade = "building.barracks.upgrade";
         public const string InfantryTraining = "training.infantry.start";
         public const string RangedTraining = "training.ranged.start";
         public const string QuestClaim = "quest.claim_available";
@@ -26,12 +27,14 @@ namespace AL.UI.Kingdom
         // and the LIVE GitHub issue state at implementation time (2026-07-21), not copied from the
         // stale post-merge audit table (#178):
         //   - #137 (save hardening) is required by every mutation family except Champion (spec 15).
-        //   - building / research / training share {137, 163, 165, 183}.
+        //   - research / training share {137, 163, 165, 183}.
         //   - Warmaster {137, 163, 171, 183}; territory capture {137, 163, 166, 173};
         //     quest claim {133, 137} (spec-15 quest set was {137, 152, 133}, but #152 is CLOSED and
         //     therefore no longer blocking, so it is dropped — see KingdomReleaseContainmentTests);
         //     Champion {150, 173, 180}.
-        // Only issues that are OPEN (still blocking) are listed. #152/#156/#127/#223 are CLOSED and
+        // Building construction is now live through the save/economy/progression/game-data contracts,
+        // so supported definitions carry no issue blocker. Runtime profile/service availability still
+        // fails closed. Only issues that are OPEN (still blocking) are listed. #152/#156/#127/#223 are CLOSED and
         // must never appear here; a listed closed issue is a diagnostics honesty defect that the
         // live-state test fails on. mana_shrine / mine stay as permanently-unavailable deck entries
         // (D9) rather than being dropped — the catalog defines no such building ids yet (#183).
@@ -40,13 +43,14 @@ namespace AL.UI.Kingdom
             var descriptors = new List<KingdomCommandDescriptor>
             {
                 Available(BoardView, "Board View", KingdomCommandCategory.Presentation),
-                Mutating(TownHallUpgrade, "Town Hall", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
-                Mutating(FarmUpgrade, "Farm", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
-                Mutating(LumberMillUpgrade, "Lumber", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
-                Mutating(QuarryUpgrade, "Quarry", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
-                Mutating(GoldMineUpgrade, "Gold Mine", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
-                Mutating(ManaShrineUpgrade, "Mana Shrine", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
-                Mutating(MineUpgrade, "Mine", KingdomCommandCategory.Build, context.Capabilities.BuildingUpgrade, "building-contract-missing", 137, 163, 165, 183),
+                BuildingCommand(TownHallUpgrade, "Town Hall", context.Capabilities.BuildingUpgrade),
+                BuildingCommand(FarmUpgrade, "Farm", context.Capabilities.BuildingUpgrade),
+                BuildingCommand(LumberMillUpgrade, "Lumber", context.Capabilities.BuildingUpgrade),
+                BuildingCommand(QuarryUpgrade, "Quarry", context.Capabilities.BuildingUpgrade),
+                BuildingCommand(GoldMineUpgrade, "Gold Mine", context.Capabilities.BuildingUpgrade),
+                UnsupportedBuild(ManaShrineUpgrade, "Mana Shrine"),
+                UnsupportedBuild(MineUpgrade, "Mine"),
+                BuildingCommand(BarracksUpgrade, "Barracks", context.Capabilities.BuildingUpgrade),
                 Mutating(InfantryTraining, "Infantry", KingdomCommandCategory.Forces, context.Capabilities.TroopTraining, "training-contract-missing", 137, 163, 165, 183),
                 Mutating(RangedTraining, "Ranged", KingdomCommandCategory.Forces, context.Capabilities.TroopTraining, "training-contract-missing", 137, 163, 165, 183),
                 Mutating(QuestClaim, "Claim", KingdomCommandCategory.Forces, context.Capabilities.QuestClaim, "quest-claim-contract-missing", 133, 137),
@@ -58,6 +62,22 @@ namespace AL.UI.Kingdom
             };
 
             return descriptors;
+        }
+
+        public static bool TryGetBuildingId(string commandId, out string buildingId)
+        {
+            switch (commandId)
+            {
+                case TownHallUpgrade: buildingId = "TownHall"; return true;
+                case FarmUpgrade: buildingId = "Farm"; return true;
+                case LumberMillUpgrade: buildingId = "LumberMill"; return true;
+                case QuarryUpgrade: buildingId = "Quarry"; return true;
+                case GoldMineUpgrade: buildingId = "GoldMine"; return true;
+                case BarracksUpgrade: buildingId = "Barracks"; return true;
+                default:
+                    buildingId = string.Empty;
+                    return false;
+            }
         }
 
         public static KingdomCommandDescriptor Resolve(string id, KingdomCommandContext context)
@@ -107,6 +127,33 @@ namespace AL.UI.Kingdom
                 capabilityEnabled ? KingdomCommandAvailability.Available : KingdomCommandAvailability.UnavailableDependency,
                 capabilityEnabled ? string.Empty : technicalCode,
                 capabilityEnabled ? Array.Empty<int>() : blockingIssueIds);
+        }
+
+        private static KingdomCommandDescriptor UnsupportedBuild(string id, string label)
+        {
+            return new KingdomCommandDescriptor(
+                id,
+                label,
+                KingdomCommandCategory.Build,
+                KingdomCommandAvailability.UnavailableBuild,
+                "building-definition-unavailable",
+                Array.Empty<int>());
+        }
+
+        private static KingdomCommandDescriptor BuildingCommand(
+            string id,
+            string label,
+            bool capabilityEnabled)
+        {
+            return new KingdomCommandDescriptor(
+                id,
+                label,
+                KingdomCommandCategory.Build,
+                capabilityEnabled
+                    ? KingdomCommandAvailability.Available
+                    : KingdomCommandAvailability.UnavailableDependency,
+                capabilityEnabled ? string.Empty : "building-runtime-unavailable",
+                Array.Empty<int>());
         }
 
         private static KingdomCommandDescriptor RealmDependent(string id, string label, KingdomCommandCategory category, bool capabilityEnabled, bool hasCommittedRealm, string technicalCode, params int[] blockingIssueIds)

@@ -153,6 +153,7 @@ namespace AL.Core
                     return;
                 }
 
+                ReconcileCompletedConstruction(postLoadMarker);
                 marker.MarkLoadSucceeded(_runtimeOwnerId);
             }
             catch (Exception ex)
@@ -390,6 +391,31 @@ namespace AL.Core
             if (marker.TryGetExpected<IResourceService>(out var resourceService))
             {
                 resourceService.TickProduction(Time.deltaTime);
+            }
+
+            if (marker.TryGetExpected<IBuildingService>(out var buildingService))
+            {
+                buildingService.ReconcileCompletedConstructions(
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            }
+        }
+
+        private static void ReconcileCompletedConstruction(
+            IOfflineServiceStackMarker marker)
+        {
+            if (marker == null ||
+                !marker.TryGetExpected<IBuildingService>(out var buildingService))
+            {
+                return;
+            }
+
+            BuildingConstructionReconcileResult result =
+                buildingService.ReconcileCompletedConstructions(
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+            if (result.Status == BuildingConstructionStatus.CommitUncertain ||
+                result.Status == BuildingConstructionStatus.SaveFailedRolledBack)
+            {
+                Debug.LogWarning(result.DiagnosticCode);
             }
         }
 

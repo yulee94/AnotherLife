@@ -2055,20 +2055,22 @@ namespace AL.Data.Catalogs
                         state);
 
                     int level;
-                    if (TryReadRequiredInt32(
+                    bool levelValid = TryReadRequiredInt32(
                             row,
                             "Level",
                             path,
                             SaveSemanticDomain.Buildings,
                             collector,
                             state,
-                            out level) &&
-                        level < 0)
+                            out level);
+                    if (levelValid && (level < 0 || level > 10))
                     {
                         MarkMalformed(
                             state,
                             collector,
-                            "SAVE_BUILDING_LEVEL_NEGATIVE",
+                            level < 0
+                                ? "SAVE_BUILDING_LEVEL_NEGATIVE"
+                                : "SAVE_BUILDING_LEVEL_ABOVE_CAP",
                             path + ".Level",
                             SaveSemanticDomain.Buildings);
                     }
@@ -2106,6 +2108,18 @@ namespace AL.Data.Catalogs
                             state,
                             collector,
                             "SAVE_BUILDING_TIMER_CONTRADICTORY",
+                            path,
+                            SaveSemanticDomain.Buildings);
+                    }
+                    else if (levelValid &&
+                             upgradingValid &&
+                             upgrading &&
+                             level >= 10)
+                    {
+                        MarkMalformed(
+                            state,
+                            collector,
+                            "SAVE_BUILDING_UPGRADE_ABOVE_CAP",
                             path,
                             SaveSemanticDomain.Buildings);
                     }
