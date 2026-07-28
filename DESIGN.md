@@ -1,7 +1,7 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.26
+**Version:** 1.27
 **Last updated:** 2026-07-28
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
@@ -72,6 +72,7 @@ This guide consolidates the active project direction in:
 - [Umbral Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Umbral_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Reusable Architecture Construction-State System](unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md)
 - [Kingdom Building Level, Placement, and Presentation Design](unity/Docs/Architecture/Kingdom_Building_Level_And_Placement_Design.md)
+- [Live Kingdom Construction UX Design](unity/Docs/Architecture/Live_Kingdom_Construction_UX_Design.md)
 - [Eldergrove Workshop Level Progression — approved production source](unity/Assets/AL/Art/Designs/EldergroveWorkshopLevelProgression.md)
 - [Eldergrove Workshop Level Blockout Handoff](unity/Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md)
 - [Eldergrove Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md)
@@ -525,7 +526,9 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - A missing building row is Level `0` and remains query-safe; an existing Level `1` row remains the current built baseline. Queries never create building rows. Only a committed `0 → 1` construction order may create the first row.
 - One active order is allowed per building. Costs are paid in full when the order is accepted. A known save failure restores both wallet and building state; an uncertain commit preserves the candidate and blocks further construction until save reconciliation.
 - The first live command-deck construction slice exposes approved runtime definitions for Town Hall, Farm, Lumber Mill, Quarry, Gold Mine, and Barracks. Reserved Mana Shrine and Mine slots remain visible but inert until matching game-data definitions are approved.
-- Cancellation, refunds, build queues, cross-building prerequisites, premium speedups, and network-issued order identities are not inferred by the local slice. Introducing any of them changes economy or progression direction and requires an explicit design decision.
+- Recommended next interaction: construction discovery and construction commitment are separate. Selecting a world building or BUILD entry opens the same local inspector and authoritative quote; only the inspector's explicit `Construct` or `Upgrade` action may spend resources. Implementation remains held for owner review; do not treat the current direct-spend buttons as the finished UX.
+- The construction inspector shows only confirmed current level, exact next level, authoritative cost, treasury sufficiency, duration, active completion time, and supported status. It must not invent yields, unlocks, production bonuses, lore, or target-stage visuals that do not exist in approved data.
+- Cancellation, refunds, build queues, cross-building prerequisites, premium speedups, server order identity, demolition, and relocation are on explicit product hold. Do not surface them as disabled teasers, placeholder buttons, or implied future promises. Reopening any of them requires a separate owner decision.
 - The active production building family is the four-realm `TownHall`, using the existing stable center slot as a hero-scale civic anchor rather than replacing the castle keep or landmark layer. Stonehold, Eldergrove, Crownlands, and Umbral production sources, Level `1`/`6`/`10` grayboxes, final Level `1`–`10` production models, and direct live bindings are approved. Working Level `10` labels guide visual production but do not establish narrative canon, powers, institutions, or gameplay.
 - Town Hall Level `10` capstones remain grounded, static extensions of approved civic structure: Stonehold uses the **Oathstone Crown**, Eldergrove the **Open Crown Arbor**, Crownlands the **Concord Meridian**, and Umbral the **Veiled Accord Yoke**. They do not reuse the Workshop seed lantern, forge chimney, storm calibration device, or bound-eclipse apparatus. Replacing them with unsupported, continuously active, function-changing, or Workshop-specific spectacle is a major design-direction decision.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
@@ -925,5 +928,6 @@ These questions do not block concept exploration, but they must be resolved befo
 - Which DCC source formats, texture-authoring tools, and large-file/version-control workflow are required for production?
 - Which assets require facial blendshapes, cloth, hair simulation, destructibility, or other features that materially change budget?
 - After representative on-device profiling, which provisional triangle, bone, material, texture, and VFX ceilings should become category-specific production limits?
+- Should the recommended construction interaction—select building or BUILD entry, inspect authoritative quote, then explicitly `Construct` or `Upgrade`—replace the current direct-spend BUILD buttons in the next implementation pass?
 
 Record answers here or in an approved subject-specific decision record, then link that record from this section.

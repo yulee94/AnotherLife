@@ -12,6 +12,11 @@
 
 This document defines how live kingdom buildings occupy stable locations, progress from an unbuilt plot through Level 10, and consume the approved four-realm construction motion system. It now also records the first gameplay-authoritative local construction transaction. Production rates, cross-building prerequisites, cancellation/refunds, network order identity, and unlisted final-model families remain outside this approval.
 
+The proposed player-facing selection, quote, affordability, action, and result
+experience is defined separately in
+`Live_Kingdom_Construction_UX_Design.md`. That UX remains design-only until its
+recommended interaction direction is approved.
+
 ## Approved decisions
 
 1. The Stonehold, Eldergrove, Crownlands, and Umbral prototypes are **realm construction-motion grammars**. They are not final models and are not one-to-one definitions for every building.
@@ -199,13 +204,15 @@ Quarry and Gold Mine use Wood/Stone at `40/60`; Barracks uses
 Stone/Wood/Gold at `55/30/15`. Other supported definitions already carry
 their own exact recipes for later UI exposure.
 
-### Major design-direction flags
+### Owner-approved product hold
 
-The following are deliberately not inferred from this slice and require an
-explicit owner decision before implementation:
+The following are explicitly held. They are not inferred, implemented, or
+shown as disabled/future controls. Reopening any item requires a separate
+owner decision:
 
 - cancellation or partial/full refunds after an accepted spend;
-- global builders, parallel-build limits, or queued orders across buildings;
+- builder rosters/capacity, parallel-build limits, or queued orders across
+  buildings;
 - prerequisite graphs, district locks, or Town Hall gating;
 - premium currency speedups or time purchases;
 - server-issued order IDs, cross-device conflict resolution, or live-service
@@ -252,11 +259,11 @@ loading-budget expansion. It is not a physical-device performance claim.
 
 ## Deferred production decisions
 
-- Cross-building prerequisites, production rates, cancellation, and refund rules.
-- Network order identity, cross-device conflict resolution, and any migration
-  required by a future server-authoritative construction record.
+- Production rates and building-yield presentation.
+- The held cancellation/refund, queue/builder, prerequisite, speedup, server
+  identity, demolition, and relocation families may be revisited only through
+  an explicit owner decision.
 - Whether a future authoritative order-progress snapshot should expose
   in-progress target-delta construction before gameplay confirms the level.
 - Which building definitions support which footprints and level-specific module deltas.
-- Whether player relocation is included in the first production kingdom release.
 - Final model source format, loading strategy, asset bundle/addressable policy, and device-tier thresholds.
