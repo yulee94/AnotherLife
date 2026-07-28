@@ -483,3 +483,65 @@ Avoid: cartoon, chibi, miniature-diorama cuteness, low-poly final look, bright g
 - Runtime boundary: isolated review prefabs and scene only; no save, economy, progression, catalog, build-setting, or live-kingdom binding
 - Handoff: `Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md`
 - Remaining runtime-candidate evidence: final topology and materials, LODs, metric/footprint validation, populated-district profiling, and representative Android/iOS device results
+
+## Approved Stonehold Town Hall Level 1/6/10 production source
+
+- File: `architecture_stonehold_townhall_level_progression_v001.png`
+- Status: Owner-approved Stonehold Town Hall source; Unity graybox gate passed
+- Generated: 2026-07-27
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Stonehold material and construction language
+- Source reference:
+  `architecture_stonehold_modular_workshop_detail_v001.png`
+- Dimensions: `1575 x 998`
+- Byte length: `2,156,529`
+- SHA-256:
+  `9d8d81db09c76b2dc32269bf102f4e2e0f7a9906d372892480b6fd9dd7e159f9`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-27: approve the candidate and continue into
+the deterministic Stonehold Town Hall Level `1`, `6`, and `10` Unity graybox.
+
+### Recorded Stonehold Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style and material-language reference only; preserve its Stonehold basalt, soot-aged iron, bronze repair, grounded masonry, dark presentation board, and production-readable rendering, but do not copy its workshop layout, forge bay, chimney, props, or exact geometry.
+Primary request: design the Stonehold Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is a practical public council hall in the center of a working settlement, not a castle keep, palace, throne room, temple, barracks, or workshop.
+Subject and progression: Level 1 is a complete compact weatherproof public hall with a broad low basalt mass, one clearly centered clipped-stone entrance arch facing the viewer, safe civic steps, two grounded front piers, heavy correctly pitched roof plates, drainage, and one restrained warm interior slit. Level 6 keeps that exact foundation and entrance, then adds two low civic wings, paired load-bearing buttress towers, an iron-locked continuous lintel path, sheltered records/service galleries, rear circulation, and a stronger assembly-hall roofline. Level 10 keeps every earlier module and adds the grounded Oathstone Crown: a stepped central belfry/crown physically carried by the established central wall and roof load path, one fixed iron oath plate, and one narrow contained amber slit. The capstone is architectural and static, never a forge chimney or floating crown.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera and scale, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include a small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, realistic grounded construction, large readable shapes, mobile-friendly simplification, crisp edges, restrained surface detail.
+Lighting/mood: neutral studio/gameplay lighting with readable graphite midtones; localized warm amber only at the entrance slit; no cinematic fog hiding geometry.
+Color palette: dark basalt, charcoal iron, dark timber, sparse worn bronze repair, pale ash mortar, tiny contained forge-amber accent.
+Materials/textures: believable block masonry, heavy iron locks and roof ribs, restrained age and repair. Roofs must be physically correct: ridges are the highest lines, planes slope downward to lower eaves, all roof plates sit on visible walls or brackets. No inverted, concave, upside-down, or unsupported roof forms.
+Constraints: preserve a fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability from silhouette; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: workshop tools, forge bay, large chimney, throne, castle keep towers, cathedral spires, spike fields, floating pieces, levitation, glowing cracks, broad emission, portals, animated mechanisms, weapons, giant bell, exaggerated fantasy ornament, miniature-diorama cuteness, inverted roofs.
+```
+
+### Source review
+
+- Owner approval: explicit continuation after viewing the candidate
+- Protected reads: broad civic mass, centered clipped entrance, correct roof
+  pitch, cumulative low wings, and grounded Oathstone Crown
+- Production cautions: retain civic scale below the protected settlement
+  landmark; keep the crown physically carried and static; suppress fine iron
+  and masonry breakup before weakening the primary silhouette
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `91 / 100`
+- Static mobile-safety result: `94 / 100`
+- Renderer counts: `36`, `76`, and `116`
+- Focused verification: `15 / 15` Stonehold Town Hall EditMode tests passed
+- Platform verification: Android Architecture `148 / 148`; iOS Architecture
+  `148 / 148`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Stonehold_TownHall_Level_Blockout_Handoff.md`

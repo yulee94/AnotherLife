@@ -1,6 +1,6 @@
 # Four-Realm Town Hall Production Contract
 
-**Status:** Candidate production direction for owner review
+**Status:** Shared production direction approved; Stonehold graybox gate passed
 
 **Date:** 2026-07-27
 
@@ -17,6 +17,21 @@ family after Workshop parity. It closes the shared scope needed to begin
 graybox work without inventing economy, save, timer, quest, worker, or
 narrative rules. Exact final mesh measurements remain subject to the first
 Stonehold graybox and mobile camera review.
+
+## Approved Stonehold source
+
+- Source sheet:
+  `Assets/AL/Art/Architecture/ConceptSheets/architecture_stonehold_townhall_level_progression_v001.png`
+- Owner decision: approved on 2026-07-27 with direction to continue.
+- Approved anchors: Level `1`, `6`, and `10`; one fixed center entrance and
+  footprint; correctly pitched heavy roofs; cumulative low civic wings; and
+  the grounded static Oathstone Crown.
+- Authority boundary: source-only visual direction. It does not enter the
+  runtime catalog or establish gameplay costs, duration, save data, economy,
+  final mesh topology, collider implementation, LOD thresholds, or device
+  performance.
+- Graybox handoff:
+  `Stonehold_TownHall_Level_Blockout_Handoff.md`
 
 ## Major design-direction decisions
 
