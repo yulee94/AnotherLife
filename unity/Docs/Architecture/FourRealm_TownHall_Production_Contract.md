@@ -1,8 +1,8 @@
 # Four-Realm Town Hall Production Contract
 
 **Status:** Shared production direction approved; all four realm source designs
-and Level `1`/`6`/`10` graybox gates passed; Stonehold final production and
-live-binding proof passed
+and Level `1`/`6`/`10` graybox gates passed; Stonehold and Eldergrove final
+production and live-binding proofs passed
 
 **Date:** 2026-07-28
 
@@ -43,12 +43,15 @@ camera review and representative-device profiling.
 - Approved anchors: Level `1`, `6`, and `10`; one fixed center entrance and
   open civic court; exactly three primary authored root arches; cumulative
   unequal galleries; and the grounded static Open Crown Arbor.
-- Authority boundary: source-only visual direction. It does not enter the
-  runtime catalog or establish gameplay costs, duration, save data, economy,
-  final mesh topology, collider implementation, LOD thresholds, or device
-  performance.
+- Production status: final dimensions, cumulative topology, Town Hall-specific
+  atlas, exactly two colliders, four LOD bands, Open Crown Arbor, and exact
+  `RealmId.Eldergrove + BuildingId.TownHall` live binding now pass. This does
+  not establish gameplay costs, duration, save data, economy, or measured
+  device performance.
 - Graybox handoff:
   `Eldergrove_TownHall_Level_Blockout_Handoff.md`
+- Final handoff:
+  `Eldergrove_TownHall_Final_Model_And_Runtime_Binding.md`
 
 ## Approved Crownlands source
 
@@ -330,25 +333,25 @@ work around those blockers.
 
 ## Production sequence
 
-Stonehold now proves the final shared implementation pattern:
+Stonehold and Eldergrove now prove the final shared implementation pattern:
 
 - ten cumulative deltas at LOD0–2 and three far milestones at LOD3;
 - one Town Hall-specific RGB atlas plus one localized opaque accent material;
 - exactly two root box colliders and stable behavior-free anchors;
-- direct `RealmId.Stonehold + BuildingId.TownHall` catalog identity;
+- direct exact realm plus `BuildingId.TownHall` catalog identity;
 - the realm motion profile reused only as construction motion grammar;
 - confirmed gameplay level as the sole visual authority.
 
-Eldergrove, Crownlands, and Umbral remain separately gated. Their production
-models must translate their approved silhouettes rather than copying
-Stonehold geometry or materials.
+Crownlands and Umbral remain separately gated. Their production models must
+translate their approved silhouettes rather than copying Stonehold or
+Eldergrove geometry or materials.
 
 ## Deferred decisions
 
-- Final measured dimensions for Eldergrove, Crownlands, and Umbral after each
-  production camera pass.
+- Final measured dimensions for Crownlands and Umbral after each production
+  camera pass.
 - Final production-model surface sheets and exact surface wear beyond the
-  current Stonehold atlas proof.
+  current Stonehold and Eldergrove atlas proofs.
 - Final damage, disabled, repair, selected, and unavailable art.
 - Bounded civic workers and ambient activity scheduling.
 - Measured scene-residency threshold for replacing the packaged Resources

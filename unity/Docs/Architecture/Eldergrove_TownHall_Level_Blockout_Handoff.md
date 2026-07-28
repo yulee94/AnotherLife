@@ -1,6 +1,7 @@
 # Eldergrove Town Hall Level Blockout Handoff
 
-**Status:** Graybox proof passed; final production model not started
+**Status:** Graybox proof passed; final production model and live binding
+implemented
 
 **Date:** 2026-07-27
 
@@ -9,10 +10,10 @@
 **Stable slot identity:** `kingdom.slot.town-hall`
 
 This handoff records the owner-approved Eldergrove Town Hall source and the
-deterministic Level `1`, `6`, and `10` Unity proof. It validates the shared
-Town Hall spatial and visual contracts without entering the runtime catalog or
-inventing gameplay progression, economy, save, timer, quest, worker, or
-narrative authority.
+deterministic Level `1`, `6`, and `10` Unity proof. The subsequent final model
+now enters the runtime catalog under the same spatial and visual contracts
+without inventing gameplay progression, economy, save, timer, quest, worker,
+or narrative authority.
 
 ## Review assets
 
@@ -31,6 +32,9 @@ narrative authority.
 
 The review scene is excluded from build settings. The prefabs have no
 dependency on the source concept sheet.
+
+The final production implementation is recorded in
+`Eldergrove_TownHall_Final_Model_And_Runtime_Binding.md`.
 
 ## Major design-direction decisions
 
@@ -106,30 +110,25 @@ The static mobile-safety score is:
 | **Total** | **`94 / 100`** |
 
 The score applies to graybox structure, not final runtime performance. The
-review assets are not bound into the packaged catalog, so this change adds no
-live district draw calls, texture residency, save data, or upgrade commands.
+review assets remain unbound; the separately validated final production prefab
+now supplies the live visual binding without adding save data or upgrade
+commands.
 
-## Open production work
+## Production follow-through
 
-- Author final Level `1`–`10` organic topology while preserving exactly three
-  primary load-bearing arches and the proven cumulative silhouettes.
-- Create the Eldergrove Town Hall atlas and restrained localized accent
-  treatment; moss, leaves, and emission must remain nonessential.
-- Replace review volume previews with exactly two final root colliders.
-- Author the approved LOD0–3 hierarchy and validate the Town Hall triangle,
-  renderer, and material ceilings.
+- Final Level `1`–`10` topology, the exactly-three-arch load path, Town
+  Hall-specific RGB atlas, non-emissive localized accent, exactly two root
+  colliders, four LOD bands, and exact live catalog binding are complete.
 - Measure compact iPhone and representative Android framing in the live kingdom
   scene.
 - Profile populated-district memory, draw calls, triangles, texture residency,
   and package-size impact on representative devices.
-- Bind the final model directly to confirmed `BuildingState.Level` only after
-  the production model and catalog entry pass.
 - Keep live upgrade commands blocked on the open progression, economy, save,
   and game-data authority work.
 
 ## Realm sequence status
 
 The Crownlands and Umbral Town Hall source translations and graybox gates have
-now passed under the same shared civic ladder and center-slot contract. All
-four realm proofs are complete; final production-model and live-binding work
-remains separately gated.
+passed under the same shared civic ladder and center-slot contract. Stonehold
+and Eldergrove final production models and live bindings now pass; Crownlands
+and Umbral remain separately gated.

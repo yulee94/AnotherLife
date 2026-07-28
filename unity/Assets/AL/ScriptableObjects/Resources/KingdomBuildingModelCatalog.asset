@@ -53,3 +53,11 @@ MonoBehaviour:
     strategicBoardScale: 0.09
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.eldergrove.townhall.production.v1
+    realmId: 2
+    buildingId: TownHall
+    prefab: {fileID: 6718489068813069786, guid: 64552283a5bd040f08d3f41d6a94ca5a, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 6b478526cd4084f87a7b34095d9cc1cd, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10
