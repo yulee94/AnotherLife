@@ -11,13 +11,18 @@
 **Scope:** Four-realm settlement design source, shared construction-state
 runtime, four realm-motion grayboxes, all four Workshop Level 1–10 production
 models and direct live-kingdom bindings, plus all four Town Hall Level
-`1`/`6`/`10` production-direction grayboxes
+`1`/`6`/`10` production-direction grayboxes and the Stonehold Town Hall final
+production model and live binding
 
 ## Outcome
 
 The approved architecture package is platform-neutral and safe to share with Android and iOS work. The shipped runtime receives no concept-sheet or preview-video dependency, all prototype and production-review scenes remain outside Player build settings, and the shared animation and production-model code uses only Unity APIs supported by Android and iOS Player builds.
 
-This is a static production-readiness statement, not final-device performance approval. The Eldergrove, Stonehold, Crownlands, and Umbral Workshops now supply production meshes, atlas materials, LODs, colliders, and direct binding; simultaneous-building density and representative devices still require profiling.
+This is a static production-readiness statement, not final-device performance
+approval. The Eldergrove, Stonehold, Crownlands, and Umbral Workshops plus the
+Stonehold Town Hall now supply production meshes, atlas materials, LODs,
+colliders, and direct binding; simultaneous-building density and representative
+devices still require profiling.
 
 ## Applied mobile optimizations
 
@@ -42,14 +47,19 @@ This is a static production-readiness statement, not final-device performance ap
   structure and measures `2,400 / 1,420 / 828 / 316` triangles across LOD0–3.
 - The Umbral live production model uses the same cumulative renderer structure
   and measures `1,476 / 816 / 396 / 180` triangles across LOD0–3.
+- The Stonehold Town Hall final model stays beneath the larger civic ceilings
+  at `1,368 / 1,052 / 684 / 564` triangles and `10 / 10 / 10 / 3`
+  renderers across LOD0–3.
 - Each production family uses one non-readable mipmapped RGB 1024 atlas, one
   localized opaque accent material, and exactly two root box colliders.
 - The packaged model catalog loads once per city layout engine and binds the
   correct realm prefab from stable `RealmId + BuildingId`; no visual level is
   persisted.
-- The packaged catalog also binds one realm motion profile per Workshop. A
-  newly confirmed adjacent level animates only its new delta, uses at most four
-  cached LOD transforms, and sleeps after at most `1.25` seconds.
+- The packaged catalog also binds one compatible realm motion profile per
+  production entry. Stonehold Town Hall deliberately reuses Stonehold's motion
+  grammar without reusing Workshop geometry or activity. A newly confirmed
+  adjacent level animates only its new delta, uses at most four cached LOD
+  transforms, and sleeps after at most `1.25` seconds.
 - Initial load, stream-in, reconnect, offline reconciliation, same-level
   refresh, and multi-level jump remain settled and do not replay motion.
 - Each prototype uses at most one localized, shadowless activity light.
@@ -59,6 +69,9 @@ This is a static production-readiness statement, not final-device performance ap
 - Stonehold, Eldergrove, Crownlands, and Umbral Town Hall grayboxes keep fixed
   anchors, cumulative level groups, opaque instanced review materials, no
   runtime behavior, and no concept-sheet prefab dependency.
+- The Stonehold Town Hall final model keeps the same fixed center slot and
+  anchors, one Town Hall-specific RGB atlas, two opaque materials, two root box
+  colliders, and no source-sheet dependency.
 
 ## Android and iOS compatibility boundary
 
@@ -92,6 +105,12 @@ Xcode component service no longer offers iOS 15.0 through 15.5 for direct
 download on this installation. Until an archived compatible runtime or
 physical iOS 15 device is attached, the iOS 15 claim is limited to deployment-
 target compilation and native linking; it is not yet an iOS 15 runtime pass.
+
+The Stonehold Town Hall production change received a fresh Unity iOS Player
+export and an Xcode 26.6 unsigned ARM64 device build. Every generated
+application target linked with deployment target `15.0`. This proves compile
+and native-link compatibility; it does not substitute for an iOS `15` runtime
+launch.
 
 ## Static readiness score
 
@@ -129,16 +148,21 @@ and Umbral Town Hall blockout suites verify:
   multi-level reconciliation;
 - one-delta adjacent-level motion, immediate reduced-motion settling, and
   automatic sleep after the bounded transition.
+- the Stonehold Town Hall final atlas, two-material ceiling, two root
+  colliders, four LOD bands, stable anchors, exact catalog identity, Level `0`
+  reservation, upgrade hold, and one-shot adjacent confirmed-level motion.
 
 The focused Eldergrove production suite passes `18 / 18` and the focused
 Stonehold production suite passes `19 / 19`. The Crownlands production suite
 passes `19 / 19`, and the Umbral production suite passes `19 / 19`. The
 focused confirmed-level transition suite passes `14 / 14`. The Umbral Town
-Hall suite passes `17 / 17`. The expanded Architecture suite passes
-`200 / 200` in Unity 2022.3.62f3 while actively targeting Android and again
-while actively targeting iOS. All four final Workshop models and every Town
-Hall graybox still require populated-kingdom profiling on representative
-Android and iOS devices before measured performance approval.
+Hall suite passes `17 / 17`. The focused Stonehold Town Hall final production
+suite passes `21 / 21`. The expanded Architecture suite passes `221 / 221` in
+Unity 2022.3.62f3 while actively targeting Android and again while actively
+targeting iOS. All four final Workshop models, the Stonehold final Town Hall,
+and the remaining Town Hall grayboxes still require populated-kingdom
+profiling on representative Android and iOS devices before measured
+performance approval.
 
 ## Production handoff
 

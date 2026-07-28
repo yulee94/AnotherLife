@@ -1,7 +1,8 @@
 # Four-Realm Town Hall Production Contract
 
 **Status:** Shared production direction approved; all four realm source designs
-and Level `1`/`6`/`10` graybox gates passed
+and Level `1`/`6`/`10` graybox gates passed; Stonehold final production and
+live-binding proof passed
 
 **Date:** 2026-07-28
 
@@ -327,10 +328,27 @@ work around those blockers.
 - populated-kingdom physical-device profiling remains explicitly open until
   measured.
 
+## Production sequence
+
+Stonehold now proves the final shared implementation pattern:
+
+- ten cumulative deltas at LOD0–2 and three far milestones at LOD3;
+- one Town Hall-specific RGB atlas plus one localized opaque accent material;
+- exactly two root box colliders and stable behavior-free anchors;
+- direct `RealmId.Stonehold + BuildingId.TownHall` catalog identity;
+- the realm motion profile reused only as construction motion grammar;
+- confirmed gameplay level as the sole visual authority.
+
+Eldergrove, Crownlands, and Umbral remain separately gated. Their production
+models must translate their approved silhouettes rather than copying
+Stonehold geometry or materials.
+
 ## Deferred decisions
 
-- Final measured dimensions after the Stonehold graybox.
-- Final production-model surface sheets and exact surface wear.
+- Final measured dimensions for Eldergrove, Crownlands, and Umbral after each
+  production camera pass.
+- Final production-model surface sheets and exact surface wear beyond the
+  current Stonehold atlas proof.
 - Final damage, disabled, repair, selected, and unavailable art.
 - Bounded civic workers and ambient activity scheduling.
 - Measured scene-residency threshold for replacing the packaged Resources

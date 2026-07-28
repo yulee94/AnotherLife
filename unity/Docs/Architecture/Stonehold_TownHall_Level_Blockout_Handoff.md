@@ -1,6 +1,7 @@
 # Stonehold Town Hall Level Blockout Handoff
 
-**Status:** Graybox proof passed; final production model not started
+**Status:** Graybox proof passed; final production model and live binding
+implemented
 
 **Date:** 2026-07-27
 
@@ -105,23 +106,25 @@ The score applies to graybox structure, not final runtime performance. The
 review assets are not bound into the packaged catalog, so this change adds no
 live district draw calls, texture residency, save data, or upgrade commands.
 
-## Open production work
+## Production continuation
 
-- Author final Level `1`–`10` topology at the approved LOD ceilings.
-- Create the Town Hall-specific Stonehold atlas and localized accent treatment.
-- Replace review volume previews with exactly two final root colliders.
-- Measure compact iPhone and representative Android framing in the live kingdom
-  scene.
-- Profile populated-district memory, draw calls, triangles, texture residency,
-  and package-size impact on representative devices.
-- Bind the final model directly to confirmed `BuildingState.Level` only after
-  the production model and catalog entry pass.
-- Keep live upgrade commands blocked on the open progression, economy, save,
+The final production model and direct live binding are recorded in
+`Stonehold_TownHall_Final_Model_And_Runtime_Binding.md`.
+
+- Final Level `1`–`10` topology, atlas, two root colliders, four LOD bands,
+  stable anchors, and exact Stonehold + Town Hall catalog identity are complete.
+- The production model binds only to confirmed `BuildingState.Level`.
+- Physical populated-district profiling remains open on representative Android
+  and physical iOS `15` devices.
+- Damage, repair, selected, disabled, unavailable, and bounded civic-activity
+  art remain open.
+- Live upgrade commands remain blocked on the open progression, economy, save,
   and game-data authority work.
 
 ## Realm sequence status
 
 The Eldergrove, Crownlands, and Umbral Town Hall source translations and
 graybox gates have now passed under the same shared civic ladder and center-
-slot contract. All four realm proofs are complete; final production-model and
-live-binding work remains separately gated.
+slot contract. All four realm proofs are complete. Stonehold now passes the
+first final Town Hall production and live-binding gate; Eldergrove,
+Crownlands, and Umbral remain separately gated.

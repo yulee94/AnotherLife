@@ -45,3 +45,11 @@ MonoBehaviour:
     strategicBoardScale: 0.12
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.stonehold.townhall.production.v1
+    realmId: 1
+    buildingId: TownHall
+    prefab: {fileID: 6390210644148224361, guid: 8efaf25037c3b444f86bfe62ea193ed7, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: f16c72f88ea9045b09dbeeb2e9f9e25a, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10
