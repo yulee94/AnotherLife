@@ -125,6 +125,6 @@ The final production model and direct live binding are recorded in
 
 The Eldergrove, Crownlands, and Umbral Town Hall source translations and
 graybox gates have now passed under the same shared civic ladder and center-
-slot contract. All four realm proofs are complete. Stonehold now passes the
-first final Town Hall production and live-binding gate; Eldergrove,
-Crownlands, and Umbral remain separately gated.
+slot contract. All four realm proofs are complete. Stonehold, Eldergrove, and
+Crownlands now pass final Town Hall production and live-binding gates; Umbral
+remains separately gated.

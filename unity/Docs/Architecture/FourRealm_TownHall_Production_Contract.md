@@ -1,8 +1,8 @@
 # Four-Realm Town Hall Production Contract
 
 **Status:** Shared production direction approved; all four realm source designs
-and Level `1`/`6`/`10` graybox gates passed; Stonehold and Eldergrove final
-production and live-binding proofs passed
+and Level `1`/`6`/`10` graybox gates passed; Stonehold, Eldergrove, and
+Crownlands final production and live-binding proofs passed
 
 **Date:** 2026-07-28
 
@@ -62,12 +62,15 @@ camera review and representative-device profiling.
 - Approved anchors: Level `1`, `6`, and `10`; one fixed axial entrance and
   broad civic mass; cumulative balanced wings; exactly two lower grounded
   civic towers; and the shallow static Concord Meridian.
-- Authority boundary: source-only visual direction. It does not enter the
-  runtime catalog or establish gameplay costs, duration, save data, economy,
-  final mesh topology, collider implementation, LOD thresholds, or device
-  performance.
+- Production status: final dimensions, cumulative topology, Town Hall-specific
+  atlas, exactly two colliders, four LOD bands, Concord Meridian, and exact
+  `RealmId.Crownlands + BuildingId.TownHall` live binding now pass. This does
+  not establish gameplay costs, duration, save data, economy, or measured
+  device performance.
 - Graybox handoff:
   `Crownlands_TownHall_Level_Blockout_Handoff.md`
+- Final handoff:
+  `Crownlands_TownHall_Final_Model_And_Runtime_Binding.md`
 
 ## Approved Umbral source
 
@@ -188,9 +191,9 @@ Only approved art may approach the fixed slot boundary.
 - Level `5` establishes the central civic meridian and balanced side galleries
   without turning the building into a palace.
 - Working Level `10` direction: **Concord Meridian** — two grounded civic
-  towers support one fixed silver meridian arch and a restrained central dial.
-  It is not a clock mechanic, lightning device, royal throne, levitating ring,
-  or continuously rotating instrument.
+  towers support one fixed shallow silver meridian arch and one solid unmarked
+  apex block. It is not a clock mechanic, lightning device, royal throne,
+  levitating ring, royal symbol, or continuously rotating instrument.
 
 ### Umbral
 
@@ -256,7 +259,7 @@ should prefer LOD1; LOD0 is for close inspection.
 
 Expanding the packaged catalog to the Town Hall family does not by itself
 authorize Addressables, AssetBundles, remote delivery, or a second loading
-service. The existing `Resources` catalog remains the candidate binding until
+service. The existing `Resources` catalog remains the loading boundary until
 measured residency or package-size evidence justifies a change.
 
 ## Colliders, anchors, and occlusion
@@ -333,7 +336,8 @@ work around those blockers.
 
 ## Production sequence
 
-Stonehold and Eldergrove now prove the final shared implementation pattern:
+Stonehold, Eldergrove, and Crownlands now prove the final shared
+implementation pattern:
 
 - ten cumulative deltas at LOD0–2 and three far milestones at LOD3;
 - one Town Hall-specific RGB atlas plus one localized opaque accent material;
@@ -342,16 +346,15 @@ Stonehold and Eldergrove now prove the final shared implementation pattern:
 - the realm motion profile reused only as construction motion grammar;
 - confirmed gameplay level as the sole visual authority.
 
-Crownlands and Umbral remain separately gated. Their production models must
-translate their approved silhouettes rather than copying Stonehold or
-Eldergrove geometry or materials.
+Umbral remains separately gated. Its production model must translate its
+approved silhouette rather than copying Stonehold, Eldergrove, or Crownlands
+geometry or materials.
 
 ## Deferred decisions
 
-- Final measured dimensions for Crownlands and Umbral after each production
-  camera pass.
+- Final measured dimensions for Umbral after its production camera pass.
 - Final production-model surface sheets and exact surface wear beyond the
-  current Stonehold and Eldergrove atlas proofs.
+  current Stonehold, Eldergrove, and Crownlands atlas proofs.
 - Final damage, disabled, repair, selected, and unavailable art.
 - Bounded civic workers and ambient activity scheduling.
 - Measured scene-residency threshold for replacing the packaged Resources

@@ -61,3 +61,11 @@ MonoBehaviour:
     strategicBoardScale: 0.09
     minimumLevel: 1
     maximumLevel: 10
+  - modelId: building.crownlands.townhall.production.v1
+    realmId: 3
+    buildingId: TownHall
+    prefab: {fileID: 133079770350490369, guid: 40d5f7687fed640fd8c0d4b1868ff0ef, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 7d438dcf308ea4e1d943221428f1d250, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10

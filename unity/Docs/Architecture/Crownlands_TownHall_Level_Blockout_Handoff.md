@@ -1,6 +1,7 @@
 # Crownlands Town Hall Level Blockout Handoff
 
-**Status:** Graybox proof passed; final production model not started
+**Status:** Graybox proof passed; final production model and live binding now
+implemented
 
 **Date:** 2026-07-28
 
@@ -9,8 +10,9 @@
 **Stable slot identity:** `kingdom.slot.town-hall`
 
 This handoff records the owner-approved Crownlands Town Hall source and the
-deterministic Level `1`, `6`, and `10` Unity proof. It validates the shared
-Town Hall spatial and visual contracts without entering the runtime catalog or
+deterministic Level `1`, `6`, and `10` Unity proof that preceded production.
+The final model now enters the runtime catalog under the separate
+`Crownlands_TownHall_Final_Model_And_Runtime_Binding.md` contract without
 inventing gameplay progression, economy, save, timer, quest, worker, or
 narrative authority.
 
@@ -108,27 +110,32 @@ The score applies to graybox structure, not final runtime performance. The
 review assets are not bound into the packaged catalog, so this change adds no
 live district draw calls, texture residency, save data, or upgrade commands.
 
-## Open production work
+## Production closure and remaining validation
 
-- Author final Level `1`–`10` topology while preserving the broad civic mass,
-  clipped entrance, paired grounded towers, and proven cumulative silhouettes.
-- Create the Crownlands Town Hall atlas and restrained localized accent
-  treatment; blue or violet emission must remain nonessential.
-- Replace review volume previews with exactly two final root colliders.
-- Author the approved LOD0–3 hierarchy and validate the Town Hall triangle,
-  renderer, and material ceilings.
+The final production pass now supplies:
+
+- final Level `1`–`10` cumulative topology preserving the broad civic mass,
+  clipped entrance, paired grounded towers, and proven silhouettes;
+- one Town Hall RGB atlas plus one restrained non-emissive blue accent;
+- exactly two final root box colliders;
+- four LOD bands at `1,584 / 1,412 / 924 / 652` triangles with
+  `10 / 10 / 10 / 3` renderers;
+- exact `RealmId.Crownlands + BuildingId.TownHall` catalog binding to
+  `building.crownlands.townhall.production.v1`;
+- direct confirmed-level presentation plus session-only
+  `crownlands.stormwright` construction motion.
+
+Still required:
+
 - Measure compact iPhone and representative Android framing in the live kingdom
   scene.
 - Profile populated-district memory, draw calls, triangles, texture residency,
   and package-size impact on representative devices.
-- Bind the final model directly to confirmed `BuildingState.Level` only after
-  the production model and catalog entry pass.
 - Keep live upgrade commands blocked on the open progression, economy, save,
   and game-data authority work.
 
 ## Realm sequence status
 
-The Umbral Town Hall source translation and graybox gate have now passed under
-the same shared civic ladder and center-slot contract. All four realm proofs
-are complete; final production-model and live-binding work remains separately
-gated.
+All four realm graybox proofs are complete. Stonehold, Eldergrove, and
+Crownlands now also have final production models and direct live bindings;
+Umbral remains the final Town Hall production-model slice.
