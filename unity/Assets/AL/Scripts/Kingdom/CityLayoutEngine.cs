@@ -2,8 +2,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using AL.Core;
-using AL.Data.Definitions;
-using AL.Data.Runtime;
 
 namespace AL.Kingdom
 {
@@ -15,7 +13,15 @@ namespace AL.Kingdom
 
         public static event System.Action<string> OnBuildingSelected;
 
-        private Dictionary<Vector2Int, BuildingState> _occupiedTiles = new Dictionary<Vector2Int, BuildingState>();
+        private static readonly int ColorProperty = Shader.PropertyToID("_Color");
+        private static readonly int BaseColorProperty = Shader.PropertyToID("_BaseColor");
+        private static readonly int MetallicProperty = Shader.PropertyToID("_Metallic");
+        private static readonly int GlossinessProperty = Shader.PropertyToID("_Glossiness");
+        private static readonly int EmissionColorProperty = Shader.PropertyToID("_EmissionColor");
+        private static Material _sharedEmissiveMaterial;
+
+        private readonly Dictionary<Vector2Int, KingdomBuildingPresentation> _occupiedTiles =
+            new Dictionary<Vector2Int, KingdomBuildingPresentation>();
         private Transform _visualRoot;
         private RealmId _activeRealmId;
 
@@ -27,112 +33,122 @@ namespace AL.Kingdom
             return new Vector3(x, 0, z);
         }
 
-        public void AutoPlaceBuildings(RealmId realmId, List<BuildingState> buildings)
+        public void AutoPlaceBuildings(
+            RealmId realmId,
+            IReadOnlyList<KingdomBuildingPresentation> buildings)
         {
             _activeRealmId = realmId;
             _occupiedTiles.Clear();
             ClearExistingBuildingVisuals();
-            int index = 0;
 
-            foreach (var b in buildings)
+            if (buildings == null)
             {
-                if (b == null || string.IsNullOrWhiteSpace(b.BuildingId))
+                return;
+            }
+
+            foreach (KingdomBuildingPresentation building in buildings)
+            {
+                if (building?.Slot == null || building.Slot.RealmId != realmId)
                 {
                     continue;
                 }
 
-                Vector2Int pos = CalculateRealmPosition(realmId, index++);
-                _occupiedTiles[pos] = b;
+                Vector2Int pos = building.Slot.GridPosition;
+                if (_occupiedTiles.ContainsKey(pos))
+                {
+                    Debug.LogError(
+                        $"Duplicate kingdom slot coordinate {pos} in {KingdomBuildingLayoutCatalog.LayoutVersion}.");
+                    continue;
+                }
+
+                _occupiedTiles.Add(pos, building);
 
                 SpawnRoadVisual(pos);
-                SpawnBuildingVisual(b, pos);
+                SpawnBuildingVisual(building, pos);
             }
         }
 
-        private Vector2Int CalculateRealmPosition(RealmId realmId, int index)
+        private void SpawnBuildingVisual(
+            KingdomBuildingPresentation presentation,
+            Vector2Int pos)
         {
-            return realmId switch
-            {
-                RealmId.Stonehold => CalculateCircular(index),
-                RealmId.Eldergrove => CalculateOrganic(index),
-                RealmId.Crownlands => CalculateGrid(index),
-                RealmId.Umbral => CalculateDivergent(index),
-                _ => new Vector2Int(index, index)
-            };
-        }
-
-        private Vector2Int CalculateCircular(int i)
-        {
-            float angle = i * (Mathf.PI * 2 / 15);
-            float radius = (i < 5) ? 2 : (i < 10 ? 5 : 8);
-            return new Vector2Int((int)(Mathf.Cos(angle) * radius), (int)(Mathf.Sin(angle) * radius));
-        }
-
-        private Vector2Int CalculateOrganic(int i)
-        {
-            Random.InitState(i * 123);
-            return new Vector2Int(Random.Range(-10, 10), Random.Range(-10, 10));
-        }
-
-        private Vector2Int CalculateGrid(int i)
-        {
-            return new Vector2Int((i % 4) * 3, (i / 4) * 3);
-        }
-
-        private Vector2Int CalculateDivergent(int i)
-        {
-            return new Vector2Int(i * 2, (i % 2 == 0) ? i : -i);
-        }
-
-        private void SpawnBuildingVisual(BuildingState state, Vector2Int pos)
-        {
-            if (state == null)
+            if (presentation?.Slot == null)
             {
                 return;
             }
 
             Transform root = EnsureVisualRoot();
             Vector3 worldPosition = GridToWorld(pos);
-            float height = Mathf.Clamp(0.72f + state.Level * 0.08f, 0.72f, 1.85f);
-            Color bodyColor = GetBuildingBodyColor(state.BuildingId);
+            int level = presentation.ConfirmedLevel;
+            float height = Mathf.Clamp(0.72f + level * 0.08f, 0.72f, 1.85f);
+            Color bodyColor = presentation.Status == KingdomBuildingPresentationStatus.InvalidState
+                ? new Color(0.56f, 0.16f, 0.18f)
+                : GetBuildingBodyColor(presentation.BuildingId);
             Color accentColor = GetRealmAccent(_activeRealmId);
 
-            var buildingRoot = new GameObject($"Building_{state.BuildingId}");
+            var buildingRoot = new GameObject($"Building_{presentation.Slot.SlotId}");
             buildingRoot.transform.SetParent(root, false);
             buildingRoot.transform.position = worldPosition;
+            buildingRoot.transform.rotation = Quaternion.Euler(
+                0f,
+                presentation.Slot.RotationQuarterTurns * 90f,
+                0f);
 
-            CreateDistrictFootprint(buildingRoot.transform, state, bodyColor, accentColor);
+            CreateDistrictFootprint(buildingRoot.transform, presentation, bodyColor, accentColor);
+            if (!presentation.IsBuilt)
+            {
+                CreateUnbuiltPlot(
+                    buildingRoot.transform,
+                    presentation,
+                    bodyColor,
+                    accentColor);
+                CreateLevelBadge(
+                    buildingRoot.transform,
+                    presentation,
+                    0.18f,
+                    accentColor);
+                return;
+            }
+
             var baseObject = CreatePrimitive(buildingRoot.transform, "Base", PrimitiveType.Cube, new Vector3(0f, height * 0.5f, 0f), new Vector3(TileSize * 0.88f, height, TileSize * 0.88f), bodyColor);
-            baseObject.AddComponent<KingdomBuildingSelectable>().Configure(state.BuildingId, state.Level, bodyColor, accentColor, state.IsUpgrading, GetUpgradeRemainingSeconds(state));
+            baseObject.AddComponent<KingdomBuildingSelectable>().Configure(
+                presentation.BuildingId,
+                level,
+                bodyColor,
+                accentColor,
+                presentation.IsUpgrading,
+                GetUpgradeRemainingSeconds(presentation),
+                presentation.DiagnosticCode);
             CreatePrimitive(buildingRoot.transform, "Trim", PrimitiveType.Cube, new Vector3(0f, height + 0.04f, 0f), new Vector3(TileSize * 0.98f, 0.10f, TileSize * 0.98f), accentColor, null, 0.04f, 0.58f, accentColor * 0.06f);
-            CreateWindowDetails(buildingRoot.transform, height, accentColor, state.BuildingId);
-            CreateBuildingBanners(buildingRoot.transform, height, accentColor, state.BuildingId);
+            CreateWindowDetails(buildingRoot.transform, height, accentColor, presentation.BuildingId);
+            CreateBuildingBanners(buildingRoot.transform, height, accentColor, presentation.BuildingId);
 
-            if (state.BuildingId.Contains("Hall"))
+            if (presentation.BuildingId.Contains("Hall"))
             {
                 CreateTownHallDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Barracks"))
+            else if (presentation.BuildingId.Contains("Barracks"))
             {
                 CreateBarracksDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Farm"))
+            else if (presentation.BuildingId.Contains("Farm"))
             {
                 CreateFarmDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Lumber"))
+            else if (presentation.BuildingId.Contains("Lumber"))
             {
                 CreateLumberDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Mana"))
+            else if (presentation.BuildingId.Contains("Mana"))
             {
                 CreateManaShrineDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Gold"))
+            else if (presentation.BuildingId.Contains("Gold"))
             {
                 CreateGoldMineDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
-            else if (state.BuildingId.Contains("Mine") || state.BuildingId.Contains("Quarry"))
+            else if (presentation.BuildingId.Contains("Mine") ||
+                     presentation.BuildingId.Contains("Quarry"))
             {
                 CreateMineDetails(buildingRoot.transform, height, bodyColor, accentColor);
             }
@@ -141,12 +157,16 @@ namespace AL.Kingdom
                 CreatePrimitive(buildingRoot.transform, "Roof", PrimitiveType.Cube, new Vector3(0f, height + 0.18f, 0f), new Vector3(TileSize * 0.68f, 0.22f, TileSize * 0.68f), Color.Lerp(bodyColor, accentColor, 0.35f), new Vector3(0f, 45f, 0f), 0.02f, 0.46f);
             }
 
-            if (state.IsUpgrading)
+            if (presentation.IsUpgrading)
             {
-                CreateUpgradeIndicator(buildingRoot.transform, height, accentColor, GetUpgradeRemainingSeconds(state));
+                CreateUpgradeIndicator(
+                    buildingRoot.transform,
+                    height,
+                    accentColor,
+                    GetUpgradeRemainingSeconds(presentation));
             }
 
-            CreateLevelBadge(buildingRoot.transform, state, height, accentColor);
+            CreateLevelBadge(buildingRoot.transform, presentation, height, accentColor);
         }
 
         private void SpawnRoadVisual(Vector2Int pos)
@@ -177,15 +197,80 @@ namespace AL.Kingdom
             rightEdge.transform.rotation = road.transform.rotation;
         }
 
-        private void CreateDistrictFootprint(Transform parent, BuildingState state, Color bodyColor, Color accentColor)
+        private void CreateDistrictFootprint(
+            Transform parent,
+            KingdomBuildingPresentation presentation,
+            Color bodyColor,
+            Color accentColor)
         {
             Color plateColor = Color.Lerp(bodyColor, Color.black, 0.34f);
             CreatePrimitive(parent, "DistrictPlate", PrimitiveType.Cube, new Vector3(0f, 0.035f, 0f), new Vector3(TileSize * 1.24f, 0.055f, TileSize * 1.24f), plateColor, new Vector3(0f, 45f, 0f), 0.02f, 0.40f);
             CreatePrimitive(parent, "DistrictInlay", PrimitiveType.Cube, new Vector3(0f, 0.070f, 0f), new Vector3(TileSize * 0.98f, 0.030f, TileSize * 0.98f), Color.Lerp(bodyColor, accentColor, 0.18f), new Vector3(0f, 45f, 0f), 0.02f, 0.48f, accentColor * 0.025f);
 
-            if (state.IsUpgrading)
+            if (presentation.IsUpgrading)
             {
                 CreatePrimitive(parent, "UpgradeWorksiteGlow", PrimitiveType.Cylinder, new Vector3(0f, 0.095f, 0f), new Vector3(TileSize * 0.52f, 0.020f, TileSize * 0.52f), Color.Lerp(accentColor, new Color(1f, 0.82f, 0.32f), 0.50f), null, 0.02f, 0.60f, accentColor * 0.15f);
+            }
+        }
+
+        private void CreateUnbuiltPlot(
+            Transform parent,
+            KingdomBuildingPresentation presentation,
+            Color bodyColor,
+            Color accentColor)
+        {
+            bool invalid =
+                presentation.Status == KingdomBuildingPresentationStatus.InvalidState;
+            Color markerColor = invalid
+                ? new Color(0.92f, 0.24f, 0.22f)
+                : Color.Lerp(bodyColor, accentColor, 0.32f);
+
+            var siteMarker = CreatePrimitive(
+                parent,
+                invalid ? "InvalidSiteMarker" : "ReservedSiteMarker",
+                PrimitiveType.Cylinder,
+                new Vector3(0f, 0.14f, 0f),
+                new Vector3(TileSize * 0.24f, 0.08f, TileSize * 0.24f),
+                markerColor,
+                null,
+                0.02f,
+                0.48f,
+                markerColor * (invalid ? 0.14f : 0.04f));
+            siteMarker.AddComponent<KingdomBuildingSelectable>().Configure(
+                presentation.BuildingId,
+                presentation.ConfirmedLevel,
+                markerColor,
+                accentColor,
+                presentation.IsUpgrading,
+                GetUpgradeRemainingSeconds(presentation),
+                presentation.DiagnosticCode);
+
+            for (int i = 0; i < 4; i++)
+            {
+                float angle = i * Mathf.PI * 0.5f;
+                Vector3 position = new Vector3(
+                    Mathf.Cos(angle) * TileSize * 0.42f,
+                    0.13f,
+                    Mathf.Sin(angle) * TileSize * 0.42f);
+                CreatePrimitive(
+                    parent,
+                    "SiteBoundaryPost",
+                    PrimitiveType.Cube,
+                    position,
+                    new Vector3(0.055f, 0.20f, 0.055f),
+                    markerColor,
+                    null,
+                    0.02f,
+                    0.38f);
+            }
+
+            if (presentation.IsUpgrading)
+            {
+                CreateUpgradeIndicator(
+                    parent,
+                    0.42f,
+                    accentColor,
+                    GetUpgradeRemainingSeconds(presentation));
             }
         }
 
@@ -290,10 +375,17 @@ namespace AL.Kingdom
             CreatePrimitive(parent, "MineShaft", PrimitiveType.Cube, new Vector3(-0.50f, 0.32f, -0.34f), new Vector3(0.30f, 0.36f, 0.12f), Color.Lerp(bodyColor, Color.black, 0.30f), null, 0.02f, 0.36f);
         }
 
-        private void CreateLevelBadge(Transform parent, BuildingState state, float height, Color accentColor)
+        private void CreateLevelBadge(
+            Transform parent,
+            KingdomBuildingPresentation presentation,
+            float height,
+            Color accentColor)
         {
-            int remainingSeconds = GetUpgradeRemainingSeconds(state);
-            Color plateColor = Color.Lerp(accentColor, Color.black, 0.26f);
+            int remainingSeconds = GetUpgradeRemainingSeconds(presentation);
+            bool invalid =
+                presentation.Status == KingdomBuildingPresentationStatus.InvalidState;
+            Color badgeAccent = invalid ? new Color(0.92f, 0.24f, 0.22f) : accentColor;
+            Color plateColor = Color.Lerp(badgeAccent, Color.black, 0.26f);
             CreatePrimitive(parent, "LevelPlate", PrimitiveType.Cube, new Vector3(0f, height + 0.78f, -0.205f), new Vector3(0.96f, 0.38f, 0.035f), plateColor, new Vector3(55f, 0f, 0f), 0.03f, 0.56f, accentColor * 0.08f);
             CreatePrimitive(parent, "LevelPlatePin", PrimitiveType.Cube, new Vector3(0f, height + 0.54f, -0.15f), new Vector3(0.08f, 0.20f, 0.030f), Color.Lerp(plateColor, Color.white, 0.16f), new Vector3(55f, 0f, 0f), 0.04f, 0.54f);
             var labelObject = new GameObject("LevelLabel");
@@ -301,14 +393,18 @@ namespace AL.Kingdom
             labelObject.transform.localPosition = new Vector3(0f, height + 0.78f, -0.18f);
             labelObject.transform.localRotation = Quaternion.Euler(55f, 0f, 0f);
             var label = labelObject.AddComponent<TextMesh>();
-            label.text = state.IsUpgrading
-                ? $"{GetShortBuildingName(state.BuildingId)}\nUP {remainingSeconds}s"
-                : $"{GetShortBuildingName(state.BuildingId)}\nLv {state.Level}";
+            label.text = invalid
+                ? $"{GetShortBuildingName(presentation.BuildingId)}\nDATA!"
+                : presentation.IsUpgrading
+                    ? $"{GetShortBuildingName(presentation.BuildingId)}\nUP {remainingSeconds}s"
+                    : presentation.ConfirmedLevel == 0
+                        ? $"{GetShortBuildingName(presentation.BuildingId)}\nUNBUILT"
+                        : $"{GetShortBuildingName(presentation.BuildingId)}\nLv {presentation.ConfirmedLevel}";
             label.anchor = TextAnchor.MiddleCenter;
             label.alignment = TextAlignment.Center;
             label.fontSize = 48;
             label.characterSize = 0.055f;
-            label.color = Color.Lerp(accentColor, Color.white, 0.50f);
+            label.color = Color.Lerp(badgeAccent, Color.white, 0.50f);
         }
 
         private void CreateUpgradeIndicator(Transform parent, float height, Color accentColor, int remainingSeconds)
@@ -363,23 +459,66 @@ namespace AL.Kingdom
                 return;
             }
 
-            Material material = renderer.material;
-            material.color = color;
-            if (material.HasProperty("_Metallic"))
+            Material sharedMaterial = renderer.sharedMaterial;
+            if (emission.HasValue)
             {
-                material.SetFloat("_Metallic", metallic);
+                sharedMaterial = GetSharedEmissiveMaterial(sharedMaterial);
+                renderer.sharedMaterial = sharedMaterial;
             }
 
-            if (material.HasProperty("_Glossiness"))
+            var properties = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(properties);
+            if (sharedMaterial != null && sharedMaterial.HasProperty(ColorProperty))
             {
-                material.SetFloat("_Glossiness", smoothness);
+                properties.SetColor(ColorProperty, color);
             }
 
-            if (emission.HasValue && material.HasProperty("_EmissionColor"))
+            if (sharedMaterial != null && sharedMaterial.HasProperty(BaseColorProperty))
             {
-                material.EnableKeyword("_EMISSION");
-                material.SetColor("_EmissionColor", emission.Value);
+                properties.SetColor(BaseColorProperty, color);
             }
+
+            if (sharedMaterial != null && sharedMaterial.HasProperty(MetallicProperty))
+            {
+                properties.SetFloat(MetallicProperty, metallic);
+            }
+
+            if (sharedMaterial != null && sharedMaterial.HasProperty(GlossinessProperty))
+            {
+                properties.SetFloat(GlossinessProperty, smoothness);
+            }
+
+            if (emission.HasValue &&
+                sharedMaterial != null &&
+                sharedMaterial.HasProperty(EmissionColorProperty))
+            {
+                properties.SetColor(EmissionColorProperty, emission.Value);
+            }
+
+            renderer.SetPropertyBlock(properties);
+        }
+
+        private static Material GetSharedEmissiveMaterial(Material fallback)
+        {
+            if (_sharedEmissiveMaterial != null)
+            {
+                return _sharedEmissiveMaterial;
+            }
+
+            Shader shader = Shader.Find("Standard");
+            _sharedEmissiveMaterial = shader != null
+                ? new Material(shader)
+                : fallback != null
+                    ? new Material(fallback)
+                    : null;
+            if (_sharedEmissiveMaterial != null)
+            {
+                _sharedEmissiveMaterial.name = "Kingdom Shared Emissive";
+                _sharedEmissiveMaterial.hideFlags = HideFlags.HideAndDontSave;
+                _sharedEmissiveMaterial.EnableKeyword("_EMISSION");
+            }
+
+            return _sharedEmissiveMaterial;
         }
 
         private Transform EnsureVisualRoot()
@@ -455,11 +594,29 @@ namespace AL.Kingdom
                 .Replace("ManaShrine", "Mana");
         }
 
-        internal static void RaiseBuildingSelected(string buildingId, int level, bool isUpgrading, int remainingSeconds)
+        internal static void RaiseBuildingSelected(
+            string buildingId,
+            int level,
+            bool isUpgrading,
+            int remainingSeconds,
+            string diagnosticCode)
         {
-            string status = isUpgrading ? $"UPGRADING / {remainingSeconds}s" : "READY";
+            bool invalid = !string.IsNullOrWhiteSpace(diagnosticCode);
+            string status = invalid
+                ? "DATA UNAVAILABLE"
+                : isUpgrading
+                    ? $"UPGRADING / {remainingSeconds}s"
+                    : level == 0
+                        ? "UNBUILT"
+                        : "READY";
             string district = GetShortBuildingName(buildingId).ToUpperInvariant();
-            OnBuildingSelected?.Invoke($"DISTRICT LOCK: {district} Lv {level} | {GetBuildingRole(buildingId)} | {status}. {GetBuildingRecommendation(buildingId, isUpgrading)}");
+            string recommendation = invalid
+                ? $"State rejected ({diagnosticCode}); gameplay data was not changed."
+                : level == 0
+                    ? "Reserved plot. Construction requires an approved gameplay order."
+                    : GetBuildingRecommendation(buildingId, isUpgrading);
+            OnBuildingSelected?.Invoke(
+                $"DISTRICT LOCK: {district} Lv {level} | {GetBuildingRole(buildingId)} | {status}. {recommendation}");
         }
 
         private static string GetBuildingRole(string buildingId)
@@ -542,15 +699,21 @@ namespace AL.Kingdom
             return "Upgrade when the command deck shows enough spare resources.";
         }
 
-        private static int GetUpgradeRemainingSeconds(BuildingState state)
+        private static int GetUpgradeRemainingSeconds(
+            KingdomBuildingPresentation presentation)
         {
-            if (state == null || !state.IsUpgrading)
+            if (presentation == null || !presentation.IsUpgrading)
             {
                 return 0;
             }
 
             long now = System.DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            return Mathf.Max(0, (int)(state.UpgradeCompleteTimestamp - now));
+            long remaining = presentation.UpgradeCompleteTimestamp - now;
+            return remaining <= 0
+                ? 0
+                : remaining >= int.MaxValue
+                    ? int.MaxValue
+                    : (int)remaining;
         }
 
         private void ClearExistingBuildingVisuals()
@@ -565,10 +728,14 @@ namespace AL.Kingdom
 
     public class KingdomBuildingSelectable : MonoBehaviour
     {
+        private static readonly int ColorProperty = Shader.PropertyToID("_Color");
+        private static readonly int BaseColorProperty = Shader.PropertyToID("_BaseColor");
+
         private string _buildingId;
         private int _level;
         private bool _isUpgrading;
         private int _remainingSeconds;
+        private string _diagnosticCode;
         private Color _baseColor;
         private Color _accentColor;
         private Renderer _renderer;
@@ -576,12 +743,20 @@ namespace AL.Kingdom
         private float _highlightTimer;
         private bool _hovered;
 
-        public void Configure(string buildingId, int level, Color baseColor, Color accentColor, bool isUpgrading, int remainingSeconds)
+        public void Configure(
+            string buildingId,
+            int level,
+            Color baseColor,
+            Color accentColor,
+            bool isUpgrading,
+            int remainingSeconds,
+            string diagnosticCode)
         {
             _buildingId = buildingId;
             _level = level;
             _isUpgrading = isUpgrading;
             _remainingSeconds = remainingSeconds;
+            _diagnosticCode = diagnosticCode ?? string.Empty;
             _baseColor = baseColor;
             _accentColor = accentColor;
             _renderer = GetComponent<Renderer>();
@@ -597,7 +772,12 @@ namespace AL.Kingdom
 
             _highlightTimer = 0.42f;
             SpawnSelectionPulse();
-            CityLayoutEngine.RaiseBuildingSelected(_buildingId, _level, _isUpgrading, _remainingSeconds);
+            CityLayoutEngine.RaiseBuildingSelected(
+                _buildingId,
+                _level,
+                _isUpgrading,
+                _remainingSeconds,
+                _diagnosticCode);
         }
 
         private void OnMouseEnter()
@@ -647,7 +827,20 @@ namespace AL.Kingdom
 
             if (_renderer != null)
             {
-                _renderer.material.color = color;
+                Material sharedMaterial = _renderer.sharedMaterial;
+                var properties = new MaterialPropertyBlock();
+                _renderer.GetPropertyBlock(properties);
+                if (sharedMaterial != null && sharedMaterial.HasProperty(ColorProperty))
+                {
+                    properties.SetColor(ColorProperty, color);
+                }
+
+                if (sharedMaterial != null && sharedMaterial.HasProperty(BaseColorProperty))
+                {
+                    properties.SetColor(BaseColorProperty, color);
+                }
+
+                _renderer.SetPropertyBlock(properties);
             }
         }
 

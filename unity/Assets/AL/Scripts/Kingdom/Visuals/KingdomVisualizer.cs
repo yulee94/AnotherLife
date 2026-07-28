@@ -1,7 +1,6 @@
 using UnityEngine;
 using AL.Core;
 using AL.Core.Interfaces;
-using AL.Data.Runtime;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
@@ -68,14 +67,10 @@ namespace AL.Kingdom.Visuals
 
             SetupTerrain(realmId);
 
-            var buildings = new List<BuildingState>(_buildingService.GetAllBuildingStates());
-            if (buildings.Count == 0)
-            {
-                // Ensure base buildings exist for the visualization
-                buildings.Add(_buildingService.GetBuildingState("TownHall"));
-                buildings.Add(_buildingService.GetBuildingState("Farm"));
-                buildings.Add(_buildingService.GetBuildingState("Barracks"));
-            }
+            IReadOnlyList<KingdomBuildingPresentation> buildings =
+                KingdomBuildingPresentationResolver.Resolve(
+                    realmId,
+                    _buildingService.GetAllBuildingStates());
 
             _layoutEngine.AutoPlaceBuildings(realmId, buildings);
             CreateTerritoryOutposts();
@@ -94,16 +89,24 @@ namespace AL.Kingdom.Visuals
 
                 if (_buildingService != null)
                 {
-                    foreach (var building in _buildingService.GetAllBuildingStates())
+                    IReadOnlyList<KingdomBuildingPresentation> buildings =
+                        KingdomBuildingPresentationResolver.Resolve(
+                            _realmService?.CurrentRealmId ?? RealmId.None,
+                            _buildingService.GetAllBuildingStates());
+                    foreach (KingdomBuildingPresentation building in buildings)
                     {
                         if (building == null)
                         {
                             continue;
                         }
 
+                        hash = hash * 31 + building.Slot.SlotId.GetHashCode();
                         hash = hash * 31 + (building.BuildingId == null ? 0 : building.BuildingId.GetHashCode());
-                        hash = hash * 31 + building.Level;
+                        hash = hash * 31 + building.ConfirmedLevel;
                         hash = hash * 31 + (building.IsUpgrading ? 1 : 0);
+                        hash = hash * 31 + (int)building.Status;
+                        hash = hash * 31 + building.UpgradeCompleteTimestamp.GetHashCode();
+                        hash = hash * 31 + building.DiagnosticCode.GetHashCode();
                     }
                 }
 

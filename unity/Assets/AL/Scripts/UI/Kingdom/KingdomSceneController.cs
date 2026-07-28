@@ -6,6 +6,7 @@ using AL.Data.Runtime;
 using AL.Kingdom;
 using AL.Kingdom.Visuals;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -288,7 +289,11 @@ namespace AL.UI.Kingdom
         private void RefreshDistrictsPanel()
         {
             var buildings = ServiceLocator.Get<IBuildingService>();
-            Dictionary<string, BuildingState> snapshot = BuildBuildingSnapshot(buildings);
+            RealmId realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+            Dictionary<string, KingdomBuildingPresentation> snapshot =
+                KingdomBuildingPresentationResolver
+                    .Resolve(realmId, buildings.GetAllBuildingStates())
+                    .ToDictionary(item => item.BuildingId, StringComparer.Ordinal);
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
             var builder = new StringBuilder();
@@ -297,10 +302,20 @@ namespace AL.UI.Kingdom
             {
                 if (snapshot.TryGetValue(buildingId, out var state) && state != null)
                 {
+                    if (state.Status == KingdomBuildingPresentationStatus.InvalidState)
+                    {
+                        builder.AppendLine(
+                            $"{FormatBuildingName(buildingId),-12}  --  DATA UNAVAILABLE");
+                        continue;
+                    }
+
                     string timer = state.IsUpgrading
                         ? $"UPGRADING {Math.Max(0, state.UpgradeCompleteTimestamp - now)}s"
-                        : "READY";
-                    builder.AppendLine($"{FormatBuildingName(buildingId),-12}  Lv {state.Level}  {timer}");
+                        : state.ConfirmedLevel == 0
+                            ? "UNBUILT"
+                            : "READY";
+                    builder.AppendLine(
+                        $"{FormatBuildingName(buildingId),-12}  Lv {state.ConfirmedLevel}  {timer}");
                 }
                 else
                 {
@@ -326,20 +341,6 @@ namespace AL.UI.Kingdom
                 "RESEARCH\n" +
                 FormatResearch("Steel Forging", steel) + "\n" +
                 FormatResearch("Plate Armor", armor);
-        }
-
-        private static Dictionary<string, BuildingState> BuildBuildingSnapshot(IBuildingService buildings)
-        {
-            var snapshot = new Dictionary<string, BuildingState>(StringComparer.Ordinal);
-            foreach (var state in buildings.GetAllBuildingStates())
-            {
-                if (state != null && !string.IsNullOrEmpty(state.BuildingId) && !snapshot.ContainsKey(state.BuildingId))
-                {
-                    snapshot[state.BuildingId] = state;
-                }
-            }
-
-            return snapshot;
         }
 
         private static Dictionary<string, ResearchState> BuildResearchSnapshot(IResearchService research)
@@ -430,17 +431,22 @@ namespace AL.UI.Kingdom
             }
 
             var buildings = ServiceLocator.Get<IBuildingService>();
+            RealmId realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             int upgradingCount = 0;
             int totalBuildingLevels = 0;
-            foreach (var state in buildings.GetAllBuildingStates())
+            foreach (KingdomBuildingPresentation state in
+                     KingdomBuildingPresentationResolver.Resolve(
+                         realmId,
+                         buildings.GetAllBuildingStates()))
             {
-                if (state == null)
+                if (state == null ||
+                    state.Status == KingdomBuildingPresentationStatus.InvalidState)
                 {
                     continue;
                 }
 
-                totalBuildingLevels += Math.Max(0, state.Level);
+                totalBuildingLevels += state.ConfirmedLevel;
                 if (state.IsUpgrading && state.UpgradeCompleteTimestamp > now)
                 {
                     upgradingCount++;
