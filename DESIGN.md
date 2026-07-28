@@ -1,8 +1,8 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.12
-**Last updated:** 2026-07-27
+**Version:** 1.27
+**Last updated:** 2026-07-28
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
 
@@ -58,15 +58,34 @@ This guide consolidates the active project direction in:
 - [Four-Realm Architecture](unity/Assets/AL/Art/Designs/FourRealmArchitecture.md)
 - [Stonehold Architecture Animation Contract](unity/Docs/Architecture/Stonehold_Architecture_Animation_Contract.md)
 - [Stonehold Animation Prototype Handoff](unity/Docs/Architecture/Stonehold_Animation_Prototype_Handoff.md)
+- [Stonehold Workshop Level Progression](unity/Assets/AL/Art/Designs/StoneholdWorkshopLevelProgression.md)
+- [Stonehold Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Stonehold_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Eldergrove Architecture Animation Contract](unity/Docs/Architecture/Eldergrove_Architecture_Animation_Contract.md)
 - [Eldergrove Animation Prototype Handoff](unity/Docs/Architecture/Eldergrove_Animation_Prototype_Handoff.md)
 - [Crownlands Architecture Animation Contract](unity/Docs/Architecture/Crownlands_Architecture_Animation_Contract.md)
 - [Umbral Architecture Animation Contract](unity/Docs/Architecture/Umbral_Architecture_Animation_Contract.md)
 - [Crownlands Animation Prototype Handoff](unity/Docs/Architecture/Crownlands_Animation_Prototype_Handoff.md)
+- [Crownlands Workshop Level Progression](unity/Assets/AL/Art/Designs/CrownlandsWorkshopLevelProgression.md)
+- [Crownlands Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Crownlands_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Umbral Animation Prototype Handoff](unity/Docs/Architecture/Umbral_Animation_Prototype_Handoff.md)
+- [Umbral Workshop Level Progression](unity/Assets/AL/Art/Designs/UmbralWorkshopLevelProgression.md)
+- [Umbral Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Umbral_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Reusable Architecture Construction-State System](unity/Docs/Architecture/Reusable_Architecture_Construction_State_System.md)
 - [Kingdom Building Level, Placement, and Presentation Design](unity/Docs/Architecture/Kingdom_Building_Level_And_Placement_Design.md)
+- [Live Kingdom Construction UX Design](unity/Docs/Architecture/Live_Kingdom_Construction_UX_Design.md)
+- [Eldergrove Workshop Level Progression — approved production source](unity/Assets/AL/Art/Designs/EldergroveWorkshopLevelProgression.md)
+- [Eldergrove Workshop Level Blockout Handoff](unity/Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md)
+- [Eldergrove Workshop Final Model and Runtime Binding](unity/Docs/Architecture/Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md)
 - [Architecture Android and iOS Compatibility Handoff](unity/Docs/Architecture/Architecture_Mobile_Compatibility_Handoff.md)
+- [Four-Realm Town Hall Production Contract](unity/Docs/Architecture/FourRealm_TownHall_Production_Contract.md)
+- [Stonehold Town Hall Level Blockout Handoff](unity/Docs/Architecture/Stonehold_TownHall_Level_Blockout_Handoff.md)
+- [Stonehold Town Hall Final Model and Runtime Binding](unity/Docs/Architecture/Stonehold_TownHall_Final_Model_And_Runtime_Binding.md)
+- [Eldergrove Town Hall Level Blockout Handoff](unity/Docs/Architecture/Eldergrove_TownHall_Level_Blockout_Handoff.md)
+- [Eldergrove Town Hall Final Model and Runtime Binding](unity/Docs/Architecture/Eldergrove_TownHall_Final_Model_And_Runtime_Binding.md)
+- [Crownlands Town Hall Level Blockout Handoff](unity/Docs/Architecture/Crownlands_TownHall_Level_Blockout_Handoff.md)
+- [Crownlands Town Hall Final Model and Runtime Binding](unity/Docs/Architecture/Crownlands_TownHall_Final_Model_And_Runtime_Binding.md)
+- [Umbral Town Hall Level Blockout Handoff](unity/Docs/Architecture/Umbral_TownHall_Level_Blockout_Handoff.md)
+- [Umbral Town Hall Final Model and Runtime Binding](unity/Docs/Architecture/Umbral_TownHall_Final_Model_And_Runtime_Binding.md)
 - [Approved Arcane Axis Vector Masters](unity/Assets/AL/Art/Heraldry/VectorMasters/README.md)
 - [Android and Windows Design Handoff](unity/Docs/Cross_Platform_Design_Handoff.md)
 - [Android Adaptive Icon Packet](unity/Docs/Branding/AndroidAdaptive/README.md)
@@ -501,6 +520,17 @@ For non-creature work, translate rather than imitate: preserve the sheets' belie
 - Use realm construction logic consistently across modular kits.
 - Use stable building-slot identity for placement. Save-list or enumeration order must never determine a building's grid position, footprint, rotation, or entrance orientation.
 - Use the approved `Level 0` through `Level 10` visual progression in the kingdom-building level design. `Level 0` is an unbuilt reserved plot, `Level 1` is the first complete operational building and current baseline, and later levels add cumulative modular changes without replacing the building's function.
+- Production models bind from stable `RealmId + BuildingId` identity and derive their cumulative visual level directly from confirmed gameplay state. Never persist a parallel visual stage that can disagree with gameplay.
+- Live production construction motion is confirmation-driven and session-only: an active upgrade keeps the confirmed model settled with localized worksite feedback, a newly confirmed adjacent level may animate only its new delta, and first load or offline reconciliation never replays motion.
+- Live construction is gameplay-authoritative. Building definitions own the exact Level `1`–`10` resource recipes and UTC durations; the building service owns quote, validation, resource spend, active-order state, completion, rollback, and persistence; the runtime owner reconciles completed work before presentation consumes the save.
+- A missing building row is Level `0` and remains query-safe; an existing Level `1` row remains the current built baseline. Queries never create building rows. Only a committed `0 → 1` construction order may create the first row.
+- One active order is allowed per building. Costs are paid in full when the order is accepted. A known save failure restores both wallet and building state; an uncertain commit preserves the candidate and blocks further construction until save reconciliation.
+- The first live command-deck construction slice exposes approved runtime definitions for Town Hall, Farm, Lumber Mill, Quarry, Gold Mine, and Barracks. Reserved Mana Shrine and Mine slots remain visible but inert until matching game-data definitions are approved.
+- Recommended next interaction: construction discovery and construction commitment are separate. Selecting a world building or BUILD entry opens the same local inspector and authoritative quote; only the inspector's explicit `Construct` or `Upgrade` action may spend resources. Implementation remains held for owner review; do not treat the current direct-spend buttons as the finished UX.
+- The construction inspector shows only confirmed current level, exact next level, authoritative cost, treasury sufficiency, duration, active completion time, and supported status. It must not invent yields, unlocks, production bonuses, lore, or target-stage visuals that do not exist in approved data.
+- Cancellation, refunds, build queues, cross-building prerequisites, premium speedups, server order identity, demolition, and relocation are on explicit product hold. Do not surface them as disabled teasers, placeholder buttons, or implied future promises. Reopening any of them requires a separate owner decision.
+- The active production building family is the four-realm `TownHall`, using the existing stable center slot as a hero-scale civic anchor rather than replacing the castle keep or landmark layer. Stonehold, Eldergrove, Crownlands, and Umbral production sources, Level `1`/`6`/`10` grayboxes, final Level `1`–`10` production models, and direct live bindings are approved. Working Level `10` labels guide visual production but do not establish narrative canon, powers, institutions, or gameplay.
+- Town Hall Level `10` capstones remain grounded, static extensions of approved civic structure: Stonehold uses the **Oathstone Crown**, Eldergrove the **Open Crown Arbor**, Crownlands the **Concord Meridian**, and Umbral the **Veiled Accord Yoke**. They do not reuse the Workshop seed lantern, forge chimney, storm calibration device, or bound-eclipse apparatus. Replacing them with unsupported, continuously active, function-changing, or Workshop-specific spectacle is a major design-direction decision.
 - Provide clean state, active state, damaged state, disabled state, and selected/outlined behavior where required.
 - Avoid miniature-diorama cuteness as the default 2.5D solution.
 
@@ -628,6 +658,7 @@ Never overwrite an approved source version. Create a new version and preserve th
 - Unity `2022.3.62f3`.
 - Built-in Render Pipeline at the time of this guide.
 - Target experiences include mobile and PC.
+- iOS `15.0` is the approved minimum deployment target; compatibility claims still distinguish build-level validation from an actual iOS 15 runtime or device pass.
 - Current generated prefabs and materials are blockouts/reference implementations, not a final quality bar.
 - Production models must use Unity's meter scale: `1 Unity unit = 1 meter`.
 - Shared design handoffs must remain usable from Android and Windows checkouts: preserve committed Unity metadata, portable paths, and Git LFS assets; do not require a macOS-only path or an iOS-only branch to recover approved source.
@@ -888,7 +919,7 @@ Do not stop for ordinary reversible interpretation inside the approved brief. Re
 
 These questions do not block concept exploration, but they must be resolved before the affected production gate:
 
-- What are the final minimum supported iPhone, iPad, Android, and PC hardware targets?
+- Which minimum iPhone and iPad hardware models within the approved iOS 15 software floor, and which Android and PC hardware targets, define the lowest production tier?
 - What frame-rate, memory, download-size, and scene-complexity budgets define each quality tier?
 - Will the project remain on the Built-in Render Pipeline through first production art, or adopt a planned rendering migration?
 - Which exact realm palette values and shared material tokens pass representative character, creature, architecture, UI, and VFX tests?
@@ -897,5 +928,6 @@ These questions do not block concept exploration, but they must be resolved befo
 - Which DCC source formats, texture-authoring tools, and large-file/version-control workflow are required for production?
 - Which assets require facial blendshapes, cloth, hair simulation, destructibility, or other features that materially change budget?
 - After representative on-device profiling, which provisional triangle, bone, material, texture, and VFX ceilings should become category-specific production limits?
+- Should the recommended construction interaction—select building or BUILD entry, inspect authoritative quote, then explicitly `Construct` or `Upgrade`—replace the current direct-spend BUILD buttons in the next implementation pass?
 
 Record answers here or in an approved subject-specific decision record, then link that record from this section.

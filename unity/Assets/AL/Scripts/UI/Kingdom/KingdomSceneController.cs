@@ -45,6 +45,7 @@ namespace AL.UI.Kingdom
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
         private bool _profileReady;
+        private long _lastLiveRefreshTimestamp;
         private readonly List<Image> _messageSignalBars = new List<Image>();
         private readonly Text[] _readinessChipTexts = new Text[4];
         private readonly Image[] _readinessChipPanels = new Image[4];
@@ -88,6 +89,7 @@ namespace AL.UI.Kingdom
             BuildRuntimeWorld();
             BuildRuntimeUi();
             Refresh();
+            _lastLiveRefreshTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
         // Reads the merged #241 offline-stack marker to decide whether a ready profile exists. It never
@@ -111,12 +113,16 @@ namespace AL.UI.Kingdom
 
         private void Update()
         {
-            // #178 D7: the hidden per-second domain completion (CompleteUpgrade x8 + CompleteResearch)
-            // is removed. Upgrade/research timers now show their real, frozen state until #165/#183
-            // land. Update only drives cosmetic presentation pulses, which read no service state.
             UpdateCommandMessagePulse();
             UpdateStrategicReadinessPulse();
             UpdateResourceTickerPulse();
+
+            long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            if (_profileReady && now > _lastLiveRefreshTimestamp)
+            {
+                _lastLiveRefreshTimestamp = now;
+                Refresh();
+            }
         }
 
         private void BuildRuntimeWorld()
@@ -245,13 +251,9 @@ namespace AL.UI.Kingdom
         // rather than calling that getter from read-only UI; DISTRICTS/RESEARCH still show their real
         // (frozen) state through the non-seeding GetAll* reads (D7).
         //
-        // Two deliberate carve-outs, neither of which persists state on a #241-canonical loaded profile:
-        //   (a) _kingdomVisualizer?.RefreshVisuals() below delegates to KingdomVisualizer, which seeds a
-        //       few base buildings only on an empty profile. That is a pre-existing, accepted board
-        //       behavior owned by a file outside this correction's scope, not a controller-owned read.
-        //   (b) GetResourceCount/GetCredits (resource ticker + WAR chip) run wallet/credit normalization
-        //       that is a strict no-op on a canonical loaded save and never calls Save(); they seed no
-        //       domain entities.
+        // GetResourceCount/GetCredits (resource ticker + WAR chip) run wallet/credit normalization
+        // that is a strict no-op on a canonical loaded save and never calls Save(); the visualizer and
+        // district panel both consume immutable building snapshots and seed no domain entities.
         private void Refresh()
         {
             _kingdomVisualizer?.RefreshVisuals();
@@ -913,19 +915,27 @@ namespace AL.UI.Kingdom
             CreateCommandSection(parent, font, descriptors, KingdomCommandCategory.RealmOps, "REALM OPS", new Vector2(18f, -586f), -626f);
         }
 
-        private static KingdomCommandContext CreateCommandContext()
+        private KingdomCommandContext CreateCommandContext()
         {
             bool hasCommittedRealm = false;
+            bool buildingConstructionAvailable = false;
             try
             {
                 hasCommittedRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId != RealmId.None;
+                buildingConstructionAvailable =
+                    _profileReady &&
+                    ServiceLocator.TryGet<IBuildingService>(out _);
             }
             catch (Exception)
             {
                 hasCommittedRealm = false;
+                buildingConstructionAvailable = false;
             }
 
-            return new KingdomCommandContext(hasCommittedRealm, new KingdomCommandCapabilities());
+            return new KingdomCommandContext(
+                hasCommittedRealm,
+                new KingdomCommandCapabilities(
+                    buildingUpgrade: buildingConstructionAvailable));
         }
 
         private void CreateCommandSection(
@@ -1000,7 +1010,101 @@ namespace AL.UI.Kingdom
                 return;
             }
 
+            if (KingdomCommandPolicy.TryGetBuildingId(
+                    descriptor.Id,
+                    out string buildingId))
+            {
+                BuildingConstructionResult result =
+                    ServiceLocator.Get<IBuildingService>().TryStartConstruction(
+                        buildingId,
+                        DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                SetMessage(FormatConstructionResult(result));
+                Refresh();
+                return;
+            }
+
             SetMessage(CreateUnavailableCommandMessage(descriptor));
+        }
+
+        private static string FormatConstructionResult(
+            BuildingConstructionResult result)
+        {
+            if (result == null)
+            {
+                return "CONSTRUCTION UNAVAILABLE: no authoritative result.";
+            }
+
+            BuildingConstructionQuote quote = result.Quote;
+            string label = quote == null
+                ? "BUILDING"
+                : FormatBuildingName(quote.BuildingId).ToUpperInvariant();
+            switch (result.Status)
+            {
+                case BuildingConstructionStatus.Started:
+                    return
+                        $"{label} ORDER ACCEPTED: Lv {quote.ConfirmedLevel} → {quote.TargetLevel}; " +
+                        $"{FormatDuration(quote.DurationSeconds)}; {FormatConstructionCosts(quote.Costs)}.";
+                case BuildingConstructionStatus.AlreadyInProgress:
+                    long remaining = Math.Max(
+                        0,
+                        quote.CompleteTimestamp -
+                        DateTimeOffset.UtcNow.ToUnixTimeSeconds());
+                    return
+                        $"{label} ORDER ACTIVE: Lv {quote.ConfirmedLevel} → {quote.TargetLevel}; " +
+                        $"{FormatDuration(remaining)} remaining.";
+                case BuildingConstructionStatus.MaxLevel:
+                    return $"{label} COMPLETE: Level {quote.ConfirmedLevel} is the capstone.";
+                case BuildingConstructionStatus.RejectedInsufficientResources:
+                    return
+                        $"{label} ORDER REJECTED: requires {FormatConstructionCosts(quote.Costs)}.";
+                case BuildingConstructionStatus.SaveFailedRolledBack:
+                    return
+                        $"{label} ORDER NOT COMMITTED: resources and building state were restored.";
+                case BuildingConstructionStatus.CommitUncertain:
+                    return
+                        $"{label} ORDER UNRESOLVED: persistence reconciliation is required before another order.";
+                case BuildingConstructionStatus.RejectedUnsupportedBuilding:
+                case BuildingConstructionStatus.RejectedInvalidDefinition:
+                    return $"{label} UNAVAILABLE: construction definition is not approved.";
+                case BuildingConstructionStatus.RejectedMalformedState:
+                    return $"{label} UNAVAILABLE: saved building state requires recovery.";
+                case BuildingConstructionStatus.RejectedNoCurrentSave:
+                    return $"{label} UNAVAILABLE: no writable kingdom profile.";
+                case BuildingConstructionStatus.RejectedEconomyUnavailable:
+                    return $"{label} UNAVAILABLE: economy transaction could not be authorized.";
+                default:
+                    return $"{label} ORDER UNCHANGED: {result.DiagnosticCode}.";
+            }
+        }
+
+        private static string FormatConstructionCosts(
+            IReadOnlyList<BuildingConstructionCost> costs)
+        {
+            if (costs == null || costs.Count == 0)
+            {
+                return "no resource cost";
+            }
+
+            return string.Join(
+                " / ",
+                costs.Select(cost =>
+                    $"{FormatResourceLabel(cost.ResourceType)} {FormatCompactNumber(cost.Amount)}"));
+        }
+
+        private static string FormatDuration(long seconds)
+        {
+            seconds = Math.Max(0L, seconds);
+            if (seconds < 60L)
+            {
+                return seconds + "s";
+            }
+
+            if (seconds < 3600L)
+            {
+                return (seconds / 60L) + "m";
+            }
+
+            return (seconds / 3600L) + "h";
         }
 
         private static string CreateUnavailableCommandMessage(KingdomCommandDescriptor descriptor)

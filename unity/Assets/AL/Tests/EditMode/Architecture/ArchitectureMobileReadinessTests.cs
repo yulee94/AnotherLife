@@ -18,7 +18,13 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Art/Generated/Architecture/Crownlands/" +
                 "Crownlands_Stormwright_AnimationPrototype.prefab",
             "Assets/AL/Art/Generated/Architecture/Umbral/" +
-                "Umbral_Veilwright_AnimationPrototype.prefab"
+                "Umbral_Veilwright_AnimationPrototype.prefab",
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/" +
+                "Eldergrove_Workshop_Level01_Blockout.prefab",
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/" +
+                "Eldergrove_Workshop_Level06_Blockout.prefab",
+            "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/" +
+                "Eldergrove_Workshop_Level10_Blockout.prefab"
         };
 
         private static readonly string[] PrototypeScenePaths =
@@ -30,11 +36,25 @@ namespace AL.Tests.EditMode.Architecture
             "Assets/AL/Scenes/Prototypes/" +
                 "CrownlandsStormwrightAnimationPrototype.unity",
             "Assets/AL/Scenes/Prototypes/" +
-                "UmbralVeilwrightAnimationPrototype.unity"
+                "UmbralVeilwrightAnimationPrototype.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "EldergroveWorkshopLevelBlockout.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "EldergroveWorkshopProductionModel.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "StoneholdWorkshopProductionModel.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "CrownlandsStormwrightProductionModel.unity",
+            "Assets/AL/Scenes/Prototypes/" +
+                "UmbralVeilwrightProductionModel.unity"
         };
 
         private const string ConceptSheetFolder =
             "Assets/AL/Art/Architecture/ConceptSheets";
+
+        private const string EldergroveWorkshopLevelProgressionPath =
+            ConceptSheetFolder +
+            "/architecture_eldergrove_workshop_level_progression_v001.png";
 
         [TestCaseSource(nameof(PrototypePrefabPaths))]
         public void PrototypeUsesBoundedPlatformNeutralRendering(
@@ -160,6 +180,43 @@ namespace AL.Tests.EditMode.Architecture
                     Is.EqualTo(TextureImporterNPOTScale.None),
                     assetPath);
             }
+        }
+
+        [Test]
+        public void EldergroveWorkshopLevelProgressionRemainsAValidatedSourceOnlyAsset()
+        {
+            Texture2D sheet =
+                AssetDatabase.LoadAssetAtPath<Texture2D>(
+                    EldergroveWorkshopLevelProgressionPath);
+            Assert.That(sheet, Is.Not.Null, EldergroveWorkshopLevelProgressionPath);
+            Assert.That(sheet.width, Is.EqualTo(1773));
+            Assert.That(sheet.height, Is.EqualTo(887));
+
+            var importer =
+                AssetImporter.GetAtPath(EldergroveWorkshopLevelProgressionPath)
+                    as TextureImporter;
+            Assert.That(importer, Is.Not.Null);
+            Assert.That(importer.isReadable, Is.False);
+            Assert.That(importer.mipmapEnabled, Is.False);
+            Assert.That(
+                importer.npotScale,
+                Is.EqualTo(TextureImporterNPOTScale.None));
+            Assert.That(importer.assetBundleName, Is.Null.Or.Empty);
+
+            string[] playerDependencies = EditorBuildSettings.scenes
+                .Where(scene => scene.enabled)
+                .SelectMany(
+                    scene => AssetDatabase.GetDependencies(scene.path, true))
+                .Concat(
+                    PrototypePrefabPaths.SelectMany(
+                        prefabPath =>
+                            AssetDatabase.GetDependencies(prefabPath, true)))
+                .Distinct()
+                .ToArray();
+            Assert.That(
+                playerDependencies,
+                Has.None.EqualTo(EldergroveWorkshopLevelProgressionPath),
+                "The review sheet must not become a runtime texture dependency.");
         }
 
         private static IEnumerable<Texture> GetAssignedTextures(

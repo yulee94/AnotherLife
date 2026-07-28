@@ -103,9 +103,25 @@ namespace AL.Tests.EditMode
                 CommandId("LumberMillUpgrade"),
                 CommandId("QuarryUpgrade"),
                 CommandId("GoldMineUpgrade"),
-                CommandId("ManaShrineUpgrade"),
-                CommandId("MineUpgrade")
+                CommandId("BarracksUpgrade")
             }));
+        }
+
+        [Test]
+        public void MissingCatalogBuildingsRemainVisibleAndUnavailable()
+        {
+            object context = CreateContext(
+                hasCommittedRealm: true,
+                capabilities: CreateCapabilities(buildingUpgrade: true));
+            object[] deck = CreateDeckDescriptors(context);
+
+            foreach (string fieldName in new[] { "ManaShrineUpgrade", "MineUpgrade" })
+            {
+                object command = deck.Single(item => Id(item) == CommandId(fieldName));
+                Assert.That(Availability(command), Is.EqualTo("UnavailableBuild"));
+                Assert.That(IsInteractable(command), Is.False);
+                Assert.That(TechnicalCode(command), Is.EqualTo("building-definition-unavailable"));
+            }
         }
 
         [Test]

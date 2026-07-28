@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using NUnit.Framework;
+using UnityEditor;
 using UnityEngine;
 using R = AL.Tests.EditMode.ProductionScenes.ProductionSceneTestReflection;
 
@@ -19,6 +20,15 @@ namespace AL.Tests.EditMode.ProductionScenes
 
         private static string BuildSettingsPath =>
             Path.GetFullPath(Path.Combine(Application.dataPath, "..", "ProjectSettings", "EditorBuildSettings.asset"));
+
+        [Test]
+        public void IosPlatformBaselineUsesVersion15AndAppleSiliconSimulator()
+        {
+            Assert.That(PlayerSettings.iOS.targetOSVersionString, Is.EqualTo("15.0"));
+            Assert.That(
+                PlayerSettings.iOS.simulatorSdkArchitecture,
+                Is.EqualTo(AppleMobileArchitectureSimulator.ARM64));
+        }
 
         [Test]
         public void StatusCodesMatchTheReviewedSpecificationExactly()

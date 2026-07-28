@@ -436,3 +436,319 @@ Constraints: one consistent building; no text, labels, numbers, logo, AL monogra
 - Runtime authority: Graybox proof for state ownership, fixed four-anchor convergence, one localized light, stable-state sleep, reduced motion, and deterministic roof cutaway only. Gameplay timing, production art, live integration, and measured device performance remain open.
 
 The graybox preserves Umbral as a fourth peer realm rather than a progression tier. Its distinctiveness comes from offset construction, protected negative space, inward direction, and controlled closure—not from greater power, broader effects, or higher systemic status.
+
+## Approved Eldergrove Workshop Level 0–10 production source
+
+- File: `architecture_eldergrove_workshop_level_progression_v001.png`
+- Status: Owner-approved production source; Level 1/6/10 Unity blockout gate passed; runtime candidate not yet approved
+- Generated: 2026-07-27
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted level-progression proposal derived from approved project sources
+- Source references: `architecture_eldergrove_modular_workshop_detail_v001.png` and `architecture_four_realm_modular_construction_master_v001.png`
+- Dimensions: `1773 x 887`
+- SHA-256: `115ef09a1bbac56d7dfe330cac8a96cd5b446c81d294ec6b85d28a494135c20c`
+- Visual-verdict score: `93 / 100`
+- Runtime authority: None. The sheet is source-only and does not establish gameplay levels, costs, durations, save fields, transactions, exact dimensions, topology, pivots, materials, colliders, LOD thresholds, or measured device performance.
+
+Owner decision recorded 2026-07-27: the level-progression source was approved and production work was directed to continue.
+
+### Recorded level-progression generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production model progression concept sheet for the Another Life Unity game
+Primary request: Create one original, production-readable Eldergrove Workshop Level 0 through Level 10 visual progression sheet, derived from the two approved architecture reference sheets. Show exactly eleven distinct isometric stages of the same building family and the same stable footprint. Arrange six stages left-to-right on the top row (Level 0–5) and five stages left-to-right on the bottom row (Level 6–10), with equal framing and generous separation. Do not add written labels; the progression order is purely spatial.
+Level progression: Level 0 is an unbuilt reserved plot with stone footprint boundary, realm ground treatment, entrance orientation, and restrained root-guide marker. Level 1 is the first complete operational workshop with credible enclosure, roof, open entrance, and one cultivation work area. Level 2 adds structural root braces and weather protection. Level 3 adds a visible functional annex or storage bay. Level 4 strengthens the roofline and adds one modest vertical cultivation vent. Level 5 adds a district-facing coordination or public work module. Level 6 adds an upper structural mass or second functional bay. Level 7 fully expresses the signature Eldergrove guided-growth mechanism through structure, not effects. Level 8 refines the envelope with durable bronze joinery, repair history, and restrained craft. Level 9 integrates logistics, storage, and civic approach. Level 10 adds one landmark capstone silhouette while remaining the same Workshop function and footprint family.
+Style/medium: premium realistic high-fantasy 3D environment concept sheet, mystical medieval naturalism, believable modular construction, tactile physically plausible materials, adult serious tone, suitable for later game modeling.
+Camera/composition: fixed three-quarter isometric strategic camera for all eleven stages; consistent scale, entrance direction, ground plane, lighting, and crop. Each adjacent level must read through primary or secondary form, not color or glow. Preserve strategic readability on a compact mobile screen.
+Materials: aged masonry foundation, load-bearing living roots and dark timber, moss and lichen used selectively, weathered bronze joints and cultivation hardware, muted green and bark umber, small warm living accents. Roots follow credible load paths and never float. Roofs and walls remain physically assembled; later levels are cumulative modular deltas rather than unrelated replacements.
+Motion/model readiness cues: clear separable foundation, entrance, wall bay, root brace, roof, annex, workbench/storage, cultivation mechanism, and capstone modules; believable pivots and sockets; quiet stable operational pose.
+Accessibility and mobile constraints: silhouettes and level differences survive grayscale and reduced effects; no particles, no transparent magical fog, no tiny repeated props as the only upgrade cue; simplified primary masses; maximum two obvious material families plus restrained bronze accents per stage.
+Avoid: cartoon, chibi, miniature-diorama cuteness, low-poly final look, bright green palette-swap identity, uncontrolled foliage noise, glow on every edge, floating assembly, stretching rigid masonry, palette-only level differences, random runes, pseudo-text, logos, watermark, people, creatures, UI, duplicated panels, inconsistent camera, changing footprint orientation, or a different building category at higher levels.
+```
+
+### Visual review
+
+- Verdict: `pass` at `93 / 100`; subsequently owner-approved
+- Strengths: exactly eleven cumulative presentations; preserved entrance and footprint identity; clear roof, annex, upper-mass, and capstone progression; restrained material hierarchy; no effect-dependent level distinction
+- Production cautions: treat the written module matrix as scale authority because the five-panel upper row receives slightly larger cells; protect the subtle Level `2` root-brace delta; merge or remove Level `9`–`10` bronze and loose-prop detail on mobile-low
+- Approval boundary: the sheet is approved visual/model-source direction and its three Unity blockout anchors have passed; runtime-candidate approval still requires final modeling, import, LOD, and device evidence
+
+### Unity blockout verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `92 / 100`
+- Static mobile-readiness result: `94 / 100` retained
+- Renderer counts: `57`, `85`, and `115`
+- Runtime boundary: isolated review prefabs and scene only; no save, economy, progression, catalog, build-setting, or live-kingdom binding
+- Handoff: `Docs/Architecture/Eldergrove_Workshop_Level_Blockout_Handoff.md`
+- Remaining runtime-candidate evidence: final topology and materials, LODs, metric/footprint validation, populated-district profiling, and representative Android/iOS device results
+
+## Approved Stonehold Town Hall Level 1/6/10 production source
+
+- File: `architecture_stonehold_townhall_level_progression_v001.png`
+- Status: Owner-approved Stonehold Town Hall source; Unity graybox gate passed
+- Generated: 2026-07-27
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Stonehold material and construction language
+- Source reference:
+  `architecture_stonehold_modular_workshop_detail_v001.png`
+- Dimensions: `1575 x 998`
+- Byte length: `2,156,529`
+- SHA-256:
+  `9d8d81db09c76b2dc32269bf102f4e2e0f7a9906d372892480b6fd9dd7e159f9`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-27: approve the candidate and continue into
+the deterministic Stonehold Town Hall Level `1`, `6`, and `10` Unity graybox.
+
+### Recorded Stonehold Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style and material-language reference only; preserve its Stonehold basalt, soot-aged iron, bronze repair, grounded masonry, dark presentation board, and production-readable rendering, but do not copy its workshop layout, forge bay, chimney, props, or exact geometry.
+Primary request: design the Stonehold Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is a practical public council hall in the center of a working settlement, not a castle keep, palace, throne room, temple, barracks, or workshop.
+Subject and progression: Level 1 is a complete compact weatherproof public hall with a broad low basalt mass, one clearly centered clipped-stone entrance arch facing the viewer, safe civic steps, two grounded front piers, heavy correctly pitched roof plates, drainage, and one restrained warm interior slit. Level 6 keeps that exact foundation and entrance, then adds two low civic wings, paired load-bearing buttress towers, an iron-locked continuous lintel path, sheltered records/service galleries, rear circulation, and a stronger assembly-hall roofline. Level 10 keeps every earlier module and adds the grounded Oathstone Crown: a stepped central belfry/crown physically carried by the established central wall and roof load path, one fixed iron oath plate, and one narrow contained amber slit. The capstone is architectural and static, never a forge chimney or floating crown.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera and scale, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include a small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, realistic grounded construction, large readable shapes, mobile-friendly simplification, crisp edges, restrained surface detail.
+Lighting/mood: neutral studio/gameplay lighting with readable graphite midtones; localized warm amber only at the entrance slit; no cinematic fog hiding geometry.
+Color palette: dark basalt, charcoal iron, dark timber, sparse worn bronze repair, pale ash mortar, tiny contained forge-amber accent.
+Materials/textures: believable block masonry, heavy iron locks and roof ribs, restrained age and repair. Roofs must be physically correct: ridges are the highest lines, planes slope downward to lower eaves, all roof plates sit on visible walls or brackets. No inverted, concave, upside-down, or unsupported roof forms.
+Constraints: preserve a fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability from silhouette; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: workshop tools, forge bay, large chimney, throne, castle keep towers, cathedral spires, spike fields, floating pieces, levitation, glowing cracks, broad emission, portals, animated mechanisms, weapons, giant bell, exaggerated fantasy ornament, miniature-diorama cuteness, inverted roofs.
+```
+
+### Source review
+
+- Owner approval: explicit continuation after viewing the candidate
+- Protected reads: broad civic mass, centered clipped entrance, correct roof
+  pitch, cumulative low wings, and grounded Oathstone Crown
+- Production cautions: retain civic scale below the protected settlement
+  landmark; keep the crown physically carried and static; suppress fine iron
+  and masonry breakup before weakening the primary silhouette
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `91 / 100`
+- Static mobile-safety result: `94 / 100`
+- Renderer counts: `36`, `76`, and `116`
+- Focused verification: `15 / 15` Stonehold Town Hall EditMode tests passed
+- Platform verification: Android Architecture `148 / 148`; iOS Architecture
+  `148 / 148`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Stonehold_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Eldergrove Town Hall Level 1/6/10 production source
+
+- File: `architecture_eldergrove_townhall_level_progression_v001.png`
+- Status: Owner-approved Eldergrove Town Hall source; Unity graybox gate passed
+- Generated: 2026-07-27
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Eldergrove material and construction language
+- Source reference:
+  `architecture_eldergrove_modular_workshop_detail_v001.png`
+- Dimensions: `1536 x 1024`
+- Byte length: `2,449,185`
+- SHA-256:
+  `68130063b7c3f078f81e0d95f6d849e2cf72b1eb1189ba4cbec3e16275eaacac`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-27: approve the candidate and continue into
+the deterministic Eldergrove Town Hall Level `1`, `6`, and `10` Unity graybox.
+
+### Recorded Eldergrove Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style, material, and construction-language reference only. Preserve Eldergrove pale aged stone, authored load-bearing living roots, dark timber, weathered bronze collars, restrained moss/lichen, dark production board, and premium realistic mystical-medieval rendering. Do not copy the workshop layout, cultivation table, seed lantern, roof turret, props, exact root paths, or exact geometry.
+Primary request: design the Eldergrove Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is an open practical public council hall at the center of a working settlement, not a palace, temple, shrine, castle keep, greenhouse, workshop, throne room, or giant tree.
+Subject and progression: Level 1 is a complete compact weatherproof civic hall organized around an open pale-stone court, one clear centered public entrance facing the viewer, sheltered council floor, drainage, dark timber gallery edges, and exactly three young but structural living-root arches physically collared into stone footings. The entrance remains open and readable. Level 6 keeps that exact pivot, entrance, and fixed rectangular footprint, then adds low unequal steward and records galleries, a broader sheltered assembly canopy, mature versions of the same three root arches, bronze load collars, rear circulation, and one deterministic council-canopy load path. Level 10 keeps every earlier module and adds the grounded Open Crown Arbor: the same three mature load-bearing root arches rise from their established footings to carry a fixed weathered-bronze ring framing a truly open sky oculus above the civic hall. The ring and roots are architectural, static, and physically supported. There is no object, lantern, seed, orb, flame, crystal, or glow inside the oculus.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera, scale, entrance direction, and ground plane, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include one small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, believable modular construction, large readable forms, mobile-friendly simplification, crisp edges, restrained organic detail, adult serious tone.
+Lighting/mood: neutral studio/gameplay lighting with readable stone, root, timber, and bronze midtones. Natural warm interior light may appear only as tiny window warmth. No green emission and no cinematic fog hiding structure.
+Color palette: pale gray-beige stone, deep bark umber, dark weathered timber, muted moss green used sparingly, aged bronze collars and ring, tiny warm interior amber.
+Materials/textures: credible masonry courses, roots that widen into grounded footings and follow visible compression paths, physical bronze collars and fasteners, durable timber galleries, restrained wear and repair. Roof and canopy planes must be physically correct, supported, and drain away from the open court. Later levels are cumulative additions, never unrelated replacements.
+Protected identity: exactly three primary authored root arches remain countable at every strategic stage; open central civic court; breathable entrance; pale-stone and root load path; Level 10 open-sky oculus carried by the same grounded arches. Realm identity must survive with moss, leaves, particles, glow, and small props removed.
+Constraints: fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: workshop cultivation table, seed lantern, glowing seed, floating orb, magical portal, dense foliage cloud, giant treehouse, cathedral, druid shrine, throne, castle keep towers, greenhouse glass, unsupported roots, procedural root tangle, roof inversion, floating pieces, broad green emission, glowing cracks, waterfalls, excessive vines, flower decoration, spike fields, weapons, giant bell, exaggerated fantasy ornament, miniature-diorama cuteness.
+```
+
+### Source review
+
+- Owner approval: explicit approval after viewing the candidate
+- Protected reads: open pale-stone civic court, breathable fixed entrance,
+  exactly three primary living-root arches, cumulative unequal galleries, and
+  the empty supported Open Crown Arbor
+- Production cautions: preserve the root count and direct load paths when
+  organic meshes replace the graybox cylinders; keep moss, leaves, emission,
+  and small props nonessential; retain the civic rather than shrine silhouette
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `92 / 100`
+- Static mobile-safety result: `94 / 100`
+- Renderer counts: `47`, `77`, and `116`
+- Focused verification: `18 / 18` Eldergrove Town Hall EditMode tests passed
+- Platform verification: Android Architecture `166 / 166`; iOS Architecture
+  `166 / 166`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Eldergrove_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Crownlands Town Hall Level 1/6/10 production source
+
+- File: `architecture_crownlands_townhall_level_progression_v001.png`
+- Status: Owner-approved Crownlands Town Hall source; Unity graybox gate passed
+- Generated: 2026-07-27; owner-approved 2026-07-28
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Crownlands material and construction language
+- Source reference:
+  `architecture_crownlands_modular_stormwright_detail_v001.png`
+- Dimensions: `1535 x 1024`
+- Byte length: `2,325,623`
+- SHA-256:
+  `bc2dc8473f42e09151c82a66f6eff39fc80ad298364192238b1608947e303af1`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-28: approve the category-corrected candidate
+and continue into the deterministic Crownlands Town Hall Level `1`, `6`, and
+`10` Unity graybox.
+
+### Recorded Crownlands Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style, material, and construction-language reference only. Preserve Crownlands pale disciplined masonry, deep blue slate roof groups, silvered structural ribs, restrained worn gold repair, dark production board, and premium realistic mystical-medieval rendering. Do not copy the Stormwright Workshop layout, open calibration bay, celestial instrument, energy well, dome, props, exact arches, or exact geometry.
+Primary request: design the Crownlands Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is an upright symmetrical public council hall at the center of a working settlement, not a palace, throne room, temple, cathedral, castle keep, observatory, workshop, or royal monument.
+Subject and progression: Level 1 is a complete compact weatherproof civic hall with one clear centered public entrance facing the viewer, a strong axial approach, paired grounded entrance piers, pale limestone wall bays, correctly pitched blue-slate roof groups, visible drainage, and restrained silver structural ribs. Level 6 keeps that exact pivot, entrance, and fixed rectangular footprint, then adds balanced but not perfectly identical public-records and steward galleries, a broader sheltered assembly hall, paired civic tower bases, rear service circulation, and a clearly grounded central meridian load path. Level 10 keeps every earlier module and adds the grounded Concord Meridian: the same two civic towers rise from established wall and foundation loads to support one fixed silver meridian arch above the hall, with one restrained solid central dial physically mounted at the arch apex. The arch and dial are architectural and static. They do not rotate, levitate, emit lightning, tell time, or contain a glowing orb.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera, scale, entrance direction, and ground plane, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean solid-black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include one small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, believable modular construction, large readable forms, mobile-friendly simplification, crisp edges, restrained civic ornament, adult serious tone.
+Lighting/mood: neutral studio/gameplay lighting with readable limestone, slate, silvered metal, and dark timber midtones. Natural warm interior light may appear only as tiny window warmth. No broad blue or violet emission and no cinematic fog hiding structure.
+Color palette: pale warm-gray limestone, midnight blue slate, aged silver steel, dark weathered timber, sparse restrained gold repair, tiny warm interior amber.
+Materials/textures: credible masonry courses, direct vertical load paths, physical roof support and drainage, durable sheltered galleries, restrained repair history. Roof ridges are the highest lines and planes slope down to supported eaves. Later levels are cumulative additions, never unrelated replacements.
+Protected identity: upright civic symmetry; one centered axial public entrance; paired grounded entrance piers; disciplined wall bays; Level 10 meridian arch carried by exactly two grounded civic towers; restrained solid apex dial. Realm identity must survive with banners, particles, glow, tiny conductors, and small props removed.
+Constraints: fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: Stormwright Workshop calibration table, energy well, celestial machinery, observatory dome, lightning, magical beam, floating orb, levitating ring, giant clock, clock face, rotating instrument, throne, palace, cathedral, castle keep towers, unsupported arch, roof inversion, floating pieces, broad violet or blue emission, glowing cracks, banner clutter, excessive spires, weapons, giant bell, exaggerated royal ornament, miniature-diorama cuteness.
+```
+
+### Focused category correction
+
+- Rejected first draft: `85 / 100`; pointed portal, rose-window motif, narrow
+  towers, and oversized arch read as a cathedral or royal monument
+- Final source review: `93 / 100`, pass
+- Correction: broadened and lowered the civic mass; replaced religious
+  openings with clipped civic bays; shortened and thickened the paired towers;
+  lowered the meridian into a directly supported roof crown; retained one
+  solid unmarked apex block
+- Protected reads: fixed axial entrance, disciplined pale masonry, cumulative
+  balanced wings, exactly two lower grounded civic towers, and a shallow static
+  Concord Meridian
+- Production cautions: retain civic scale below the protected settlement
+  landmark; collapse fine slate ribs and courtyard detail before weakening the
+  primary mass; keep the apex free of clock or calibration-device language
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `92 / 100`
+- Static mobile-safety result: `95 / 100`
+- Renderer counts: `29`, `67`, and `101`
+- Focused verification: `17 / 17` Crownlands Town Hall EditMode tests passed
+- Platform verification: Android Architecture `183 / 183`; iOS Architecture
+  `183 / 183`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Crownlands_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Umbral Town Hall Level 1/6/10 production source
+
+- File: `architecture_umbral_townhall_level_progression_v001.png`
+- Status: Owner-approved Umbral Town Hall source; Unity graybox gate passed
+- Generated and owner-approved: 2026-07-28
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Umbral material and construction language
+- Source reference:
+  `architecture_umbral_modular_veilwright_detail_v001.png`
+- Dimensions: `1575 x 998`
+- Byte length: `2,211,316`
+- SHA-256:
+  `2088a8a20c5e189f9943f5fc8c6b0d5a51065ccc7f0ee69b7c3677dd62f780f0`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-28: approve the category-corrected candidate
+and continue into the deterministic Umbral Town Hall Level `1`, `6`, and `10`
+Unity graybox.
+
+### Recorded Umbral Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style, material, and construction-language reference only. Preserve Umbral graphite masonry, offset inhabitable masses, split roof planes, ash-dark timber, sparse weathered brass, localized darkglass, dark production board, and premium realistic mystical-medieval rendering. Do not copy the Veilwright Workshop layout, ritual work floor, bound-eclipse apparatus, violet pedestal, awnings, props, exact piers, or exact geometry.
+Primary request: design the Umbral Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is a practical protected public council hall at the center of a working settlement, not a portal, ritual shrine, temple, gallows, castle keep, palace, workshop, prison, throne room, or magical machine.
+Subject and progression: Level 1 is a complete compact weatherproof civic hall composed from two offset graphite masses around a protected central council chamber, one clear oblique-but-readable public entrance facing the viewer, safe steps, split physically supported roof planes, ash-timber galleries, drainage, sparse brass hierarchy, and one small contained non-emissive darkglass civic inset. Level 6 keeps that exact pivot, entrance, and fixed rectangular footprint, then adds unequal records and steward galleries, rear service circulation, a broader sheltered public threshold, and exactly four grounded thick boundary piers whose physical sheltering relationship is countable without forming a portal frame. Level 10 keeps every earlier module and adds the grounded Veiled Accord Yoke: the same four established offset boundary piers carry an asymmetrical fixed double crossframe integrated close above the roof around one narrow truly empty vertical council slit. The crossframe is architectural, static, visibly supported, and secondary to the building mass. There is no object, orb, crystal, flame, figure, doorway, portal surface, or glow inside the slit.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera, scale, entrance direction, and ground plane, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean solid-black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include one small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, believable modular construction, large readable forms, mobile-friendly simplification, crisp edges, restrained asymmetry, adult serious tone.
+Lighting/mood: neutral studio/gameplay lighting with readable graphite, charcoal timber, brass, and aubergine-darkglass midtones. Natural warm interior light may appear only as tiny window warmth. No broad violet emission, darkness cloud, or cinematic fog hiding structure.
+Color palette: graphite and blackened stone, charcoal ash timber, sparse aged brass, restrained aubergine undertones, one non-emissive darkglass inset, tiny warm interior amber.
+Materials/textures: credible masonry courses, direct grounded pier loads, physical split-roof support and drainage, durable sheltered galleries, restrained wear and repair. Roof ridges remain above supported eaves. Later levels are cumulative additions, never unrelated replacements.
+Protected identity: deliberate offset civic masses; one oblique but readable fixed public entrance; protected central chamber; exactly four grounded thick boundary piers at Level 6 and Level 10; Level 10 asymmetrical double crossframe close above the roof around a narrow empty council slit. Realm identity must survive with violet color, particles, glow, cloth, and small props removed.
+Constraints: fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: Veilwright Workshop ritual floor, bound-eclipse apparatus, circular altar, magic pedestal, floating orb, portal, doorway-shaped capstone, gallows, execution scaffold, prison, throne, shrine, cathedral, castle keep towers, unsupported crossframe, floating pieces, broad violet emission, glowing cracks, darkness fog, dense awnings, tent silhouette, excessive spikes, weapons, giant bell, exaggerated occult ornament, miniature-diorama cuteness.
+```
+
+### Focused silhouette correction
+
+- Rejected first draft: `87 / 100`; the tall Level `10` yoke and long vertical
+  void read as a keep, portal frame, or gallows
+- Final source review: `93 / 100`, pass
+- Correction: lowered and widened the yoke close to the occupied roof;
+  shortened the upper pier extensions; replaced the doorway-height opening
+  with a short narrow upper slit; retained four grounded piers and a static
+  asymmetrical double crossframe
+- Protected reads: fixed oblique entrance, offset graphite civic masses,
+  cumulative unequal galleries, exactly four grounded boundary piers, and a
+  compact empty-slit Veiled Accord Yoke
+- Production cautions: keep the yoke secondary to the occupied hall, leave the
+  slit truly empty, remove fine shingles and finials before weakening the
+  offset silhouette or pier count, and keep darkglass non-emissive
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `91 / 100`
+- Static mobile-safety result: `95 / 100`
+- Renderer counts: `23`, `60`, and `93`
+- Focused verification: `17 / 17` Umbral Town Hall EditMode tests passed
+- Platform verification: Android Architecture `200 / 200`; iOS Architecture
+  `200 / 200`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Local Apple toolchain: Xcode `26.6`; iOS `26.5` Simulator available
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Umbral_TownHall_Level_Blockout_Handoff.md`

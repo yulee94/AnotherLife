@@ -73,13 +73,15 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void EveryMutationFamilyExceptChampionDeclaresSaveHardeningDependency()
+        public void DeferredMutationFamiliesDeclareSaveHardeningDependency()
         {
             string championId = CommandId("ChampionDeploy");
 
             foreach (object descriptor in CreateDescriptors(CommittedRealmContext()))
             {
-                if (Category(descriptor) == "Presentation" || Id(descriptor) == championId)
+                if (Category(descriptor) == "Presentation" ||
+                    Category(descriptor) == "Build" ||
+                    Id(descriptor) == championId)
                 {
                     continue;
                 }
@@ -268,8 +270,8 @@ namespace AL.Tests.EditMode
                 // Drive the command-selection handler for every descriptor the deck can present, under
                 // both a realm-committed all-capabilities-true context (maximizes interactable commands)
                 // and a no-realm context (the invalid-context path). This closes the hierarchy/UnityEvents
-                // reachability vector: no command's selection is wired to a domain mutation, so selecting
-                // any of them loads, saves, and seeds nothing regardless of availability.
+                // reachability vector. The live building path is exercised against an empty wallet here:
+                // gameplay authority rejects it before mutation, while deferred commands stay inert.
                 MethodInfo handle = controllerType.GetMethod(
                     "HandleCommandSelected", BindingFlags.Instance | BindingFlags.NonPublic);
                 Assert.That(handle, Is.Not.Null, "HandleCommandSelected must exist to be exercised.");

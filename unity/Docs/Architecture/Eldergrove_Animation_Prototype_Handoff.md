@@ -1,6 +1,6 @@
 # Eldergrove Atelier Animation Prototype Handoff
 
-**Status:** Approved motion direction implemented as an isolated Unity graybox
+**Status:** Approved motion direction implemented as an isolated Unity graybox; Workshop production successor delivered
 
 **Date:** 2026-07-27
 
@@ -14,6 +14,11 @@ grounded root growth, a settled root vault, correctly pitched rigid roof
 installation, roof-and-lantern cutaway ownership, and one contained cultivation
 cycle. It is not production art and is not connected to gameplay construction,
 saves, economy, navigation, or the live kingdom.
+
+The Workshop production successor is documented in
+`Docs/Architecture/Eldergrove_Workshop_Final_Model_And_Runtime_Binding.md`.
+That separate prefab owns the final Level `1`–`10` geometry and live-kingdom
+binding; this Atelier prototype remains isolated motion evidence.
 
 ## Delivered assets
 
@@ -79,8 +84,9 @@ Project-owner approval remains required before:
   budget before removing secondary detail;
 - raising renderer, material, light, transparency, or active-building budgets
   without representative Android and iOS device evidence;
-- connecting the prototype directly to production saves, economy, navigation,
-  or live kingdom progression.
+- connecting this animation prototype directly to production saves, economy,
+  navigation, or live kingdom progression instead of using the approved
+  production model/catalog boundary.
 
 ## Rebuild
 

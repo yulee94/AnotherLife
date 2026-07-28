@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AL.Core;
@@ -40,6 +41,7 @@ namespace AL.Services.Local
                 def.Id = bId;
                 def.DisplayName = bId.Replace("Mill", " Mill").Replace("Hall", " Hall").Replace("Mine", " Mine");
                 def.MaxLevel = 10;
+                def.ConstructionLevels = CreateConstructionLevels(bId);
                 _buildings[bId] = def;
             }
 
@@ -145,6 +147,188 @@ namespace AL.Services.Local
             realm.RealmName = name;
             realm.Description = $"{desc}\n\n{perks}";
             _realms[id] = realm;
+        }
+
+        private static List<BuildingConstructionLevelDefinition> CreateConstructionLevels(
+            string buildingId)
+        {
+            int[] baseCosts =
+            {
+                100, 175, 300, 475, 700, 1000, 1400, 1900, 2500, 3250
+            };
+            int[] durations =
+            {
+                10, 30, 120, 300, 900, 1800, 3600, 7200, 14400, 28800
+            };
+
+            int scalePercent = GetConstructionCostScalePercent(buildingId);
+            var levels = new List<BuildingConstructionLevelDefinition>(10);
+            for (int index = 0; index < baseCosts.Length; index++)
+            {
+                long budget = checked((baseCosts[index] * (long)scalePercent + 99L) / 100L);
+                levels.Add(new BuildingConstructionLevelDefinition
+                {
+                    TargetLevel = index + 1,
+                    DurationSeconds = durations[index],
+                    Costs = CreateConstructionCosts(buildingId, budget)
+                });
+            }
+
+            return levels;
+        }
+
+        private static int GetConstructionCostScalePercent(string buildingId)
+        {
+            switch (buildingId)
+            {
+                case "TownHall": return 140;
+                case "Farm":
+                case "LumberMill": return 80;
+                case "Quarry":
+                case "Market": return 90;
+                case "Storehouse": return 85;
+                case "GoldMine":
+                case "Stable":
+                case "Watchtower": return 100;
+                case "Barracks":
+                case "Workshop": return 110;
+                case "Forge": return 115;
+                case "Academy":
+                case "Embassy": return 120;
+                case "Wall": return 95;
+                default: return 100;
+            }
+        }
+
+        private static List<BuildingConstructionCostDefinition> CreateConstructionCosts(
+            string buildingId,
+            long budget)
+        {
+            switch (buildingId)
+            {
+                case "Farm":
+                case "LumberMill":
+                    return SplitCost(budget, ResourceType.Wood, 70, ResourceType.Stone, 30);
+                case "Quarry":
+                case "GoldMine":
+                    return SplitCost(budget, ResourceType.Wood, 40, ResourceType.Stone, 60);
+                case "Barracks":
+                case "Wall":
+                case "Watchtower":
+                    return SplitCost(
+                        budget,
+                        ResourceType.Stone,
+                        55,
+                        ResourceType.Wood,
+                        30,
+                        ResourceType.Gold,
+                        15);
+                case "Academy":
+                    return SplitCost(
+                        budget,
+                        ResourceType.Stone,
+                        40,
+                        ResourceType.Wood,
+                        25,
+                        ResourceType.ManaStone,
+                        35);
+                case "Forge":
+                case "Workshop":
+                    return SplitCost(
+                        budget,
+                        ResourceType.Stone,
+                        45,
+                        ResourceType.Wood,
+                        25,
+                        ResourceType.Ore,
+                        30);
+                case "Market":
+                case "Embassy":
+                    return SplitCost(
+                        budget,
+                        ResourceType.Wood,
+                        45,
+                        ResourceType.Stone,
+                        25,
+                        ResourceType.Gold,
+                        30);
+                case "Stable":
+                    return SplitCost(
+                        budget,
+                        ResourceType.Wood,
+                        55,
+                        ResourceType.Stone,
+                        25,
+                        ResourceType.Gold,
+                        20);
+                case "Storehouse":
+                    return SplitCost(budget, ResourceType.Wood, 60, ResourceType.Stone, 40);
+                case "TownHall":
+                default:
+                    return SplitCost(
+                        budget,
+                        ResourceType.Stone,
+                        45,
+                        ResourceType.Wood,
+                        35,
+                        ResourceType.Gold,
+                        20);
+            }
+        }
+
+        private static List<BuildingConstructionCostDefinition> SplitCost(
+            long budget,
+            ResourceType firstType,
+            int firstPercent,
+            ResourceType secondType,
+            int secondPercent,
+            ResourceType? thirdType = null,
+            int thirdPercent = 0)
+        {
+            if (budget <= 0 ||
+                firstPercent <= 0 ||
+                secondPercent <= 0 ||
+                firstPercent + secondPercent + thirdPercent != 100 ||
+                (thirdPercent > 0 && !thirdType.HasValue))
+            {
+                throw new InvalidOperationException(
+                    "Building construction cost profile is invalid.");
+            }
+
+            long firstAmount = Math.Max(1L, budget * firstPercent / 100L);
+            long secondAmount = Math.Max(1L, budget * secondPercent / 100L);
+            long thirdAmount = thirdPercent > 0
+                ? Math.Max(1L, budget - firstAmount - secondAmount)
+                : 0L;
+            if (thirdPercent == 0)
+            {
+                secondAmount = Math.Max(1L, budget - firstAmount);
+            }
+
+            var costs = new List<BuildingConstructionCostDefinition>
+            {
+                new BuildingConstructionCostDefinition
+                {
+                    ResourceType = firstType,
+                    Amount = firstAmount
+                },
+                new BuildingConstructionCostDefinition
+                {
+                    ResourceType = secondType,
+                    Amount = secondAmount
+                }
+            };
+
+            if (thirdType.HasValue)
+            {
+                costs.Add(new BuildingConstructionCostDefinition
+                {
+                    ResourceType = thirdType.Value,
+                    Amount = thirdAmount
+                });
+            }
+
+            return costs;
         }
 
         public RealmDefinition GetRealm(RealmId id) => _realms.TryGetValue(id, out var r) ? r : null;

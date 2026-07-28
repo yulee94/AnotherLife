@@ -71,6 +71,24 @@ namespace AL.Tests.EditMode
             }
         }
 
+        [TestCase(RealmId.Stonehold)]
+        [TestCase(RealmId.Eldergrove)]
+        [TestCase(RealmId.Crownlands)]
+        [TestCase(RealmId.Umbral)]
+        public void TownHallOwnsStableCentralHeroSlot(RealmId realmId)
+        {
+            KingdomBuildingSlotDefinition townHall =
+                KingdomBuildingLayoutCatalog
+                    .GetSlots(realmId)
+                    .Single(slot => slot.BuildingId == "TownHall");
+
+            Assert.That(
+                townHall.SlotId,
+                Is.EqualTo("kingdom.slot.town-hall"));
+            Assert.That(townHall.GridPosition, Is.EqualTo(Vector2Int.zero));
+            Assert.That(townHall.RotationQuarterTurns, Is.Zero);
+        }
+
         [Test]
         public void ResolutionUsesStableSlotsInsteadOfSaveListOrder()
         {

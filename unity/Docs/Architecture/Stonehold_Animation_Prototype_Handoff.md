@@ -1,6 +1,6 @@
 # Stonehold Workshop Animation Prototype Handoff
 
-**Status:** Approved motion direction implemented as an isolated Unity graybox
+**Status:** Approved motion direction implemented as an isolated Unity graybox; production successor delivered
 
 **Date:** 2026-07-24
 
@@ -13,6 +13,14 @@ architecture direction. It proves rigid construction stages, roof cutaway
 ownership, stable completed mass, a contained forge cue, and short functional
 bellows and hammer events. It is not production art and is not connected to
 gameplay construction, saves, economy, navigation, or the live kingdom.
+
+The production successor is documented in
+`Docs/Architecture/Stonehold_Workshop_Final_Model_And_Runtime_Binding.md`.
+That separate prefab now supplies the final dimensions, cumulative Level
+`1`–`10` geometry, atlas, colliders, LODs, Level `10` capstone, packaged
+catalog entry, and direct gameplay-authoritative live-kingdom binding. This
+prototype remains isolated animation evidence and is not used as the live
+model.
 
 ## Delivered assets
 
@@ -74,8 +82,9 @@ Project-owner approval remains required before:
   removing secondary detail;
 - raising renderer, material, light, transparency, or active-building budgets
   without representative Android and iOS device evidence;
-- connecting the prototype directly to production saves, economy, navigation,
-  or live kingdom progression.
+- connecting this animation prototype directly to production saves, economy,
+  navigation, or live kingdom progression instead of using the approved
+  production model/catalog boundary.
 
 ## Rebuild
 

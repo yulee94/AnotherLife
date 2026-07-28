@@ -90,6 +90,32 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
+        public void RealmSelectionUsesApprovedFlatEmblems()
+        {
+            object record = R.RecordById("al_scene_realm_selection");
+            OpenScene(record, out Scene scene);
+            object controller = FindComponent(scene, R.Runtime("AL.UI.RealmSelection.RealmSelectionController"));
+            var serialized = new SerializedObject((UnityEngine.Object)controller);
+
+            AssertSpriteReference(
+                serialized,
+                "_stoneholdEmblem",
+                "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Stonehold_Flat_256_v001.png");
+            AssertSpriteReference(
+                serialized,
+                "_eldergroveEmblem",
+                "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Eldergrove_Flat_256_v001.png");
+            AssertSpriteReference(
+                serialized,
+                "_crownlandsEmblem",
+                "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Crownlands_Flat_256_v001.png");
+            AssertSpriteReference(
+                serialized,
+                "_umbralEmblem",
+                "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Umbral_Flat_256_v001.png");
+        }
+
+        [Test]
         public void DuplicateEventSystemIsDrift()
         {
             object record = R.RecordById("al_scene_kingdom");
@@ -208,6 +234,19 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.IsTrue(diffs.Any(d => d.Contains(fragment)),
                 $"Expected a diff containing '{fragment}'. Diffs: {string.Join(" | ", diffs)}");
             Assert.AreEqual("Drifted", R.Prop(result, "Status").ToString());
+        }
+
+        private static void AssertSpriteReference(
+            SerializedObject serialized,
+            string propertyName,
+            string expectedAssetPath)
+        {
+            Sprite expected = AssetDatabase.LoadAssetAtPath<Sprite>(expectedAssetPath);
+            Assert.That(expected, Is.Not.Null, $"Missing approved emblem at {expectedAssetPath}.");
+
+            SerializedProperty property = serialized.FindProperty(propertyName);
+            Assert.That(property, Is.Not.Null, $"Missing serialized emblem field {propertyName}.");
+            Assert.That(property.objectReferenceValue, Is.SameAs(expected), propertyName);
         }
 
         private static object FindComponent(Scene scene, Type type)

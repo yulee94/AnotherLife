@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 076f13bab4264dbba054921ef1c9a7f6, type: 3}
+  m_Name: KingdomBuildingModelCatalog
+  m_EditorClassIdentifier: 
+  entries:
+  - modelId: building.eldergrove.workshop.production.v1
+    realmId: 2
+    buildingId: Workshop
+    prefab: {fileID: 955633731617476343, guid: 856e9f0cea18f4647812c4467a05d991, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 6b478526cd4084f87a7b34095d9cc1cd, type: 2}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.stonehold.workshop.production.v1
+    realmId: 1
+    buildingId: Workshop
+    prefab: {fileID: 2707078820881950298, guid: fa8beffdd2c1045579a3fbd5c25ef181, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: f16c72f88ea9045b09dbeeb2e9f9e25a, type: 2}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.crownlands.workshop.production.v1
+    realmId: 3
+    buildingId: Workshop
+    prefab: {fileID: 7794163945326938044, guid: af08230ec23a84ed59fe22cb35dc22df, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 7d438dcf308ea4e1d943221428f1d250, type: 2}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.umbral.workshop.production.v1
+    realmId: 4
+    buildingId: Workshop
+    prefab: {fileID: 2170986007990784864, guid: 197149fd997cd4a59b110b4722bc7e68, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: fe3a44a5e1ef4a06ac99d628640257af, type: 2}
+    strategicBoardScale: 0.12
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.stonehold.townhall.production.v1
+    realmId: 1
+    buildingId: TownHall
+    prefab: {fileID: 6390210644148224361, guid: 8efaf25037c3b444f86bfe62ea193ed7, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: f16c72f88ea9045b09dbeeb2e9f9e25a, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.eldergrove.townhall.production.v1
+    realmId: 2
+    buildingId: TownHall
+    prefab: {fileID: 6718489068813069786, guid: 64552283a5bd040f08d3f41d6a94ca5a, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 6b478526cd4084f87a7b34095d9cc1cd, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.crownlands.townhall.production.v1
+    realmId: 3
+    buildingId: TownHall
+    prefab: {fileID: 133079770350490369, guid: 40d5f7687fed640fd8c0d4b1868ff0ef, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: 7d438dcf308ea4e1d943221428f1d250, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10
+  - modelId: building.umbral.townhall.production.v1
+    realmId: 4
+    buildingId: TownHall
+    prefab: {fileID: 1554135779196789712, guid: 1a01ccaafe3d44864b31d30ef7091279, type: 3}
+    realmMotionProfile: {fileID: 11400000, guid: fe3a44a5e1ef4a06ac99d628640257af, type: 2}
+    strategicBoardScale: 0.09
+    minimumLevel: 1
+    maximumLevel: 10

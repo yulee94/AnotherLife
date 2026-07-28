@@ -1,0 +1,140 @@
+# Crownlands Town Hall Level Blockout Handoff
+
+**Status:** Graybox proof passed; final production model and live binding now
+implemented
+
+**Date:** 2026-07-28
+
+**Building identity:** `TownHall`
+
+**Stable slot identity:** `kingdom.slot.town-hall`
+
+This handoff records the owner-approved Crownlands Town Hall source and the
+deterministic Level `1`, `6`, and `10` Unity proof that preceded production.
+The final model now enters the runtime catalog under the separate
+`Crownlands_TownHall_Final_Model_And_Runtime_Binding.md` contract without
+inventing gameplay progression, economy, save, timer, quest, worker, or
+narrative authority.
+
+## Review assets
+
+- Source:
+  `Assets/AL/Art/Architecture/ConceptSheets/architecture_crownlands_townhall_level_progression_v001.png`
+- Builder:
+  `Assets/AL/Scripts/Editor/Architecture/CrownlandsTownHallLevelBlockoutBuilder.cs`
+- Level `1`:
+  `Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Crownlands_TownHall_Level01_Blockout.prefab`
+- Level `6`:
+  `Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Crownlands_TownHall_Level06_Blockout.prefab`
+- Level `10`:
+  `Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Crownlands_TownHall_Level10_Blockout.prefab`
+- Review scene:
+  `Assets/AL/Scenes/Prototypes/CrownlandsTownHallLevelBlockout.unity`
+
+The review scene is excluded from build settings. The prefabs have no
+dependency on the source concept sheet.
+
+## Major design-direction decisions
+
+1. Level `1` is a complete broad civic hall with one fixed centered clipped
+   entrance, a strong axial public approach, paired entrance piers,
+   disciplined pale-stone bays, and correctly pitched blue-slate roof groups.
+   It is not a cathedral, palace, throne room, observatory, or realm landmark.
+2. Levels `2`–`6` add cumulative foundation locks, one records wing, a
+   sheltered public threshold, a grounded silver meridian load path, a
+   balancing steward wing, and exactly two lower thick civic/service towers
+   without moving the entrance, pivot, or stable slot.
+3. Levels `7`–`9` add a restrained upper council course, rear service
+   circulation, and forecourt integration while retaining the broad working
+   civic mass.
+4. Level `10` adds the Concord Meridian. Exactly two established grounded
+   towers directly support one shallow fixed silver arch close above the roof.
+   Its apex block is solid, unmarked, and static; it is not a clock, lightning
+   device, Stormwright calibration instrument, floating ring, or royal symbol.
+5. The graybox stays collider-free. Named selection and navigation volume
+   previews validate candidate coverage without becoming live physics or save
+   authority.
+6. Five opaque instanced graybox material families prove value separation.
+   Final production art should merge them into the approved target of one
+   architectural atlas plus one localized accent material.
+
+Changing the civic role, fixed axial entrance, paired-tower load path,
+cumulative ladder, restrained static meridian, or gameplay-authoritative level
+rule requires owner approval.
+
+## Verified engineering properties
+
+- Cumulative groups: Level `1` contains one delta, Level `6` contains six, and
+  Level `10` contains all ten.
+- Renderer counts: `29`, `67`, and `101`; each stays within the static proof
+  ceiling of `120`.
+- Materials: five instancing-enabled opaque review materials.
+- Static behavior: no `MonoBehaviour`, Animator, particles, audio, light,
+  collider, motion vector, light-probe, reflection-probe, or shadow work inside
+  the review prefabs.
+- Roof safety: both Level `1` roof ridges are mathematically higher than their
+  corresponding eaves.
+- Spatial safety: all three anchors pass their approved width, depth, and
+  height envelopes; Level `10` stays inside `15.2 m × 14.2 m × 12.6 m`.
+- Identity: `Entrance`, `CameraFocus`, `Activity_00`, `Output_00`, and both
+  collider-review volumes remain stable across anchors.
+- Protected form: Levels `6` and `10` retain exactly two grounded civic towers;
+  the Level `10` arch has two direct supports and one solid unmarked apex block.
+- Dependencies: the source sheet is not a prefab dependency and the review
+  scene is outside build settings.
+
+## Validation
+
+| Gate | Result |
+| --- | --- |
+| Visual verdict | `92 / 100`, pass |
+| Static mobile safety | `95 / 100`, pass |
+| Crownlands Town Hall focused EditMode | `17 / 17` |
+| Android Architecture EditMode | `183 / 183` |
+| iOS Architecture EditMode | `183 / 183` |
+| iOS deployment floor | `15.0` |
+| iOS simulator architecture | ARM64 |
+
+The static mobile-safety score is:
+
+| Category | Score |
+| --- | ---: |
+| Renderer and batching discipline | `19 / 20` |
+| Opaque instanced material discipline | `19 / 20` |
+| Sleeping/static effect discipline | `20 / 20` |
+| Cumulative hierarchy and LOD readiness | `19 / 20` |
+| Spatial, selection, and strategic readability | `18 / 20` |
+| **Total** | **`95 / 100`** |
+
+The score applies to graybox structure, not final runtime performance. The
+review assets are not bound into the packaged catalog, so this change adds no
+live district draw calls, texture residency, save data, or upgrade commands.
+
+## Production closure and remaining validation
+
+The final production pass now supplies:
+
+- final Level `1`–`10` cumulative topology preserving the broad civic mass,
+  clipped entrance, paired grounded towers, and proven silhouettes;
+- one Town Hall RGB atlas plus one restrained non-emissive blue accent;
+- exactly two final root box colliders;
+- four LOD bands at `1,584 / 1,412 / 924 / 652` triangles with
+  `10 / 10 / 10 / 3` renderers;
+- exact `RealmId.Crownlands + BuildingId.TownHall` catalog binding to
+  `building.crownlands.townhall.production.v1`;
+- direct confirmed-level presentation plus session-only
+  `crownlands.stormwright` construction motion.
+
+Still required:
+
+- Measure compact iPhone and representative Android framing in the live kingdom
+  scene.
+- Profile populated-district memory, draw calls, triangles, texture residency,
+  and package-size impact on representative devices.
+- Keep live upgrade commands blocked on the open progression, economy, save,
+  and game-data authority work.
+
+## Realm sequence status
+
+All four realm graybox proofs, final production models, and direct live
+bindings are complete under the shared Town Hall contract.

@@ -1073,7 +1073,6 @@ namespace AL.Tests.EditMode
             {
                 "Kingdom/Quests/LocalQuestService.cs",
                 "Kingdom/Research/LocalResearchService.cs",
-                "Services/Local/LocalBuildingService.cs",
                 "Services/Local/LocalTrainingService.cs",
                 "Utilities/DemoInitializer.cs"
             };

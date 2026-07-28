@@ -53,6 +53,30 @@ namespace AL.Tests.EditMode.RealmSelection
         }
 
         [Test]
+        public void PackagedCatalogFilePathBecomesAFileRequestUri()
+        {
+            string streamingAssetsRoot = Path.Combine(Path.GetTempPath(), "Another Life StreamingAssets");
+
+            string requestUri = RealmCatalogRuntimeHost.BuildRequestUri(streamingAssetsRoot);
+
+            Assert.That(requestUri, Does.StartWith("file:"));
+            Assert.That(
+                new System.Uri(requestUri).LocalPath,
+                Is.EqualTo(Path.GetFullPath(Path.Combine(streamingAssetsRoot, RealmCatalogRuntime.RelativePath))));
+        }
+
+        [Test]
+        public void PackagedCatalogRequestPreservesRemoteAndAndroidUriRoots()
+        {
+            Assert.That(
+                RealmCatalogRuntimeHost.BuildRequestUri("jar:file:///game.apk!/assets"),
+                Is.EqualTo("jar:file:///game.apk!/assets/GameData/al_realm_catalog.json"));
+            Assert.That(
+                RealmCatalogRuntimeHost.BuildRequestUri("https://content.example.test/assets"),
+                Is.EqualTo("https://content.example.test/assets/GameData/al_realm_catalog.json"));
+        }
+
+        [Test]
         public void ParserRejectsUnsupportedVersionPolicyAndDuplicateRealm()
         {
             Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"0.1.0\"", "\"9.0.0\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-UNSUPPORTED"));

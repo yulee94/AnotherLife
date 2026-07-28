@@ -301,6 +301,40 @@ namespace AL.Tests.EditMode
                 Does.Contain("SAVE_STABLE_ID_PRESERVED_UNKNOWN"));
         }
 
+        [TestCase(
+            11,
+            false,
+            0,
+            "SAVE_BUILDING_LEVEL_ABOVE_CAP")]
+        [TestCase(
+            10,
+            true,
+            1700000000,
+            "SAVE_BUILDING_UPGRADE_ABOVE_CAP")]
+        public void BuildingLevelCapContradictionsFailClosed(
+            int level,
+            bool isUpgrading,
+            long completionTimestamp,
+            string expectedCode)
+        {
+            string buildings =
+                "[{\"BuildingId\":\"building_a\",\"Level\":" + level +
+                ",\"IsUpgrading\":" + isUpgrading.ToString().ToLowerInvariant() +
+                ",\"UpgradeCompleteTimestamp\":" + completionTimestamp + "}]";
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(buildings: buildings),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            AssertFlag(candidate.DisabledDomains, SaveSemanticDomain.Buildings);
+            Assert.That(
+                candidate.Diagnostics.Select(item => item.Code),
+                Does.Contain(expectedCode));
+        }
+
         [Test]
         public void RealmGemHomeRealmCannotUseNone()
         {
