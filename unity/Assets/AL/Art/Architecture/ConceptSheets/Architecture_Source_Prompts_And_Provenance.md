@@ -545,3 +545,67 @@ Avoid: workshop tools, forge bay, large chimney, throne, castle keep towers, cat
   progression, catalog, build-setting, or live-kingdom binding
 - Handoff:
   `Docs/Architecture/Stonehold_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Eldergrove Town Hall Level 1/6/10 production source
+
+- File: `architecture_eldergrove_townhall_level_progression_v001.png`
+- Status: Owner-approved Eldergrove Town Hall source; Unity graybox gate passed
+- Generated: 2026-07-27
+- Tool path: Codex built-in image generation
+- Source type: AI-assisted production-direction proposal derived from approved
+  Eldergrove material and construction language
+- Source reference:
+  `architecture_eldergrove_modular_workshop_detail_v001.png`
+- Dimensions: `1536 x 1024`
+- Byte length: `2,449,185`
+- SHA-256:
+  `68130063b7c3f078f81e0d95f6d849e2cf72b1eb1189ba4cbec3e16275eaacac`
+- Runtime authority: None. The sheet is source-only and does not establish
+  gameplay levels, costs, durations, save fields, economy, final topology,
+  colliders, LODs, catalog binding, or measured device performance.
+
+Owner decision recorded 2026-07-27: approve the candidate and continue into
+the deterministic Eldergrove Town Hall Level `1`, `6`, and `10` Unity graybox.
+
+### Recorded Eldergrove Town Hall generation specification
+
+```text
+Use case: stylized-concept
+Asset type: production concept sheet for a mobile Unity kingdom building
+Input image: Image 1 is a style, material, and construction-language reference only. Preserve Eldergrove pale aged stone, authored load-bearing living roots, dark timber, weathered bronze collars, restrained moss/lichen, dark production board, and premium realistic mystical-medieval rendering. Do not copy the workshop layout, cultivation table, seed lantern, roof turret, props, exact root paths, or exact geometry.
+Primary request: design the Eldergrove Town Hall as a hero-scale civic anchor shown at three cumulative states: Level 1, Level 6, and Level 10. It is an open practical public council hall at the center of a working settlement, not a palace, temple, shrine, castle keep, greenhouse, workshop, throne room, or giant tree.
+Subject and progression: Level 1 is a complete compact weatherproof civic hall organized around an open pale-stone court, one clear centered public entrance facing the viewer, sheltered council floor, drainage, dark timber gallery edges, and exactly three young but structural living-root arches physically collared into stone footings. The entrance remains open and readable. Level 6 keeps that exact pivot, entrance, and fixed rectangular footprint, then adds low unequal steward and records galleries, a broader sheltered assembly canopy, mature versions of the same three root arches, bronze load collars, rear circulation, and one deterministic council-canopy load path. Level 10 keeps every earlier module and adds the grounded Open Crown Arbor: the same three mature load-bearing root arches rise from their established footings to carry a fixed weathered-bronze ring framing a truly open sky oculus above the civic hall. The ring and roots are architectural, static, and physically supported. There is no object, lantern, seed, orb, flame, crystal, or glow inside the oculus.
+Composition/framing: wide landscape production sheet. Three equal large three-quarter elevated views in one row, same camera, scale, entrance direction, and ground plane, reading left-to-right Level 1, Level 6, Level 10. Beneath them include three clean black silhouette thumbnails and one small top-down footprint inset proving a fixed rectangular center slot and unchanged front entrance. Include one small neutral human scale figure at the far edge only. No exploded kit in this first sheet.
+Style/medium: original high-end game architecture concept art with production-model clarity, believable modular construction, large readable forms, mobile-friendly simplification, crisp edges, restrained organic detail, adult serious tone.
+Lighting/mood: neutral studio/gameplay lighting with readable stone, root, timber, and bronze midtones. Natural warm interior light may appear only as tiny window warmth. No green emission and no cinematic fog hiding structure.
+Color palette: pale gray-beige stone, deep bark umber, dark weathered timber, muted moss green used sparingly, aged bronze collars and ring, tiny warm interior amber.
+Materials/textures: credible masonry courses, roots that widen into grounded footings and follow visible compression paths, physical bronze collars and fasteners, durable timber galleries, restrained wear and repair. Roof and canopy planes must be physically correct, supported, and drain away from the open court. Later levels are cumulative additions, never unrelated replacements.
+Protected identity: exactly three primary authored root arches remain countable at every strategic stage; open central civic court; breathable entrance; pale-stone and root load path; Level 10 open-sky oculus carried by the same grounded arches. Realm identity must survive with moss, leaves, particles, glow, and small props removed.
+Constraints: fixed entrance, pivot, footprint, and cumulative Level 1 to 6 to 10 growth; strategic-view readability; grounded load paths; no text, letters, numbers, labels, logos, heraldry, watermark, or pseudo-writing.
+Avoid: workshop cultivation table, seed lantern, glowing seed, floating orb, magical portal, dense foliage cloud, giant treehouse, cathedral, druid shrine, throne, castle keep towers, greenhouse glass, unsupported roots, procedural root tangle, roof inversion, floating pieces, broad green emission, glowing cracks, waterfalls, excessive vines, flower decoration, spike fields, weapons, giant bell, exaggerated fantasy ornament, miniature-diorama cuteness.
+```
+
+### Source review
+
+- Owner approval: explicit approval after viewing the candidate
+- Protected reads: open pale-stone civic court, breathable fixed entrance,
+  exactly three primary living-root arches, cumulative unequal galleries, and
+  the empty supported Open Crown Arbor
+- Production cautions: preserve the root count and direct load paths when
+  organic meshes replace the graybox cylinders; keep moss, leaves, emission,
+  and small props nonessential; retain the civic rather than shrine silhouette
+
+### Unity graybox verification
+
+- Review anchors: Level `1`, Level `6`, and Level `10`
+- Visual-verdict result: `pass` at `92 / 100`
+- Static mobile-safety result: `94 / 100`
+- Renderer counts: `47`, `77`, and `116`
+- Focused verification: `18 / 18` Eldergrove Town Hall EditMode tests passed
+- Platform verification: Android Architecture `166 / 166`; iOS Architecture
+  `166 / 166`
+- iOS floor: `15.0`; simulator architecture: ARM64
+- Runtime boundary: isolated review prefabs and scene only; no save, economy,
+  progression, catalog, build-setting, or live-kingdom binding
+- Handoff:
+  `Docs/Architecture/Eldergrove_TownHall_Level_Blockout_Handoff.md`

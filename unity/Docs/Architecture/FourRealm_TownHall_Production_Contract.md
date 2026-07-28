@@ -1,6 +1,7 @@
 # Four-Realm Town Hall Production Contract
 
-**Status:** Shared production direction approved; Stonehold graybox gate passed
+**Status:** Shared production direction approved; Stonehold and Eldergrove
+grayboxes passed; Crownlands source design is next
 
 **Date:** 2026-07-27
 
@@ -32,6 +33,21 @@ Stonehold graybox and mobile camera review.
   performance.
 - Graybox handoff:
   `Stonehold_TownHall_Level_Blockout_Handoff.md`
+
+## Approved Eldergrove source
+
+- Source sheet:
+  `Assets/AL/Art/Architecture/ConceptSheets/architecture_eldergrove_townhall_level_progression_v001.png`
+- Owner decision: approved on 2026-07-27 after candidate review.
+- Approved anchors: Level `1`, `6`, and `10`; one fixed center entrance and
+  open civic court; exactly three primary authored root arches; cumulative
+  unequal galleries; and the grounded static Open Crown Arbor.
+- Authority boundary: source-only visual direction. It does not enter the
+  runtime catalog or establish gameplay costs, duration, save data, economy,
+  final mesh topology, collider implementation, LOD thresholds, or device
+  performance.
+- Graybox handoff:
+  `Eldergrove_TownHall_Level_Blockout_Handoff.md`
 
 ## Major design-direction decisions
 
@@ -254,7 +270,7 @@ work around those blockers.
 
 ## Validation gates
 
-### Stonehold proof gate
+### Per-realm graybox proof gate
 
 - deterministic Level `1`, `6`, and `10` graybox;
 - stable center-slot fit and neighbor-clearance check in every realm layout;
