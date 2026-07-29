@@ -19,6 +19,7 @@ namespace AL.ChampionMode.World
         private static Material _presentationSky;
         private static Mesh _beveledCube;
         private static Mesh _cypressMesh;
+        private static RenderStateSnapshot _baselineRenderState;
         private static int _activeSceneLeases;
 
         public static int CachedSurfaceTextureCount => _sharedSurfaceTexture != null ? 1 : 0;
@@ -29,38 +30,15 @@ namespace AL.ChampionMode.World
 
         public sealed class SceneLease : IDisposable
         {
-            private readonly Material _previousSkybox;
-            private readonly AmbientMode _previousAmbientMode;
-            private readonly Color _previousAmbientLight;
-            private readonly Color _previousAmbientSkyColor;
-            private readonly Color _previousAmbientEquatorColor;
-            private readonly Color _previousAmbientGroundColor;
-            private readonly float _previousAmbientIntensity;
-            private readonly float _previousReflectionIntensity;
-            private readonly bool _previousFog;
-            private readonly FogMode _previousFogMode;
-            private readonly Color _previousFogColor;
-            private readonly float _previousFogDensity;
-            private readonly float _previousFogStartDistance;
-            private readonly float _previousFogEndDistance;
             private bool _disposed;
 
             internal SceneLease()
             {
-                _previousSkybox = RenderSettings.skybox;
-                _previousAmbientMode = RenderSettings.ambientMode;
-                _previousAmbientLight = RenderSettings.ambientLight;
-                _previousAmbientSkyColor = RenderSettings.ambientSkyColor;
-                _previousAmbientEquatorColor = RenderSettings.ambientEquatorColor;
-                _previousAmbientGroundColor = RenderSettings.ambientGroundColor;
-                _previousAmbientIntensity = RenderSettings.ambientIntensity;
-                _previousReflectionIntensity = RenderSettings.reflectionIntensity;
-                _previousFog = RenderSettings.fog;
-                _previousFogMode = RenderSettings.fogMode;
-                _previousFogColor = RenderSettings.fogColor;
-                _previousFogDensity = RenderSettings.fogDensity;
-                _previousFogStartDistance = RenderSettings.fogStartDistance;
-                _previousFogEndDistance = RenderSettings.fogEndDistance;
+                if (_activeSceneLeases == 0)
+                {
+                    _baselineRenderState = RenderStateSnapshot.Capture();
+                }
+
                 _activeSceneLeases++;
             }
 
@@ -72,21 +50,66 @@ namespace AL.ChampionMode.World
                 }
 
                 _disposed = true;
-                RenderSettings.skybox = _previousSkybox;
-                RenderSettings.ambientMode = _previousAmbientMode;
-                RenderSettings.ambientLight = _previousAmbientLight;
-                RenderSettings.ambientSkyColor = _previousAmbientSkyColor;
-                RenderSettings.ambientEquatorColor = _previousAmbientEquatorColor;
-                RenderSettings.ambientGroundColor = _previousAmbientGroundColor;
-                RenderSettings.ambientIntensity = _previousAmbientIntensity;
-                RenderSettings.reflectionIntensity = _previousReflectionIntensity;
-                RenderSettings.fog = _previousFog;
-                RenderSettings.fogMode = _previousFogMode;
-                RenderSettings.fogColor = _previousFogColor;
-                RenderSettings.fogDensity = _previousFogDensity;
-                RenderSettings.fogStartDistance = _previousFogStartDistance;
-                RenderSettings.fogEndDistance = _previousFogEndDistance;
-                ReleaseSharedResources();
+                ReleaseSceneLease();
+            }
+        }
+
+        private sealed class RenderStateSnapshot
+        {
+            private readonly Material _skybox;
+            private readonly AmbientMode _ambientMode;
+            private readonly Color _ambientLight;
+            private readonly Color _ambientSkyColor;
+            private readonly Color _ambientEquatorColor;
+            private readonly Color _ambientGroundColor;
+            private readonly float _ambientIntensity;
+            private readonly float _reflectionIntensity;
+            private readonly bool _fog;
+            private readonly FogMode _fogMode;
+            private readonly Color _fogColor;
+            private readonly float _fogDensity;
+            private readonly float _fogStartDistance;
+            private readonly float _fogEndDistance;
+
+            private RenderStateSnapshot()
+            {
+                _skybox = RenderSettings.skybox;
+                _ambientMode = RenderSettings.ambientMode;
+                _ambientLight = RenderSettings.ambientLight;
+                _ambientSkyColor = RenderSettings.ambientSkyColor;
+                _ambientEquatorColor = RenderSettings.ambientEquatorColor;
+                _ambientGroundColor = RenderSettings.ambientGroundColor;
+                _ambientIntensity = RenderSettings.ambientIntensity;
+                _reflectionIntensity = RenderSettings.reflectionIntensity;
+                _fog = RenderSettings.fog;
+                _fogMode = RenderSettings.fogMode;
+                _fogColor = RenderSettings.fogColor;
+                _fogDensity = RenderSettings.fogDensity;
+                _fogStartDistance = RenderSettings.fogStartDistance;
+                _fogEndDistance = RenderSettings.fogEndDistance;
+            }
+
+            public static RenderStateSnapshot Capture()
+            {
+                return new RenderStateSnapshot();
+            }
+
+            public void Restore()
+            {
+                RenderSettings.skybox = _skybox;
+                RenderSettings.ambientMode = _ambientMode;
+                RenderSettings.ambientLight = _ambientLight;
+                RenderSettings.ambientSkyColor = _ambientSkyColor;
+                RenderSettings.ambientEquatorColor = _ambientEquatorColor;
+                RenderSettings.ambientGroundColor = _ambientGroundColor;
+                RenderSettings.ambientIntensity = _ambientIntensity;
+                RenderSettings.reflectionIntensity = _reflectionIntensity;
+                RenderSettings.fog = _fog;
+                RenderSettings.fogMode = _fogMode;
+                RenderSettings.fogColor = _fogColor;
+                RenderSettings.fogDensity = _fogDensity;
+                RenderSettings.fogStartDistance = _fogStartDistance;
+                RenderSettings.fogEndDistance = _fogEndDistance;
             }
         }
 
@@ -838,7 +861,7 @@ namespace AL.ChampionMode.World
             RenderSettings.reflectionIntensity = 0.72f;
         }
 
-        private static void ReleaseSharedResources()
+        private static void ReleaseSceneLease()
         {
             _activeSceneLeases = Mathf.Max(0, _activeSceneLeases - 1);
             if (_activeSceneLeases > 0)
@@ -846,6 +869,8 @@ namespace AL.ChampionMode.World
                 return;
             }
 
+            _baselineRenderState?.Restore();
+            _baselineRenderState = null;
             DestroyOwnedResource(_presentationSky);
             DestroyOwnedResource(_sharedSurfaceMaterial);
             DestroyOwnedResource(_sharedEmissiveMaterial);

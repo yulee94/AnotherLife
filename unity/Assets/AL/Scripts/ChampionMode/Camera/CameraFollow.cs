@@ -28,7 +28,7 @@ namespace AL.ChampionMode.Camera
         [SerializeField] private bool _collisionEnabled = true;
         [SerializeField] private float _collisionRadius = 0.28f;
         [SerializeField] private float _collisionPadding = 0.18f;
-        [SerializeField] private LayerMask _collisionMask = ~0;
+        [SerializeField] private LayerMask _collisionMask = Physics.DefaultRaycastLayers;
         [SerializeField, Range(0f, 1f)] private float _cameraShakeScale = 0.65f;
 
         private float _yaw = 0f;
@@ -51,6 +51,7 @@ namespace AL.ChampionMode.Camera
         private float _cinematicSmoothTime = 0.16f;
         private float _defaultFieldOfView = 42f;
         private UnityEngine.Camera _camera;
+        private readonly RaycastHit[] _collisionHits = new RaycastHit[16];
 
         public void Configure(Transform target, float distance, float heightOffset, float pitch, float yaw)
         {
@@ -244,15 +245,12 @@ namespace AL.ChampionMode.Camera
                 }
 
                 transform.rotation = rotation;
-                Vector3 smoothedPosition = Vector3.SmoothDamp(
+                transform.position = ResolveFollowCameraPosition(
+                    pivot,
                     transform.position,
                     desiredPosition,
-                    ref _positionVelocity,
-                    _followSmoothTime);
-                transform.position = ResolveFinalCameraPosition(
-                    pivot,
-                    smoothedPosition,
-                    shakeOffset);
+                    shakeOffset,
+                    Time.deltaTime);
             }
             else
             {
@@ -279,23 +277,45 @@ namespace AL.ChampionMode.Camera
                 return desiredPosition;
             }
 
-            if (!Physics.SphereCast(
-                    pivot,
-                    Mathf.Max(0.05f, _collisionRadius),
-                    direction / distance,
-                    out var hit,
-                    distance,
-                    _collisionMask,
-                    QueryTriggerInteraction.Ignore))
+            int hitCount = Physics.SphereCastNonAlloc(
+                pivot,
+                Mathf.Max(0.05f, _collisionRadius),
+                direction / distance,
+                _collisionHits,
+                distance,
+                _collisionMask,
+                QueryTriggerInteraction.Ignore);
+            float nearestDistance = distance;
+            bool foundObstacle = false;
+            for (int index = 0; index < hitCount; index++)
+            {
+                RaycastHit hit = _collisionHits[index];
+                if (hit.collider == null || IsTargetHierarchy(hit.collider.transform))
+                {
+                    continue;
+                }
+
+                nearestDistance = Mathf.Min(nearestDistance, hit.distance);
+                foundObstacle = true;
+            }
+
+            if (!foundObstacle)
             {
                 return desiredPosition;
             }
 
             float safeDistance = Mathf.Clamp(
-                hit.distance - Mathf.Max(0.02f, _collisionPadding),
+                nearestDistance - Mathf.Max(0.02f, _collisionPadding),
                 0f,
                 distance);
             return pivot + direction.normalized * safeDistance;
+        }
+
+        private bool IsTargetHierarchy(Transform candidate)
+        {
+            return _target != null &&
+                   candidate != null &&
+                   (candidate == _target || candidate.IsChildOf(_target));
         }
 
         private Vector3 ResolveFinalCameraPosition(
@@ -304,6 +324,26 @@ namespace AL.ChampionMode.Camera
             Vector3 shakeOffset)
         {
             return ResolveCameraCollision(pivot, smoothedPosition + shakeOffset);
+        }
+
+        private Vector3 ResolveFollowCameraPosition(
+            Vector3 pivot,
+            Vector3 currentPosition,
+            Vector3 desiredPosition,
+            Vector3 shakeOffset,
+            float deltaTime)
+        {
+            Vector3 smoothedPosition = Vector3.SmoothDamp(
+                currentPosition,
+                desiredPosition,
+                ref _positionVelocity,
+                _followSmoothTime,
+                Mathf.Infinity,
+                Mathf.Max(0f, deltaTime));
+            return ResolveFinalCameraPosition(
+                pivot,
+                smoothedPosition,
+                shakeOffset);
         }
 
         private void UpdateCinematicCamera()

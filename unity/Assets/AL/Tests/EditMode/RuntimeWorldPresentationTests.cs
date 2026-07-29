@@ -203,6 +203,73 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void CameraFollow_SmoothedRecoveryReturnsToDesiredDistance()
+        {
+            _root = new GameObject("A7_CameraSmoothedRecoveryRoot");
+            var cameraObject = new GameObject("Camera");
+            cameraObject.transform.SetParent(_root.transform);
+            var follow = cameraObject.AddComponent<CameraFollow>();
+            var wall = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            wall.transform.SetParent(_root.transform);
+            wall.transform.position = new Vector3(0f, 1.5f, -4f);
+            wall.transform.localScale = new Vector3(5f, 5f, 0.3f);
+            Physics.SyncTransforms();
+
+            Vector3 pivot = new Vector3(0f, 1.5f, 0f);
+            Vector3 desired = new Vector3(0f, 1.5f, -8f);
+            Vector3 current = InvokeFollowPosition(
+                follow,
+                pivot,
+                desired,
+                desired,
+                Vector3.zero,
+                1f / 60f);
+            float obstructedDistance = Vector3.Distance(pivot, current);
+            Assert.That(current.z, Is.GreaterThan(-4f));
+
+            Object.DestroyImmediate(wall);
+            Physics.SyncTransforms();
+            for (int frame = 0; frame < 30; frame++)
+            {
+                current = InvokeFollowPosition(
+                    follow,
+                    pivot,
+                    current,
+                    desired,
+                    Vector3.zero,
+                    1f / 60f);
+            }
+
+            float recoveredDistance = Vector3.Distance(pivot, current);
+            Assert.That(recoveredDistance, Is.GreaterThan(obstructedDistance + 2f));
+            Assert.That(recoveredDistance, Is.EqualTo(8f).Within(0.08f));
+            Assert.That(current.z, Is.LessThan(-7.9f));
+        }
+
+        [Test]
+        public void CameraCollision_IgnoresConfiguredTargetHierarchy()
+        {
+            _root = new GameObject("A7_TargetHierarchyRoot");
+            var target = new GameObject("ChampionTarget");
+            target.transform.SetParent(_root.transform);
+            var targetChild = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            targetChild.name = "ChampionTargetVisualCollider";
+            targetChild.transform.SetParent(target.transform);
+            targetChild.transform.position = new Vector3(0f, 1.5f, -2f);
+            targetChild.transform.localScale = new Vector3(5f, 5f, 0.3f);
+            var cameraObject = new GameObject("Camera");
+            cameraObject.transform.SetParent(_root.transform);
+            var follow = cameraObject.AddComponent<CameraFollow>();
+            follow.Configure(target.transform, 8f, 1.5f, 0f, 0f);
+            Physics.SyncTransforms();
+
+            Vector3 pivot = new Vector3(0f, 1.5f, 0f);
+            Vector3 desired = new Vector3(0f, 1.5f, -8f);
+
+            Assert.That(InvokeCollision(follow, pivot, desired), Is.EqualTo(desired));
+        }
+
+        [Test]
         public void CameraCollision_IsAppliedAfterShakeOffset()
         {
             _root = new GameObject("A7_CameraShakeCollisionRoot");
@@ -266,6 +333,42 @@ namespace AL.Tests.EditMode
             Assert.That(RuntimeWorldPresentation.OwnedMeshCount, Is.Zero);
         }
 
+        [Test]
+        public void SceneLease_OutOfOrderDisposalRestoresBaselineOnlyAfterFinalLease()
+        {
+            Material previousSkybox = RenderSettings.skybox;
+            bool previousFog = RenderSettings.fog;
+            _root = new GameObject("A7_NestedLifecycleRoot");
+            RuntimeWorldPresentation.SceneLease first = null;
+            RuntimeWorldPresentation.SceneLease second = null;
+            try
+            {
+                first = RuntimeWorldPresentation.BeginScenePresentation();
+                RuntimeWorldPresentation.BuildArenaBackdrop(_root.transform, true);
+                Material presentationSky = RenderSettings.skybox;
+                second = RuntimeWorldPresentation.BeginScenePresentation();
+
+                first.Dispose();
+
+                Assert.That(RenderSettings.skybox, Is.SameAs(presentationSky));
+                Assert.That(RuntimeWorldPresentation.CachedSurfaceTextureCount, Is.EqualTo(1));
+                Assert.That(RuntimeWorldPresentation.OwnedMeshCount, Is.GreaterThan(0));
+
+                second.Dispose();
+
+                Assert.That(RenderSettings.skybox, Is.SameAs(previousSkybox));
+                Assert.That(RenderSettings.fog, Is.EqualTo(previousFog));
+                Assert.That(RuntimeWorldPresentation.CachedSurfaceTextureCount, Is.Zero);
+                Assert.That(RuntimeWorldPresentation.CachedSurfaceMaterialCount, Is.Zero);
+                Assert.That(RuntimeWorldPresentation.OwnedMeshCount, Is.Zero);
+            }
+            finally
+            {
+                second?.Dispose();
+                first?.Dispose();
+            }
+        }
+
         private static Vector3 InvokeCollision(
             CameraFollow follow,
             Vector3 pivot,
@@ -276,6 +379,23 @@ namespace AL.Tests.EditMode
                 BindingFlags.Instance | BindingFlags.NonPublic);
             Assert.That(method, Is.Not.Null);
             return (Vector3)method.Invoke(follow, new object[] { pivot, desired });
+        }
+
+        private static Vector3 InvokeFollowPosition(
+            CameraFollow follow,
+            Vector3 pivot,
+            Vector3 current,
+            Vector3 desired,
+            Vector3 shake,
+            float deltaTime)
+        {
+            MethodInfo method = typeof(CameraFollow).GetMethod(
+                "ResolveFollowCameraPosition",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(method, Is.Not.Null);
+            return (Vector3)method.Invoke(
+                follow,
+                new object[] { pivot, current, desired, shake, deltaTime });
         }
     }
 }
