@@ -69,7 +69,11 @@ namespace AL.Data.Catalogs
                     StableReference(
                         "rare_resource_id",
                         allowedStringValues: GameDataWalletResourceReferences.StableIds),
-                    StableReferenceArray("capability_profile_ids", 1, MaximumProfileReferences),
+                    StableReferenceArray(
+                        "capability_profile_ids",
+                        1,
+                        1,
+                        allowedStringValues: GameDataRealmCapabilityProfiles.StableIds),
                     AssetReference(
                         "asset_ref",
                         GameDataRealmReferences.AssetReferences)
@@ -82,6 +86,12 @@ namespace AL.Data.Catalogs
                         "REALM-RARE-RESOURCE-REFERENCE",
                         "The realm name, numeric value, and rare-resource ID do not match the reviewed exact relation.",
                         ValidateRealmRareResourceRelation),
+                    new GameDataCatalogRecordConstraint(
+                        "realm_capability_profile_reference",
+                        "capability_profile_ids",
+                        "REALM-CAPABILITY-PROFILE-REFERENCE",
+                        "The realm and capability-profile IDs do not match the reviewed exact relation.",
+                        ValidateRealmCapabilityProfileRelation),
                     new GameDataCatalogRecordConstraint(
                         "realm_world_asset_reference",
                         "asset_ref",
@@ -286,6 +296,21 @@ namespace AL.Data.Catalogs
                 assetReference);
         }
 
+        private static bool? ValidateRealmCapabilityProfileRelation(
+            string realmStableId,
+            IReadOnlyDictionary<string, GameDataValue> fields)
+        {
+            IReadOnlyList<string> profileIds;
+            if (!TryReadStringArray(fields, "capability_profile_ids", out profileIds))
+            {
+                return null;
+            }
+
+            return GameDataRealmCapabilityProfiles.IsApprovedRealmRelation(
+                realmStableId,
+                profileIds);
+        }
+
         private static bool TryReadRealmIdentity(
             IReadOnlyDictionary<string, GameDataValue> fields,
             out string legacyName,
@@ -326,6 +351,39 @@ namespace AL.Data.Catalogs
                     : null;
             value = stringValue == null ? null : stringValue.Value;
             return stringValue != null;
+        }
+
+        private static bool TryReadStringArray(
+            IReadOnlyDictionary<string, GameDataValue> fields,
+            string fieldName,
+            out IReadOnlyList<string> values)
+        {
+            GameDataValue fieldValue;
+            var arrayValue =
+                fields.TryGetValue(fieldName, out fieldValue)
+                    ? fieldValue as GameDataArrayValue
+                    : null;
+            if (arrayValue == null)
+            {
+                values = null;
+                return false;
+            }
+
+            var mutableValues = new string[arrayValue.Count];
+            for (var index = 0; index < arrayValue.Count; index++)
+            {
+                var stringValue = arrayValue.Items[index] as GameDataStringValue;
+                if (stringValue == null)
+                {
+                    values = null;
+                    return false;
+                }
+
+                mutableValues[index] = stringValue.Value;
+            }
+
+            values = mutableValues;
+            return true;
         }
 
         private static GameDataCatalogFieldRule LegacyEnum(
@@ -384,7 +442,8 @@ namespace AL.Data.Catalogs
             string name,
             int minimumItems,
             int maximumItems,
-            string referenceFamily = null)
+            string referenceFamily = null,
+            IEnumerable<string> allowedStringValues = null)
         {
             return new GameDataCatalogFieldRule(
                 name,
@@ -398,7 +457,8 @@ namespace AL.Data.Catalogs
                     true,
                     nonBlank: true,
                     stableId: true,
-                    referenceFamily: referenceFamily));
+                    referenceFamily: referenceFamily,
+                    allowedStringValues: allowedStringValues));
         }
     }
 }
