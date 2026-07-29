@@ -5,6 +5,7 @@ using System.Linq;
 using AL.Core;
 using AL.Data.Runtime;
 using AL.Kingdom;
+using AL.Kingdom.Visuals.Architecture;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -228,7 +229,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void CityLayoutRendersBuiltUnbuiltAndInvalidStatesAtStableSlots()
+        public void DefaultCatalogRendersProductionTownHallAndRetainsStateMarkers()
         {
             DestroyIfPresent("Kingdom_CityBoard");
             var engineObject = new GameObject("KingdomBuildingLayoutTests.Engine");
@@ -252,12 +253,36 @@ namespace AL.Tests.EditMode
                 GameObject board = GameObject.Find("Kingdom_CityBoard");
                 Assert.That(board, Is.Not.Null);
 
-                AssertPresentationRoot(
+                KingdomBuildingPresentation townHall =
+                    presentations.Single(item => item.BuildingId == "TownHall");
+                Transform townHallRoot = AssertPresentationRoot(
                     engine,
                     board.transform,
-                    presentations.Single(item => item.BuildingId == "TownHall"),
-                    "Base",
+                    townHall,
+                    "ProductionModel",
                     "Lv 1");
+                Assert.That(
+                    townHallRoot
+                        .Cast<Transform>()
+                        .Count(child => child.name == "ProductionModel"),
+                    Is.EqualTo(1));
+                Assert.That(townHallRoot.Find("Base"), Is.Null);
+
+                Transform productionModel =
+                    townHallRoot.Find("ProductionModel");
+                KingdomBuildingLevelModel levelModel =
+                    productionModel.GetComponent<KingdomBuildingLevelModel>();
+                Assert.That(levelModel, Is.Not.Null);
+                Assert.That(
+                    levelModel.AppliedLevel,
+                    Is.EqualTo(townHall.ConfirmedLevel));
+
+                KingdomBuildingSelectable selectable =
+                    productionModel.GetComponent<KingdomBuildingSelectable>();
+                Assert.That(selectable, Is.Not.Null);
+                Assert.That(levelModel.SelectionCollider, Is.Not.Null);
+                Assert.That(levelModel.SelectionCollider.enabled, Is.True);
+
                 AssertPresentationRoot(
                     engine,
                     board.transform,
@@ -278,7 +303,124 @@ namespace AL.Tests.EditMode
             }
         }
 
-        private static void AssertPresentationRoot(
+        [Test]
+        public void NullModelCatalogRendersBuiltTownHallFallback()
+        {
+            DestroyIfPresent("Kingdom_CityBoard");
+            var engineObject = new GameObject("KingdomBuildingLayoutTests.FallbackEngine");
+
+            try
+            {
+                var engine = engineObject.AddComponent<CityLayoutEngine>();
+                engine.ConfigureModelCatalog(null);
+                KingdomBuildingPresentation townHall =
+                    KingdomBuildingPresentationResolver
+                        .Resolve(
+                            RealmId.Crownlands,
+                            new[] { State("TownHall", 4) })
+                        .Single(item => item.BuildingId == "TownHall");
+
+                engine.AutoPlaceBuildings(
+                    RealmId.Crownlands,
+                    new[] { townHall });
+
+                GameObject board = GameObject.Find("Kingdom_CityBoard");
+                Assert.That(board, Is.Not.Null);
+                Transform root = AssertPresentationRoot(
+                    engine,
+                    board.transform,
+                    townHall,
+                    "Base",
+                    "Lv 4");
+                Assert.That(root.Find("ProductionModel"), Is.Null);
+                Assert.That(
+                    root
+                        .Cast<Transform>()
+                        .Count(child => child.name == "ProductionModel"),
+                    Is.Zero);
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(engineObject);
+                DestroyIfPresent("Kingdom_CityBoard");
+            }
+        }
+
+        [Test]
+        public void RebuildingProductionTownHallTwiceDoesNotDuplicateRootsOrModels()
+        {
+            DestroyIfPresent("Kingdom_CityBoard");
+            var engineObject = new GameObject("KingdomBuildingLayoutTests.RebuildEngine");
+
+            try
+            {
+                var engine = engineObject.AddComponent<CityLayoutEngine>();
+                KingdomBuildingPresentation townHall =
+                    KingdomBuildingPresentationResolver
+                        .Resolve(
+                            RealmId.Crownlands,
+                            new[] { State("TownHall", 3) })
+                        .Single(item => item.BuildingId == "TownHall");
+                Transform previousRoot = null;
+                GameObject previousModel = null;
+
+                for (int rebuild = 0; rebuild < 2; rebuild++)
+                {
+                    engine.AutoPlaceBuildings(
+                        RealmId.Crownlands,
+                        new[] { townHall });
+
+                    GameObject board = GameObject.Find("Kingdom_CityBoard");
+                    Assert.That(board, Is.Not.Null);
+                    if (rebuild > 0)
+                    {
+                        Assert.That(
+                            previousRoot == null,
+                            Is.True,
+                            "Refresh must destroy the previous building root.");
+                        Assert.That(
+                            previousModel == null,
+                            Is.True,
+                            "Refresh must destroy the previous production model.");
+                    }
+
+                    Assert.That(
+                        board.transform
+                            .Cast<Transform>()
+                            .Count(
+                                child =>
+                                    child.name ==
+                                    "Building_" + townHall.Slot.SlotId),
+                        Is.EqualTo(1));
+
+                    Transform root = AssertPresentationRoot(
+                        engine,
+                        board.transform,
+                        townHall,
+                        "ProductionModel",
+                        "Lv 3");
+                    Assert.That(
+                        root
+                            .Cast<Transform>()
+                            .Count(child => child.name == "ProductionModel"),
+                        Is.EqualTo(1));
+                    Assert.That(
+                        root.Find("ProductionModel")
+                            .GetComponent<KingdomBuildingLevelModel>()
+                            .AppliedLevel,
+                        Is.EqualTo(townHall.ConfirmedLevel));
+                    previousRoot = root;
+                    previousModel = root.Find("ProductionModel").gameObject;
+                }
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(engineObject);
+                DestroyIfPresent("Kingdom_CityBoard");
+            }
+        }
+
+        private static Transform AssertPresentationRoot(
             CityLayoutEngine engine,
             Transform board,
             KingdomBuildingPresentation presentation,
@@ -287,7 +429,8 @@ namespace AL.Tests.EditMode
         {
             Transform root = board.Find("Building_" + presentation.Slot.SlotId);
             Assert.That(root, Is.Not.Null, presentation.Slot.SlotId);
-            Assert.That(root.Find(requiredChild), Is.Not.Null, requiredChild);
+            Transform visual = root.Find(requiredChild);
+            Assert.That(visual, Is.Not.Null, requiredChild);
             Assert.AreEqual(
                 engine.GridToWorld(presentation.Slot.GridPosition),
                 root.position);
@@ -301,6 +444,14 @@ namespace AL.Tests.EditMode
             TextMesh label = root.GetComponentInChildren<TextMesh>();
             Assert.That(label, Is.Not.Null);
             Assert.That(label.text, Does.Contain(requiredLabel));
+
+            var selectable =
+                visual.GetComponent<KingdomBuildingSelectable>();
+            Assert.That(
+                selectable,
+                Is.Not.Null,
+                $"{requiredChild} must expose the stable selection contract.");
+            return root;
         }
 
         private static void DestroyIfPresent(string objectName)
