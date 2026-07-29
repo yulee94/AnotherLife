@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 PACKET_VERSION = "anotherlife-main-quest-line-2026-07-23-v001"
+OMEN_1_PACKET_VERSION = "omen1-a1-2026-07-29-v003"
 REALMS = {"CROWNLANDS", "STONEHOLD", "ELDERGROVE", "UMBRAL"}
 VARIANT_QUESTS = {
     "MQ_C1_PROOF_OF_WORTH",
@@ -129,6 +130,12 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
     require(manifest["packetId"] == "ANOTHERLIFE_MAIN_QUEST_LINE", "packet ID drift")
     require(manifest["trackedIssue"] == 274, "tracked issue drift")
     require(manifest["primaryMode"] == "codex_narrative_content", "primary mode drift")
+    prologue_authority = manifest["authorities"]["prologueQuest"]
+    require(prologue_authority["questId"] == "OMEN_1", "OMEN_1 authority ID drift")
+    require(
+        prologue_authority["packetVersion"] == OMEN_1_PACKET_VERSION,
+        "OMEN_1 authority version drift",
+    )
     require(
         manifest["sourceStatus"] == "canonical_narrative_source_complete_runtime_not_wired",
         "source status drift",
@@ -231,6 +238,10 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
             require(
                 main["sourceAuthority"]["path"] == manifest["authorities"]["prologueQuest"]["path"],
                 "OMEN_1 source authority drift",
+            )
+            require(
+                main["sourceAuthority"]["version"] == prologue_authority["packetVersion"],
+                "OMEN_1 source authority version drift",
             )
         else:
             previous = main_quests[position - 1]
