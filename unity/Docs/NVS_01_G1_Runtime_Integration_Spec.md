@@ -3,15 +3,15 @@
 ## 1. Control and activation
 
 - Milestone/task: NVS-01 / G1
-- Specification version/status: `nvs01-g1-2026-07-29-v003` / approved; synchronized to A1 v003; runtime synchronization remains issue #365 step 3
+- Specification version/status: `nvs01-g1-2026-07-29-v004` / approved; synchronized to A1 v003; runtime synchronization remains issue #365 step 3
 - Primary mode: Codex coordination/review
-- Current `main` inspected: `7d026a57b400290910a3b8ad07ad64f2e7500bb5`
+- Current `main` inspected: `a97d5e5cf0afc0701ff57d6d110ce056632b4eec`
 - A1 source chain: issue #128; source PR #256 merge `be7304ed6505dae4f557472f1dc480e328404520`; authority-correction PR #258 merge `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`; realm-identity issue #365 / source PR #367 merge `ca5888afbd22c2b5a626174cd0194ce18db72260`
 - A1 packet: `omen1-a1-2026-07-29-v003`; committed canonical UTF-8/LF/no-BOM bytes: 8,317; SHA-256 `8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732`
 - Product decision: issue #138 comment `4966062298`
 - Downstream implementation: issue #134
 
-A1 contains exactly one internally valid `OMEN_1` v003 packet. PR #367 changed only `packetVersion` and `placement.eligibleRealmIds`, preserving all player-facing text, quest meaning, ordering, and the 8,317-byte size; semantic no-drift proof, the packet validator, eleven structural negative fixtures, focused identity negatives, repository gates, and hosted run `30419923467` passed. No runtime file was mixed into A1. G1 v003 is approved as the binding coordination contract, but the existing generated/runtime v002 identity remains unavailable until issue #365 step 3 synchronizes it exactly.
+A1 contains exactly one internally valid `OMEN_1` v003 packet. PR #367 changed only `packetVersion` and `placement.eligibleRealmIds`, preserving all player-facing text, quest meaning, ordering, and the 8,317-byte size; semantic no-drift proof, the packet validator, eleven structural negative fixtures, focused identity negatives, repository gates, and hosted run `30419923467` passed. No runtime file was mixed into A1. G1 v004 is approved as the binding coordination contract. It retains the v003 runtime requirements and adds only the bounded Android debug-preview identity exception in section 4 because that source set consumes the same generated Unity catalog and its regression gate cannot remain pinned to v002 while validating v003.
 
 ## 2. Goal, player outcome, and delivery target
 
@@ -52,9 +52,18 @@ No row changes narrative meaning.
 | Champion arena | Existing scene, free entry, retry, clear/defeat UI, direct Kingdom loads; no typed quest context/result | Add an adapter/context service; preserve free entry. Do not duplicate the arena. |
 | `INotificationService` | String-only messages/errors | Use a typed NVS diagnostic/result internally and map to visible localized text; #177 remains broader follow-up. |
 | `IGameDataService` / `LocalGameDataService` chapter setup | `InitializeStoryData()` creates `ChapterDefinition` objects, but `AddChapter()` discards them and the interface exposes no chapter lookup | C3 adds a realm-tagged immutable chapter dictionary and lookup; no new OMEN_1 content is seeded there. |
-| Android archive/preview | Hard-coded `NVS_01_Packet.kt` and UI references | Historical preview only. #134 must not edit it. Issue #186 may later consume generated read-only data or display a drift error; Android never writes authoritative quest state. |
+| Android archive/preview | The debug source set packages `Assets/StreamingAssets/AL/Narrative`; its read-only parser and regression tests pin the catalog version/hash, while release UI remains unavailable. | Issue #365 step 3 may atomically synchronize only the debug parser's expected packet version/hash, its focused tests, and the preview content catalog's two source-version references when the Unity catalog identity changes. No copy, UI, route, action, progress, save, or runtime behavior may change. #186 owns every broader preview-consumer or source-fidelity change; Android never writes authoritative quest state. |
 
 The existing `CH0_PROLOGUE`, `C_OMEN`, and generic `C1` are not aliases for `POST_REALM_PROLOGUE` or `CH1_REALM_INTRO`. C3 must validate and persist the approved abstract unlock through the existing realm chapter definitions: Crownlands `C1_CL`, Stonehold `C1_SH`, Eldergrove `C1_EG`, and Umbral `C1_UM`. Missing or mismatched definitions make the report transaction unavailable; G1 does not invent a parallel chapter ID family.
+
+The step 3 Android exception is limited to these paths:
+
+- `app/src/debug/java/com/example/anotherlife/data/contracts/Nvs01PreviewContracts.kt`
+- `app/src/test/java/com/example/anotherlife/data/contracts/Nvs01PreviewParserTest.kt`
+- `app/src/test/java/com/example/anotherlife/data/contracts/QuestPreviewContentParserTest.kt`
+- `unity/Assets/AL/StreamingAssets/GameData/al_quest_preview_content_catalog.json`
+
+This exception exists because `app/build.gradle.kts` supplies the generated Unity NVS catalog directly to the Android debug asset set and `Nvs01PreviewParserTest` reads that tracked file. Leaving the parser at v002 after the catalog becomes v003 makes the required Android regression gate fail rather than producing a separately deployable stale preview. The exception does not make Android authoritative, enable the release route, or supersede #186.
 
 ## 5. Runtime catalog contract
 
@@ -237,7 +246,7 @@ Potential shared edits:
 - `LocalGameDataService.cs`: C3 lookup-only shared edit described above; acquire its exclusive soft lock together with `SaveGameData.cs`, preserve every existing definition/service behavior, and release both locks when the C3 PR merges. It remains prohibited from defining OMEN_1 content.
 - `ProjectInitializer.cs`: prohibited unless a separately reviewed deterministic asset-generation requirement proves unavoidable.
 
-A1 packet and completion report are read-only inputs during engineering. Prohibited: narrative text/IDs; `app/src/main/java/com/example/anotherlife/data/simulation/NVS_01_Packet.kt`; Android preview/UI files owned by #186; any new OMEN_1 content in `LocalGameDataService.cs`; `ProjectInitializer.cs` absent a separately approved necessity; unrelated Q1-Q5 redesign; broad Chapter 1; #135 bridge; terrestrial assets; and unrelated save/economy/combat refactors.
+A1 packet and completion report are read-only inputs during engineering. Prohibited: narrative text/IDs; `app/src/main/java/com/example/anotherlife/data/simulation/NVS_01_Packet.kt`; Android preview/UI files owned by #186 except the four identity-only step 3 paths and fields listed in section 4; any new OMEN_1 content in `LocalGameDataService.cs`; `ProjectInitializer.cs` absent a separately approved necessity; unrelated Q1-Q5 redesign; broad Chapter 1; #135 bridge; terrestrial assets; and unrelated save/economy/combat refactors.
 
 ## 12. Test and fault matrix
 
@@ -247,7 +256,7 @@ C2: offer defer/accept; lore branch; arena-start action; free arena isolation; s
 
 C3: old-save default; every chapter compatibility/migration row and all four realms; every D16 row; forward version; duplicate result/dialogue/report/retry; candidate-reference identity before/after failure and success; fault before and after each Tear/report transaction boundary; nested save prohibited; post-commit notification failure; temp/install/final-verification failure; reload reconciliation; no duplicated Gold, affinity, Tear, completion, or unlock.
 
-C4: Unity batch compile, focused/full EditMode, profile-safe PlayMode scene round trip, representative scene smoke, Player build smoke when #150 permits, Kingdom/free Champion regressions, Android unit/debug regression build, catalog drift check, repository policy/hygiene, and clean final diff. #186—not #134—owns any Android preview consumer change. Every test records setup, action, saved/reloaded state, expected side effects, command, result XML/log, and unavailable checks.
+C4: Unity batch compile, focused/full EditMode, profile-safe PlayMode scene round trip, representative scene smoke, Player build smoke when #150 permits, Kingdom/free Champion regressions, Android unit/debug regression build, catalog drift check, repository policy/hygiene, and clean final diff. Outside the four identity-only step 3 exceptions in section 4, #186—not #134—owns Android preview consumer and source-fidelity changes. Every test records setup, action, saved/reloaded state, expected side effects, command, result XML/log, and unavailable checks.
 
 ## 13. Optimization and device budgets
 
