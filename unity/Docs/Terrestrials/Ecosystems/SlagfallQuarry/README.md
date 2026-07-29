@@ -32,5 +32,22 @@ Every PNG is `1536 × 1024`, opaque RGB, under `unity/Docs`, and routed through
 Git LFS. No production model, texture, terrain, rig, animation, prefab, scene,
 shader, VFX, audio, catalog, or editable source is included.
 
+## Validation Contract
+
+`slagfall_quarry_visual_source_packet.schema.json` is a closed Draft 2020-12
+packet schema. It requires every manifest field and fixes the exact parent and
+source versions, provenance path/hash and generation calls, authority and
+readiness states, habitat/fauna/kit IDs, ordered unique role and ID sets,
+anatomy and scale locks, zero-effect contract, provisional production ranges,
+source budgets, selected paths, byte lengths, SHA-256 values, Git LFS
+OID/sizes, and the empty external-input set.
+
+`slagfall_quarry_visual_source_packet.negative_fixtures.json` supplies one
+positive control and `57` named mutations. The mutations cover version,
+provenance, authority, readiness, identity, anatomy, uniqueness, effects,
+production, byte budgets, exact asset/input lineage, required fields, and
+closed-object behavior. They are schema-test inputs only and add no runtime or
+approval authority.
+
 Parent ecosystem indexes remain unchanged because integration must sequence
 their count update after predecessor packets.

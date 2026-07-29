@@ -5,6 +5,17 @@
   "sourceVersion": "tdf-eco-slagfall-2026-07-29-v001",
   "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
   "createdDate": "2026-07-29",
+  "promptDocument": {
+    "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/Executed_Generation_Prompts_And_Provenance.md",
+    "sha256": "9e9d9eca1d79cc3c6d77fb56f513e4006f2e063c30791819cec5891713515d1a"
+  },
+  "generator": {
+    "product": "Codex built-in image generation",
+    "versionOrModel": "unavailable_to_operator",
+    "externalInputsSupplied": false,
+    "editableSourceAvailable": false,
+    "licenseRecordId": "tdf_license_codex_imagegen_generated_original_v001"
+  },
   "authority": {
     "terrestrialDesignSource": true,
     "runtime": false,
@@ -56,6 +67,7 @@
     "materialFamilyIds": ["tdf_matfam_opaque_hide_keratin", "tdf_matfam_stonehold_slate_iron"]
   },
   "environmentKit": {
+    "kitId": "tdf_envkit_stonehold_slagfall_quarry",
     "propFamilyIds": [
       "tdf_prop_stonehold_slagfall_settled_cooled_slag_plate_cluster",
       "tdf_prop_stonehold_slagfall_eroded_terrace_bench_bank",
@@ -72,6 +84,8 @@
     "requiredEmissionFamilies": 0
   },
   "productionEnvelope": {
+    "status": "ProvisionalSourceTarget",
+    "implementationAuthority": false,
     "habitatReviewCellMeters": {"width": 128, "length": 128},
     "habitatCompressedTargetMiB": {"minimum": 6, "maximum": 8},
     "habitatHardCeilingMiB": 12,
@@ -87,14 +101,28 @@
     "distantRatioPercent": {"minimum": 6, "maximum": 8}
   },
   "sourceBudgets": {
+    "image": {
+      "mediaType": "image/png",
+      "pixelWidth": 1536,
+      "pixelHeight": 1024,
+      "colorSpace": "sRGB",
+      "bitDepth": 8,
+      "alphaPolicy": "opaque_rgb",
+      "estimatedDecodedRgbBytes": 4718592,
+      "maximumDecodedRgbaBytes": 6291456
+    },
     "finalCount": 5,
     "finalBytes": 15299489,
+    "finalBytesCeiling": 20971520,
     "retainedInputCount": 2,
     "retainedInputBytes": 5748557,
+    "retainedInputBytesCeiling": 8388608,
     "totalCount": 7,
     "totalBytes": 21048046,
+    "totalBytesCeiling": 29360128,
     "maximumCompressedBytesPerImage": 4194304,
     "playerBuildBytes": 0,
+    "installBytes": 0,
     "runtimeResidentBytes": 0
   },
   "sourceAssets": [
@@ -102,40 +130,60 @@
       "assetId": "tdf_asset_fauna_stonehold_slagwhistle_burrower_identity_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v001.png",
       "roles": ["identity", "anatomy", "scale", "material"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
       "byteLength": 2694596,
       "sha256": "b5255a2be02393e59e21e8d0f42536627b9b89aff0db7a7292c7b2f5a5821dae",
+      "gitLfsOid": "b5255a2be02393e59e21e8d0f42536627b9b89aff0db7a7292c7b2f5a5821dae",
+      "gitLfsSize": 2694596,
       "generationCall": "call_M5MFIEBJLfuph7QFmqiIfI96"
     },
     {
       "assetId": "tdf_asset_fauna_stonehold_slagwhistle_burrower_motion_contact_lod_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_motion_contact_lod_v001.png",
       "roles": ["motion", "dig_contact", "fold_states", "reduction"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
       "byteLength": 2548650,
       "sha256": "d3dcb6b948ec5e5289e0876166a2d8191eee02424fc78e0a8a84294ce3bb4760",
+      "gitLfsOid": "d3dcb6b948ec5e5289e0876166a2d8191eee02424fc78e0a8a84294ce3bb4760",
+      "gitLfsSize": 2548650,
       "generationCall": "call_AGxO5jcDBdU7urLErSXLDmDI"
     },
     {
       "assetId": "tdf_asset_habitat_stonehold_slagfall_quarry_establishing_placement_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_establishing_placement_v001.png",
       "roles": ["establishing", "placement", "terrace_runoff_plate", "effects_off"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
       "byteLength": 3593314,
       "sha256": "653f80aefc7a1edf54a9097d7043a5bddb85549a5a055aeacfadca206db384d6",
+      "gitLfsOid": "653f80aefc7a1edf54a9097d7043a5bddb85549a5a055aeacfadca206db384d6",
+      "gitLfsSize": 3593314,
       "generationCall": "call_sbOkRep9x6Yf3f0r95sK5ZdT"
     },
     {
       "assetId": "tdf_asset_habitat_stonehold_slagfall_quarry_layout_transition_readability_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_layout_transition_readability_v001.png",
       "roles": ["illustrative_spatial_grammar", "neighbor_transitions", "grayscale", "effects_off"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
       "byteLength": 3264995,
       "sha256": "8590500b6f2c7daa0a41b5314a4887b7fecba3a1313062d9f42c2095c3da4ed2",
+      "gitLfsOid": "8590500b6f2c7daa0a41b5314a4887b7fecba3a1313062d9f42c2095c3da4ed2",
+      "gitLfsSize": 3264995,
       "generationCall": "call_HPfOLyPGC36yyZe0KOnK5dfe"
     },
     {
       "assetId": "tdf_asset_habitat_stonehold_slagfall_quarry_material_kit_reduction_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_material_kit_reduction_v001.png",
       "roles": ["environment_kit", "materials", "progressive_reduction", "distant_placement"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
       "byteLength": 3197934,
       "sha256": "473d1695f347a31f5eaa9c934552e4ce4b59624e47d8520504b58670127bc5d9",
+      "gitLfsOid": "473d1695f347a31f5eaa9c934552e4ce4b59624e47d8520504b58670127bc5d9",
+      "gitLfsSize": 3197934,
       "generationCall": "call_N7gawlAtZCyIO21sYfiKLHRW"
     }
   ],
@@ -144,16 +192,24 @@
       "assetId": "tdf_asset_input_fauna_stonehold_slagwhistle_motion_effects_base_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/tdf_input_fauna_stonehold_slagwhistle_motion_effects_base_v001.png",
       "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "usage": "lineage_only_prohibited_as_required_identity",
       "byteLength": 2593396,
       "sha256": "bf3c80fa8971b28b4bfad0c58791f426bd179b99330d06d3b2bf6f109590c77d",
+      "gitLfsOid": "bf3c80fa8971b28b4bfad0c58791f426bd179b99330d06d3b2bf6f109590c77d",
+      "gitLfsSize": 2593396,
       "generationCall": "call_htAQjWEtoGXIl4FsgKVo3HvB"
     },
     {
       "assetId": "tdf_asset_input_habitat_stonehold_slagfall_quarry_red_kit_base_v001",
       "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/tdf_input_habitat_stonehold_slagfall_quarry_red_kit_base_v001.png",
       "state": "RetainedRefinementInput",
+      "qaDisposition": "NotFinal",
+      "usage": "lineage_only_prohibited_as_required_identity",
       "byteLength": 3155161,
       "sha256": "ed69b580aab9e2a407c49854c6e4cf4a9cf56b23a58b2150fc18df5e6138eef2",
+      "gitLfsOid": "ed69b580aab9e2a407c49854c6e4cf4a9cf56b23a58b2150fc18df5e6138eef2",
+      "gitLfsSize": 3155161,
       "generationCall": "call_yoggARDVyXDRnAKvrd2B9tQi"
     }
   ],

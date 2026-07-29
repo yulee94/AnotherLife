@@ -1,0 +1,406 @@
+{
+  "fixtureCatalogVersion": "1.0.0",
+  "schemaPath": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/slagfall_quarry_visual_source_packet.schema.json",
+  "manifestPath": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/slagfall_quarry_visual_source_manifest.json",
+  "positiveControlExpected": "Accepted",
+  "negativeFixtures": [
+    {
+      "fixtureId": "reject_schema_reference_drift",
+      "operation": "replace",
+      "jsonPointer": "/$schema",
+      "value": "./other.schema.json",
+      "proves": "The packet is bound to its exact schema."
+    },
+    {
+      "fixtureId": "reject_source_version_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceVersion",
+      "value": "tdf-eco-slagfall-2026-07-29-v002",
+      "proves": "The exact source version is immutable."
+    },
+    {
+      "fixtureId": "reject_parent_roster_version_drift",
+      "operation": "replace",
+      "jsonPointer": "/parentRosterSourceVersion",
+      "value": "tdf-eco-2026-07-28-v001",
+      "proves": "The exact parent roster source is immutable."
+    },
+    {
+      "fixtureId": "reject_prompt_hash_drift",
+      "operation": "replace",
+      "jsonPointer": "/promptDocument/sha256",
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "proves": "Prompt provenance is hash-bound."
+    },
+    {
+      "fixtureId": "reject_external_generation_input_claim",
+      "operation": "replace",
+      "jsonPointer": "/generator/externalInputsSupplied",
+      "value": true,
+      "proves": "Generator disclosure cannot contradict the no-external-input record."
+    },
+    {
+      "fixtureId": "reject_runtime_authority",
+      "operation": "replace",
+      "jsonPointer": "/authority/runtime",
+      "value": true,
+      "proves": "The terrestrial source cannot grant runtime authority."
+    },
+    {
+      "fixtureId": "reject_gameplay_authority",
+      "operation": "replace",
+      "jsonPointer": "/authority/gameplay",
+      "value": true,
+      "proves": "The terrestrial source cannot grant gameplay authority."
+    },
+    {
+      "fixtureId": "reject_user_approval_claim",
+      "operation": "replace",
+      "jsonPointer": "/authority/userCreativeApproval",
+      "value": true,
+      "proves": "The packet cannot claim user creative approval."
+    },
+    {
+      "fixtureId": "reject_user_readiness_approval",
+      "operation": "replace",
+      "jsonPointer": "/readiness/userCreativeState",
+      "value": "UserApproved",
+      "proves": "User approval remains NotRequested."
+    },
+    {
+      "fixtureId": "reject_runtime_readiness_approval",
+      "operation": "replace",
+      "jsonPointer": "/readiness/runtimeIntegrationState",
+      "value": "RuntimeApproved",
+      "proves": "Runtime integration remains Blocked."
+    },
+    {
+      "fixtureId": "reject_visual_qa_upgrade",
+      "operation": "replace",
+      "jsonPointer": "/readiness/visualQaState",
+      "value": "Pass",
+      "proves": "PassWithConcern blockers cannot be silently cleared."
+    },
+    {
+      "fixtureId": "reject_habitat_id_drift",
+      "operation": "replace",
+      "jsonPointer": "/habitat/habitatId",
+      "value": "tdf_habitat_stonehold_other_quarry",
+      "proves": "The habitat stable ID is exact."
+    },
+    {
+      "fixtureId": "reject_duplicate_neighbor",
+      "operation": "replace",
+      "jsonPointer": "/habitat/neighborHabitatIds/1",
+      "value": "tdf_habitat_stonehold_ore_gallery_mouths",
+      "proves": "Both ordered neighbor IDs are required and unique."
+    },
+    {
+      "fixtureId": "reject_transition_id_drift",
+      "operation": "replace",
+      "jsonPointer": "/habitat/sharedTransitionIds/1",
+      "value": "tdf_transition_stonehold_unknown_to_slagfall_quarry",
+      "proves": "Both transition IDs are exact."
+    },
+    {
+      "fixtureId": "reject_fauna_profile_drift",
+      "operation": "replace",
+      "jsonPointer": "/fauna/profileId",
+      "value": "tdf_fauna_stonehold_generic_burrower",
+      "proves": "The fauna stable profile ID is exact."
+    },
+    {
+      "fixtureId": "reject_fauna_scale_drift",
+      "operation": "replace",
+      "jsonPointer": "/fauna/scaleChampionUnits/length",
+      "value": 1.2,
+      "proves": "The reviewed adult length is exact."
+    },
+    {
+      "fixtureId": "reject_heat_fold_count_drift",
+      "operation": "replace",
+      "jsonPointer": "/fauna/anatomyLock/heatFolds",
+      "value": 3,
+      "proves": "The two-fold anatomy lock is exact."
+    },
+    {
+      "fixtureId": "reject_forefoot_count_drift",
+      "operation": "replace",
+      "jsonPointer": "/fauna/anatomyLock/stabilizerClawsPerForefoot",
+      "value": 3,
+      "proves": "The forefoot anatomy lock is exact."
+    },
+    {
+      "fixtureId": "reject_nostril_form_drift",
+      "operation": "replace",
+      "jsonPointer": "/fauna/anatomyLock/nostrilForm",
+      "value": "round_open_nostrils",
+      "proves": "The protected horizontal-slit nostril form is exact."
+    },
+    {
+      "fixtureId": "reject_duplicate_unpictured_variant",
+      "operation": "replace",
+      "jsonPointer": "/fauna/unpicturedVariants/1",
+      "value": "slagwhistle_deeper_quarry_broad_claw",
+      "proves": "Both pending structural variants are exact and unique."
+    },
+    {
+      "fixtureId": "reject_duplicate_material_family",
+      "operation": "replace",
+      "jsonPointer": "/fauna/materialFamilyIds/1",
+      "value": "tdf_matfam_opaque_hide_keratin",
+      "proves": "The two material families are exact and unique."
+    },
+    {
+      "fixtureId": "reject_environment_kit_id_drift",
+      "operation": "replace",
+      "jsonPointer": "/environmentKit/kitId",
+      "value": "tdf_envkit_stonehold_generic_quarry",
+      "proves": "The environment-kit stable ID is exact."
+    },
+    {
+      "fixtureId": "reject_duplicate_prop_family",
+      "operation": "replace",
+      "jsonPointer": "/environmentKit/propFamilyIds/7",
+      "value": "tdf_prop_stonehold_slagfall_settled_cooled_slag_plate_cluster",
+      "proves": "All eight ordered prop-family IDs are exact and unique."
+    },
+    {
+      "fixtureId": "reject_required_particles",
+      "operation": "replace",
+      "jsonPointer": "/environmentKit/requiredParticles",
+      "value": 1,
+      "proves": "Required particle families remain exactly zero."
+    },
+    {
+      "fixtureId": "reject_required_dynamic_lights",
+      "operation": "replace",
+      "jsonPointer": "/environmentKit/requiredDynamicLights",
+      "value": 1,
+      "proves": "Required dynamic lights remain exactly zero."
+    },
+    {
+      "fixtureId": "reject_required_water",
+      "operation": "replace",
+      "jsonPointer": "/environmentKit/requiredWaterFamilies",
+      "value": 1,
+      "proves": "Required water families remain exactly zero."
+    },
+    {
+      "fixtureId": "reject_required_emission",
+      "operation": "replace",
+      "jsonPointer": "/environmentKit/requiredEmissionFamilies",
+      "value": 1,
+      "proves": "Required emission families remain exactly zero."
+    },
+    {
+      "fixtureId": "reject_implementation_authority",
+      "operation": "replace",
+      "jsonPointer": "/productionEnvelope/implementationAuthority",
+      "value": true,
+      "proves": "Provisional production targets cannot grant implementation authority."
+    },
+    {
+      "fixtureId": "reject_fauna_triangle_budget_drift",
+      "operation": "replace",
+      "jsonPointer": "/productionEnvelope/faunaLod0Triangles/maximum",
+      "value": 12000,
+      "proves": "The provisional LOD0 range is exact."
+    },
+    {
+      "fixtureId": "reject_lod_percent_out_of_contract",
+      "operation": "replace",
+      "jsonPointer": "/productionEnvelope/lod1RatioPercent/maximum",
+      "value": 101,
+      "proves": "The exact LOD1 range and percentage bounds are enforced."
+    },
+    {
+      "fixtureId": "reject_image_dimension_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/image/pixelWidth",
+      "value": 1024,
+      "proves": "The documented raster dimensions are exact."
+    },
+    {
+      "fixtureId": "reject_final_count_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/finalCount",
+      "value": 4,
+      "proves": "The exact final count is enforced."
+    },
+    {
+      "fixtureId": "reject_final_byte_total_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/finalBytes",
+      "value": 15299490,
+      "proves": "The exact final-byte arithmetic is enforced."
+    },
+    {
+      "fixtureId": "reject_total_byte_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/totalBytes",
+      "value": 21048047,
+      "proves": "The exact seven-file byte total is enforced."
+    },
+    {
+      "fixtureId": "reject_player_build_bytes",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/playerBuildBytes",
+      "value": 1,
+      "proves": "Player-build impact remains exactly zero bytes."
+    },
+    {
+      "fixtureId": "reject_install_bytes",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/installBytes",
+      "value": 1,
+      "proves": "Install impact remains exactly zero bytes."
+    },
+    {
+      "fixtureId": "reject_runtime_resident_bytes",
+      "operation": "replace",
+      "jsonPointer": "/sourceBudgets/runtimeResidentBytes",
+      "value": 1,
+      "proves": "Runtime-resident impact remains exactly zero bytes."
+    },
+    {
+      "fixtureId": "reject_missing_source_assets",
+      "operation": "emptyArray",
+      "jsonPointer": "/sourceAssets",
+      "proves": "Exactly five ordered final assets are required."
+    },
+    {
+      "fixtureId": "reject_duplicate_source_asset_id",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/1/assetId",
+      "value": "tdf_asset_fauna_stonehold_slagwhistle_burrower_identity_v001",
+      "proves": "Final asset IDs and positions are exact."
+    },
+    {
+      "fixtureId": "reject_duplicate_source_role",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/roles/1",
+      "value": "identity",
+      "proves": "Each final role set is exact and unique."
+    },
+    {
+      "fixtureId": "reject_source_asset_state_promotion",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/state",
+      "value": "RuntimeReady",
+      "proves": "A review sheet cannot become runtime-ready source."
+    },
+    {
+      "fixtureId": "reject_source_asset_qa_upgrade",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/qaDisposition",
+      "value": "Pass",
+      "proves": "Selected sheets retain their PassWithConcern disposition."
+    },
+    {
+      "fixtureId": "reject_source_path_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/path",
+      "value": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/wrong.png",
+      "proves": "Every selected final path is exact."
+    },
+    {
+      "fixtureId": "reject_source_sha_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/sha256",
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "proves": "Every selected final SHA-256 is exact."
+    },
+    {
+      "fixtureId": "reject_source_lfs_oid_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/gitLfsOid",
+      "value": "0000000000000000000000000000000000000000000000000000000000000000",
+      "proves": "Every selected final Git LFS OID is exact."
+    },
+    {
+      "fixtureId": "reject_source_lfs_size_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/gitLfsSize",
+      "value": 2694597,
+      "proves": "Every selected final Git LFS size is exact."
+    },
+    {
+      "fixtureId": "reject_generation_call_drift",
+      "operation": "replace",
+      "jsonPointer": "/sourceAssets/0/generationCall",
+      "value": "call_unknown",
+      "proves": "Every final is bound to its exact generation call."
+    },
+    {
+      "fixtureId": "reject_missing_generation_inputs",
+      "operation": "emptyArray",
+      "jsonPointer": "/generationInputs",
+      "proves": "Exactly two ordered retained lineage inputs are required."
+    },
+    {
+      "fixtureId": "reject_generation_input_path_drift",
+      "operation": "replace",
+      "jsonPointer": "/generationInputs/0/path",
+      "value": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/wrong.png",
+      "proves": "Every retained input path is exact."
+    },
+    {
+      "fixtureId": "reject_generation_input_state_drift",
+      "operation": "replace",
+      "jsonPointer": "/generationInputs/0/state",
+      "value": "ReadyForUserReview",
+      "proves": "Retained lineage inputs cannot become review finals."
+    },
+    {
+      "fixtureId": "reject_generation_input_qa_promotion",
+      "operation": "replace",
+      "jsonPointer": "/generationInputs/0/qaDisposition",
+      "value": "PassWithConcern",
+      "proves": "Retained lineage inputs remain NotFinal."
+    },
+    {
+      "fixtureId": "reject_generation_input_identity_usage",
+      "operation": "replace",
+      "jsonPointer": "/generationInputs/0/usage",
+      "value": "required_identity",
+      "proves": "Retained lineage inputs remain prohibited as required identity."
+    },
+    {
+      "fixtureId": "reject_generation_input_lfs_size_drift",
+      "operation": "replace",
+      "jsonPointer": "/generationInputs/1/gitLfsSize",
+      "value": 3155162,
+      "proves": "Every retained input Git LFS size is exact."
+    },
+    {
+      "fixtureId": "reject_external_input",
+      "operation": "replace",
+      "jsonPointer": "/externalInputs",
+      "value": [
+        "unapproved_external_input"
+      ],
+      "proves": "The external-input set must remain empty."
+    },
+    {
+      "fixtureId": "reject_unexpected_nested_property",
+      "operation": "add",
+      "jsonPointer": "/authority/runtimeApprovedBy",
+      "value": "nobody",
+      "proves": "Nested authority objects are closed to undeclared fields."
+    },
+    {
+      "fixtureId": "reject_missing_required_anatomy_field",
+      "operation": "remove",
+      "jsonPointer": "/fauna/anatomyLock/nostrilForm",
+      "proves": "All anatomy-lock fields are required."
+    },
+    {
+      "fixtureId": "reject_unexpected_top_level_property",
+      "operation": "add",
+      "jsonPointer": "/runtimePrefab",
+      "value": "prohibited",
+      "proves": "The packet is closed to undeclared top-level runtime fields."
+    }
+  ]
+}

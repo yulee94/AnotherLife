@@ -1,62 +1,1282 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://anotherlife.local/schemas/slagfall-quarry-visual-source-packet-v1.json",
-  "title": "Slagfall Quarry Visual Source Packet",
+  "$id": "https://anotherlife.local/schemas/terrestrial/slagfall-quarry-visual-source/1.0.0",
+  "title": "AnotherLife Slagfall Quarry Visual Source Packet",
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schemaVersion", "packetId", "sourceVersion", "parentRosterSourceVersion",
-    "createdDate", "authority", "readiness", "habitat", "fauna",
-    "environmentKit", "productionEnvelope", "sourceBudgets", "sourceAssets",
-    "generationInputs", "externalInputs"
+    "$schema",
+    "schemaVersion",
+    "packetId",
+    "sourceVersion",
+    "parentRosterSourceVersion",
+    "createdDate",
+    "promptDocument",
+    "generator",
+    "authority",
+    "readiness",
+    "habitat",
+    "fauna",
+    "environmentKit",
+    "productionEnvelope",
+    "sourceBudgets",
+    "sourceAssets",
+    "generationInputs",
+    "externalInputs"
   ],
   "properties": {
-    "$schema": {"type": "string"},
-    "schemaVersion": {"const": "1.0.0"},
-    "packetId": {"const": "tdf_packet_slagfall_quarry_visual_source_v001"},
-    "sourceVersion": {"const": "tdf-eco-slagfall-2026-07-29-v001"},
-    "parentRosterSourceVersion": {"type": "string"},
-    "createdDate": {"type": "string", "format": "date"},
-    "authority": {"type": "object"},
-    "readiness": {"type": "object"},
-    "habitat": {"type": "object"},
-    "fauna": {"type": "object"},
-    "environmentKit": {"type": "object"},
-    "productionEnvelope": {"type": "object"},
-    "sourceBudgets": {"type": "object"},
+    "$schema": {
+      "const": "./slagfall_quarry_visual_source_packet.schema.json"
+    },
+    "schemaVersion": {
+      "const": "1.0.0"
+    },
+    "packetId": {
+      "const": "tdf_packet_slagfall_quarry_visual_source_v001"
+    },
+    "sourceVersion": {
+      "const": "tdf-eco-slagfall-2026-07-29-v001"
+    },
+    "parentRosterSourceVersion": {
+      "const": "tdf-eco-2026-07-27-v001"
+    },
+    "createdDate": {
+      "const": "2026-07-29"
+    },
+    "promptDocument": {
+      "$ref": "#/$defs/promptDocument"
+    },
+    "generator": {
+      "$ref": "#/$defs/generator"
+    },
+    "authority": {
+      "$ref": "#/$defs/authority"
+    },
+    "readiness": {
+      "$ref": "#/$defs/readiness"
+    },
+    "habitat": {
+      "$ref": "#/$defs/habitat"
+    },
+    "fauna": {
+      "$ref": "#/$defs/fauna"
+    },
+    "environmentKit": {
+      "$ref": "#/$defs/environmentKit"
+    },
+    "productionEnvelope": {
+      "$ref": "#/$defs/productionEnvelope"
+    },
+    "sourceBudgets": {
+      "$ref": "#/$defs/sourceBudgets"
+    },
     "sourceAssets": {
-      "type": "array", "minItems": 5, "maxItems": 5,
-      "items": {"$ref": "#/$defs/asset"}
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/burrowerIdentityAsset"
+        },
+        {
+          "$ref": "#/$defs/burrowerMotionAsset"
+        },
+        {
+          "$ref": "#/$defs/quarryEstablishingAsset"
+        },
+        {
+          "$ref": "#/$defs/quarryLayoutAsset"
+        },
+        {
+          "$ref": "#/$defs/quarryKitAsset"
+        }
+      ],
+      "items": false
     },
     "generationInputs": {
-      "type": "array", "minItems": 2, "maxItems": 2,
-      "items": {"$ref": "#/$defs/input"}
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/burrowerMotionInput"
+        },
+        {
+          "$ref": "#/$defs/quarryKitInput"
+        }
+      ],
+      "items": false
     },
-    "externalInputs": {"type": "array", "maxItems": 0}
+    "externalInputs": {
+      "type": "array",
+      "maxItems": 0,
+      "items": false
+    }
   },
   "$defs": {
-    "asset": {
-      "type": "object", "additionalProperties": false,
-      "required": ["assetId", "path", "roles", "byteLength", "sha256", "generationCall"],
+    "stableId": {
+      "type": "string",
+      "pattern": "^tdf_[a-z0-9]+(?:_[a-z0-9]+)*$"
+    },
+    "variantId": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:_[a-z0-9]+)*$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "positiveRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum",
+        "maximum"
+      ],
       "properties": {
-        "assetId": {"type": "string", "pattern": "^tdf_asset_"},
-        "path": {"type": "string", "pattern": "^unity/Docs/.+\\.png$"},
-        "roles": {"type": "array", "minItems": 1, "items": {"type": "string"}},
-        "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
-        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-        "generationCall": {"type": "string", "pattern": "^call_"}
+        "minimum": {
+          "type": "number",
+          "minimum": 0
+        },
+        "maximum": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
       }
     },
-    "input": {
-      "type": "object", "additionalProperties": false,
-      "required": ["assetId", "path", "state", "byteLength", "sha256", "generationCall"],
+    "percentRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "minimum",
+        "maximum"
+      ],
       "properties": {
-        "assetId": {"type": "string", "pattern": "^tdf_asset_input_"},
-        "path": {"type": "string", "pattern": "^unity/Docs/.+\\.png$"},
-        "state": {"const": "RetainedRefinementInput"},
-        "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
-        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
-        "generationCall": {"type": "string", "pattern": "^call_"}
+        "minimum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "maximum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        }
+      }
+    },
+    "promptDocument": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/Executed_Generation_Prompts_And_Provenance.md"
+        },
+        "sha256": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/sha256"
+            },
+            {
+              "const": "9e9d9eca1d79cc3c6d77fb56f513e4006f2e063c30791819cec5891713515d1a"
+            }
+          ]
+        }
+      }
+    },
+    "generator": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "product",
+        "versionOrModel",
+        "externalInputsSupplied",
+        "editableSourceAvailable",
+        "licenseRecordId"
+      ],
+      "properties": {
+        "product": {
+          "const": "Codex built-in image generation"
+        },
+        "versionOrModel": {
+          "const": "unavailable_to_operator"
+        },
+        "externalInputsSupplied": {
+          "const": false
+        },
+        "editableSourceAvailable": {
+          "const": false
+        },
+        "licenseRecordId": {
+          "const": "tdf_license_codex_imagegen_generated_original_v001"
+        }
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "terrestrialDesignSource",
+        "runtime",
+        "gameplay",
+        "narrative",
+        "save",
+        "userCreativeApproval"
+      ],
+      "properties": {
+        "terrestrialDesignSource": {
+          "const": true
+        },
+        "runtime": {
+          "const": false
+        },
+        "gameplay": {
+          "const": false
+        },
+        "narrative": {
+          "const": false
+        },
+        "save": {
+          "const": false
+        },
+        "userCreativeApproval": {
+          "const": false
+        }
+      }
+    },
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "technicalPacketState",
+        "userCreativeState",
+        "runtimeIntegrationState",
+        "visualQaState"
+      ],
+      "properties": {
+        "technicalPacketState": {
+          "const": "TechnicalReviewReady"
+        },
+        "userCreativeState": {
+          "const": "NotRequested"
+        },
+        "runtimeIntegrationState": {
+          "const": "Blocked"
+        },
+        "visualQaState": {
+          "const": "PassWithConcern"
+        }
+      }
+    },
+    "habitat": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "habitatId",
+        "realmId",
+        "state",
+        "environmentKitId",
+        "protectedIdentity",
+        "neighborHabitatIds",
+        "sharedTransitionIds"
+      ],
+      "properties": {
+        "habitatId": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "const": "tdf_habitat_stonehold_slagfall_quarry"
+            }
+          ]
+        },
+        "realmId": {
+          "const": "stonehold"
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "environmentKitId": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "const": "tdf_envkit_stonehold_slagfall_quarry"
+            }
+          ]
+        },
+        "protectedIdentity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/variantId"
+            },
+            {
+              "const": "terrace_edges_runoff_channels_cooled_slag_plate_direction"
+            }
+          ]
+        },
+        "neighborHabitatIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "tdf_habitat_stonehold_ore_gallery_mouths"
+            },
+            {
+              "const": "tdf_habitat_stonehold_faultroad_escarpment"
+            }
+          ],
+          "items": false
+        },
+        "sharedTransitionIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "tdf_transition_stonehold_faultroad_escarpment_to_slagfall_quarry"
+            },
+            {
+              "const": "tdf_transition_stonehold_ore_gallery_mouths_to_slagfall_quarry"
+            }
+          ],
+          "items": false
+        }
+      }
+    },
+    "fauna": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profileId",
+        "state",
+        "qaDisposition",
+        "picturedVariant",
+        "unpicturedVariants",
+        "protectedIdentity",
+        "scaleChampionUnits",
+        "anatomyLock",
+        "rigFamilyId",
+        "materialFamilyIds"
+      ],
+      "properties": {
+        "profileId": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "const": "tdf_fauna_stonehold_slagwhistle_burrower"
+            }
+          ]
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "qaDisposition": {
+          "const": "PassWithConcern"
+        },
+        "picturedVariant": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/variantId"
+            },
+            {
+              "const": "slagwhistle_cooled_bench_adult"
+            }
+          ]
+        },
+        "unpicturedVariants": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "slagwhistle_deeper_quarry_broad_claw"
+            },
+            {
+              "const": "slagwhistle_cooled_bench_long_hind"
+            }
+          ],
+          "items": false
+        },
+        "protectedIdentity": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/variantId"
+            },
+            {
+              "const": "paired_foreclaws_triangular_ear_folds_short_counterweight_tail"
+            }
+          ]
+        },
+        "scaleChampionUnits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "length",
+            "shoulderHeight"
+          ],
+          "properties": {
+            "length": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "const": 0.9
+            },
+            "shoulderHeight": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "const": 0.38
+            }
+          }
+        },
+        "anatomyLock": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "heatFolds",
+            "broadShovelCapsPerForefoot",
+            "stabilizerClawsPerForefoot",
+            "counterweightTails",
+            "nostrilForm"
+          ],
+          "properties": {
+            "heatFolds": {
+              "const": 2
+            },
+            "broadShovelCapsPerForefoot": {
+              "const": 1
+            },
+            "stabilizerClawsPerForefoot": {
+              "const": 2
+            },
+            "counterweightTails": {
+              "const": 1
+            },
+            "nostrilForm": {
+              "const": "protected_horizontal_slits"
+            }
+          }
+        },
+        "rigFamilyId": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "const": "tdf_rig_quad_burrower"
+            }
+          ]
+        },
+        "materialFamilyIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "tdf_matfam_opaque_hide_keratin"
+            },
+            {
+              "const": "tdf_matfam_stonehold_slate_iron"
+            }
+          ],
+          "items": false
+        }
+      }
+    },
+    "environmentKit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kitId",
+        "propFamilyIds",
+        "requiredParticles",
+        "requiredDynamicLights",
+        "requiredWaterFamilies",
+        "requiredEmissionFamilies"
+      ],
+      "properties": {
+        "kitId": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/stableId"
+            },
+            {
+              "const": "tdf_envkit_stonehold_slagfall_quarry"
+            }
+          ]
+        },
+        "propFamilyIds": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "tdf_prop_stonehold_slagfall_settled_cooled_slag_plate_cluster"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_eroded_terrace_bench_bank"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_clay_runoff_channel_cut"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_broken_rock_spur_proxy"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_heat_scarred_rubble_cluster"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_dull_recent_fracture_seam"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_ash_scrub_mineral_grass_patch"
+            },
+            {
+              "const": "tdf_prop_stonehold_slagfall_dark_mineral_crust_edge"
+            }
+          ],
+          "items": false
+        },
+        "requiredParticles": {
+          "const": 0
+        },
+        "requiredDynamicLights": {
+          "const": 0
+        },
+        "requiredWaterFamilies": {
+          "const": 0
+        },
+        "requiredEmissionFamilies": {
+          "const": 0
+        }
+      }
+    },
+    "productionEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "implementationAuthority",
+        "habitatReviewCellMeters",
+        "habitatCompressedTargetMiB",
+        "habitatHardCeilingMiB",
+        "faunaLod0Triangles",
+        "faunaBones",
+        "faunaCompressedTargetMiB",
+        "faunaHardCeilingMiB",
+        "faunaMaximumMaterials",
+        "faunaTextureSetMaximum",
+        "faunaClipMaximum",
+        "lod1RatioPercent",
+        "lod2RatioPercent",
+        "distantRatioPercent"
+      ],
+      "properties": {
+        "status": {
+          "const": "ProvisionalSourceTarget"
+        },
+        "implementationAuthority": {
+          "const": false
+        },
+        "habitatReviewCellMeters": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "width",
+            "length"
+          ],
+          "properties": {
+            "width": {
+              "const": 128
+            },
+            "length": {
+              "const": 128
+            }
+          }
+        },
+        "habitatCompressedTargetMiB": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/positiveRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 6
+                },
+                "maximum": {
+                  "const": 8
+                }
+              }
+            }
+          ]
+        },
+        "habitatHardCeilingMiB": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "const": 12
+        },
+        "faunaLod0Triangles": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/positiveRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 8000
+                },
+                "maximum": {
+                  "const": 10000
+                }
+              }
+            }
+          ]
+        },
+        "faunaBones": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/positiveRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 34
+                },
+                "maximum": {
+                  "const": 42
+                }
+              }
+            }
+          ]
+        },
+        "faunaCompressedTargetMiB": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/positiveRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 3
+                },
+                "maximum": {
+                  "const": 4
+                }
+              }
+            }
+          ]
+        },
+        "faunaHardCeilingMiB": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "const": 7
+        },
+        "faunaMaximumMaterials": {
+          "type": "integer",
+          "minimum": 1,
+          "const": 2
+        },
+        "faunaTextureSetMaximum": {
+          "const": "one_1k_color_normal_packed_set"
+        },
+        "faunaClipMaximum": {
+          "type": "integer",
+          "minimum": 1,
+          "const": 6
+        },
+        "lod1RatioPercent": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/percentRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 55
+                },
+                "maximum": {
+                  "const": 60
+                }
+              }
+            }
+          ]
+        },
+        "lod2RatioPercent": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/percentRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 20
+                },
+                "maximum": {
+                  "const": 25
+                }
+              }
+            }
+          ]
+        },
+        "distantRatioPercent": {
+          "allOf": [
+            {
+              "$ref": "#/$defs/percentRange"
+            },
+            {
+              "properties": {
+                "minimum": {
+                  "const": 6
+                },
+                "maximum": {
+                  "const": 8
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    "sourceBudgets": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "image",
+        "finalCount",
+        "finalBytes",
+        "finalBytesCeiling",
+        "retainedInputCount",
+        "retainedInputBytes",
+        "retainedInputBytesCeiling",
+        "totalCount",
+        "totalBytes",
+        "totalBytesCeiling",
+        "maximumCompressedBytesPerImage",
+        "playerBuildBytes",
+        "installBytes",
+        "runtimeResidentBytes"
+      ],
+      "properties": {
+        "image": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mediaType",
+            "pixelWidth",
+            "pixelHeight",
+            "colorSpace",
+            "bitDepth",
+            "alphaPolicy",
+            "estimatedDecodedRgbBytes",
+            "maximumDecodedRgbaBytes"
+          ],
+          "properties": {
+            "mediaType": {
+              "const": "image/png"
+            },
+            "pixelWidth": {
+              "const": 1536
+            },
+            "pixelHeight": {
+              "const": 1024
+            },
+            "colorSpace": {
+              "const": "sRGB"
+            },
+            "bitDepth": {
+              "const": 8
+            },
+            "alphaPolicy": {
+              "const": "opaque_rgb"
+            },
+            "estimatedDecodedRgbBytes": {
+              "const": 4718592
+            },
+            "maximumDecodedRgbaBytes": {
+              "const": 6291456
+            }
+          }
+        },
+        "finalCount": {
+          "const": 5
+        },
+        "finalBytes": {
+          "const": 15299489
+        },
+        "finalBytesCeiling": {
+          "const": 20971520
+        },
+        "retainedInputCount": {
+          "const": 2
+        },
+        "retainedInputBytes": {
+          "const": 5748557
+        },
+        "retainedInputBytesCeiling": {
+          "const": 8388608
+        },
+        "totalCount": {
+          "const": 7
+        },
+        "totalBytes": {
+          "const": 21048046
+        },
+        "totalBytesCeiling": {
+          "const": 29360128
+        },
+        "maximumCompressedBytesPerImage": {
+          "const": 4194304
+        },
+        "playerBuildBytes": {
+          "const": 0
+        },
+        "installBytes": {
+          "const": 0
+        },
+        "runtimeResidentBytes": {
+          "const": 0
+        }
+      }
+    },
+    "burrowerIdentityAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "roles",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_fauna_stonehold_slagwhistle_burrower_identity_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v001.png"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "identity"
+            },
+            {
+              "const": "anatomy"
+            },
+            {
+              "const": "scale"
+            },
+            {
+              "const": "material"
+            }
+          ],
+          "items": false
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "qaDisposition": {
+          "const": "PassWithConcern"
+        },
+        "byteLength": {
+          "const": 2694596
+        },
+        "sha256": {
+          "const": "b5255a2be02393e59e21e8d0f42536627b9b89aff0db7a7292c7b2f5a5821dae"
+        },
+        "gitLfsOid": {
+          "const": "b5255a2be02393e59e21e8d0f42536627b9b89aff0db7a7292c7b2f5a5821dae"
+        },
+        "gitLfsSize": {
+          "const": 2694596
+        },
+        "generationCall": {
+          "const": "call_M5MFIEBJLfuph7QFmqiIfI96"
+        }
+      }
+    },
+    "burrowerMotionAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "roles",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_fauna_stonehold_slagwhistle_burrower_motion_contact_lod_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_motion_contact_lod_v001.png"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "motion"
+            },
+            {
+              "const": "dig_contact"
+            },
+            {
+              "const": "fold_states"
+            },
+            {
+              "const": "reduction"
+            }
+          ],
+          "items": false
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "qaDisposition": {
+          "const": "PassWithConcern"
+        },
+        "byteLength": {
+          "const": 2548650
+        },
+        "sha256": {
+          "const": "d3dcb6b948ec5e5289e0876166a2d8191eee02424fc78e0a8a84294ce3bb4760"
+        },
+        "gitLfsOid": {
+          "const": "d3dcb6b948ec5e5289e0876166a2d8191eee02424fc78e0a8a84294ce3bb4760"
+        },
+        "gitLfsSize": {
+          "const": 2548650
+        },
+        "generationCall": {
+          "const": "call_AGxO5jcDBdU7urLErSXLDmDI"
+        }
+      }
+    },
+    "quarryEstablishingAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "roles",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_habitat_stonehold_slagfall_quarry_establishing_placement_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_establishing_placement_v001.png"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "establishing"
+            },
+            {
+              "const": "placement"
+            },
+            {
+              "const": "terrace_runoff_plate"
+            },
+            {
+              "const": "effects_off"
+            }
+          ],
+          "items": false
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "qaDisposition": {
+          "const": "PassWithConcern"
+        },
+        "byteLength": {
+          "const": 3593314
+        },
+        "sha256": {
+          "const": "653f80aefc7a1edf54a9097d7043a5bddb85549a5a055aeacfadca206db384d6"
+        },
+        "gitLfsOid": {
+          "const": "653f80aefc7a1edf54a9097d7043a5bddb85549a5a055aeacfadca206db384d6"
+        },
+        "gitLfsSize": {
+          "const": 3593314
+        },
+        "generationCall": {
+          "const": "call_sbOkRep9x6Yf3f0r95sK5ZdT"
+        }
+      }
+    },
+    "quarryLayoutAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "roles",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_habitat_stonehold_slagfall_quarry_layout_transition_readability_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_layout_transition_readability_v001.png"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "illustrative_spatial_grammar"
+            },
+            {
+              "const": "neighbor_transitions"
+            },
+            {
+              "const": "grayscale"
+            },
+            {
+              "const": "effects_off"
+            }
+          ],
+          "items": false
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "qaDisposition": {
+          "const": "PassWithConcern"
+        },
+        "byteLength": {
+          "const": 3264995
+        },
+        "sha256": {
+          "const": "8590500b6f2c7daa0a41b5314a4887b7fecba3a1313062d9f42c2095c3da4ed2"
+        },
+        "gitLfsOid": {
+          "const": "8590500b6f2c7daa0a41b5314a4887b7fecba3a1313062d9f42c2095c3da4ed2"
+        },
+        "gitLfsSize": {
+          "const": 3264995
+        },
+        "generationCall": {
+          "const": "call_HPfOLyPGC36yyZe0KOnK5dfe"
+        }
+      }
+    },
+    "quarryKitAsset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "roles",
+        "state",
+        "qaDisposition",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_habitat_stonehold_slagfall_quarry_material_kit_reduction_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_material_kit_reduction_v001.png"
+        },
+        "roles": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "prefixItems": [
+            {
+              "const": "environment_kit"
+            },
+            {
+              "const": "materials"
+            },
+            {
+              "const": "progressive_reduction"
+            },
+            {
+              "const": "distant_placement"
+            }
+          ],
+          "items": false
+        },
+        "state": {
+          "const": "ReadyForUserReview"
+        },
+        "qaDisposition": {
+          "const": "PassWithConcern"
+        },
+        "byteLength": {
+          "const": 3197934
+        },
+        "sha256": {
+          "const": "473d1695f347a31f5eaa9c934552e4ce4b59624e47d8520504b58670127bc5d9"
+        },
+        "gitLfsOid": {
+          "const": "473d1695f347a31f5eaa9c934552e4ce4b59624e47d8520504b58670127bc5d9"
+        },
+        "gitLfsSize": {
+          "const": 3197934
+        },
+        "generationCall": {
+          "const": "call_N7gawlAtZCyIO21sYfiKLHRW"
+        }
+      }
+    },
+    "burrowerMotionInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "state",
+        "qaDisposition",
+        "usage",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_input_fauna_stonehold_slagwhistle_motion_effects_base_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/tdf_input_fauna_stonehold_slagwhistle_motion_effects_base_v001.png"
+        },
+        "state": {
+          "const": "RetainedRefinementInput"
+        },
+        "qaDisposition": {
+          "const": "NotFinal"
+        },
+        "usage": {
+          "const": "lineage_only_prohibited_as_required_identity"
+        },
+        "byteLength": {
+          "const": 2593396
+        },
+        "sha256": {
+          "const": "bf3c80fa8971b28b4bfad0c58791f426bd179b99330d06d3b2bf6f109590c77d"
+        },
+        "gitLfsOid": {
+          "const": "bf3c80fa8971b28b4bfad0c58791f426bd179b99330d06d3b2bf6f109590c77d"
+        },
+        "gitLfsSize": {
+          "const": 2593396
+        },
+        "generationCall": {
+          "const": "call_htAQjWEtoGXIl4FsgKVo3HvB"
+        }
+      }
+    },
+    "quarryKitInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "path",
+        "state",
+        "qaDisposition",
+        "usage",
+        "byteLength",
+        "sha256",
+        "gitLfsOid",
+        "gitLfsSize",
+        "generationCall"
+      ],
+      "properties": {
+        "assetId": {
+          "const": "tdf_asset_input_habitat_stonehold_slagfall_quarry_red_kit_base_v001"
+        },
+        "path": {
+          "const": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/tdf_input_habitat_stonehold_slagfall_quarry_red_kit_base_v001.png"
+        },
+        "state": {
+          "const": "RetainedRefinementInput"
+        },
+        "qaDisposition": {
+          "const": "NotFinal"
+        },
+        "usage": {
+          "const": "lineage_only_prohibited_as_required_identity"
+        },
+        "byteLength": {
+          "const": 3155161
+        },
+        "sha256": {
+          "const": "ed69b580aab9e2a407c49854c6e4cf4a9cf56b23a58b2150fc18df5e6138eef2"
+        },
+        "gitLfsOid": {
+          "const": "ed69b580aab9e2a407c49854c6e4cf4a9cf56b23a58b2150fc18df5e6138eef2"
+        },
+        "gitLfsSize": {
+          "const": 3155161
+        },
+        "generationCall": {
+          "const": "call_yoggARDVyXDRnAKvrd2B9tQi"
+        }
       }
     }
   }
