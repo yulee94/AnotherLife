@@ -12,11 +12,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.anotherlife.R
 import com.example.anotherlife.data.simulation.DialogueNode
 import com.example.anotherlife.data.simulation.NVS_01_Packet
 import com.example.anotherlife.data.simulation.NarrativeState
+import com.example.anotherlife.ui.layout.usesLargeTextLayout
 
 @Composable
 fun NarrativeDebugScreen(
@@ -65,7 +67,8 @@ fun NarrativeDebugScreen(
         }
 
         LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.weight(1f)
         ) {
             items(NVS_01_Packet.storyNodes) { node ->
                 NodeDebugCard(node) {
@@ -83,6 +86,8 @@ fun NarrativeDebugScreen(
 
 @Composable
 fun NodeDebugCard(node: DialogueNode, onTrigger: (DialogueNode) -> Unit) {
+    val previewLines = if (usesLargeTextLayout()) 2 else 1
+
     OutlinedCard(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -93,7 +98,12 @@ fun NodeDebugCard(node: DialogueNode, onTrigger: (DialogueNode) -> Unit) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = node.id, style = MaterialTheme.typography.labelSmall)
                 Text(text = node.characterName, style = MaterialTheme.typography.titleMedium)
-                Text(text = node.text, style = MaterialTheme.typography.bodySmall, maxLines = 1)
+                Text(
+                    text = node.text,
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = previewLines,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
             
             IconButton(onClick = { onTrigger(node) }) {
