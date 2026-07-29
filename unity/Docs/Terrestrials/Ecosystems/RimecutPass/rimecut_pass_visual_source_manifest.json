@@ -1,0 +1,139 @@
+{
+  "$schema": "./rimecut_pass_visual_source_packet.schema.json",
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_rimecut_pass_visual_source_v001",
+  "sourceVersion": "tdf-eco-rimecut-2026-07-29-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-29",
+  "promptDocument": "unity/Docs/Terrestrials/Ecosystems/RimecutPass/Executed_Generation_Prompts_And_Provenance.md",
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "visualQaState": "PassWithConcern"
+  },
+  "habitat": {
+    "habitatId": "tdf_habitat_stonehold_rimecut_pass",
+    "realmId": "stonehold",
+    "state": "ReadyForUserReview",
+    "environmentKitId": "tdf_envkit_stonehold_rimecut_pass",
+    "protectedIdentity": "pass_notch_safe_ledge_edge_stone_rib_direction",
+    "neighborHabitatIds": [
+      "tdf_habitat_stonehold_faultroad_escarpment",
+      "tdf_habitat_stonehold_ore_gallery_mouths"
+    ],
+    "sharedTransitionIds": [
+      "tdf_transition_stonehold_faultroad_escarpment_to_rimecut_pass",
+      "tdf_transition_stonehold_ore_gallery_mouths_to_rimecut_pass"
+    ],
+    "materialFamilyIds": ["tdf_matfam_stonehold_slate_iron"]
+  },
+  "placementReference": {
+    "profileId": "tdf_fauna_stonehold_rimefan_kite",
+    "sourceVersion": "tdf-eco-soarer-2026-07-27-v001",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "protectedIdentity": "diamond_wing_deep_chest_short_wedge_tail",
+    "scaleChampionUnits": {"wingspan": 2.3},
+    "usage": "same_adult_placement_only_no_identity_spawn_population_or_variant_authority",
+    "referencedAssets": [
+      {
+        "assetId": "tdf_asset_fauna_stonehold_rimefan_kite_turnaround_v001",
+        "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_stonehold_rimefan_kite_turnaround_v001.png",
+        "byteLength": 2385499,
+        "sha256": "459a3d9f34939d3c6d4ec71699e142807d234a61ba6c1bd20496963e25d5abae"
+      },
+      {
+        "assetId": "tdf_asset_fauna_stonehold_rimefan_kite_motion_material_v001",
+        "path": "unity/Docs/Terrestrials/Ecosystems/AvianSoarers/ConceptSheets/tdf_fauna_stonehold_rimefan_kite_motion_material_v001.png",
+        "byteLength": 2424547,
+        "sha256": "348d9ae7df2ec4ed2d988901010c0e20ef114f8c5bd8621e697d00e2fb50e0c9"
+      }
+    ]
+  },
+  "environmentKit": {
+    "propFamilyIds": [
+      "tdf_prop_stonehold_rimecut_wind_cut_ice_shelf_slab",
+      "tdf_prop_stonehold_rimecut_safe_ledge_edge_bank",
+      "tdf_prop_stonehold_rimecut_exposed_stone_rib_cluster",
+      "tdf_prop_stonehold_rimecut_coarse_snow_static_drift_mass",
+      "tdf_prop_stonehold_rimecut_avalanche_chute_settled_fan",
+      "tdf_prop_stonehold_rimecut_cold_melt_channel_cut",
+      "tdf_prop_stonehold_rimecut_lee_sedge_moss_patch",
+      "tdf_prop_stonehold_rimecut_distant_pass_notch_saddle_proxy"
+    ],
+    "requiredParticles": 0,
+    "requiredDynamicLights": 0,
+    "requiredWaterFamilies": 0,
+    "requiredEmissionFamilies": 0
+  },
+  "productionEnvelope": {
+    "status": "ProvisionalSourceTarget",
+    "reviewCellMeters": {"width": 128, "length": 128},
+    "lowMobileUniqueCompressedTargetMiB": {"minimum": 6, "maximum": 8},
+    "hardParentCeilingMiB": 12,
+    "preferredSharedMaterialInstances": 2,
+    "maximumSimultaneousMaterialFamilies": 4,
+    "lod1RatioPercent": {"minimum": 50, "maximum": 60},
+    "lod2RatioPercent": {"minimum": 18, "maximum": 25},
+    "distantRatioPercent": {"minimum": 5, "maximum": 8}
+  },
+  "sourceBudgets": {
+    "finalCount": 3,
+    "finalBytes": 9195572,
+    "retainedInputCount": 0,
+    "referencedExistingAssetCount": 2,
+    "referencedExistingBytes": 4810046,
+    "duplicatedExistingBytes": 0,
+    "maximumCompressedBytesPerImage": 4194304,
+    "playerBuildBytes": 0,
+    "runtimeResidentBytes": 0
+  },
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_habitat_stonehold_rimecut_pass_establishing_rimefan_placement_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/RimecutPass/ConceptSheets/tdf_habitat_stonehold_rimecut_pass_establishing_rimefan_placement_v001.png",
+      "roles": ["establishing", "pass_notch", "safe_ledge", "rimefan_placement", "weather_off"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2843239,
+      "sha256": "c8db73e6658b8e966f83ae128be58c13f2c7b39aa607d01bdae03682819c16a6",
+      "gitLfsOid": "c8db73e6658b8e966f83ae128be58c13f2c7b39aa607d01bdae03682819c16a6",
+      "gitLfsSize": 2843239,
+      "generationCall": "call_LAaI9Li8fORZHRkb5sTnuEif"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_rimecut_pass_layout_transition_readability_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/RimecutPass/ConceptSheets/tdf_habitat_stonehold_rimecut_pass_layout_transition_readability_v001.png",
+      "roles": ["illustrative_spatial_grammar", "safe_ledge_chute_separation", "neighbor_transitions", "grayscale"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 3394215,
+      "sha256": "e4d538d43496357644bcb456262131b2b300b276114d8ce30dbe3e6d57374a03",
+      "gitLfsOid": "e4d538d43496357644bcb456262131b2b300b276114d8ce30dbe3e6d57374a03",
+      "gitLfsSize": 3394215,
+      "generationCall": "call_XNZvfGvUwlHt8y05H7mC7gzP"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_rimecut_pass_material_kit_reduction_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/RimecutPass/ConceptSheets/tdf_habitat_stonehold_rimecut_pass_material_kit_reduction_v001.png",
+      "roles": ["environment_kit", "materials", "progressive_reduction", "weather_off", "distant_placement"],
+      "state": "ReadyForUserReview",
+      "qaDisposition": "PassWithConcern",
+      "byteLength": 2958118,
+      "sha256": "c2309735089635f31b7cc25f84fe0b7b07550e050fc83864b098884c19e15ba3",
+      "gitLfsOid": "c2309735089635f31b7cc25f84fe0b7b07550e050fc83864b098884c19e15ba3",
+      "gitLfsSize": 2958118,
+      "generationCall": "call_jXB0hAVvBqHupo1EtEvpDS3x"
+    }
+  ],
+  "externalInputs": []
+}
