@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -10,9 +11,96 @@ namespace AL.ChampionMode.World
     public static class RuntimeWorldPresentation
     {
         private const float TerrainSize = 92f;
-        private static readonly Dictionary<int, Texture2D> Textures = new Dictionary<int, Texture2D>();
+        private const int SurfaceTextureSize = 64;
+        private static readonly HashSet<Mesh> OwnedMeshes = new HashSet<Mesh>();
+        private static Texture2D _sharedSurfaceTexture;
+        private static Material _sharedSurfaceMaterial;
+        private static Material _sharedEmissiveMaterial;
+        private static Material _presentationSky;
         private static Mesh _beveledCube;
         private static Mesh _cypressMesh;
+        private static int _activeSceneLeases;
+
+        public static int CachedSurfaceTextureCount => _sharedSurfaceTexture != null ? 1 : 0;
+        public static int CachedSurfaceMaterialCount =>
+            (_sharedSurfaceMaterial != null ? 1 : 0) +
+            (_sharedEmissiveMaterial != null ? 1 : 0);
+        public static int OwnedMeshCount => OwnedMeshes.Count;
+
+        public sealed class SceneLease : IDisposable
+        {
+            private readonly Material _previousSkybox;
+            private readonly AmbientMode _previousAmbientMode;
+            private readonly Color _previousAmbientLight;
+            private readonly Color _previousAmbientSkyColor;
+            private readonly Color _previousAmbientEquatorColor;
+            private readonly Color _previousAmbientGroundColor;
+            private readonly float _previousAmbientIntensity;
+            private readonly float _previousReflectionIntensity;
+            private readonly bool _previousFog;
+            private readonly FogMode _previousFogMode;
+            private readonly Color _previousFogColor;
+            private readonly float _previousFogDensity;
+            private readonly float _previousFogStartDistance;
+            private readonly float _previousFogEndDistance;
+            private bool _disposed;
+
+            internal SceneLease()
+            {
+                _previousSkybox = RenderSettings.skybox;
+                _previousAmbientMode = RenderSettings.ambientMode;
+                _previousAmbientLight = RenderSettings.ambientLight;
+                _previousAmbientSkyColor = RenderSettings.ambientSkyColor;
+                _previousAmbientEquatorColor = RenderSettings.ambientEquatorColor;
+                _previousAmbientGroundColor = RenderSettings.ambientGroundColor;
+                _previousAmbientIntensity = RenderSettings.ambientIntensity;
+                _previousReflectionIntensity = RenderSettings.reflectionIntensity;
+                _previousFog = RenderSettings.fog;
+                _previousFogMode = RenderSettings.fogMode;
+                _previousFogColor = RenderSettings.fogColor;
+                _previousFogDensity = RenderSettings.fogDensity;
+                _previousFogStartDistance = RenderSettings.fogStartDistance;
+                _previousFogEndDistance = RenderSettings.fogEndDistance;
+                _activeSceneLeases++;
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _disposed = true;
+                RenderSettings.skybox = _previousSkybox;
+                RenderSettings.ambientMode = _previousAmbientMode;
+                RenderSettings.ambientLight = _previousAmbientLight;
+                RenderSettings.ambientSkyColor = _previousAmbientSkyColor;
+                RenderSettings.ambientEquatorColor = _previousAmbientEquatorColor;
+                RenderSettings.ambientGroundColor = _previousAmbientGroundColor;
+                RenderSettings.ambientIntensity = _previousAmbientIntensity;
+                RenderSettings.reflectionIntensity = _previousReflectionIntensity;
+                RenderSettings.fog = _previousFog;
+                RenderSettings.fogMode = _previousFogMode;
+                RenderSettings.fogColor = _previousFogColor;
+                RenderSettings.fogDensity = _previousFogDensity;
+                RenderSettings.fogStartDistance = _previousFogStartDistance;
+                RenderSettings.fogEndDistance = _previousFogEndDistance;
+                ReleaseSharedResources();
+            }
+        }
+
+        public static SceneLease BeginScenePresentation()
+        {
+            return new SceneLease();
+        }
+
+        public static bool UsesReducedQualityTier(string tier)
+        {
+            return tier == "mobile_low" ||
+                   tier == "mobile_standard" ||
+                   tier == "desktop_low";
+        }
 
         public static void BuildArenaBackdrop(Transform parent, bool reducedQuality)
         {
@@ -30,14 +118,15 @@ namespace AL.ChampionMode.World
             var filter = terrain.AddComponent<MeshFilter>();
             filter.sharedMesh = CreateTerrain(resolution);
             var renderer = terrain.AddComponent<MeshRenderer>();
-            renderer.sharedMaterial = CreateSurfaceMaterial(
+            ApplySurfaceMaterial(
+                renderer,
                 new Color(0.11f, 0.14f, 0.145f),
-                new Color(0.28f, 0.31f, 0.24f),
                 0.04f,
-                0.18f);
+                0.18f,
+                0f,
+                7f);
             renderer.shadowCastingMode = ShadowCastingMode.On;
             renderer.receiveShadows = true;
-            terrain.AddComponent<MeshCollider>().sharedMesh = filter.sharedMesh;
 
             int rockCount = reducedQuality ? 16 : 34;
             for (int i = 0; i < rockCount; i++)
@@ -54,53 +143,81 @@ namespace AL.ChampionMode.World
                 rock.transform.localScale = new Vector3(0.82f + i % 4 * 0.20f, heightScale, 0.78f + i % 3 * 0.18f);
                 rock.AddComponent<MeshFilter>().sharedMesh = CreateRock(i);
                 var rockRenderer = rock.AddComponent<MeshRenderer>();
-                rockRenderer.sharedMaterial = renderer.sharedMaterial;
+                ApplySurfaceMaterial(
+                    rockRenderer,
+                    new Color(0.11f, 0.14f, 0.145f),
+                    0.04f,
+                    0.18f,
+                    0f,
+                    7f);
                 rockRenderer.shadowCastingMode = ShadowCastingMode.On;
             }
 
             BuildWindcarvedGrove(root, reducedQuality);
-            BuildDistantCitadel(
-                root,
-                reducedQuality,
-                CreateSurfaceMaterial(
-                    new Color(0.085f, 0.105f, 0.135f),
-                    new Color(0.22f, 0.25f, 0.29f),
-                    0.16f,
-                    0.30f),
-                CreateEmissiveMaterial(new Color(0.18f, 0.50f, 1f), 1.6f));
+            BuildDistantCitadel(root, reducedQuality);
             ConfigureSky();
         }
 
         public static Texture2D GetSurfaceTexture(Color baseColor, Color variationColor)
         {
-            int key = ColorUtility.ToHtmlStringRGB(baseColor).GetHashCode() ^
-                      ColorUtility.ToHtmlStringRGB(variationColor).GetHashCode();
-            if (Textures.TryGetValue(key, out var existing) && existing != null)
+            if (_sharedSurfaceTexture != null)
             {
-                return existing;
+                return _sharedSurfaceTexture;
             }
 
-            const int size = 128;
-            var texture = new Texture2D(size, size, TextureFormat.RGB24, true)
+            var texture = new Texture2D(SurfaceTextureSize, SurfaceTextureSize, TextureFormat.RGB24, true)
             {
-                name = "AL_ProceduralSurface_" + key,
+                name = "AL_SharedProceduralSurface",
                 wrapMode = TextureWrapMode.Repeat,
                 filterMode = FilterMode.Trilinear,
                 anisoLevel = 2
             };
-            for (int y = 0; y < size; y++)
+            var pixels = new Color32[SurfaceTextureSize * SurfaceTextureSize];
+            for (int y = 0; y < SurfaceTextureSize; y++)
             {
-                for (int x = 0; x < size; x++)
+                for (int x = 0; x < SurfaceTextureSize; x++)
                 {
                     float broad = Mathf.PerlinNoise(x * 0.055f + 11.2f, y * 0.055f + 31.8f);
                     float fine = Mathf.PerlinNoise(x * 0.19f + 57.3f, y * 0.19f + 3.6f);
-                    texture.SetPixel(x, y, Color.Lerp(baseColor * 0.72f, variationColor * 1.12f, broad * 0.74f + fine * 0.26f));
+                    byte value = (byte)Mathf.RoundToInt(
+                        Mathf.Lerp(128f, 236f, broad * 0.74f + fine * 0.26f));
+                    pixels[y * SurfaceTextureSize + x] = new Color32(value, value, value, 255);
                 }
             }
 
-            texture.Apply(true, false);
-            Textures[key] = texture;
-            return texture;
+            texture.SetPixels32(pixels);
+            texture.Apply(true, true);
+            _sharedSurfaceTexture = texture;
+            return _sharedSurfaceTexture;
+        }
+
+        public static void ApplySurfaceMaterial(
+            Renderer renderer,
+            Color color,
+            float metallic,
+            float smoothness,
+            float emissionIntensity = 0f,
+            float textureScale = 3.5f)
+        {
+            if (renderer == null)
+            {
+                return;
+            }
+
+            bool emissive = emissionIntensity > 0f;
+            renderer.sharedMaterial = GetSharedSurfaceMaterial(emissive);
+            var properties = new MaterialPropertyBlock();
+            renderer.GetPropertyBlock(properties);
+            properties.SetColor("_Color", color);
+            properties.SetFloat("_Metallic", Mathf.Clamp01(metallic));
+            properties.SetFloat("_Glossiness", Mathf.Clamp01(smoothness));
+            properties.SetVector(
+                "_MainTex_ST",
+                new Vector4(textureScale, textureScale, 0f, 0f));
+            properties.SetColor(
+                "_EmissionColor",
+                emissive ? color * emissionIntensity : Color.black);
+            renderer.SetPropertyBlock(properties);
         }
 
         public static Mesh GetBeveledCubeMesh()
@@ -189,36 +306,38 @@ namespace AL.ChampionMode.World
             };
             _beveledCube.RecalculateNormals();
             _beveledCube.RecalculateBounds();
+            OwnedMeshes.Add(_beveledCube);
             return _beveledCube;
         }
 
-        private static Material CreateSurfaceMaterial(Color color, Color variation, float metallic, float smoothness)
+        private static Material GetSharedSurfaceMaterial(bool emissive)
         {
+            Material existing = emissive ? _sharedEmissiveMaterial : _sharedSurfaceMaterial;
+            if (existing != null)
+            {
+                return existing;
+            }
+
             var shader = Shader.Find("Standard") ?? Shader.Find("Legacy Shaders/Diffuse");
             var material = new Material(shader)
             {
+                name = emissive ? "AL_SharedSurface_Emissive" : "AL_SharedSurface",
                 color = Color.white,
-                mainTexture = GetSurfaceTexture(color, variation)
+                mainTexture = GetSurfaceTexture(Color.white, Color.gray)
             };
-            material.mainTextureScale = new Vector2(7f, 7f);
-            if (material.HasProperty("_Metallic")) material.SetFloat("_Metallic", metallic);
-            if (material.HasProperty("_Glossiness")) material.SetFloat("_Glossiness", smoothness);
-            return material;
-        }
-
-        private static Material CreateEmissiveMaterial(Color color, float intensity)
-        {
-            var shader = Shader.Find("Standard") ?? Shader.Find("Legacy Shaders/Diffuse");
-            var material = new Material(shader) { color = color };
-            if (material.HasProperty("_EmissionColor"))
+            if (emissive && material.HasProperty("_EmissionColor"))
             {
                 material.EnableKeyword("_EMISSION");
-                material.SetColor("_EmissionColor", color * Mathf.Max(0f, intensity));
+                material.SetColor("_EmissionColor", Color.white);
             }
 
-            if (material.HasProperty("_Glossiness"))
+            if (emissive)
             {
-                material.SetFloat("_Glossiness", 0.72f);
+                _sharedEmissiveMaterial = material;
+            }
+            else
+            {
+                _sharedSurfaceMaterial = material;
             }
 
             return material;
@@ -256,6 +375,7 @@ namespace AL.ChampionMode.World
             var mesh = new Mesh { name = "AL_CitadelBasin_" + resolution, vertices = vertices, uv = uv, triangles = triangles };
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+            OwnedMeshes.Add(mesh);
             return mesh;
         }
 
@@ -265,7 +385,14 @@ namespace AL.ChampionMode.World
             float basin = Mathf.SmoothStep(-0.7f, 8.5f, Mathf.InverseLerp(11f, 44f, radius));
             float broad = Mathf.PerlinNoise(x * 0.035f + 13.7f, z * 0.035f + 41.3f) * 5.2f;
             float detail = Mathf.PerlinNoise(x * 0.12f + 73.1f, z * 0.12f + 7.9f) * 1.2f;
-            return basin + broad + detail + Mathf.Abs(Mathf.Sin(x * 0.075f + z * 0.046f)) * 2.1f - 3.4f;
+            float shapedHeight =
+                basin +
+                broad +
+                detail +
+                Mathf.Abs(Mathf.Sin(x * 0.075f + z * 0.046f)) * 2.1f -
+                3.4f;
+            float innerClearance = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(12f, 18f, radius));
+            return Mathf.Lerp(-1.6f, shapedHeight, innerClearance);
         }
 
         private static Mesh CreateRock(int seed)
@@ -334,6 +461,7 @@ namespace AL.ChampionMode.World
             };
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+            OwnedMeshes.Add(mesh);
             return mesh;
         }
 
@@ -341,11 +469,6 @@ namespace AL.ChampionMode.World
         {
             int count = reducedQuality ? 14 : 28;
             Mesh mesh = GetCypressMesh();
-            Material material = CreateSurfaceMaterial(
-                new Color(0.035f, 0.095f, 0.080f),
-                new Color(0.12f, 0.24f, 0.15f),
-                0f,
-                0.12f);
 
             for (int i = 0; i < count; i++)
             {
@@ -369,7 +492,13 @@ namespace AL.ChampionMode.World
                 tree.transform.localScale = new Vector3(scale, scale * (1.05f + i % 3 * 0.08f), scale);
                 tree.AddComponent<MeshFilter>().sharedMesh = mesh;
                 var treeRenderer = tree.AddComponent<MeshRenderer>();
-                treeRenderer.sharedMaterial = material;
+                ApplySurfaceMaterial(
+                    treeRenderer,
+                    new Color(0.055f, 0.16f, 0.10f),
+                    0f,
+                    0.12f,
+                    0f,
+                    5f);
                 treeRenderer.shadowCastingMode = reducedQuality ? ShadowCastingMode.Off : ShadowCastingMode.On;
                 treeRenderer.receiveShadows = true;
             }
@@ -398,6 +527,7 @@ namespace AL.ChampionMode.World
             };
             _cypressMesh.RecalculateNormals();
             _cypressMesh.RecalculateBounds();
+            OwnedMeshes.Add(_cypressMesh);
             return _cypressMesh;
         }
 
@@ -484,11 +614,7 @@ namespace AL.ChampionMode.World
             return new Vector2(point.x + 0.5f, point.y + 0.5f);
         }
 
-        private static void BuildDistantCitadel(
-            Transform parent,
-            bool reducedQuality,
-            Material stoneMaterial,
-            Material windowMaterial)
+        private static void BuildDistantCitadel(Transform parent, bool reducedQuality)
         {
             int count = reducedQuality ? 7 : 11;
             Vector3 previousPosition = Vector3.zero;
@@ -510,7 +636,13 @@ namespace AL.ChampionMode.World
 
                 tower.AddComponent<MeshFilter>().sharedMesh = CreateCitadelTower(i);
                 var towerRenderer = tower.AddComponent<MeshRenderer>();
-                towerRenderer.sharedMaterial = stoneMaterial;
+                ApplySurfaceMaterial(
+                    towerRenderer,
+                    new Color(0.085f, 0.105f, 0.135f),
+                    0.16f,
+                    0.30f,
+                    0f,
+                    7f);
                 towerRenderer.shadowCastingMode = ShadowCastingMode.On;
                 towerRenderer.receiveShadows = true;
 
@@ -519,7 +651,8 @@ namespace AL.ChampionMode.World
                     "CitadelWindow_Lower_" + i,
                     new Vector3(0f, 1.48f, -0.91f),
                     new Vector3(0.16f, 0.40f, 0.035f),
-                    windowMaterial);
+                    new Color(0.18f, 0.50f, 1f),
+                    1.6f);
 
                 if (!reducedQuality)
                 {
@@ -528,7 +661,8 @@ namespace AL.ChampionMode.World
                         "CitadelWindow_Upper_" + i,
                         new Vector3(0f, 2.35f, -0.86f),
                         new Vector3(0.11f, 0.24f, 0.035f),
-                        windowMaterial);
+                        new Color(0.18f, 0.50f, 1f),
+                        1.6f);
                 }
 
                 if (i > 0)
@@ -547,7 +681,13 @@ namespace AL.ChampionMode.World
                         0.58f);
                     wall.AddComponent<MeshFilter>().sharedMesh = GetBeveledCubeMesh();
                     var wallRenderer = wall.AddComponent<MeshRenderer>();
-                    wallRenderer.sharedMaterial = stoneMaterial;
+                    ApplySurfaceMaterial(
+                        wallRenderer,
+                        new Color(0.085f, 0.105f, 0.135f),
+                        0.16f,
+                        0.30f,
+                        0f,
+                        7f);
                     wallRenderer.shadowCastingMode = ShadowCastingMode.On;
                     wallRenderer.receiveShadows = true;
                 }
@@ -585,6 +725,7 @@ namespace AL.ChampionMode.World
             };
             mesh.RecalculateNormals();
             mesh.RecalculateBounds();
+            OwnedMeshes.Add(mesh);
             return mesh;
         }
 
@@ -634,7 +775,8 @@ namespace AL.ChampionMode.World
             string name,
             Vector3 localPosition,
             Vector3 localScale,
-            Material material)
+            Color color,
+            float emissionIntensity)
         {
             var window = GameObject.CreatePrimitive(PrimitiveType.Cube);
             window.name = name;
@@ -642,7 +784,13 @@ namespace AL.ChampionMode.World
             window.transform.localPosition = localPosition;
             window.transform.localScale = localScale;
             RemoveCollider(window);
-            window.GetComponent<Renderer>().sharedMaterial = material;
+            ApplySurfaceMaterial(
+                window.GetComponent<Renderer>(),
+                color,
+                0f,
+                0.72f,
+                emissionIntensity,
+                1f);
         }
 
         private static void RemoveCollider(GameObject target)
@@ -655,11 +803,11 @@ namespace AL.ChampionMode.World
 
             if (Application.isPlaying)
             {
-                Object.Destroy(collider);
+                UnityEngine.Object.Destroy(collider);
             }
             else
             {
-                Object.DestroyImmediate(collider);
+                UnityEngine.Object.DestroyImmediate(collider);
             }
         }
 
@@ -667,20 +815,71 @@ namespace AL.ChampionMode.World
         {
             var shader = Shader.Find("Skybox/Procedural");
             if (shader == null) return;
-            var sky = new Material(shader);
-            sky.SetColor("_SkyTint", new Color(0.28f, 0.39f, 0.58f));
-            sky.SetColor("_GroundColor", new Color(0.055f, 0.070f, 0.090f));
-            sky.SetFloat("_AtmosphereThickness", 0.92f);
-            sky.SetFloat("_Exposure", 0.92f);
-            if (sky.HasProperty("_SunSize")) sky.SetFloat("_SunSize", 0.035f);
-            if (sky.HasProperty("_SunSizeConvergence")) sky.SetFloat("_SunSizeConvergence", 4.2f);
-            RenderSettings.skybox = sky;
+            if (_presentationSky == null)
+            {
+                _presentationSky = new Material(shader)
+                {
+                    name = "AL_ChampionArenaSky"
+                };
+                _presentationSky.SetColor("_SkyTint", new Color(0.28f, 0.39f, 0.58f));
+                _presentationSky.SetColor("_GroundColor", new Color(0.055f, 0.070f, 0.090f));
+                _presentationSky.SetFloat("_AtmosphereThickness", 0.92f);
+                _presentationSky.SetFloat("_Exposure", 0.92f);
+                if (_presentationSky.HasProperty("_SunSize")) _presentationSky.SetFloat("_SunSize", 0.035f);
+                if (_presentationSky.HasProperty("_SunSizeConvergence")) _presentationSky.SetFloat("_SunSizeConvergence", 4.2f);
+            }
+
+            RenderSettings.skybox = _presentationSky;
             RenderSettings.ambientMode = AmbientMode.Trilight;
             RenderSettings.ambientSkyColor = new Color(0.30f, 0.38f, 0.52f);
             RenderSettings.ambientEquatorColor = new Color(0.16f, 0.20f, 0.27f);
             RenderSettings.ambientGroundColor = new Color(0.060f, 0.070f, 0.090f);
             RenderSettings.ambientIntensity = 1.08f;
             RenderSettings.reflectionIntensity = 0.72f;
+        }
+
+        private static void ReleaseSharedResources()
+        {
+            _activeSceneLeases = Mathf.Max(0, _activeSceneLeases - 1);
+            if (_activeSceneLeases > 0)
+            {
+                return;
+            }
+
+            DestroyOwnedResource(_presentationSky);
+            DestroyOwnedResource(_sharedSurfaceMaterial);
+            DestroyOwnedResource(_sharedEmissiveMaterial);
+            DestroyOwnedResource(_sharedSurfaceTexture);
+            _presentationSky = null;
+            _sharedSurfaceMaterial = null;
+            _sharedEmissiveMaterial = null;
+            _sharedSurfaceTexture = null;
+
+            foreach (Mesh mesh in OwnedMeshes)
+            {
+                DestroyOwnedResource(mesh);
+            }
+
+            OwnedMeshes.Clear();
+            _beveledCube = null;
+            _cypressMesh = null;
+        }
+
+        private static void DestroyOwnedResource(UnityEngine.Object resource)
+        {
+            if (resource == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                UnityEngine.Object.Destroy(resource);
+            }
+            else
+            {
+                UnityEngine.Object.DestroyImmediate(resource);
+            }
         }
     }
 }

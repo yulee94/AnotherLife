@@ -1,6 +1,6 @@
 # A7 Static Player-Experience Audit and First Visual Prototype
 
-**Status date:** 2026-07-27
+**Status date:** 2026-07-29
 **Primary mode:** Codex engineering (A7 visual experience)
 **Evidence base:** current `origin/main`, open issues and PRs, production scene YAML, runtime UI/camera code, focused Unity EditMode tests, and isolated renderer captures. This is a static first-pass audit, not a substitute for an integrated player playtest.
 **Scope:** Boot, Realm Selection, Kingdom, Champion Arena, UI architecture, camera architecture, feedback, accessibility, and presentation performance.
@@ -56,20 +56,24 @@ The first safe improvement is therefore a presentation foundation around the pla
 
 ## Implemented first prototype
 
-**Player-facing outcome:** the Champion Arena prototype now sits inside a textured atmospheric citadel basin with a connected skyline, faceted geology, sparse wind-carved vegetation, and quality-tiered silhouette budgets rather than ending at a flat sandbox boundary. The combat camera pulls inward before intersecting world geometry.
+**Player-facing outcome:** the Champion Arena prototype now sits inside a textured atmospheric citadel basin with a connected skyline, faceted geology, sparse wind-carved vegetation, and quality-tiered silhouette budgets rather than ending at a flat sandbox boundary. The combat camera resolves its final smoothed and shaken position before intersecting world geometry.
 
 Acceptance criteria:
 
 - deterministic terrain geometry and set-dressing counts;
 - high and reduced-quality geometry budgets;
+- presentation terrain has no physics collider and keeps a 12 m inner combat clearance below the arena floor;
 - a shared chamfered-stone mesh replaces hard cube edges in arena architecture;
+- one shared 64 px mipmapped texture releases its CPU copy after upload;
+- two shared surface-material variants use per-renderer property blocks instead of per-object material instances;
 - the high tier uses 2,401 terrain vertices, 34 rocks, 28 trees, 11 towers, and 10 curtain-wall spans;
 - the reduced tier uses 625 terrain vertices, 16 rocks, 14 trees, 7 towers, and 6 curtain-wall spans;
+- `mobile_low`, `mobile_standard`, and `desktop_low` select the reduced presentation budget;
 - no quest, combat, reward, balance, save, or narrative mutation;
 - no new package or external runtime dependency;
-- camera obstruction resolution uses bounded sphere casts;
+- camera obstruction resolution uses bounded sphere casts after smoothing and shake, without forcing a minimum distance through close walls;
 - camera shake is reduced by default without removing event feedback;
-- project imports, reloads assemblies, and runs the focused tests without compiler errors in Unity 2022.3.62f3;
+- scene exit restores prior sky, ambient, reflection, and fog state and releases generated meshes, materials, texture, and sky material;
 - broad redesign remains in a draft PR and is not production-approved pending A1 review.
 
 ## Original AnotherLife adaptation
@@ -81,17 +85,18 @@ The implementation uses a dusk citadel basin, weathered monolith silhouettes, re
 - [Player-scale arena frame](Architecture/Previews/a7_champion_arena_gameplay_v001.png)
 - [Environment overview](Architecture/Previews/a7_champion_arena_world_foundation_v001.png)
 
-These are deterministic editor-rendered prototype captures using the production arena construction path and runtime lighting configuration. They are not claims of a finished authored-asset world, a representative HUD capture, or an integrated playtest.
+These are deterministic editor-rendered baseline prototype captures using the production arena construction path and runtime lighting configuration. They predate the 2026-07-29 safety/lifecycle correction, which intentionally preserves the visual direction while changing collision, resource ownership, and quality behavior. They are not claims of a finished authored-asset world, a representative HUD capture, or an integrated playtest.
 
 ## Validation and evidence limits
 
-- Passed: Unity 2022.3.62f3 headless import, script compilation, domain reload, and both evidence renders; process exited `0`.
-- Passed: focused EditMode suite `AL.Tests.EditMode.RuntimeWorldPresentationTests`: **5/5**.
-- Covered: texture caching/bounds, deterministic high/low scene budgets, idempotent backdrop construction, shared chamfered geometry, and a camera-obstruction pull-in case.
+- Prior baseline passed: Unity 2022.3.62f3 import, script compilation, domain reload, both evidence renders, and focused EditMode suite `AL.Tests.EditMode.RuntimeWorldPresentationTests`: **5/5**.
+- Current correction passed: Unity Roslyn compilation of `AL.Runtime` and `AL.EditMode.Tests` using editor-generated response files.
+- Current correction coverage added: presentation-only terrain and inner clearance, one-texture/two-material bounds, CPU texture-copy release, close-wall camera safety, obstruction recovery, post-shake collision, mobile-standard budget selection, render-state restoration, and generated-resource release.
 - Passed: no shared-lock file is changed.
-- Passed: open PRs #334 and #335 were inspected; neither declared this file scope.
-- Not yet performed: live production-arena gameplay capture with HUD, GPU/CPU profiler capture, device matrix, controller/touch pass, or integrated user playtest.
-- Known prototype risks: the presentation terrain collider still needs gameplay-boundary validation; runtime-generated materials need profiler evidence; camera collision layers need production tuning; and the procedural art remains a bridge to approved authored assets rather than final commercial world art.
+- Passed: rebased onto current `main` after #346 merged; the combined `AL.Runtime` and `AL.EditMode.Tests` assemblies, including `ChampionRealmContextTests`, compile successfully.
+- Blocked: expanded EditMode execution. Three retries stopped before project load because Unity Licensing Client IPC timed out with internal exit code `199`.
+- Not yet performed: refreshed safety-correction captures, live production-arena gameplay with HUD, GPU/CPU profiler capture, device matrix, controller/touch pass, #346 combined Test Runner execution, or integrated user playtest.
+- Known prototype risks: production collision-layer tuning, device profiler evidence, blocked #346 combined test execution, and procedural art remaining visibly simpler than approved authored assets.
 
 ## A7 status report
 
@@ -107,12 +112,12 @@ These are deterministic editor-rendered prototype captures using the production 
 
 **Systems affected:** Champion Arena presentation and lighting, deterministic runtime surface/mesh generation, combat camera collision/comfort, and focused EditMode coverage.
 
-**Risks:** runtime material and collider cost, production collision-layer tuning, procedural art remaining visibly simpler than authored assets, and unperformed device profiling.
+**Risks:** production collision-layer tuning, procedural art remaining visibly simpler than authored assets, unperformed device profiling, and the pending #346 combined Test Runner execution.
 
 **Dependencies:** user/A1 visual approval; later approved environment/character source assets; no active shared-file lock.
 
-**Testing plan:** completed focused EditMode tests and deterministic captures; still required are arena playthrough, camera obstruction cases against production layers, four aspect ratios, controller/touch, and high/low-tier profiler comparison.
+**Testing plan:** the combined runtime and test assemblies compile; the expanded focused suite and #346 regression are authored but still require Unity execution after licensing IPC recovers. Remaining manual evidence is an arena playthrough, refreshed obstruction captures, four aspect ratios, controller/touch, and high/low-tier profiler comparison.
 
 **Approval needed from A1:** approve, revise, or reject the citadel-basin visual direction and decide whether it may remain connected to the production arena while authored environment assets are developed.
 
-**Current status:** Prototype complete and draft PR open; validation is current, but the visual direction is not approved or merged.
+**Current status:** Safety/lifecycle correction implemented and compiling; draft PR remains open, expanded Unity execution is blocked by licensing IPC, and the visual direction is not approved or merged.

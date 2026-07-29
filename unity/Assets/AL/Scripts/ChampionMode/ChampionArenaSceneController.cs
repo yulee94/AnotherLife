@@ -127,6 +127,7 @@ namespace AL.ChampionMode
         private GameObject _inspectionShowcaseRoot;
         private GameObject _introStageCueRoot;
         private RuntimePlatformQualityController _qualityController;
+        private RuntimeWorldPresentation.SceneLease _presentationLease;
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private RealmId _realmId = RealmId.None;
@@ -199,6 +200,11 @@ namespace AL.ChampionMode
 
         private void BuildArena()
         {
+            if (_presentationLease == null)
+            {
+                _presentationLease = RuntimeWorldPresentation.BeginScenePresentation();
+            }
+
             ConfigureArenaLighting();
             BuildArenaEnvironment();
             Color realmAccent = GetRealmAccentColor(_realmId);
@@ -366,8 +372,8 @@ namespace AL.ChampionMode
         {
             return _qualityController != null &&
                    _qualityController.CurrentProfile != null &&
-                   (_qualityController.CurrentProfile.Tier == "mobile_low" ||
-                    _qualityController.CurrentProfile.Tier == "desktop_low");
+                   RuntimeWorldPresentation.UsesReducedQualityTier(
+                       _qualityController.CurrentProfile.Tier);
         }
 
         private void CreateArenaGroundDetails(Transform environment, ArenaAtmospherePulse atmospherePulse, Color realmAccent, Color riftRed, Color coldBlue)
@@ -624,37 +630,12 @@ namespace AL.ChampionMode
                 return;
             }
 
-            var shader = Shader.Find("Standard");
-            var material = shader != null ? new Material(shader) : new Material(renderer.material);
-            if (material.HasProperty("_MainTex"))
-            {
-                material.color = Color.white;
-                material.mainTexture = RuntimeWorldPresentation.GetSurfaceTexture(
-                    color,
-                    Color.Lerp(color, Color.white, 0.20f));
-                material.mainTextureScale = new Vector2(3.5f, 3.5f);
-            }
-            else
-            {
-                material.color = color;
-            }
-            if (material.HasProperty("_Metallic"))
-            {
-                material.SetFloat("_Metallic", metallic);
-            }
-
-            if (material.HasProperty("_Glossiness"))
-            {
-                material.SetFloat("_Glossiness", smoothness);
-            }
-
-            if (smoothness > 0.68f && material.HasProperty("_EmissionColor"))
-            {
-                material.EnableKeyword("_EMISSION");
-                material.SetColor("_EmissionColor", color * 0.75f);
-            }
-
-            renderer.sharedMaterial = material;
+            RuntimeWorldPresentation.ApplySurfaceMaterial(
+                renderer,
+                color,
+                metallic,
+                smoothness,
+                smoothness > 0.68f ? 0.75f : 0f);
         }
 
         private static Light CreatePointLight(string name, Vector3 position, Color color, float intensity, float range)
@@ -1036,6 +1017,9 @@ namespace AL.ChampionMode
                 _playerCombat.OnManaChanged -= UpdateManaText;
                 _playerCombat.OnDeath -= HandlePlayerDeath;
             }
+
+            _presentationLease?.Dispose();
+            _presentationLease = null;
         }
 
         private static void EnsureEventSystem()
@@ -3019,17 +3003,18 @@ namespace AL.ChampionMode
     internal sealed class ChampionClearShowcaseVfx : MonoBehaviour
     {
         private const float Lifetime = 3.2f;
-        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Renderer> _renderers = new List<Renderer>();
         private readonly List<Color> _emissionColors = new List<Color>();
         private readonly List<Light> _lights = new List<Light>();
         private readonly List<float> _lightIntensities = new List<float>();
+        private readonly MaterialPropertyBlock _propertyBlock = new MaterialPropertyBlock();
         private Color _accent = Color.white;
         private float _age;
 
         public void Configure(Color accent)
         {
             _accent = accent;
-            _materials.Clear();
+            _renderers.Clear();
             _emissionColors.Clear();
             _lights.Clear();
             _lightIntensities.Clear();
@@ -3037,17 +3022,19 @@ namespace AL.ChampionMode
             var renderers = GetComponentsInChildren<Renderer>();
             foreach (var renderer in renderers)
             {
-                if (renderer == null || renderer.material == null)
+                Material material = renderer != null ? renderer.sharedMaterial : null;
+                if (material == null)
                 {
                     continue;
                 }
 
-                var material = renderer.material;
-                _materials.Add(material);
+                _renderers.Add(renderer);
                 if (material.HasProperty("_EmissionColor"))
                 {
                     material.EnableKeyword("_EMISSION");
-                    _emissionColors.Add(material.GetColor("_EmissionColor"));
+                    renderer.GetPropertyBlock(_propertyBlock);
+                    Color emission = _propertyBlock.GetColor("_EmissionColor");
+                    _emissionColors.Add(emission.maxColorComponent > 0f ? emission : accent);
                 }
                 else
                 {
@@ -3075,17 +3062,21 @@ namespace AL.ChampionMode
             float pulse = (Mathf.Sin(Time.time * 8.2f) + 1f) * 0.5f;
             transform.localScale = Vector3.one * Mathf.Lerp(1f, 1.14f, normalized);
 
-            for (int i = 0; i < _materials.Count; i++)
+            for (int i = 0; i < _renderers.Count; i++)
             {
-                var material = _materials[i];
-                if (material == null || !material.HasProperty("_EmissionColor"))
+                Renderer renderer = _renderers[i];
+                if (renderer == null)
                 {
                     continue;
                 }
 
                 Color baseEmission = i < _emissionColors.Count ? _emissionColors[i] : _accent;
                 float strength = Mathf.Lerp(1.22f, 0.18f, normalized) * (0.86f + pulse * 0.28f);
-                material.SetColor("_EmissionColor", Color.Lerp(baseEmission, _accent, pulse * 0.34f) * strength);
+                renderer.GetPropertyBlock(_propertyBlock);
+                _propertyBlock.SetColor(
+                    "_EmissionColor",
+                    Color.Lerp(baseEmission, _accent, pulse * 0.34f) * strength);
+                renderer.SetPropertyBlock(_propertyBlock);
             }
 
             for (int i = 0; i < _lights.Count; i++)
@@ -3109,10 +3100,11 @@ namespace AL.ChampionMode
 
     internal sealed class ChampionInspectionShowcase : MonoBehaviour
     {
-        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Renderer> _renderers = new List<Renderer>();
         private readonly List<Light> _lights = new List<Light>();
         private readonly List<float> _lightBaseIntensities = new List<float>();
         private readonly List<ParticleSystem> _particles = new List<ParticleSystem>();
+        private readonly MaterialPropertyBlock _propertyBlock = new MaterialPropertyBlock();
         private Color _accent;
         private Color _edge;
         private Vector3 _baseLocalPosition;
@@ -3133,18 +3125,19 @@ namespace AL.ChampionMode
 
         private void CollectTargets()
         {
-            _materials.Clear();
+            _renderers.Clear();
             foreach (var renderer in GetComponentsInChildren<Renderer>(true))
             {
-                if (renderer == null || renderer.material == null)
+                Material material = renderer != null ? renderer.sharedMaterial : null;
+                if (material == null)
                 {
                     continue;
                 }
 
-                if (renderer.material.HasProperty("_EmissionColor"))
+                if (material.HasProperty("_EmissionColor"))
                 {
-                    renderer.material.EnableKeyword("_EMISSION");
-                    _materials.Add(renderer.material);
+                    material.EnableKeyword("_EMISSION");
+                    _renderers.Add(renderer);
                 }
             }
 
@@ -3183,16 +3176,18 @@ namespace AL.ChampionMode
                 _turntableOrbit.localRotation = Quaternion.Euler(0f, time * 18f, 0f);
             }
 
-            for (int i = 0; i < _materials.Count; i++)
+            for (int i = 0; i < _renderers.Count; i++)
             {
-                Material material = _materials[i];
-                if (material == null)
+                Renderer renderer = _renderers[i];
+                if (renderer == null)
                 {
                     continue;
                 }
 
                 Color color = i % 2 == 0 ? _accent : _edge;
-                material.SetColor("_EmissionColor", color * Mathf.Max(0f, pulse));
+                renderer.GetPropertyBlock(_propertyBlock);
+                _propertyBlock.SetColor("_EmissionColor", color * Mathf.Max(0f, pulse));
+                renderer.SetPropertyBlock(_propertyBlock);
             }
 
             for (int i = 0; i < _lights.Count; i++)
@@ -3223,10 +3218,11 @@ namespace AL.ChampionMode
 
     internal sealed class ChampionIntroCinematicCue : MonoBehaviour
     {
-        private readonly List<Material> _materials = new List<Material>();
+        private readonly List<Renderer> _renderers = new List<Renderer>();
         private readonly List<Color> _emissionColors = new List<Color>();
         private readonly List<Light> _lights = new List<Light>();
         private readonly List<float> _lightIntensities = new List<float>();
+        private readonly MaterialPropertyBlock _propertyBlock = new MaterialPropertyBlock();
         private Transform _heroHalo;
         private Transform _heroInner;
         private Transform _bossHalo;
@@ -3245,7 +3241,7 @@ namespace AL.ChampionMode
         private void OnEnable()
         {
             _time = 0f;
-            if (_materials.Count == 0)
+            if (_renderers.Count == 0)
             {
                 CollectTargets();
             }
@@ -3253,21 +3249,24 @@ namespace AL.ChampionMode
 
         private void CollectTargets()
         {
-            _materials.Clear();
+            _renderers.Clear();
             _emissionColors.Clear();
             _lights.Clear();
             _lightIntensities.Clear();
 
             foreach (var renderer in GetComponentsInChildren<Renderer>(true))
             {
-                if (renderer == null || renderer.material == null || !renderer.material.HasProperty("_EmissionColor"))
+                Material material = renderer != null ? renderer.sharedMaterial : null;
+                if (material == null || !material.HasProperty("_EmissionColor"))
                 {
                     continue;
                 }
 
-                renderer.material.EnableKeyword("_EMISSION");
-                _materials.Add(renderer.material);
-                _emissionColors.Add(renderer.material.color);
+                material.EnableKeyword("_EMISSION");
+                renderer.GetPropertyBlock(_propertyBlock);
+                Color color = _propertyBlock.GetColor("_Color");
+                _renderers.Add(renderer);
+                _emissionColors.Add(color.maxColorComponent > 0f ? color : Color.white);
             }
 
             foreach (var light in GetComponentsInChildren<Light>(true))
@@ -3290,16 +3289,20 @@ namespace AL.ChampionMode
             RotateCue(_bossHalo, -14f);
             RotateCue(_bossInner, 34f);
 
-            for (int i = 0; i < _materials.Count; i++)
+            for (int i = 0; i < _renderers.Count; i++)
             {
-                var material = _materials[i];
-                if (material == null)
+                Renderer renderer = _renderers[i];
+                if (renderer == null)
                 {
                     continue;
                 }
 
                 float pulse = 0.52f + Mathf.Sin(_time * 2.4f + i * 0.62f) * 0.34f;
-                material.SetColor("_EmissionColor", _emissionColors[i] * Mathf.Max(0f, pulse));
+                renderer.GetPropertyBlock(_propertyBlock);
+                _propertyBlock.SetColor(
+                    "_EmissionColor",
+                    _emissionColors[i] * Mathf.Max(0f, pulse));
+                renderer.SetPropertyBlock(_propertyBlock);
             }
 
             for (int i = 0; i < _lights.Count; i++)
@@ -3330,7 +3333,7 @@ namespace AL.ChampionMode
     {
         private struct PulsedMaterial
         {
-            public Material Material;
+            public Renderer Renderer;
             public Color Color;
             public float Phase;
             public float Intensity;
@@ -3346,6 +3349,7 @@ namespace AL.ChampionMode
 
         private readonly List<PulsedMaterial> _materials = new List<PulsedMaterial>();
         private readonly List<PulsedLight> _lights = new List<PulsedLight>();
+        private readonly MaterialPropertyBlock _propertyBlock = new MaterialPropertyBlock();
 
         public void RegisterRenderer(GameObject target, Color color, float phase, float intensity)
         {
@@ -3364,7 +3368,7 @@ namespace AL.ChampionMode
             material.EnableKeyword("_EMISSION");
             _materials.Add(new PulsedMaterial
             {
-                Material = material,
+                Renderer = renderer,
                 Color = color,
                 Phase = phase,
                 Intensity = Mathf.Max(0f, intensity)
@@ -3394,13 +3398,17 @@ namespace AL.ChampionMode
             for (int i = 0; i < _materials.Count; i++)
             {
                 var entry = _materials[i];
-                if (entry.Material == null)
+                if (entry.Renderer == null)
                 {
                     continue;
                 }
 
                 float pulse = 0.70f + Mathf.Sin(time + entry.Phase) * 0.30f;
-                entry.Material.SetColor("_EmissionColor", entry.Color * entry.Intensity * Mathf.Max(0f, pulse));
+                entry.Renderer.GetPropertyBlock(_propertyBlock);
+                _propertyBlock.SetColor(
+                    "_EmissionColor",
+                    entry.Color * entry.Intensity * Mathf.Max(0f, pulse));
+                entry.Renderer.SetPropertyBlock(_propertyBlock);
             }
 
             for (int i = 0; i < _lights.Count; i++)

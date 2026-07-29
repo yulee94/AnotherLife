@@ -233,8 +233,8 @@ namespace AL.ChampionMode.Camera
             {
                 Quaternion rotation = Quaternion.Euler(_pitch, _yaw, 0);
                 Vector3 negDistance = new Vector3(0.0f, 0.0f, -_distance);
-                Vector3 position = (rotation * negDistance) + _target.position + new Vector3(0, _heightOffset, 0);
-                position = ResolveCameraCollision(_target.position + new Vector3(0f, _heightOffset, 0f), position);
+                Vector3 pivot = _target.position + new Vector3(0f, _heightOffset, 0f);
+                Vector3 desiredPosition = (rotation * negDistance) + pivot;
                 Vector3 shakeOffset = Vector3.zero;
                 if (_shakeTime > 0f)
                 {
@@ -244,7 +244,15 @@ namespace AL.ChampionMode.Camera
                 }
 
                 transform.rotation = rotation;
-                transform.position = Vector3.SmoothDamp(transform.position, position, ref _positionVelocity, _followSmoothTime) + shakeOffset;
+                Vector3 smoothedPosition = Vector3.SmoothDamp(
+                    transform.position,
+                    desiredPosition,
+                    ref _positionVelocity,
+                    _followSmoothTime);
+                transform.position = ResolveFinalCameraPosition(
+                    pivot,
+                    smoothedPosition,
+                    shakeOffset);
             }
             else
             {
@@ -283,8 +291,19 @@ namespace AL.ChampionMode.Camera
                 return desiredPosition;
             }
 
-            return pivot + direction.normalized *
-                Mathf.Max(0.55f, hit.distance - Mathf.Max(0.02f, _collisionPadding));
+            float safeDistance = Mathf.Clamp(
+                hit.distance - Mathf.Max(0.02f, _collisionPadding),
+                0f,
+                distance);
+            return pivot + direction.normalized * safeDistance;
+        }
+
+        private Vector3 ResolveFinalCameraPosition(
+            Vector3 pivot,
+            Vector3 smoothedPosition,
+            Vector3 shakeOffset)
+        {
+            return ResolveCameraCollision(pivot, smoothedPosition + shakeOffset);
         }
 
         private void UpdateCinematicCamera()
