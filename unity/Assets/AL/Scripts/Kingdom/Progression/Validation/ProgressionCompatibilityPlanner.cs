@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
 using AL.Core;
 
 namespace AL.Kingdom.Progression
@@ -18,7 +17,8 @@ namespace AL.Kingdom.Progression
         public const int MaximumEffectsPerResearch = 64;
         public const int MaximumCostEntriesPerProfile = 16;
         public const int MaximumPrerequisiteTargets = 512;
-        public const int MaximumIdUtf8Bytes = 128;
+        public const int MaximumIdUtf8Bytes =
+            ProgressionText.MaximumIdentifierUtf8Bytes;
 
         public static ProgressionCompatibilityResult BuildResearchCompatibility(
             string catalogSetId,
@@ -39,6 +39,9 @@ namespace AL.Kingdom.Progression
                     prerequisiteTargets,
                     MaximumPrerequisiteTargets,
                     out bool prerequisiteTargetLimitExceeded);
+            bool hasDefinitionSource = definitions != null &&
+                                       definitionList.Count > 0 &&
+                                       !definitionLimitExceeded;
 
             ValidateCatalog(
                 ProgressionDomain.Research,
@@ -47,6 +50,10 @@ namespace AL.Kingdom.Progression
                 definitions,
                 definitionList,
                 definitionLimitExceeded,
+                diagnostics);
+            ValidateTimestampPolicy(
+                timestampPolicy,
+                ProgressionDomain.Research,
                 diagnostics);
 
             if (rawStates == null)
@@ -91,6 +98,8 @@ namespace AL.Kingdom.Progression
                     BuildResearchRevision(
                         catalogSetId,
                         catalogRevision,
+                        definitionList,
+                        prerequisiteTargetList,
                         stateList,
                         Array.Empty<ResearchProgressionSnapshot>(),
                         diagnostics,
@@ -99,7 +108,10 @@ namespace AL.Kingdom.Progression
                         timestampPolicy),
                     Array.Empty<ResearchProgressionSnapshot>(),
                     stateList,
-                    diagnostics);
+                    diagnostics,
+                    definitionList,
+                    timestampPolicy,
+                    hasDefinitionSource);
             }
 
             var statesById = stateList.ToDictionary(
@@ -138,6 +150,8 @@ namespace AL.Kingdom.Progression
                 BuildResearchRevision(
                     catalogSetId,
                     catalogRevision,
+                    definitionList,
+                    prerequisiteTargetList,
                     stateList,
                     snapshots,
                     diagnostics,
@@ -146,7 +160,10 @@ namespace AL.Kingdom.Progression
                     timestampPolicy),
                 snapshots,
                 stateList,
-                diagnostics);
+                diagnostics,
+                definitionList,
+                timestampPolicy,
+                hasDefinitionSource);
         }
 
         public static ProgressionCompatibilityResult BuildTrainingCompatibility(
@@ -155,7 +172,8 @@ namespace AL.Kingdom.Progression
             IEnumerable<TroopProgressionDefinition> definitions,
             IEnumerable<TroopProgressionStateRecord> rawStates,
             IEnumerable<ProgressionPrerequisiteTargetDefinition>
-                prerequisiteTargets = null)
+                prerequisiteTargets = null,
+            ProgressionTimestampPolicy timestampPolicy = null)
         {
             var diagnostics = new List<ProgressionDiagnostic>();
             List<TroopProgressionDefinition> definitionList =
@@ -167,6 +185,9 @@ namespace AL.Kingdom.Progression
                     prerequisiteTargets,
                     MaximumPrerequisiteTargets,
                     out bool prerequisiteTargetLimitExceeded);
+            bool hasDefinitionSource = definitions != null &&
+                                       definitionList.Count > 0 &&
+                                       !definitionLimitExceeded;
 
             ValidateCatalog(
                 ProgressionDomain.Training,
@@ -175,6 +196,10 @@ namespace AL.Kingdom.Progression
                 definitions,
                 definitionList,
                 definitionLimitExceeded,
+                diagnostics);
+            ValidateTimestampPolicy(
+                timestampPolicy,
+                ProgressionDomain.Training,
                 diagnostics);
 
             if (rawStates == null)
@@ -215,14 +240,20 @@ namespace AL.Kingdom.Progression
                     BuildTrainingRevision(
                         catalogSetId,
                         catalogRevision,
+                        definitionList,
+                        prerequisiteTargetList,
                         stateList,
                         Array.Empty<TroopProgressionSnapshot>(),
                         diagnostics,
                         rawStates == null,
-                        stateLimitExceeded),
+                        stateLimitExceeded,
+                        timestampPolicy),
                     Array.Empty<TroopProgressionSnapshot>(),
                     stateList,
-                    diagnostics);
+                    diagnostics,
+                    definitionList,
+                    timestampPolicy,
+                    hasDefinitionSource);
             }
 
             var statesById = stateList.ToDictionary(
@@ -261,14 +292,20 @@ namespace AL.Kingdom.Progression
                 BuildTrainingRevision(
                     catalogSetId,
                     catalogRevision,
+                    definitionList,
+                    prerequisiteTargetList,
                     stateList,
                     snapshots,
                     diagnostics,
                     false,
-                    false),
+                    false,
+                    timestampPolicy),
                 snapshots,
                 stateList,
-                diagnostics);
+                diagnostics,
+                definitionList,
+                timestampPolicy,
+                hasDefinitionSource);
         }
 
         private static void ValidateCatalog<TDefinition>(
@@ -280,7 +317,11 @@ namespace AL.Kingdom.Progression
             bool limitExceeded,
             ICollection<ProgressionDiagnostic> diagnostics)
         {
-            if (!IsValidId(catalogSetId) || !IsValidId(catalogRevision))
+            bool catalogSetIdValid =
+                ProgressionText.IsValidIdentifier(catalogSetId);
+            bool catalogRevisionValid =
+                ProgressionText.IsValidIdentifier(catalogRevision);
+            if (!catalogSetIdValid || !catalogRevisionValid)
             {
                 diagnostics.Add(Diagnostic(
                     ProgressionDiagnosticCode.InvalidCatalogIdentity,
@@ -332,7 +373,7 @@ namespace AL.Kingdom.Progression
                     continue;
                 }
 
-                string id = definition.Identity?.Id ?? string.Empty;
+                string id = SafeDiagnosticId(definition.Identity?.Id);
                 ValidateDefinitionIdentity(
                     definition.Identity,
                     ResearchSchemaVersion,
@@ -407,7 +448,7 @@ namespace AL.Kingdom.Progression
                     continue;
                 }
 
-                string id = definition.Identity?.Id ?? string.Empty;
+                string id = SafeDiagnosticId(definition.Identity?.Id);
                 ValidateDefinitionIdentity(
                     definition.Identity,
                     TroopSchemaVersion,
@@ -498,8 +539,12 @@ namespace AL.Kingdom.Progression
             int index,
             ICollection<ProgressionDiagnostic> diagnostics)
         {
-            string id = identity?.Id ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(id))
+            string id = SafeDiagnosticId(identity?.Id);
+            ProgressionIdentifierValidation idValidation =
+                ProgressionText.ValidateIdentifier(identity?.Id);
+            if (idValidation == ProgressionIdentifierValidation.Null ||
+                idValidation == ProgressionIdentifierValidation.Empty ||
+                idValidation == ProgressionIdentifierValidation.Whitespace)
             {
                 diagnostics.Add(Diagnostic(
                     ProgressionDiagnosticCode.BlankDefinitionId,
@@ -507,7 +552,7 @@ namespace AL.Kingdom.Progression
                     id,
                     index));
             }
-            else if (!IsValidId(id))
+            if (!IsValidAnySourceIdentity(identity))
             {
                 diagnostics.Add(Diagnostic(
                     ProgressionDiagnosticCode.InvalidDefinitionIdentity,
@@ -517,18 +562,7 @@ namespace AL.Kingdom.Progression
             }
 
             if (identity == null ||
-                !IsValidId(identity.ContentVersion) ||
-                !IsValidId(identity.SourceRevision) ||
-                !IsSha256(identity.RawSha256))
-            {
-                diagnostics.Add(Diagnostic(
-                    ProgressionDiagnosticCode.InvalidDefinitionIdentity,
-                    domain,
-                    id,
-                    index));
-            }
-
-            if (identity == null ||
+                !ProgressionText.IsValidIdentifier(identity.SchemaVersion) ||
                 !string.Equals(
                     identity.SchemaVersion,
                     expectedSchemaVersion,
@@ -633,11 +667,12 @@ namespace AL.Kingdom.Progression
                              Index = index
                          })
                          .Where(item => item.Target?.Identity != null)
-                         .Select(item => new IndexedIdentity(
-                             item.Target.Identity.Id,
-                             item.Index))
-                         .Where(identity => !string.IsNullOrWhiteSpace(identity.Id))
-                         .GroupBy(identity => identity.Id, StringComparer.Ordinal)
+                          .Select(item => new IndexedIdentity(
+                              item.Target.Identity.Id,
+                              item.Index))
+                          .Where(identity =>
+                              ProgressionText.IsValidIdentifier(identity.Id))
+                          .GroupBy(identity => identity.Id, StringComparer.Ordinal)
                          .Where(group => group.Count() > 1))
             {
                 diagnostics.Add(Diagnostic(
@@ -673,7 +708,7 @@ namespace AL.Kingdom.Progression
 
             var targetLookup = targets
                 .Where(target => target?.Identity != null &&
-                                 IsValidId(target.Identity.Id))
+                                 IsValidAnySourceIdentity(target.Identity))
                 .GroupBy(target => target.Identity.Id, StringComparer.Ordinal)
                 .Where(group => group.Count() == 1)
                 .ToDictionary(
@@ -684,7 +719,8 @@ namespace AL.Kingdom.Progression
             {
                 ProgressionPrerequisite prerequisite = prerequisites[index];
                 if (prerequisite == null ||
-                    !IsValidId(prerequisite.DefinitionId) ||
+                    !ProgressionText.IsValidIdentifier(
+                        prerequisite.DefinitionId) ||
                     prerequisite.MinimumLevel < 0 ||
                     !targetLookup.TryGetValue(
                         prerequisite?.DefinitionId ?? string.Empty,
@@ -700,9 +736,11 @@ namespace AL.Kingdom.Progression
             }
 
             foreach (IGrouping<string, ProgressionPrerequisite> group in prerequisites
-                         .Where(prerequisite => prerequisite != null &&
-                                                !string.IsNullOrWhiteSpace(
-                                                    prerequisite.DefinitionId))
+                          .Where(prerequisite => prerequisite != null &&
+                                                ProgressionText
+                                                    .IsValidIdentifier(
+                                                        prerequisite
+                                                            .DefinitionId))
                          .GroupBy(
                              prerequisite => prerequisite.DefinitionId,
                              StringComparer.Ordinal)
@@ -749,9 +787,9 @@ namespace AL.Kingdom.Progression
             }
 
             foreach (IGrouping<string, ProgressionSourceIdentity> group in definition
-                         .EffectProfiles
-                         .Where(identity => identity != null &&
-                                            !string.IsNullOrWhiteSpace(identity.Id))
+                          .EffectProfiles
+                          .Where(identity => identity != null &&
+                                            IsValidProfileIdentity(identity))
                          .GroupBy(identity => identity.Id, StringComparer.Ordinal)
                          .Where(group => group.Count() > 1))
             {
@@ -771,7 +809,9 @@ namespace AL.Kingdom.Progression
         {
             var definitionsById = definitions
                 .Where(definition => definition?.Identity != null &&
-                                     IsValidId(definition.Identity.Id))
+                                     IsValidDefinitionIdentity(
+                                         definition.Identity,
+                                         ResearchSchemaVersion))
                 .GroupBy(definition => definition.Identity.Id, StringComparer.Ordinal)
                 .Where(group => group.Count() == 1)
                 .ToDictionary(
@@ -792,7 +832,15 @@ namespace AL.Kingdom.Progression
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(state.DefinitionId))
+                ProgressionIdentifierValidation stateIdValidation =
+                    ProgressionText.ValidateIdentifier(state.DefinitionId);
+                ProgressionIdentifierValidation contentVersionValidation =
+                    ProgressionText.ValidateIdentifier(
+                        state.DefinitionContentVersion);
+                if (stateIdValidation == ProgressionIdentifierValidation.Null ||
+                    stateIdValidation == ProgressionIdentifierValidation.Empty ||
+                    stateIdValidation ==
+                    ProgressionIdentifierValidation.Whitespace)
                 {
                     diagnostics.Add(Diagnostic(
                         ProgressionDiagnosticCode.BlankStateId,
@@ -802,10 +850,21 @@ namespace AL.Kingdom.Progression
                     continue;
                 }
 
-                if (!IsValidId(state.DefinitionId))
+                if (stateIdValidation != ProgressionIdentifierValidation.Valid)
                 {
                     diagnostics.Add(Diagnostic(
                         ProgressionDiagnosticCode.InvalidStateId,
+                        ProgressionDomain.Research,
+                        state.DefinitionId,
+                        index));
+                    continue;
+                }
+
+                if (contentVersionValidation !=
+                    ProgressionIdentifierValidation.Valid)
+                {
+                    diagnostics.Add(Diagnostic(
+                        ProgressionDiagnosticCode.UnsupportedContentVersion,
                         ProgressionDomain.Research,
                         state.DefinitionId,
                         index));
@@ -870,15 +929,6 @@ namespace AL.Kingdom.Progression
                      timestampPolicy.MinimumUtcTimestamp ||
                      state.CompletionTimestamp >
                      timestampPolicy.MaximumUtcTimestamp);
-                if (hasTimerEvidence && !timestampPolicyValid)
-                {
-                    diagnostics.Add(Diagnostic(
-                        ProgressionDiagnosticCode.InvalidTimestampPolicy,
-                        ProgressionDomain.Research,
-                        state.DefinitionId,
-                        index));
-                }
-
                 if ((state.HasActiveLegacyOrder && state.CompletionTimestamp <= 0) ||
                     (!state.HasActiveLegacyOrder && state.CompletionTimestamp < 0) ||
                     timestampOutsidePolicy ||
@@ -923,7 +973,9 @@ namespace AL.Kingdom.Progression
         {
             var definitionsById = definitions
                 .Where(definition => definition?.Identity != null &&
-                                     IsValidId(definition.Identity.Id))
+                                     IsValidDefinitionIdentity(
+                                         definition.Identity,
+                                         TroopSchemaVersion))
                 .GroupBy(definition => definition.Identity.Id, StringComparer.Ordinal)
                 .Where(group => group.Count() == 1)
                 .ToDictionary(
@@ -944,7 +996,15 @@ namespace AL.Kingdom.Progression
                     continue;
                 }
 
-                if (string.IsNullOrWhiteSpace(state.DefinitionId))
+                ProgressionIdentifierValidation stateIdValidation =
+                    ProgressionText.ValidateIdentifier(state.DefinitionId);
+                ProgressionIdentifierValidation contentVersionValidation =
+                    ProgressionText.ValidateIdentifier(
+                        state.DefinitionContentVersion);
+                if (stateIdValidation == ProgressionIdentifierValidation.Null ||
+                    stateIdValidation == ProgressionIdentifierValidation.Empty ||
+                    stateIdValidation ==
+                    ProgressionIdentifierValidation.Whitespace)
                 {
                     diagnostics.Add(Diagnostic(
                         ProgressionDiagnosticCode.BlankStateId,
@@ -954,10 +1014,21 @@ namespace AL.Kingdom.Progression
                     continue;
                 }
 
-                if (!IsValidId(state.DefinitionId))
+                if (stateIdValidation != ProgressionIdentifierValidation.Valid)
                 {
                     diagnostics.Add(Diagnostic(
                         ProgressionDiagnosticCode.InvalidStateId,
+                        ProgressionDomain.Training,
+                        state.DefinitionId,
+                        index));
+                    continue;
+                }
+
+                if (contentVersionValidation !=
+                    ProgressionIdentifierValidation.Valid)
+                {
+                    diagnostics.Add(Diagnostic(
+                        ProgressionDiagnosticCode.UnsupportedContentVersion,
                         ProgressionDomain.Training,
                         state.DefinitionId,
                         index));
@@ -1051,7 +1122,8 @@ namespace AL.Kingdom.Progression
             ICollection<ProgressionDiagnostic> diagnostics)
         {
             foreach (IGrouping<string, IndexedIdentity> group in identities
-                         .Where(identity => !string.IsNullOrWhiteSpace(identity.Id))
+                         .Where(identity =>
+                             ProgressionText.IsValidIdentifier(identity.Id))
                          .GroupBy(identity => identity.Id, StringComparer.Ordinal)
                          .Where(group => group.Count() > 1))
             {
@@ -1069,7 +1141,8 @@ namespace AL.Kingdom.Progression
             ICollection<ProgressionDiagnostic> diagnostics)
         {
             foreach (IGrouping<string, IndexedIdentity> group in identities
-                         .Where(identity => !string.IsNullOrWhiteSpace(identity.Id))
+                         .Where(identity =>
+                             ProgressionText.IsValidIdentifier(identity.Id))
                          .GroupBy(identity => identity.Id, StringComparer.Ordinal)
                          .Where(group => group.Count() > 1))
             {
@@ -1083,56 +1156,98 @@ namespace AL.Kingdom.Progression
 
         private static bool IsValidProfileIdentity(ProgressionSourceIdentity identity)
         {
-            return identity != null &&
-                   IsValidId(identity.Id) &&
+            return IsValidDefinitionIdentity(identity, ProfileSchemaVersion);
+        }
+
+        private static bool IsValidDefinitionIdentity(
+            ProgressionSourceIdentity identity,
+            string expectedSchemaVersion)
+        {
+            return IsValidAnySourceIdentity(identity) &&
                    string.Equals(
                        identity.SchemaVersion,
-                       ProfileSchemaVersion,
-                       StringComparison.Ordinal) &&
-                   IsValidId(identity.ContentVersion) &&
-                   IsValidId(identity.SourceRevision) &&
-                   IsSha256(identity.RawSha256);
+                       expectedSchemaVersion,
+                       StringComparison.Ordinal);
         }
 
         private static bool IsValidAnySourceIdentity(
             ProgressionSourceIdentity identity)
         {
-            return identity != null &&
-                   IsValidId(identity.Id) &&
-                   IsValidId(identity.SchemaVersion) &&
-                   IsValidId(identity.ContentVersion) &&
-                   IsValidId(identity.SourceRevision) &&
-                   IsSha256(identity.RawSha256);
+            if (identity == null)
+            {
+                return false;
+            }
+
+            bool idValid =
+                ProgressionText.IsValidIdentifier(identity.Id);
+            bool schemaValid =
+                ProgressionText.IsValidIdentifier(identity.SchemaVersion);
+            bool contentValid =
+                ProgressionText.IsValidIdentifier(identity.ContentVersion);
+            bool revisionValid =
+                ProgressionText.IsValidIdentifier(identity.SourceRevision);
+            bool hashValid = IsSha256(identity.RawSha256);
+            return idValid &&
+                   schemaValid &&
+                   contentValid &&
+                   revisionValid &&
+                   hashValid;
+        }
+
+        private static void ValidateTimestampPolicy(
+            ProgressionTimestampPolicy policy,
+            ProgressionDomain domain,
+            ICollection<ProgressionDiagnostic> diagnostics)
+        {
+            if (IsValidTimestampPolicy(policy))
+            {
+                return;
+            }
+
+            diagnostics.Add(Diagnostic(
+                ProgressionDiagnosticCode.InvalidTimestampPolicy,
+                domain,
+                string.Empty,
+                -1));
         }
 
         private static bool IsValidTimestampPolicy(
             ProgressionTimestampPolicy policy)
         {
-            return policy != null &&
-                   IsValidId(policy.PolicyVersion) &&
-                   policy.MinimumUtcTimestamp > 0 &&
-                   policy.MaximumUtcTimestamp >= policy.MinimumUtcTimestamp;
-        }
-
-        private static bool IsValidId(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value) ||
-                Encoding.UTF8.GetByteCount(value) > MaximumIdUtf8Bytes ||
-                value.Any(char.IsWhiteSpace))
+            if (policy == null ||
+                !ProgressionText.IsValidIdentifier(policy.PolicyVersion) ||
+                policy.MinimumUtcTimestamp <= 0 ||
+                policy.MaximumUtcTimestamp < policy.MinimumUtcTimestamp ||
+                policy.MaximumRetentionAgeSeconds < 0 ||
+                policy.MaximumFutureLeadSeconds < 0)
             {
                 return false;
             }
 
-            return !value.Any(char.IsControl);
+            long policySpan =
+                policy.MaximumUtcTimestamp - policy.MinimumUtcTimestamp;
+            return policy.MaximumRetentionAgeSeconds <= policySpan &&
+                   policy.MaximumFutureLeadSeconds <= policySpan;
         }
 
         private static bool IsSha256(string value)
         {
-            return value != null &&
-                   value.Length == 64 &&
-                   value.All(character =>
-                       (character >= '0' && character <= '9') ||
-                       (character >= 'a' && character <= 'f'));
+            if (value == null || value.Length != 64)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if ((character < '0' || character > '9') &&
+                    (character < 'a' || character > 'f'))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static ProgressionCompatibilityStatus DetermineUnavailableStatus(
@@ -1151,9 +1266,10 @@ namespace AL.Kingdom.Progression
                 diagnostic.Code == ProgressionDiagnosticCode.InvalidDurationProfile ||
                 diagnostic.Code == ProgressionDiagnosticCode.InvalidPrerequisite ||
                 diagnostic.Code == ProgressionDiagnosticCode.DuplicatePrerequisite ||
-                diagnostic.Code == ProgressionDiagnosticCode.InvalidEffectProfile ||
-                diagnostic.Code == ProgressionDiagnosticCode.DuplicateEffectProfile ||
-                diagnostic.Code == ProgressionDiagnosticCode.InvalidInventoryPolicy)
+                 diagnostic.Code == ProgressionDiagnosticCode.InvalidEffectProfile ||
+                 diagnostic.Code == ProgressionDiagnosticCode.DuplicateEffectProfile ||
+                 diagnostic.Code == ProgressionDiagnosticCode.InvalidInventoryPolicy ||
+                 diagnostic.Code == ProgressionDiagnosticCode.InvalidTimestampPolicy)
                 ? ProgressionCompatibilityStatus.UnavailableCatalog
                 : ProgressionCompatibilityStatus.MalformedState;
         }
@@ -1165,7 +1281,10 @@ namespace AL.Kingdom.Progression
             string stateRevision,
             IEnumerable<ResearchProgressionSnapshot> snapshots,
             IEnumerable<ResearchProgressionStateRecord> states,
-            IEnumerable<ProgressionDiagnostic> diagnostics)
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            IEnumerable<ResearchProgressionDefinition> definitions,
+            ProgressionTimestampPolicy timestampPolicy,
+            bool hasDefinitionSource)
         {
             return new ProgressionCompatibilityResult(
                 ProgressionDomain.Research,
@@ -1177,7 +1296,11 @@ namespace AL.Kingdom.Progression
                 Array.Empty<TroopProgressionSnapshot>(),
                 states,
                 Array.Empty<TroopProgressionStateRecord>(),
-                SortDiagnostics(diagnostics));
+                SortDiagnostics(diagnostics),
+                definitions,
+                Array.Empty<TroopProgressionDefinition>(),
+                timestampPolicy,
+                hasDefinitionSource);
         }
 
         private static ProgressionCompatibilityResult TrainingResult(
@@ -1187,7 +1310,10 @@ namespace AL.Kingdom.Progression
             string stateRevision,
             IEnumerable<TroopProgressionSnapshot> snapshots,
             IEnumerable<TroopProgressionStateRecord> states,
-            IEnumerable<ProgressionDiagnostic> diagnostics)
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            IEnumerable<TroopProgressionDefinition> definitions,
+            ProgressionTimestampPolicy timestampPolicy,
+            bool hasDefinitionSource)
         {
             return new ProgressionCompatibilityResult(
                 ProgressionDomain.Training,
@@ -1199,7 +1325,11 @@ namespace AL.Kingdom.Progression
                 snapshots,
                 Array.Empty<ResearchProgressionStateRecord>(),
                 states,
-                SortDiagnostics(diagnostics));
+                SortDiagnostics(diagnostics),
+                Array.Empty<ResearchProgressionDefinition>(),
+                definitions,
+                timestampPolicy,
+                hasDefinitionSource);
         }
 
         private static IEnumerable<ProgressionDiagnostic> SortDiagnostics(
@@ -1215,6 +1345,9 @@ namespace AL.Kingdom.Progression
         private static string BuildResearchRevision(
             string catalogSetId,
             string catalogRevision,
+            IReadOnlyList<ResearchProgressionDefinition> definitions,
+            IReadOnlyList<ProgressionPrerequisiteTargetDefinition>
+                prerequisiteTargets,
             IReadOnlyList<ResearchProgressionStateRecord> states,
             IEnumerable<ResearchProgressionSnapshot> snapshots,
             IEnumerable<ProgressionDiagnostic> diagnostics,
@@ -1225,138 +1358,424 @@ namespace AL.Kingdom.Progression
             var segments = new List<string>
             {
                 "research-state",
-                catalogSetId,
-                catalogRevision,
+                "catalog-set-id",
+                IdentifierRevisionValue(catalogSetId),
+                "catalog-revision",
+                IdentifierRevisionValue(catalogRevision),
                 nullStateCollection ? "null-collection" : "collection",
                 stateLimitExceeded ? "truncated" : "complete",
-                timestampPolicy?.PolicyVersion,
-                Invariant(timestampPolicy?.MinimumUtcTimestamp ?? 0),
-                Invariant(timestampPolicy?.MaximumUtcTimestamp ?? 0)
+                BuildTimestampPolicyRevision(timestampPolicy),
+                BuildSequenceRevision(
+                    "research-definition-structure",
+                    (definitions ??
+                     Array.Empty<ResearchProgressionDefinition>())
+                    .Select(BuildResearchDefinitionStructureRevision)),
+                BuildSequenceRevision(
+                    "prerequisite-target-structure",
+                    (prerequisiteTargets ??
+                     Array.Empty<ProgressionPrerequisiteTargetDefinition>())
+                    .Select(BuildPrerequisiteTargetStructureRevision)),
+                BuildSequenceRevision(
+                    "research-raw-state",
+                    (states ?? Array.Empty<ResearchProgressionStateRecord>())
+                    .Select(BuildResearchRawStateRevision)),
+                BuildSequenceRevision(
+                    "research-snapshot",
+                    (snapshots ??
+                     Array.Empty<ResearchProgressionSnapshot>())
+                    .Where(snapshot =>
+                        snapshot?.Definition?.Identity != null)
+                    .OrderBy(
+                        snapshot => snapshot.Definition.Identity.Id,
+                        StringComparer.Ordinal)
+                    .Select(BuildResearchSnapshotRevision)),
+                BuildDiagnosticRevision(diagnostics)
             };
-            for (int index = 0; index < states.Count; index++)
-            {
-                ResearchProgressionStateRecord state = states[index];
-                segments.Add("raw-state");
-                segments.Add(Invariant(index));
-                if (state == null)
-                {
-                    segments.Add("null");
-                    continue;
-                }
-
-                segments.Add("value");
-                AddNullableRawSegment(
-                    segments,
-                    "definition-id",
-                    state.DefinitionId);
-                AddNullableRawSegment(
-                    segments,
-                    "content-version",
-                    state.DefinitionContentVersion);
-                segments.Add(Invariant(state.Level));
-                segments.Add(state.HasActiveLegacyOrder ? "1" : "0");
-                segments.Add(Invariant(state.CompletionTimestamp));
-            }
-
-            foreach (ResearchProgressionSnapshot snapshot in snapshots
-                         .Where(snapshot => snapshot?.Definition?.Identity != null)
-                         .OrderBy(
-                             snapshot => snapshot.Definition.Identity.Id,
-                             StringComparer.Ordinal))
-            {
-                segments.Add("snapshot");
-                segments.Add(snapshot.Definition.Identity.Id);
-                segments.Add(Invariant(snapshot.Level));
-                segments.Add(snapshot.Origin.ToString());
-            }
-
-            AddDiagnosticRevisionSegments(segments, diagnostics);
             return ProgressionContractHash.Compute(segments.ToArray());
         }
 
         private static string BuildTrainingRevision(
             string catalogSetId,
             string catalogRevision,
+            IReadOnlyList<TroopProgressionDefinition> definitions,
+            IReadOnlyList<ProgressionPrerequisiteTargetDefinition>
+                prerequisiteTargets,
             IReadOnlyList<TroopProgressionStateRecord> states,
             IEnumerable<TroopProgressionSnapshot> snapshots,
             IEnumerable<ProgressionDiagnostic> diagnostics,
             bool nullStateCollection,
-            bool stateLimitExceeded)
+            bool stateLimitExceeded,
+            ProgressionTimestampPolicy timestampPolicy)
         {
             var segments = new List<string>
             {
                 "training-state",
-                catalogSetId,
-                catalogRevision,
+                "catalog-set-id",
+                IdentifierRevisionValue(catalogSetId),
+                "catalog-revision",
+                IdentifierRevisionValue(catalogRevision),
                 nullStateCollection ? "null-collection" : "collection",
-                stateLimitExceeded ? "truncated" : "complete"
+                stateLimitExceeded ? "truncated" : "complete",
+                BuildTimestampPolicyRevision(timestampPolicy),
+                BuildSequenceRevision(
+                    "training-definition-structure",
+                    (definitions ??
+                     Array.Empty<TroopProgressionDefinition>())
+                    .Select(BuildTroopDefinitionStructureRevision)),
+                BuildSequenceRevision(
+                    "prerequisite-target-structure",
+                    (prerequisiteTargets ??
+                     Array.Empty<ProgressionPrerequisiteTargetDefinition>())
+                    .Select(BuildPrerequisiteTargetStructureRevision)),
+                BuildSequenceRevision(
+                    "training-raw-state",
+                    (states ?? Array.Empty<TroopProgressionStateRecord>())
+                    .Select(BuildTrainingRawStateRevision)),
+                BuildSequenceRevision(
+                    "training-snapshot",
+                    (snapshots ?? Array.Empty<TroopProgressionSnapshot>())
+                    .Where(snapshot =>
+                        snapshot?.Definition?.Identity != null)
+                    .OrderBy(
+                        snapshot => snapshot.Definition.Identity.Id,
+                        StringComparer.Ordinal)
+                    .Select(BuildTrainingSnapshotRevision)),
+                BuildDiagnosticRevision(diagnostics)
             };
-            for (int index = 0; index < states.Count; index++)
-            {
-                TroopProgressionStateRecord state = states[index];
-                segments.Add("raw-state");
-                segments.Add(Invariant(index));
-                if (state == null)
-                {
-                    segments.Add("null");
-                    continue;
-                }
-
-                segments.Add("value");
-                AddNullableRawSegment(
-                    segments,
-                    "definition-id",
-                    state.DefinitionId);
-                AddNullableRawSegment(
-                    segments,
-                    "content-version",
-                    state.DefinitionContentVersion);
-                segments.Add(Invariant(state.ActiveCount));
-                segments.Add(Invariant(state.WoundedCount));
-                segments.Add(Invariant(state.ReservedCount));
-            }
-
-            foreach (TroopProgressionSnapshot snapshot in snapshots
-                         .Where(snapshot => snapshot?.Definition?.Identity != null)
-                         .OrderBy(
-                             snapshot => snapshot.Definition.Identity.Id,
-                             StringComparer.Ordinal))
-            {
-                segments.Add("snapshot");
-                segments.Add(snapshot.Definition.Identity.Id);
-                segments.Add(Invariant(snapshot.ActiveCount));
-                segments.Add(Invariant(snapshot.WoundedCount));
-                segments.Add(Invariant(snapshot.ReservedCount));
-                segments.Add(snapshot.Origin.ToString());
-            }
-
-            AddDiagnosticRevisionSegments(segments, diagnostics);
             return ProgressionContractHash.Compute(segments.ToArray());
         }
 
-        private static void AddDiagnosticRevisionSegments(
-            ICollection<string> segments,
+        private static string BuildTimestampPolicyRevision(
+            ProgressionTimestampPolicy policy)
+        {
+            return ProgressionContractHash.Compute(
+                "timestamp-policy",
+                IdentifierRevisionValue(policy?.PolicyVersion),
+                Invariant(policy?.MinimumUtcTimestamp ?? 0),
+                Invariant(policy?.MaximumUtcTimestamp ?? 0),
+                Invariant(policy?.MaximumRetentionAgeSeconds ?? 0),
+                Invariant(policy?.MaximumFutureLeadSeconds ?? 0));
+        }
+
+        private static string BuildResearchDefinitionStructureRevision(
+            ResearchProgressionDefinition definition)
+        {
+            if (definition == null)
+            {
+                return ProgressionContractHash.Compute(
+                    "research-definition-structure",
+                    "null-definition");
+            }
+
+            return ProgressionContractHash.Compute(
+                "research-definition-structure",
+                SourceIdentityStatusToken(definition.Identity),
+                SourceIdentityStatusToken(definition.CostProfile?.Identity),
+                SourceIdentityStatusToken(definition.DurationProfile?.Identity),
+                BuildPrerequisiteIdentityStatus(definition.Prerequisites),
+                BuildSourceIdentityCollectionStatus(definition.EffectProfiles));
+        }
+
+        private static string BuildTroopDefinitionStructureRevision(
+            TroopProgressionDefinition definition)
+        {
+            if (definition == null)
+            {
+                return ProgressionContractHash.Compute(
+                    "training-definition-structure",
+                    "null-definition");
+            }
+
+            return ProgressionContractHash.Compute(
+                "training-definition-structure",
+                SourceIdentityStatusToken(definition.Identity),
+                SourceIdentityStatusToken(definition.CostProfile?.Identity),
+                SourceIdentityStatusToken(definition.DurationProfile?.Identity),
+                BuildPrerequisiteIdentityStatus(definition.Prerequisites),
+                SourceIdentityStatusToken(definition.BattleProfile),
+                SourceIdentityStatusToken(definition.InventoryPolicy));
+        }
+
+        private static string BuildPrerequisiteTargetStructureRevision(
+            ProgressionPrerequisiteTargetDefinition target)
+        {
+            return ProgressionContractHash.Compute(
+                "prerequisite-target-structure",
+                target == null
+                    ? "null-target"
+                    : SourceIdentityStatusToken(target.Identity));
+        }
+
+        private static string BuildPrerequisiteIdentityStatus(
+            IReadOnlyList<ProgressionPrerequisite> prerequisites)
+        {
+            if (prerequisites == null)
+            {
+                return "null-prerequisite-list";
+            }
+
+            if (prerequisites.Count > MaximumPrerequisitesPerDefinition)
+            {
+                return "prerequisite-identities|over-limit";
+            }
+
+            for (int index = 0; index < prerequisites.Count; index++)
+            {
+                ProgressionPrerequisite prerequisite = prerequisites[index];
+                if (prerequisite == null)
+                {
+                    return "null-prerequisite|" + Invariant(index);
+                }
+
+                ProgressionIdentifierValidation validation =
+                    ProgressionText.ValidateIdentifier(
+                        prerequisite.DefinitionId);
+                if (validation != ProgressionIdentifierValidation.Valid)
+                {
+                    return "invalid-prerequisite|" +
+                           Invariant(index) +
+                           "|" +
+                           IdentifierStatusToken(validation);
+                }
+            }
+
+            return "valid-prerequisite-identities";
+        }
+
+        private static string BuildSourceIdentityCollectionStatus(
+            IReadOnlyList<ProgressionSourceIdentity> identities)
+        {
+            if (identities == null)
+            {
+                return "null-source-identity-list";
+            }
+
+            if (identities.Count > MaximumEffectsPerResearch)
+            {
+                return "source-identities|over-limit";
+            }
+
+            for (int index = 0; index < identities.Count; index++)
+            {
+                ProgressionSourceIdentity identity = identities[index];
+                if (!IsValidAnySourceIdentity(identity))
+                {
+                    return ProgressionContractHash.Compute(
+                        "invalid-source-identity",
+                        Invariant(index),
+                        SourceIdentityStatusToken(identity));
+                }
+            }
+
+            return "valid-source-identities";
+        }
+
+        private static string SourceIdentityStatusToken(
+            ProgressionSourceIdentity identity)
+        {
+            if (identity == null)
+            {
+                return "source-identity|null";
+            }
+
+            return ProgressionContractHash.Compute(
+                "source-identity-status",
+                IdentifierStatusToken(
+                    ProgressionText.ValidateIdentifier(identity.Id)),
+                IdentifierStatusToken(
+                    ProgressionText.ValidateIdentifier(
+                        identity.SchemaVersion)),
+                IdentifierStatusToken(
+                    ProgressionText.ValidateIdentifier(
+                        identity.ContentVersion)),
+                IdentifierStatusToken(
+                    ProgressionText.ValidateIdentifier(
+                        identity.SourceRevision)),
+                IsSha256(identity.RawSha256)
+                    ? "sha256-valid"
+                    : identity.RawSha256 == null
+                        ? "sha256-null"
+                        : identity.RawSha256.Length == 0
+                            ? "sha256-empty"
+                            : "sha256-invalid");
+        }
+
+        private static string BuildResearchRawStateRevision(
+            ResearchProgressionStateRecord state,
+            int index)
+        {
+            if (state == null)
+            {
+                return ProgressionContractHash.Compute(
+                    "research-raw-state",
+                    Invariant(index),
+                    "null");
+            }
+
+            return ProgressionContractHash.Compute(
+                "research-raw-state",
+                Invariant(index),
+                "value",
+                IdentifierRevisionValue(state.DefinitionId),
+                IdentifierRevisionValue(state.DefinitionContentVersion),
+                Invariant(state.Level),
+                state.HasActiveLegacyOrder ? "1" : "0",
+                Invariant(state.CompletionTimestamp));
+        }
+
+        private static string BuildTrainingRawStateRevision(
+            TroopProgressionStateRecord state,
+            int index)
+        {
+            if (state == null)
+            {
+                return ProgressionContractHash.Compute(
+                    "training-raw-state",
+                    Invariant(index),
+                    "null");
+            }
+
+            return ProgressionContractHash.Compute(
+                "training-raw-state",
+                Invariant(index),
+                "value",
+                IdentifierRevisionValue(state.DefinitionId),
+                IdentifierRevisionValue(state.DefinitionContentVersion),
+                Invariant(state.ActiveCount),
+                Invariant(state.WoundedCount),
+                Invariant(state.ReservedCount));
+        }
+
+        private static string BuildResearchSnapshotRevision(
+            ResearchProgressionSnapshot snapshot)
+        {
+            return ProgressionContractHash.Compute(
+                "research-snapshot",
+                IdentifierRevisionValue(snapshot.Definition.Identity.Id),
+                Invariant(snapshot.Level),
+                StateOriginToken(snapshot.Origin));
+        }
+
+        private static string BuildTrainingSnapshotRevision(
+            TroopProgressionSnapshot snapshot)
+        {
+            return ProgressionContractHash.Compute(
+                "training-snapshot",
+                IdentifierRevisionValue(snapshot.Definition.Identity.Id),
+                Invariant(snapshot.ActiveCount),
+                Invariant(snapshot.WoundedCount),
+                Invariant(snapshot.ReservedCount),
+                StateOriginToken(snapshot.Origin));
+        }
+
+        private static string BuildDiagnosticRevision(
             IEnumerable<ProgressionDiagnostic> diagnostics)
         {
-            foreach (ProgressionDiagnostic diagnostic in
-                     SortDiagnostics(diagnostics))
+            return BuildSequenceRevision(
+                "diagnostics",
+                SortDiagnostics(diagnostics).Select(diagnostic =>
+                    ProgressionContractHash.Compute(
+                        "diagnostic",
+                        Invariant((long)diagnostic.Domain),
+                        IdentifierRevisionValue(diagnostic.DefinitionId),
+                        Invariant((long)diagnostic.Code),
+                        Invariant(diagnostic.SourceIndex))));
+        }
+
+        private static string BuildSequenceRevision(
+            string label,
+            IEnumerable<string> values)
+        {
+            const int batchSize = 128;
+            var batchHashes = new List<string>();
+            var batch = new List<string>(batchSize + 2);
+            long valueCount = 0;
+            int batchIndex = 0;
+            foreach (string value in values ?? Array.Empty<string>())
             {
-                segments.Add("diagnostic");
-                segments.Add(diagnostic.Domain.ToString());
-                segments.Add(diagnostic.DefinitionId);
-                segments.Add(diagnostic.Code.ToString());
-                segments.Add(Invariant(diagnostic.SourceIndex));
+                if (batch.Count == 0)
+                {
+                    batch.Add(label + "-batch");
+                    batch.Add(Invariant(batchIndex));
+                }
+
+                batch.Add(value ?? string.Empty);
+                valueCount++;
+                if (batch.Count != batchSize + 2)
+                {
+                    continue;
+                }
+
+                batchHashes.Add(
+                    ProgressionContractHash.Compute(batch.ToArray()));
+                batch.Clear();
+                batchIndex++;
+            }
+
+            if (batch.Count > 0)
+            {
+                batchHashes.Add(
+                    ProgressionContractHash.Compute(batch.ToArray()));
+            }
+
+            var root = new List<string>(batchHashes.Count + 3)
+            {
+                label,
+                Invariant(valueCount),
+                batchHashes.Count == 0 ? "empty" : "batched"
+            };
+            root.AddRange(batchHashes);
+            return ProgressionContractHash.Compute(root.ToArray());
+        }
+
+        private static string IdentifierRevisionValue(string value)
+        {
+            ProgressionIdentifierValidation validation =
+                ProgressionText.ValidateIdentifier(value);
+            return validation == ProgressionIdentifierValidation.Valid
+                ? "valid|" + value
+                : "invalid|" + IdentifierStatusToken(validation);
+        }
+
+        private static string IdentifierStatusToken(
+            ProgressionIdentifierValidation validation)
+        {
+            switch (validation)
+            {
+                case ProgressionIdentifierValidation.Valid:
+                    return "valid";
+                case ProgressionIdentifierValidation.Null:
+                    return "null";
+                case ProgressionIdentifierValidation.Empty:
+                    return "empty";
+                case ProgressionIdentifierValidation.TooLong:
+                    return "too-long";
+                case ProgressionIdentifierValidation.Whitespace:
+                    return "whitespace";
+                case ProgressionIdentifierValidation.Control:
+                    return "control";
+                case ProgressionIdentifierValidation.UnpairedHighSurrogate:
+                    return "unpaired-high-surrogate";
+                case ProgressionIdentifierValidation.UnpairedLowSurrogate:
+                    return "unpaired-low-surrogate";
+                case ProgressionIdentifierValidation.Utf8TooLong:
+                    return "utf8-too-long";
+                default:
+                    return "invalid-utf8";
             }
         }
 
-        private static void AddNullableRawSegment(
-            ICollection<string> segments,
-            string label,
-            string value)
+        private static string StateOriginToken(ProgressionStateOrigin origin)
         {
-            segments.Add(label);
-            segments.Add(value == null ? "null" : "value");
-            segments.Add(value);
+            switch (origin)
+            {
+                case ProgressionStateOrigin.Saved:
+                    return "saved";
+                case ProgressionStateOrigin.EffectiveInitialUnpersisted:
+                    return "effective-initial-unpersisted";
+                default:
+                    return "invalid-origin";
+            }
         }
 
         private static string Invariant(long value)
@@ -1396,7 +1815,18 @@ namespace AL.Kingdom.Progression
             string definitionId,
             int sourceIndex)
         {
-            return new ProgressionDiagnostic(code, domain, definitionId, sourceIndex);
+            return new ProgressionDiagnostic(
+                code,
+                domain,
+                SafeDiagnosticId(definitionId),
+                sourceIndex);
+        }
+
+        private static string SafeDiagnosticId(string value)
+        {
+            return ProgressionText.IsValidIdentifier(value)
+                ? value
+                : string.Empty;
         }
 
         private readonly struct IndexedIdentity

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using AL.Core.Interfaces;
@@ -82,7 +81,11 @@ namespace AL.Kingdom.Progression
         InvalidStateId = 44,
         BelowInitialLevel = 45,
         PreservedUnknownFutureDefinition = 46,
-        InvalidTimestampPolicy = 47
+        InvalidTimestampPolicy = 47,
+        StalePrerequisiteRevision = 48,
+        SourceMigrationRequired = 49,
+        DefinitionRemovedButLegacyOrderPreserved = 50,
+        InvalidCommittedReceipt = 51
     }
 
     public enum ProgressionPlanStatus
@@ -112,7 +115,9 @@ namespace AL.Kingdom.Progression
         InventoryOverflow = 22,
         ClockInvalid = 23,
         CommitUncertain = 24,
-        RecoveryRequired = 25
+        RecoveryRequired = 25,
+        MigrationRequired = 26,
+        StalePrerequisiteRevision = 27
     }
 
     public enum ProgressionOperationDurability
@@ -136,6 +141,22 @@ namespace AL.Kingdom.Progression
         StaleExpectedRevision = 3,
         CommitUncertain = 4,
         MalformedLedger = 5
+    }
+
+    public enum ProgressionOperationKind
+    {
+        None = 0,
+        Start = 1,
+        Completion = 2
+    }
+
+    public enum ProgressionOrderSourceDisposition
+    {
+        ExactCurrentSource = 0,
+        CompatibleCompleteUnderCommittedSnapshot = 1,
+        MigrationRequired = 2,
+        UnsupportedVersion = 3,
+        DefinitionRemovedButLegacyOrderPreserved = 4
     }
 
     public enum TroopInventoryCapacityPolicy
@@ -238,15 +259,46 @@ namespace AL.Kingdom.Progression
             string policyVersion,
             long minimumUtcTimestamp,
             long maximumUtcTimestamp)
+            : this(
+                policyVersion,
+                minimumUtcTimestamp,
+                maximumUtcTimestamp,
+                DefaultWindow(minimumUtcTimestamp, maximumUtcTimestamp),
+                DefaultWindow(minimumUtcTimestamp, maximumUtcTimestamp))
+        {
+        }
+
+        public ProgressionTimestampPolicy(
+            string policyVersion,
+            long minimumUtcTimestamp,
+            long maximumUtcTimestamp,
+            long maximumRetentionAgeSeconds,
+            long maximumFutureLeadSeconds)
         {
             PolicyVersion = policyVersion ?? string.Empty;
             MinimumUtcTimestamp = minimumUtcTimestamp;
             MaximumUtcTimestamp = maximumUtcTimestamp;
+            MaximumRetentionAgeSeconds = maximumRetentionAgeSeconds;
+            MaximumFutureLeadSeconds = maximumFutureLeadSeconds;
         }
 
         public string PolicyVersion { get; }
         public long MinimumUtcTimestamp { get; }
         public long MaximumUtcTimestamp { get; }
+        public long MaximumRetentionAgeSeconds { get; }
+        public long MaximumFutureLeadSeconds { get; }
+
+        private static long DefaultWindow(long minimum, long maximum)
+        {
+            try
+            {
+                return checked(maximum - minimum);
+            }
+            catch (OverflowException)
+            {
+                return -1;
+            }
+        }
     }
 
     public sealed class ResearchProgressionDefinition
@@ -420,7 +472,9 @@ namespace AL.Kingdom.Progression
         {
             Code = code;
             Domain = domain;
-            DefinitionId = definitionId ?? string.Empty;
+            DefinitionId = ProgressionText.IsValidIdentifier(definitionId)
+                ? definitionId
+                : string.Empty;
             SourceIndex = sourceIndex;
         }
 
@@ -436,6 +490,8 @@ namespace AL.Kingdom.Progression
         private readonly IReadOnlyList<TroopProgressionSnapshot> _troops;
         private readonly IReadOnlyList<ResearchProgressionStateRecord> _preservedResearchStates;
         private readonly IReadOnlyList<TroopProgressionStateRecord> _preservedTroopStates;
+        private readonly IReadOnlyList<ResearchProgressionDefinition> _researchDefinitions;
+        private readonly IReadOnlyList<TroopProgressionDefinition> _troopDefinitions;
         private readonly IReadOnlyList<ProgressionDiagnostic> _diagnostics;
 
         public ProgressionCompatibilityResult(
@@ -449,6 +505,39 @@ namespace AL.Kingdom.Progression
             IEnumerable<ResearchProgressionStateRecord> preservedResearchStates,
             IEnumerable<TroopProgressionStateRecord> preservedTroopStates,
             IEnumerable<ProgressionDiagnostic> diagnostics)
+            : this(
+                domain,
+                status,
+                catalogSetId,
+                catalogRevision,
+                stateRevision,
+                research,
+                troops,
+                preservedResearchStates,
+                preservedTroopStates,
+                diagnostics,
+                Array.Empty<ResearchProgressionDefinition>(),
+                Array.Empty<TroopProgressionDefinition>(),
+                null,
+                false)
+        {
+        }
+
+        public ProgressionCompatibilityResult(
+            ProgressionDomain domain,
+            ProgressionCompatibilityStatus status,
+            string catalogSetId,
+            string catalogRevision,
+            string stateRevision,
+            IEnumerable<ResearchProgressionSnapshot> research,
+            IEnumerable<TroopProgressionSnapshot> troops,
+            IEnumerable<ResearchProgressionStateRecord> preservedResearchStates,
+            IEnumerable<TroopProgressionStateRecord> preservedTroopStates,
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            IEnumerable<ResearchProgressionDefinition> researchDefinitions,
+            IEnumerable<TroopProgressionDefinition> troopDefinitions,
+            ProgressionTimestampPolicy timestampPolicy,
+            bool hasDefinitionSource)
         {
             Domain = domain;
             Status = status;
@@ -459,7 +548,11 @@ namespace AL.Kingdom.Progression
             _troops = ProgressionCollections.Freeze(troops);
             _preservedResearchStates = ProgressionCollections.Freeze(preservedResearchStates);
             _preservedTroopStates = ProgressionCollections.Freeze(preservedTroopStates);
+            _researchDefinitions = ProgressionCollections.Freeze(researchDefinitions);
+            _troopDefinitions = ProgressionCollections.Freeze(troopDefinitions);
             _diagnostics = ProgressionCollections.Freeze(diagnostics);
+            TimestampPolicy = timestampPolicy;
+            HasDefinitionSource = hasDefinitionSource;
         }
 
         public ProgressionDomain Domain { get; }
@@ -473,6 +566,12 @@ namespace AL.Kingdom.Progression
             _preservedResearchStates;
         public IReadOnlyList<TroopProgressionStateRecord> PreservedTroopStates =>
             _preservedTroopStates;
+        public IReadOnlyList<ResearchProgressionDefinition> ResearchDefinitions =>
+            _researchDefinitions;
+        public IReadOnlyList<TroopProgressionDefinition> TroopDefinitions =>
+            _troopDefinitions;
+        public ProgressionTimestampPolicy TimestampPolicy { get; }
+        public bool HasDefinitionSource { get; }
         public IReadOnlyList<ProgressionDiagnostic> Diagnostics => _diagnostics;
     }
 
@@ -563,7 +662,8 @@ namespace AL.Kingdom.Progression
             string expectedCatalogSetId,
             string expectedProgressionRevision,
             string expectedEconomyRevision,
-            string requestPolicyVersion)
+            string requestPolicyVersion,
+            string expectedPrerequisiteRevision = "")
         {
             ProfileId = profileId ?? string.Empty;
             OrderType = orderType;
@@ -576,6 +676,8 @@ namespace AL.Kingdom.Progression
             ExpectedProgressionRevision = expectedProgressionRevision ?? string.Empty;
             ExpectedEconomyRevision = expectedEconomyRevision ?? string.Empty;
             RequestPolicyVersion = requestPolicyVersion ?? string.Empty;
+            ExpectedPrerequisiteRevision =
+                expectedPrerequisiteRevision ?? string.Empty;
         }
 
         public string ProfileId { get; }
@@ -589,6 +691,133 @@ namespace AL.Kingdom.Progression
         public string ExpectedProgressionRevision { get; }
         public string ExpectedEconomyRevision { get; }
         public string RequestPolicyVersion { get; }
+        public string ExpectedPrerequisiteRevision { get; }
+    }
+
+    public sealed class ProgressionCommittedOperationResult
+    {
+        private readonly IReadOnlyList<BuildingConstructionCost> _costs;
+
+        public ProgressionCommittedOperationResult(
+            ProgressionOperationKind operationKind,
+            ProgressionOrderType orderType,
+            string profileId,
+            ProgressionSourceIdentity definitionSource,
+            ProgressionSourceIdentity costProfile,
+            ProgressionSourceIdentity durationProfile,
+            string orderId,
+            string operationId,
+            string startOperationId,
+            string completionOperationId,
+            string cancellationOperationId,
+            long previousValue,
+            long targetValue,
+            long batchCount,
+            long maximumValue,
+            long questProgressAmount,
+            TroopInventoryCapacityPolicy inventoryCapacityPolicy,
+            IEnumerable<BuildingConstructionCost> costs,
+            long startTimestamp,
+            long endTimestamp,
+            long commitTimestamp,
+            ProgressionTimestampPolicy timestampPolicy,
+            string catalogSetId,
+            string catalogRevision,
+            string progressionRevision,
+            string economyRevision,
+            string prerequisiteRevision,
+            string questRevision,
+            string operationPolicyVersion,
+            string orderPolicyVersion,
+            string orderCatalogSetId,
+            string orderCatalogRevision,
+            string orderProgressionRevision,
+            string orderEconomyRevision,
+            string orderHash,
+            ProgressionOrderSourceDisposition sourceDisposition,
+            string semanticHash,
+            string planHash)
+        {
+            OperationKind = operationKind;
+            OrderType = orderType;
+            ProfileId = profileId ?? string.Empty;
+            DefinitionSource = definitionSource;
+            CostProfile = costProfile;
+            DurationProfile = durationProfile;
+            OrderId = orderId ?? string.Empty;
+            OperationId = operationId ?? string.Empty;
+            StartOperationId = startOperationId ?? string.Empty;
+            CompletionOperationId = completionOperationId ?? string.Empty;
+            CancellationOperationId = cancellationOperationId ?? string.Empty;
+            PreviousValue = previousValue;
+            TargetValue = targetValue;
+            BatchCount = batchCount;
+            MaximumValue = maximumValue;
+            QuestProgressAmount = questProgressAmount;
+            InventoryCapacityPolicy = inventoryCapacityPolicy;
+            _costs = ProgressionCollections.Freeze(costs);
+            StartTimestamp = startTimestamp;
+            EndTimestamp = endTimestamp;
+            CommitTimestamp = commitTimestamp;
+            TimestampPolicy = timestampPolicy;
+            CatalogSetId = catalogSetId ?? string.Empty;
+            CatalogRevision = catalogRevision ?? string.Empty;
+            ProgressionRevision = progressionRevision ?? string.Empty;
+            EconomyRevision = economyRevision ?? string.Empty;
+            PrerequisiteRevision = prerequisiteRevision ?? string.Empty;
+            QuestRevision = questRevision ?? string.Empty;
+            OperationPolicyVersion = operationPolicyVersion ?? string.Empty;
+            OrderPolicyVersion = orderPolicyVersion ?? string.Empty;
+            OrderCatalogSetId = orderCatalogSetId ?? string.Empty;
+            OrderCatalogRevision = orderCatalogRevision ?? string.Empty;
+            OrderProgressionRevision =
+                orderProgressionRevision ?? string.Empty;
+            OrderEconomyRevision = orderEconomyRevision ?? string.Empty;
+            OrderHash = orderHash ?? string.Empty;
+            SourceDisposition = sourceDisposition;
+            SemanticHash = semanticHash ?? string.Empty;
+            PlanHash = planHash ?? string.Empty;
+        }
+
+        public ProgressionOperationKind OperationKind { get; }
+        public ProgressionOrderType OrderType { get; }
+        public string ProfileId { get; }
+        public string DefinitionId => DefinitionSource?.Id ?? string.Empty;
+        public ProgressionSourceIdentity DefinitionSource { get; }
+        public ProgressionSourceIdentity CostProfile { get; }
+        public ProgressionSourceIdentity DurationProfile { get; }
+        public string OrderId { get; }
+        public string OperationId { get; }
+        public string StartOperationId { get; }
+        public string CompletionOperationId { get; }
+        public string CancellationOperationId { get; }
+        public long PreviousValue { get; }
+        public long TargetValue { get; }
+        public long BatchCount { get; }
+        public long MaximumValue { get; }
+        public long QuestProgressAmount { get; }
+        public TroopInventoryCapacityPolicy InventoryCapacityPolicy { get; }
+        public IReadOnlyList<BuildingConstructionCost> Costs => _costs;
+        public long StartTimestamp { get; }
+        public long EndTimestamp { get; }
+        public long CommitTimestamp { get; }
+        public ProgressionTimestampPolicy TimestampPolicy { get; }
+        public string CatalogSetId { get; }
+        public string CatalogRevision { get; }
+        public string ProgressionRevision { get; }
+        public string EconomyRevision { get; }
+        public string PrerequisiteRevision { get; }
+        public string QuestRevision { get; }
+        public string OperationPolicyVersion { get; }
+        public string OrderPolicyVersion { get; }
+        public string OrderCatalogSetId { get; }
+        public string OrderCatalogRevision { get; }
+        public string OrderProgressionRevision { get; }
+        public string OrderEconomyRevision { get; }
+        public string OrderHash { get; }
+        public ProgressionOrderSourceDisposition SourceDisposition { get; }
+        public string SemanticHash { get; }
+        public string PlanHash { get; }
     }
 
     public sealed class ProgressionOperationReceipt
@@ -598,17 +827,37 @@ namespace AL.Kingdom.Progression
             string semanticHash,
             string resultHash,
             ProgressionOperationDurability durability)
+            : this(
+                operationId,
+                semanticHash,
+                resultHash,
+                durability,
+                null)
+        {
+        }
+
+        public ProgressionOperationReceipt(
+            string operationId,
+            string semanticHash,
+            string resultHash,
+            ProgressionOperationDurability durability,
+            ProgressionCommittedOperationResult committedResult)
         {
             OperationId = operationId ?? string.Empty;
             SemanticHash = semanticHash ?? string.Empty;
             ResultHash = resultHash ?? string.Empty;
             Durability = durability;
+            CommittedResult = committedResult;
+            OperationKind = committedResult?.OperationKind ??
+                ProgressionOperationKind.None;
         }
 
         public string OperationId { get; }
         public string SemanticHash { get; }
         public string ResultHash { get; }
         public ProgressionOperationDurability Durability { get; }
+        public ProgressionOperationKind OperationKind { get; }
+        public ProgressionCommittedOperationResult CommittedResult { get; }
     }
 
     public sealed class ProgressionReplayClassification
@@ -653,7 +902,14 @@ namespace AL.Kingdom.Progression
             string requestPolicyVersion,
             string semanticHash,
             string planHash,
-            IEnumerable<ProgressionDiagnostic> diagnostics)
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            long maximumValue = 0,
+            TroopInventoryCapacityPolicy inventoryCapacityPolicy =
+                TroopInventoryCapacityPolicy.Unresolved,
+            ProgressionTimestampPolicy timestampPolicy = null,
+            string prerequisiteRevision = "",
+            ProgressionOperationReceipt committedReceipt = null,
+            string catalogRevision = "")
         {
             Status = status;
             OrderType = orderType;
@@ -668,16 +924,22 @@ namespace AL.Kingdom.Progression
             PreviousValue = previousValue;
             TargetValue = targetValue;
             BatchCount = batchCount;
+            MaximumValue = maximumValue;
+            InventoryCapacityPolicy = inventoryCapacityPolicy;
             _costs = ProgressionCollections.Freeze(costs);
             StartTimestamp = startTimestamp;
             EndTimestamp = endTimestamp;
+            TimestampPolicy = timestampPolicy;
             CatalogSetId = catalogSetId ?? string.Empty;
+            CatalogRevision = catalogRevision ?? string.Empty;
             ProgressionRevision = progressionRevision ?? string.Empty;
             EconomyRevision = economyRevision ?? string.Empty;
+            PrerequisiteRevision = prerequisiteRevision ?? string.Empty;
             RequestPolicyVersion = requestPolicyVersion ?? string.Empty;
             SemanticHash = semanticHash ?? string.Empty;
             PlanHash = planHash ?? string.Empty;
             _diagnostics = ProgressionCollections.Freeze(diagnostics);
+            CommittedReceipt = committedReceipt;
         }
 
         public ProgressionPlanStatus Status { get; }
@@ -693,16 +955,22 @@ namespace AL.Kingdom.Progression
         public long PreviousValue { get; }
         public long TargetValue { get; }
         public long BatchCount { get; }
+        public long MaximumValue { get; }
+        public TroopInventoryCapacityPolicy InventoryCapacityPolicy { get; }
         public IReadOnlyList<BuildingConstructionCost> Costs => _costs;
         public long StartTimestamp { get; }
         public long EndTimestamp { get; }
+        public ProgressionTimestampPolicy TimestampPolicy { get; }
         public string CatalogSetId { get; }
+        public string CatalogRevision { get; }
         public string ProgressionRevision { get; }
         public string EconomyRevision { get; }
+        public string PrerequisiteRevision { get; }
         public string RequestPolicyVersion { get; }
         public string SemanticHash { get; }
         public string PlanHash { get; }
         public IReadOnlyList<ProgressionDiagnostic> Diagnostics => _diagnostics;
+        public ProgressionOperationReceipt CommittedReceipt { get; }
         public bool CanCommit => Status == ProgressionPlanStatus.Ready;
     }
 
@@ -733,7 +1001,13 @@ namespace AL.Kingdom.Progression
             string progressionRevision,
             string economyRevision,
             string requestPolicyVersion,
-            string orderHash)
+            string orderHash,
+            long maximumValue = 0,
+            TroopInventoryCapacityPolicy inventoryCapacityPolicy =
+                TroopInventoryCapacityPolicy.Unresolved,
+            ProgressionTimestampPolicy timestampPolicy = null,
+            string prerequisiteRevision = "",
+            string catalogRevision = "")
         {
             OrderType = orderType;
             State = state;
@@ -750,12 +1024,17 @@ namespace AL.Kingdom.Progression
             PreviousValue = previousValue;
             TargetValue = targetValue;
             BatchCount = batchCount;
+            MaximumValue = maximumValue;
+            InventoryCapacityPolicy = inventoryCapacityPolicy;
             _committedCosts = ProgressionCollections.Freeze(committedCosts);
             StartTimestamp = startTimestamp;
             EndTimestamp = endTimestamp;
+            TimestampPolicy = timestampPolicy;
             CatalogSetId = catalogSetId ?? string.Empty;
+            CatalogRevision = catalogRevision ?? string.Empty;
             ProgressionRevision = progressionRevision ?? string.Empty;
             EconomyRevision = economyRevision ?? string.Empty;
+            PrerequisiteRevision = prerequisiteRevision ?? string.Empty;
             RequestPolicyVersion = requestPolicyVersion ?? string.Empty;
             OrderHash = orderHash ?? string.Empty;
         }
@@ -775,13 +1054,18 @@ namespace AL.Kingdom.Progression
         public long PreviousValue { get; }
         public long TargetValue { get; }
         public long BatchCount { get; }
+        public long MaximumValue { get; }
+        public TroopInventoryCapacityPolicy InventoryCapacityPolicy { get; }
         public IReadOnlyList<BuildingConstructionCost> CommittedCosts =>
             _committedCosts;
         public long StartTimestamp { get; }
         public long EndTimestamp { get; }
+        public ProgressionTimestampPolicy TimestampPolicy { get; }
         public string CatalogSetId { get; }
+        public string CatalogRevision { get; }
         public string ProgressionRevision { get; }
         public string EconomyRevision { get; }
+        public string PrerequisiteRevision { get; }
         public string RequestPolicyVersion { get; }
         public string OrderHash { get; }
     }
@@ -838,7 +1122,13 @@ namespace AL.Kingdom.Progression
             string completionPolicyVersion,
             string semanticHash,
             string planHash,
-            IEnumerable<ProgressionDiagnostic> diagnostics)
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            ProgressionOrderSnapshot orderSnapshot = null,
+            ProgressionOrderSourceDisposition sourceDisposition =
+                ProgressionOrderSourceDisposition.ExactCurrentSource,
+            ProgressionOperationReceipt committedReceipt = null,
+            long commitTimestamp = 0,
+            string catalogRevision = "")
         {
             Status = status;
             OrderType = orderType;
@@ -856,6 +1146,11 @@ namespace AL.Kingdom.Progression
             SemanticHash = semanticHash ?? string.Empty;
             PlanHash = planHash ?? string.Empty;
             _diagnostics = ProgressionCollections.Freeze(diagnostics);
+            OrderSnapshot = orderSnapshot;
+            SourceDisposition = sourceDisposition;
+            CommittedReceipt = committedReceipt;
+            CommitTimestamp = commitTimestamp;
+            CatalogRevision = catalogRevision ?? string.Empty;
         }
 
         public ProgressionPlanStatus Status { get; }
@@ -867,6 +1162,7 @@ namespace AL.Kingdom.Progression
         public long TargetValue { get; }
         public long QuestProgressAmount { get; }
         public string CatalogSetId { get; }
+        public string CatalogRevision { get; }
         public string ProgressionRevision { get; }
         public string EconomyRevision { get; }
         public string QuestRevision { get; }
@@ -874,6 +1170,10 @@ namespace AL.Kingdom.Progression
         public string SemanticHash { get; }
         public string PlanHash { get; }
         public IReadOnlyList<ProgressionDiagnostic> Diagnostics => _diagnostics;
+        public ProgressionOrderSnapshot OrderSnapshot { get; }
+        public ProgressionOrderSourceDisposition SourceDisposition { get; }
+        public ProgressionOperationReceipt CommittedReceipt { get; }
+        public long CommitTimestamp { get; }
         public bool CanCommit => Status == ProgressionPlanStatus.Ready;
     }
 
@@ -907,15 +1207,33 @@ namespace AL.Kingdom.Progression
             string researchContentVersion,
             int level,
             ProgressionSourceIdentity effectProfile)
+            : this(
+                new ProgressionSourceIdentity(
+                    researchDefinitionId,
+                    string.Empty,
+                    researchContentVersion,
+                    string.Empty,
+                    string.Empty),
+                level,
+                effectProfile)
         {
-            ResearchDefinitionId = researchDefinitionId ?? string.Empty;
-            ResearchContentVersion = researchContentVersion ?? string.Empty;
+        }
+
+        public ResearchEffectReference(
+            ProgressionSourceIdentity researchDefinition,
+            int level,
+            ProgressionSourceIdentity effectProfile)
+        {
+            ResearchDefinition = researchDefinition;
             Level = level;
             EffectProfile = effectProfile;
         }
 
-        public string ResearchDefinitionId { get; }
-        public string ResearchContentVersion { get; }
+        public ProgressionSourceIdentity ResearchDefinition { get; }
+        public string ResearchDefinitionId =>
+            ResearchDefinition?.Id ?? string.Empty;
+        public string ResearchContentVersion =>
+            ResearchDefinition?.ContentVersion ?? string.Empty;
         public int Level { get; }
         public ProgressionSourceIdentity EffectProfile { get; }
     }
@@ -975,35 +1293,276 @@ namespace AL.Kingdom.Progression
         }
     }
 
-    internal static class ProgressionContractHash
+    internal enum ProgressionIdentifierValidation
     {
-        internal static string Compute(params string[] segments)
+        Valid = 0,
+        Null = 1,
+        Empty = 2,
+        TooLong = 3,
+        Whitespace = 4,
+        Control = 5,
+        UnpairedHighSurrogate = 6,
+        UnpairedLowSurrogate = 7,
+        Utf8TooLong = 8,
+        InvalidUtf8 = 9
+    }
+
+    internal static class ProgressionText
+    {
+        internal const int MaximumIdentifierUtf8Bytes = 128;
+        internal const int MaximumCanonicalSegmentChars = 512;
+        internal static readonly UTF8Encoding StrictUtf8 =
+            new UTF8Encoding(false, true);
+
+        internal static bool IsValidIdentifier(string value)
         {
-            var canonical = new StringBuilder();
-            foreach (string segment in segments ?? Array.Empty<string>())
+            return ValidateIdentifier(value) ==
+                   ProgressionIdentifierValidation.Valid;
+        }
+
+        internal static ProgressionIdentifierValidation ValidateIdentifier(
+            string value)
+        {
+            if (value == null)
             {
-                string value = segment ?? string.Empty;
-                canonical
-                    .Append(Encoding.UTF8
-                        .GetByteCount(value)
-                        .ToString(CultureInfo.InvariantCulture))
-                    .Append(':')
-                    .Append(value)
-                    .Append(';');
+                return ProgressionIdentifierValidation.Null;
             }
 
-            byte[] payload = Encoding.UTF8.GetBytes(canonical.ToString());
+            if (value.Length == 0)
+            {
+                return ProgressionIdentifierValidation.Empty;
+            }
+
+            // UTF-8 never uses fewer bytes than the UTF-16 code-unit count.
+            // Rejecting this O(1) boundary first prevents hostile strings from
+            // reaching a scan or encoder.
+            if (value.Length > MaximumIdentifierUtf8Bytes)
+            {
+                return ProgressionIdentifierValidation.TooLong;
+            }
+
+            ProgressionIdentifierValidation structure =
+                ValidateUtf16Structure(value, true);
+            if (structure != ProgressionIdentifierValidation.Valid)
+            {
+                return structure;
+            }
+
+            try
+            {
+                return StrictUtf8.GetByteCount(value) <=
+                       MaximumIdentifierUtf8Bytes
+                    ? ProgressionIdentifierValidation.Valid
+                    : ProgressionIdentifierValidation.Utf8TooLong;
+            }
+            catch (EncoderFallbackException)
+            {
+                return ProgressionIdentifierValidation.InvalidUtf8;
+            }
+        }
+
+        internal static bool TryGetStrictUtf8ByteCount(
+            string value,
+            out int byteCount)
+        {
+            byteCount = 0;
+            value = value ?? string.Empty;
+            if (value.Length > MaximumCanonicalSegmentChars ||
+                ValidateUtf16Structure(value, false) !=
+                ProgressionIdentifierValidation.Valid)
+            {
+                return false;
+            }
+
+            try
+            {
+                byteCount = StrictUtf8.GetByteCount(value);
+                return true;
+            }
+            catch (EncoderFallbackException)
+            {
+                return false;
+            }
+        }
+
+        private static ProgressionIdentifierValidation ValidateUtf16Structure(
+            string value,
+            bool enforceIdentifierCharacters)
+        {
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (char.IsHighSurrogate(character))
+                {
+                    if (index + 1 >= value.Length ||
+                        !char.IsLowSurrogate(value[index + 1]))
+                    {
+                        return ProgressionIdentifierValidation
+                            .UnpairedHighSurrogate;
+                    }
+
+                    index++;
+                    continue;
+                }
+
+                if (char.IsLowSurrogate(character))
+                {
+                    return ProgressionIdentifierValidation
+                        .UnpairedLowSurrogate;
+                }
+
+                if (enforceIdentifierCharacters &&
+                    char.IsWhiteSpace(character))
+                {
+                    return ProgressionIdentifierValidation.Whitespace;
+                }
+
+                if (enforceIdentifierCharacters &&
+                    char.IsControl(character))
+                {
+                    return ProgressionIdentifierValidation.Control;
+                }
+            }
+
+            return ProgressionIdentifierValidation.Valid;
+        }
+    }
+
+    internal static class ProgressionContractHash
+    {
+        private const int MaximumSegments = 262144;
+        private const int MaximumCanonicalPayloadBytes = 8388608;
+
+        internal static string Compute(params string[] segments)
+        {
+            return TryCompute(out string hash, segments)
+                ? hash
+                : string.Empty;
+        }
+
+        internal static bool TryCompute(
+            out string hash,
+            params string[] segments)
+        {
+            hash = string.Empty;
+            string[] values = segments ?? Array.Empty<string>();
+            if (values.Length > MaximumSegments)
+            {
+                return false;
+            }
+
+            int canonicalByteCount = 0;
+            int maximumSegmentByteCount = 0;
+            for (int index = 0; index < values.Length; index++)
+            {
+                string value = values[index] ?? string.Empty;
+                if (!ProgressionText.TryGetStrictUtf8ByteCount(
+                        value,
+                        out int byteCount))
+                {
+                    return false;
+                }
+
+                int prefixCharacters = DecimalDigitCount(byteCount);
+                try
+                {
+                    canonicalByteCount = checked(
+                        canonicalByteCount +
+                        prefixCharacters +
+                        1 +
+                        byteCount +
+                        1);
+                }
+                catch (OverflowException)
+                {
+                    return false;
+                }
+
+                if (canonicalByteCount > MaximumCanonicalPayloadBytes)
+                {
+                    return false;
+                }
+
+                maximumSegmentByteCount = Math.Max(
+                    maximumSegmentByteCount,
+                    byteCount);
+            }
+
+            var buffer = new byte[Math.Max(
+                maximumSegmentByteCount,
+                32)];
             using (SHA256 sha256 = SHA256.Create())
             {
-                byte[] digest = sha256.ComputeHash(payload);
+                for (int index = 0; index < values.Length; index++)
+                {
+                    string value = values[index] ?? string.Empty;
+                    int byteCount =
+                        ProgressionText.StrictUtf8.GetByteCount(value);
+                    int prefixLength = WriteDecimalAscii(byteCount, buffer);
+                    buffer[prefixLength] = (byte)':';
+                    sha256.TransformBlock(
+                        buffer,
+                        0,
+                        prefixLength + 1,
+                        buffer,
+                        0);
+                    if (byteCount > 0)
+                    {
+                        int written = ProgressionText.StrictUtf8.GetBytes(
+                            value,
+                            0,
+                            value.Length,
+                            buffer,
+                            0);
+                        sha256.TransformBlock(
+                            buffer,
+                            0,
+                            written,
+                            buffer,
+                            0);
+                    }
+
+                    buffer[0] = (byte)';';
+                    sha256.TransformBlock(buffer, 0, 1, buffer, 0);
+                }
+
+                sha256.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                byte[] digest = sha256.Hash;
                 var hexadecimal = new StringBuilder(digest.Length * 2);
                 foreach (byte value in digest)
                 {
                     hexadecimal.Append(value.ToString("x2"));
                 }
 
-                return hexadecimal.ToString();
+                hash = hexadecimal.ToString();
+                return true;
             }
+        }
+
+        private static int DecimalDigitCount(int value)
+        {
+            int digits = 1;
+            while (value >= 10)
+            {
+                value /= 10;
+                digits++;
+            }
+
+            return digits;
+        }
+
+        private static int WriteDecimalAscii(int value, byte[] buffer)
+        {
+            int digits = DecimalDigitCount(value);
+            int cursor = digits;
+            do
+            {
+                cursor--;
+                buffer[cursor] = (byte)('0' + (value % 10));
+                value /= 10;
+            } while (cursor > 0);
+
+            return digits;
         }
     }
 }

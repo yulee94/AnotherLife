@@ -270,7 +270,9 @@ namespace AL.Tests.EditMode.Progression
                     Fixture.CatalogSetId,
                     Fixture.CatalogRevision,
                     new[] { definition },
-                    null);
+                    null,
+                    null,
+                    Fixture.TimestampPolicy);
             ProgressionCompatibilityResult empty =
                 Fixture.ResearchCompatibility(
                     new[] { definition },
@@ -620,6 +622,165 @@ namespace AL.Tests.EditMode.Progression
                 troopResult.Diagnostics.Select(diagnostic => diagnostic.Code),
                 Does.Contain(ProgressionDiagnosticCode.InvalidInventoryPolicy));
         }
+
+        [Test]
+        public void HostileStateIdentitiesFailClosedWithoutUnboundedHashAllocation()
+        {
+            ResearchProgressionDefinition research =
+                Fixture.Research("fake.research.alpha");
+            TroopProgressionDefinition troop =
+                Fixture.Troop("fake.troop.alpha");
+            string maximumPlusOne = new string(
+                'x',
+                ProgressionCompatibilityPlanner.MaximumIdUtf8Bytes + 1);
+            string hostile = new string('x', 1024 * 1024);
+
+            // Warm the hashing and crypto paths before measuring the hostile input.
+            Fixture.ResearchCompatibility(
+                new[] { research },
+                Array.Empty<ResearchProgressionStateRecord>());
+            Fixture.TrainingCompatibility(
+                new[] { troop },
+                Array.Empty<TroopProgressionStateRecord>());
+
+            ProgressionCompatibilityResult maximumPlusOneResult =
+                Fixture.ResearchCompatibility(
+                    new[] { research },
+                    new[]
+                    {
+                        new ResearchProgressionStateRecord(
+                            maximumPlusOne,
+                            Fixture.ContentVersion,
+                            0,
+                            false,
+                            0)
+                    });
+
+            long researchBefore = GC.GetAllocatedBytesForCurrentThread();
+            ProgressionCompatibilityResult hostileResearch =
+                Fixture.ResearchCompatibility(
+                    new[] { research },
+                    new[]
+                    {
+                        new ResearchProgressionStateRecord(
+                            hostile,
+                            hostile,
+                            0,
+                            false,
+                            0)
+                    });
+            long researchAllocated =
+                GC.GetAllocatedBytesForCurrentThread() - researchBefore;
+
+            long trainingBefore = GC.GetAllocatedBytesForCurrentThread();
+            ProgressionCompatibilityResult hostileTraining =
+                Fixture.TrainingCompatibility(
+                    new[] { troop },
+                    new[]
+                    {
+                        new TroopProgressionStateRecord(
+                            hostile,
+                            hostile,
+                            0,
+                            0,
+                            0)
+                    });
+            long trainingAllocated =
+                GC.GetAllocatedBytesForCurrentThread() - trainingBefore;
+
+            foreach (ProgressionCompatibilityResult result in new[]
+                     {
+                         maximumPlusOneResult,
+                         hostileResearch,
+                         hostileTraining
+                     })
+            {
+                Assert.That(
+                    result.Status,
+                    Is.EqualTo(ProgressionCompatibilityStatus.MalformedState));
+                Assert.That(result.StateRevision, Has.Length.EqualTo(64));
+                Assert.That(
+                    result.Diagnostics.Select(diagnostic => diagnostic.Code),
+                    Does.Contain(ProgressionDiagnosticCode.InvalidStateId));
+                Assert.That(
+                    result.Diagnostics.All(diagnostic =>
+                        diagnostic.DefinitionId.Length <=
+                        ProgressionCompatibilityPlanner.MaximumIdUtf8Bytes),
+                    Is.True);
+            }
+
+            Assert.That(
+                hostileResearch.PreservedResearchStates[0].DefinitionId,
+                Is.SameAs(hostile));
+            Assert.That(
+                hostileResearch.PreservedResearchStates[0]
+                    .DefinitionContentVersion,
+                Is.SameAs(hostile));
+            Assert.That(
+                hostileTraining.PreservedTroopStates[0].DefinitionId,
+                Is.SameAs(hostile));
+            Assert.That(researchAllocated, Is.LessThan(512L * 1024L));
+            Assert.That(trainingAllocated, Is.LessThan(512L * 1024L));
+        }
+
+        [Test]
+        public void MalformedUtf16IsRejectedWithoutReplacementCanonicalization()
+        {
+            ResearchProgressionDefinition research =
+                Fixture.Research("fake.research.alpha");
+            const string unpairedHigh = "fake.\uD800";
+            const string unpairedLow = "fake.\uDC00";
+
+            ProgressionCompatibilityResult high =
+                Fixture.ResearchCompatibility(
+                    new[] { research },
+                    new[]
+                    {
+                        new ResearchProgressionStateRecord(
+                            unpairedHigh,
+                            Fixture.ContentVersion,
+                            0,
+                            false,
+                            0)
+                    });
+            ProgressionCompatibilityResult low =
+                Fixture.ResearchCompatibility(
+                    new[] { research },
+                    new[]
+                    {
+                        new ResearchProgressionStateRecord(
+                            unpairedLow,
+                            Fixture.ContentVersion,
+                            0,
+                            false,
+                            0)
+                    });
+
+            Assert.That(
+                high.Diagnostics.Select(diagnostic => diagnostic.Code),
+                Does.Contain(ProgressionDiagnosticCode.InvalidStateId));
+            Assert.That(
+                low.Diagnostics.Select(diagnostic => diagnostic.Code),
+                Does.Contain(ProgressionDiagnosticCode.InvalidStateId));
+            Assert.That(high.Diagnostics.All(d => d.DefinitionId.Length == 0), Is.True);
+            Assert.That(low.Diagnostics.All(d => d.DefinitionId.Length == 0), Is.True);
+            Assert.That(high.StateRevision, Has.Length.EqualTo(64));
+            Assert.That(low.StateRevision, Has.Length.EqualTo(64));
+            Assert.That(
+                high.StateRevision,
+                Is.Not.EqualTo(low.StateRevision),
+                "Unpaired high and low surrogates must not collapse through UTF-8 replacement.");
+
+            ResearchProgressionDefinition validSupplementary =
+                Fixture.Research("fake.research.\U0001F600");
+            ProgressionCompatibilityResult valid =
+                Fixture.ResearchCompatibility(
+                    new[] { validSupplementary },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            Assert.That(
+                valid.Status,
+                Is.EqualTo(ProgressionCompatibilityStatus.Available));
+        }
     }
 
     public sealed class ProgressionOrderPlannerTests
@@ -945,10 +1106,17 @@ namespace AL.Tests.EditMode.Progression
                 unitDuration: 10,
                 maximumDuration: 100,
                 allowsZeroDuration: false);
+            var deadlineTimestampPolicy = new ProgressionTimestampPolicy(
+                "timestamp.policy.deadline-overflow",
+                long.MaxValue - 1000,
+                long.MaxValue,
+                1000,
+                1000);
             ProgressionCompatibilityResult deadlineCompatibility =
                 Fixture.TrainingCompatibility(
                     new[] { deadlineDefinition },
-                    Array.Empty<TroopProgressionStateRecord>());
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    timestampPolicy: deadlineTimestampPolicy);
             ProgressionStartPlan deadlineOverflow = Fixture.PlanTraining(
                 deadlineCompatibility,
                 Fixture.TrainingStart(
@@ -1104,6 +1272,780 @@ namespace AL.Tests.EditMode.Progression
         }
 
         [Test]
+        public void PrerequisiteRevisionIsExpectedCarriedHashBoundAndStaleSafe()
+        {
+            var prerequisite = new ProgressionPrerequisite(
+                "fake.building.academy",
+                2);
+            ResearchProgressionDefinition definition = Fixture.Research(
+                "fake.research.prerequisite-revision",
+                prerequisites: new[] { prerequisite });
+            ProgressionCompatibilityResult compatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { definition },
+                    Array.Empty<ResearchProgressionStateRecord>(),
+                    new[]
+                    {
+                        new ProgressionPrerequisiteTargetDefinition(
+                            Fixture.ProfileIdentity(prerequisite.DefinitionId),
+                            5)
+                    });
+            var revisionOne = new ProgressionPrerequisiteSnapshot(
+                "prerequisite.rev.1",
+                new[]
+                {
+                    new ProgressionLevelValue(prerequisite.DefinitionId, 2)
+                });
+            var revisionTwo = new ProgressionPrerequisiteSnapshot(
+                "prerequisite.rev.2",
+                new[]
+                {
+                    new ProgressionLevelValue(prerequisite.DefinitionId, 2)
+                });
+            ProgressionStartRequest requestOne = Fixture.ResearchStart(
+                compatibility,
+                definition.Identity.Id,
+                1,
+                expectedPrerequisiteRevision: revisionOne.Revision);
+
+            ProgressionStartPlan first = Fixture.PlanResearch(
+                compatibility,
+                requestOne,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                revisionOne,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionStartPlan stale = Fixture.PlanResearch(
+                compatibility,
+                requestOne,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                revisionTwo,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionStartRequest requestTwo = Fixture.ResearchStart(
+                compatibility,
+                definition.Identity.Id,
+                1,
+                operationId: "research-start-prerequisite-2",
+                orderId: "research-order-prerequisite-2",
+                expectedPrerequisiteRevision: revisionTwo.Revision);
+            ProgressionStartPlan second = Fixture.PlanResearch(
+                compatibility,
+                requestTwo,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                revisionTwo,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+
+            Assert.That(first.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                first.PrerequisiteRevision,
+                Is.EqualTo(revisionOne.Revision));
+            Assert.That(
+                Fixture.Order(first).PrerequisiteRevision,
+                Is.EqualTo(revisionOne.Revision));
+            Assert.That(
+                stale.Status,
+                Is.EqualTo(ProgressionPlanStatus.StalePrerequisiteRevision));
+            Assert.That(stale.PlanHash, Is.Empty);
+            Assert.That(second.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(second.PrerequisiteRevision, Is.EqualTo(revisionTwo.Revision));
+            Assert.That(second.SemanticHash, Is.Not.EqualTo(first.SemanticHash));
+            Assert.That(second.PlanHash, Is.Not.EqualTo(first.PlanHash));
+
+            ProgressionOrderSnapshot firstOrder = Fixture.Order(first);
+            ProgressionOperationReceipt firstReceipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(first, firstOrder);
+            ProgressionStartPlan exactReplay = Fixture.PlanResearch(
+                null,
+                requestOne,
+                null,
+                revisionTwo,
+                new[] { firstReceipt },
+                null,
+                0);
+            var changedRevisionRequest = new ProgressionStartRequest(
+                requestOne.ProfileId,
+                requestOne.OrderType,
+                requestOne.DefinitionId,
+                requestOne.OrderId,
+                requestOne.OperationId,
+                requestOne.RequestedTargetLevel,
+                requestOne.RequestedBatchCount,
+                requestOne.ExpectedCatalogSetId,
+                requestOne.ExpectedProgressionRevision,
+                requestOne.ExpectedEconomyRevision,
+                requestOne.RequestPolicyVersion,
+                revisionTwo.Revision);
+            ProgressionStartPlan changedReplay = Fixture.PlanResearch(
+                null,
+                changedRevisionRequest,
+                null,
+                revisionTwo,
+                new[] { firstReceipt },
+                null,
+                0);
+            Assert.That(
+                exactReplay.Status,
+                Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
+            Assert.That(
+                exactReplay.PrerequisiteRevision,
+                Is.EqualTo(revisionOne.Revision));
+            Assert.That(
+                changedReplay.Status,
+                Is.EqualTo(ProgressionPlanStatus.CorrelationConflict));
+
+            ResearchProgressionDefinition noRequirements =
+                Fixture.Research("fake.research.empty-prerequisite-authority");
+            ProgressionCompatibilityResult emptyCompatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { noRequirements },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionStartPlan empty = Fixture.PlanResearch(
+                emptyCompatibility,
+                Fixture.ResearchStart(
+                    emptyCompatibility,
+                    noRequirements.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            Assert.That(empty.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                empty.PrerequisiteRevision,
+                Is.EqualTo(Fixture.NoPrerequisites.Revision));
+        }
+
+        [Test]
+        public void TimestampPolicyBoundariesCoverStartsCompletionAndReconciliation()
+        {
+            var policy = new ProgressionTimestampPolicy(
+                "timestamp.policy.boundary",
+                100,
+                300,
+                50,
+                20);
+            ResearchProgressionDefinition research = Fixture.Research(
+                "fake.research.timestamp-boundary",
+                unitDuration: 20,
+                maximumDuration: 20);
+            ProgressionCompatibilityResult researchCompatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { research },
+                    Array.Empty<ResearchProgressionStateRecord>(),
+                    timestampPolicy: policy);
+            ProgressionStartRequest researchRequest = Fixture.ResearchStart(
+                researchCompatibility,
+                research.Identity.Id,
+                1);
+
+            ProgressionStartPlan atMinimum = Fixture.PlanResearch(
+                researchCompatibility,
+                researchRequest,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionStartPlan belowMinimum = Fixture.PlanResearch(
+                researchCompatibility,
+                researchRequest,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                99);
+
+            Assert.That(atMinimum.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(atMinimum.EndTimestamp, Is.EqualTo(120));
+            Assert.That(atMinimum.TimestampPolicy, Is.SameAs(policy));
+            Assert.That(Fixture.Order(atMinimum).TimestampPolicy, Is.SameAs(policy));
+            Assert.That(
+                belowMinimum.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+
+            var retentionDrift = new ProgressionTimestampPolicy(
+                policy.PolicyVersion,
+                policy.MinimumUtcTimestamp,
+                policy.MaximumUtcTimestamp,
+                policy.MaximumRetentionAgeSeconds - 1,
+                policy.MaximumFutureLeadSeconds);
+            ProgressionCompatibilityResult retentionDriftCompatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { research },
+                    Array.Empty<ResearchProgressionStateRecord>(),
+                    timestampPolicy: retentionDrift);
+            ProgressionStartPlan retentionDriftStart = Fixture.PlanResearch(
+                retentionDriftCompatibility,
+                Fixture.ResearchStart(
+                    retentionDriftCompatibility,
+                    research.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            Assert.That(
+                retentionDriftCompatibility.StateRevision,
+                Is.Not.EqualTo(researchCompatibility.StateRevision));
+            Assert.That(
+                retentionDriftStart.PlanHash,
+                Is.Not.EqualTo(atMinimum.PlanHash));
+            Assert.That(
+                Fixture.Order(retentionDriftStart).OrderHash,
+                Is.Not.EqualTo(Fixture.Order(atMinimum).OrderHash));
+
+            ResearchProgressionDefinition beyondFutureDefinition =
+                Fixture.Research(
+                    "fake.research.timestamp-future",
+                    unitDuration: 21,
+                    maximumDuration: 21);
+            ProgressionCompatibilityResult beyondFutureCompatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { beyondFutureDefinition },
+                    Array.Empty<ResearchProgressionStateRecord>(),
+                    timestampPolicy: policy);
+            ProgressionStartPlan beyondFuture = Fixture.PlanResearch(
+                beyondFutureCompatibility,
+                Fixture.ResearchStart(
+                    beyondFutureCompatibility,
+                    beyondFutureDefinition.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            Assert.That(
+                beyondFuture.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+
+            TroopProgressionDefinition training =
+                Fixture.Troop("fake.troop.zero-duration-boundary");
+            ProgressionCompatibilityResult trainingCompatibility =
+                Fixture.TrainingCompatibility(
+                    new[] { training },
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    timestampPolicy: policy);
+            ProgressionStartRequest trainingRequest = Fixture.TrainingStart(
+                trainingCompatibility,
+                training.Identity.Id,
+                1);
+            ProgressionStartPlan atMaximum = Fixture.PlanTraining(
+                trainingCompatibility,
+                trainingRequest,
+                Fixture.Economy(ResourceType.Food, 1000),
+                300);
+            ProgressionStartPlan aboveMaximum = Fixture.PlanTraining(
+                trainingCompatibility,
+                trainingRequest,
+                Fixture.Economy(ResourceType.Food, 1000),
+                301);
+            Assert.That(atMaximum.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(atMaximum.StartTimestamp, Is.EqualTo(atMaximum.EndTimestamp));
+            Assert.That(
+                aboveMaximum.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+
+            ProgressionOrderSnapshot researchOrder = Fixture.Order(atMinimum);
+            ProgressionCompletionRequest completion =
+                Fixture.Completion(researchCompatibility, researchOrder);
+            ProgressionCompletionPlan atEnd =
+                ProgressionOrderPlanner.PlanCompletion(
+                    researchCompatibility,
+                    researchOrder,
+                    completion,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    120);
+            ProgressionCompletionPlan atRetention =
+                ProgressionOrderPlanner.PlanCompletion(
+                    researchCompatibility,
+                    researchOrder,
+                    completion,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    170);
+            ProgressionCompletionPlan beyondRetention =
+                ProgressionOrderPlanner.PlanCompletion(
+                    researchCompatibility,
+                    researchOrder,
+                    completion,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    171);
+            ProgressionCompletionPlan beforeStart =
+                ProgressionOrderPlanner.PlanCompletion(
+                    researchCompatibility,
+                    researchOrder,
+                    completion,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    99);
+            ProgressionCompletionPlan atFutureBoundary =
+                ProgressionOrderPlanner.PlanCompletion(
+                    researchCompatibility,
+                    researchOrder,
+                    completion,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    100);
+            ProgressionCompletionPlan aboveAbsoluteMaximum =
+                ProgressionOrderPlanner.PlanCompletion(
+                    researchCompatibility,
+                    researchOrder,
+                    completion,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    301);
+            Assert.That(atEnd.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(atRetention.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                beyondRetention.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+            Assert.That(
+                beforeStart.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+            Assert.That(
+                atFutureBoundary.Status,
+                Is.EqualTo(ProgressionPlanStatus.NotYetEligible));
+            Assert.That(
+                aboveAbsoluteMaximum.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+
+            ProgressionReconciliationPlan atFutureReconciliation =
+                ProgressionOrderPlanner.PlanReconciliation(
+                    new[] { researchOrder },
+                    100);
+            ProgressionReconciliationPlan atRetentionReconciliation =
+                ProgressionOrderPlanner.PlanReconciliation(
+                    new[] { researchOrder },
+                    170);
+            ProgressionReconciliationPlan beyondRetentionReconciliation =
+                ProgressionOrderPlanner.PlanReconciliation(
+                    new[] { researchOrder },
+                    171);
+            ProgressionReconciliationPlan belowAbsoluteReconciliation =
+                ProgressionOrderPlanner.PlanReconciliation(
+                    new[] { researchOrder },
+                    99);
+            ProgressionReconciliationPlan aboveAbsoluteReconciliation =
+                ProgressionOrderPlanner.PlanReconciliation(
+                    new[] { researchOrder },
+                    301);
+            Assert.That(
+                atFutureReconciliation.Status,
+                Is.EqualTo(ProgressionPlanStatus.NoChange));
+            Assert.That(
+                atRetentionReconciliation.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                beyondRetentionReconciliation.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+            Assert.That(
+                belowAbsoluteReconciliation.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+            Assert.That(
+                aboveAbsoluteReconciliation.Status,
+                Is.EqualTo(ProgressionPlanStatus.ClockInvalid));
+
+            ProgressionOrderSnapshot zeroDurationOrder = Fixture.Order(atMaximum);
+            ProgressionCompletionPlan zeroDurationCompletion =
+                ProgressionOrderPlanner.PlanCompletion(
+                    trainingCompatibility,
+                    zeroDurationOrder,
+                    Fixture.Completion(trainingCompatibility, zeroDurationOrder),
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    300);
+            Assert.That(
+                zeroDurationCompletion.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+        }
+
+        [Test]
+        public void HostileRequestIdentitiesRejectBeforeSemanticHashAllocation()
+        {
+            ResearchProgressionDefinition definition =
+                Fixture.Research("fake.research.hostile-request");
+            ProgressionCompatibilityResult compatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { definition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            string maximumPlusOne = new string(
+                'x',
+                ProgressionCompatibilityPlanner.MaximumIdUtf8Bytes + 1);
+            string hostile = new string('x', 1024 * 1024);
+            Func<string, ProgressionStartRequest>[] startRequests =
+            {
+                value => new ProgressionStartRequest(
+                    value,
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    value,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    value,
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    value,
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    value,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    value,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    value,
+                    Fixture.StartPolicyVersion,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    value,
+                    Fixture.NoPrerequisites.Revision),
+                value => new ProgressionStartRequest(
+                    "profile-1",
+                    ProgressionOrderType.ResearchLevel,
+                    definition.Identity.Id,
+                    "hostile-order",
+                    "hostile-start",
+                    1,
+                    0,
+                    Fixture.CatalogSetId,
+                    compatibility.StateRevision,
+                    Fixture.EconomyRevision,
+                    Fixture.StartPolicyVersion,
+                    value)
+            };
+
+            ProgressionStartPlan ready = Fixture.PlanResearch(
+                compatibility,
+                Fixture.ResearchStart(compatibility, definition.Identity.Id, 1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            foreach (string invalidIdentity in
+                     new[] { maximumPlusOne, hostile })
+            {
+                foreach (Func<string, ProgressionStartRequest> createRequest in
+                         startRequests)
+                {
+                    ProgressionStartRequest request =
+                        createRequest(invalidIdentity);
+                    long before = GC.GetAllocatedBytesForCurrentThread();
+                    ProgressionStartPlan result = Fixture.PlanResearch(
+                        compatibility,
+                        request,
+                        Fixture.Economy(ResourceType.Gold, 1000),
+                        Fixture.NoPrerequisites,
+                        Fixture.NoReceipts,
+                        Fixture.NoOrders,
+                        100);
+                    long allocated =
+                        GC.GetAllocatedBytesForCurrentThread() - before;
+                    Assert.That(
+                        result.Status,
+                        Is.EqualTo(ProgressionPlanStatus.InvalidRequest));
+                    Assert.That(result.SemanticHash, Is.Empty);
+                    Assert.That(result.PlanHash, Is.Empty);
+                    Assert.That(
+                        result.Diagnostics.All(diagnostic =>
+                            diagnostic.DefinitionId.Length <=
+                            ProgressionCompatibilityPlanner
+                                .MaximumIdUtf8Bytes),
+                        Is.True);
+                    Assert.That(allocated, Is.LessThan(512L * 1024L));
+                }
+            }
+
+            ProgressionOrderSnapshot order = Fixture.Order(ready);
+            Func<string, ProgressionCompletionRequest>[] completionRequests =
+            {
+                value => new ProgressionCompletionRequest(
+                    value,
+                    order.OrderId,
+                    order.CompletionOperationId,
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    order.EconomyRevision,
+                    Fixture.QuestRevision,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    value,
+                    order.CompletionOperationId,
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    order.EconomyRevision,
+                    Fixture.QuestRevision,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    order.OrderId,
+                    value,
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    order.EconomyRevision,
+                    Fixture.QuestRevision,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    order.OrderId,
+                    order.CompletionOperationId,
+                    value,
+                    compatibility.StateRevision,
+                    order.EconomyRevision,
+                    Fixture.QuestRevision,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    order.OrderId,
+                    order.CompletionOperationId,
+                    compatibility.CatalogSetId,
+                    value,
+                    order.EconomyRevision,
+                    Fixture.QuestRevision,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    order.OrderId,
+                    order.CompletionOperationId,
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    value,
+                    Fixture.QuestRevision,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    order.OrderId,
+                    order.CompletionOperationId,
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    order.EconomyRevision,
+                    value,
+                    Fixture.CompletionPolicyVersion),
+                value => new ProgressionCompletionRequest(
+                    order.ProfileId,
+                    order.OrderId,
+                    order.CompletionOperationId,
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    order.EconomyRevision,
+                    Fixture.QuestRevision,
+                    value)
+            };
+            foreach (string invalidIdentity in
+                     new[] { maximumPlusOne, hostile })
+            {
+                foreach (
+                    Func<string, ProgressionCompletionRequest> createRequest in
+                    completionRequests)
+                {
+                    ProgressionCompletionRequest request =
+                        createRequest(invalidIdentity);
+                    long before = GC.GetAllocatedBytesForCurrentThread();
+                    ProgressionCompletionPlan result =
+                        ProgressionOrderPlanner.PlanCompletion(
+                            compatibility,
+                            order,
+                            request,
+                            Fixture.NoReceipts,
+                            Fixture.CompletionDependencies,
+                            order.EndTimestamp);
+                    long allocated =
+                        GC.GetAllocatedBytesForCurrentThread() - before;
+                    Assert.That(
+                        result.Status,
+                        Is.EqualTo(ProgressionPlanStatus.InvalidRequest));
+                    Assert.That(result.SemanticHash, Is.Empty);
+                    Assert.That(result.PlanHash, Is.Empty);
+                    Assert.That(allocated, Is.LessThan(512L * 1024L));
+                }
+            }
+        }
+
+        [Test]
+        public void UnpairedSurrogateRequestsRejectWhileValidPairsRemainDistinct()
+        {
+            ResearchProgressionDefinition firstDefinition =
+                Fixture.Research("fake.research.\U0001F600");
+            ResearchProgressionDefinition secondDefinition =
+                Fixture.Research("fake.research.\U0001F601");
+            ProgressionCompatibilityResult compatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { firstDefinition, secondDefinition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            var high = new ProgressionStartRequest(
+                "profile-1",
+                ProgressionOrderType.ResearchLevel,
+                firstDefinition.Identity.Id,
+                "surrogate-order-high",
+                "surrogate.\uD800",
+                1,
+                0,
+                compatibility.CatalogSetId,
+                compatibility.StateRevision,
+                Fixture.EconomyRevision,
+                Fixture.StartPolicyVersion,
+                Fixture.NoPrerequisites.Revision);
+            var low = new ProgressionStartRequest(
+                "profile-1",
+                ProgressionOrderType.ResearchLevel,
+                firstDefinition.Identity.Id,
+                "surrogate-order-low",
+                "surrogate.\uDC00",
+                1,
+                0,
+                compatibility.CatalogSetId,
+                compatibility.StateRevision,
+                Fixture.EconomyRevision,
+                Fixture.StartPolicyVersion,
+                Fixture.NoPrerequisites.Revision);
+
+            ProgressionStartPlan highResult = Fixture.PlanResearch(
+                compatibility,
+                high,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionStartPlan lowResult = Fixture.PlanResearch(
+                compatibility,
+                low,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionStartPlan first = Fixture.PlanResearch(
+                compatibility,
+                Fixture.ResearchStart(
+                    compatibility,
+                    firstDefinition.Identity.Id,
+                    1,
+                    operationId: "paired-start-1",
+                    orderId: "paired-order-1"),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionStartPlan second = Fixture.PlanResearch(
+                compatibility,
+                Fixture.ResearchStart(
+                    compatibility,
+                    secondDefinition.Identity.Id,
+                    1,
+                    operationId: "paired-start-2",
+                    orderId: "paired-order-2"),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+
+            Assert.That(
+                highResult.Status,
+                Is.EqualTo(ProgressionPlanStatus.InvalidRequest));
+            Assert.That(
+                lowResult.Status,
+                Is.EqualTo(ProgressionPlanStatus.InvalidRequest));
+            Assert.That(highResult.SemanticHash, Is.Empty);
+            Assert.That(lowResult.SemanticHash, Is.Empty);
+            Assert.That(first.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(second.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(first.SemanticHash, Is.Not.EqualTo(second.SemanticHash));
+        }
+
+        [Test]
         public void StartReplayIsExactConflictSafeAndCommitUncertain()
         {
             ResearchProgressionDefinition definition =
@@ -1124,11 +2066,11 @@ namespace AL.Tests.EditMode.Progression
                 Fixture.NoReceipts,
                 Fixture.NoOrders,
                 100);
-            var committed = new ProgressionOperationReceipt(
-                request.OperationId,
-                ready.SemanticHash,
-                ready.PlanHash,
-                ProgressionOperationDurability.Committed);
+            ProgressionOrderSnapshot committedOrder = Fixture.Order(ready);
+            ProgressionOperationReceipt committed =
+                ProgressionOrderPlanner.CreateCommittedReceipt(
+                    ready,
+                    committedOrder);
 
             ProgressionStartPlan exact = Fixture.PlanResearch(
                 compatibility,
@@ -1141,9 +2083,32 @@ namespace AL.Tests.EditMode.Progression
             Assert.That(
                 exact.Status,
                 Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
-            Assert.That(exact.Costs, Is.Empty);
-            Assert.That(exact.TargetValue, Is.Zero);
+            Assert.That(exact.Costs, Is.EqualTo(ready.Costs));
+            Assert.That(exact.TargetValue, Is.EqualTo(ready.TargetValue));
+            Assert.That(exact.PreviousValue, Is.EqualTo(ready.PreviousValue));
+            Assert.That(exact.StartTimestamp, Is.EqualTo(ready.StartTimestamp));
+            Assert.That(exact.EndTimestamp, Is.EqualTo(ready.EndTimestamp));
+            Assert.That(exact.CatalogRevision, Is.EqualTo(ready.CatalogRevision));
+            Assert.That(
+                exact.PrerequisiteRevision,
+                Is.EqualTo(ready.PrerequisiteRevision));
             Assert.That(exact.PlanHash, Is.EqualTo(ready.PlanHash));
+            Assert.That(exact.CommittedReceipt, Is.SameAs(committed));
+            Assert.That(
+                exact.CommittedReceipt.CommittedResult.CommitTimestamp,
+                Is.EqualTo(ready.StartTimestamp));
+            Assert.That(
+                exact.CommittedReceipt.CommittedResult.OrderCatalogSetId,
+                Is.EqualTo(committedOrder.CatalogSetId));
+            Assert.That(
+                exact.CommittedReceipt.CommittedResult.OrderCatalogRevision,
+                Is.EqualTo(committedOrder.CatalogRevision));
+            Assert.That(
+                exact.CommittedReceipt.CommittedResult.OrderProgressionRevision,
+                Is.EqualTo(committedOrder.ProgressionRevision));
+            Assert.That(
+                exact.CommittedReceipt.CommittedResult.OrderEconomyRevision,
+                Is.EqualTo(committedOrder.EconomyRevision));
 
             ProgressionStartRequest changedPayload = Fixture.ResearchStart(
                 compatibility,
@@ -1338,6 +2303,380 @@ namespace AL.Tests.EditMode.Progression
         }
 
         [Test]
+        public void PaidResearchOrderUsesCommittedSnapshotAcrossTypedSourceDrift()
+        {
+            ResearchProgressionDefinition original =
+                Fixture.Research("fake.research.source-drift");
+            ProgressionCompatibilityResult initial =
+                Fixture.ResearchCompatibility(
+                    new[] { original },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionStartPlan start = Fixture.PlanResearch(
+                initial,
+                Fixture.ResearchStart(initial, original.Identity.Id, 1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOrderSnapshot order = Fixture.Order(start);
+
+            ResearchProgressionDefinition compatibleDefinition =
+                Fixture.ReissueResearch(original, reissueProfiles: true);
+            ResearchProgressionDefinition migrationDefinition =
+                Fixture.ReissueResearch(
+                    original,
+                    contentVersion: "fake.content.v2");
+            ResearchProgressionDefinition unsupportedDefinition =
+                Fixture.ReissueResearch(
+                    original,
+                    schemaVersion: "al.progression.research.v99");
+            ResearchProgressionDefinition unsupportedCostDefinition =
+                Fixture.ReissueResearch(
+                    original,
+                    costSchemaVersion: "al.progression.profile.v99");
+            ResearchProgressionDefinition unsupportedDurationDefinition =
+                Fixture.ReissueResearch(
+                    original,
+                    durationSchemaVersion: "al.progression.profile.v99");
+            ProgressionCompatibilityResult exact =
+                Fixture.ResearchCompatibility(
+                    new[] { original },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionCompatibilityResult compatible =
+                Fixture.ResearchCompatibility(
+                    new[] { compatibleDefinition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionCompatibilityResult migration =
+                Fixture.ResearchCompatibility(
+                    new[]
+                    {
+                        migrationDefinition,
+                        Fixture.Research(
+                            "fake.research.source-drift-unrelated")
+                    },
+                    new[]
+                    {
+                        new ResearchProgressionStateRecord(
+                            order.DefinitionId,
+                            order.DefinitionContentVersion,
+                            (int)order.PreviousValue,
+                            false,
+                            0)
+                    });
+            ProgressionCompatibilityResult unsupported =
+                Fixture.ResearchCompatibility(
+                    new[] { unsupportedDefinition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionCompatibilityResult unsupportedCost =
+                Fixture.ResearchCompatibility(
+                    new[] { unsupportedCostDefinition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionCompatibilityResult unsupportedDuration =
+                Fixture.ResearchCompatibility(
+                    new[] { unsupportedDurationDefinition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionCompatibilityResult catalogReissue =
+                Fixture.ResearchCompatibility(
+                    new[] { original },
+                    Array.Empty<ResearchProgressionStateRecord>(),
+                    catalogRevision: "fake.catalog.rev.2");
+            var removedRow = new ResearchProgressionStateRecord(
+                order.DefinitionId,
+                order.DefinitionContentVersion,
+                (int)order.PreviousValue,
+                false,
+                0);
+            ProgressionCompatibilityResult removed =
+                Fixture.ResearchCompatibility(
+                    new[]
+                    {
+                        Fixture.Research("fake.research.unrelated-current")
+                    },
+                    new[] { removedRow });
+
+            ProgressionCompletionPlan exactPlan = Fixture.PlanCompletion(
+                exact,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan compatiblePlan = Fixture.PlanCompletion(
+                compatible,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan migrationPlan = Fixture.PlanCompletion(
+                migration,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan unsupportedPlan = Fixture.PlanCompletion(
+                unsupported,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan unsupportedCostPlan =
+                Fixture.PlanCompletion(
+                    unsupportedCost,
+                    order,
+                    order.EndTimestamp);
+            ProgressionCompletionPlan unsupportedDurationPlan =
+                Fixture.PlanCompletion(
+                    unsupportedDuration,
+                    order,
+                    order.EndTimestamp);
+            ProgressionCompletionPlan catalogReissuePlan =
+                Fixture.PlanCompletion(
+                    catalogReissue,
+                    order,
+                    order.EndTimestamp);
+            ProgressionCompletionPlan removedPlan = Fixture.PlanCompletion(
+                removed,
+                order,
+                order.EndTimestamp);
+
+            Assert.That(exactPlan.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                exactPlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition.ExactCurrentSource));
+            Assert.That(
+                compatiblePlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                compatiblePlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition
+                    .CompatibleCompleteUnderCommittedSnapshot));
+            Assert.That(
+                compatiblePlan.TargetValue,
+                Is.EqualTo(order.TargetValue));
+            Assert.That(
+                compatiblePlan.OrderSnapshot.CommittedCosts,
+                Is.EqualTo(order.CommittedCosts));
+            Assert.That(
+                compatiblePlan.OrderSnapshot.EndTimestamp,
+                Is.EqualTo(order.EndTimestamp));
+            Assert.That(
+                catalogReissuePlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                catalogReissuePlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition
+                    .CompatibleCompleteUnderCommittedSnapshot));
+            Assert.That(
+                migrationPlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.MigrationRequired));
+            Assert.That(
+                migrationPlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition.MigrationRequired));
+            foreach (ProgressionCompletionPlan unsupportedSourcePlan in
+                     new[]
+                     {
+                         unsupportedPlan,
+                         unsupportedCostPlan,
+                         unsupportedDurationPlan
+                     })
+            {
+                Assert.That(
+                    unsupportedSourcePlan.Status,
+                    Is.EqualTo(ProgressionPlanStatus.UnsupportedVersion));
+                Assert.That(
+                    unsupportedSourcePlan.SourceDisposition,
+                    Is.EqualTo(ProgressionOrderSourceDisposition
+                        .UnsupportedVersion));
+            }
+            Assert.That(
+                removedPlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                removedPlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition
+                    .DefinitionRemovedButLegacyOrderPreserved));
+            Assert.That(removedPlan.TargetValue, Is.EqualTo(order.TargetValue));
+            Assert.That(removedRow.Level, Is.EqualTo(order.PreviousValue));
+            Assert.That(order.DefinitionSource, Is.SameAs(original.Identity));
+        }
+
+        [Test]
+        public void PaidTrainingOrderUsesCommittedSnapshotAcrossTypedSourceDrift()
+        {
+            TroopProgressionDefinition original =
+                Fixture.Troop("fake.troop.source-drift");
+            ProgressionCompatibilityResult initial =
+                Fixture.TrainingCompatibility(
+                    new[] { original },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionStartPlan start = Fixture.PlanTraining(
+                initial,
+                Fixture.TrainingStart(initial, original.Identity.Id, 5),
+                Fixture.Economy(ResourceType.Food, 1000),
+                100);
+            ProgressionOrderSnapshot order = Fixture.Order(start);
+
+            TroopProgressionDefinition compatibleDefinition =
+                Fixture.ReissueTroop(original, reissueProfiles: true);
+            TroopProgressionDefinition migrationDefinition =
+                Fixture.ReissueTroop(
+                    original,
+                    contentVersion: "fake.content.v2");
+            TroopProgressionDefinition unsupportedDefinition =
+                Fixture.ReissueTroop(
+                    original,
+                    schemaVersion: "al.progression.troop.v99");
+            TroopProgressionDefinition unsupportedCostDefinition =
+                Fixture.ReissueTroop(
+                    original,
+                    costSchemaVersion: "al.progression.profile.v99");
+            TroopProgressionDefinition unsupportedDurationDefinition =
+                Fixture.ReissueTroop(
+                    original,
+                    durationSchemaVersion: "al.progression.profile.v99");
+            ProgressionCompatibilityResult exact =
+                Fixture.TrainingCompatibility(
+                    new[] { original },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionCompatibilityResult compatible =
+                Fixture.TrainingCompatibility(
+                    new[] { compatibleDefinition },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionCompatibilityResult migration =
+                Fixture.TrainingCompatibility(
+                    new[]
+                    {
+                        migrationDefinition,
+                        Fixture.Troop(
+                            "fake.troop.source-drift-unrelated")
+                    },
+                    new[]
+                    {
+                        new TroopProgressionStateRecord(
+                            order.DefinitionId,
+                            order.DefinitionContentVersion,
+                            order.PreviousValue,
+                            0,
+                            0)
+                    });
+            ProgressionCompatibilityResult unsupported =
+                Fixture.TrainingCompatibility(
+                    new[] { unsupportedDefinition },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionCompatibilityResult unsupportedCost =
+                Fixture.TrainingCompatibility(
+                    new[] { unsupportedCostDefinition },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionCompatibilityResult unsupportedDuration =
+                Fixture.TrainingCompatibility(
+                    new[] { unsupportedDurationDefinition },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionCompatibilityResult catalogReissue =
+                Fixture.TrainingCompatibility(
+                    new[] { original },
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    catalogRevision: "fake.catalog.rev.2");
+            var removedRow = new TroopProgressionStateRecord(
+                order.DefinitionId,
+                order.DefinitionContentVersion,
+                order.PreviousValue,
+                0,
+                0);
+            ProgressionCompatibilityResult removed =
+                Fixture.TrainingCompatibility(
+                    new[]
+                    {
+                        Fixture.Troop("fake.troop.unrelated-current")
+                    },
+                    new[] { removedRow });
+
+            ProgressionCompletionPlan exactPlan = Fixture.PlanCompletion(
+                exact,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan compatiblePlan = Fixture.PlanCompletion(
+                compatible,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan migrationPlan = Fixture.PlanCompletion(
+                migration,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan unsupportedPlan = Fixture.PlanCompletion(
+                unsupported,
+                order,
+                order.EndTimestamp);
+            ProgressionCompletionPlan unsupportedCostPlan =
+                Fixture.PlanCompletion(
+                    unsupportedCost,
+                    order,
+                    order.EndTimestamp);
+            ProgressionCompletionPlan unsupportedDurationPlan =
+                Fixture.PlanCompletion(
+                    unsupportedDuration,
+                    order,
+                    order.EndTimestamp);
+            ProgressionCompletionPlan catalogReissuePlan =
+                Fixture.PlanCompletion(
+                    catalogReissue,
+                    order,
+                    order.EndTimestamp);
+            ProgressionCompletionPlan removedPlan = Fixture.PlanCompletion(
+                removed,
+                order,
+                order.EndTimestamp);
+
+            Assert.That(exactPlan.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                exactPlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition.ExactCurrentSource));
+            Assert.That(
+                compatiblePlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                compatiblePlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition
+                    .CompatibleCompleteUnderCommittedSnapshot));
+            Assert.That(
+                compatiblePlan.OrderSnapshot.CommittedCosts,
+                Is.EqualTo(order.CommittedCosts));
+            Assert.That(
+                catalogReissuePlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                catalogReissuePlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition
+                    .CompatibleCompleteUnderCommittedSnapshot));
+            Assert.That(
+                migrationPlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.MigrationRequired));
+            Assert.That(
+                migrationPlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition.MigrationRequired));
+            foreach (ProgressionCompletionPlan unsupportedSourcePlan in
+                     new[]
+                     {
+                         unsupportedPlan,
+                         unsupportedCostPlan,
+                         unsupportedDurationPlan
+                     })
+            {
+                Assert.That(
+                    unsupportedSourcePlan.Status,
+                    Is.EqualTo(ProgressionPlanStatus.UnsupportedVersion));
+                Assert.That(
+                    unsupportedSourcePlan.SourceDisposition,
+                    Is.EqualTo(ProgressionOrderSourceDisposition
+                        .UnsupportedVersion));
+            }
+            Assert.That(
+                removedPlan.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(
+                removedPlan.SourceDisposition,
+                Is.EqualTo(ProgressionOrderSourceDisposition
+                    .DefinitionRemovedButLegacyOrderPreserved));
+            Assert.That(removedPlan.TargetValue, Is.EqualTo(order.TargetValue));
+            Assert.That(removedRow.ActiveCount, Is.EqualTo(order.PreviousValue));
+            Assert.That(order.MaximumValue, Is.EqualTo(original.MaximumInventoryCount));
+            Assert.That(
+                order.InventoryCapacityPolicy,
+                Is.EqualTo(original.InventoryCapacityPolicy));
+        }
+
+        [Test]
         public void CompletionIsClockGatedExactAndReplaySafe()
         {
             ResearchProgressionDefinition definition =
@@ -1397,11 +2736,8 @@ namespace AL.Tests.EditMode.Progression
             Assert.That(ready.PlanHash, Has.Length.EqualTo(64));
             Assert.That(compatibility.Research[0].Level, Is.Zero);
 
-            var receipt = new ProgressionOperationReceipt(
-                request.OperationId,
-                ready.SemanticHash,
-                ready.PlanHash,
-                ProgressionOperationDurability.Committed);
+            ProgressionOperationReceipt receipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(ready);
             ProgressionCompletionPlan replay =
                 ProgressionOrderPlanner.PlanCompletion(
                     compatibility,
@@ -1413,8 +2749,13 @@ namespace AL.Tests.EditMode.Progression
             Assert.That(
                 replay.Status,
                 Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
-            Assert.That(replay.QuestProgressAmount, Is.Zero);
-            Assert.That(replay.PreviousValue, Is.EqualTo(replay.TargetValue));
+            Assert.That(
+                replay.QuestProgressAmount,
+                Is.EqualTo(ready.QuestProgressAmount));
+            Assert.That(replay.PreviousValue, Is.EqualTo(ready.PreviousValue));
+            Assert.That(replay.TargetValue, Is.EqualTo(ready.TargetValue));
+            Assert.That(replay.CommitTimestamp, Is.EqualTo(ready.CommitTimestamp));
+            Assert.That(replay.CommittedReceipt, Is.SameAs(receipt));
 
             var uncertain = new ProgressionOperationReceipt(
                 request.OperationId,
@@ -1527,7 +2868,11 @@ namespace AL.Tests.EditMode.Progression
                 Array.Empty<TroopProgressionSnapshot>(),
                 Array.Empty<ResearchProgressionStateRecord>(),
                 Array.Empty<TroopProgressionStateRecord>(),
-                Array.Empty<ProgressionDiagnostic>());
+                Array.Empty<ProgressionDiagnostic>(),
+                valid.ResearchDefinitions,
+                valid.TroopDefinitions,
+                valid.TimestampPolicy,
+                valid.HasDefinitionSource);
             var forgedDuplicate = new ProgressionCompatibilityResult(
                 ProgressionDomain.Research,
                 ProgressionCompatibilityStatus.Available,
@@ -1538,10 +2883,38 @@ namespace AL.Tests.EditMode.Progression
                 Array.Empty<TroopProgressionSnapshot>(),
                 Array.Empty<ResearchProgressionStateRecord>(),
                 Array.Empty<TroopProgressionStateRecord>(),
-                Array.Empty<ProgressionDiagnostic>());
+                Array.Empty<ProgressionDiagnostic>(),
+                valid.ResearchDefinitions,
+                valid.TroopDefinitions,
+                valid.TimestampPolicy,
+                valid.HasDefinitionSource);
+            var forgedMixed = new ProgressionCompatibilityResult(
+                ProgressionDomain.Research,
+                ProgressionCompatibilityStatus.Available,
+                valid.CatalogSetId,
+                valid.CatalogRevision,
+                valid.StateRevision,
+                new[] { valid.Research[0], null },
+                Array.Empty<TroopProgressionSnapshot>(),
+                Array.Empty<ResearchProgressionStateRecord>(),
+                Array.Empty<TroopProgressionStateRecord>(),
+                Array.Empty<ProgressionDiagnostic>(),
+                valid.ResearchDefinitions,
+                valid.TroopDefinitions,
+                valid.TimestampPolicy,
+                valid.HasDefinitionSource);
+            ProgressionStartPlan validStart = Fixture.PlanResearch(
+                valid,
+                Fixture.ResearchStart(valid, definition.Identity.Id, 1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOrderSnapshot validOrder = Fixture.Order(validStart);
 
             foreach (ProgressionCompatibilityResult forged in
-                     new[] { forgedNull, forgedDuplicate })
+                     new[] { forgedNull, forgedDuplicate, forgedMixed })
             {
                 ProgressionStartPlan result = null;
                 Assert.That(
@@ -1559,6 +2932,417 @@ namespace AL.Tests.EditMode.Progression
                     Throws.Nothing);
                 Assert.That(
                     result.Status,
+                    Is.EqualTo(ProgressionPlanStatus.StateMalformed));
+
+                ProgressionCompletionPlan completion = null;
+                Assert.That(
+                    () => completion = ProgressionOrderPlanner.PlanCompletion(
+                        forged,
+                        validOrder,
+                        Fixture.Completion(forged, validOrder),
+                        Fixture.NoReceipts,
+                        Fixture.CompletionDependencies,
+                        validOrder.EndTimestamp),
+                    Throws.Nothing);
+                Assert.That(
+                    completion.Status,
+                    Is.EqualTo(ProgressionPlanStatus.StateMalformed));
+            }
+
+            TroopProgressionDefinition troopDefinition =
+                Fixture.Troop("fake.troop.forged-mixed");
+            ProgressionCompatibilityResult validTraining =
+                Fixture.TrainingCompatibility(
+                    new[] { troopDefinition },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionStartPlan validTrainingStart = Fixture.PlanTraining(
+                validTraining,
+                Fixture.TrainingStart(
+                    validTraining,
+                    troopDefinition.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Food, 1000),
+                100);
+            ProgressionOrderSnapshot validTrainingOrder =
+                Fixture.Order(validTrainingStart);
+            var forgedTraining = new ProgressionCompatibilityResult(
+                ProgressionDomain.Training,
+                ProgressionCompatibilityStatus.Available,
+                validTraining.CatalogSetId,
+                validTraining.CatalogRevision,
+                validTraining.StateRevision,
+                Array.Empty<ResearchProgressionSnapshot>(),
+                new[] { validTraining.Troops[0], null },
+                Array.Empty<ResearchProgressionStateRecord>(),
+                Array.Empty<TroopProgressionStateRecord>(),
+                Array.Empty<ProgressionDiagnostic>(),
+                validTraining.ResearchDefinitions,
+                validTraining.TroopDefinitions,
+                validTraining.TimestampPolicy,
+                validTraining.HasDefinitionSource);
+            ProgressionCompletionPlan trainingCompletion = null;
+            Assert.That(
+                () => trainingCompletion =
+                    ProgressionOrderPlanner.PlanCompletion(
+                        forgedTraining,
+                        validTrainingOrder,
+                        Fixture.Completion(
+                            forgedTraining,
+                            validTrainingOrder),
+                        Fixture.NoReceipts,
+                        Fixture.CompletionDependencies,
+                        validTrainingOrder.EndTimestamp),
+                Throws.Nothing);
+            Assert.That(
+                trainingCompletion.Status,
+                Is.EqualTo(ProgressionPlanStatus.StateMalformed));
+        }
+
+        [Test]
+        public void CompletionRejectsSemanticallyInconsistentNonTargetRows()
+        {
+            ResearchProgressionDefinition target =
+                Fixture.Research("fake.research.semantic-target");
+            ResearchProgressionDefinition unrelated =
+                Fixture.Research("fake.research.semantic-unrelated");
+            ProgressionCompatibilityResult research =
+                Fixture.ResearchCompatibility(
+                    new[] { target, unrelated },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionStartPlan researchStart = Fixture.PlanResearch(
+                research,
+                Fixture.ResearchStart(research, target.Identity.Id, 1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOrderSnapshot researchOrder =
+                Fixture.Order(researchStart);
+            ResearchProgressionSnapshot targetSnapshot =
+                research.Research.Single(snapshot =>
+                    string.Equals(
+                        snapshot.Definition.Identity.Id,
+                        target.Identity.Id,
+                        StringComparison.Ordinal));
+            ResearchProgressionSnapshot unrelatedSnapshot =
+                research.Research.Single(snapshot =>
+                    string.Equals(
+                        snapshot.Definition.Identity.Id,
+                        unrelated.Identity.Id,
+                        StringComparison.Ordinal));
+            Func<IEnumerable<ResearchProgressionSnapshot>,
+                IEnumerable<ResearchProgressionStateRecord>,
+                ProgressionCompatibilityResult> forgeResearch =
+                (snapshots, states) => new ProgressionCompatibilityResult(
+                    ProgressionDomain.Research,
+                    ProgressionCompatibilityStatus.Available,
+                    research.CatalogSetId,
+                    research.CatalogRevision,
+                    research.StateRevision,
+                    snapshots,
+                    Array.Empty<TroopProgressionSnapshot>(),
+                    states,
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    Array.Empty<ProgressionDiagnostic>(),
+                    research.ResearchDefinitions,
+                    research.TroopDefinitions,
+                    research.TimestampPolicy,
+                    research.HasDefinitionSource);
+            var mismatchedState = new ResearchProgressionStateRecord(
+                unrelated.Identity.Id,
+                unrelated.Identity.ContentVersion,
+                2,
+                false,
+                0);
+            var mismatchedSnapshot = new ResearchProgressionSnapshot(
+                unrelated,
+                1,
+                ProgressionStateOrigin.Saved,
+                false,
+                0);
+            var activeLegacyState = new ResearchProgressionStateRecord(
+                unrelated.Identity.Id,
+                unrelated.Identity.ContentVersion,
+                1,
+                true,
+                100);
+            var overMaximumState = new ResearchProgressionStateRecord(
+                unrelated.Identity.Id,
+                unrelated.Identity.ContentVersion,
+                unrelated.MaximumLevel + 1,
+                false,
+                0);
+            var overMaximumSnapshot = new ResearchProgressionSnapshot(
+                unrelated,
+                unrelated.MaximumLevel + 1,
+                ProgressionStateOrigin.Saved,
+                false,
+                0);
+            var unknownState = new ResearchProgressionStateRecord(
+                "fake.research.semantic-unknown",
+                Fixture.ContentVersion,
+                0,
+                false,
+                0);
+            var targetState = new ResearchProgressionStateRecord(
+                target.Identity.Id,
+                target.Identity.ContentVersion,
+                (int)researchOrder.PreviousValue,
+                false,
+                0);
+            var activeUnrelatedDuringTargetDrift =
+                new ProgressionCompatibilityResult(
+                    ProgressionDomain.Research,
+                    ProgressionCompatibilityStatus.MalformedState,
+                    research.CatalogSetId,
+                    research.CatalogRevision,
+                    research.StateRevision,
+                    Array.Empty<ResearchProgressionSnapshot>(),
+                    Array.Empty<TroopProgressionSnapshot>(),
+                    new[] { targetState, activeLegacyState },
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    new[]
+                    {
+                        new ProgressionDiagnostic(
+                            ProgressionDiagnosticCode
+                                .UnsupportedContentVersion,
+                            ProgressionDomain.Research,
+                            target.Identity.Id,
+                            0)
+                    },
+                    research.ResearchDefinitions,
+                    research.TroopDefinitions,
+                    research.TimestampPolicy,
+                    research.HasDefinitionSource);
+            var crossDomainTargetDrift =
+                new ProgressionCompatibilityResult(
+                    ProgressionDomain.Research,
+                    ProgressionCompatibilityStatus.MalformedState,
+                    research.CatalogSetId,
+                    research.CatalogRevision,
+                    research.StateRevision,
+                    Array.Empty<ResearchProgressionSnapshot>(),
+                    Array.Empty<TroopProgressionSnapshot>(),
+                    new[] { targetState },
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    new[]
+                    {
+                        new ProgressionDiagnostic(
+                            ProgressionDiagnosticCode
+                                .UnsupportedContentVersion,
+                            ProgressionDomain.Training,
+                            target.Identity.Id,
+                            0)
+                    },
+                    research.ResearchDefinitions,
+                    research.TroopDefinitions,
+                    research.TimestampPolicy,
+                    research.HasDefinitionSource);
+            var invalidStatusTargetDrift =
+                new ProgressionCompatibilityResult(
+                    ProgressionDomain.Research,
+                    (ProgressionCompatibilityStatus)999,
+                    research.CatalogSetId,
+                    research.CatalogRevision,
+                    research.StateRevision,
+                    Array.Empty<ResearchProgressionSnapshot>(),
+                    Array.Empty<TroopProgressionSnapshot>(),
+                    new[] { targetState },
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    new[]
+                    {
+                        new ProgressionDiagnostic(
+                            ProgressionDiagnosticCode
+                                .UnsupportedContentVersion,
+                            ProgressionDomain.Research,
+                            target.Identity.Id,
+                            0)
+                    },
+                    research.ResearchDefinitions,
+                    research.TroopDefinitions,
+                    research.TimestampPolicy,
+                    research.HasDefinitionSource);
+            var emptyClaimedDefinitionSource =
+                new ProgressionCompatibilityResult(
+                    ProgressionDomain.Research,
+                    ProgressionCompatibilityStatus.MalformedState,
+                    research.CatalogSetId,
+                    research.CatalogRevision,
+                    research.StateRevision,
+                    Array.Empty<ResearchProgressionSnapshot>(),
+                    Array.Empty<TroopProgressionSnapshot>(),
+                    new[] { targetState },
+                    Array.Empty<TroopProgressionStateRecord>(),
+                    new[]
+                    {
+                        new ProgressionDiagnostic(
+                            ProgressionDiagnosticCode
+                                .PreservedUnknownFutureDefinition,
+                            ProgressionDomain.Research,
+                            target.Identity.Id,
+                            0)
+                    },
+                    Array.Empty<ResearchProgressionDefinition>(),
+                    Array.Empty<TroopProgressionDefinition>(),
+                    research.TimestampPolicy,
+                    true);
+            ProgressionCompatibilityResult[] forgedResearch =
+            {
+                forgeResearch(
+                    new[] { targetSnapshot, mismatchedSnapshot },
+                    new[] { mismatchedState }),
+                forgeResearch(
+                    new[] { targetSnapshot, mismatchedSnapshot },
+                    new[] { activeLegacyState }),
+                forgeResearch(
+                    new[] { targetSnapshot, overMaximumSnapshot },
+                    new[] { overMaximumState }),
+                forgeResearch(
+                    new[] { targetSnapshot, unrelatedSnapshot },
+                    new[] { unknownState }),
+                forgeResearch(
+                    new[] { targetSnapshot },
+                    Array.Empty<ResearchProgressionStateRecord>()),
+                forgeResearch(
+                    new[] { unrelatedSnapshot },
+                    new[] { targetState }),
+                activeUnrelatedDuringTargetDrift,
+                crossDomainTargetDrift,
+                invalidStatusTargetDrift,
+                emptyClaimedDefinitionSource,
+                forgeResearch(
+                    new[]
+                    {
+                        targetSnapshot,
+                        new ResearchProgressionSnapshot(
+                            unrelated,
+                            unrelated.InitialLevel + 1,
+                            ProgressionStateOrigin
+                                .EffectiveInitialUnpersisted,
+                            false,
+                            0)
+                    },
+                    Array.Empty<ResearchProgressionStateRecord>())
+            };
+
+            foreach (ProgressionCompatibilityResult forged in forgedResearch)
+            {
+                ProgressionCompletionPlan completion = null;
+                Assert.That(
+                    () => completion =
+                        ProgressionOrderPlanner.PlanCompletion(
+                            forged,
+                            researchOrder,
+                            Fixture.Completion(forged, researchOrder),
+                            Fixture.NoReceipts,
+                            Fixture.CompletionDependencies,
+                            researchOrder.EndTimestamp),
+                    Throws.Nothing);
+                Assert.That(
+                    completion.Status,
+                    Is.EqualTo(ProgressionPlanStatus.StateMalformed));
+            }
+
+            TroopProgressionDefinition troopTarget =
+                Fixture.Troop("fake.troop.semantic-target");
+            TroopProgressionDefinition troopUnrelated =
+                Fixture.Troop(
+                    "fake.troop.semantic-unrelated",
+                    maximumInventory: 10,
+                    maximumBatch: 10);
+            ProgressionCompatibilityResult training =
+                Fixture.TrainingCompatibility(
+                    new[] { troopTarget, troopUnrelated },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionStartPlan trainingStart = Fixture.PlanTraining(
+                training,
+                Fixture.TrainingStart(
+                    training,
+                    troopTarget.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Food, 1000),
+                100);
+            ProgressionOrderSnapshot trainingOrder =
+                Fixture.Order(trainingStart);
+            TroopProgressionSnapshot troopTargetSnapshot =
+                training.Troops.Single(snapshot =>
+                    string.Equals(
+                        snapshot.Definition.Identity.Id,
+                        troopTarget.Identity.Id,
+                        StringComparison.Ordinal));
+            TroopProgressionSnapshot troopUnrelatedSnapshot =
+                training.Troops.Single(snapshot =>
+                    string.Equals(
+                        snapshot.Definition.Identity.Id,
+                        troopUnrelated.Identity.Id,
+                        StringComparison.Ordinal));
+            Func<IEnumerable<TroopProgressionSnapshot>,
+                IEnumerable<TroopProgressionStateRecord>,
+                ProgressionCompatibilityResult> forgeTraining =
+                (snapshots, states) => new ProgressionCompatibilityResult(
+                    ProgressionDomain.Training,
+                    ProgressionCompatibilityStatus.Available,
+                    training.CatalogSetId,
+                    training.CatalogRevision,
+                    training.StateRevision,
+                    Array.Empty<ResearchProgressionSnapshot>(),
+                    snapshots,
+                    Array.Empty<ResearchProgressionStateRecord>(),
+                    states,
+                    Array.Empty<ProgressionDiagnostic>(),
+                    training.ResearchDefinitions,
+                    training.TroopDefinitions,
+                    training.TimestampPolicy,
+                    training.HasDefinitionSource);
+            var overflowingTroopState = new TroopProgressionStateRecord(
+                troopUnrelated.Identity.Id,
+                troopUnrelated.Identity.ContentVersion,
+                troopUnrelated.MaximumInventoryCount,
+                1,
+                0);
+            var troopTargetState = new TroopProgressionStateRecord(
+                troopTarget.Identity.Id,
+                troopTarget.Identity.ContentVersion,
+                trainingOrder.PreviousValue,
+                0,
+                0);
+            ProgressionCompatibilityResult[] forgedTraining =
+            {
+                forgeTraining(
+                    new[]
+                    {
+                        troopTargetSnapshot,
+                        new TroopProgressionSnapshot(
+                            troopUnrelated,
+                            troopUnrelated.MaximumInventoryCount,
+                            1,
+                            0,
+                            ProgressionStateOrigin.Saved)
+                    },
+                    new[] { overflowingTroopState }),
+                forgeTraining(
+                    new[] { troopUnrelatedSnapshot },
+                    new[] { troopTargetState })
+            };
+
+            foreach (ProgressionCompatibilityResult forged in forgedTraining)
+            {
+                ProgressionCompletionPlan trainingCompletion = null;
+                Assert.That(
+                    () => trainingCompletion =
+                        ProgressionOrderPlanner.PlanCompletion(
+                            forged,
+                            trainingOrder,
+                            Fixture.Completion(
+                                forged,
+                                trainingOrder),
+                            Fixture.NoReceipts,
+                            Fixture.CompletionDependencies,
+                            trainingOrder.EndTimestamp),
+                    Throws.Nothing);
+                Assert.That(
+                    trainingCompletion.Status,
                     Is.EqualTo(ProgressionPlanStatus.StateMalformed));
             }
         }
@@ -1592,7 +3376,8 @@ namespace AL.Tests.EditMode.Progression
                             0,
                             false,
                             0)
-                    });
+                    },
+                    catalogRevision: "fake.catalog.rev.2");
             const string currentEconomyRevision = "economy.rev.2";
             const string currentQuestRevision = "quest.rev.2";
             var request = new ProgressionCompletionRequest(
@@ -1615,6 +3400,16 @@ namespace AL.Tests.EditMode.Progression
                         currentEconomyRevision,
                         currentQuestRevision),
                     order.EndTimestamp);
+            ProgressionOperationReceipt receipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(result);
+            ProgressionCompletionPlan replay =
+                ProgressionOrderPlanner.PlanCompletion(
+                    null,
+                    null,
+                    request,
+                    new[] { receipt },
+                    null,
+                    0);
 
             Assert.That(initial.StateRevision, Is.Not.EqualTo(current.StateRevision));
             Assert.That(
@@ -1630,6 +3425,37 @@ namespace AL.Tests.EditMode.Progression
             Assert.That(
                 result.EconomyRevision,
                 Is.EqualTo(currentEconomyRevision));
+            Assert.That(receipt, Is.Not.Null);
+            Assert.That(
+                receipt.CommittedResult.CatalogRevision,
+                Is.EqualTo(current.CatalogRevision));
+            Assert.That(
+                receipt.CommittedResult.ProgressionRevision,
+                Is.EqualTo(current.StateRevision));
+            Assert.That(
+                receipt.CommittedResult.EconomyRevision,
+                Is.EqualTo(currentEconomyRevision));
+            Assert.That(
+                receipt.CommittedResult.OrderCatalogRevision,
+                Is.EqualTo(order.CatalogRevision));
+            Assert.That(
+                receipt.CommittedResult.OrderProgressionRevision,
+                Is.EqualTo(order.ProgressionRevision));
+            Assert.That(
+                receipt.CommittedResult.OrderEconomyRevision,
+                Is.EqualTo(order.EconomyRevision));
+            Assert.That(
+                replay.Status,
+                Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
+            Assert.That(
+                replay.OrderSnapshot.CatalogRevision,
+                Is.EqualTo(order.CatalogRevision));
+            Assert.That(
+                replay.OrderSnapshot.ProgressionRevision,
+                Is.EqualTo(order.ProgressionRevision));
+            Assert.That(
+                replay.OrderSnapshot.EconomyRevision,
+                Is.EqualTo(order.EconomyRevision));
         }
 
         [Test]
@@ -1672,11 +3498,8 @@ namespace AL.Tests.EditMode.Progression
                     Fixture.NoReceipts,
                     Fixture.CompletionDependencies,
                     completed.EndTimestamp);
-            var receipt = new ProgressionOperationReceipt(
-                request.OperationId,
-                ready.SemanticHash,
-                ready.PlanHash,
-                ProgressionOperationDurability.Committed);
+            ProgressionOperationReceipt receipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(ready);
             ProgressionCompletionPlan replay =
                 ProgressionOrderPlanner.PlanCompletion(
                     compatibility,
@@ -1685,6 +3508,14 @@ namespace AL.Tests.EditMode.Progression
                     new[] { receipt },
                     Fixture.CompletionDependencies,
                     completed.EndTimestamp);
+            ProgressionCompletionPlan replayWithoutLiveInputs =
+                ProgressionOrderPlanner.PlanCompletion(
+                    null,
+                    null,
+                    request,
+                    new[] { receipt },
+                    null,
+                    0);
 
             Assert.That(
                 missingReceipt.Status,
@@ -1693,6 +3524,232 @@ namespace AL.Tests.EditMode.Progression
                 replay.Status,
                 Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
             Assert.That(replay.PlanHash, Is.EqualTo(ready.PlanHash));
+            Assert.That(
+                replayWithoutLiveInputs.Status,
+                Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
+            Assert.That(
+                replayWithoutLiveInputs.CommittedReceipt,
+                Is.SameAs(receipt));
+            Assert.That(
+                replayWithoutLiveInputs.TargetValue,
+                Is.EqualTo(ready.TargetValue));
+            Assert.That(
+                replayWithoutLiveInputs.QuestProgressAmount,
+                Is.EqualTo(ready.QuestProgressAmount));
+        }
+
+        [Test]
+        public void CommittedReceiptsAreExactIndependentlyVerifiedAndKindBound()
+        {
+            ResearchProgressionDefinition definition =
+                Fixture.Research("fake.research.committed-result");
+            ProgressionCompatibilityResult compatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { definition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionStartPlan start = Fixture.PlanResearch(
+                compatibility,
+                Fixture.ResearchStart(compatibility, definition.Identity.Id, 1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOrderSnapshot order = Fixture.Order(start);
+            ProgressionCompletionRequest request =
+                Fixture.Completion(compatibility, order);
+            ProgressionCompletionPlan ready =
+                ProgressionOrderPlanner.PlanCompletion(
+                    compatibility,
+                    order,
+                    request,
+                    Fixture.NoReceipts,
+                    Fixture.CompletionDependencies,
+                    order.EndTimestamp);
+            ProgressionOperationReceipt receipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(ready);
+            ProgressionCompletionPlan replay =
+                ProgressionOrderPlanner.PlanCompletion(
+                    null,
+                    null,
+                    request,
+                    new[] { receipt },
+                    null,
+                    0);
+
+            Assert.That(receipt, Is.Not.Null);
+            Assert.That(
+                receipt.OperationKind,
+                Is.EqualTo(ProgressionOperationKind.Completion));
+            Assert.That(receipt.ResultHash, Has.Length.EqualTo(64));
+            Assert.That(replay.Status, Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
+            Assert.That(replay.CommittedReceipt, Is.SameAs(receipt));
+            Assert.That(replay.OrderSnapshot.OrderHash, Is.EqualTo(order.OrderHash));
+            Assert.That(ready.CatalogRevision, Is.EqualTo(compatibility.CatalogRevision));
+            Assert.That(replay.CatalogRevision, Is.EqualTo(ready.CatalogRevision));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.DefinitionSource,
+                Is.SameAs(order.DefinitionSource));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.CatalogRevision,
+                Is.EqualTo(order.CatalogRevision));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.PrerequisiteRevision,
+                Is.EqualTo(order.PrerequisiteRevision));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.OrderCatalogSetId,
+                Is.EqualTo(order.CatalogSetId));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.OrderCatalogRevision,
+                Is.EqualTo(order.CatalogRevision));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.OrderProgressionRevision,
+                Is.EqualTo(order.ProgressionRevision));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.OrderEconomyRevision,
+                Is.EqualTo(order.EconomyRevision));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.CommitTimestamp,
+                Is.EqualTo(ready.CommitTimestamp));
+            Assert.That(
+                replay.CommittedReceipt.CommittedResult.QuestProgressAmount,
+                Is.EqualTo(ready.QuestProgressAmount));
+            Assert.That(
+                () => ((IList<BuildingConstructionCost>)receipt
+                    .CommittedResult.Costs).Add(
+                    new BuildingConstructionCost(ResourceType.Gold, 1)),
+                Throws.TypeOf<NotSupportedException>());
+            Assert.That(ready.CommittedReceipt, Is.Null);
+
+            ProgressionCommittedOperationResult corruptedResult =
+                Fixture.CopyCommittedResult(
+                    receipt.CommittedResult,
+                    targetValue: receipt.CommittedResult.TargetValue + 1);
+            var corruptedPayload = new ProgressionOperationReceipt(
+                receipt.OperationId,
+                receipt.SemanticHash,
+                receipt.ResultHash,
+                ProgressionOperationDurability.Committed,
+                corruptedResult);
+            var randomHash = new ProgressionOperationReceipt(
+                receipt.OperationId,
+                receipt.SemanticHash,
+                new string('f', 64),
+                ProgressionOperationDurability.Committed,
+                receipt.CommittedResult);
+            foreach (ProgressionOperationReceipt invalid in
+                     new[] { corruptedPayload, randomHash })
+            {
+                ProgressionCompletionPlan rejected =
+                    ProgressionOrderPlanner.PlanCompletion(
+                        null,
+                        null,
+                        request,
+                        new[] { invalid },
+                        null,
+                        0);
+                Assert.That(
+                    rejected.Status,
+                    Is.EqualTo(ProgressionPlanStatus.RecoveryRequired));
+                Assert.That(rejected.CommittedReceipt, Is.Null);
+            }
+
+            ProgressionStartRequest unrelatedRequest = Fixture.ResearchStart(
+                compatibility,
+                definition.Identity.Id,
+                1,
+                operationId: "unrelated-start-operation",
+                orderId: "unrelated-start-order");
+            ProgressionStartPlan unrelatedStart = Fixture.PlanResearch(
+                compatibility,
+                unrelatedRequest,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOperationReceipt unrelatedReceipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(unrelatedStart);
+            var matchingOuterUnrelatedPayload =
+                new ProgressionOperationReceipt(
+                    receipt.OperationId,
+                    receipt.SemanticHash,
+                    unrelatedReceipt.ResultHash,
+                    ProgressionOperationDurability.Committed,
+                    unrelatedReceipt.CommittedResult);
+            ProgressionCompletionPlan unrelatedPayloadRejected =
+                ProgressionOrderPlanner.PlanCompletion(
+                    null,
+                    null,
+                    request,
+                    new[] { matchingOuterUnrelatedPayload },
+                    null,
+                    0);
+            ProgressionCompletionPlan unrelatedDoesNotReplay =
+                ProgressionOrderPlanner.PlanCompletion(
+                    compatibility,
+                    order,
+                    request,
+                    new[] { unrelatedReceipt },
+                    Fixture.CompletionDependencies,
+                    order.EndTimestamp);
+            Assert.That(
+                unrelatedPayloadRejected.Status,
+                Is.EqualTo(ProgressionPlanStatus.RecoveryRequired));
+            Assert.That(
+                unrelatedPayloadRejected.CommittedReceipt,
+                Is.Null);
+            Assert.That(
+                unrelatedDoesNotReplay.Status,
+                Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(unrelatedDoesNotReplay.CommittedReceipt, Is.Null);
+
+            ProgressionStartRequest wrongKindRequest = Fixture.ResearchStart(
+                compatibility,
+                definition.Identity.Id,
+                1,
+                operationId: order.CompletionOperationId,
+                orderId: "wrong-kind-order");
+            ProgressionStartPlan wrongKindStart = Fixture.PlanResearch(
+                compatibility,
+                wrongKindRequest,
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOperationReceipt wrongKindReceipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(wrongKindStart);
+            ProgressionCompletionPlan wrongKind =
+                ProgressionOrderPlanner.PlanCompletion(
+                    null,
+                    null,
+                    request,
+                    new[] { wrongKindReceipt },
+                    null,
+                    0);
+            Assert.That(
+                wrongKind.Status,
+                Is.EqualTo(ProgressionPlanStatus.CorrelationConflict));
+            Assert.That(wrongKind.CommittedReceipt, Is.Null);
+
+            var uncertainWithPayload = new ProgressionOperationReceipt(
+                receipt.OperationId,
+                receipt.SemanticHash,
+                string.Empty,
+                ProgressionOperationDurability.CommitUncertain,
+                receipt.CommittedResult);
+            ProgressionCompletionPlan invalidUncertain =
+                ProgressionOrderPlanner.PlanCompletion(
+                    null,
+                    null,
+                    request,
+                    new[] { uncertainWithPayload },
+                    null,
+                    0);
+            Assert.That(
+                invalidUncertain.Status,
+                Is.EqualTo(ProgressionPlanStatus.RecoveryRequired));
         }
 
         [Test]
@@ -1741,7 +3798,12 @@ namespace AL.Tests.EditMode.Progression
                 order.ProgressionRevision,
                 order.EconomyRevision,
                 order.RequestPolicyVersion,
-                order.OrderHash);
+                order.OrderHash,
+                order.MaximumValue,
+                order.InventoryCapacityPolicy,
+                order.TimestampPolicy,
+                order.PrerequisiteRevision,
+                order.CatalogRevision);
 
             ProgressionCompletionPlan result =
                 ProgressionOrderPlanner.PlanCompletion(
@@ -1759,11 +3821,8 @@ namespace AL.Tests.EditMode.Progression
                     Fixture.NoReceipts,
                     Fixture.CompletionDependencies,
                     order.EndTimestamp);
-            var receipt = new ProgressionOperationReceipt(
-                order.CompletionOperationId,
-                ready.SemanticHash,
-                ready.PlanHash,
-                ProgressionOperationDurability.Committed);
+            ProgressionOperationReceipt receipt =
+                ProgressionOrderPlanner.CreateCommittedReceipt(ready);
             ProgressionCompletionPlan replayAgainstTamperedOrder =
                 ProgressionOrderPlanner.PlanCompletion(
                     compatibility,
@@ -1778,7 +3837,13 @@ namespace AL.Tests.EditMode.Progression
                 Is.EqualTo(ProgressionPlanStatus.OrderMalformed));
             Assert.That(
                 replayAgainstTamperedOrder.Status,
-                Is.EqualTo(ProgressionPlanStatus.OrderMalformed));
+                Is.EqualTo(ProgressionPlanStatus.AlreadyCommitted));
+            Assert.That(
+                replayAgainstTamperedOrder.CommittedReceipt,
+                Is.SameAs(receipt));
+            Assert.That(
+                replayAgainstTamperedOrder.TargetValue,
+                Is.EqualTo(ready.TargetValue));
         }
 
         [Test]
@@ -1808,7 +3873,8 @@ namespace AL.Tests.EditMode.Progression
                 Fixture.CatalogSetId,
                 compatibility.StateRevision,
                 Fixture.EconomyRevision,
-                Fixture.StartPolicyVersion);
+                Fixture.StartPolicyVersion,
+                Fixture.NoPrerequisites.Revision);
             CultureInfo originalCulture = CultureInfo.CurrentCulture;
             ProgressionStartPlan baseline;
             ProgressionStartPlan changedCulture;
@@ -1945,11 +4011,35 @@ namespace AL.Tests.EditMode.Progression
             };
             ProgressionCompatibilityResult compatibility =
                 Fixture.ResearchCompatibility(new[] { beta, alpha }, states);
+            ResearchProgressionDefinition sourceRevisionDrift =
+                Fixture.ReissueResearch(
+                    alpha,
+                    sourceRevision: "fake.source.rev.2",
+                    hashCharacter: 'b');
+            ResearchProgressionDefinition rawHashDrift =
+                Fixture.ReissueResearch(
+                    alpha,
+                    sourceRevision: alpha.Identity.SourceRevision,
+                    hashCharacter: 'c');
+            ProgressionCompatibilityResult sourceRevisionCompatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { beta, sourceRevisionDrift },
+                    states);
+            ProgressionCompatibilityResult rawHashCompatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { beta, rawHashDrift },
+                    states);
 
             ResearchEffectSnapshot first =
                 ProgressionOrderPlanner.BuildResearchEffectSnapshot(compatibility);
             ResearchEffectSnapshot second =
                 ProgressionOrderPlanner.BuildResearchEffectSnapshot(compatibility);
+            ResearchEffectSnapshot sourceRevisionSnapshot =
+                ProgressionOrderPlanner.BuildResearchEffectSnapshot(
+                    sourceRevisionCompatibility);
+            ResearchEffectSnapshot rawHashSnapshot =
+                ProgressionOrderPlanner.BuildResearchEffectSnapshot(
+                    rawHashCompatibility);
 
             Assert.That(first.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
             Assert.That(
@@ -1963,6 +4053,30 @@ namespace AL.Tests.EditMode.Progression
                 }));
             Assert.That(first.SnapshotHash, Has.Length.EqualTo(64));
             Assert.That(second.SnapshotHash, Is.EqualTo(first.SnapshotHash));
+            Assert.That(
+                sourceRevisionCompatibility.StateRevision,
+                Is.EqualTo(compatibility.StateRevision));
+            Assert.That(
+                rawHashCompatibility.StateRevision,
+                Is.EqualTo(compatibility.StateRevision));
+            Assert.That(
+                sourceRevisionSnapshot.SnapshotHash,
+                Is.Not.EqualTo(first.SnapshotHash));
+            Assert.That(
+                rawHashSnapshot.SnapshotHash,
+                Is.Not.EqualTo(first.SnapshotHash));
+            ResearchEffectReference alphaEffect = first.Effects.First(effect =>
+                effect.ResearchDefinitionId == alpha.Identity.Id);
+            Assert.That(alphaEffect.ResearchDefinition, Is.SameAs(alpha.Identity));
+            Assert.That(
+                alphaEffect.ResearchDefinition.SchemaVersion,
+                Is.EqualTo(alpha.Identity.SchemaVersion));
+            Assert.That(
+                alphaEffect.ResearchDefinition.SourceRevision,
+                Is.EqualTo(alpha.Identity.SourceRevision));
+            Assert.That(
+                alphaEffect.ResearchDefinition.RawSha256,
+                Is.EqualTo(alpha.Identity.RawSha256));
             Assert.That(states[0].Level, Is.EqualTo(1));
             Assert.That(states[1].Level, Is.EqualTo(2));
             Assert.That(
@@ -1985,7 +4099,9 @@ namespace AL.Tests.EditMode.Progression
             new ProgressionTimestampPolicy(
                 "timestamp.policy.v1",
                 1,
-                4102444800);
+                4102444800,
+                4102444799,
+                4102444799);
         internal static readonly ProgressionCompletionDependencySnapshot
             CompletionDependencies =
                 new ProgressionCompletionDependencySnapshot(
@@ -2097,6 +4213,181 @@ namespace AL.Tests.EditMode.Progression
                 Array.Empty<ProgressionSourceIdentity>());
         }
 
+        internal static ResearchProgressionDefinition ReissueResearch(
+            ResearchProgressionDefinition source,
+            string schemaVersion = null,
+            string contentVersion = null,
+            string sourceRevision = "fake.source.rev.2",
+            char hashCharacter = 'b',
+            bool reissueProfiles = false,
+            string costSchemaVersion = null,
+            string durationSchemaVersion = null)
+        {
+            ProgressionCostProfile cost = source.CostProfile;
+            ProgressionDurationProfile duration = source.DurationProfile;
+            if (reissueProfiles || costSchemaVersion != null)
+            {
+                cost = new ProgressionCostProfile(
+                    new ProgressionSourceIdentity(
+                        source.CostProfile.Identity.Id,
+                        costSchemaVersion ??
+                        source.CostProfile.Identity.SchemaVersion,
+                        source.CostProfile.Identity.ContentVersion,
+                        sourceRevision,
+                        new string((char)(hashCharacter + 1), 64)),
+                    source.CostProfile.UnitCosts,
+                    source.CostProfile.MaximumAmountPerResource);
+            }
+
+            if (reissueProfiles || durationSchemaVersion != null)
+            {
+                duration = new ProgressionDurationProfile(
+                    new ProgressionSourceIdentity(
+                        source.DurationProfile.Identity.Id,
+                        durationSchemaVersion ??
+                        source.DurationProfile.Identity.SchemaVersion,
+                        source.DurationProfile.Identity.ContentVersion,
+                        sourceRevision,
+                        new string((char)(hashCharacter + 2), 64)),
+                    source.DurationProfile.UnitSeconds,
+                    source.DurationProfile.MaximumSeconds,
+                    source.DurationProfile.AllowsZeroDuration);
+            }
+
+            return new ResearchProgressionDefinition(
+                new ProgressionSourceIdentity(
+                    source.Identity.Id,
+                    schemaVersion ?? source.Identity.SchemaVersion,
+                    contentVersion ?? source.Identity.ContentVersion,
+                    sourceRevision,
+                    new string(hashCharacter, 64)),
+                source.InitialLevel,
+                source.MaximumLevel,
+                cost,
+                duration,
+                source.Prerequisites,
+                source.EffectProfiles);
+        }
+
+        internal static TroopProgressionDefinition ReissueTroop(
+            TroopProgressionDefinition source,
+            string schemaVersion = null,
+            string contentVersion = null,
+            string sourceRevision = "fake.source.rev.2",
+            char hashCharacter = 'b',
+            bool reissueProfiles = false,
+            string costSchemaVersion = null,
+            string durationSchemaVersion = null)
+        {
+            ProgressionCostProfile cost = source.CostProfile;
+            ProgressionDurationProfile duration = source.DurationProfile;
+            if (reissueProfiles || costSchemaVersion != null)
+            {
+                cost = new ProgressionCostProfile(
+                    new ProgressionSourceIdentity(
+                        source.CostProfile.Identity.Id,
+                        costSchemaVersion ??
+                        source.CostProfile.Identity.SchemaVersion,
+                        source.CostProfile.Identity.ContentVersion,
+                        sourceRevision,
+                        new string((char)(hashCharacter + 1), 64)),
+                    source.CostProfile.UnitCosts,
+                    source.CostProfile.MaximumAmountPerResource);
+            }
+
+            if (reissueProfiles || durationSchemaVersion != null)
+            {
+                duration = new ProgressionDurationProfile(
+                    new ProgressionSourceIdentity(
+                        source.DurationProfile.Identity.Id,
+                        durationSchemaVersion ??
+                        source.DurationProfile.Identity.SchemaVersion,
+                        source.DurationProfile.Identity.ContentVersion,
+                        sourceRevision,
+                        new string((char)(hashCharacter + 2), 64)),
+                    source.DurationProfile.UnitSeconds,
+                    source.DurationProfile.MaximumSeconds,
+                    source.DurationProfile.AllowsZeroDuration);
+            }
+
+            return new TroopProgressionDefinition(
+                new ProgressionSourceIdentity(
+                    source.Identity.Id,
+                    schemaVersion ?? source.Identity.SchemaVersion,
+                    contentVersion ?? source.Identity.ContentVersion,
+                    sourceRevision,
+                    new string(hashCharacter, 64)),
+                source.MaximumInventoryCount,
+                source.MaximumBatchCount,
+                cost,
+                duration,
+                source.Prerequisites,
+                source.BattleProfile,
+                source.InventoryPolicy,
+                source.InventoryCapacityPolicy);
+        }
+
+        internal static ProgressionSourceIdentity ReissueIdentity(
+            ProgressionSourceIdentity source,
+            string sourceRevision,
+            char hashCharacter)
+        {
+            return new ProgressionSourceIdentity(
+                source.Id,
+                source.SchemaVersion,
+                source.ContentVersion,
+                sourceRevision,
+                new string(hashCharacter, 64));
+        }
+
+        internal static ProgressionCommittedOperationResult CopyCommittedResult(
+            ProgressionCommittedOperationResult source,
+            ProgressionOperationKind? operationKind = null,
+            string orderId = null,
+            long? targetValue = null,
+            long? questProgressAmount = null)
+        {
+            return new ProgressionCommittedOperationResult(
+                operationKind ?? source.OperationKind,
+                source.OrderType,
+                source.ProfileId,
+                source.DefinitionSource,
+                source.CostProfile,
+                source.DurationProfile,
+                orderId ?? source.OrderId,
+                source.OperationId,
+                source.StartOperationId,
+                source.CompletionOperationId,
+                source.CancellationOperationId,
+                source.PreviousValue,
+                targetValue ?? source.TargetValue,
+                source.BatchCount,
+                source.MaximumValue,
+                questProgressAmount ?? source.QuestProgressAmount,
+                source.InventoryCapacityPolicy,
+                source.Costs,
+                source.StartTimestamp,
+                source.EndTimestamp,
+                source.CommitTimestamp,
+                source.TimestampPolicy,
+                source.CatalogSetId,
+                source.CatalogRevision,
+                source.ProgressionRevision,
+                source.EconomyRevision,
+                source.PrerequisiteRevision,
+                source.QuestRevision,
+                source.OperationPolicyVersion,
+                source.OrderPolicyVersion,
+                source.OrderCatalogSetId,
+                source.OrderCatalogRevision,
+                source.OrderProgressionRevision,
+                source.OrderEconomyRevision,
+                source.OrderHash,
+                source.SourceDisposition,
+                source.SemanticHash,
+                source.PlanHash);
+        }
+
         internal static ProgressionSourceIdentity ProfileIdentity(
             string id,
             string sourceRevision = "fake.source.rev.1",
@@ -2114,11 +4405,12 @@ namespace AL.Tests.EditMode.Progression
             IEnumerable<ResearchProgressionStateRecord> states,
             IEnumerable<ProgressionPrerequisiteTargetDefinition>
                 prerequisiteTargets = null,
-            ProgressionTimestampPolicy timestampPolicy = null)
+            ProgressionTimestampPolicy timestampPolicy = null,
+            string catalogRevision = null)
         {
             return ProgressionCompatibilityPlanner.BuildResearchCompatibility(
                 CatalogSetId,
-                CatalogRevision,
+                catalogRevision ?? CatalogRevision,
                 definitions,
                 states,
                 prerequisiteTargets,
@@ -2129,14 +4421,17 @@ namespace AL.Tests.EditMode.Progression
             IEnumerable<TroopProgressionDefinition> definitions,
             IEnumerable<TroopProgressionStateRecord> states,
             IEnumerable<ProgressionPrerequisiteTargetDefinition>
-                prerequisiteTargets = null)
+                prerequisiteTargets = null,
+            ProgressionTimestampPolicy timestampPolicy = null,
+            string catalogRevision = null)
         {
             return ProgressionCompatibilityPlanner.BuildTrainingCompatibility(
                 CatalogSetId,
-                CatalogRevision,
+                catalogRevision ?? CatalogRevision,
                 definitions,
                 states,
-                prerequisiteTargets);
+                prerequisiteTargets,
+                timestampPolicy ?? TimestampPolicy);
         }
 
         internal static ProgressionStartRequest ResearchStart(
@@ -2145,7 +4440,8 @@ namespace AL.Tests.EditMode.Progression
             int targetLevel,
             string operationId = "research-start-1",
             string expectedRevision = null,
-            string orderId = "research-order-1")
+            string orderId = "research-order-1",
+            string expectedPrerequisiteRevision = null)
         {
             return new ProgressionStartRequest(
                 "profile-1",
@@ -2158,7 +4454,8 @@ namespace AL.Tests.EditMode.Progression
                 CatalogSetId,
                 expectedRevision ?? compatibility.StateRevision,
                 EconomyRevision,
-                StartPolicyVersion);
+                StartPolicyVersion,
+                expectedPrerequisiteRevision ?? NoPrerequisites.Revision);
         }
 
         internal static ProgressionStartRequest TrainingStart(
@@ -2167,7 +4464,8 @@ namespace AL.Tests.EditMode.Progression
             long batchCount,
             string operationId = "training-start-1",
             string expectedRevision = null,
-            string orderId = "training-order-1")
+            string orderId = "training-order-1",
+            string expectedPrerequisiteRevision = null)
         {
             return new ProgressionStartRequest(
                 "profile-1",
@@ -2180,7 +4478,8 @@ namespace AL.Tests.EditMode.Progression
                 CatalogSetId,
                 expectedRevision ?? compatibility.StateRevision,
                 EconomyRevision,
-                StartPolicyVersion);
+                StartPolicyVersion,
+                expectedPrerequisiteRevision ?? NoPrerequisites.Revision);
         }
 
         internal static ProgressionEconomySnapshot Economy(
@@ -2323,7 +4622,12 @@ namespace AL.Tests.EditMode.Progression
                 order.ProgressionRevision,
                 order.EconomyRevision,
                 order.RequestPolicyVersion,
-                order.OrderHash);
+                order.OrderHash,
+                order.MaximumValue,
+                order.InventoryCapacityPolicy,
+                order.TimestampPolicy,
+                order.PrerequisiteRevision,
+                order.CatalogRevision);
         }
 
         internal static ProgressionCompletionRequest Completion(
@@ -2339,6 +4643,22 @@ namespace AL.Tests.EditMode.Progression
                 order.EconomyRevision,
                 QuestRevision,
                 CompletionPolicyVersion);
+        }
+
+        internal static ProgressionCompletionPlan PlanCompletion(
+            ProgressionCompatibilityResult compatibility,
+            ProgressionOrderSnapshot order,
+            long timestamp,
+            IEnumerable<ProgressionOperationReceipt> receipts = null,
+            ProgressionCompletionDependencySnapshot dependencies = null)
+        {
+            return ProgressionOrderPlanner.PlanCompletion(
+                compatibility,
+                order,
+                Completion(compatibility, order),
+                receipts ?? NoReceipts,
+                dependencies ?? CompletionDependencies,
+                timestamp);
         }
 
         internal static string[] Diagnostics(ProgressionCompatibilityResult result)
