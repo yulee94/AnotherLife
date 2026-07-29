@@ -1,9 +1,9 @@
 # World Atlas Topology and Immutable Query Contract
 
-**Contract ID:** al_world_atlas_topology_query_contract_v001  
-**Issue:** #181  
-**Primary Codex mode:** coordination/review  
-**Baseline:** main@2f5475cbf41ca6ba740f83859ce0007a1bfdde51  
+**Contract ID:** al_world_atlas_topology_query_contract_v001
+**Issue:** #181
+**Primary Codex mode:** coordination/review
+**Baseline:** main@2f5475cbf41ca6ba740f83859ce0007a1bfdde51
 **Status:** binding coordination input for ordered narrative and engineering work; not runtime acceptance
 
 ## 1. Purpose
