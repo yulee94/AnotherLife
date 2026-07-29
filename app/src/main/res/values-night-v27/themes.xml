@@ -1,0 +1,6 @@
+<resources>
+
+    <style name="Theme.AnotherLife.Base" parent="Theme.AnotherLife.PlatformBase">
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>
