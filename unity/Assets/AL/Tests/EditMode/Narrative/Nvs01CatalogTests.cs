@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -39,7 +40,10 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(
                 ContractField<string>("CanonicalSha256"),
                 ComputeSha256(artifact));
-            Assert.AreEqual("omen1-a1-2026-07-22-v002", ContractField<string>("PacketVersion"));
+            Assert.AreEqual(
+                "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732",
+                ContractField<string>("CanonicalSha256"));
+            Assert.AreEqual("omen1-a1-2026-07-29-v003", ContractField<string>("PacketVersion"));
             Assert.AreEqual("AL/Narrative/OMEN_1.catalog.json", ContractField<string>("StreamingAssetsRelativePath"));
 
             object result = Validate(artifact, true);
@@ -161,10 +165,66 @@ namespace AL.Tests.EditMode.Narrative
 
             AssertRejected(
                 Mutate(
-                    "  \"packetVersion\": \"omen1-a1-2026-07-22-v002\",",
+                    "  \"packetVersion\": \"omen1-a1-2026-07-29-v003\",",
+                    "  \"packetVersion\": \"omen1-a1-2026-07-22-v002\","),
+                false,
+                "VERSION-UNSUPPORTED");
+
+            AssertRejected(
+                Mutate(
+                    "  \"packetVersion\": \"omen1-a1-2026-07-29-v003\",",
                     "  \"packetVersion\": \"omen1-a1-2026-07-22-v999\","),
                 false,
                 "VERSION-UNSUPPORTED");
+        }
+
+        [Test]
+        public void ExactLowercaseRealmSequenceRejectsCaseAliasesAndShapeDrift()
+        {
+            const string canonical =
+                "    \"eligibleRealmIds\": [\"crownlands\", \"stonehold\", \"eldergrove\", \"umbral\"],";
+
+            foreach (string invalid in new[]
+                     {
+                         "    \"eligibleRealmIds\": [\"CROWNLANDS\", \"STONEHOLD\", \"ELDERGROVE\", \"UMBRAL\"],",
+                         "    \"eligibleRealmIds\": [\"Crownlands\", \"stonehold\", \"eldergrove\", \"umbral\"],",
+                         "    \"eligibleRealmIds\": [\"crownlandS\", \"stonehold\", \"eldergrove\", \"umbral\"],",
+                         "    \"eligibleRealmIds\": [\"unknown\", \"stonehold\", \"eldergrove\", \"umbral\"],",
+                         "    \"eligibleRealmIds\": [\"\", \"stonehold\", \"eldergrove\", \"umbral\"],",
+                         "    \"eligibleRealmIds\": [\"crownlands\", \"crownlands\", \"eldergrove\", \"umbral\"],",
+                         "    \"eligibleRealmIds\": [\"crownlands\", \"stonehold\", \"eldergrove\"],",
+                         "    \"eligibleRealmIds\": [\"crownlands\", \"stonehold\", \"eldergrove\", \"umbral\", \"unknown\"],",
+                         "    \"eligibleRealmIds\": [\"stonehold\", \"crownlands\", \"eldergrove\", \"umbral\"],"
+                     })
+            {
+                AssertRejected(Mutate(canonical, invalid), false, "CATALOG-MALFORMED");
+            }
+        }
+
+        [Test]
+        public void RealmProfileValidationRemainsOrdinalUnderTurkishCulture()
+        {
+            CultureInfo originalCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+            CultureInfo originalUiCulture = System.Threading.Thread.CurrentThread.CurrentUICulture;
+            try
+            {
+                var turkish = new CultureInfo("tr-TR");
+                System.Threading.Thread.CurrentThread.CurrentCulture = turkish;
+                System.Threading.Thread.CurrentThread.CurrentUICulture = turkish;
+
+                AssertAccepted(Validate(CanonicalArtifactBytes(), false));
+                AssertRejected(
+                    Mutate(
+                        "    \"eligibleRealmIds\": [\"crownlands\", \"stonehold\", \"eldergrove\", \"umbral\"],",
+                        "    \"eligibleRealmIds\": [\"CROWNLANDS\", \"stonehold\", \"eldergrove\", \"umbral\"],"),
+                    false,
+                    "CATALOG-MALFORMED");
+            }
+            finally
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = originalCulture;
+                System.Threading.Thread.CurrentThread.CurrentUICulture = originalUiCulture;
+            }
         }
 
         [Test]
@@ -307,6 +367,11 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(10, Items(GetProperty(catalog, "ExternalCapabilities")).Length);
             Assert.AreEqual(5, Items(GetProperty(catalog, "Consequences")).Length);
             Assert.AreEqual(28, ((IDictionary)GetProperty(catalog, "Localization")).Count);
+            CollectionAssert.AreEqual(
+                new[] { "crownlands", "stonehold", "eldergrove", "umbral" },
+                Items(GetProperty(GetProperty(catalog, "Placement"), "EligibleRealmIds"))
+                    .Cast<string>()
+                    .ToArray());
 
             CollectionAssert.AreEqual(
                 new[] { "OFFERED", "TALK_TO_VALERIUS", "INVESTIGATE_SKY_CASTLE", "FAILED", "REPORT_TO_VALERIUS", "COMPLETED" },

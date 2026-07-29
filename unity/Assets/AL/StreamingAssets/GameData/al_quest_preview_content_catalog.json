@@ -8,7 +8,7 @@
     "primaryMode": "codex_narrative_content",
     "consumerIssue": 186,
     "nvsCatalog": "unity/Assets/StreamingAssets/AL/Narrative/OMEN_1.catalog.json",
-    "nvsPacketVersion": "omen1-a1-2026-07-22-v002",
+    "nvsPacketVersion": "omen1-a1-2026-07-29-v003",
     "worldAtlasCatalog": "al_world_atlas_narrative_catalog",
     "routeBoundaryIssue": 133,
     "notificationIssue": 177
@@ -91,7 +91,7 @@
     {
       "id": "quest_preview_omen_1",
       "questId": "OMEN_1",
-      "sourceVersion": "omen1-a1-2026-07-22-v002",
+      "sourceVersion": "omen1-a1-2026-07-29-v003",
       "previewRole": "read_only_catalog_preview",
       "releaseAvailability": "hidden_until_engineering_contract",
       "titleKey": "quest.omen1.title",

@@ -10,9 +10,9 @@ import kotlinx.serialization.json.intOrNull
 
 const val NVS01_PREVIEW_ASSET = "OMEN_1.catalog.json"
 const val MAX_NVS01_PREVIEW_CATALOG_BYTES = 64 * 1024
-const val EXPECTED_NVS01_PACKET_VERSION = "omen1-a1-2026-07-22-v002"
+const val EXPECTED_NVS01_PACKET_VERSION = "omen1-a1-2026-07-29-v003"
 const val EXPECTED_NVS01_CATALOG_SHA256 =
-    "b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f"
+    "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732"
 
 private const val SUPPORTED_NVS01_SCHEMA_VERSION = 1
 private const val MAX_NVS01_RECORDS = 128

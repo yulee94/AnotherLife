@@ -92,10 +92,14 @@ class Nvs01PreviewParserTest {
     }
 
     @Test
-    fun unsupportedSchemaAndContentDriftFailClosed() {
+    fun unsupportedSchemaLegacyIdentityAndContentDriftFailClosed() {
         val unsupportedSchema = canonicalCatalog.replaceFirst(
             "\"schemaVersion\": 1",
             "\"schemaVersion\": 2"
+        )
+        val legacyIdentity = canonicalCatalog.replaceFirst(
+            EXPECTED_NVS01_PACKET_VERSION,
+            "omen1-a1-2026-07-22-v002"
         )
         val validButUnapprovedCopy = canonicalCatalog.replaceFirst(
             "a strange resonance",
@@ -105,6 +109,10 @@ class Nvs01PreviewParserTest {
         assertThrows(IllegalArgumentException::class.java) {
             Nvs01PreviewParser.parse(unsupportedSchema)
         }
+        val legacyIdentityError = assertThrows(IllegalArgumentException::class.java) {
+            Nvs01PreviewParser.parse(legacyIdentity)
+        }
+        assertTrue(legacyIdentityError.message.orEmpty().contains("packet version"))
         val driftError = assertThrows(IllegalArgumentException::class.java) {
             Nvs01PreviewParser.parse(validButUnapprovedCopy)
         }
