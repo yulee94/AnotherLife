@@ -510,6 +510,7 @@ namespace AL.Core.BossRewards
             string operationId)
         {
             BossRewardBinding found = null;
+            int matchCount = 0;
             for (int index = 0; index < bindings.Count; index++)
             {
                 BossRewardBinding candidate = bindings[index];
@@ -547,7 +548,12 @@ namespace AL.Core.BossRewards
                         bossDefinitionId,
                         StringComparison.Ordinal))
                     continue;
-                if (found != null)
+                matchCount++;
+                if (matchCount == 1)
+                {
+                    found = candidate;
+                }
+                else
                 {
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-BINDING-DUPLICATE",
@@ -556,11 +562,9 @@ namespace AL.Core.BossRewards
                         operationId,
                         bossDefinitionId,
                         "The catalog contains duplicate boss reward bindings."));
-                    return null;
                 }
-                found = candidate;
             }
-            return found;
+            return matchCount == 1 ? found : null;
         }
 
         private static BossRewardProfile ResolveUniqueProfile(
@@ -571,6 +575,7 @@ namespace AL.Core.BossRewards
             string operationId)
         {
             BossRewardProfile found = null;
+            int matchCount = 0;
             for (int index = 0; index < profiles.Count; index++)
             {
                 BossRewardProfile candidate = profiles[index];
@@ -602,7 +607,12 @@ namespace AL.Core.BossRewards
                 if (!string.Equals(candidate.Id, profileId, StringComparison.Ordinal) ||
                     !string.Equals(candidate.ContentVersion, contentVersion, StringComparison.Ordinal))
                     continue;
-                if (found != null)
+                matchCount++;
+                if (matchCount == 1)
+                {
+                    found = candidate;
+                }
+                else
                 {
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-PROFILE-DUPLICATE",
@@ -611,11 +621,9 @@ namespace AL.Core.BossRewards
                         operationId,
                         profileId,
                         "The catalog contains duplicate reward profile versions."));
-                    return null;
                 }
-                found = candidate;
             }
-            return found;
+            return matchCount == 1 ? found : null;
         }
 
         private static Dictionary<string, BossEquipmentDefinitionSnapshot>

@@ -590,6 +590,116 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void DuplicateBindingDiagnosticsIgnoreOppositeEndPermutation()
+        {
+            BossRewardCatalogSnapshot source = BossRewardTestFixtures.Catalog();
+            BossRewardBinding matching = source.Bindings[0];
+            var invalidZ = new BossRewardBinding(
+                "boss-bad-z",
+                BossRewardTestFixtures.BossVersion,
+                BossRewardTestFixtures.RewardProfileId,
+                BossRewardTestFixtures.RewardProfileVersion);
+            var invalidA = new BossRewardBinding(
+                "boss-bad-a",
+                BossRewardTestFixtures.BossVersion,
+                BossRewardTestFixtures.RewardProfileId,
+                BossRewardTestFixtures.RewardProfileVersion);
+            var forwardBindings = new BossRewardBinding[]
+            {
+                matching,
+                matching,
+                invalidZ,
+                null,
+                invalidA,
+                matching
+            };
+            BossRewardBinding[] reverseBindings =
+                forwardBindings.Reverse().ToArray();
+
+            BossRewardComputationResult forward = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                CatalogWithCollections(source, bindings: forwardBindings));
+            BossRewardComputationResult reverse = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                CatalogWithCollections(source, bindings: reverseBindings));
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.BossRewardBindingMismatch,
+                forward.Status);
+            Assert.AreEqual(forward.Status, reverse.Status);
+            Assert.AreEqual(5, forward.Diagnostics.Count);
+            Assert.AreEqual(
+                2,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-BINDING-DUPLICATE"));
+            Assert.AreEqual(
+                2,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-BINDING-ID-INVALID"));
+            Assert.AreEqual(
+                1,
+                forward.Diagnostics.Count(item =>
+                    item.Code == "AL-BOSS-REWARD-CATALOG-BINDING-NULL"));
+            CollectionAssert.AreEqual(
+                forward.Diagnostics.Select(DiagnosticIdentity).ToArray(),
+                reverse.Diagnostics.Select(DiagnosticIdentity).ToArray());
+        }
+
+        [Test]
+        public void DuplicateProfileDiagnosticsIgnoreOppositeEndPermutation()
+        {
+            BossRewardCatalogSnapshot source = BossRewardTestFixtures.Catalog();
+            BossRewardProfile matching = source.Profiles[0];
+            BossRewardProfile invalidZ =
+                BossRewardTestFixtures.Profile(id: "reward-profile-z");
+            BossRewardProfile invalidA =
+                BossRewardTestFixtures.Profile(id: "reward-profile-a");
+            var forwardProfiles = new BossRewardProfile[]
+            {
+                matching,
+                matching,
+                invalidZ,
+                null,
+                invalidA,
+                matching
+            };
+            BossRewardProfile[] reverseProfiles =
+                forwardProfiles.Reverse().ToArray();
+
+            BossRewardComputationResult forward = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                CatalogWithCollections(source, profiles: forwardProfiles));
+            BossRewardComputationResult reverse = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                CatalogWithCollections(source, profiles: reverseProfiles));
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.InvalidRewardProfile,
+                forward.Status);
+            Assert.AreEqual(forward.Status, reverse.Status);
+            Assert.AreEqual(5, forward.Diagnostics.Count);
+            Assert.AreEqual(
+                2,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-PROFILE-DUPLICATE"));
+            Assert.AreEqual(
+                2,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-PROFILE-ID-INVALID"));
+            Assert.AreEqual(
+                1,
+                forward.Diagnostics.Count(item =>
+                    item.Code == "AL-BOSS-REWARD-CATALOG-PROFILE-NULL"));
+            CollectionAssert.AreEqual(
+                forward.Diagnostics.Select(DiagnosticIdentity).ToArray(),
+                reverse.Diagnostics.Select(DiagnosticIdentity).ToArray());
+        }
+
+        [Test]
         public void MaximumDefinitionsAndEntriesResolveThroughSingleIndex()
         {
             var definitions =
@@ -701,6 +811,106 @@ namespace AL.Tests.EditMode.BossRewards
                 forward.Diagnostics.Count(item =>
                     item.Code ==
                     "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT"));
+            CollectionAssert.AreEqual(
+                forward.Diagnostics.Select(DiagnosticIdentity).ToArray(),
+                reverse.Diagnostics.Select(DiagnosticIdentity).ToArray());
+        }
+
+        [Test]
+        public void MaximumBindingDiagnosticsScanPastDuplicateAndRemainCanonical()
+        {
+            BossRewardCatalogSnapshot source = BossRewardTestFixtures.Catalog();
+            BossRewardBinding matching = source.Bindings[0];
+            var bindings = new List<BossRewardBinding>(
+                BossRewardTechnicalLimits.MaximumCatalogEntries)
+            {
+                matching,
+                matching
+            };
+            for (int index = 0;
+                 index <
+                 BossRewardTechnicalLimits.MaximumCatalogEntries - 2;
+                 index++)
+            {
+                bindings.Add(new BossRewardBinding(
+                    "boss-bad-" +
+                    index.ToString("D4", CultureInfo.InvariantCulture),
+                    BossRewardTestFixtures.BossVersion,
+                    BossRewardTestFixtures.RewardProfileId,
+                    BossRewardTestFixtures.RewardProfileVersion));
+            }
+
+            int materialized = 0;
+            int forwardMaterializations;
+            int reverseMaterializations;
+            BossRewardComputationResult forward;
+            BossRewardComputationResult reverse;
+            Action previousMaterializationObserver =
+                BossRewardDiagnostic.MaterializedForTesting;
+            BossRewardDiagnostic.MaterializedForTesting = () => materialized++;
+            try
+            {
+                forward = BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    CatalogWithCollections(source, bindings: bindings));
+                forwardMaterializations = materialized;
+                materialized = 0;
+                bindings.Reverse();
+                reverse = BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    CatalogWithCollections(source, bindings: bindings));
+                reverseMaterializations = materialized;
+            }
+            finally
+            {
+                BossRewardDiagnostic.MaterializedForTesting =
+                    previousMaterializationObserver;
+            }
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.BossRewardBindingMismatch,
+                forward.Status);
+            Assert.AreEqual(forward.Status, reverse.Status);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                forwardMaterializations);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                reverseMaterializations);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                forward.Diagnostics.Count);
+            Assert.AreEqual(
+                1,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT"));
+            Assert.AreEqual(
+                1,
+                reverse.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT"));
+            Assert.AreEqual(
+                1,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-BINDING-DUPLICATE"));
+            string[] expectedRetainedInvalidIds = Enumerable
+                .Range(
+                    0,
+                    BossRewardTechnicalLimits.MaximumDiagnostics - 2)
+                .Select(index =>
+                    "boss-bad-" +
+                    index.ToString("D4", CultureInfo.InvariantCulture))
+                .ToArray();
+            CollectionAssert.AreEqual(
+                expectedRetainedInvalidIds,
+                forward.Diagnostics
+                    .Where(item =>
+                        item.Code ==
+                        "AL-BOSS-REWARD-CATALOG-BINDING-ID-INVALID")
+                    .Select(item => item.RecordId)
+                    .ToArray());
             CollectionAssert.AreEqual(
                 forward.Diagnostics.Select(DiagnosticIdentity).ToArray(),
                 reverse.Diagnostics.Select(DiagnosticIdentity).ToArray());
@@ -841,6 +1051,22 @@ namespace AL.Tests.EditMode.BossRewards
                     null,
                     "source_revision_1",
                     BossRewardTestFixtures.ShaA));
+        }
+
+        private static BossRewardCatalogSnapshot CatalogWithCollections(
+            BossRewardCatalogSnapshot source,
+            IEnumerable<BossRewardBinding> bindings = null,
+            IEnumerable<BossRewardProfile> profiles = null)
+        {
+            return new BossRewardCatalogSnapshot(
+                source.GameId,
+                source.CatalogSetId,
+                source.SchemaVersion,
+                source.Revision,
+                bindings ?? source.Bindings,
+                profiles ?? source.Profiles,
+                source.EquipmentDefinitions,
+                source.AnnouncementPolicyIds);
         }
 
         private static string DiagnosticIdentity(
