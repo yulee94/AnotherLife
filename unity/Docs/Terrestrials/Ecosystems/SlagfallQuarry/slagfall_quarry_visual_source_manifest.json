@@ -1,0 +1,161 @@
+{
+  "$schema": "./slagfall_quarry_visual_source_packet.schema.json",
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_slagfall_quarry_visual_source_v001",
+  "sourceVersion": "tdf-eco-slagfall-2026-07-29-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-29",
+  "authority": {
+    "terrestrialDesignSource": true,
+    "runtime": false,
+    "gameplay": false,
+    "narrative": false,
+    "save": false,
+    "userCreativeApproval": false
+  },
+  "readiness": {
+    "technicalPacketState": "TechnicalReviewReady",
+    "userCreativeState": "NotRequested",
+    "runtimeIntegrationState": "Blocked",
+    "visualQaState": "PassWithConcern"
+  },
+  "habitat": {
+    "habitatId": "tdf_habitat_stonehold_slagfall_quarry",
+    "realmId": "stonehold",
+    "state": "ReadyForUserReview",
+    "environmentKitId": "tdf_envkit_stonehold_slagfall_quarry",
+    "protectedIdentity": "terrace_edges_runoff_channels_cooled_slag_plate_direction",
+    "neighborHabitatIds": [
+      "tdf_habitat_stonehold_ore_gallery_mouths",
+      "tdf_habitat_stonehold_faultroad_escarpment"
+    ],
+    "sharedTransitionIds": [
+      "tdf_transition_stonehold_faultroad_escarpment_to_slagfall_quarry",
+      "tdf_transition_stonehold_ore_gallery_mouths_to_slagfall_quarry"
+    ]
+  },
+  "fauna": {
+    "profileId": "tdf_fauna_stonehold_slagwhistle_burrower",
+    "state": "ReadyForUserReview",
+    "qaDisposition": "PassWithConcern",
+    "picturedVariant": "slagwhistle_cooled_bench_adult",
+    "unpicturedVariants": [
+      "slagwhistle_deeper_quarry_broad_claw",
+      "slagwhistle_cooled_bench_long_hind"
+    ],
+    "protectedIdentity": "paired_foreclaws_triangular_ear_folds_short_counterweight_tail",
+    "scaleChampionUnits": {"length": 0.90, "shoulderHeight": 0.38},
+    "anatomyLock": {
+      "heatFolds": 2,
+      "broadShovelCapsPerForefoot": 1,
+      "stabilizerClawsPerForefoot": 2,
+      "counterweightTails": 1,
+      "nostrilForm": "protected_horizontal_slits"
+    },
+    "rigFamilyId": "tdf_rig_quad_burrower",
+    "materialFamilyIds": ["tdf_matfam_opaque_hide_keratin", "tdf_matfam_stonehold_slate_iron"]
+  },
+  "environmentKit": {
+    "propFamilyIds": [
+      "tdf_prop_stonehold_slagfall_settled_cooled_slag_plate_cluster",
+      "tdf_prop_stonehold_slagfall_eroded_terrace_bench_bank",
+      "tdf_prop_stonehold_slagfall_clay_runoff_channel_cut",
+      "tdf_prop_stonehold_slagfall_broken_rock_spur_proxy",
+      "tdf_prop_stonehold_slagfall_heat_scarred_rubble_cluster",
+      "tdf_prop_stonehold_slagfall_dull_recent_fracture_seam",
+      "tdf_prop_stonehold_slagfall_ash_scrub_mineral_grass_patch",
+      "tdf_prop_stonehold_slagfall_dark_mineral_crust_edge"
+    ],
+    "requiredParticles": 0,
+    "requiredDynamicLights": 0,
+    "requiredWaterFamilies": 0,
+    "requiredEmissionFamilies": 0
+  },
+  "productionEnvelope": {
+    "habitatReviewCellMeters": {"width": 128, "length": 128},
+    "habitatCompressedTargetMiB": {"minimum": 6, "maximum": 8},
+    "habitatHardCeilingMiB": 12,
+    "faunaLod0Triangles": {"minimum": 8000, "maximum": 10000},
+    "faunaBones": {"minimum": 34, "maximum": 42},
+    "faunaCompressedTargetMiB": {"minimum": 3, "maximum": 4},
+    "faunaHardCeilingMiB": 7,
+    "faunaMaximumMaterials": 2,
+    "faunaTextureSetMaximum": "one_1k_color_normal_packed_set",
+    "faunaClipMaximum": 6,
+    "lod1RatioPercent": {"minimum": 55, "maximum": 60},
+    "lod2RatioPercent": {"minimum": 20, "maximum": 25},
+    "distantRatioPercent": {"minimum": 6, "maximum": 8}
+  },
+  "sourceBudgets": {
+    "finalCount": 5,
+    "finalBytes": 15299489,
+    "retainedInputCount": 2,
+    "retainedInputBytes": 5748557,
+    "totalCount": 7,
+    "totalBytes": 21048046,
+    "maximumCompressedBytesPerImage": 4194304,
+    "playerBuildBytes": 0,
+    "runtimeResidentBytes": 0
+  },
+  "sourceAssets": [
+    {
+      "assetId": "tdf_asset_fauna_stonehold_slagwhistle_burrower_identity_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v001.png",
+      "roles": ["identity", "anatomy", "scale", "material"],
+      "byteLength": 2694596,
+      "sha256": "b5255a2be02393e59e21e8d0f42536627b9b89aff0db7a7292c7b2f5a5821dae",
+      "generationCall": "call_M5MFIEBJLfuph7QFmqiIfI96"
+    },
+    {
+      "assetId": "tdf_asset_fauna_stonehold_slagwhistle_burrower_motion_contact_lod_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_motion_contact_lod_v001.png",
+      "roles": ["motion", "dig_contact", "fold_states", "reduction"],
+      "byteLength": 2548650,
+      "sha256": "d3dcb6b948ec5e5289e0876166a2d8191eee02424fc78e0a8a84294ce3bb4760",
+      "generationCall": "call_AGxO5jcDBdU7urLErSXLDmDI"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_slagfall_quarry_establishing_placement_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_establishing_placement_v001.png",
+      "roles": ["establishing", "placement", "terrace_runoff_plate", "effects_off"],
+      "byteLength": 3593314,
+      "sha256": "653f80aefc7a1edf54a9097d7043a5bddb85549a5a055aeacfadca206db384d6",
+      "generationCall": "call_sbOkRep9x6Yf3f0r95sK5ZdT"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_slagfall_quarry_layout_transition_readability_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_layout_transition_readability_v001.png",
+      "roles": ["illustrative_spatial_grammar", "neighbor_transitions", "grayscale", "effects_off"],
+      "byteLength": 3264995,
+      "sha256": "8590500b6f2c7daa0a41b5314a4887b7fecba3a1313062d9f42c2095c3da4ed2",
+      "generationCall": "call_HPfOLyPGC36yyZe0KOnK5dfe"
+    },
+    {
+      "assetId": "tdf_asset_habitat_stonehold_slagfall_quarry_material_kit_reduction_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_material_kit_reduction_v001.png",
+      "roles": ["environment_kit", "materials", "progressive_reduction", "distant_placement"],
+      "byteLength": 3197934,
+      "sha256": "473d1695f347a31f5eaa9c934552e4ce4b59624e47d8520504b58670127bc5d9",
+      "generationCall": "call_N7gawlAtZCyIO21sYfiKLHRW"
+    }
+  ],
+  "generationInputs": [
+    {
+      "assetId": "tdf_asset_input_fauna_stonehold_slagwhistle_motion_effects_base_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/tdf_input_fauna_stonehold_slagwhistle_motion_effects_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "byteLength": 2593396,
+      "sha256": "bf3c80fa8971b28b4bfad0c58791f426bd179b99330d06d3b2bf6f109590c77d",
+      "generationCall": "call_htAQjWEtoGXIl4FsgKVo3HvB"
+    },
+    {
+      "assetId": "tdf_asset_input_habitat_stonehold_slagfall_quarry_red_kit_base_v001",
+      "path": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarry/GenerationInputs/tdf_input_habitat_stonehold_slagfall_quarry_red_kit_base_v001.png",
+      "state": "RetainedRefinementInput",
+      "byteLength": 3155161,
+      "sha256": "ed69b580aab9e2a407c49854c6e4cf4a9cf56b23a58b2150fc18df5e6138eef2",
+      "generationCall": "call_yoggARDVyXDRnAKvrd2B9tQi"
+    }
+  ],
+  "externalInputs": []
+}
