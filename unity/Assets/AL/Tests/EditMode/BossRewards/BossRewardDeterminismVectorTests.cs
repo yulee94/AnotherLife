@@ -157,11 +157,149 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void IndependentScenarioVectorsCoverOpaqueUtf8HighBitAndOrdering()
+        {
+            VectorArtifact artifact = ReadArtifact();
+            var names = new HashSet<string>(StringComparer.Ordinal);
+
+            Assert.NotNull(artifact.ScenarioVectors);
+            Assert.AreEqual(1, artifact.ScenarioVectors.Length);
+            foreach (ScenarioVector scenario in artifact.ScenarioVectors)
+            {
+                Assert.NotNull(scenario);
+                Assert.IsTrue(names.Add(scenario.Name), scenario.Name);
+                Assert.NotNull(scenario.Entries);
+                Assert.GreaterOrEqual(scenario.Entries.Length, 2);
+                Assert.IsTrue(scenario.Entries.Any(entry =>
+                    entry.Draw > int.MaxValue));
+
+                BossRewardComputationRequest request =
+                    BossRewardTestFixtures.Request(
+                        gameId: artifact.ComputedResultDefaults.GameId,
+                        catalogSetId:
+                        artifact.CanonicalInputDefaults.CatalogSetId,
+                        profileId: scenario.ProfileId,
+                        encounterId: scenario.EncounterId,
+                        encounterCompletionId:
+                        scenario.EncounterCompletionId,
+                        rewardResultId: scenario.RewardResultId,
+                        bossDefinitionId:
+                        artifact.CanonicalInputDefaults.BossDefinitionId,
+                        bossDefinitionContentVersion:
+                        artifact.ComputedResultDefaults
+                            .BossDefinitionContentVersion,
+                        rewardProfileId:
+                        artifact.CanonicalInputDefaults.RewardProfileId,
+                        rewardProfileContentVersion:
+                        artifact.CanonicalInputDefaults
+                            .RewardProfileContentVersion,
+                        determinismVersion: artifact.DeterminismVersion);
+                foreach (ScenarioEntryVector entry in scenario.Entries)
+                {
+                    byte[] canonical =
+                        BossRewardDeterministicRoll.BuildCanonicalInput(
+                            request.DeterminismVersion,
+                            request.CatalogSetId,
+                            request.RewardResultId,
+                            request.EncounterCompletionId,
+                            request.BossDefinitionId,
+                            request.RewardProfileId,
+                            request.RewardProfileContentVersion,
+                            entry.EquipmentDefinitionId);
+                    byte[] digest =
+                        BossRewardDeterministicRoll.ComputeDigest(canonical);
+                    uint draw =
+                        BossRewardDeterministicRoll.ReadBigEndianDraw(digest);
+
+                    Assert.AreEqual(
+                        entry.CanonicalHex,
+                        BossRewardDeterministicRoll.ToLowerHex(canonical),
+                        entry.EquipmentDefinitionId);
+                    Assert.AreEqual(
+                        entry.Sha256,
+                        BossRewardDeterministicRoll.ToLowerHex(digest),
+                        entry.EquipmentDefinitionId);
+                    Assert.AreEqual(
+                        (ulong)entry.Draw,
+                        draw,
+                        entry.EquipmentDefinitionId);
+                    Assert.AreEqual(
+                        (ulong)entry.ThresholdExclusive,
+                        BossRewardDeterministicRoll.ComputeThresholdExclusive(
+                            entry.ChanceMicros),
+                        entry.EquipmentDefinitionId);
+                    Assert.AreEqual(
+                        entry.ExpectedHit,
+                        BossRewardDeterministicRoll.IsHit(
+                            draw,
+                            entry.ChanceMicros),
+                        entry.EquipmentDefinitionId);
+                }
+
+                BossRewardProfile profile = ScenarioProfile(
+                    artifact,
+                    scenario);
+                BossRewardCatalogSnapshot catalog = ScenarioCatalog(
+                    artifact,
+                    profile,
+                    scenario);
+                BossRewardComputationResult result =
+                    BossRewardComputation.Compute(request, catalog);
+
+                Assert.AreEqual(
+                    BossRewardComputationStatus.Computed,
+                    result.Status,
+                    scenario.Name);
+                Assert.AreEqual(scenario.ProfileId, result.Value.ProfileId);
+                Assert.AreEqual(
+                    scenario.EncounterId,
+                    result.Value.EncounterId);
+                Assert.AreEqual(
+                    scenario.EncounterCompletionId,
+                    result.Value.EncounterCompletionId);
+                Assert.AreEqual(
+                    scenario.RewardResultId,
+                    result.Value.RewardResultId);
+                CollectionAssert.AreNotEqual(
+                    scenario.Entries
+                        .Select(entry => entry.EquipmentDefinitionId)
+                        .ToArray(),
+                    scenario.ExpectedOrderedResult,
+                    scenario.Name);
+                CollectionAssert.AreEqual(
+                    scenario.ExpectedOrderedResult,
+                    result.Value.Drops
+                        .Select(drop => drop.EquipmentDefinitionId)
+                        .ToArray(),
+                    scenario.Name);
+                foreach (BossRewardComputedDrop drop in result.Value.Drops)
+                {
+                    ScenarioEntryVector expected = scenario.Entries.Single(
+                        entry => string.Equals(
+                            entry.EquipmentDefinitionId,
+                            drop.EquipmentDefinitionId,
+                            StringComparison.Ordinal));
+                    Assert.AreEqual(
+                        expected.ExpectedAcquisitionSnapshotFingerprint,
+                        drop.AcquisitionSnapshotFingerprint,
+                        drop.EquipmentDefinitionId);
+                }
+                Assert.AreEqual(
+                    scenario.ExpectedComputationHash,
+                    result.Value.ComputationHash,
+                    scenario.Name);
+            }
+        }
+
+        [Test]
         public void VectorArtifactDeclaresExactSupportedSchemaAndDefaults()
         {
             VectorArtifact artifact = ReadArtifact();
 
-            Assert.AreEqual("boss_reward_vector_v1", artifact.VectorSchemaVersion);
+            Assert.AreEqual("boss_reward_vector_v2", artifact.VectorSchemaVersion);
+            Assert.AreEqual(
+                "python3_stdlib_independent",
+                artifact.Generator);
             Assert.AreEqual(
                 BossRewardTechnicalLimits.SupportedDeterminismVersion,
                 artifact.DeterminismVersion);
@@ -283,6 +421,68 @@ namespace AL.Tests.EditMode.BossRewards
                 new[] { defaults.AcquisitionAnnouncementPolicyId });
         }
 
+        private static BossRewardProfile ScenarioProfile(
+            VectorArtifact artifact,
+            ScenarioVector scenario)
+        {
+            ComputedResultDefaults defaults = artifact.ComputedResultDefaults;
+            return new BossRewardProfile(
+                defaults.GameId,
+                artifact.CanonicalInputDefaults.CatalogSetId,
+                artifact.CanonicalInputDefaults.RewardProfileId,
+                defaults.EquipmentDefinitionSchemaVersion,
+                artifact.CanonicalInputDefaults.RewardProfileContentVersion,
+                defaults.WarzoneCredits,
+                defaults.IsExplicitNoReward,
+                scenario.Entries.Select(entry => new BossRewardEntry(
+                    entry.EquipmentDefinitionId,
+                    entry.ChanceMicros,
+                    defaults.Quantity,
+                    defaults.AcquisitionAnnouncementPolicyId)),
+                "source_revision_1",
+                defaults.RewardProfileSha256);
+        }
+
+        private static BossRewardCatalogSnapshot ScenarioCatalog(
+            VectorArtifact artifact,
+            BossRewardProfile profile,
+            ScenarioVector scenario)
+        {
+            ComputedResultDefaults defaults = artifact.ComputedResultDefaults;
+            BossEquipmentDefinitionSnapshot[] definitions = scenario.Entries
+                .Select(entry => new BossEquipmentDefinitionSnapshot(
+                    entry.EquipmentDefinitionId,
+                    defaults.EquipmentDefinitionSchemaVersion,
+                    defaults.EquipmentDefinitionContentVersion,
+                    defaults.SlotId,
+                    defaults.AttackBonus,
+                    defaults.DefenseBonus,
+                    defaults.HealthBonus,
+                    defaults.StackPolicyId,
+                    defaults.AcquisitionSnapshotPolicyId,
+                    "equipment_content_" + entry.EquipmentDefinitionId,
+                    "source_revision_1",
+                    BossRewardTestFixtures.ShaB))
+                .ToArray();
+            return new BossRewardCatalogSnapshot(
+                defaults.GameId,
+                artifact.CanonicalInputDefaults.CatalogSetId,
+                defaults.EquipmentDefinitionSchemaVersion,
+                BossRewardTestFixtures.CatalogRevision,
+                new[]
+                {
+                    new BossRewardBinding(
+                        artifact.CanonicalInputDefaults.BossDefinitionId,
+                        defaults.BossDefinitionContentVersion,
+                        artifact.CanonicalInputDefaults.RewardProfileId,
+                        artifact.CanonicalInputDefaults
+                            .RewardProfileContentVersion)
+                },
+                new[] { profile },
+                definitions,
+                new[] { defaults.AcquisitionAnnouncementPolicyId });
+        }
+
         private static VectorArtifact ReadArtifact()
         {
             using (FileStream stream = File.OpenRead(VectorPath()))
@@ -312,6 +512,9 @@ namespace AL.Tests.EditMode.BossRewards
             [DataMember(Name = "vectorSchemaVersion", IsRequired = true)]
             public string VectorSchemaVersion { get; set; }
 
+            [DataMember(Name = "generator", IsRequired = true)]
+            public string Generator { get; set; }
+
             [DataMember(Name = "determinismVersion", IsRequired = true)]
             public string DeterminismVersion { get; set; }
 
@@ -326,6 +529,9 @@ namespace AL.Tests.EditMode.BossRewards
 
             [DataMember(Name = "negativeVectors", IsRequired = true)]
             public NegativeDeterminismVector[] NegativeVectors { get; set; }
+
+            [DataMember(Name = "scenarioVectors", IsRequired = true)]
+            public ScenarioVector[] ScenarioVectors { get; set; }
         }
 
         [DataContract]
@@ -456,6 +662,64 @@ namespace AL.Tests.EditMode.BossRewards
 
             [DataMember(Name = "expectedDiagnosticCode", IsRequired = true)]
             public string ExpectedDiagnosticCode { get; set; }
+        }
+
+        [DataContract]
+        private sealed class ScenarioVector
+        {
+            [DataMember(Name = "name", IsRequired = true)]
+            public string Name { get; set; }
+
+            [DataMember(Name = "profileId", IsRequired = true)]
+            public string ProfileId { get; set; }
+
+            [DataMember(Name = "encounterId", IsRequired = true)]
+            public string EncounterId { get; set; }
+
+            [DataMember(Name = "encounterCompletionId", IsRequired = true)]
+            public string EncounterCompletionId { get; set; }
+
+            [DataMember(Name = "rewardResultId", IsRequired = true)]
+            public string RewardResultId { get; set; }
+
+            [DataMember(Name = "entries", IsRequired = true)]
+            public ScenarioEntryVector[] Entries { get; set; }
+
+            [DataMember(Name = "expectedOrderedResult", IsRequired = true)]
+            public string[] ExpectedOrderedResult { get; set; }
+
+            [DataMember(Name = "expectedComputationHash", IsRequired = true)]
+            public string ExpectedComputationHash { get; set; }
+        }
+
+        [DataContract]
+        private sealed class ScenarioEntryVector
+        {
+            [DataMember(Name = "equipmentDefinitionId", IsRequired = true)]
+            public string EquipmentDefinitionId { get; set; }
+
+            [DataMember(Name = "chanceMicros", IsRequired = true)]
+            public int ChanceMicros { get; set; }
+
+            [DataMember(Name = "canonicalHex", IsRequired = true)]
+            public string CanonicalHex { get; set; }
+
+            [DataMember(Name = "sha256", IsRequired = true)]
+            public string Sha256 { get; set; }
+
+            [DataMember(Name = "draw", IsRequired = true)]
+            public long Draw { get; set; }
+
+            [DataMember(Name = "thresholdExclusive", IsRequired = true)]
+            public long ThresholdExclusive { get; set; }
+
+            [DataMember(Name = "expectedHit", IsRequired = true)]
+            public bool ExpectedHit { get; set; }
+
+            [DataMember(
+                Name = "expectedAcquisitionSnapshotFingerprint",
+                IsRequired = true)]
+            public string ExpectedAcquisitionSnapshotFingerprint { get; set; }
         }
     }
 }

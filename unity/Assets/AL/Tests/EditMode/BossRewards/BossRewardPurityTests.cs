@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -145,6 +146,41 @@ namespace AL.Tests.EditMode.BossRewards
             Assert.AreEqual(BossRewardDiagnosticSeverity.Error, ordered[2].Severity);
         }
 
+        [Test]
+        public void DiagnosticSelectionPrecedesCapAndIgnoresInputPermutation()
+        {
+            BossRewardDiagnostic[] forward = Enumerable.Range(0, 200)
+                .Select(index => Diagnostic(
+                    "AL-BOSS-REWARD-REQUEST-BOUND",
+                    BossRewardDiagnosticSeverity.Error,
+                    "record_" +
+                    index.ToString("D3", CultureInfo.InvariantCulture),
+                    "field"))
+                .ToArray();
+            BossRewardDiagnostic[] reverse = forward
+                .Reverse()
+                .ToArray();
+
+            IReadOnlyList<BossRewardDiagnostic> first =
+                BossRewardDiagnosticOrdering.Order(forward);
+            IReadOnlyList<BossRewardDiagnostic> second =
+                BossRewardDiagnosticOrdering.Order(reverse);
+
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                first.Count);
+            Assert.AreEqual(
+                1,
+                first.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT"));
+            CollectionAssert.AreEqual(
+                first.Select(DiagnosticIdentity).ToArray(),
+                second.Select(DiagnosticIdentity).ToArray());
+            Assert.IsTrue(first.Any(item => item.RecordId == "record_000"));
+            Assert.IsFalse(first.Any(item => item.RecordId == "record_199"));
+        }
+
         private static IEnumerable<BossRewardBinding> TooManyBindings()
         {
             for (int index = 0;
@@ -174,6 +210,23 @@ namespace AL.Tests.EditMode.BossRewards
                 "safe",
                 "operation",
                 recordId);
+        }
+
+        private static string DiagnosticIdentity(
+            BossRewardDiagnostic diagnostic)
+        {
+            return string.Join(
+                "|",
+                diagnostic.Severity,
+                diagnostic.Code,
+                diagnostic.RecordId,
+                diagnostic.FieldPath,
+                diagnostic.Domain,
+                diagnostic.OperationId,
+                diagnostic.BlocksOperation,
+                diagnostic.SchemaVersion,
+                diagnostic.ContentVersion,
+                diagnostic.SafeDeveloperMessage);
         }
     }
 }

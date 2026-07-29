@@ -1,5 +1,6 @@
 {
-  "vectorSchemaVersion": "boss_reward_vector_v1",
+  "vectorSchemaVersion": "boss_reward_vector_v2",
+  "generator": "python3_stdlib_independent",
   "determinismVersion": "boss_reward_sha256_v1",
   "canonicalInputDefaults": {
     "catalogSetId": "catalog_set_test",
@@ -101,6 +102,53 @@
       "chanceMicros": 1000000,
       "expectedStatus": "InvalidRewardProfile",
       "expectedDiagnosticCode": "AL-BOSS-REWARD-CATALOG-ENTRY-ID-INVALID"
+    }
+  ],
+  "scenarioVectors": [
+    {
+      "name": "opaque_utf8_high_bit_multi_entry",
+      "profileId": "0f47ac10b58cc4372a5670e02b2c3d479",
+      "encounterId": "c1-encounter-01",
+      "encounterCompletionId": "완료-1",
+      "rewardResultId": "완료-1:boss_reward",
+      "entries": [
+        {
+          "equipmentDefinitionId": "equipment_vector_gamma",
+          "chanceMicros": 1000000,
+          "canonicalHex": "00000015626f73735f7265776172645f7368613235365f763100000010636174616c6f675f7365745f7465737400000014ec9984eba38c2d313a626f73735f72657761726400000008ec9984eba38c2d3100000009626f73735f74657374000000137265776172645f70726f66696c655f74657374000000097265776172645f76310000001665717569706d656e745f766563746f725f67616d6d61",
+          "sha256": "9de002c230be6912214e48b8a3c2c1062c3db017ec1bd3facadaa3f9b42a6e82",
+          "draw": 2648703682,
+          "thresholdExclusive": 4294967296,
+          "expectedHit": true,
+          "expectedAcquisitionSnapshotFingerprint": "76b2c15198e10464cf80ccd7f870576fa010568df81bcd1afcd43901a4ce83f9"
+        },
+        {
+          "equipmentDefinitionId": "equipment_vector_alpha",
+          "chanceMicros": 1000000,
+          "canonicalHex": "00000015626f73735f7265776172645f7368613235365f763100000010636174616c6f675f7365745f7465737400000014ec9984eba38c2d313a626f73735f72657761726400000008ec9984eba38c2d3100000009626f73735f74657374000000137265776172645f70726f66696c655f74657374000000097265776172645f76310000001665717569706d656e745f766563746f725f616c706861",
+          "sha256": "ea303286bda6015129487e83b9ad26e1cfc2d4fc693e730763039b8578beebea",
+          "draw": 3929027206,
+          "thresholdExclusive": 4294967296,
+          "expectedHit": true,
+          "expectedAcquisitionSnapshotFingerprint": "7d9d356136a0927599e2160620b7968a403215e679a7c8711b751b340880d218"
+        },
+        {
+          "equipmentDefinitionId": "equipment_vector_beta",
+          "chanceMicros": 1000000,
+          "canonicalHex": "00000015626f73735f7265776172645f7368613235365f763100000010636174616c6f675f7365745f7465737400000014ec9984eba38c2d313a626f73735f72657761726400000008ec9984eba38c2d3100000009626f73735f74657374000000137265776172645f70726f66696c655f74657374000000097265776172645f76310000001565717569706d656e745f766563746f725f62657461",
+          "sha256": "32c122783463418975df5d6bac5733811f63ee1da838d734c71e12d3708fac21",
+          "draw": 851518072,
+          "thresholdExclusive": 4294967296,
+          "expectedHit": true,
+          "expectedAcquisitionSnapshotFingerprint": "3adacbce7dfc13fd428be1ca0c0affe7e40207a467ac98fa13c024db4c2a92ff"
+        }
+      ],
+      "expectedOrderedResult": [
+        "equipment_vector_alpha",
+        "equipment_vector_beta",
+        "equipment_vector_gamma"
+      ],
+      "expectedComputationHash": "f53eaad2eca5a946c910f6823ebb78f43dabd4806845fe6af57a8f53851bccc2"
     }
   ]
 }

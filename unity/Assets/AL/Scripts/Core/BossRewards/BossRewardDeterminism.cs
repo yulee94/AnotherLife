@@ -104,7 +104,7 @@ namespace AL.Core.BossRewards
             BossRewardComputationRequest request,
             BossRewardCatalogSnapshot catalog)
         {
-            var diagnostics = new List<BossRewardDiagnostic>();
+            var diagnostics = new BossRewardDiagnosticCollector();
             ValidateRequest(request, diagnostics);
             if (diagnostics.Count > 0)
                 return Failure(BossRewardComputationStatus.InvalidRequest, diagnostics);
@@ -141,7 +141,7 @@ namespace AL.Core.BossRewards
 
             if (!BossRewardText.IsCanonicalTechnicalId(catalog.GameId) ||
                 !BossRewardText.IsCanonicalTechnicalId(catalog.CatalogSetId) ||
-                !BossRewardText.IsBoundedTechnicalId(catalog.Revision) ||
+                !BossRewardText.IsBoundedRevision(catalog.Revision) ||
                 !string.Equals(request.GameId, catalog.GameId, StringComparison.Ordinal) ||
                 !string.Equals(request.CatalogSetId, catalog.CatalogSetId, StringComparison.Ordinal))
             {
@@ -228,7 +228,7 @@ namespace AL.Core.BossRewards
                         request.RewardProfileId,
                         "The requested reward profile is unavailable."));
                 return Failure(
-                    diagnostics.Any(item => item.Code.EndsWith("DUPLICATE", StringComparison.Ordinal))
+                    diagnostics.HasDuplicateDiagnostic
                         ? BossRewardComputationStatus.InvalidRewardProfile
                         : BossRewardComputationStatus.UnknownRewardProfile,
                     diagnostics);
@@ -238,10 +238,8 @@ namespace AL.Core.BossRewards
                 ValidateProfileAndDefinitions(request, catalog, profile, diagnostics);
             if (diagnostics.Count > 0)
             {
-                BossRewardComputationStatus status = diagnostics.Any(item =>
-                    item.Code.StartsWith(
-                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT",
-                        StringComparison.Ordinal))
+                BossRewardComputationStatus status =
+                    diagnostics.HasEquipmentDiagnostic
                     ? BossRewardComputationStatus.InvalidEquipmentDefinition
                     : BossRewardComputationStatus.InvalidRewardProfile;
                 return Failure(status, diagnostics);
@@ -434,7 +432,7 @@ namespace AL.Core.BossRewards
 
         private static void ValidateRequest(
             BossRewardComputationRequest request,
-            ICollection<BossRewardDiagnostic> diagnostics)
+            BossRewardDiagnosticCollector diagnostics)
         {
             if (request == null)
             {
@@ -448,17 +446,37 @@ namespace AL.Core.BossRewards
                 return;
             }
 
-            RequireId(request.GameId, "request.gameId", request.RewardResultId, diagnostics);
-            RequireId(request.CatalogSetId, "request.catalogSetId", request.RewardResultId, diagnostics);
-            RequireId(request.ProfileId, "request.profileId", request.RewardResultId, diagnostics);
-            RequireId(request.EncounterId, "request.encounterId", request.RewardResultId, diagnostics);
-            RequireId(
+            RequireCanonicalTechnicalId(
+                request.GameId,
+                "request.gameId",
+                request.RewardResultId,
+                diagnostics);
+            RequireCanonicalTechnicalId(
+                request.CatalogSetId,
+                "request.catalogSetId",
+                request.RewardResultId,
+                diagnostics);
+            RequireOpaqueAuthorityId(
+                request.ProfileId,
+                "request.profileId",
+                request.RewardResultId,
+                diagnostics);
+            RequireOpaqueAuthorityId(
+                request.EncounterId,
+                "request.encounterId",
+                request.RewardResultId,
+                diagnostics);
+            RequireOpaqueAuthorityId(
                 request.EncounterCompletionId,
                 "request.encounterCompletionId",
                 request.RewardResultId,
                 diagnostics);
-            RequireId(request.RewardResultId, "request.rewardResultId", request.RewardResultId, diagnostics);
-            RequireId(
+            RequireOpaqueAuthorityId(
+                request.RewardResultId,
+                "request.rewardResultId",
+                request.RewardResultId,
+                diagnostics);
+            RequireCanonicalTechnicalId(
                 request.BossDefinitionId,
                 "request.bossDefinitionId",
                 request.RewardResultId,
@@ -468,7 +486,7 @@ namespace AL.Core.BossRewards
                 "request.bossDefinitionContentVersion",
                 request.RewardResultId,
                 diagnostics);
-            RequireId(
+            RequireCanonicalTechnicalId(
                 request.RewardProfileId,
                 "request.rewardProfileId",
                 request.RewardResultId,
@@ -488,7 +506,7 @@ namespace AL.Core.BossRewards
         private static BossRewardBinding ResolveUniqueBinding(
             IReadOnlyList<BossRewardBinding> bindings,
             string bossDefinitionId,
-            ICollection<BossRewardDiagnostic> diagnostics,
+            BossRewardDiagnosticCollector diagnostics,
             string operationId)
         {
             BossRewardBinding found = null;
@@ -500,7 +518,7 @@ namespace AL.Core.BossRewards
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-BINDING-NULL",
                         BossRewardDiagnosticDomain.Catalog,
-                        "catalog.bindings[" + index + "]",
+                        "catalog.bindings",
                         operationId,
                         string.Empty,
                         "The catalog contains a null boss reward binding."));
@@ -518,7 +536,7 @@ namespace AL.Core.BossRewards
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-BINDING-ID-INVALID",
                         BossRewardDiagnosticDomain.Catalog,
-                        "catalog.bindings[" + index + "]",
+                        "catalog.bindings",
                         operationId,
                         candidate.BossDefinitionId,
                         "The boss reward binding contains a noncanonical identity."));
@@ -549,7 +567,7 @@ namespace AL.Core.BossRewards
             IReadOnlyList<BossRewardProfile> profiles,
             string profileId,
             string contentVersion,
-            ICollection<BossRewardDiagnostic> diagnostics,
+            BossRewardDiagnosticCollector diagnostics,
             string operationId)
         {
             BossRewardProfile found = null;
@@ -561,7 +579,7 @@ namespace AL.Core.BossRewards
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-PROFILE-NULL",
                         BossRewardDiagnosticDomain.Catalog,
-                        "catalog.profiles[" + index + "]",
+                        "catalog.profiles",
                         operationId,
                         string.Empty,
                         "The catalog contains a null reward profile."));
@@ -575,7 +593,7 @@ namespace AL.Core.BossRewards
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-PROFILE-ID-INVALID",
                         BossRewardDiagnosticDomain.Catalog,
-                        "catalog.profiles[" + index + "]",
+                        "catalog.profiles",
                         operationId,
                         candidate.Id,
                         "The reward profile contains a noncanonical identity."));
@@ -605,14 +623,14 @@ namespace AL.Core.BossRewards
                 BossRewardComputationRequest request,
                 BossRewardCatalogSnapshot catalog,
                 BossRewardProfile profile,
-                ICollection<BossRewardDiagnostic> diagnostics)
+                BossRewardDiagnosticCollector diagnostics)
         {
             if (!BossRewardText.IsCanonicalTechnicalId(profile.GameId) ||
                 !BossRewardText.IsCanonicalTechnicalId(profile.CatalogSetId) ||
                 !BossRewardText.IsCanonicalTechnicalId(profile.Id) ||
                 !BossRewardText.IsBoundedVersion(profile.SchemaVersion) ||
                 !BossRewardText.IsBoundedVersion(profile.ContentVersion) ||
-                !BossRewardText.IsBoundedTechnicalId(profile.SourceRevision) ||
+                !BossRewardText.IsBoundedRevision(profile.SourceRevision) ||
                 !BossRewardText.IsLowerSha256(profile.RawSha256) ||
                 !string.Equals(profile.GameId, catalog.GameId, StringComparison.Ordinal) ||
                 !string.Equals(profile.CatalogSetId, catalog.CatalogSetId, StringComparison.Ordinal) ||
@@ -667,10 +685,70 @@ namespace AL.Core.BossRewards
             var entryIds = new HashSet<string>(StringComparer.Ordinal);
             var equipmentById = new Dictionary<string, BossEquipmentDefinitionSnapshot>(
                 StringComparer.Ordinal);
+            var indexedDefinitions =
+                new Dictionary<string, BossEquipmentDefinitionSnapshot>(
+                    StringComparer.Ordinal);
+            var seenDefinitionIds = new HashSet<string>(StringComparer.Ordinal);
+            var ambiguousDefinitionIds =
+                new HashSet<string>(StringComparer.Ordinal);
+            for (int index = 0;
+                 index < catalog.EquipmentDefinitions.Count;
+                 index++)
+            {
+                BossEquipmentDefinitionSnapshot definition =
+                    catalog.EquipmentDefinitions[index];
+                if (definition == null)
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-NULL",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.equipmentDefinitions",
+                        request.RewardResultId,
+                        string.Empty,
+                        "The catalog contains a null equipment definition."));
+                    continue;
+                }
+                if (!BossRewardText.IsCanonicalTechnicalId(
+                        definition.EquipmentDefinitionId))
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-ID-INVALID",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.equipmentDefinitions.equipmentDefinitionId",
+                        request.RewardResultId,
+                        definition.EquipmentDefinitionId,
+                        "The equipment definition contains a noncanonical identity."));
+                    continue;
+                }
+
+                bool isUsable = ValidateEquipmentDefinition(
+                    definition,
+                    catalog.SchemaVersion,
+                    diagnostics,
+                    request.RewardResultId);
+                if (!seenDefinitionIds.Add(definition.EquipmentDefinitionId))
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-DUPLICATE",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.equipmentDefinitions",
+                        request.RewardResultId,
+                        definition.EquipmentDefinitionId,
+                        "The catalog contains duplicate equipment definition versions."));
+                    indexedDefinitions.Remove(definition.EquipmentDefinitionId);
+                    ambiguousDefinitionIds.Add(definition.EquipmentDefinitionId);
+                    continue;
+                }
+                if (isUsable)
+                    indexedDefinitions.Add(
+                        definition.EquipmentDefinitionId,
+                        definition);
+            }
+
             for (int index = 0; index < profile.Entries.Count; index++)
             {
                 BossRewardEntry entry = profile.Entries[index];
-                string path = "profile.entries[" + index + "]";
+                const string path = "profile.entries";
                 if (entry == null)
                 {
                     diagnostics.Add(Error(
@@ -738,110 +816,51 @@ namespace AL.Core.BossRewards
                         "The acquisition announcement policy is unavailable."));
                 }
 
-                BossEquipmentDefinitionSnapshot definition = ResolveUniqueEquipment(
-                    catalog.EquipmentDefinitions,
-                    entry.EquipmentDefinitionId,
-                    diagnostics,
-                    request.RewardResultId);
-                if (definition != null)
+                if (ambiguousDefinitionIds.Contains(
+                        entry.EquipmentDefinitionId))
+                    continue;
+                if (!indexedDefinitions.TryGetValue(
+                        entry.EquipmentDefinitionId,
+                        out BossEquipmentDefinitionSnapshot definition))
                 {
-                    ValidateEquipmentDefinition(
-                        definition,
-                        catalog.SchemaVersion,
-                        diagnostics,
-                        request.RewardResultId);
-                    equipmentById[entry.EquipmentDefinitionId] = definition;
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-UNKNOWN",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "profile.entries.equipmentDefinitionId",
+                        request.RewardResultId,
+                        entry.EquipmentDefinitionId,
+                        "The reward entry references an unknown equipment definition."));
+                    continue;
                 }
+                equipmentById[entry.EquipmentDefinitionId] = definition;
             }
             return equipmentById;
         }
 
-        private static BossEquipmentDefinitionSnapshot ResolveUniqueEquipment(
-            IReadOnlyList<BossEquipmentDefinitionSnapshot> definitions,
-            string equipmentId,
-            ICollection<BossRewardDiagnostic> diagnostics,
-            string operationId)
-        {
-            BossEquipmentDefinitionSnapshot found = null;
-            for (int index = 0; index < definitions.Count; index++)
-            {
-                BossEquipmentDefinitionSnapshot candidate = definitions[index];
-                if (candidate == null)
-                {
-                    diagnostics.Add(Error(
-                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-NULL",
-                        BossRewardDiagnosticDomain.Catalog,
-                        "catalog.equipmentDefinitions[" + index + "]",
-                        operationId,
-                        string.Empty,
-                        "The catalog contains a null equipment definition."));
-                    continue;
-                }
-                if (!BossRewardText.IsCanonicalTechnicalId(
-                        candidate.EquipmentDefinitionId))
-                {
-                    diagnostics.Add(Error(
-                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-ID-INVALID",
-                        BossRewardDiagnosticDomain.Catalog,
-                        "catalog.equipmentDefinitions[" + index + "]",
-                        operationId,
-                        candidate.EquipmentDefinitionId,
-                        "The equipment definition contains a noncanonical identity."));
-                    continue;
-                }
-                if (!string.Equals(
-                        candidate.EquipmentDefinitionId,
-                        equipmentId,
-                        StringComparison.Ordinal))
-                    continue;
-                if (found != null)
-                {
-                    diagnostics.Add(Error(
-                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-DUPLICATE",
-                        BossRewardDiagnosticDomain.Catalog,
-                        "catalog.equipmentDefinitions",
-                        operationId,
-                        equipmentId,
-                        "The catalog contains duplicate equipment definition versions."));
-                    return null;
-                }
-                found = candidate;
-            }
-            if (found == null)
-            {
-                diagnostics.Add(Error(
-                    "AL-BOSS-REWARD-CATALOG-EQUIPMENT-UNKNOWN",
-                    BossRewardDiagnosticDomain.Catalog,
-                    "profile.entries",
-                    operationId,
-                    equipmentId,
-                    "The reward entry references an unknown equipment definition."));
-            }
-            return found;
-        }
-
-        private static void ValidateEquipmentDefinition(
+        private static bool ValidateEquipmentDefinition(
             BossEquipmentDefinitionSnapshot definition,
             string supportedSchemaVersion,
-            ICollection<BossRewardDiagnostic> diagnostics,
+            BossRewardDiagnosticCollector diagnostics,
             string operationId)
         {
-            if (!BossRewardText.IsCanonicalTechnicalId(
-                    definition.EquipmentDefinitionId) ||
-                !BossRewardText.IsBoundedVersion(definition.SchemaVersion) ||
-                !BossRewardText.IsBoundedVersion(definition.ContentVersion) ||
-                !BossRewardText.IsCanonicalTechnicalId(definition.SlotId) ||
-                !BossRewardStackPolicies.IsSupported(definition.StackPolicyId) ||
-                !BossRewardAcquisitionSnapshotPolicies.IsSupported(
-                    definition.AcquisitionSnapshotPolicyId) ||
-                !BossRewardText.IsBoundedContentKey(
-                    definition.PresentationContentKey) ||
-                !BossRewardText.IsBoundedTechnicalId(definition.SourceRevision) ||
-                !BossRewardText.IsLowerSha256(definition.RawSha256) ||
-                !string.Equals(
+            bool isUsable =
+                BossRewardText.IsCanonicalTechnicalId(
+                    definition.EquipmentDefinitionId) &&
+                BossRewardText.IsBoundedVersion(definition.SchemaVersion) &&
+                BossRewardText.IsBoundedVersion(definition.ContentVersion) &&
+                BossRewardText.IsCanonicalTechnicalId(definition.SlotId) &&
+                BossRewardStackPolicies.IsSupported(definition.StackPolicyId) &&
+                BossRewardAcquisitionSnapshotPolicies.IsSupported(
+                    definition.AcquisitionSnapshotPolicyId) &&
+                BossRewardText.IsBoundedContentKey(
+                    definition.PresentationContentKey) &&
+                BossRewardText.IsBoundedRevision(definition.SourceRevision) &&
+                BossRewardText.IsLowerSha256(definition.RawSha256) &&
+                string.Equals(
                     definition.SchemaVersion,
                     supportedSchemaVersion,
-                    StringComparison.Ordinal))
+                    StringComparison.Ordinal);
+            if (!isUsable)
             {
                 diagnostics.Add(Error(
                     "AL-BOSS-REWARD-CATALOG-EQUIPMENT-INVALID",
@@ -851,13 +870,14 @@ namespace AL.Core.BossRewards
                     definition.EquipmentDefinitionId,
                     "The equipment technical definition is invalid or unsupported."));
             }
+            return isUsable;
         }
 
-        private static void RequireId(
+        private static void RequireCanonicalTechnicalId(
             string value,
             string fieldPath,
             string operationId,
-            ICollection<BossRewardDiagnostic> diagnostics)
+            BossRewardDiagnosticCollector diagnostics)
         {
             if (BossRewardText.IsCanonicalTechnicalId(value)) return;
             diagnostics.Add(Error(
@@ -869,11 +889,27 @@ namespace AL.Core.BossRewards
                 "A required canonical technical identity is invalid."));
         }
 
+        private static void RequireOpaqueAuthorityId(
+            string value,
+            string fieldPath,
+            string operationId,
+            BossRewardDiagnosticCollector diagnostics)
+        {
+            if (BossRewardText.IsBoundedOpaqueId(value)) return;
+            diagnostics.Add(Error(
+                "AL-BOSS-REWARD-REQUEST-ID-INVALID",
+                BossRewardDiagnosticDomain.Request,
+                fieldPath,
+                operationId,
+                value,
+                "A required bounded opaque authority identity is invalid."));
+        }
+
         private static void RequireVersion(
             string value,
             string fieldPath,
             string operationId,
-            ICollection<BossRewardDiagnostic> diagnostics)
+            BossRewardDiagnosticCollector diagnostics)
         {
             if (BossRewardText.IsBoundedVersion(value)) return;
             diagnostics.Add(Error(

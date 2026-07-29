@@ -133,7 +133,7 @@ namespace AL.Core.BossRewards
                         "inventory",
                         string.Empty,
                         "The owned-equipment collection is null."));
-            if (!BossRewardText.IsBoundedTechnicalId(inventoryRevision))
+            if (!BossRewardText.IsBoundedRevision(inventoryRevision))
                 return Result(
                     OwnedEquipmentQueryStatus.MalformedProvenance,
                     Array.Empty<OwnedEquipmentSnapshot>(),
@@ -188,13 +188,13 @@ namespace AL.Core.BossRewards
                 boundedRows.Add(sourceRow);
             }
             OwnedEquipmentSnapshot[] rows = boundedRows.ToArray();
-            var diagnostics = new List<BossRewardDiagnostic>();
+            var diagnostics = new BossRewardDiagnosticCollector();
             var seen = new HashSet<string>(StringComparer.Ordinal);
             var knownDefinitions = new Dictionary<string, BossEquipmentDefinitionSnapshot>(
                 StringComparer.Ordinal);
             if (!BossRewardText.IsCanonicalTechnicalId(catalog.GameId) ||
                 !BossRewardText.IsCanonicalTechnicalId(catalog.CatalogSetId) ||
-                !BossRewardText.IsBoundedTechnicalId(catalog.Revision))
+                !BossRewardText.IsBoundedRevision(catalog.Revision))
                 return Result(
                     OwnedEquipmentQueryStatus.Unavailable,
                     Array.Empty<OwnedEquipmentSnapshot>(),
@@ -218,7 +218,7 @@ namespace AL.Core.BossRewards
                         inventoryRevision,
                         Error(
                             "AL-BOSS-REWARD-INVENTORY-CATALOG-INVALID",
-                            "catalog.equipmentDefinitions[" + index + "]",
+                            "catalog.equipmentDefinitions",
                             definition == null
                                 ? string.Empty
                                 : definition.EquipmentDefinitionId,
@@ -237,7 +237,7 @@ namespace AL.Core.BossRewards
             for (int index = 0; index < rows.Length; index++)
             {
                 OwnedEquipmentSnapshot row = rows[index];
-                string path = "inventory.items[" + index + "]";
+                const string path = "inventory.items";
                 if (row == null)
                 {
                     Add(
@@ -320,9 +320,11 @@ namespace AL.Core.BossRewards
                         "The inventory acquisition timestamps are invalid.");
                     status = Prefer(status, OwnedEquipmentQueryStatus.MalformedTimestamp);
                 }
-                if (!IsOptionalId(row.LastSourceBossDefinitionId) ||
-                    !IsOptionalId(row.LastSourceEncounterCompletionId) ||
-                    !IsOptionalId(row.LastAppliedRewardResultId))
+                if (!IsOptionalCanonicalTechnicalId(
+                        row.LastSourceBossDefinitionId) ||
+                    !IsOptionalOpaqueId(
+                        row.LastSourceEncounterCompletionId) ||
+                    !IsOptionalOpaqueId(row.LastAppliedRewardResultId))
                 {
                     Add(
                         diagnostics,
@@ -345,7 +347,7 @@ namespace AL.Core.BossRewards
                                 diagnostics,
                                 "AL-BOSS-REWARD-INVENTORY-FUTURE-DEFINITION-PRESERVED",
                                 path + ".equipmentDefinitionId",
-                                row.EquipmentDefinitionId,
+                                string.Empty,
                                 "One or more unknown future equipment rows are preserved but excluded from planning.",
                                 BossRewardDiagnosticSeverity.Warning,
                                 false);
@@ -449,7 +451,7 @@ namespace AL.Core.BossRewards
                        definition.AcquisitionSnapshotPolicyId) &&
                    BossRewardText.IsBoundedContentKey(
                        definition.PresentationContentKey) &&
-                   BossRewardText.IsBoundedTechnicalId(definition.SourceRevision) &&
+                   BossRewardText.IsBoundedRevision(definition.SourceRevision) &&
                    BossRewardText.IsLowerSha256(definition.RawSha256);
         }
 
@@ -464,10 +466,16 @@ namespace AL.Core.BossRewards
             return current;
         }
 
-        private static bool IsOptionalId(string value)
+        private static bool IsOptionalCanonicalTechnicalId(string value)
         {
             return string.IsNullOrEmpty(value) ||
                    BossRewardText.IsCanonicalTechnicalId(value);
+        }
+
+        private static bool IsOptionalOpaqueId(string value)
+        {
+            return string.IsNullOrEmpty(value) ||
+                   BossRewardText.IsBoundedOpaqueId(value);
         }
 
         private static OwnedEquipmentQueryResult Result(
@@ -480,7 +488,7 @@ namespace AL.Core.BossRewards
         }
 
         private static void Add(
-            ICollection<BossRewardDiagnostic> diagnostics,
+            BossRewardDiagnosticCollector diagnostics,
             string code,
             string fieldPath,
             string recordId,

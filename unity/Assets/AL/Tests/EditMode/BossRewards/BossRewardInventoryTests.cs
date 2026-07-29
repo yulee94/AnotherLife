@@ -57,6 +57,47 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void OpaqueCompletionAndResultProvenanceArePreserved()
+        {
+            const string completionId = "완료-1";
+            const string resultId = completionId + ":boss_reward";
+            BossEquipmentDefinitionSnapshot definition =
+                BossRewardTestFixtures.Equipment();
+            var row = new OwnedEquipmentSnapshot(
+                definition.EquipmentDefinitionId,
+                definition.ContentVersion,
+                BossRewardComputation.ComputeAcquisitionSnapshotFingerprint(
+                    definition),
+                definition.SlotId,
+                definition.AttackBonus,
+                definition.DefenseBonus,
+                definition.HealthBonus,
+                definition.StackPolicyId,
+                1,
+                10,
+                20,
+                BossRewardTestFixtures.BossId,
+                completionId,
+                resultId,
+                BossRewardTestFixtures.InventorySchemaVersion,
+                true);
+
+            OwnedEquipmentQueryResult result = BossRewardInventoryValidator.Validate(
+                new[] { row },
+                BossRewardTestFixtures.InventoryRevision,
+                BossRewardTestFixtures.Catalog(),
+                BossRewardTestFixtures.InventorySchemaVersion);
+
+            Assert.AreEqual(OwnedEquipmentQueryStatus.Valid, result.Status);
+            Assert.AreEqual(
+                completionId,
+                result.Items[0].LastSourceEncounterCompletionId);
+            Assert.AreEqual(
+                resultId,
+                result.Items[0].LastAppliedRewardResultId);
+        }
+
+        [Test]
         public void NullCollectionAndNullRowAreDistinct()
         {
             OwnedEquipmentQueryResult nullCollection =

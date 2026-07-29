@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using AL.Core.BossRewards;
 using NUnit.Framework;
@@ -73,18 +74,14 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
-        public void EveryRequestIdentityRequiresCanonicalCatalogGrammar()
+        public void CanonicalCatalogIdentitiesRejectNoncanonicalGrammar()
         {
             BossRewardComputationRequest[] requests =
             {
                 BossRewardTestFixtures.Request(gameId: "AnotherLife"),
                 BossRewardTestFixtures.Request(catalogSetId: "catalog_set_한"),
-                BossRewardTestFixtures.Request(profileId: "profile-test"),
-                BossRewardTestFixtures.Request(encounterId: "1_encounter"),
-                BossRewardTestFixtures.Request(
-                    encounterCompletionId: "completion__test"),
-                BossRewardTestFixtures.Request(rewardResultId: "result_test_"),
-                BossRewardTestFixtures.Request(bossDefinitionId: "boss.unknown"),
+                BossRewardTestFixtures.Request(bossDefinitionId: "boss-unknown"),
+                BossRewardTestFixtures.Request(bossDefinitionId: "1_boss"),
                 BossRewardTestFixtures.Request(
                     rewardProfileId: "reward_profile_한")
             };
@@ -104,11 +101,35 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
-        public void CanonicalIdentityLengthMatchesCatalogAuthority()
+        public void OpaqueAuthorityIdentitiesAcceptExistingAndMultibyteForms()
+        {
+            const string profileGuidN =
+                "0f47ac10b58cc4372a5670e02b2c3d479";
+            const string encounterId = "c1-encounter-01";
+            const string completionId = "완료-1";
+            const string resultId = completionId + ":boss_reward";
+
+            BossRewardComputationResult result = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(
+                    profileId: profileGuidN,
+                    encounterId: encounterId,
+                    encounterCompletionId: completionId,
+                    rewardResultId: resultId),
+                BossRewardTestFixtures.Catalog());
+
+            Assert.AreEqual(BossRewardComputationStatus.Computed, result.Status);
+            Assert.AreEqual(profileGuidN, result.Value.ProfileId);
+            Assert.AreEqual(encounterId, result.Value.EncounterId);
+            Assert.AreEqual(completionId, result.Value.EncounterCompletionId);
+            Assert.AreEqual(resultId, result.Value.RewardResultId);
+        }
+
+        [Test]
+        public void OpaqueAuthorityIdentityLengthUsesDedicatedUtf8Ceiling()
         {
             string maximum = new string(
                 'a',
-                BossRewardTechnicalLimits.MaximumIdentifierUtf8Bytes);
+                BossRewardTechnicalLimits.MaximumOpaqueIdentifierUtf8Bytes);
             string oversized = maximum + "a";
 
             BossRewardComputationResult accepted = BossRewardComputation.Compute(
@@ -125,6 +146,20 @@ namespace AL.Tests.EditMode.BossRewards
                 BossRewardComputationStatus.InvalidRequest,
                 rejected.Status);
             Assert.IsTrue(rejected.Diagnostics.Any(item =>
+                item.Code == "AL-BOSS-REWARD-REQUEST-ID-INVALID"));
+        }
+
+        [Test]
+        public void OpaqueAuthorityIdentityRejectsMalformedUtf16()
+        {
+            BossRewardComputationResult result = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(encounterId: "\ud800"),
+                BossRewardTestFixtures.Catalog());
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.InvalidRequest,
+                result.Status);
+            Assert.IsTrue(result.Diagnostics.Any(item =>
                 item.Code == "AL-BOSS-REWARD-REQUEST-ID-INVALID"));
         }
 
@@ -555,6 +590,88 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void MaximumDefinitionsAndEntriesResolveThroughSingleIndex()
+        {
+            var definitions =
+                new List<BossEquipmentDefinitionSnapshot>(
+                    BossRewardTechnicalLimits.MaximumCatalogEntries);
+            var entries =
+                new List<BossRewardEntry>(
+                    BossRewardTechnicalLimits.MaximumRewardEntries);
+            for (int index = 0;
+                 index < BossRewardTechnicalLimits.MaximumCatalogEntries;
+                 index++)
+            {
+                string id = "equipment_bound_" +
+                            index.ToString("D4", CultureInfo.InvariantCulture);
+                definitions.Add(BossRewardTestFixtures.Equipment(id));
+                if (index < BossRewardTechnicalLimits.MaximumRewardEntries)
+                {
+                    entries.Add(new BossRewardEntry(
+                        id,
+                        index == 0
+                            ? BossRewardTechnicalLimits.MicrosPerUnit
+                            : 0,
+                        1,
+                        BossRewardTestFixtures.ItemPolicyId));
+                }
+            }
+            BossRewardProfile profile =
+                BossRewardTestFixtures.Profile(entries: entries);
+
+            BossRewardComputationResult result = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                BossRewardTestFixtures.Catalog(
+                    profile,
+                    equipment: definitions));
+
+            Assert.AreEqual(BossRewardComputationStatus.Computed, result.Status);
+            Assert.AreEqual(1, result.Value.Drops.Count);
+            Assert.AreEqual(
+                "equipment_bound_0000",
+                result.Value.Drops[0].EquipmentDefinitionId);
+            Assert.IsEmpty(result.Diagnostics);
+        }
+
+        [Test]
+        public void MalformedMaximumCatalogDiagnosticsAreBoundedAndPermutationInvariant()
+        {
+            var definitions =
+                new List<BossEquipmentDefinitionSnapshot>(
+                    BossRewardTechnicalLimits.MaximumCatalogEntries);
+            for (int index = 0;
+                 index < BossRewardTechnicalLimits.MaximumCatalogEntries;
+                 index++)
+            {
+                definitions.Add(BossRewardTestFixtures.Equipment(
+                    "equipment-bad-" +
+                    index.ToString("D4", CultureInfo.InvariantCulture)));
+            }
+            BossRewardComputationResult forward = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                BossRewardTestFixtures.Catalog(equipment: definitions));
+            definitions.Reverse();
+            BossRewardComputationResult reverse = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                BossRewardTestFixtures.Catalog(equipment: definitions));
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.InvalidEquipmentDefinition,
+                forward.Status);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                forward.Diagnostics.Count);
+            Assert.AreEqual(
+                1,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT"));
+            CollectionAssert.AreEqual(
+                forward.Diagnostics.Select(DiagnosticIdentity).ToArray(),
+                reverse.Diagnostics.Select(DiagnosticIdentity).ToArray());
+        }
+
+        [Test]
         public void ContentVersionChangesHashAndUnrelatedMissDoesNotChangeDraw()
         {
             BossRewardComputationResult baseline =
@@ -689,6 +806,25 @@ namespace AL.Tests.EditMode.BossRewards
                     null,
                     "source_revision_1",
                     BossRewardTestFixtures.ShaA));
+        }
+
+        private static string DiagnosticIdentity(
+            BossRewardDiagnostic diagnostic)
+        {
+            return string.Join(
+                "|",
+                ((int)diagnostic.Severity).ToString(
+                    CultureInfo.InvariantCulture),
+                diagnostic.Code,
+                diagnostic.RecordId,
+                diagnostic.FieldPath,
+                ((int)diagnostic.Domain).ToString(
+                    CultureInfo.InvariantCulture),
+                diagnostic.OperationId,
+                diagnostic.BlocksOperation ? "1" : "0",
+                diagnostic.SchemaVersion,
+                diagnostic.ContentVersion,
+                diagnostic.SafeDeveloperMessage);
         }
     }
 }

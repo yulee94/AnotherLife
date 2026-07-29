@@ -24,6 +24,7 @@ namespace AL.Tests.EditMode.BossRewards
         internal const string EconomyRevision = "economy_revision_1";
         internal const string InventoryRevision = "inventory_revision_1";
         internal const string LedgerRevision = "ledger_revision_1";
+        internal const string CatalogRevision = "catalog_revision_1";
         internal const string ItemPolicyId = "boss_reward.item_acquired";
         internal const string CreditPolicyId = "boss_reward.credits_committed";
         internal const string NoRewardPolicyId = "boss_reward.explicit_no_reward";
@@ -118,13 +119,14 @@ namespace AL.Tests.EditMode.BossRewards
             BossRewardProfile profile = null,
             IEnumerable<BossRewardBinding> bindings = null,
             IEnumerable<BossEquipmentDefinitionSnapshot> equipment = null,
-            IEnumerable<string> announcementPolicies = null)
+            IEnumerable<string> announcementPolicies = null,
+            string revision = CatalogRevision)
         {
             return new BossRewardCatalogSnapshot(
                 GameId,
                 CatalogSetId,
                 SchemaVersion,
-                "catalog_revision_1",
+                revision,
                 bindings ?? new[]
                 {
                     new BossRewardBinding(
@@ -195,11 +197,13 @@ namespace AL.Tests.EditMode.BossRewards
                 InventorySchemaVersion);
         }
 
-        internal static BossRewardLedgerSnapshot EmptyLedger()
+        internal static BossRewardLedgerSnapshot EmptyLedger(
+            string gameId = GameId,
+            string profileId = ProfileId)
         {
             return new BossRewardLedgerSnapshot(
-                GameId,
-                ProfileId,
+                gameId,
+                profileId,
                 BossRewardLedgerStatus.Empty,
                 LedgerRevision,
                 Array.Empty<BossRewardAppliedLedgerRecord>(),
@@ -253,6 +257,7 @@ namespace AL.Tests.EditMode.BossRewards
             string expectedInventoryRevision = InventoryRevision,
             string expectedLedgerRevision = LedgerRevision,
             string expectedCatalogSetId = CatalogSetId,
+            string expectedCatalogRevision = CatalogRevision,
             string policyVersion =
                 BossRewardTechnicalLimits.SupportedApplicationPolicyVersion)
         {
@@ -263,6 +268,7 @@ namespace AL.Tests.EditMode.BossRewards
                 expectedInventoryRevision,
                 expectedLedgerRevision,
                 expectedCatalogSetId,
+                expectedCatalogRevision,
                 policyVersion);
         }
 

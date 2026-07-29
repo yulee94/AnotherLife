@@ -1,7 +1,6 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text;
 
 namespace AL.Core.BossRewards
@@ -9,6 +8,8 @@ namespace AL.Core.BossRewards
     public static class BossRewardTechnicalLimits
     {
         public const int MaximumIdentifierUtf8Bytes = 128;
+        public const int MaximumOpaqueIdentifierUtf8Bytes = 256;
+        public const int MaximumRevisionUtf8Bytes = 256;
         public const int MaximumVersionUtf8Bytes = 128;
         public const int MaximumCatalogEntries = 4096;
         public const int MaximumRewardEntries = 256;
@@ -145,7 +146,21 @@ namespace AL.Core.BossRewards
             if (comparison != 0) return comparison;
             comparison = Domain.CompareTo(other.Domain);
             if (comparison != 0) return comparison;
-            return StringComparer.Ordinal.Compare(OperationId, other.OperationId);
+            comparison = StringComparer.Ordinal.Compare(OperationId, other.OperationId);
+            if (comparison != 0) return comparison;
+            comparison = BlocksOperation.CompareTo(other.BlocksOperation);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                SchemaVersion,
+                other.SchemaVersion);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                ContentVersion,
+                other.ContentVersion);
+            if (comparison != 0) return comparison;
+            return StringComparer.Ordinal.Compare(
+                SafeDeveloperMessage,
+                other.SafeDeveloperMessage);
         }
     }
 
@@ -491,33 +506,146 @@ namespace AL.Core.BossRewards
             IEnumerable<BossRewardDiagnostic> diagnostics)
         {
             if (diagnostics == null) return Empty;
-            var bounded = new List<BossRewardDiagnostic>();
-            bool overflow = false;
+            if (diagnostics is BossRewardDiagnosticCollector collector)
+                return collector.ToOrderedReadOnly();
+
+            var bounded = new BossRewardDiagnosticCollector();
             foreach (BossRewardDiagnostic diagnostic in diagnostics)
-            {
-                if (diagnostic == null)
-                    throw new ArgumentException(
-                        "Diagnostic collection contains a null record.");
-                if (bounded.Count >= BossRewardTechnicalLimits.MaximumDiagnostics)
-                {
-                    overflow = true;
-                    break;
-                }
                 bounded.Add(diagnostic);
-            }
-            if (overflow)
+            return bounded.ToOrderedReadOnly();
+        }
+    }
+
+    internal sealed class BossRewardDiagnosticCollector :
+        IEnumerable<BossRewardDiagnostic>
+    {
+        private readonly List<BossRewardDiagnostic> selected =
+            new List<BossRewardDiagnostic>(
+                BossRewardTechnicalLimits.MaximumDiagnostics);
+        private bool overflowed;
+        private bool isMaxHeap;
+        private bool hasDuplicateDiagnostic;
+        private bool hasEquipmentDiagnostic;
+
+        public int Count =>
+            overflowed
+                ? BossRewardTechnicalLimits.MaximumDiagnostics
+                : selected.Count;
+
+        public bool HasDuplicateDiagnostic => hasDuplicateDiagnostic;
+        public bool HasEquipmentDiagnostic => hasEquipmentDiagnostic;
+
+        public void Add(BossRewardDiagnostic diagnostic)
+        {
+            if (diagnostic == null)
+                throw new ArgumentException(
+                    "Diagnostic collection contains a null record.",
+                    nameof(diagnostic));
+
+            hasDuplicateDiagnostic |= diagnostic.Code.EndsWith(
+                "DUPLICATE",
+                StringComparison.Ordinal);
+            hasEquipmentDiagnostic |= diagnostic.Code.StartsWith(
+                "AL-BOSS-REWARD-CATALOG-EQUIPMENT",
+                StringComparison.Ordinal);
+
+            if (!overflowed)
             {
-                bounded[bounded.Count - 1] = new BossRewardDiagnostic(
+                if (selected.Count <
+                    BossRewardTechnicalLimits.MaximumDiagnostics)
+                {
+                    selected.Add(diagnostic);
+                    return;
+                }
+
+                overflowed = true;
+                BuildMaxHeap();
+                RetainIfSmaller(diagnostic);
+                RemoveMaximum();
+                return;
+            }
+
+            RetainIfSmaller(diagnostic);
+        }
+
+        public IReadOnlyList<BossRewardDiagnostic> ToOrderedReadOnly()
+        {
+            if (selected.Count == 0 && !overflowed)
+                return Array.AsReadOnly(new BossRewardDiagnostic[0]);
+
+            int outputCount = selected.Count + (overflowed ? 1 : 0);
+            var copy = new BossRewardDiagnostic[outputCount];
+            selected.CopyTo(copy, 0);
+            if (overflowed)
+            {
+                copy[copy.Length - 1] = new BossRewardDiagnostic(
                     "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT",
                     BossRewardDiagnosticSeverity.Error,
                     BossRewardDiagnosticDomain.Transaction,
                     "diagnostics",
                     true,
-                    "Additional diagnostics were deterministically truncated.");
+                    "Additional diagnostics were canonically truncated.");
             }
-            BossRewardDiagnostic[] copy = bounded.ToArray();
             Array.Sort(copy);
-            return copy.Length == 0 ? Empty : Array.AsReadOnly(copy);
+            return Array.AsReadOnly(copy);
+        }
+
+        public IEnumerator<BossRewardDiagnostic> GetEnumerator()
+        {
+            return ToOrderedReadOnly().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
+        }
+
+        private void RetainIfSmaller(BossRewardDiagnostic diagnostic)
+        {
+            if (!isMaxHeap)
+                BuildMaxHeap();
+            if (selected.Count == 0 ||
+                diagnostic.CompareTo(selected[0]) >= 0)
+                return;
+            selected[0] = diagnostic;
+            SiftDown(0);
+        }
+
+        private void BuildMaxHeap()
+        {
+            for (int index = (selected.Count / 2) - 1; index >= 0; index--)
+                SiftDown(index);
+            isMaxHeap = true;
+        }
+
+        private void RemoveMaximum()
+        {
+            int last = selected.Count - 1;
+            selected[0] = selected[last];
+            selected.RemoveAt(last);
+            if (selected.Count > 0)
+                SiftDown(0);
+        }
+
+        private void SiftDown(int index)
+        {
+            while (true)
+            {
+                int left = (index * 2) + 1;
+                if (left >= selected.Count) return;
+                int right = left + 1;
+                int largest =
+                    right < selected.Count &&
+                    selected[right].CompareTo(selected[left]) > 0
+                        ? right
+                        : left;
+                if (selected[index].CompareTo(selected[largest]) >= 0)
+                    return;
+                BossRewardDiagnostic swap = selected[index];
+                selected[index] = selected[largest];
+                selected[largest] = swap;
+                index = largest;
+            }
         }
     }
 
@@ -547,6 +675,20 @@ namespace AL.Core.BossRewards
             return IsBoundedTechnicalText(
                 value,
                 BossRewardTechnicalLimits.MaximumIdentifierUtf8Bytes);
+        }
+
+        public static bool IsBoundedOpaqueId(string value)
+        {
+            return IsBoundedTechnicalText(
+                value,
+                BossRewardTechnicalLimits.MaximumOpaqueIdentifierUtf8Bytes);
+        }
+
+        public static bool IsBoundedRevision(string value)
+        {
+            return IsBoundedTechnicalText(
+                value,
+                BossRewardTechnicalLimits.MaximumRevisionUtf8Bytes);
         }
 
         public static bool IsCanonicalTechnicalId(string value)

@@ -26,6 +26,9 @@ namespace AL.Tests.EditMode.BossRewards
             Assert.AreEqual(1, result.Plan.LedgerRecord.CommittedDrops.Count);
             Assert.AreEqual(2, result.Plan.DurableNotificationIntents.Count);
             Assert.AreEqual(1, result.Plan.PostCommitEvents.Count);
+            Assert.AreEqual(
+                BossRewardTestFixtures.CatalogRevision,
+                result.Plan.ExpectedCatalogRevision);
             Assert.AreEqual(64, result.Plan.PlanHash.Length);
             Assert.Throws<NotSupportedException>(() =>
                 ((IList)result.Plan.InventoryOperations).Clear());
@@ -109,44 +112,19 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
-        public void RetainedV1ReceiptRemainsReplayable()
+        public void RetainedV1ReceiptReplaysForV2Caller()
         {
-            BossRewardComputedValue source =
+            const string retainedComputationHash =
+                "ed35edd2297fda24425b5f40dfd459dad5cb1702147ddc162aa0855f4f37f34b";
+            const string retainedSnapshotFingerprint =
+                "48457a5dbc694f7187bf689f64fc5b247c103e2ac97d18a4295b56dea6eb6960";
+            BossRewardComputedValue value =
                 BossRewardTestFixtures.Computation().Value;
-            var provisional = new BossRewardComputedValue(
-                source.GameId,
-                source.CatalogSetId,
-                source.ProfileId,
-                source.RewardResultId,
-                source.EncounterId,
-                source.EncounterCompletionId,
-                source.BossDefinitionId,
-                source.BossDefinitionContentVersion,
-                source.RewardProfileId,
-                source.RewardProfileContentVersion,
-                source.RewardProfileSha256,
-                source.WarzoneCredits,
-                source.IsExplicitNoReward,
-                source.Drops,
-                BossRewardTechnicalLimits.DeterminismVersionV1,
-                BossRewardTestFixtures.ShaA);
-            var value = new BossRewardComputedValue(
-                provisional.GameId,
-                provisional.CatalogSetId,
-                provisional.ProfileId,
-                provisional.RewardResultId,
-                provisional.EncounterId,
-                provisional.EncounterCompletionId,
-                provisional.BossDefinitionId,
-                provisional.BossDefinitionContentVersion,
-                provisional.RewardProfileId,
-                provisional.RewardProfileContentVersion,
-                provisional.RewardProfileSha256,
-                provisional.WarzoneCredits,
-                provisional.IsExplicitNoReward,
-                provisional.Drops,
-                provisional.DeterminismVersion,
-                BossRewardComputation.RecomputeComputationHash(provisional));
+            Assert.AreEqual(retainedComputationHash, value.ComputationHash);
+            Assert.AreEqual(1, value.Drops.Count);
+            Assert.AreEqual(
+                retainedSnapshotFingerprint,
+                value.Drops[0].AcquisitionSnapshotFingerprint);
             var computation = new BossRewardComputationResult(
                 BossRewardComputationStatus.Computed,
                 value,
@@ -165,7 +143,7 @@ namespace AL.Tests.EditMode.BossRewards
                 sourceRecord.RewardProfileId,
                 sourceRecord.RewardProfileContentVersion,
                 sourceRecord.RewardProfileSha256,
-                sourceRecord.ComputationHash,
+                retainedComputationHash,
                 sourceRecord.WarzoneCredits,
                 sourceRecord.IsExplicitNoReward,
                 BossRewardTechnicalLimits.DeterminismVersionV1,
@@ -186,8 +164,7 @@ namespace AL.Tests.EditMode.BossRewards
             BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
                 BossRewardTestFixtures.ApplicationRequest(
                     computation,
-                    policyVersion:
-                        BossRewardTechnicalLimits.ApplicationPolicyVersionV1),
+                    policyVersion: "boss_reward_application_v2"),
                 BossRewardTestFixtures.PlanningContext(ledger: ledger));
 
             Assert.AreEqual(
@@ -195,6 +172,54 @@ namespace AL.Tests.EditMode.BossRewards
                 result.Status);
             Assert.AreSame(retainedRecord, result.ExistingRecord);
             Assert.IsNull(result.Plan);
+        }
+
+        [Test]
+        public void FutureWriterPolicyCannotCreateNewPlanBeforeSupport()
+        {
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(
+                    policyVersion: "boss_reward_application_v2"),
+                BossRewardTestFixtures.PlanningContext());
+
+            Assert.AreEqual(
+                BossRewardPlanningStatus.UnsupportedVersion,
+                result.Status);
+            Assert.IsNull(result.Plan);
+        }
+
+        [Test]
+        public void OpaqueAuthorityIdentitiesFlowThroughPlanAndCorrelations()
+        {
+            const string profileId =
+                "0f47ac10b58cc4372a5670e02b2c3d479";
+            const string encounterId = "c1-encounter-01";
+            const string completionId = "완료-1";
+            const string resultId = completionId + ":boss_reward";
+            BossRewardComputationResult computation =
+                BossRewardTestFixtures.Computation(
+                    request: BossRewardTestFixtures.Request(
+                        profileId: profileId,
+                        encounterId: encounterId,
+                        encounterCompletionId: completionId,
+                        rewardResultId: resultId));
+
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(computation),
+                BossRewardTestFixtures.PlanningContext(
+                    profileId: profileId,
+                    ledger: BossRewardTestFixtures.EmptyLedger(
+                        profileId: profileId)));
+
+            Assert.AreEqual(BossRewardPlanningStatus.Ready, result.Status);
+            Assert.AreEqual(profileId, result.Plan.LedgerRecord.ProfileId);
+            Assert.AreEqual(
+                resultId + ":credits",
+                result.Plan.DurableNotificationIntents[0].CorrelationId);
+            Assert.IsTrue(result.Plan.DurableNotificationIntents[1]
+                .CorrelationId.StartsWith(
+                    resultId + ":item:",
+                    StringComparison.Ordinal));
         }
 
         [Test]
@@ -293,7 +318,9 @@ namespace AL.Tests.EditMode.BossRewards
                 true);
 
             BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
-                BossRewardTestFixtures.ApplicationRequest(computation),
+                BossRewardTestFixtures.ApplicationRequest(
+                    computation,
+                    policyVersion: "boss_reward_application_v2"),
                 BossRewardTestFixtures.PlanningContext(ledger: ledger));
 
             Assert.AreEqual(
@@ -375,9 +402,47 @@ namespace AL.Tests.EditMode.BossRewards
                 BossRewardTestFixtures.ApplicationRequest(
                     expectedCatalogSetId: "catalog_old"),
                 BossRewardTestFixtures.PlanningContext());
+            BossRewardPlanningResult catalogRevisionStale =
+                BossRewardApplicationPlanner.Plan(
+                    BossRewardTestFixtures.ApplicationRequest(
+                        expectedCatalogRevision: "catalog_revision_old"),
+                    BossRewardTestFixtures.PlanningContext());
+            BossRewardCatalogSnapshot changedCatalog =
+                BossRewardTestFixtures.Catalog(
+                    BossRewardTestFixtures.Profile(credits: 26),
+                    revision: "catalog_revision_2");
+            BossRewardPlanningResult revisionAndContentStale =
+                BossRewardApplicationPlanner.Plan(
+                    BossRewardTestFixtures.ApplicationRequest(),
+                    BossRewardTestFixtures.PlanningContext(
+                        rewardCatalog: changedCatalog));
 
             Assert.AreEqual(BossRewardPlanningStatus.StalePlan, stale.Status);
             Assert.AreEqual(BossRewardPlanningStatus.CatalogDrift, drift.Status);
+            Assert.AreEqual(
+                BossRewardPlanningStatus.StalePlan,
+                catalogRevisionStale.Status);
+            Assert.AreEqual(
+                BossRewardPlanningStatus.StalePlan,
+                revisionAndContentStale.Status);
+        }
+
+        [Test]
+        public void SameRevisionCatalogContentDriftIsInvalidComputedResult()
+        {
+            BossRewardCatalogSnapshot changedCatalog =
+                BossRewardTestFixtures.Catalog(
+                    BossRewardTestFixtures.Profile(credits: 26),
+                    revision: BossRewardTestFixtures.CatalogRevision);
+
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(),
+                BossRewardTestFixtures.PlanningContext(
+                    rewardCatalog: changedCatalog));
+
+            Assert.AreEqual(
+                BossRewardPlanningStatus.InvalidComputedResult,
+                result.Status);
         }
 
         [Test]
@@ -531,6 +596,32 @@ namespace AL.Tests.EditMode.BossRewards
                 BossRewardTestFixtures.PlanningContext());
 
             Assert.AreEqual(first.Plan.PlanHash, replay.Plan.PlanHash);
+        }
+
+        [Test]
+        public void CatalogRevisionIsCapturedAndBindsPlanHash()
+        {
+            BossRewardCatalogSnapshot nextCatalog =
+                BossRewardTestFixtures.Catalog(
+                    revision: "catalog_revision_2");
+            BossRewardPlanningResult first = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(),
+                BossRewardTestFixtures.PlanningContext());
+            BossRewardPlanningResult second = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(
+                    expectedCatalogRevision: nextCatalog.Revision),
+                BossRewardTestFixtures.PlanningContext(
+                    rewardCatalog: nextCatalog));
+
+            Assert.AreEqual(BossRewardPlanningStatus.Ready, first.Status);
+            Assert.AreEqual(BossRewardPlanningStatus.Ready, second.Status);
+            Assert.AreEqual(
+                BossRewardTestFixtures.CatalogRevision,
+                first.Plan.ExpectedCatalogRevision);
+            Assert.AreEqual(
+                nextCatalog.Revision,
+                second.Plan.ExpectedCatalogRevision);
+            Assert.AreNotEqual(first.Plan.PlanHash, second.Plan.PlanHash);
         }
     }
 }

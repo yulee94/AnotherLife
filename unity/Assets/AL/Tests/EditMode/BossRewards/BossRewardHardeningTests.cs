@@ -360,7 +360,7 @@ namespace AL.Tests.EditMode.BossRewards
         {
             string maximumResultId = new string(
                 'r',
-                BossRewardTechnicalLimits.MaximumIdentifierUtf8Bytes);
+                BossRewardTechnicalLimits.MaximumOpaqueIdentifierUtf8Bytes);
             BossRewardComputationResult computation =
                 BossRewardTestFixtures.Computation(
                     request: BossRewardTestFixtures.Request(
