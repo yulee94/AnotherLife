@@ -3,7 +3,7 @@
 ## Control
 
 - Milestone: NVS-01, A1
-- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-22-v002`
+- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-29-v003`
 - Primary mode: Codex narrative/content
 - Upstream decision: issue #138, comment `4966062298`
 - Tracked task: issue #128
@@ -28,6 +28,14 @@ The tone is urgent, mysterious, hopeful, and non-punitive. The player always has
 Every dialogue line, choice, objective, speaker field, title, and description has a stable localization key with initial English source text in the packet.
 
 Version `v002` removes the report objective's redundant inline `sourceText`. The unchanged English objective remains exclusively at localization key `objective.omen1.report`, preserving D7 and D13 while eliminating duplicate localization authority. No dialogue, choice, state, consequence, or player-facing text changed.
+
+Version `v003` replaces only the four eligible realm identifiers with the
+canonical lowercase launch IDs: `crownlands`, `stonehold`, `eldergrove`, and
+`umbral`. Realm eligibility and every approved quest, dialogue, choice,
+objective, encounter, Retry, artifact, reward, report, chapter, and
+localization meaning remain unchanged. G1, generated runtime data, validation,
+adapters, and production integration require separate downstream
+synchronization under issue #365.
 
 ## Boundaries
 
