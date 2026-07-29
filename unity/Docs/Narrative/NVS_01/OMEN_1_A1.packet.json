@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packetVersion": "omen1-a1-2026-07-22-v002",
+  "packetVersion": "omen1-a1-2026-07-29-v003",
   "milestoneId": "NVS-01",
   "questId": "OMEN_1",
   "titleKey": "quest.omen1.title",
@@ -12,7 +12,7 @@
   },
   "placement": {
     "contextId": "POST_REALM_PROLOGUE",
-    "eligibleRealmIds": ["CROWNLANDS", "STONEHOLD", "ELDERGROVE", "UMBRAL"],
+    "eligibleRealmIds": ["crownlands", "stonehold", "eldergrove", "umbral"],
     "prerequisite": "ONE_COMMITTED_PLAYABLE_REALM",
     "offerAction": "SELECT_VALERIUS",
     "autoAccept": false,
