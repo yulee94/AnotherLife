@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.Build;
@@ -12,6 +13,15 @@ namespace AL.Tests.EditMode.DesignAssets
     {
         private const string BrandIconPath =
             "Assets/AL/Art/App_Icon_Mystic_Medieval_AL.png";
+
+        private const string ApprovedBrandIconGuid =
+            "a97dbdb16fc334e758f5230fa20ca0b0";
+
+        private const string IosBuildSupportUnavailableDiagnostic =
+            "IOS_BUILD_SUPPORT_UNAVAILABLE";
+
+        private const string IosIconQueryUnavailableDiagnostic =
+            "IOS_ICON_QUERY_UNAVAILABLE";
 
         private const string AndroidAdaptiveForegroundPath =
             "Assets/AL/Art/Branding/AndroidAdaptive/" +
@@ -31,6 +41,38 @@ namespace AL.Tests.EditMode.DesignAssets
 
         private const string RuntimeExportFolder =
             "Assets/AL/Art/Heraldry/RuntimeExports";
+
+        private static readonly string[] SerializedIosIconMatrix =
+        {
+            "0:iPhone:180x180",
+            "0:iPhone:120x120",
+            "0:iPad:167x167",
+            "0:iPad:152x152",
+            "0:iPad:76x76",
+            "3:iPhone:120x120",
+            "3:iPhone:80x80",
+            "3:iPad:80x80",
+            "3:iPad:40x40",
+            "1:iPhone:87x87",
+            "1:iPhone:58x58",
+            "1:iPhone:29x29",
+            "1:iPad:58x58",
+            "1:iPad:29x29",
+            "2:iPhone:60x60",
+            "2:iPhone:40x40",
+            "2:iPad:40x40",
+            "2:iPad:20x20",
+            "4:App Store:1024x1024"
+        };
+
+        private static readonly Regex SerializedIosIconPattern = new Regex(
+            @"    - m_Textures:\r?\n" +
+            @"      - \{fileID: 2800000, guid: (?<guid>[a-f0-9]{32}), type: 3\}\r?\n" +
+            @"      m_Width: (?<width>\d+)\r?\n" +
+            @"      m_Height: (?<height>\d+)\r?\n" +
+            @"      m_Kind: (?<kind>\d+)\r?\n" +
+            @"      m_SubKind: (?<subkind>[^\r\n]+)",
+            RegexOptions.CultureInvariant);
 
         private static readonly string[] Realms =
         {
@@ -84,20 +126,58 @@ namespace AL.Tests.EditMode.DesignAssets
         public void ApprovedBrandIconFillsEveryIosSlot()
         {
             Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(BrandIconPath);
-            var verifiedSlots = new List<string>();
+            Assert.That(icon, Is.Not.Null);
 
-            foreach (PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.iOS))
+            IosIconQueryResult query = QueryLiveIosIconSlots();
+            if (query.Status == IosIconQueryStatus.BuildSupportUnavailable)
             {
-                PlatformIcon[] slots = PlayerSettings.GetPlatformIcons(NamedBuildTarget.iOS, kind);
-                foreach (PlatformIcon slot in slots)
-                {
-                    verifiedSlots.Add($"{kind}:{slot.width}x{slot.height}");
-                    Assert.That(slot.maxLayerCount, Is.EqualTo(1));
-                    Assert.That(slot.GetTexture(0), Is.SameAs(icon));
-                }
+                Assert.That(
+                    query.DiagnosticCode,
+                    Is.EqualTo(IosBuildSupportUnavailableDiagnostic));
+                Assert.That(query.Slots, Is.Empty);
+                return;
             }
 
-            Assert.That(verifiedSlots, Is.Not.Empty);
+            Assert.That(
+                query.Status,
+                Is.EqualTo(IosIconQueryStatus.Available),
+                query.DiagnosticCode);
+            Assert.That(query.DiagnosticCode, Is.Empty);
+
+            foreach (IosLiveIconSlot slot in query.Slots)
+            {
+                Assert.That(slot.Icon.maxLayerCount, Is.EqualTo(1), slot.Label);
+                Assert.That(slot.Icon.GetTexture(0), Is.SameAs(icon), slot.Label);
+            }
+        }
+
+        [Test]
+        public void SerializedProjectSettingsPinsEveryIosBrandIconSlot()
+        {
+            Assert.That(
+                AssetDatabase.AssetPathToGUID(BrandIconPath),
+                Is.EqualTo(ApprovedBrandIconGuid));
+
+            string iosIconBlock = ReadSerializedIosIconBlock();
+            MatchCollection matches = SerializedIosIconPattern.Matches(iosIconBlock);
+            Assert.That(matches.Count, Is.GreaterThan(0), "Serialized iOS icon matrix is empty.");
+
+            var actualMatrix = new List<string>(matches.Count);
+            foreach (Match match in matches)
+            {
+                string slot =
+                    $"{match.Groups["kind"].Value}:" +
+                    $"{match.Groups["subkind"].Value}:" +
+                    $"{match.Groups["width"].Value}x{match.Groups["height"].Value}";
+                actualMatrix.Add(slot);
+
+                Assert.That(
+                    match.Groups["guid"].Value,
+                    Is.EqualTo(ApprovedBrandIconGuid),
+                    slot);
+            }
+
+            CollectionAssert.AreEqual(SerializedIosIconMatrix, actualMatrix);
         }
 
         [Test]
@@ -215,6 +295,71 @@ namespace AL.Tests.EditMode.DesignAssets
             }
         }
 
+        private static IosIconQueryResult QueryLiveIosIconSlots()
+        {
+            if (!BuildPipeline.IsBuildTargetSupported(
+                    BuildTargetGroup.iOS,
+                    BuildTarget.iOS))
+            {
+                return new IosIconQueryResult(
+                    IosIconQueryStatus.BuildSupportUnavailable,
+                    IosBuildSupportUnavailableDiagnostic,
+                    new List<IosLiveIconSlot>());
+            }
+
+            var slots = new List<IosLiveIconSlot>();
+            foreach (PlatformIconKind kind in
+                     PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.iOS))
+            {
+                foreach (PlatformIcon icon in
+                         PlayerSettings.GetPlatformIcons(NamedBuildTarget.iOS, kind))
+                {
+                    slots.Add(new IosLiveIconSlot(
+                        $"{kind}:{icon.width}x{icon.height}",
+                        icon));
+                }
+            }
+
+            if (slots.Count == 0)
+            {
+                return new IosIconQueryResult(
+                    IosIconQueryStatus.IconQueryUnavailable,
+                    IosIconQueryUnavailableDiagnostic,
+                    slots);
+            }
+
+            return new IosIconQueryResult(
+                IosIconQueryStatus.Available,
+                string.Empty,
+                slots);
+        }
+
+        private static string ReadSerializedIosIconBlock()
+        {
+            DirectoryInfo projectRoot = Directory.GetParent(Application.dataPath);
+            Assert.That(projectRoot, Is.Not.Null, "Unity project root is unavailable.");
+
+            string settingsPath = Path.Combine(
+                projectRoot.FullName,
+                "ProjectSettings",
+                "ProjectSettings.asset");
+            Assert.That(File.Exists(settingsPath), Is.True, settingsPath);
+
+            string settings = File.ReadAllText(settingsPath);
+            const string iosTargetMarker = "  - m_BuildTarget: iPhone";
+            int start = settings.IndexOf(
+                iosTargetMarker,
+                System.StringComparison.Ordinal);
+            Assert.That(start, Is.GreaterThanOrEqualTo(0), iosTargetMarker);
+
+            int end = settings.IndexOf(
+                "\n  m_BuildTargetBatching:",
+                start,
+                System.StringComparison.Ordinal);
+            Assert.That(end, Is.GreaterThan(start), "Serialized iOS icon block is incomplete.");
+            return settings.Substring(start, end - start);
+        }
+
         private static TextureImporter RequireImporter(string assetPath)
         {
             TextureImporter importer = AssetImporter.GetAtPath(assetPath) as TextureImporter;
@@ -325,6 +470,45 @@ namespace AL.Tests.EditMode.DesignAssets
                 Assert.That(pixel.g, Is.GreaterThanOrEqualTo(250));
                 Assert.That(pixel.b, Is.GreaterThanOrEqualTo(250));
             }
+        }
+
+        private enum IosIconQueryStatus
+        {
+            Available,
+            BuildSupportUnavailable,
+            IconQueryUnavailable
+        }
+
+        private sealed class IosIconQueryResult
+        {
+            public IosIconQueryResult(
+                IosIconQueryStatus status,
+                string diagnosticCode,
+                List<IosLiveIconSlot> slots)
+            {
+                Status = status;
+                DiagnosticCode = diagnosticCode;
+                Slots = slots;
+            }
+
+            public IosIconQueryStatus Status { get; }
+
+            public string DiagnosticCode { get; }
+
+            public List<IosLiveIconSlot> Slots { get; }
+        }
+
+        private sealed class IosLiveIconSlot
+        {
+            public IosLiveIconSlot(string label, PlatformIcon icon)
+            {
+                Label = label;
+                Icon = icon;
+            }
+
+            public string Label { get; }
+
+            public PlatformIcon Icon { get; }
         }
     }
 }
