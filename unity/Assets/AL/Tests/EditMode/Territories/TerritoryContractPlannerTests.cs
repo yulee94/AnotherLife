@@ -46,6 +46,132 @@ namespace AL.Tests.EditMode.Territories
         }
 
         [Test]
+        public void QueryFailsClosedForNullDefinitionWithoutThrowing()
+        {
+            object validDefinition = NewDefinition(
+                "T2",
+                "territory.silver_woods",
+                "Eldergrove",
+                "Wood",
+                40L,
+                false,
+                "Stonehold",
+                "Eldergrove",
+                "Crownlands",
+                "Umbral");
+            Array definitions = ArrayOf(
+                DefinitionType,
+                validDefinition,
+                null);
+            object planner = NewPlanner(definitions);
+            Array states = ArrayOf(
+                StateRecordType,
+                NewState("T2", "Eldergrove", 0L));
+
+            object first = Invoke(planner, "BuildQuery", states, Realm("Eldergrove"));
+            object second = Invoke(planner, "BuildQuery", states, Realm("Eldergrove"));
+
+            AssertDefinitionFailure(
+                first,
+                "Eldergrove",
+                "Error|NullDefinition|");
+            AssertDefinitionFailure(
+                second,
+                "Eldergrove",
+                "Error|NullDefinition|");
+            CollectionAssert.AreEqual(DiagnosticKeys(first), DiagnosticKeys(second));
+            Assert.AreSame(validDefinition, definitions.GetValue(0));
+            Assert.IsNull(definitions.GetValue(1));
+            Assert.AreEqual("T2", Property(states.GetValue(0), "Id"));
+        }
+
+        [Test]
+        public void QueryFailsClosedForDuplicateDefinitionIdsWithoutThrowing()
+        {
+            object firstDefinition = NewDefinition(
+                "T1",
+                "territory.iron_peaks",
+                "Stonehold",
+                "Stone",
+                50L,
+                true,
+                "Stonehold",
+                "Eldergrove",
+                "Crownlands",
+                "Umbral");
+            object secondDefinition = NewDefinition(
+                "T1",
+                "territory.iron_peaks_duplicate",
+                "Stonehold",
+                "Stone",
+                50L,
+                true,
+                "Stonehold",
+                "Eldergrove",
+                "Crownlands",
+                "Umbral");
+            object thirdDefinition = NewDefinition(
+                "T2",
+                "territory.silver_woods",
+                "Eldergrove",
+                "Wood",
+                40L,
+                false,
+                "Stonehold",
+                "Eldergrove",
+                "Crownlands",
+                "Umbral");
+            object fourthDefinition = NewDefinition(
+                "T2",
+                "territory.silver_woods_duplicate",
+                "Eldergrove",
+                "Wood",
+                40L,
+                false,
+                "Stonehold",
+                "Eldergrove",
+                "Crownlands",
+                "Umbral");
+            Array definitions = ArrayOf(
+                DefinitionType,
+                thirdDefinition,
+                firstDefinition,
+                fourthDefinition,
+                secondDefinition);
+            object planner = NewPlanner(definitions);
+            Array states = ArrayOf(
+                StateRecordType,
+                NewState("T2", "Eldergrove", 0L),
+                NewState("T1", "Stonehold", 0L));
+
+            object first = Invoke(planner, "BuildQuery", states, Realm("Stonehold"));
+            object second = Invoke(planner, "BuildQuery", states, Realm("Stonehold"));
+
+            AssertDefinitionFailure(
+                first,
+                "Stonehold",
+                "Error|DuplicateDefinitionId|T1",
+                "Error|DuplicateDefinitionId|T2");
+            AssertDefinitionFailure(
+                second,
+                "Stonehold",
+                "Error|DuplicateDefinitionId|T1",
+                "Error|DuplicateDefinitionId|T2");
+            CollectionAssert.AreEqual(DiagnosticKeys(first), DiagnosticKeys(second));
+            Assert.AreSame(thirdDefinition, definitions.GetValue(0));
+            Assert.AreSame(firstDefinition, definitions.GetValue(1));
+            Assert.AreSame(fourthDefinition, definitions.GetValue(2));
+            Assert.AreSame(secondDefinition, definitions.GetValue(3));
+            CollectionAssert.AreEqual(
+                new[] { "T2", "T1" },
+                new[]
+                {
+                    Property(states.GetValue(0), "Id").ToString(),
+                    Property(states.GetValue(1), "Id").ToString()
+                });
+        }
+
+        [Test]
         public void QueryPreservesUnknownFutureTerritoryButExcludesItFromSupportedIncome()
         {
             object planner = CreateBaselinePlanner();
@@ -233,6 +359,36 @@ namespace AL.Tests.EditMode.Territories
             return InvokeStatic(PlannerType, "CreateCurrentBaseline");
         }
 
+        private static object NewPlanner(Array definitions)
+        {
+            return Activator.CreateInstance(
+                PlannerType,
+                new object[] { definitions });
+        }
+
+        private static object NewDefinition(
+            string id,
+            string contentKey,
+            string initialOwner,
+            string bonusType,
+            long bonusAmount,
+            bool isFortress,
+            params string[] allowedOwners)
+        {
+            Array owners = ArrayOf(
+                RealmType,
+                allowedOwners.Select(Realm).ToArray());
+            return Activator.CreateInstance(
+                DefinitionType,
+                id,
+                contentKey,
+                Realm(initialOwner),
+                Resource(bonusType),
+                bonusAmount,
+                isFortress,
+                owners);
+        }
+
         private static object NewState(string id, string owner, long revision)
         {
             return Activator.CreateInstance(StateRecordType, id, Realm(owner), revision);
@@ -269,6 +425,31 @@ namespace AL.Tests.EditMode.Territories
             Assert.True(
                 diagnostics.Any(diagnostic => Property(diagnostic, "Code").ToString() == expectedCode && Property(diagnostic, "TerritoryId").ToString() == expectedTerritoryId),
                 $"Expected diagnostic {expectedCode} for {expectedTerritoryId}.");
+        }
+
+        private static void AssertDefinitionFailure(
+            object query,
+            string expectedCommittedRealm,
+            params string[] expectedDiagnostics)
+        {
+            Assert.AreEqual("Unavailable", Property(query, "Status").ToString());
+            Assert.AreEqual("territory_current_v1", Property(query, "CatalogId"));
+            Assert.AreEqual(
+                expectedCommittedRealm,
+                Property(query, "CommittedProfileRealm").ToString());
+            Assert.AreEqual(string.Empty, Property(query, "StateRevisionHash"));
+            Assert.IsEmpty(Items(Property(query, "Territories")));
+            CollectionAssert.AreEqual(expectedDiagnostics, DiagnosticKeys(query));
+        }
+
+        private static string[] DiagnosticKeys(object result)
+        {
+            return Items(Property(result, "Diagnostics"))
+                .Select(diagnostic =>
+                    $"{Property(diagnostic, "Severity")}|" +
+                    $"{Property(diagnostic, "Code")}|" +
+                    $"{Property(diagnostic, "TerritoryId")}")
+                .ToArray();
         }
 
         private static object[] Items(object value)
@@ -319,11 +500,18 @@ namespace AL.Tests.EditMode.Territories
             return Enum.Parse(RealmType, value);
         }
 
+        private static object Resource(string value)
+        {
+            return Enum.Parse(ResourceType, value);
+        }
+
         private static Type PlannerType => RuntimeType("AL.RealmWar.Territories.Contracts.TerritoryContractPlanner");
+        private static Type DefinitionType => RuntimeType("AL.RealmWar.Territories.Contracts.TerritoryDefinition");
         private static Type StateRecordType => RuntimeType("AL.RealmWar.Territories.Contracts.TerritoryStateRecord");
         private static Type AuthorizationType => RuntimeType("AL.RealmWar.Territories.Contracts.TerritoryCaptureAuthorization");
         private static Type RequestType => RuntimeType("AL.RealmWar.Territories.Contracts.TerritoryCaptureRequest");
         private static Type RealmType => RuntimeType("AL.Core.RealmId");
+        private static Type ResourceType => RuntimeType("AL.Core.ResourceType");
 
         private static Type RuntimeType(string typeName)
         {

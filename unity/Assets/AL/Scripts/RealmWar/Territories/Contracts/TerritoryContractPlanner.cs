@@ -257,6 +257,18 @@ namespace AL.RealmWar.Territories.Contracts
         public TerritoryQueryResult BuildQuery(IEnumerable<TerritoryStateRecord> rawStates, RealmId committedProfileRealm)
         {
             var diagnostics = ValidateDefinitions().ToList();
+            if (diagnostics.Any(diagnostic =>
+                    diagnostic.Severity == TerritoryDiagnosticSeverity.Error))
+            {
+                return new TerritoryQueryResult(
+                    TerritoryQueryStatus.Unavailable,
+                    CurrentCatalogId,
+                    string.Empty,
+                    committedProfileRealm,
+                    Array.Empty<TerritorySnapshot>(),
+                    diagnostics);
+            }
+
             var states = (rawStates ?? Array.Empty<TerritoryStateRecord>()).ToList();
             var definitionsById = _definitions.Where(definition => !string.IsNullOrWhiteSpace(definition?.Id)).ToDictionary(definition => definition.Id, StringComparer.Ordinal);
             var snapshots = new List<TerritorySnapshot>();
