@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/ore-gallery-mouths-visual-source-packet-v1.json",
+  "title": "Ore Gallery Mouths Visual Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion", "packetId", "sourceVersion", "parentRosterSourceVersion",
+    "createdDate", "authority", "readiness", "habitat", "fauna",
+    "environmentKit", "productionEnvelope", "sourceBudgets", "sourceAssets",
+    "generationInputs", "externalInputs"
+  ],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": "1.0.0"},
+    "packetId": {"const": "tdf_packet_ore_gallery_mouths_visual_source_v001"},
+    "sourceVersion": {"const": "tdf-eco-ore-gallery-2026-07-29-v001"},
+    "parentRosterSourceVersion": {"type": "string"},
+    "createdDate": {"type": "string", "format": "date"},
+    "authority": {"type": "object"},
+    "readiness": {"type": "object"},
+    "habitat": {"type": "object"},
+    "fauna": {"type": "object"},
+    "environmentKit": {"type": "object"},
+    "productionEnvelope": {"type": "object"},
+    "sourceBudgets": {"type": "object"},
+    "sourceAssets": {
+      "type": "array", "minItems": 5, "maxItems": 5,
+      "items": {"$ref": "#/$defs/asset"}
+    },
+    "generationInputs": {
+      "type": "array", "minItems": 2, "maxItems": 2,
+      "items": {"$ref": "#/$defs/input"}
+    },
+    "externalInputs": {"type": "array", "maxItems": 0}
+  },
+  "$defs": {
+    "asset": {
+      "type": "object", "additionalProperties": false,
+      "required": ["assetId", "path", "roles", "byteLength", "sha256", "generationCall"],
+      "properties": {
+        "assetId": {"type": "string", "pattern": "^tdf_asset_"},
+        "path": {"type": "string", "pattern": "^unity/Docs/.+\\.png$"},
+        "roles": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+        "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "generationCall": {"type": "string", "pattern": "^call_"}
+      }
+    },
+    "input": {
+      "type": "object", "additionalProperties": false,
+      "required": ["assetId", "path", "state", "byteLength", "sha256", "generationCall"],
+      "properties": {
+        "assetId": {"type": "string", "pattern": "^tdf_asset_input_"},
+        "path": {"type": "string", "pattern": "^unity/Docs/.+\\.png$"},
+        "state": {"const": "RetainedRefinementInput"},
+        "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
+        "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+        "generationCall": {"type": "string", "pattern": "^call_"}
+      }
+    }
+  }
+}
