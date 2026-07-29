@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
+using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+using AL.Services.Local;
 using AL.UI.Kingdom;
 using NUnit.Framework;
 using UnityEngine;
@@ -20,12 +23,21 @@ namespace AL.Tests.EditMode.Narrative
     public sealed class Nvs01KingdomSceneWiringTests
     {
         private GameObject _host;
+        private string _saveRoot;
 
         [SetUp]
         public void SetUp()
         {
             ServicesDictionary().Clear();
             ServiceLocator.Register<IRealmService>(new CommittedRealmService(RealmId.Crownlands));
+            _saveRoot = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-Nvs01KingdomTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(_saveRoot);
+            var saveService = CreateSaveService(_saveRoot);
+            saveService.CreateNewSave(RealmId.Crownlands);
+            ServiceLocator.Register<ISaveGameService>(saveService);
         }
 
         [TearDown]
@@ -43,6 +55,10 @@ namespace AL.Tests.EditMode.Narrative
             }
 
             ServicesDictionary().Clear();
+            if (!string.IsNullOrEmpty(_saveRoot) && Directory.Exists(_saveRoot))
+            {
+                Directory.Delete(_saveRoot, true);
+            }
         }
 
         [Test]
@@ -147,6 +163,99 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
+        public void ProductionPanelReloadsTheLastVerifiedChoiceFromDisk()
+        {
+            KingdomSceneController controller = CreateController(profileReady: true);
+            Click(controller, Localize("npc.valerius.name"));
+            Click(controller, Localize("choice.omen1.accept"));
+
+            Assert.AreEqual("TALK_TO_VALERIUS", CurrentView(controller).StateId);
+
+            var reloaded = CreateSaveService(_saveRoot);
+            reloaded.Load();
+            Assert.AreEqual(
+                Nvs01ProgressData.CurrentVersion,
+                reloaded.CurrentSave.Nvs01Progress.Version);
+            Assert.AreEqual(
+                "TALK_TO_VALERIUS",
+                reloaded.CurrentSave.Nvs01Progress.StateId);
+            ServiceLocator.Register<ISaveGameService>(reloaded);
+
+            DestroyControllerUi();
+            controller = CreateController(profileReady: true);
+
+            Assert.AreEqual("TALK_TO_VALERIUS", CurrentView(controller).StateId);
+            AssertButtonLabels(
+                controller,
+                Localize("choice.omen1.investigate"),
+                Localize("choice.omen1.ask_more"));
+        }
+
+        [Test]
+        public void ForwardProgressVersionFailsClosedWithoutActions()
+        {
+            var saveService = ServiceLocator.Get<ISaveGameService>();
+            saveService.CurrentSave.Nvs01Progress.Version =
+                Nvs01ProgressData.CurrentVersion + 1;
+
+            KingdomSceneController controller = CreateController(profileReady: true);
+
+            Assert.AreEqual(
+                Nvs01KingdomViewStatus.Unavailable,
+                CurrentView(controller).Status);
+            Assert.AreEqual(
+                "AL-NVS01-SAVE-PROGRESS-UNAVAILABLE",
+                CurrentView(controller).DiagnosticCode);
+            Assert.IsEmpty(ActionButtons(controller));
+        }
+
+        [TestCase("blank-state")]
+        [TestCase("inactive-encounter")]
+        [TestCase("inactive-operation")]
+        public void RuntimeInconsistentProgressLoadsOnlyAsReadOnlyEvidence(
+            string scenario)
+        {
+            KingdomSceneController controller = CreateController(profileReady: true);
+            Click(controller, Localize("npc.valerius.name"));
+            Click(controller, Localize("choice.omen1.accept"));
+
+            var saveService =
+                (LocalSaveGameService)ServiceLocator.Get<ISaveGameService>();
+            Nvs01ProgressData progress = saveService.CurrentSave.Nvs01Progress;
+            Assert.AreEqual(Nvs01ProgressData.CurrentVersion, progress.Version);
+            switch (scenario)
+            {
+                case "blank-state":
+                    progress.StateId = string.Empty;
+                    break;
+                case "inactive-encounter":
+                    progress.HasCurrentEncounter = false;
+                    progress.CurrentEncounter.RequestId =
+                        "00000000-0000-0000-0000-000000000001";
+                    break;
+                case "inactive-operation":
+                    Assert.True(progress.HasLastOperation);
+                    progress.HasLastOperation = false;
+                    break;
+                default:
+                    Assert.Fail("Unknown malformed progress scenario.");
+                    break;
+            }
+
+            WriteCanonicalSave(saveService.CurrentSave);
+            var reloaded = CreateSaveService(_saveRoot);
+            reloaded.Load();
+
+            Assert.AreEqual(
+                SaveLoadStatus.LoadedPrimaryDegraded,
+                reloaded.LastLoadStatus);
+            Assert.IsNull(reloaded.CurrentSave);
+            Assert.IsNotNull(reloaded.ReadOnlyCandidateSnapshot);
+            Assert.False(reloaded.LastLoadDisposition.IsRuntimeUsable);
+            Assert.False(reloaded.LastLoadDisposition.IsWritable);
+        }
+
+        [Test]
         public void ControllerDoesNotDuplicateNarrativeOrUseTheDevelopmentFactory()
         {
             string path = Path.Combine(
@@ -177,6 +286,46 @@ namespace AL.Tests.EditMode.Narrative
             Invoke(controller, "BuildRuntimeUi");
             Invoke(controller, "InitializeNvs01Presenter", VerifiedCatalog());
             return controller;
+        }
+
+        private void DestroyControllerUi()
+        {
+            if (_host != null)
+            {
+                UnityEngine.Object.DestroyImmediate(_host);
+                _host = null;
+            }
+
+            GameObject canvas = GameObject.Find("KingdomCanvas");
+            if (canvas != null)
+            {
+                UnityEngine.Object.DestroyImmediate(canvas);
+            }
+        }
+
+        private static LocalSaveGameService CreateSaveService(string root)
+        {
+            ConstructorInfo constructor = typeof(LocalSaveGameService).GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(string) },
+                null);
+            Assert.NotNull(constructor);
+            return (LocalSaveGameService)constructor.Invoke(new object[] { root });
+        }
+
+        private void WriteCanonicalSave(SaveGameData save)
+        {
+            string json = JsonUtility.ToJson(save, true);
+            var encoding = new UTF8Encoding(false, true);
+            File.WriteAllText(
+                Path.Combine(_saveRoot, "save.json"),
+                json,
+                encoding);
+            File.WriteAllText(
+                Path.Combine(_saveRoot, "save.backup.json"),
+                json,
+                encoding);
         }
 
         private static Nvs01KingdomView CurrentView(KingdomSceneController controller)

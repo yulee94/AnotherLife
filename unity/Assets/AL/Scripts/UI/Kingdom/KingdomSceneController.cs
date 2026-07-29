@@ -9,6 +9,7 @@ using AL.Kingdom;
 using AL.Kingdom.Visuals;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
+using AL.Services.Local;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -454,12 +455,37 @@ namespace AL.UI.Kingdom
                 return;
             }
 
-            // This scene-local committer is intentionally transient. C3 owns durable clone -> validate
-            // -> persist/verify -> publish semantics; the production Kingdom controller owns only the
-            // current scene session until that contract is available.
+            if (!ServiceLocator.TryGet<ISaveGameService>(out var saveGameService) ||
+                saveGameService.CurrentSave == null ||
+                !(saveGameService is ISaveGameCandidateStore candidateStore))
+            {
+                _nvs01Presenter = null;
+                RenderNvs01View(
+                    Nvs01KingdomView.PersistenceUnavailable(null),
+                    true);
+                return;
+            }
+
+            if (!Nvs01ProgressCodec.TryDecode(
+                    saveGameService.CurrentSave.Nvs01Progress,
+                    verifiedCatalog,
+                    out Nvs01QuestSnapshot initialSnapshot,
+                    out Nvs01RuntimeDiagnostic persistenceDiagnostic))
+            {
+                _nvs01Presenter = null;
+                RenderNvs01View(
+                    Nvs01KingdomView.PersistenceUnavailable(
+                        persistenceDiagnostic?.Code),
+                    true);
+                return;
+            }
+
             var runtime = new Nvs01QuestRuntime(
                 verifiedCatalog,
-                new Nvs01InMemoryMutationCommitter(),
+                initialSnapshot,
+                new Nvs01SaveGameMutationCommitter(
+                    candidateStore,
+                    verifiedCatalog),
                 () => Guid.NewGuid().ToString("D"));
             _nvs01Presenter = new Nvs01KingdomPresenter(
                 runtime,

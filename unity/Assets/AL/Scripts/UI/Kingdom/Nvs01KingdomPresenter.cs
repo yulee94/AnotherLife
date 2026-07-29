@@ -97,6 +97,25 @@ namespace AL.UI.Kingdom
         public static Nvs01KingdomView CatalogUnavailable(Nvs01CatalogDiagnostic diagnostic)
         {
             string code = diagnostic?.Code ?? Nvs01CatalogContract.DiagnosticCodePrefix + "CATALOG-MISSING";
+            return Unavailable(
+                code,
+                "Quest content is currently unavailable. (" + code + ")");
+        }
+
+        public static Nvs01KingdomView PersistenceUnavailable(string diagnosticCode)
+        {
+            string code = string.IsNullOrWhiteSpace(diagnosticCode)
+                ? Nvs01CatalogContract.DiagnosticCodePrefix + "SAVE-PROGRESS-UNAVAILABLE"
+                : diagnosticCode;
+            return Unavailable(
+                code,
+                "Quest progress is currently unavailable. (" + code + ")");
+        }
+
+        private static Nvs01KingdomView Unavailable(
+            string code,
+            string playerMessage)
+        {
             return new Nvs01KingdomView(
                 Nvs01KingdomViewStatus.Unavailable,
                 string.Empty,
@@ -111,7 +130,7 @@ namespace AL.UI.Kingdom
                 string.Empty,
                 false,
                 null,
-                "Quest content is currently unavailable. (" + code + ")",
+                playerMessage,
                 code);
         }
 

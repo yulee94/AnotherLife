@@ -646,6 +646,49 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void CurrentPrimaryMissingNvs01ProgressLoadsWritableWithNeutralDefault()
+        {
+            string root = CreateRoot();
+
+            try
+            {
+                CreateCurrentProfile(root);
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                byte[] withoutNvs01 = RemoveNvs01Progress(
+                    File.ReadAllBytes(primaryPath));
+                File.WriteAllBytes(primaryPath, withoutNvs01);
+                File.WriteAllBytes(backupPath, withoutNvs01);
+                Dictionary<string, byte[]> originalDirectory =
+                    SnapshotDirectory(root);
+
+                object service = CreateSaveService(root);
+                Invoke(service, "Load");
+
+                Assert.AreEqual(
+                    "LoadedPrimary",
+                    GetProperty(service, "LastLoadStatus").ToString());
+                object currentSave = GetProperty(service, "CurrentSave");
+                Assert.NotNull(currentSave);
+                Assert.Null(GetProperty(service, "ReadOnlyCandidateSnapshot"));
+                object progress = GetField(currentSave, "Nvs01Progress");
+                Assert.NotNull(progress);
+                Assert.AreEqual(0, GetField(progress, "Version"));
+
+                object disposition = GetProperty(
+                    service,
+                    "LastLoadDisposition");
+                Assert.True((bool)GetProperty(disposition, "IsRuntimeUsable"));
+                Assert.True((bool)GetProperty(disposition, "IsWritable"));
+                AssertDirectoryUnchanged(root, originalDirectory);
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
         public void MultibyteSerializedPayloadUsesUtf8ByteLimitBeforeMutation()
         {
             string root = CreateRoot();
@@ -784,6 +827,83 @@ namespace AL.Tests.EditMode
                 "\"SaveSchemaVersion\": 2",
                 1);
             return StrictUtf8.GetBytes(forwardJson);
+        }
+
+        private static byte[] RemoveNvs01Progress(byte[] currentBytes)
+        {
+            string json = StrictUtf8.GetString(currentBytes);
+            const string property = "\"Nvs01Progress\":";
+            int propertyStart = json.IndexOf(
+                property,
+                StringComparison.Ordinal);
+            Assert.That(propertyStart, Is.GreaterThanOrEqualTo(0));
+
+            int valueStart = propertyStart + property.Length;
+            while (valueStart < json.Length &&
+                   char.IsWhiteSpace(json[valueStart]))
+            {
+                valueStart++;
+            }
+
+            Assert.That(valueStart, Is.LessThan(json.Length));
+            Assert.AreEqual('{', json[valueStart]);
+
+            var depth = 0;
+            var inString = false;
+            var escaped = false;
+            for (var index = valueStart; index < json.Length; index++)
+            {
+                char character = json[index];
+                if (inString)
+                {
+                    if (escaped)
+                    {
+                        escaped = false;
+                    }
+                    else if (character == '\\')
+                    {
+                        escaped = true;
+                    }
+                    else if (character == '"')
+                    {
+                        inString = false;
+                    }
+
+                    continue;
+                }
+
+                if (character == '"')
+                {
+                    inString = true;
+                }
+                else if (character == '{')
+                {
+                    depth++;
+                }
+                else if (character == '}')
+                {
+                    depth--;
+                    if (depth == 0)
+                    {
+                        int propertyEnd = index + 1;
+                        while (propertyEnd < json.Length &&
+                               char.IsWhiteSpace(json[propertyEnd]))
+                        {
+                            propertyEnd++;
+                        }
+
+                        Assert.That(propertyEnd, Is.LessThan(json.Length));
+                        Assert.AreEqual(',', json[propertyEnd]);
+                        return StrictUtf8.GetBytes(
+                            json.Remove(
+                                propertyStart,
+                                propertyEnd - propertyStart + 1));
+                    }
+                }
+            }
+
+            Assert.Fail("The generated NVS-01 progress object was not closed.");
+            return Array.Empty<byte>();
         }
 
         private static string LegacyCompatibleJson()

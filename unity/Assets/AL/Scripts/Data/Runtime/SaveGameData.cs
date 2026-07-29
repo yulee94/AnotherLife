@@ -31,8 +31,83 @@ namespace AL.Data.Runtime
         public ChampionCustomizationState ChampionCustomization = new ChampionCustomizationState();
         public List<OwnedEquipmentState> OwnedEquipment = new List<OwnedEquipmentState>();
         public List<AppliedBossLootRewardState> AppliedBossLootRewards = new List<AppliedBossLootRewardState>();
+        public Nvs01ProgressData Nvs01Progress = new Nvs01ProgressData();
         public int WarzoneCredits;
         public long LastSavedTimestamp;
+    }
+
+    [Serializable]
+    public class Nvs01ProgressData
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public string PacketVersion = string.Empty;
+        public string PacketSha256 = string.Empty;
+        public string QuestId = string.Empty;
+        public long Revision;
+        public string StateId = string.Empty;
+        public List<Nvs01ObjectiveProgressData> Objectives =
+            new List<Nvs01ObjectiveProgressData>();
+        public string CurrentDialogueNodeId = string.Empty;
+        public bool PendingChoice;
+        public string PendingSemanticActionId = string.Empty;
+        public string CommittedRealmId = string.Empty;
+        public int EncounterStatus;
+        public bool HasCurrentEncounter;
+        public Nvs01EncounterRequestData CurrentEncounter =
+            new Nvs01EncounterRequestData();
+        public string LastEncounterCorrelationId = string.Empty;
+        public bool HasLastEncounterOutcome;
+        public int LastEncounterOutcome;
+        public string LastEncounterEventId = string.Empty;
+        public string LastEncounterSnapshotVersion = string.Empty;
+        public string LastEncounterSnapshotReference = string.Empty;
+        public bool HasLastOperation;
+        public Nvs01OperationReceiptData LastOperation =
+            new Nvs01OperationReceiptData();
+        public List<string> ConsequenceIntentIds = new List<string>();
+        public List<string> AcquiredArtifactIds = new List<string>();
+        public List<string> AppliedEffectKeys = new List<string>();
+        public string UnlockedChapterId = string.Empty;
+    }
+
+    [Serializable]
+    public class Nvs01ObjectiveProgressData
+    {
+        public string ObjectiveId = string.Empty;
+        public int Status;
+    }
+
+    [Serializable]
+    public class Nvs01EncounterRequestData
+    {
+        public int ContractVersion;
+        public string RequestId = string.Empty;
+        public string CorrelationId = string.Empty;
+        public string QuestId = string.Empty;
+        public string StateId = string.Empty;
+        public string ObjectiveId = string.Empty;
+        public string HookId = string.Empty;
+        public string LocationId = string.Empty;
+        public string RealmId = string.Empty;
+        public string SuccessEventId = string.Empty;
+        public string FailureEventId = string.Empty;
+        public string CancelledEventId = string.Empty;
+        public string UnavailableEventId = string.Empty;
+        public string ReturnScene = string.Empty;
+    }
+
+    [Serializable]
+    public class Nvs01OperationReceiptData
+    {
+        public string OperationId = string.Empty;
+        public string PayloadFingerprint = string.Empty;
+        public int Status;
+        public long Revision;
+        public string StateId = string.Empty;
+        public string EventId = string.Empty;
+        public string CorrelationId = string.Empty;
     }
 
     [Serializable]
