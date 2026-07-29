@@ -4,7 +4,7 @@
 
 | Field | Value |
 | --- | --- |
-| Tracked issue | `#183` |
+| Tracked issue | [#183](https://github.com/yulee94/AnotherLife/issues/183) |
 | Phase | `Phase C3E — realm blocker-ledger convergence` |
 | Primary mode | Codex coordination/review |
 | Audited current main | `4f8200efbe4d3054db3765e0eace20035b89557b` |
