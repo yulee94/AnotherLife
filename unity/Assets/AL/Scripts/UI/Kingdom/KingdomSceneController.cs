@@ -1,11 +1,14 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.Kingdom;
 using AL.Kingdom.Visuals;
-using System.Collections.Generic;
+using AL.Narrative.Nvs01;
+using AL.Narrative.Nvs01.Contracts;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -38,6 +41,11 @@ namespace AL.UI.Kingdom
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
         private KingdomVisualizer _kingdomVisualizer;
+        private Nvs01KingdomPresenter _nvs01Presenter;
+        private Nvs01KingdomView _nvs01View;
+        private Transform _nvs01ActionRoot;
+        private readonly List<Button> _nvs01ActionButtons = new List<Button>();
+        private bool _nvs01CatalogLoading;
         private Color _messageAccentBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.92f);
         private Color _messagePanelBaseColor = new Color(0.020f, 0.027f, 0.037f, 0.92f);
         private Color _messageWashBaseColor = new Color(0.28f, 0.56f, 0.78f, 0.05f);
@@ -89,6 +97,7 @@ namespace AL.UI.Kingdom
             BuildRuntimeWorld();
             BuildRuntimeUi();
             Refresh();
+            StartCoroutine(InitializeNvs01QuestPresentation());
             _lastLiveRefreshTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
@@ -199,6 +208,7 @@ namespace AL.UI.Kingdom
             _troopText = CreatePanelText(_dashboardRoot.transform, "ForcesPanel", "TroopText", font, 18, TextAnchor.UpperLeft, new Vector2(32f, -460f), new Vector2(520f, 214f));
             _researchText = CreatePanelText(_dashboardRoot.transform, "ResearchPanel", "ResearchText", font, 18, TextAnchor.UpperLeft, new Vector2(584f, -150f), new Vector2(454f, 174f));
             _questText = CreatePanelText(_dashboardRoot.transform, "QuestPanel", "QuestText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -342f), new Vector2(454f, 166f));
+            ConfigureNvs01QuestPanel();
             _territoryText = CreatePanelText(_dashboardRoot.transform, "TerritoryPanel", "TerritoryText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -526f), new Vector2(454f, 194f));
             _battleText = CreatePanelText(_dashboardRoot.transform, "BattlePanel", "BattleText", font, 17, TextAnchor.UpperLeft, new Vector2(584f, -738f), new Vector2(454f, 170f));
 
@@ -280,11 +290,10 @@ namespace AL.UI.Kingdom
             RefreshDistrictsPanel();
             RefreshResearchPanel();
 
-            // FORCES/WAR ZONE still depend on state-seeding getters. OBJECTIVES now has a
-            // non-mutating quest compatibility query, but no approved read-only presentation
-            // contract. Per D8 these panels remain technically unavailable until those contracts exist.
+            // FORCES/WAR ZONE still depend on state-seeding getters. OBJECTIVES is now owned by the
+            // packet-backed NVS-01 presenter and never reads the legacy state-seeding quest service.
             _troopText.text = BuildUnavailablePanel("FORCES");
-            _questText.text = BuildUnavailablePanel("OBJECTIVES");
+            RefreshNvs01QuestPanel();
             _territoryText.text = BuildUnavailablePanel("WAR ZONE");
         }
 
@@ -376,6 +385,7 @@ namespace AL.UI.Kingdom
             SetPanelText(_researchText, BuildUnavailablePanel("RESEARCH"));
             SetPanelText(_questText, BuildUnavailablePanel("OBJECTIVES"));
             SetPanelText(_territoryText, BuildUnavailablePanel("WAR ZONE"));
+            ClearNvs01ActionButtons();
         }
 
         private static void SetPanelText(Text target, string value)
@@ -389,6 +399,377 @@ namespace AL.UI.Kingdom
         private static string BuildUnavailablePanel(string header)
         {
             return header + "\n\nTEMPORARILY UNAVAILABLE\nLive data pending domain contract.";
+        }
+
+        private void ConfigureNvs01QuestPanel()
+        {
+            if (_questText == null)
+            {
+                return;
+            }
+
+            var textRect = _questText.GetComponent<RectTransform>();
+            textRect.sizeDelta = new Vector2(textRect.sizeDelta.x, 82f);
+
+            var actionRoot = new GameObject("Nvs01QuestActions");
+            actionRoot.transform.SetParent(_questText.transform.parent, false);
+            Stretch(actionRoot.AddComponent<RectTransform>());
+            _nvs01ActionRoot = actionRoot.transform;
+            _questText.text = BuildNvs01LoadingPanel();
+        }
+
+        private IEnumerator InitializeNvs01QuestPresentation()
+        {
+            if (!_profileReady)
+            {
+                _nvs01CatalogLoading = false;
+                _nvs01Presenter = null;
+                _nvs01View = null;
+                SetPanelText(_questText, BuildUnavailablePanel("OBJECTIVES"));
+                ClearNvs01ActionButtons();
+                yield break;
+            }
+
+            _nvs01CatalogLoading = true;
+            RefreshNvs01QuestPanel();
+
+            Nvs01CatalogLoadResult result = null;
+            yield return Nvs01CatalogLoader.Shared.LoadOnce(value => result = value);
+
+            _nvs01CatalogLoading = false;
+            if (result != null && result.IsSuccess)
+            {
+                InitializeNvs01Presenter(result.VerifiedCatalog);
+                yield break;
+            }
+
+            RenderNvs01CatalogUnavailable(result?.Diagnostics.FirstOrDefault());
+        }
+
+        private void InitializeNvs01Presenter(Nvs01VerifiedCatalog verifiedCatalog)
+        {
+            if (verifiedCatalog == null)
+            {
+                RenderNvs01CatalogUnavailable(null);
+                return;
+            }
+
+            // This scene-local committer is intentionally transient. C3 owns durable clone -> validate
+            // -> persist/verify -> publish semantics; the production Kingdom controller owns only the
+            // current scene session until that contract is available.
+            var runtime = new Nvs01QuestRuntime(
+                verifiedCatalog,
+                new Nvs01InMemoryMutationCommitter(),
+                () => Guid.NewGuid().ToString("D"));
+            _nvs01Presenter = new Nvs01KingdomPresenter(
+                runtime,
+                ResolveNvs01RealmContext,
+                () => BuildNvs01CapabilitySnapshot(verifiedCatalog.Catalog),
+                () => Guid.NewGuid().ToString("D"),
+                () => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
+
+            if (!_profileReady)
+            {
+                _nvs01View = null;
+                SetPanelText(_questText, BuildUnavailablePanel("OBJECTIVES"));
+                ClearNvs01ActionButtons();
+                return;
+            }
+
+            RenderNvs01View(_nvs01Presenter.Present(), true);
+        }
+
+        private static Nvs01RealmContext ResolveNvs01RealmContext()
+        {
+            try
+            {
+                if (!ServiceLocator.TryGet<IRealmService>(out var realmService) || realmService == null)
+                {
+                    return Nvs01RealmContext.Unavailable();
+                }
+
+                return Nvs01RealmContextAdapter.FromCommittedIdentity(realmService.Identity);
+            }
+            catch (Exception)
+            {
+                return Nvs01RealmContext.Unavailable();
+            }
+        }
+
+        private static Nvs01CapabilitySnapshot BuildNvs01CapabilitySnapshot(Nvs01Catalog catalog)
+        {
+            var availability = new Dictionary<string, bool>(StringComparer.Ordinal);
+            foreach (Nvs01ExternalCapability capability in catalog.ExternalCapabilities)
+            {
+                // The command view is present in this slice. Champion location, deploy, hook, and
+                // result-delivery capabilities remain false until their production owners are wired.
+                availability.Add(
+                    capability.Id,
+                    string.Equals(
+                        capability.Id,
+                        catalog.Placement.CompletionDestination,
+                        StringComparison.Ordinal));
+            }
+
+            return new Nvs01CapabilitySnapshot(availability);
+        }
+
+        private void RenderNvs01CatalogUnavailable(Nvs01CatalogDiagnostic diagnostic)
+        {
+            _nvs01Presenter = null;
+            RenderNvs01View(Nvs01KingdomView.CatalogUnavailable(diagnostic), true);
+        }
+
+        private void RefreshNvs01QuestPanel()
+        {
+            if (_questText == null)
+            {
+                return;
+            }
+
+            if (!_profileReady)
+            {
+                _questText.text = BuildUnavailablePanel("OBJECTIVES");
+                ClearNvs01ActionButtons();
+                return;
+            }
+
+            if (_nvs01CatalogLoading || (_nvs01Presenter == null && _nvs01View == null))
+            {
+                _questText.text = BuildNvs01LoadingPanel();
+                return;
+            }
+
+            if (_nvs01View != null)
+            {
+                _questText.text = BuildNvs01Summary(_nvs01View);
+            }
+        }
+
+        private void RenderNvs01View(Nvs01KingdomView view, bool announce)
+        {
+            _nvs01View = view;
+            if (_questText != null)
+            {
+                _questText.text = BuildNvs01Summary(view);
+            }
+
+            RebuildNvs01ActionButtons(view);
+            if (announce && view != null)
+            {
+                string announcement = BuildNvs01Announcement(view);
+                if (!string.IsNullOrWhiteSpace(announcement))
+                {
+                    SetMessage(announcement);
+                }
+            }
+        }
+
+        private static string BuildNvs01LoadingPanel()
+        {
+            return "OBJECTIVES\n\n" +
+                   Nvs01CatalogContract.QuestId +
+                   "\nVerifying approved quest data...";
+        }
+
+        private static string BuildNvs01Summary(Nvs01KingdomView view)
+        {
+            if (view == null)
+            {
+                return BuildNvs01LoadingPanel();
+            }
+
+            var builder = new StringBuilder("OBJECTIVES");
+            if (!string.IsNullOrWhiteSpace(view.Title))
+            {
+                builder.Append('\n').Append(view.Title);
+            }
+
+            if (!string.IsNullOrWhiteSpace(view.ObjectiveText))
+            {
+                builder.Append('\n').Append(view.ObjectiveText);
+            }
+
+            if (!string.IsNullOrWhiteSpace(view.PlayerMessage))
+            {
+                builder.Append('\n').Append(view.PlayerMessage);
+            }
+
+            return builder.ToString();
+        }
+
+        private static string BuildNvs01Announcement(Nvs01KingdomView view)
+        {
+            if (!string.IsNullOrWhiteSpace(view.PlayerMessage))
+            {
+                return view.PlayerMessage;
+            }
+
+            if (!string.IsNullOrWhiteSpace(view.DialogueText))
+            {
+                var builder = new StringBuilder();
+                if (!string.IsNullOrWhiteSpace(view.SpeakerName))
+                {
+                    builder.Append(view.SpeakerName);
+                    if (!string.IsNullOrWhiteSpace(view.SpeakerRole))
+                    {
+                        builder.Append(" — ").Append(view.SpeakerRole);
+                    }
+
+                    builder.Append('\n');
+                }
+
+                builder.Append(view.DialogueText);
+                return builder.ToString();
+            }
+
+            if (!string.IsNullOrWhiteSpace(view.Description))
+            {
+                return view.Title + "\n" + view.Description;
+            }
+
+            return view.Title;
+        }
+
+        private void RebuildNvs01ActionButtons(Nvs01KingdomView view)
+        {
+            ClearNvs01ActionButtons();
+            if (_nvs01ActionRoot == null ||
+                view == null ||
+                view.Status == Nvs01KingdomViewStatus.Unavailable)
+            {
+                return;
+            }
+
+            foreach (Nvs01KingdomChoice choice in view.Choices)
+            {
+                string choiceKey = choice.Key;
+                CreateNvs01ActionButton(
+                    choice.Label,
+                    () => HandleNvs01ActionResult(_nvs01Presenter?.SelectChoice(choiceKey)));
+            }
+
+            if (view.PrimaryAction != Nvs01KingdomActionKind.None &&
+                !string.IsNullOrWhiteSpace(view.PrimaryActionLabel))
+            {
+                Nvs01KingdomActionKind action = view.PrimaryAction;
+                CreateNvs01ActionButton(
+                    view.PrimaryActionLabel,
+                    () => InvokeNvs01PrimaryAction(action));
+            }
+        }
+
+        private void CreateNvs01ActionButton(string label, UnityEngine.Events.UnityAction action)
+        {
+            if (_nvs01ActionRoot == null || _nvs01ActionButtons.Count >= 3)
+            {
+                return;
+            }
+
+            int index = _nvs01ActionButtons.Count;
+            var buttonObject = new GameObject("Nvs01Action_" + index);
+            buttonObject.transform.SetParent(_nvs01ActionRoot, false);
+
+            var image = buttonObject.AddComponent<Image>();
+            image.color = new Color(0.085f, 0.125f, 0.155f, 0.98f);
+
+            var button = buttonObject.AddComponent<Button>();
+            button.transition = Selectable.Transition.ColorTint;
+            button.colors = new ColorBlock
+            {
+                normalColor = image.color,
+                highlightedColor = new Color(0.16f, 0.26f, 0.32f, 1f),
+                pressedColor = new Color(0.045f, 0.075f, 0.095f, 1f),
+                selectedColor = new Color(0.12f, 0.20f, 0.25f, 1f),
+                disabledColor = new Color(0.08f, 0.09f, 0.10f, 0.55f),
+                colorMultiplier = 1f,
+                fadeDuration = 0.08f
+            };
+            button.onClick.AddListener(action);
+
+            var rect = buttonObject.GetComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.zero;
+            rect.pivot = Vector2.zero;
+            rect.anchoredPosition = new Vector2(18f + index * 136f, 14f);
+            rect.sizeDelta = new Vector2(126f, 34f);
+
+            var labelObject = new GameObject("Label");
+            labelObject.transform.SetParent(buttonObject.transform, false);
+            var text = labelObject.AddComponent<Text>();
+            text.font = GetDefaultFont();
+            text.fontSize = 13;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 9;
+            text.resizeTextMaxSize = 13;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Truncate;
+            text.color = new Color(0.92f, 0.96f, 1f);
+            text.text = label;
+            var labelRect = labelObject.GetComponent<RectTransform>();
+            Stretch(labelRect);
+            labelRect.offsetMin = new Vector2(5f, 2f);
+            labelRect.offsetMax = new Vector2(-5f, -2f);
+
+            _nvs01ActionButtons.Add(button);
+        }
+
+        private void InvokeNvs01PrimaryAction(Nvs01KingdomActionKind action)
+        {
+            if (_nvs01Presenter == null)
+            {
+                return;
+            }
+
+            Nvs01KingdomActionResult result;
+            switch (action)
+            {
+                case Nvs01KingdomActionKind.SelectValerius:
+                    result = _nvs01Presenter.SelectValerius();
+                    break;
+                case Nvs01KingdomActionKind.InvokeSemanticAction:
+                case Nvs01KingdomActionKind.ResumeEncounter:
+                    result = _nvs01Presenter.InvokePrimaryAction();
+                    break;
+                default:
+                    return;
+            }
+
+            HandleNvs01ActionResult(result);
+        }
+
+        private void HandleNvs01ActionResult(Nvs01KingdomActionResult result)
+        {
+            if (result?.View == null)
+            {
+                return;
+            }
+
+            RenderNvs01View(result.View, true);
+        }
+
+        private void ClearNvs01ActionButtons()
+        {
+            foreach (Button button in _nvs01ActionButtons)
+            {
+                if (button == null)
+                {
+                    continue;
+                }
+
+                button.gameObject.SetActive(false);
+                if (Application.isPlaying)
+                {
+                    Destroy(button.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(button.gameObject);
+                }
+            }
+
+            _nvs01ActionButtons.Clear();
         }
 
         private void RefreshResourceTicker(IResourceService resources, ResourceType rareResourceType, int warzoneCredits)
