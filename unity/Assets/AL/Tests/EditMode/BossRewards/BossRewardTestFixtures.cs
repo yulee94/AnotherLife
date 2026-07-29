@@ -16,7 +16,8 @@ namespace AL.Tests.EditMode.BossRewards
         internal const string BossVersion = "boss_v1";
         internal const string RewardProfileId = "reward_profile_test";
         internal const string RewardProfileVersion = "reward_v1";
-        internal const string SchemaVersion = "boss_reward_schema_v1";
+        internal const string SchemaVersion =
+            BossRewardTechnicalLimits.SupportedRewardSchemaVersion;
         internal const string InventorySchemaVersion =
             BossRewardTechnicalLimits.SupportedInventorySchemaVersion;
         internal const string SaveRevision = "save_revision_1";
@@ -78,7 +79,7 @@ namespace AL.Tests.EditMode.BossRewards
                 defenseBonus,
                 healthBonus,
                 stackPolicyId,
-                "acquisition_snapshot_v1",
+                BossRewardAcquisitionSnapshotPolicies.SnapshotV1,
                 "equipment_content_" + id,
                 "source_revision_1",
                 rawSha256);
@@ -197,10 +198,13 @@ namespace AL.Tests.EditMode.BossRewards
         internal static BossRewardLedgerSnapshot EmptyLedger()
         {
             return new BossRewardLedgerSnapshot(
+                GameId,
+                ProfileId,
                 BossRewardLedgerStatus.Empty,
                 LedgerRevision,
                 Array.Empty<BossRewardAppliedLedgerRecord>(),
-                Array.Empty<BossRewardDiagnostic>());
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
         }
 
         internal static BossRewardAppliedLedgerRecord LedgerRecord(

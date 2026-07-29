@@ -100,7 +100,8 @@ namespace AL.Core.BossRewards
         public string InventoryRevision { get; }
         public bool CanApplyRewards =>
             Status == OwnedEquipmentQueryStatus.Valid ||
-            Status == OwnedEquipmentQueryStatus.Empty;
+            Status == OwnedEquipmentQueryStatus.Empty ||
+            Status == OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition;
     }
 
     public static class BossRewardInventoryValidator
@@ -156,6 +157,20 @@ namespace AL.Core.BossRewards
                         "inventory.schemaVersion",
                         supportedInventorySchemaVersion,
                         "The inventory schema version is unsupported."));
+            if (!BossRewardText.IsBoundedVersion(catalog.SchemaVersion) ||
+                !string.Equals(
+                    catalog.SchemaVersion,
+                    BossRewardTechnicalLimits.SupportedRewardSchemaVersion,
+                    StringComparison.Ordinal))
+                return Result(
+                    OwnedEquipmentQueryStatus.UnsupportedVersion,
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    inventoryRevision,
+                    Error(
+                        "AL-BOSS-REWARD-INVENTORY-CATALOG-SCHEMA-UNSUPPORTED",
+                        "catalog.schemaVersion",
+                        catalog.SchemaVersion,
+                        "The equipment catalog schema version is unsupported."));
 
             var boundedRows = new List<OwnedEquipmentSnapshot>();
             foreach (OwnedEquipmentSnapshot sourceRow in sourceRows)
@@ -177,9 +192,8 @@ namespace AL.Core.BossRewards
             var seen = new HashSet<string>(StringComparer.Ordinal);
             var knownDefinitions = new Dictionary<string, BossEquipmentDefinitionSnapshot>(
                 StringComparer.Ordinal);
-            if (!BossRewardText.IsBoundedTechnicalId(catalog.GameId) ||
-                !BossRewardText.IsBoundedTechnicalId(catalog.CatalogSetId) ||
-                !BossRewardText.IsBoundedVersion(catalog.SchemaVersion) ||
+            if (!BossRewardText.IsCanonicalTechnicalId(catalog.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(catalog.CatalogSetId) ||
                 !BossRewardText.IsBoundedTechnicalId(catalog.Revision))
                 return Result(
                     OwnedEquipmentQueryStatus.Unavailable,
@@ -219,6 +233,7 @@ namespace AL.Core.BossRewards
                     inventoryRevision);
 
             OwnedEquipmentQueryStatus status = OwnedEquipmentQueryStatus.Valid;
+            bool reportedUnknownFutureDefinition = false;
             for (int index = 0; index < rows.Length; index++)
             {
                 OwnedEquipmentSnapshot row = rows[index];
@@ -234,7 +249,8 @@ namespace AL.Core.BossRewards
                     status = Prefer(status, OwnedEquipmentQueryStatus.MalformedNullEntry);
                     continue;
                 }
-                if (!BossRewardText.IsBoundedTechnicalId(row.EquipmentDefinitionId))
+                if (!BossRewardText.IsCanonicalTechnicalId(
+                        row.EquipmentDefinitionId))
                 {
                     Add(
                         diagnostics,
@@ -323,13 +339,18 @@ namespace AL.Core.BossRewards
                 {
                     if (!row.IsSupportedDefinition)
                     {
-                        Add(
-                            diagnostics,
-                            "AL-BOSS-REWARD-INVENTORY-FUTURE-DEFINITION-PRESERVED",
-                            path + ".equipmentDefinitionId",
-                            row.EquipmentDefinitionId,
-                            "An unknown future equipment row is preserved but unsupported.",
-                            BossRewardDiagnosticSeverity.Warning);
+                        if (!reportedUnknownFutureDefinition)
+                        {
+                            Add(
+                                diagnostics,
+                                "AL-BOSS-REWARD-INVENTORY-FUTURE-DEFINITION-PRESERVED",
+                                path + ".equipmentDefinitionId",
+                                row.EquipmentDefinitionId,
+                                "One or more unknown future equipment rows are preserved but excluded from planning.",
+                                BossRewardDiagnosticSeverity.Warning,
+                                false);
+                            reportedUnknownFutureDefinition = true;
+                        }
                         status = Prefer(
                             status,
                             OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition);
@@ -414,7 +435,7 @@ namespace AL.Core.BossRewards
             string supportedSchemaVersion)
         {
             return definition != null &&
-                   BossRewardText.IsBoundedTechnicalId(
+                   BossRewardText.IsCanonicalTechnicalId(
                        definition.EquipmentDefinitionId) &&
                    BossRewardText.IsBoundedVersion(definition.SchemaVersion) &&
                    string.Equals(
@@ -422,11 +443,11 @@ namespace AL.Core.BossRewards
                        supportedSchemaVersion,
                        StringComparison.Ordinal) &&
                    BossRewardText.IsBoundedVersion(definition.ContentVersion) &&
-                   BossRewardText.IsBoundedTechnicalId(definition.SlotId) &&
+                   BossRewardText.IsCanonicalTechnicalId(definition.SlotId) &&
                    BossRewardStackPolicies.IsSupported(definition.StackPolicyId) &&
-                   BossRewardText.IsBoundedTechnicalId(
+                   BossRewardAcquisitionSnapshotPolicies.IsSupported(
                        definition.AcquisitionSnapshotPolicyId) &&
-                   BossRewardText.IsBoundedTechnicalId(
+                   BossRewardText.IsBoundedContentKey(
                        definition.PresentationContentKey) &&
                    BossRewardText.IsBoundedTechnicalId(definition.SourceRevision) &&
                    BossRewardText.IsLowerSha256(definition.RawSha256);
@@ -445,7 +466,8 @@ namespace AL.Core.BossRewards
 
         private static bool IsOptionalId(string value)
         {
-            return string.IsNullOrEmpty(value) || BossRewardText.IsBoundedTechnicalId(value);
+            return string.IsNullOrEmpty(value) ||
+                   BossRewardText.IsCanonicalTechnicalId(value);
         }
 
         private static OwnedEquipmentQueryResult Result(
@@ -463,14 +485,15 @@ namespace AL.Core.BossRewards
             string fieldPath,
             string recordId,
             string message,
-            BossRewardDiagnosticSeverity severity = BossRewardDiagnosticSeverity.Error)
+            BossRewardDiagnosticSeverity severity = BossRewardDiagnosticSeverity.Error,
+            bool blocksOperation = true)
         {
             diagnostics.Add(new BossRewardDiagnostic(
                 code,
                 severity,
                 BossRewardDiagnosticDomain.Inventory,
                 fieldPath,
-                true,
+                blocksOperation,
                 message,
                 string.Empty,
                 recordId));

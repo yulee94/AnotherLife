@@ -93,26 +93,36 @@ namespace AL.Core.BossRewards
     public sealed class BossRewardLedgerSnapshot
     {
         public BossRewardLedgerSnapshot(
+            string gameId,
+            string profileId,
             BossRewardLedgerStatus status,
             string revision,
             IEnumerable<BossRewardAppliedLedgerRecord> records,
-            IEnumerable<BossRewardDiagnostic> diagnostics)
+            IEnumerable<BossRewardDiagnostic> diagnostics,
+            bool isComplete)
         {
+            GameId = gameId ?? string.Empty;
+            ProfileId = profileId ?? string.Empty;
             Status = status;
             Revision = revision ?? string.Empty;
             Records = BossRewardImmutable.Freeze(
                 records,
                 BossRewardTechnicalLimits.MaximumLedgerRows);
             Diagnostics = BossRewardDiagnosticOrdering.Order(diagnostics);
+            IsComplete = isComplete;
         }
 
+        public string GameId { get; }
+        public string ProfileId { get; }
         public BossRewardLedgerStatus Status { get; }
         public string Revision { get; }
         public IReadOnlyList<BossRewardAppliedLedgerRecord> Records { get; }
         public IReadOnlyList<BossRewardDiagnostic> Diagnostics { get; }
+        public bool IsComplete { get; }
         public bool IsUsable =>
-            Status == BossRewardLedgerStatus.Valid ||
-            Status == BossRewardLedgerStatus.Empty;
+            IsComplete &&
+            (Status == BossRewardLedgerStatus.Valid ||
+             Status == BossRewardLedgerStatus.Empty);
     }
 
     public sealed class BossRewardEconomySnapshot
@@ -401,11 +411,7 @@ namespace AL.Core.BossRewards
 
             BossRewardComputedValue value = request.Computation.Value;
 
-            if (!BossRewardText.IsBoundedVersion(request.ApplicationPolicyVersion) ||
-                !string.Equals(
-                    request.ApplicationPolicyVersion,
-                    BossRewardTechnicalLimits.SupportedApplicationPolicyVersion,
-                    StringComparison.Ordinal))
+            if (!BossRewardText.IsBoundedVersion(request.ApplicationPolicyVersion))
                 return Reject(
                     BossRewardPlanningStatus.UnsupportedVersion,
                     "AL-BOSS-REWARD-TRANSACTION-POLICY-UNSUPPORTED",
@@ -419,7 +425,7 @@ namespace AL.Core.BossRewards
                     request.ExpectedInventoryRevision) ||
                 !BossRewardText.IsBoundedTechnicalId(
                     request.ExpectedLedgerRevision) ||
-                !BossRewardText.IsBoundedTechnicalId(
+                !BossRewardText.IsCanonicalTechnicalId(
                     request.ExpectedCatalogSetId))
                 return Reject(
                     BossRewardPlanningStatus.InternalInvariantFailure,
@@ -435,9 +441,9 @@ namespace AL.Core.BossRewards
                     value.RewardResultId,
                     "The save snapshot is unavailable.");
             if (!BossRewardText.IsBoundedTechnicalId(context.SaveRevision) ||
-                !BossRewardText.IsBoundedTechnicalId(context.GameId) ||
-                !BossRewardText.IsBoundedTechnicalId(context.ProfileId) ||
-                !BossRewardText.IsBoundedTechnicalId(context.CatalogSetId))
+                !BossRewardText.IsCanonicalTechnicalId(context.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(context.ProfileId) ||
+                !BossRewardText.IsCanonicalTechnicalId(context.CatalogSetId))
                 return Reject(
                     BossRewardPlanningStatus.InternalInvariantFailure,
                     "AL-BOSS-REWARD-TRANSACTION-CONTEXT-INVALID",
@@ -445,16 +451,67 @@ namespace AL.Core.BossRewards
                     value.RewardResultId,
                     "The planning context contains an invalid identity or revision.");
             if (!string.Equals(
-                    request.ExpectedCatalogSetId,
-                    context.CatalogSetId,
-                    StringComparison.Ordinal) ||
-                !string.Equals(
                     value.GameId,
                     context.GameId,
                     StringComparison.Ordinal) ||
                 !string.Equals(
                     value.ProfileId,
                     context.ProfileId,
+                    StringComparison.Ordinal))
+                return Reject(
+                    BossRewardPlanningStatus.CatalogDrift,
+                    "AL-BOSS-REWARD-TRANSACTION-PROFILE-DRIFT",
+                    "context.profileId",
+                    value.RewardResultId,
+                    "The game or save profile identity changed after computation.");
+            if (context.Ledger == null || !context.Ledger.IsUsable)
+                return Reject(
+                    BossRewardPlanningStatus.InternalInvariantFailure,
+                    "AL-BOSS-REWARD-LEDGER-UNUSABLE",
+                    "context.ledger",
+                    value.RewardResultId,
+                    "The complete applied-result ledger is unavailable or malformed.");
+            if (!IsStructurallyValidLedger(
+                    context.Ledger,
+                    context.GameId,
+                    context.ProfileId))
+                return Reject(
+                    BossRewardPlanningStatus.InternalInvariantFailure,
+                    "AL-BOSS-REWARD-LEDGER-MALFORMED",
+                    "context.ledger",
+                    value.RewardResultId,
+                    "The applied-result ledger does not match its declared status or receipt contract.");
+
+            BossRewardPlanningResult replay = CheckLedgerReplay(
+                request,
+                context.Ledger,
+                value);
+            if (replay != null) return replay;
+            if (context.Ledger.Records.Count >=
+                BossRewardTechnicalLimits.MaximumLedgerRows)
+                return Reject(
+                    BossRewardPlanningStatus.InternalInvariantFailure,
+                    "AL-BOSS-REWARD-LEDGER-CAPACITY-EXCEEDED",
+                    "context.ledger",
+                    value.RewardResultId,
+                    "The applied-result ledger cannot safely accept another receipt.");
+            if (!string.Equals(
+                    request.ApplicationPolicyVersion,
+                    BossRewardTechnicalLimits.SupportedApplicationPolicyVersion,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    value.DeterminismVersion,
+                    BossRewardTechnicalLimits.SupportedDeterminismVersion,
+                    StringComparison.Ordinal))
+                return Reject(
+                    BossRewardPlanningStatus.UnsupportedVersion,
+                    "AL-BOSS-REWARD-TRANSACTION-POLICY-UNSUPPORTED",
+                    "request.applicationPolicyVersion",
+                    value.RewardResultId,
+                    "A new reward plan requires the current deterministic and application policy versions.");
+            if (!string.Equals(
+                    request.ExpectedCatalogSetId,
+                    context.CatalogSetId,
                     StringComparison.Ordinal) ||
                 !string.Equals(
                     value.CatalogSetId,
@@ -547,23 +604,6 @@ namespace AL.Core.BossRewards
                     "context.inventory",
                     value.RewardResultId,
                     "The inventory snapshot does not match the current immutable catalog authority.");
-            if (context.Ledger == null || !context.Ledger.IsUsable)
-                return Reject(
-                    BossRewardPlanningStatus.InternalInvariantFailure,
-                    "AL-BOSS-REWARD-LEDGER-UNUSABLE",
-                    "context.ledger",
-                    value.RewardResultId,
-                    "The applied-result ledger is unavailable or malformed.");
-            if (!IsStructurallyValidLedger(
-                    context.Ledger,
-                    context.GameId,
-                    context.ProfileId))
-                return Reject(
-                    BossRewardPlanningStatus.InternalInvariantFailure,
-                    "AL-BOSS-REWARD-LEDGER-MALFORMED",
-                    "context.ledger",
-                    value.RewardResultId,
-                    "The applied-result ledger does not match its declared status or receipt contract.");
             if (!AreNotificationDefinitionsStructurallyValid(
                     context.AvailableNotificationDefinitionIds))
                 return Reject(
@@ -572,12 +612,6 @@ namespace AL.Core.BossRewards
                     "context.availableNotificationDefinitionIds",
                     value.RewardResultId,
                     "The available notification-definition snapshot is malformed.");
-
-            BossRewardPlanningResult replay = CheckLedgerReplay(
-                request,
-                context.Ledger,
-                value);
-            if (replay != null) return replay;
 
             int nextCredits;
             try
@@ -602,10 +636,13 @@ namespace AL.Core.BossRewards
                     value.RewardResultId,
                     "The Warzone Credit addition exceeds the domain maximum.");
 
-            var inventoryById = context.Inventory.Items.ToDictionary(
-                item => item.EquipmentDefinitionId,
-                StringComparer.Ordinal);
+            var inventoryById = context.Inventory.Items
+                .Where(item => item.IsSupportedDefinition)
+                .ToDictionary(
+                    item => item.EquipmentDefinitionId,
+                    StringComparer.Ordinal);
             var operations = new List<BossRewardInventoryOperation>();
+            int projectedInventoryRows = context.Inventory.Items.Count;
             BossRewardComputedDrop[] orderedDrops = value.Drops
                 .OrderBy(drop => drop.EquipmentDefinitionId, StringComparer.Ordinal)
                 .ToArray();
@@ -616,6 +653,15 @@ namespace AL.Core.BossRewards
                         drop.EquipmentDefinitionId,
                         out OwnedEquipmentSnapshot existing))
                 {
+                    if (projectedInventoryRows >=
+                        BossRewardTechnicalLimits.MaximumInventoryRows)
+                        return Reject(
+                            BossRewardPlanningStatus.InventoryMalformed,
+                            "AL-BOSS-REWARD-INVENTORY-CAPACITY-EXCEEDED",
+                            "plan.inventory",
+                            drop.EquipmentDefinitionId,
+                            "The inventory cannot safely accept another equipment row.");
+                    projectedInventoryRows++;
                     var candidate = new OwnedEquipmentSnapshot(
                         drop.EquipmentDefinitionId,
                         drop.EquipmentDefinitionContentVersion,
@@ -826,7 +872,8 @@ namespace AL.Core.BossRewards
 
             BossRewardComputationResult computation = request.Computation;
             BossRewardComputedValue value = computation.Value;
-            string recordId = BossRewardText.IsBoundedTechnicalId(value.RewardResultId)
+            string recordId =
+                BossRewardText.IsCanonicalTechnicalId(value.RewardResultId)
                 ? value.RewardResultId
                 : string.Empty;
             bool statusMatchesValue =
@@ -836,24 +883,23 @@ namespace AL.Core.BossRewards
                       !value.IsExplicitNoReward;
             if (!statusMatchesValue ||
                 computation.Diagnostics.Any(item => item.BlocksOperation) ||
-                !BossRewardText.IsBoundedTechnicalId(value.GameId) ||
-                !BossRewardText.IsBoundedTechnicalId(value.CatalogSetId) ||
-                !BossRewardText.IsBoundedTechnicalId(value.ProfileId) ||
-                !BossRewardText.IsBoundedTechnicalId(value.RewardResultId) ||
-                !BossRewardText.IsBoundedTechnicalId(value.EncounterId) ||
-                !BossRewardText.IsBoundedTechnicalId(value.EncounterCompletionId) ||
-                !BossRewardText.IsBoundedTechnicalId(value.BossDefinitionId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.CatalogSetId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.ProfileId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.RewardResultId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.EncounterId) ||
+                !BossRewardText.IsCanonicalTechnicalId(
+                    value.EncounterCompletionId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.BossDefinitionId) ||
                 !BossRewardText.IsBoundedVersion(value.BossDefinitionContentVersion) ||
-                !BossRewardText.IsBoundedTechnicalId(value.RewardProfileId) ||
+                !BossRewardText.IsCanonicalTechnicalId(value.RewardProfileId) ||
                 !BossRewardText.IsBoundedVersion(value.RewardProfileContentVersion) ||
                 !BossRewardText.IsLowerSha256(value.RewardProfileSha256) ||
                 value.WarzoneCredits < 0 ||
                 value.WarzoneCredits > BossRewardTechnicalLimits.MaximumWarzoneCredits ||
                 !BossRewardText.IsBoundedVersion(value.DeterminismVersion) ||
-                !string.Equals(
-                    value.DeterminismVersion,
-                    BossRewardTechnicalLimits.SupportedDeterminismVersion,
-                    StringComparison.Ordinal) ||
+                !BossRewardTechnicalLimits.IsReadableDeterminismVersion(
+                    value.DeterminismVersion) ||
                 !BossRewardText.IsLowerSha256(value.ComputationHash) ||
                 !AreComputedDropsStructurallyValid(value.Drops) ||
                 (value.IsExplicitNoReward &&
@@ -997,15 +1043,16 @@ namespace AL.Core.BossRewards
             {
                 BossRewardComputedDrop drop = drops[index];
                 if (drop == null ||
-                    !BossRewardText.IsBoundedTechnicalId(drop.EquipmentDefinitionId) ||
+                    !BossRewardText.IsCanonicalTechnicalId(
+                        drop.EquipmentDefinitionId) ||
                     !BossRewardText.IsBoundedVersion(
                         drop.EquipmentDefinitionContentVersion) ||
                     !BossRewardText.IsLowerSha256(
                         drop.AcquisitionSnapshotFingerprint) ||
-                    !BossRewardText.IsBoundedTechnicalId(drop.SlotId) ||
+                    !BossRewardText.IsCanonicalTechnicalId(drop.SlotId) ||
                     drop.Quantity != 1 ||
                     !BossRewardStackPolicies.IsSupported(drop.StackPolicyId) ||
-                    !BossRewardText.IsBoundedTechnicalId(
+                    !BossRewardText.IsBoundedContentKey(
                         drop.AcquisitionAnnouncementPolicyId) ||
                     (previousId != null &&
                      StringComparer.Ordinal.Compare(
@@ -1031,22 +1078,19 @@ namespace AL.Core.BossRewards
                 (inventory.Items.Count == 0))
                 return false;
             if (inventory.Status != OwnedEquipmentQueryStatus.Empty &&
-                inventory.Status != OwnedEquipmentQueryStatus.Valid)
+                inventory.Status != OwnedEquipmentQueryStatus.Valid &&
+                inventory.Status !=
+                OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition)
                 return false;
 
             string previousId = null;
+            bool containsUnsupportedDefinition = false;
             for (int index = 0; index < inventory.Items.Count; index++)
             {
                 OwnedEquipmentSnapshot row = inventory.Items[index];
                 if (row == null ||
-                    !row.IsSupportedDefinition ||
-                    !BossRewardText.IsBoundedTechnicalId(row.EquipmentDefinitionId) ||
-                    !BossRewardText.IsBoundedVersion(
-                        row.EquipmentDefinitionContentVersion) ||
-                    !BossRewardText.IsLowerSha256(
-                        row.AcquisitionSnapshotFingerprint) ||
-                    !BossRewardText.IsBoundedTechnicalId(row.SlotId) ||
-                    !BossRewardStackPolicies.IsSupported(row.StackPolicyId) ||
+                    !BossRewardText.IsCanonicalTechnicalId(
+                        row.EquipmentDefinitionId) ||
                     row.Quantity <= 0 ||
                     row.Quantity > BossRewardTechnicalLimits.MaximumOwnedQuantity ||
                     (string.Equals(
@@ -1056,9 +1100,10 @@ namespace AL.Core.BossRewards
                      row.Quantity != 1) ||
                     row.FirstAcquiredUtcSeconds < 0 ||
                     row.LastAcquiredUtcSeconds < row.FirstAcquiredUtcSeconds ||
-                    !IsOptionalTechnicalId(row.LastSourceBossDefinitionId) ||
-                    !IsOptionalTechnicalId(row.LastSourceEncounterCompletionId) ||
-                    !IsOptionalTechnicalId(row.LastAppliedRewardResultId) ||
+                    !IsOptionalCanonicalId(row.LastSourceBossDefinitionId) ||
+                    !IsOptionalCanonicalId(
+                        row.LastSourceEncounterCompletionId) ||
+                    !IsOptionalCanonicalId(row.LastAppliedRewardResultId) ||
                     !BossRewardText.IsBoundedVersion(row.SchemaVersion) ||
                     !string.Equals(
                         row.SchemaVersion,
@@ -1069,9 +1114,25 @@ namespace AL.Core.BossRewards
                          previousId,
                          row.EquipmentDefinitionId) >= 0))
                     return false;
+                if (row.IsSupportedDefinition)
+                {
+                    if (!BossRewardText.IsBoundedVersion(
+                            row.EquipmentDefinitionContentVersion) ||
+                        !BossRewardText.IsLowerSha256(
+                            row.AcquisitionSnapshotFingerprint) ||
+                        !BossRewardText.IsCanonicalTechnicalId(row.SlotId) ||
+                        !BossRewardStackPolicies.IsSupported(row.StackPolicyId))
+                        return false;
+                }
+                else
+                {
+                    containsUnsupportedDefinition = true;
+                }
                 previousId = row.EquipmentDefinitionId;
             }
-            return true;
+            return containsUnsupportedDefinition ==
+                   (inventory.Status ==
+                    OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition);
         }
 
         private static bool MatchesAuthoritativeInventory(
@@ -1103,6 +1164,17 @@ namespace AL.Core.BossRewards
             string expectedProfileId)
         {
             if (ledger == null ||
+                !ledger.IsComplete ||
+                !BossRewardText.IsCanonicalTechnicalId(ledger.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(ledger.ProfileId) ||
+                !string.Equals(
+                    ledger.GameId,
+                    expectedGameId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    ledger.ProfileId,
+                    expectedProfileId,
+                    StringComparison.Ordinal) ||
                 !Enum.IsDefined(typeof(BossRewardLedgerStatus), ledger.Status) ||
                 !BossRewardText.IsBoundedTechnicalId(ledger.Revision) ||
                 ledger.Records == null ||
@@ -1143,16 +1215,19 @@ namespace AL.Core.BossRewards
             BossRewardAppliedLedgerRecord record)
         {
             if (record == null ||
-                !BossRewardText.IsBoundedTechnicalId(record.GameId) ||
-                !BossRewardText.IsBoundedTechnicalId(record.CatalogSetId) ||
-                !BossRewardText.IsBoundedTechnicalId(record.ProfileId) ||
-                !BossRewardText.IsBoundedTechnicalId(record.RewardResultId) ||
-                !BossRewardText.IsBoundedTechnicalId(record.EncounterId) ||
-                !BossRewardText.IsBoundedTechnicalId(record.EncounterCompletionId) ||
-                !BossRewardText.IsBoundedTechnicalId(record.BossDefinitionId) ||
+                !BossRewardText.IsCanonicalTechnicalId(record.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(record.CatalogSetId) ||
+                !BossRewardText.IsCanonicalTechnicalId(record.ProfileId) ||
+                !BossRewardText.IsCanonicalTechnicalId(record.RewardResultId) ||
+                !BossRewardText.IsCanonicalTechnicalId(record.EncounterId) ||
+                !BossRewardText.IsCanonicalTechnicalId(
+                    record.EncounterCompletionId) ||
+                !BossRewardText.IsCanonicalTechnicalId(
+                    record.BossDefinitionId) ||
                 !BossRewardText.IsBoundedVersion(
                     record.BossDefinitionContentVersion) ||
-                !BossRewardText.IsBoundedTechnicalId(record.RewardProfileId) ||
+                !BossRewardText.IsCanonicalTechnicalId(
+                    record.RewardProfileId) ||
                 !BossRewardText.IsBoundedVersion(
                     record.RewardProfileContentVersion) ||
                 !BossRewardText.IsLowerSha256(record.RewardProfileSha256) ||
@@ -1163,17 +1238,13 @@ namespace AL.Core.BossRewards
                 (record.IsExplicitNoReward &&
                  (record.WarzoneCredits != 0 || record.CommittedDrops.Count != 0)) ||
                 !BossRewardText.IsBoundedVersion(record.DeterminismVersion) ||
-                !string.Equals(
-                    record.DeterminismVersion,
-                    BossRewardTechnicalLimits.SupportedDeterminismVersion,
-                    StringComparison.Ordinal) ||
+                !BossRewardTechnicalLimits.IsReadableDeterminismVersion(
+                    record.DeterminismVersion) ||
                 !AreComputedDropsStructurallyValid(record.CommittedDrops) ||
                 record.CommittedUtcSeconds < 0 ||
                 !BossRewardText.IsBoundedVersion(record.ApplicationPolicyVersion) ||
-                !string.Equals(
-                    record.ApplicationPolicyVersion,
-                    BossRewardTechnicalLimits.SupportedApplicationPolicyVersion,
-                    StringComparison.Ordinal) ||
+                !BossRewardTechnicalLimits.IsReadableApplicationPolicyVersion(
+                    record.ApplicationPolicyVersion) ||
                 !Enum.IsDefined(typeof(BossRewardLedgerRecordState), record.State) ||
                 record.NotificationCorrelationIds == null)
                 return false;
@@ -1251,10 +1322,10 @@ namespace AL.Core.BossRewards
             return required.Count == 0;
         }
 
-        private static bool IsOptionalTechnicalId(string value)
+        private static bool IsOptionalCanonicalId(string value)
         {
             return string.IsNullOrEmpty(value) ||
-                   BossRewardText.IsBoundedTechnicalId(value);
+                   BossRewardText.IsCanonicalTechnicalId(value);
         }
 
         private static bool AreNotificationDefinitionsStructurallyValid(
@@ -1267,7 +1338,7 @@ namespace AL.Core.BossRewards
             for (int index = 0; index < definitionIds.Count; index++)
             {
                 string definitionId = definitionIds[index];
-                if (!BossRewardText.IsBoundedTechnicalId(definitionId) ||
+                if (!BossRewardText.IsBoundedContentKey(definitionId) ||
                     !seen.Add(definitionId))
                     return false;
             }
@@ -1306,11 +1377,14 @@ namespace AL.Core.BossRewards
         {
             BossRewardAppliedLedgerRecord found = null;
             var seen = new HashSet<string>(StringComparer.Ordinal);
+            var completionOwners = new Dictionary<string, string>(
+                StringComparer.Ordinal);
             for (int index = 0; index < ledger.Records.Count; index++)
             {
                 BossRewardAppliedLedgerRecord record = ledger.Records[index];
                 if (record == null ||
-                    !BossRewardText.IsBoundedTechnicalId(record.RewardResultId) ||
+                    !BossRewardText.IsCanonicalTechnicalId(
+                        record.RewardResultId) ||
                     !seen.Add(record.RewardResultId))
                     return Reject(
                         BossRewardPlanningStatus.InternalInvariantFailure,
@@ -1318,6 +1392,30 @@ namespace AL.Core.BossRewards
                         "context.ledger.records[" + index + "]",
                         value.RewardResultId,
                         "The applied-result ledger contains a malformed or duplicate row.");
+                if (completionOwners.ContainsKey(record.EncounterCompletionId))
+                    return Reject(
+                        BossRewardPlanningStatus.InternalInvariantFailure,
+                        "AL-BOSS-REWARD-LEDGER-COMPLETION-DUPLICATE",
+                        "context.ledger.records[" + index + "]",
+                        value.RewardResultId,
+                        "The ledger maps one encounter completion to multiple receipts.");
+                completionOwners.Add(
+                    record.EncounterCompletionId,
+                    record.RewardResultId);
+                if (string.Equals(
+                        record.EncounterCompletionId,
+                        value.EncounterCompletionId,
+                        StringComparison.Ordinal) &&
+                    !string.Equals(
+                        record.RewardResultId,
+                        value.RewardResultId,
+                        StringComparison.Ordinal))
+                    return Reject(
+                        BossRewardPlanningStatus.CorrelationConflict,
+                        "AL-BOSS-REWARD-LEDGER-COMPLETION-CONFLICT",
+                        "context.ledger",
+                        value.RewardResultId,
+                        "The encounter completion is already bound to another reward result.");
                 if (string.Equals(
                         record.RewardResultId,
                         value.RewardResultId,

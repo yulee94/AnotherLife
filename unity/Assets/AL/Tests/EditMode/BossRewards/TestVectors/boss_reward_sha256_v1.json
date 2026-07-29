@@ -81,17 +81,26 @@
     },
     {
       "name": "chance_full",
-      "equipmentDefinitionId": "equipment_unicode_한",
+      "equipmentDefinitionId": "equipment_gamma",
       "chanceMicros": 1000000,
-      "canonicalHex": "00000015626f73735f7265776172645f7368613235365f763100000010636174616c6f675f7365745f746573740000000b726573756c745f746573740000000f636f6d706c6574696f6e5f7465737400000009626f73735f74657374000000137265776172645f70726f66696c655f74657374000000097265776172645f76310000001565717569706d656e745f756e69636f64655fed959c",
-      "sha256": "fb40422e9469909946f4b3dd0de18885aa7d6851e1c5ea7741174e875a9e8489",
-      "draw": 4215292462,
+      "canonicalHex": "00000015626f73735f7265776172645f7368613235365f763100000010636174616c6f675f7365745f746573740000000b726573756c745f746573740000000f636f6d706c6574696f6e5f7465737400000009626f73735f74657374000000137265776172645f70726f66696c655f74657374000000097265776172645f76310000000f65717569706d656e745f67616d6d61",
+      "sha256": "020d7123da13f46004c553e4ef58b1179370a530dce4a7b2d458a85aaa94550f",
+      "draw": 34435363,
       "thresholdExclusive": 4294967296,
       "expectedHit": true,
       "expectedOrderedResult": [
-        "equipment_unicode_한"
+        "equipment_gamma"
       ],
-      "expectedComputationHash": "36c00f3a461a2d53a26cee8c738a18307625fb3e083a63778eee4e114dfc4e57"
+      "expectedComputationHash": "ba89bd8d5c7249313682d35b2fa1ea507c90c6f6dd51e3b0fcfd5db3dca94b99"
+    }
+  ],
+  "negativeVectors": [
+    {
+      "name": "unicode_equipment_id_rejected",
+      "equipmentDefinitionId": "equipment_unicode_한",
+      "chanceMicros": 1000000,
+      "expectedStatus": "InvalidRewardProfile",
+      "expectedDiagnosticCode": "AL-BOSS-REWARD-CATALOG-ENTRY-ID-INVALID"
     }
   ]
 }

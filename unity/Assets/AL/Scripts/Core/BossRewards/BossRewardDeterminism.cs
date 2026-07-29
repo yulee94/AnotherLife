@@ -121,9 +121,26 @@ namespace AL.Core.BossRewards
                 return Failure(BossRewardComputationStatus.CatalogUnavailable, diagnostics);
             }
 
-            if (!BossRewardText.IsBoundedTechnicalId(catalog.GameId) ||
-                !BossRewardText.IsBoundedTechnicalId(catalog.CatalogSetId) ||
-                !BossRewardText.IsBoundedVersion(catalog.SchemaVersion) ||
+            if (!BossRewardText.IsBoundedVersion(catalog.SchemaVersion) ||
+                !string.Equals(
+                    catalog.SchemaVersion,
+                    BossRewardTechnicalLimits.SupportedRewardSchemaVersion,
+                    StringComparison.Ordinal))
+            {
+                diagnostics.Add(Error(
+                    "AL-BOSS-REWARD-CATALOG-SCHEMA-UNSUPPORTED",
+                    BossRewardDiagnosticDomain.Catalog,
+                    "catalog.schemaVersion",
+                    request.RewardResultId,
+                    catalog.SchemaVersion,
+                    "The boss reward catalog schema version is unsupported."));
+                return Failure(
+                    BossRewardComputationStatus.UnsupportedVersion,
+                    diagnostics);
+            }
+
+            if (!BossRewardText.IsCanonicalTechnicalId(catalog.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(catalog.CatalogSetId) ||
                 !BossRewardText.IsBoundedTechnicalId(catalog.Revision) ||
                 !string.Equals(request.GameId, catalog.GameId, StringComparison.Ordinal) ||
                 !string.Equals(request.CatalogSetId, catalog.CatalogSetId, StringComparison.Ordinal))
@@ -489,6 +506,24 @@ namespace AL.Core.BossRewards
                         "The catalog contains a null boss reward binding."));
                     continue;
                 }
+                if (!BossRewardText.IsCanonicalTechnicalId(
+                        candidate.BossDefinitionId) ||
+                    !BossRewardText.IsBoundedVersion(
+                        candidate.BossDefinitionContentVersion) ||
+                    !BossRewardText.IsCanonicalTechnicalId(
+                        candidate.RewardProfileId) ||
+                    !BossRewardText.IsBoundedVersion(
+                        candidate.RewardProfileContentVersion))
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-BINDING-ID-INVALID",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.bindings[" + index + "]",
+                        operationId,
+                        candidate.BossDefinitionId,
+                        "The boss reward binding contains a noncanonical identity."));
+                    continue;
+                }
                 if (!string.Equals(
                         candidate.BossDefinitionId,
                         bossDefinitionId,
@@ -532,6 +567,20 @@ namespace AL.Core.BossRewards
                         "The catalog contains a null reward profile."));
                     continue;
                 }
+                if (!BossRewardText.IsCanonicalTechnicalId(candidate.GameId) ||
+                    !BossRewardText.IsCanonicalTechnicalId(
+                        candidate.CatalogSetId) ||
+                    !BossRewardText.IsCanonicalTechnicalId(candidate.Id))
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-PROFILE-ID-INVALID",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.profiles[" + index + "]",
+                        operationId,
+                        candidate.Id,
+                        "The reward profile contains a noncanonical identity."));
+                    continue;
+                }
                 if (!string.Equals(candidate.Id, profileId, StringComparison.Ordinal) ||
                     !string.Equals(candidate.ContentVersion, contentVersion, StringComparison.Ordinal))
                     continue;
@@ -558,9 +607,9 @@ namespace AL.Core.BossRewards
                 BossRewardProfile profile,
                 ICollection<BossRewardDiagnostic> diagnostics)
         {
-            if (!BossRewardText.IsBoundedTechnicalId(profile.GameId) ||
-                !BossRewardText.IsBoundedTechnicalId(profile.CatalogSetId) ||
-                !BossRewardText.IsBoundedTechnicalId(profile.Id) ||
+            if (!BossRewardText.IsCanonicalTechnicalId(profile.GameId) ||
+                !BossRewardText.IsCanonicalTechnicalId(profile.CatalogSetId) ||
+                !BossRewardText.IsCanonicalTechnicalId(profile.Id) ||
                 !BossRewardText.IsBoundedVersion(profile.SchemaVersion) ||
                 !BossRewardText.IsBoundedVersion(profile.ContentVersion) ||
                 !BossRewardText.IsBoundedTechnicalId(profile.SourceRevision) ||
@@ -633,7 +682,8 @@ namespace AL.Core.BossRewards
                         "The reward profile contains a null entry."));
                     continue;
                 }
-                if (!BossRewardText.IsBoundedTechnicalId(entry.EquipmentDefinitionId))
+                if (!BossRewardText.IsCanonicalTechnicalId(
+                        entry.EquipmentDefinitionId))
                 {
                     diagnostics.Add(Error(
                         "AL-BOSS-REWARD-CATALOG-ENTRY-ID-INVALID",
@@ -675,7 +725,7 @@ namespace AL.Core.BossRewards
                         entry.EquipmentDefinitionId,
                         "The first production migration permits quantity one only."));
                 }
-                if (!BossRewardText.IsBoundedTechnicalId(
+                if (!BossRewardText.IsBoundedContentKey(
                         entry.AcquisitionAnnouncementPolicyId) ||
                     !allowedPolicies.Contains(entry.AcquisitionAnnouncementPolicyId))
                 {
@@ -716,8 +766,30 @@ namespace AL.Core.BossRewards
             for (int index = 0; index < definitions.Count; index++)
             {
                 BossEquipmentDefinitionSnapshot candidate = definitions[index];
-                if (candidate == null ||
-                    !string.Equals(
+                if (candidate == null)
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-NULL",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.equipmentDefinitions[" + index + "]",
+                        operationId,
+                        string.Empty,
+                        "The catalog contains a null equipment definition."));
+                    continue;
+                }
+                if (!BossRewardText.IsCanonicalTechnicalId(
+                        candidate.EquipmentDefinitionId))
+                {
+                    diagnostics.Add(Error(
+                        "AL-BOSS-REWARD-CATALOG-EQUIPMENT-ID-INVALID",
+                        BossRewardDiagnosticDomain.Catalog,
+                        "catalog.equipmentDefinitions[" + index + "]",
+                        operationId,
+                        candidate.EquipmentDefinitionId,
+                        "The equipment definition contains a noncanonical identity."));
+                    continue;
+                }
+                if (!string.Equals(
                         candidate.EquipmentDefinitionId,
                         equipmentId,
                         StringComparison.Ordinal))
@@ -754,13 +826,16 @@ namespace AL.Core.BossRewards
             ICollection<BossRewardDiagnostic> diagnostics,
             string operationId)
         {
-            if (!BossRewardText.IsBoundedTechnicalId(definition.EquipmentDefinitionId) ||
+            if (!BossRewardText.IsCanonicalTechnicalId(
+                    definition.EquipmentDefinitionId) ||
                 !BossRewardText.IsBoundedVersion(definition.SchemaVersion) ||
                 !BossRewardText.IsBoundedVersion(definition.ContentVersion) ||
-                !BossRewardText.IsBoundedTechnicalId(definition.SlotId) ||
+                !BossRewardText.IsCanonicalTechnicalId(definition.SlotId) ||
                 !BossRewardStackPolicies.IsSupported(definition.StackPolicyId) ||
-                !BossRewardText.IsBoundedTechnicalId(definition.AcquisitionSnapshotPolicyId) ||
-                !BossRewardText.IsBoundedTechnicalId(definition.PresentationContentKey) ||
+                !BossRewardAcquisitionSnapshotPolicies.IsSupported(
+                    definition.AcquisitionSnapshotPolicyId) ||
+                !BossRewardText.IsBoundedContentKey(
+                    definition.PresentationContentKey) ||
                 !BossRewardText.IsBoundedTechnicalId(definition.SourceRevision) ||
                 !BossRewardText.IsLowerSha256(definition.RawSha256) ||
                 !string.Equals(
@@ -784,14 +859,14 @@ namespace AL.Core.BossRewards
             string operationId,
             ICollection<BossRewardDiagnostic> diagnostics)
         {
-            if (BossRewardText.IsBoundedTechnicalId(value)) return;
+            if (BossRewardText.IsCanonicalTechnicalId(value)) return;
             diagnostics.Add(Error(
                 "AL-BOSS-REWARD-REQUEST-ID-INVALID",
                 BossRewardDiagnosticDomain.Request,
                 fieldPath,
                 operationId,
                 value,
-                "A required bounded technical identity is invalid."));
+                "A required canonical technical identity is invalid."));
         }
 
         private static void RequireVersion(

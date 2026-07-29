@@ -8,7 +8,7 @@ namespace AL.Core.BossRewards
 {
     public static class BossRewardTechnicalLimits
     {
-        public const int MaximumIdentifierUtf8Bytes = 256;
+        public const int MaximumIdentifierUtf8Bytes = 128;
         public const int MaximumVersionUtf8Bytes = 128;
         public const int MaximumCatalogEntries = 4096;
         public const int MaximumRewardEntries = 256;
@@ -18,9 +18,32 @@ namespace AL.Core.BossRewards
         public const int MaximumWarzoneCredits = int.MaxValue;
         public const int MaximumOwnedQuantity = int.MaxValue;
         public const int MicrosPerUnit = 1_000_000;
-        public const string SupportedDeterminismVersion = "boss_reward_sha256_v1";
-        public const string SupportedApplicationPolicyVersion = "boss_reward_application_v1";
+        public const string SupportedRewardSchemaVersion = "boss_reward_schema_v1";
+        public const string DeterminismVersionV1 = "boss_reward_sha256_v1";
+        public const string ApplicationPolicyVersionV1 =
+            "boss_reward_application_v1";
+        public const string SupportedDeterminismVersion = DeterminismVersionV1;
+        public const string SupportedApplicationPolicyVersion =
+            ApplicationPolicyVersionV1;
         public const string SupportedInventorySchemaVersion = "owned_equipment_v1";
+
+        public static bool IsReadableDeterminismVersion(string value)
+        {
+            // Append future readable versions; never replace retained readers.
+            return string.Equals(
+                value,
+                DeterminismVersionV1,
+                StringComparison.Ordinal);
+        }
+
+        public static bool IsReadableApplicationPolicyVersion(string value)
+        {
+            // Append future readable versions; never replace retained readers.
+            return string.Equals(
+                value,
+                ApplicationPolicyVersionV1,
+                StringComparison.Ordinal);
+        }
     }
 
     public static class BossRewardStackPolicies
@@ -32,6 +55,16 @@ namespace AL.Core.BossRewards
         {
             return string.Equals(value, StackQuantity, StringComparison.Ordinal) ||
                    string.Equals(value, UniqueInstance, StringComparison.Ordinal);
+        }
+    }
+
+    public static class BossRewardAcquisitionSnapshotPolicies
+    {
+        public const string SnapshotV1 = "acquisition_snapshot_v1";
+
+        public static bool IsSupported(string value)
+        {
+            return string.Equals(value, SnapshotV1, StringComparison.Ordinal);
         }
     }
 
@@ -516,6 +549,26 @@ namespace AL.Core.BossRewards
                 BossRewardTechnicalLimits.MaximumIdentifierUtf8Bytes);
         }
 
+        public static bool IsCanonicalTechnicalId(string value)
+        {
+            return IsBoundedTechnicalId(value) &&
+                   IsCanonicalSegment(value, 0, value.Length);
+        }
+
+        public static bool IsBoundedContentKey(string value)
+        {
+            if (!IsBoundedTechnicalId(value)) return false;
+            int segmentStart = 0;
+            for (int index = 0; index <= value.Length; index++)
+            {
+                if (index != value.Length && value[index] != '.') continue;
+                if (!IsCanonicalSegment(value, segmentStart, index))
+                    return false;
+                segmentStart = index + 1;
+            }
+            return true;
+        }
+
         public static bool IsBoundedVersion(string value)
         {
             return IsBoundedTechnicalText(
@@ -567,6 +620,34 @@ namespace AL.Core.BossRewards
                 }
             }
             return StrictUtf8.GetByteCount(value) <= maximumUtf8Bytes;
+        }
+
+        private static bool IsCanonicalSegment(
+            string value,
+            int startInclusive,
+            int endExclusive)
+        {
+            if (startInclusive >= endExclusive ||
+                value[startInclusive] < 'a' ||
+                value[startInclusive] > 'z')
+                return false;
+            bool previousWasUnderscore = false;
+            for (int index = startInclusive + 1; index < endExclusive; index++)
+            {
+                char character = value[index];
+                if (character == '_')
+                {
+                    if (previousWasUnderscore || index + 1 == endExclusive)
+                        return false;
+                    previousWasUnderscore = true;
+                    continue;
+                }
+                if (!((character >= 'a' && character <= 'z') ||
+                      (character >= '0' && character <= '9')))
+                    return false;
+                previousWasUnderscore = false;
+            }
+            return true;
         }
     }
 }

@@ -135,7 +135,8 @@ namespace AL.Tests.EditMode.BossRewards
                 result.Status);
             Assert.AreEqual("equipment_future", result.Items[0].EquipmentDefinitionId);
             Assert.IsFalse(result.Items[0].IsSupportedDefinition);
-            Assert.IsFalse(result.CanApplyRewards);
+            Assert.IsTrue(result.CanApplyRewards);
+            Assert.IsFalse(result.Diagnostics[0].BlocksOperation);
         }
 
         [Test]
@@ -237,6 +238,35 @@ namespace AL.Tests.EditMode.BossRewards
             Assert.AreEqual(
                 OwnedEquipmentQueryStatus.Unavailable,
                 unavailable.Status);
+        }
+
+        [Test]
+        public void CoherentFutureCatalogSchemaIsNotInterpretedAsCurrent()
+        {
+            BossRewardCatalogSnapshot source = BossRewardTestFixtures.Catalog();
+            var futureCatalog = new BossRewardCatalogSnapshot(
+                source.GameId,
+                source.CatalogSetId,
+                "boss_reward_schema_v2",
+                source.Revision,
+                source.Bindings,
+                source.Profiles,
+                source.EquipmentDefinitions,
+                source.AnnouncementPolicyIds);
+
+            OwnedEquipmentQueryResult result =
+                BossRewardInventoryValidator.Validate(
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    BossRewardTestFixtures.InventoryRevision,
+                    futureCatalog,
+                    BossRewardTestFixtures.InventorySchemaVersion);
+
+            Assert.AreEqual(
+                OwnedEquipmentQueryStatus.UnsupportedVersion,
+                result.Status);
+            Assert.AreEqual(
+                "AL-BOSS-REWARD-INVENTORY-CATALOG-SCHEMA-UNSUPPORTED",
+                result.Diagnostics[0].Code);
         }
 
         [Test]

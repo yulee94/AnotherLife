@@ -52,6 +52,36 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void PreservedUnknownFutureRowDoesNotBlockKnownReward()
+        {
+            BossEquipmentDefinitionSnapshot future =
+                BossRewardTestFixtures.Equipment("equipment_future");
+            OwnedEquipmentQueryResult inventory =
+                BossRewardTestFixtures.Inventory(
+                    new[]
+                    {
+                        BossRewardTestFixtures.Owned(
+                            future,
+                            id: "equipment_future",
+                            supported: false)
+                    });
+
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(),
+                BossRewardTestFixtures.PlanningContext(inventory: inventory));
+
+            Assert.AreEqual(
+                OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition,
+                inventory.Status);
+            Assert.AreEqual(BossRewardPlanningStatus.Ready, result.Status);
+            Assert.AreEqual(25, result.Plan.CreditOperation.Delta);
+            Assert.AreEqual(1, result.Plan.InventoryOperations.Count);
+            Assert.AreEqual(
+                BossRewardTestFixtures.AlphaId,
+                result.Plan.InventoryOperations[0].EquipmentDefinitionId);
+        }
+
+        [Test]
         public void ExactLedgerReplayReturnsStoredRecordWithoutPlan()
         {
             BossRewardComputationResult computation =
@@ -59,10 +89,13 @@ namespace AL.Tests.EditMode.BossRewards
             BossRewardAppliedLedgerRecord record =
                 BossRewardTestFixtures.LedgerRecord(computation.Value);
             var ledger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
                 BossRewardLedgerStatus.Valid,
                 BossRewardTestFixtures.LedgerRevision,
                 new[] { record },
-                Array.Empty<BossRewardDiagnostic>());
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
 
             BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
                 BossRewardTestFixtures.ApplicationRequest(computation),
@@ -73,6 +106,170 @@ namespace AL.Tests.EditMode.BossRewards
                 result.Status);
             Assert.IsNull(result.Plan);
             Assert.AreSame(record, result.ExistingRecord);
+        }
+
+        [Test]
+        public void RetainedV1ReceiptRemainsReplayable()
+        {
+            BossRewardComputedValue source =
+                BossRewardTestFixtures.Computation().Value;
+            var provisional = new BossRewardComputedValue(
+                source.GameId,
+                source.CatalogSetId,
+                source.ProfileId,
+                source.RewardResultId,
+                source.EncounterId,
+                source.EncounterCompletionId,
+                source.BossDefinitionId,
+                source.BossDefinitionContentVersion,
+                source.RewardProfileId,
+                source.RewardProfileContentVersion,
+                source.RewardProfileSha256,
+                source.WarzoneCredits,
+                source.IsExplicitNoReward,
+                source.Drops,
+                BossRewardTechnicalLimits.DeterminismVersionV1,
+                BossRewardTestFixtures.ShaA);
+            var value = new BossRewardComputedValue(
+                provisional.GameId,
+                provisional.CatalogSetId,
+                provisional.ProfileId,
+                provisional.RewardResultId,
+                provisional.EncounterId,
+                provisional.EncounterCompletionId,
+                provisional.BossDefinitionId,
+                provisional.BossDefinitionContentVersion,
+                provisional.RewardProfileId,
+                provisional.RewardProfileContentVersion,
+                provisional.RewardProfileSha256,
+                provisional.WarzoneCredits,
+                provisional.IsExplicitNoReward,
+                provisional.Drops,
+                provisional.DeterminismVersion,
+                BossRewardComputation.RecomputeComputationHash(provisional));
+            var computation = new BossRewardComputationResult(
+                BossRewardComputationStatus.Computed,
+                value,
+                Array.Empty<BossRewardDiagnostic>());
+            BossRewardAppliedLedgerRecord sourceRecord =
+                BossRewardTestFixtures.LedgerRecord(value);
+            var retainedRecord = new BossRewardAppliedLedgerRecord(
+                sourceRecord.GameId,
+                sourceRecord.CatalogSetId,
+                sourceRecord.ProfileId,
+                sourceRecord.RewardResultId,
+                sourceRecord.EncounterId,
+                sourceRecord.EncounterCompletionId,
+                sourceRecord.BossDefinitionId,
+                sourceRecord.BossDefinitionContentVersion,
+                sourceRecord.RewardProfileId,
+                sourceRecord.RewardProfileContentVersion,
+                sourceRecord.RewardProfileSha256,
+                sourceRecord.ComputationHash,
+                sourceRecord.WarzoneCredits,
+                sourceRecord.IsExplicitNoReward,
+                BossRewardTechnicalLimits.DeterminismVersionV1,
+                sourceRecord.CommittedDrops,
+                sourceRecord.CommittedUtcSeconds,
+                BossRewardTechnicalLimits.ApplicationPolicyVersionV1,
+                sourceRecord.NotificationCorrelationIds,
+                sourceRecord.State);
+            var ledger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
+                BossRewardLedgerStatus.Valid,
+                BossRewardTestFixtures.LedgerRevision,
+                new[] { retainedRecord },
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
+
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(
+                    computation,
+                    policyVersion:
+                        BossRewardTechnicalLimits.ApplicationPolicyVersionV1),
+                BossRewardTestFixtures.PlanningContext(ledger: ledger));
+
+            Assert.AreEqual(
+                BossRewardPlanningStatus.AlreadyCommitted,
+                result.Status);
+            Assert.AreSame(retainedRecord, result.ExistingRecord);
+            Assert.IsNull(result.Plan);
+        }
+
+        [Test]
+        public void ExactReplayPrecedesStaleAndUnavailableMutationDomains()
+        {
+            BossRewardComputationResult computation =
+                BossRewardTestFixtures.Computation();
+            BossRewardAppliedLedgerRecord record =
+                BossRewardTestFixtures.LedgerRecord(computation.Value);
+            var ledger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
+                BossRewardLedgerStatus.Valid,
+                "ledger_revision_after_commit",
+                new[] { record },
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
+            var context = new BossRewardPlanningContext(
+                true,
+                "save_revision_after_commit",
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
+                "catalog_set_after_commit",
+                null,
+                new BossRewardEconomySnapshot(
+                    false,
+                    0,
+                    0,
+                    "economy_revision_after_commit"),
+                null,
+                ledger,
+                Array.Empty<string>(),
+                -1);
+
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(computation),
+                context);
+
+            Assert.AreEqual(
+                BossRewardPlanningStatus.AlreadyCommitted,
+                result.Status);
+            Assert.AreSame(record, result.ExistingRecord);
+            Assert.IsNull(result.Plan);
+        }
+
+        [Test]
+        public void EncounterCompletionCannotBindASecondRewardResult()
+        {
+            BossRewardComputationResult first =
+                BossRewardTestFixtures.Computation();
+            BossRewardAppliedLedgerRecord committed =
+                BossRewardTestFixtures.LedgerRecord(first.Value);
+            var ledger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
+                BossRewardLedgerStatus.Valid,
+                BossRewardTestFixtures.LedgerRevision,
+                new[] { committed },
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
+            BossRewardComputationResult second =
+                BossRewardTestFixtures.Computation(
+                    request: BossRewardTestFixtures.Request(
+                        rewardResultId: "result_second"));
+
+            BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
+                BossRewardTestFixtures.ApplicationRequest(second),
+                BossRewardTestFixtures.PlanningContext(ledger: ledger));
+
+            Assert.AreEqual(
+                BossRewardPlanningStatus.CorrelationConflict,
+                result.Status);
+            Assert.AreEqual(
+                "AL-BOSS-REWARD-LEDGER-COMPLETION-CONFLICT",
+                result.Diagnostics[0].Code);
         }
 
         [Test]
@@ -87,10 +284,13 @@ namespace AL.Tests.EditMode.BossRewards
             BossRewardAppliedLedgerRecord record =
                 BossRewardTestFixtures.LedgerRecord(conflictingComputation.Value);
             var ledger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
                 BossRewardLedgerStatus.Valid,
                 BossRewardTestFixtures.LedgerRevision,
                 new[] { record },
-                Array.Empty<BossRewardDiagnostic>());
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
 
             BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
                 BossRewardTestFixtures.ApplicationRequest(computation),
@@ -108,6 +308,8 @@ namespace AL.Tests.EditMode.BossRewards
             BossRewardComputationResult computation =
                 BossRewardTestFixtures.Computation();
             var ledger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
                 BossRewardLedgerStatus.Valid,
                 BossRewardTestFixtures.LedgerRevision,
                 new[]
@@ -116,7 +318,8 @@ namespace AL.Tests.EditMode.BossRewards
                         computation.Value,
                         state: BossRewardLedgerRecordState.PendingRecovery)
                 },
-                Array.Empty<BossRewardDiagnostic>());
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
 
             BossRewardPlanningResult result = BossRewardApplicationPlanner.Plan(
                 BossRewardTestFixtures.ApplicationRequest(computation),
@@ -133,15 +336,21 @@ namespace AL.Tests.EditMode.BossRewards
             BossRewardAppliedLedgerRecord record =
                 BossRewardTestFixtures.LedgerRecord(computation.Value);
             var duplicateLedger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
                 BossRewardLedgerStatus.Valid,
                 BossRewardTestFixtures.LedgerRevision,
                 new[] { record, record },
-                Array.Empty<BossRewardDiagnostic>());
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
             var nullLedger = new BossRewardLedgerSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.ProfileId,
                 BossRewardLedgerStatus.Valid,
                 BossRewardTestFixtures.LedgerRevision,
                 new BossRewardAppliedLedgerRecord[] { null },
-                Array.Empty<BossRewardDiagnostic>());
+                Array.Empty<BossRewardDiagnostic>(),
+                true);
 
             Assert.AreEqual(
                 BossRewardPlanningStatus.InternalInvariantFailure,

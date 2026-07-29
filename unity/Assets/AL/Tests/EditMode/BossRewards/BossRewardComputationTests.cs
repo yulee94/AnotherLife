@@ -73,6 +73,231 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void EveryRequestIdentityRequiresCanonicalCatalogGrammar()
+        {
+            BossRewardComputationRequest[] requests =
+            {
+                BossRewardTestFixtures.Request(gameId: "AnotherLife"),
+                BossRewardTestFixtures.Request(catalogSetId: "catalog_set_한"),
+                BossRewardTestFixtures.Request(profileId: "profile-test"),
+                BossRewardTestFixtures.Request(encounterId: "1_encounter"),
+                BossRewardTestFixtures.Request(
+                    encounterCompletionId: "completion__test"),
+                BossRewardTestFixtures.Request(rewardResultId: "result_test_"),
+                BossRewardTestFixtures.Request(bossDefinitionId: "boss.unknown"),
+                BossRewardTestFixtures.Request(
+                    rewardProfileId: "reward_profile_한")
+            };
+
+            foreach (BossRewardComputationRequest request in requests)
+            {
+                BossRewardComputationResult result = BossRewardComputation.Compute(
+                    request,
+                    BossRewardTestFixtures.Catalog());
+
+                Assert.AreEqual(
+                    BossRewardComputationStatus.InvalidRequest,
+                    result.Status);
+                Assert.IsTrue(result.Diagnostics.Any(item =>
+                    item.Code == "AL-BOSS-REWARD-REQUEST-ID-INVALID"));
+            }
+        }
+
+        [Test]
+        public void CanonicalIdentityLengthMatchesCatalogAuthority()
+        {
+            string maximum = new string(
+                'a',
+                BossRewardTechnicalLimits.MaximumIdentifierUtf8Bytes);
+            string oversized = maximum + "a";
+
+            BossRewardComputationResult accepted = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(rewardResultId: maximum),
+                BossRewardTestFixtures.Catalog());
+            BossRewardComputationResult rejected = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(rewardResultId: oversized),
+                BossRewardTestFixtures.Catalog());
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.Computed,
+                accepted.Status);
+            Assert.AreEqual(
+                BossRewardComputationStatus.InvalidRequest,
+                rejected.Status);
+            Assert.IsTrue(rejected.Diagnostics.Any(item =>
+                item.Code == "AL-BOSS-REWARD-REQUEST-ID-INVALID"));
+        }
+
+        [Test]
+        public void CatalogBossProfileAndEquipmentIdsRejectNoncanonicalRecords()
+        {
+            BossRewardCatalogSnapshot source = BossRewardTestFixtures.Catalog();
+            var invalidCatalogIdentity = new BossRewardCatalogSnapshot(
+                source.GameId,
+                "catalog_set_한",
+                source.SchemaVersion,
+                source.Revision,
+                source.Bindings,
+                source.Profiles,
+                source.EquipmentDefinitions,
+                source.AnnouncementPolicyIds);
+            var invalidBinding = new BossRewardBinding(
+                "boss_한",
+                BossRewardTestFixtures.BossVersion,
+                BossRewardTestFixtures.RewardProfileId,
+                BossRewardTestFixtures.RewardProfileVersion);
+            BossRewardProfile validProfile = BossRewardTestFixtures.Profile();
+            var invalidProfile = new BossRewardProfile(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.CatalogSetId,
+                "reward_profile_한",
+                BossRewardTestFixtures.SchemaVersion,
+                BossRewardTestFixtures.RewardProfileVersion,
+                0,
+                true,
+                Array.Empty<BossRewardEntry>(),
+                "source_revision_1",
+                BossRewardTestFixtures.ShaA);
+            BossEquipmentDefinitionSnapshot validEquipment =
+                BossRewardTestFixtures.Equipment();
+            var invalidEquipment = new BossEquipmentDefinitionSnapshot(
+                "equipment_한",
+                validEquipment.SchemaVersion,
+                validEquipment.ContentVersion,
+                validEquipment.SlotId,
+                validEquipment.AttackBonus,
+                validEquipment.DefenseBonus,
+                validEquipment.HealthBonus,
+                validEquipment.StackPolicyId,
+                validEquipment.AcquisitionSnapshotPolicyId,
+                validEquipment.PresentationContentKey,
+                validEquipment.SourceRevision,
+                validEquipment.RawSha256);
+
+            BossRewardComputationResult catalogResult =
+                BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    invalidCatalogIdentity);
+            BossRewardComputationResult bindingResult =
+                BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    BossRewardTestFixtures.Catalog(
+                        bindings: new[]
+                        {
+                            invalidBinding,
+                            source.Bindings[0]
+                        }));
+            BossRewardComputationResult profileResult =
+                BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    new BossRewardCatalogSnapshot(
+                        source.GameId,
+                        source.CatalogSetId,
+                        source.SchemaVersion,
+                        source.Revision,
+                        source.Bindings,
+                        new[] { invalidProfile, validProfile },
+                        source.EquipmentDefinitions,
+                        source.AnnouncementPolicyIds));
+            BossRewardComputationResult equipmentResult =
+                BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    BossRewardTestFixtures.Catalog(
+                        equipment: new[]
+                        {
+                            invalidEquipment,
+                            validEquipment,
+                            BossRewardTestFixtures.Equipment(
+                                BossRewardTestFixtures.BetaId,
+                                "equipment_v1",
+                                5,
+                                6,
+                                7,
+                                BossRewardTestFixtures.ShaA)
+                        }));
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.CatalogUnavailable,
+                catalogResult.Status);
+            Assert.IsTrue(bindingResult.Diagnostics.Any(item =>
+                item.Code == "AL-BOSS-REWARD-CATALOG-BINDING-ID-INVALID"));
+            Assert.IsTrue(profileResult.Diagnostics.Any(item =>
+                item.Code == "AL-BOSS-REWARD-CATALOG-PROFILE-ID-INVALID"));
+            Assert.IsTrue(equipmentResult.Diagnostics.Any(item =>
+                item.Code == "AL-BOSS-REWARD-CATALOG-EQUIPMENT-ID-INVALID"));
+            Assert.IsFalse(bindingResult.IsSuccess);
+            Assert.IsFalse(profileResult.IsSuccess);
+            Assert.IsFalse(equipmentResult.IsSuccess);
+        }
+
+        [Test]
+        public void CoherentFutureRewardSchemaIsRejectedBeforeInterpretation()
+        {
+            const string futureSchema = "boss_reward_schema_v9";
+            var profile = new BossRewardProfile(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.CatalogSetId,
+                BossRewardTestFixtures.RewardProfileId,
+                futureSchema,
+                BossRewardTestFixtures.RewardProfileVersion,
+                25,
+                false,
+                new[]
+                {
+                    new BossRewardEntry(
+                        BossRewardTestFixtures.AlphaId,
+                        BossRewardTechnicalLimits.MicrosPerUnit,
+                        1,
+                        BossRewardTestFixtures.ItemPolicyId)
+                },
+                "source_revision_1",
+                BossRewardTestFixtures.ShaA);
+            BossEquipmentDefinitionSnapshot source =
+                BossRewardTestFixtures.Equipment();
+            var equipment = new BossEquipmentDefinitionSnapshot(
+                source.EquipmentDefinitionId,
+                futureSchema,
+                source.ContentVersion,
+                source.SlotId,
+                source.AttackBonus,
+                source.DefenseBonus,
+                source.HealthBonus,
+                source.StackPolicyId,
+                source.AcquisitionSnapshotPolicyId,
+                source.PresentationContentKey,
+                source.SourceRevision,
+                source.RawSha256);
+            var catalog = new BossRewardCatalogSnapshot(
+                BossRewardTestFixtures.GameId,
+                BossRewardTestFixtures.CatalogSetId,
+                futureSchema,
+                "catalog_revision_1",
+                new[]
+                {
+                    new BossRewardBinding(
+                        BossRewardTestFixtures.BossId,
+                        BossRewardTestFixtures.BossVersion,
+                        BossRewardTestFixtures.RewardProfileId,
+                        BossRewardTestFixtures.RewardProfileVersion)
+                },
+                new[] { profile },
+                new[] { equipment },
+                new[] { BossRewardTestFixtures.ItemPolicyId });
+
+            BossRewardComputationResult result = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                catalog);
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.UnsupportedVersion,
+                result.Status);
+            Assert.AreEqual(
+                "AL-BOSS-REWARD-CATALOG-SCHEMA-UNSUPPORTED",
+                result.Diagnostics[0].Code);
+            Assert.IsNull(result.Value);
+        }
+
+        [Test]
         public void UnknownBossAndBindingMismatchRemainDistinct()
         {
             BossRewardComputationResult unknown = BossRewardComputation.Compute(
@@ -214,6 +439,45 @@ namespace AL.Tests.EditMode.BossRewards
             Assert.AreEqual(
                 BossRewardComputationStatus.InvalidRewardProfile,
                 profileResult.Status);
+        }
+
+        [Test]
+        public void UnsupportedAcquisitionSnapshotPolicyIsRejected()
+        {
+            BossEquipmentDefinitionSnapshot source =
+                BossRewardTestFixtures.Equipment();
+            var unsupported = new BossEquipmentDefinitionSnapshot(
+                source.EquipmentDefinitionId,
+                source.SchemaVersion,
+                source.ContentVersion,
+                source.SlotId,
+                source.AttackBonus,
+                source.DefenseBonus,
+                source.HealthBonus,
+                source.StackPolicyId,
+                "acquisition_snapshot_v2",
+                source.PresentationContentKey,
+                source.SourceRevision,
+                source.RawSha256);
+
+            BossRewardComputationResult result = BossRewardComputation.Compute(
+                BossRewardTestFixtures.Request(),
+                BossRewardTestFixtures.Catalog(
+                    equipment: new[]
+                    {
+                        unsupported,
+                        BossRewardTestFixtures.Equipment(
+                            BossRewardTestFixtures.BetaId,
+                            "equipment_v1",
+                            5,
+                            6,
+                            7,
+                            BossRewardTestFixtures.ShaA)
+                    }));
+
+            Assert.AreEqual(
+                BossRewardComputationStatus.InvalidEquipmentDefinition,
+                result.Status);
         }
 
         [Test]
