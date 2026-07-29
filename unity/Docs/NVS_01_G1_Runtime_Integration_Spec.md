@@ -3,15 +3,15 @@
 ## 1. Control and activation
 
 - Milestone/task: NVS-01 / G1
-- Specification version/status: `nvs01-g1-2026-07-22-v002` / approved; synchronized to A1 v002
+- Specification version/status: `nvs01-g1-2026-07-29-v003` / approved; synchronized to A1 v003; runtime synchronization remains issue #365 step 3
 - Primary mode: Codex coordination/review
-- Current `main` inspected: `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`
-- A1: issue #128, source PR #256 merge `be7304ed6505dae4f557472f1dc480e328404520`, authority-correction PR #258 merge `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`
-- A1 packet: `omen1-a1-2026-07-22-v002`; committed canonical UTF-8/LF/no-BOM bytes: 8,317; SHA-256 `b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f`
+- Current `main` inspected: `7d026a57b400290910a3b8ad07ad64f2e7500bb5`
+- A1 source chain: issue #128; source PR #256 merge `be7304ed6505dae4f557472f1dc480e328404520`; authority-correction PR #258 merge `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`; realm-identity issue #365 / source PR #367 merge `ca5888afbd22c2b5a626174cd0194ce18db72260`
+- A1 packet: `omen1-a1-2026-07-29-v003`; committed canonical UTF-8/LF/no-BOM bytes: 8,317; SHA-256 `8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732`
 - Product decision: issue #138 comment `4966062298`
 - Downstream implementation: issue #134
 
-A1 contains exactly one internally valid `OMEN_1` packet. Its eleven negative fixtures, Android unit/debug build, repository classification, hygiene, and GitHub Actions Quality Gates run #128 passed. No runtime file was mixed into A1. The user approved the A1 source before PR #256 merged; PR #258 removed only duplicate localization authority and did not change player-facing text or narrative meaning. G1 is therefore approved and active.
+A1 contains exactly one internally valid `OMEN_1` v003 packet. PR #367 changed only `packetVersion` and `placement.eligibleRealmIds`, preserving all player-facing text, quest meaning, ordering, and the 8,317-byte size; semantic no-drift proof, the packet validator, eleven structural negative fixtures, focused identity negatives, repository gates, and hosted run `30419923467` passed. No runtime file was mixed into A1. G1 v003 is approved as the binding coordination contract, but the existing generated/runtime v002 identity remains unavailable until issue #365 step 3 synchronizes it exactly.
 
 ## 2. Goal, player outcome, and delivery target
 
@@ -58,7 +58,7 @@ The existing `CH0_PROLOGUE`, `C_OMEN`, and generic `C1` are not aliases for `POS
 
 ## 5. Runtime catalog contract
 
-Runtime representation: UTF-8 JSON catalog `al.narrative.nvs01`, schema version `1`, exact supported content version `omen1-a1-2026-07-22-v002`, with SHA-256 of the canonical A1 bytes. Canonical bytes are the committed UTF-8, LF, no-BOM packet bytes, including its final LF. C1 must apply the repository's existing `unity-json` LF attribute to both `Docs/Narrative/NVS_01/*.packet.json` and `Assets/StreamingAssets/AL/Narrative/*.catalog.json`. The exporter reads strict UTF-8 bytes, rejects a BOM or bare CR, deterministically converts any checkout-provided CRLF pairs to LF, requires the final LF and exact canonical hash, then writes those canonical bytes without JSON reserialization. The tracked artifact and bytes presented to the Player build must be byte-for-byte identical to the 8,317-byte committed blob; drift verification runs after checkout and immediately before packaging. Mobile loading must use the supported StreamingAssets API; parse once, retain one immutable catalog, and allocate no per-frame objects.
+Runtime representation: UTF-8 JSON catalog `al.narrative.nvs01`, schema version `1`, exact supported content version `omen1-a1-2026-07-29-v003`, with SHA-256 of the canonical A1 bytes. Canonical bytes are the committed UTF-8, LF, no-BOM packet bytes, including its final LF. C1 must apply the repository's existing `unity-json` LF attribute to both `Docs/Narrative/NVS_01/*.packet.json` and `Assets/StreamingAssets/AL/Narrative/*.catalog.json`. The exporter reads strict UTF-8 bytes, rejects a BOM or bare CR, deterministically converts any checkout-provided CRLF pairs to LF, requires the final LF and exact canonical hash, then writes those canonical bytes without JSON reserialization. The tracked artifact and bytes presented to the Player build must be byte-for-byte identical to the 8,317-byte committed blob; drift verification runs after checkout and immediately before packaging. Mobile loading must use the supported StreamingAssets API; parse once, retain one immutable catalog, and allocate no per-frame objects.
 
 Required root fields: `schemaVersion`, `packetVersion`, `milestoneId`, `questId`, `titleKey`, `descriptionKey`, `approval`, `placement`, `speaker`, `states`, `objectives`, `dialogue`, `transitions`, `externalCapabilities`, `consequences`, `abandonment`, and `localization`. Unknown root or record properties fail closed for version 1. Schema-v1 objective records contain exactly `id`, `textKey`, `activatesIn`, and `completesOn`; `sourceText` and every other inline player-facing text property are prohibited and reject the catalog. Strings are nonblank; IDs and property names are ordinal/case-sensitive; category IDs are unique; arrays use source order. `titleKey` and `descriptionKey` must resolve in `localization`, just like every other player-facing key.
 
@@ -71,8 +71,20 @@ Validation must prove:
 - every consequence has one source-declared trigger and every trigger is valid;
 - success, failure, cancel, and unavailable result IDs exist as requested external capabilities;
 - external dependencies remain `requested` until an implementation adapter proves support;
-- eligible realms are exactly the four approved values;
+- eligible realms are exactly, ordinally, and in source order: `crownlands`, `stonehold`, `eldergrove`, `umbral`; case-folding, culture normalization, aliases, reordering, missing values, or extras are prohibited;
 - unsupported schema/content versions, duplicate keys, integer overflow, malformed UTF-8, or hash drift fail visibly without fallback.
+
+### 5.1 v002 compatibility and canonical realm identity
+
+The accepted v003 realm sequence is exactly `crownlands`, `stonehold`, `eldergrove`, `umbral`. It must be supplied by a `CommittedValid` #173 realm identity and compared ordinally. Runtime code must not lowercase, case-fold, culture-normalize, or map an alternate spelling.
+
+The v002 packet identity `omen1-a1-2026-07-22-v002` / `b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f` and its uppercase `CROWNLANDS`, `STONEHOLD`, `ELDERGROVE`, `UMBRAL` values are development-only legacy evidence, not v003 aliases:
+
+1. A v002 packet, catalog, hash, snapshot, request, result, or receipt presented to the v003 contract is unsupported/invalid, mutates nothing, and grants no reward, chapter unlock, encounter result, or completion.
+2. Historical v002 review and fidelity documents remain immutable evidence; they are not rewritten to claim v003 validation.
+3. There is no accepted production save integration or production route known to contain a durable v002 OMEN_1 aggregate.
+4. If durable v002 profile evidence is later discovered, #137 preserves it read-only and a separately reviewed explicit migration is required; casing alone never authorizes inferred migration.
+5. The generated/runtime v002 catalog remains visibly unavailable until issue #365 step 3 regenerates and validates the exact v003 bytes.
 
 Fable/shared contracts are not required for the standalone Unity slice. The encounter request/result records must be plain C# data without `UnityEngine` types so a later bridge can reuse their meaning.
 
@@ -111,9 +123,11 @@ Objectives are event-based, not numeric counters. `OBJ_OMEN_1_TALK` is active wh
 
 ## 8. Encounter request/result contract
 
-`NvsEncounterRequest` requires: contract version, request/correlation GUID, `OMEN_1`, current state/objective, `HOOK_SKY_CASTLE_ARENA`, `LOCATION_SKY_CASTLE_MARKER`, committed realm ID, expected success/failure/cancel/unavailable event IDs, and return scene `Kingdom`. The quest runtime produces it; a Champion adapter validates and consumes it once.
+`NvsEncounterRequest` requires: contract version, request/correlation GUID, `OMEN_1`, current state/objective, `HOOK_SKY_CASTLE_ARENA`, `LOCATION_SKY_CASTLE_MARKER`, committed realm ID emitted ordinally as exactly one of `crownlands`, `stonehold`, `eldergrove`, or `umbral`, expected success/failure/cancel/unavailable event IDs, and return scene `Kingdom`. The quest runtime produces it; a Champion adapter validates and consumes it once.
 
 `NvsEncounterResult` requires: contract version, the same correlation ID, quest/hook/realm, outcome enum (`Success`, `Failure`, `Cancelled`, `Unavailable`), matching event ID, and optional snapshot version/reference. The arena adapter produces it; the quest runtime consumes it.
+
+The committed-realm adapter consumes only a `CommittedValid` #173 identity. `None`, undefined, unavailable, uncommitted, uppercase, mixed-case, unknown, wrong-realm, stale-version, and hash-mismatched input is rejected visibly and non-mutatingly; free arena entry remains isolated.
 
 Request context is persisted before scene load and survives scene changes. A duplicate request returns the existing context. A duplicate result returns the prior committed disposition. Late or mismatched results never progress. Free arena entry carries no request and produces no quest result. The arena must publish result intent before returning to Kingdom; the quest service durably commits it before UI advancement.
 
@@ -134,6 +148,8 @@ All rejected events emit a stable `AL-NVS01-*` diagnostic and a localized player
 ## 9. Persistence and D16
 
 Add `Nvs01ProgressData` with backward-compatible defaults: version `0` means absent/unoffered; packet version/hash; checked monotonic quest revision; quest state; active/completed objective IDs; current dialogue node; pending-choice flag; encounter status/current-and-last correlation plus committed outcome; acquired-artifact IDs; the fixed Tear/report applied-effect keys; selected-realm Chapter 1 unlock ID; and the current revision's operation ID/disposition. Unknown newer versions, revision overflow, or inconsistent revision/disposition are read-only/unavailable.
+
+Under v003, any persisted v002 packet/hash/realm-bearing aggregate or correlated request/result is read-only and unavailable. It is preserved as evidence, never normalized or rewarded, unless a separately reviewed #137 migration is opened after real durable v002 profile evidence is found.
 
 Replay protection is bounded: it stores no command history. Expected revision rejects every older/later transition command; current/last encounter correlation and outcome reject late request/result replay; fixed effect keys reject Tear/report replay; and the current revision's operation disposition answers an immediate duplicate deterministically. Abandonment and reacceptance each increment revision, so an old acceptance/dialogue/retry command cannot become valid merely because the same state name appears again.
 
@@ -225,9 +241,9 @@ A1 packet and completion report are read-only inputs during engineering. Prohibi
 
 ## 12. Test and fault matrix
 
-C1: valid catalog; missing/malformed/unsupported/hash drift; duplicate/blank IDs; missing speaker/dialogue/objective/state/localization; unknown or wrong-case objective properties including inline `sourceText`; invalid terminal; unreachable state; unknown hook/location/result; invalid consequence/artifact; deterministic output. A Windows/`core.autocrlf=true` fixture must prove CRLF checkout input emits the same 8,317 LF bytes and `b22c1663...` hash, while raw artifact/package verification rejects CRLF, BOM, bare CR, or any byte drift.
+C1: valid v003 catalog; missing/malformed/unsupported/hash drift; duplicate/blank IDs; missing speaker/dialogue/objective/state/localization; unknown or wrong-case objective properties including inline `sourceText`; invalid terminal; unreachable state; unknown hook/location/result; invalid consequence/artifact; deterministic output. The exact ordinal realm sequence `crownlands`, `stonehold`, `eldergrove`, `umbral` is accepted; uppercase, mixed-case, culture-sensitive variants, unknown, blank, duplicate, missing, extra, and reordered values are rejected. v002 version/hash/catalog fixtures fail closed without aliasing. A Windows/`core.autocrlf=true` fixture must prove CRLF checkout input emits the same 8,317 LF bytes and `8bec0bee...` hash, while raw artifact/package verification rejects CRLF, BOM, bare CR, or any byte drift.
 
-C2: offer defer/accept; lore branch; arena-start action; free arena isolation; success/failure/cancel/unavailable; explicit Retry; abandonment allowed/denied during encounter; manual report; every invalid, duplicate, late, or mismatched request/result.
+C2: offer defer/accept; lore branch; arena-start action; free arena isolation; success/failure/cancel/unavailable; explicit Retry; abandonment allowed/denied during encounter; manual report; all four canonical `CommittedValid` realm identities; rejection of every unavailable/uncommitted/undefined/uppercase/mixed-case/unknown/wrong-realm input; v002 snapshot/request/result rejection; and every invalid, duplicate, late, or mismatched request/result.
 
 C3: old-save default; every chapter compatibility/migration row and all four realms; every D16 row; forward version; duplicate result/dialogue/report/retry; candidate-reference identity before/after failure and success; fault before and after each Tear/report transaction boundary; nested save prohibited; post-commit notification failure; temp/install/final-verification failure; reload reconciliation; no duplicated Gold, affinity, Tear, completion, or unlock.
 
@@ -266,4 +282,4 @@ G1 is implementation-ready when this specification is approved. Engineering #134
 
 No unresolved narrative or product decision remains. These are technical dependency/evidence blockers, not permission to alter A1.
 
-Codex engineering handoff: implement issue #134 from this approved G1 synchronized to A1 `omen1-a1-2026-07-22-v002`, authority-correction merge `cc3a331b9dcd655c95ed38ff6fbdd79e3f585e8e`, and canonical SHA-256 `b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f`. Preserve narrative, old saves, service registrations, and free arena entry; declare locks; implement strict validation, deterministic correlated state/events, D16 resume, atomic/idempotent consequences, visible failure, and the complete evidence matrix; return for G2, A2, and U1.
+Codex engineering handoff: continue issue #134 only after issue #365 step 3 synchronizes runtime to this approved G1, A1 `omen1-a1-2026-07-29-v003`, source-correction PR #367 merge `ca5888afbd22c2b5a626174cd0194ce18db72260`, canonical SHA-256 `8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732`, and exact realm order `crownlands`, `stonehold`, `eldergrove`, `umbral`. Preserve narrative, historical v002 evidence, old saves, service registrations, and free arena entry; reject v002/uppercase identity without aliasing; declare locks; implement strict validation, deterministic correlated state/events, D16 resume, atomic/idempotent consequences, visible failure, and the complete evidence matrix; return for G2, A2, and U1.
