@@ -32,26 +32,6 @@ namespace AL.Data.Catalogs
         public GameDataWalletResourceClassification Classification { get; }
     }
 
-    public sealed class GameDataRealmRareResourceReference
-    {
-        internal GameDataRealmRareResourceReference(
-            string realmStableId,
-            string legacyRealmName,
-            int legacyRealmValue,
-            string resourceStableId)
-        {
-            RealmStableId = realmStableId;
-            LegacyRealmName = legacyRealmName;
-            LegacyRealmValue = legacyRealmValue;
-            ResourceStableId = resourceStableId;
-        }
-
-        public string RealmStableId { get; }
-        public string LegacyRealmName { get; }
-        public int LegacyRealmValue { get; }
-        public string ResourceStableId { get; }
-    }
-
     /// <summary>
     /// Exact, balance-neutral resource identities consumed by the six-family realm schema.
     /// Record order is the persisted wallet order; resolution is ordinal and never normalized.
@@ -63,7 +43,6 @@ namespace AL.Data.Catalogs
 
         private static readonly IReadOnlyList<GameDataWalletResourceReference> entries;
         private static readonly IReadOnlyList<string> stableIds;
-        private static readonly IReadOnlyList<GameDataRealmRareResourceReference> realmRareResources;
         private static readonly Dictionary<string, GameDataWalletResourceReference> entriesByStableId;
         private static readonly Dictionary<string, GameDataWalletResourceReference> entriesByLegacyName;
         private static readonly Dictionary<int, GameDataWalletResourceReference> entriesByLegacyValue;
@@ -115,45 +94,12 @@ namespace AL.Data.Catalogs
                 mutableStableIds[index] = entry.StableId;
             }
 
-            var mutableRealmRareResources = new[]
-            {
-                RealmRare("crownlands", "Crownlands", 3, "royal_sigil"),
-                RealmRare("stonehold", "Stonehold", 1, "deep_ore"),
-                RealmRare("eldergrove", "Eldergrove", 2, "world_sap"),
-                RealmRare("umbral", "Umbral", 4, "dark_crystal")
-            };
-            var realmIds = new HashSet<string>(StringComparer.Ordinal);
-            var realmNames = new HashSet<string>(StringComparer.Ordinal);
-            var realmValues = new HashSet<int>();
-            var rareResourceIds = new HashSet<string>(StringComparer.Ordinal);
-            for (var index = 0; index < mutableRealmRareResources.Length; index++)
-            {
-                var relation = mutableRealmRareResources[index];
-                GameDataWalletResourceReference resource;
-                if (!GameDataCatalogIdentifiers.IsCanonicalStableId(relation.RealmStableId) ||
-                    string.IsNullOrWhiteSpace(relation.LegacyRealmName) ||
-                    relation.LegacyRealmValue <= 0 ||
-                    !entriesByStableId.TryGetValue(relation.ResourceStableId, out resource) ||
-                    resource.Classification != GameDataWalletResourceClassification.OptionalRare ||
-                    !realmIds.Add(relation.RealmStableId) ||
-                    !realmNames.Add(relation.LegacyRealmName) ||
-                    !realmValues.Add(relation.LegacyRealmValue) ||
-                    !rareResourceIds.Add(relation.ResourceStableId))
-                {
-                    throw new InvalidOperationException(
-                        "The realm rare-resource reference authority contains invalid or duplicate identity.");
-                }
-            }
-
             entries = ImmutableCollections.Freeze(mutableEntries);
             stableIds = ImmutableCollections.Freeze(mutableStableIds);
-            realmRareResources = ImmutableCollections.Freeze(mutableRealmRareResources);
         }
 
         public static IReadOnlyList<GameDataWalletResourceReference> Entries => entries;
         public static IReadOnlyList<string> StableIds => stableIds;
-        public static IReadOnlyList<GameDataRealmRareResourceReference> RealmRareResources =>
-            realmRareResources;
 
         public static bool TryGetByStableId(
             string stableId,
@@ -176,52 +122,6 @@ namespace AL.Data.Catalogs
             return entriesByLegacyValue.TryGetValue(legacyEnumValue, out reference);
         }
 
-        public static bool TryGetRealmRareResource(
-            string realmStableId,
-            string legacyRealmName,
-            int legacyRealmValue,
-            out GameDataRealmRareResourceReference reference)
-        {
-            for (var index = 0; index < realmRareResources.Count; index++)
-            {
-                var candidate = realmRareResources[index];
-                if (string.Equals(
-                        candidate.RealmStableId,
-                        realmStableId,
-                        StringComparison.Ordinal) &&
-                    candidate.LegacyRealmValue == legacyRealmValue &&
-                    string.Equals(
-                        candidate.LegacyRealmName,
-                        legacyRealmName,
-                        StringComparison.Ordinal))
-                {
-                    reference = candidate;
-                    return true;
-                }
-            }
-
-            reference = null;
-            return false;
-        }
-
-        public static bool IsApprovedRealmRareResourceRelation(
-            string realmStableId,
-            string legacyRealmName,
-            int legacyRealmValue,
-            string resourceStableId)
-        {
-            GameDataRealmRareResourceReference relation;
-            return TryGetRealmRareResource(
-                       realmStableId,
-                       legacyRealmName,
-                       legacyRealmValue,
-                       out relation) &&
-                   string.Equals(
-                       relation.ResourceStableId,
-                       resourceStableId,
-                       StringComparison.Ordinal);
-        }
-
         private static GameDataWalletResourceReference Resource(
             int value,
             string stableId,
@@ -236,17 +136,5 @@ namespace AL.Data.Catalogs
                 classification);
         }
 
-        private static GameDataRealmRareResourceReference RealmRare(
-            string realmStableId,
-            string legacyRealmName,
-            int legacyRealmValue,
-            string resourceStableId)
-        {
-            return new GameDataRealmRareResourceReference(
-                realmStableId,
-                legacyRealmName,
-                legacyRealmValue,
-                resourceStableId);
-        }
     }
 }

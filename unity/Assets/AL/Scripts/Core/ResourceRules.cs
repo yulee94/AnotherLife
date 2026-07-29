@@ -68,6 +68,33 @@ namespace AL.Core
                 }
             }
 
+            if (GameDataRealmReferences.Entries.Count != GameDataRealmReferences.RealmCount)
+            {
+                throw new InvalidOperationException(
+                    "ResourceRules and the catalog realm-reference authority have different bounds.");
+            }
+
+            for (var index = 0; index < GameDataRealmReferences.Entries.Count; index++)
+            {
+                var reference = GameDataRealmReferences.Entries[index];
+                var realmId = (RealmId)reference.LegacyRealmValue;
+                if (!Enum.IsDefined(typeof(RealmId), realmId) ||
+                    !string.Equals(
+                        realmId.ToString(),
+                        reference.LegacyRealmName,
+                        StringComparison.Ordinal) ||
+                    !TryGetRareResourceForRealm(realmId, out var rareResource) ||
+                    !TryGetStableId(rareResource, out var rareResourceId) ||
+                    !string.Equals(
+                        rareResourceId,
+                        reference.RareResourceStableId,
+                        StringComparison.Ordinal))
+                {
+                    throw new InvalidOperationException(
+                        "ResourceRules drifted from the catalog realm-reference authority.");
+                }
+            }
+
             WalletResources = Array.AsReadOnly(WalletResourceValues);
         }
 

@@ -58,10 +58,21 @@ namespace AL.Data.Catalogs
                     ContentReference("name_ref"),
                     ContentReference("description_ref"),
                     StableReference(
+                        "inner_realm_id",
+                        allowedStringValues: GameDataRealmReferences.InnerRealmIds),
+                    StableReference(
+                        "main_gate_id",
+                        allowedStringValues: GameDataRealmReferences.MainGateIds),
+                    StableReference(
+                        "outer_warzone_id",
+                        allowedStringValues: GameDataRealmReferences.OuterWarzoneIds),
+                    StableReference(
                         "rare_resource_id",
                         allowedStringValues: GameDataWalletResourceReferences.StableIds),
                     StableReferenceArray("capability_profile_ids", 1, MaximumProfileReferences),
-                    AssetReference("asset_ref")
+                    AssetReference(
+                        "asset_ref",
+                        GameDataRealmReferences.AssetReferences)
                 },
                 new[]
                 {
@@ -70,7 +81,14 @@ namespace AL.Data.Catalogs
                         "rare_resource_id",
                         "REALM-RARE-RESOURCE-REFERENCE",
                         "The realm name, numeric value, and rare-resource ID do not match the reviewed exact relation.",
-                        ValidateRealmRareResourceRelation)
+                        ValidateRealmRareResourceRelation),
+                    new GameDataCatalogRecordConstraint(
+                        "realm_world_asset_reference",
+                        "asset_ref",
+                        "REALM-WORLD-ASSET-REFERENCE",
+                        "The realm identity, content, world-boundary, and asset " +
+                        "references do not match the reviewed exact relation.",
+                        ValidateRealmWorldAssetRelation)
                 });
         }
 
@@ -186,13 +204,16 @@ namespace AL.Data.Catalogs
                 nonBlank: true);
         }
 
-        private static GameDataCatalogFieldRule AssetReference(string name)
+        private static GameDataCatalogFieldRule AssetReference(
+            string name,
+            IEnumerable<string> allowedStringValues = null)
         {
             return new GameDataCatalogFieldRule(
                 name,
                 GameDataValueKind.String,
                 true,
-                nonBlank: true);
+                nonBlank: true,
+                allowedStringValues: allowedStringValues);
         }
 
         private static GameDataCatalogFieldRule StableReference(
@@ -214,35 +235,97 @@ namespace AL.Data.Catalogs
             string realmStableId,
             IReadOnlyDictionary<string, GameDataValue> fields)
         {
-            GameDataValue legacyNameValue;
-            GameDataValue legacyNumericValue;
-            GameDataValue resourceIdValue;
-            if (!fields.TryGetValue("legacy_realm_id", out legacyNameValue) ||
-                !fields.TryGetValue("legacy_realm_value", out legacyNumericValue) ||
-                !fields.TryGetValue("rare_resource_id", out resourceIdValue))
+            string legacyName;
+            int legacyValue;
+            string resourceId;
+            if (!TryReadRealmIdentity(fields, out legacyName, out legacyValue) ||
+                !TryReadString(fields, "rare_resource_id", out resourceId))
             {
                 return null;
             }
 
-            var legacyName = legacyNameValue as GameDataStringValue;
+            return GameDataRealmReferences.IsApprovedRareResourceRelation(
+                realmStableId,
+                legacyName,
+                legacyValue,
+                resourceId);
+        }
+
+        private static bool? ValidateRealmWorldAssetRelation(
+            string realmStableId,
+            IReadOnlyDictionary<string, GameDataValue> fields)
+        {
+            string legacyName;
+            int legacyValue;
+            string nameReference;
+            string descriptionReference;
+            string innerRealmId;
+            string mainGateId;
+            string outerWarzoneId;
+            string assetReference;
+            if (!TryReadRealmIdentity(fields, out legacyName, out legacyValue) ||
+                !TryReadString(fields, "name_ref", out nameReference) ||
+                !TryReadString(fields, "description_ref", out descriptionReference) ||
+                !TryReadString(fields, "inner_realm_id", out innerRealmId) ||
+                !TryReadString(fields, "main_gate_id", out mainGateId) ||
+                !TryReadString(fields, "outer_warzone_id", out outerWarzoneId) ||
+                !TryReadString(fields, "asset_ref", out assetReference))
+            {
+                return null;
+            }
+
+            return GameDataRealmReferences.IsApprovedWorldAssetRelation(
+                realmStableId,
+                legacyName,
+                legacyValue,
+                nameReference,
+                descriptionReference,
+                innerRealmId,
+                mainGateId,
+                outerWarzoneId,
+                assetReference);
+        }
+
+        private static bool TryReadRealmIdentity(
+            IReadOnlyDictionary<string, GameDataValue> fields,
+            out string legacyName,
+            out int legacyValue)
+        {
+            legacyName = null;
+            legacyValue = 0;
+            GameDataValue legacyNumericValue;
+            if (!TryReadString(fields, "legacy_realm_id", out legacyName) ||
+                !fields.TryGetValue("legacy_realm_value", out legacyNumericValue))
+            {
+                return false;
+            }
+
             var legacyNumber = legacyNumericValue as GameDataNumberValue;
-            var resourceId = resourceIdValue as GameDataStringValue;
             long exactLegacyValue;
-            if (legacyName == null ||
-                legacyNumber == null ||
-                resourceId == null ||
+            if (legacyNumber == null ||
                 !legacyNumber.TryGetInt64(out exactLegacyValue) ||
                 exactLegacyValue < int.MinValue ||
                 exactLegacyValue > int.MaxValue)
             {
-                return null;
+                return false;
             }
 
-            return GameDataWalletResourceReferences.IsApprovedRealmRareResourceRelation(
-                realmStableId,
-                legacyName.Value,
-                (int)exactLegacyValue,
-                resourceId.Value);
+            legacyValue = (int)exactLegacyValue;
+            return true;
+        }
+
+        private static bool TryReadString(
+            IReadOnlyDictionary<string, GameDataValue> fields,
+            string fieldName,
+            out string value)
+        {
+            GameDataValue fieldValue;
+            var stringValue =
+                fields.TryGetValue(fieldName, out fieldValue)
+                    ? fieldValue as GameDataStringValue
+                    : null;
+            value = stringValue == null ? null : stringValue.Value;
+            return stringValue != null;
         }
 
         private static GameDataCatalogFieldRule LegacyEnum(
