@@ -139,20 +139,88 @@ namespace AL.Tests.EditMode.Territories
             AssertDiagnostic(missingAuthPlan, "MissingAuthorization", "T5");
         }
 
-        [Test]
-        public void IncomeSnapshotUsesOneRevisionAndCurrentOwnedTotals()
+        [TestCase("Stonehold", "T1", "Stone", 50L)]
+        [TestCase("Eldergrove", "T2", "Wood", 40L)]
+        [TestCase("Crownlands", "T3", "Gold", 20L)]
+        [TestCase("Umbral", "T4", "Food", 60L)]
+        public void IncomeSnapshotUsesOneRevisionAndExactCurrentOwnedTotals(
+            string committedRealm,
+            string expectedTerritoryId,
+            string expectedResourceType,
+            long expectedAmountPerMinute)
         {
             object planner = CreateBaselinePlanner();
-            object query = QueryBaseline(planner, "Crownlands");
-            object income = Invoke(planner, "PlanIncome", query, Realm("Crownlands"));
+            object query = QueryBaseline(planner, committedRealm);
+            object income = Invoke(planner, "PlanIncome", query, Realm(committedRealm));
 
             Assert.AreEqual("Available", Property(income, "Status").ToString());
             Assert.AreEqual(Property(query, "StateRevisionHash"), Property(income, "StateRevisionHash"));
 
             object[] contributions = Items(Property(income, "Contributions"));
-            Assert.AreEqual(new[] { "T3" }, contributions.Select(item => Property(item, "TerritoryId").ToString()).ToArray());
-            Assert.AreEqual("Gold", Property(contributions.Single(), "ResourceType").ToString());
-            Assert.AreEqual(20L, Property(contributions.Single(), "AmountPerMinute"));
+            Assert.AreEqual(new[] { expectedTerritoryId }, contributions.Select(item => Property(item, "TerritoryId").ToString()).ToArray());
+            Assert.AreEqual(expectedResourceType, Property(contributions.Single(), "ResourceType").ToString());
+            Assert.AreEqual(expectedAmountPerMinute, Property(contributions.Single(), "AmountPerMinute"));
+        }
+
+        [Test]
+        public void IncomeRejectsUncommittedProfileBeforeNeutralTerritoryCanContribute()
+        {
+            object planner = CreateBaselinePlanner();
+            object query = QueryBaseline(planner, "None");
+            object income = Invoke(planner, "PlanIncome", query, Realm("None"));
+
+            Assert.AreEqual("Unavailable", Property(income, "Status").ToString());
+            Assert.IsEmpty(Items(Property(income, "Contributions")));
+            AssertDiagnostic(income, "NoCommittedRealm", string.Empty);
+        }
+
+        [Test]
+        public void IncomeRejectsUndefinedCommittedProfileRealm()
+        {
+            object planner = CreateBaselinePlanner();
+            object undefinedRealm = Enum.ToObject(RealmType, 999);
+            object query = Invoke(planner, "BuildQuery", InvokeStatic(PlannerType, "CreateCurrentBaselineStates"), undefinedRealm);
+            object income = Invoke(planner, "PlanIncome", query, undefinedRealm);
+
+            Assert.AreEqual("Unavailable", Property(income, "Status").ToString());
+            Assert.IsEmpty(Items(Property(income, "Contributions")));
+            AssertDiagnostic(income, "InvalidCommittedRealm", string.Empty);
+        }
+
+        [Test]
+        public void IncomeRejectsExpectedRealmThatDiffersFromCommittedProfile()
+        {
+            object planner = CreateBaselinePlanner();
+            object query = QueryBaseline(planner, "Stonehold");
+            object income = Invoke(planner, "PlanIncome", query, Realm("Crownlands"));
+
+            Assert.AreEqual("Unavailable", Property(income, "Status").ToString());
+            Assert.IsEmpty(Items(Property(income, "Contributions")));
+            AssertDiagnostic(income, "ProfileRealmMismatch", string.Empty);
+        }
+
+        [Test]
+        public void IncomeRejectsMissingExpectedRealmForCommittedProfile()
+        {
+            object planner = CreateBaselinePlanner();
+            object query = QueryBaseline(planner, "Stonehold");
+            object income = Invoke(planner, "PlanIncome", query, Realm("None"));
+
+            Assert.AreEqual("Unavailable", Property(income, "Status").ToString());
+            Assert.IsEmpty(Items(Property(income, "Contributions")));
+            AssertDiagnostic(income, "InvalidExpectedRealm", string.Empty);
+        }
+
+        [Test]
+        public void IncomeRejectsUndefinedExpectedRealm()
+        {
+            object planner = CreateBaselinePlanner();
+            object query = QueryBaseline(planner, "Stonehold");
+            object income = Invoke(planner, "PlanIncome", query, Enum.ToObject(RealmType, 999));
+
+            Assert.AreEqual("Unavailable", Property(income, "Status").ToString());
+            Assert.IsEmpty(Items(Property(income, "Contributions")));
+            AssertDiagnostic(income, "InvalidExpectedRealm", string.Empty);
         }
 
         private static object QueryBaseline(object planner, string committedRealm)

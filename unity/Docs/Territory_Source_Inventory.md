@@ -1,9 +1,9 @@
 # Territory Source and Caller Inventory
 
-**Status date:** 2026-07-16
+**Status date:** 2026-07-27
 **Owner mode:** Codex engineering
 **Related issue/spec:** #166, `unity/Docs/Territory_Ownership_Income_Transaction_Spec.md`
-**Branch:** `codex/territory-contract-planner`
+**Branch:** `codex/warzone-committed-realm-income`
 **Scope:** Current-source inventory only. No production behavior, save schema, catalog, scene, Android, narrative, territory balance, or UI behavior is changed by this document.
 
 ## Purpose
@@ -61,10 +61,10 @@ No save field is added or changed by this PR.
 | --- | --- | --- | --- |
 | `WarzoneService.GetTerritories()` | `ITerritoryService.GetTerritories()` | Seeds T1-T5 on null/empty and returns mutable `TerritoryData` rows. | Later service migration should return immutable query results or safe unavailable state. |
 | `WarzoneService.CaptureTerritory(string, RealmId)` | `ITerritoryService.CaptureTerritory` | Selects first matching row, overwrites owner, emits event, tries quest progress and +100 Warzone Credits, then saves. | Pure planner now models validation, same-owner no-op, stale checks, authorization, and reward deltas without mutation. |
-| `WarzoneService.CalculatePassiveIncome(ResourceType)` | `ITerritoryService.CalculatePassiveIncome` | Reads selected realm and sums matching mutable rows. | Pure planner now models one immutable income snapshot with supported current rows only. |
-| `LocalResourceService.AddTerritoryIncome(double)` | Calls `CalculatePassiveIncome` once per supported resource. | Consumes six independent territory reads during production. | Later #163/#166 integration should consume one snapshot per tick. |
+| `WarzoneService.CalculatePassiveIncome(ResourceType)` | `ITerritoryService.CalculatePassiveIncome` | Reads raw `SelectedRealm`, seeds on null/empty through `GetTerritories()`, and sums matching mutable rows. There are no current C# callers beyond the interface and implementation declarations. | Pure planner models one immutable income snapshot and now rejects missing, undefined, or mismatched committed-realm authority. Production scalar wiring remains prohibited in this phase. |
+| `LocalResourceService.TickProduction(double)` | Resolves `IEconomyProductionContributionProvider` | Returns `RejectedDependencyUnavailable` when no approved contribution provider is registered; it does not call `ITerritoryService.CalculatePassiveIncome`. | Later #163/#166 integration must provide one validated territory-income snapshot through the approved contribution boundary. |
 | `DemoInitializer` | `CaptureTerritory("T5", realm)` | Development/demo direct capture command. | Remains outside this pure planner. Release command containment is owned by #178. |
-| `KingdomSceneController` | Reads territory/warzone state for status surfaces. | UI/controller behavior remains unchanged. | Later UI migration should consume immutable query/unavailable status. |
+| `KingdomVisualizer` | Calls `GetTerritories()` while refreshing the status snapshot and creating territory outposts. | Both reads can seed live state through the legacy service. | Later UI migration should consume an immutable query/unavailable status; this pure planner PR does not change the visualizer. |
 
 ## Event, Quest, Credit, and Notification Boundaries
 
@@ -98,7 +98,9 @@ The new planner/test slice covers:
 - neutral capture planning with one revision increment, +100 Warzone Credits, and +1 quest progress;
 - stale owner rejection before reward planning;
 - `RealmId.None` and missing authorization rejection;
-- single-revision passive-income snapshot for current owned totals.
+- single-revision passive-income snapshot with exact Stonehold, Eldergrove, Crownlands, and Umbral current totals;
+- passive-income rejection for `RealmId.None`, undefined committed/expected realms, and expected/profile mismatch;
+- neutral T5 cannot become uncommitted profile income.
 
 ## Deferred Work
 
