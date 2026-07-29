@@ -65,9 +65,9 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreSame(initial, fixture.Snapshot);
             Assert.AreSame(Property(VerifiedCatalog(), "Catalog"), Property(fixture.Runtime, "Catalog"));
 
-            object offer = fixture.SelectValerius("Offer", "CROWNLANDS");
+            object offer = fixture.SelectValerius("Offer", "crownlands");
             AssertCommitted(offer, 1, Offered);
-            AssertSnapshot(fixture.Snapshot, 1, Offered, OfferDialogue, true, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(fixture.Snapshot, 1, Offered, OfferDialogue, true, string.Empty, "crownlands", "None");
             AssertObjectives(fixture.Snapshot, "Active", "Inactive", "Inactive");
 
             object beforeWrongChoice = fixture.Snapshot;
@@ -77,14 +77,14 @@ namespace AL.Tests.EditMode.Narrative
 
             object decline = fixture.Choice("choice.omen1.decline");
             AssertCommitted(decline, 2, Offered);
-            AssertSnapshot(fixture.Snapshot, 2, Offered, string.Empty, false, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(fixture.Snapshot, 2, Offered, string.Empty, false, string.Empty, "crownlands", "None");
             AssertObjectives(fixture.Snapshot, "Active", "Inactive", "Inactive");
             CollectionAssert.IsEmpty(StringItems(Property(decline, "ConsequenceIntentIds")));
 
-            fixture.SelectValerius("Offer", "CROWNLANDS");
+            fixture.SelectValerius("Offer", "crownlands");
             object accepted = fixture.Choice("choice.omen1.accept");
             AssertCommitted(accepted, 4, Talk);
-            AssertSnapshot(fixture.Snapshot, 4, Talk, StartDialogue, true, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(fixture.Snapshot, 4, Talk, StartDialogue, true, string.Empty, "crownlands", "None");
             AssertObjectives(fixture.Snapshot, "Completed", "Inactive", "Inactive");
         }
 
@@ -92,35 +92,35 @@ namespace AL.Tests.EditMode.Narrative
         public void DirectHappyPathUsesManualReportAndPublishesOnlyCatalogConsequenceIntents()
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
-            AssertSnapshot(fixture.Snapshot, 5, Investigate, ArenaStartDialogue, false, string.Empty, "CROWNLANDS", "Requested");
+            fixture.AdvanceToRequest(false, "crownlands");
+            AssertSnapshot(fixture.Snapshot, 5, Investigate, ArenaStartDialogue, false, string.Empty, "crownlands", "Requested");
 
             object successResult = fixture.Result("Success", "arena-v1", "snapshot://one");
             object success = fixture.ApplyResult(successResult);
             AssertCommitted(success, 6, Report);
-            AssertSnapshot(fixture.Snapshot, 6, Report, string.Empty, false, string.Empty, "CROWNLANDS", "Resolved");
+            AssertSnapshot(fixture.Snapshot, 6, Report, string.Empty, false, string.Empty, "crownlands", "Resolved");
             AssertObjectives(fixture.Snapshot, "Completed", "Completed", "Active");
             CollectionAssert.AreEqual(new[] { TearIntent }, StringItems(Property(success, "ConsequenceIntentIds")));
             CollectionAssert.AreEqual(new[] { TearIntent }, StringItems(Property(fixture.Snapshot, "ConsequenceIntentIds")));
             Assert.AreEqual("arena-v1", Property(fixture.Snapshot, "LastEncounterSnapshotVersion"));
             Assert.AreEqual("snapshot://one", Property(fixture.Snapshot, "LastEncounterSnapshotReference"));
 
-            object wrongInteraction = fixture.SelectValerius("Offer", "CROWNLANDS");
+            object wrongInteraction = fixture.SelectValerius("Offer", "crownlands");
             AssertStatus(wrongInteraction, "Rejected", "AL-NVS01-EVENT-MISMATCH");
             Assert.AreEqual(6L, Property(fixture.Snapshot, "Revision"));
 
-            fixture.SelectValerius("Report", "CROWNLANDS");
-            AssertSnapshot(fixture.Snapshot, 7, Report, ReportDialogue, true, string.Empty, "CROWNLANDS", "Resolved");
+            fixture.SelectValerius("Report", "crownlands");
+            AssertSnapshot(fixture.Snapshot, 7, Report, ReportDialogue, true, string.Empty, "crownlands", "Resolved");
             object conclusion = fixture.Choice("choice.omen1.present_tear");
             AssertCommitted(conclusion, 8, Completed);
-            AssertSnapshot(fixture.Snapshot, 8, Completed, ReportConclusionDialogue, true, string.Empty, "CROWNLANDS", "Resolved");
+            AssertSnapshot(fixture.Snapshot, 8, Completed, ReportConclusionDialogue, true, string.Empty, "crownlands", "Resolved");
             AssertObjectives(fixture.Snapshot, "Completed", "Completed", "Completed");
             CollectionAssert.AreEqual(ReportIntents, StringItems(Property(conclusion, "ConsequenceIntentIds")));
             CollectionAssert.AreEqual(new[] { TearIntent }.Concat(ReportIntents).ToArray(), StringItems(Property(fixture.Snapshot, "ConsequenceIntentIds")));
 
             object close = fixture.Choice("choice.omen1.continue");
             AssertCommitted(close, 9, Completed);
-            AssertSnapshot(fixture.Snapshot, 9, Completed, string.Empty, false, string.Empty, "CROWNLANDS", "Resolved");
+            AssertSnapshot(fixture.Snapshot, 9, Completed, string.Empty, false, string.Empty, "crownlands", "Resolved");
             CollectionAssert.IsEmpty(StringItems(Property(close, "ConsequenceIntentIds")));
         }
 
@@ -128,29 +128,29 @@ namespace AL.Tests.EditMode.Narrative
         public void LoreBranchAndArenaStartUseTheAuthoredTwoStepHandoff()
         {
             var fixture = new RuntimeFixture();
-            fixture.SelectValerius("Offer", "CROWNLANDS");
+            fixture.SelectValerius("Offer", "crownlands");
             fixture.Choice("choice.omen1.accept");
 
             fixture.Choice("choice.omen1.ask_more");
-            AssertSnapshot(fixture.Snapshot, 3, Talk, LoreDialogue, true, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(fixture.Snapshot, 3, Talk, LoreDialogue, true, string.Empty, "crownlands", "None");
             fixture.Choice("choice.omen1.depart");
-            AssertSnapshot(fixture.Snapshot, 4, Talk, GoDialogue, true, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(fixture.Snapshot, 4, Talk, GoDialogue, true, string.Empty, "crownlands", "None");
             fixture.Choice("choice.omen1.deploy");
-            AssertSnapshot(fixture.Snapshot, 5, Talk, ArenaStartDialogue, false, RequestArena, "CROWNLANDS", "None");
+            AssertSnapshot(fixture.Snapshot, 5, Talk, ArenaStartDialogue, false, RequestArena, "crownlands", "None");
             Assert.IsNull(Property(fixture.Snapshot, "CurrentEncounter"));
             Assert.AreEqual(0, fixture.GuidCalls, "The authored arena-start node must commit before request identity is generated.");
 
-            object requestDisposition = fixture.InvokePending("CROWNLANDS");
+            object requestDisposition = fixture.InvokePending("crownlands");
             AssertCommitted(requestDisposition, 6, Investigate);
-            AssertSnapshot(fixture.Snapshot, 6, Investigate, ArenaStartDialogue, false, string.Empty, "CROWNLANDS", "Requested");
+            AssertSnapshot(fixture.Snapshot, 6, Investigate, ArenaStartDialogue, false, string.Empty, "crownlands", "Requested");
             Assert.AreEqual(2, fixture.GuidCalls);
             Assert.NotNull(Property(requestDisposition, "EncounterRequest"));
         }
 
-        [TestCase("CROWNLANDS")]
-        [TestCase("STONEHOLD")]
-        [TestCase("ELDERGROVE")]
-        [TestCase("UMBRAL")]
+        [TestCase("crownlands")]
+        [TestCase("stonehold")]
+        [TestCase("eldergrove")]
+        [TestCase("umbral")]
         public void EncounterRequestIsExactForEveryRealmAndDuplicatesReuseItsCorrelation(string realm)
         {
             var fixture = new RuntimeFixture();
@@ -194,11 +194,108 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(2, fixture.GuidCalls);
         }
 
+        [TestCase("Crownlands", "crownlands")]
+        [TestCase("Stonehold", "stonehold")]
+        [TestCase("Eldergrove", "eldergrove")]
+        [TestCase("Umbral", "umbral")]
+        public void CommittedRealmAdapterEmitsOnlyCanonicalLaunchIds(string realm, string expectedLaunchId)
+        {
+            object context = AdaptRealmIdentity(
+                EnumValue(RealmIdentityStatusType, "CommittedValid"),
+                EnumValue(RealmIdType, realm),
+                "0.1.0");
+
+            Assert.AreEqual("CommittedValid", Property(context, "Status").ToString());
+            Assert.AreEqual(expectedLaunchId, Property(context, "RealmId"));
+            Assert.True((bool)Property(context, "IsCommittedValid"));
+        }
+
+        [Test]
+        public void RealmAdapterFailsClosedForUnavailableUncommittedInvalidUndefinedAndStaleIdentity()
+        {
+            foreach (string status in new[] { "ProfileUnavailable", "CatalogUnavailable", "Uncommitted" })
+            {
+                object unavailable = AdaptRealmIdentity(
+                    EnumValue(RealmIdentityStatusType, status),
+                    EnumValue(RealmIdType, "Crownlands"),
+                    "0.1.0");
+                Assert.AreEqual("Unavailable", Property(unavailable, "Status").ToString(), status);
+                Assert.AreEqual(string.Empty, Property(unavailable, "RealmId"), status);
+            }
+
+            foreach (object invalid in new[]
+                     {
+                         AdaptRealmIdentity(
+                             EnumValue(RealmIdentityStatusType, "InvalidPersistedIdentity"),
+                             EnumValue(RealmIdType, "Crownlands"),
+                             "0.1.0"),
+                         AdaptRealmIdentity(
+                             EnumValue(RealmIdentityStatusType, "CommittedValid"),
+                             EnumValue(RealmIdType, "None"),
+                             "0.1.0"),
+                         AdaptRealmIdentity(
+                             EnumValue(RealmIdentityStatusType, "CommittedValid"),
+                             Enum.ToObject(RealmIdType, 999),
+                             "0.1.0"),
+                         AdaptRealmIdentity(
+                             Enum.ToObject(RealmIdentityStatusType, 999),
+                             EnumValue(RealmIdType, "Crownlands"),
+                             "0.1.0"),
+                         AdaptRealmIdentity(
+                             EnumValue(RealmIdentityStatusType, "CommittedValid"),
+                             EnumValue(RealmIdType, "Crownlands"),
+                             "0.0.9"),
+                         AdaptRealmIdentity(
+                             EnumValue(RealmIdentityStatusType, "CommittedValid"),
+                             EnumValue(RealmIdType, "Crownlands"),
+                             "0.1.0 ")
+                     })
+            {
+                Assert.AreEqual("Invalid", Property(invalid, "Status").ToString());
+                Assert.AreEqual(string.Empty, Property(invalid, "RealmId"));
+                Assert.False((bool)Property(invalid, "IsCommittedValid"));
+            }
+        }
+
+        [TestCase("CROWNLANDS")]
+        [TestCase("Crownlands")]
+        [TestCase("crownlandS")]
+        [TestCase("unknown")]
+        public void UppercaseMixedCaseAndUnknownLaunchRealmIdsFailClosed(string realm)
+        {
+            var fixture = new RuntimeFixture();
+            object before = fixture.Snapshot;
+            object rejected = fixture.SelectValerius("Offer", realm);
+
+            AssertStatus(rejected, "Rejected", "AL-NVS01-EVENT-MISMATCH");
+            Assert.AreSame(before, fixture.Snapshot);
+            Assert.AreEqual(0, fixture.GuidCalls);
+            Assert.AreEqual(0, fixture.CommitAttempts);
+        }
+
+        [Test]
+        public void BlankOrExplicitlyInvalidLaunchRealmContextsFailClosed()
+        {
+            var fixture = new RuntimeFixture();
+            Assert.Throws<ArgumentException>(() => fixture.Realm("CommittedValid", string.Empty));
+
+            object before = fixture.Snapshot;
+            object rejected = Invoke(
+                fixture.Runtime,
+                "SelectValerius",
+                fixture.Command("NPC_VALERIUS", "POST_REALM_PROLOGUE"),
+                EnumValue(InteractionKindType, "Offer"),
+                fixture.Realm("Invalid", "crownlands"));
+
+            AssertStatus(rejected, "Rejected", "AL-NVS01-EVENT-MISMATCH");
+            Assert.AreSame(before, fixture.Snapshot);
+        }
+
         [Test]
         public void MissingCapabilitiesOrRealmFailClosedBeforeRequestIdentityOrCommit()
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToArenaStart(false, "CROWNLANDS");
+            fixture.AdvanceToArenaStart(false, "crownlands");
             object before = fixture.Snapshot;
             int attempts = fixture.CommitAttempts;
 
@@ -210,7 +307,7 @@ namespace AL.Tests.EditMode.Narrative
                     "InvokePendingSemanticAction",
                     command,
                     fixture.Capabilities(capability),
-                    fixture.Realm("CommittedValid", "CROWNLANDS"));
+                    fixture.Realm("CommittedValid", "crownlands"));
                 AssertStatus(unavailable, "DependencyUnavailable", "AL-NVS01-DEPENDENCY-UNAVAILABLE");
                 Assert.AreSame(before, fixture.Snapshot, capability);
                 Assert.AreEqual(0, fixture.GuidCalls, capability);
@@ -231,11 +328,11 @@ namespace AL.Tests.EditMode.Narrative
                 "InvokePendingSemanticAction",
                 fixture.Command("PLAYER", RequestArena),
                 fixture.AllCapabilities(),
-                fixture.Realm("CommittedValid", "STONEHOLD"));
+                fixture.Realm("CommittedValid", "stonehold"));
             AssertStatus(wrongRealm, "Rejected", "AL-NVS01-EVENT-MISMATCH");
             Assert.AreSame(before, fixture.Snapshot);
 
-            object valid = fixture.InvokePending("CROWNLANDS");
+            object valid = fixture.InvokePending("crownlands");
             AssertCommitted(valid, 5, Investigate);
         }
 
@@ -254,7 +351,7 @@ namespace AL.Tests.EditMode.Narrative
             string expectedIntent)
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
+            fixture.AdvanceToRequest(false, "crownlands");
             object before = fixture.Snapshot;
             object request = Property(before, "CurrentEncounter");
             object result = fixture.Result(outcome, "snapshot-v1", "snapshot-ref-1");
@@ -262,7 +359,7 @@ namespace AL.Tests.EditMode.Narrative
 
             AssertCommitted(disposition, 6, state);
             Assert.AreNotSame(before, fixture.Snapshot);
-            AssertSnapshot(fixture.Snapshot, 6, state, dialogue, outcome == "Failure", pendingAction, "CROWNLANDS", "Resolved");
+            AssertSnapshot(fixture.Snapshot, 6, state, dialogue, outcome == "Failure", pendingAction, "crownlands", "Resolved");
             AssertObjectives(fixture.Snapshot, talkStatus, arenaStatus, reportStatus);
             Assert.IsNull(Property(fixture.Snapshot, "CurrentEncounter"));
             Assert.AreEqual(Property(request, "CorrelationId"), Property(fixture.Snapshot, "LastEncounterCorrelationId"));
@@ -279,19 +376,19 @@ namespace AL.Tests.EditMode.Narrative
         public void FailureRetryIsExplicitAndCreatesANewRequestOnlyAfterTheChoiceCommits()
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
+            fixture.AdvanceToRequest(false, "crownlands");
             string firstCorrelation = (string)Property(Property(fixture.Snapshot, "CurrentEncounter"), "CorrelationId");
             fixture.ApplyResult(fixture.Result("Failure"));
 
             object retryChoice = fixture.Choice("choice.omen1.retry");
             AssertCommitted(retryChoice, 7, Failed);
-            AssertSnapshot(fixture.Snapshot, 7, Failed, FailureDialogue, false, RetryArena, "CROWNLANDS", "Resolved");
+            AssertSnapshot(fixture.Snapshot, 7, Failed, FailureDialogue, false, RetryArena, "crownlands", "Resolved");
             Assert.IsNull(Property(fixture.Snapshot, "CurrentEncounter"));
             Assert.AreEqual(2, fixture.GuidCalls);
 
             object retryCommand = fixture.Command("PLAYER", RetryArena);
             object capabilities = fixture.AllCapabilities();
-            object realm = fixture.Realm("CommittedValid", "CROWNLANDS");
+            object realm = fixture.Realm("CommittedValid", "crownlands");
             object retry = Invoke(
                 fixture.Runtime,
                 "InvokePendingSemanticAction",
@@ -299,7 +396,7 @@ namespace AL.Tests.EditMode.Narrative
                 capabilities,
                 realm);
             AssertCommitted(retry, 8, Investigate);
-            AssertSnapshot(fixture.Snapshot, 8, Investigate, string.Empty, false, string.Empty, "CROWNLANDS", "Requested");
+            AssertSnapshot(fixture.Snapshot, 8, Investigate, string.Empty, false, string.Empty, "crownlands", "Requested");
             object request = Property(fixture.Snapshot, "CurrentEncounter");
             Assert.AreEqual(GeneratedGuid(3), Property(request, "RequestId"));
             Assert.AreEqual(GeneratedGuid(4), Property(request, "CorrelationId"));
@@ -328,22 +425,22 @@ namespace AL.Tests.EditMode.Narrative
             var generated = new RuntimeFixture(
                 null,
                 new[] { GeneratedGuid(1), GeneratedGuid(2), GeneratedGuid(3), GeneratedGuid(2) });
-            generated.AdvanceToRequest(false, "CROWNLANDS");
+            generated.AdvanceToRequest(false, "crownlands");
             generated.ApplyResult(generated.Result("Failure"));
             generated.Choice("choice.omen1.retry");
             object beforeRejectedRetry = generated.Snapshot;
 
-            object rejectedRetry = generated.InvokePending("CROWNLANDS");
+            object rejectedRetry = generated.InvokePending("crownlands");
             AssertStatus(rejectedRetry, "Rejected", "AL-NVS01-TRANSITION-INVALID");
             Assert.AreSame(beforeRejectedRetry, generated.Snapshot);
             Assert.IsNull(Property(generated.Snapshot, "CurrentEncounter"));
             Assert.AreEqual(4, generated.GuidCalls);
 
             var persisted = new RuntimeFixture();
-            persisted.AdvanceToRequest(false, "CROWNLANDS");
+            persisted.AdvanceToRequest(false, "crownlands");
             persisted.ApplyResult(persisted.Result("Failure"));
             persisted.Choice("choice.omen1.retry");
-            persisted.InvokePending("CROWNLANDS");
+            persisted.InvokePending("crownlands");
             object currentRequest = Property(persisted.Snapshot, "CurrentEncounter");
             object reusedCorrelationRequest = CloneRequestWithCorrelation(
                 currentRequest,
@@ -360,15 +457,15 @@ namespace AL.Tests.EditMode.Narrative
         public void CancelAndUnavailableExposeExplicitTechnicalReissueWithoutDialogue(string outcome)
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
+            fixture.AdvanceToRequest(false, "crownlands");
             object oldResult = fixture.Result(outcome);
             fixture.ApplyResult(oldResult);
-            AssertSnapshot(fixture.Snapshot, 6, Investigate, string.Empty, false, RetryArena, "CROWNLANDS", "Resolved");
+            AssertSnapshot(fixture.Snapshot, 6, Investigate, string.Empty, false, RetryArena, "crownlands", "Resolved");
             Assert.IsNull(Property(fixture.Snapshot, "CurrentEncounter"));
 
-            object reissue = fixture.InvokePending("CROWNLANDS");
+            object reissue = fixture.InvokePending("crownlands");
             AssertCommitted(reissue, 7, Investigate);
-            AssertSnapshot(fixture.Snapshot, 7, Investigate, string.Empty, false, string.Empty, "CROWNLANDS", "Requested");
+            AssertSnapshot(fixture.Snapshot, 7, Investigate, string.Empty, false, string.Empty, "crownlands", "Requested");
             Assert.AreEqual(GeneratedGuid(4), Property(Property(fixture.Snapshot, "CurrentEncounter"), "CorrelationId"));
 
             object beforeLate = fixture.Snapshot;
@@ -388,22 +485,22 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreSame(cleanSnapshot, clean.Snapshot);
 
             var talk = new RuntimeFixture();
-            talk.SelectValerius("Offer", "CROWNLANDS");
+            talk.SelectValerius("Offer", "crownlands");
             talk.Choice("choice.omen1.accept");
             object reset = talk.Abandon(false);
             AssertCommitted(reset, 3, Offered);
-            AssertSnapshot(talk.Snapshot, 3, Offered, string.Empty, false, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(talk.Snapshot, 3, Offered, string.Empty, false, string.Empty, "crownlands", "None");
             AssertObjectives(talk.Snapshot, "Active", "Inactive", "Inactive");
 
             var active = new RuntimeFixture();
-            active.AdvanceToRequest(false, "CROWNLANDS");
+            active.AdvanceToRequest(false, "crownlands");
             object activeSnapshot = active.Snapshot;
             object denied = active.Abandon(false);
             AssertStatus(denied, "Rejected", "AL-NVS01-TRANSITION-INVALID");
             Assert.AreSame(activeSnapshot, active.Snapshot);
 
             var failed = new RuntimeFixture();
-            failed.AdvanceToRequest(false, "CROWNLANDS");
+            failed.AdvanceToRequest(false, "crownlands");
             failed.ApplyResult(failed.Result("Failure"));
             object failedSnapshot = failed.Snapshot;
             object assertionDenied = failed.Abandon(true);
@@ -414,10 +511,10 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(string.Empty, Property(failed.Snapshot, "LastEncounterCorrelationId"));
 
             var earned = new RuntimeFixture();
-            earned.AdvanceToRequest(false, "CROWNLANDS");
+            earned.AdvanceToRequest(false, "crownlands");
             earned.ApplyResult(earned.Result("Success"));
             earned.Abandon(false);
-            AssertSnapshot(earned.Snapshot, 7, Offered, string.Empty, false, string.Empty, "CROWNLANDS", "None");
+            AssertSnapshot(earned.Snapshot, 7, Offered, string.Empty, false, string.Empty, "crownlands", "None");
             CollectionAssert.AreEqual(new[] { TearIntent }, StringItems(Property(earned.Snapshot, "ConsequenceIntentIds")));
             AssertObjectives(earned.Snapshot, "Active", "Inactive", "Inactive");
 
@@ -434,7 +531,7 @@ namespace AL.Tests.EditMode.Narrative
         {
             var fixture = new RuntimeFixture();
             object command = fixture.Command("NPC_VALERIUS", "POST_REALM_PROLOGUE", timestamp: 9000);
-            object realm = fixture.Realm("CommittedValid", "CROWNLANDS");
+            object realm = fixture.Realm("CommittedValid", "crownlands");
             object offer = Invoke(fixture.Runtime, "SelectValerius", command, EnumValue(InteractionKindType, "Offer"), realm);
             AssertCommitted(offer, 1, Offered);
             object committedSnapshot = fixture.Snapshot;
@@ -469,7 +566,7 @@ namespace AL.Tests.EditMode.Narrative
         public void DuplicateLateAndMismatchedResultsNeverProgressOrRepublishIntents()
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
+            fixture.AdvanceToRequest(false, "crownlands");
             object request = Property(fixture.Snapshot, "CurrentEncounter");
             object activeSnapshot = fixture.Snapshot;
 
@@ -477,7 +574,7 @@ namespace AL.Tests.EditMode.Narrative
                      {
                          fixture.CreateResult(request, "Success", correlationId: GeneratedGuid(99)),
                          fixture.CreateResult(request, "Success", hookId: "HOOK_WRONG"),
-                         fixture.CreateResult(request, "Success", realmId: "STONEHOLD"),
+                         fixture.CreateResult(request, "Success", realmId: "stonehold"),
                          fixture.CreateResult(request, "Success", eventId: ArenaFailure)
                      })
             {
@@ -489,7 +586,7 @@ namespace AL.Tests.EditMode.Narrative
 
             object successResult = fixture.CreateResult(request, "Success", "snap-v1", "snap-ref-1");
             fixture.ApplyResult(successResult);
-            fixture.SelectValerius("Report", "CROWNLANDS");
+            fixture.SelectValerius("Report", "crownlands");
             object afterLaterCommand = fixture.Snapshot;
 
             object exactDuplicate = fixture.ApplyResult(successResult);
@@ -517,7 +614,7 @@ namespace AL.Tests.EditMode.Narrative
         public void PersistedSnapshotsRejectImpossibleDialogueAndResultTopology()
         {
             var failed = new RuntimeFixture();
-            failed.AdvanceToRequest(false, "CROWNLANDS");
+            failed.AdvanceToRequest(false, "crownlands");
             failed.ApplyResult(failed.Result("Failure"));
 
             Assert.Throws<ArgumentException>(() => CloneSnapshot(
@@ -532,7 +629,7 @@ namespace AL.Tests.EditMode.Narrative
             AssertRuntimeReconstructionRejected(missingFailureDialogue);
 
             var talk = new RuntimeFixture();
-            talk.SelectValerius("Offer", "CROWNLANDS");
+            talk.SelectValerius("Offer", "crownlands");
             talk.Choice("choice.omen1.accept");
             object missingTalkDialogue = CloneSnapshot(
                 talk.Snapshot,
@@ -541,7 +638,7 @@ namespace AL.Tests.EditMode.Narrative
             AssertRuntimeReconstructionRejected(missingTalkDialogue);
 
             var report = new RuntimeFixture();
-            report.AdvanceToRequest(false, "CROWNLANDS");
+            report.AdvanceToRequest(false, "crownlands");
             report.ApplyResult(report.Result("Success"));
             object failureMasqueradingAsReport = CloneSnapshot(
                 report.Snapshot,
@@ -551,20 +648,54 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
+        public void V002PacketHashAndRealmIdentitySnapshotsRequestsAndResultsFailClosed()
+        {
+            var progressed = new RuntimeFixture();
+            progressed.SelectValerius("Offer", "crownlands");
+
+            AssertRuntimeReconstructionRejected(CloneSnapshot(
+                progressed.Snapshot,
+                "PacketVersion", "omen1-a1-2026-07-22-v002"));
+            AssertRuntimeReconstructionRejected(CloneSnapshot(
+                progressed.Snapshot,
+                "PacketSha256", "b22c166310617657cf9716f988e697d4c4992b4d1877b6fd4d0a3311af9a9a1f"));
+            AssertRuntimeReconstructionRejected(CloneSnapshot(
+                progressed.Snapshot,
+                "CommittedRealmId", "CROWNLANDS"));
+
+            var active = new RuntimeFixture();
+            active.AdvanceToRequest(false, "crownlands");
+            object request = Property(active.Snapshot, "CurrentEncounter");
+            object staleRealmRequest = CloneRequestWithRealm(request, "CROWNLANDS");
+            AssertRuntimeReconstructionRejected(CloneSnapshot(
+                active.Snapshot,
+                "CurrentEncounter", staleRealmRequest));
+
+            object before = active.Snapshot;
+            object staleRealmResult = active.CreateResult(request, "Success", realmId: "CROWNLANDS");
+            object rejected = active.ApplyResult(staleRealmResult);
+            AssertStatus(rejected, "Rejected", "AL-NVS01-EVENT-MISMATCH");
+            Assert.AreSame(before, active.Snapshot);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => CloneRequestWithContractVersion(request, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => active.CreateResult(request, "Success", contractVersion: 0));
+        }
+
+        [Test]
         public void RevisionOverflowAndInjectedCommitFailuresPreservePublishedSnapshotIdentity()
         {
             var seed = new RuntimeFixture();
             object maximumSnapshot = CloneSnapshotWithRevision(seed.Snapshot, long.MaxValue);
             var overflow = new RuntimeFixture(maximumSnapshot);
             object beforeOverflow = overflow.Snapshot;
-            object overflowResult = overflow.SelectValerius("Offer", "CROWNLANDS");
+            object overflowResult = overflow.SelectValerius("Offer", "crownlands");
             AssertStatus(overflowResult, "Rejected", "AL-NVS01-TRANSITION-INVALID");
             Assert.AreSame(beforeOverflow, overflow.Snapshot);
             Assert.AreEqual(0, overflow.CommitAttempts);
             Assert.AreEqual(0, overflow.GuidCalls);
 
             var requestFailure = new RuntimeFixture();
-            requestFailure.AdvanceToArenaStart(false, "CROWNLANDS");
+            requestFailure.AdvanceToArenaStart(false, "crownlands");
             object beforeRequest = requestFailure.Snapshot;
             object requestCommand = requestFailure.Command("PLAYER", RequestArena);
             requestFailure.FailNextCommit();
@@ -573,7 +704,7 @@ namespace AL.Tests.EditMode.Narrative
                 "InvokePendingSemanticAction",
                 requestCommand,
                 requestFailure.AllCapabilities(),
-                requestFailure.Realm("CommittedValid", "CROWNLANDS"));
+                requestFailure.Realm("CommittedValid", "crownlands"));
             AssertStatus(failedRequest, "CommitFailed", "AL-NVS01-SAVE-FAILED");
             Assert.AreSame(beforeRequest, requestFailure.Snapshot);
             Assert.IsNull(Property(failedRequest, "EncounterRequest"));
@@ -583,12 +714,12 @@ namespace AL.Tests.EditMode.Narrative
                 "InvokePendingSemanticAction",
                 requestCommand,
                 requestFailure.AllCapabilities(),
-                requestFailure.Realm("CommittedValid", "CROWNLANDS"));
+                requestFailure.Realm("CommittedValid", "crownlands"));
             AssertCommitted(retrySameCommand, 5, Investigate);
             Assert.AreEqual(GeneratedGuid(3), Property(Property(retrySameCommand, "EncounterRequest"), "RequestId"));
 
             var resultFailure = new RuntimeFixture();
-            resultFailure.AdvanceToRequest(false, "CROWNLANDS");
+            resultFailure.AdvanceToRequest(false, "crownlands");
             object beforeResult = resultFailure.Snapshot;
             object success = resultFailure.Result("Success");
             resultFailure.FailNextCommit();
@@ -635,7 +766,7 @@ namespace AL.Tests.EditMode.Narrative
             foreach (string outcome in new[] { "Success", "Failure", "Cancelled", "Unavailable" })
             {
                 var fixture = new RuntimeFixture();
-                fixture.AdvanceToRequest(false, "CROWNLANDS");
+                fixture.AdvanceToRequest(false, "crownlands");
                 object request = Property(fixture.Snapshot, "CurrentEncounter");
                 object adapter = New(AdapterType);
                 object[] bindArgs = { fixture.Runtime, null };
@@ -659,7 +790,7 @@ namespace AL.Tests.EditMode.Narrative
         public void ChampionAdapterRetriesTheLockedResultAfterCommitFailureWithoutOutcomeSwap()
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
+            fixture.AdvanceToRequest(false, "crownlands");
             object before = fixture.Snapshot;
             object adapter = New(AdapterType);
             object[] bindArgs = { fixture.Runtime, null };
@@ -688,7 +819,7 @@ namespace AL.Tests.EditMode.Narrative
         public void RuntimeContractsAreDeeplyImmutableBoundedAndFreeOfUnitySaveSceneOrTextAuthority()
         {
             var fixture = new RuntimeFixture();
-            fixture.AdvanceToRequest(false, "CROWNLANDS");
+            fixture.AdvanceToRequest(false, "crownlands");
             object snapshot = fixture.Snapshot;
 
             AssertReadOnlyList(Property(snapshot, "Objectives"));
@@ -704,7 +835,7 @@ namespace AL.Tests.EditMode.Narrative
 
             foreach (Type type in new[]
                      {
-                         EncounterRequestType, EncounterResultType, CommandEnvelopeType, RealmContextType,
+                         EncounterRequestType, EncounterResultType, CommandEnvelopeType, RealmContextType, RealmContextAdapterType,
                          CapabilitySnapshotType, ObjectiveSnapshotType, OperationReceiptType, SnapshotType,
                          DiagnosticType, DispositionType, MutationPlanType, QuestRuntimeType, AdapterType
                      })
@@ -791,7 +922,7 @@ namespace AL.Tests.EditMode.Narrative
             }
             Assert.NotNull(diagnostic);
             Assert.AreEqual(diagnosticCode, Property(diagnostic, "Code"));
-            Assert.AreEqual("omen1-a1-2026-07-22-v002", Property(diagnostic, "PacketVersion"));
+            Assert.AreEqual("omen1-a1-2026-07-29-v003", Property(diagnostic, "PacketVersion"));
             Assert.AreEqual(QuestId, Property(diagnostic, "QuestId"));
             Assert.False(string.IsNullOrWhiteSpace((string)Property(diagnostic, "StateId")));
         }
@@ -866,7 +997,7 @@ namespace AL.Tests.EditMode.Narrative
             }
 
             string committedRealmId = (string)Property(snapshot, "CommittedRealmId");
-            if (revision > 0 && committedRealmId.Length == 0) committedRealmId = "CROWNLANDS";
+            if (revision > 0 && committedRealmId.Length == 0) committedRealmId = "crownlands";
 
             return New(
                 SnapshotType,
@@ -946,6 +1077,57 @@ namespace AL.Tests.EditMode.Narrative
                 Property(request, "CancelledEventId"),
                 Property(request, "UnavailableEventId"),
                 Property(request, "ReturnScene"));
+        }
+
+        private static object CloneRequestWithRealm(object request, string realmId)
+        {
+            return New(
+                EncounterRequestType,
+                Property(request, "ContractVersion"),
+                Property(request, "RequestId"),
+                Property(request, "CorrelationId"),
+                Property(request, "QuestId"),
+                Property(request, "StateId"),
+                Property(request, "ObjectiveId"),
+                Property(request, "HookId"),
+                Property(request, "LocationId"),
+                realmId,
+                Property(request, "SuccessEventId"),
+                Property(request, "FailureEventId"),
+                Property(request, "CancelledEventId"),
+                Property(request, "UnavailableEventId"),
+                Property(request, "ReturnScene"));
+        }
+
+        private static object CloneRequestWithContractVersion(object request, int contractVersion)
+        {
+            return New(
+                EncounterRequestType,
+                contractVersion,
+                Property(request, "RequestId"),
+                Property(request, "CorrelationId"),
+                Property(request, "QuestId"),
+                Property(request, "StateId"),
+                Property(request, "ObjectiveId"),
+                Property(request, "HookId"),
+                Property(request, "LocationId"),
+                Property(request, "RealmId"),
+                Property(request, "SuccessEventId"),
+                Property(request, "FailureEventId"),
+                Property(request, "CancelledEventId"),
+                Property(request, "UnavailableEventId"),
+                Property(request, "ReturnScene"));
+        }
+
+        private static object AdaptRealmIdentity(object status, object realmId, string catalogVersion)
+        {
+            object identity = New(
+                RealmIdentitySnapshotType,
+                status,
+                realmId,
+                catalogVersion,
+                "AL-TEST-REALM-IDENTITY");
+            return InvokeStatic(RealmContextAdapterType, "FromCommittedIdentity", identity);
         }
 
         private static void AssertRuntimeReconstructionRejected(object snapshot)
@@ -1076,7 +1258,11 @@ namespace AL.Tests.EditMode.Narrative
         private static Type CommandEnvelopeType => RuntimeType("AL.Narrative.Nvs01.Nvs01CommandEnvelope");
         private static Type InteractionKindType => RuntimeType("AL.Narrative.Nvs01.Nvs01InteractionKind");
         private static Type RealmContextType => RuntimeType("AL.Narrative.Nvs01.Nvs01RealmContext");
+        private static Type RealmContextAdapterType => RuntimeType("AL.Narrative.Nvs01.Nvs01RealmContextAdapter");
         private static Type RealmContextStatusType => RuntimeType("AL.Narrative.Nvs01.Nvs01RealmContextStatus");
+        private static Type RealmIdentitySnapshotType => RuntimeType("AL.RealmSelection.RealmIdentitySnapshot");
+        private static Type RealmIdentityStatusType => RuntimeType("AL.RealmSelection.RealmIdentityStatus");
+        private static Type RealmIdType => RuntimeType("AL.Core.RealmId");
         private static Type CapabilitySnapshotType => RuntimeType("AL.Narrative.Nvs01.Nvs01CapabilitySnapshot");
         private static Type ObjectiveSnapshotType => RuntimeType("AL.Narrative.Nvs01.Nvs01ObjectiveSnapshot");
         private static Type OperationReceiptType => RuntimeType("AL.Narrative.Nvs01.Nvs01OperationReceipt");
@@ -1204,13 +1390,14 @@ namespace AL.Tests.EditMode.Narrative
                 string correlationId = null,
                 string hookId = null,
                 string realmId = null,
-                string eventId = null)
+                string eventId = null,
+                int? contractVersion = null)
             {
                 object outcomeValue = EnumValue(EncounterOutcomeType, outcome);
                 if (eventId == null) eventId = (string)Invoke(request, "GetEventId", outcomeValue);
                 return New(
                     EncounterResultType,
-                    Property(request, "ContractVersion"),
+                    contractVersion ?? (int)Property(request, "ContractVersion"),
                     correlationId ?? Property(request, "CorrelationId"),
                     Property(request, "QuestId"),
                     hookId ?? Property(request, "HookId"),
@@ -1247,9 +1434,9 @@ namespace AL.Tests.EditMode.Narrative
 
             internal void AdvanceToReportDialogue()
             {
-                AdvanceToRequest(false, "CROWNLANDS");
+                AdvanceToRequest(false, "crownlands");
                 AssertCommitted(ApplyResult(Result("Success")), 6, Report);
-                AssertCommitted(SelectValerius("Report", "CROWNLANDS"), 7, Report);
+                AssertCommitted(SelectValerius("Report", "crownlands"), 7, Report);
             }
 
             internal void AdvanceToCompleted()

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using AL.Core;
 using AL.Narrative.Nvs01.Contracts;
+using AL.RealmSelection;
 
 namespace AL.Narrative.Nvs01
 {
@@ -96,6 +98,45 @@ namespace AL.Narrative.Nvs01
 
         public static Nvs01RealmContext Unavailable() =>
             new Nvs01RealmContext(Nvs01RealmContextStatus.Unavailable, string.Empty);
+
+        public static Nvs01RealmContext Invalid() =>
+            new Nvs01RealmContext(Nvs01RealmContextStatus.Invalid, string.Empty);
+    }
+
+    public static class Nvs01RealmContextAdapter
+    {
+        public static Nvs01RealmContext FromCommittedIdentity(RealmIdentitySnapshot identity)
+        {
+            if (identity.Status == RealmIdentityStatus.ProfileUnavailable ||
+                identity.Status == RealmIdentityStatus.CatalogUnavailable ||
+                identity.Status == RealmIdentityStatus.Uncommitted)
+            {
+                return Nvs01RealmContext.Unavailable();
+            }
+
+            if (!identity.IsCommittedValid ||
+                !string.Equals(identity.CatalogVersion, RealmCatalogRuntime.SupportedVersion, StringComparison.Ordinal))
+            {
+                return Nvs01RealmContext.Invalid();
+            }
+
+            switch (identity.RealmId)
+            {
+                case RealmId.Crownlands:
+                    return Committed("crownlands");
+                case RealmId.Stonehold:
+                    return Committed("stonehold");
+                case RealmId.Eldergrove:
+                    return Committed("eldergrove");
+                case RealmId.Umbral:
+                    return Committed("umbral");
+                default:
+                    return Nvs01RealmContext.Invalid();
+            }
+        }
+
+        private static Nvs01RealmContext Committed(string realmId) =>
+            new Nvs01RealmContext(Nvs01RealmContextStatus.CommittedValid, realmId);
     }
 
     public sealed class Nvs01CapabilitySnapshot

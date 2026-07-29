@@ -30,7 +30,7 @@ class QuestPreviewContentParserTest {
     fun mismatchedCanonicalPacketVersionFailsClosed() {
         val mismatched = canonicalContent.replaceFirst(
             EXPECTED_NVS01_PACKET_VERSION,
-            "omen1-a1-unsupported"
+            "omen1-a1-2026-07-22-v002"
         )
 
         val error = assertThrows(IllegalArgumentException::class.java) {

@@ -1541,7 +1541,7 @@ namespace AL.Narrative.Nvs01
                 }
 
                 Exact(catalog.Placement.ContextId, "POST_REALM_PROLOGUE", "$.placement.contextId");
-                ExactSequence(catalog.Placement.EligibleRealmIds, new[] { "CROWNLANDS", "STONEHOLD", "ELDERGROVE", "UMBRAL" }, "$.placement.eligibleRealmIds");
+                ExactSequence(catalog.Placement.EligibleRealmIds, new[] { "crownlands", "stonehold", "eldergrove", "umbral" }, "$.placement.eligibleRealmIds");
                 Exact(catalog.Placement.Prerequisite, "ONE_COMMITTED_PLAYABLE_REALM", "$.placement.prerequisite");
                 Exact(catalog.Placement.OfferAction, "SELECT_VALERIUS", "$.placement.offerAction");
                 Exact(catalog.Placement.AutoAccept, false, "$.placement.autoAccept");
