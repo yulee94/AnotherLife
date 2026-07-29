@@ -996,10 +996,62 @@ namespace AL.Data.Catalogs
                     }
                 }
 
+                ValidateRecordConstraints(
+                    schema,
+                    fields,
+                    path,
+                    descriptor,
+                    id,
+                    artifactOrder,
+                    index,
+                    collector);
                 records.Add(new RecordCandidate(id, fields, references, index));
             }
 
             return records;
+        }
+
+        private static void ValidateRecordConstraints(
+            GameDataCatalogFamilySchema schema,
+            IEnumerable<KeyValuePair<string, GameDataValue>> fields,
+            string recordPath,
+            GameDataArtifactManifest descriptor,
+            string recordId,
+            int artifactOrder,
+            int recordOrder,
+            DiagnosticCollector collector)
+        {
+            if (schema.RecordConstraints.Count == 0)
+            {
+                return;
+            }
+
+            var fieldsByName = ImmutableCollections.FreezeSortedDictionary(fields);
+            for (var index = 0; index < schema.RecordConstraints.Count; index++)
+            {
+                var constraint = schema.RecordConstraints[index];
+                bool? isSatisfied;
+                try
+                {
+                    isSatisfied = constraint.Evaluate(recordId, fieldsByName);
+                }
+                catch (Exception)
+                {
+                    isSatisfied = false;
+                }
+
+                if (isSatisfied == false)
+                {
+                    collector.FieldValueError(
+                        descriptor,
+                        recordId,
+                        recordPath + "." + constraint.FieldName,
+                        constraint.DiagnosticCode,
+                        constraint.Message,
+                        artifactOrder,
+                        recordOrder);
+                }
+            }
         }
 
         private static GameDataValue ValidateAndMaterialize(

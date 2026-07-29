@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using AL.Data.Catalogs;
 
 namespace AL.Core
 {
@@ -23,6 +24,13 @@ namespace AL.Core
 
         static ResourceRules()
         {
+            if (GameDataWalletResourceReferences.Entries.Count != WalletResourceValues.Length ||
+                GameDataWalletResourceReferences.CoreResourceCount != CoreResourceCount)
+            {
+                throw new InvalidOperationException(
+                    "ResourceRules and the catalog resource-reference authority have different bounds.");
+            }
+
             var unique = new HashSet<ResourceType>();
             for (int index = 0; index < WalletResourceValues.Length; index++)
             {
@@ -36,12 +44,80 @@ namespace AL.Core
                 {
                     throw new InvalidOperationException("ResourceRules wallet index mapping drifted from its canonical order.");
                 }
+
+                GameDataWalletResourceReference reference =
+                    GameDataWalletResourceReferences.Entries[index];
+                bool expectedCore = index < CoreResourceCount;
+                bool referenceCore =
+                    reference.Classification == GameDataWalletResourceClassification.Core;
+                bool referenceOptionalRare =
+                    reference.Classification ==
+                    GameDataWalletResourceClassification.OptionalRare;
+                if (reference.WalletIndex != index ||
+                    reference.LegacyEnumValue != (int)resourceType ||
+                    !string.Equals(
+                        reference.LegacyEnumName,
+                        resourceType.ToString(),
+                        StringComparison.Ordinal) ||
+                    referenceCore != expectedCore ||
+                    referenceCore != IsCoreResource(resourceType) ||
+                    referenceOptionalRare != IsRareResource(resourceType))
+                {
+                    throw new InvalidOperationException(
+                        "ResourceRules drifted from the catalog resource-reference authority.");
+                }
             }
 
             WalletResources = Array.AsReadOnly(WalletResourceValues);
         }
 
         public static IReadOnlyList<ResourceType> WalletResources { get; }
+
+        public static bool TryGetResourceTypeByStableId(
+            string stableId,
+            out ResourceType resourceType)
+        {
+            GameDataWalletResourceReference reference;
+            if (!GameDataWalletResourceReferences.TryGetByStableId(stableId, out reference))
+            {
+                resourceType = default;
+                return false;
+            }
+
+            resourceType = (ResourceType)reference.LegacyEnumValue;
+            return TryGetWalletIndex(resourceType, out int walletIndex) &&
+                   walletIndex == reference.WalletIndex &&
+                   string.Equals(
+                       resourceType.ToString(),
+                       reference.LegacyEnumName,
+                       StringComparison.Ordinal);
+        }
+
+        public static bool TryGetStableId(
+            ResourceType resourceType,
+            out string stableId)
+        {
+            if (!TryGetWalletIndex(resourceType, out int walletIndex))
+            {
+                stableId = null;
+                return false;
+            }
+
+            GameDataWalletResourceReference reference =
+                GameDataWalletResourceReferences.Entries[walletIndex];
+            if (reference.LegacyEnumValue != (int)resourceType ||
+                !string.Equals(
+                    reference.LegacyEnumName,
+                    resourceType.ToString(),
+                    StringComparison.Ordinal))
+            {
+                stableId = null;
+                return false;
+            }
+
+            stableId = reference.StableId;
+            return true;
+        }
 
         public static ResourceType GetRareResourceForRealm(RealmId realmId)
         {

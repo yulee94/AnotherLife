@@ -57,9 +57,20 @@ namespace AL.Data.Catalogs
                     Integer("legacy_realm_value", 1, 4),
                     ContentReference("name_ref"),
                     ContentReference("description_ref"),
-                    StableReference("rare_resource_id"),
+                    StableReference(
+                        "rare_resource_id",
+                        allowedStringValues: GameDataWalletResourceReferences.StableIds),
                     StableReferenceArray("capability_profile_ids", 1, MaximumProfileReferences),
                     AssetReference("asset_ref")
+                },
+                new[]
+                {
+                    new GameDataCatalogRecordConstraint(
+                        "realm_rare_resource_reference",
+                        "rare_resource_id",
+                        "REALM-RARE-RESOURCE-REFERENCE",
+                        "The realm name, numeric value, and rare-resource ID do not match the reviewed exact relation.",
+                        ValidateRealmRareResourceRelation)
                 });
         }
 
@@ -155,13 +166,15 @@ namespace AL.Data.Catalogs
 
         private static GameDataCatalogFamilySchema RequiredFamily(
             string family,
-            IEnumerable<GameDataCatalogFieldRule> fields)
+            IEnumerable<GameDataCatalogFieldRule> fields,
+            IEnumerable<GameDataCatalogRecordConstraint> recordConstraints = null)
         {
             return new GameDataCatalogFamilySchema(
                 family,
                 new[] { SchemaVersion },
                 fields,
-                allowEmptyRecords: false);
+                allowEmptyRecords: false,
+                recordConstraints: recordConstraints);
         }
 
         private static GameDataCatalogFieldRule ContentReference(string name)
@@ -184,7 +197,8 @@ namespace AL.Data.Catalogs
 
         private static GameDataCatalogFieldRule StableReference(
             string name,
-            string referenceFamily = null)
+            string referenceFamily = null,
+            IEnumerable<string> allowedStringValues = null)
         {
             return new GameDataCatalogFieldRule(
                 name,
@@ -192,7 +206,43 @@ namespace AL.Data.Catalogs
                 true,
                 nonBlank: true,
                 stableId: true,
-                referenceFamily: referenceFamily);
+                referenceFamily: referenceFamily,
+                allowedStringValues: allowedStringValues);
+        }
+
+        private static bool? ValidateRealmRareResourceRelation(
+            string realmStableId,
+            IReadOnlyDictionary<string, GameDataValue> fields)
+        {
+            GameDataValue legacyNameValue;
+            GameDataValue legacyNumericValue;
+            GameDataValue resourceIdValue;
+            if (!fields.TryGetValue("legacy_realm_id", out legacyNameValue) ||
+                !fields.TryGetValue("legacy_realm_value", out legacyNumericValue) ||
+                !fields.TryGetValue("rare_resource_id", out resourceIdValue))
+            {
+                return null;
+            }
+
+            var legacyName = legacyNameValue as GameDataStringValue;
+            var legacyNumber = legacyNumericValue as GameDataNumberValue;
+            var resourceId = resourceIdValue as GameDataStringValue;
+            long exactLegacyValue;
+            if (legacyName == null ||
+                legacyNumber == null ||
+                resourceId == null ||
+                !legacyNumber.TryGetInt64(out exactLegacyValue) ||
+                exactLegacyValue < int.MinValue ||
+                exactLegacyValue > int.MaxValue)
+            {
+                return null;
+            }
+
+            return GameDataWalletResourceReferences.IsApprovedRealmRareResourceRelation(
+                realmStableId,
+                legacyName.Value,
+                (int)exactLegacyValue,
+                resourceId.Value);
         }
 
         private static GameDataCatalogFieldRule LegacyEnum(

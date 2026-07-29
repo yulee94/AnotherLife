@@ -202,6 +202,65 @@ namespace AL.Data.Catalogs
         }
     }
 
+    public sealed class GameDataCatalogRecordConstraint
+    {
+        private readonly Func<string, IReadOnlyDictionary<string, GameDataValue>, bool?> evaluator;
+
+        public GameDataCatalogRecordConstraint(
+            string name,
+            string fieldName,
+            string diagnosticCode,
+            string message,
+            Func<string, IReadOnlyDictionary<string, GameDataValue>, bool?> evaluator)
+        {
+            if (!GameDataCatalogIdentifiers.IsCanonicalStableId(name))
+            {
+                throw new ArgumentException(
+                    "A record-constraint name must be a canonical lower-snake-case ID.",
+                    nameof(name));
+            }
+
+            if (string.IsNullOrWhiteSpace(fieldName))
+            {
+                throw new ArgumentException(
+                    "A record constraint must identify its diagnostic field.",
+                    nameof(fieldName));
+            }
+
+            if (string.IsNullOrWhiteSpace(diagnosticCode))
+            {
+                throw new ArgumentException(
+                    "A record constraint requires a stable diagnostic code.",
+                    nameof(diagnosticCode));
+            }
+
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new ArgumentException(
+                    "A record constraint requires a diagnostic message.",
+                    nameof(message));
+            }
+
+            Name = name;
+            FieldName = fieldName;
+            DiagnosticCode = diagnosticCode;
+            Message = message;
+            this.evaluator = evaluator ?? throw new ArgumentNullException(nameof(evaluator));
+        }
+
+        public string Name { get; }
+        public string FieldName { get; }
+        public string DiagnosticCode { get; }
+        public string Message { get; }
+
+        internal bool? Evaluate(
+            string recordId,
+            IReadOnlyDictionary<string, GameDataValue> fields)
+        {
+            return evaluator(recordId, fields);
+        }
+    }
+
     public sealed class GameDataCatalogFamilySchema
     {
         private readonly HashSet<int> supportedVersions;
@@ -211,7 +270,8 @@ namespace AL.Data.Catalogs
             string family,
             IEnumerable<int> supportedVersions,
             IEnumerable<GameDataCatalogFieldRule> fields,
-            bool allowEmptyRecords = false)
+            bool allowEmptyRecords = false,
+            IEnumerable<GameDataCatalogRecordConstraint> recordConstraints = null)
         {
             if (!GameDataCatalogIdentifiers.IsCanonicalStableId(family))
             {
@@ -248,11 +308,45 @@ namespace AL.Data.Catalogs
             Fields = ImmutableCollections.Freeze(index.Values);
             fieldsByName = new ReadOnlyDictionary<string, GameDataCatalogFieldRule>(index);
             AllowEmptyRecords = allowEmptyRecords;
+
+            var constraints = new List<GameDataCatalogRecordConstraint>();
+            var constraintNames = new HashSet<string>(StringComparer.Ordinal);
+            if (recordConstraints != null)
+            {
+                foreach (var constraint in recordConstraints)
+                {
+                    if (constraint == null)
+                    {
+                        throw new ArgumentException(
+                            "Record constraints cannot contain null.",
+                            nameof(recordConstraints));
+                    }
+
+                    if (!index.ContainsKey(constraint.FieldName))
+                    {
+                        throw new ArgumentException(
+                            "A record constraint must target a declared schema field.",
+                            nameof(recordConstraints));
+                    }
+
+                    if (!constraintNames.Add(constraint.Name))
+                    {
+                        throw new ArgumentException(
+                            "Record-constraint names must be unique.",
+                            nameof(recordConstraints));
+                    }
+
+                    constraints.Add(constraint);
+                }
+            }
+
+            RecordConstraints = ImmutableCollections.Freeze(constraints);
         }
 
         public string Family { get; }
         public IReadOnlyList<GameDataCatalogFieldRule> Fields { get; }
         public bool AllowEmptyRecords { get; }
+        public IReadOnlyList<GameDataCatalogRecordConstraint> RecordConstraints { get; }
 
         public bool SupportsVersion(int version)
         {
