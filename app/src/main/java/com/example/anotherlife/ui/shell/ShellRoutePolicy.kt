@@ -28,6 +28,35 @@ object ShellRoutePolicy {
         }
     }
 
+    fun navigationSelection(route: Route): Route {
+        return if (route == Route.Quest) Route.NarrativeDebug else route
+    }
+
+    fun persistenceKey(route: Route): String {
+        return when (route) {
+            Route.Kingdom -> "kingdom"
+            Route.Dossier -> "dossier"
+            Route.Champion -> "champion"
+            Route.Battle -> "battle"
+            Route.Warzone -> "warzone"
+            Route.Quest -> "quest"
+            Route.NarrativeDebug -> "narrative_debug"
+        }
+    }
+
+    fun routeFromPersistenceKey(key: String): Route? {
+        return when (key) {
+            "kingdom" -> Route.Kingdom
+            "dossier" -> Route.Dossier
+            "champion" -> Route.Champion
+            "battle" -> Route.Battle
+            "warzone" -> Route.Warzone
+            "quest" -> Route.Quest
+            "narrative_debug" -> Route.NarrativeDebug
+            else -> null
+        }
+    }
+
     fun resolveRoute(route: Any?, debugToolsEnabled: Boolean): RouteResolution {
         return when (route) {
             is Route -> if (route !in debugOnlyRoutes || debugToolsEnabled) {

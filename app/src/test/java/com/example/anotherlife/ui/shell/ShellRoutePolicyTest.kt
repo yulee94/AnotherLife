@@ -57,6 +57,41 @@ class ShellRoutePolicyTest {
     }
 
     @Test
+    fun questPreviewKeepsNarrativeDebugSelectedInBottomNavigation() {
+        assertEquals(
+            Route.NarrativeDebug,
+            ShellRoutePolicy.navigationSelection(Route.Quest)
+        )
+        assertEquals(
+            Route.Kingdom,
+            ShellRoutePolicy.navigationSelection(Route.Kingdom)
+        )
+    }
+
+    @Test
+    fun routePersistenceKeysRoundTripAndRejectUnknownValues() {
+        val routes = listOf(
+            Route.Kingdom,
+            Route.Dossier,
+            Route.Champion,
+            Route.Battle,
+            Route.Warzone,
+            Route.Quest,
+            Route.NarrativeDebug
+        )
+
+        routes.forEach { route ->
+            assertEquals(
+                route,
+                ShellRoutePolicy.routeFromPersistenceKey(
+                    ShellRoutePolicy.persistenceKey(route)
+                )
+            )
+        }
+        assertEquals(null, ShellRoutePolicy.routeFromPersistenceKey("unknown"))
+    }
+
+    @Test
     fun releaseStateRestorationRemovesHistoricalNarrativeDebug() {
         val restored = listOf(
             Route.Kingdom,

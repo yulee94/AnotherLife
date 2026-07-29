@@ -17,15 +17,30 @@ class AndroidQuestPreviewLoader(context: Context) {
         cachedCatalog?.let { return it }
         return loadMutex.withLock {
             cachedCatalog ?: withContext(Dispatchers.IO) {
-                val rawCatalog = assets.open(NVS01_PREVIEW_ASSET).use {
-                    readBoundedUtf8(
-                        input = it,
-                        maxBytes = MAX_NVS01_PREVIEW_CATALOG_BYTES,
-                        label = NVS01_PREVIEW_ASSET
+                val canonicalQuest = Nvs01PreviewParser.parse(
+                    readAsset(
+                        assetName = NVS01_PREVIEW_ASSET,
+                        maxBytes = MAX_NVS01_PREVIEW_CATALOG_BYTES
                     )
-                }
-                Nvs01PreviewParser.parse(rawCatalog)
+                )
+                QuestPreviewContentParser.parse(
+                    raw = readAsset(
+                        assetName = QUEST_PREVIEW_CONTENT_ASSET,
+                        maxBytes = MAX_QUEST_PREVIEW_CONTENT_BYTES
+                    ),
+                    canonicalQuest = canonicalQuest
+                )
             }.also { cachedCatalog = it }
+        }
+    }
+
+    private fun readAsset(assetName: String, maxBytes: Int): String {
+        return assets.open(assetName).use {
+            readBoundedUtf8(
+                input = it,
+                maxBytes = maxBytes,
+                label = assetName
+            )
         }
     }
 

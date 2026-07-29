@@ -14,12 +14,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -40,7 +44,10 @@ import com.example.anotherlife.data.contracts.AndroidQuestPreviewLoader
 import com.example.anotherlife.data.contracts.QuestPreviewCatalog
 
 @Composable
-fun QuestPreviewRoute(modifier: Modifier = Modifier) {
+fun QuestPreviewRoute(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val context = LocalContext.current.applicationContext
     val loader = remember(context) { AndroidQuestPreviewLoader.shared(context) }
     val uiState by produceState<QuestPreviewUiState>(
@@ -54,34 +61,95 @@ fun QuestPreviewRoute(modifier: Modifier = Modifier) {
             )
     }
 
-    QuestScreen(state = uiState, modifier = modifier)
+    QuestScreen(
+        state = uiState,
+        onBack = onBack,
+        modifier = modifier
+    )
 }
 
 @Composable
 fun QuestScreen(
     state: QuestPreviewUiState,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     when (state) {
-        QuestPreviewUiState.Loading -> QuestPreviewLoading(modifier)
-        is QuestPreviewUiState.Ready -> QuestPreviewContent(state.catalog, modifier)
-        is QuestPreviewUiState.Unavailable -> QuestPreviewUnavailable(state.detail, modifier)
+        QuestPreviewUiState.Loading -> QuestPreviewLoading(onBack, modifier)
+        is QuestPreviewUiState.Ready -> QuestPreviewContent(
+            catalog = state.catalog,
+            onBack = onBack,
+            modifier = modifier
+        )
+        is QuestPreviewUiState.Unavailable -> QuestPreviewUnavailable(
+            detail = state.detail,
+            onBack = onBack,
+            modifier = modifier
+        )
     }
 }
 
 @Composable
-private fun QuestPreviewLoading(modifier: Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+private fun QuestPreviewLoading(
+    onBack: () -> Unit,
+    modifier: Modifier
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        QuestPreviewHeader(onBack = onBack)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator()
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(R.string.quest_preview_loading),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun QuestPreviewHeader(
+    onBack: () -> Unit,
+    sourceVersion: String? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 8.dp, end = 20.dp, top = 12.dp, bottom = 8.dp),
+        verticalAlignment = Alignment.Top
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            CircularProgressIndicator()
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.quest_preview_loading),
-                style = MaterialTheme.typography.bodyMedium
+        IconButton(
+            onClick = onBack,
+            modifier = Modifier.size(48.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                contentDescription = stringResource(R.string.quest_preview_back)
             )
+        }
+        Spacer(modifier = Modifier.width(4.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.quest_preview_screen_title),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { heading() }
+            )
+            sourceVersion?.let {
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(R.string.quest_preview_source_identity, it),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
@@ -89,6 +157,7 @@ private fun QuestPreviewLoading(modifier: Modifier) {
 @Composable
 private fun QuestPreviewContent(
     catalog: QuestPreviewCatalog,
+    onBack: () -> Unit,
     modifier: Modifier
 ) {
     LazyColumn(
@@ -97,17 +166,9 @@ private fun QuestPreviewContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item(key = "header") {
-            Text(
-                text = stringResource(R.string.quest_preview_screen_title),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.semantics { heading() }
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.quest_preview_source_identity, catalog.sourceVersion),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+            QuestPreviewHeader(
+                onBack = onBack,
+                sourceVersion = catalog.sourceVersion
             )
         }
 
@@ -168,6 +229,27 @@ private fun QuestPreviewContent(
             )
         }
 
+        item(key = "location") {
+            Text(
+                text = stringResource(R.string.quest_preview_location),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.semantics { heading() }
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = catalog.locationName,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
+            )
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = catalog.locationSummary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
         item(key = "objectives-heading") {
             HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
@@ -183,8 +265,18 @@ private fun QuestPreviewContent(
             items = catalog.objectives,
             key = { _, objective -> objective.id }
         ) { index, objective ->
+            val objectiveDescription = stringResource(
+                R.string.quest_preview_objective_description,
+                index + 1,
+                catalog.objectives.size,
+                objective.text
+            )
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clearAndSetSemantics {
+                        contentDescription = objectiveDescription
+                    },
                 verticalAlignment = Alignment.Top
             ) {
                 Text(
@@ -226,11 +318,35 @@ private fun QuestPreviewContent(
         item(key = "runtime-boundary") {
             HorizontalDivider()
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.quest_preview_runtime_unavailable),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Surface(
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Row(
+                    modifier = Modifier.padding(14.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = null,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Column {
+                        Text(
+                            text = catalog.runtimeStatusTitle,
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = catalog.runtimeStatusSummary,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -238,24 +354,20 @@ private fun QuestPreviewContent(
 @Composable
 private fun QuestPreviewUnavailable(
     detail: String,
+    onBack: () -> Unit,
     modifier: Modifier
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(20.dp)
     ) {
-        Text(
-            text = stringResource(R.string.quest_preview_screen_title),
-            style = MaterialTheme.typography.headlineSmall,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.semantics { heading() }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
+        QuestPreviewHeader(onBack = onBack)
         Surface(
             color = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp, vertical = 8.dp)
         ) {
             Row(
                 modifier = Modifier.padding(16.dp),
