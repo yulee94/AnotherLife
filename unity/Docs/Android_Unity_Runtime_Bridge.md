@@ -35,7 +35,7 @@ The bridge intentionally uses reflection so regular Android CI can keep compilin
 - `ON_DESTROY` and composable disposal close the route session, clear that host's callback token, forward to `UnityPlayer.destroy()`, and detach child views.
 - Focus is forwarded with `windowFocusChanged(true)` after attach.
 - A replacement host gets a new callback token; disposal of the prior host cannot clear the replacement.
-- AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportOutcome(String)` JVM entry point in minified release builds while unused host and contract code can still be removed.
+- AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportOutcome(String)` JVM entry point in minified release builds while unused host and contract code can still be removed. The Java reference parameter is nullable at this external boundary; a null JNI/Unity argument is delivered as typed `bridge.null_message` failure instead of throwing across JNI.
 
 The bridge must stay behind one Android view container. Do not let independent screens create competing Unity player instances.
 
@@ -69,6 +69,7 @@ Contract rules:
 - `intent` is exactly `preview` or `authoritative`. It describes transport intent; it does not grant save, reward, progression, or gameplay authority.
 - Capability IDs are explicit, unique, and bounded to 16 entries.
 - The complete UTF-8 message is bounded to 32 KiB.
+- Duplicate root object members are rejected by a streaming parser guard before the request is materialized as a JSON tree.
 - Realm, profile, encounter, content, catalog, and receipt fields remain absent until an approved route-specific contract defines their authority and validation.
 
 `UnityView.routeLaunchSequence` is the Android launch identity. Changing it creates a new request ID even when `routeId` is unchanged, so a retry cannot inherit the prior launch's duplicate guard. Callers must supply a route ID explicitly; there is no implicit gameplay route.
@@ -101,7 +102,8 @@ Supported `status` values are exactly `success`, `failure`, `cancelled`, and `un
 
 Android rejects:
 
-- malformed, blank, oversized, or structurally unexpected JSON;
+- null, malformed, blank, oversized, or structurally unexpected JSON;
+- duplicate root object members before last-value-wins tree materialization;
 - unsupported versions or statuses;
 - missing or invalid stable IDs;
 - request or route mismatches;
@@ -131,7 +133,7 @@ Required checks for bridge changes:
 - Outcome callback test from Unity to Android
 - Back, home, pause, resume, and destroy lifecycle test
 
-Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
+Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, duplicate request/outcome members, nullable Java/JNI boundary rejection, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
 
 Still blocked for #135 completion:
 

@@ -197,7 +197,7 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
         removeAllViews()
     }
 
-    private fun handleOutcome(rawJson: String) {
+    private fun handleOutcome(rawJson: String?) {
         when (val delivery = bridgeSession.consumeOutcome(rawJson)) {
             is UnityBridgeSessionDelivery.Delivered -> {
                 hideStatus()

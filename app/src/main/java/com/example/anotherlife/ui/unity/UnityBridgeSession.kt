@@ -55,7 +55,7 @@ internal class UnityBridgeSession(
     }
 
     @Synchronized
-    fun consumeOutcome(rawJson: String): UnityBridgeSessionDelivery {
+    fun consumeOutcome(rawJson: String?): UnityBridgeSessionDelivery {
         if (closed) {
             return rejectedDelivery(UnityBridgeProtocolErrorCode.SessionClosed)
         }
@@ -121,10 +121,10 @@ internal data class UnityBridgeCallbackToken(val value: Long)
 
 internal class UnityBridgeCallbackRegistry {
     private var nextToken = 0L
-    private var activeRegistration: Pair<UnityBridgeCallbackToken, (String) -> Unit>? = null
+    private var activeRegistration: Pair<UnityBridgeCallbackToken, (String?) -> Unit>? = null
 
     @Synchronized
-    fun register(callback: (String) -> Unit): UnityBridgeCallbackToken {
+    fun register(callback: (String?) -> Unit): UnityBridgeCallbackToken {
         val token = UnityBridgeCallbackToken(++nextToken)
         activeRegistration = token to callback
         return token
@@ -137,7 +137,7 @@ internal class UnityBridgeCallbackRegistry {
         }
     }
 
-    fun report(rawJson: String) {
+    fun report(rawJson: String?) {
         val callback = synchronized(this) { activeRegistration?.second }
         runCatching { callback?.invoke(rawJson) }
     }
@@ -147,7 +147,7 @@ internal class UnityBridgeCallbackRegistry {
 object UnityBridgeCallbacks {
     private val registry = UnityBridgeCallbackRegistry()
 
-    internal fun register(callback: (String) -> Unit): UnityBridgeCallbackToken {
+    internal fun register(callback: (String?) -> Unit): UnityBridgeCallbackToken {
         return registry.register(callback)
     }
 
@@ -157,7 +157,7 @@ object UnityBridgeCallbacks {
 
     @Keep
     @JvmStatic
-    fun reportOutcome(rawJson: String) {
+    fun reportOutcome(rawJson: String?) {
         registry.report(rawJson)
     }
 }

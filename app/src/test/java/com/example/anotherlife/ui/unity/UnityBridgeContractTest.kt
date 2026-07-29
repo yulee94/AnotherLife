@@ -78,6 +78,24 @@ class UnityBridgeContractTest {
     }
 
     @Test
+    fun requestRejectsDuplicateCorrelationMembersBeforeTreeMaterialization() {
+        val fixtures = listOf(
+            "requestId" to
+                """{"contractVersion":2,"requestId":"request-0001","requestId":"request-0002","routeId":"bridge.smoke","intent":"preview","requestedCapabilities":[]}""",
+            "routeId" to
+                """{"contractVersion":2,"requestId":"request-0001","routeId":"bridge.smoke","routeId":"bridge.other","intent":"preview","requestedCapabilities":[]}"""
+        )
+
+        fixtures.forEach { (field, rawJson) ->
+            assertRejected(
+                UnityBridgeContract.parseRequest(rawJson),
+                UnityBridgeProtocolErrorCode.DuplicateField,
+                field
+            )
+        }
+    }
+
+    @Test
     fun outcomeParsesTypedUnavailableWithCorrelationAndDiagnostic() {
         val outcome = accepted(
             UnityBridgeContract.parseOutcome(
@@ -126,6 +144,28 @@ class UnityBridgeContractTest {
             UnityBridgeContract.parseOutcome(valid.dropLast(1) + ""","unknown":true}"""),
             UnityBridgeProtocolErrorCode.UnexpectedField
         )
+    }
+
+    @Test
+    fun outcomeRejectsDuplicateCorrelationStatusAndPayloadMembers() {
+        val fixtures = listOf(
+            "requestId" to
+                """{"contractVersion":2,"requestId":"request-0001","requestId":"request-0002","routeId":"bridge.smoke","status":"success"}""",
+            "routeId" to
+                """{"contractVersion":2,"requestId":"request-0001","routeId":"bridge.smoke","routeId":"bridge.other","status":"success"}""",
+            "status" to
+                """{"contractVersion":2,"requestId":"request-0001","routeId":"bridge.smoke","status":"success","status":"failure","diagnosticCode":"route.failed"}""",
+            "payload" to
+                """{"contractVersion":2,"requestId":"request-0001","routeId":"bridge.smoke","status":"success","payload":"first","pay\u006coad":"second"}"""
+        )
+
+        fixtures.forEach { (field, rawJson) ->
+            assertRejected(
+                UnityBridgeContract.parseOutcome(rawJson),
+                UnityBridgeProtocolErrorCode.DuplicateField,
+                field
+            )
+        }
     }
 
     @Test
@@ -253,6 +293,41 @@ class UnityBridgeContractTest {
         assertEquals("active", activeHostPayload)
     }
 
+    @Test
+    fun jvmCallbackBoundaryTurnsNullIntoTypedRejectionWithoutThrowing() {
+        val session = UnityBridgeSession { REQUEST_ONE }
+        val start = started(session.startRoute(ROUTE, UnityRouteIntent.Preview))
+        var delivery: UnityBridgeSessionDelivery? = null
+        val token = UnityBridgeCallbacks.register { rawJson ->
+            delivery = session.consumeOutcome(rawJson)
+        }
+
+        try {
+            val boundary = UnityBridgeCallbacks::class.java.getMethod(
+                "reportOutcome",
+                String::class.java
+            )
+            val invocation = runCatching {
+                boundary.invoke(null, *arrayOfNulls<Any>(1))
+            }
+
+            assertNull(invocation.exceptionOrNull())
+            assertTrue(delivery != null)
+            assertDeliveryRejected(
+                delivery!!,
+                UnityBridgeProtocolErrorCode.NullMessage
+            )
+            assertEquals(
+                start.request.requestId,
+                delivered(
+                    session.consumeOutcome(outcomeJson(start.request.requestId))
+                ).requestId
+            )
+        } finally {
+            UnityBridgeCallbacks.clear(token)
+        }
+    }
+
     private fun validRequest(): UnityRouteRequest {
         return accepted(
             UnityBridgeContract.createRequest(
@@ -289,13 +364,16 @@ class UnityBridgeContractTest {
 
     private fun assertRejected(
         result: UnityBridgeContractResult<*>,
-        expected: UnityBridgeProtocolErrorCode
+        expected: UnityBridgeProtocolErrorCode,
+        expectedField: String? = null
     ) {
         assertTrue(result is UnityBridgeContractResult.Rejected)
+        val error = (result as UnityBridgeContractResult.Rejected).error
         assertEquals(
             expected,
-            (result as UnityBridgeContractResult.Rejected).error.code
+            error.code
         )
+        expectedField?.let { assertEquals(it, error.field) }
     }
 
     private fun started(start: UnityBridgeSessionStart): UnityBridgeSessionStart.Started {

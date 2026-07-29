@@ -1,7 +1,16 @@
 package com.example.anotherlife.ui.unity
 
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.encoding.CompositeDecoder
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.encoding.decodeStructure
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -71,9 +80,11 @@ data class UnityBridgeProtocolError(
 )
 
 enum class UnityBridgeProtocolErrorCode(val wireValue: String) {
+    NullMessage("bridge.null_message"),
     EmptyMessage("bridge.empty_message"),
     MessageTooLarge("bridge.message_too_large"),
     MalformedJson("bridge.malformed_json"),
+    DuplicateField("bridge.duplicate_field"),
     UnexpectedField("bridge.unexpected_field"),
     MissingField("bridge.missing_field"),
     InvalidContractVersion("bridge.invalid_contract_version"),
@@ -103,14 +114,19 @@ sealed interface UnityBridgeContractResult<out T> {
 }
 
 object UnityBridgeContract {
-    private val requestKeys = setOf(
+    private val requestMemberNames = listOf(
         "contractVersion",
         "requestId",
         "routeId",
         "intent",
         "requestedCapabilities"
     )
-    private val outcomeKeys = setOf(
+    private val requestKeys = requestMemberNames.toSet()
+    private val requestDuplicateSchema = DuplicateObjectMemberSchema(
+        descriptorName = "UnityRouteRequestDuplicateGuard",
+        memberNames = requestMemberNames
+    )
+    private val outcomeMemberNames = listOf(
         "contractVersion",
         "requestId",
         "routeId",
@@ -118,6 +134,11 @@ object UnityBridgeContract {
         "diagnosticCode",
         "resultId",
         "payload"
+    )
+    private val outcomeKeys = outcomeMemberNames.toSet()
+    private val outcomeDuplicateSchema = DuplicateObjectMemberSchema(
+        descriptorName = "UnityRouteOutcomeDuplicateGuard",
+        memberNames = outcomeMemberNames
     )
 
     fun createRequest(
@@ -170,6 +191,13 @@ object UnityBridgeContract {
             return rejected(UnityBridgeProtocolErrorCode.EmptyMessage)
         }
 
+        findDuplicateObjectMember(
+            rawJson = rawJson,
+            schema = requestDuplicateSchema
+        )?.let { duplicate ->
+            return rejected(UnityBridgeProtocolErrorCode.DuplicateField, duplicate)
+        }
+
         val root = runCatching { bridgeJson.parseToJsonElement(rawJson) as? JsonObject }
             .getOrNull()
             ?: return rejected(UnityBridgeProtocolErrorCode.MalformedJson)
@@ -211,12 +239,22 @@ object UnityBridgeContract {
         }
     }
 
-    fun parseOutcome(rawJson: String): UnityBridgeContractResult<UnityRouteOutcome> {
+    fun parseOutcome(rawJson: String?): UnityBridgeContractResult<UnityRouteOutcome> {
+        if (rawJson == null) {
+            return rejected(UnityBridgeProtocolErrorCode.NullMessage)
+        }
         if (rawJson.exceedsUtf8Limit(MAX_UNITY_BRIDGE_MESSAGE_BYTES)) {
             return rejected(UnityBridgeProtocolErrorCode.MessageTooLarge)
         }
         if (rawJson.isBlank()) {
             return rejected(UnityBridgeProtocolErrorCode.EmptyMessage)
+        }
+
+        findDuplicateObjectMember(
+            rawJson = rawJson,
+            schema = outcomeDuplicateSchema
+        )?.let { duplicate ->
+            return rejected(UnityBridgeProtocolErrorCode.DuplicateField, duplicate)
         }
 
         val root = runCatching { bridgeJson.parseToJsonElement(rawJson) as? JsonObject }
@@ -460,6 +498,63 @@ object UnityBridgeContract {
             violation(errorCode, field)
         }
     }
+}
+
+private class DuplicateObjectMemberSchema(
+    descriptorName: String,
+    val memberNames: List<String>
+) {
+    val descriptor: SerialDescriptor = buildClassSerialDescriptor(descriptorName) {
+        memberNames.forEach { memberName ->
+            element(memberName, JsonElement.serializer().descriptor)
+        }
+    }
+}
+
+private class DuplicateObjectMemberGuard(
+    private val schema: DuplicateObjectMemberSchema
+) : KSerializer<Unit> {
+    override val descriptor: SerialDescriptor = schema.descriptor
+
+    var duplicateMember: String? = null
+        private set
+
+    override fun deserialize(decoder: Decoder) {
+        decoder.decodeStructure(descriptor) {
+            val seenMembers = BooleanArray(schema.memberNames.size)
+            while (true) {
+                val index = decodeElementIndex(descriptor)
+                if (index == CompositeDecoder.DECODE_DONE) break
+
+                if (seenMembers[index]) {
+                    duplicateMember = schema.memberNames[index]
+                    throw DuplicateObjectMemberFound()
+                }
+                seenMembers[index] = true
+                decodeSerializableElement(
+                    descriptor = descriptor,
+                    index = index,
+                    deserializer = JsonElement.serializer()
+                )
+            }
+        }
+    }
+
+    override fun serialize(encoder: Encoder, value: Unit) {
+        error("DuplicateObjectMemberGuard is decode-only")
+    }
+}
+
+private class DuplicateObjectMemberFound :
+    RuntimeException(null, null, false, false)
+
+private fun findDuplicateObjectMember(
+    rawJson: String,
+    schema: DuplicateObjectMemberSchema
+): String? {
+    val guard = DuplicateObjectMemberGuard(schema)
+    runCatching { bridgeJson.decodeFromString(guard, rawJson) }
+    return guard.duplicateMember
 }
 
 private class BridgeContractViolation(
