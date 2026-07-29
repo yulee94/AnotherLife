@@ -111,6 +111,9 @@ namespace AL.Tests.EditMode.GameDataCatalog
             CollectionAssert.AreEquivalent(
                 new[] { "single", "aoe", "self", "ally", "enemy" },
                 Field(registry, "skills", "target_type").AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                GameDataWalletResourceReferences.StableIds,
+                Field(registry, "realms", "rare_resource_id").AllowedStringValues);
 
             Assert.AreEqual("realms", Field(registry, "champions", "realm_id").ReferenceFamily);
             Assert.AreEqual(
@@ -292,7 +295,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
             var champion = artifacts.Single(artifact => artifact.Family == "champions");
             var missingRealm = CatalogFixture.MutateArtifact(
                 champion,
-                "\"realm_id\":\"realm_fixture\"",
+                "\"realm_id\":\"stonehold\"",
                 "\"realm_id\":\"missing_realm\"");
             var championSet = artifacts
                 .Select(artifact => artifact.Family == "champions" ? missingRealm : artifact)
@@ -324,6 +327,91 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 schemaType.Assembly.GetReferencedAssemblies()
                     .Any(reference => reference.Name.StartsWith("UnityEngine", StringComparison.Ordinal)),
                 "The pure catalog assembly must not acquire a UnityEngine dependency.");
+        }
+
+        [Test]
+        public void RealmRareResourceReferencesAcceptOnlyExactApprovedRelations()
+        {
+            var validRealm = ValidArtifacts().Single(artifact => artifact.Family == "realms");
+            var relations = new[]
+            {
+                new[] { "Stonehold", "1", "deep_ore" },
+                new[] { "Eldergrove", "2", "world_sap" },
+                new[] { "Crownlands", "3", "royal_sigil" },
+                new[] { "Umbral", "4", "dark_crystal" }
+            };
+
+            foreach (var relation in relations)
+            {
+                var artifact = MutateRealmRelation(
+                    validRealm,
+                    relation[0].ToLowerInvariant(),
+                    relation[0],
+                    relation[1],
+                    relation[2]);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.LoadedPackaged,
+                    result.Status,
+                    string.Join("|", relation));
+                Assert.NotNull(result.Snapshot, string.Join("|", relation));
+            }
+
+            foreach (var invalidResourceId in new[]
+                     {
+                         "royal_sigil",
+                         "DeepOre",
+                         "deep-ore",
+                         "deep ore",
+                         " deep_ore",
+                         "deep_ore ",
+                         "unknown_resource"
+                     })
+            {
+                var artifact = MutateRealmRelation(
+                    validRealm,
+                    "stonehold",
+                    "Stonehold",
+                    "1",
+                    invalidResourceId);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.InvalidRecord,
+                    result.Status,
+                    invalidResourceId);
+                Assert.IsNull(result.Snapshot, invalidResourceId);
+                CollectionAssert.Contains(
+                    result.Diagnostics.Select(diagnostic => diagnostic.Code).ToArray(),
+                    "AL-GDC-REALM-RARE-RESOURCE-REFERENCE",
+                    invalidResourceId);
+            }
+
+            var wrongRealmId = MutateRealmRelation(
+                validRealm,
+                "stone_hold",
+                "Stonehold",
+                "1",
+                "deep_ore");
+            var wrongRealmIdResult = Validate(wrongRealmId);
+            Assert.AreEqual(
+                GameDataCatalogLoadStatus.InvalidRecord,
+                wrongRealmIdResult.Status);
+            Assert.IsNull(wrongRealmIdResult.Snapshot);
+            CollectionAssert.Contains(
+                wrongRealmIdResult.Diagnostics.Select(diagnostic => diagnostic.Code).ToArray(),
+                "AL-GDC-REALM-RARE-RESOURCE-REFERENCE");
+        }
+
+        [Test]
+        public void RealmSchemaPublishesOneExactResourceRelationConstraint()
+        {
+            var realm = Family(GameDataSixFamilySchemas.CreateRegistry(), "realms");
+
+            Assert.AreEqual(1, realm.RecordConstraints.Count);
+            var constraint = realm.RecordConstraints[0];
+            Assert.AreEqual("realm_rare_resource_reference", constraint.Name);
+            Assert.AreEqual("rare_resource_id", constraint.FieldName);
+            Assert.AreEqual("REALM-RARE-RESOURCE-REFERENCE", constraint.DiagnosticCode);
         }
 
         private static GameDataCatalogFamilySchema Family(
@@ -412,7 +500,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
                     "Catalogs/realms.phase_c2_fixture.json",
                     true,
                     "0.1.0",
-                    "[{\"id\":\"realm_fixture\",\"legacy_realm_id\":\"Stonehold\",\"legacy_realm_value\":1,\"name_ref\":\"fixture.realm.name\",\"description_ref\":\"fixture.realm.description\",\"rare_resource_id\":\"deep_ore\",\"capability_profile_ids\":[\"resilience\"],\"asset_ref\":\"Assets/Fixture/Realm\"}]",
+                    "[{\"id\":\"stonehold\",\"legacy_realm_id\":\"Stonehold\",\"legacy_realm_value\":1,\"name_ref\":\"fixture.realm.name\",\"description_ref\":\"fixture.realm.description\",\"rare_resource_id\":\"deep_ore\",\"capability_profile_ids\":[\"resilience\"],\"asset_ref\":\"Assets/Fixture/Realm\"}]",
                     "[]",
                     string.Empty),
                 CatalogFixture.FamilyArtifact(
@@ -448,7 +536,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
                     "Catalogs/champions.phase_c2_fixture.json",
                     true,
                     "0.1.0",
-                    "[{\"id\":\"champion_fixture\",\"name_ref\":\"fixture.champion.name\",\"realm_id\":\"realm_fixture\",\"class_family_id\":\"warrior\",\"portrait_asset_ref\":\"Assets/Fixture/ChampionPortrait\",\"model_asset_ref\":\"Assets/Fixture/ChampionModel\",\"base_skill_ids\":[\"skill_fixture\"],\"stat_profile_id\":\"champion_stats\"}]",
+                    "[{\"id\":\"champion_fixture\",\"name_ref\":\"fixture.champion.name\",\"realm_id\":\"stonehold\",\"class_family_id\":\"warrior\",\"portrait_asset_ref\":\"Assets/Fixture/ChampionPortrait\",\"model_asset_ref\":\"Assets/Fixture/ChampionModel\",\"base_skill_ids\":[\"skill_fixture\"],\"stat_profile_id\":\"champion_stats\"}]",
                     "[]",
                     string.Empty),
                 CatalogFixture.FamilyArtifact(
@@ -484,6 +572,49 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 GameDataCatalogSourceKind.Packaged,
                 new DateTimeOffset(2026, 7, 23, 0, 0, 0, TimeSpan.Zero),
                 new DateTimeOffset(2026, 7, 23, 0, 0, 1, TimeSpan.Zero));
+        }
+
+        private static CatalogFixture.Artifact MutateRealmRelation(
+            CatalogFixture.Artifact source,
+            string realmStableId,
+            string legacyName,
+            string legacyValue,
+            string resourceId)
+        {
+            var artifact = source;
+            if (!string.Equals(realmStableId, "stonehold", StringComparison.Ordinal))
+            {
+                artifact = CatalogFixture.MutateArtifact(
+                    artifact,
+                    "\"id\":\"stonehold\"",
+                    "\"id\":\"" + realmStableId + "\"");
+            }
+
+            if (!string.Equals(legacyName, "Stonehold", StringComparison.Ordinal))
+            {
+                artifact = CatalogFixture.MutateArtifact(
+                    artifact,
+                    "\"legacy_realm_id\":\"Stonehold\"",
+                    "\"legacy_realm_id\":\"" + legacyName + "\"");
+            }
+
+            if (!string.Equals(legacyValue, "1", StringComparison.Ordinal))
+            {
+                artifact = CatalogFixture.MutateArtifact(
+                    artifact,
+                    "\"legacy_realm_value\":1",
+                    "\"legacy_realm_value\":" + legacyValue);
+            }
+
+            if (!string.Equals(resourceId, "deep_ore", StringComparison.Ordinal))
+            {
+                artifact = CatalogFixture.MutateArtifact(
+                    artifact,
+                    "\"rare_resource_id\":\"deep_ore\"",
+                    "\"rare_resource_id\":\"" + resourceId + "\"");
+            }
+
+            return artifact;
         }
 
         private static GameDataCatalogStore Load(params CatalogFixture.Artifact[] artifacts)
