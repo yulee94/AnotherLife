@@ -311,6 +311,218 @@ namespace AL.Tests.EditMode.BossRewards
         }
 
         [Test]
+        public void CatalogErrorSelectionIgnoresDefinitionPermutation()
+        {
+            BossEquipmentDefinitionSnapshot duplicate =
+                BossRewardTestFixtures.Equipment("equipment_mike");
+            BossEquipmentDefinitionSnapshot malformed =
+                BossRewardTestFixtures.Equipment(
+                    "equipment_zeta",
+                    rawSha256: "not_a_sha256");
+            var forwardDefinitions = new[]
+            {
+                malformed,
+                duplicate,
+                duplicate
+            };
+            BossEquipmentDefinitionSnapshot[] reverseDefinitions =
+                forwardDefinitions.Reverse().ToArray();
+
+            OwnedEquipmentQueryResult forward =
+                BossRewardInventoryValidator.Validate(
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    BossRewardTestFixtures.InventoryRevision,
+                    BossRewardTestFixtures.Catalog(
+                        equipment: forwardDefinitions),
+                    BossRewardTestFixtures.InventorySchemaVersion);
+            OwnedEquipmentQueryResult reverse =
+                BossRewardInventoryValidator.Validate(
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    BossRewardTestFixtures.InventoryRevision,
+                    BossRewardTestFixtures.Catalog(
+                        equipment: reverseDefinitions),
+                    BossRewardTestFixtures.InventorySchemaVersion);
+
+            AssertEquivalent(forward, reverse);
+            Assert.AreEqual(OwnedEquipmentQueryStatus.Unavailable, forward.Status);
+            Assert.AreEqual(1, forward.Diagnostics.Count);
+            Assert.AreEqual(
+                "equipment_mike",
+                forward.Diagnostics[0].RecordId);
+        }
+
+        [Test]
+        public void NullCatalogErrorWinsCanonicallyAcrossDefinitionPermutation()
+        {
+            BossEquipmentDefinitionSnapshot duplicate =
+                BossRewardTestFixtures.Equipment("equipment_mike");
+            BossEquipmentDefinitionSnapshot malformed =
+                BossRewardTestFixtures.Equipment(
+                    "equipment_zeta",
+                    rawSha256: "not_a_sha256");
+            var forwardDefinitions =
+                new BossEquipmentDefinitionSnapshot[]
+                {
+                    malformed,
+                    duplicate,
+                    null,
+                    duplicate
+                };
+
+            OwnedEquipmentQueryResult forward =
+                BossRewardInventoryValidator.Validate(
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    BossRewardTestFixtures.InventoryRevision,
+                    BossRewardTestFixtures.Catalog(
+                        equipment: forwardDefinitions),
+                    BossRewardTestFixtures.InventorySchemaVersion);
+            OwnedEquipmentQueryResult reverse =
+                BossRewardInventoryValidator.Validate(
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    BossRewardTestFixtures.InventoryRevision,
+                    BossRewardTestFixtures.Catalog(
+                        equipment: forwardDefinitions.Reverse()),
+                    BossRewardTestFixtures.InventorySchemaVersion);
+
+            AssertEquivalent(forward, reverse);
+            Assert.AreEqual(1, forward.Diagnostics.Count);
+            Assert.AreEqual(string.Empty, forward.Diagnostics[0].RecordId);
+        }
+
+        [Test]
+        public void MalformedRowStatusAndItemsIgnoreInputPermutation()
+        {
+            BossEquipmentDefinitionSnapshot alpha =
+                BossRewardTestFixtures.Equipment(
+                    BossRewardTestFixtures.AlphaId);
+            BossEquipmentDefinitionSnapshot beta =
+                BossRewardTestFixtures.Equipment(
+                    BossRewardTestFixtures.BetaId,
+                    attackBonus: 5,
+                    defenseBonus: 6,
+                    healthBonus: 7,
+                    rawSha256: BossRewardTestFixtures.ShaA);
+            BossEquipmentDefinitionSnapshot gamma =
+                BossRewardTestFixtures.Equipment("equipment_gamma");
+            BossEquipmentDefinitionSnapshot delta =
+                BossRewardTestFixtures.Equipment("equipment_delta");
+            BossEquipmentDefinitionSnapshot epsilon =
+                BossRewardTestFixtures.Equipment("equipment_epsilon");
+            BossRewardCatalogSnapshot catalog =
+                BossRewardTestFixtures.Catalog(
+                    equipment: new[]
+                    {
+                        alpha,
+                        beta,
+                        gamma,
+                        delta,
+                        epsilon
+                    });
+
+            OwnedEquipmentSnapshot unsupported = CopyRow(
+                BossRewardTestFixtures.Owned(alpha),
+                schemaVersion: "owned_equipment_v2");
+            OwnedEquipmentSnapshot quantity =
+                BossRewardTestFixtures.Owned(
+                    beta,
+                    quantity: 0,
+                    id: BossRewardTestFixtures.BetaId);
+            OwnedEquipmentSnapshot timestamp = CopyRow(
+                BossRewardTestFixtures.Owned(
+                    gamma,
+                    id: gamma.EquipmentDefinitionId),
+                firstAcquiredUtcSeconds: 20,
+                lastAcquiredUtcSeconds: 10);
+            OwnedEquipmentSnapshot provenance = CopyRow(
+                BossRewardTestFixtures.Owned(
+                    delta,
+                    id: delta.EquipmentDefinitionId),
+                lastSourceBossDefinitionId: "boss-invalid");
+            OwnedEquipmentSnapshot snapshot = CopyRow(
+                BossRewardTestFixtures.Owned(
+                    epsilon,
+                    id: epsilon.EquipmentDefinitionId),
+                acquisitionSnapshotFingerprint:
+                    "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc");
+            BossEquipmentDefinitionSnapshot missingDefinition =
+                BossRewardTestFixtures.Equipment("equipment_missing");
+            OwnedEquipmentSnapshot missing =
+                BossRewardTestFixtures.Owned(
+                    missingDefinition,
+                    id: missingDefinition.EquipmentDefinitionId);
+            BossEquipmentDefinitionSnapshot futureDefinition =
+                BossRewardTestFixtures.Equipment("equipment_future");
+            OwnedEquipmentSnapshot future =
+                BossRewardTestFixtures.Owned(
+                    futureDefinition,
+                    id: futureDefinition.EquipmentDefinitionId,
+                    supported: false);
+            var invalidId = new OwnedEquipmentSnapshot(
+                "equipment-invalid",
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                0,
+                0,
+                0,
+                string.Empty,
+                1,
+                0,
+                0,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                BossRewardTestFixtures.InventorySchemaVersion,
+                false);
+            OwnedEquipmentSnapshot duplicateAlpha =
+                BossRewardTestFixtures.Owned(alpha, quantity: 1);
+            var forwardRows = new OwnedEquipmentSnapshot[]
+            {
+                future,
+                null,
+                invalidId,
+                duplicateAlpha,
+                missing,
+                quantity,
+                snapshot,
+                timestamp,
+                provenance,
+                unsupported
+            };
+
+            OwnedEquipmentQueryResult forward =
+                BossRewardInventoryValidator.Validate(
+                    forwardRows,
+                    BossRewardTestFixtures.InventoryRevision,
+                    catalog,
+                    BossRewardTestFixtures.InventorySchemaVersion);
+            OwnedEquipmentQueryResult reverse =
+                BossRewardInventoryValidator.Validate(
+                    forwardRows.Reverse(),
+                    BossRewardTestFixtures.InventoryRevision,
+                    catalog,
+                    BossRewardTestFixtures.InventorySchemaVersion);
+
+            AssertEquivalent(forward, reverse);
+            Assert.AreEqual(
+                OwnedEquipmentQueryStatus.UnsupportedVersion,
+                forward.Status);
+            Assert.IsFalse(forward.CanApplyRewards);
+            OwnedEquipmentSnapshot[] alphaItems = forward.Items
+                .Where(item =>
+                    item.EquipmentDefinitionId ==
+                    BossRewardTestFixtures.AlphaId)
+                .ToArray();
+            Assert.AreEqual(2, alphaItems.Length);
+            Assert.AreEqual(
+                1,
+                alphaItems[0].Quantity);
+            Assert.AreEqual(
+                2,
+                alphaItems[1].Quantity);
+        }
+
+        [Test]
         public void DiagnosticOverflowIsBoundedAndTyped()
         {
             var rows = new OwnedEquipmentSnapshot[
@@ -331,6 +543,107 @@ namespace AL.Tests.EditMode.BossRewards
             Assert.IsTrue(result.Diagnostics.Any(item =>
                 item.Code ==
                 "AL-BOSS-REWARD-TRANSACTION-DIAGNOSTIC-LIMIT"));
+        }
+
+        private static OwnedEquipmentSnapshot CopyRow(
+            OwnedEquipmentSnapshot source,
+            string acquisitionSnapshotFingerprint = null,
+            int? quantity = null,
+            long? firstAcquiredUtcSeconds = null,
+            long? lastAcquiredUtcSeconds = null,
+            string lastSourceBossDefinitionId = null,
+            string schemaVersion = null)
+        {
+            return new OwnedEquipmentSnapshot(
+                source.EquipmentDefinitionId,
+                source.EquipmentDefinitionContentVersion,
+                acquisitionSnapshotFingerprint ??
+                source.AcquisitionSnapshotFingerprint,
+                source.SlotId,
+                source.AttackBonus,
+                source.DefenseBonus,
+                source.HealthBonus,
+                source.StackPolicyId,
+                quantity ?? source.Quantity,
+                firstAcquiredUtcSeconds ?? source.FirstAcquiredUtcSeconds,
+                lastAcquiredUtcSeconds ?? source.LastAcquiredUtcSeconds,
+                lastSourceBossDefinitionId ??
+                source.LastSourceBossDefinitionId,
+                source.LastSourceEncounterCompletionId,
+                source.LastAppliedRewardResultId,
+                schemaVersion ?? source.SchemaVersion,
+                source.IsSupportedDefinition);
+        }
+
+        private static void AssertEquivalent(
+            OwnedEquipmentQueryResult expected,
+            OwnedEquipmentQueryResult actual)
+        {
+            Assert.AreEqual(expected.Status, actual.Status);
+            Assert.AreEqual(expected.CanApplyRewards, actual.CanApplyRewards);
+            Assert.AreEqual(expected.InventoryRevision, actual.InventoryRevision);
+            Assert.AreEqual(expected.Items.Count, actual.Items.Count);
+            for (int index = 0; index < expected.Items.Count; index++)
+            {
+                OwnedEquipmentSnapshot left = expected.Items[index];
+                OwnedEquipmentSnapshot right = actual.Items[index];
+                Assert.AreEqual(
+                    left.EquipmentDefinitionId,
+                    right.EquipmentDefinitionId);
+                Assert.AreEqual(
+                    left.EquipmentDefinitionContentVersion,
+                    right.EquipmentDefinitionContentVersion);
+                Assert.AreEqual(
+                    left.AcquisitionSnapshotFingerprint,
+                    right.AcquisitionSnapshotFingerprint);
+                Assert.AreEqual(left.SlotId, right.SlotId);
+                Assert.AreEqual(left.AttackBonus, right.AttackBonus);
+                Assert.AreEqual(left.DefenseBonus, right.DefenseBonus);
+                Assert.AreEqual(left.HealthBonus, right.HealthBonus);
+                Assert.AreEqual(left.StackPolicyId, right.StackPolicyId);
+                Assert.AreEqual(left.Quantity, right.Quantity);
+                Assert.AreEqual(
+                    left.FirstAcquiredUtcSeconds,
+                    right.FirstAcquiredUtcSeconds);
+                Assert.AreEqual(
+                    left.LastAcquiredUtcSeconds,
+                    right.LastAcquiredUtcSeconds);
+                Assert.AreEqual(
+                    left.LastSourceBossDefinitionId,
+                    right.LastSourceBossDefinitionId);
+                Assert.AreEqual(
+                    left.LastSourceEncounterCompletionId,
+                    right.LastSourceEncounterCompletionId);
+                Assert.AreEqual(
+                    left.LastAppliedRewardResultId,
+                    right.LastAppliedRewardResultId);
+                Assert.AreEqual(left.SchemaVersion, right.SchemaVersion);
+                Assert.AreEqual(
+                    left.IsSupportedDefinition,
+                    right.IsSupportedDefinition);
+            }
+            Assert.AreEqual(
+                expected.Diagnostics.Count,
+                actual.Diagnostics.Count);
+            for (int index = 0; index < expected.Diagnostics.Count; index++)
+            {
+                BossRewardDiagnostic left = expected.Diagnostics[index];
+                BossRewardDiagnostic right = actual.Diagnostics[index];
+                Assert.AreEqual(left.Severity, right.Severity);
+                Assert.AreEqual(left.Code, right.Code);
+                Assert.AreEqual(left.RecordId, right.RecordId);
+                Assert.AreEqual(left.FieldPath, right.FieldPath);
+                Assert.AreEqual(left.Domain, right.Domain);
+                Assert.AreEqual(left.OperationId, right.OperationId);
+                Assert.AreEqual(
+                    left.BlocksOperation,
+                    right.BlocksOperation);
+                Assert.AreEqual(left.SchemaVersion, right.SchemaVersion);
+                Assert.AreEqual(left.ContentVersion, right.ContentVersion);
+                Assert.AreEqual(
+                    left.SafeDeveloperMessage,
+                    right.SafeDeveloperMessage);
+            }
         }
     }
 }

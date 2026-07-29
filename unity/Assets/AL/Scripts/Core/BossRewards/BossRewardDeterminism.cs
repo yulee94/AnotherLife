@@ -928,7 +928,7 @@ namespace AL.Core.BossRewards
             return new BossRewardComputationResult(status, null, diagnostics);
         }
 
-        private static BossRewardDiagnostic Error(
+        private static BossRewardDiagnosticCandidate Error(
             string code,
             BossRewardDiagnosticDomain domain,
             string fieldPath,
@@ -936,7 +936,7 @@ namespace AL.Core.BossRewards
             string recordId,
             string message)
         {
-            return new BossRewardDiagnostic(
+            return new BossRewardDiagnosticCandidate(
                 code,
                 BossRewardDiagnosticSeverity.Error,
                 domain,

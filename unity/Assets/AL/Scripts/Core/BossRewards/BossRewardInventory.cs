@@ -192,6 +192,8 @@ namespace AL.Core.BossRewards
             var seen = new HashSet<string>(StringComparer.Ordinal);
             var knownDefinitions = new Dictionary<string, BossEquipmentDefinitionSnapshot>(
                 StringComparer.Ordinal);
+            var definitionCounts = new Dictionary<string, int>(
+                StringComparer.Ordinal);
             if (!BossRewardText.IsCanonicalTechnicalId(catalog.GameId) ||
                 !BossRewardText.IsCanonicalTechnicalId(catalog.CatalogSetId) ||
                 !BossRewardText.IsBoundedRevision(catalog.Revision))
@@ -204,26 +206,59 @@ namespace AL.Core.BossRewards
                         "catalog",
                         inventoryRevision,
                         "The immutable equipment catalog identity is malformed."));
+            BossRewardDiagnosticCandidate? canonicalCatalogError = null;
             for (int index = 0; index < catalog.EquipmentDefinitions.Count; index++)
             {
                 BossEquipmentDefinitionSnapshot definition =
                     catalog.EquipmentDefinitions[index];
+                string definitionId = definition == null
+                    ? string.Empty
+                    : definition.EquipmentDefinitionId;
+                if (!string.IsNullOrEmpty(definitionId))
+                {
+                    definitionCounts.TryGetValue(
+                        definitionId,
+                        out int count);
+                    definitionCounts[definitionId] = count + 1;
+                }
+
                 if (!IsUsableEquipmentDefinition(
                         definition,
-                        catalog.SchemaVersion) ||
-                    knownDefinitions.ContainsKey(definition.EquipmentDefinitionId))
-                    return Result(
-                        OwnedEquipmentQueryStatus.Unavailable,
-                        Array.Empty<OwnedEquipmentSnapshot>(),
-                        inventoryRevision,
-                        Error(
-                            "AL-BOSS-REWARD-INVENTORY-CATALOG-INVALID",
-                            "catalog.equipmentDefinitions",
-                            definition == null
-                                ? string.Empty
-                                : definition.EquipmentDefinitionId,
-                            "The immutable equipment catalog contains a malformed or duplicate definition."));
-                knownDefinitions.Add(definition.EquipmentDefinitionId, definition);
+                        catalog.SchemaVersion))
+                {
+                    SelectCanonical(
+                        ref canonicalCatalogError,
+                        CreateDiagnosticCandidate(
+                        "AL-BOSS-REWARD-INVENTORY-CATALOG-INVALID",
+                        "catalog.equipmentDefinitions",
+                        definitionId,
+                        "The immutable equipment catalog contains a malformed definition."));
+                    continue;
+                }
+
+                if (!knownDefinitions.ContainsKey(definitionId))
+                    knownDefinitions.Add(definitionId, definition);
+            }
+            foreach (KeyValuePair<string, int> pair in definitionCounts)
+            {
+                if (pair.Value <= 1) continue;
+                SelectCanonical(
+                    ref canonicalCatalogError,
+                    CreateDiagnosticCandidate(
+                    "AL-BOSS-REWARD-INVENTORY-CATALOG-INVALID",
+                    "catalog.equipmentDefinitions",
+                    pair.Key,
+                    "The immutable equipment catalog contains a duplicate definition."));
+                knownDefinitions.Remove(pair.Key);
+            }
+            if (canonicalCatalogError.HasValue)
+            {
+                diagnostics.Add(canonicalCatalogError.Value);
+                return new OwnedEquipmentQueryResult(
+                    OwnedEquipmentQueryStatus.Unavailable,
+                    Array.Empty<OwnedEquipmentSnapshot>(),
+                    diagnostics,
+                    inventoryRevision);
             }
             if (rows.Length == 0)
                 return new OwnedEquipmentQueryResult(
@@ -423,8 +458,8 @@ namespace AL.Core.BossRewards
 
             OwnedEquipmentSnapshot[] ordered = rows
                 .Where(row => row != null)
-                .OrderBy(row => row.EquipmentDefinitionId, StringComparer.Ordinal)
                 .ToArray();
+            Array.Sort(ordered, CompareRows);
             return new OwnedEquipmentQueryResult(
                 status,
                 ordered,
@@ -459,11 +494,106 @@ namespace AL.Core.BossRewards
             OwnedEquipmentQueryStatus current,
             OwnedEquipmentQueryStatus candidate)
         {
-            if (current == OwnedEquipmentQueryStatus.Valid) return candidate;
-            if (current == OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition &&
-                candidate != OwnedEquipmentQueryStatus.Valid)
-                return candidate;
-            return current;
+            int currentPrecedence = GetStatusPrecedence(current);
+            int candidatePrecedence = GetStatusPrecedence(candidate);
+            if (candidatePrecedence > currentPrecedence) return candidate;
+            if (candidatePrecedence < currentPrecedence) return current;
+            return (int)candidate < (int)current ? candidate : current;
+        }
+
+        private static int GetStatusPrecedence(
+            OwnedEquipmentQueryStatus status)
+        {
+            switch (status)
+            {
+                case OwnedEquipmentQueryStatus.Valid:
+                case OwnedEquipmentQueryStatus.Empty:
+                    return 0;
+                case OwnedEquipmentQueryStatus.PreservedUnknownFutureDefinition:
+                    return 10;
+                case OwnedEquipmentQueryStatus.MalformedNullEntry:
+                    return 20;
+                case OwnedEquipmentQueryStatus.MalformedBlankId:
+                    return 30;
+                case OwnedEquipmentQueryStatus.MalformedDuplicateId:
+                    return 40;
+                case OwnedEquipmentQueryStatus.MalformedUnknownRequiredDefinition:
+                    return 50;
+                case OwnedEquipmentQueryStatus.MalformedQuantity:
+                    return 60;
+                case OwnedEquipmentQueryStatus.MalformedSnapshot:
+                    return 70;
+                case OwnedEquipmentQueryStatus.MalformedTimestamp:
+                    return 80;
+                case OwnedEquipmentQueryStatus.MalformedProvenance:
+                    return 90;
+                case OwnedEquipmentQueryStatus.UnsupportedVersion:
+                    return 100;
+                case OwnedEquipmentQueryStatus.MalformedNullCollection:
+                    return 110;
+                case OwnedEquipmentQueryStatus.Unavailable:
+                    return 120;
+                default:
+                    return 120;
+            }
+        }
+
+        private static int CompareRows(
+            OwnedEquipmentSnapshot left,
+            OwnedEquipmentSnapshot right)
+        {
+            int comparison = StringComparer.Ordinal.Compare(
+                left.EquipmentDefinitionId,
+                right.EquipmentDefinitionId);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.EquipmentDefinitionContentVersion,
+                right.EquipmentDefinitionContentVersion);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.AcquisitionSnapshotFingerprint,
+                right.AcquisitionSnapshotFingerprint);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.SlotId,
+                right.SlotId);
+            if (comparison != 0) return comparison;
+            comparison = left.AttackBonus.CompareTo(right.AttackBonus);
+            if (comparison != 0) return comparison;
+            comparison = left.DefenseBonus.CompareTo(right.DefenseBonus);
+            if (comparison != 0) return comparison;
+            comparison = left.HealthBonus.CompareTo(right.HealthBonus);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.StackPolicyId,
+                right.StackPolicyId);
+            if (comparison != 0) return comparison;
+            comparison = left.Quantity.CompareTo(right.Quantity);
+            if (comparison != 0) return comparison;
+            comparison = left.FirstAcquiredUtcSeconds.CompareTo(
+                right.FirstAcquiredUtcSeconds);
+            if (comparison != 0) return comparison;
+            comparison = left.LastAcquiredUtcSeconds.CompareTo(
+                right.LastAcquiredUtcSeconds);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.LastSourceBossDefinitionId,
+                right.LastSourceBossDefinitionId);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.LastSourceEncounterCompletionId,
+                right.LastSourceEncounterCompletionId);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.LastAppliedRewardResultId,
+                right.LastAppliedRewardResultId);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                left.SchemaVersion,
+                right.SchemaVersion);
+            if (comparison != 0) return comparison;
+            return left.IsSupportedDefinition.CompareTo(
+                right.IsSupportedDefinition);
         }
 
         private static bool IsOptionalCanonicalTechnicalId(string value)
@@ -496,7 +626,25 @@ namespace AL.Core.BossRewards
             BossRewardDiagnosticSeverity severity = BossRewardDiagnosticSeverity.Error,
             bool blocksOperation = true)
         {
-            diagnostics.Add(new BossRewardDiagnostic(
+            diagnostics.Add(CreateDiagnosticCandidate(
+                code,
+                fieldPath,
+                recordId,
+                message,
+                severity,
+                blocksOperation));
+        }
+
+        private static BossRewardDiagnosticCandidate CreateDiagnosticCandidate(
+            string code,
+            string fieldPath,
+            string recordId,
+            string message,
+            BossRewardDiagnosticSeverity severity =
+                BossRewardDiagnosticSeverity.Error,
+            bool blocksOperation = true)
+        {
+            return new BossRewardDiagnosticCandidate(
                 code,
                 severity,
                 BossRewardDiagnosticDomain.Inventory,
@@ -504,7 +652,16 @@ namespace AL.Core.BossRewards
                 blocksOperation,
                 message,
                 string.Empty,
-                recordId));
+                recordId);
+        }
+
+        private static void SelectCanonical(
+            ref BossRewardDiagnosticCandidate? selected,
+            BossRewardDiagnosticCandidate candidate)
+        {
+            if (!selected.HasValue ||
+                candidate.CompareTo(selected.Value) < 0)
+                selected = candidate;
         }
 
         private static BossRewardDiagnostic Error(

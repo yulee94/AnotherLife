@@ -1,7 +1,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Text;
+
+[assembly: InternalsVisibleTo("AL.BossRewards.Tests")]
 
 namespace AL.Core.BossRewards
 {
@@ -89,6 +92,9 @@ namespace AL.Core.BossRewards
 
     public sealed class BossRewardDiagnostic : IComparable<BossRewardDiagnostic>
     {
+        [ThreadStatic]
+        private static Action materializedForTesting;
+
         public BossRewardDiagnostic(
             string code,
             BossRewardDiagnosticSeverity severity,
@@ -120,6 +126,13 @@ namespace AL.Core.BossRewards
             RecordId = BossRewardText.Sanitize(recordId, 256);
             SchemaVersion = BossRewardText.Sanitize(schemaVersion, 128);
             ContentVersion = BossRewardText.Sanitize(contentVersion, 128);
+            materializedForTesting?.Invoke();
+        }
+
+        internal static Action MaterializedForTesting
+        {
+            get => materializedForTesting;
+            set => materializedForTesting = value;
         }
 
         public string Code { get; }
@@ -136,31 +149,8 @@ namespace AL.Core.BossRewards
         public int CompareTo(BossRewardDiagnostic other)
         {
             if (ReferenceEquals(other, null)) return -1;
-            int comparison = Severity.CompareTo(other.Severity);
-            if (comparison != 0) return comparison;
-            comparison = StringComparer.Ordinal.Compare(Code, other.Code);
-            if (comparison != 0) return comparison;
-            comparison = StringComparer.Ordinal.Compare(RecordId, other.RecordId);
-            if (comparison != 0) return comparison;
-            comparison = StringComparer.Ordinal.Compare(FieldPath, other.FieldPath);
-            if (comparison != 0) return comparison;
-            comparison = Domain.CompareTo(other.Domain);
-            if (comparison != 0) return comparison;
-            comparison = StringComparer.Ordinal.Compare(OperationId, other.OperationId);
-            if (comparison != 0) return comparison;
-            comparison = BlocksOperation.CompareTo(other.BlocksOperation);
-            if (comparison != 0) return comparison;
-            comparison = StringComparer.Ordinal.Compare(
-                SchemaVersion,
-                other.SchemaVersion);
-            if (comparison != 0) return comparison;
-            comparison = StringComparer.Ordinal.Compare(
-                ContentVersion,
-                other.ContentVersion);
-            if (comparison != 0) return comparison;
-            return StringComparer.Ordinal.Compare(
-                SafeDeveloperMessage,
-                other.SafeDeveloperMessage);
+            return new BossRewardDiagnosticCandidate(this).CompareTo(
+                new BossRewardDiagnosticCandidate(other));
         }
     }
 
@@ -516,16 +506,146 @@ namespace AL.Core.BossRewards
         }
     }
 
+    internal readonly struct BossRewardDiagnosticCandidate :
+        IComparable<BossRewardDiagnosticCandidate>
+    {
+        private readonly BossRewardDiagnostic materialized;
+
+        public BossRewardDiagnosticCandidate(
+            string code,
+            BossRewardDiagnosticSeverity severity,
+            BossRewardDiagnosticDomain domain,
+            string fieldPath,
+            bool blocksOperation,
+            string safeDeveloperMessage,
+            string operationId = "",
+            string recordId = "",
+            string schemaVersion = "",
+            string contentVersion = "")
+        {
+            if (string.IsNullOrEmpty(code))
+                throw new ArgumentException(
+                    "A diagnostic code is required.",
+                    nameof(code));
+            if (!code.StartsWith("AL-BOSS-REWARD-", StringComparison.Ordinal))
+                throw new ArgumentException(
+                    "Diagnostic code is outside the boss-reward family.",
+                    nameof(code));
+            if (!Enum.IsDefined(typeof(BossRewardDiagnosticSeverity), severity))
+                throw new ArgumentOutOfRangeException(nameof(severity));
+            if (!Enum.IsDefined(typeof(BossRewardDiagnosticDomain), domain))
+                throw new ArgumentOutOfRangeException(nameof(domain));
+
+            materialized = null;
+            Code = BossRewardText.Sanitize(code, 96);
+            Severity = severity;
+            Domain = domain;
+            FieldPath = BossRewardText.Sanitize(fieldPath, 256);
+            BlocksOperation = blocksOperation;
+            SafeDeveloperMessage =
+                BossRewardText.Sanitize(safeDeveloperMessage, 512);
+            OperationId = BossRewardText.Sanitize(operationId, 256);
+            RecordId = BossRewardText.Sanitize(recordId, 256);
+            SchemaVersion = BossRewardText.Sanitize(schemaVersion, 128);
+            ContentVersion = BossRewardText.Sanitize(contentVersion, 128);
+        }
+
+        public BossRewardDiagnosticCandidate(BossRewardDiagnostic diagnostic)
+        {
+            if (diagnostic == null)
+                throw new ArgumentException(
+                    "Diagnostic collection contains a null record.",
+                    nameof(diagnostic));
+
+            materialized = diagnostic;
+            Code = diagnostic.Code;
+            Severity = diagnostic.Severity;
+            Domain = diagnostic.Domain;
+            FieldPath = diagnostic.FieldPath;
+            BlocksOperation = diagnostic.BlocksOperation;
+            SafeDeveloperMessage = diagnostic.SafeDeveloperMessage;
+            OperationId = diagnostic.OperationId;
+            RecordId = diagnostic.RecordId;
+            SchemaVersion = diagnostic.SchemaVersion;
+            ContentVersion = diagnostic.ContentVersion;
+        }
+
+        public string Code { get; }
+        public BossRewardDiagnosticSeverity Severity { get; }
+        public BossRewardDiagnosticDomain Domain { get; }
+        public string FieldPath { get; }
+        public bool BlocksOperation { get; }
+        public string SafeDeveloperMessage { get; }
+        public string OperationId { get; }
+        public string RecordId { get; }
+        public string SchemaVersion { get; }
+        public string ContentVersion { get; }
+
+        public BossRewardDiagnostic Materialize()
+        {
+            return materialized ?? new BossRewardDiagnostic(
+                Code,
+                Severity,
+                Domain,
+                FieldPath,
+                BlocksOperation,
+                SafeDeveloperMessage,
+                OperationId,
+                RecordId,
+                SchemaVersion,
+                ContentVersion);
+        }
+
+        public int CompareTo(BossRewardDiagnosticCandidate other)
+        {
+            int comparison = Severity.CompareTo(other.Severity);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(Code, other.Code);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                RecordId,
+                other.RecordId);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                FieldPath,
+                other.FieldPath);
+            if (comparison != 0) return comparison;
+            comparison = Domain.CompareTo(other.Domain);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                OperationId,
+                other.OperationId);
+            if (comparison != 0) return comparison;
+            comparison = BlocksOperation.CompareTo(other.BlocksOperation);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                SchemaVersion,
+                other.SchemaVersion);
+            if (comparison != 0) return comparison;
+            comparison = StringComparer.Ordinal.Compare(
+                ContentVersion,
+                other.ContentVersion);
+            if (comparison != 0) return comparison;
+            return StringComparer.Ordinal.Compare(
+                SafeDeveloperMessage,
+                other.SafeDeveloperMessage);
+        }
+    }
+
     internal sealed class BossRewardDiagnosticCollector :
         IEnumerable<BossRewardDiagnostic>
     {
-        private readonly List<BossRewardDiagnostic> selected =
-            new List<BossRewardDiagnostic>(
-                BossRewardTechnicalLimits.MaximumDiagnostics);
+        private const int MaximumRetainedDiagnostics =
+            BossRewardTechnicalLimits.MaximumDiagnostics - 1;
+        private readonly List<BossRewardDiagnosticCandidate> selected =
+            new List<BossRewardDiagnosticCandidate>(
+                MaximumRetainedDiagnostics);
         private bool overflowed;
         private bool isMaxHeap;
         private bool hasDuplicateDiagnostic;
         private bool hasEquipmentDiagnostic;
+        private bool isFinalized;
+        private IReadOnlyList<BossRewardDiagnostic> materialized;
 
         public int Count =>
             overflowed
@@ -537,10 +657,39 @@ namespace AL.Core.BossRewards
 
         public void Add(BossRewardDiagnostic diagnostic)
         {
-            if (diagnostic == null)
-                throw new ArgumentException(
-                    "Diagnostic collection contains a null record.",
-                    nameof(diagnostic));
+            Add(new BossRewardDiagnosticCandidate(diagnostic));
+        }
+
+        public void Add(
+            string code,
+            BossRewardDiagnosticSeverity severity,
+            BossRewardDiagnosticDomain domain,
+            string fieldPath,
+            bool blocksOperation,
+            string safeDeveloperMessage,
+            string operationId = "",
+            string recordId = "",
+            string schemaVersion = "",
+            string contentVersion = "")
+        {
+            Add(new BossRewardDiagnosticCandidate(
+                code,
+                severity,
+                domain,
+                fieldPath,
+                blocksOperation,
+                safeDeveloperMessage,
+                operationId,
+                recordId,
+                schemaVersion,
+                contentVersion));
+        }
+
+        public void Add(BossRewardDiagnosticCandidate diagnostic)
+        {
+            if (isFinalized)
+                throw new InvalidOperationException(
+                    "Diagnostics cannot be added after materialization.");
 
             hasDuplicateDiagnostic |= diagnostic.Code.EndsWith(
                 "DUPLICATE",
@@ -552,7 +701,7 @@ namespace AL.Core.BossRewards
             if (!overflowed)
             {
                 if (selected.Count <
-                    BossRewardTechnicalLimits.MaximumDiagnostics)
+                    MaximumRetainedDiagnostics)
                 {
                     selected.Add(diagnostic);
                     return;
@@ -561,7 +710,6 @@ namespace AL.Core.BossRewards
                 overflowed = true;
                 BuildMaxHeap();
                 RetainIfSmaller(diagnostic);
-                RemoveMaximum();
                 return;
             }
 
@@ -570,12 +718,22 @@ namespace AL.Core.BossRewards
 
         public IReadOnlyList<BossRewardDiagnostic> ToOrderedReadOnly()
         {
+            if (materialized != null) return materialized;
+            if (isFinalized)
+                throw new InvalidOperationException(
+                    "Diagnostic materialization is already in progress.");
+            isFinalized = true;
             if (selected.Count == 0 && !overflowed)
-                return Array.AsReadOnly(new BossRewardDiagnostic[0]);
+            {
+                materialized =
+                    Array.AsReadOnly(new BossRewardDiagnostic[0]);
+                return materialized;
+            }
 
             int outputCount = selected.Count + (overflowed ? 1 : 0);
             var copy = new BossRewardDiagnostic[outputCount];
-            selected.CopyTo(copy, 0);
+            for (int index = 0; index < selected.Count; index++)
+                copy[index] = selected[index].Materialize();
             if (overflowed)
             {
                 copy[copy.Length - 1] = new BossRewardDiagnostic(
@@ -587,7 +745,8 @@ namespace AL.Core.BossRewards
                     "Additional diagnostics were canonically truncated.");
             }
             Array.Sort(copy);
-            return Array.AsReadOnly(copy);
+            materialized = Array.AsReadOnly(copy);
+            return materialized;
         }
 
         public IEnumerator<BossRewardDiagnostic> GetEnumerator()
@@ -600,7 +759,8 @@ namespace AL.Core.BossRewards
             return GetEnumerator();
         }
 
-        private void RetainIfSmaller(BossRewardDiagnostic diagnostic)
+        private void RetainIfSmaller(
+            BossRewardDiagnosticCandidate diagnostic)
         {
             if (!isMaxHeap)
                 BuildMaxHeap();
@@ -618,15 +778,6 @@ namespace AL.Core.BossRewards
             isMaxHeap = true;
         }
 
-        private void RemoveMaximum()
-        {
-            int last = selected.Count - 1;
-            selected[0] = selected[last];
-            selected.RemoveAt(last);
-            if (selected.Count > 0)
-                SiftDown(0);
-        }
-
         private void SiftDown(int index)
         {
             while (true)
@@ -641,7 +792,7 @@ namespace AL.Core.BossRewards
                         : left;
                 if (selected[index].CompareTo(selected[largest]) >= 0)
                     return;
-                BossRewardDiagnostic swap = selected[index];
+                BossRewardDiagnosticCandidate swap = selected[index];
                 selected[index] = selected[largest];
                 selected[largest] = swap;
                 index = largest;
@@ -733,7 +884,14 @@ namespace AL.Core.BossRewards
 
         public static string Sanitize(string value, int maximumCharacters)
         {
-            if (string.IsNullOrEmpty(value)) return string.Empty;
+            if (string.IsNullOrEmpty(value) || maximumCharacters <= 0)
+                return string.Empty;
+            int length = Math.Min(value.Length, maximumCharacters);
+            bool requiresCopy = value.Length > maximumCharacters;
+            for (int index = 0; index < length && !requiresCopy; index++)
+                requiresCopy = char.IsControl(value[index]);
+            if (!requiresCopy) return value;
+
             var output = new StringBuilder(Math.Min(value.Length, maximumCharacters));
             for (int index = 0; index < value.Length && output.Length < maximumCharacters; index++)
             {

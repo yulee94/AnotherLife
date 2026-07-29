@@ -647,17 +647,52 @@ namespace AL.Tests.EditMode.BossRewards
                     "equipment-bad-" +
                     index.ToString("D4", CultureInfo.InvariantCulture)));
             }
-            BossRewardComputationResult forward = BossRewardComputation.Compute(
-                BossRewardTestFixtures.Request(),
-                BossRewardTestFixtures.Catalog(equipment: definitions));
-            definitions.Reverse();
-            BossRewardComputationResult reverse = BossRewardComputation.Compute(
-                BossRewardTestFixtures.Request(),
-                BossRewardTestFixtures.Catalog(equipment: definitions));
+            int materialized = 0;
+            int forwardMaterializations;
+            int reverseMaterializations;
+            BossRewardComputationResult forward;
+            BossRewardComputationResult reverse;
+            Action previousMaterializationObserver =
+                BossRewardDiagnostic.MaterializedForTesting;
+            BossRewardDiagnostic.MaterializedForTesting = () => materialized++;
+            try
+            {
+                forward = BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    BossRewardTestFixtures.Catalog(equipment: definitions));
+                forwardMaterializations = materialized;
+                materialized = 0;
+                definitions.Reverse();
+                reverse = BossRewardComputation.Compute(
+                    BossRewardTestFixtures.Request(),
+                    BossRewardTestFixtures.Catalog(equipment: definitions));
+                reverseMaterializations = materialized;
+            }
+            finally
+            {
+                BossRewardDiagnostic.MaterializedForTesting =
+                    previousMaterializationObserver;
+            }
 
             Assert.AreEqual(
                 BossRewardComputationStatus.InvalidEquipmentDefinition,
                 forward.Status);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                forwardMaterializations);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics,
+                reverseMaterializations);
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics - 1,
+                forward.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-EQUIPMENT-ID-INVALID"));
+            Assert.AreEqual(
+                BossRewardTechnicalLimits.MaximumDiagnostics - 1,
+                reverse.Diagnostics.Count(item =>
+                    item.Code ==
+                    "AL-BOSS-REWARD-CATALOG-EQUIPMENT-ID-INVALID"));
             Assert.AreEqual(
                 BossRewardTechnicalLimits.MaximumDiagnostics,
                 forward.Diagnostics.Count);
