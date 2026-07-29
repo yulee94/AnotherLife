@@ -1,0 +1,49 @@
+{
+  "$schema": "./sunmane_edge_meadow_visual_source_packet.schema.json",
+  "schemaVersion": "1.0.0",
+  "packetId": "tdf_packet_sunmane_edge_meadow_visual_source_v001",
+  "sourceVersion": "tdf-eco-sunmane-2026-07-29-v001",
+  "parentRosterSourceVersion": "tdf-eco-2026-07-27-v001",
+  "createdDate": "2026-07-29",
+  "authority": {"terrestrialDesignSource": true, "runtime": false, "gameplay": false, "narrative": false, "save": false, "userCreativeApproval": false},
+  "readiness": {"technicalPacketState": "TechnicalReviewReady", "userCreativeState": "NotRequested", "runtimeIntegrationState": "Blocked", "visualQaState": "PassWithConcern"},
+  "habitat": {
+    "habitatId": "tdf_habitat_eldergrove_sunmane_edge_meadow",
+    "realmId": "eldergrove",
+    "state": "ReadyForUserReview",
+    "environmentKitId": "tdf_envkit_eldergrove_sunmane_edge_meadow",
+    "protectedIdentity": "forest_boundary_sightline_pockets_drainage_fold",
+    "neighborHabitatIds": ["tdf_habitat_eldergrove_mirrorroot_littoral", "tdf_habitat_eldergrove_hollowbark_oldgrowth"],
+    "sharedTransitionIds": ["tdf_transition_eldergrove_mirrorroot_littoral_to_sunmane_edge_meadow", "tdf_transition_eldergrove_sunmane_edge_meadow_to_hollowbark_oldgrowth"]
+  },
+  "fauna": {
+    "profileId": "tdf_fauna_eldergrove_thornburrow_hare",
+    "state": "ReadyForUserReview",
+    "picturedVariant": "standard_edge_meadow_adult",
+    "unpicturedVariants": ["wet_edge_structural_variant"],
+    "protectedIdentity": "hind_leg_wedge_paired_root_tusks_flat_counterbalance_tail",
+    "scaleChampionUnits": {"shoulderHeight": 0.32, "length": 0.75}
+  },
+  "environmentKit": {
+    "propFamilyIds": [
+      "tdf_prop_eldergrove_sunmane_shallow_drainage_fold_bank",
+      "tdf_prop_eldergrove_sunmane_wind_combed_grass_mass",
+      "tdf_prop_eldergrove_sunmane_weathered_meadow_stone_cluster",
+      "tdf_prop_eldergrove_sunmane_exposed_root_edge",
+      "tdf_prop_eldergrove_sunmane_dry_seed_head_clump",
+      "tdf_prop_eldergrove_sunmane_low_pollinator_plant_patch",
+      "tdf_prop_eldergrove_sunmane_sparse_thorn_scrub",
+      "tdf_prop_eldergrove_sunmane_distant_broken_tree_line_proxy"
+    ],
+    "requiredParticles": 0, "requiredDynamicLights": 0, "requiredWaterFamilies": 0, "requiredEmissionFamilies": 0
+  },
+  "sourceBudgets": {"finalCount": 5, "finalBytes": 14528608, "retainedInputCount": 0, "playerBuildBytes": 0, "runtimeResidentBytes": 0, "maximumCompressedBytesPerImage": 4194304},
+  "sourceAssets": [
+    {"assetId": "tdf_asset_fauna_eldergrove_thornburrow_hare_identity_v001", "path": "unity/Docs/Terrestrials/Ecosystems/SunmaneEdgeMeadow/ConceptSheets/tdf_fauna_eldergrove_thornburrow_hare_identity_v001.png", "byteLength": 2690635, "sha256": "a048e3a5c8cd159f64153b5af5c6dc874988131e0cfacc0753688195cb9a29c4", "generationCall": "call_uMimWAZEu46RTGk0X5FW5rlr"},
+    {"assetId": "tdf_asset_fauna_eldergrove_thornburrow_hare_motion_contact_lod_v001", "path": "unity/Docs/Terrestrials/Ecosystems/SunmaneEdgeMeadow/ConceptSheets/tdf_fauna_eldergrove_thornburrow_hare_motion_contact_lod_v001.png", "byteLength": 2466247, "sha256": "4fa302284c701d7e24a3481181a2441826996f1bb07a7b54fc36c527273e6615", "generationCall": "call_XkGbjdZIRgAAA6lnJDzq18ks"},
+    {"assetId": "tdf_asset_habitat_eldergrove_sunmane_edge_meadow_establishing_placement_v001", "path": "unity/Docs/Terrestrials/Ecosystems/SunmaneEdgeMeadow/ConceptSheets/tdf_habitat_eldergrove_sunmane_edge_meadow_establishing_placement_v001.png", "byteLength": 3219577, "sha256": "2eae324ca1908e408ed0a33cb1cf8f411759b83fd44b88f4c4bbf0cda91685f5", "generationCall": "call_2AeRxmDlm7GXRzSqC3Q35PNz"},
+    {"assetId": "tdf_asset_habitat_eldergrove_sunmane_edge_meadow_layout_transition_readability_v001", "path": "unity/Docs/Terrestrials/Ecosystems/SunmaneEdgeMeadow/ConceptSheets/tdf_habitat_eldergrove_sunmane_edge_meadow_layout_transition_readability_v001.png", "byteLength": 3145629, "sha256": "ca54b8ca5c781e8a0b4ed7e770a5b73354f19ffe22e47e8914cb1524689ff64d", "generationCall": "call_Cbnlpc3cK0KXhFt2gctNnb1r"},
+    {"assetId": "tdf_asset_habitat_eldergrove_sunmane_edge_meadow_material_kit_reduction_v001", "path": "unity/Docs/Terrestrials/Ecosystems/SunmaneEdgeMeadow/ConceptSheets/tdf_habitat_eldergrove_sunmane_edge_meadow_material_kit_reduction_v001.png", "byteLength": 3006520, "sha256": "e1d26b7b7e443831c8ab6032ce2a2b15741de1d548632800756caaac05aca4af", "generationCall": "call_FhPhAWeLwyYOU35fpJbjryJr"}
+  ],
+  "externalInputs": []
+}

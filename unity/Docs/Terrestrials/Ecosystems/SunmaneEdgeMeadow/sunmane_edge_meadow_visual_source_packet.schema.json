@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.local/schemas/sunmane-edge-meadow-visual-source-packet-v1.json",
+  "title": "Sunmane Edge Meadow Visual Source Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "packetId", "sourceVersion", "parentRosterSourceVersion", "createdDate", "authority", "readiness", "habitat", "fauna", "environmentKit", "sourceBudgets", "sourceAssets", "externalInputs"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schemaVersion": {"const": "1.0.0"},
+    "packetId": {"const": "tdf_packet_sunmane_edge_meadow_visual_source_v001"},
+    "sourceVersion": {"const": "tdf-eco-sunmane-2026-07-29-v001"},
+    "parentRosterSourceVersion": {"type": "string"},
+    "createdDate": {"type": "string", "format": "date"},
+    "authority": {"type": "object"},
+    "readiness": {"type": "object"},
+    "habitat": {"type": "object"},
+    "fauna": {"type": "object"},
+    "environmentKit": {"type": "object"},
+    "sourceBudgets": {"type": "object"},
+    "sourceAssets": {
+      "type": "array", "minItems": 5, "maxItems": 5,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["assetId", "path", "byteLength", "sha256", "generationCall"],
+        "properties": {
+          "assetId": {"type": "string", "pattern": "^tdf_asset_"},
+          "path": {"type": "string", "pattern": "^unity/Docs/.+\\.png$"},
+          "byteLength": {"type": "integer", "minimum": 1, "maximum": 4194304},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+          "generationCall": {"type": "string", "pattern": "^call_"}
+        }
+      }
+    },
+    "externalInputs": {"type": "array", "maxItems": 0}
+  }
+}

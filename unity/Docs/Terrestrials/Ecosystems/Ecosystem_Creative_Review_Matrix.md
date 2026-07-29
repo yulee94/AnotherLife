@@ -11,6 +11,7 @@
 - Stonehold habitat companion: `tdf-eco-faultroad-2026-07-27-v001`
 - Eldergrove habitat companion: `tdf-eco-hollowbark-2026-07-27-v001`
 - Eldergrove littoral companion: `tdf-eco-mirrorroot-2026-07-27-v001`
+- Eldergrove edge-meadow companion: `tdf-eco-sunmane-2026-07-29-v001`
 - Primary Codex mode: `terrestrial-design`
 - Review state: `RosterProposed` habitats; mixed fauna source states
 - User decision requested by this PR: no
@@ -37,7 +38,7 @@ family.
 ## Habitat Matrix
 
 All sixteen habitat entries have stable design IDs and connected transition
-intent. Four now have exact companion concept source; twelve remain
+intent. Five now have exact companion concept source; eleven remain
 roster-only. None has authored production terrain, runtime integration, or
 user approval.
 
@@ -49,7 +50,7 @@ user approval.
 | `tdf_habitat_stonehold_slagfall_quarry` | `RosterProposed` | none | Do cooled slag terraces look physically settled rather than like a permanent lava theme? |
 | `tdf_habitat_eldergrove_hollowbark_oldgrowth` | `ReadyForUserReview` | establishing/placement/reduction, illustrative spatial/transition, and material/kit/LOD-intent sheets | Break portal-like root arches and repeated cavities; replace illustrative layout/scale/LOD with measured evidence; preserve a clear open understory and exact Grove Strider identity. |
 | `tdf_habitat_eldergrove_mirrorroot_littoral` | `ReadyForUserReview` | establishing/placement, illustrative depth/transition, and material/kit/reduction sheets | Strengthen realm-specific shoreline identity; prove both named transitions and dry/shallow/deep recognition in measured views with reflection, ripple, flicker, specular response, and emission disabled; correct root-engineering and creature-reduction concerns. |
-| `tdf_habitat_eldergrove_sunmane_edge_meadow` | `RosterProposed` | none | Does the meadow remain adult and naturalistic without flower/pollen spectacle? |
+| `tdf_habitat_eldergrove_sunmane_edge_meadow` | `ReadyForUserReview` | establishing/placement, illustrative transition/readability, material/kit/reduction, and standard-adult Thornburrow Hare sheets | Recover subdued green-gold meadow color from dry/brown drift; measure both seams and reject dominant wet-edge water, unsupported landmark meaning, constructed roots, and unverified LOD claims. |
 | `tdf_habitat_eldergrove_moonroot_floodbasin` | `ReadyForUserReview` | Moonroot establishing, layout/transition/depth, material/reduced-atmosphere/LOD, and shared contact sheets | Resolve constructed-shelf and gate-like split-buttress concerns while preserving depth and route read without effects. |
 | `tdf_habitat_crownlands_crownstep_chalkland` | `RosterProposed` | none | Does disciplined landform rhythm carry Crownlands identity without gold paint or banners? |
 | `tdf_habitat_crownlands_galegrain_roadbelt` | `RosterProposed` | none | Do road, field, and shelter lines remain clear at reduced crop density? |
@@ -70,7 +71,7 @@ user approval.
 | `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
 | `tdf_grove_strider` | `ReadyForUserReview` | normalized immutable base sheet plus exact Hollowbark placement/reduction evidence | not requested | rear/top/underside, hoof/ear/tendril roots, motion/contact, measured scale/LOD, and correction of generated crown/armor/proportion drift; no juvenile or variant authority |
 | `tdf_mire_lumenback` | `ReadyForUserReview` | normalized immutable base sheet plus concerned Mirrorroot placement/reduction evidence | not requested | rear/top/underside, pouch/feeler/swim contact, motion, and emission-off measured LOD; preserve feet/contact before ring detail and grant no juvenile, population, or unpictured-variant authority |
-| `tdf_fauna_eldergrove_thornburrow_hare` | `ProposedTextOnly` | none | not requested | adult proportion turnaround, tusk/root contact, bound/landing sheet |
+| `tdf_fauna_eldergrove_thornburrow_hare` | `ReadyForUserReview` | standard-adult identity plus motion/contact/distance sheets and habitat placement | not requested | measured turnaround/scale, rear-foot/tusk/tail deformation and contact, verified LOD silhouettes, and correction of familiar rodent/capybara drift; wet-edge variant remains text-only |
 | `tdf_fauna_eldergrove_moonshell_cicada` | `ReadyForUserReview` | flood-season turnaround, motion/material, and shared contact/scale sheets | not requested | resolve rostrum, unobstructed six-leg/four-wing continuity, and distant presence-proxy concerns; dry-season ecotype remains text-only |
 | `tdf_fauna_crownlands_broadcrest_aurochs` | `ProposedTextOnly` | none | not requested | original skull/horn-root turnaround, herd turn, shoulder-load sheet |
 | `tdf_fauna_crownlands_grainveil_covey` | `ProposedTextOnly` | none | not requested | group scale, wedge/fan silhouette, ground motion and scatter sheet |
@@ -126,6 +127,14 @@ raster bytes. Generic boreal-lake risk, unproved Moonroot/Sunmane identities,
 reflection/specular dependency, engineered-looking root bundles, same-adult
 perspective ambiguity, incorrect lowest-proxy detail priority, missing measured
 depth/scale/LOD, and production measurements remain blocking.
+
+The Sunmane habitat and standard-adult Thornburrow Hare are governed by
+`unity/Docs/Terrestrials/Ecosystems/SunmaneEdgeMeadow/`. Their exact source is
+`ReadyForUserReview` with `PassWithConcern`. Dry/brown habitat drift, broad
+wet-edge water, unmeasured transitions, familiar rodent anatomy, distance loss
+of tusks/feet/tail, and illustrative-only kit/LOD evidence remain production
+blocks. No juvenile, population, wet-edge-variant, elite-placement, or gameplay
+authority is created.
 
 ## Inherited Boss And Elite Anchors
 
