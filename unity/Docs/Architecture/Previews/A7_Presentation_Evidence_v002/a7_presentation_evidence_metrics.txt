@@ -1,0 +1,33 @@
+AnotherLife A7 Presentation Evidence
+Succeeded: True
+Generated UTC: 2026-07-29T03:36:00.6690621Z
+Unity: 2022.3.62f3 | OS: Windows 11  (10.0.26100) 64bit
+Graphics: AMD Radeon(TM) Graphics (Direct3D11), 3682 MB
+Capture: 1600x900
+GPU timing: unavailable - GPU timing is intentionally reported unavailable because the Editor-only synchronous capture has no reliable cross-platform GPU frame timing sample.
+
+Scenario | Tier | Build CPU ms | Render CPU ms | Renderers | Meshes | Vertices | Materials | Textures | Lights | Colliders | Resource bytes
+arena_desktop_high | desktop_standard | 44.699 | 24.476 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 653027
+arena_mobile_reduced | mobile_low | 44.068 | 11.861 | 240 | 30 | 3148 | 2 | 1 | 19 | 5 | 393939
+realm_crownlands_hud | desktop_standard | 230.748 | 10.613 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 657819
+camera_close_obstruction | desktop_standard | 25.375 | 6.848 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
+camera_recovery | desktop_standard | 25.375 | 12.829 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
+camera_post_shake_collision | desktop_standard | 25.375 | 12.687 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
+
+Non-reduced versus reduced delta (desktop_standard - mobile_low)
+Build CPU ms: 0.630
+Render CPU ms: 12.615
+Renderers: 55
+Vertices: 2660
+Resource bytes: 259088
+
+Limitations
+- The mobile/reduced capture is deterministic Editor tier simulation, not physical-device GPU evidence.
+- Non-reduced/reduced construction values are medians of three warmed alternating-order Editor wall-clock samples; render values and other construction values are single samples, not device frame-time benchmarks.
+- Profiler process totals include Unity Editor overhead; scenario resource bytes are the narrower owned-resource sample.
+- The Crownlands HUD frame stages realm, label, and bar state for presentation; live realm resolution is verified separately by ChampionRealmContextTests.
+- The staged HUD frame retains current production layout and exposes unresolved overlap at 1600x900; it is audit evidence, not visual approval.
+- Both tier captures retain 19 lights and zero particles in the harness, so mobile lighting and weather cost are not validated.
+- Captures are fixed 1600x900 (16:9); additional aspect ratios are not exercised by this harness.
+- Controller and touch navigation are not exercised by this non-interactive capture.
+- Reduced motion, camera shake scaling, contrast, subtitle, and UI-scale accessibility controls require interactive review.

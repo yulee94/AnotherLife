@@ -1,5 +1,6 @@
 using System.Linq;
 using System.Reflection;
+using AL.ChampionMode;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.World;
 using NUnit.Framework;
@@ -366,6 +367,27 @@ namespace AL.Tests.EditMode
             {
                 second?.Dispose();
                 first?.Dispose();
+            }
+        }
+
+        [Test]
+        public void PresentationBehaviours_DoNotConstructUnityResourcesInFieldInitializers()
+        {
+            _root = new GameObject("A7_PresentationBehaviourConstructionRoot");
+            Assembly runtimeAssembly = typeof(ChampionArenaSceneController).Assembly;
+            string[] typeNames =
+            {
+                "AL.ChampionMode.ChampionClearShowcaseVfx",
+                "AL.ChampionMode.ChampionInspectionShowcase",
+                "AL.ChampionMode.ChampionIntroCinematicCue",
+                "AL.ChampionMode.ArenaAtmospherePulse"
+            };
+
+            foreach (string typeName in typeNames)
+            {
+                System.Type behaviourType = runtimeAssembly.GetType(typeName);
+                Assert.That(behaviourType, Is.Not.Null, typeName);
+                Assert.That(_root.AddComponent(behaviourType), Is.Not.Null, typeName);
             }
         }
 

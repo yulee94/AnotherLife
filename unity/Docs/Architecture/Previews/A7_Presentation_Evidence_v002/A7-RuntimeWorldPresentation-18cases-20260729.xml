@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="18" result="Passed" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.6212046">
+  <test-suite type="TestSuite" id="2364" name="AnotherLifeUnity" fullname="AnotherLifeUnity" runstate="Runnable" testcasecount="1177" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.621205" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties />
+    <test-suite type="Assembly" id="3716" name="AL.EditMode.Tests.dll" fullname="C:/Users/MY/Documents/AnotherLife/.codex-worktrees/A7-wow-benchmark-onetime/unity/Library/ScriptAssemblies/AL.EditMode.Tests.dll" runstate="Runnable" testcasecount="1042" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.569385" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="14508" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+      </properties>
+      <test-suite type="TestSuite" id="3717" name="AL" fullname="AL" runstate="Runnable" testcasecount="1042" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.545348" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="3718" name="Tests" fullname="AL.Tests" runstate="Runnable" testcasecount="1042" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.522804" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="3719" name="EditMode" fullname="AL.Tests.EditMode" runstate="Runnable" testcasecount="1042" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.502097" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="2805" name="RuntimeWorldPresentationTests" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" testcasecount="18" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.469639" total="18" passed="18" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-suite type="ParameterizedMethod" id="2809" name="ArenaBackdrop_UsesDeterministicQualityBudgets" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.ArenaBackdrop_UsesDeterministicQualityBudgets" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.369855" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="2807" name="ArenaBackdrop_UsesDeterministicQualityBudgets(True,625,16,14,7,51)" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.ArenaBackdrop_UsesDeterministicQualityBudgets(True,625,16,14,7,51)" methodname="ArenaBackdrop_UsesDeterministicQualityBudgets" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1901197569" result="Passed" start-time="2026-07-29 03:34:41Z" end-time="2026-07-29 03:34:42Z" duration="0.343645" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="2808" name="ArenaBackdrop_UsesDeterministicQualityBudgets(False,2401,34,28,11,106)" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.ArenaBackdrop_UsesDeterministicQualityBudgets(False,2401,34,28,11,106)" methodname="ArenaBackdrop_UsesDeterministicQualityBudgets" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1023936491" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.016186" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-case id="2810" name="BeveledCube_IsCachedAndUsesChamferedGeometry" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.BeveledCube_IsCachedAndUsesChamferedGeometry" methodname="BeveledCube_IsCachedAndUsesChamferedGeometry" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1395058628" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.002722" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2813" name="CameraCollision_CloseWallNeverForcesCameraThroughObstacle" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.CameraCollision_CloseWallNeverForcesCameraThroughObstacle" methodname="CameraCollision_CloseWallNeverForcesCameraThroughObstacle" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="2050379714" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.008302" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2816" name="CameraCollision_IgnoresConfiguredTargetHierarchy" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.CameraCollision_IgnoresConfiguredTargetHierarchy" methodname="CameraCollision_IgnoresConfiguredTargetHierarchy" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="881869534" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.006101" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2817" name="CameraCollision_IsAppliedAfterShakeOffset" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.CameraCollision_IsAppliedAfterShakeOffset" methodname="CameraCollision_IsAppliedAfterShakeOffset" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="447350726" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.002398" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2812" name="CameraCollision_PullsDesiredPositionInFrontOfObstacle" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.CameraCollision_PullsDesiredPositionInFrontOfObstacle" methodname="CameraCollision_PullsDesiredPositionInFrontOfObstacle" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1703819052" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.002090" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2814" name="CameraCollision_RecoversToDesiredPositionAfterObstacleClears" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.CameraCollision_RecoversToDesiredPositionAfterObstacleClears" methodname="CameraCollision_RecoversToDesiredPositionAfterObstacleClears" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="431058646" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.002311" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2815" name="CameraFollow_SmoothedRecoveryReturnsToDesiredDistance" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.CameraFollow_SmoothedRecoveryReturnsToDesiredDistance" methodname="CameraFollow_SmoothedRecoveryReturnsToDesiredDistance" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="2067365370" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.006016" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2825" name="PresentationBehaviours_DoNotConstructUnityResourcesInFieldInitializers" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.PresentationBehaviours_DoNotConstructUnityResourcesInFieldInitializers" methodname="PresentationBehaviours_DoNotConstructUnityResourcesInFieldInitializers" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="872988738" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.007406" asserts="0">
+                <properties />
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="2822" name="QualityTier_UsesMeasuredBackdropBudget" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.QualityTier_UsesMeasuredBackdropBudget" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" testcasecount="4" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.005256" total="4" passed="4" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="2818" name="QualityTier_UsesMeasuredBackdropBudget(&quot;mobile_low&quot;,True)" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.QualityTier_UsesMeasuredBackdropBudget(&quot;mobile_low&quot;,True)" methodname="QualityTier_UsesMeasuredBackdropBudget" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="757727737" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.002135" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="2819" name="QualityTier_UsesMeasuredBackdropBudget(&quot;mobile_standard&quot;,True)" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.QualityTier_UsesMeasuredBackdropBudget(&quot;mobile_standard&quot;,True)" methodname="QualityTier_UsesMeasuredBackdropBudget" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="310401562" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.000495" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="2820" name="QualityTier_UsesMeasuredBackdropBudget(&quot;desktop_low&quot;,True)" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.QualityTier_UsesMeasuredBackdropBudget(&quot;desktop_low&quot;,True)" methodname="QualityTier_UsesMeasuredBackdropBudget" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1913931847" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.000345" asserts="0">
+                  <properties />
+                </test-case>
+                <test-case id="2821" name="QualityTier_UsesMeasuredBackdropBudget(&quot;desktop_standard&quot;,False)" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.QualityTier_UsesMeasuredBackdropBudget(&quot;desktop_standard&quot;,False)" methodname="QualityTier_UsesMeasuredBackdropBudget" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="204330988" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.000373" asserts="0">
+                  <properties />
+                </test-case>
+              </test-suite>
+              <test-case id="2824" name="SceneLease_OutOfOrderDisposalRestoresBaselineOnlyAfterFinalLease" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.SceneLease_OutOfOrderDisposalRestoresBaselineOnlyAfterFinalLease" methodname="SceneLease_OutOfOrderDisposalRestoresBaselineOnlyAfterFinalLease" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1791802319" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.010090" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2823" name="SceneLease_RestoresRenderSettingsAndReleasesResources" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.SceneLease_RestoresRenderSettingsAndReleasesResources" methodname="SceneLease_RestoresRenderSettingsAndReleasesResources" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="2070135482" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.008622" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2811" name="SurfaceMaterialFamily_SharesMaterialsAndKeepsPerRendererColor" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.SurfaceMaterialFamily_SharesMaterialsAndKeepsPerRendererColor" methodname="SurfaceMaterialFamily_SharesMaterialsAndKeepsPerRendererColor" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="1164884623" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.005319" asserts="0">
+                <properties />
+              </test-case>
+              <test-case id="2806" name="SurfaceTexture_IsCachedAndBounded" fullname="AL.Tests.EditMode.RuntimeWorldPresentationTests.SurfaceTexture_IsCachedAndBounded" methodname="SurfaceTexture_IsCachedAndBounded" classname="AL.Tests.EditMode.RuntimeWorldPresentationTests" runstate="Runnable" seed="540931288" result="Passed" start-time="2026-07-29 03:34:42Z" end-time="2026-07-29 03:34:42Z" duration="0.003707" asserts="0">
+                <properties />
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
