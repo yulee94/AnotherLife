@@ -1,22 +1,22 @@
 AnotherLife A7 Presentation Evidence
 Succeeded: True
-Generated UTC: 2026-07-29T03:36:00.6690621Z
+Generated UTC: 2026-07-29T03:52:19.3063386Z
 Unity: 2022.3.62f3 | OS: Windows 11  (10.0.26100) 64bit
 Graphics: AMD Radeon(TM) Graphics (Direct3D11), 3682 MB
 Capture: 1600x900
 GPU timing: unavailable - GPU timing is intentionally reported unavailable because the Editor-only synchronous capture has no reliable cross-platform GPU frame timing sample.
 
 Scenario | Tier | Build CPU ms | Render CPU ms | Renderers | Meshes | Vertices | Materials | Textures | Lights | Colliders | Resource bytes
-arena_desktop_high | desktop_standard | 44.699 | 24.476 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 653027
-arena_mobile_reduced | mobile_low | 44.068 | 11.861 | 240 | 30 | 3148 | 2 | 1 | 19 | 5 | 393939
-realm_crownlands_hud | desktop_standard | 230.748 | 10.613 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 657819
-camera_close_obstruction | desktop_standard | 25.375 | 6.848 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
-camera_recovery | desktop_standard | 25.375 | 12.829 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
-camera_post_shake_collision | desktop_standard | 25.375 | 12.687 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
+arena_desktop_high | desktop_standard | 30.210 | 23.743 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 653027
+arena_mobile_reduced | mobile_low | 21.269 | 17.480 | 240 | 30 | 3148 | 2 | 1 | 19 | 5 | 393939
+realm_crownlands_hud | desktop_standard | 349.998 | 15.759 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 657819
+camera_close_obstruction | desktop_standard | 32.117 | 8.472 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
+camera_recovery | desktop_standard | 32.117 | 11.459 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
+camera_post_shake_collision | desktop_standard | 32.117 | 9.603 | 295 | 52 | 5808 | 2 | 1 | 19 | 5 | 656699
 
 Non-reduced versus reduced delta (desktop_standard - mobile_low)
-Build CPU ms: 0.630
-Render CPU ms: 12.615
+Build CPU ms: 8.941
+Render CPU ms: 6.263
 Renderers: 55
 Vertices: 2660
 Resource bytes: 259088
