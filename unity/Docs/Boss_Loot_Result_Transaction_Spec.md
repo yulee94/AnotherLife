@@ -321,6 +321,15 @@ Every required ID must be:
 
 Unknown future IDs in saves are preserved but unsupported. Unknown IDs in a new production reward request reject.
 
+Catalog-owned technical IDs (`gameId`, `catalogSetId`, boss, reward-profile,
+equipment, and slot IDs) use the canonical grammar
+`^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$`. Save/profile, encounter, encounter
+completion, reward-result, and correlation IDs are separate opaque authority
+identities: they are compared ordinally and may contain existing hyphen,
+colon, digit-leading, or well-formed multibyte UTF-8 forms, but must remain
+nonblank, untrimmed, control/whitespace-free, and within the opaque UTF-8 byte
+ceiling. Neither class is silently normalized.
+
 ### 6.3 Result identity source
 
 `rewardResultId` is issued by the encounter-result authority, not generated from wall clock, frame time, object instance, boss name, or random seed.
@@ -772,7 +781,9 @@ public sealed class BossRewardApplicationRequest
     public string ExpectedSaveRevision { get; }
     public string ExpectedEconomyRevision { get; }
     public string ExpectedInventoryRevision { get; }
+    public string ExpectedLedgerRevision { get; }
     public string ExpectedCatalogSetId { get; }
+    public string ExpectedCatalogRevision { get; }
     public string ApplicationPolicyVersion { get; }
 }
 ```
