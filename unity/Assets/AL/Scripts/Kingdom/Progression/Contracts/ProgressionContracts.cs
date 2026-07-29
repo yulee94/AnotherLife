@@ -486,6 +486,7 @@ namespace AL.Kingdom.Progression
 
     public sealed class ProgressionCompatibilityResult
     {
+        private static readonly object PlannerProvenance = new object();
         private readonly IReadOnlyList<ResearchProgressionSnapshot> _research;
         private readonly IReadOnlyList<TroopProgressionSnapshot> _troops;
         private readonly IReadOnlyList<ResearchProgressionStateRecord> _preservedResearchStates;
@@ -493,6 +494,7 @@ namespace AL.Kingdom.Progression
         private readonly IReadOnlyList<ResearchProgressionDefinition> _researchDefinitions;
         private readonly IReadOnlyList<TroopProgressionDefinition> _troopDefinitions;
         private readonly IReadOnlyList<ProgressionDiagnostic> _diagnostics;
+        private readonly object _provenance;
 
         public ProgressionCompatibilityResult(
             ProgressionDomain domain,
@@ -538,6 +540,41 @@ namespace AL.Kingdom.Progression
             IEnumerable<TroopProgressionDefinition> troopDefinitions,
             ProgressionTimestampPolicy timestampPolicy,
             bool hasDefinitionSource)
+            : this(
+                domain,
+                status,
+                catalogSetId,
+                catalogRevision,
+                stateRevision,
+                research,
+                troops,
+                preservedResearchStates,
+                preservedTroopStates,
+                diagnostics,
+                researchDefinitions,
+                troopDefinitions,
+                timestampPolicy,
+                hasDefinitionSource,
+                null)
+        {
+        }
+
+        private ProgressionCompatibilityResult(
+            ProgressionDomain domain,
+            ProgressionCompatibilityStatus status,
+            string catalogSetId,
+            string catalogRevision,
+            string stateRevision,
+            IEnumerable<ResearchProgressionSnapshot> research,
+            IEnumerable<TroopProgressionSnapshot> troops,
+            IEnumerable<ResearchProgressionStateRecord> preservedResearchStates,
+            IEnumerable<TroopProgressionStateRecord> preservedTroopStates,
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            IEnumerable<ResearchProgressionDefinition> researchDefinitions,
+            IEnumerable<TroopProgressionDefinition> troopDefinitions,
+            ProgressionTimestampPolicy timestampPolicy,
+            bool hasDefinitionSource,
+            object provenance)
         {
             Domain = domain;
             Status = status;
@@ -553,6 +590,41 @@ namespace AL.Kingdom.Progression
             _diagnostics = ProgressionCollections.Freeze(diagnostics);
             TimestampPolicy = timestampPolicy;
             HasDefinitionSource = hasDefinitionSource;
+            _provenance = provenance;
+        }
+
+        internal static ProgressionCompatibilityResult CreatePlannerResult(
+            ProgressionDomain domain,
+            ProgressionCompatibilityStatus status,
+            string catalogSetId,
+            string catalogRevision,
+            string stateRevision,
+            IEnumerable<ResearchProgressionSnapshot> research,
+            IEnumerable<TroopProgressionSnapshot> troops,
+            IEnumerable<ResearchProgressionStateRecord> preservedResearchStates,
+            IEnumerable<TroopProgressionStateRecord> preservedTroopStates,
+            IEnumerable<ProgressionDiagnostic> diagnostics,
+            IEnumerable<ResearchProgressionDefinition> researchDefinitions,
+            IEnumerable<TroopProgressionDefinition> troopDefinitions,
+            ProgressionTimestampPolicy timestampPolicy,
+            bool hasDefinitionSource)
+        {
+            return new ProgressionCompatibilityResult(
+                domain,
+                status,
+                catalogSetId,
+                catalogRevision,
+                stateRevision,
+                research,
+                troops,
+                preservedResearchStates,
+                preservedTroopStates,
+                diagnostics,
+                researchDefinitions,
+                troopDefinitions,
+                timestampPolicy,
+                hasDefinitionSource,
+                PlannerProvenance);
         }
 
         public ProgressionDomain Domain { get; }
@@ -573,6 +645,9 @@ namespace AL.Kingdom.Progression
         public ProgressionTimestampPolicy TimestampPolicy { get; }
         public bool HasDefinitionSource { get; }
         public IReadOnlyList<ProgressionDiagnostic> Diagnostics => _diagnostics;
+        internal bool HasPlannerDefinitionProvenance =>
+            HasDefinitionSource &&
+            ReferenceEquals(_provenance, PlannerProvenance);
     }
 
     public sealed class ProgressionResourceBalance

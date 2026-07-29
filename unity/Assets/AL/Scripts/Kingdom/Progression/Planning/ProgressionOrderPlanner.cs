@@ -147,20 +147,13 @@ namespace AL.Kingdom.Progression
                 !plan.CanCommit ||
                 !IsValidReadyStartPlan(plan) ||
                 !IsValidId(completionOperationId) ||
-                string.Equals(
-                    completionOperationId,
-                    plan.OperationId,
-                    StringComparison.Ordinal) ||
                 (!string.IsNullOrEmpty(cancellationOperationId) &&
-                 (!IsValidId(cancellationOperationId) ||
-                  string.Equals(
-                      cancellationOperationId,
-                      plan.OperationId,
-                      StringComparison.Ordinal) ||
-                  string.Equals(
-                      cancellationOperationId,
-                      completionOperationId,
-                      StringComparison.Ordinal))))
+                 !IsValidId(cancellationOperationId)) ||
+                !AreOrderOperationIdsDistinct(
+                    plan.OrderId,
+                    plan.OperationId,
+                    completionOperationId,
+                    cancellationOperationId))
             {
                 return null;
             }
@@ -230,19 +223,12 @@ namespace AL.Kingdom.Progression
         }
 
         public static ProgressionOperationReceipt CreateCommittedReceipt(
-            ProgressionStartPlan plan)
-        {
-            return CreateCommittedReceipt(plan, null);
-        }
-
-        public static ProgressionOperationReceipt CreateCommittedReceipt(
             ProgressionStartPlan plan,
             ProgressionOrderSnapshot order)
         {
             if (!IsValidReadyStartPlan(plan) ||
-                (order != null &&
-                 (!IsValidOrder(order) ||
-                  !IsOrderForStartPlan(order, plan))))
+                !IsValidOrder(order) ||
+                !IsOrderForStartPlan(order, plan))
             {
                 return null;
             }
@@ -257,8 +243,8 @@ namespace AL.Kingdom.Progression
                 plan.OrderId,
                 plan.OperationId,
                 plan.OperationId,
-                order?.CompletionOperationId ?? string.Empty,
-                order?.CancellationOperationId ?? string.Empty,
+                order.CompletionOperationId,
+                order.CancellationOperationId,
                 plan.PreviousValue,
                 plan.TargetValue,
                 plan.BatchCount,
@@ -278,11 +264,11 @@ namespace AL.Kingdom.Progression
                 string.Empty,
                 plan.RequestPolicyVersion,
                 plan.RequestPolicyVersion,
-                order?.CatalogSetId ?? plan.CatalogSetId,
-                order?.CatalogRevision ?? plan.CatalogRevision,
-                order?.ProgressionRevision ?? plan.ProgressionRevision,
-                order?.EconomyRevision ?? plan.EconomyRevision,
-                order?.OrderHash ?? string.Empty,
+                order.CatalogSetId,
+                order.CatalogRevision,
+                order.ProgressionRevision,
+                order.EconomyRevision,
+                order.OrderHash,
                 ProgressionOrderSourceDisposition.ExactCurrentSource,
                 plan.SemanticHash,
                 plan.PlanHash);
@@ -1176,60 +1162,111 @@ namespace AL.Kingdom.Progression
                     compatibility,
                     ProgressionDomain.Research))
             {
-                return new ResearchEffectSnapshot(
-                    ProgressionPlanStatus.StateMalformed,
-                    compatibility?.CatalogSetId,
-                    compatibility?.StateRevision,
-                    string.Empty,
-                    Array.Empty<ResearchEffectReference>(),
-                    new[]
-                    {
-                        new ProgressionDiagnostic(
-                            ProgressionDiagnosticCode.StateUnavailable,
-                            ProgressionDomain.Research,
-                            string.Empty,
-                            -1)
-                    });
+                return RejectResearchEffectSnapshot(compatibility);
             }
 
-            List<ResearchEffectReference> effects = compatibility.Research
-                .Where(snapshot => snapshot.Level > 0)
-                .OrderBy(
-                    snapshot => snapshot.Definition.Identity.Id,
-                    StringComparer.Ordinal)
-                .SelectMany(snapshot => snapshot.Definition.EffectProfiles
-                    .OrderBy(identity => identity.Id, StringComparer.Ordinal)
-                    .Select(identity => new ResearchEffectReference(
+            var effects = new List<ResearchEffectReference>();
+            var definitionHashes = new List<string>(
+                compatibility.Research.Count);
+            foreach (ResearchProgressionSnapshot snapshot in
+                     compatibility.Research
+                         .Where(candidate => candidate.Level > 0)
+                         .OrderBy(
+                             candidate =>
+                                 candidate.Definition.Identity.Id,
+                             StringComparer.Ordinal))
+            {
+                var definitionSegments = new List<string>(
+                    snapshot.Definition.EffectProfiles.Count + 9)
+                {
+                    "research-effect-definition-v2"
+                };
+                AddIdentityHashSegments(
+                    definitionSegments,
+                    "research-definition",
+                    snapshot.Definition.Identity);
+                definitionSegments.Add(Invariant(snapshot.Level));
+                definitionSegments.Add(Invariant(
+                    snapshot.Definition.EffectProfiles.Count));
+
+                foreach (ProgressionSourceIdentity effectProfile in
+                         snapshot.Definition.EffectProfiles.OrderBy(
+                             identity => identity.Id,
+                             StringComparer.Ordinal))
+                {
+                    string leafHash = ProgressionContractHash.Compute(
+                        "research-effect-profile-v2",
+                        "effect-profile",
+                        effectProfile.Id,
+                        effectProfile.SchemaVersion,
+                        effectProfile.ContentVersion,
+                        effectProfile.SourceRevision,
+                        effectProfile.RawSha256);
+                    if (!IsHash(leafHash))
+                    {
+                        return RejectResearchEffectSnapshot(compatibility);
+                    }
+
+                    definitionSegments.Add(leafHash);
+                    effects.Add(new ResearchEffectReference(
                         snapshot.Definition.Identity,
                         snapshot.Level,
-                        identity)))
-                .ToList();
-            var hashSegments = new List<string>
-            {
-                "research-effects",
-                compatibility.CatalogSetId,
-                compatibility.StateRevision
-            };
-            foreach (ResearchEffectReference effect in effects)
-            {
-                hashSegments.Add("effect");
-                AddIdentityHashSegments(
-                    hashSegments,
-                    "research-definition",
-                    effect.ResearchDefinition);
-                hashSegments.Add(Invariant(effect.Level));
-                AddIdentityHashSegments(
-                    hashSegments,
-                    "effect-profile",
-                    effect.EffectProfile);
+                        effectProfile));
+                }
+
+                string definitionHash = ProgressionContractHash.Compute(
+                    definitionSegments.ToArray());
+                if (!IsHash(definitionHash))
+                {
+                    return RejectResearchEffectSnapshot(compatibility);
+                }
+
+                definitionHashes.Add(definitionHash);
             }
+
+            var rootSegments =
+                new List<string>(definitionHashes.Count + 5)
+                {
+                    "research-effects-v2",
+                    compatibility.CatalogSetId,
+                    compatibility.StateRevision,
+                    Invariant(effects.Count),
+                    Invariant(definitionHashes.Count)
+                };
+            rootSegments.AddRange(definitionHashes);
+            string snapshotHash = ProgressionContractHash.Compute(
+                rootSegments.ToArray());
+            if (!IsHash(snapshotHash))
+            {
+                return RejectResearchEffectSnapshot(compatibility);
+            }
+
             return new ResearchEffectSnapshot(
                 ProgressionPlanStatus.Ready,
                 compatibility.CatalogSetId,
                 compatibility.StateRevision,
-                ProgressionContractHash.Compute(hashSegments.ToArray()),
+                snapshotHash,
                 effects,
                 Array.Empty<ProgressionDiagnostic>());
+        }
+
+        private static ResearchEffectSnapshot RejectResearchEffectSnapshot(
+            ProgressionCompatibilityResult compatibility)
+        {
+            return new ResearchEffectSnapshot(
+                ProgressionPlanStatus.StateMalformed,
+                compatibility?.CatalogSetId,
+                compatibility?.StateRevision,
+                string.Empty,
+                Array.Empty<ResearchEffectReference>(),
+                new[]
+                {
+                    new ProgressionDiagnostic(
+                        ProgressionDiagnosticCode.StateUnavailable,
+                        ProgressionDomain.Research,
+                        string.Empty,
+                        -1)
+                });
         }
 
         private static ProgressionStartPlan ReplayStart(
@@ -1813,6 +1850,7 @@ namespace AL.Kingdom.Progression
                 !IsValidId(compatibility.CatalogRevision) ||
                 !IsHash(compatibility.StateRevision) ||
                 !compatibility.HasDefinitionSource ||
+                !compatibility.HasPlannerDefinitionProvenance ||
                 !IsValidTimestampPolicy(compatibility.TimestampPolicy) ||
                 compatibility.Diagnostics.Count != 0)
             {
@@ -1825,6 +1863,9 @@ namespace AL.Kingdom.Progression
                     compatibility.Research.Count >
                     ProgressionCompatibilityPlanner.MaximumDefinitions ||
                     compatibility.Troops.Count != 0 ||
+                    compatibility.TroopDefinitions.Count != 0 ||
+                    compatibility.ResearchDefinitions.Count !=
+                    compatibility.Research.Count ||
                     compatibility.PreservedTroopStates.Count != 0 ||
                     compatibility.PreservedResearchStates.Count >
                     ProgressionCompatibilityPlanner.MaximumStateRows ||
@@ -1835,6 +1876,7 @@ namespace AL.Kingdom.Progression
                             snapshot => snapshot.Definition.Identity.Id,
                             StringComparer.Ordinal)
                         .Any(group => group.Count() > 1) ||
+                    !HasExactResearchDefinitionReferences(compatibility) ||
                     !HasConsistentResearchRawState(compatibility))
                 {
                     return false;
@@ -1846,6 +1888,9 @@ namespace AL.Kingdom.Progression
                     compatibility.Troops.Count >
                     ProgressionCompatibilityPlanner.MaximumDefinitions ||
                     compatibility.Research.Count != 0 ||
+                    compatibility.ResearchDefinitions.Count != 0 ||
+                    compatibility.TroopDefinitions.Count !=
+                    compatibility.Troops.Count ||
                     compatibility.PreservedResearchStates.Count != 0 ||
                     compatibility.PreservedTroopStates.Count >
                     ProgressionCompatibilityPlanner.MaximumStateRows ||
@@ -1856,7 +1901,80 @@ namespace AL.Kingdom.Progression
                             snapshot => snapshot.Definition.Identity.Id,
                             StringComparer.Ordinal)
                         .Any(group => group.Count() > 1) ||
+                    !HasExactTroopDefinitionReferences(compatibility) ||
                     !HasConsistentTroopRawState(compatibility))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool HasExactResearchDefinitionReferences(
+            ProgressionCompatibilityResult compatibility)
+        {
+            for (int snapshotIndex = 0;
+                 snapshotIndex < compatibility.Research.Count;
+                 snapshotIndex++)
+            {
+                ResearchProgressionDefinition snapshotDefinition =
+                    compatibility.Research[snapshotIndex].Definition;
+                bool found = false;
+                for (int definitionIndex = 0;
+                     definitionIndex <
+                     compatibility.ResearchDefinitions.Count;
+                     definitionIndex++)
+                {
+                    if (!ReferenceEquals(
+                            snapshotDefinition,
+                            compatibility.ResearchDefinitions[
+                                definitionIndex]))
+                    {
+                        continue;
+                    }
+
+                    found = true;
+                    break;
+                }
+
+                if (!found)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool HasExactTroopDefinitionReferences(
+            ProgressionCompatibilityResult compatibility)
+        {
+            for (int snapshotIndex = 0;
+                 snapshotIndex < compatibility.Troops.Count;
+                 snapshotIndex++)
+            {
+                TroopProgressionDefinition snapshotDefinition =
+                    compatibility.Troops[snapshotIndex].Definition;
+                bool found = false;
+                for (int definitionIndex = 0;
+                     definitionIndex <
+                     compatibility.TroopDefinitions.Count;
+                     definitionIndex++)
+                {
+                    if (!ReferenceEquals(
+                            snapshotDefinition,
+                            compatibility.TroopDefinitions[
+                                definitionIndex]))
+                    {
+                        continue;
+                    }
+
+                    found = true;
+                    break;
+                }
+
+                if (!found)
                 {
                     return false;
                 }
@@ -1894,7 +2012,8 @@ namespace AL.Kingdom.Progression
                 if (snapshot.Origin ==
                     ProgressionStateOrigin.EffectiveInitialUnpersisted)
                 {
-                    if (hasRawState)
+                    if (hasRawState ||
+                        snapshot.Level != snapshot.Definition.InitialLevel)
                     {
                         return false;
                     }
@@ -1946,7 +2065,10 @@ namespace AL.Kingdom.Progression
                 if (snapshot.Origin ==
                     ProgressionStateOrigin.EffectiveInitialUnpersisted)
                 {
-                    if (hasRawState)
+                    if (hasRawState ||
+                        snapshot.ActiveCount != 0 ||
+                        snapshot.WoundedCount != 0 ||
+                        snapshot.ReservedCount != 0)
                     {
                         return false;
                     }
@@ -2327,20 +2449,13 @@ namespace AL.Kingdom.Progression
                 !IsValidId(order.OrderId) ||
                 !IsValidId(order.StartOperationId) ||
                 !IsValidId(order.CompletionOperationId) ||
-                string.Equals(
+                (!string.IsNullOrEmpty(order.CancellationOperationId) &&
+                 !IsValidId(order.CancellationOperationId)) ||
+                !AreOrderOperationIdsDistinct(
+                    order.OrderId,
                     order.StartOperationId,
                     order.CompletionOperationId,
-                    StringComparison.Ordinal) ||
-                (!string.IsNullOrEmpty(order.CancellationOperationId) &&
-                 (!IsValidId(order.CancellationOperationId) ||
-                  string.Equals(
-                      order.CancellationOperationId,
-                      order.StartOperationId,
-                      StringComparison.Ordinal) ||
-                  string.Equals(
-                      order.CancellationOperationId,
-                      order.CompletionOperationId,
-                      StringComparison.Ordinal))) ||
+                    order.CancellationOperationId) ||
                 order.CommittedCosts.Count == 0 ||
                 order.CommittedCosts.Count >
                 ProgressionCompatibilityPlanner.MaximumCostEntriesPerProfile ||
@@ -3212,6 +3327,14 @@ namespace AL.Kingdom.Progression
                 !IsValidId(result.OrderId) ||
                 !IsValidId(result.OperationId) ||
                 !IsValidId(result.StartOperationId) ||
+                !IsValidId(result.CompletionOperationId) ||
+                (!string.IsNullOrEmpty(result.CancellationOperationId) &&
+                 !IsValidId(result.CancellationOperationId)) ||
+                !AreOrderOperationIdsDistinct(
+                    result.OrderId,
+                    result.StartOperationId,
+                    result.CompletionOperationId,
+                    result.CancellationOperationId) ||
                 !IsValidId(result.CatalogSetId) ||
                 !IsValidId(result.CatalogRevision) ||
                 !IsValidId(result.ProgressionRevision) ||
@@ -3223,6 +3346,7 @@ namespace AL.Kingdom.Progression
                 !IsValidId(result.OrderCatalogRevision) ||
                 !IsValidId(result.OrderProgressionRevision) ||
                 !IsValidId(result.OrderEconomyRevision) ||
+                !IsHash(result.OrderHash) ||
                 !IsHash(result.SemanticHash) ||
                 !IsHash(result.PlanHash) ||
                 result.PreviousValue < 0 ||
@@ -3251,20 +3375,6 @@ namespace AL.Kingdom.Progression
                 result.EndTimestamp < result.StartTimestamp ||
                 result.EndTimestamp - result.StartTimestamp >
                 result.TimestampPolicy.MaximumFutureLeadSeconds)
-            {
-                return false;
-            }
-
-            if (!string.IsNullOrEmpty(result.CancellationOperationId) &&
-                (!IsValidId(result.CancellationOperationId) ||
-                 string.Equals(
-                     result.CancellationOperationId,
-                     result.StartOperationId,
-                     StringComparison.Ordinal) ||
-                 string.Equals(
-                     result.CancellationOperationId,
-                     result.CompletionOperationId,
-                     StringComparison.Ordinal)))
             {
                 return false;
             }
@@ -3322,15 +3432,7 @@ namespace AL.Kingdom.Progression
                     !string.Equals(
                         result.OrderEconomyRevision,
                         result.EconomyRevision,
-                        StringComparison.Ordinal) ||
-                    (!string.IsNullOrEmpty(result.CompletionOperationId) &&
-                     (!IsValidId(result.CompletionOperationId) ||
-                      string.Equals(
-                          result.CompletionOperationId,
-                          result.StartOperationId,
-                          StringComparison.Ordinal))) ||
-                    (!string.IsNullOrEmpty(result.OrderHash) &&
-                     !IsHash(result.OrderHash)))
+                        StringComparison.Ordinal))
                 {
                     return false;
                 }
@@ -3342,14 +3444,6 @@ namespace AL.Kingdom.Progression
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(result.OrderHash))
-                {
-                    return string.IsNullOrEmpty(
-                               result.CompletionOperationId) &&
-                           string.IsNullOrEmpty(
-                               result.CancellationOperationId);
-                }
-
                 ProgressionOrderSnapshot committedStartOrder =
                     BuildCommittedOrderSnapshot(result);
                 return committedStartOrder != null &&
@@ -3358,17 +3452,11 @@ namespace AL.Kingdom.Progression
                            startPlan);
             }
 
-            if (!IsValidId(result.CompletionOperationId) ||
-                !string.Equals(
+            if (!string.Equals(
                     result.OperationId,
                     result.CompletionOperationId,
                     StringComparison.Ordinal) ||
-                string.Equals(
-                    result.StartOperationId,
-                    result.CompletionOperationId,
-                    StringComparison.Ordinal) ||
                 !IsValidId(result.QuestRevision) ||
-                !IsHash(result.OrderHash) ||
                 result.CommitTimestamp < result.EndTimestamp ||
                 result.CommitTimestamp - result.EndTimestamp >
                 result.TimestampPolicy.MaximumRetentionAgeSeconds ||
@@ -3681,6 +3769,8 @@ namespace AL.Kingdom.Progression
                         order.DefinitionContentVersion,
                         StringComparison.Ordinal))
                 {
+                    sourceDisposition =
+                        ProgressionOrderSourceDisposition.MigrationRequired;
                     failureStatus = ProgressionPlanStatus.MigrationRequired;
                     failureDiagnostic =
                         ProgressionDiagnosticCode.SourceMigrationRequired;
@@ -3834,6 +3924,8 @@ namespace AL.Kingdom.Progression
                         order.DefinitionContentVersion,
                         StringComparison.Ordinal))
                 {
+                    sourceDisposition =
+                        ProgressionOrderSourceDisposition.MigrationRequired;
                     failureStatus = ProgressionPlanStatus.MigrationRequired;
                     failureDiagnostic =
                         ProgressionDiagnosticCode.SourceMigrationRequired;
@@ -4282,6 +4374,39 @@ namespace AL.Kingdom.Progression
         private static bool IsValidId(string value)
         {
             return ProgressionText.IsValidIdentifier(value);
+        }
+
+        private static bool AreOrderOperationIdsDistinct(
+            string orderId,
+            string startOperationId,
+            string completionOperationId,
+            string cancellationOperationId)
+        {
+            return !string.Equals(
+                       orderId,
+                       startOperationId,
+                       StringComparison.Ordinal) &&
+                   !string.Equals(
+                       orderId,
+                       completionOperationId,
+                       StringComparison.Ordinal) &&
+                   !string.Equals(
+                       startOperationId,
+                       completionOperationId,
+                       StringComparison.Ordinal) &&
+                   (string.IsNullOrEmpty(cancellationOperationId) ||
+                    (!string.Equals(
+                         orderId,
+                         cancellationOperationId,
+                         StringComparison.Ordinal) &&
+                     !string.Equals(
+                         startOperationId,
+                         cancellationOperationId,
+                         StringComparison.Ordinal) &&
+                     !string.Equals(
+                         completionOperationId,
+                         cancellationOperationId,
+                         StringComparison.Ordinal)));
         }
 
         private static IEnumerable<string> EnumerateOperationIds(

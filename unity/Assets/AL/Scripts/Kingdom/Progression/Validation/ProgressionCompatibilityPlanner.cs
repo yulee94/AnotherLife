@@ -1286,7 +1286,7 @@ namespace AL.Kingdom.Progression
             ProgressionTimestampPolicy timestampPolicy,
             bool hasDefinitionSource)
         {
-            return new ProgressionCompatibilityResult(
+            return ProgressionCompatibilityResult.CreatePlannerResult(
                 ProgressionDomain.Research,
                 status,
                 catalogSetId,
@@ -1315,7 +1315,7 @@ namespace AL.Kingdom.Progression
             ProgressionTimestampPolicy timestampPolicy,
             bool hasDefinitionSource)
         {
-            return new ProgressionCompatibilityResult(
+            return ProgressionCompatibilityResult.CreatePlannerResult(
                 ProgressionDomain.Training,
                 status,
                 catalogSetId,
