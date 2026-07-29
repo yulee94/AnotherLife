@@ -200,6 +200,18 @@ namespace AL.Tests.EditMode.Territories
         }
 
         [Test]
+        public void IncomeRejectsMissingExpectedRealmForCommittedProfile()
+        {
+            object planner = CreateBaselinePlanner();
+            object query = QueryBaseline(planner, "Stonehold");
+            object income = Invoke(planner, "PlanIncome", query, Realm("None"));
+
+            Assert.AreEqual("Unavailable", Property(income, "Status").ToString());
+            Assert.IsEmpty(Items(Property(income, "Contributions")));
+            AssertDiagnostic(income, "InvalidExpectedRealm", string.Empty);
+        }
+
+        [Test]
         public void IncomeRejectsUndefinedExpectedRealm()
         {
             object planner = CreateBaselinePlanner();
