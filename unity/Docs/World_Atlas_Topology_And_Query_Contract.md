@@ -221,7 +221,7 @@ Topology IDs use ASCII lowercase snake case and are ordinal, case-sensitive iden
 For every topology, boundary, wall, transition, bridge, and endpoint identity:
 
 - encoded length is 1 through 96 UTF-8 bytes;
-- the grammar is lowercase ASCII letters or digits separated by single underscores;
+- the grammar is ^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$: the first byte is a lowercase ASCII letter, followed by lowercase ASCII letters or digits in segments separated by single underscores;
 - leading, trailing, or repeated underscores are invalid;
 - whitespace, Unicode lookalikes, punctuation, uppercase, mixed case, empty values, and normalization are invalid;
 - no trim, case fold, culture normalization, alias, basename inference, display-name inference, or hash-order inference is permitted;
