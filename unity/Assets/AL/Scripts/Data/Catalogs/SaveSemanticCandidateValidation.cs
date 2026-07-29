@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 
 namespace AL.Data.Catalogs
 {
@@ -44,7 +45,8 @@ namespace AL.Data.Catalogs
         Customization = 1 << 11,
         Warmaster = 1 << 12,
         Chapter = 1 << 13,
-        All = (1 << 14) - 1
+        Narrative = 1 << 14,
+        All = (1 << 15) - 1
     }
 
     public enum SaveSemanticDiagnosticSeverity
@@ -338,6 +340,37 @@ namespace AL.Data.Catalogs
     /// Immutable limits and compatibility knowledge used while inspecting one raw save.
     /// The validator does not read catalogs, Unity types, or files.
     /// </summary>
+    public sealed class SaveSemanticNvs01Rule
+    {
+        public SaveSemanticNvs01Rule(
+            int currentVersion,
+            string packetVersion,
+            string packetSha256,
+            string questId)
+        {
+            if (currentVersion <= 0)
+                throw new ArgumentOutOfRangeException(nameof(currentVersion));
+            if (string.IsNullOrWhiteSpace(packetVersion) ||
+                packetVersion.Length > 256)
+                throw new ArgumentException("Packet version is invalid.", nameof(packetVersion));
+            if (string.IsNullOrWhiteSpace(packetSha256) ||
+                packetSha256.Length > 256)
+                throw new ArgumentException("Packet hash is invalid.", nameof(packetSha256));
+            if (string.IsNullOrWhiteSpace(questId) || questId.Length > 256)
+                throw new ArgumentException("Quest ID is invalid.", nameof(questId));
+
+            CurrentVersion = currentVersion;
+            PacketVersion = packetVersion;
+            PacketSha256 = packetSha256;
+            QuestId = questId;
+        }
+
+        public int CurrentVersion { get; }
+        public string PacketVersion { get; }
+        public string PacketSha256 { get; }
+        public string QuestId { get; }
+    }
+
     public sealed class SaveSemanticValidationPolicy
     {
         public const int DefaultMaximumInputBytes = 1024 * 1024;
@@ -351,7 +384,8 @@ namespace AL.Data.Catalogs
             int currentProfileInitializationVersion,
             SaveSemanticValidationAuthority authority,
             int maximumInputBytes = DefaultMaximumInputBytes,
-            int maximumDiagnostics = DefaultMaximumDiagnostics)
+            int maximumDiagnostics = DefaultMaximumDiagnostics,
+            SaveSemanticNvs01Rule nvs01Rule = null)
         {
             if (string.IsNullOrWhiteSpace(currentSaveFormatId) ||
                 currentSaveFormatId.Length > 128)
@@ -392,6 +426,7 @@ namespace AL.Data.Catalogs
             Authority = authority;
             MaximumInputBytes = maximumInputBytes;
             MaximumDiagnostics = maximumDiagnostics;
+            Nvs01Rule = nvs01Rule;
         }
 
         public string CurrentSaveFormatId { get; }
@@ -400,6 +435,7 @@ namespace AL.Data.Catalogs
         public SaveSemanticValidationAuthority Authority { get; }
         public int MaximumInputBytes { get; }
         public int MaximumDiagnostics { get; }
+        public SaveSemanticNvs01Rule Nvs01Rule { get; }
     }
 
     public sealed class SaveSemanticCandidate
@@ -674,6 +710,7 @@ namespace AL.Data.Catalogs
                     "ChampionCustomization",
                     "OwnedEquipment",
                     "AppliedBossLootRewards",
+                    "Nvs01Progress",
                     "WarzoneCredits",
                     "LastSavedTimestamp"
                 },
@@ -779,6 +816,65 @@ namespace AL.Data.Catalogs
                 "BossId",
                 "RewardDigest",
                 "CommittedTimestamp");
+
+        private static readonly HashSet<string> Nvs01ProgressFields =
+            Fields(
+                "Version",
+                "PacketVersion",
+                "PacketSha256",
+                "QuestId",
+                "Revision",
+                "StateId",
+                "Objectives",
+                "CurrentDialogueNodeId",
+                "PendingChoice",
+                "PendingSemanticActionId",
+                "CommittedRealmId",
+                "EncounterStatus",
+                "HasCurrentEncounter",
+                "CurrentEncounter",
+                "LastEncounterCorrelationId",
+                "HasLastEncounterOutcome",
+                "LastEncounterOutcome",
+                "LastEncounterEventId",
+                "LastEncounterSnapshotVersion",
+                "LastEncounterSnapshotReference",
+                "HasLastOperation",
+                "LastOperation",
+                "ConsequenceIntentIds",
+                "AcquiredArtifactIds",
+                "AppliedEffectKeys",
+                "UnlockedChapterId");
+
+        private static readonly HashSet<string> Nvs01ObjectiveFields =
+            Fields("ObjectiveId", "Status");
+
+        private static readonly HashSet<string> Nvs01EncounterFields =
+            Fields(
+                "ContractVersion",
+                "RequestId",
+                "CorrelationId",
+                "QuestId",
+                "StateId",
+                "ObjectiveId",
+                "HookId",
+                "LocationId",
+                "RealmId",
+                "SuccessEventId",
+                "FailureEventId",
+                "CancelledEventId",
+                "UnavailableEventId",
+                "ReturnScene");
+
+        private static readonly HashSet<string> Nvs01OperationFields =
+            Fields(
+                "OperationId",
+                "PayloadFingerprint",
+                "Status",
+                "Revision",
+                "StateId",
+                "EventId",
+                "CorrelationId");
 
         public static SaveSemanticCandidate Validate(
             byte[] rawBytes,
@@ -1120,6 +1216,7 @@ namespace AL.Data.Catalogs
                 state);
             ValidateEquipmentRows(root, policy.Authority, collector, state);
             ValidateAppliedBossLootRewardRows(root, policy.Authority, collector, state);
+            ValidateNvs01Progress(root, policy.Nvs01Rule, collector, state);
 
             SaveSemanticCandidateOutcome outcome;
             bool writable;
@@ -3188,6 +3285,722 @@ namespace AL.Data.Catalogs
                             SaveSemanticDomain.Envelope);
                     }
                 });
+        }
+
+        private static void ValidateNvs01Progress(
+            StrictJsonObject root,
+            SaveSemanticNvs01Rule rule,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress";
+            StrictJsonValue value;
+            if (!root.TryGet("Nvs01Progress", out value))
+            {
+                MarkNormalized(
+                    state,
+                    collector,
+                    "SAVE_NVS01_PROGRESS_DEFAULTED",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            var progress = value as StrictJsonObject;
+            if (progress == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_PROGRESS_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                progress,
+                Nvs01ProgressFields,
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state);
+
+            int version;
+            if (!TryReadRequiredInt32(
+                    progress,
+                    "Version",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out version))
+            {
+                return;
+            }
+
+            if (version < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_VERSION_NEGATIVE",
+                    path + ".Version",
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            int currentVersion = rule == null ? 1 : rule.CurrentVersion;
+            if (version > currentVersion)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_NVS01_VERSION_FORWARD",
+                    path + ".Version",
+                    SaveSemanticDomain.Narrative,
+                    rawOnly: true);
+                return;
+            }
+
+            if (version > 0 && rule == null)
+            {
+                MarkPreservedUnknown(
+                    state,
+                    collector,
+                    "SAVE_NVS01_AUTHORITY_UNAVAILABLE",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    rawOnly: true);
+                return;
+            }
+
+            string ignoredString;
+            foreach (string field in new[]
+                     {
+                         "PacketVersion",
+                         "PacketSha256",
+                         "QuestId",
+                         "StateId",
+                         "CurrentDialogueNodeId",
+                         "PendingSemanticActionId",
+                         "CommittedRealmId",
+                         "LastEncounterCorrelationId",
+                         "LastEncounterEventId",
+                         "LastEncounterSnapshotVersion",
+                         "LastEncounterSnapshotReference",
+                         "UnlockedChapterId"
+                     })
+            {
+                TryReadRequiredString(
+                    progress,
+                    field,
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    allowBlank: true,
+                    collector,
+                    state,
+                    out ignoredString);
+            }
+
+            if (version == currentVersion)
+            {
+                StrictJsonValue packetVersionValue;
+                StrictJsonValue packetShaValue;
+                StrictJsonValue questValue;
+                var packetVersion = progress.TryGet(
+                        "PacketVersion",
+                        out packetVersionValue)
+                    ? packetVersionValue as StrictJsonString
+                    : null;
+                var packetSha = progress.TryGet(
+                        "PacketSha256",
+                        out packetShaValue)
+                    ? packetShaValue as StrictJsonString
+                    : null;
+                var questId = progress.TryGet("QuestId", out questValue)
+                    ? questValue as StrictJsonString
+                    : null;
+                if (packetVersion == null ||
+                    packetSha == null ||
+                    questId == null ||
+                    !string.Equals(
+                        packetVersion.Value,
+                        rule.PacketVersion,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
+                        packetSha.Value,
+                        rule.PacketSha256,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
+                        questId.Value,
+                        rule.QuestId,
+                        StringComparison.Ordinal))
+                {
+                    MarkPreservedUnknown(
+                        state,
+                        collector,
+                        "SAVE_NVS01_PACKET_IDENTITY_UNSUPPORTED",
+                        path,
+                        SaveSemanticDomain.Narrative,
+                        rawOnly: true);
+                }
+            }
+
+            long revision;
+            if (TryReadRequiredInt64(
+                    progress,
+                    "Revision",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out revision) &&
+                revision < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_REVISION_NEGATIVE",
+                    path + ".Revision",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            int encounterStatus;
+            if (TryReadRequiredInt32(
+                    progress,
+                    "EncounterStatus",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out encounterStatus) &&
+                (encounterStatus < 0 || encounterStatus > 3))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_ENCOUNTER_STATUS_INVALID",
+                    path + ".EncounterStatus",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            int encounterOutcome;
+            if (TryReadRequiredInt32(
+                    progress,
+                    "LastEncounterOutcome",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out encounterOutcome) &&
+                (encounterOutcome < 0 || encounterOutcome > 3))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_ENCOUNTER_OUTCOME_INVALID",
+                    path + ".LastEncounterOutcome",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            bool ignoredBoolean;
+            foreach (string field in new[]
+                     {
+                         "PendingChoice",
+                         "HasCurrentEncounter",
+                         "HasLastEncounterOutcome",
+                         "HasLastOperation"
+                     })
+            {
+                TryReadRequiredBoolean(
+                    progress,
+                    field,
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out ignoredBoolean);
+            }
+
+            ValidateNvs01ObjectiveRows(progress, collector, state);
+            ValidateNvs01StringArray(
+                progress,
+                "ConsequenceIntentIds",
+                16,
+                collector,
+                state);
+            ValidateNvs01StringArray(
+                progress,
+                "AcquiredArtifactIds",
+                16,
+                collector,
+                state);
+            ValidateNvs01StringArray(
+                progress,
+                "AppliedEffectKeys",
+                16,
+                collector,
+                state);
+            ValidateNvs01Encounter(progress, collector, state);
+            ValidateNvs01Operation(progress, collector, state);
+
+            if (version == 0 && !IsNeutralNvs01Progress(progress))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_NEUTRAL_STATE_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+        }
+
+        private static bool IsNeutralNvs01Progress(StrictJsonObject progress)
+        {
+            if (!HasNvs01IntegerValue(progress, "Revision", 0) ||
+                !HasNvs01IntegerValue(progress, "EncounterStatus", 0) ||
+                !HasNvs01IntegerValue(progress, "LastEncounterOutcome", 0))
+            {
+                return false;
+            }
+
+            foreach (string field in new[]
+                     {
+                         "PacketVersion",
+                         "PacketSha256",
+                         "QuestId",
+                         "StateId",
+                         "CurrentDialogueNodeId",
+                         "PendingSemanticActionId",
+                         "CommittedRealmId",
+                         "LastEncounterCorrelationId",
+                         "LastEncounterEventId",
+                         "LastEncounterSnapshotVersion",
+                         "LastEncounterSnapshotReference",
+                         "UnlockedChapterId"
+                     })
+            {
+                if (!HasNvs01StringValue(progress, field, string.Empty))
+                {
+                    return false;
+                }
+            }
+
+            foreach (string field in new[]
+                     {
+                         "PendingChoice",
+                         "HasCurrentEncounter",
+                         "HasLastEncounterOutcome",
+                         "HasLastOperation"
+                     })
+            {
+                if (!HasNvs01BooleanValue(progress, field, false))
+                {
+                    return false;
+                }
+            }
+
+            foreach (string field in new[]
+                     {
+                         "Objectives",
+                         "ConsequenceIntentIds",
+                         "AcquiredArtifactIds",
+                         "AppliedEffectKeys"
+                     })
+            {
+                StrictJsonValue value;
+                var rows = progress.TryGet(field, out value)
+                    ? value as StrictJsonArray
+                    : null;
+                if (rows == null || rows.Items.Count != 0)
+                {
+                    return false;
+                }
+            }
+
+            StrictJsonValue encounterValue;
+            var encounter = progress.TryGet("CurrentEncounter", out encounterValue)
+                ? encounterValue as StrictJsonObject
+                : null;
+            if (encounter == null ||
+                !HasNvs01IntegerValue(encounter, "ContractVersion", 0))
+            {
+                return false;
+            }
+
+            foreach (string field in Nvs01EncounterFields.Where(
+                         name => !string.Equals(
+                             name,
+                             "ContractVersion",
+                             StringComparison.Ordinal)))
+            {
+                if (!HasNvs01StringValue(encounter, field, string.Empty))
+                {
+                    return false;
+                }
+            }
+
+            StrictJsonValue operationValue;
+            var operation = progress.TryGet("LastOperation", out operationValue)
+                ? operationValue as StrictJsonObject
+                : null;
+            if (operation == null ||
+                !HasNvs01IntegerValue(operation, "Status", 0) ||
+                !HasNvs01IntegerValue(operation, "Revision", 0))
+            {
+                return false;
+            }
+
+            foreach (string field in new[]
+                     {
+                         "OperationId",
+                         "PayloadFingerprint",
+                         "StateId",
+                         "EventId",
+                         "CorrelationId"
+                     })
+            {
+                if (!HasNvs01StringValue(operation, field, string.Empty))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool HasNvs01StringValue(
+            StrictJsonObject row,
+            string field,
+            string expected)
+        {
+            StrictJsonValue value;
+            var text = row.TryGet(field, out value)
+                ? value as StrictJsonString
+                : null;
+            return text != null &&
+                   string.Equals(text.Value, expected, StringComparison.Ordinal);
+        }
+
+        private static bool HasNvs01IntegerValue(
+            StrictJsonObject row,
+            string field,
+            long expected)
+        {
+            StrictJsonValue value;
+            long actual;
+            return row.TryGet(field, out value) &&
+                   TryReadInt64(value, out actual) &&
+                   actual == expected;
+        }
+
+        private static bool HasNvs01BooleanValue(
+            StrictJsonObject row,
+            string field,
+            bool expected)
+        {
+            StrictJsonValue value;
+            var boolean = row.TryGet(field, out value)
+                ? value as StrictJsonBoolean
+                : null;
+            return boolean != null && boolean.Value == expected;
+        }
+
+        private static void ValidateNvs01ObjectiveRows(
+            StrictJsonObject progress,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress.Objectives";
+            StrictJsonValue value;
+            var rows = progress.TryGet("Objectives", out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_OBJECTIVES_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (rows.Items.Count > 16)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_OBJECTIVE_LIMIT",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            var count = Math.Min(rows.Items.Count, 16);
+            for (var index = 0; index < count; index++)
+            {
+                string rowPath = path + "[" +
+                                 index.ToString(CultureInfo.InvariantCulture) + "]";
+                var row = rows.Items[index] as StrictJsonObject;
+                if (row == null)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_OBJECTIVE_INVALID",
+                        rowPath,
+                        SaveSemanticDomain.Narrative);
+                    continue;
+                }
+
+                InspectUnexpectedProperties(
+                    row,
+                    Nvs01ObjectiveFields,
+                    rowPath,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state);
+                string objectiveId;
+                if (TryReadRequiredString(
+                        row,
+                        "ObjectiveId",
+                        rowPath,
+                        SaveSemanticDomain.Narrative,
+                        allowBlank: false,
+                        collector,
+                        state,
+                        out objectiveId) &&
+                    !ids.Add(objectiveId))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_OBJECTIVE_DUPLICATE",
+                        rowPath + ".ObjectiveId",
+                        SaveSemanticDomain.Narrative);
+                }
+
+                int status;
+                if (TryReadRequiredInt32(
+                        row,
+                        "Status",
+                        rowPath,
+                        SaveSemanticDomain.Narrative,
+                        collector,
+                        state,
+                        out status) &&
+                    (status < 0 || status > 2))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_OBJECTIVE_STATUS_INVALID",
+                        rowPath + ".Status",
+                        SaveSemanticDomain.Narrative);
+                }
+            }
+        }
+
+        private static void ValidateNvs01StringArray(
+            StrictJsonObject progress,
+            string field,
+            int maximum,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            string path = "$.Nvs01Progress." + field;
+            StrictJsonValue value;
+            var rows = progress.TryGet(field, out value)
+                ? value as StrictJsonArray
+                : null;
+            if (rows == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_COLLECTION_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            if (rows.Items.Count > maximum)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_COLLECTION_LIMIT",
+                    path,
+                    SaveSemanticDomain.Narrative);
+            }
+
+            var ids = new HashSet<string>(StringComparer.Ordinal);
+            var count = Math.Min(rows.Items.Count, maximum);
+            for (var index = 0; index < count; index++)
+            {
+                string itemPath = path + "[" +
+                                  index.ToString(CultureInfo.InvariantCulture) + "]";
+                var text = rows.Items[index] as StrictJsonString;
+                if (text == null ||
+                    string.IsNullOrWhiteSpace(text.Value) ||
+                    text.Value.Length > MaximumStableIdCharacters ||
+                    !ids.Add(text.Value))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_NVS01_COLLECTION_ITEM_INVALID",
+                        itemPath,
+                        SaveSemanticDomain.Narrative);
+                }
+            }
+        }
+
+        private static void ValidateNvs01Encounter(
+            StrictJsonObject progress,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress.CurrentEncounter";
+            StrictJsonValue value;
+            var encounter = progress.TryGet("CurrentEncounter", out value)
+                ? value as StrictJsonObject
+                : null;
+            if (encounter == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_ENCOUNTER_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                encounter,
+                Nvs01EncounterFields,
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state);
+            int ignoredInteger;
+            TryReadRequiredInt32(
+                encounter,
+                "ContractVersion",
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state,
+                out ignoredInteger);
+            string ignoredString;
+            foreach (string field in Nvs01EncounterFields.Where(
+                         name => !string.Equals(
+                             name,
+                             "ContractVersion",
+                             StringComparison.Ordinal)))
+            {
+                TryReadRequiredString(
+                    encounter,
+                    field,
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    allowBlank: true,
+                    collector,
+                    state,
+                    out ignoredString);
+            }
+        }
+
+        private static void ValidateNvs01Operation(
+            StrictJsonObject progress,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Nvs01Progress.LastOperation";
+            StrictJsonValue value;
+            var operation = progress.TryGet("LastOperation", out value)
+                ? value as StrictJsonObject
+                : null;
+            if (operation == null)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_OPERATION_INVALID",
+                    path,
+                    SaveSemanticDomain.Narrative);
+                return;
+            }
+
+            InspectUnexpectedProperties(
+                operation,
+                Nvs01OperationFields,
+                path,
+                SaveSemanticDomain.Narrative,
+                collector,
+                state);
+            string ignoredString;
+            foreach (string field in new[]
+                     {
+                         "OperationId",
+                         "PayloadFingerprint",
+                         "StateId",
+                         "EventId",
+                         "CorrelationId"
+                     })
+            {
+                TryReadRequiredString(
+                    operation,
+                    field,
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    allowBlank: true,
+                    collector,
+                    state,
+                    out ignoredString);
+            }
+
+            int status;
+            if (TryReadRequiredInt32(
+                    operation,
+                    "Status",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out status) &&
+                (status < 0 || status > 4))
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_OPERATION_STATUS_INVALID",
+                    path + ".Status",
+                    SaveSemanticDomain.Narrative);
+            }
+
+            long revision;
+            if (TryReadRequiredInt64(
+                    operation,
+                    "Revision",
+                    path,
+                    SaveSemanticDomain.Narrative,
+                    collector,
+                    state,
+                    out revision) &&
+                revision < 0)
+            {
+                MarkMalformed(
+                    state,
+                    collector,
+                    "SAVE_NVS01_OPERATION_REVISION_NEGATIVE",
+                    path + ".Revision",
+                    SaveSemanticDomain.Narrative);
+            }
         }
 
         private static void ValidateObjectRows(

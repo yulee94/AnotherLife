@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using AL.Data.Catalogs;
@@ -138,6 +139,181 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(0, GetField(persona, "Diplomat"));
             Assert.AreEqual(0, GetField(persona, "Sage"));
             Assert.AreEqual(0, GetField(persona, "Rogue"));
+            object nvsProgress = GetField(save, "Nvs01Progress");
+            Assert.NotNull(nvsProgress);
+            Assert.AreEqual(0, GetField(nvsProgress, "Version"));
+            Assert.IsEmpty((IList)GetField(nvsProgress, "Objectives"));
+            Assert.IsEmpty((IList)GetField(nvsProgress, "ConsequenceIntentIds"));
+        }
+
+        [Test]
+        public void CandidateCommitPublishesOnlyTheTwiceVerifiedDetachedSave()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
+                object publishedBefore = GetProperty(service, "CurrentSave");
+
+                object result = InvokePreparedCandidate(
+                    service,
+                    "C1_CANDIDATE_COMMITTED");
+
+                Assert.AreEqual(
+                    "Committed",
+                    GetProperty(result, "Outcome").ToString());
+                object publishedAfter = GetProperty(service, "CurrentSave");
+                Assert.AreNotSame(publishedBefore, publishedAfter);
+                Assert.AreEqual(
+                    "C1_CANDIDATE_COMMITTED",
+                    GetField(publishedAfter, "CurrentChapterId"));
+
+                object reloaded = CreateSaveService(root);
+                Invoke(reloaded, "Load");
+                Assert.AreEqual(
+                    "C1_CANDIDATE_COMMITTED",
+                    GetField(
+                        GetProperty(reloaded, "CurrentSave"),
+                        "CurrentChapterId"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void CandidateCommitFailurePreservesTheExactPublishedReference()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
+
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            string primaryPath = Path.Combine(root, "save.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            fileSystem.WriteFailuresBeforeMutation.Add(
+                Path.Combine(root, "save.tmp.json"));
+
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex(
+                    "^AL-SAVE-TEMP-WRITE-FAILED:"));
+            object result = InvokePreparedCandidate(
+                service,
+                "C1_MUST_NOT_PUBLISH");
+
+            Assert.AreEqual(
+                "PreviousPreserved",
+                GetProperty(result, "Outcome").ToString());
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(
+                "C1",
+                GetField(publishedBefore, "CurrentChapterId"));
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+        }
+
+        [Test]
+        public void DuplicateCandidateFreezesWhenCanonicalPrimaryCannotBeVerified()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                Invoke(
+                    service,
+                    "CreateNewSave",
+                    Enum.Parse(realmType, "Crownlands"));
+                object publishedBefore = GetProperty(service, "CurrentSave");
+                File.Delete(Path.Combine(root, "save.json"));
+
+                LogAssert.Expect(
+                    LogType.Error,
+                    new System.Text.RegularExpressions.Regex(
+                        "^AL-SAVE-DUPLICATE-UNVERIFIED:"));
+                object result = InvokeDuplicateCandidate(service);
+
+                Assert.AreEqual(
+                    "CommitUncertain",
+                    GetProperty(result, "Outcome").ToString());
+                Assert.AreSame(
+                    publishedBefore,
+                    GetProperty(service, "CurrentSave"));
+                Assert.AreEqual(
+                    "CommitUncertain",
+                    GetProperty(service, "LastSaveStatus").ToString());
+                Assert.NotNull(
+                    GetProperty(service, "ReadOnlyCandidateSnapshot"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void DuplicateCandidateKeepsPublishedReferenceAfterExactVerification()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                object service = CreateSaveService(root);
+                Type realmType = GetRuntimeType("AL.Core.RealmId");
+                Invoke(
+                    service,
+                    "CreateNewSave",
+                    Enum.Parse(realmType, "Crownlands"));
+                object publishedBefore = GetProperty(service, "CurrentSave");
+
+                object result = InvokeDuplicateCandidate(service);
+
+                Assert.AreEqual(
+                    "Duplicate",
+                    GetProperty(result, "Outcome").ToString());
+                Assert.AreSame(
+                    publishedBefore,
+                    GetProperty(service, "CurrentSave"));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
         }
 
         [Test]
@@ -4310,6 +4486,68 @@ namespace AL.Tests.EditMode
                 null);
             Assert.NotNull(constructor, "Expected the testable persistence-path constructor.");
             return constructor.Invoke(new object[] { root });
+        }
+
+        private static object InvokePreparedCandidate(
+            object service,
+            string chapterId)
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type preparationType = GetRuntimeType(
+                "AL.Services.Local.SaveCandidateMutationPreparation");
+            Type callbackType = typeof(Func<,>).MakeGenericType(
+                saveType,
+                preparationType);
+            ParameterExpression candidate = Expression.Parameter(
+                saveType,
+                "candidate");
+            MethodInfo prepared = preparationType.GetMethod(
+                "Prepared",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(prepared);
+            Delegate callback = Expression.Lambda(
+                    callbackType,
+                    Expression.Block(
+                        Expression.Assign(
+                            Expression.Field(candidate, "CurrentChapterId"),
+                            Expression.Constant(chapterId)),
+                        Expression.Call(prepared)),
+                    candidate)
+                .Compile();
+
+            Type storeType = GetRuntimeType(
+                "AL.Services.Local.ISaveGameCandidateStore");
+            MethodInfo commit = storeType.GetMethod("TryCommitCandidate");
+            Assert.NotNull(commit);
+            return commit.Invoke(service, new object[] { callback });
+        }
+
+        private static object InvokeDuplicateCandidate(object service)
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type preparationType = GetRuntimeType(
+                "AL.Services.Local.SaveCandidateMutationPreparation");
+            Type callbackType = typeof(Func<,>).MakeGenericType(
+                saveType,
+                preparationType);
+            ParameterExpression candidate = Expression.Parameter(
+                saveType,
+                "candidate");
+            MethodInfo duplicate = preparationType.GetMethod(
+                "Duplicate",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(duplicate);
+            Delegate callback = Expression.Lambda(
+                    callbackType,
+                    Expression.Call(duplicate),
+                    candidate)
+                .Compile();
+
+            Type storeType = GetRuntimeType(
+                "AL.Services.Local.ISaveGameCandidateStore");
+            MethodInfo commit = storeType.GetMethod("TryCommitCandidate");
+            Assert.NotNull(commit);
+            return commit.Invoke(service, new object[] { callback });
         }
 
         private static string ArrangeExactBackupOnly(

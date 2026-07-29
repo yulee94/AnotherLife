@@ -9,6 +9,8 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Catalogs;
 using AL.Data.Runtime;
+using AL.Narrative.Nvs01;
+using AL.Narrative.Nvs01.Contracts;
 
 namespace AL.Services.Local
 {
@@ -206,7 +208,8 @@ namespace AL.Services.Local
     public class LocalSaveGameService :
         ISaveGameService,
         ISaveLoadDispositionProvider,
-        ISaveOperationDispositionProvider
+        ISaveOperationDispositionProvider,
+        ISaveGameCandidateStore
     {
         private const string SaveFileName = "save.json";
         private const string BackupFileName = "save.backup.json";
@@ -468,6 +471,241 @@ namespace AL.Services.Local
             SetSaveStatus(status, message, true);
         }
 
+        SaveCandidateCommitResult ISaveGameCandidateStore.TryCommitCandidate(
+            Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate)
+        {
+            if (prepareCandidate == null)
+            {
+                throw new ArgumentNullException(nameof(prepareCandidate));
+            }
+
+            if (!_profileWritable && LastSaveStatus == SaveOperationStatus.CommitUncertain)
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.CommitUncertain,
+                    _currentSave,
+                    "AL-SAVE-COMMIT-UNCERTAIN-BLOCKED: Persistence remains frozen until the canonical save inventory is reloaded and reconciled.");
+            }
+
+            if (!_profileWritable || _currentSave == null)
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.ReadOnly,
+                    _currentSave,
+                    "AL-SAVE-READ-ONLY-DISPOSITION: The selected save generation is unavailable or read-only.");
+            }
+
+            SaveGameData publishedBefore = _currentSave;
+            byte[] requiredRecoveryWitnessBytes = _committedRecoveryWitnessBytes;
+            if (requiredRecoveryWitnessBytes != null &&
+                !TryVerifyCommittedRecoveryWitnessTargetTwice(
+                    requiredRecoveryWitnessBytes,
+                    out _,
+                    out _))
+            {
+                const string witnessChangedMessage =
+                    "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact recovery evidence changed before the candidate commit; persistence was frozen.";
+                _profileWritable = false;
+                _readOnlyCandidate = CloneSave(publishedBefore);
+                LastSaveDisposition = CreateSaveDisposition(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    witnessChangedMessage);
+                SetSaveStatus(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    witnessChangedMessage,
+                    true);
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.PreviousPreserved,
+                    publishedBefore,
+                    witnessChangedMessage);
+            }
+
+            SaveGameData candidate = CloneSave(publishedBefore);
+            SaveCandidateMutationPreparation preparation;
+            try
+            {
+                preparation = prepareCandidate(candidate);
+            }
+            catch (Exception exception)
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Rejected,
+                    publishedBefore,
+                    "AL-SAVE-CANDIDATE-PREPARATION-FAILED: " +
+                    exception.GetType().Name);
+            }
+
+            if (preparation == null)
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Rejected,
+                    publishedBefore,
+                    "AL-SAVE-CANDIDATE-PREPARATION-MISSING: The candidate callback returned no disposition.");
+            }
+
+            if (preparation.Disposition == SaveCandidateMutationDisposition.Duplicate)
+            {
+                if (!TryVerifyPublishedCandidateAuthorityTwice(
+                        publishedBefore,
+                        out string duplicateVerificationMessage))
+                {
+                    _profileWritable = false;
+                    _readOnlyCandidate = CloneSave(publishedBefore);
+                    LastSaveDisposition = CreateSaveDisposition(
+                        SaveOperationStatus.CommitUncertain,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        duplicateVerificationMessage);
+                    SetSaveStatus(
+                        SaveOperationStatus.CommitUncertain,
+                        duplicateVerificationMessage,
+                        true);
+                    return new SaveCandidateCommitResult(
+                        SaveCandidateCommitOutcome.CommitUncertain,
+                        publishedBefore,
+                        duplicateVerificationMessage);
+                }
+
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Duplicate,
+                    publishedBefore,
+                    string.IsNullOrWhiteSpace(preparation.Message)
+                        ? duplicateVerificationMessage
+                        : preparation.Message);
+            }
+
+            if (preparation.Disposition == SaveCandidateMutationDisposition.Rejected)
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Rejected,
+                    publishedBefore,
+                    preparation.Message);
+            }
+
+            if (preparation.Disposition != SaveCandidateMutationDisposition.Prepared)
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Rejected,
+                    publishedBefore,
+                    "AL-SAVE-CANDIDATE-DISPOSITION-INVALID: The candidate callback returned an unsupported disposition.");
+            }
+
+            ApplyNeutralPersistenceDefaults(candidate);
+            if (!ValidateSaveSemantics(candidate, out string candidateError))
+            {
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Rejected,
+                    publishedBefore,
+                    "AL-SAVE-CANDIDATE-INVALID: " + candidateError);
+            }
+
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                requiredRecoveryWitnessBytes,
+                out SaveGameData persistedSave,
+                out SaveOperationDisposition disposition,
+                out string message);
+            LastSaveDisposition = disposition;
+
+            if (status == SaveOperationStatus.SavedPrimary)
+            {
+                _currentSave = persistedSave;
+                _readOnlyCandidate = null;
+                _profileWritable = true;
+                _committedRecoveryWitnessBytes = null;
+                _committedInvalidPrimaryWitnessBytes = null;
+                _committedInvalidPrimaryQuarantinePath = null;
+                _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                _committedInvalidPrimaryRecoveryMarkerPath = null;
+                SetSaveStatus(SaveOperationStatus.SavedPrimary, message, false);
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Committed,
+                    _currentSave,
+                    message);
+            }
+
+            if (requiredRecoveryWitnessBytes != null ||
+                status == SaveOperationStatus.CommitUncertain ||
+                (status == SaveOperationStatus.SaveFailedPreviousPreserved &&
+                 disposition != null &&
+                 !disposition.CleanupVerified))
+            {
+                _profileWritable = false;
+                _readOnlyCandidate = CloneSave(publishedBefore);
+            }
+
+            _currentSave = publishedBefore;
+            SetSaveStatus(status, message, true);
+            return new SaveCandidateCommitResult(
+                status == SaveOperationStatus.CommitUncertain
+                    ? SaveCandidateCommitOutcome.CommitUncertain
+                    : SaveCandidateCommitOutcome.PreviousPreserved,
+                publishedBefore,
+                message);
+        }
+
+        private bool TryVerifyPublishedCandidateAuthorityTwice(
+            SaveGameData publishedSave,
+            out string message)
+        {
+            message =
+                "AL-SAVE-DUPLICATE-UNVERIFIED: The published save no longer has an exact, stable canonical authority; persistence was frozen.";
+            if (publishedSave == null ||
+                !TrySerializeBounded(
+                    publishedSave,
+                    out string publishedJson,
+                    out _))
+            {
+                return false;
+            }
+
+            byte[] publishedBytes = StrictUtf8.GetBytes(publishedJson);
+            SaveCanonicalLedger first = CaptureCanonicalLedger();
+            if (!IsExactValidGeneration(
+                    first.Primary,
+                    publishedBytes,
+                    out _) ||
+                first.Backup.Disposition != SaveFileReadDisposition.Read ||
+                !TryDeserializeValidSaveBytes(
+                    first.Backup.Bytes,
+                    out _,
+                    out _,
+                    SaveCandidateSourceGeneration.Backup) ||
+                first.Temp.Disposition != SaveFileReadDisposition.Missing ||
+                first.Previous.Disposition != SaveFileReadDisposition.Missing ||
+                !IsCommittedRecoveryMarkerCleanupVerified() ||
+                !IsCommittedInvalidPrimaryQuarantineIntact())
+            {
+                return false;
+            }
+
+            SaveCanonicalLedger second = CaptureCanonicalLedger();
+            if (!IsExactValidGeneration(
+                    second.Primary,
+                    publishedBytes,
+                    out _) ||
+                !MatchesExactState(second.Backup, first.Backup) ||
+                second.Temp.Disposition != SaveFileReadDisposition.Missing ||
+                second.Previous.Disposition != SaveFileReadDisposition.Missing ||
+                !IsCommittedRecoveryMarkerCleanupVerified() ||
+                !IsCommittedInvalidPrimaryQuarantineIntact())
+            {
+                return false;
+            }
+
+            message =
+                "AL-SAVE-DUPLICATE-VERIFIED: The published save and canonical authority matched exactly across two bounded inventories.";
+            return true;
+        }
+
         public void Load()
         {
             SaveGameData priorSave = _currentSave;
@@ -613,6 +851,25 @@ namespace AL.Services.Local
                     SaveLoadStatus.RecoveryFailed,
                     "AL-SAVE-SELECTED-DESERIALIZE-FAILED: The selected bounded candidate could not be materialized safely; disk evidence was preserved.",
                     true);
+                return;
+            }
+
+            if (!ValidateSaveSemantics(selectedSave, out _))
+            {
+                _currentSave = null;
+                _readOnlyCandidate = selectedSave;
+                _profileWritable = false;
+                PublishDisposition(
+                    inventory,
+                    selected,
+                    selection.ReasonCode,
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    SaveLoadStatus.LoadedPrimaryDegraded,
+                    "AL-SAVE-SELECTED-SEMANTIC-FAILED: The selected candidate contains runtime-inconsistent state and remains available only as a read-only diagnostic snapshot.",
+                    false);
                 return;
             }
 
@@ -772,7 +1029,7 @@ namespace AL.Services.Local
             bool runtimeUsable =
                 selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
                 selected.IsWritable &&
-                IsRuntimeRoundTrippable(selected.Outcome);
+                IsRuntimeRoundTrippable(selected);
             bool writable = runtimeUsable &&
                 (!HasUnresolvedAuxiliaryEvidence(inventory) ||
                  hasCommittedBackupRecoveryWitness);
@@ -797,7 +1054,7 @@ namespace AL.Services.Local
                     SaveLoadStatus.LoadedPrimary,
                     selected.Outcome == SaveSemanticCandidateOutcome.Valid
                         ? "AL-SAVE-LOAD-PRIMARY: A semantically valid primary was loaded without disk mutation or offline progression."
-                        : "AL-SAVE-LOAD-PRIMARY-COMPATIBLE: A round-trippable primary with preserved stable IDs was loaded without disk mutation or offline progression.",
+                        : "AL-SAVE-LOAD-PRIMARY-COMPATIBLE: A round-trippable primary using only approved compatibility handling was loaded without disk mutation or offline progression.",
                     false);
                 return;
             }
@@ -2434,7 +2691,7 @@ namespace AL.Services.Local
                    selected.ProfileInitializationVersion ==
                        _semanticPolicy.CurrentProfileInitializationVersion &&
                    selected.IsWritable &&
-                   IsRuntimeRoundTrippable(selected.Outcome) &&
+                   IsRuntimeRoundTrippable(selected) &&
                    primary.ReadResult.Disposition == SaveFileReadDisposition.Missing &&
                    backup.ReadResult.Disposition == SaveFileReadDisposition.Read &&
                    temp.ReadResult.Disposition == SaveFileReadDisposition.Missing &&
@@ -3327,9 +3584,17 @@ namespace AL.Services.Local
                 save.Warmaster == null ||
                 save.ChampionCustomization == null ||
                 save.OwnedEquipment == null ||
-                save.AppliedBossLootRewards == null)
+                save.AppliedBossLootRewards == null ||
+                save.Nvs01Progress == null)
             {
                 error = "Required top-level save collections or objects are null after normalization.";
+                return false;
+            }
+
+            if (!Nvs01ProgressCodec.TryValidateStoredData(
+                    save.Nvs01Progress,
+                    out error))
+            {
                 return false;
             }
 
@@ -3406,6 +3671,7 @@ namespace AL.Services.Local
             save.Warmaster.UnlockedSetIds = RemoveNullStrings(save.Warmaster.UnlockedSetIds);
             save.Warmaster.PurchasedPieceIds = RemoveNullStrings(save.Warmaster.PurchasedPieceIds);
             save.ChampionCustomization ??= new ChampionCustomizationState();
+            EnsureNvs01NeutralDefaults(save);
 
             EnsureResource(save, ResourceType.Food, 1000);
             EnsureResource(save, ResourceType.Wood, 1000);
@@ -3437,6 +3703,34 @@ namespace AL.Services.Local
                 : entries.Any(string.IsNullOrWhiteSpace)
                     ? entries.Where(entry => !string.IsNullOrWhiteSpace(entry)).ToList()
                     : entries;
+
+        private static void EnsureNvs01NeutralDefaults(SaveGameData save)
+        {
+            save.Nvs01Progress ??= new Nvs01ProgressData();
+            if (save.Nvs01Progress.Version != 0)
+            {
+                return;
+            }
+
+            save.Nvs01Progress.PacketVersion ??= string.Empty;
+            save.Nvs01Progress.PacketSha256 ??= string.Empty;
+            save.Nvs01Progress.QuestId ??= string.Empty;
+            save.Nvs01Progress.StateId ??= string.Empty;
+            save.Nvs01Progress.Objectives ??= new List<Nvs01ObjectiveProgressData>();
+            save.Nvs01Progress.CurrentDialogueNodeId ??= string.Empty;
+            save.Nvs01Progress.PendingSemanticActionId ??= string.Empty;
+            save.Nvs01Progress.CommittedRealmId ??= string.Empty;
+            save.Nvs01Progress.CurrentEncounter ??= new Nvs01EncounterRequestData();
+            save.Nvs01Progress.LastEncounterCorrelationId ??= string.Empty;
+            save.Nvs01Progress.LastEncounterEventId ??= string.Empty;
+            save.Nvs01Progress.LastEncounterSnapshotVersion ??= string.Empty;
+            save.Nvs01Progress.LastEncounterSnapshotReference ??= string.Empty;
+            save.Nvs01Progress.LastOperation ??= new Nvs01OperationReceiptData();
+            save.Nvs01Progress.ConsequenceIntentIds ??= new List<string>();
+            save.Nvs01Progress.AcquiredArtifactIds ??= new List<string>();
+            save.Nvs01Progress.AppliedEffectKeys ??= new List<string>();
+            save.Nvs01Progress.UnlockedChapterId ??= string.Empty;
+        }
 
         private static void EnsureResource(SaveGameData save, ResourceType type, long startingAmount)
         {
@@ -3770,6 +4064,7 @@ namespace AL.Services.Local
             save.Warmaster.PurchasedPieceIds ??= new List<string>();
             save.ChampionCustomization ??= new ChampionCustomizationState();
             save.OwnedEquipment ??= new List<OwnedEquipmentState>();
+            EnsureNvs01NeutralDefaults(save);
         }
 
         private static void ApplyApprovedNeutralNormalization(
@@ -3921,7 +4216,7 @@ namespace AL.Services.Local
                 if (entry.ReadResult.Disposition != SaveFileReadDisposition.Read ||
                     entry.SemanticCandidate == null ||
                     !entry.SemanticCandidate.IsWritable ||
-                    !IsRuntimeRoundTrippable(entry.SemanticCandidate.Outcome))
+                    !IsRuntimeRoundTrippable(entry.SemanticCandidate))
                 {
                     return true;
                 }
@@ -3991,12 +4286,41 @@ namespace AL.Services.Local
             candidate.ProfileInitializationVersion ==
                 _semanticPolicy.CurrentProfileInitializationVersion &&
             candidate.IsWritable &&
-            IsRuntimeRoundTrippable(candidate.Outcome);
+            IsRuntimeRoundTrippable(candidate);
 
         private static bool IsRuntimeRoundTrippable(
-            SaveSemanticCandidateOutcome outcome) =>
-            outcome == SaveSemanticCandidateOutcome.Valid ||
-            outcome == SaveSemanticCandidateOutcome.CompatiblePreservedUnknown;
+            SaveSemanticCandidate candidate)
+        {
+            if (candidate == null)
+            {
+                return false;
+            }
+
+            if (candidate.Outcome == SaveSemanticCandidateOutcome.Valid ||
+                candidate.Outcome ==
+                    SaveSemanticCandidateOutcome.CompatiblePreservedUnknown)
+            {
+                return true;
+            }
+
+            if (candidate.Outcome !=
+                    SaveSemanticCandidateOutcome.CompatibleNormalized ||
+                candidate.NormalizedDomains != SaveSemanticDomain.Narrative ||
+                candidate.DisabledDomains != SaveSemanticDomain.None ||
+                candidate.PreservedUnknownDomains != SaveSemanticDomain.None ||
+                candidate.Diagnostics.Count != 1)
+            {
+                return false;
+            }
+
+            SaveSemanticDiagnostic diagnostic = candidate.Diagnostics[0];
+            return diagnostic != null &&
+                   diagnostic.Code == "SAVE_NVS01_PROGRESS_DEFAULTED" &&
+                   diagnostic.Path == "$.Nvs01Progress" &&
+                   diagnostic.Domain == SaveSemanticDomain.Narrative &&
+                   diagnostic.Severity ==
+                       SaveSemanticDiagnosticSeverity.Information;
+        }
 
         private void PruneQuarantines(
             string sourceFileName,
@@ -4189,7 +4513,15 @@ namespace AL.Services.Local
                 SaveGameData.CurrentSaveSchemaVersion,
                 SaveGameData.CurrentProfileInitializationVersion,
                 authority,
-                SaveSemanticValidationPolicy.DefaultMaximumInputBytes);
+                maximumInputBytes:
+                    SaveSemanticValidationPolicy.DefaultMaximumInputBytes,
+                maximumDiagnostics:
+                    SaveSemanticValidationPolicy.DefaultMaximumDiagnostics,
+                nvs01Rule: new SaveSemanticNvs01Rule(
+                    Nvs01ProgressData.CurrentVersion,
+                    Nvs01RuntimeContract.PacketVersion,
+                    Nvs01RuntimeContract.PacketSha256,
+                    Nvs01RuntimeContract.QuestId));
         }
 
         private static int[] EnumValues(Type enumType) =>

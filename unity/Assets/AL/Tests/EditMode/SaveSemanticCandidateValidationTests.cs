@@ -11,6 +11,8 @@ namespace AL.Tests.EditMode
     public sealed class SaveSemanticCandidateValidationTests
     {
         private const string CurrentFormatId = "anotherlife.local-save";
+        private const string Nvs01PacketHash =
+            "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef";
         private static readonly SaveSemanticValidationAuthority Authority =
             new SaveSemanticValidationAuthority(
                 new[] { 0, 1, 2, 3, 4 },
@@ -75,6 +77,26 @@ namespace AL.Tests.EditMode
             "\"PrimaryG\":0.4,\"PrimaryB\":1.0,\"HairR\":0.08," +
             "\"HairG\":0.06,\"HairB\":0.04,\"CapeEnabled\":true," +
             "\"HelmetEnabled\":false}";
+        private const string NeutralNvs01ProgressJson =
+            "{\"Version\":0,\"PacketVersion\":\"\",\"PacketSha256\":\"\"," +
+            "\"QuestId\":\"\",\"Revision\":0,\"StateId\":\"\",\"Objectives\":[]," +
+            "\"CurrentDialogueNodeId\":\"\",\"PendingChoice\":false," +
+            "\"PendingSemanticActionId\":\"\",\"CommittedRealmId\":\"\"," +
+            "\"EncounterStatus\":0,\"HasCurrentEncounter\":false," +
+            "\"CurrentEncounter\":{\"ContractVersion\":0,\"RequestId\":\"\"," +
+            "\"CorrelationId\":\"\",\"QuestId\":\"\",\"StateId\":\"\"," +
+            "\"ObjectiveId\":\"\",\"HookId\":\"\",\"LocationId\":\"\"," +
+            "\"RealmId\":\"\",\"SuccessEventId\":\"\",\"FailureEventId\":\"\"," +
+            "\"CancelledEventId\":\"\",\"UnavailableEventId\":\"\"," +
+            "\"ReturnScene\":\"\"},\"LastEncounterCorrelationId\":\"\"," +
+            "\"HasLastEncounterOutcome\":false,\"LastEncounterOutcome\":0," +
+            "\"LastEncounterEventId\":\"\",\"LastEncounterSnapshotVersion\":\"\"," +
+            "\"LastEncounterSnapshotReference\":\"\",\"HasLastOperation\":false," +
+            "\"LastOperation\":{\"OperationId\":\"\",\"PayloadFingerprint\":\"\"," +
+            "\"Status\":0,\"Revision\":0,\"StateId\":\"\",\"EventId\":\"\"," +
+            "\"CorrelationId\":\"\"},\"ConsequenceIntentIds\":[]," +
+            "\"AcquiredArtifactIds\":[],\"AppliedEffectKeys\":[]," +
+            "\"UnlockedChapterId\":\"\"}";
 
         [Test]
         public void CurrentSupportedFingerprintIsValidAndOwnsImmutableRawBytes()
@@ -102,6 +124,106 @@ namespace AL.Tests.EditMode
             byte[] firstCopy = candidate.CopyRawBytes();
             firstCopy[0] = (byte)'[';
             CollectionAssert.AreEqual(expected, candidate.CopyRawBytes());
+        }
+
+        [Test]
+        public void MissingNvs01ProgressUsesOnlyTheApprovedNeutralDefault()
+        {
+            string json = CurrentJson().Replace(
+                "\"Nvs01Progress\":" + NeutralNvs01ProgressJson + ",",
+                string.Empty);
+
+            SaveSemanticCandidate candidate = Validate(
+                json,
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatibleNormalized,
+                candidate.Outcome);
+            Assert.True(candidate.IsWritable);
+            AssertFlag(
+                candidate.NormalizedDomains,
+                SaveSemanticDomain.Narrative);
+            Assert.That(
+                candidate.Diagnostics.Select(diagnostic => diagnostic.Code),
+                Does.Contain("SAVE_NVS01_PROGRESS_DEFAULTED"));
+        }
+
+        [Test]
+        public void ForwardNvs01ProgressIsPreservedReadOnly()
+        {
+            string forward = NeutralNvs01ProgressJson.Replace(
+                "\"Version\":0",
+                "\"Version\":2");
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(nvs01Progress: forward),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            AssertFlag(
+                candidate.PreservedUnknownDomains,
+                SaveSemanticDomain.Narrative);
+            Assert.That(
+                candidate.Diagnostics.Select(diagnostic => diagnostic.Code),
+                Does.Contain("SAVE_NVS01_VERSION_FORWARD"));
+        }
+
+        [Test]
+        public void UnsupportedNvs01PacketIdentityIsPreservedReadOnly()
+        {
+            string unsupported = NeutralNvs01ProgressJson
+                .Replace("\"Version\":0", "\"Version\":1")
+                .Replace(
+                    "\"PacketVersion\":\"\"",
+                    "\"PacketVersion\":\"v002\"")
+                .Replace(
+                    "\"PacketSha256\":\"\"",
+                    "\"PacketSha256\":\"" + Nvs01PacketHash + "\"")
+                .Replace(
+                    "\"QuestId\":\"\"",
+                    "\"QuestId\":\"OMEN_1\"")
+                .Replace(
+                    "\"StateId\":\"\"",
+                    "\"StateId\":\"OFFERED\"");
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(nvs01Progress: unsupported),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            Assert.That(
+                candidate.Diagnostics.Select(diagnostic => diagnostic.Code),
+                Does.Contain("SAVE_NVS01_PACKET_IDENTITY_UNSUPPORTED"));
+        }
+
+        [Test]
+        public void NeutralNvs01VersionRejectsAuthoredState()
+        {
+            string authoredNeutral = NeutralNvs01ProgressJson.Replace(
+                "\"StateId\":\"\"",
+                "\"StateId\":\"COMPLETED\"");
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(nvs01Progress: authoredNeutral),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.DegradedMalformed,
+                candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            AssertFlag(
+                candidate.DisabledDomains,
+                SaveSemanticDomain.Narrative);
+            Assert.That(
+                candidate.Diagnostics.Select(diagnostic => diagnostic.Code),
+                Does.Contain("SAVE_NVS01_NEUTRAL_STATE_INVALID"));
         }
 
         [Test]
@@ -1307,7 +1429,12 @@ namespace AL.Tests.EditMode
                 CurrentFormatId,
                 1,
                 1,
-                Authority);
+                Authority,
+                nvs01Rule: new SaveSemanticNvs01Rule(
+                    1,
+                    "v003",
+                    Nvs01PacketHash,
+                    "OMEN_1"));
         }
 
         private static byte[] Bytes(string json)
@@ -1338,6 +1465,7 @@ namespace AL.Tests.EditMode
             string warmaster = null,
             string championCustomization = null,
             string ownedEquipment = null,
+            string nvs01Progress = null,
             long lastSavedTimestamp = 123,
             string extraTopLevel = "")
         {
@@ -1363,6 +1491,8 @@ namespace AL.Tests.EditMode
                    (championCustomization ?? CurrentChampionCustomizationJson) + "," +
                    "\"OwnedEquipment\":" + (ownedEquipment ?? "[]") + "," +
                    "\"AppliedBossLootRewards\":[]," +
+                   "\"Nvs01Progress\":" +
+                   (nvs01Progress ?? NeutralNvs01ProgressJson) + "," +
                    "\"WarzoneCredits\":0," +
                    "\"LastSavedTimestamp\":" + lastSavedTimestamp +
                    extraTopLevel +
