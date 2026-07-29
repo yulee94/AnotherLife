@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
 using AL.Core;
-using AL.Core.Interfaces;
 using AL.ChampionMode.Skills;
 using System.Collections;
 using System.Linq;
@@ -34,6 +33,7 @@ namespace AL.ChampionMode.Control
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
+        private RealmId _realmId = RealmId.None;
 
         private void Awake()
         {
@@ -119,7 +119,7 @@ namespace AL.ChampionMode.Control
 
         private void HandleActions()
         {
-            if (_controlsLocked)
+            if (_controlsLocked || _realmId == RealmId.None)
             {
                 return;
             }
@@ -140,7 +140,7 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator PerformAttack()
         {
-            if (_controlsLocked)
+            if (_controlsLocked || _realmId == RealmId.None)
             {
                 yield break;
             }
@@ -168,7 +168,7 @@ namespace AL.ChampionMode.Control
             // 2. Hit Detection
             Vector3 hitCenter = transform.position + transform.forward * 1.5f + Vector3.up;
             Collider[] hitColliders = Physics.OverlapSphere(hitCenter, _attackRange);
-            RealmId realmId = GetCurrentRealmId();
+            RealmId realmId = _realmId;
 
             bool hitAnything = false;
             bool hitBoss = false;
@@ -217,7 +217,7 @@ namespace AL.ChampionMode.Control
 
         private void CreateHitVFX(Vector3 position)
         {
-            SkillEffectFactory.SpawnRealmImpact(position, GetCurrentRealmId());
+            SkillEffectFactory.SpawnRealmImpact(position, _realmId);
         }
 
         public void CheckVictory(int pendingDestroyedDummies = 0)
@@ -271,14 +271,14 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator Dodge()
         {
-            if (_controlsLocked)
+            if (_controlsLocked || _realmId == RealmId.None)
             {
                 yield break;
             }
 
             _isDodging = true;
             _skillCaster?.CancelCurrentSkill();
-            SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, GetCurrentRealmId());
+            SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, _realmId);
             RuntimeCombatAudio.PlayDodge();
             Vector3 dodgeDir = transform.forward;
             float timer = 0f;
@@ -307,7 +307,7 @@ namespace AL.ChampionMode.Control
 
         public void RequestBasicAttack()
         {
-            if (!_controlsLocked && !_isAttacking)
+            if (!_controlsLocked && !_isAttacking && _realmId != RealmId.None)
             {
                 StartCoroutine(PerformAttack());
             }
@@ -315,7 +315,7 @@ namespace AL.ChampionMode.Control
 
         public void RequestDodge()
         {
-            if (!_controlsLocked && !_isDodging)
+            if (!_controlsLocked && !_isDodging && _realmId != RealmId.None)
             {
                 StartCoroutine(Dodge());
             }
@@ -323,7 +323,7 @@ namespace AL.ChampionMode.Control
 
         public void RequestSkill(int index)
         {
-            if (_controlsLocked)
+            if (_controlsLocked || _realmId == RealmId.None)
             {
                 return;
             }
@@ -331,9 +331,21 @@ namespace AL.ChampionMode.Control
             UseSkill(index);
         }
 
+        public void ConfigureRealmContext(RealmId realmId)
+        {
+            RealmId normalized = ChampionRealmContext.Normalize(realmId);
+            if (_realmId != RealmId.None && normalized != _realmId)
+            {
+                return;
+            }
+
+            _realmId = normalized;
+            _skillCaster?.ConfigureRealmContext(normalized);
+        }
+
         public void SetBlocking(bool isBlocking)
         {
-            if (_controlsLocked)
+            if (_controlsLocked || _realmId == RealmId.None)
             {
                 _isBlocking = false;
                 return;
@@ -358,17 +370,5 @@ namespace AL.ChampionMode.Control
             }
         }
 
-        private RealmId GetCurrentRealmId()
-        {
-            try
-            {
-                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
-            }
-            catch (System.Exception)
-            {
-                return RealmId.Crownlands;
-            }
-        }
     }
 }

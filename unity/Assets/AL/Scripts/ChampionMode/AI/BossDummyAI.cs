@@ -51,6 +51,7 @@ namespace AL.ChampionMode.AI
         private BossVisualFeedback _visualFeedback;
         private string _lootEncounterId;
         private string _lootRewardResultId;
+        private RealmId _realmId = RealmId.None;
 
         public event Action<BossLootResult> LootRolled;
 
@@ -78,6 +79,13 @@ namespace AL.ChampionMode.AI
 
         private void Start()
         {
+            if (_realmId == RealmId.None)
+            {
+                Debug.LogError("AL-CHAMPION-REALM-IDENTITY-UNAVAILABLE: Boss runtime disabled.");
+                enabled = false;
+                return;
+            }
+
             ApplyBossDefinition();
             _lootEncounterId = Guid.NewGuid().ToString("N");
             _lootRewardResultId = Guid.NewGuid().ToString("N");
@@ -194,7 +202,7 @@ namespace AL.ChampionMode.AI
 
             ClearTelegraphReadout();
             Debug.Log("BOSS: SLAM!");
-            SkillEffectFactory.SpawnBossSlamImpact(impactCenter, impactRadius, GetCurrentRealmId());
+            SkillEffectFactory.SpawnBossSlamImpact(impactCenter, impactRadius, _realmId);
             RuntimeCombatAudio.PlayHeavySkill();
 
             if (_player != null && DistanceOnGround(_player.position, impactCenter) <= impactRadius)
@@ -246,7 +254,7 @@ namespace AL.ChampionMode.AI
 
         public void TakeDamage(float amount)
         {
-            if (_isDead)
+            if (_isDead || _realmId == RealmId.None)
             {
                 return;
             }
@@ -268,6 +276,18 @@ namespace AL.ChampionMode.AI
             {
                 Die();
             }
+        }
+
+        public void ConfigureRealmContext(RealmId realmId)
+        {
+            RealmId normalized = ChampionRealmContext.Normalize(realmId);
+            if (_realmId != RealmId.None && normalized != _realmId)
+            {
+                return;
+            }
+
+            _realmId = normalized;
+            enabled = normalized != RealmId.None;
         }
 
         private void ApplyBreakDamage(float sourceDamage)
@@ -475,18 +495,6 @@ namespace AL.ChampionMode.AI
             _hitReactRoutine = null;
         }
 
-        private RealmId GetCurrentRealmId()
-        {
-            try
-            {
-                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
-            }
-            catch (Exception)
-            {
-                return RealmId.Crownlands;
-            }
-        }
     }
 
     internal sealed class BossVisualFeedback : MonoBehaviour

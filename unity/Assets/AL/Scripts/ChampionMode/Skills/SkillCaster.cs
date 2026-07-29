@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
 using AL.Core;
-using AL.Core.Interfaces;
 using UnityEngine;
 
 namespace AL.ChampionMode.Skills
@@ -53,6 +52,7 @@ namespace AL.ChampionMode.Skills
         private float _activeCastStartTime;
         private float _activeCastDuration;
         private float _lastDeniedFeedbackTime = -999f;
+        private RealmId _realmId = RealmId.None;
 
         public bool IsCasting => _castRoutine != null;
         public int ActiveSlot => _activeSlot;
@@ -92,6 +92,11 @@ namespace AL.ChampionMode.Skills
                 return false;
             }
 
+            if (_realmId == RealmId.None)
+            {
+                return false;
+            }
+
             if (IsCasting)
             {
                 ShowDeniedFeedback("CASTING", new Color(0.80f, 0.86f, 1f));
@@ -113,8 +118,19 @@ namespace AL.ChampionMode.Skills
             }
 
             _activeSlot = slotIndex;
-            _castRoutine = StartCoroutine(CastRoutine(slotIndex));
+            _castRoutine = StartCoroutine(CastRoutine(slotIndex, _realmId));
             return true;
+        }
+
+        public void ConfigureRealmContext(RealmId realmId)
+        {
+            RealmId normalized = ChampionRealmContext.Normalize(realmId);
+            if (_realmId != RealmId.None && normalized != _realmId)
+            {
+                return;
+            }
+
+            _realmId = normalized;
         }
 
         public void CancelCurrentSkill()
@@ -165,12 +181,11 @@ namespace AL.ChampionMode.Skills
             return IsValidSlot(slotIndex) ? _vfxKeys[slotIndex] : string.Empty;
         }
 
-        private IEnumerator CastRoutine(int slotIndex)
+        private IEnumerator CastRoutine(int slotIndex, RealmId realmId)
         {
             Debug.Log($"Casting {_skillNames[slotIndex]}.");
             _activeCastStartTime = Time.time;
             _activeCastDuration = Mathf.Max(0f, _castTimes[slotIndex]);
-            var realmId = GetCurrentRealmId();
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 previewCenter = GetSkillGroundCenter(slotIndex, forward);
             SkillEffectFactory.SpawnSkillCastRing(transform.position, realmId, GetSkillPreviewRadius(slotIndex), _castTimes[slotIndex] + 0.15f);
@@ -181,7 +196,7 @@ namespace AL.ChampionMode.Skills
 
             yield return new WaitForSeconds(_castTimes[slotIndex]);
 
-            ResolveSkill(slotIndex);
+            ResolveSkill(slotIndex, realmId);
             _nextReadyTimes[slotIndex] = Time.time + _cooldowns[slotIndex];
             _castRoutine = null;
             ClearActiveCast();
@@ -194,9 +209,8 @@ namespace AL.ChampionMode.Skills
             _activeCastDuration = 0f;
         }
 
-        private void ResolveSkill(int slotIndex)
+        private void ResolveSkill(int slotIndex, RealmId realmId)
         {
-            var realmId = GetCurrentRealmId();
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 groundCenter = GetSkillGroundCenter(slotIndex, forward);
             Vector3 hitCenter = groundCenter + Vector3.up;
@@ -389,19 +403,6 @@ namespace AL.ChampionMode.Skills
             }
 
             return Mathf.Max(minimum, value);
-        }
-
-        private RealmId GetCurrentRealmId()
-        {
-            try
-            {
-                var realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
-                return realmId == RealmId.None ? RealmId.Crownlands : realmId;
-            }
-            catch (System.Exception)
-            {
-                return RealmId.Crownlands;
-            }
         }
 
         private static bool IsValidSlot(int slotIndex)
