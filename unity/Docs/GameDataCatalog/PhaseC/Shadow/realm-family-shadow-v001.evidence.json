@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "realm-family-shadow-evidence-2026-07-30-v001",
+  "purpose": "non_production_shadow_validation",
+  "productionEligible": false,
+  "runtimeAuthority": "unchanged",
+  "consumerActivation": "none",
+  "sourceCandidate": {
+    "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+    "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439",
+    "inheritedRealmCandidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v002",
+    "realmDisposition": "ready_for_non_production_shadow_generation",
+    "effectiveRealmBlockingIds": [],
+    "effectiveGlobalBlockingCount": 26
+  },
+  "artifact": {
+    "path": "unity/Docs/GameDataCatalog/PhaseC/Shadow/realm-family-shadow-v001.json",
+    "catalogId": "realms_phase_c9a_shadow_v1",
+    "family": "realms",
+    "schemaVersion": 1,
+    "contentVersion": "0.1.0-shadow.1",
+    "sourceRevision": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+    "rawSha256": "265160f0c20b10293a69572fbcc4703ad81add498b20dfb727c353e050b0eccb",
+    "recordCount": 4,
+    "aliasCount": 0
+  },
+  "generator": {
+    "path": "tools/game-data/generate_phase_c_realm_shadow_artifact.py",
+    "sourceRevision": "6e388e94b723008dcdf41b23ca3e0a510db4244e",
+    "rawSha256": "71daae1ceef84d28417a4d25e0862d14df101b2df5eb253e4197349038889141",
+    "command": "python3 tools/game-data/generate_phase_c_realm_shadow_artifact.py --write --generator-revision 6e388e94b723008dcdf41b23ca3e0a510db4244e"
+  },
+  "inputs": [
+    {
+      "role": "six_family_technical_source_v003",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+      "sourceRevision": "779e7363fca9ffed9e412f43cc74b20665fa4e9c",
+      "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439"
+    },
+    {
+      "role": "realm_technical_source_v002",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v002.json",
+      "sourceRevision": "d219472073bee9fcd420d0cac1d94412019b865b",
+      "rawSha256": "60498d1a071ea79eb37c1b8889a1faaa5c7aee69679c1043256535ef4d3c1685"
+    },
+    {
+      "role": "realm_content_map",
+      "path": "unity/Docs/Narrative/GameData/phase-c-six-family-content-map.json",
+      "sourceRevision": "963c4bc6e6db8ae2b87d363ceb229519e97f13b0",
+      "rawSha256": "8377a47d659a2e7dd238e35f373dbefa711e4ca16bf95e280e2dc36029327353"
+    },
+    {
+      "role": "specialized_realm_catalog",
+      "path": "unity/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json",
+      "sourceRevision": "2119c89bfa985a0a3e273042cf086a99a49b45b0",
+      "rawSha256": "33321936662b98f9c18edf4122ad163053d1aff3017b06556cad694420e9e8d8"
+    },
+    {
+      "role": "legacy_realm_service",
+      "path": "unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs",
+      "sourceRevision": "efd64249c96761d2c0f1e0097c4402d46231c09a",
+      "rawSha256": "7be267f64de24718090170af779ce57b5ffd88eb50a55e9d4e5ff011443276f9"
+    },
+    {
+      "role": "realm_reference_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmReferences.cs",
+      "sourceRevision": "f44e22cd3a0e334062f1ef8e487ffca1ecba6261",
+      "rawSha256": "4bb8457c9831756a8cf6c2ddf3f14a5fd5c51866370c870cb074a53313bbdf4f"
+    },
+    {
+      "role": "realm_capability_profile_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmCapabilityProfiles.cs",
+      "sourceRevision": "59b99aa94e45d5564e373b8824e2aa3b30b8a754",
+      "rawSha256": "8413f45a32cad1bf71107c0c6cea18e4c8e86b7f8191a19ff0bcc0875e89b427"
+    },
+    {
+      "role": "six_family_schema",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataSixFamilySchemas.cs",
+      "sourceRevision": "a2e6a9a0dddfb7522d880d4db9d17222adcbbffe",
+      "rawSha256": "3c759d9ea2f1b2d6aca53d1e5f213bf0edb057eb0751bf3c9bfe9ae94b15d9bb"
+    }
+  ],
+  "comparison": {
+    "specializedCatalogPath": "unity/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json",
+    "specializedCatalogId": "al_realm_catalog",
+    "specializedCatalogVersion": "0.1.0",
+    "matchingRealmOrder": [
+      "crownlands",
+      "stonehold",
+      "eldergrove",
+      "umbral"
+    ],
+    "comparedFields": [
+      {
+        "shadow": "id",
+        "specialized": "id"
+      },
+      {
+        "shadow": "legacy_realm_id",
+        "specialized": "legacyRuntimeId"
+      },
+      {
+        "shadow": "name_ref (resolved)",
+        "specialized": "peopleName"
+      },
+      {
+        "shadow": "inner_realm_id",
+        "specialized": "innerRealmId"
+      },
+      {
+        "shadow": "main_gate_id",
+        "specialized": "mainGateId"
+      },
+      {
+        "shadow": "outer_warzone_id",
+        "specialized": "outerWarzoneId"
+      }
+    ],
+    "commonOnlyFields": [
+      "legacy_realm_value",
+      "name_ref",
+      "description_ref",
+      "rare_resource_id",
+      "capability_profile_ids",
+      "asset_ref"
+    ],
+    "specializedAuthorityRetained": [
+      "selectionPolicy",
+      "narrativeContinuity",
+      "realmGemIds"
+    ]
+  },
+  "diagnostics": [
+    {
+      "code": "AL-C9A-REALM-SHADOW-MATCH",
+      "severity": "information",
+      "realmId": "crownlands",
+      "fieldPath": "$.records[0]",
+      "message": "Common identity, legacy identity, and world-boundary fields match the specialized authored realm."
+    },
+    {
+      "code": "AL-C9A-REALM-SHADOW-MATCH",
+      "severity": "information",
+      "realmId": "stonehold",
+      "fieldPath": "$.records[1]",
+      "message": "Common identity, legacy identity, and world-boundary fields match the specialized authored realm."
+    },
+    {
+      "code": "AL-C9A-REALM-SHADOW-MATCH",
+      "severity": "information",
+      "realmId": "eldergrove",
+      "fieldPath": "$.records[2]",
+      "message": "Common identity, legacy identity, and world-boundary fields match the specialized authored realm."
+    },
+    {
+      "code": "AL-C9A-REALM-SHADOW-MATCH",
+      "severity": "information",
+      "realmId": "umbral",
+      "fieldPath": "$.records[3]",
+      "message": "Common identity, legacy identity, and world-boundary fields match the specialized authored realm."
+    },
+    {
+      "code": "AL-C9A-SPECIALIZED-SCOPE-RETAINED",
+      "severity": "information",
+      "realmId": "",
+      "fieldPath": "$",
+      "message": "Selection policy, narrative continuity, and Realm Gem references remain specialized-only authority."
+    },
+    {
+      "code": "AL-C9A-RUNTIME-AUTHORITY-UNCHANGED",
+      "severity": "information",
+      "realmId": "",
+      "fieldPath": "$",
+      "message": "The shadow artifact has no manifest, loader registration, store publication, or gameplay consumer."
+    }
+  ],
+  "forbiddenOutputs": [
+    "unity/Assets/AL/StreamingAssets/GameData/catalog-set.json",
+    "unity/Assets/Resources/GameData/catalog-set.json",
+    "unity/Docs/GameDataCatalog/PhaseC/Generated/catalog-set.json",
+    "unity/Assets/AL/StreamingAssets/GameData/Catalogs/realms.json",
+    "unity/Assets/Resources/GameData/Catalogs/realms.json"
+  ]
+}
