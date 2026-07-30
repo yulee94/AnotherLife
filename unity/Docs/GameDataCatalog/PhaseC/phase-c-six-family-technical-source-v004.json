@@ -1,0 +1,458 @@
+{
+  "schemaVersion": 4,
+  "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-30-v004",
+  "sourceKind": "versioned_overlay",
+  "productionEligible": false,
+  "supersedes": {
+    "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+    "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v003.json",
+    "sourceRevision": "779e7363fca9ffed9e412f43cc74b20665fa4e9c",
+    "rawSha256": "984ff58bcea68e67258152ff2056d7ce430fe0e91658764bcca3abaa3d66c439"
+  },
+  "provenance": [
+    {
+      "role": "building_asset_authority_decision",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C4D_Building_Asset_Reference_Authority.md",
+      "sourceRevision": "b5c8472c71f0d9dd7b832e780e235ecf5e70e099",
+      "rawSha256": "ea811e83ba98be7b87d7595aaf7db7ca8900d2668f4bfde2349f6778caa64579"
+    },
+    {
+      "role": "building_asset_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataBuildingAssetReferences.cs",
+      "sourceRevision": "b5c8472c71f0d9dd7b832e780e235ecf5e70e099",
+      "rawSha256": "d229bb20fee3634ffd5004008e40d0fe83f77a301920755945185b5fb785a98b"
+    },
+    {
+      "role": "six_family_schema",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataSixFamilySchemas.cs",
+      "sourceRevision": "b5c8472c71f0d9dd7b832e780e235ecf5e70e099",
+      "rawSha256": "cf13e84a4d27e25fb037e4bf4a1fc7eb597d3bb836cefef00c1d062ec8b74d21"
+    },
+    {
+      "role": "building_asset_registry_tests",
+      "path": "unity/Assets/AL/Tests/EditMode/GameDataCatalog/GameDataBuildingAssetReferenceTests.cs",
+      "sourceRevision": "b5c8472c71f0d9dd7b832e780e235ecf5e70e099",
+      "rawSha256": "215c22dfcc25dd64cdc694a3bde6fc4aa244aa239b8701db2e7f8b25af4f6e41"
+    },
+    {
+      "role": "building_icon_atlas",
+      "path": "unity/Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png",
+      "sourceRevision": "b5c8472c71f0d9dd7b832e780e235ecf5e70e099",
+      "rawSha256": "874bba1c9fa9ba8435dcf61b29eca2786c049e0abf7d899680011a22e481b3a8"
+    },
+    {
+      "role": "building_icon_atlas_import",
+      "path": "unity/Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png.meta",
+      "sourceRevision": "b5c8472c71f0d9dd7b832e780e235ecf5e70e099",
+      "rawSha256": "663f14d76bdf5381cd0b8fb293db68212a01065e7eefec5cd16f78ab20be6d7c"
+    }
+  ],
+  "upstream": {
+    "sourcePacketId": "game-data-phase-c-six-family-source-2026-07-23-v001",
+    "sourcePacketPath": "unity/Docs/Narrative/GameData/Phase_C_Six_Family_Source_Packet.md",
+    "contentMapPath": "unity/Docs/Narrative/GameData/phase-c-six-family-content-map.json",
+    "sourceCommit": "963c4bc6e6db8ae2b87d363ceb229519e97f13b0",
+    "contentMapGitBlobSha256": "8377a47d659a2e7dd238e35f373dbefa711e4ca16bf95e280e2dc36029327353"
+  },
+  "approval": {
+    "userFinalCreativeAcceptance": "pending",
+    "userBalanceAcceptance": "pending",
+    "runtimeAuthority": "unchanged"
+  },
+  "evidencePolicy": {
+    "observedValues": "migration_evidence_only",
+    "balanceAuthority": "not_approved"
+  },
+  "productionFamilyOrder": [
+    "realms",
+    "buildings",
+    "research",
+    "troops",
+    "champions",
+    "skills"
+  ],
+  "families": [
+    {
+      "family": "realms",
+      "requiredForProduction": true,
+      "artifactDisposition": "ready_for_non_production_shadow_generation",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+        "family": "realms",
+        "fields": [
+          "*"
+        ]
+      },
+      "blockingIds": []
+    },
+    {
+      "family": "buildings",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "registryVersion": 1,
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+        "family": "buildings",
+        "fields": [
+          "mappings",
+          "unavailableAnchors",
+          "targetLevels",
+          "baseBudgets",
+          "costComputation",
+          "progressionBindings",
+          "costProfiles",
+          "durationProfiles",
+          "prerequisiteProfiles",
+          "realmEligibilityProfiles"
+        ]
+      },
+      "atlas": {
+        "assetPath": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png",
+        "guid": "8cfa4b19fc1e4475873c4ea7560dc9ad",
+        "rawSha256": "874bba1c9fa9ba8435dcf61b29eca2786c049e0abf7d899680011a22e481b3a8",
+        "metaRawSha256": "663f14d76bdf5381cd0b8fb293db68212a01065e7eefec5cd16f78ab20be6d7c",
+        "width": 1536,
+        "height": 1024,
+        "columns": 5,
+        "rows": 3,
+        "pixelYAxis": "top_origin",
+        "spriteImportMode": "single",
+        "mipmaps": false,
+        "srgb": true,
+        "maxTextureSize": 2048
+      },
+      "assetBindings": [
+        {
+          "order": 0,
+          "canonicalId": "town_hall",
+          "legacyBuildingId": "TownHall",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#town_hall",
+          "column": 0,
+          "row": 0,
+          "pixelRect": [
+            0,
+            0,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 1,
+          "canonicalId": "farm",
+          "legacyBuildingId": "Farm",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#farm",
+          "column": 1,
+          "row": 0,
+          "pixelRect": [
+            307,
+            0,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 2,
+          "canonicalId": "lumber_mill",
+          "legacyBuildingId": "LumberMill",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#lumber_mill",
+          "column": 2,
+          "row": 0,
+          "pixelRect": [
+            614,
+            0,
+            308,
+            341
+          ]
+        },
+        {
+          "order": 3,
+          "canonicalId": "quarry",
+          "legacyBuildingId": "Quarry",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#quarry",
+          "column": 3,
+          "row": 0,
+          "pixelRect": [
+            922,
+            0,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 4,
+          "canonicalId": "gold_mine",
+          "legacyBuildingId": "GoldMine",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#gold_mine",
+          "column": 4,
+          "row": 0,
+          "pixelRect": [
+            1229,
+            0,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 5,
+          "canonicalId": "barracks",
+          "legacyBuildingId": "Barracks",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#barracks",
+          "column": 0,
+          "row": 1,
+          "pixelRect": [
+            0,
+            341,
+            307,
+            342
+          ]
+        },
+        {
+          "order": 6,
+          "canonicalId": "academy",
+          "legacyBuildingId": "Academy",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#academy",
+          "column": 1,
+          "row": 1,
+          "pixelRect": [
+            307,
+            341,
+            307,
+            342
+          ]
+        },
+        {
+          "order": 7,
+          "canonicalId": "market",
+          "legacyBuildingId": "Market",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#market",
+          "column": 2,
+          "row": 1,
+          "pixelRect": [
+            614,
+            341,
+            308,
+            342
+          ]
+        },
+        {
+          "order": 8,
+          "canonicalId": "storehouse",
+          "legacyBuildingId": "Storehouse",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#storehouse",
+          "column": 3,
+          "row": 1,
+          "pixelRect": [
+            922,
+            341,
+            307,
+            342
+          ]
+        },
+        {
+          "order": 9,
+          "canonicalId": "forge",
+          "legacyBuildingId": "Forge",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#forge",
+          "column": 4,
+          "row": 1,
+          "pixelRect": [
+            1229,
+            341,
+            307,
+            342
+          ]
+        },
+        {
+          "order": 10,
+          "canonicalId": "stable",
+          "legacyBuildingId": "Stable",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#stable",
+          "column": 0,
+          "row": 2,
+          "pixelRect": [
+            0,
+            683,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 11,
+          "canonicalId": "workshop",
+          "legacyBuildingId": "Workshop",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#workshop",
+          "column": 1,
+          "row": 2,
+          "pixelRect": [
+            307,
+            683,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 12,
+          "canonicalId": "embassy",
+          "legacyBuildingId": "Embassy",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#embassy",
+          "column": 2,
+          "row": 2,
+          "pixelRect": [
+            614,
+            683,
+            308,
+            341
+          ]
+        },
+        {
+          "order": 13,
+          "canonicalId": "wall",
+          "legacyBuildingId": "Wall",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#wall",
+          "column": 3,
+          "row": 2,
+          "pixelRect": [
+            922,
+            683,
+            307,
+            341
+          ]
+        },
+        {
+          "order": 14,
+          "canonicalId": "watchtower",
+          "legacyBuildingId": "Watchtower",
+          "assetRef": "Assets/AL/Art/Buildings/RuntimeExports/S_Building_Icon_Atlas_1536x1024_v001.png#watchtower",
+          "column": 4,
+          "row": 2,
+          "pixelRect": [
+            1229,
+            683,
+            307,
+            341
+          ]
+        }
+      ],
+      "resolvedBlockingIds": [
+        "buildings.max_level_review",
+        "buildings.cost_profiles",
+        "buildings.duration_profiles",
+        "buildings.asset_refs"
+      ],
+      "blockingIds": [
+        "buildings.production_profiles"
+      ]
+    },
+    {
+      "family": "research",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+        "family": "research",
+        "fields": [
+          "*"
+        ]
+      },
+      "blockingIds": [
+        "research.max_levels",
+        "research.cost_profiles",
+        "research.duration_profiles",
+        "research.effects",
+        "research.prerequisites"
+      ]
+    },
+    {
+      "family": "troops",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+        "family": "troops",
+        "fields": [
+          "*"
+        ]
+      },
+      "blockingIds": [
+        "troops.records",
+        "troops.localization",
+        "troops.base_stats",
+        "troops.training_profiles",
+        "troops.asset_refs"
+      ]
+    },
+    {
+      "family": "champions",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+        "family": "champions",
+        "fields": [
+          "*"
+        ]
+      },
+      "blockingIds": [
+        "champions.records",
+        "champions.localization",
+        "champions.realm_class_assignments",
+        "champions.asset_refs",
+        "champions.base_skill_refs",
+        "champions.stat_profiles"
+      ]
+    },
+    {
+      "family": "skills",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+        "family": "skills",
+        "fields": [
+          "*"
+        ]
+      },
+      "blockingIds": [
+        "skills.slot_policy",
+        "skills.behavior_profiles",
+        "skills.presentation_profiles",
+        "skills.target_authority",
+        "skills.audio_asset_refs",
+        "skills.vfx_asset_refs",
+        "skills.balance_acceptance"
+      ]
+    }
+  ],
+  "blockingIds": [
+    "approval.user_creative_balance",
+    "buildings.production_profiles",
+    "research.max_levels",
+    "research.cost_profiles",
+    "research.duration_profiles",
+    "research.effects",
+    "research.prerequisites",
+    "troops.records",
+    "troops.localization",
+    "troops.base_stats",
+    "troops.training_profiles",
+    "troops.asset_refs",
+    "champions.records",
+    "champions.localization",
+    "champions.realm_class_assignments",
+    "champions.asset_refs",
+    "champions.base_skill_refs",
+    "champions.stat_profiles",
+    "skills.slot_policy",
+    "skills.behavior_profiles",
+    "skills.presentation_profiles",
+    "skills.target_authority",
+    "skills.audio_asset_refs",
+    "skills.vfx_asset_refs",
+    "skills.balance_acceptance"
+  ],
+  "generationGate": {
+    "status": "blocked",
+    "requireProductionEligibleResult": "refused_without_writes",
+    "outputPaths": []
+  }
+}
