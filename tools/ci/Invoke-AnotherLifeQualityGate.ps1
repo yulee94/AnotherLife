@@ -1,5 +1,5 @@
 param(
-    [ValidateSet("Classify", "Hygiene")]
+    [ValidateSet("Classify", "Hygiene", "AndroidReleaseApplicability")]
     [string] $Mode,
     [string] $BaseRef = ""
 )
@@ -55,21 +55,62 @@ function Get-PushEventCommitRange {
     }
 }
 
-function Get-BaseRef {
-    if ($BaseRef) {
-        return $BaseRef
+function Assert-GitCommitObject {
+    param(
+        [Parameter(Mandatory = $true)][string] $Sha,
+        [Parameter(Mandatory = $true)][string] $EventField
+    )
+
+    try {
+        Invoke-GitLines @("cat-file", "-e", "${Sha}^{commit}") | Out-Null
+    } catch {
+        throw "GitHub event $EventField SHA '$Sha' is not an available commit object."
+    }
+}
+
+function Get-PullRequestEventCommitRange {
+    if ($env:GITHUB_EVENT_NAME -ne "pull_request") {
+        return $null
     }
 
-    $pushRange = Get-PushEventCommitRange
-    if ($null -ne $pushRange) {
-        return $pushRange.Before
+    $event = Read-GitHubEvent
+    if ($null -eq $event -or
+        -not ($event.PSObject.Properties.Name -contains "pull_request") -or
+        $null -eq $event.pull_request -or
+        $null -eq $event.pull_request.base -or
+        $null -eq $event.pull_request.head -or
+        -not ($event.pull_request.base.PSObject.Properties.Name -contains "sha") -or
+        -not ($event.pull_request.head.PSObject.Properties.Name -contains "sha")) {
+        throw "Pull request event payload is unavailable or does not contain base/head metadata."
     }
 
-    if ($env:GITHUB_BASE_REF) {
-        return "origin/$env:GITHUB_BASE_REF"
+    $baseSha = [string]$event.pull_request.base.sha
+    $headSha = [string]$event.pull_request.head.sha
+    $shaPattern = "^[0-9a-fA-F]{40}$"
+    if ($baseSha -notmatch $shaPattern -or
+        $headSha -notmatch $shaPattern -or
+        $baseSha -eq ("0" * 40) -or
+        $headSha -eq ("0" * 40)) {
+        throw "Pull request event base/head commit SHAs are invalid."
     }
 
-    return "origin/main"
+    Assert-GitCommitObject $baseSha "pull_request.base.sha"
+    Assert-GitCommitObject $headSha "pull_request.head.sha"
+
+    $checkedOutHead = (
+        Invoke-GitLines @("rev-parse", "HEAD") |
+            Select-Object -First 1
+    ).Trim()
+    if (-not $checkedOutHead.Equals(
+            $headSha,
+            [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Pull request checkout HEAD '$checkedOutHead' does not match event head SHA '$headSha'."
+    }
+
+    return [pscustomobject]@{
+        Base = $baseSha
+        Head = $headSha
+    }
 }
 
 function Get-DiffRange {
@@ -82,7 +123,12 @@ function Get-DiffRange {
         return "$($pushRange.Before)..$($pushRange.After)"
     }
 
-    return "$(Get-BaseRef)...HEAD"
+    $pullRequestRange = Get-PullRequestEventCommitRange
+    if ($null -ne $pullRequestRange) {
+        return "$($pullRequestRange.Base)...$($pullRequestRange.Head)"
+    }
+
+    return "origin/main...HEAD"
 }
 
 function Get-ChangedFiles {
@@ -93,14 +139,27 @@ function Get-ChangedFiles {
             Invoke-GitLines @(
                 "diff",
                 "--name-only",
-                "--diff-filter=ACMRT",
+                "--no-renames",
+                "--diff-filter=ACDMT",
                 $diffRange
             )
         )
         if ($files.Count -eq 0 -and (-not $env:GITHUB_ACTIONS -or $BaseRef -eq "HEAD")) {
-            $files = @(Invoke-GitLines @("diff", "--cached", "--name-only", "--diff-filter=ACMRT"))
+            $files = @(
+                Invoke-GitLines @(
+                    "diff",
+                    "--cached",
+                    "--name-only",
+                    "--no-renames",
+                    "--diff-filter=ACDMT"
+                )
+            )
         }
-        return $files
+        return @(
+            $files |
+                Where-Object { $_ } |
+                Sort-Object -Unique
+        )
     } catch {
         throw "Changed-file diff failed closed for '$diffRange': $($_.Exception.Message)"
     }
@@ -463,8 +522,27 @@ function Invoke-Hygiene {
         if ($text -match "(?m)^\s*permissions:\s*write-all\s*$") {
             Add-Failure $failures "Workflow '$workflow' requests overbroad write-all token permissions."
         }
-        if ($text -match "uses:\s*[^@\r\n]+@v\d+(\s|$)") {
-            Add-Failure $failures "Workflow '$workflow' uses a mutable major-version action tag instead of an immutable SHA."
+
+        $usesMatches = [regex]::Matches(
+            $text,
+            '(?m)^\s*(?:-\s*)?uses:\s*[''"]?([^''"\s#]+)[''"]?\s*(?:#.*)?$'
+        )
+        foreach ($usesMatch in $usesMatches) {
+            $actionReference = $usesMatch.Groups[1].Value
+            if ($actionReference.StartsWith("./", [System.StringComparison]::Ordinal) -or
+                $actionReference.StartsWith("docker://", [System.StringComparison]::OrdinalIgnoreCase)) {
+                continue
+            }
+
+            $separatorIndex = $actionReference.LastIndexOf("@", [System.StringComparison]::Ordinal)
+            $actionRef = if ($separatorIndex -ge 0) {
+                $actionReference.Substring($separatorIndex + 1)
+            } else {
+                ""
+            }
+            if ($separatorIndex -le 0 -or $actionRef -notmatch "^[0-9a-fA-F]{40}$") {
+                Add-Failure $failures "Workflow '$workflow' action '$actionReference' is not pinned to a full 40-hex commit SHA."
+            }
         }
     }
 
@@ -473,7 +551,44 @@ function Invoke-Hygiene {
     Assert-NoFailures $failures
 }
 
+function Invoke-AndroidReleaseApplicability {
+    $changedFiles = Get-ChangedFiles
+    $releaseSensitivePaths = Get-PolicyList "android_release_sensitive_paths" @(
+        "app/",
+        "build.gradle.kts",
+        "settings.gradle.kts",
+        "gradle.properties",
+        "gradle/",
+        "gradlew",
+        "gradlew.bat",
+        ".github/workflows/quality-gates.yml",
+        ".github/anotherlife-policy.yml",
+        "tools/ci/Invoke-AnotherLifeQualityGate.ps1",
+        "tools/ci/Test-AnotherLifeQualityGateFixtures.ps1"
+    )
+    $matchedPaths = @(
+        $changedFiles |
+            Where-Object { Test-AnyPathPrefix $_ $releaseSensitivePaths } |
+            Sort-Object -Unique
+    )
+    $applicable = $matchedPaths.Count -gt 0
+    $applicableText = $applicable.ToString().ToLowerInvariant()
+
+    Write-Host "Android release applicable: $applicableText"
+    Write-Host "Release-sensitive changed paths:"
+    if ($matchedPaths.Count -eq 0) {
+        Write-Host "  (none)"
+    } else {
+        $matchedPaths | ForEach-Object { Write-Host "  $_" }
+    }
+
+    if ($env:GITHUB_OUTPUT) {
+        Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "applicable=$applicableText"
+    }
+}
+
 switch ($Mode) {
     "Classify" { Invoke-Classify }
     "Hygiene" { Invoke-Hygiene }
+    "AndroidReleaseApplicability" { Invoke-AndroidReleaseApplicability }
 }
