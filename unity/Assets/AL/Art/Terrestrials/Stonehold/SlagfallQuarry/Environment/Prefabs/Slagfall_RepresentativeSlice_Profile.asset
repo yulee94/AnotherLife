@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: df4bed70b724c490d82fc1b59bcf7afe, type: 3}
+  m_Name: Slagfall_RepresentativeSlice_Profile
+  m_EditorClassIdentifier: 
+  _sourceVersion: tdf-eco-slagfall-2026-07-30-v002
+  _habitatSourceId: tdf_asset_habitat_stonehold_slagfall_quarry_master_v002
+  _habitatSourceSha256: 600a76d983f0cb63abf1169b7a9cdf34477b60ebf2e10ca9f74883efd899d195
+  _slagwhistleIdentitySourceId: tdf_asset_fauna_stonehold_slagwhistle_burrower_identity_v002
+  _slagwhistleIdentitySha256: 1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05
+  _slagwhistleMotionSourceId: tdf_asset_fauna_stonehold_slagwhistle_burrower_motion_contact_v002
+  _slagwhistleMotionSha256: 1099937075dba7012545afb7636e100c592c561c30c2fe68ce7a434ca4ff2d92
+  _cellSizeMeters: {x: 128, y: 128}
+  _habitatFamilies:
+  - _familyId: slagfall.irregular_fracture_raft
+    _variants:
+    - {fileID: 7453474118956577486, guid: 4b3e1cf09355b4ada934969c896433d5, type: 3}
+    - {fileID: 6471871332748397372, guid: 81295ea4b085d45d5aa69b5d4ce3d883, type: 3}
+    - {fileID: 400957816183764523, guid: da987d83880d9464d9035b789c6b7800, type: 3}
+  - _familyId: slagfall.broken_fracture_raft
+    _variants:
+    - {fileID: 793491186921690748, guid: a69c822de2f9c4cf884ed4eddff2b61e, type: 3}
+    - {fileID: 3588725011120446783, guid: aa86c024eb1004ca482b91e91ebff2cd, type: 3}
+    - {fileID: 4550519250628412722, guid: f24ffb5459287456e8ad4104d5667283, type: 3}
+  - _familyId: slagfall.undercut_extraction_ledge
+    _variants:
+    - {fileID: 8799173036096533197, guid: 44a1ba32cacb449e6a6142aeb642fced, type: 3}
+    - {fileID: 2072223436136718021, guid: c920767afea444353aa925d62878a7a9, type: 3}
+    - {fileID: 8976203023118406759, guid: ea66f95483c6a45d88210d1230bc6e0e, type: 3}
+  - _familyId: slagfall.talus_apron
+    _variants:
+    - {fileID: 2207868917822122342, guid: f5b191036c8364bf9a9324fc1b8a7863, type: 3}
+  - _familyId: slagfall.collapsed_gallery_mouth
+    _variants:
+    - {fileID: 354632334792502305, guid: 5833d55f3179c4c78897f016fe3f13e7, type: 3}
+  - _familyId: slagfall.diagonal_fault_slab
+    _variants:
+    - {fileID: 1521431696904950340, guid: c2aefd07af489413c9f24998251b5704, type: 3}
+  - _familyId: slagfall.braided_runoff_pool
+    _variants:
+    - {fileID: 641141736030380469, guid: 517c6d87b0df44f128abbce9e78d084c, type: 3}
+  - _familyId: slagfall.iron_soil_wedge
+    _variants:
+    - {fileID: 1439460079278376731, guid: 68ece87f890244b49a015f1b41be9bca, type: 3}
+  _slagwhistlePrefab: {fileID: 4934158166754118630, guid: e5e9b67a5e1bb460a8b222831b5e254a, type: 3}
+  _representativeSlicePrefab: {fileID: 245064009332215032, guid: 1dae884a8733d4ba99a4de6128835aef, type: 3}
+  _slagwhistleClips:
+  - {fileID: 7400000, guid: af36b4b1a37fa4f799d082f8aebab115, type: 2}
+  - {fileID: 7400000, guid: 346a4459c93964f83998597c1a3c5ade, type: 2}
+  - {fileID: 7400000, guid: 109cdf7c99f4a44289193e2d459b3432, type: 2}
+  - {fileID: 7400000, guid: 6de236a589e9a4f8dab23fb80eaed37c, type: 2}
+  - {fileID: 7400000, guid: 11b0d940529f14a249d5050769a18e74, type: 2}
+  - {fileID: 7400000, guid: b07f4df1a46f94a7eb6aa7eaaa2b04b2, type: 2}
+  _habitatTextureSet:
+  - {fileID: 2800000, guid: 2f28bd7dd720a4335a317baf2512c0a0, type: 3}
+  - {fileID: 2800000, guid: 3d85475dfe1c8424e92e494171620469, type: 3}
+  - {fileID: 2800000, guid: db07bb51946934018947a81f1d3eff52, type: 3}
+  _slagwhistleTextureSet:
+  - {fileID: 2800000, guid: 6be614482d1db45eea5d479bc533440c, type: 3}
+  - {fileID: 2800000, guid: 771ba135df7024228a09c4ab345231af, type: 3}
+  - {fileID: 2800000, guid: e68442e5b4c1a4abba89eb9c61affcee, type: 3}
+  _slagwhistleLod0Triangles: 8688
+  _slagwhistleLod1Triangles: 4832
+  _slagwhistleLod2Triangles: 1800
+  _slagwhistleImpostorTriangles: 656
+  _slagwhistleBoneCount: 36
+  _slagwhistleMaterialSlots: 1
+  _habitatSourceBytes: 8564850
+  _slagwhistleSourceBytes: 3363673
