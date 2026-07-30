@@ -1,5 +1,4 @@
 param(
-    [ValidateSet("Classify", "Hygiene", "AndroidReleaseApplicability")]
     [string] $Mode,
     [string] $BaseRef = ""
 )
@@ -173,14 +172,132 @@ function Read-GitHubEvent {
     return Get-Content -Raw -LiteralPath $env:GITHUB_EVENT_PATH | ConvertFrom-Json
 }
 
+function ConvertTo-SafeDiagnosticText {
+    param([AllowNull()][string] $Text)
+
+    if ($null -eq $Text) {
+        return ""
+    }
+
+    try {
+        $safe = $Text
+        $safe = [regex]::Replace(
+            $safe,
+            "(?i)\bgithub_pat_[A-Za-z0-9_]{20,}\b",
+            "<redacted-token>"
+        )
+        $safe = [regex]::Replace(
+            $safe,
+            "(?i)\bgh[pousr]_[A-Za-z0-9_]{20,}\b",
+            "<redacted-token>"
+        )
+        $safe = [regex]::Replace(
+            $safe,
+            "(?i)([""']?Authorization[""']?\s*[:=]\s*[""']?)(?:(?:Bearer|token|Basic)\s+)?[^""'\s,;]+",
+            '$1<redacted-token>'
+        )
+        $safe = [regex]::Replace(
+            $safe,
+            "(?i)(Bearer\s+)[A-Za-z0-9._~+/=-]{20,}",
+            '$1<redacted-token>'
+        )
+
+        $roots = [System.Collections.Generic.List[string]]::new()
+        if ($env:GITHUB_WORKSPACE) {
+            $roots.Add([string]$env:GITHUB_WORKSPACE) | Out-Null
+        }
+
+        try {
+            $scriptRepoRoot = [System.IO.Path]::GetFullPath(
+                (Join-Path $PSScriptRoot "..\..")
+            )
+            $roots.Add($scriptRepoRoot) | Out-Null
+        } catch {
+            # Continue with token redaction and any other available root.
+        }
+
+        foreach ($root in ($roots | Where-Object { $_ } | Sort-Object -Unique)) {
+            $normalizedRoot = ([string]$root).Replace("\", "/").TrimEnd("/")
+            $isUncRoot = $normalizedRoot.StartsWith(
+                "//",
+                [System.StringComparison]::Ordinal
+            )
+            $isUnixRoot = -not $isUncRoot -and $normalizedRoot.StartsWith(
+                "/",
+                [System.StringComparison]::Ordinal
+            )
+            $isDriveRoot = $normalizedRoot -match "^[A-Za-z]:/"
+            if (-not $normalizedRoot -or
+                (-not $isUncRoot -and -not $isUnixRoot -and -not $isDriveRoot)) {
+                continue
+            }
+
+            $prefixPattern = ""
+            $rootRemainder = $normalizedRoot
+            if ($isUncRoot) {
+                $prefixPattern = "[\\/]{2}"
+                $rootRemainder = $normalizedRoot.Substring(2)
+            } elseif ($isUnixRoot) {
+                $prefixPattern = "[\\/]"
+                $rootRemainder = $normalizedRoot.Substring(1)
+            } elseif ($isDriveRoot) {
+                $prefixPattern = [regex]::Escape($normalizedRoot.Substring(0, 2)) + "[\\/]"
+                $rootRemainder = $normalizedRoot.Substring(3)
+            }
+
+            $segments = @(
+                $rootRemainder.Split(
+                    @("/"),
+                    [System.StringSplitOptions]::RemoveEmptyEntries
+                )
+            )
+            if ($segments.Count -eq 0) {
+                continue
+            }
+
+            $rootPattern = $prefixPattern + (
+                ($segments | ForEach-Object { [regex]::Escape($_) }) -join "[\\/]"
+            )
+            # Redact only at a path separator or an explicit diagnostic
+            # terminator. Spaces, plus signs, and ordinary filename
+            # characters can legally continue a sibling path and must not be
+            # treated as a root boundary. Three dots admit BaseRef...HEAD.
+            $rootPattern += '(?=$|[\\/]|\.{3}|[''"]|[.,;!?](?:\s|[''"]|$)|[\)\]\}](?:\s|$))'
+            $regexOptions = if ($isUnixRoot) {
+                [System.Text.RegularExpressions.RegexOptions]::None
+            } else {
+                [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+            }
+            $safe = [regex]::Replace(
+                $safe,
+                $rootPattern,
+                "<repo>",
+                $regexOptions
+            )
+        }
+
+        return $safe
+    } catch {
+        # A sanitizer failure must never fall back to the unsanitized text.
+        return "<diagnostic-redaction-failed>"
+    }
+}
+
+function Write-SafeHost {
+    param([AllowNull()][string] $Message)
+
+    Write-Host (ConvertTo-SafeDiagnosticText $Message)
+}
+
 function Add-Failure {
     param(
         [System.Collections.Generic.List[string]] $Failures,
         [string] $Message
     )
 
-    $Failures.Add($Message) | Out-Null
-    Write-Host "::error::$Message"
+    $safeMessage = ConvertTo-SafeDiagnosticText $Message
+    $Failures.Add($safeMessage) | Out-Null
+    Write-SafeHost "::error::$safeMessage"
 }
 
 function Get-PolicyPath {
@@ -337,9 +454,9 @@ function Invoke-Classify {
     }
 
     $changedFiles = Get-ChangedFiles
-    Write-Host "Event: $($env:GITHUB_EVENT_NAME); PR metadata checks: $isPullRequest"
-    Write-Host "Changed files:"
-    $changedFiles | ForEach-Object { Write-Host "  $_" }
+    Write-SafeHost "Event: $($env:GITHUB_EVENT_NAME); PR metadata checks: $isPullRequest"
+    Write-SafeHost "Changed files:"
+    $changedFiles | ForEach-Object { Write-SafeHost "  $_" }
 
     if ($isPullRequest -and
         $headBranch -and
@@ -413,9 +530,9 @@ function Invoke-Classify {
         Add-Failure $failures "Source-mode and engineering paths are mixed without an explicit mixed-mode justification."
     }
 
-    Write-Host "Narrative paths changed: $($narrativeChanged.Count)"
-    Write-Host "Terrestrial design paths changed: $($terrestrialChanged.Count)"
-    Write-Host "Engineering/workflow paths changed: $($engineeringChanged.Count)"
+    Write-SafeHost "Narrative paths changed: $($narrativeChanged.Count)"
+    Write-SafeHost "Terrestrial design paths changed: $($terrestrialChanged.Count)"
+    Write-SafeHost "Engineering/workflow paths changed: $($engineeringChanged.Count)"
     Assert-NoFailures $failures
 }
 
@@ -423,7 +540,7 @@ function Invoke-Hygiene {
     $failures = [System.Collections.Generic.List[string]]::new()
     $diffRange = Get-DiffRange
 
-    Write-Host "Running git diff --check against $diffRange"
+    Write-SafeHost "Running git diff --check against $diffRange"
     $diffCheck = & git diff --check $diffRange 2>&1
     if ($LASTEXITCODE -ne 0) {
         Add-Failure $failures "git diff --check failed:`n$diffCheck"
@@ -546,8 +663,8 @@ function Invoke-Hygiene {
         }
     }
 
-    Write-Host "Tracked files checked: $($trackedFiles.Count)"
-    Write-Host "Unity meta GUIDs checked: $($guidToFiles.Count)"
+    Write-SafeHost "Tracked files checked: $($trackedFiles.Count)"
+    Write-SafeHost "Unity meta GUIDs checked: $($guidToFiles.Count)"
     Assert-NoFailures $failures
 }
 
@@ -574,12 +691,12 @@ function Invoke-AndroidReleaseApplicability {
     $applicable = $matchedPaths.Count -gt 0
     $applicableText = $applicable.ToString().ToLowerInvariant()
 
-    Write-Host "Android release applicable: $applicableText"
-    Write-Host "Release-sensitive changed paths:"
+    Write-SafeHost "Android release applicable: $applicableText"
+    Write-SafeHost "Release-sensitive changed paths:"
     if ($matchedPaths.Count -eq 0) {
-        Write-Host "  (none)"
+        Write-SafeHost "  (none)"
     } else {
-        $matchedPaths | ForEach-Object { Write-Host "  $_" }
+        $matchedPaths | ForEach-Object { Write-SafeHost "  $_" }
     }
 
     if ($env:GITHUB_OUTPUT) {
@@ -587,8 +704,25 @@ function Invoke-AndroidReleaseApplicability {
     }
 }
 
-switch ($Mode) {
-    "Classify" { Invoke-Classify }
-    "Hygiene" { Invoke-Hygiene }
-    "AndroidReleaseApplicability" { Invoke-AndroidReleaseApplicability }
+try {
+    $supportedModes = @(
+        "Classify",
+        "Hygiene",
+        "AndroidReleaseApplicability"
+    )
+    if ($supportedModes -notcontains $Mode) {
+        throw "Unsupported quality-gate mode '$Mode'."
+    }
+
+    switch ($Mode) {
+        "Classify" { Invoke-Classify }
+        "Hygiene" { Invoke-Hygiene }
+        "AndroidReleaseApplicability" { Invoke-AndroidReleaseApplicability }
+    }
+} catch {
+    $safeFailure = ConvertTo-SafeDiagnosticText $_.Exception.Message
+    [Console]::Error.WriteLine(
+        "AnotherLife quality gate failed: $safeFailure"
+    )
+    exit 1
 }
