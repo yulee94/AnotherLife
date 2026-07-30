@@ -26,9 +26,9 @@ Before work:
 
 ## Ownership
 
-### This Codex agent — responsible project owner
+### This Codex agent — A1 coordination, narrative, and engineering owner
 
-This Codex agent owns all project work and responsibility through four declared modes.
+This Codex agent owns project coordination/review, narrative/content, and engineering responsibility through three declared modes. Effective 2026-07-30, the user's co-developer exclusively owns future A2 terrestrial design and concept work.
 
 #### Coordination/review mode
 
@@ -40,15 +40,17 @@ This mode must ground decisions in current source, written requirements, retaine
 
 Owns quests, chapters, dialogue, NPCs, lore, artifacts, localization-facing copy, continuity, consequences, relationships, factions, stable narrative IDs, narrative packets, and narrative-fidelity correction.
 
-#### Terrestrial-design mode
+### User's co-developer — A2 terrestrial design and concept
 
-Owns terrestrial creature/fauna concepts, silhouettes, anatomy, palettes, materials, habitat presentation, motion intent, scale, variants, design sheets, source assets, and design-fidelity correction.
+Owns future terrestrial creature/fauna concepts, silhouettes, anatomy, palettes, materials, habitat presentation, motion intent, scale, variants, design sheets, source assets, and design-fidelity correction.
+
+Every terrestrial-source dependency, review request, or engineering need routes through A1 to the co-developer. No Codex agent may silently absorb A2 creative authority.
 
 #### Engineering mode
 
 Owns Android and Unity source, runtime services, gameplay, combat, bosses, loot, terrestrial runtime integration, assets/import, scenes, save/migration/recovery, catalogs, contracts, build systems, tests, CI, tooling, diagnostics, performance, and accessibility mechanics.
 
-Engineering mode must consume approved narrative and terrestrial-design source rather than silently inventing or redesigning it in runtime code.
+Engineering mode must consume approved narrative source and co-developer terrestrial-design source rather than silently inventing or redesigning either in runtime code.
 
 Engineering mode also owns the standing optimization requirement: runtime code, assets, generated data, VFX, UI, catalogs, and builds must remain manageable for the broadest feasible device range with the lowest feasible install size. Prefer bounded data, pooling, compression, deduplication, lazy loading, deterministic generation, and scalable quality tiers before adding heavier content.
 
@@ -56,11 +58,11 @@ Engineering mode also owns the standing optimization requirement: runtime code, 
 
 The user owns final product, creative, visual-design, balance, irreversible-profile, milestone, integrated playtest, and release approval.
 
-GPT, Android Studio, Gemini, and other external assistants/tools receive no future project work, coordination assignment, review gate, or approval responsibility. Historical GPT-authored specifications and reviews remain repository evidence until this Codex agent or the user explicitly supersedes them.
+Except for the user's explicitly designated co-developer in the A2 terrestrial role, GPT, Android Studio, Gemini, and other external assistants/tools receive no future project work, coordination assignment, review gate, or approval responsibility. Historical GPT-authored specifications and reviews remain repository evidence until this Codex agent or the user explicitly supersedes them.
 
 ## Mode separation and handoffs
 
-The same Codex agent may perform every mode, but coordination/review, source authoring/design, and engineering implementation normally use separate branches and PRs so evidence and intent remain reviewable.
+The same Codex agent may perform the three Codex modes, but coordination/review, narrative source authoring, and engineering implementation normally use separate branches and PRs so evidence and intent remain reviewable. Terrestrial source/design is an external co-developer handoff through A1.
 
 Narrative flow:
 
@@ -75,13 +77,14 @@ Narrative flow:
 Terrestrial-design flow:
 
 1. User design goal.
-2. Codex terrestrial-design packet/source.
-3. Codex coordination/review technical handoff.
-4. Codex engineering implementation/integration.
-5. Codex coordination/review technical disposition and Codex terrestrial-design fidelity disposition.
-6. User approval.
+2. A1 sequencing and scope.
+3. Co-developer terrestrial-design packet/source.
+4. A1 coordination/review technical handoff.
+5. Codex engineering implementation/integration.
+6. A1 technical disposition and co-developer design-fidelity disposition.
+7. User approval.
 
-A mixed-mode PR requires a written Codex coordination/review justification explaining why separate PRs are impractical. It must still identify which source, design, engineering, and review responsibilities were performed.
+A mixed-mode PR requires a written Codex coordination/review justification explaining why separate PRs are impractical. It must still identify which source, design, engineering, and review responsibilities were performed; this rule never transfers A2 creative authority to Codex.
 
 ## Branches and PRs
 
@@ -89,8 +92,9 @@ Allowed prefixes:
 
 - `codex/coordination-<scope>` — planning, specification, review, governance, status, and risk.
 - `codex/narrative-<scope>` — narrative/content mode.
-- `codex/terrestrial-<scope>` — terrestrial-design mode.
 - `codex/<scope>` — engineering mode.
+
+Existing `codex/terrestrial-*` branches are historical or frozen only. Do not create a new A2 branch or PR until A1 records the co-developer's actual branch/mode convention and synchronizes the PR template and machine policy; do not invent a prefix.
 
 `gpt/`, `android-studio/`, and `gemini/` are retired for new work.
 
@@ -122,8 +126,8 @@ The first approved open PR declaring a file holds the lock. Later work must wait
 
 - Coordination/review: verify current main, issue/PR state, dependencies, locks, source claims, acceptance criteria, evidence quality, and no stale completion claim.
 - Narrative/content: verify stable IDs, references, branches, consequences, localization, failure/retry/recovery, and user-approved intent.
-- Terrestrial design: verify scope, views, silhouette, scale, material, motion, variants, readability, source identity, and a clear engineering handoff without hidden gameplay authority.
+- Terrestrial design/fidelity (co-developer): verify scope, views, silhouette, scale, material, motion, variants, readability, and source identity. A1 verifies the technical handoff and absence of hidden gameplay authority.
 - Engineering: run relevant builds/tests, report exact commands/results, preserve old saves and approved source, and disclose every blocked check.
 - Optimization: for any runtime, asset, VFX, UI, catalog, dependency, or packaging change, declare expected performance, memory, build-size, install-size, and device-compatibility impact plus any unperformed measurement.
 
-Every task ends with the current phase, acceptance status, PR/issue state, shared locks, unresolved validation, and the next Codex mode or user step.
+Every task ends with the current phase, acceptance status, PR/issue state, shared locks, unresolved validation, and the next Codex mode, co-developer source step, or user step.
