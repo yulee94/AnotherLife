@@ -31,7 +31,7 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator RepresentativeSlicePassesNinetyPointSafetyGate()
+        public IEnumerator RepresentativeSlicePassesDeterministicRepresentationGate()
         {
             GameObject prefab =
                 AssetDatabase.LoadAssetAtPath<GameObject>(SlicePrefabPath);
@@ -125,12 +125,43 @@ namespace AL.Tests.PlayMode
             Assert.GreaterOrEqual(
                 score,
                 90,
-                $"Slagfall representative-slice safety score was {score}/100.");
+                $"Slagfall deterministic representation score was {score}/100.");
             Assert.AreEqual(
                 100,
                 score,
-                "All deterministic representative-slice safety gates should pass.");
+                "All deterministic representation and degradation checks should pass.");
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator SyntheticCrowdVisibilityRestoresAllOneHundredUsers()
+        {
+            GameObject prefab =
+                AssetDatabase.LoadAssetAtPath<GameObject>(SlicePrefabPath);
+            Assert.NotNull(prefab, SlicePrefabPath);
+            _instance = Object.Instantiate(prefab);
+            SlagfallRepresentativeSlice slice =
+                _instance.GetComponent<SlagfallRepresentativeSlice>();
+            Assert.NotNull(slice);
+
+            slice.SetSyntheticCrowdActive(false);
+            yield return null;
+            Assert.AreEqual(
+                0,
+                slice.ActiveRepresentedSyntheticUserCount);
+
+            slice.SetSyntheticCrowdActive(true);
+            yield return null;
+            Assert.AreEqual(
+                TerritoryLoadDegradationPlanner
+                    .SafeRepresentedUserCapacity,
+                slice.ActiveRepresentedSyntheticUserCount);
+            Assert.AreEqual(
+                TerritoryLoadLevel.Heavy,
+                slice.Controller.CurrentLevel);
+            Assert.AreEqual(
+                TerritoryRenderTier.LowDetail,
+                slice.Slagwhistle.CurrentTier);
         }
 
         [UnityTest]

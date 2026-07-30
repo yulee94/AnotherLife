@@ -26,6 +26,26 @@ namespace AL.Terrestrials.Slagfall
             _syntheticCrowd;
         public bool EffectsOff { get; private set; }
         public bool ReducedMotion { get; private set; }
+        public int ActiveRepresentedSyntheticUserCount
+        {
+            get
+            {
+                int represented = 0;
+                foreach (TerritoryCrowdParticipant participant in
+                    _syntheticCrowd)
+                {
+                    if (participant != null &&
+                        participant.gameObject.activeInHierarchy &&
+                        participant.IsRepresented &&
+                        participant.ActiveRepresentationCount == 1)
+                    {
+                        represented++;
+                    }
+                }
+
+                return represented;
+            }
+        }
 
         private void Awake()
         {
@@ -125,6 +145,51 @@ namespace AL.Terrestrials.Slagfall
                 frameTimeMilliseconds,
                 elapsedSeconds);
             _slagwhistle.ApplyLoad(_controller.CurrentLevel);
+        }
+
+        public void SetTargetFrameTimeMilliseconds(
+            float targetFrameTimeMilliseconds)
+        {
+            Initialize();
+            _controller.SetTargetFrameTimeMilliseconds(
+                targetFrameTimeMilliseconds);
+        }
+
+        public void SetSyntheticCrowdActive(bool active)
+        {
+            Initialize();
+            var crowdRoots = new HashSet<GameObject>();
+            foreach (TerritoryCrowdParticipant participant in
+                _syntheticCrowd)
+            {
+                if (participant == null)
+                {
+                    continue;
+                }
+
+                Transform parent = participant.transform.parent;
+                if (parent != null)
+                {
+                    crowdRoots.Add(parent.gameObject);
+                }
+                else if (participant.gameObject.activeSelf != active)
+                {
+                    participant.gameObject.SetActive(active);
+                }
+            }
+
+            foreach (GameObject crowdRoot in crowdRoots)
+            {
+                if (crowdRoot.activeSelf != active)
+                {
+                    crowdRoot.SetActive(active);
+                }
+            }
+
+            if (active)
+            {
+                _controller.Refresh();
+            }
         }
 
         public void SetAccessibility(

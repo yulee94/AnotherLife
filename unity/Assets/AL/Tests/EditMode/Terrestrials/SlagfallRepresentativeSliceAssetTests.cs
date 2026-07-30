@@ -5,7 +5,9 @@ using System.Security.Cryptography;
 using AL.Terrestrials.Slagfall;
 using NUnit.Framework;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace AL.Tests.EditMode.Terrestrials
 {
@@ -249,6 +251,37 @@ namespace AL.Tests.EditMode.Terrestrials
             finally
             {
                 UnityEngine.Object.DestroyImmediate(root);
+            }
+        }
+
+        [Test]
+        public void ReviewSceneContainsDisabledThirtyMinuteEvidenceRunner()
+        {
+            Scene scene = EditorSceneManager.OpenScene(
+                ScenePath,
+                OpenSceneMode.Additive);
+            try
+            {
+                SlagfallDeviceEvidenceRunner runner = scene
+                    .GetRootGameObjects()
+                    .SelectMany(
+                        root =>
+                            root.GetComponentsInChildren<
+                                SlagfallDeviceEvidenceRunner>(true))
+                    .Single();
+                Assert.AreEqual(
+                    SlagfallEvidenceLane.MobileLow,
+                    runner.Lane);
+                Assert.AreEqual(
+                    SlagfallEvidenceContract.MinimumRunSeconds,
+                    runner.DurationSeconds);
+                Assert.IsFalse(
+                    runner.RunInEditor,
+                    "Opening the review scene in Play Mode must not accidentally start a 30-minute device run.");
+            }
+            finally
+            {
+                EditorSceneManager.CloseScene(scene, true);
             }
         }
 

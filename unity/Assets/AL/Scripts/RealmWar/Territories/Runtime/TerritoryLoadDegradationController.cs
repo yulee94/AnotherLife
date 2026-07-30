@@ -38,6 +38,9 @@ namespace AL.RealmWar.Territories.Runtime
 
         public int ActiveUserCount => _activeUserCount;
 
+        public float TargetFrameTimeMilliseconds =>
+            _targetFrameTimeMilliseconds;
+
         public int PlanApplicationCount { get; private set; }
 
         private void Awake()
@@ -87,22 +90,31 @@ namespace AL.RealmWar.Territories.Runtime
             float degradeDelaySeconds = 0.5f,
             float recoverDelaySeconds = 3f)
         {
-            if (float.IsNaN(targetFrameTimeMilliseconds) ||
-                float.IsInfinity(targetFrameTimeMilliseconds) ||
-                targetFrameTimeMilliseconds <= 0f)
-            {
-                throw new ArgumentOutOfRangeException(nameof(targetFrameTimeMilliseconds));
-            }
-
             _observer = observer;
             _visualAdapter = visualAdapter;
-            _targetFrameTimeMilliseconds = targetFrameTimeMilliseconds;
+            SetTargetFrameTimeMilliseconds(targetFrameTimeMilliseconds);
             _degradeDelaySeconds = degradeDelaySeconds;
             _recoverDelaySeconds = recoverDelaySeconds;
             _stateMachine = new TerritoryLoadStateMachine(degradeDelaySeconds, recoverDelaySeconds);
             _smoothedFrameTimeMilliseconds = 0f;
             _sampleElapsedSeconds = 0f;
             ApplyCurrentPlan();
+        }
+
+        public void SetTargetFrameTimeMilliseconds(
+            float targetFrameTimeMilliseconds)
+        {
+            if (float.IsNaN(targetFrameTimeMilliseconds) ||
+                float.IsInfinity(targetFrameTimeMilliseconds) ||
+                targetFrameTimeMilliseconds <= 0f)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(targetFrameTimeMilliseconds));
+            }
+
+            _targetFrameTimeMilliseconds = targetFrameTimeMilliseconds;
+            _smoothedFrameTimeMilliseconds = 0f;
+            _sampleElapsedSeconds = 0f;
         }
 
         public void SetActiveUserCount(int activeUserCount)

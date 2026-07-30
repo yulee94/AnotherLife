@@ -2075,6 +2075,18 @@ namespace AL.Editor.Terrestrials
             RenderSettings.ambientMode = AmbientMode.Flat;
             RenderSettings.ambientLight =
                 new Color(0.36f, 0.36f, 0.37f);
+
+            var evidenceObject =
+                new GameObject("Slagfall Device Evidence Runner");
+            evidenceObject
+                .AddComponent<SlagfallDeviceEvidenceRunner>()
+                .Configure(
+                    slice.GetComponent<
+                        SlagfallRepresentativeSlice>(),
+                    SlagfallEvidenceLane.MobileLow,
+                    SlagfallEvidenceContract.MinimumRunSeconds,
+                    false,
+                    false);
             EditorSceneManager.SaveScene(scene, ScenePath);
         }
 
