@@ -168,6 +168,9 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 GameDataRealmReferences.AssetReferences,
                 Field(registry, "realms", "asset_ref").AllowedStringValues);
             CollectionAssert.AreEquivalent(
+                GameDataBuildingAssetReferences.AssetReferences,
+                Field(registry, "buildings", "asset_ref").AllowedStringValues);
+            CollectionAssert.AreEquivalent(
                 GameDataRealmCapabilityProfiles.StableIds,
                 Field(
                         registry,
@@ -219,6 +222,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
             AssertNonStableAddress(Field(registry, "realms", "name_ref"));
             AssertNonStableAddress(Field(registry, "realms", "description_ref"));
             AssertNonStableAddress(Field(registry, "realms", "asset_ref"));
+            AssertNonStableAddress(Field(registry, "buildings", "asset_ref"));
             AssertNonStableAddress(Field(registry, "champions", "portrait_asset_ref"));
             AssertNonStableAddress(Field(registry, "champions", "model_asset_ref"));
             AssertNonStableAddress(Field(registry, "skills", "vfx_asset_ref"));
@@ -682,7 +686,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
             var building =
                 Family(GameDataSixFamilySchemas.CreateRegistry(), "buildings");
 
-            Assert.AreEqual(1, building.RecordConstraints.Count);
+            Assert.AreEqual(2, building.RecordConstraints.Count);
             Assert.AreEqual(
                 "building_progression_reference",
                 building.RecordConstraints[0].Name);
@@ -692,6 +696,66 @@ namespace AL.Tests.EditMode.GameDataCatalog
             Assert.AreEqual(
                 "BUILDING-PROGRESSION-REFERENCE",
                 building.RecordConstraints[0].DiagnosticCode);
+            Assert.AreEqual(
+                "building_asset_reference",
+                building.RecordConstraints[1].Name);
+            Assert.AreEqual(
+                "asset_ref",
+                building.RecordConstraints[1].FieldName);
+            Assert.AreEqual(
+                "BUILDING-ASSET-REFERENCE",
+                building.RecordConstraints[1].DiagnosticCode);
+        }
+
+        [Test]
+        public void BuildingAssetReferencesAcceptOnlyExactApprovedRelations()
+        {
+            var validBuilding = ValidArtifacts()
+                .Single(artifact => artifact.Family == "buildings");
+
+            foreach (var reference in GameDataBuildingAssetReferences.Entries)
+            {
+                var artifact = MutateBuildingAssetRelation(
+                    validBuilding,
+                    reference);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.LoadedPackaged,
+                    result.Status,
+                    reference.StableId);
+                Assert.NotNull(result.Snapshot, reference.StableId);
+            }
+
+            var baseline = GameDataBuildingAssetReferences.Entries[0];
+            var other = GameDataBuildingAssetReferences.Entries[1];
+            var swapped = MutateBuildingString(
+                validBuilding,
+                "asset_ref",
+                baseline.AssetReference,
+                other.AssetReference);
+            var swappedResult = Validate(swapped);
+            Assert.AreEqual(
+                GameDataCatalogLoadStatus.InvalidRecord,
+                swappedResult.Status);
+            Assert.IsNull(swappedResult.Snapshot);
+            CollectionAssert.Contains(
+                swappedResult.Diagnostics
+                    .Select(diagnostic => diagnostic.Code)
+                    .ToArray(),
+                "AL-GDC-BUILDING-ASSET-REFERENCE");
+
+            var wrongFragment = MutateBuildingString(
+                validBuilding,
+                "asset_ref",
+                baseline.AssetReference,
+                baseline.AssetReference.Replace(
+                    "#town_hall",
+                    "#TownHall"));
+            var wrongFragmentResult = Validate(wrongFragment);
+            Assert.AreEqual(
+                GameDataCatalogLoadStatus.InvalidRecord,
+                wrongFragmentResult.Status);
+            Assert.IsNull(wrongFragmentResult.Snapshot);
         }
 
         private static GameDataCatalogFamilySchema Family(
@@ -789,7 +853,9 @@ namespace AL.Tests.EditMode.GameDataCatalog
                     "Catalogs/buildings.phase_c2_fixture.json",
                     true,
                     "0.1.0",
-                    "[{\"id\":\"town_hall\",\"legacy_building_id\":\"TownHall\",\"name_ref\":\"building.town_hall.name\",\"initial_level\":0,\"max_level\":10,\"production_profile_ids\":[\"resource_output\"],\"cost_profile_id\":\"building_upgrade_cost_town_hall\",\"duration_profile_id\":\"building_upgrade_duration_common\",\"prerequisite_profile_id\":\"building_prerequisite_none\",\"realm_eligibility_profile_id\":\"building_realm_eligibility_all\",\"asset_ref\":\"Assets/Fixture/Building\"}]",
+                    "[{\"id\":\"town_hall\",\"legacy_building_id\":\"TownHall\",\"name_ref\":\"building.town_hall.name\",\"initial_level\":0,\"max_level\":10,\"production_profile_ids\":[\"resource_output\"],\"cost_profile_id\":\"building_upgrade_cost_town_hall\",\"duration_profile_id\":\"building_upgrade_duration_common\",\"prerequisite_profile_id\":\"building_prerequisite_none\",\"realm_eligibility_profile_id\":\"building_realm_eligibility_all\",\"asset_ref\":\"" +
+                    GameDataBuildingAssetReferences.AssetReferences[0] +
+                    "\"}]",
                     "[{\"legacyId\":\"TownHall\",\"canonicalId\":\"town_hall\",\"introducedVersion\":1,\"retirementVersion\":null,\"migrationIssue\":\"#165\"}]",
                     string.Empty),
                 CatalogFixture.FamilyArtifact(
@@ -996,6 +1062,17 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 "cost_profile_id",
                 baseline.CostProfileStableId,
                 reference.CostProfileStableId);
+            var baselineAsset =
+                GameDataBuildingAssetReferences.Entries[0];
+            Assert.True(
+                GameDataBuildingAssetReferences.TryGetByStableId(
+                    reference.StableId,
+                    out var targetAsset));
+            artifact = MutateBuildingString(
+                artifact,
+                "asset_ref",
+                baselineAsset.AssetReference,
+                targetAsset.AssetReference);
             if (string.Equals(
                     baseline.StableId,
                     reference.StableId,
@@ -1012,6 +1089,21 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 artifact,
                 "\"canonicalId\":\"" + baseline.StableId + "\"",
                 "\"canonicalId\":\"" + reference.StableId + "\"");
+        }
+
+        private static CatalogFixture.Artifact MutateBuildingAssetRelation(
+            CatalogFixture.Artifact source,
+            GameDataBuildingAssetReference reference)
+        {
+            Assert.AreEqual(
+                GameDataBuildingAssetReferences.Entries[0].StableId,
+                GameDataBuildingProgressionRegistry.Entries[0].StableId);
+            Assert.True(
+                GameDataBuildingProgressionRegistry.Resolve(
+                    reference.StableId,
+                    out var progression) !=
+                GameDataBuildingIdentityResolutionStatus.Unknown);
+            return MutateBuildingRelation(source, progression);
         }
 
         private static CatalogFixture.Artifact MutateBuildingString(

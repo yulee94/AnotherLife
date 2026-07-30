@@ -146,7 +146,9 @@ namespace AL.Data.Catalogs
                             GameDataBuildingProgressionRegistry
                                 .RealmEligibilityProfileStableId
                         }),
-                    AssetReference("asset_ref")
+                    AssetReference(
+                        "asset_ref",
+                        GameDataBuildingAssetReferences.AssetReferences)
                 },
                 new[]
                 {
@@ -156,7 +158,14 @@ namespace AL.Data.Catalogs
                         "BUILDING-PROGRESSION-REFERENCE",
                         "The building identity, content, level, and progression-profile " +
                         "references do not match the reviewed exact relation.",
-                        ValidateBuildingProgressionRelation)
+                        ValidateBuildingProgressionRelation),
+                    new GameDataCatalogRecordConstraint(
+                        "building_asset_reference",
+                        "asset_ref",
+                        "BUILDING-ASSET-REFERENCE",
+                        "The building identity, legacy alias, and icon-atlas " +
+                        "reference do not match the reviewed exact relation.",
+                        ValidateBuildingAssetRelation)
                 });
         }
 
@@ -415,6 +424,31 @@ namespace AL.Data.Catalogs
                     durationProfileStableId,
                     prerequisiteProfileStableId,
                     realmEligibilityProfileStableId);
+        }
+
+        private static bool? ValidateBuildingAssetRelation(
+            string buildingStableId,
+            IReadOnlyDictionary<string, GameDataValue> fields)
+        {
+            string legacyBuildingId;
+            string assetReference;
+            if (!TryReadString(
+                    fields,
+                    "legacy_building_id",
+                    out legacyBuildingId) ||
+                !TryReadString(
+                    fields,
+                    "asset_ref",
+                    out assetReference))
+            {
+                return null;
+            }
+
+            return GameDataBuildingAssetReferences
+                .IsApprovedBuildingAssetRelation(
+                    buildingStableId,
+                    legacyBuildingId,
+                    assetReference);
         }
 
         private static bool TryReadRealmIdentity(
