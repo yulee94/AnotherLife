@@ -1,0 +1,742 @@
+{
+  "schemaVersion": 3,
+  "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v003",
+  "sourceKind": "versioned_overlay",
+  "productionEligible": false,
+  "supersedes": {
+    "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v002",
+    "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source-v002.json",
+    "sourceRevision": "d219472073bee9fcd420d0cac1d94412019b865b",
+    "rawSha256": "60498d1a071ea79eb37c1b8889a1faaa5c7aee69679c1043256535ef4d3c1685"
+  },
+  "provenance": [
+    {
+      "role": "building_authority_decision",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C4A_Building_Authority_Convergence.md",
+      "sourceRevision": "c0d27a4c247615e33f1ed189b789e99bbf1355ac",
+      "rawSha256": "b94895911e46cfd03dfb08b15e3c4ccf860a028ffe62d922c95e564fd2e5e039"
+    },
+    {
+      "role": "wallet_resource_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataWalletResourceReferences.cs",
+      "sourceRevision": "f44e22cd3a0e334062f1ef8e487ffca1ecba6261",
+      "rawSha256": "07ef09c4bca55278a7db6dd09c9740352829bb677eb1ea4c817b8646ac02c699"
+    },
+    {
+      "role": "realm_reference_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmReferences.cs",
+      "sourceRevision": "f44e22cd3a0e334062f1ef8e487ffca1ecba6261",
+      "rawSha256": "4bb8457c9831756a8cf6c2ddf3f14a5fd5c51866370c870cb074a53313bbdf4f"
+    },
+    {
+      "role": "building_progression_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataBuildingProgressionRegistry.cs",
+      "sourceRevision": "a2e6a9a0dddfb7522d880d4db9d17222adcbbffe",
+      "rawSha256": "319cb9f97cff850c3e0f79c30ae877c2876ecab6cf70d9fa681a672be4b430c4"
+    },
+    {
+      "role": "building_progression_registry_tests",
+      "path": "unity/Assets/AL/Tests/EditMode/GameDataCatalog/GameDataBuildingProgressionRegistryTests.cs",
+      "sourceRevision": "a2e6a9a0dddfb7522d880d4db9d17222adcbbffe",
+      "rawSha256": "8e911d59f0884c1d4ef7201f35579c6f2b257008d1c853345bea68d28d50ab29"
+    },
+    {
+      "role": "six_family_schema",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataSixFamilySchemas.cs",
+      "sourceRevision": "a2e6a9a0dddfb7522d880d4db9d17222adcbbffe",
+      "rawSha256": "3c759d9ea2f1b2d6aca53d1e5f213bf0edb057eb0751bf3c9bfe9ae94b15d9bb"
+    }
+  ],
+  "upstream": {
+    "sourcePacketId": "game-data-phase-c-six-family-source-2026-07-23-v001",
+    "sourcePacketPath": "unity/Docs/Narrative/GameData/Phase_C_Six_Family_Source_Packet.md",
+    "contentMapPath": "unity/Docs/Narrative/GameData/phase-c-six-family-content-map.json",
+    "sourceCommit": "963c4bc6e6db8ae2b87d363ceb229519e97f13b0",
+    "contentMapGitBlobSha256": "8377a47d659a2e7dd238e35f373dbefa711e4ca16bf95e280e2dc36029327353"
+  },
+  "approval": {
+    "userFinalCreativeAcceptance": "pending",
+    "userBalanceAcceptance": "pending",
+    "runtimeAuthority": "unchanged"
+  },
+  "evidencePolicy": {
+    "observedValues": "migration_evidence_only",
+    "balanceAuthority": "not_approved"
+  },
+  "productionFamilyOrder": [
+    "realms",
+    "buildings",
+    "research",
+    "troops",
+    "champions",
+    "skills"
+  ],
+  "families": [
+    {
+      "family": "realms",
+      "requiredForProduction": true,
+      "artifactDisposition": "ready_for_non_production_shadow_generation",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v002",
+        "family": "realms",
+        "fields": [
+          "mappings",
+          "unavailableAnchors",
+          "resolvedBlockingIds"
+        ]
+      },
+      "blockingIds": []
+    },
+    {
+      "family": "buildings",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "registryVersion": 1,
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "buildings",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "targetLevels": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "baseBudgets": [
+        100,
+        175,
+        300,
+        475,
+        700,
+        1000,
+        1400,
+        1900,
+        2500,
+        3250
+      ],
+      "costComputation": {
+        "scaleRounding": "ceil_base_budget_times_scale_percent_div_100",
+        "orderedShareRounding": "max_1_floor_budget_times_share_percent_div_100",
+        "finalShareRounding": "positive_exact_remainder"
+      },
+      "progressionBindings": [
+        {
+          "order": 0,
+          "canonicalId": "town_hall",
+          "legacyBuildingId": "TownHall",
+          "nameRef": "building.town_hall.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_town_hall",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 1,
+          "canonicalId": "farm",
+          "legacyBuildingId": "Farm",
+          "nameRef": "building.farm.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_farm",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 2,
+          "canonicalId": "lumber_mill",
+          "legacyBuildingId": "LumberMill",
+          "nameRef": "building.lumber_mill.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_lumber_mill",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 3,
+          "canonicalId": "quarry",
+          "legacyBuildingId": "Quarry",
+          "nameRef": "building.quarry.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_quarry",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 4,
+          "canonicalId": "gold_mine",
+          "legacyBuildingId": "GoldMine",
+          "nameRef": "building.gold_mine.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_gold_mine",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 5,
+          "canonicalId": "barracks",
+          "legacyBuildingId": "Barracks",
+          "nameRef": "building.barracks.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_barracks",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 6,
+          "canonicalId": "academy",
+          "legacyBuildingId": "Academy",
+          "nameRef": "building.academy.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_academy",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 7,
+          "canonicalId": "market",
+          "legacyBuildingId": "Market",
+          "nameRef": "building.market.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_market",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 8,
+          "canonicalId": "storehouse",
+          "legacyBuildingId": "Storehouse",
+          "nameRef": "building.storehouse.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_storehouse",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 9,
+          "canonicalId": "forge",
+          "legacyBuildingId": "Forge",
+          "nameRef": "building.forge.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_forge",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 10,
+          "canonicalId": "stable",
+          "legacyBuildingId": "Stable",
+          "nameRef": "building.stable.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_stable",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 11,
+          "canonicalId": "workshop",
+          "legacyBuildingId": "Workshop",
+          "nameRef": "building.workshop.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_workshop",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 12,
+          "canonicalId": "embassy",
+          "legacyBuildingId": "Embassy",
+          "nameRef": "building.embassy.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_embassy",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 13,
+          "canonicalId": "wall",
+          "legacyBuildingId": "Wall",
+          "nameRef": "building.wall.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_wall",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        },
+        {
+          "order": 14,
+          "canonicalId": "watchtower",
+          "legacyBuildingId": "Watchtower",
+          "nameRef": "building.watchtower.name",
+          "initialLevel": 0,
+          "maxLevel": 10,
+          "costProfileId": "building_upgrade_cost_watchtower",
+          "durationProfileId": "building_upgrade_duration_common",
+          "prerequisiteProfileId": "building_prerequisite_none",
+          "realmEligibilityProfileId": "building_realm_eligibility_all"
+        }
+      ],
+      "costProfiles": [
+        {
+          "order": 0,
+          "stableId": "building_upgrade_cost_town_hall",
+          "scalePercent": 140,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 45
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 35
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 20
+            }
+          ]
+        },
+        {
+          "order": 1,
+          "stableId": "building_upgrade_cost_farm",
+          "scalePercent": 80,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 70
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 30
+            }
+          ]
+        },
+        {
+          "order": 2,
+          "stableId": "building_upgrade_cost_lumber_mill",
+          "scalePercent": 80,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 70
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 30
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "stableId": "building_upgrade_cost_quarry",
+          "scalePercent": 90,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 40
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 60
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "stableId": "building_upgrade_cost_gold_mine",
+          "scalePercent": 100,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 40
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 60
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "stableId": "building_upgrade_cost_barracks",
+          "scalePercent": 110,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 55
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 30
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 15
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "stableId": "building_upgrade_cost_academy",
+          "scalePercent": 120,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 40
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 25
+            },
+            {
+              "resourceStableId": "mana_stone",
+              "percent": 35
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "stableId": "building_upgrade_cost_market",
+          "scalePercent": 90,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 45
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 25
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 30
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "stableId": "building_upgrade_cost_storehouse",
+          "scalePercent": 85,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 60
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 40
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "stableId": "building_upgrade_cost_forge",
+          "scalePercent": 115,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 45
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 25
+            },
+            {
+              "resourceStableId": "ore",
+              "percent": 30
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "stableId": "building_upgrade_cost_stable",
+          "scalePercent": 100,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 55
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 25
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 20
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "stableId": "building_upgrade_cost_workshop",
+          "scalePercent": 110,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 45
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 25
+            },
+            {
+              "resourceStableId": "ore",
+              "percent": 30
+            }
+          ]
+        },
+        {
+          "order": 12,
+          "stableId": "building_upgrade_cost_embassy",
+          "scalePercent": 120,
+          "shares": [
+            {
+              "resourceStableId": "wood",
+              "percent": 45
+            },
+            {
+              "resourceStableId": "stone",
+              "percent": 25
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 30
+            }
+          ]
+        },
+        {
+          "order": 13,
+          "stableId": "building_upgrade_cost_wall",
+          "scalePercent": 95,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 55
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 30
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 15
+            }
+          ]
+        },
+        {
+          "order": 14,
+          "stableId": "building_upgrade_cost_watchtower",
+          "scalePercent": 100,
+          "shares": [
+            {
+              "resourceStableId": "stone",
+              "percent": 55
+            },
+            {
+              "resourceStableId": "wood",
+              "percent": 30
+            },
+            {
+              "resourceStableId": "gold",
+              "percent": 15
+            }
+          ]
+        }
+      ],
+      "durationProfiles": [
+        {
+          "stableId": "building_upgrade_duration_common",
+          "durationSeconds": [
+            10,
+            30,
+            120,
+            300,
+            900,
+            1800,
+            3600,
+            7200,
+            14400,
+            28800
+          ]
+        }
+      ],
+      "prerequisiteProfiles": [
+        {
+          "stableId": "building_prerequisite_none",
+          "requiredBuildingIds": []
+        }
+      ],
+      "realmEligibilityProfiles": [
+        {
+          "stableId": "building_realm_eligibility_all",
+          "eligibleRealmIds": [
+            "crownlands",
+            "stonehold",
+            "eldergrove",
+            "umbral"
+          ]
+        }
+      ],
+      "resolvedBlockingIds": [
+        "buildings.max_level_review",
+        "buildings.cost_profiles",
+        "buildings.duration_profiles"
+      ],
+      "blockingIds": [
+        "buildings.production_profiles",
+        "buildings.asset_refs"
+      ]
+    },
+    {
+      "family": "research",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "research",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "research.max_levels",
+        "research.cost_profiles",
+        "research.duration_profiles",
+        "research.effects",
+        "research.prerequisites"
+      ]
+    },
+    {
+      "family": "troops",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "troops",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "troops.records",
+        "troops.localization",
+        "troops.base_stats",
+        "troops.training_profiles",
+        "troops.asset_refs"
+      ]
+    },
+    {
+      "family": "champions",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "champions",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "champions.records",
+        "champions.localization",
+        "champions.realm_class_assignments",
+        "champions.asset_refs",
+        "champions.base_skill_refs",
+        "champions.stat_profiles"
+      ]
+    },
+    {
+      "family": "skills",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "skills",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "skills.slot_policy",
+        "skills.behavior_profiles",
+        "skills.presentation_profiles",
+        "skills.target_authority",
+        "skills.audio_asset_refs",
+        "skills.vfx_asset_refs",
+        "skills.balance_acceptance"
+      ]
+    }
+  ],
+  "blockingIds": [
+    "approval.user_creative_balance",
+    "buildings.production_profiles",
+    "buildings.asset_refs",
+    "research.max_levels",
+    "research.cost_profiles",
+    "research.duration_profiles",
+    "research.effects",
+    "research.prerequisites",
+    "troops.records",
+    "troops.localization",
+    "troops.base_stats",
+    "troops.training_profiles",
+    "troops.asset_refs",
+    "champions.records",
+    "champions.localization",
+    "champions.realm_class_assignments",
+    "champions.asset_refs",
+    "champions.base_skill_refs",
+    "champions.stat_profiles",
+    "skills.slot_policy",
+    "skills.behavior_profiles",
+    "skills.presentation_profiles",
+    "skills.target_authority",
+    "skills.audio_asset_refs",
+    "skills.vfx_asset_refs",
+    "skills.balance_acceptance"
+  ],
+  "generationGate": {
+    "status": "blocked",
+    "requireProductionEligibleResult": "refused_without_writes",
+    "outputPaths": []
+  }
+}
