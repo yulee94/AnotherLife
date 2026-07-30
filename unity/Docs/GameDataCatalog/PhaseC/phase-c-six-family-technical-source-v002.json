@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 2,
+  "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-29-v002",
+  "sourceKind": "versioned_overlay",
+  "productionEligible": false,
+  "supersedes": {
+    "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+    "path": "unity/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source.json",
+    "sourceRevision": "5858967b17a8c802ba4aca6225e1b61e45cdf5d9",
+    "rawSha256": "5ed847c448d39c4a87ab53e6230621c0bd931e9deb27f43e35b57fdfbfcefa3b"
+  },
+  "provenance": [
+    {
+      "role": "realm_authority_decision",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C3A_Realm_Authority_Convergence.md",
+      "sourceRevision": "27e2d477ad98f131593b991c85ce8388d9216641",
+      "rawSha256": "4d220976127f1c80c407a42ce987aa50a38dbee268ecc7a80258f3178c77925f"
+    },
+    {
+      "role": "resource_authority_decision",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C3B_Resource_Reference_Authority.md",
+      "sourceRevision": "4122483dda7cbba5d87577e70b4280786849be1d",
+      "rawSha256": "c068ec6d24e10d94fe7466355987e9c1161fa4a390443fa77a93c136216121f0"
+    },
+    {
+      "role": "realm_blocker_decision",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C3E_Realm_Blocker_Ledger_Convergence.md",
+      "sourceRevision": "4edbac7a4f53f8b7287da3c9ecf1299286e8d6fc",
+      "rawSha256": "0eb1f95b22e00b7ffd66f9cfb729a0456beb85bb161a0cd64aa7cfca40257955"
+    },
+    {
+      "role": "capability_authority_decision",
+      "path": "unity/Docs/GameDataCatalog/PhaseC/Phase_C3F_Realm_Capability_Profile_Authority.md",
+      "sourceRevision": "36b2395477acd40c1ffc9f75498d2ac55f9e0fd9",
+      "rawSha256": "9a3094e191746b51395b48b4ee3254911f8e79edd02087db91818c1b7d4290b8"
+    },
+    {
+      "role": "resource_reference_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataWalletResourceReferences.cs",
+      "sourceRevision": "f44e22cd3a0e334062f1ef8e487ffca1ecba6261",
+      "rawSha256": "07ef09c4bca55278a7db6dd09c9740352829bb677eb1ea4c817b8646ac02c699"
+    },
+    {
+      "role": "realm_reference_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmReferences.cs",
+      "sourceRevision": "f44e22cd3a0e334062f1ef8e487ffca1ecba6261",
+      "rawSha256": "4bb8457c9831756a8cf6c2ddf3f14a5fd5c51866370c870cb074a53313bbdf4f"
+    },
+    {
+      "role": "capability_profile_registry",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmCapabilityProfiles.cs",
+      "sourceRevision": "59b99aa94e45d5564e373b8824e2aa3b30b8a754",
+      "rawSha256": "8413f45a32cad1bf71107c0c6cea18e4c8e86b7f8191a19ff0bcc0875e89b427"
+    },
+    {
+      "role": "six_family_schema",
+      "path": "unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataSixFamilySchemas.cs",
+      "sourceRevision": "59b99aa94e45d5564e373b8824e2aa3b30b8a754",
+      "rawSha256": "ff2c91c3b27a370f5f89812927f4211461a5b4d523dbf1167f277c2be5affdb6"
+    }
+  ],
+  "upstream": {
+    "sourcePacketId": "game-data-phase-c-six-family-source-2026-07-23-v001",
+    "sourcePacketPath": "unity/Docs/Narrative/GameData/Phase_C_Six_Family_Source_Packet.md",
+    "contentMapPath": "unity/Docs/Narrative/GameData/phase-c-six-family-content-map.json",
+    "sourceCommit": "963c4bc6e6db8ae2b87d363ceb229519e97f13b0",
+    "contentMapGitBlobSha256": "8377a47d659a2e7dd238e35f373dbefa711e4ca16bf95e280e2dc36029327353"
+  },
+  "approval": {
+    "userFinalCreativeAcceptance": "pending",
+    "userBalanceAcceptance": "pending",
+    "runtimeAuthority": "unchanged"
+  },
+  "evidencePolicy": {
+    "observedValues": "migration_evidence_only",
+    "balanceAuthority": "not_approved"
+  },
+  "productionFamilyOrder": [
+    "realms",
+    "buildings",
+    "research",
+    "troops",
+    "champions",
+    "skills"
+  ],
+  "families": [
+    {
+      "family": "realms",
+      "requiredForProduction": true,
+      "artifactDisposition": "ready_for_non_production_shadow_generation",
+      "mappings": [
+        {
+          "canonicalId": "crownlands",
+          "technicalAnchor": "RealmId.Crownlands",
+          "legacyEnumValue": 3,
+          "contentRefs": [
+            "realm.crownlands.name",
+            "realm.crownlands.description"
+          ],
+          "aliases": [],
+          "rareResourceId": "royal_sigil",
+          "capabilityProfileIds": [
+            "battle_realm_crownlands"
+          ],
+          "innerRealmId": "inner_crownlands",
+          "mainGateId": "gate_crownlands_meridian",
+          "outerWarzoneId": "warzone_crownlands",
+          "assetRef": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Crownlands_Flat_256_v001.png",
+          "assetGuid": "ba4dfcc7b514049f79f6ec3424193b46",
+          "assetRawSha256": "f5c7e351ec930aac69f6df02d03034bc38c465ed8dfa787dd4feba044f33f82b",
+          "observed": {
+            "rareResourceAnchor": "ResourceType.RoyalSigil"
+          }
+        },
+        {
+          "canonicalId": "stonehold",
+          "technicalAnchor": "RealmId.Stonehold",
+          "legacyEnumValue": 1,
+          "contentRefs": [
+            "realm.stonehold.name",
+            "realm.stonehold.description"
+          ],
+          "aliases": [],
+          "rareResourceId": "deep_ore",
+          "capabilityProfileIds": [
+            "battle_realm_stonehold"
+          ],
+          "innerRealmId": "inner_stonehold",
+          "mainGateId": "gate_stonehold_faultline",
+          "outerWarzoneId": "warzone_stonehold",
+          "assetRef": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Stonehold_Flat_256_v001.png",
+          "assetGuid": "94d8d9e2cf04a4b769c213a13c164b8e",
+          "assetRawSha256": "53d220dc8b938d212963286133ca39e1968fa1421126559dd56bdfde9c437946",
+          "observed": {
+            "rareResourceAnchor": "ResourceType.DeepOre"
+          }
+        },
+        {
+          "canonicalId": "eldergrove",
+          "technicalAnchor": "RealmId.Eldergrove",
+          "legacyEnumValue": 2,
+          "contentRefs": [
+            "realm.eldergrove.name",
+            "realm.eldergrove.description"
+          ],
+          "aliases": [],
+          "rareResourceId": "world_sap",
+          "capabilityProfileIds": [
+            "battle_realm_eldergrove"
+          ],
+          "innerRealmId": "inner_eldergrove",
+          "mainGateId": "gate_eldergrove_greenveil",
+          "outerWarzoneId": "warzone_eldergrove",
+          "assetRef": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Eldergrove_Flat_256_v001.png",
+          "assetGuid": "53001b27fd9d14914984211765be4391",
+          "assetRawSha256": "1d45fc8fba82ebb3fdc1c4f819026ea8e45b11c248378371c7b2b6923c6e0cac",
+          "observed": {
+            "rareResourceAnchor": "ResourceType.WorldSap"
+          }
+        },
+        {
+          "canonicalId": "umbral",
+          "technicalAnchor": "RealmId.Umbral",
+          "legacyEnumValue": 4,
+          "contentRefs": [
+            "realm.umbral.name",
+            "realm.umbral.description"
+          ],
+          "aliases": [],
+          "rareResourceId": "dark_crystal",
+          "capabilityProfileIds": [
+            "battle_realm_umbral"
+          ],
+          "innerRealmId": "inner_umbral",
+          "mainGateId": "gate_umbral_ashvein",
+          "outerWarzoneId": "warzone_umbral",
+          "assetRef": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Umbral_Flat_256_v001.png",
+          "assetGuid": "a426041e03b0742999a34b8b5e198406",
+          "assetRawSha256": "a9daefa3ea6445ba2db680dad92a456db75becebec8848c678b29d5ea2c85aaa",
+          "observed": {
+            "rareResourceAnchor": "ResourceType.DarkCrystal"
+          }
+        }
+      ],
+      "unavailableAnchors": [],
+      "resolvedBlockingIds": [
+        "realms.rare_resource_catalog",
+        "realms.capability_profiles",
+        "realms.asset_refs"
+      ],
+      "blockingIds": []
+    },
+    {
+      "family": "buildings",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "buildings",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "buildings.max_level_review",
+        "buildings.production_profiles",
+        "buildings.cost_profiles",
+        "buildings.duration_profiles",
+        "buildings.asset_refs"
+      ]
+    },
+    {
+      "family": "research",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "research",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "research.max_levels",
+        "research.cost_profiles",
+        "research.duration_profiles",
+        "research.effects",
+        "research.prerequisites"
+      ]
+    },
+    {
+      "family": "troops",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "troops",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "troops.records",
+        "troops.localization",
+        "troops.base_stats",
+        "troops.training_profiles",
+        "troops.asset_refs"
+      ]
+    },
+    {
+      "family": "champions",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "champions",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "champions.records",
+        "champions.localization",
+        "champions.realm_class_assignments",
+        "champions.asset_refs",
+        "champions.base_skill_refs",
+        "champions.stat_profiles"
+      ]
+    },
+    {
+      "family": "skills",
+      "requiredForProduction": true,
+      "artifactDisposition": "blocked_required",
+      "inherits": {
+        "candidateId": "game-data-phase-c-six-family-technical-source-2026-07-23-v001",
+        "family": "skills",
+        "fields": [
+          "mappings",
+          "unavailableAnchors"
+        ]
+      },
+      "blockingIds": [
+        "skills.slot_policy",
+        "skills.behavior_profiles",
+        "skills.presentation_profiles",
+        "skills.target_authority",
+        "skills.audio_asset_refs",
+        "skills.vfx_asset_refs",
+        "skills.balance_acceptance"
+      ]
+    }
+  ],
+  "blockingIds": [
+    "approval.user_creative_balance",
+    "buildings.max_level_review",
+    "buildings.production_profiles",
+    "buildings.cost_profiles",
+    "buildings.duration_profiles",
+    "buildings.asset_refs",
+    "research.max_levels",
+    "research.cost_profiles",
+    "research.duration_profiles",
+    "research.effects",
+    "research.prerequisites",
+    "troops.records",
+    "troops.localization",
+    "troops.base_stats",
+    "troops.training_profiles",
+    "troops.asset_refs",
+    "champions.records",
+    "champions.localization",
+    "champions.realm_class_assignments",
+    "champions.asset_refs",
+    "champions.base_skill_refs",
+    "champions.stat_profiles",
+    "skills.slot_policy",
+    "skills.behavior_profiles",
+    "skills.presentation_profiles",
+    "skills.target_authority",
+    "skills.audio_asset_refs",
+    "skills.vfx_asset_refs",
+    "skills.balance_acceptance"
+  ],
+  "generationGate": {
+    "status": "blocked",
+    "requireProductionEligibleResult": "refused_without_writes",
+    "outputPaths": []
+  }
+}
