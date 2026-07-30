@@ -3,7 +3,7 @@
 ## Status
 
 - Issue: `#259`
-- Primary Codex mode: `terrestrial-design`
+- Primary delivery mode: `A2 terrestrial design`
 - Source version: `tdf-eco-2026-07-27-v001`
 - Packet state: `RosterProposed`
 - User creative approval: `NotRequested`
@@ -43,9 +43,15 @@ This folder contains the A2 terrestrial-design proposal for coherent fauna and h
   bounded natural kit, qualitative depth/transition studies, Mire Lumenback
   placement, provenance, QA, schema, and manifest evidence without duplicating
   the canonical creature raster.
+- `SlagfallQuarryV002/` — A2-owned corrective source
+  `tdf-eco-slagfall-2026-07-30-v002` with exact Stonehold quarry habitat,
+  corrected Slagwhistle identity and motion, provenance, QA, and manifest
+  evidence. It supersedes the visual concerns in frozen PR #369 without
+  editing that branch.
 
 The parent roster adds no concept art or runtime asset. Its companion packets
-advance four habitats, one pictured Moonshell ecotype, and three avian-soarer
+advance five habitats, one pictured Moonshell ecotype, one pictured
+Slagwhistle adult, and three avian-soarer
 identities to `ReadyForUserReview`. The normalization companion advances the
 exact pictured bases for Basalt Grazer, Grove Strider, and Mire Lumenback to
 `ReadyForUserReview` with concerns and zero duplicated raster bytes. The
@@ -70,22 +76,25 @@ Habitat suitability links to existing creatures are visual/ecological design ref
 - Supporting fauna families: `16` (`4` per realm)
 - Reused foundation family IDs: `3`
 - New exact visual-review family IDs: `3`
-- New exact habitat visual-review IDs: `4`
+- New exact habitat visual-review IDs: `5`
 - New exact flood-season fauna visual-review IDs: `1`
+- New exact Slagwhistle visual-review IDs: `1`
 - Normalized legacy exact visual-review family IDs: `3`
-- Remaining new text-only family IDs: `9`
+- Remaining new text-only family IDs: `8`
 - Remaining foundation text-only variant IDs: `6`
 - Avian-soarer finals/retained inputs: `8 / 3`
 - Moonroot finals/retained inputs: `6 / 3`
 - Faultroad finals/retained inputs: `3 / 1`
 - Hollowbark finals/retained inputs: `3 / 0`
 - Mirrorroot finals/retained inputs: `3 / 0`
+- Slagfall v002 finals/retained inputs: `3 / 0`
 - Foundation exact sheets referenced/new copies: `3 / 0`
 - Avian-soarer Player/install bytes: `0`
 - Moonroot Player/install bytes: `0`
 - Faultroad Player/install bytes: `0`
 - Hollowbark Player/install bytes: `0`
 - Mirrorroot Player/install bytes: `0`
+- Slagfall v002 Player/install bytes: `0`
 - Foundation normalization new Player/install bytes: `0`
 - Existing boss/elite anchors referenced: `16`
 - Runtime or shared-file changes: `0`

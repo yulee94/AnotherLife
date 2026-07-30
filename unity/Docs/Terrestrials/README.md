@@ -1,6 +1,8 @@
 # Terrestrial Design Foundation
 
-This folder is Codex terrestrial-design source for issue #194. It is not gameplay, narrative, spawning, combat, AI, reward, save, or runtime authority.
+This folder contains historical Codex terrestrial-design source and current
+A2 co-developer terrestrial source. It is not gameplay, narrative, spawning,
+combat, AI, reward, save, or runtime authority.
 
 Current source package:
 
