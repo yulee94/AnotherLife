@@ -2,8 +2,13 @@ name: AnotherLife Quality Gates
 
 on:
   pull_request:
-    branches:
-      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+      - ready_for_review
+      - converted_to_draft
   push:
     branches:
       - main
@@ -11,57 +16,208 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   classify:
     name: policy / classify
     runs-on: windows-latest
+    timeout-minutes: 15
     steps:
-      - name: Checkout
+      - name: Checkout exact event head
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        timeout-minutes: 5
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Classify PR scope
         shell: pwsh
+        timeout-minutes: 5
         run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Classify
 
   hygiene:
     name: repository / hygiene
     runs-on: windows-latest
+    timeout-minutes: 40
     steps:
-      - name: Checkout
+      - name: Checkout exact event head
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        timeout-minutes: 5
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Repository hygiene
         shell: pwsh
-        run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene
+        timeout-minutes: 10
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $transcript = "artifacts/repository-hygiene.txt"
+          try {
+            & ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Hygiene *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Repository hygiene exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Quality-gate fixture proof
+        shell: pwsh
+        timeout-minutes: 10
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $transcript = "artifacts/quality-gate-fixtures.txt"
+          try {
+            & ./tools/ci/Test-AnotherLifeQualityGateFixtures.ps1 -Scenario All *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Quality-gate fixtures exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Upload quality-gate evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        timeout-minutes: 10
+        with:
+          name: quality-gate-evidence-${{ github.run_attempt }}
+          path: |
+            artifacts/repository-hygiene.txt
+            artifacts/quality-gate-fixtures.txt
+          if-no-files-found: error
+          retention-days: 90
 
   android-unit-debug:
     name: android / unit-debug
     runs-on: windows-latest
+    timeout-minutes: 75
     steps:
-      - name: Checkout
+      - name: Checkout exact event head
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        timeout-minutes: 5
         with:
           fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - name: Set up JDK
         uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        timeout-minutes: 10
         with:
           distribution: temurin
           java-version: "21"
       - name: Gradle version
         shell: pwsh
+        timeout-minutes: 5
         run: ./gradlew.bat --version
       - name: Android unit tests and debug assembly
         shell: pwsh
-        run: ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
-      - name: Upload Android reports
+        timeout-minutes: 35
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $transcript = "artifacts/android-unit-debug-gradle.txt"
+          try {
+            & ./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Android unit/debug Gradle gate exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Upload Android unit/debug evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        timeout-minutes: 10
         with:
-          name: android-unit-debug-reports
+          name: android-unit-debug-evidence-${{ github.run_attempt }}
           path: |
+            artifacts/android-unit-debug-gradle.txt
             app/build/reports/tests/
             app/build/test-results/
             app/build/outputs/apk/debug/
-          if-no-files-found: warn
+          if-no-files-found: error
+          retention-days: 90
+
+  android-release:
+    name: android / release
+    runs-on: windows-latest
+    timeout-minutes: 80
+    steps:
+      - name: Checkout exact event head
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        timeout-minutes: 5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Determine Android release applicability
+        id: release_applicability
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $transcript = "artifacts/android-release-applicability.txt"
+          try {
+            & ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode AndroidReleaseApplicability *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Android release applicability exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Set up JDK
+        if: steps.release_applicability.outputs.applicable == 'true'
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        timeout-minutes: 10
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Gradle version
+        if: steps.release_applicability.outputs.applicable == 'true'
+        shell: pwsh
+        timeout-minutes: 5
+        run: ./gradlew.bat --version
+      - name: Android release lint and assembly
+        if: steps.release_applicability.outputs.applicable == 'true'
+        shell: pwsh
+        timeout-minutes: 35
+        run: |
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          $transcript = "artifacts/android-release-gradle.txt"
+          try {
+            & ./gradlew.bat :app:lintRelease :app:assembleRelease --no-daemon *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Android release Gradle gate exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
+      - name: Upload Android release evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        timeout-minutes: 10
+        with:
+          name: android-release-evidence-${{ github.run_attempt }}
+          path: |
+            artifacts/android-release-applicability.txt
+            artifacts/android-release-gradle.txt
+            app/build/reports/tests/
+            app/build/reports/lint-results-release*
+            app/build/test-results/
+            app/build/outputs/apk/release/
+            app/build/outputs/mapping/
+            app/build/outputs/logs/
+          if-no-files-found: error
+          retention-days: 90

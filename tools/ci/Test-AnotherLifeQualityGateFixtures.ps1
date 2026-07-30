@@ -1,6 +1,24 @@
 param(
     [string] $WorkingRoot = "",
-    [ValidateSet("All", "DuplicateGuid", "TestScene", "MissingScene", "MalformedJson", "MutableAction", "MixedScope", "Coordination", "RetiredPrefix", "PolicyAuthority", "PushMain")]
+    [ValidateSet(
+        "All",
+        "DuplicateGuid",
+        "TestScene",
+        "MissingScene",
+        "MalformedJson",
+        "MutableAction",
+        "MixedScope",
+        "Coordination",
+        "RetiredPrefix",
+        "PolicyAuthority",
+        "PushMain",
+        "PullRequestRange",
+        "InvalidBase",
+        "StackedBase",
+        "PathChanges",
+        "DeletedSharedFile",
+        "AndroidReleaseApplicability"
+    )]
     [string] $Scenario = "All"
 )
 
@@ -8,6 +26,14 @@ $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
+$powerShellExecutable = if ($PSVersionTable.PSEdition -eq "Core") {
+    Join-Path $PSHOME "pwsh.exe"
+} else {
+    Join-Path $PSHOME "powershell.exe"
+}
+if (-not (Test-Path -LiteralPath $powerShellExecutable)) {
+    throw "Current PowerShell host executable was not found at '$powerShellExecutable'."
+}
 if (-not $WorkingRoot) {
     $WorkingRoot = Join-Path ([System.IO.Path]::GetTempPath()) "AnotherLife-QualityGateFixtures-$([Guid]::NewGuid().ToString('N'))"
 }
@@ -88,6 +114,87 @@ function Assert-Contains {
     }
 }
 
+function Write-PullRequestEvent {
+    param(
+        [Parameter(Mandatory = $true)][string] $Path,
+        [Parameter(Mandatory = $true)][string] $BaseSha,
+        [Parameter(Mandatory = $true)][string] $HeadSha,
+        [Parameter(Mandatory = $true)][string] $Body,
+        [string] $BaseBranch = "main",
+        [string] $HeadBranch = "codex/quality-gate-fixture"
+    )
+
+    $event = @{
+        pull_request = @{
+            draft = $false
+            body = $Body
+            base = @{
+                ref = $BaseBranch
+                sha = $BaseSha
+            }
+            head = @{
+                ref = $HeadBranch
+                sha = $HeadSha
+            }
+        }
+    }
+    $event |
+        ConvertTo-Json -Depth 6 |
+        Set-Content -LiteralPath $Path -Encoding utf8
+}
+
+function Add-FixtureCommit {
+    param(
+        [Parameter(Mandatory = $true)][string] $FixtureRepo,
+        [Parameter(Mandatory = $true)][string] $Message
+    )
+
+    Invoke-Checked git @("add", "-A") $FixtureRepo | Out-Null
+    Invoke-Checked git @("commit", "-q", "-m", $Message) $FixtureRepo | Out-Null
+    return (
+        Invoke-Checked git @("rev-parse", "HEAD") $FixtureRepo
+    ).Trim()
+}
+
+function Invoke-PullRequestGate {
+    param(
+        [Parameter(Mandatory = $true)][string] $FixtureRepo,
+        [Parameter(Mandatory = $true)][string] $EventPath,
+        [ValidateSet("Classify", "Hygiene", "AndroidReleaseApplicability")]
+        [string] $Mode = "Classify",
+        [string] $GitHubOutput = "",
+        [switch] $ExpectFailure
+    )
+
+    $environment = @{
+        GITHUB_ACTIONS = "true"
+        GITHUB_EVENT_NAME = "pull_request"
+        GITHUB_EVENT_PATH = $EventPath
+        GITHUB_BASE_REF = ""
+        GITHUB_HEAD_REF = ""
+        GITHUB_OUTPUT = $GitHubOutput
+    }
+    $invoke = @{
+        FilePath = $powerShellExecutable
+        Arguments = @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+            "-Mode",
+            $Mode
+        )
+        WorkingDirectory = $FixtureRepo
+        Environment = $environment
+    }
+    if ($ExpectFailure) {
+        return Invoke-Checked @invoke -ExpectFailure
+    }
+
+    return Invoke-Checked @invoke
+}
+
 function Invoke-HygieneFailureFixture {
     param(
         [Parameter(Mandatory = $true)][string] $Name,
@@ -101,7 +208,7 @@ function Invoke-HygieneFailureFixture {
     Push-Location $fixtureRepo
     try {
         Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
-        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD") $fixtureRepo -ExpectFailure
+        $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene", "-BaseRef", "HEAD") $fixtureRepo -ExpectFailure
     } finally {
         Pop-Location
     }
@@ -155,19 +262,37 @@ function Test-MalformedJsonFixture {
 }
 
 function Test-MutableActionFixture {
-    Invoke-HygieneFailureFixture "mutable-action" {
-        param($fixtureRepo)
-        New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github/workflows") | Out-Null
-        Set-Content -LiteralPath (Join-Path $fixtureRepo ".github/workflows/bad.yml") -Value @"
+    $fixtures = @(
+        [pscustomobject]@{
+            Name = "mutable-action-major"
+            Reference = "actions/checkout@v4"
+        },
+        [pscustomobject]@{
+            Name = "mutable-action-branch"
+            Reference = "actions/checkout@main"
+        },
+        [pscustomobject]@{
+            Name = "mutable-action-short-sha"
+            Reference = "actions/checkout@34e1148"
+        }
+    )
+
+    foreach ($fixture in $fixtures) {
+        $reference = $fixture.Reference
+        Invoke-HygieneFailureFixture $fixture.Name {
+            param($fixtureRepo)
+            New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github/workflows") | Out-Null
+            Set-Content -LiteralPath (Join-Path $fixtureRepo ".github/workflows/bad.yml") -Value @"
 name: Bad
 on: [pull_request]
 jobs:
   bad:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: $reference
 "@
-    } "uses a mutable major-version action tag"
+        } "is not pinned to a full 40-hex commit SHA"
+    }
 }
 
 function Test-MixedScopeFixture {
@@ -192,7 +317,7 @@ function Test-MixedScopeFixture {
     Push-Location $fixtureRepo
     try {
         Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
-        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+        $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
@@ -227,7 +352,7 @@ function Test-CoordinationFixture {
     Push-Location $fixtureRepo
     try {
         Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
-        Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+        Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
@@ -267,14 +392,14 @@ function Test-PushMainFixture {
 }
 "@
 
-        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify") $fixtureRepo @{
+        $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify") $fixtureRepo @{
             GITHUB_ACTIONS = "true"
             GITHUB_EVENT_NAME = "push"
             GITHUB_EVENT_PATH = $eventPath
             GITHUB_BASE_REF = ""
             GITHUB_HEAD_REF = ""
         }
-        $hygieneOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene") $fixtureRepo @{
+        $hygieneOutput = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Hygiene") $fixtureRepo @{
             GITHUB_ACTIONS = "true"
             GITHUB_EVENT_NAME = "push"
             GITHUB_EVENT_PATH = $eventPath
@@ -290,7 +415,7 @@ function Test-PushMainFixture {
   "after": "$before"
 }
 "@
-        $mismatchOutput = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify") $fixtureRepo @{
+        $mismatchOutput = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify") $fixtureRepo @{
             GITHUB_ACTIONS = "true"
             GITHUB_EVENT_NAME = "push"
             GITHUB_EVENT_PATH = $mismatchEventPath
@@ -326,7 +451,7 @@ function Test-RetiredPrefixFixture {
     Push-Location $fixtureRepo
     try {
         Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
-        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+        $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
@@ -382,7 +507,7 @@ production_test_scene_path: unity/Assets/Test.unity
     Push-Location $fixtureRepo
     try {
         Invoke-Checked git @("add", ".") $fixtureRepo | Out-Null
-        $output = Invoke-Checked powershell @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+        $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
@@ -394,6 +519,204 @@ production_test_scene_path: unity/Assets/Test.unity
     }
 
     Assert-Contains $output "Engineering/workflow paths changed: 2"
+}
+
+function Test-PullRequestRangeFixture {
+    $fixtureRepo = New-FixtureRepo "pull-request-range"
+    Invoke-Checked git @("branch", "-M", "main") $fixtureRepo | Out-Null
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+
+    $runtimePath = Join-Path $fixtureRepo "app/src/main"
+    New-Item -ItemType Directory -Force -Path $runtimePath | Out-Null
+    Set-Content -LiteralPath (Join-Path $runtimePath "PullRequestRangeFixture.kt") -Value "class PullRequestRangeFixture" -NoNewline
+    $head = Add-FixtureCommit $fixtureRepo "pull request range head"
+
+    Invoke-Checked git @("update-ref", "refs/remotes/origin/main", $head) $fixtureRepo | Out-Null
+
+    $body = "- [x] Codex engineering`n`nRefs #155`n`n## Shared-file lock`n`nNone."
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Write-PullRequestEvent $eventPath $base $head $body
+    $output = Invoke-PullRequestGate $fixtureRepo $eventPath
+
+    Assert-Contains $output "app/src/main/PullRequestRangeFixture.kt"
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
+
+    Invoke-Checked git @("checkout", "--detach", $base) $fixtureRepo | Out-Null
+    try {
+        $mismatchOutput = Invoke-PullRequestGate $fixtureRepo $eventPath -ExpectFailure
+    } finally {
+        Invoke-Checked git @("checkout", "--detach", $head) $fixtureRepo | Out-Null
+    }
+    Assert-Contains $mismatchOutput "does not match event head SHA"
+
+    $zeroEventPath = Join-Path $fixtureRepo "event-zero-base.json"
+    Write-PullRequestEvent $zeroEventPath ("0" * 40) $head $body
+    $zeroOutput = Invoke-PullRequestGate $fixtureRepo $zeroEventPath -ExpectFailure
+    Assert-Contains $zeroOutput "base/head commit SHAs are invalid"
+
+    $malformedEventPath = Join-Path $fixtureRepo "event-malformed-head.json"
+    Write-PullRequestEvent $malformedEventPath $base "not-a-commit-sha" $body
+    $malformedOutput = Invoke-PullRequestGate $fixtureRepo $malformedEventPath -ExpectFailure
+    Assert-Contains $malformedOutput "base/head commit SHAs are invalid"
+
+    $missingEventPath = Join-Path $fixtureRepo "event-missing-base.json"
+    Write-PullRequestEvent $missingEventPath ("1" * 40) $head $body
+    $missingOutput = Invoke-PullRequestGate $fixtureRepo $missingEventPath -ExpectFailure
+    Assert-Contains $missingOutput ("1" * 40)
+    Assert-Contains $missingOutput "not an available"
+}
+
+function Test-InvalidBaseFixture {
+    $fixtureRepo = New-FixtureRepo "invalid-base"
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $runtimePath = Join-Path $fixtureRepo "app/src/main"
+    New-Item -ItemType Directory -Force -Path $runtimePath | Out-Null
+    Set-Content -LiteralPath (Join-Path $runtimePath "InvalidBaseFixture.kt") -Value "class InvalidBaseFixture" -NoNewline
+    $head = Add-FixtureCommit $fixtureRepo "invalid base head"
+
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`n## Shared-file lock`n`nNone."
+    Write-PullRequestEvent $eventPath $base $head $body "feature/unapproved-base"
+    $output = Invoke-PullRequestGate $fixtureRepo $eventPath -ExpectFailure
+
+    Assert-Contains $output "Base branch 'feature/unapproved-base' is not main and no stacked/dependency declaration was found."
+}
+
+function Test-StackedBaseFixture {
+    $fixtureRepo = New-FixtureRepo "stacked-base"
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $runtimePath = Join-Path $fixtureRepo "app/src/main"
+    New-Item -ItemType Directory -Force -Path $runtimePath | Out-Null
+    Set-Content -LiteralPath (Join-Path $runtimePath "StackedBaseFixture.kt") -Value "class StackedBaseFixture" -NoNewline
+    $head = Add-FixtureCommit $fixtureRepo "stacked base head"
+
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`nDepends on #154.`n`n## Shared-file lock`n`nNone."
+    Write-PullRequestEvent $eventPath $base $head $body "feature/declared-stack"
+    $output = Invoke-PullRequestGate $fixtureRepo $eventPath
+
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
+}
+
+function Test-PathChangesFixture {
+    $fixtureRepo = New-FixtureRepo "path-changes"
+    $narrativePath = Join-Path $fixtureRepo "unity/Docs/Narrative"
+    $terrestrialPath = Join-Path $fixtureRepo "unity/Docs/Terrestrials"
+    New-Item -ItemType Directory -Force -Path $narrativePath | Out-Null
+    New-Item -ItemType Directory -Force -Path $terrestrialPath | Out-Null
+    Set-Content -LiteralPath (Join-Path $narrativePath "Deleted.md") -Value "# Delete me" -NoNewline
+    Set-Content -LiteralPath (Join-Path $terrestrialPath "Moved.cs") -Value "public class MovedFixture {}" -NoNewline
+    $base = Add-FixtureCommit $fixtureRepo "path changes base"
+
+    $androidPath = Join-Path $fixtureRepo "app/src/main"
+    $runtimePath = Join-Path $fixtureRepo "unity/Assets/AL/Scripts"
+    New-Item -ItemType Directory -Force -Path $androidPath | Out-Null
+    New-Item -ItemType Directory -Force -Path $runtimePath | Out-Null
+    Set-Content -LiteralPath (Join-Path $androidPath "Added.kt") -Value "class AddedFixture" -NoNewline
+    Remove-Item -LiteralPath (Join-Path $narrativePath "Deleted.md")
+    Invoke-Checked git @(
+        "mv",
+        "unity/Docs/Terrestrials/Moved.cs",
+        "unity/Assets/AL/Scripts/Moved.cs"
+    ) $fixtureRepo | Out-Null
+    $head = Add-FixtureCommit $fixtureRepo "path changes head"
+
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`nMixed-mode fixture: separate PRs are impractical for this exact path-classification proof.`n`n## Shared-file lock`n`nNone."
+    Write-PullRequestEvent $eventPath $base $head $body
+    $output = Invoke-PullRequestGate $fixtureRepo $eventPath
+
+    Assert-Contains $output "app/src/main/Added.kt"
+    Assert-Contains $output "unity/Docs/Narrative/Deleted.md"
+    Assert-Contains $output "unity/Docs/Terrestrials/Moved.cs"
+    Assert-Contains $output "unity/Assets/AL/Scripts/Moved.cs"
+    Assert-Contains $output "Narrative paths changed: 1"
+    Assert-Contains $output "Terrestrial design paths changed: 1"
+    Assert-Contains $output "Engineering/workflow paths changed: 2"
+}
+
+function Test-DeletedSharedFileFixture {
+    $fixtureRepo = New-FixtureRepo "deleted-shared-file"
+    $sharedDirectory = Join-Path $fixtureRepo "unity/Assets/AL/Scripts/Core"
+    New-Item -ItemType Directory -Force -Path $sharedDirectory | Out-Null
+    $sharedPath = Join-Path $sharedDirectory "Bootloader.cs"
+    Set-Content -LiteralPath $sharedPath -Value "public class Bootloader {}" -NoNewline
+    $base = Add-FixtureCommit $fixtureRepo "shared file base"
+
+    Remove-Item -LiteralPath $sharedPath
+    $head = Add-FixtureCommit $fixtureRepo "delete shared file"
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`n## Shared-file lock`n`nNone."
+    Write-PullRequestEvent $eventPath $base $head $body
+    $output = Invoke-PullRequestGate $fixtureRepo $eventPath -ExpectFailure
+
+    Assert-Contains $output "Shared file 'unity/Assets/AL/Scripts/Core/Bootloader.cs' changed but was not declared in the PR body."
+}
+
+function Test-AndroidReleaseApplicabilityFixture {
+    $fixtureRepo = New-FixtureRepo "android-release-applicability"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`n## Shared-file lock`n`nNone."
+
+    $addBase = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $androidDirectory = Join-Path $fixtureRepo "app/src/main"
+    New-Item -ItemType Directory -Force -Path $androidDirectory | Out-Null
+    $androidFile = Join-Path $androidDirectory "ReleaseFixture.kt"
+    Set-Content -LiteralPath $androidFile -Value "class ReleaseFixture" -NoNewline
+    $addHead = Add-FixtureCommit $fixtureRepo "android add"
+    $addEvent = Join-Path $WorkingRoot "android-release-add-event.json"
+    $addOutputPath = Join-Path $WorkingRoot "android-release-add-output.txt"
+    Write-PullRequestEvent $addEvent $addBase $addHead $body
+    $addOutput = Invoke-PullRequestGate $fixtureRepo $addEvent -Mode AndroidReleaseApplicability -GitHubOutput $addOutputPath
+    Assert-Contains $addOutput "Android release applicable: true"
+    Assert-Contains (Get-Content -Raw -LiteralPath $addOutputPath) "applicable=true"
+
+    $deleteBase = $addHead
+    Remove-Item -LiteralPath $androidFile
+    $deleteHead = Add-FixtureCommit $fixtureRepo "android delete"
+    $deleteEvent = Join-Path $WorkingRoot "android-release-delete-event.json"
+    $deleteOutputPath = Join-Path $WorkingRoot "android-release-delete-output.txt"
+    Write-PullRequestEvent $deleteEvent $deleteBase $deleteHead $body
+    $deleteOutput = Invoke-PullRequestGate $fixtureRepo $deleteEvent -Mode AndroidReleaseApplicability -GitHubOutput $deleteOutputPath
+    Assert-Contains $deleteOutput "Android release applicable: true"
+    Assert-Contains $deleteOutput "app/src/main/ReleaseFixture.kt"
+    Assert-Contains (Get-Content -Raw -LiteralPath $deleteOutputPath) "applicable=true"
+
+    $renameSource = Join-Path $androidDirectory "Renamed.kt"
+    Set-Content -LiteralPath $renameSource -Value "class RenamedFixture" -NoNewline
+    $renameBase = Add-FixtureCommit $fixtureRepo "android rename base"
+    $documentationDirectory = Join-Path $fixtureRepo "unity/Docs"
+    New-Item -ItemType Directory -Force -Path $documentationDirectory | Out-Null
+    Invoke-Checked git @(
+        "mv",
+        "app/src/main/Renamed.kt",
+        "unity/Docs/Renamed.md"
+    ) $fixtureRepo | Out-Null
+    $renameHead = Add-FixtureCommit $fixtureRepo "android rename to documentation"
+    $renameEvent = Join-Path $WorkingRoot "android-release-rename-event.json"
+    $renameOutputPath = Join-Path $WorkingRoot "android-release-rename-output.txt"
+    Write-PullRequestEvent $renameEvent $renameBase $renameHead $body
+    $renameOutput = Invoke-PullRequestGate $fixtureRepo $renameEvent -Mode AndroidReleaseApplicability -GitHubOutput $renameOutputPath
+    Assert-Contains $renameOutput "Android release applicable: true"
+    Assert-Contains $renameOutput "app/src/main/Renamed.kt"
+    Assert-Contains (Get-Content -Raw -LiteralPath $renameOutputPath) "applicable=true"
+
+    $documentationBase = $renameHead
+    Set-Content -LiteralPath (Join-Path $documentationDirectory "Governance.md") -Value "# Governance only" -NoNewline
+    $documentationHead = Add-FixtureCommit $fixtureRepo "governance documentation only"
+    $documentationEvent = Join-Path $WorkingRoot "android-release-documentation-event.json"
+    $documentationOutputPath = Join-Path $WorkingRoot "android-release-documentation-output.txt"
+    Write-PullRequestEvent $documentationEvent $documentationBase $documentationHead $body
+    $documentationOutput = Invoke-PullRequestGate $fixtureRepo $documentationEvent -Mode AndroidReleaseApplicability -GitHubOutput $documentationOutputPath
+    Assert-Contains $documentationOutput "Android release applicable: false"
+    Assert-Contains (Get-Content -Raw -LiteralPath $documentationOutputPath) "applicable=false"
 }
 
 if (Test-Path -LiteralPath $WorkingRoot) {
@@ -413,6 +736,12 @@ try {
         "PushMain" { Test-PushMainFixture }
         "RetiredPrefix" { Test-RetiredPrefixFixture }
         "PolicyAuthority" { Test-PolicyAuthorityFixture }
+        "PullRequestRange" { Test-PullRequestRangeFixture }
+        "InvalidBase" { Test-InvalidBaseFixture }
+        "StackedBase" { Test-StackedBaseFixture }
+        "PathChanges" { Test-PathChangesFixture }
+        "DeletedSharedFile" { Test-DeletedSharedFileFixture }
+        "AndroidReleaseApplicability" { Test-AndroidReleaseApplicabilityFixture }
         "All" {
             Test-DuplicateGuidFixture
             Test-TestSceneFixture
@@ -424,6 +753,12 @@ try {
             Test-PushMainFixture
             Test-RetiredPrefixFixture
             Test-PolicyAuthorityFixture
+            Test-PullRequestRangeFixture
+            Test-InvalidBaseFixture
+            Test-StackedBaseFixture
+            Test-PathChangesFixture
+            Test-DeletedSharedFileFixture
+            Test-AndroidReleaseApplicabilityFixture
         }
     }
 

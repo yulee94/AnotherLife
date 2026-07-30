@@ -1,8 +1,9 @@
-version: 2
+version: 3
 status_names:
   classify: "policy / classify"
   hygiene: "repository / hygiene"
   android_unit_debug: "android / unit-debug"
+  android_release: "android / release"
 branch_prefixes:
   - codex/
 primary_modes:
@@ -42,6 +43,18 @@ workflow_paths:
   - .github/workflows/
   - .github/anotherlife-policy.yml
   - tools/ci/
+android_release_sensitive_paths:
+  - app/
+  - build.gradle.kts
+  - settings.gradle.kts
+  - gradle.properties
+  - gradle/
+  - gradlew
+  - gradlew.bat
+  - .github/workflows/quality-gates.yml
+  - .github/anotherlife-policy.yml
+  - tools/ci/Invoke-AnotherLifeQualityGate.ps1
+  - tools/ci/Test-AnotherLifeQualityGateFixtures.ps1
 forbidden_tracked_path_patterns:
   - "^unity/(Library|Temp|Logs|Build|Builds|UserSettings)/"
   - "^unity/Assets/StreamingAssets/aa/"
