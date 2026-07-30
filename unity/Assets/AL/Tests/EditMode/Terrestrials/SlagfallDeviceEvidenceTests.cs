@@ -167,6 +167,173 @@ namespace AL.Tests.EditMode.Terrestrials
         }
 
         [Test]
+        public void MissingLifecycleEvidenceCannotEnterProductionScoring()
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.warmReadySeconds = null;
+            report.incrementalUnityAllocatedMemoryBytes = null;
+            report.lifecycleStressPassed = false;
+            report.lifecycleCycleCount = 11;
+
+            Assert.IsFalse(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers));
+            CollectionAssert.IsSubsetOf(
+                new[]
+                {
+                    "warm_ready_timing_missing",
+                    "incremental_unity_memory_evidence_missing",
+                    "lifecycle_stress_failed"
+                },
+                blockers);
+        }
+
+        [Test]
+        public void MissingEvidenceOverheadExclusionFailsClosed()
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.excludedEvidenceOverheadFrameCount = 0;
+
+            Assert.IsFalse(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers));
+            CollectionAssert.Contains(
+                blockers,
+                "evidence_overhead_frame_exclusion_missing");
+        }
+
+        [Test]
+        public void LaneTamperingOrUnrecoveredThermalLoadFailsClosed()
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.targetFrameRate = 60;
+            report.thermalEvidenceSource =
+                "android.os.PowerManager.getCurrentThermalStatus";
+            report.thermalStateAtEnd = "severe";
+
+            Assert.IsFalse(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers));
+            CollectionAssert.IsSubsetOf(
+                new[]
+                {
+                    "evidence_lane_target_frame_rate_mismatch",
+                    "local_thermal_state_unrecovered"
+                },
+                blockers);
+        }
+
+        [Test]
+        public void MobileLowRejectsIosOrMetalEvidence()
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.platform = "IPhonePlayer";
+            report.graphicsDeviceType = "Metal";
+            report.thermalStateAtStart =
+                "external_capture_required";
+            report.thermalStateAtEnd =
+                "external_capture_required";
+            report.thermalEvidenceSource =
+                "external_platform_capture_required";
+
+            Assert.IsFalse(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers));
+            CollectionAssert.IsSubsetOf(
+                new[]
+                {
+                    "evidence_lane_platform_mismatch",
+                    "evidence_lane_graphics_api_mismatch"
+                },
+                blockers);
+        }
+
+        [TestCase("OpenGLES3")]
+        [TestCase("Vulkan")]
+        public void MobileLowAcceptsApprovedAndroidGraphicsApis(
+            string graphicsDeviceType)
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.graphicsDeviceType = graphicsDeviceType;
+
+            Assert.IsTrue(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers),
+                string.Join(", ", blockers));
+        }
+
+        [Test]
+        public void MobileStandardIosCanUseExternalThermalEvidence()
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.evidenceLane =
+                SlagfallEvidenceContract.StableId(
+                    SlagfallEvidenceLane.MobileStandard);
+            report.platform = "IPhonePlayer";
+            report.graphicsDeviceType = "Metal";
+            report.targetFrameRate =
+                SlagfallEvidenceContract.TargetFrameRate(
+                    SlagfallEvidenceLane.MobileStandard);
+            report.targetFrameTimeMilliseconds =
+                SlagfallEvidenceContract.TargetFrameTimeMilliseconds(
+                    SlagfallEvidenceLane.MobileStandard);
+            report.thermalStateAtStart =
+                "external_capture_required";
+            report.thermalStateAtEnd =
+                "external_capture_required";
+            report.thermalEvidenceSource =
+                "external_platform_capture_required";
+
+            Assert.IsTrue(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers),
+                string.Join(", ", blockers));
+        }
+
+        [Test]
+        public void MissingThermalStatesFailClosed()
+        {
+            SlagfallDeviceEvidenceReport report =
+                CreateCompleteReport();
+            report.thermalEvidenceSource = string.Empty;
+            report.thermalStateAtStart = string.Empty;
+            report.thermalStateAtEnd = string.Empty;
+
+            Assert.IsFalse(
+                SlagfallDeviceEvidenceValidator
+                    .ValidateForProductionScoring(
+                        report,
+                        out string[] blockers));
+            CollectionAssert.IsSubsetOf(
+                new[]
+                {
+                    "thermal_evidence_source_missing",
+                    "thermal_state_start_missing",
+                    "thermal_state_end_missing",
+                    "local_thermal_state_unrecovered"
+                },
+                blockers);
+        }
+
+        [Test]
         public void FrameBudgetCanChangeWithoutGlobalQualityMutation()
         {
             int qualityBefore = QualitySettings.GetQualityLevel();
@@ -210,7 +377,21 @@ namespace AL.Tests.EditMode.Terrestrials
                     SlagfallEvidenceContract.SchemaVersion,
                 sourceVersion =
                     SlagfallSourceAuthority.SourceVersion,
+                evidenceLane =
+                    SlagfallEvidenceContract.StableId(
+                        SlagfallEvidenceLane.MobileLow),
+                platform = "Android",
+                graphicsDeviceType = "Vulkan",
+                targetFrameRate =
+                    SlagfallEvidenceContract.TargetFrameRate(
+                        SlagfallEvidenceLane.MobileLow),
+                targetFrameTimeMilliseconds =
+                    SlagfallEvidenceContract
+                        .TargetFrameTimeMilliseconds(
+                            SlagfallEvidenceLane.MobileLow),
                 completed = true,
+                intendedDurationSeconds =
+                    SlagfallEvidenceContract.MinimumRunSeconds,
                 observedDurationSeconds =
                     SlagfallEvidenceContract.MinimumRunSeconds,
                 registeredUserCount =
@@ -227,6 +408,7 @@ namespace AL.Tests.EditMode.Terrestrials
                 finalFiveMinuteGpuMilliseconds = metric,
                 totalAllocatedMemoryBytes = metric,
                 totalReservedMemoryBytes = metric,
+                incrementalUnityAllocatedMemoryBytes = metric,
                 loadedTextureMemoryBytes = metric,
                 loadedMeshMemoryBytes = metric,
                 loadedAnimationMemoryBytes = metric,
@@ -236,8 +418,16 @@ namespace AL.Tests.EditMode.Terrestrials
                 batchCount = metric,
                 setPassCallCount = metric,
                 coldReadySeconds = 1d,
+                warmReadySeconds = metric,
                 optionalTierCancellationPassed = true,
+                lifecycleStressPassed = true,
+                lifecycleCycleCount = 12,
                 exitReleasePlateauPassed = true,
+                excludedEvidenceOverheadFrameCount = 1,
+                thermalStateAtStart = "moderate",
+                thermalStateAtEnd = "light",
+                thermalEvidenceSource =
+                    "android.os.PowerManager.getCurrentThermalStatus",
                 lowMemoryEventCount = 0,
                 severeLogCount = 0,
                 externalGpuCaptureId = "gpu-capture-001",

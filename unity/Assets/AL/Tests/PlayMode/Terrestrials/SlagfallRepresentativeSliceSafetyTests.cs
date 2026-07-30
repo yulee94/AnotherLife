@@ -1,4 +1,5 @@
 #if UNITY_EDITOR
+using System;
 using System.Collections;
 using System.Linq;
 using AL.RealmWar.Territories.Runtime;
@@ -6,6 +7,7 @@ using AL.Terrestrials.Slagfall;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Profiling;
 using UnityEngine.TestTools;
 using Object = UnityEngine.Object;
 
@@ -13,6 +15,11 @@ namespace AL.Tests.PlayMode
 {
     public sealed class SlagfallRepresentativeSliceSafetyTests
     {
+        private const int PressureStressCycles = 1000;
+        private const int LifecycleStressCycles = 12;
+        private const int LifecycleWarmupCycles = 2;
+        private const long MemoryPlateauToleranceBytes =
+            4L * 1024L * 1024L;
         private const string SlicePrefabPath =
             "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/" +
             "Environment/Prefabs/Slagfall_RepresentativeSlice.prefab";
@@ -65,7 +72,9 @@ namespace AL.Tests.PlayMode
 
             bool criticalContinuity = true;
             bool heavyRecovery = true;
-            for (int cycle = 0; cycle < 24; cycle++)
+            for (int cycle = 0;
+                cycle < PressureStressCycles;
+                cycle++)
             {
                 slice.ApplySyntheticPressure(60f, 0.5f);
                 criticalContinuity &=
@@ -173,8 +182,11 @@ namespace AL.Tests.PlayMode
 
             int baselineSlices = CountLoadedSceneSlices();
             int baselineParticipants = CountLoadedSceneParticipants();
+            var releasedMemory = new long[LifecycleStressCycles];
 
-            for (int cycle = 0; cycle < 12; cycle++)
+            for (int cycle = 0;
+                cycle < LifecycleStressCycles;
+                cycle++)
             {
                 _instance = Object.Instantiate(prefab);
                 yield return null;
@@ -200,6 +212,11 @@ namespace AL.Tests.PlayMode
                 Object.Destroy(_instance);
                 _instance = null;
                 yield return null;
+                yield return Resources.UnloadUnusedAssets();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                releasedMemory[cycle] =
+                    Profiler.GetTotalAllocatedMemoryLong();
 
                 Assert.AreEqual(
                     baselineSlices,
@@ -211,11 +228,22 @@ namespace AL.Tests.PlayMode
                     $"Synthetic participant leaked after cycle {cycle}.");
             }
 
-            yield return Resources.UnloadUnusedAssets();
             Assert.AreEqual(baselineSlices, CountLoadedSceneSlices());
             Assert.AreEqual(
                 baselineParticipants,
                 CountLoadedSceneParticipants());
+            long[] steadyStateMemory = releasedMemory
+                .Skip(LifecycleWarmupCycles)
+                .ToArray();
+            Assert.LessOrEqual(
+                steadyStateMemory.Max() - steadyStateMemory.Min(),
+                MemoryPlateauToleranceBytes,
+                "Released memory did not settle into the 4 MiB lifecycle plateau.");
+            Assert.LessOrEqual(
+                steadyStateMemory[steadyStateMemory.Length - 1],
+                steadyStateMemory[0] +
+                    MemoryPlateauToleranceBytes,
+                "Final released memory grew beyond the 4 MiB lifecycle tolerance.");
         }
 
         private static int CountLoadedSceneSlices()

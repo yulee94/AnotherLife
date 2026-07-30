@@ -16,7 +16,7 @@ namespace AL.Terrestrials.Slagfall
     public static class SlagfallEvidenceContract
     {
         public const string SchemaVersion =
-            "slagfall-device-evidence-v001";
+            "slagfall-device-evidence-v002";
         public const float MinimumRunSeconds = 30f * 60f;
         public const float EvidenceWindowSeconds = 5f * 60f;
         public const int RequiredRepresentedUsers =
@@ -79,6 +79,123 @@ namespace AL.Terrestrials.Slagfall
                         lane,
                         "Unknown Slagfall evidence lane.");
             }
+        }
+
+        public static bool TryParseStableId(
+            string stableId,
+            out SlagfallEvidenceLane lane)
+        {
+            switch (stableId)
+            {
+                case "mobile_low":
+                    lane = SlagfallEvidenceLane.MobileLow;
+                    return true;
+                case "mobile_standard":
+                    lane = SlagfallEvidenceLane.MobileStandard;
+                    return true;
+                case "desktop_low":
+                    lane = SlagfallEvidenceLane.DesktopLow;
+                    return true;
+                case "desktop_standard":
+                    lane = SlagfallEvidenceLane.DesktopStandard;
+                    return true;
+                default:
+                    lane = default;
+                    return false;
+            }
+        }
+
+        public static bool PlatformMatchesLane(
+            SlagfallEvidenceLane lane,
+            string platform)
+        {
+            switch (lane)
+            {
+                case SlagfallEvidenceLane.MobileLow:
+                    return string.Equals(
+                        platform,
+                        "Android",
+                        StringComparison.Ordinal);
+                case SlagfallEvidenceLane.MobileStandard:
+                    return string.Equals(
+                            platform,
+                            "Android",
+                            StringComparison.Ordinal) ||
+                        string.Equals(
+                            platform,
+                            "IPhonePlayer",
+                            StringComparison.Ordinal);
+                case SlagfallEvidenceLane.DesktopLow:
+                case SlagfallEvidenceLane.DesktopStandard:
+                    return string.Equals(
+                            platform,
+                            "OSXPlayer",
+                            StringComparison.Ordinal) ||
+                        string.Equals(
+                            platform,
+                            "WindowsPlayer",
+                            StringComparison.Ordinal) ||
+                        string.Equals(
+                            platform,
+                            "LinuxPlayer",
+                            StringComparison.Ordinal);
+                default:
+                    return false;
+            }
+        }
+
+        public static bool GraphicsDeviceMatchesLane(
+            SlagfallEvidenceLane lane,
+            string graphicsDeviceType)
+        {
+            if (lane != SlagfallEvidenceLane.MobileLow)
+            {
+                return !string.IsNullOrWhiteSpace(
+                    graphicsDeviceType);
+            }
+
+            return string.Equals(
+                    graphicsDeviceType,
+                    "OpenGLES3",
+                    StringComparison.Ordinal) ||
+                string.Equals(
+                    graphicsDeviceType,
+                    "Vulkan",
+                    StringComparison.Ordinal);
+        }
+
+        public static bool LocalThermalStatePasses(
+            string evidenceSource,
+            string endingState)
+        {
+            if (string.Equals(
+                evidenceSource,
+                "external_platform_capture_required",
+                StringComparison.Ordinal))
+            {
+                return true;
+            }
+
+            if (!string.Equals(
+                evidenceSource,
+                "android.os.PowerManager.getCurrentThermalStatus",
+                StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return string.Equals(
+                    endingState,
+                    "none",
+                    StringComparison.Ordinal) ||
+                string.Equals(
+                    endingState,
+                    "light",
+                    StringComparison.Ordinal) ||
+                string.Equals(
+                    endingState,
+                    "moderate",
+                    StringComparison.Ordinal);
         }
     }
 
@@ -207,6 +324,7 @@ namespace AL.Terrestrials.Slagfall
 
         public SlagfallMetricSummary totalAllocatedMemoryBytes;
         public SlagfallMetricSummary totalReservedMemoryBytes;
+        public SlagfallMetricSummary incrementalUnityAllocatedMemoryBytes;
         public SlagfallMetricSummary graphicsDriverMemoryBytes;
         public SlagfallMetricSummary loadedTextureMemoryBytes;
         public SlagfallMetricSummary loadedMeshMemoryBytes;
@@ -221,10 +339,14 @@ namespace AL.Terrestrials.Slagfall
         public SlagfallMetricSummary particleSystemCount;
 
         public double coldReadySeconds;
+        public SlagfallMetricSummary warmReadySeconds;
         public bool optionalTierCancellationPassed;
         public double optionalTierCancellationSeconds;
+        public bool lifecycleStressPassed;
+        public int lifecycleCycleCount;
         public bool exitReleasePlateauPassed;
         public double exitReleaseSeconds;
+        public int excludedEvidenceOverheadFrameCount;
         public string streamingEvidenceBoundary;
         public string overdrawEvidenceBoundary;
         public string instanceBufferEvidenceBoundary;
@@ -404,7 +526,47 @@ namespace AL.Terrestrials.Slagfall
                 report.sourceVersion ==
                     SlagfallSourceAuthority.SourceVersion,
                 "approved_source_version_mismatch");
+            bool knownLane =
+                SlagfallEvidenceContract.TryParseStableId(
+                    report.evidenceLane,
+                    out SlagfallEvidenceLane lane);
+            Require(
+                failures,
+                knownLane,
+                "evidence_lane_unknown");
+            if (knownLane)
+            {
+                Require(
+                    failures,
+                    report.targetFrameRate ==
+                        SlagfallEvidenceContract.TargetFrameRate(lane),
+                    "evidence_lane_target_frame_rate_mismatch");
+                Require(
+                    failures,
+                    Math.Abs(
+                        report.targetFrameTimeMilliseconds -
+                        SlagfallEvidenceContract
+                            .TargetFrameTimeMilliseconds(lane)) <= 0.01d,
+                    "evidence_lane_target_frame_time_mismatch");
+                Require(
+                    failures,
+                    SlagfallEvidenceContract.PlatformMatchesLane(
+                        lane,
+                        report.platform),
+                    "evidence_lane_platform_mismatch");
+                Require(
+                    failures,
+                    SlagfallEvidenceContract.GraphicsDeviceMatchesLane(
+                        lane,
+                        report.graphicsDeviceType),
+                    "evidence_lane_graphics_api_mismatch");
+            }
             Require(failures, report.completed, "run_not_completed");
+            Require(
+                failures,
+                report.intendedDurationSeconds >=
+                    SlagfallEvidenceContract.MinimumRunSeconds,
+                "intended_run_shorter_than_30_minutes");
             Require(
                 failures,
                 report.observedDurationSeconds >=
@@ -454,6 +616,11 @@ namespace AL.Terrestrials.Slagfall
                 "reserved_memory_evidence_missing");
             Require(
                 failures,
+                report.incrementalUnityAllocatedMemoryBytes?.available ==
+                    true,
+                "incremental_unity_memory_evidence_missing");
+            Require(
+                failures,
                 report.loadedTextureMemoryBytes?.available == true,
                 "texture_residency_evidence_missing");
             Require(
@@ -493,8 +660,21 @@ namespace AL.Terrestrials.Slagfall
                 "cold_ready_timing_missing");
             Require(
                 failures,
+                report.warmReadySeconds?.available == true,
+                "warm_ready_timing_missing");
+            Require(
+                failures,
                 report.optionalTierCancellationPassed,
                 "optional_tier_cancellation_failed");
+            Require(
+                failures,
+                report.lifecycleStressPassed &&
+                    report.lifecycleCycleCount >= 12,
+                "lifecycle_stress_failed");
+            Require(
+                failures,
+                report.excludedEvidenceOverheadFrameCount > 0,
+                "evidence_overhead_frame_exclusion_missing");
             Require(
                 failures,
                 report.exitReleasePlateauPassed,
@@ -507,6 +687,27 @@ namespace AL.Terrestrials.Slagfall
                 failures,
                 report.severeLogCount == 0,
                 "severe_log_observed");
+            Require(
+                failures,
+                !string.IsNullOrWhiteSpace(
+                    report.thermalEvidenceSource),
+                "thermal_evidence_source_missing");
+            Require(
+                failures,
+                !string.IsNullOrWhiteSpace(
+                    report.thermalStateAtStart),
+                "thermal_state_start_missing");
+            Require(
+                failures,
+                !string.IsNullOrWhiteSpace(
+                    report.thermalStateAtEnd),
+                "thermal_state_end_missing");
+            Require(
+                failures,
+                SlagfallEvidenceContract.LocalThermalStatePasses(
+                    report.thermalEvidenceSource,
+                    report.thermalStateAtEnd),
+                "local_thermal_state_unrecovered");
             RequireReference(
                 failures,
                 report.externalGpuCaptureId,

@@ -317,6 +317,13 @@ namespace AL.Editor.Terrestrials
             BuildTarget target,
             SlagfallEvidenceLane lane)
         {
+            if (lane == SlagfallEvidenceLane.MobileLow &&
+                target != BuildTarget.Android)
+            {
+                throw new ArgumentException(
+                    "The mobile_low evidence lane requires a constrained Android GLES3 or Vulkan device.");
+            }
+
             bool mobileTarget =
                 target == BuildTarget.Android ||
                 target == BuildTarget.iOS;

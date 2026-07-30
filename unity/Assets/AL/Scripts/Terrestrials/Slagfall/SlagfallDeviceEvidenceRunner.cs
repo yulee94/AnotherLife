@@ -18,6 +18,7 @@ namespace AL.Terrestrials.Slagfall
         private const double MemoryPlateauToleranceBytes =
             4d * 1024d * 1024d;
         private const int LifecycleCycles = 12;
+        private const int LifecycleWarmupCycles = 2;
 
         [SerializeField] private SlagfallRepresentativeSlice _slice;
         [SerializeField] private SlagfallEvidenceLane _lane =
@@ -47,6 +48,8 @@ namespace AL.Terrestrials.Slagfall
         private double _nextCheckpointTime;
         private int _minimumRepresentedUsers =
             SlagfallEvidenceContract.RequiredRepresentedUsers;
+        private int _frameSamplesToSkip;
+        private int _excludedEvidenceOverheadFrameCount;
         private int _previousTargetFrameRate;
         private bool _targetFrameRateChanged;
         private bool _running;
@@ -113,7 +116,15 @@ namespace AL.Terrestrials.Slagfall
 
             double elapsed =
                 Time.realtimeSinceStartupAsDouble - _startedRealtime;
-            CaptureFrame(elapsed);
+            if (_frameSamplesToSkip > 0)
+            {
+                _frameSamplesToSkip--;
+                _excludedEvidenceOverheadFrameCount++;
+            }
+            else
+            {
+                CaptureFrame(elapsed);
+            }
             CaptureRepresentation();
 
             if (elapsed >= _nextCounterTime)
@@ -187,8 +198,10 @@ namespace AL.Terrestrials.Slagfall
             _targetFrameRateChanged = true;
 
             _startedRealtime = Time.realtimeSinceStartupAsDouble;
-            _nextCounterTime = 0d;
+            _nextCounterTime = _counterIntervalSeconds;
             _nextCheckpointTime = _checkpointIntervalSeconds;
+            _frameSamplesToSkip = 0;
+            _excludedEvidenceOverheadFrameCount = 0;
             _accumulator =
                 new SlagfallEvidenceAccumulator(_durationSeconds);
             _report = CreateReport();
@@ -427,6 +440,8 @@ namespace AL.Terrestrials.Slagfall
                     AddCounter(recorder.Id, recorder.LastValue);
                 }
             }
+
+            MarkEvidenceOverhead();
         }
 
         private IEnumerator FinalizeEvidence()
@@ -542,23 +557,65 @@ namespace AL.Terrestrials.Slagfall
             yield return null;
 
             var releasedMemory = new List<long>();
+            var warmReadySeconds = new List<double>();
+            var incrementalMemory = new List<double>();
+            bool lifecycleContinuityPassed = true;
             double worstReleaseSeconds = 0d;
+            AsyncOperation originalUnload =
+                Resources.UnloadUnusedAssets();
+            yield return originalUnload;
+            long releasedBaseline =
+                Profiler.GetTotalAllocatedMemoryLong();
             for (int cycle = 0; cycle < LifecycleCycles; cycle++)
             {
+                double warmStarted =
+                    Time.realtimeSinceStartupAsDouble;
                 GameObject root = Instantiate(prefab);
                 SlagfallRepresentativeSlice slice =
                     root.GetComponent<SlagfallRepresentativeSlice>();
+                if (slice == null)
+                {
+                    lifecycleContinuityPassed = false;
+                    Destroy(root);
+                    yield return null;
+                    break;
+                }
+
                 slice.SetTargetFrameTimeMilliseconds(
                     SlagfallEvidenceContract
                         .TargetFrameTimeMilliseconds(_lane));
                 slice.SetSyntheticCrowdActive(true);
                 slice.SetAccessibility(_effectsOff, _reducedMotion);
                 slice.ApplySyntheticPressure(
-                    (float)SlagfallEvidenceContract
-                        .TargetFrameTimeMilliseconds(_lane),
-                    1f);
+                    Math.Max(
+                        60f,
+                        (float)SlagfallEvidenceContract
+                            .TargetFrameTimeMilliseconds(_lane) * 2f),
+                    0.5f);
                 yield return null;
+                warmReadySeconds.Add(
+                    Time.realtimeSinceStartupAsDouble -
+                    warmStarted);
+                long loadedMemory =
+                    Profiler.GetTotalAllocatedMemoryLong();
+                incrementalMemory.Add(
+                    Math.Max(
+                        0d,
+                        loadedMemory - releasedBaseline));
+                lifecycleContinuityPassed &=
+                    slice.SyntheticCrowd.Count ==
+                        SlagfallEvidenceContract
+                            .RequiredRepresentedUsers &&
+                    slice.ActiveRepresentedSyntheticUserCount ==
+                        SlagfallEvidenceContract
+                            .RequiredRepresentedUsers &&
+                    slice.Controller.CurrentPlan.CulledCount == 0 &&
+                    slice.Slagwhistle.IsRepresented;
                 slice.CancelOptionalPresentation();
+                lifecycleContinuityPassed &=
+                    slice.Slagwhistle.CurrentTier ==
+                        TerritoryRenderTier.LowDetail &&
+                    slice.Slagwhistle.IsRepresented;
 
                 double releaseStarted =
                     Time.realtimeSinceStartupAsDouble;
@@ -573,16 +630,35 @@ namespace AL.Terrestrials.Slagfall
                         releaseStarted);
                 releasedMemory.Add(
                     Profiler.GetTotalAllocatedMemoryLong());
+                releasedBaseline =
+                    releasedMemory[releasedMemory.Count - 1];
             }
 
+            _report.warmReadySeconds =
+                SlagfallMetricSummary.From(warmReadySeconds);
+            _report.incrementalUnityAllocatedMemoryBytes =
+                SlagfallMetricSummary.From(incrementalMemory);
+            _report.lifecycleCycleCount = releasedMemory.Count;
+            _report.lifecycleStressPassed =
+                lifecycleContinuityPassed &&
+                releasedMemory.Count == LifecycleCycles;
             _report.exitReleaseSeconds = worstReleaseSeconds;
-            long minimum = releasedMemory.Min();
-            long maximum = releasedMemory.Max();
+            if (releasedMemory.Count < LifecycleCycles)
+            {
+                _report.exitReleasePlateauPassed = false;
+                yield break;
+            }
+
+            List<long> steadyStateMemory = releasedMemory
+                .Skip(LifecycleWarmupCycles)
+                .ToList();
+            long minimum = steadyStateMemory.Min();
+            long maximum = steadyStateMemory.Max();
             bool bounded =
                 maximum - minimum <= MemoryPlateauToleranceBytes;
             bool finalBounded =
-                releasedMemory[releasedMemory.Count - 1] <=
-                    releasedMemory[0] +
+                steadyStateMemory[steadyStateMemory.Count - 1] <=
+                    steadyStateMemory[0] +
                     MemoryPlateauToleranceBytes;
             _report.exitReleasePlateauPassed =
                 bounded && finalBounded;
@@ -606,6 +682,12 @@ namespace AL.Terrestrials.Slagfall
             _report.totalReservedMemoryBytes = Counter(
                 "total_reserved_memory",
                 "unity_total_reserved_memory_unavailable");
+            if (_report.incrementalUnityAllocatedMemoryBytes == null)
+            {
+                _report.incrementalUnityAllocatedMemoryBytes =
+                    SlagfallMetricSummary.Unavailable(
+                        "lifecycle_incremental_memory_unavailable");
+            }
             _report.graphicsDriverMemoryBytes = Counter(
                 "graphics_driver_memory",
                 "graphics_driver_memory_unavailable");
@@ -642,6 +724,14 @@ namespace AL.Terrestrials.Slagfall
             _report.particleSystemCount = Counter(
                 "particle_systems",
                 "particle_system_count_unavailable");
+            if (_report.warmReadySeconds == null)
+            {
+                _report.warmReadySeconds =
+                    SlagfallMetricSummary.Unavailable(
+                        "lifecycle_warm_ready_timing_unavailable");
+            }
+            _report.excludedEvidenceOverheadFrameCount =
+                _excludedEvidenceOverheadFrameCount;
         }
 
         private SlagfallMetricSummary Counter(
@@ -690,6 +780,17 @@ namespace AL.Terrestrials.Slagfall
             if (completed)
             {
                 WriteAtomic(_completePath, json);
+            }
+
+            MarkEvidenceOverhead();
+        }
+
+        private void MarkEvidenceOverhead()
+        {
+            if (_running && !_finishing)
+            {
+                _frameSamplesToSkip =
+                    Math.Max(_frameSamplesToSkip, 1);
             }
         }
 
