@@ -19,23 +19,30 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.lang.reflect.Method
-import org.json.JSONObject
 
 /**
  * Hosts the Unity runtime when the exported Unity Android library is present.
  */
 @Composable
 fun UnityView(
+    routeId: String,
     modifier: Modifier = Modifier,
-    routeTag: String = "Main",
-    onReady: () -> Unit = {},
-    onOutcome: (UnityRouteOutcome) -> Unit = {}
+    routeLaunchSequence: Long = 0L,
+    routeIntent: UnityRouteIntent = UnityRouteIntent.Preview,
+    requestedCapabilities: List<String> = emptyList(),
+    onRouteDispatched: () -> Unit = {},
+    onOutcome: (UnityRouteOutcome) -> Unit = {},
+    onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
     val hostState = remember { mutableStateOf<UnityRuntimeContainer?>(null) }
-    val currentRouteTag = rememberUpdatedState(routeTag)
-    val currentOnReady = rememberUpdatedState(onReady)
+    val currentRouteId = rememberUpdatedState(routeId)
+    val currentRouteLaunchSequence = rememberUpdatedState(routeLaunchSequence)
+    val currentRouteIntent = rememberUpdatedState(routeIntent)
+    val currentRequestedCapabilities = rememberUpdatedState(requestedCapabilities)
+    val currentOnRouteDispatched = rememberUpdatedState(onRouteDispatched)
     val currentOnOutcome = rememberUpdatedState(onOutcome)
+    val currentOnProtocolError = rememberUpdatedState(onProtocolError)
 
     AndroidView(
         factory = { context ->
@@ -45,12 +52,33 @@ fun UnityView(
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
                 hostState.value = this
-                setRoute(currentRouteTag.value, currentOnOutcome.value)
-                currentOnReady.value()
+                if (
+                    setRoute(
+                        routeId = currentRouteId.value,
+                        routeLaunchSequence = currentRouteLaunchSequence.value,
+                        routeIntent = currentRouteIntent.value,
+                        requestedCapabilities = currentRequestedCapabilities.value,
+                        onOutcome = currentOnOutcome.value,
+                        onProtocolError = currentOnProtocolError.value
+                    )
+                ) {
+                    currentOnRouteDispatched.value()
+                }
             }
         },
         update = { host ->
-            host.setRoute(routeTag, currentOnOutcome.value)
+            if (
+                host.setRoute(
+                    routeId = routeId,
+                    routeLaunchSequence = routeLaunchSequence,
+                    routeIntent = routeIntent,
+                    requestedCapabilities = requestedCapabilities,
+                    onOutcome = currentOnOutcome.value,
+                    onProtocolError = currentOnProtocolError.value
+                )
+            ) {
+                currentOnRouteDispatched.value()
+            }
         },
         modifier = modifier.fillMaxSize()
     )
@@ -71,72 +99,26 @@ fun UnityView(
             lifecycleOwner.lifecycle.removeObserver(observer)
             hostState.value?.destroyUnity()
             hostState.value = null
-            UnityBridgeCallbacks.clear()
         }
-    }
-}
-
-data class UnityRouteOutcome(
-    val routeTag: String,
-    val status: UnityRouteOutcomeStatus,
-    val payload: String?
-) {
-    companion object {
-        fun fromJsonOrFailure(rawJson: String, fallbackRouteTag: String): UnityRouteOutcome {
-            return runCatching {
-                val json = JSONObject(rawJson)
-                val routeTag = json.optString("routeTag", fallbackRouteTag)
-                val status = UnityRouteOutcomeStatus.fromWireValue(json.optString("status", "failure"))
-                val payload = json.optString("payload").ifBlank { null }
-
-                UnityRouteOutcome(routeTag, status, payload)
-            }.getOrElse {
-                UnityRouteOutcome(fallbackRouteTag, UnityRouteOutcomeStatus.Failure, rawJson)
-            }
-        }
-    }
-}
-
-enum class UnityRouteOutcomeStatus {
-    Success,
-    Failure,
-    Cancelled;
-
-    companion object {
-        fun fromWireValue(value: String): UnityRouteOutcomeStatus {
-            return when (value.lowercase()) {
-                "success" -> Success
-                "cancelled", "canceled" -> Cancelled
-                else -> Failure
-            }
-        }
-    }
-}
-
-object UnityBridgeCallbacks {
-    @Volatile
-    private var callback: ((String) -> Unit)? = null
-
-    fun register(callback: (String) -> Unit) {
-        this.callback = callback
-    }
-
-    fun clear() {
-        callback = null
-    }
-
-    @JvmStatic
-    fun reportOutcome(rawJson: String) {
-        callback?.invoke(rawJson)
     }
 }
 
 private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
     private val unityPlayer = ReflectionUnityPlayer.create(context)
     private val statusView = createStatusView(context)
-    private var currentRouteTag: String? = null
-    private var outcomeDeliveredForRoute: String? = null
+    private val bridgeSession = UnityBridgeSession()
+    @Volatile
     private var destroyed = false
+    private var activeLaunch: UnityRouteLaunch? = null
+    private var onOutcome: (UnityRouteOutcome) -> Unit = {}
+    private var onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
+    private val callbackToken = UnityBridgeCallbacks.register { rawJson ->
+        post {
+            if (!destroyed) {
+                handleOutcome(rawJson)
+            }
+        }
+    }
 
     init {
         setBackgroundColor(Color.BLACK)
@@ -148,34 +130,54 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
             )
             unityPlayer.windowFocusChanged(true)
         } else {
-            addView(statusView)
+            showStatus("Unity runtime unavailable")
         }
     }
 
-    fun setRoute(routeTag: String, onOutcome: (UnityRouteOutcome) -> Unit) {
-        UnityBridgeCallbacks.register { rawJson ->
-            val activeRoute = currentRouteTag ?: return@register
-            val outcome = UnityRouteOutcome.fromJsonOrFailure(rawJson, activeRoute)
-            if (outcome.routeTag != activeRoute) return@register
-            if (outcomeDeliveredForRoute == outcome.routeTag) return@register
+    fun setRoute(
+        routeId: String,
+        routeLaunchSequence: Long,
+        routeIntent: UnityRouteIntent,
+        requestedCapabilities: List<String>,
+        onOutcome: (UnityRouteOutcome) -> Unit,
+        onProtocolError: (UnityBridgeProtocolError) -> Unit
+    ): Boolean {
+        this.onOutcome = onOutcome
+        this.onProtocolError = onProtocolError
 
-            outcomeDeliveredForRoute = outcome.routeTag
-            onOutcome(outcome)
+        val launch = UnityRouteLaunch(
+            routeId = routeId,
+            launchSequence = routeLaunchSequence,
+            intent = routeIntent,
+            requestedCapabilities = requestedCapabilities.toList()
+        )
+        if (launch == activeLaunch) return false
+        activeLaunch = launch
+
+        val start = bridgeSession.startRoute(
+            routeId = routeId,
+            intent = routeIntent,
+            requestedCapabilities = requestedCapabilities
+        )
+        if (start is UnityBridgeSessionStart.Rejected) {
+            showProtocolError(start.error)
+            return false
         }
 
-        if (routeTag == currentRouteTag) return
-
-        currentRouteTag = routeTag
-        outcomeDeliveredForRoute = null
-        if (unityPlayer != null) {
-            val payload = JSONObject()
-                .put("routeTag", routeTag)
-                .put("contractVersion", 1)
-                .toString()
-            unityPlayer.sendMessage("AndroidBridge", "SetRouteContext", payload)
-        } else {
-            statusView.text = "Unity runtime unavailable\nRoute: $routeTag"
+        start as UnityBridgeSessionStart.Started
+        if (unityPlayer == null) {
+            showStatus("Unity runtime unavailable\nRoute: $routeId")
+            return false
         }
+        if (!unityPlayer.sendMessage("AndroidBridge", "SetRouteContext", start.encodedPayload)) {
+            showProtocolError(
+                UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SendUnavailable)
+            )
+            return false
+        }
+
+        hideStatus()
+        return true
     }
 
     fun resumeUnity() {
@@ -189,8 +191,40 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
     fun destroyUnity() {
         if (destroyed) return
         destroyed = true
+        bridgeSession.close()
+        UnityBridgeCallbacks.clear(callbackToken)
         unityPlayer?.destroy()
         removeAllViews()
+    }
+
+    private fun handleOutcome(rawJson: String?) {
+        when (val delivery = bridgeSession.consumeOutcome(rawJson)) {
+            is UnityBridgeSessionDelivery.Delivered -> {
+                hideStatus()
+                onOutcome(delivery.outcome)
+            }
+
+            is UnityBridgeSessionDelivery.Rejected -> showProtocolError(delivery.error)
+        }
+    }
+
+    private fun showProtocolError(error: UnityBridgeProtocolError) {
+        showStatus("Unity bridge unavailable\nCode: ${error.code.wireValue}")
+        onProtocolError(error)
+    }
+
+    private fun showStatus(message: String) {
+        statusView.text = message
+        if (statusView.parent == null) {
+            addView(statusView)
+        }
+        statusView.bringToFront()
+    }
+
+    private fun hideStatus() {
+        if (statusView.parent === this) {
+            removeView(statusView)
+        }
     }
 
     private fun createStatusView(context: Context): TextView {
@@ -237,8 +271,12 @@ private class ReflectionUnityPlayer private constructor(
         runCatching { windowFocusChangedMethod?.invoke(instance, hasFocus) }
     }
 
-    fun sendMessage(gameObject: String, method: String, payload: String) {
-        runCatching { sendMessageMethod?.invoke(instance, gameObject, method, payload) }
+    fun sendMessage(gameObject: String, method: String, payload: String): Boolean {
+        val target = sendMessageMethod ?: return false
+        return runCatching {
+            target.invoke(instance, gameObject, method, payload)
+            true
+        }.getOrDefault(false)
     }
 
     private fun Method?.invokeSafely() {
@@ -265,3 +303,10 @@ private fun Class<*>.noArgMethod(name: String): Method? {
         method.name == name && method.parameterTypes.isEmpty()
     }
 }
+
+private data class UnityRouteLaunch(
+    val routeId: String,
+    val launchSequence: Long,
+    val intent: UnityRouteIntent,
+    val requestedCapabilities: List<String>
+)
