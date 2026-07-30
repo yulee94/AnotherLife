@@ -129,6 +129,14 @@ namespace AL.Tests.EditMode.GameDataCatalog
             CollectionAssert.AreEquivalent(
                 GameDataRealmReferences.AssetReferences,
                 Field(registry, "realms", "asset_ref").AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                GameDataRealmCapabilityProfiles.StableIds,
+                Field(
+                        registry,
+                        "realms",
+                        "capability_profile_ids")
+                    .ItemRule
+                    .AllowedStringValues);
 
             Assert.AreEqual("realms", Field(registry, "champions", "realm_id").ReferenceFamily);
             Assert.AreEqual(
@@ -214,7 +222,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
             AssertArrayBounds(
                 Field(registry, "realms", "capability_profile_ids"),
                 1,
-                GameDataSixFamilySchemas.MaximumProfileReferences);
+                1);
             AssertArrayBounds(
                 Field(registry, "buildings", "production_profile_ids"),
                 1,
@@ -455,11 +463,65 @@ namespace AL.Tests.EditMode.GameDataCatalog
         }
 
         [Test]
+        public void RealmCapabilityProfilesAcceptOnlyExactApprovedRelations()
+        {
+            var validRealm = ValidArtifacts().Single(artifact => artifact.Family == "realms");
+
+            foreach (var reference in GameDataRealmReferences.Entries)
+            {
+                var artifact = MutateRealmRelation(validRealm, reference);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.LoadedPackaged,
+                    result.Status,
+                    reference.StableId);
+                Assert.NotNull(result.Snapshot, reference.StableId);
+            }
+
+            foreach (var invalidProfileArray in new[]
+                     {
+                         "[\"battle_realm_crownlands\"]",
+                         "[\"Battle_realm_stonehold\"]",
+                         "[\"battle-realm-stonehold\"]",
+                         "[\"battle realm stonehold\"]",
+                         "[\" battle_realm_stonehold\"]",
+                         "[\"battle_realm_stonehold \"]",
+                         "[\"unknown_profile\"]",
+                         "[]",
+                         "[\"battle_realm_stonehold\",\"battle_realm_stonehold\"]",
+                         "[\"battle_realm_stonehold\",\"battle_realm_crownlands\"]"
+                     })
+            {
+                var artifact = MutateRealmCapabilityProfileIds(
+                    validRealm,
+                    "[\"battle_realm_stonehold\"]",
+                    invalidProfileArray);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.InvalidRecord,
+                    result.Status,
+                    invalidProfileArray);
+                Assert.IsNull(result.Snapshot, invalidProfileArray);
+            }
+
+            var crossRealmProfile = MutateRealmCapabilityProfileIds(
+                validRealm,
+                "[\"battle_realm_stonehold\"]",
+                "[\"battle_realm_crownlands\"]");
+            var crossRealmResult = Validate(crossRealmProfile);
+            CollectionAssert.Contains(
+                crossRealmResult.Diagnostics
+                    .Select(diagnostic => diagnostic.Code)
+                    .ToArray(),
+                "AL-GDC-REALM-CAPABILITY-PROFILE-REFERENCE");
+        }
+
+        [Test]
         public void RealmSchemaPublishesExactReviewedRelationConstraints()
         {
             var realm = Family(GameDataSixFamilySchemas.CreateRegistry(), "realms");
 
-            Assert.AreEqual(2, realm.RecordConstraints.Count);
+            Assert.AreEqual(3, realm.RecordConstraints.Count);
             Assert.AreEqual(
                 "realm_rare_resource_reference",
                 realm.RecordConstraints[0].Name);
@@ -468,12 +530,21 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 "REALM-RARE-RESOURCE-REFERENCE",
                 realm.RecordConstraints[0].DiagnosticCode);
             Assert.AreEqual(
-                "realm_world_asset_reference",
+                "realm_capability_profile_reference",
                 realm.RecordConstraints[1].Name);
-            Assert.AreEqual("asset_ref", realm.RecordConstraints[1].FieldName);
+            Assert.AreEqual(
+                "capability_profile_ids",
+                realm.RecordConstraints[1].FieldName);
+            Assert.AreEqual(
+                "REALM-CAPABILITY-PROFILE-REFERENCE",
+                realm.RecordConstraints[1].DiagnosticCode);
+            Assert.AreEqual(
+                "realm_world_asset_reference",
+                realm.RecordConstraints[2].Name);
+            Assert.AreEqual("asset_ref", realm.RecordConstraints[2].FieldName);
             Assert.AreEqual(
                 "REALM-WORLD-ASSET-REFERENCE",
-                realm.RecordConstraints[1].DiagnosticCode);
+                realm.RecordConstraints[2].DiagnosticCode);
         }
 
         private static GameDataCatalogFamilySchema Family(
@@ -648,7 +719,7 @@ namespace AL.Tests.EditMode.GameDataCatalog
                    "\",\"main_gate_id\":\"" + reference.MainGateId +
                    "\",\"outer_warzone_id\":\"" + reference.OuterWarzoneId +
                    "\",\"rare_resource_id\":\"" + reference.RareResourceStableId +
-                   "\",\"capability_profile_ids\":[\"resilience\"]" +
+                   "\",\"capability_profile_ids\":[\"battle_realm_stonehold\"]" +
                    ",\"asset_ref\":\"" + reference.AssetReference + "\"}]";
         }
 
@@ -705,6 +776,20 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 "rare_resource_id",
                 baseline.RareResourceStableId,
                 reference.RareResourceStableId);
+            GameDataRealmCapabilityProfile baselineProfile;
+            GameDataRealmCapabilityProfile targetProfile;
+            Assert.True(
+                GameDataRealmCapabilityProfiles.TryGetByRealmStableId(
+                    baseline.StableId,
+                    out baselineProfile));
+            Assert.True(
+                GameDataRealmCapabilityProfiles.TryGetByRealmStableId(
+                    reference.StableId,
+                    out targetProfile));
+            artifact = MutateRealmCapabilityProfileIds(
+                artifact,
+                "[\"" + baselineProfile.StableId + "\"]",
+                "[\"" + targetProfile.StableId + "\"]");
             return MutateRealmString(
                 artifact,
                 "asset_ref",
@@ -724,6 +809,19 @@ namespace AL.Tests.EditMode.GameDataCatalog
                     source,
                     "\"" + fieldName + "\":\"" + oldValue + "\"",
                     "\"" + fieldName + "\":\"" + newValue + "\"");
+        }
+
+        private static CatalogFixture.Artifact MutateRealmCapabilityProfileIds(
+            CatalogFixture.Artifact source,
+            string oldArray,
+            string newArray)
+        {
+            return string.Equals(oldArray, newArray, StringComparison.Ordinal)
+                ? source
+                : CatalogFixture.MutateArtifact(
+                    source,
+                    "\"capability_profile_ids\":" + oldArray,
+                    "\"capability_profile_ids\":" + newArray);
         }
 
         private static GameDataCatalogStore Load(params CatalogFixture.Artifact[] artifacts)
