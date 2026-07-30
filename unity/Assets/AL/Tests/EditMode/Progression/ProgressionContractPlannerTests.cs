@@ -3551,6 +3551,119 @@ namespace AL.Tests.EditMode.Progression
         }
 
         [Test]
+        public void ResearchCompletionRejectsPublicAvailableCloneWithoutPlannerProvenance()
+        {
+            ResearchProgressionDefinition definition =
+                Fixture.Research("fake.research.forged-completion");
+            ProgressionCompatibilityResult compatibility =
+                Fixture.ResearchCompatibility(
+                    new[] { definition },
+                    Array.Empty<ResearchProgressionStateRecord>());
+            ProgressionStartPlan start = Fixture.PlanResearch(
+                compatibility,
+                Fixture.ResearchStart(
+                    compatibility,
+                    definition.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Gold, 1000),
+                Fixture.NoPrerequisites,
+                Fixture.NoReceipts,
+                Fixture.NoOrders,
+                100);
+            ProgressionOrderSnapshot order = Fixture.Order(start);
+
+            ProgressionCompletionPlan valid = Fixture.PlanCompletion(
+                compatibility,
+                order,
+                order.EndTimestamp);
+            Assert.That(valid.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(valid.CanCommit, Is.True);
+
+            var publicClone = new ProgressionCompatibilityResult(
+                compatibility.Domain,
+                compatibility.Status,
+                compatibility.CatalogSetId,
+                compatibility.CatalogRevision,
+                compatibility.StateRevision,
+                compatibility.Research,
+                compatibility.Troops,
+                compatibility.PreservedResearchStates,
+                compatibility.PreservedTroopStates,
+                compatibility.Diagnostics,
+                compatibility.ResearchDefinitions,
+                compatibility.TroopDefinitions,
+                compatibility.TimestampPolicy,
+                compatibility.HasDefinitionSource);
+
+            ProgressionCompletionPlan forged = Fixture.PlanCompletion(
+                publicClone,
+                order,
+                order.EndTimestamp);
+            Assert.That(
+                forged.Status,
+                Is.EqualTo(ProgressionPlanStatus.StateMalformed));
+            Assert.That(forged.CanCommit, Is.False);
+            Assert.That(
+                forged.Diagnostics.Single().Code,
+                Is.EqualTo(ProgressionDiagnosticCode.StateUnavailable));
+        }
+
+        [Test]
+        public void TrainingCompletionRejectsPublicAvailableCloneWithoutPlannerProvenance()
+        {
+            TroopProgressionDefinition definition =
+                Fixture.Troop("fake.troop.forged-completion");
+            ProgressionCompatibilityResult compatibility =
+                Fixture.TrainingCompatibility(
+                    new[] { definition },
+                    Array.Empty<TroopProgressionStateRecord>());
+            ProgressionStartPlan start = Fixture.PlanTraining(
+                compatibility,
+                Fixture.TrainingStart(
+                    compatibility,
+                    definition.Identity.Id,
+                    1),
+                Fixture.Economy(ResourceType.Food, 1000),
+                100);
+            ProgressionOrderSnapshot order = Fixture.Order(start);
+
+            ProgressionCompletionPlan valid = Fixture.PlanCompletion(
+                compatibility,
+                order,
+                order.EndTimestamp);
+            Assert.That(valid.Status, Is.EqualTo(ProgressionPlanStatus.Ready));
+            Assert.That(valid.CanCommit, Is.True);
+
+            var publicClone = new ProgressionCompatibilityResult(
+                compatibility.Domain,
+                compatibility.Status,
+                compatibility.CatalogSetId,
+                compatibility.CatalogRevision,
+                compatibility.StateRevision,
+                compatibility.Research,
+                compatibility.Troops,
+                compatibility.PreservedResearchStates,
+                compatibility.PreservedTroopStates,
+                compatibility.Diagnostics,
+                compatibility.ResearchDefinitions,
+                compatibility.TroopDefinitions,
+                compatibility.TimestampPolicy,
+                compatibility.HasDefinitionSource);
+
+            ProgressionCompletionPlan forged = Fixture.PlanCompletion(
+                publicClone,
+                order,
+                order.EndTimestamp);
+            Assert.That(
+                forged.Status,
+                Is.EqualTo(ProgressionPlanStatus.StateMalformed));
+            Assert.That(forged.CanCommit, Is.False);
+            Assert.That(
+                forged.Diagnostics.Single().Code,
+                Is.EqualTo(ProgressionDiagnosticCode.StateUnavailable));
+        }
+
+        [Test]
         public void CompletionRejectsSemanticallyInconsistentNonTargetRows()
         {
             ResearchProgressionDefinition target =

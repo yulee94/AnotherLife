@@ -3603,6 +3603,11 @@ namespace AL.Kingdom.Progression
                 return false;
             }
 
+            if (!compatibility.HasPlannerDefinitionProvenance)
+            {
+                return false;
+            }
+
             if ((expectedDomain == ProgressionDomain.Research &&
                  compatibility.ResearchDefinitions.Count == 0) ||
                 (expectedDomain == ProgressionDomain.Training &&
