@@ -108,12 +108,55 @@ namespace AL.Data.Catalogs
                 "buildings",
                 new[]
                 {
-                    ContentReference("name_ref"),
-                    Integer("max_level", 1, MaximumCatalogInteger),
+                    LegacyEnum(
+                        "legacy_building_id",
+                        GameDataBuildingProgressionRegistry.LegacyBuildingIds),
+                    ContentReference(
+                        "name_ref",
+                        GameDataBuildingProgressionRegistry.NameReferences),
+                    Integer(
+                        "initial_level",
+                        GameDataBuildingProgressionRegistry.InitialLevel,
+                        GameDataBuildingProgressionRegistry.InitialLevel),
+                    Integer(
+                        "max_level",
+                        GameDataBuildingProgressionRegistry.MaximumLevel,
+                        GameDataBuildingProgressionRegistry.MaximumLevel),
                     StableReferenceArray("production_profile_ids", 1, MaximumProfileReferences),
-                    StableReference("cost_profile_id"),
-                    StableReference("duration_profile_id"),
+                    StableReference(
+                        "cost_profile_id",
+                        allowedStringValues:
+                        GameDataBuildingProgressionRegistry.CostProfileStableIds),
+                    StableReference(
+                        "duration_profile_id",
+                        allowedStringValues: new[]
+                        {
+                            GameDataBuildingProgressionRegistry.DurationProfileStableId
+                        }),
+                    StableReference(
+                        "prerequisite_profile_id",
+                        allowedStringValues: new[]
+                        {
+                            GameDataBuildingProgressionRegistry.PrerequisiteProfileStableId
+                        }),
+                    StableReference(
+                        "realm_eligibility_profile_id",
+                        allowedStringValues: new[]
+                        {
+                            GameDataBuildingProgressionRegistry
+                                .RealmEligibilityProfileStableId
+                        }),
                     AssetReference("asset_ref")
+                },
+                new[]
+                {
+                    new GameDataCatalogRecordConstraint(
+                        "building_progression_reference",
+                        "cost_profile_id",
+                        "BUILDING-PROGRESSION-REFERENCE",
+                        "The building identity, content, level, and progression-profile " +
+                        "references do not match the reviewed exact relation.",
+                        ValidateBuildingProgressionRelation)
                 });
         }
 
@@ -205,13 +248,16 @@ namespace AL.Data.Catalogs
                 recordConstraints: recordConstraints);
         }
 
-        private static GameDataCatalogFieldRule ContentReference(string name)
+        private static GameDataCatalogFieldRule ContentReference(
+            string name,
+            IEnumerable<string> allowedStringValues = null)
         {
             return new GameDataCatalogFieldRule(
                 name,
                 GameDataValueKind.String,
                 true,
-                nonBlank: true);
+                nonBlank: true,
+                allowedStringValues: allowedStringValues);
         }
 
         private static GameDataCatalogFieldRule AssetReference(
@@ -311,6 +357,66 @@ namespace AL.Data.Catalogs
                 profileIds);
         }
 
+        private static bool? ValidateBuildingProgressionRelation(
+            string buildingStableId,
+            IReadOnlyDictionary<string, GameDataValue> fields)
+        {
+            string legacyBuildingId;
+            string nameReference;
+            long initialLevel;
+            long maximumLevel;
+            string costProfileStableId;
+            string durationProfileStableId;
+            string prerequisiteProfileStableId;
+            string realmEligibilityProfileStableId;
+            if (!TryReadString(
+                    fields,
+                    "legacy_building_id",
+                    out legacyBuildingId) ||
+                !TryReadString(fields, "name_ref", out nameReference) ||
+                !TryReadInteger(fields, "initial_level", out initialLevel) ||
+                !TryReadInteger(fields, "max_level", out maximumLevel) ||
+                !TryReadString(
+                    fields,
+                    "cost_profile_id",
+                    out costProfileStableId) ||
+                !TryReadString(
+                    fields,
+                    "duration_profile_id",
+                    out durationProfileStableId) ||
+                !TryReadString(
+                    fields,
+                    "prerequisite_profile_id",
+                    out prerequisiteProfileStableId) ||
+                !TryReadString(
+                    fields,
+                    "realm_eligibility_profile_id",
+                    out realmEligibilityProfileStableId))
+            {
+                return null;
+            }
+
+            if (initialLevel < int.MinValue ||
+                initialLevel > int.MaxValue ||
+                maximumLevel < int.MinValue ||
+                maximumLevel > int.MaxValue)
+            {
+                return false;
+            }
+
+            return GameDataBuildingProgressionRegistry
+                .IsApprovedBuildingRelation(
+                    buildingStableId,
+                    legacyBuildingId,
+                    nameReference,
+                    (int)initialLevel,
+                    (int)maximumLevel,
+                    costProfileStableId,
+                    durationProfileStableId,
+                    prerequisiteProfileStableId,
+                    realmEligibilityProfileStableId);
+        }
+
         private static bool TryReadRealmIdentity(
             IReadOnlyDictionary<string, GameDataValue> fields,
             out string legacyName,
@@ -353,6 +459,21 @@ namespace AL.Data.Catalogs
             return stringValue != null;
         }
 
+        private static bool TryReadInteger(
+            IReadOnlyDictionary<string, GameDataValue> fields,
+            string fieldName,
+            out long value)
+        {
+            value = 0L;
+            GameDataValue fieldValue;
+            var numberValue =
+                fields.TryGetValue(fieldName, out fieldValue)
+                    ? fieldValue as GameDataNumberValue
+                    : null;
+            return numberValue != null &&
+                   numberValue.TryGetInt64(out value);
+        }
+
         private static bool TryReadStringArray(
             IReadOnlyDictionary<string, GameDataValue> fields,
             string fieldName,
@@ -389,6 +510,15 @@ namespace AL.Data.Catalogs
         private static GameDataCatalogFieldRule LegacyEnum(
             string name,
             params string[] allowedValues)
+        {
+            return LegacyEnum(
+                name,
+                (IEnumerable<string>)allowedValues);
+        }
+
+        private static GameDataCatalogFieldRule LegacyEnum(
+            string name,
+            IEnumerable<string> allowedValues)
         {
             return new GameDataCatalogFieldRule(
                 name,

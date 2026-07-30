@@ -53,9 +53,13 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 "asset_ref",
                 "cost_profile_id",
                 "duration_profile_id",
+                "initial_level",
+                "legacy_building_id",
                 "max_level",
                 "name_ref",
-                "production_profile_ids");
+                "prerequisite_profile_id",
+                "production_profile_ids",
+                "realm_eligibility_profile_id");
             AssertExactRequiredFields(
                 Family(registry, "research"),
                 "cost_profile_id",
@@ -109,6 +113,40 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 new[] { "Infantry", "Cavalry", "Ranged", "Siege" },
                 Field(registry, "troops", "legacy_troop_type").AllowedStringValues);
             CollectionAssert.AreEquivalent(
+                GameDataBuildingProgressionRegistry.LegacyBuildingIds,
+                Field(registry, "buildings", "legacy_building_id")
+                    .AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                GameDataBuildingProgressionRegistry.NameReferences,
+                Field(registry, "buildings", "name_ref").AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                GameDataBuildingProgressionRegistry.CostProfileStableIds,
+                Field(registry, "buildings", "cost_profile_id")
+                    .AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    GameDataBuildingProgressionRegistry.DurationProfileStableId
+                },
+                Field(registry, "buildings", "duration_profile_id")
+                    .AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    GameDataBuildingProgressionRegistry
+                        .PrerequisiteProfileStableId
+                },
+                Field(registry, "buildings", "prerequisite_profile_id")
+                    .AllowedStringValues);
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    GameDataBuildingProgressionRegistry
+                        .RealmEligibilityProfileStableId
+                },
+                Field(registry, "buildings", "realm_eligibility_profile_id")
+                    .AllowedStringValues);
+            CollectionAssert.AreEquivalent(
                 new[] { "warrior", "mage", "ranger", "assassin" },
                 Field(registry, "champions", "class_family_id").AllowedStringValues);
             CollectionAssert.AreEquivalent(
@@ -158,6 +196,10 @@ namespace AL.Tests.EditMode.GameDataCatalog
             AssertStableString(Field(registry, "realms", "rare_resource_id"));
             AssertStableString(Field(registry, "buildings", "cost_profile_id"));
             AssertStableString(Field(registry, "buildings", "duration_profile_id"));
+            AssertStableString(
+                Field(registry, "buildings", "prerequisite_profile_id"));
+            AssertStableString(
+                Field(registry, "buildings", "realm_eligibility_profile_id"));
             AssertStableString(Field(registry, "research", "cost_profile_id"));
             AssertStableString(Field(registry, "research", "duration_profile_id"));
             AssertStableString(Field(registry, "troops", "training_profile_id"));
@@ -190,9 +232,13 @@ namespace AL.Tests.EditMode.GameDataCatalog
 
             AssertIntegerBounds(Field(registry, "realms", "legacy_realm_value"), 1, 4);
             AssertIntegerBounds(
+                Field(registry, "buildings", "initial_level"),
+                GameDataBuildingProgressionRegistry.InitialLevel,
+                GameDataBuildingProgressionRegistry.InitialLevel);
+            AssertIntegerBounds(
                 Field(registry, "buildings", "max_level"),
-                1,
-                GameDataSixFamilySchemas.MaximumCatalogInteger);
+                GameDataBuildingProgressionRegistry.MaximumLevel,
+                GameDataBuildingProgressionRegistry.MaximumLevel);
             AssertIntegerBounds(
                 Field(registry, "research", "max_level"),
                 1,
@@ -254,13 +300,13 @@ namespace AL.Tests.EditMode.GameDataCatalog
             var store = Load(artifacts);
             Assert.AreEqual(
                 GameDataQueryStatus.AliasResolved,
-                store.QueryRecord("buildings", "LegacyBuilding").Status);
+                store.QueryRecord("buildings", "TownHall").Status);
             Assert.AreEqual(
                 GameDataQueryStatus.AliasResolved,
                 store.QueryRecord("research", "Legacy Research").Status);
             Assert.AreEqual(
                 GameDataQueryStatus.UnknownId,
-                store.QueryRecord("buildings", "legacybuilding").Status,
+                store.QueryRecord("buildings", "townhall").Status,
                 "Aliases are exact and must not be resolved through case folding or fuzzy normalization.");
         }
 
@@ -547,6 +593,107 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 realm.RecordConstraints[2].DiagnosticCode);
         }
 
+        [Test]
+        public void BuildingProgressionReferencesAcceptOnlyExactApprovedRelations()
+        {
+            var validBuilding = ValidArtifacts()
+                .Single(artifact => artifact.Family == "buildings");
+
+            foreach (var reference in GameDataBuildingProgressionRegistry.Entries)
+            {
+                var artifact = MutateBuildingRelation(
+                    validBuilding,
+                    reference);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.LoadedPackaged,
+                    result.Status,
+                    reference.StableId);
+                Assert.NotNull(result.Snapshot, reference.StableId);
+            }
+
+            var baseline = GameDataBuildingProgressionRegistry.Entries[0];
+            var other = GameDataBuildingProgressionRegistry.Entries[1];
+            var swappedValues = new[]
+            {
+                new[]
+                {
+                    "legacy_building_id",
+                    baseline.LegacyBuildingId,
+                    other.LegacyBuildingId
+                },
+                new[]
+                {
+                    "name_ref",
+                    baseline.NameReference,
+                    other.NameReference
+                },
+                new[]
+                {
+                    "cost_profile_id",
+                    baseline.CostProfileStableId,
+                    other.CostProfileStableId
+                }
+            };
+
+            foreach (var swap in swappedValues)
+            {
+                var artifact = MutateBuildingString(
+                    validBuilding,
+                    swap[0],
+                    swap[1],
+                    swap[2]);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.InvalidRecord,
+                    result.Status,
+                    swap[0]);
+                Assert.IsNull(result.Snapshot, swap[0]);
+                CollectionAssert.Contains(
+                    result.Diagnostics
+                        .Select(diagnostic => diagnostic.Code)
+                        .ToArray(),
+                    "AL-GDC-BUILDING-PROGRESSION-REFERENCE",
+                    swap[0]);
+            }
+
+            foreach (var numericMutation in new[]
+                     {
+                         new[] { "\"initial_level\":0", "\"initial_level\":1" },
+                         new[] { "\"max_level\":10", "\"max_level\":9" }
+                     })
+            {
+                var artifact = CatalogFixture.MutateArtifact(
+                    validBuilding,
+                    numericMutation[0],
+                    numericMutation[1]);
+                var result = Validate(artifact);
+                Assert.AreEqual(
+                    GameDataCatalogLoadStatus.InvalidRecord,
+                    result.Status,
+                    numericMutation[1]);
+                Assert.IsNull(result.Snapshot, numericMutation[1]);
+            }
+        }
+
+        [Test]
+        public void BuildingSchemaPublishesExactReviewedRelationConstraint()
+        {
+            var building =
+                Family(GameDataSixFamilySchemas.CreateRegistry(), "buildings");
+
+            Assert.AreEqual(1, building.RecordConstraints.Count);
+            Assert.AreEqual(
+                "building_progression_reference",
+                building.RecordConstraints[0].Name);
+            Assert.AreEqual(
+                "cost_profile_id",
+                building.RecordConstraints[0].FieldName);
+            Assert.AreEqual(
+                "BUILDING-PROGRESSION-REFERENCE",
+                building.RecordConstraints[0].DiagnosticCode);
+        }
+
         private static GameDataCatalogFamilySchema Family(
             GameDataCatalogSchemaRegistry registry,
             string family)
@@ -642,8 +789,8 @@ namespace AL.Tests.EditMode.GameDataCatalog
                     "Catalogs/buildings.phase_c2_fixture.json",
                     true,
                     "0.1.0",
-                    "[{\"id\":\"building_fixture\",\"name_ref\":\"fixture.building.name\",\"max_level\":10,\"production_profile_ids\":[\"resource_output\"],\"cost_profile_id\":\"building_cost\",\"duration_profile_id\":\"building_duration\",\"asset_ref\":\"Assets/Fixture/Building\"}]",
-                    "[{\"legacyId\":\"LegacyBuilding\",\"canonicalId\":\"building_fixture\",\"introducedVersion\":1,\"retirementVersion\":null,\"migrationIssue\":\"#165\"}]",
+                    "[{\"id\":\"town_hall\",\"legacy_building_id\":\"TownHall\",\"name_ref\":\"building.town_hall.name\",\"initial_level\":0,\"max_level\":10,\"production_profile_ids\":[\"resource_output\"],\"cost_profile_id\":\"building_upgrade_cost_town_hall\",\"duration_profile_id\":\"building_upgrade_duration_common\",\"prerequisite_profile_id\":\"building_prerequisite_none\",\"realm_eligibility_profile_id\":\"building_realm_eligibility_all\",\"asset_ref\":\"Assets/Fixture/Building\"}]",
+                    "[{\"legacyId\":\"TownHall\",\"canonicalId\":\"town_hall\",\"introducedVersion\":1,\"retirementVersion\":null,\"migrationIssue\":\"#165\"}]",
                     string.Empty),
                 CatalogFixture.FamilyArtifact(
                     "research",
@@ -822,6 +969,63 @@ namespace AL.Tests.EditMode.GameDataCatalog
                     source,
                     "\"capability_profile_ids\":" + oldArray,
                     "\"capability_profile_ids\":" + newArray);
+        }
+
+        private static CatalogFixture.Artifact MutateBuildingRelation(
+            CatalogFixture.Artifact source,
+            GameDataBuildingProgressionReference reference)
+        {
+            var baseline = GameDataBuildingProgressionRegistry.Entries[0];
+            var artifact = MutateBuildingString(
+                source,
+                "id",
+                baseline.StableId,
+                reference.StableId);
+            artifact = MutateBuildingString(
+                artifact,
+                "legacy_building_id",
+                baseline.LegacyBuildingId,
+                reference.LegacyBuildingId);
+            artifact = MutateBuildingString(
+                artifact,
+                "name_ref",
+                baseline.NameReference,
+                reference.NameReference);
+            artifact = MutateBuildingString(
+                artifact,
+                "cost_profile_id",
+                baseline.CostProfileStableId,
+                reference.CostProfileStableId);
+            if (string.Equals(
+                    baseline.StableId,
+                    reference.StableId,
+                    StringComparison.Ordinal))
+            {
+                return artifact;
+            }
+
+            artifact = CatalogFixture.MutateArtifact(
+                artifact,
+                "\"legacyId\":\"" + baseline.LegacyBuildingId + "\"",
+                "\"legacyId\":\"" + reference.LegacyBuildingId + "\"");
+            return CatalogFixture.MutateArtifact(
+                artifact,
+                "\"canonicalId\":\"" + baseline.StableId + "\"",
+                "\"canonicalId\":\"" + reference.StableId + "\"");
+        }
+
+        private static CatalogFixture.Artifact MutateBuildingString(
+            CatalogFixture.Artifact source,
+            string fieldName,
+            string oldValue,
+            string newValue)
+        {
+            return string.Equals(oldValue, newValue, StringComparison.Ordinal)
+                ? source
+                : CatalogFixture.MutateArtifact(
+                    source,
+                    "\"" + fieldName + "\":\"" + oldValue + "\"",
+                    "\"" + fieldName + "\":\"" + newValue + "\"");
         }
 
         private static GameDataCatalogStore Load(params CatalogFixture.Artifact[] artifacts)
