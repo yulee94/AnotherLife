@@ -65,7 +65,8 @@ Engineering must consume approved source rather than silently rewrite or redesig
 - The former A2 task, assigned A2 worktree, terrestrial branches, and source assets are no-touch for Codex.
 - PR #369 remains frozen at its exact source head for user creative review, with `UserCreativeState: NotRequested` and `RuntimeIntegrationState: Blocked`; it must not be edited or rebased on the former A2 task's behalf.
 - The unpublished Sunmane, Rimecut, and Ore Gallery branches remain draft material for the new owner to reassess under A1 sequencing.
-- No new A2 branch or PR is authorized until A1 records the co-developer's actual branch/mode convention and synchronizes the PR template and machine policy. A1 must not invent that convention.
+- A1 recorded the co-developer convention in issue #259 on 2026-07-30: branch prefix `a2/terrestrial-<scope>` and primary mode `A2 terrestrial design`.
+- New A2 work may use that convention after the synchronized PR template and machine policy land on `main`.
 
 ## Branch and review change
 
@@ -75,9 +76,10 @@ New Codex branches use these prefixes:
 codex/coordination-<scope>
 codex/narrative-<scope>
 codex/<engineering-scope>
+a2/terrestrial-<scope>
 ```
 
-Existing `codex/terrestrial-*` branches are historical or frozen. They do not authorize new Codex A2 work.
+Existing `codex/terrestrial-*` branches are historical or frozen. They do not authorize new Codex A2 work; `a2/terrestrial-*` is the only prefix for new co-developer A2 source.
 
 `gpt/`, `android-studio/`, and `gemini/` are retired for new work.
 

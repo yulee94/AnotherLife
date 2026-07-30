@@ -93,15 +93,16 @@ Allowed prefixes:
 - `codex/coordination-<scope>` — planning, specification, review, governance, status, and risk.
 - `codex/narrative-<scope>` — narrative/content mode.
 - `codex/<scope>` — engineering mode.
+- `a2/terrestrial-<scope>` — the user's co-developer's A2 terrestrial-design source and fidelity work.
 
-Existing `codex/terrestrial-*` branches are historical or frozen only. Do not create a new A2 branch or PR until A1 records the co-developer's actual branch/mode convention and synchronizes the PR template and machine policy; do not invent a prefix.
+The A2 convention was recorded through A1 in issue #259 on 2026-07-30: branch prefix `a2/terrestrial-<scope>` and primary mode `A2 terrestrial design`. Existing `codex/terrestrial-*` branches remain historical or frozen only and do not authorize new Codex A2 work.
 
 `gpt/`, `android-studio/`, and `gemini/` are retired for new work.
 
 Every PR must:
 
 - represent one major completion;
-- declare exactly one primary Codex mode;
+- declare exactly one primary delivery mode;
 - link the upstream issue, user decision, source packet, design packet, or specification;
 - declare narrative, terrestrial design, runtime, contracts/catalogs, save, assets, workflow, and shared-file impact;
 - list exact validation and every unperformed or unavailable check;
