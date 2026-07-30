@@ -1026,29 +1026,44 @@ namespace AL.Core.SaveAuthority
                 return;
             }
 
-            if (_authority.Status == ProfileWriteAuthorityStatus.Writable)
+            bool constructionSucceeded = false;
+            try
             {
-                AuthorityEpochAllocationResult constructionEpoch =
-                    _epochAllocator.Allocate();
-                if (constructionEpoch.Status !=
-                        AuthorityEpochAllocationStatus.Allocated ||
-                    !AuthorityEpochAllocator.IsStrictSuccessor(
-                        _authority.AuthorityEpoch,
-                        constructionEpoch.AuthorityEpoch))
+                if (_authority.Status == ProfileWriteAuthorityStatus.Writable)
                 {
-                    _authority =
-                        ProfileWriteAuthoritySnapshotFactory.Unavailable(
-                            EpochDiagnostic);
-                    _publishedCandidate = default(TCandidate);
-                    return;
+                    AuthorityEpochAllocationResult constructionEpoch =
+                        _epochAllocator.Allocate();
+                    if (constructionEpoch.Status !=
+                            AuthorityEpochAllocationStatus.Allocated ||
+                        !AuthorityEpochAllocator.IsStrictSuccessor(
+                            _authority.AuthorityEpoch,
+                            constructionEpoch.AuthorityEpoch))
+                    {
+                        _authority =
+                            ProfileWriteAuthoritySnapshotFactory.Unavailable(
+                                EpochDiagnostic);
+                        _publishedCandidate = default(TCandidate);
+                        return;
+                    }
+
+                    _authority = ProfileWriteAuthoritySnapshotFactory.Writable(
+                        _authority.ProfileId,
+                        constructionEpoch.AuthorityEpoch,
+                        _authority.VerifiedGenerationFingerprint,
+                        _authority.SelectedSourceGeneration,
+                        _authority.DiagnosticCodes);
                 }
 
-                _authority = ProfileWriteAuthoritySnapshotFactory.Writable(
-                    _authority.ProfileId,
-                    constructionEpoch.AuthorityEpoch,
-                    _authority.VerifiedGenerationFingerprint,
-                    _authority.SelectedSourceGeneration,
-                    _authority.DiagnosticCodes);
+                constructionSucceeded = true;
+            }
+            finally
+            {
+                if (!constructionSucceeded &&
+                    _coordinator.TryRetire(this) ==
+                    AuthorityCoordinatorRetirementStatus.Retired)
+                {
+                    _registered = false;
+                }
             }
         }
 

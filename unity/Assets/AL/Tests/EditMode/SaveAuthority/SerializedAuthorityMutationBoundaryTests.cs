@@ -653,6 +653,56 @@ namespace AL.Tests.EditMode.SaveAuthority
         }
 
         [Test]
+        public void ConstructionEpochFailureReleasesCoordinatorForReplacement()
+        {
+            var coordinator = new ProcessAuthorityMutationCoordinator();
+            var source = new FixedEpochSource(
+                Enumerable.Repeat(
+                        "00000000000000000000000000000000",
+                        SaveAuthorityTechnicalLimits
+                            .MaximumEpochAllocationAttempts)
+                    .Concat(
+                        new[]
+                        {
+                            "0123456789abcdef0000000000000002",
+                            "0123456789abcdef0000000000000003"
+                        })
+                    .ToArray());
+            var allocator = new AuthorityEpochAllocator(source);
+
+            var failed = Fixture.Create(
+                allocator: allocator,
+                coordinator: coordinator);
+            var replacement = Fixture.Create(
+                allocator: allocator,
+                coordinator: coordinator);
+            ProfileMutationResult committed = Commit(replacement, 1);
+
+            Assert.AreEqual(
+                ProfileWriteAuthorityStatus.Unavailable,
+                failed.Boundary.GetCurrentAuthority().Status);
+            Assert.AreEqual(
+                ProfileWriteAuthorityStatus.Writable,
+                replacement.Boundary.GetCurrentAuthority().Status,
+                string.Join(
+                    ",",
+                    replacement.Boundary.GetCurrentAuthority()
+                        .DiagnosticCodes));
+            Assert.AreEqual(
+                ProfileMutationStatus.Committed,
+                committed.Status);
+            Assert.AreEqual(1UL, committed.Receipt.PublicationSequence);
+            Assert.AreEqual(
+                "0123456789abcdef0000000000000003",
+                committed.Receipt.CommittedAuthorityEpoch);
+            Assert.AreEqual(0, failed.Persistence.CheckCount);
+            Assert.AreEqual(0, failed.Persistence.PersistCount);
+            Assert.AreEqual(0, failed.Sink.Receipts.Count);
+            Assert.AreEqual(1, replacement.Persistence.PersistCount);
+            Assert.AreEqual(1, replacement.Sink.Receipts.Count);
+        }
+
+        [Test]
         public void EpochExhaustionDoesNoCallbackPersistenceOrReceiptWork()
         {
             var invalidSource = new FixedEpochSource(
