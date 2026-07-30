@@ -13,7 +13,19 @@ The current Android foundation:
 - posts UI-facing callbacks through the Android view's main-thread queue;
 - owns callback registration and disposal by host token.
 
-This is not a completed embedded runtime. No Unity receiver/sender, Unity Android export, production route, or device round trip is present.
+The current Unity foundation:
+
+- defines the matching contract-v2 request and outcome DTOs, diagnostics, and
+  bounded validators;
+- parses the five-field route request without `JsonUtility` or an added JSON
+  dependency;
+- exposes an isolated `AndroidBridge.SetRouteContext(string)` component
+  boundary backed by a pure receiver and an injected outcome sink;
+- keeps the component unregistered and every route unavailable.
+
+This is not a completed embedded runtime. The Unity receiver has no production
+scene registration or JVM sender, and no Unity Android export, production
+route, or device round trip is present.
 
 ## Packaging Model
 
@@ -74,7 +86,73 @@ Contract rules:
 
 `UnityView.routeLaunchSequence` is the Android launch identity. Changing it creates a new request ID even when `routeId` is unchanged, so a retry cannot inherit the prior launch's duplicate guard. Callers must supply a route ID explicitly; there is no implicit gameplay route.
 
-An invalid Android request is shown as a bridge protocol error and is not sent. An unknown but syntactically valid route must fail visibly in the future Unity receiver and return a correlated `unavailable` or `failure` outcome. No route is enabled by this contract alone.
+An invalid Android request is shown as a bridge protocol error and is not sent.
+The current isolated Unity receiver returns a correlated `unavailable` outcome
+for every unknown but syntactically valid route. JVM delivery and end-to-end
+visibility remain future slices. No route is enabled by this contract alone.
+
+## Unity Receiver Boundary
+
+The unregistered Unity boundary lives under
+`Assets/AL/Scripts/Platform/Android/`. It is part of `AL.Runtime`; it adds no
+assembly definition, package, scene object, prefab, service registration, or
+protected shared-file edit.
+
+`UnityBridgeContract.ParseRequest` performs:
+
+1. a strict UTF-8 preflight with the inclusive 32 KiB limit;
+2. exact JSON object parsing with decoded member-name comparison;
+3. duplicate rejection for every allowed root member, including escaped-key
+   equivalents such as `request\u0049d`;
+4. exact required/allowed field, version, intent, stable-ID, capability-count,
+   capability-shape, and ordinal-uniqueness validation.
+
+The specialized parser is bounded to the bridge schema. It retains at most 16
+capability values, limits skipped JSON nesting to 32 levels, and does not
+materialize a generic JSON tree. Malformed UTF-16, comments, trailing content,
+non-object roots, and unsupported JSON shapes fail closed.
+
+`AndroidBridge.SetRouteContext(string)` delegates to a pure
+`UnityBridgeRouteReceiver`. Every receive accepted before a close, terminal
+capacity failure, or disposal request attempts exactly one immutable sink
+report. Reports are queued for serialized delivery outside the state lock, so a
+finite sink re-entry or a concurrent receive cannot deadlock or recurse through
+the sink:
+
+- a fully valid, previously unseen request produces one sendable
+  `UnityRouteOutcome` with the exact request/route correlation, status
+  `unavailable`, diagnostic `route.not_available`, and no result or payload;
+- malformed or invalid input produces one non-sendable local
+  `ProtocolFailure` carrying the exact `bridge.*` diagnostic and no fabricated
+  fallback IDs;
+- an exact latest replay produces local `bridge.duplicate_outcome`;
+- reuse of an older request ID, or a current ID with changed intent or ordered
+  capabilities, produces local `bridge.request_mismatch`;
+- reuse of the current request ID with a changed route produces local
+  `bridge.route_mismatch`;
+- a new request ID for the same route is a new launch and receives its own
+  correlated unavailable outcome.
+
+Only correlated reports are eligible for the later Unity-to-JVM sender.
+Protocol failures are deliberately not serialized into invalid wire outcomes.
+The receiver retains at most 256 exact request IDs without eviction. Reaching
+that bound permanently closes the receiver with `bridge.session_closed` rather
+than forgetting a stale identity. Serialized dispatch retains at most 64
+regular pending reports plus one reserved terminal report. Queue-capacity or
+per-drain dispatch-budget exhaustion emits exactly one terminal
+`bridge.session_closed`, drains already accepted reports in FIFO order, and
+tears down rather than permitting an unbounded recursive queue. `Close` is
+idempotent and reports `bridge.session_closed` on later receives. `Dispose`,
+component disable, and component destruction are nonblocking graceful-close
+requests: they reject new receives, allow reports already accepted by the
+receiver to drain in FIFO order, then clear the sink and ledger. This avoids
+same-thread and coordinated cross-thread disposal deadlocks; after the bounded
+drain completes, no later sink invocation can start. Sink exceptions and direct
+re-entry are contained.
+
+The component currently defaults to a discarding sink and is absent from every
+scene and prefab. That keeps this slice testable without implying that a JVM
+callback sender or a production route exists.
 
 ## Outcome Contract
 
@@ -135,10 +213,43 @@ Required checks for bridge changes:
 
 Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, duplicate request/outcome members, nullable Java/JNI boundary rejection, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
 
+Current Unity contract coverage includes exact constants and wire values,
+valid/invalid route requests, decoded escaped-key duplicates, strict
+allowed/required fields, malformed UTF-16/JSON, exact UTF-8 size boundaries,
+stable-ID limits, exact intent values, capability count/type/uniqueness,
+outcome diagnostics and exact payload/message bounds, request/outcome correlation,
+unknown routes, malformed-then-valid recovery, same-route relaunch, exact
+replay, stale and altered envelopes, bounded identity exhaustion, throwing and
+re-entrant sinks, serialized queue/dispatch-budget exhaustion, accepted-report
+drain, and nonblocking same-thread/cross-thread disposal.
+
+## Unity Receiver Optimization Impact
+
+- Runtime work is one-shot per `SetRouteContext` call and O(n) for a message
+  bounded to 32 KiB. There is no `Update`, polling, per-frame allocation, route
+  loading, or gameplay mutation.
+- Per-call managed allocations include bounded decoded strings/parser state, at
+  most 16 capability values, validation uniqueness storage, DTO copy/read-only
+  wrappers, one result/report, and a `StringBuilder` only when JSON escaping
+  requires it.
+- Session retention is bounded to 256 request IDs of at most 128 ASCII
+  characters each; capacity closes fail-closed rather than evicting history.
+- Re-entrant/concurrent sink delivery is serialized through at most 64 regular
+  pending reports plus one reserved terminal report, with fail-closed teardown
+  on queue or per-drain budget exhaustion.
+- The two runtime C# files add expected nonzero, linker/stripping-dependent
+  managed Player assembly, build, and installed-size growth.
+- No external binary, asset, AAR, package, assembly definition, or dependency
+  is added.
+- Player build size, installed size, runtime-memory/startup allocation,
+  IL2CPP/linker behavior, Android package export, profiler measurements,
+  physical-device startup/frame pacing/thermal behavior, and low-end device
+  compatibility remain unperformed.
+
 Still blocked for #135 completion:
 
-- matching Unity DTO/validator and `AndroidBridge.SetRouteContext` receiver;
-- Unity-to-JVM outcome sender;
+- production registration and a Unity-to-JVM sender that consumes only
+  sendable correlated receiver reports;
 - reproducible `unityLibrary`/AAR packaging;
 - unknown-route end-to-end unavailable behavior;
 - back/home/configuration/process/audio/input/focus/low-memory lifecycle proof;
