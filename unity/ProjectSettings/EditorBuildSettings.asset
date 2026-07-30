@@ -14,4 +14,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AL/Scenes/Kingdom.unity
     guid: dea6fe75315c3402fbfa8de764bd9873
+  - enabled: 1
+    path: Assets/Test.unity
+    guid: 30477a26c93c85546a8612b1c5716a60
+  - enabled: 1
+    path: Assets/QualityGateMissingScene.unity
+    guid: 15515515515515515515515515515516
   m_configObjects: {}

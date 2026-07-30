@@ -1,0 +1,13 @@
+name: Intentional negative fixture - never merge
+
+on:
+  workflow_dispatch:
+
+permissions: write-all
+
+jobs:
+  never-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "This workflow exists only for issue #155 hygiene-policy proof."
