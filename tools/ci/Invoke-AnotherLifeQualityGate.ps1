@@ -438,7 +438,7 @@ function Invoke-Classify {
     $primaryModes = Get-PolicyList "primary_modes" @(
         "Codex coordination/review",
         "Codex narrative/content",
-        "Codex terrestrial design",
+        "A2 terrestrial design",
         "Codex engineering"
     )
     $retiredAgentsAndPrefixes = Get-PolicyList "retired_agents_and_prefixes" @("GPT", "Android Studio", "gpt/", "android-studio/", "gemini/")
@@ -461,7 +461,14 @@ function Invoke-Classify {
     if ($isPullRequest -and
         $headBranch -and
         -not ($branchPrefixes | Where-Object { $headBranch.StartsWith($_, [System.StringComparison]::Ordinal) })) {
-        Add-Failure $failures "Branch '$headBranch' does not use an allowed Codex-only AnotherLife prefix: $($branchPrefixes -join ', ')."
+        Add-Failure $failures "Branch '$headBranch' does not use an allowed AnotherLife owner prefix: $($branchPrefixes -join ', ')."
+    }
+
+    $retiredBranchPrefixes = @($retiredAgentsAndPrefixes | Where-Object { $_ -match "/" })
+    if ($isPullRequest -and
+        $headBranch -and
+        ($retiredBranchPrefixes | Where-Object { $headBranch.StartsWith($_, [System.StringComparison]::Ordinal) })) {
+        Add-Failure $failures "Branch '$headBranch' uses a retired AnotherLife ownership prefix."
     }
 
     if ($isPullRequest -and
@@ -476,10 +483,10 @@ function Invoke-Classify {
         $modeMatches = [regex]::Matches($body, "- \[[xX]\] ($modePattern)")
 
         if ($modeMatches.Count -ne 1) {
-            Add-Failure $failures "Exactly one primary Codex mode must be selected in the PR body."
+            Add-Failure $failures "Exactly one primary delivery mode must be selected in the PR body."
         }
 
-        $retiredModeNames = @($retiredAgentsAndPrefixes | Where-Object { $_ -notmatch "/$" })
+        $retiredModeNames = @($retiredAgentsAndPrefixes | Where-Object { $_ -notmatch "/" })
         if ($retiredModeNames.Count -gt 0) {
             $retiredModePattern = ($retiredModeNames | ForEach-Object { [regex]::Escape($_) }) -join "|"
             if ($body -match "- \[[xX]\] ($retiredModePattern)") {

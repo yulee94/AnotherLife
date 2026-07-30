@@ -6,10 +6,11 @@ status_names:
   android_release: "android / release"
 branch_prefixes:
   - codex/
+  - a2/terrestrial-
 primary_modes:
   - Codex coordination/review
   - Codex narrative/content
-  - Codex terrestrial design
+  - A2 terrestrial design
   - Codex engineering
 retired_agents_and_prefixes:
   - GPT
@@ -18,6 +19,7 @@ retired_agents_and_prefixes:
   - gpt/
   - android-studio/
   - gemini/
+  - codex/terrestrial-
 shared_files:
   - unity/Assets/AL/Scripts/Core/Bootloader.cs
   - unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs
@@ -63,9 +65,9 @@ forbidden_tracked_path_patterns:
   - "(?i)(unity_lic|license|signing|keystore|password|secret)"
 production_test_scene_path: unity/Assets/Test.unity
 required_pr_checks:
-  - one Codex primary mode is selected
+  - one primary delivery mode is selected
   - upstream issue or artifact is linked
   - changed shared files are declared
-  - branch prefix matches the single Codex agent ownership model
+  - branch prefix matches the recorded owner convention
   - draft PRs are not represented as ready to merge
   - no future GPT, Android Studio, Gemini, or external-agent action is required

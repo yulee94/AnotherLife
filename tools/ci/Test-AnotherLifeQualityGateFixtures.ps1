@@ -11,6 +11,7 @@ param(
         "MixedScope",
         "Coordination",
         "RetiredPrefix",
+        "A2Convention",
         "PolicyAuthority",
         "PushMain",
         "PullRequestRange",
@@ -577,7 +578,9 @@ function Test-PushMainFixture {
 }
 
 function Test-RetiredPrefixFixture {
-    $fixtureRepo = New-FixtureRepo "retired-gpt"
+    $fixtureRepo = New-FixtureRepo "retired-terrestrial"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
     New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs") | Out-Null
     Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Retired.md") -Value "# Retired fixture"
     $eventPath = Join-Path $fixtureRepo "event.json"
@@ -587,7 +590,7 @@ function Test-RetiredPrefixFixture {
     "draft": false,
     "body": "- [x] Codex coordination/review\n\nRefs #155\n\n## Shared-file lock\n\nNone.",
     "base": { "ref": "main" },
-    "head": { "ref": "gpt/retired-fixture" }
+    "head": { "ref": "codex/terrestrial-retired-fixture" }
   }
 }
 "@
@@ -600,13 +603,49 @@ function Test-RetiredPrefixFixture {
             GITHUB_EVENT_NAME = "pull_request"
             GITHUB_EVENT_PATH = $eventPath
             GITHUB_BASE_REF = "main"
-            GITHUB_HEAD_REF = "gpt/retired-fixture"
+            GITHUB_HEAD_REF = "codex/terrestrial-retired-fixture"
         } -ExpectFailure
     } finally {
         Pop-Location
     }
 
-    Assert-Contains $output "Codex-only AnotherLife prefix"
+    Assert-Contains $output "retired AnotherLife ownership prefix"
+}
+
+function Test-A2ConventionFixture {
+    $fixtureRepo = New-FixtureRepo "a2-convention"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs/Terrestrials") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Terrestrials/A2.md") -Value "# A2 fixture"
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Set-Content -LiteralPath $eventPath -Value @"
+{
+  "pull_request": {
+    "draft": false,
+    "body": "- [x] A2 terrestrial design\n\nRefs #259\n\n## Shared-file lock\n\nNone.",
+    "base": { "ref": "main" },
+    "head": { "ref": "a2/terrestrial-fixture" }
+  }
+}
+"@
+
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", ".github/anotherlife-policy.yml", "tools/ci/Invoke-AnotherLifeQualityGate.ps1") $fixtureRepo | Out-Null
+        Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
+        $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
+            GITHUB_ACTIONS = ""
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "a2/terrestrial-fixture"
+        }
+    } finally {
+        Pop-Location
+    }
+
+    Assert-Contains $output "Terrestrial design paths changed: 1"
 }
 
 function Test-PolicyAuthorityFixture {
@@ -880,6 +919,7 @@ try {
         "Coordination" { Test-CoordinationFixture }
         "PushMain" { Test-PushMainFixture }
         "RetiredPrefix" { Test-RetiredPrefixFixture }
+        "A2Convention" { Test-A2ConventionFixture }
         "PolicyAuthority" { Test-PolicyAuthorityFixture }
         "PullRequestRange" { Test-PullRequestRangeFixture }
         "InvalidBase" { Test-InvalidBaseFixture }
@@ -898,6 +938,7 @@ try {
             Test-CoordinationFixture
             Test-PushMainFixture
             Test-RetiredPrefixFixture
+            Test-A2ConventionFixture
             Test-PolicyAuthorityFixture
             Test-PullRequestRangeFixture
             Test-InvalidBaseFixture

@@ -2,13 +2,13 @@
 
 Describe the single major completion in this pull request.
 
-## Primary Codex mode
+## Primary delivery mode
 
 Select exactly one:
 
 - [ ] Codex coordination/review — planning, specification, triage, review, risk, governance, or status
 - [ ] Codex narrative/content — quests, dialogue, lore, localization-facing source, continuity, or narrative fidelity
-- [ ] Codex terrestrial design — terrestrial concepts, silhouettes, materials, motion intent, design source, or design fidelity
+- [ ] A2 terrestrial design — co-developer terrestrial concepts, silhouettes, materials, motion intent, design source, or design fidelity
 - [ ] Codex engineering — Android, Unity, runtime, gameplay, assets, build, save, contracts, tests, CI, or tooling
 
 A mixed-mode PR requires a written Codex coordination/review justification explaining why separate PRs are impractical.
@@ -53,7 +53,7 @@ Confirm no other open PR holds the lock.
 - [ ] Task-specific acceptance criteria are listed or linked.
 - [ ] The diff stays within the declared primary mode and file scope.
 - [ ] Narrative meaning was not rewritten outside Codex narrative/content mode.
-- [ ] Terrestrial visual intent was not redesigned outside Codex terrestrial-design mode.
+- [ ] Terrestrial visual intent was not redesigned outside A2 terrestrial-design mode.
 - [ ] Engineering consumes approved source/design rather than creating parallel hard-coded authority.
 - [ ] Coordination/review claims are grounded in current source, issues/PRs, and retained evidence.
 - [ ] New save fields have backward-compatible defaults when applicable.
@@ -78,7 +78,7 @@ Not run: explain the exact blocker when applicable.
 - [ ] Declared all shared files before editing.
 - [ ] Updated onto latest `main` before final disposition.
 - [ ] No collaborator work was overwritten or force-pushed away.
-- [ ] Branch prefix matches `codex/coordination-`, `codex/narrative-`, `codex/terrestrial-`, or `codex/` engineering.
+- [ ] Branch prefix matches `codex/coordination-`, `codex/narrative-`, `codex/` engineering, or `a2/terrestrial-`.
 - [ ] No future GPT, Android Studio, Gemini, or external-agent action is required by this PR.
 - [ ] Documentation names the active Codex workspace/evidence path when workspace-specific validation is reported.
 - [ ] No unnecessary generated, duplicate, cache, build output, oversized binary, or machine-local artifact is included.
@@ -87,5 +87,5 @@ Not run: explain the exact blocker when applicable.
 
 - Codex coordination/review disposition: `BLOCKED / READY FOR SOURCE-MODE REVIEW / READY TO MERGE`
 - Codex narrative/content fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
-- Codex terrestrial-design fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
+- A2 terrestrial-design fidelity disposition, when applicable: `pending / pass / changes required / not applicable`
 - User approval required: `yes / no`, with decision link when already recorded

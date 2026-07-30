@@ -179,7 +179,7 @@ Fixtures are deterministic local guards. Live PRs above prove the hosted workflo
 
 Terrestrial path classification is a policy signal only. It does not grant terrestrial creative authority.
 
-Effective 2026-07-30, future A2 Terrestrial Design & Concept work belongs to the user's co-developer. A1 may coordinate dependencies and governance, but this task and other agents must not touch the former A2 worktree, PR #369, terrestrial source branches, or unpublished Sunmane/Rimecut/Ore Gallery packets. No machine-policy branch or mode convention for the new co-developer may be invented without the user's explicit convention.
+Effective 2026-07-30, future A2 Terrestrial Design & Concept work belongs to the user's co-developer. A1 may coordinate dependencies and governance, but this task and other agents must not touch the former A2 worktree, PR #369, terrestrial source branches, or unpublished Sunmane/Rimecut/Ore Gallery packets. A1 recorded the user's co-developer convention in issue #259: branch `a2/terrestrial-<scope>` and primary mode `A2 terrestrial design`.
 
 ## Hosted Unity blocker
 
@@ -207,7 +207,6 @@ Issue #155 remains open for:
 3. semantic workflow-permission analysis beyond the already proven top-level `permissions: write-all` case, followed by a retained live proof for the strengthened rule; the current scanner also catches `pull_request_target` but not every YAML-equivalent overbroad permission;
 4. an immutable digest policy if `docker://` actions are introduced;
 5. deciding whether the final direct-stderr failure summary must also be retained in the quality artifact;
-6. recording the user's exact co-developer branch/mode convention before changing the historical terrestrial classifier/prefix.
 
 ## Phase and next step
 

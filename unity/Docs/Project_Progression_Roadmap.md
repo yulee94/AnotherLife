@@ -26,7 +26,7 @@ Use together:
 - Preserve old saves and service registrations.
 - Optimize continuously for broad device reach, low memory pressure, scalable visual quality, and the lowest feasible install size.
 - Reopen closed issues or create focused follow-ups when current source, Unity Hub play, or review evidence shows the issue still blocks the product direction.
-- Use one focused PR per major completion and one primary Codex mode for Codex work. A2 source work waits for an A1-recorded co-developer branch/mode convention.
+- Use one focused PR per major completion and one primary delivery mode. New co-developer A2 source uses `a2/terrestrial-<scope>` with primary mode `A2 terrestrial design`.
 - Do not advance while the current phase gate is red unless the user reprioritizes.
 - Historical GPT artifacts may be consumed as technical specifications/evidence, but no future GPT action or approval is required.
 

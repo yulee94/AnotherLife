@@ -76,7 +76,7 @@ Rules:
 2. Do not modify the former A2 worktree, terrestrial branches, PR #369, or unpublished terrestrial drafts.
 3. Keep PR #369 frozen with `UserCreativeState: NotRequested` and `RuntimeIntegrationState: Blocked`.
 4. Leave Sunmane, Rimecut, and Ore Gallery unpublished for new-owner reassessment under A1 sequencing.
-5. Do not create a new A2 branch or PR until A1 records the co-developer's branch/mode convention and synchronizes repository policy.
+5. Use the A1-recorded convention for new co-developer source: branch `a2/terrestrial-<scope>` and primary mode `A2 terrestrial design`.
 
 MODE 3 — ENGINEERING
 
