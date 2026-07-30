@@ -634,6 +634,7 @@ function Test-A2ConventionFixture {
     try {
         Invoke-Checked git @("add", ".github/anotherlife-policy.yml", "tools/ci/Invoke-AnotherLifeQualityGate.ps1") $fixtureRepo | Out-Null
         Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
+        Invoke-Checked git @("add", "unity/Docs/Terrestrials/A2.md") $fixtureRepo | Out-Null
         $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
