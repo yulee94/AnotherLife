@@ -21,11 +21,14 @@ The current Unity foundation:
   dependency;
 - exposes an isolated `AndroidBridge.SetRouteContext(string)` component
   boundary backed by a pure receiver and an injected outcome sink;
+- canonically encodes validated contract-v2 outcomes and exposes an isolated
+  Unity-to-JVM sender with a guarded, injected Android platform adapter;
 - keeps the component unregistered and every route unavailable.
 
 This is not a completed embedded runtime. The Unity receiver has no production
-scene registration or JVM sender, and no Unity Android export, production
-route, or device round trip is present.
+scene registration, its default sink still discards reports, and the sender is
+not registered. No Unity Android export, production route, or device round trip
+is present.
 
 ## Packaging Model
 
@@ -133,8 +136,8 @@ the sink:
 - a new request ID for the same route is a new launch and receives its own
   correlated unavailable outcome.
 
-Only correlated reports are eligible for the later Unity-to-JVM sender.
-Protocol failures are deliberately not serialized into invalid wire outcomes.
+Only correlated reports are eligible for the Unity-to-JVM sender. Protocol
+failures are deliberately not serialized into invalid wire outcomes.
 The receiver retains at most 256 exact request IDs without eviction. Reaching
 that bound permanently closes the receiver with `bridge.session_closed` rather
 than forgetting a stale identity. Serialized dispatch retains at most 64
@@ -151,8 +154,9 @@ drain completes, no later sink invocation can start. Sink exceptions and direct
 re-entry are contained.
 
 The component currently defaults to a discarding sink and is absent from every
-scene and prefab. That keeps this slice testable without implying that a JVM
-callback sender or a production route exists.
+scene and prefab. The sender is also absent from every scene, prefab, service,
+and component configuration. This keeps both boundaries testable without
+implying production registration or a production route.
 
 ## Outcome Contract
 
@@ -178,6 +182,84 @@ Payload version 2:
 
 Supported `status` values are exactly `success`, `failure`, `cancelled`, and `unavailable`. `failure` and `unavailable` require a bounded lowercase diagnostic code. A successful outcome for an `authoritative` request requires a stable `resultId`; other outcomes may omit it. `payload` is optional, opaque, bounded to 16 KiB, and is not gameplay authority.
 
+### Unity sender boundary
+
+`UnityBridgeContract.EncodeOutcome` first reruns outcome validation, then emits
+the exact contract-v2 fields in canonical order. Null optional fields are
+omitted rather than serialized as JSON `null`. Quotes, reverse slashes, and
+control characters are escaped explicitly; strict UTF-8 is checked again after
+encoding, and the complete output remains bounded to 32 KiB.
+
+`UnityBridgeOutcomeSender` implements `IUnityBridgeOutcomeSink` but remains
+unregistered. Its constructor captures the current thread as the declared Unity
+main thread and takes exclusive ownership of one
+`IUnityBridgeOutcomePlatformAdapter`. It also requires an
+`IUnityBridgeOutcomeDispatchResultSink`; there is no constructor that silently
+discards dispatch results. A future owner must construct the adapter, result
+sink, and sender on the Unity main thread, keep the sender alive until the
+receiver's bounded graceful drain completes, dispose the receiver first, and
+dispose the sender afterward.
+
+Before any platform call, the sender:
+
+1. accepts only `UnityBridgeReceiverReport.IsSendable` reports;
+2. reruns exact request/outcome validation and correlation;
+3. canonically encodes the validated outcome;
+4. rejects an off-owner-thread or re-entrant call before it can take request
+   ownership or touch Unity/JNI state;
+5. reserves the request identity before entering the adapter.
+
+Dispatch depth is one; there is no recursive queue. A busy or wrong-thread call
+is typed and retryable because no platform invocation began. A platform
+`Unavailable` result is contractually restricted to cases where no external
+callback invocation was attempted. It retains a SHA-256 fingerprint of the
+full validated request envelope, including intent and ordered capabilities,
+plus the exact canonical outcome. Only that same correlated report can retry
+the request ID; an altered envelope is rejected as
+`bridge.request_mismatch`.
+
+A completed callback invocation and an adapter exception or invalid adapter
+result are terminal. Exceptions are delivery-uncertain, so automatic retry is
+prohibited to avoid a second JVM call after a possibly completed first call.
+Terminal and retryable identities share one ordinal, no-eviction limit of 256;
+capacity fails closed as `bridge.session_closed`. Disposal is idempotent,
+nonblocking during an in-flight invocation, disposes the exclusively owned
+adapter once after that invocation returns, and prevents later dispatch.
+
+Direct `TryDispatch` callers receive the typed dispatch result. When the sender
+is consumed through the receiver-facing, void `IUnityBridgeOutcomeSink.Publish`
+boundary, every admitted, non-re-entrant, pre-disposal call forwards the
+original report and exactly one typed result to the required result sink after
+dispatch. That owner can retain a retryable report and schedule a later exact
+retry after `Publish` returns; the sender does not schedule retries itself.
+Result-sink exceptions are contained, and an immediate result-sink
+`TryDispatch` re-entry receives typed `Busy` without another platform call.
+Nested/concurrent `Publish` is forbidden by the serialized main-thread
+ownership contract and is suppressed to prevent recursive result
+notifications. A result-sink-triggered disposal is deferred until result
+publication returns so the adapter and observer remain valid for the complete
+bounded call.
+
+`AndroidUnityBridgeOutcomePlatformAdapter` preserves these exact constants:
+
+```text
+class:      com.example.anotherlife.ui.unity.UnityBridgeCallbacks
+method:     reportOutcome
+descriptor: (Ljava/lang/String;)V
+```
+
+It captures the same main-thread assumption, compiles the JNI path only for
+`UNITY_ANDROID && !UNITY_EDITOR`, checks `RuntimePlatform.Android`, and uses a
+short-lived `AndroidJavaClass` wrapper for each invocation. Other builds return
+typed `Unavailable` without touching JNI. Missing classes/methods and JNI
+exceptions become typed `InvocationFailed`; none unwind through the receiver.
+
+The JVM method returns `void` and Android deliberately no-ops when no host
+callback is registered. Sender status `CallbackInvoked` therefore proves only
+that the JVM call returned. It does not prove host receipt, Android session
+consumption, route completion, gameplay consequence, persistence, or durable
+exactly-once authority.
+
 Android rejects:
 
 - null, malformed, blank, oversized, or structurally unexpected JSON;
@@ -198,6 +280,13 @@ If the Unity runtime class is missing, `UnityView` shows `Unity runtime unavaila
 `onRouteDispatched` is invoked only after a validated request is successfully sent through the reflected Unity message method. It is not a Unity-loaded or route-ready acknowledgement, and it is not invoked for a missing runtime, invalid route request, or unavailable send method.
 
 Malformed, stale, mismatched, unsupported, and duplicate outcomes surface a stable `bridge.*` protocol diagnostic through `onProtocolError`. They do not fabricate a route result or consume the active request. Callback delivery is posted to the host view before invoking UI/navigation callbacks, and a disposed host's registration token cannot clear a newer host.
+
+Unity sender rejection, unavailability, busy/thread failure, retention
+exhaustion, and invocation failure remain local typed dispatch results. Direct
+callers receive them synchronously; each admitted receiver-facing `Publish`
+forwards the original report plus exactly one result through the required
+result sink. They are not sent through the same unavailable callback, do not
+fabricate another route outcome, and do not activate fallback gameplay.
 
 ## Validation
 
@@ -221,23 +310,42 @@ outcome diagnostics and exact payload/message bounds, request/outcome correlatio
 unknown routes, malformed-then-valid recovery, same-route relaunch, exact
 replay, stale and altered envelopes, bounded identity exhaustion, throwing and
 re-entrant sinks, serialized queue/dispatch-budget exhaustion, accepted-report
-drain, and nonblocking same-thread/cross-thread disposal.
+drain, and nonblocking same-thread/cross-thread disposal. Focused sender
+coverage additionally exercises canonical encoding/escaping, the exact JVM
+class/method/descriptor constants, Editor platform unavailability,
+non-sendable and forged-correlation rejection, adapter-reported callback
+invocation and duplicate suppression, exact unavailable retry binding,
+ambiguous exception containment, invalid adapter results, wrong-thread retry,
+depth-one re-entry, terminal/retryable/shared 256-ID limits, sink exception
+containment, typed receiver-facing result publication, retained exact retry,
+result-sink re-entry rejection, and re-entrant/cross-thread disposal. The guarded
+`AndroidJavaClass.CallStatic` path and actual JVM callback remain part of the
+unperformed packaged/device round trip.
 
-## Unity Receiver Optimization Impact
+## Unity Bridge Optimization Impact
 
 - Runtime work is one-shot per `SetRouteContext` call and O(n) for a message
   bounded to 32 KiB. There is no `Update`, polling, per-frame allocation, route
   loading, or gameplay mutation.
-- Per-call managed allocations include bounded decoded strings/parser state, at
-  most 16 capability values, validation uniqueness storage, DTO copy/read-only
-  wrappers, one result/report, and a `StringBuilder` only when JSON escaping
-  requires it.
+- Receiver-call managed allocations include bounded decoded strings/parser
+  state, at most 16 capability values, validation uniqueness storage, DTO
+  copy/read-only wrappers, one result/report, and a `StringBuilder` only when
+  decoded JSON string content requires escape processing.
 - Session retention is bounded to 256 request IDs of at most 128 ASCII
   characters each; capacity closes fail-closed rather than evicting history.
 - Re-entrant/concurrent sink delivery is serialized through at most 64 regular
   pending reports plus one reserved terminal report, with fail-closed teardown
   on queue or per-drain budget exhaustion.
-- The two runtime C# files add expected nonzero, linker/stripping-dependent
+- Sender work is one-shot and depth-one. Every accepted dispatch allocates the
+  outcome encoder's `StringBuilder` and canonical string of at most 32 KiB, an
+  additional bounded length-framed request-plus-outcome `StringBuilder` and
+  string (about 34 Ki UTF-16 code units at declared maxima), strict-UTF-8 hash
+  input bytes, one SHA-256 instance, and a 32-byte fingerprint. At most 256
+  request identities are retained across terminal IDs and retryable
+  fingerprints; there is no eviction, unbounded retry queue, or per-frame work.
+- The Android adapter creates and disposes one short-lived JNI class wrapper per
+  attempted callback. It retains no Java object or Android host registration.
+- The three runtime C# files add expected nonzero, linker/stripping-dependent
   managed Player assembly, build, and installed-size growth.
 - No external binary, asset, AAR, package, assembly definition, or dependency
   is added.
@@ -248,8 +356,7 @@ drain, and nonblocking same-thread/cross-thread disposal.
 
 Still blocked for #135 completion:
 
-- production registration and a Unity-to-JVM sender that consumes only
-  sendable correlated receiver reports;
+- production registration/wiring of the receiver and sender;
 - reproducible `unityLibrary`/AAR packaging;
 - unknown-route end-to-end unavailable behavior;
 - back/home/configuration/process/audio/input/focus/low-memory lifecycle proof;
