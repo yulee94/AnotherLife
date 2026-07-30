@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/AL/Scenes/Kingdom.unity
     guid: dea6fe75315c3402fbfa8de764bd9873
+  - enabled: 1
+    path: D:/a/AnotherLife/AnotherLife/github_pat_SANITIZER_PROOF_CANARY_20260730/QualityGateProofMissing.unity
+    guid: 00000000000000000000000000000000
   m_configObjects: {}
