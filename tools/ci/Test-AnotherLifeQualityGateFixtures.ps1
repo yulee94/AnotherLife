@@ -7,6 +7,7 @@ param(
         "MissingScene",
         "MalformedJson",
         "MutableAction",
+        "DiagnosticSanitization",
         "MixedScope",
         "Coordination",
         "RetiredPrefix",
@@ -27,7 +28,15 @@ Set-StrictMode -Version Latest
 
 $repoRoot = Resolve-Path (Join-Path $PSScriptRoot "..\..")
 $powerShellExecutable = if ($PSVersionTable.PSEdition -eq "Core") {
-    Join-Path $PSHOME "pwsh.exe"
+    $coreExecutableName = if (
+        [System.Environment]::OSVersion.Platform -eq
+        [System.PlatformID]::Win32NT
+    ) {
+        "pwsh.exe"
+    } else {
+        "pwsh"
+    }
+    Join-Path $PSHOME $coreExecutableName
 } else {
     Join-Path $PSHOME "powershell.exe"
 }
@@ -112,6 +121,58 @@ function Assert-Contains {
     if ($Text -notmatch [regex]::Escape($Needle)) {
         throw "Expected output to contain '$Needle'. Actual output:`n$Text"
     }
+}
+
+function Assert-NotContains {
+    param(
+        [Parameter(Mandatory = $true)][string] $Text,
+        [Parameter(Mandatory = $true)][string] $Needle
+    )
+
+    if ($Text -match [regex]::Escape($Needle)) {
+        throw "Expected output not to contain '$Needle'. Actual output:`n$Text"
+    }
+}
+
+function ConvertTo-MixedSeparators {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    $characters = $Path.ToCharArray()
+    $separatorIndex = 0
+    for ($index = 0; $index -lt $characters.Length; $index++) {
+        if ($characters[$index] -eq [char]"/" -or
+            $characters[$index] -eq [char]"\") {
+            $characters[$index] = if (($separatorIndex % 2) -eq 0) {
+                [char]"/"
+            } else {
+                [char]"\"
+            }
+            $separatorIndex++
+        }
+    }
+
+    return -join $characters
+}
+
+function Invoke-DiagnosticSanitizationProbe {
+    param(
+        [Parameter(Mandatory = $true)][string] $FixtureRepo,
+        [Parameter(Mandatory = $true)][string] $Mode,
+        [Parameter(Mandatory = $true)][string] $BaseRef,
+        [hashtable] $Environment = @{}
+    )
+
+    return Invoke-Checked $powerShellExecutable @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+        "-Mode",
+        $Mode,
+        "-BaseRef",
+        $BaseRef
+    ) $FixtureRepo $Environment -ExpectFailure
 }
 
 function Write-PullRequestEvent {
@@ -293,6 +354,89 @@ jobs:
 "@
         } "is not pinned to a full 40-hex commit SHA"
     }
+}
+
+function Test-DiagnosticSanitizationFixture {
+    $fixtureRepo = New-FixtureRepo "diagnostic-sanitization"
+    $fakeToken = "github_pat_$("A" * 48)"
+
+    $tokenOutput = Invoke-DiagnosticSanitizationProbe `
+        $fixtureRepo "Hygiene" $fakeToken
+    Assert-Contains $tokenOutput "Running git diff --check against <redacted-token>...HEAD"
+    Assert-Contains $tokenOutput "::error::git diff --check failed:"
+    Assert-Contains $tokenOutput "AnotherLife quality gate failed: 1 quality gate failure(s)."
+    Assert-Contains $tokenOutput "<redacted-token>"
+    Assert-NotContains $tokenOutput $fakeToken
+
+    $invalidModeOutput = Invoke-DiagnosticSanitizationProbe `
+        $fixtureRepo $fakeToken "HEAD"
+    Assert-Contains $invalidModeOutput "Unsupported quality-gate mode '<redacted-token>'."
+    Assert-NotContains $invalidModeOutput $fakeToken
+
+    $authorizationSecret = "opaque-secret-value-1234567890"
+    $quotedAuthorization = "`"Authorization`": `"token $authorizationSecret`""
+    $authorizationOutput = Invoke-DiagnosticSanitizationProbe `
+        $fixtureRepo "Hygiene" $quotedAuthorization
+    Assert-Contains $authorizationOutput "<redacted-token>"
+    Assert-NotContains $authorizationOutput $authorizationSecret
+
+    $nativeRoot = $fixtureRepo
+    $forwardRoot = $fixtureRepo.Replace("\", "/")
+    $reverseRoot = $forwardRoot.Replace("/", "\")
+    $mixedRoot = ConvertTo-MixedSeparators $fixtureRepo
+    $rootVariants = @(
+        $nativeRoot,
+        $forwardRoot,
+        $reverseRoot,
+        $mixedRoot
+    ) | Sort-Object -Unique
+
+    foreach ($rootVariant in $rootVariants) {
+        # Classify fails while discovering changed files, so this exercises
+        # the top-level catch rather than only Add-Failure.
+        $rootOutput = Invoke-DiagnosticSanitizationProbe `
+            $fixtureRepo "Classify" $rootVariant
+        Assert-Contains $rootOutput "<repo>"
+        foreach ($unredactedVariant in $rootVariants) {
+            Assert-NotContains $rootOutput $unredactedVariant
+        }
+    }
+
+    $siblingRoots = @(
+        "$fixtureRepo-archive",
+        "$fixtureRepo+archive",
+        "$fixtureRepo archive"
+    )
+    foreach ($siblingRoot in $siblingRoots) {
+        $siblingOutput = Invoke-DiagnosticSanitizationProbe `
+            $fixtureRepo "Classify" $siblingRoot
+        Assert-Contains $siblingOutput $siblingRoot
+        Assert-NotContains $siblingOutput "<repo>"
+    }
+
+    $sentenceMode = "Failure at ${fixtureRepo}."
+    $sentenceOutput = Invoke-DiagnosticSanitizationProbe `
+        $fixtureRepo $sentenceMode "HEAD"
+    Assert-Contains $sentenceOutput "Failure at <repo>."
+    Assert-NotContains $sentenceOutput $fixtureRepo
+
+    $unixRoot = "/home/runner/work/AnotherLife/AnotherLife"
+    $unixReverseRoot = $unixRoot.Replace("/", "\")
+    $unixOutput = Invoke-DiagnosticSanitizationProbe `
+        $fixtureRepo "Classify" $unixReverseRoot @{
+            GITHUB_WORKSPACE = $unixRoot
+        }
+    Assert-Contains $unixOutput "<repo>"
+    Assert-NotContains $unixOutput $unixRoot
+    Assert-NotContains $unixOutput $unixReverseRoot
+
+    $unixCaseDistinctRoot = "/home/runner/work/anotherlife/anotherlife"
+    $unixCaseOutput = Invoke-DiagnosticSanitizationProbe `
+        $fixtureRepo "Classify" $unixCaseDistinctRoot @{
+            GITHUB_WORKSPACE = $unixRoot
+        }
+    Assert-Contains $unixCaseOutput $unixCaseDistinctRoot
+    Assert-NotContains $unixCaseOutput "<repo>"
 }
 
 function Test-MixedScopeFixture {
@@ -731,6 +875,7 @@ try {
         "MissingScene" { Test-MissingSceneFixture }
         "MalformedJson" { Test-MalformedJsonFixture }
         "MutableAction" { Test-MutableActionFixture }
+        "DiagnosticSanitization" { Test-DiagnosticSanitizationFixture }
         "MixedScope" { Test-MixedScopeFixture }
         "Coordination" { Test-CoordinationFixture }
         "PushMain" { Test-PushMainFixture }
@@ -748,6 +893,7 @@ try {
             Test-MissingSceneFixture
             Test-MalformedJsonFixture
             Test-MutableActionFixture
+            Test-DiagnosticSanitizationFixture
             Test-MixedScopeFixture
             Test-CoordinationFixture
             Test-PushMainFixture
