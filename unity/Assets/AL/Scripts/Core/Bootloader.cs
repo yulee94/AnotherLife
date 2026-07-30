@@ -1,3 +1,4 @@
+// AL-QG-LIVE-PROOF-UNDECLARED-SHARED: intentional nonfunctional change; never merge.
 using UnityEngine;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
