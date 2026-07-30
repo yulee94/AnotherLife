@@ -375,6 +375,7 @@ def validate_content_map(
 def validate_specialized_catalog(
     repo_root: Path,
     mappings: list[dict[str, Any]],
+    content_by_key: dict[str, str],
 ) -> dict[str, Any]:
     specialized, _ = load_json(
         repo_root / SPECIALIZED_CATALOG_PATH,
@@ -398,6 +399,7 @@ def validate_specialized_catalog(
             "legacyRuntimeId": mapping["technicalAnchor"].removeprefix(
                 "RealmId."
             ),
+            "peopleName": content_by_key[mapping["contentRefs"][0]],
             "innerRealmId": mapping["innerRealmId"],
             "mainGateId": mapping["mainGateId"],
             "outerWarzoneId": mapping["outerWarzoneId"],
@@ -562,6 +564,10 @@ def build_evidence(
                     "specialized": "legacyRuntimeId",
                 },
                 {
+                    "shadow": "name_ref (resolved)",
+                    "specialized": "peopleName",
+                },
+                {
                     "shadow": "inner_realm_id",
                     "specialized": "innerRealmId",
                 },
@@ -661,8 +667,12 @@ def main() -> int:
     try:
         validate_forbidden_outputs(repo_root)
         _, mappings = validate_source_chain(repo_root)
-        validate_content_map(repo_root, mappings)
-        specialized = validate_specialized_catalog(repo_root, mappings)
+        content_by_key = validate_content_map(repo_root, mappings)
+        specialized = validate_specialized_catalog(
+            repo_root,
+            mappings,
+            content_by_key,
+        )
         artifact = build_artifact(mappings)
         artifact_raw = canonical_json(artifact)
 
