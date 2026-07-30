@@ -201,6 +201,49 @@ namespace AL.Platform.Android
         }
     }
 
+    public sealed class UnityBridgeOutcomeEncodingResult
+    {
+        private UnityBridgeOutcomeEncodingResult(
+            UnityRouteOutcome outcome,
+            string encodedJson,
+            UnityBridgeProtocolError error)
+        {
+            Outcome = outcome;
+            EncodedJson = encodedJson;
+            Error = error;
+        }
+
+        public bool IsEncoded =>
+            Outcome != null &&
+            EncodedJson != null &&
+            Error == null;
+        public UnityRouteOutcome Outcome { get; }
+        public string EncodedJson { get; }
+        public UnityBridgeProtocolError Error { get; }
+
+        internal static UnityBridgeOutcomeEncodingResult Encoded(
+            UnityRouteOutcome outcome,
+            string encodedJson)
+        {
+            return new UnityBridgeOutcomeEncodingResult(
+                outcome ??
+                throw new ArgumentNullException(nameof(outcome)),
+                encodedJson ??
+                throw new ArgumentNullException(nameof(encodedJson)),
+                null);
+        }
+
+        internal static UnityBridgeOutcomeEncodingResult Rejected(
+            UnityBridgeProtocolErrorCode code,
+            string field = null)
+        {
+            return new UnityBridgeOutcomeEncodingResult(
+                null,
+                null,
+                new UnityBridgeProtocolError(code, field));
+        }
+    }
+
     public static class UnityBridgeContract
     {
         public const int ContractVersion = 2;
@@ -510,6 +553,81 @@ namespace AL.Platform.Android
                     outcome.DiagnosticCode,
                     outcome.ResultId,
                     outcome.Payload));
+        }
+
+        public static UnityBridgeOutcomeEncodingResult EncodeOutcome(
+            UnityRouteOutcome outcome)
+        {
+            var validation = ValidateOutcome(outcome);
+            if (!validation.IsAccepted)
+            {
+                return UnityBridgeOutcomeEncodingResult.Rejected(
+                    validation.Error.Code,
+                    validation.Error.Field);
+            }
+
+            var validOutcome = validation.Outcome;
+            var expectedByteCount =
+                GetEncodedOutcomeByteCount(validOutcome);
+            if (expectedByteCount > MaximumMessageBytes)
+            {
+                return UnityBridgeOutcomeEncodingResult.Rejected(
+                    UnityBridgeProtocolErrorCode.MessageTooLarge);
+            }
+
+            var encoded = new StringBuilder(expectedByteCount);
+            encoded.Append("{\"contractVersion\":2,\"requestId\":");
+            AppendJsonString(encoded, validOutcome.RequestId);
+            encoded.Append(",\"routeId\":");
+            AppendJsonString(encoded, validOutcome.RouteId);
+            encoded.Append(",\"status\":");
+            AppendJsonString(
+                encoded,
+                GetOutcomeStatusWireValue(validOutcome.Status));
+
+            if (validOutcome.DiagnosticCode != null)
+            {
+                encoded.Append(",\"diagnosticCode\":");
+                AppendJsonString(
+                    encoded,
+                    validOutcome.DiagnosticCode);
+            }
+
+            if (validOutcome.ResultId != null)
+            {
+                encoded.Append(",\"resultId\":");
+                AppendJsonString(encoded, validOutcome.ResultId);
+            }
+
+            if (validOutcome.Payload != null)
+            {
+                encoded.Append(",\"payload\":");
+                AppendJsonString(encoded, validOutcome.Payload);
+            }
+
+            encoded.Append('}');
+            var encodedJson = encoded.ToString();
+
+            int actualByteCount;
+            try
+            {
+                actualByteCount = StrictUtf8.GetByteCount(encodedJson);
+            }
+            catch (EncoderFallbackException)
+            {
+                return UnityBridgeOutcomeEncodingResult.Rejected(
+                    UnityBridgeProtocolErrorCode.MalformedJson);
+            }
+
+            if (actualByteCount > MaximumMessageBytes)
+            {
+                return UnityBridgeOutcomeEncodingResult.Rejected(
+                    UnityBridgeProtocolErrorCode.MessageTooLarge);
+            }
+
+            return UnityBridgeOutcomeEncodingResult.Encoded(
+                validOutcome,
+                encodedJson);
         }
 
         public static UnityBridgeOutcomeValidationResult
@@ -1083,6 +1201,60 @@ namespace AL.Platform.Android
             }
 
             return count;
+        }
+
+        private static void AppendJsonString(
+            StringBuilder output,
+            string value)
+        {
+            const string hexadecimal = "0123456789abcdef";
+
+            output.Append('"');
+            for (var index = 0; index < value.Length; index++)
+            {
+                var character = value[index];
+                switch (character)
+                {
+                    case '"':
+                        output.Append("\\\"");
+                        break;
+                    case '\\':
+                        output.Append("\\\\");
+                        break;
+                    case '\b':
+                        output.Append("\\b");
+                        break;
+                    case '\f':
+                        output.Append("\\f");
+                        break;
+                    case '\n':
+                        output.Append("\\n");
+                        break;
+                    case '\r':
+                        output.Append("\\r");
+                        break;
+                    case '\t':
+                        output.Append("\\t");
+                        break;
+                    default:
+                        if (character < 0x20)
+                        {
+                            output.Append("\\u00");
+                            output.Append(
+                                hexadecimal[(character >> 4) & 0x0f]);
+                            output.Append(
+                                hexadecimal[character & 0x0f]);
+                        }
+                        else
+                        {
+                            output.Append(character);
+                        }
+
+                        break;
+                }
+            }
+
+            output.Append('"');
         }
 
         private enum RequestMember
