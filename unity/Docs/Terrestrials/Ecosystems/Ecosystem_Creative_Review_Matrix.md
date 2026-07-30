@@ -37,7 +37,7 @@ family.
 ## Habitat Matrix
 
 All sixteen habitat entries have stable design IDs and connected transition
-intent. Four now have exact companion concept source; twelve remain
+intent. Five now have exact companion concept source; eleven remain
 roster-only. None has authored production terrain, runtime integration, or
 user approval.
 
@@ -46,7 +46,7 @@ user approval.
 | `tdf_habitat_stonehold_faultroad_escarpment` | `ReadyForUserReview` | establishing/scale/reduction, layout/transition, and material/kit/LOD sheets | Resolve remaining masonry-like joints, replace illustrative section/plinth with measured orthographic evidence, and lock prop dimension/repetition bands. |
 | `tdf_habitat_stonehold_rimecut_pass` | `RosterProposed` | none | Is the pass notch navigable and distinctive without a whiteout or ice sparkle? |
 | `tdf_habitat_stonehold_ore_gallery_mouths` | `RosterProposed` | none | Do cave mouths, columns, and ground plane remain readable without colored fog or glowing ore? |
-| `tdf_habitat_stonehold_slagfall_quarry` | `RosterProposed` | none | Do cooled slag terraces look physically settled rather than like a permanent lava theme? |
+| `tdf_habitat_stonehold_slagfall_quarry` | `ReadyForUserReview` | v002 establishing, plan, section, transition, material-kit, grayscale, and distant-reduction master | Preserve irregular raft breakup, braided runoff, broad gallery throats, and the no-spire/no-masonry rule through measured production blockout. |
 | `tdf_habitat_eldergrove_hollowbark_oldgrowth` | `ReadyForUserReview` | establishing/placement/reduction, illustrative spatial/transition, and material/kit/LOD-intent sheets | Break portal-like root arches and repeated cavities; replace illustrative layout/scale/LOD with measured evidence; preserve a clear open understory and exact Grove Strider identity. |
 | `tdf_habitat_eldergrove_mirrorroot_littoral` | `ReadyForUserReview` | establishing/placement, illustrative depth/transition, and material/kit/reduction sheets | Strengthen realm-specific shoreline identity; prove both named transitions and dry/shallow/deep recognition in measured views with reflection, ripple, flicker, specular response, and emission disabled; correct root-engineering and creature-reduction concerns. |
 | `tdf_habitat_eldergrove_sunmane_edge_meadow` | `RosterProposed` | none | Does the meadow remain adult and naturalistic without flower/pollen spectacle? |
@@ -67,7 +67,7 @@ user approval.
 | `tdf_basalt_grazer` | `ReadyForUserReview` | normalized immutable base sheet plus exact Faultroad scale/contact/reduced-placement evidence | not requested | rear/top/underside, plate/limb roots, motion/contact, and measured fauna LOD; habitat placement concern now bounded by Faultroad QA |
 | `tdf_fauna_stonehold_rimefan_kite` | `ReadyForUserReview` | avian-soarer turnaround and motion/material sheets | not requested | resolve `PassWithConcern` skull, wing-group, and wedge-tail consistency |
 | `tdf_fauna_stonehold_oreveil_isopod` | `ProposedTextOnly` | none | not requested | top/side/front anatomy, plate count, curl, locomotion/contact sheet |
-| `tdf_fauna_stonehold_slagwhistle_burrower` | `ProposedTextOnly` | none | not requested | turnaround, foreclaw/ear-fold callouts, dig/contact sheet |
+| `tdf_fauna_stonehold_slagwhistle_burrower` | `ReadyForUserReview` | v002 identity/anatomy/scale/LOD sheet plus plant/cut/push/scurry/vent contact sequence | not requested | measured sculpt and rig blockout preserving the scapular yoke, one fused shovel palm plus two stabilizers per forefoot, flattened tail, and zero mandatory airborne effects |
 | `tdf_grove_strider` | `ReadyForUserReview` | normalized immutable base sheet plus exact Hollowbark placement/reduction evidence | not requested | rear/top/underside, hoof/ear/tendril roots, motion/contact, measured scale/LOD, and correction of generated crown/armor/proportion drift; no juvenile or variant authority |
 | `tdf_mire_lumenback` | `ReadyForUserReview` | normalized immutable base sheet plus concerned Mirrorroot placement/reduction evidence | not requested | rear/top/underside, pouch/feeler/swim contact, motion, and emission-off measured LOD; preserve feet/contact before ring detail and grant no juvenile, population, or unpictured-variant authority |
 | `tdf_fauna_eldergrove_thornburrow_hare` | `ProposedTextOnly` | none | not requested | adult proportion turnaround, tusk/root contact, bound/landing sheet |
