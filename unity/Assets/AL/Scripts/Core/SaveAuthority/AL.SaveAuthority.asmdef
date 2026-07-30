@@ -1,0 +1,14 @@
+{
+    "name": "AL.SaveAuthority",
+    "rootNamespace": "AL.Core.SaveAuthority",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
