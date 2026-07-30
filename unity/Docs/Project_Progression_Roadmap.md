@@ -1,6 +1,6 @@
 # AnotherLife Project Progression Roadmap
 
-This roadmap defines how Codex and the user move Another Life from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay. `Ownership_Decision_Record.md` controls ownership chronology.
+This roadmap defines how Codex, the user's co-developer, and the user move Another Life from prototype to release candidate. It controls sequence and gates; it does not itself author source or implement gameplay. `Ownership_Decision_Record.md` controls ownership chronology.
 
 ## Authority
 
@@ -14,19 +14,19 @@ Use together:
 6. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
 7. `.github/pull_request_template.md` — required PR declaration.
 
-`AGENTS.md` wins conflicts. The user decides creative and product direction. Codex coordination/review mode resolves technical sequencing and acceptance disposition. Codex source/design and engineering modes perform delivery.
+`AGENTS.md` wins conflicts. The user decides creative and product direction. Codex A1 coordination/review mode resolves technical sequencing and acceptance disposition. Codex narrative/content and engineering modes perform their delivery; the user's co-developer owns A2 terrestrial source/design and fidelity through A1 sequencing.
 
 ## Operating principles
 
 - Keep `main` buildable before expansion.
 - Deliver thin complete slices before scaling.
-- Codex narrative/content and terrestrial-design source precede Codex engineering implementation.
+- Codex narrative/content and co-developer terrestrial-design source precede Codex engineering implementation.
 - Codex coordination/review mode specifies and reviews handoffs without silently rewriting source.
 - Use stable IDs and validated data instead of duplicated hard-coded authority.
 - Preserve old saves and service registrations.
 - Optimize continuously for broad device reach, low memory pressure, scalable visual quality, and the lowest feasible install size.
 - Reopen closed issues or create focused follow-ups when current source, Unity Hub play, or review evidence shows the issue still blocks the product direction.
-- Use one focused PR per major completion and one primary Codex mode.
+- Use one focused PR per major completion and one primary Codex mode for Codex work. A2 source work waits for an A1-recorded co-developer branch/mode convention.
 - Do not advance while the current phase gate is red unless the user reprioritizes.
 - Historical GPT artifacts may be consumed as technical specifications/evidence, but no future GPT action or approval is required.
 
@@ -44,7 +44,7 @@ Use together:
 
 ### Goal
 
-Establish one workspace, the single Codex agent responsibility model, one active implementation path per issue, and reliable validation commands.
+Establish one workspace, the A1-led ownership boundary, one active implementation path per issue, and reliable validation commands.
 
 ### Codex coordination/review mode
 
@@ -57,9 +57,9 @@ Establish one workspace, the single Codex agent responsibility model, one active
 - Keep content isolated while runtime contracts are unstable.
 - Validate current IDs and references without broad expansion.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
-- Keep design experiments isolated and deferred unless a user-approved active task needs them.
+- Keep design experiments isolated and deferred unless A1 routes a user-approved active task to the co-developer.
 - Do not mix concept/design source into build-health PRs.
 
 ### Codex engineering mode
@@ -102,9 +102,9 @@ Prove one bounded user-approved quest can move from Codex narrative source to a 
 - Implement deterministic state transitions and gameplay handoff.
 - Implement persistence, migration, idempotency, recovery, and tests.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
-- No default Phase 1 workload. Terrestrial design starts only if the user explicitly makes it a dependency of the approved slice; it remains a separate source PR.
+- No default Phase 1 workload. Terrestrial design starts only if the user explicitly makes it a dependency and A1 routes it to the co-developer; it remains separate source work.
 
 ### User
 
@@ -138,9 +138,9 @@ Generalize NVS-01 into a complete Chapter 1 flow without quest-specific runtime 
 - Generalize quest, objective, reward, handoff, chapter, persistence, and validation systems.
 - Add cross-quest and old-save regression coverage.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
-- Author terrestrial designs only for user-approved Chapter 1 subjects and hand them to engineering through separate packets.
+- Author terrestrial designs only for user-approved Chapter 1 subjects routed by A1, then return separate packets for A1 technical handoff.
 
 ### Exit gate
 
@@ -159,7 +159,7 @@ Make approved choices visibly affect existing gameplay systems while preserving 
 - Define narrative meaning for realm, faction, advisor, artifact, boss, reward, and world-state consequences.
 - Specify semantic hooks and return events.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
 - Define user-approved terrestrial fauna/creature/habitat presentation and design-fidelity criteria.
 - Keep visual design separate from combat stats, AI, and runtime implementation.
@@ -195,7 +195,7 @@ Build the serious MMO-style objective loop: direct 3D champion/lord control in t
 
 - Define realm stakes, dragon/final-wish meaning, boss/realm identity, objective messaging, failure/retry/counterplay meaning, and user-facing copy.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
 - Provide approved creature/boss/realm visual source where needed, without granting runtime authority until engineering integration.
 
@@ -214,13 +214,13 @@ Build the serious MMO-style objective loop: direct 3D champion/lord control in t
 
 ### Goal
 
-Scale content and terrestrial designs without ID drift, broken references, inconsistent assets, or manual import fragility.
+Scale content and terrestrial designs without ID drift, broken references, inconsistent assets, or manual import fragility across the A1/co-developer handoff.
 
 ### Codex narrative/content mode
 
 - Establish naming, IDs, localization keys, continuity rules, reusable content structures, and source validation.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
 - Establish terrestrial design taxonomies, naming, variation rules, scale references, material conventions, motion briefs, LOD/readability expectations, and source-asset packaging.
 
@@ -248,7 +248,7 @@ Harden the game against old saves, invalid source, device differences, performan
 
 - Review pacing, clarity, continuity, recovery copy, save/resume meaning, and localization-facing defects.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
 - Review silhouette/readability at target distances, color-independent recognition, motion clarity, variant consistency, reduced-motion compatibility, and LOD fidelity.
 
@@ -281,7 +281,7 @@ Produce a reproducible traceable release candidate with frozen source and user a
 - Freeze release narrative, continuity, and localization-facing source.
 - Sign off narrative fidelity.
 
-### Codex terrestrial-design mode
+### Co-developer A2 terrestrial-design owner through A1
 
 - Freeze terrestrial design source and sign off integrated design fidelity.
 
@@ -308,18 +308,18 @@ Produce a reproducible traceable release candidate with frozen source and user a
 ## Recurring delivery cycle
 
 1. **Orient** — Codex coordination/review identifies phase, issue, upstream source, dependencies, PRs, locks, and evidence.
-2. **Author/design** — Codex narrative or terrestrial mode creates bounded source when needed.
+2. **Author/design** — Codex narrative mode creates narrative source; A1 routes needed terrestrial source to the co-developer.
 3. **Specify** — Codex coordination/review defines implementation and acceptance.
-4. **Branch** — one focused Codex branch with the correct mode.
+4. **Branch** — one focused Codex branch with the correct Codex mode; new A2 source waits for the recorded co-developer convention.
 5. **Implement** — Codex engineering stays within scope.
 6. **Validate** — exact relevant checks and retained evidence.
-7. **Review** — Codex coordination/review technical disposition plus applicable Codex source/design fidelity disposition.
+7. **Review** — Codex coordination/review technical disposition plus applicable Codex narrative or co-developer terrestrial-fidelity disposition.
 8. **Playtest** — user milestone acceptance.
 9. **Merge/close** — dependency order, release locks, update status.
 
 ## Milestone readiness
 
-A milestone is complete only when upstream source is approved, declared Codex modes are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
+A milestone is complete only when upstream source is approved, declared Codex modes and the A2 co-developer boundary are respected, locks are released, save/contract compatibility is addressed, exact tests exist, source fidelity is checked, no duplicate PR remains, the integrated state is on `main`, and the user makes the required acceptance decision.
 
 ## Selecting the next task
 
