@@ -1,0 +1,76 @@
+{
+  "vectorSchemaVersion": "battle_vector_v1",
+  "generator": "python3_stdlib_independent",
+  "fixedPointVectors": [
+    {
+      "name": "half_to_even_zero",
+      "value": 1,
+      "multipliersMicros": [500000],
+      "expected": 0
+    },
+    {
+      "name": "half_to_even_two",
+      "value": 3,
+      "multipliersMicros": [500000],
+      "expected": 2
+    },
+    {
+      "name": "multiply_all_then_round_once",
+      "value": 10,
+      "multipliersMicros": [1100000, 1050000],
+      "expected": 12
+    },
+    {
+      "name": "large_exact_intermediate",
+      "value": 2305843009213693951,
+      "multipliersMicros": [1000000, 1000000],
+      "expected": 2305843009213693951
+    }
+  ],
+  "entropyVectors": [
+    {
+      "name": "pvp_round_one_attacker_rate",
+      "drawNamespace": "round.1.attacker_damage_rate",
+      "roundIndex": 1,
+      "canonicalHex": "00000010626174746c655f7368613235365f763100000013636174616c6f672e626174746c652e746573740000000b726573756c742e746573740000000c726571756573742e7465737400000019626174746c652e72756c65732e6d6967726174696f6e5f763100000011626174746c655f636f6e74656e745f7631000000403934356363626532306264373637383639663931333539396633656563336538333234643933383033646338643365353038303032313832346631303766663300000040363536393761613839346433643364623533323266663134613933663230336639656664633137643466646333653537643336386631353536366665313435650000004033373364303038633365396334346538316563653061343239633236633835626666323434386333363135303134376264303331393038636138313235343164000000406432653330383962326132323137383532316537616661383039343365353930666538666364616264613037383832366166383766326537363864653863303600000040303132333435363738396162636465663031323334353637383961626364656630313233343536373839616263646566303132333435363738396162636465660000001c726f756e642e312e61747461636b65725f64616d6167655f7261746500000001",
+      "sha256": "96a9680a0884757d763ee2157a975234de27caca5d4de6425446c00ab50c7b13",
+      "draw": 2527684618,
+      "minimum": 80000,
+      "maximumExclusive": 160000,
+      "mapped": 127081
+    }
+  ],
+  "scenarioVectors": [
+    {
+      "name": "authoritative_pvp_migration_v1",
+      "battleKind": "Pvp",
+      "executionMode": "Authoritative",
+      "seedHex": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "expectedStatus": "Computed",
+      "attackerPower": 5186,
+      "opponentPower": 4446,
+      "roundCount": 13,
+      "outcome": "AttackerVictory",
+      "outcomeTechnicalId": "attacker_pressure",
+      "firstRoundSignature": "1|127081|159863|659042066|710750898|4475249102|3786957934",
+      "lastRoundSignature": "13|126702|88194|98597433|8695702|1858981696|0",
+      "attackerLosses": [
+        "troop.cavalry|3|6|31",
+        "troop.infantry|8|16|76",
+        "troop.ranged|6|10|44",
+        "troop.siege|1|2|7"
+      ],
+      "opponentLosses": [
+        "troop.cavalry|28|22|20",
+        "troop.infantry|34|28|18",
+        "troop.ranged|19|15|6",
+        "troop.siege|3|2|0"
+      ],
+      "credits": 55,
+      "food": 55,
+      "gold": 15,
+      "experience": 247,
+      "computationSha256": "f9320f537bc0258bc62b0376c1aaa8b76f8c4345a9aeded8288988750cce6c11"
+    }
+  ]
+}
