@@ -49,8 +49,8 @@ The only accepted v1 input is:
 | Packet ID | `al_narrative_notification_content_source_v001` |
 | Catalog ID | `al_notification_content_catalog` |
 | Catalog version | `0.1.0` |
-| UTF-8 file length | `11,786` bytes |
-| SHA-256 | `13ba706cb89039171d28805f2484fe923fdcb408cc367e882828e6fac78fa58f` |
+| UTF-8 file length | `11,526` bytes |
+| SHA-256 | `3c32ba4faa8293897fa8c6ecf3518993aa17778c5848ea47bc48ce697ae1c1c3` |
 | Sources | exactly `6` |
 | Actions | exactly `3` |
 | Definitions | exactly `11` |
@@ -60,6 +60,12 @@ The source file remains byte-identical in this coordination slice and in the
 first engineering adapter slice. A changed version, byte length, hash, packet
 identity, or count is not an in-place upgrade. It requires a new reviewed source
 packet and a versioned mapping revision.
+
+The pinned bytes are the canonical LF Git blob. The exact source path is marked
+`unity-json` in `unity/.gitattributes` so Windows, macOS, Linux, CI, and Player
+packaging consume the same representation. The former 11,786-byte
+`13ba706c...` value was a Windows CRLF working-tree representation, not the
+committed source identity, and is not accepted by the adapter.
 
 The hash pin is a source-review guard for the dormant v1 adapter. It is not a
 replacement for the #183 production manifest/envelope, provenance, atomic
