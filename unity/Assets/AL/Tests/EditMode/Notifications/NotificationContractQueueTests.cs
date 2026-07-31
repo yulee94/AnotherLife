@@ -65,6 +65,108 @@ namespace AL.Tests.EditMode.Notifications
             AssertInvalid(Definition(definitionId: definitionId));
         }
 
+        [TestCase("al_notify_action_acknowledge")]
+        [TestCase("al_notify_action_retry_operation")]
+        [TestCase("al_notify_action_open_recovery_details")]
+        public void ActionValidatorAcceptsCanonicalApprovedIds(string actionId)
+        {
+            Assert.IsTrue(NotificationValidation.IsActionId(actionId));
+        }
+
+        [TestCase(null)]
+        [TestCase("")]
+        [TestCase("al_action_acknowledge")]
+        [TestCase("al_notify_action_Acknowledge")]
+        [TestCase(" al_notify_action_acknowledge")]
+        [TestCase("al_notify_action_acknowledge ")]
+        [TestCase("al_notify_action_acknowledge-now")]
+        public void ActionValidatorRejectsNonCanonicalIds(string actionId)
+        {
+            Assert.IsFalse(NotificationValidation.IsActionId(actionId));
+        }
+
+        [Test]
+        public void ActionValidatorRejectsOversizedCanonicalShape()
+        {
+            Assert.IsFalse(NotificationValidation.IsActionId(
+                "al_notify_action_" + new string('a', 96)));
+        }
+
+        [Test]
+        public void LocalizationReferenceRequiresExactDottedGrammar()
+        {
+            var clock = new FakeClock();
+            NotificationDefinition definition = Definition(parameterSchema: new[]
+            {
+                Parameter(
+                    "content_label",
+                    NotificationParameterValueKind.LocalizationReference,
+                    true,
+                    256)
+            });
+
+            Assert.IsTrue(NotificationValidation.ValidateRequest(
+                definition,
+                Request(clock, parameters: LocalizationParameters("notification.content.approved")),
+                clock.UtcNow).IsValid);
+
+            string[] rejected =
+            {
+                "notification_key",
+                "Notification.content.approved",
+                "notification.Content.approved",
+                "notification/content/approved",
+                "notification:content:approved",
+                "notification.content@approved",
+                " notification.content.approved",
+                "notification.content.approved "
+            };
+            foreach (string reference in rejected)
+            {
+                Assert.IsFalse(NotificationValidation.ValidateRequest(
+                    definition,
+                    Request(clock, parameters: LocalizationParameters(reference)),
+                    clock.UtcNow).IsValid, reference);
+            }
+        }
+
+        [Test]
+        public void QueueRequiresAvailableExactLocalizationMembershipBeforeMutation()
+        {
+            NotificationDefinition definition = Definition(parameterSchema: new[]
+            {
+                Parameter(
+                    "content_label",
+                    NotificationParameterValueKind.LocalizationReference,
+                    true,
+                    256)
+            });
+            var resolver = new FakeResolver(new[] { definition });
+            resolver.LocalizationReferences.Add("notification.content.approved");
+            Fixture fixture = FixtureWith(resolver);
+
+            NotificationEnqueueResult accepted = fixture.Service.Enqueue(Request(
+                fixture.Clock,
+                correlationId: "test:localization:accepted",
+                parameters: LocalizationParameters("notification.content.approved")));
+            NotificationEnqueueResult unknown = fixture.Service.Enqueue(Request(
+                fixture.Clock,
+                correlationId: "test:localization:unknown",
+                parameters: LocalizationParameters("notification.content.unknown")));
+            resolver.LocalizationAuthorityAvailable = false;
+            NotificationEnqueueResult unavailable = fixture.Service.Enqueue(Request(
+                fixture.Clock,
+                correlationId: "test:localization:unavailable",
+                parameters: LocalizationParameters("notification.content.approved")));
+
+            Assert.AreEqual(NotificationEnqueueStatus.AcceptedPending, accepted.Status);
+            Assert.AreEqual(NotificationEnqueueStatus.RejectedUnsafeParameter, unknown.Status);
+            Assert.AreEqual(
+                NotificationEnqueueStatus.RejectedDefinitionUnavailable,
+                unavailable.Status);
+            Assert.AreEqual(1, fixture.Service.GetSnapshot().Records.Count);
+        }
+
         [Test]
         public void DefinitionValidatorRejectsUnsupportedSchemaAndInvalidCombinations()
         {
@@ -876,6 +978,45 @@ namespace AL.Tests.EditMode.Notifications
         }
 
         [Test]
+        public void QueueOwnedAcknowledgementRejectsStaleAndNeverInvokesActionRegistry()
+        {
+            NotificationDefinition required = Definition(
+                severity: NotificationSeverity.BlockingError,
+                channel: NotificationChannel.Acknowledgement,
+                acknowledgement: NotificationAcknowledgementPolicy.Required,
+                allowEviction: false,
+                actions: new NotificationActionDefinition[0]);
+            var registry = new FakeActionRegistry();
+            Fixture fixture = FixtureWith(new[] { required }, registry);
+            NotificationEnqueueResult queued = fixture.Service.Enqueue(Request(fixture.Clock));
+            NotificationPresenterRegistrationToken token =
+                fixture.Service.RegisterPresenter(
+                    new FakePresenter("presenter_queue_acknowledge"),
+                    new NotificationPresenterCapabilities(
+                        new[] { NotificationChannel.Acknowledgement })).Token;
+            fixture.Service.ConfirmPresented(token, queued.NotificationInstanceId);
+
+            NotificationReceiptUpdateResult stale = fixture.Service.Acknowledge(
+                new NotificationPresenterRegistrationToken(
+                    token.Generation + 1,
+                    token.PresenterId),
+                queued.NotificationInstanceId);
+            NotificationReceiptUpdateResult applied = fixture.Service.Acknowledge(
+                token,
+                queued.NotificationInstanceId);
+            NotificationReceiptUpdateResult replay = fixture.Service.Acknowledge(
+                token,
+                queued.NotificationInstanceId);
+
+            Assert.AreEqual(
+                NotificationReceiptUpdateStatus.RejectedStaleRegistration,
+                stale.Status);
+            Assert.AreEqual(NotificationReceiptUpdateStatus.Applied, applied.Status);
+            Assert.AreEqual(NotificationReceiptUpdateStatus.NoChange, replay.Status);
+            Assert.AreEqual(0, registry.CallCount);
+        }
+
+        [Test]
         public void UnregisterRetainsRecordAndRejectsStaleCallbackBeforeReattach()
         {
             Fixture fixture = FixtureWith(Definition());
@@ -1197,7 +1338,7 @@ namespace AL.Tests.EditMode.Notifications
         public void TypedActionRejectsArbitraryRoutePayloadBeforeRegistryInvocation()
         {
             var action = new NotificationActionDefinition(
-                "al_action_open_route",
+                "al_notify_action_open_route",
                 NotificationActionKind.OpenApprovedRoute,
                 new[]
                 {
@@ -1459,11 +1600,19 @@ namespace AL.Tests.EditMode.Notifications
 
         private static NotificationActionDefinition Action() =>
             new NotificationActionDefinition(
-                "al_action_acknowledge",
+                "al_notify_action_acknowledge",
                 NotificationActionKind.Acknowledge,
                 new NotificationParameterDefinition[0],
                 true,
                 true);
+
+        private static NotificationParameter[] LocalizationParameters(string reference) =>
+            new[]
+            {
+                new NotificationParameter(
+                    "content_label",
+                    NotificationParameterValue.FromLocalizationReference(reference))
+            };
 
         private static NotificationRequest Request(
             FakeClock clock,
@@ -1506,6 +1655,7 @@ namespace AL.Tests.EditMode.Notifications
             var diagnostics = new FakeDiagnosticSink();
             var service = new LocalNotificationService(
                 resolver,
+                resolver,
                 clock,
                 actionRegistry,
                 diagnostics);
@@ -1529,7 +1679,9 @@ namespace AL.Tests.EditMode.Notifications
             public FakeDiagnosticSink Diagnostics { get; }
         }
 
-        private sealed class FakeResolver : INotificationDefinitionResolver
+        private sealed class FakeResolver :
+            INotificationDefinitionResolver,
+            INotificationLocalizationReferenceAuthority
         {
             private readonly Dictionary<string, NotificationDefinition> _definitions =
                 new Dictionary<string, NotificationDefinition>(StringComparer.Ordinal);
@@ -1548,6 +1700,14 @@ namespace AL.Tests.EditMode.Notifications
             }
 
             public NotificationDefinitionResolution Override { get; set; }
+            public bool LocalizationAuthorityAvailable { get; set; } = true;
+            public HashSet<string> LocalizationReferences { get; } =
+                new HashSet<string>(StringComparer.Ordinal);
+
+            public bool IsAvailable => LocalizationAuthorityAvailable;
+
+            public bool Contains(string localizationReference) =>
+                LocalizationReferences.Contains(localizationReference);
 
             public NotificationDefinitionResolution Resolve(string definitionId)
             {
