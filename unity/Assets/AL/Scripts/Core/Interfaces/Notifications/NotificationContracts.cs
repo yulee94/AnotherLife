@@ -655,6 +655,12 @@ namespace AL.Core.Interfaces.Notifications
         NotificationDefinitionResolution Resolve(string definitionId);
     }
 
+    public interface INotificationLocalizationReferenceAuthority
+    {
+        bool IsAvailable { get; }
+        bool Contains(string localizationReference);
+    }
+
     public interface INotificationClock
     {
         DateTime UtcNow { get; }

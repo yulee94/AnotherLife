@@ -17,9 +17,11 @@ namespace AL.Core.Interfaces.Notifications
         private const string PresenterFailedDiagnostic = "AL-NTF-PRESENTER-FAILED";
         private const string ObserverFailedDiagnostic = "AL-NTF-OBSERVER-FAILED";
         private const string ActionDiagnostic = "AL-NTF-ACTION";
+        private const string ContentUnavailableDiagnostic = "AL-NTF-CONTENT-UNAVAILABLE";
 
         private readonly object _gate = new object();
         private readonly INotificationDefinitionResolver _definitionResolver;
+        private readonly INotificationLocalizationReferenceAuthority _localizationReferenceAuthority;
         private readonly INotificationClock _clock;
         private readonly INotificationActionRegistry _actionRegistry;
         private readonly INotificationDiagnosticSink _diagnosticSink;
@@ -41,11 +43,13 @@ namespace AL.Core.Interfaces.Notifications
 
         public NotificationSessionQueue(
             INotificationDefinitionResolver definitionResolver,
+            INotificationLocalizationReferenceAuthority localizationReferenceAuthority,
             INotificationClock clock,
             INotificationActionRegistry actionRegistry,
             INotificationDiagnosticSink diagnosticSink)
         {
             _definitionResolver = definitionResolver;
+            _localizationReferenceAuthority = localizationReferenceAuthority;
             _clock = clock;
             _actionRegistry = actionRegistry;
             _diagnosticSink = diagnosticSink;
@@ -140,6 +144,13 @@ namespace AL.Core.Interfaces.Notifications
                     }
 
                     return Rejected(status, request, requestValidation.DiagnosticCode);
+                }
+
+                NotificationEnqueueResult localizationRejection =
+                    ValidateLocalizationReferences(definition, request);
+                if (localizationRejection != null)
+                {
+                    return localizationRejection;
                 }
 
                 NotificationChannel channel =
@@ -241,6 +252,70 @@ namespace AL.Core.Interfaces.Notifications
                     null,
                     true);
             }
+        }
+
+        private NotificationEnqueueResult ValidateLocalizationReferences(
+            NotificationDefinition definition,
+            NotificationRequest request)
+        {
+            if (!definition.ParameterSchema.Any(item =>
+                    item.ValueKind == NotificationParameterValueKind.LocalizationReference))
+            {
+                return null;
+            }
+
+            bool available;
+            try
+            {
+                available = _localizationReferenceAuthority != null &&
+                            _localizationReferenceAuthority.IsAvailable;
+            }
+            catch
+            {
+                available = false;
+            }
+
+            if (!available)
+            {
+                return Rejected(
+                    NotificationEnqueueStatus.RejectedDefinitionUnavailable,
+                    request,
+                    ContentUnavailableDiagnostic);
+            }
+
+            for (int index = 0; index < request.Parameters.Count; index++)
+            {
+                NotificationParameter parameter = request.Parameters[index];
+                if (parameter.Value.Kind !=
+                    NotificationParameterValueKind.LocalizationReference)
+                {
+                    continue;
+                }
+
+                bool contains;
+                try
+                {
+                    contains = _localizationReferenceAuthority.Contains(
+                        (string)parameter.Value.Value);
+                }
+                catch
+                {
+                    return Rejected(
+                        NotificationEnqueueStatus.RejectedDefinitionUnavailable,
+                        request,
+                        ContentUnavailableDiagnostic);
+                }
+
+                if (!contains)
+                {
+                    return Rejected(
+                        NotificationEnqueueStatus.RejectedUnsafeParameter,
+                        request,
+                        ParameterDiagnostic);
+                }
+            }
+
+            return null;
         }
 
         public NotificationPresenterRegistrationResult RegisterPresenter(
@@ -1242,13 +1317,18 @@ namespace AL.Core.Interfaces.Notifications
     }
 
     public sealed class UnavailableNotificationDefinitionResolver :
-        INotificationDefinitionResolver
+        INotificationDefinitionResolver,
+        INotificationLocalizationReferenceAuthority
     {
+        public bool IsAvailable => false;
+
         public NotificationDefinitionResolution Resolve(string definitionId) =>
             new NotificationDefinitionResolution(
                 NotificationDefinitionResolutionStatus.CatalogUnavailable,
                 null,
                 "AL-NTF-DEFINITION");
+
+        public bool Contains(string localizationReference) => false;
     }
 
     public sealed class UnavailableNotificationActionRegistry : INotificationActionRegistry

@@ -42,7 +42,11 @@ namespace AL.Core.Interfaces.Notifications
             RegexOptions.CultureInvariant);
 
         private static readonly Regex ActionIdPattern = new Regex(
-            "^al_action_[a-z][a-z0-9]*(?:_[a-z0-9]+)*$",
+            "^al_notify_action_[a-z][a-z0-9]*(?:_[a-z0-9]+)*$",
+            RegexOptions.CultureInvariant);
+
+        private static readonly Regex LocalizationReferencePattern = new Regex(
+            "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*(?:\\.[a-z][a-z0-9]*(?:_[a-z0-9]+)*)+$",
             RegexOptions.CultureInvariant);
 
         private static readonly Regex DecimalPattern = new Regex(
@@ -247,6 +251,12 @@ namespace AL.Core.Interfaces.Notifications
                 ActionIdPattern,
                 NotificationTechnicalLimits.MaximumDefinitionIdUtf8Bytes);
 
+        public static bool IsLocalizationReference(string value) =>
+            IsBoundedPattern(
+                value,
+                LocalizationReferencePattern,
+                NotificationTechnicalLimits.MaximumStableValueUtf8Bytes);
+
         private static NotificationValidationResult ValidateParameters(
             IReadOnlyList<NotificationParameterDefinition> schema,
             IReadOnlyList<NotificationParameter> parameters)
@@ -395,7 +405,14 @@ namespace AL.Core.Interfaces.Notifications
                         : Unsafe("AL-NTF-PARAMETER");
                 }
                 case NotificationParameterValueKind.LocalizationReference:
-                    return ValidateString(definition, (string)value.Value, rejectMarkup: true);
+                {
+                    string text = (string)value.Value;
+                    NotificationValidationResult bounded =
+                        ValidateString(definition, text, rejectMarkup: true);
+                    return bounded.IsValid && IsLocalizationReference(text)
+                        ? Valid(null)
+                        : Unsafe("AL-NTF-PARAMETER");
+                }
                 default:
                     return Invalid("AL-NTF-PARAMETER");
             }

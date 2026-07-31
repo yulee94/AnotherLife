@@ -16,8 +16,15 @@ namespace AL.Services.Local
         private readonly INotificationDiagnosticSink _diagnosticSink;
 
         public LocalNotificationService()
+            : this(new UnavailableNotificationDefinitionResolver())
+        {
+        }
+
+        private LocalNotificationService(
+            UnavailableNotificationDefinitionResolver unavailableResolver)
             : this(
-                new UnavailableNotificationDefinitionResolver(),
+                unavailableResolver,
+                unavailableResolver,
                 new SystemNotificationClock(),
                 new UnavailableNotificationActionRegistry(),
                 new UnityNotificationDiagnosticSink())
@@ -26,6 +33,7 @@ namespace AL.Services.Local
 
         public LocalNotificationService(
             INotificationDefinitionResolver definitionResolver,
+            INotificationLocalizationReferenceAuthority localizationReferenceAuthority,
             INotificationClock clock,
             INotificationActionRegistry actionRegistry,
             INotificationDiagnosticSink diagnosticSink)
@@ -33,6 +41,7 @@ namespace AL.Services.Local
             _diagnosticSink = diagnosticSink ?? new UnityNotificationDiagnosticSink();
             _queue = new NotificationSessionQueue(
                 definitionResolver,
+                localizationReferenceAuthority,
                 clock,
                 actionRegistry,
                 _diagnosticSink);
