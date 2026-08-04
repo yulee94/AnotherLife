@@ -1,0 +1,16 @@
+{
+  "score": 96,
+  "verdict": "pass",
+  "category_match": true,
+  "differences": [
+    "The victory state preserves the established dark ceremonial mobile-combat hierarchy and clearly separates objective, reward, and exit action from the active three-enemy battlefield.",
+    "The reward description and treasury note are intentionally restrained but sit near the lower edge of comfortable small-text contrast for compact iPhone review.",
+    "Enemy actors, terrain, and reward icon remain structural graybox artwork rather than production character, environment, and item assets."
+  ],
+  "suggestions": [
+    "Raise compact-device contrast or size slightly for the reward description and treasury note while retaining the current hierarchy.",
+    "Replace structural enemy and environment silhouettes with approved production assets without changing independent health, all-enemies victory, or reward-return semantics.",
+    "Validate the final reward focus treatment, VoiceOver order, Dynamic Type, color-vision cues, and reduced-motion behavior on physical iPhones."
+  ],
+  "reasoning": "The generated victory state matches the reference battlefield's category, palette, spacing rhythm, and deliberate adult-fantasy hierarchy. The critical multi-enemy-to-reward transition is visually clear and exceeds the pass threshold; remaining differences are production-art and physical-device accessibility work."
+}
