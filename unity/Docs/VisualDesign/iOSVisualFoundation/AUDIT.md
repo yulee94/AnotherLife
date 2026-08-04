@@ -26,7 +26,7 @@ All changed files are contained in `unity/Docs/VisualDesign/iOSVisualFoundation/
 - `index.html` — dependency-free interaction prototype.
 - `README.md` and `DESIGN.md` — behavior, visual direction, and production boundaries.
 - `assets/` — the already-approved AL icon and four Arcane Axis realm marks, retained so the review artifact is self-contained. Their content matches existing Git LFS objects in `unity/Assets/AL/Art/`.
-- `previews/` — 22 selected screenshots covering the approved flow; historical and redundant captures were excluded.
+- `previews/` — 24 selected screenshots covering the approved flow; historical and redundant captures were excluded.
 - `visual-verdict-*.json` — retained structured visual-review results.
 
 No designated shared file is touched.
@@ -38,6 +38,7 @@ No designated shared file is touched.
 - [x] The top resource ledger uses icon plus amount only, while each resource opens purpose, balance, five pack tiers, and an explicit quantity confirmation.
 - [x] Construction uses a global queue, visibly ticks once per second, completes at zero, advances the building level, and refreshes the following level's benefits, duration, costs, and action.
 - [x] The world is presented as a large pannable sector for a 300+ player-castle target, with one castle per user and Bird's-eye, Quarter, and 3D camera states.
+- [x] Player castles open a dedicated ruler/alliance dossier; timed scouting uses the global march slot, produces a persistent report, and reveals intelligence only after completion.
 - [x] Player, Bandit, Gate, and Realm targets use an explicit battlefield-entry confirmation.
 - [x] Every visible battlefield enemy is independently selectable and damageable; victory waits until every enemy is defeated.
 - [x] The reward card appears only after complete victory, applies once inside the prototype, and returns to the same World target and camera state.
@@ -48,7 +49,7 @@ No designated shared file is touched.
 
 No P0 or P1 finding was identified.
 
-1. **Resolved — evidence size:** the source review folder contained 62 PNG captures. The repository package keeps 22 representative captures and excludes the historical duplicates.
+1. **Resolved — evidence size:** the source review folder contained 62 PNG captures. The repository package keeps 24 representative captures and excludes the historical duplicates.
 2. **Watch — spoken timer cadence:** the construction timer updates visually once per second but intentionally does not announce every second. Completion is announced through the adjacent polite status message. Production iOS validation should confirm an appropriate VoiceOver milestone cadence without creating repetitive announcements.
 
 ## Production boundaries and blockers
@@ -64,9 +65,10 @@ No P0 or P1 finding was identified.
 - Static JavaScript syntax validation.
 - Browser-console error check.
 - Final screenshot-to-reference visual verdict: 96/100, pass.
+- Player-dossier visual verdict: 96/100, pass; scout-report visual verdict: 94/100, pass.
 - Direct browser review of the complete multi-screen interaction.
 - Compact iPhone viewport review at 375 × 667 and standard modern iPhone review at 390 × 844.
-- Manual state-transition checks for realm continuity, pack quantity clamping, construction countdown/completion/next-level refresh, world pan/camera persistence, independent enemy health, all-enemies victory gating, one-time reward claim, and World return.
+- Manual state-transition checks for realm continuity, pack quantity clamping, construction countdown/completion/next-level refresh, world pan/camera persistence, player dossier/scout/report persistence, unread-report overwrite protection, gathering-report completion, independent enemy health, all-enemies victory gating, one-time reward claim, and World return.
 - Review against the repository product direction, realm selection, economy, battle, cross-platform visual, and competitive benchmark documents.
 
 ## Not validated as production

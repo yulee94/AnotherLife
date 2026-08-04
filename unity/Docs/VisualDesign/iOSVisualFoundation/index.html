@@ -295,6 +295,12 @@
     .world-action:focus-visible,
     .world-battle-action:focus-visible,
     .world-bookmark:focus-visible,
+    .world-march-pill:focus-visible,
+    .player-profile-close:focus-visible,
+    .player-profile-scout:focus-visible,
+    .player-profile-attack:focus-visible,
+    .world-report-close:focus-visible,
+    .world-report-okay:focus-visible,
     .battle-entry-cancel:focus-visible,
     .battle-entry-confirm:focus-visible,
     .battle-reward-okay:focus-visible,
@@ -1121,9 +1127,10 @@
     .world-objective p { color: var(--realm-accent); font-size: .42rem; font-weight: 780; letter-spacing: .12em; text-transform: uppercase; }
     .world-objective strong { margin-top: 4px; font-family: "Iowan Old Style", Georgia, serif; font-size: .72rem; font-weight: 560; }
     .world-objective small { margin-top: 3px; color: rgba(238,230,210,.42); font-size: .46rem; line-height: 1.3; }
-    .world-march-pill { position: absolute; z-index: 5; top: 44px; right: 12px; min-width: 112px; min-height: 46px; display: grid; align-content: center; justify-items: end; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--realm-accent) 26%, rgba(238,230,210,.12)); border-radius: 9px; color: rgba(238,230,210,.5); background: rgba(3,9,12,.82); font-size: .43rem; font-weight: 740; letter-spacing: .06em; text-transform: uppercase; backdrop-filter: blur(10px); }
+    .world-march-pill { position: absolute; z-index: 5; top: 44px; right: 12px; min-width: 112px; min-height: 46px; display: grid; align-content: center; justify-items: end; padding: 6px 10px; border: 1px solid color-mix(in srgb, var(--realm-accent) 26%, rgba(238,230,210,.12)); border-radius: 9px; color: rgba(238,230,210,.5); background: rgba(3,9,12,.82); font-size: .43rem; font-weight: 740; letter-spacing: .06em; text-transform: uppercase; cursor: pointer; backdrop-filter: blur(10px); }
     .world-march-pill strong { margin-top: 3px; color: var(--moon-ivory); font-size: .58rem; font-variant-numeric: tabular-nums; text-transform: none; }
     .world-march-pill.is-active { border-color: color-mix(in srgb, var(--realm-accent) 60%, rgba(238,230,210,.16)); color: var(--realm-accent); }
+    .world-march-pill.is-report { border-color: color-mix(in srgb, #7fc4ac 56%, rgba(238,230,210,.16)); color: #9ed8c4; box-shadow: inset 0 0 18px rgba(84,163,136,.08); }
     .world-camera-button { position: absolute; z-index: 5; top: 99px; right: 12px; min-width: 112px; min-height: 46px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; padding: 5px 9px; border: 1px solid color-mix(in srgb, var(--realm-accent) 38%, rgba(238,230,210,.15)); border-radius: 9px; color: rgba(238,230,210,.76); background: rgba(3,9,12,.86); cursor: pointer; backdrop-filter: blur(10px); }
     .world-camera-button svg { width: 21px; height: 21px; flex: 0 0 auto; fill: none; stroke: var(--realm-accent); stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round; transition: transform .42s ease; }
     .world-map-stage[data-camera="bird"] .world-camera-button svg { transform: rotate(0deg); }
@@ -1190,6 +1197,83 @@
     .world-battle-action[hidden] { display: none; }
     .world-feedback { min-height: 13px; margin: 6px 0 -1px; color: rgba(238,230,210,.43); font-size: .47rem; text-align: center; letter-spacing: .04em; }
     .world-feedback.is-active, .world-feedback.is-complete { color: color-mix(in srgb, var(--realm-accent) 78%, white); }
+
+    .player-profile-dialog,
+    .world-report-dialog { position: absolute; z-index: 32; inset: 0; display: grid; align-items: end; padding: calc(var(--safe-top) + 18px) 12px max(12px, env(safe-area-inset-bottom)); background: linear-gradient(180deg, rgba(1,4,7,.38), rgba(1,4,7,.92) 62%); backdrop-filter: blur(11px); }
+    .player-profile-dialog[hidden],
+    .world-report-dialog[hidden] { display: none; }
+    .player-profile-sheet,
+    .world-report-card { width: min(100%, 366px); max-height: calc(100% - 8px); margin: 0 auto; overflow-y: auto; border: 1px solid color-mix(in srgb, var(--realm-accent) 46%, rgba(238,230,210,.16)); border-radius: 16px 16px 11px 11px; color: var(--moon-ivory); background: radial-gradient(circle at 12% 0, color-mix(in srgb, var(--realm-accent) 11%, transparent), transparent 34%), linear-gradient(160deg, rgba(18,25,28,.99), rgba(4,9,12,.99) 64%); box-shadow: 0 -24px 64px rgba(0,0,0,.58), inset 0 1px rgba(255,255,255,.05); }
+    .player-profile-sheet { padding: 16px; }
+    .player-profile-head { display: grid; grid-template-columns: 52px minmax(0,1fr) 44px; gap: 11px; align-items: center; }
+    .player-profile-seal { position: relative; width: 50px; height: 50px; display: grid; place-items: center; border: 1px solid color-mix(in srgb, var(--realm-accent) 64%, white); color: color-mix(in srgb, var(--realm-accent) 78%, white); background: color-mix(in srgb, var(--realm-accent) 10%, rgba(2,7,9,.9)); transform: rotate(45deg); box-shadow: 0 8px 20px rgba(0,0,0,.38); }
+    .player-profile-seal::before { content: ""; position: absolute; inset: 7px; border: 1px solid color-mix(in srgb, var(--realm-accent) 38%, transparent); }
+    .player-profile-seal span { position: relative; font-family: "Iowan Old Style", Georgia, serif; font-size: 1.22rem; transform: rotate(-45deg); }
+    .player-profile-kicker,
+    .player-profile-owner,
+    .player-profile-copy,
+    .player-profile-status,
+    .player-profile-feedback { margin: 0; }
+    .player-profile-kicker { color: color-mix(in srgb, var(--realm-accent) 78%, white); font-size: .44rem; font-weight: 810; letter-spacing: .14em; text-transform: uppercase; }
+    .player-profile-owner { margin-top: 3px; font-family: "Iowan Old Style", Georgia, serif; font-size: 1.2rem; font-weight: 540; }
+    .player-profile-status { display: flex; align-items: center; gap: 5px; margin-top: 3px; color: rgba(238,230,210,.46); font-size: .48rem; }
+    .player-profile-status i { width: 6px; height: 6px; border-radius: 50%; background: #76bd96; box-shadow: 0 0 8px rgba(118,189,150,.65); }
+    .player-profile-close,
+    .world-report-close { width: 44px; height: 44px; border: 1px solid rgba(238,230,210,.13); border-radius: 50%; color: rgba(238,230,210,.74); background: rgba(255,255,255,.025); font-size: 1.1rem; cursor: pointer; }
+    .player-profile-banner { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; padding: 10px 11px; border-block: 1px solid rgba(238,230,210,.08); background: linear-gradient(90deg, color-mix(in srgb, var(--realm-accent) 8%, transparent), transparent); }
+    .player-profile-banner span { font-family: "Iowan Old Style", Georgia, serif; font-size: .91rem; }
+    .player-profile-banner strong { color: color-mix(in srgb, var(--realm-accent) 74%, white); font-size: .46rem; font-weight: 780; letter-spacing: .08em; text-align: right; text-transform: uppercase; }
+    .player-profile-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 6px; margin-top: 12px; }
+    .player-profile-metric { min-height: 52px; padding: 8px 9px; border: 1px solid rgba(238,230,210,.08); border-radius: 8px; background: rgba(255,255,255,.02); }
+    .player-profile-metric small,
+    .player-profile-metric strong { display: block; }
+    .player-profile-metric small { color: rgba(238,230,210,.36); font-size: .39rem; font-weight: 770; letter-spacing: .09em; text-transform: uppercase; }
+    .player-profile-metric strong { margin-top: 5px; overflow: hidden; color: rgba(238,230,210,.86); font-size: .65rem; font-variant-numeric: tabular-nums; text-overflow: ellipsis; }
+    .player-intel { margin-top: 11px; padding: 11px; border: 1px solid color-mix(in srgb, #7fc4ac 22%, rgba(238,230,210,.08)); border-radius: 9px; background: rgba(73,135,116,.035); }
+    .player-intel-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+    .player-intel-head strong { color: #9ed8c4; font-size: .45rem; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+    .player-intel-head span { color: rgba(238,230,210,.38); font-size: .44rem; }
+    .player-intel-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 8px; margin-top: 9px; }
+    .player-intel-grid span,
+    .player-intel-grid strong { display: block; }
+    .player-intel-grid span { color: rgba(238,230,210,.34); font-size: .38rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
+    .player-intel-grid strong { margin-top: 4px; color: rgba(238,230,210,.8); font-size: .58rem; }
+    .player-intel.is-unknown .player-intel-grid strong { color: rgba(238,230,210,.28); }
+    .player-profile-copy { margin-top: 10px; color: rgba(238,230,210,.5); font-size: .61rem; line-height: 1.42; }
+    .player-profile-actions { display: grid; grid-template-columns: .88fr 1.12fr; gap: 8px; margin-top: 13px; }
+    .player-profile-scout,
+    .player-profile-attack { min-height: 48px; border-radius: 8px; font-size: .57rem; font-weight: 820; letter-spacing: .07em; text-transform: uppercase; cursor: pointer; }
+    .player-profile-scout { border: 1px solid color-mix(in srgb, #7fc4ac 58%, white); color: #dff6ed; background: linear-gradient(180deg, rgba(52,116,96,.92), rgba(26,69,58,.96)); }
+    .player-profile-scout:disabled { color: rgba(238,230,210,.34); border-color: rgba(238,230,210,.1); background: rgba(255,255,255,.025); cursor: default; }
+    .player-profile-attack { border: 1px solid color-mix(in srgb, #d8785f 70%, #f5d9aa); color: #fff1df; background: linear-gradient(180deg, #9c4637, #5f2721); }
+    .player-rally-state { min-height: 35px; display: flex; align-items: center; justify-content: center; margin-top: 7px; border: 1px solid rgba(238,230,210,.07); border-radius: 7px; color: rgba(238,230,210,.32); font-size: .43rem; font-weight: 740; letter-spacing: .06em; text-transform: uppercase; }
+    .player-profile-feedback { min-height: 14px; margin-top: 7px; color: color-mix(in srgb, var(--realm-accent) 72%, rgba(238,230,210,.52)); font-size: .47rem; line-height: 1.35; text-align: center; }
+
+    .world-report-card { position: relative; padding: 20px 17px 17px; text-align: center; }
+    .world-report-close { position: absolute; top: 12px; right: 12px; }
+    .world-report-mark { width: 58px; height: 58px; display: grid; place-items: center; margin: 0 auto 13px; border: 1px solid color-mix(in srgb, #7fc4ac 68%, white); color: #a9dfcd; background: rgba(83,155,132,.08); transform: rotate(45deg); box-shadow: 0 0 0 6px rgba(83,155,132,.035); }
+    .world-report-mark svg { width: 29px; height: 29px; transform: rotate(-45deg); fill: none; stroke: currentColor; stroke-width: 1.45; stroke-linecap: round; stroke-linejoin: round; }
+    .world-report-kicker,
+    .world-report-title,
+    .world-report-copy,
+    .world-report-note { margin: 0; }
+    .world-report-kicker { color: #9ed8c4; font-size: .46rem; font-weight: 820; letter-spacing: .15em; text-transform: uppercase; }
+    .world-report-title { margin-top: 5px; font-family: "Iowan Old Style", Georgia, serif; font-size: 1.38rem; font-weight: 540; }
+    .world-report-copy { margin-top: 7px; color: rgba(238,230,210,.52); font-size: .63rem; line-height: 1.42; }
+    .world-report-target { display: flex; align-items: center; justify-content: space-between; gap: 9px; margin-top: 13px; padding: 10px 11px; border-block: 1px solid rgba(238,230,210,.08); text-align: left; }
+    .world-report-target span,
+    .world-report-target strong { display: block; }
+    .world-report-target span { color: rgba(238,230,210,.38); font-size: .42rem; font-weight: 760; letter-spacing: .09em; text-transform: uppercase; }
+    .world-report-target strong { margin-top: 4px; font-family: "Iowan Old Style", Georgia, serif; font-size: .86rem; font-weight: 560; }
+    .world-report-target em { color: color-mix(in srgb, var(--realm-accent) 74%, white); font-size: .53rem; font-style: normal; font-weight: 760; }
+    .world-report-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 7px; margin-top: 12px; }
+    .world-report-stat { min-height: 57px; padding: 9px 7px; border: 1px solid rgba(238,230,210,.08); border-radius: 8px; background: rgba(255,255,255,.02); }
+    .world-report-stat small,
+    .world-report-stat strong { display: block; }
+    .world-report-stat small { color: rgba(238,230,210,.36); font-size: .38rem; font-weight: 760; letter-spacing: .08em; text-transform: uppercase; }
+    .world-report-stat strong { margin-top: 6px; color: #dff6ed; font-size: .64rem; }
+    .world-report-note { margin-top: 11px; color: rgba(238,230,210,.4); font-size: .5rem; line-height: 1.42; }
+    .world-report-okay { width: 100%; min-height: 49px; margin-top: 14px; border: 1px solid color-mix(in srgb, #7fc4ac 64%, #f2e6c9); border-radius: 8px; color: #07110e; background: linear-gradient(180deg, #a9d9c8, #5d9b86); font-size: .58rem; font-weight: 830; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 
     .battle-entry-dialog { position: absolute; z-index: 30; inset: 0; display: grid; place-items: center; padding: calc(var(--safe-top) + 24px) 20px max(24px, env(safe-area-inset-bottom)); background: radial-gradient(circle at 50% 42%, color-mix(in srgb, var(--realm-accent) 12%, transparent), rgba(1,4,7,.9) 62%); backdrop-filter: blur(12px); }
     .battle-entry-dialog[hidden] { display: none; }
@@ -1316,6 +1400,28 @@
       .battle-action-cluster { right: 12px; transform: scale(.9); transform-origin: right bottom; }
       .battle-entry-card { padding: 15px; }
       .battle-entry-mark { width: 48px; height: 48px; margin-bottom: 12px; }
+      .player-profile-dialog,
+      .world-report-dialog { padding: calc(var(--safe-top) + 10px) 9px max(9px, env(safe-area-inset-bottom)); }
+      .player-profile-sheet { padding: 12px; }
+      .player-profile-head { grid-template-columns: 46px minmax(0,1fr) 40px; gap: 9px; }
+      .player-profile-seal { width: 44px; height: 44px; }
+      .player-profile-close,
+      .world-report-close { width: 40px; height: 40px; }
+      .player-profile-banner { margin-top: 10px; padding-block: 8px; }
+      .player-profile-metrics { margin-top: 9px; }
+      .player-profile-metric { min-height: 47px; padding: 6px 7px; }
+      .player-intel { margin-top: 8px; padding: 9px; }
+      .player-profile-copy { margin-top: 8px; }
+      .player-profile-actions { margin-top: 10px; }
+      .player-profile-scout,
+      .player-profile-attack { min-height: 45px; }
+      .world-report-card { padding: 16px 13px 13px; }
+      .world-report-mark { width: 50px; height: 50px; margin-bottom: 10px; }
+      .world-report-title { font-size: 1.22rem; }
+      .world-report-target { margin-top: 10px; }
+      .world-report-grid { margin-top: 9px; }
+      .world-report-stat { min-height: 51px; padding: 7px 5px; }
+      .world-report-okay { min-height: 46px; margin-top: 11px; }
       .battle-reward-card { padding: 17px 15px 15px; }
       .battle-reward-mark { width: 54px; height: 54px; margin-bottom: 12px; }
       .battle-reward-mark svg { width: 29px; height: 29px; }
@@ -1709,7 +1815,7 @@
           <div class="world-sector-pill" aria-label="Sector 04. Ten nearby player castles. World scale target: more than 300 player castles.">S04 • 10 nearby / 300+ world</div>
           <div class="world-coordinate">X: 418 • Y: 726</div>
           <section class="world-objective" aria-label="Current world objective"><p>Chapter objective</p><strong>Beyond the walls</strong><small>Dispatch one march into the outer realm.</small></section>
-          <div class="world-march-pill"><span>Marches • 0 / 1</span><strong>Ready</strong></div>
+          <button class="world-march-pill" type="button" aria-label="Marches: zero of one active. No report waiting."><span>Marches • 0 / 1</span><strong>Ready</strong></button>
           <button class="world-camera-button" type="button" aria-label="Camera angle: Quarter view. Activate for 3D view."><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 15 8 4 8-4-8-4-8 4Z"/><path d="m4 11 8 4 8-4M4 7l8 4 8-4-8-4-8 4Z"/></svg><span><small>Camera</small><strong>Quarter</strong></span></button>
           <div class="world-map-canvas">
             <svg class="world-routes" viewBox="0 0 1320 1200" preserveAspectRatio="none" aria-hidden="true"><path d="M660 528C610 470 565 405 528 360M660 528C708 466 752 420 792 396M660 528C605 570 560 630 528 684M660 528C716 566 760 610 792 660M660 528C520 480 410 410 290 360M660 528C800 475 920 430 1030 408"/><path class="march-route" d="M660 528C610 470 565 405 528 360"/></svg>
@@ -1740,6 +1846,56 @@
             <div class="world-reward"><span>Expected return</span><strong>+120 Food</strong></div>
             <div class="world-actions"><button class="world-bookmark" type="button" aria-pressed="false" aria-label="Bookmark selected world location">☆</button><button class="world-action" type="button">Dispatch gatherers</button><button class="world-battle-action" type="button" hidden>Enter battle</button></div>
             <p class="world-feedback" role="status" aria-live="polite">Select a location, inspect it, then dispatch deliberately.</p>
+          </section>
+        </div>
+
+        <div class="player-profile-dialog" hidden>
+          <section class="player-profile-sheet" role="dialog" aria-modal="true" aria-labelledby="player-profile-owner" aria-describedby="player-profile-copy player-profile-feedback">
+            <header class="player-profile-head">
+              <div class="player-profile-seal" aria-hidden="true"><span>G</span></div>
+              <div>
+                <p class="player-profile-kicker">Player castle • Neutral</p>
+                <h3 class="player-profile-owner" id="player-profile-owner">GreenWarden</h3>
+                <p class="player-profile-status"><i aria-hidden="true"></i><span>Active 4 minutes ago</span></p>
+              </div>
+              <button class="player-profile-close" type="button" aria-label="Close player profile">×</button>
+            </header>
+            <div class="player-profile-banner"><span>Thornspire</span><strong>[ROOT] Rootbound Circle</strong></div>
+            <div class="player-profile-metrics">
+              <div class="player-profile-metric"><small>Castle level</small><strong class="player-profile-level">Level 12</strong></div>
+              <div class="player-profile-metric"><small>Castle power</small><strong class="player-profile-power">27.6K</strong></div>
+              <div class="player-profile-metric"><small>Distance</small><strong class="player-profile-distance">0.9 km</strong></div>
+            </div>
+            <section class="player-intel is-unknown" aria-label="Scouting intelligence">
+              <div class="player-intel-head"><strong>Scouting intelligence</strong><span class="player-intel-state">Not scouted</span></div>
+              <div class="player-intel-grid">
+                <div><span>Wall</span><strong class="player-intel-wall">Unknown</strong></div>
+                <div><span>Defenders</span><strong class="player-intel-defenders">Unknown</strong></div>
+                <div><span>Protection</span><strong class="player-intel-protection">Unknown</strong></div>
+              </div>
+            </section>
+            <p class="player-profile-copy" id="player-profile-copy">Inspect the ruler and alliance before committing a march or entering the close battlefield.</p>
+            <div class="player-profile-actions"><button class="player-profile-scout" type="button">Scout • 14s</button><button class="player-profile-attack" type="button">Attack castle</button></div>
+            <div class="player-rally-state" aria-disabled="true">Rally locked • Alliance membership required</div>
+            <p class="player-profile-feedback" id="player-profile-feedback" role="status" aria-live="polite">Scouting uses the single global march slot.</p>
+          </section>
+        </div>
+
+        <div class="world-report-dialog" hidden>
+          <section class="world-report-card" role="dialog" aria-modal="true" aria-labelledby="world-report-title" aria-describedby="world-report-copy world-report-note">
+            <button class="world-report-close" type="button" aria-label="Close march report">×</button>
+            <div class="world-report-mark" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="14" cy="14" r="8"/><path d="m20 20 7 7M14 10v8m-4-4h8"/></svg></div>
+            <p class="world-report-kicker">March report</p>
+            <h3 class="world-report-title" id="world-report-title">Scout report ready</h3>
+            <p class="world-report-copy" id="world-report-copy">Your scouts returned with a verified snapshot of the selected player castle.</p>
+            <div class="world-report-target"><div><span>Target</span><strong class="world-report-target-name">Thornspire</strong></div><em class="world-report-target-owner">GreenWarden</em></div>
+            <div class="world-report-grid">
+              <div class="world-report-stat"><small class="world-report-label-one">Power</small><strong class="world-report-value-one">27.6K</strong></div>
+              <div class="world-report-stat"><small class="world-report-label-two">Wall</small><strong class="world-report-value-two">21.4K</strong></div>
+              <div class="world-report-stat"><small class="world-report-label-three">Defenders</small><strong class="world-report-value-three">9.8K</strong></div>
+            </div>
+            <p class="world-report-note" id="world-report-note">Report values are illustrative visual data and do not establish production combat authority.</p>
+            <button class="world-report-okay" type="button">Acknowledge report</button>
           </section>
         </div>
 
@@ -1816,9 +1972,9 @@
     </section>
 
     <aside class="notes-panel" aria-label="Prototype notes">
-      <p class="notes-kicker">Visual foundation 04</p>
-      <h2>Four realms become four kingdoms.</h2>
-      <p class="notes-lede">The first management view now shares one trustworthy building quote flow while each realm changes its construction silhouette, road logic, and spatial rhythm—not merely its color.</p>
+      <p class="notes-kicker">Visual foundation 05</p>
+      <h2>Every castle belongs to someone.</h2>
+      <p class="notes-lede">The strategic map now treats player castles as people: profile, alliance, visible state, timed scouting, verified intelligence, and a deliberate handoff into the close battlefield.</p>
       <div class="preview-controls" aria-label="Preview controls">
         <button class="control-button" type="button" data-go="launch">Launch</button>
         <button class="control-button" type="button" data-go="realms">Realm selection</button>
@@ -1883,6 +2039,16 @@
     const worldBattleAction = document.querySelector('.world-battle-action');
     const worldBookmark = document.querySelector('.world-bookmark');
     const worldFeedback = document.querySelector('.world-feedback');
+    const playerProfileDialog = document.querySelector('.player-profile-dialog');
+    const playerProfileSheet = document.querySelector('.player-profile-sheet');
+    const playerProfileClose = document.querySelector('.player-profile-close');
+    const playerProfileScout = document.querySelector('.player-profile-scout');
+    const playerProfileAttack = document.querySelector('.player-profile-attack');
+    const playerProfileFeedback = document.querySelector('.player-profile-feedback');
+    const worldReportDialog = document.querySelector('.world-report-dialog');
+    const worldReportCard = document.querySelector('.world-report-card');
+    const worldReportClose = document.querySelector('.world-report-close');
+    const worldReportOkay = document.querySelector('.world-report-okay');
     const battleEntryDialog = document.querySelector('.battle-entry-dialog');
     const battleEntryCard = document.querySelector('.battle-entry-card');
     const battleEntryCancel = document.querySelector('.battle-entry-cancel');
@@ -1911,6 +2077,7 @@
     let worldMapInitialized = false;
     let worldMapPan = { x: -465, y: -228 };
     let worldPanGesture = null;
+    let activePlayerProfileNodeKey = null;
     let pendingBattleNodeKey = null;
     let activeBattleNodeKey = null;
     let battleRewardClaimed = false;
@@ -1932,6 +2099,8 @@
     const activeWorldMarches = new Map();
     const completedWorldMarches = new Set();
     const worldNotices = new Map();
+    const worldReports = new Map();
+    const scoutedPlayerNodes = new Set();
     const bookmarkedWorldNodes = new Set();
 
     const realms = {
@@ -1976,6 +2145,19 @@
       starfall: { kind: 'player', name: 'Starfall', kicker: 'Player castle • [NOVA]', owner: 'NovaKnight', distance: '3.7 km', detail: 'A real player castle ruled by NovaKnight in the southern reach of the current sector.', metricLabel: 'Castle power', reward: '42.6K', action: 'Open player profile' }
     };
 
+    const playerProfiles = {
+      emberwatch: { tag: 'ASH', alliance: 'Ashen Accord', level: 9, lastSeen: 'Active now', wall: '13.2K', defenders: '6.1K', protection: 'Unshielded', scoutSeconds: 12 },
+      greymantle: { tag: 'VOW', alliance: 'Mantle Covenant', level: 11, lastSeen: 'Active 11 minutes ago', wall: '17.6K', defenders: '8.4K', protection: 'Ward fading', scoutSeconds: 15 },
+      lumenkeep: { tag: 'SUN', alliance: 'Luminous Host', level: 8, lastSeen: 'Active 2 minutes ago', wall: '12.8K', defenders: '5.9K', protection: 'Unshielded', scoutSeconds: 14 },
+      thornspire: { tag: 'ROOT', alliance: 'Rootbound Circle', level: 12, lastSeen: 'Active 4 minutes ago', wall: '21.4K', defenders: '9.8K', protection: 'Unshielded', scoutSeconds: 14 },
+      duskfort: { tag: 'VEIL', alliance: 'Veiled Court', level: 13, lastSeen: 'Active 18 minutes ago', wall: '24.9K', defenders: '11.2K', protection: 'Ward fading', scoutSeconds: 17 },
+      frostgate: { tag: 'NTH', alliance: 'Northern Oath', level: 11, lastSeen: 'Active 7 minutes ago', wall: '19.1K', defenders: '8.7K', protection: 'Unshielded', scoutSeconds: 16 },
+      riverhold: { tag: 'TIDE', alliance: 'River Compact', level: 10, lastSeen: 'Active 23 minutes ago', wall: '15.8K', defenders: '7.3K', protection: 'Unshielded', scoutSeconds: 18 },
+      ironwake: { tag: 'FORGE', alliance: 'Ironwake Union', level: 14, lastSeen: 'Active 9 minutes ago', wall: '27.7K', defenders: '12.9K', protection: 'Shielded', scoutSeconds: 20 },
+      moonrest: { tag: 'LUNE', alliance: 'Lunar Vigil', level: 13, lastSeen: 'Active 31 minutes ago', wall: '23.5K', defenders: '10.6K', protection: 'Unshielded', scoutSeconds: 21 },
+      starfall: { tag: 'NOVA', alliance: 'Starfall Banner', level: 15, lastSeen: 'Active now', wall: '33.2K', defenders: '15.4K', protection: 'Shielded', scoutSeconds: 24 }
+    };
+
     const worldRoutePaths = {
       food: 'M660 528C610 470 565 405 528 360',
       stone: 'M660 528C708 466 752 420 792 396',
@@ -1984,6 +2166,21 @@
       ashenGate: 'M660 528C520 480 410 410 290 360',
       realmOutpost: 'M660 528C800 475 920 430 1030 408'
     };
+
+    function getWorldRoutePath(nodeKey) {
+      if (worldRoutePaths[nodeKey]) return worldRoutePaths[nodeKey];
+      const nodeElement = document.querySelector(`[data-world-node="${nodeKey}"]`);
+      if (!nodeElement) return null;
+      const style = getComputedStyle(nodeElement);
+      const xPercent = Number.parseFloat(style.getPropertyValue('--map-x'));
+      const yPercent = Number.parseFloat(style.getPropertyValue('--map-y'));
+      if (!Number.isFinite(xPercent) || !Number.isFinite(yPercent)) return null;
+      const targetX = Math.round(1320 * xPercent / 100);
+      const targetY = Math.round(1200 * yPercent / 100);
+      const controlX = Math.round((660 + targetX) / 2);
+      const controlY = Math.round((528 + targetY) / 2 - 44);
+      return `M660 528Q${controlX} ${controlY} ${targetX} ${targetY}`;
+    }
 
     const worldCameraModes = [
       { key: 'bird', label: "Bird's-eye" },
@@ -2140,6 +2337,11 @@
 
     function showScreen(name) {
       if (name !== 'battlefield') stopBattleMovement();
+      if (name !== 'world') {
+        closePlayerProfile({ restoreFocus: false });
+        closeWorldReport({ restoreFocus: false });
+        closeBattleEntry({ restoreFocus: false });
+      }
       screens.forEach(screen => {
         const isActive = screen.dataset.screen === name;
         screen.classList.toggle('is-active', isActive);
@@ -2188,6 +2390,7 @@
       const realm = realms[selectedRealm];
       const node = worldNodes[selectedWorldNode] || worldNodes.food;
       const activeMarch = activeWorldMarches.get(selectedRealm);
+      const waitingReport = worldReports.get(selectedRealm);
       const remaining = activeMarch ? Math.max(0, activeMarch.endsAt - Date.now()) : 0;
       worldScreen.scrollTop = 0;
       document.querySelectorAll('[data-world-node]').forEach(button => {
@@ -2210,10 +2413,21 @@
 
       worldMapStage.classList.toggle('has-march', Boolean(activeMarch));
       const marchRoute = worldMapStage.querySelector('.march-route');
-      if (activeMarch && worldRoutePaths[activeMarch.nodeKey]) marchRoute.setAttribute('d', worldRoutePaths[activeMarch.nodeKey]);
+      const activeRoute = activeMarch ? getWorldRoutePath(activeMarch.nodeKey) : null;
+      if (activeRoute) marchRoute.setAttribute('d', activeRoute);
       worldMarchPill.classList.toggle('is-active', Boolean(activeMarch));
-      worldMarchPill.querySelector('span').textContent = activeMarch ? 'Marches • 1 / 1' : 'Marches • 0 / 1';
-      worldMarchPill.querySelector('strong').textContent = activeMarch ? `${worldNodes[activeMarch.nodeKey].name} • ${formatWorldCountdown(remaining)}` : 'Ready';
+      worldMarchPill.classList.toggle('is-report', !activeMarch && Boolean(waitingReport));
+      worldMarchPill.querySelector('span').textContent = activeMarch ? 'Marches • 1 / 1' : waitingReport ? 'Reports • 1' : 'Marches • 0 / 1';
+      worldMarchPill.querySelector('strong').textContent = activeMarch
+        ? `${worldNodes[activeMarch.nodeKey].name} • ${formatWorldCountdown(remaining)}`
+        : waitingReport
+          ? `${worldNodes[waitingReport.nodeKey].name} • Ready`
+          : 'Ready';
+      worldMarchPill.setAttribute('aria-label', activeMarch
+        ? `One of one marches active to ${worldNodes[activeMarch.nodeKey].name}. ${formatWorldCountdown(remaining)} remaining.`
+        : waitingReport
+          ? `One march report ready for ${worldNodes[waitingReport.nodeKey].name}. Activate to review.`
+          : 'Marches: zero of one active. No report waiting.');
 
       const selectedIsActive = activeMarch?.nodeKey === selectedWorldNode;
       if (node.kind === 'player') {
@@ -2228,6 +2442,9 @@
       } else if (activeMarch) {
         worldAction.disabled = true;
         worldAction.textContent = 'March slot occupied';
+      } else if (waitingReport) {
+        worldAction.disabled = true;
+        worldAction.textContent = 'Review march report';
       } else {
         worldAction.disabled = false;
         worldAction.textContent = node.action;
@@ -2277,6 +2494,121 @@
       }
     }
 
+    function getPlayerScoutKey(nodeKey = selectedWorldNode, realmKey = selectedRealm) {
+      return `${realmKey}:${nodeKey}`;
+    }
+
+    function openPlayerProfile(nodeKey = selectedWorldNode) {
+      const node = worldNodes[nodeKey];
+      const profile = playerProfiles[nodeKey];
+      if (!node || node.kind !== 'player' || !profile) return;
+      activePlayerProfileNodeKey = nodeKey;
+      const scouted = scoutedPlayerNodes.has(getPlayerScoutKey(nodeKey));
+      const activeMarch = activeWorldMarches.get(selectedRealm);
+      const waitingReport = worldReports.get(selectedRealm);
+      const activeNode = activeMarch ? worldNodes[activeMarch.nodeKey] : null;
+      playerProfileDialog.querySelector('.player-profile-seal span').textContent = node.owner.charAt(0).toUpperCase();
+      playerProfileDialog.querySelector('.player-profile-kicker').textContent = `Player castle • ${profile.protection === 'Shielded' ? 'Protected' : 'Frontier'}`;
+      playerProfileDialog.querySelector('.player-profile-owner').textContent = node.owner;
+      playerProfileDialog.querySelector('.player-profile-status span').textContent = profile.lastSeen;
+      playerProfileDialog.querySelector('.player-profile-banner span').textContent = node.name;
+      playerProfileDialog.querySelector('.player-profile-banner strong').textContent = `[${profile.tag}] ${profile.alliance}`;
+      playerProfileDialog.querySelector('.player-profile-level').textContent = `Level ${profile.level}`;
+      playerProfileDialog.querySelector('.player-profile-power').textContent = node.reward;
+      playerProfileDialog.querySelector('.player-profile-distance').textContent = node.distance;
+      const intel = playerProfileDialog.querySelector('.player-intel');
+      intel.classList.toggle('is-unknown', !scouted);
+      playerProfileDialog.querySelector('.player-intel-state').textContent = scouted ? 'Verified report' : 'Not scouted';
+      playerProfileDialog.querySelector('.player-intel-wall').textContent = scouted ? profile.wall : 'Unknown';
+      playerProfileDialog.querySelector('.player-intel-defenders').textContent = scouted ? profile.defenders : 'Unknown';
+      playerProfileDialog.querySelector('.player-intel-protection').textContent = scouted ? profile.protection : 'Unknown';
+      playerProfileDialog.querySelector('.player-profile-copy').textContent = scouted
+        ? `Your latest report verifies ${node.name}'s visible defenses. Attack still requires a separate battlefield confirmation.`
+        : 'Inspect the ruler and alliance before committing a march or entering the close battlefield.';
+      playerProfileScout.disabled = Boolean(activeMarch || waitingReport);
+      playerProfileScout.textContent = activeMarch
+        ? 'March slot occupied'
+        : waitingReport
+          ? 'Review report first'
+          : `${scouted ? 'Rescout' : 'Scout'} • ${profile.scoutSeconds}s`;
+      playerProfileAttack.textContent = profile.protection === 'Shielded' && scouted ? 'Test protection' : 'Attack castle';
+      playerProfileFeedback.textContent = activeMarch
+        ? `March slot occupied by ${activeNode.name} • ${formatWorldCountdown(Math.max(0, activeMarch.endsAt - Date.now()))} remaining.`
+        : waitingReport
+          ? `${worldNodes[waitingReport.nodeKey].name} report is waiting. Review it before dispatching another scout.`
+        : scouted
+          ? 'Intelligence remains attached to this player until the visual preview resets.'
+          : 'Scouting uses the single global march slot.';
+      playerProfileDialog.hidden = false;
+      playerProfileClose.focus();
+    }
+
+    function closePlayerProfile({ restoreFocus = true } = {}) {
+      if (playerProfileDialog.hidden) return;
+      playerProfileDialog.hidden = true;
+      activePlayerProfileNodeKey = null;
+      if (restoreFocus && worldScreen.classList.contains('is-active')) worldAction.focus();
+    }
+
+    function startPlayerScout() {
+      const nodeKey = activePlayerProfileNodeKey;
+      const node = worldNodes[nodeKey];
+      const profile = playerProfiles[nodeKey];
+      if (!node || !profile) return;
+      if (activeWorldMarches.has(selectedRealm)) {
+        openPlayerProfile(nodeKey);
+        return;
+      }
+      if (worldReports.has(selectedRealm)) {
+        openPlayerProfile(nodeKey);
+        return;
+      }
+      activeWorldMarches.set(selectedRealm, {
+        nodeKey,
+        type: 'scout',
+        endsAt: Date.now() + profile.scoutSeconds * 1000
+      });
+      worldReports.delete(selectedRealm);
+      worldNotices.delete(selectedRealm);
+      closePlayerProfile({ restoreFocus: false });
+      syncWorldMap();
+      worldMapStage.focus();
+    }
+
+    function openWorldReport() {
+      const report = worldReports.get(selectedRealm);
+      if (!report) return;
+      worldReportDialog.querySelector('.world-report-kicker').textContent = report.kicker;
+      worldReportDialog.querySelector('.world-report-title').textContent = report.title;
+      worldReportDialog.querySelector('.world-report-copy').textContent = report.copy;
+      worldReportDialog.querySelector('.world-report-target-name').textContent = report.target;
+      worldReportDialog.querySelector('.world-report-target-owner').textContent = report.owner;
+      worldReportDialog.querySelector('.world-report-label-one').textContent = report.stats[0].label;
+      worldReportDialog.querySelector('.world-report-value-one').textContent = report.stats[0].value;
+      worldReportDialog.querySelector('.world-report-label-two').textContent = report.stats[1].label;
+      worldReportDialog.querySelector('.world-report-value-two').textContent = report.stats[1].value;
+      worldReportDialog.querySelector('.world-report-label-three').textContent = report.stats[2].label;
+      worldReportDialog.querySelector('.world-report-value-three').textContent = report.stats[2].value;
+      worldReportDialog.querySelector('.world-report-note').textContent = report.note;
+      worldReportDialog.hidden = false;
+      worldReportOkay.focus();
+    }
+
+    function closeWorldReport({ restoreFocus = true } = {}) {
+      if (worldReportDialog.hidden) return;
+      worldReportDialog.hidden = true;
+      if (restoreFocus && worldScreen.classList.contains('is-active')) worldMarchPill.focus();
+    }
+
+    function acknowledgeWorldReport() {
+      if (!worldReports.has(selectedRealm)) return;
+      worldReports.delete(selectedRealm);
+      worldNotices.delete(selectedRealm);
+      closeWorldReport({ restoreFocus: false });
+      syncWorldMap();
+      worldMarchPill.focus();
+    }
+
     function startWorldMarch() {
       if (selectedWorldNode === 'city') {
         showScreen('kingdom');
@@ -2285,12 +2617,12 @@
       const node = worldNodes[selectedWorldNode];
       if (!node) return;
       if (node.kind === 'player') {
-        worldFeedback.textContent = `PLAYER PROFILE PREVIEW • ${node.owner} • ${node.reward} castle power.`;
-        worldFeedback.className = 'world-feedback is-complete';
+        openPlayerProfile(selectedWorldNode);
         return;
       }
-      if (activeWorldMarches.has(selectedRealm)) return;
-      activeWorldMarches.set(selectedRealm, { nodeKey: selectedWorldNode, endsAt: Date.now() + node.durationSeconds * 1000 });
+      if (activeWorldMarches.has(selectedRealm) || worldReports.has(selectedRealm)) return;
+      activeWorldMarches.set(selectedRealm, { nodeKey: selectedWorldNode, type: 'expedition', endsAt: Date.now() + node.durationSeconds * 1000 });
+      worldReports.delete(selectedRealm);
       worldNotices.delete(selectedRealm);
       syncWorldMap();
     }
@@ -2595,12 +2927,46 @@
         const node = worldNodes[march.nodeKey];
         activeWorldMarches.delete(realmKey);
         completedWorldMarches.add(realmKey);
-        if (node.resource && node.rewardAmount) {
+        if (march.type === 'scout' && node.kind === 'player') {
+          const profile = playerProfiles[march.nodeKey];
+          scoutedPlayerNodes.add(getPlayerScoutKey(march.nodeKey, realmKey));
+          worldReports.set(realmKey, {
+            nodeKey: march.nodeKey,
+            kicker: 'Scout march complete',
+            title: 'Scout report ready',
+            copy: `Your scouts returned from ${node.name} with a verified snapshot of the player castle.`,
+            target: node.name,
+            owner: `${node.owner} • [${profile.tag}]`,
+            stats: [
+              { label: 'Power', value: node.reward },
+              { label: 'Wall', value: profile.wall },
+              { label: 'Defenders', value: profile.defenders }
+            ],
+            note: `${profile.protection} • Intelligence is illustrative visual data and does not establish production PvP authority.`
+          });
+          worldNotices.set(realmKey, `SCOUT REPORT READY • ${node.name.toUpperCase()} intelligence received.`);
+        } else if (node.resource && node.rewardAmount) {
           const balanceKey = `${realmKey}:${node.resource}`;
           const baseBalance = Number.parseInt(resources[node.resource].amount.replaceAll(',', ''), 10);
           resourceBalances.set(balanceKey, (resourceBalances.get(balanceKey) ?? baseBalance) + node.rewardAmount);
+          worldReports.set(realmKey, {
+            nodeKey: march.nodeKey,
+            kicker: 'Expedition complete',
+            title: `${node.name} complete`,
+            copy: `The march returned safely and the stated resources were added to ${realms[realmKey].name}.`,
+            target: node.name,
+            owner: realms[realmKey].name,
+            stats: [
+              { label: 'Return', value: node.reward },
+              { label: 'Distance', value: node.distance },
+              { label: 'March slot', value: 'Ready' }
+            ],
+            note: 'Prototype rewards apply once at completion. Production rewards require authoritative server reconciliation.'
+          });
+          worldNotices.set(realmKey, `MARCH COMPLETE • ${node.reward.toUpperCase()} added to ${realms[realmKey].name}.`);
+        } else {
+          worldNotices.set(realmKey, `MARCH COMPLETE • ${node.name.toUpperCase()} returned.`);
         }
-        worldNotices.set(realmKey, `MARCH COMPLETE • ${node.reward.toUpperCase()} added to ${realms[realmKey].name}.`);
         changed = true;
       });
       if (activeWorldMarches.size > 0 || changed) {
@@ -3124,9 +3490,32 @@
         syncWorldMap();
       }
 
+      if (event.target.closest('.world-march-pill')) {
+        const activeMarch = activeWorldMarches.get(selectedRealm);
+        if (activeMarch) {
+          selectedWorldNode = activeMarch.nodeKey;
+          syncWorldMap();
+        } else if (worldReports.has(selectedRealm)) {
+          openWorldReport();
+        }
+      }
+
       if (event.target.closest('.world-action') && !worldAction.disabled) startWorldMarch();
 
       if (event.target.closest('.world-battle-action') && !worldBattleAction.hidden) openBattleEntry();
+
+      if (event.target.closest('.player-profile-close') || event.target === playerProfileDialog) closePlayerProfile();
+
+      if (event.target.closest('.player-profile-scout') && !playerProfileScout.disabled) startPlayerScout();
+
+      if (event.target.closest('.player-profile-attack')) {
+        closePlayerProfile({ restoreFocus: false });
+        openBattleEntry();
+      }
+
+      if (event.target.closest('.world-report-close') || event.target === worldReportDialog) closeWorldReport();
+
+      if (event.target.closest('.world-report-okay')) acknowledgeWorldReport();
 
       if (event.target.closest('.battle-entry-cancel') || event.target === battleEntryDialog) closeBattleEntry();
 
@@ -3186,6 +3575,14 @@
           battleRewardOkay.focus();
           return;
         }
+        if (!worldReportDialog.hidden) {
+          closeWorldReport();
+          return;
+        }
+        if (!playerProfileDialog.hidden) {
+          closePlayerProfile();
+          return;
+        }
         if (!battleEntryDialog.hidden) {
           closeBattleEntry();
           return;
@@ -3229,6 +3626,30 @@
         event.preventDefault();
         battleRewardOkay.focus();
       }
+      if (!worldReportDialog.hidden && event.key === 'Tab') {
+        const focusable = [worldReportClose, worldReportOkay];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+      if (!playerProfileDialog.hidden && event.key === 'Tab') {
+        const focusable = [...playerProfileSheet.querySelectorAll('button:not([disabled])')];
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
       if (!resourceDialog.hidden && event.key === 'Tab') {
         const focusScope = packQuantityDialog.hidden ? resourceSheet : packQuantityDialog;
         const focusable = [...focusScope.querySelectorAll('button:not([disabled]), input:not([disabled])')];
@@ -3271,9 +3692,13 @@
     const previewRealm = previewParams.get('realm');
     const previewScreen = previewParams.get('screen');
     const previewCamera = previewParams.get('camera');
+    const previewPlayer = previewParams.get('player');
+    const previewProfile = previewParams.get('profile');
     if (previewRealm && realms[previewRealm]) chooseRealm(previewRealm);
     if (previewCamera && worldCameraModes.some(camera => camera.key === previewCamera)) worldCameraIndex = worldCameraModes.findIndex(camera => camera.key === previewCamera);
+    if (previewPlayer && worldNodes[previewPlayer]?.kind === 'player') selectedWorldNode = previewPlayer;
     if (previewScreen && screens.some(screen => screen.dataset.screen === previewScreen)) showScreen(previewScreen);
+    if (previewProfile === '1' && worldNodes[selectedWorldNode]?.kind === 'player') window.requestAnimationFrame(() => openPlayerProfile(selectedWorldNode));
   </script>
 </body>
 </html>

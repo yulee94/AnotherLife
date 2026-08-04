@@ -26,6 +26,12 @@ This set preserves the current approved direction without committing every histo
 | --- | --- | --- | --- |
 | ![300 plus player scale](world-map-300-player-scale.png) | ![One castle per player](world-map-player-castle.png) | ![Bird's-eye camera](world-map-birds-eye.png) | ![3D camera](world-map-3d-view.png) |
 
+## Player interaction
+
+| Player castle dossier | Completed scout report |
+| --- | --- |
+| ![Player castle dossier](world-player-profile.png) | ![Completed scout report](world-player-scout-report.png) |
+
 ## Close battlefield
 
 | Entry confirmation | Three enemies | Independent damage | Complete victory reward |
