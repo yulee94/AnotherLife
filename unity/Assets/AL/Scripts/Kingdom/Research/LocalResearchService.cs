@@ -40,20 +40,39 @@ namespace AL.Services.Local
 
         public ResearchState GetResearchState(string researchId)
         {
-            if (Researches == null) return null;
-            var state = Researches.FirstOrDefault(r => r.ResearchId == researchId);
-            if (state == null)
-            {
-                state = new ResearchState { ResearchId = researchId, Level = 0 };
-                Researches.Add(state);
-            }
-            return state;
+            List<ResearchState> researches = Researches;
+            if (researches == null) return null;
+
+            ResearchState state = researches.FirstOrDefault(
+                candidate => candidate?.ResearchId == researchId);
+            return state == null
+                ? new ResearchState
+                {
+                    ResearchId = researchId,
+                    Level = 0
+                }
+                : CloneState(state);
         }
 
         public IEnumerable<ResearchState> GetAllResearchStates()
         {
-            return Researches ?? Enumerable.Empty<ResearchState>();
+            List<ResearchState> researches = Researches;
+            return researches == null
+                ? Array.Empty<ResearchState>()
+                : researches
+                    .Where(state => state != null)
+                    .Select(CloneState)
+                    .ToArray();
         }
+
+        private static ResearchState CloneState(ResearchState state) =>
+            new ResearchState
+            {
+                ResearchId = state.ResearchId,
+                Level = state.Level,
+                IsResearching = state.IsResearching,
+                CompleteTimestamp = state.CompleteTimestamp
+            };
 
         public void StartResearch(string researchId)
         {
@@ -64,12 +83,23 @@ namespace AL.Services.Local
                 return;
             }
 
-            var state = GetResearchState(researchId);
+            List<ResearchState> researches = Researches;
+            if (researches == null) return;
+
+            ResearchState state = researches.FirstOrDefault(
+                candidate => candidate?.ResearchId == researchId);
+            bool stateExists = state != null;
+            state ??= new ResearchState { ResearchId = researchId, Level = 0 };
             if (state.IsResearching) return;
 
             long cost = (state.Level + 1) * 200; // Gold cost
             if (_resourceService.ConsumeResource(ResourceType.Gold, cost))
             {
+                if (!stateExists)
+                {
+                    researches.Add(state);
+                }
+
                 state.IsResearching = true;
                 state.CompleteTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + ((state.Level + 1) * 15);
                 _saveGameService.Save();
@@ -79,8 +109,16 @@ namespace AL.Services.Local
 
         public void CompleteResearch(string researchId)
         {
-            var state = GetResearchState(researchId);
-            if (!state.IsResearching) return;
+            if (!_writeAuthorityGate.TryGetWritableSave(out _))
+            {
+                Debug.LogWarning(
+                    "[AL-RSCH-PROFILE-READ-ONLY] Research completion rejected before any profile mutation.");
+                return;
+            }
+
+            ResearchState state = Researches?.FirstOrDefault(
+                candidate => candidate?.ResearchId == researchId);
+            if (state == null || !state.IsResearching) return;
 
             if (DateTimeOffset.UtcNow.ToUnixTimeSeconds() >= state.CompleteTimestamp)
             {
@@ -117,7 +155,7 @@ namespace AL.Services.Local
             if (techId == null) return 0f;
 
             var state = GetResearchState(techId);
-            return state.Level * 0.05f; // 5% bonus per level
+            return (state?.Level ?? 0) * 0.05f; // 5% bonus per level
         }
     }
 }

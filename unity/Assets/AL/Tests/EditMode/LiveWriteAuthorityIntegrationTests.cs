@@ -213,6 +213,245 @@ namespace AL.Tests.EditMode
             }
         }
 
+        [Test]
+        public void LegacyQuestProgressFailsBeforeStateCallbacksOrPersistence()
+        {
+            string root = CreateTempRoot();
+            IStoryService previousStory = null;
+            bool hadPreviousStory = ServiceLocator.TryGet(out previousStory);
+            try
+            {
+                LocalSaveGameService saveService =
+                    CreateSaveServiceWithCountingOperations(
+                        root,
+                        out CountingFileOperationsProxy fileOperations);
+                saveService.CreateNewSave(RealmId.Crownlands);
+                saveService.CurrentSave.Quests = new List<QuestState>
+                {
+                    new QuestState
+                    {
+                        QuestId = "Q1",
+                        CurrentValue = 0,
+                        IsCompleted = false,
+                        IsClaimed = false
+                    }
+                };
+                saveService.Save();
+
+                QuestState persistedQuest = saveService.CurrentSave.Quests
+                    .Single(candidate => candidate.QuestId == "Q1");
+                byte[] diskBefore = ReadPrimary(root);
+                int saveWritesBefore = fileOperations.DurableWriteCount;
+                var resources = new LocalResourceService(saveService);
+                var credits = new LocalWarzoneCreditService(saveService);
+                var quests = new LocalQuestService(
+                    saveService,
+                    resources,
+                    credits);
+                var story = new TrackingStoryService();
+                int updatedEvents = 0;
+                int completedEvents = 0;
+                quests.OnQuestUpdated += _ => updatedEvents++;
+                quests.OnQuestCompleted += _ => completedEvents++;
+                ServiceLocator.Register<IStoryService>(story);
+
+                quests.UpdateProgress(QuestType.BuildBuilding, 1);
+
+                Assert.AreEqual(0, persistedQuest.CurrentValue);
+                Assert.IsFalse(persistedQuest.IsCompleted);
+                Assert.IsFalse(persistedQuest.IsClaimed);
+                Assert.AreEqual(0, updatedEvents);
+                Assert.AreEqual(0, completedEvents);
+                Assert.AreEqual(0, story.AdvanceCount);
+                Assert.AreEqual(saveWritesBefore, fileOperations.DurableWriteCount);
+                CollectionAssert.AreEqual(diskBefore, ReadPrimary(root));
+            }
+            finally
+            {
+                RestoreStoryService(hadPreviousStory, previousStory);
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void LegacyResearchReadsAndCompletionRemainNonMutating()
+        {
+            string root = CreateTempRoot();
+            IQuestService previousQuest = null;
+            bool hadPreviousQuest = ServiceLocator.TryGet(out previousQuest);
+            try
+            {
+                LocalSaveGameService saveService =
+                    CreateSaveServiceWithCountingOperations(
+                        root,
+                        out CountingFileOperationsProxy fileOperations);
+                saveService.CreateNewSave(RealmId.Crownlands);
+                saveService.CurrentSave.Researches = new List<ResearchState>
+                {
+                    new ResearchState
+                    {
+                        ResearchId = "Steel Forging",
+                        Level = 2,
+                        IsResearching = true,
+                        CompleteTimestamp = 1
+                    }
+                };
+                saveService.Save();
+
+                ResearchState persistedResearch = saveService.CurrentSave
+                    .Researches.Single(candidate =>
+                        candidate.ResearchId == "Steel Forging");
+                byte[] diskBefore = ReadPrimary(root);
+                int saveWritesBefore = fileOperations.DurableWriteCount;
+                var research = new LocalResearchService(
+                    saveService,
+                    new LocalResourceService(saveService));
+                var quests = new TrackingQuestService();
+                ServiceLocator.Register<IQuestService>(quests);
+
+                ResearchState existing =
+                    research.GetResearchState("Steel Forging");
+                ResearchState missing = research.GetResearchState("Plate Armor");
+                ResearchState allState = research.GetAllResearchStates().Single();
+                Assert.AreEqual(0, missing.Level);
+                existing.Level = 99;
+                existing.IsResearching = false;
+                allState.CompleteTimestamp = long.MaxValue;
+                missing.Level = 7;
+                float missingBonus = research.GetStatBonus(StatType.Defense);
+                research.CompleteResearch("Steel Forging");
+
+                Assert.NotNull(missing);
+                Assert.AreEqual("Plate Armor", missing.ResearchId);
+                Assert.AreEqual(7, missing.Level);
+                Assert.AreEqual(0f, missingBonus);
+                Assert.AreEqual(1, saveService.CurrentSave.Researches.Count);
+                Assert.AreEqual(2, persistedResearch.Level);
+                Assert.IsTrue(persistedResearch.IsResearching);
+                Assert.AreEqual(1, persistedResearch.CompleteTimestamp);
+                Assert.AreEqual(0, quests.UpdateCount);
+                Assert.AreEqual(saveWritesBefore, fileOperations.DurableWriteCount);
+                CollectionAssert.AreEqual(diskBefore, ReadPrimary(root));
+            }
+            finally
+            {
+                RestoreQuestService(hadPreviousQuest, previousQuest);
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void LegacyBuildingCompletionAndReconcileRemainNonMutating()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                LocalSaveGameService saveService =
+                    CreateSaveServiceWithCountingOperations(
+                        root,
+                        out CountingFileOperationsProxy fileOperations);
+                saveService.CreateNewSave(RealmId.Crownlands);
+                saveService.CurrentSave.Buildings = new List<BuildingState>
+                {
+                    new BuildingState
+                    {
+                        BuildingId = "Farm",
+                        Level = 0,
+                        IsUpgrading = true,
+                        UpgradeCompleteTimestamp = 1
+                    }
+                };
+                saveService.Save();
+
+                BuildingState persistedBuilding = saveService.CurrentSave
+                    .Buildings.Single(candidate => candidate.BuildingId == "Farm");
+                byte[] diskBefore = ReadPrimary(root);
+                int saveWritesBefore = fileOperations.DurableWriteCount;
+                var buildings = new LocalBuildingService(
+                    saveService,
+                    new LocalResourceService(saveService),
+                    new LocalGameDataService());
+
+                BuildingConstructionResult completion =
+                    buildings.TryCompleteConstruction("Farm", 2);
+                BuildingConstructionReconcileResult reconciliation =
+                    buildings.ReconcileCompletedConstructions(3);
+
+                Assert.AreEqual(
+                    BuildingConstructionStatus.RejectedEconomyUnavailable,
+                    completion.Status);
+                Assert.AreEqual(
+                    BuildingConstructionStatus.RejectedEconomyUnavailable,
+                    reconciliation.Status);
+                Assert.AreEqual(0, persistedBuilding.Level);
+                Assert.IsTrue(persistedBuilding.IsUpgrading);
+                Assert.AreEqual(1, persistedBuilding.UpgradeCompleteTimestamp);
+                Assert.AreEqual(
+                    0L,
+                    GetPrivateField<long>(buildings, "_lastReconcileTimestamp"));
+                Assert.AreEqual(saveWritesBefore, fileOperations.DurableWriteCount);
+                CollectionAssert.AreEqual(diskBefore, ReadPrimary(root));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void LegacyWarzoneReadsDoNotSeedDefaultsOrPersist()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                LocalSaveGameService saveService =
+                    CreateSaveServiceWithCountingOperations(
+                        root,
+                        out CountingFileOperationsProxy fileOperations);
+                saveService.CreateNewSave(RealmId.Crownlands);
+                saveService.CurrentSave.Territories = new List<TerritoryData>
+                {
+                    new TerritoryData
+                    {
+                        Id = "read-only-territory",
+                        Name = "Read Only",
+                        OwnerRealm = RealmId.Stonehold,
+                        BonusType = ResourceType.Gold,
+                        BonusAmount = 9,
+                        IsFortress = false
+                    }
+                };
+                saveService.Save();
+                TerritoryData persistedTerritory = saveService.CurrentSave
+                    .Territories.Single();
+                byte[] diskBefore = ReadPrimary(root);
+                int saveWritesBefore = fileOperations.DurableWriteCount;
+                var warzone = new WarzoneService(saveService);
+
+                TerritoryData detached = warzone.GetTerritories().Single();
+                detached.Name = "Mutated View";
+                detached.OwnerRealm = RealmId.Umbral;
+                detached.BonusAmount = long.MaxValue;
+                saveService.CurrentSave.Territories = null;
+                TerritoryData[] territories = warzone.GetTerritories().ToArray();
+                long passiveIncome =
+                    warzone.CalculatePassiveIncome(ResourceType.Gold);
+
+                Assert.AreEqual("Read Only", persistedTerritory.Name);
+                Assert.AreEqual(RealmId.Stonehold, persistedTerritory.OwnerRealm);
+                Assert.AreEqual(9, persistedTerritory.BonusAmount);
+                Assert.IsEmpty(territories);
+                Assert.AreEqual(0, passiveIncome);
+                Assert.IsNull(saveService.CurrentSave.Territories);
+                Assert.AreEqual(saveWritesBefore, fileOperations.DurableWriteCount);
+                CollectionAssert.AreEqual(diskBefore, ReadPrimary(root));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
         [TestCase("Legacy", ProfileWriteAuthorityStatus.MigrationRequired)]
         [TestCase("ForwardSchema", ProfileWriteAuthorityStatus.ForwardSchemaReadOnly)]
         [TestCase("LoadedPrimaryDegraded", ProfileWriteAuthorityStatus.DegradedReadOnly)]
@@ -603,6 +842,15 @@ namespace AL.Tests.EditMode
             property.SetValue(target, value);
         }
 
+        private static T GetPrivateField<T>(object target, string fieldName)
+        {
+            FieldInfo field = target.GetType().GetField(
+                fieldName,
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field, fieldName);
+            return (T)field.GetValue(target);
+        }
+
         private static Dictionary<ResourceType, long> Wallet(
             SaveGameData save) =>
             save.Resources.ToDictionary(
@@ -656,6 +904,24 @@ namespace AL.Tests.EditMode
             Assert.NotNull(servicesField);
             var services = (IDictionary<Type, object>)servicesField.GetValue(null);
             services.Remove(typeof(IQuestService));
+        }
+
+        private static void RestoreStoryService(
+            bool hadPrevious,
+            IStoryService previous)
+        {
+            if (hadPrevious)
+            {
+                ServiceLocator.Register(previous);
+                return;
+            }
+
+            FieldInfo servicesField = typeof(ServiceLocator).GetField(
+                "Services",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(servicesField);
+            var services = (IDictionary<Type, object>)servicesField.GetValue(null);
+            services.Remove(typeof(IStoryService));
         }
 
         public class CountingFileOperationsProxy : DispatchProxy
@@ -732,6 +998,34 @@ namespace AL.Tests.EditMode
                 string conditionId,
                 TriggerCondition conditionType)
             {
+            }
+        }
+
+        private sealed class TrackingStoryService : IStoryService
+        {
+            internal int AdvanceCount { get; private set; }
+
+            public string CurrentChapterId => string.Empty;
+            public event Action<string> OnChapterAdvanced;
+            public event Action<AL.Data.Definitions.Narrative.DialogueNode>
+                OnDialogueTriggered;
+
+            public void AdvanceStory()
+            {
+                AdvanceCount++;
+                OnChapterAdvanced?.Invoke(CurrentChapterId);
+            }
+
+            public AL.Data.Definitions.Narrative.DialogueNode GetDialogue(
+                string nodeId) => null;
+
+            public IEnumerable<AL.Data.Definitions.Narrative.DialogueNode>
+                GetConflictHints(RealmId currentRealm) =>
+                Array.Empty<AL.Data.Definitions.Narrative.DialogueNode>();
+
+            public void TriggerDialogue(string nodeId)
+            {
+                OnDialogueTriggered?.Invoke(null);
             }
         }
 

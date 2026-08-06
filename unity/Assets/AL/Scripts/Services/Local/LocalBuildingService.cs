@@ -347,7 +347,6 @@ namespace AL.Services.Local
                         NotReadyCode);
                 }
 
-                _lastReconcileTimestamp = observedAtTimestamp;
                 if (_saveGameService.LastSaveStatus == SaveOperationStatus.CommitUncertain)
                 {
                     return ReconcileResult(
@@ -356,6 +355,17 @@ namespace AL.Services.Local
                         false,
                         CommitUncertainCode);
                 }
+
+                if (!_writeAuthorityGate.TryGetWritableSave(out _))
+                {
+                    return ReconcileResult(
+                        BuildingConstructionStatus.RejectedEconomyUnavailable,
+                        Array.Empty<string>(),
+                        false,
+                        EconomyUnavailableCode);
+                }
+
+                _lastReconcileTimestamp = observedAtTimestamp;
 
                 List<BuildingState> buildings = Buildings;
                 if (buildings == null)
@@ -509,6 +519,19 @@ namespace AL.Services.Local
                     false,
                     false,
                     CommitUncertainCode);
+            }
+
+            if (!_writeAuthorityGate.TryGetWritableSave(out _))
+            {
+                return Result(
+                    BuildingConstructionStatus.RejectedEconomyUnavailable,
+                    BuildFailureQuote(
+                        BuildingConstructionStatus.RejectedEconomyUnavailable,
+                        buildingId,
+                        EconomyUnavailableCode),
+                    false,
+                    false,
+                    EconomyUnavailableCode);
             }
 
             BuildingConstructionQuote quote = BuildQuote(buildingId);

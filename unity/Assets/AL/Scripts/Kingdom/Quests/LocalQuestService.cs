@@ -93,6 +93,13 @@ namespace AL.Services.Local
                 return;
             }
 
+            if (!_writeAuthorityGate.TryGetWritableSave(out _))
+            {
+                Debug.LogWarning(
+                    "[AL-QST-PROFILE-READ-ONLY] Quest progress rejected before any profile mutation.");
+                return;
+            }
+
             bool changed = false;
             foreach (QuestState state in CreateCompatibilityView())
             {
