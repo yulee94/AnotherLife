@@ -2,3 +2,8 @@
 [attr]lfs               filter=lfs diff=lfs merge=lfs -text
 [attr]unity-json        eol=lf linguist-language=json
 [attr]unity-yaml        merge=unityyamlmerge eol=lf linguist-language=yaml -whitespace
+
+# Raw-byte-pinned Phase C generator. Keep its working bytes identical to Git
+# blobs even when a Windows checkout enables core.autocrlf.
+/tools/game-data/generate_phase_c_realm_shadow_artifact.py text eol=lf
+/tools/game-data/migrate_byte_stable_sources.py             text eol=lf

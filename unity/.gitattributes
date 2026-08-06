@@ -32,6 +32,22 @@
 /Assets/StreamingAssets/AL/Narrative/*.catalog.json     unity-json
 /Assets/AL/StreamingAssets/GameData/al_notification_content_catalog.json text unity-json
 
+# Phase C byte-stable inputs and shadow evidence. These paths are pinned by
+# raw SHA-256 or exact Git-blob comparisons, so native Windows CRLF checkout
+# conversion would invalidate otherwise unchanged authority.
+/Docs/GameDataCatalog/PhaseC/phase-c-six-family-technical-source*.json     unity-json
+/Docs/GameDataCatalog/PhaseC/Shadow/*.json                                unity-json
+/Docs/GameDataCatalog/PhaseC/Phase_C4A_Building_Authority_Convergence.md  text eol=lf
+/Docs/Narrative/GameData/phase-c-six-family-content-map.json              unity-json
+/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json                 unity-json
+/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs                  text eol=lf
+/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataWalletResourceReferences.cs text eol=lf
+/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmReferences.cs      text eol=lf
+/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmCapabilityProfiles.cs text eol=lf
+/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataBuildingProgressionRegistry.cs text eol=lf
+/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataSixFamilySchemas.cs     text eol=lf
+/Assets/AL/Tests/EditMode/GameDataCatalog/GameDataBuildingProgressionRegistryTests.cs text eol=lf
+
 # Unity UI Toolkit files
 *.tss                   text diff=css linguist-language=css
 *.uss                   text diff=css linguist-language=css
