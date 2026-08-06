@@ -1,5 +1,7 @@
 package com.example.anotherlife.ui.unity
 
+import java.util.concurrent.atomic.AtomicBoolean
+
 internal enum class UnityHostLifecycleState {
     Paused,
     Resumed,
@@ -49,6 +51,7 @@ internal class UnityHostLifecycleController<ConfigurationT>(
             failClosed()
             return
         }
+        if (state != UnityHostLifecycleState.Resumed) return
         if (hasWindowFocus && !forwardedWindowFocus) {
             forwardedWindowFocus = true
             if (!invokeSafely { runtime.windowFocusChanged(true) }) failClosed()
@@ -65,6 +68,7 @@ internal class UnityHostLifecycleController<ConfigurationT>(
             forwardedWindowFocus = false
             if (!invokeSafely { runtime.windowFocusChanged(false) }) succeeded = false
         }
+        if (state != UnityHostLifecycleState.Paused) return
         if (!invokeSafely(runtime::pause)) succeeded = false
         if (!succeeded) failClosed()
     }
@@ -303,38 +307,79 @@ internal class UnityRuntimeGrantedLeaseHandoff {
     }
 }
 
-internal data class UnityRuntimeOwnedLeaseClosure(
-    val lease: UnityRuntimeHostLease?
+internal class UnityRuntimeActivationPermit internal constructor(
+    internal val lease: UnityRuntimeHostLease
 )
 
+internal sealed interface UnityRuntimeActivationCloseDecision {
+    /** Activation observed the close and owns every partial-resource cleanup plus lease release. */
+    object ActivationWillClean : UnityRuntimeActivationCloseDecision
+
+    /** No activation is running, so destruction owns cleanup and the exact published lease. */
+    data class DestroyWillClean(
+        val lease: UnityRuntimeHostLease?
+    ) : UnityRuntimeActivationCloseDecision
+}
+
 /**
- * Atomically publishes a claimed lease or closes ownership before external teardown begins.
+ * Linearizes close against runtime activation without invoking external cleanup under this lock.
+ *
+ * A permit owns cleanup from publication through the final successful activation transition.
+ * Destruction marks the state closed immediately, but it cannot take or release the lease while
+ * that permit remains active. The permit holder must observe close at its next checkpoint, clean
+ * every partial resource, and return the exact lease only after cleanup is proven.
  */
-internal class UnityRuntimeOwnedLeaseState {
+internal class UnityRuntimeActivationLeaseState {
     private var ownedLease: UnityRuntimeHostLease? = null
+    private var activationPermit: UnityRuntimeActivationPermit? = null
     private var closed = false
 
     @Synchronized
-    fun publish(lease: UnityRuntimeHostLease): Boolean {
-        if (closed || ownedLease != null) return false
+    fun begin(lease: UnityRuntimeHostLease): UnityRuntimeActivationPermit? {
+        if (closed || ownedLease != null || activationPermit != null) return null
         ownedLease = lease
+        return UnityRuntimeActivationPermit(lease).also { activationPermit = it }
+    }
+
+    @Synchronized
+    fun canContinue(permit: UnityRuntimeActivationPermit): Boolean =
+        !closed && activationPermit === permit && ownedLease === permit.lease
+
+    /**
+     * Makes a fully activated runtime destruction-owned. This is the final activation operation.
+     */
+    @Synchronized
+    fun complete(permit: UnityRuntimeActivationPermit): Boolean {
+        if (activationPermit !== permit || ownedLease !== permit.lease || closed) return false
+        activationPermit = null
         return true
     }
 
     @Synchronized
-    fun clear(lease: UnityRuntimeHostLease): Boolean {
-        if (ownedLease !== lease) return false
-        ownedLease = null
-        return true
-    }
-
-    @Synchronized
-    fun close(): UnityRuntimeOwnedLeaseClosure? {
+    fun close(): UnityRuntimeActivationCloseDecision? {
         if (closed) return null
         closed = true
-        return UnityRuntimeOwnedLeaseClosure(
+        if (activationPermit != null) {
+            return UnityRuntimeActivationCloseDecision.ActivationWillClean
+        }
+        return UnityRuntimeActivationCloseDecision.DestroyWillClean(
             ownedLease.also { ownedLease = null }
         )
+    }
+
+    /**
+     * Ends permit ownership. An unproven cleanup deliberately retains the process-wide lease.
+     */
+    @Synchronized
+    fun finishCleanup(
+        permit: UnityRuntimeActivationPermit,
+        cleanupProven: Boolean
+    ): UnityRuntimeHostLease? {
+        if (activationPermit !== permit || ownedLease !== permit.lease) return null
+        activationPermit = null
+        if (!cleanupProven) return null
+        ownedLease = null
+        return permit.lease
     }
 
     @Synchronized
@@ -486,6 +531,41 @@ internal class UnityBridgeCallbackAdmissionGate(
     }
 }
 
+internal class UnityBridgeCallbackDeliveryPermit internal constructor()
+
+/**
+ * Linearizes a posted callback's logical start against close without waiting for user code.
+ *
+ * A permit still pending when close wins is revoked. A permit whose begin transition wins is
+ * already logically in progress and may finish after close. Callback code always runs outside the
+ * monitor, so a callback can close its own dispatcher without deadlock.
+ */
+internal class UnityBridgeCallbackDeliveryGate {
+    private val pending = LinkedHashSet<UnityBridgeCallbackDeliveryPermit>()
+    private var closed = false
+
+    @Synchronized
+    fun authorize(): UnityBridgeCallbackDeliveryPermit? {
+        if (closed) return null
+        return UnityBridgeCallbackDeliveryPermit().also(pending::add)
+    }
+
+    @Synchronized
+    fun begin(permit: UnityBridgeCallbackDeliveryPermit): Boolean {
+        if (!pending.remove(permit)) return false
+        return !closed
+    }
+
+    @Synchronized
+    fun cancel(permit: UnityBridgeCallbackDeliveryPermit): Boolean = pending.remove(permit)
+
+    @Synchronized
+    fun close() {
+        closed = true
+        pending.clear()
+    }
+}
+
 /**
  * Serializes callback admission and posting while bounding every retained main-thread delivery.
  */
@@ -501,7 +581,7 @@ internal class UnityBridgeCallbackDispatcher(
         maxPendingCallbacks = maxPendingCallbacks,
         maxMessageBytes = maxMessageBytes
     )
-    private var deliveryOpen = true
+    private val delivery = UnityBridgeCallbackDeliveryGate()
 
     // Admission and posting share this monitor so the one overflow sentinel cannot overtake work
     // admitted before it when multiple JNI producer threads report concurrently.
@@ -523,7 +603,7 @@ internal class UnityBridgeCallbackDispatcher(
 
     @Synchronized
     fun close() {
-        deliveryOpen = false
+        delivery.close()
         admission.close()
     }
 
@@ -533,20 +613,29 @@ internal class UnityBridgeCallbackDispatcher(
         admitted: UnityBridgeCallbackAdmission,
         action: () -> Unit
     ) {
+        val deliveryPermit = delivery.authorize()
+        if (deliveryPermit == null) {
+            admission.complete(admitted)
+            return
+        }
+        val admissionCompleted = AtomicBoolean(false)
+        fun completeAdmissionOnce() {
+            if (admissionCompleted.compareAndSet(false, true)) admission.complete(admitted)
+        }
         val accepted = runCatching {
             postToMain {
                 try {
-                    if (isDeliveryOpen()) action()
+                    if (delivery.begin(deliveryPermit)) action()
                 } finally {
-                    admission.complete(admitted)
+                    completeAdmissionOnce()
                 }
             }
         }.getOrDefault(false)
-        if (!accepted) admission.complete(admitted)
+        if (!accepted) {
+            delivery.cancel(deliveryPermit)
+            completeAdmissionOnce()
+        }
     }
-
-    @Synchronized
-    private fun isDeliveryOpen(): Boolean = deliveryOpen
 
     private companion object {
         const val DEFAULT_MAX_PENDING_CALLBACKS = 32

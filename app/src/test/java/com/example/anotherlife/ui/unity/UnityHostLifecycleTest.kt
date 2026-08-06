@@ -493,11 +493,11 @@ class UnityHostLifecycleTest {
     }
 
     @Test
-    fun destructionBetweenGrantClaimAndOwnershipPublicationReleasesExactlyOnce() {
+    fun closeBeforeActivationPublicationRejectsBeginAndCallerReleasesExactlyOnce() {
         val registry = UnityRuntimeHostRegistry()
         val lease = registry.tryAcquire()!!
         val handoff = UnityRuntimeGrantedLeaseHandoff()
-        val owned = UnityRuntimeOwnedLeaseState()
+        val activationState = UnityRuntimeActivationLeaseState()
         val claimed = CountDownLatch(1)
         val allowPublication = CountDownLatch(1)
         val published = AtomicBoolean(true)
@@ -507,14 +507,15 @@ class UnityHostLifecycleTest {
             assertTrue(handoff.claim(lease))
             claimed.countDown()
             assertTrue(allowPublication.await(5, TimeUnit.SECONDS))
-            published.set(owned.publish(lease))
+            published.set(activationState.begin(lease) != null)
             if (!published.get()) assertTrue(registry.release(lease))
         }
         assertTrue(claimed.await(5, TimeUnit.SECONDS))
 
-        val closure = owned.close()
-        assertNotNull(closure)
-        assertNull(closure!!.lease)
+        assertEquals(
+            UnityRuntimeActivationCloseDecision.DestroyWillClean(null),
+            activationState.close()
+        )
         assertNull(handoff.close())
         allowPublication.countDown()
         activation.join(5_000)
@@ -524,6 +525,95 @@ class UnityHostLifecycleTest {
         val replacement = registry.tryAcquire()
         assertNotNull(replacement)
         assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun closeDuringActivationDefersExactLeaseUntilActivationCleanupCompletes() {
+        val registry = UnityRuntimeHostRegistry()
+        val lease = registry.tryAcquire()!!
+        val activationState = UnityRuntimeActivationLeaseState()
+        val permit = activationState.begin(lease)!!
+
+        assertEquals(
+            UnityRuntimeActivationCloseDecision.ActivationWillClean,
+            activationState.close()
+        )
+        assertFalse(activationState.canContinue(permit))
+        assertNull(registry.tryAcquire())
+
+        val releasable = activationState.finishCleanup(permit, cleanupProven = true)
+        assertTrue(releasable === lease)
+        assertTrue(registry.release(releasable!!))
+        assertNull(activationState.finishCleanup(permit, cleanupProven = true))
+
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun concurrentCloseDuringActivationCannotReleaseBeforeCleanupProof() {
+        val registry = UnityRuntimeHostRegistry()
+        val lease = registry.tryAcquire()!!
+        val activationState = UnityRuntimeActivationLeaseState()
+        val permit = activationState.begin(lease)!!
+        val start = CountDownLatch(1)
+        val closed = CountDownLatch(1)
+        val decision = AtomicReference<UnityRuntimeActivationCloseDecision?>()
+
+        val destroyThread = thread(name = "close-during-activation") {
+            assertTrue(start.await(5, TimeUnit.SECONDS))
+            decision.set(activationState.close())
+            closed.countDown()
+        }
+        start.countDown()
+        assertTrue(closed.await(5, TimeUnit.SECONDS))
+        assertEquals(UnityRuntimeActivationCloseDecision.ActivationWillClean, decision.get())
+        assertFalse(activationState.canContinue(permit))
+        assertNull(registry.tryAcquire())
+
+        val releasable = activationState.finishCleanup(permit, cleanupProven = true)
+        assertTrue(releasable === lease)
+        assertTrue(registry.release(releasable!!))
+        destroyThread.join(5_000)
+        assertFalse(destroyThread.isAlive)
+
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun completedActivationTransfersExactCleanupOwnershipToDestroy() {
+        val lease = UnityRuntimeHostLease()
+        val activationState = UnityRuntimeActivationLeaseState()
+        val permit = activationState.begin(lease)!!
+
+        assertTrue(activationState.canContinue(permit))
+        assertTrue(activationState.complete(permit))
+        assertEquals(
+            UnityRuntimeActivationCloseDecision.DestroyWillClean(lease),
+            activationState.close()
+        )
+        assertNull(activationState.close())
+        assertNull(activationState.finishCleanup(permit, cleanupProven = true))
+    }
+
+    @Test
+    fun unprovenActivationCleanupNeverReturnsOrDuplicatesThePublishedLease() {
+        val registry = UnityRuntimeHostRegistry()
+        val lease = registry.tryAcquire()!!
+        val activationState = UnityRuntimeActivationLeaseState()
+        val permit = activationState.begin(lease)!!
+
+        assertEquals(
+            UnityRuntimeActivationCloseDecision.ActivationWillClean,
+            activationState.close()
+        )
+        assertNull(activationState.finishCleanup(permit, cleanupProven = false))
+        assertNull(activationState.finishCleanup(permit, cleanupProven = true))
+        assertNull(registry.tryAcquire())
+        assertNull(activationState.close())
     }
 
     @Test
@@ -701,6 +791,86 @@ class UnityHostLifecycleTest {
 
         assertTrue(delivered.isEmpty())
         assertEquals(1, posted.size)
+        assertEquals(0, dispatcher.snapshot().pendingCount)
+    }
+
+    @Test
+    fun callbackDeliveryAuthorizedBeforeCloseCannotBeginAfterCloseReturns() {
+        val gate = UnityBridgeCallbackDeliveryGate()
+        val permit = gate.authorize()!!
+        val runnerReady = CountDownLatch(1)
+        val allowBegin = CountDownLatch(1)
+        val began = AtomicBoolean(true)
+        val runner = thread(name = "authorized-callback") {
+            runnerReady.countDown()
+            assertTrue(allowBegin.await(5, TimeUnit.SECONDS))
+            began.set(gate.begin(permit))
+        }
+
+        assertTrue(runnerReady.await(5, TimeUnit.SECONDS))
+        gate.close()
+        allowBegin.countDown()
+        runner.join(5_000)
+
+        assertFalse(runner.isAlive)
+        assertFalse(began.get())
+        assertNull(gate.authorize())
+    }
+
+    @Test
+    fun callbackThatLogicallyBeginsMayCloseDispatcherReentrantlyWithoutLaterDelivery() {
+        val posted = mutableListOf<() -> Unit>()
+        val delivered = mutableListOf<String>()
+        lateinit var dispatcher: UnityBridgeCallbackDispatcher
+        dispatcher = UnityBridgeCallbackDispatcher(
+            maxPendingCallbacks = 3,
+            postToMain = { action -> posted.add(action) },
+            onPayload = { payload ->
+                delivered += payload
+                dispatcher.close()
+            },
+            onProtocolError = {},
+            onOverflow = {}
+        )
+        dispatcher.enqueue("started")
+        dispatcher.enqueue("must-not-start")
+
+        posted.forEach { it.invoke() }
+        dispatcher.enqueue("after-close")
+
+        assertEquals(listOf("started"), delivered)
+        assertEquals(2, posted.size)
+        assertEquals(0, dispatcher.snapshot().pendingCount)
+    }
+
+    @Test
+    fun closeReturnsWhileLogicallyStartedCallbackFinishesWithoutDeadlock() {
+        val posted = mutableListOf<() -> Unit>()
+        val callbackEntered = CountDownLatch(1)
+        val allowCallbackFinish = CountDownLatch(1)
+        val callbackFinished = AtomicBoolean(false)
+        val dispatcher = UnityBridgeCallbackDispatcher(
+            maxPendingCallbacks = 1,
+            postToMain = { action -> posted.add(action) },
+            onPayload = {
+                callbackEntered.countDown()
+                assertTrue(allowCallbackFinish.await(5, TimeUnit.SECONDS))
+                callbackFinished.set(true)
+            },
+            onProtocolError = {},
+            onOverflow = {}
+        )
+        dispatcher.enqueue("in-progress")
+        val deliveryThread = thread(name = "in-progress-callback") { posted.single().invoke() }
+        assertTrue(callbackEntered.await(5, TimeUnit.SECONDS))
+
+        dispatcher.close()
+        assertFalse(callbackFinished.get())
+        allowCallbackFinish.countDown()
+        deliveryThread.join(5_000)
+
+        assertFalse(deliveryThread.isAlive)
+        assertTrue(callbackFinished.get())
         assertEquals(0, dispatcher.snapshot().pendingCount)
     }
 

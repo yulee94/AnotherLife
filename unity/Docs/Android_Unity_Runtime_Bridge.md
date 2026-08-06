@@ -53,9 +53,12 @@ The bridge intentionally uses reflection so regular Android CI can keep compilin
   is visible and does not create another player.
 - A transferred lease is retained before any main-thread post. Disposal of an unattached waiter
   recovers and releases that exact lease, and its late deferred runnable cannot claim it. Claim to
-  owned-lease publication is synchronized with destruction; a destroy that wins that race makes
-  the claimant release exactly once before any player construction. Grant callbacks drain through
-  a non-recursive bounded runner; enqueue during an opaque grant callback is rejected, so a
+  activation-permit publication is synchronized with destruction. Close marks destruction
+  immediately, but it cannot take or release a lease while activation is in progress. The permit
+  holder checks close before and after each opaque construction, registration, view, lifecycle,
+  and route-dispatch step; when close wins, that holder performs the only partial cleanup and
+  returns the exact lease only after cleanup is proven. Grant callbacks drain through a
+  non-recursive bounded runner; enqueue during an opaque grant callback is rejected, so a
   self-requeue-and-throw callback cannot grow the stack or handoff indefinitely.
 - The Compose host is keyed by the actual `LifecycleOwner`, and Unity destruction is bound to the
   corresponding Android view's `onRelease`. An owner swap therefore releases the old view and
@@ -80,7 +83,11 @@ The bridge intentionally uses reflection so regular Android CI can keep compilin
   clears the exact callback token, closes callback admission and the route session, attempts to
   unregister application callbacks, destroys and detaches the player, and releases the lease only
   after every cleanup step is proven. A replacement can then acquire without inheriting callbacks
-  or state.
+  or state. The player's exact view is observed immediately after successful construction and
+  before registrar work, so a clean registrar rejection can prove detachment and recover; a
+  throwing view lookup remains uncertain and deliberately retains the lease. Destruction during
+  construction, registration, pre-attachment, or post-attachment activation cannot let a
+  replacement acquire until the permit holder has completed cleanup.
 - Teardown is ordered `focus false -> pause -> destroy`, idempotent, and rejects later lifecycle,
   configuration, and memory signals. Reflection invocation failures are contained at the Android
   host boundary. A failed `destroy()` invocation or uncertain application-callback unregistration
@@ -332,9 +339,12 @@ against the inclusive 32 KiB message limit. Null and oversized values enqueue on
 diagnostic and never retain the raw value in a `Runnable`. At most 32 regular callbacks plus one
 payload-free overflow sentinel can wait for main-thread delivery. Overflow closes admission and
 the bridge session fail-closed with `bridge.session_closed`; later burst items are dropped. Host
-disposal closes admission immediately while already-posted bounded work drains without invoking
-UI callbacks. Admission and `View.post` share one serialized producer boundary, so the overflow
-sentinel cannot overtake callbacks admitted before it, including under concurrent JNI producers.
+disposal closes admission immediately and revokes every posted delivery that has not reached its
+identity-permit start transition. A delivery whose start transition already won may finish, while
+no later UI callback can begin after close returns. Close never waits for callback completion, and
+a callback may close its own dispatcher without deadlock. Admission and `View.post` share one
+serialized producer boundary, so the overflow sentinel cannot overtake callbacks admitted before
+it, including under concurrent JNI producers.
 The count bound can retain up to 32 payload objects, runnables/lambdas, and raw strings of at most
 32 KiB UTF-8 each until the main thread drains them: roughly 1–2 MiB of Java/Kotlin string storage
 at the declared maximum, plus object, queue, and later parse overhead. It is not an aggregate-byte
@@ -370,8 +380,14 @@ cancel-versus-dequeue races, self-requeue rejection, off-main unattached-waiter 
 registration-failure teardown, post-registration activation rollback and clean replacement,
 strict pre-construction reflection signatures and constructor-failure containment,
 `LifecycleOwner`-keyed Android-view replacement, pre-post UTF-8 rejection, concurrent producer
-post ordering, exactly-one bounded burst overflow, disposal admission closure, stale-release
-protection, and replacement-host callback delivery.
+post ordering, exactly-one bounded burst overflow, close-versus-delivery-start linearization,
+re-entrant dispatcher close, disposal admission closure, stale-release protection, and
+replacement-host callback delivery. JVM state-machine tests prove close-before-publication,
+close-during-activation, concurrent close, successful ownership transfer, and unproven-cleanup
+retention. Compiled Android instrumentation fixtures additionally exercise destruction from a
+constructor, concurrent constructor blocking, external registration before attachment, and
+retained-state resume after attachment, plus clean registrar recovery and throwing-view
+uncertainty; current device execution remains separately disclosed below.
 These are controller/JVM and Android host tests; they do not substitute for a packaged Unity
 runtime or physical-device lifecycle proof.
 
@@ -422,7 +438,9 @@ unperformed packaged/device round trip.
   managed Player assembly, build, and installed-size growth.
 - The Android lifecycle slice adds one host controller, one active lease object, at most four
   lightweight FIFO waiter records, one application component-callback registration, and a
-  callback admission counter capped at 32 regular posts plus one payload-free overflow sentinel.
+  bounded activation permit. Callback admission is capped at 32 regular posts plus one
+  payload-free overflow sentinel; each posted item adds one lightweight identity delivery permit
+  and one once-only completion flag until delivery or disposal.
   Those regular posts can retain roughly 1–2 MiB of bounded string storage at maximum payloads,
   plus object/queue/parse overhead; the implementation bounds count rather than aggregate bytes.
   It adds no timer, polling loop, per-frame work, content asset, native library, or dependency.

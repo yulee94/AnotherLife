@@ -216,7 +216,7 @@ internal class UnityRuntimeContainer internal constructor(
     private val statusView = createStatusView(context)
     private val bridgeSession = UnityBridgeSession()
     private val grantedLeaseHandoff = UnityRuntimeGrantedLeaseHandoff()
-    private val ownedLeaseState = UnityRuntimeOwnedLeaseState()
+    private val activationLeaseState = UnityRuntimeActivationLeaseState()
     private val callbackDispatcher = UnityBridgeCallbackDispatcher(
         postToMain = { action -> post(action) },
         onPayload = ::handleOutcome,
@@ -239,7 +239,7 @@ internal class UnityRuntimeContainer internal constructor(
     private var terminalRuntimeFailure: String? = null
     private var ownershipReleaseBlocked = false
     private val destroyed: Boolean
-        get() = ownedLeaseState.isClosed()
+        get() = activationLeaseState.isClosed()
     private var activeLaunch: UnityRouteLaunch? = null
     private var activeRoutePayload: String? = null
     private var routeDispatchAttempted = false
@@ -330,27 +330,34 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     fun destroyUnity() {
-        val ownershipClosure = ownedLeaseState.close() ?: return
+        val closeDecision = activationLeaseState.close() ?: return
         callbackDispatcher.close()
         bridgeSession.close()
-        callbackToken?.let(UnityBridgeCallbacks::clear)
-        callbackToken = null
         grantedLeaseHandoff.close()?.let(dependencies.ownershipRegistry::release)
         ownershipWaitToken?.let(dependencies.ownershipRegistry::cancel)
         ownershipWaitToken = null
+
+        // An activation permit owns all partial resources until its next close checkpoint. It
+        // performs the only cleanup and cannot return the lease until that cleanup is proven.
+        if (closeDecision is UnityRuntimeActivationCloseDecision.ActivationWillClean) return
+
+        closeDecision as UnityRuntimeActivationCloseDecision.DestroyWillClean
+        callbackToken?.let(UnityBridgeCallbacks::clear)
+        callbackToken = null
         val componentCallbacksReleased = componentCallbackRegistration?.release() != false
         val controller = lifecycleController
         controller?.destroy()
         val player = unityPlayer
+        val playerView = runCatching { player?.view }.getOrNull()
         val viewsReleased = runCatching { removeAllViews() }.isSuccess &&
-            player?.view?.parent == null
+            (player == null || (playerView != null && playerView.parent == null))
         if (
             componentCallbacksReleased &&
             controller?.canReleaseOwnership() != false &&
             viewsReleased &&
             !ownershipReleaseBlocked
         ) {
-            ownershipClosure.lease?.let(dependencies.ownershipRegistry::release)
+            closeDecision.lease?.let(dependencies.ownershipRegistry::release)
         }
     }
 
@@ -458,121 +465,258 @@ internal class UnityRuntimeContainer internal constructor(
 
     private fun activateOwnedRuntime(lease: UnityRuntimeHostLease) {
         ownershipWaitToken = null
-        if (!ownedLeaseState.publish(lease)) {
+        val permit = activationLeaseState.begin(lease)
+        if (permit == null) {
             dependencies.ownershipRegistry.release(lease)
             return
         }
-        // Publication precedes the closed-state decision so a racing destroy owns the exact lease
-        // and performs the only release; activation cannot construct after observing that close.
-        if (destroyed) return
+        var player: UnityEmbeddedPlayer? = null
+        var controller: UnityHostLifecycleController<Configuration>? = null
+        var callbackRegistration: UnityHostCallbackRegistration<ComponentCallbacks2>? = null
+        var activationCallbackToken: UnityBridgeCallbackToken? = null
+        var playerView: View? = null
+        var playerViewObserved = false
+
+        fun abortActivation(
+            message: String?,
+            cleanupUncertain: Boolean = false
+        ) {
+            finishActivationCleanup(
+                permit = permit,
+                message = message,
+                player = player,
+                controller = controller,
+                callbackRegistration = callbackRegistration,
+                activationCallbackToken = activationCallbackToken,
+                playerView = playerView,
+                playerViewObserved = playerViewObserved,
+                cleanupUncertain = cleanupUncertain
+            )
+        }
+
+        if (!activationLeaseState.canContinue(permit)) {
+            abortActivation(message = null)
+            return
+        }
 
         val playerResult = runCatching { dependencies.playerFactory.create(context) }
         if (playerResult.isFailure) {
-            val message = "Unity runtime unavailable\nHost activation failed"
-            terminalRuntimeFailure = message
-            ownershipReleaseBlocked = true
-            callbackDispatcher.close()
-            bridgeSession.close()
-            showStatus(message)
+            // A throwing constructor may have initialized native state without returning a handle.
+            abortActivation(
+                message = "Unity runtime unavailable\nHost activation failed",
+                cleanupUncertain = true
+            )
             return
         }
-        val player = playerResult.getOrNull()
+        player = playerResult.getOrNull()
+
         if (player == null) {
-            registerBridgeCallback()
-            showStatus("Unity runtime unavailable")
+            if (!activationLeaseState.canContinue(permit)) {
+                abortActivation(message = null)
+                return
+            }
+            activationCallbackToken = UnityBridgeCallbacks.register(callbackDispatcher::enqueue)
+            callbackToken = activationCallbackToken
+            if (!activationLeaseState.canContinue(permit)) {
+                abortActivation(message = null)
+                return
+            }
+            val statusShown = runCatching { showStatus("Unity runtime unavailable") }.isSuccess
+            if (!statusShown || !activationLeaseState.canContinue(permit)) {
+                abortActivation(
+                    message = if (statusShown) null else {
+                        "Unity runtime unavailable\nHost activation failed"
+                    }
+                )
+                return
+            }
+            if (!activationLeaseState.complete(permit)) abortActivation(message = null)
             return
         }
 
-        val controller = UnityHostLifecycleController(player)
+        controller = UnityHostLifecycleController(player!!)
+        // Observe the exact view immediately after construction. Registrar failure remains
+        // recoverable only when teardown can prove this view detached; a throwing getter is an
+        // uncertain native activation and deliberately retains the lease.
+        val playerViewResult = runCatching { player!!.view }
+        if (playerViewResult.isFailure) {
+            abortActivation(
+                message = "Unity runtime unavailable\nHost activation failed",
+                cleanupUncertain = true
+            )
+            return
+        }
+        playerView = playerViewResult.getOrNull()
+        playerViewObserved = playerView != null
+        if (!playerViewObserved || !activationLeaseState.canContinue(permit)) {
+            abortActivation(
+                message = if (playerViewObserved) null else {
+                    "Unity runtime unavailable\nHost activation failed"
+                },
+                cleanupUncertain = !playerViewObserved
+            )
+            return
+        }
+
         val callbacks = createComponentCallbacks()
-        val registrar = runCatching {
+        val registrarResult = runCatching {
             dependencies.callbackRegistrarFactory.create(context)
-        }.getOrNull()
-        if (registrar == null) {
-            rollBackActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed",
-                player = player,
-                controller = controller,
-                callbackRegistration = null,
-                lease = lease
+        }
+        if (registrarResult.isFailure) {
+            abortActivation(
+                message = "Unity runtime unavailable\nLifecycle callback registration failed"
             )
             return
         }
-        val callbackRegistration = UnityHostCallbackRegistration(
-            registrar,
-            callbacks
-        )
-        if (!callbackRegistration.register()) {
-            rollBackActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed",
-                player = player,
-                controller = controller,
-                callbackRegistration = callbackRegistration,
-                lease = lease
+        if (!activationLeaseState.canContinue(permit)) {
+            abortActivation(message = null)
+            return
+        }
+        val registrar = registrarResult.getOrNull()
+        if (registrar == null) {
+            abortActivation(
+                message = "Unity runtime unavailable\nLifecycle callback registration failed"
             )
             return
         }
 
-        val activated = runCatching {
-            unityPlayer = player
-            lifecycleController = controller
-            componentCallbackRegistration = callbackRegistration
-            registerBridgeCallback()
+        callbackRegistration = UnityHostCallbackRegistration(registrar, callbacks)
+        val callbacksRegistered = callbackRegistration!!.register()
+        if (!activationLeaseState.canContinue(permit)) {
+            abortActivation(message = null)
+            return
+        }
+        if (!callbacksRegistered) {
+            abortActivation(
+                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+            )
+            return
+        }
+
+        activationCallbackToken = UnityBridgeCallbacks.register(callbackDispatcher::enqueue)
+        callbackToken = activationCallbackToken
+        if (!activationLeaseState.canContinue(permit)) {
+            abortActivation(message = null)
+            return
+        }
+
+        unityPlayer = player
+        lifecycleController = controller
+        componentCallbackRegistration = callbackRegistration
+        if (!activationLeaseState.canContinue(permit)) {
+            abortActivation(message = null)
+            return
+        }
+
+        val attached = runCatching {
             addView(
-                player.view,
+                playerView!!,
                 LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             )
-            hideStatus()
-            applyRetainedHostState(controller)
-            if (!destroyed) dispatchActiveRoute()
         }.isSuccess
-        if (!activated && !destroyed) {
-            rollBackActivation(
-                message = "Unity runtime unavailable\nHost activation failed",
-                player = player,
-                controller = controller,
-                callbackRegistration = callbackRegistration,
-                lease = lease
+        if (!attached || !activationLeaseState.canContinue(permit)) {
+            abortActivation(
+                message = if (attached) null else {
+                    "Unity runtime unavailable\nHost activation failed"
+                }
             )
+            return
         }
+
+        val statusHidden = runCatching { hideStatus() }.isSuccess
+        if (!statusHidden || !activationLeaseState.canContinue(permit)) {
+            abortActivation(
+                message = if (statusHidden) null else {
+                    "Unity runtime unavailable\nHost activation failed"
+                }
+            )
+            return
+        }
+
+        val retainedStateApplied = runCatching {
+            applyRetainedHostState(controller!!, permit)
+        }.getOrDefault(false)
+        if (!retainedStateApplied || !activationLeaseState.canContinue(permit)) {
+            abortActivation(
+                message = if (destroyed) null else {
+                    "Unity runtime unavailable\nHost activation failed"
+                }
+            )
+            return
+        }
+
+        val routeDispatchCompleted = runCatching {
+            dispatchActiveRoute(permit)
+        }.isSuccess
+        if (!routeDispatchCompleted || !activationLeaseState.canContinue(permit)) {
+            abortActivation(
+                message = if (destroyed) null else {
+                    "Unity runtime unavailable\nHost activation failed"
+                }
+            )
+            return
+        }
+
+        // The success transition is deliberately last. If close wins this race, activation still
+        // owns all resources and performs the only cleanup/release path.
+        if (!activationLeaseState.complete(permit)) abortActivation(message = null)
     }
 
-    private fun rollBackActivation(
-        message: String,
-        player: UnityEmbeddedPlayer,
-        controller: UnityHostLifecycleController<Configuration>,
+    private fun finishActivationCleanup(
+        permit: UnityRuntimeActivationPermit,
+        message: String?,
+        player: UnityEmbeddedPlayer?,
+        controller: UnityHostLifecycleController<Configuration>?,
         callbackRegistration: UnityHostCallbackRegistration<ComponentCallbacks2>?,
-        lease: UnityRuntimeHostLease
+        activationCallbackToken: UnityBridgeCallbackToken?,
+        playerView: View?,
+        playerViewObserved: Boolean,
+        cleanupUncertain: Boolean
     ) {
-        terminalRuntimeFailure = message
+        if (message != null) terminalRuntimeFailure = message
         callbackDispatcher.close()
         bridgeSession.close()
-        callbackToken?.let(UnityBridgeCallbacks::clear)
-        callbackToken = null
+        activationCallbackToken?.let(UnityBridgeCallbacks::clear)
+        if (callbackToken == activationCallbackToken) callbackToken = null
+
         val callbacksReleased = callbackRegistration?.release() != false
-        controller.destroy()
-        (player.view.parent as? ViewGroup)?.let { parent ->
-            runCatching { parent.removeView(player.view) }
+        controller?.destroy()
+        val exactPlayerViewRemoved = if (playerView == null) {
+            player == null
+        } else {
+            runCatching {
+                (playerView.parent as? ViewGroup)?.removeView(playerView)
+            }.isSuccess
         }
-        unityPlayer = null
-        lifecycleController = null
-        componentCallbackRegistration = null
-        val viewDetached = player.view.parent == null
-        if (callbacksReleased && controller.canReleaseOwnership() && viewDetached) {
-            if (dependencies.ownershipRegistry.release(lease)) {
-                ownedLeaseState.clear(lease)
-            } else {
+        val ownedViewsRemoved = runCatching { removeAllViews() }.isSuccess
+        val viewDetached = when {
+            player == null -> true
+            !playerViewObserved || playerView == null -> false
+            else -> playerView.parent == null
+        }
+
+        if (unityPlayer === player) unityPlayer = null
+        if (lifecycleController === controller) lifecycleController = null
+        if (componentCallbackRegistration === callbackRegistration) {
+            componentCallbackRegistration = null
+        }
+
+        val cleanupProven = !cleanupUncertain &&
+            callbacksReleased &&
+            (player == null || controller?.canReleaseOwnership() == true) &&
+            exactPlayerViewRemoved &&
+            ownedViewsRemoved &&
+            viewDetached
+        val releasableLease = activationLeaseState.finishCleanup(permit, cleanupProven)
+        if (cleanupProven && releasableLease != null) {
+            if (!dependencies.ownershipRegistry.release(releasableLease)) {
                 ownershipReleaseBlocked = true
             }
-        } else {
+        } else if (!cleanupProven) {
             ownershipReleaseBlocked = true
         }
-        showStatus(message)
-    }
 
-    private fun registerBridgeCallback() {
-        if (callbackToken != null || destroyed) return
-        callbackToken = UnityBridgeCallbacks.register(callbackDispatcher::enqueue)
+        if (!destroyed && message != null) runCatching { showStatus(message) }
     }
 
     private fun createComponentCallbacks() = object : ComponentCallbacks2 {
@@ -591,18 +735,30 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     private fun applyRetainedHostState(
-        controller: UnityHostLifecycleController<Configuration>
-    ) {
+        controller: UnityHostLifecycleController<Configuration>,
+        permit: UnityRuntimeActivationPermit
+    ): Boolean {
         controller.onWindowFocusChanged(latestWindowFocus)
+        if (!activationLeaseState.canContinue(permit)) return false
         when {
-            lifecycleState == Lifecycle.State.DESTROYED -> destroyUnity()
+            lifecycleState == Lifecycle.State.DESTROYED -> {
+                destroyUnity()
+                return false
+            }
             lifecycleState.isAtLeast(Lifecycle.State.RESUMED) -> controller.resume()
             else -> controller.pause()
         }
-        closeAfterLifecycleFailure(controller)
+        if (!activationLeaseState.canContinue(permit)) return false
+        if (controller.isDestroyed()) {
+            destroyUnity()
+            return false
+        }
+        return activationLeaseState.canContinue(permit)
     }
 
-    private fun dispatchActiveRoute(): Boolean {
+    private fun dispatchActiveRoute(
+        activationPermit: UnityRuntimeActivationPermit? = null
+    ): Boolean {
         if (destroyed || terminalRuntimeFailure != null || routeDispatchAttempted) return false
         val payload = activeRoutePayload ?: return false
         val player = unityPlayer
@@ -619,16 +775,22 @@ internal class UnityRuntimeContainer internal constructor(
 
         routeDispatchAttempted = true
         if (!player.sendMessage("AndroidBridge", "SetRouteContext", payload)) {
+            if (!canContinueDispatch(activationPermit)) return false
             showProtocolError(
                 UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SendUnavailable)
             )
             return false
         }
+        if (!canContinueDispatch(activationPermit)) return false
 
         hideStatus()
+        if (!canContinueDispatch(activationPermit)) return false
         runCatching(onRouteDispatched)
-        return true
+        return canContinueDispatch(activationPermit)
     }
+
+    private fun canContinueDispatch(permit: UnityRuntimeActivationPermit?): Boolean =
+        if (permit == null) !destroyed else activationLeaseState.canContinue(permit)
 
     private fun handleOutcome(rawJson: String?) {
         when (val delivery = bridgeSession.consumeOutcome(rawJson)) {

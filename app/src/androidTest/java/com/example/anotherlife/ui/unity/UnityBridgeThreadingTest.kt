@@ -326,6 +326,247 @@ class UnityBridgeThreadingTest {
     }
 
     @Test
+    fun rejectedRegistrarCleanupReleasesForImmediateReplacement() {
+        val registry = UnityRuntimeHostRegistry()
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val rejectedRegistrar = RecordingComponentCallbackRegistrar(registerResult = false)
+        val goodRegistrar = RecordingComponentCallbackRegistrar()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val rejectedDependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                RecordingEmbeddedPlayer(playerContext).also(players::add)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory {
+                rejectedRegistrar
+            }
+        )
+        val replacementDependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                RecordingEmbeddedPlayer(playerContext).also(players::add)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { goodRegistrar }
+        )
+
+        composeRule.runOnUiThread {
+            val rejected = UnityRuntimeContainer(context, rejectedDependencies)
+            assertEquals(1, players.size)
+            assertEquals(1, players[0].destroyCount)
+            assertNull(players[0].view.parent)
+
+            val replacement = UnityRuntimeContainer(context, replacementDependencies)
+            assertEquals(2, players.size)
+            replacement.destroyUnity()
+            rejected.destroyUnity()
+        }
+
+        assertEquals(1, rejectedRegistrar.registerCount)
+        assertEquals(0, rejectedRegistrar.unregisterCount)
+        assertEquals(1, goodRegistrar.registerCount)
+        assertEquals(1, goodRegistrar.unregisterCount)
+        assertEquals(1, players[1].destroyCount)
+    }
+
+    @Test
+    fun reentrantDestroyInsideConstructionCleansBeforeReplacementCanAcquire() {
+        val registry = UnityRuntimeHostRegistry()
+        val reservedOwner = registry.tryAcquire()!!
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var waiting: UnityRuntimeContainer? = null
+        val dependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                RecordingEmbeddedPlayer(playerContext).also { player ->
+                    players += player
+                    waiting!!.destroyUnity()
+                }
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+
+        composeRule.runOnUiThread {
+            waiting = UnityRuntimeContainer(context, dependencies)
+            assertEquals(1, registry.waitingCount())
+            assertTrue(registry.release(reservedOwner))
+        }
+
+        assertEquals(1, players.size)
+        assertEquals(1, players.single().destroyCount)
+        assertNull(players.single().view.parent)
+        assertEquals(0, registrar.registerCount)
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun concurrentDestroyInsideConstructionCannotReleaseUntilPlayerCleanupCompletes() {
+        val registry = UnityRuntimeHostRegistry()
+        val reservedOwner = registry.tryAcquire()!!
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val factoryEntered = CountDownLatch(1)
+        val allowFactoryReturn = CountDownLatch(1)
+        val destroyCompleted = CountDownLatch(1)
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var waiting: UnityRuntimeContainer? = null
+        val dependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                factoryEntered.countDown()
+                assertTrue(allowFactoryReturn.await(5, TimeUnit.SECONDS))
+                RecordingEmbeddedPlayer(playerContext).also(players::add)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+        composeRule.runOnUiThread {
+            waiting = UnityRuntimeContainer(context, dependencies)
+        }
+        val destroyThread = thread(name = "destroy-inside-player-construction") {
+            assertTrue(factoryEntered.await(5, TimeUnit.SECONDS))
+            waiting!!.destroyUnity()
+            assertNull(registry.tryAcquire())
+            destroyCompleted.countDown()
+            allowFactoryReturn.countDown()
+        }
+
+        composeRule.runOnUiThread { assertTrue(registry.release(reservedOwner)) }
+        assertTrue(destroyCompleted.await(5, TimeUnit.SECONDS))
+        destroyThread.join(5_000)
+        assertFalse(destroyThread.isAlive)
+        assertEquals(1, players.single().destroyCount)
+        assertNull(players.single().view.parent)
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun reentrantDestroyAfterExternalRegistrationCleansBeforeViewAttachment() {
+        val registry = UnityRuntimeHostRegistry()
+        val reservedOwner = registry.tryAcquire()!!
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var waiting: UnityRuntimeContainer? = null
+        val registrar = RecordingComponentCallbackRegistrar(
+            onRegister = { waiting!!.destroyUnity() }
+        )
+        val dependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                RecordingEmbeddedPlayer(playerContext).also(players::add)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+
+        composeRule.runOnUiThread {
+            waiting = UnityRuntimeContainer(context, dependencies)
+            assertTrue(registry.release(reservedOwner))
+        }
+
+        assertEquals(1, registrar.registerCount)
+        assertEquals(1, registrar.unregisterCount)
+        assertEquals(1, players.single().destroyCount)
+        assertNull(players.single().view.parent)
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun reentrantDestroyAfterAttachmentCleansPlayerCallbacksAndViewBeforeReplacement() {
+        val registry = UnityRuntimeHostRegistry()
+        val reservedOwner = registry.tryAcquire()!!
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var waiting: UnityRuntimeContainer? = null
+        val dependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                RecordingEmbeddedPlayer(
+                    context = playerContext,
+                    onResume = { waiting!!.destroyUnity() }
+                ).also(players::add)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+
+        composeRule.runOnUiThread {
+            waiting = UnityRuntimeContainer(context, dependencies)
+            waiting!!.resumeUnity()
+            assertTrue(registry.release(reservedOwner))
+        }
+
+        assertEquals(1, registrar.registerCount)
+        assertEquals(1, registrar.unregisterCount)
+        assertEquals(1, players.single().destroyCount)
+        assertNull(players.single().view.parent)
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun throwingPlayerViewRetainsLeaseAndPreventsReplacementActivation() {
+        val registry = UnityRuntimeHostRegistry()
+        val playerDestroyCount = AtomicInteger()
+        val replacementFactoryCount = AtomicInteger()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val throwingViewPlayer = object : UnityEmbeddedPlayer {
+            override val view: View
+                get() = error("synthetic view lookup failure")
+
+            override fun resume() = true
+            override fun pause() = true
+            override fun destroy(): Boolean {
+                playerDestroyCount.incrementAndGet()
+                return true
+            }
+            override fun windowFocusChanged(hasFocus: Boolean) = true
+            override fun lowMemory() = true
+            override fun configurationChanged(configuration: Configuration) = true
+            override fun sendMessage(
+                gameObject: String,
+                method: String,
+                payload: String
+            ) = true
+        }
+        val failingDependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { throwingViewPlayer },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+        val replacementDependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { playerContext ->
+                replacementFactoryCount.incrementAndGet()
+                RecordingEmbeddedPlayer(playerContext)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+
+        composeRule.runOnUiThread {
+            val failed = UnityRuntimeContainer(context, failingDependencies)
+            val waiting = UnityRuntimeContainer(context, replacementDependencies)
+            assertEquals(1, playerDestroyCount.get())
+            assertEquals(0, replacementFactoryCount.get())
+            assertEquals(1, registry.waitingCount())
+            failed.destroyUnity()
+            assertEquals(0, replacementFactoryCount.get())
+            waiting.destroyUnity()
+        }
+
+        assertEquals(0, registrar.registerCount)
+        assertEquals(0, replacementFactoryCount.get())
+        assertEquals(0, registry.waitingCount())
+    }
+
+    @Test
     fun uncertainRegistrationCleanupRetainsLeaseAndCancelledReplacementCannotActivate() {
         val registry = UnityRuntimeHostRegistry()
         val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
@@ -559,7 +800,8 @@ class UnityBridgeThreadingTest {
     private class RecordingComponentCallbackRegistrar(
         private val registerResult: Boolean = true,
         private val unregisterResult: Boolean = true,
-        private val throwOnRegister: Boolean = false
+        private val throwOnRegister: Boolean = false,
+        private val onRegister: () -> Unit = {}
     ) : UnityHostCallbackRegistrar<ComponentCallbacks2> {
         var registerCount = 0
         var unregisterCount = 0
@@ -567,6 +809,7 @@ class UnityBridgeThreadingTest {
         override fun register(callback: ComponentCallbacks2): Boolean {
             registerCount += 1
             if (throwOnRegister) error("synthetic registration failure")
+            onRegister()
             return registerResult
         }
 
@@ -578,15 +821,29 @@ class UnityBridgeThreadingTest {
 
     private class RecordingEmbeddedPlayer(
         context: Context,
-        preAttachView: Boolean = false
+        preAttachView: Boolean = false,
+        private val onFirstViewRead: () -> Unit = {},
+        private val onResume: () -> Unit = {}
     ) : UnityEmbeddedPlayer {
-        override val view: View = FrameLayout(context).also { playerView ->
+        private val playerView = FrameLayout(context).also { playerView ->
             if (preAttachView) FrameLayout(context).addView(playerView)
         }
+        private var viewRead = false
+        override val view: View
+            get() {
+                if (!viewRead) {
+                    viewRead = true
+                    onFirstViewRead()
+                }
+                return playerView
+            }
         var sendCount = 0
         var destroyCount = 0
 
-        override fun resume() = true
+        override fun resume(): Boolean {
+            onResume()
+            return true
+        }
 
         override fun pause() = true
 
