@@ -4,6 +4,7 @@ import android.content.ComponentCallbacks2
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Color
+import android.os.Looper
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -12,6 +13,7 @@ import android.widget.TextView
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -37,8 +39,56 @@ fun UnityView(
     onOutcome: (UnityRouteOutcome) -> Unit = {},
     onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
 ) {
+    UnityViewContent(
+        routeId = routeId,
+        modifier = modifier,
+        routeLaunchSequence = routeLaunchSequence,
+        routeIntent = routeIntent,
+        requestedCapabilities = requestedCapabilities,
+        onRouteDispatched = onRouteDispatched,
+        onOutcome = onOutcome,
+        onProtocolError = onProtocolError,
+        dependencies = UnityRuntimeHostDependencies.Production
+    )
+}
+
+@Composable
+internal fun UnityViewForTest(
+    routeId: String,
+    dependencies: UnityRuntimeHostDependencies,
+    routeLaunchSequence: Long = 0L,
+    routeIntent: UnityRouteIntent = UnityRouteIntent.Preview,
+    requestedCapabilities: List<String> = emptyList(),
+    onRouteDispatched: () -> Unit = {},
+    onOutcome: (UnityRouteOutcome) -> Unit = {},
+    onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
+) {
+    UnityViewContent(
+        routeId = routeId,
+        modifier = Modifier,
+        routeLaunchSequence = routeLaunchSequence,
+        routeIntent = routeIntent,
+        requestedCapabilities = requestedCapabilities,
+        onRouteDispatched = onRouteDispatched,
+        onOutcome = onOutcome,
+        onProtocolError = onProtocolError,
+        dependencies = dependencies
+    )
+}
+
+@Composable
+private fun UnityViewContent(
+    routeId: String,
+    modifier: Modifier,
+    routeLaunchSequence: Long,
+    routeIntent: UnityRouteIntent,
+    requestedCapabilities: List<String>,
+    onRouteDispatched: () -> Unit,
+    onOutcome: (UnityRouteOutcome) -> Unit,
+    onProtocolError: (UnityBridgeProtocolError) -> Unit,
+    dependencies: UnityRuntimeHostDependencies
+) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val hostState = remember { mutableStateOf<UnityRuntimeContainer?>(null) }
     val currentRouteId = rememberUpdatedState(routeId)
     val currentRouteLaunchSequence = rememberUpdatedState(routeLaunchSequence)
     val currentRouteIntent = rememberUpdatedState(routeIntent)
@@ -47,128 +97,148 @@ fun UnityView(
     val currentOnOutcome = rememberUpdatedState(onOutcome)
     val currentOnProtocolError = rememberUpdatedState(onProtocolError)
 
-    AndroidView(
-        factory = { context ->
-            UnityRuntimeContainer(context).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                hostState.value = this
-                if (
+    key(lifecycleOwner) {
+        val hostState = remember { mutableStateOf<UnityRuntimeContainer?>(null) }
+
+        AndroidView(
+            factory = { context ->
+                UnityRuntimeContainer(context, dependencies).apply {
+                    layoutParams = ViewGroup.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT
+                    )
+                    hostState.value = this
                     setRoute(
                         routeId = currentRouteId.value,
                         routeLaunchSequence = currentRouteLaunchSequence.value,
                         routeIntent = currentRouteIntent.value,
                         requestedCapabilities = currentRequestedCapabilities.value,
+                        onRouteDispatched = currentOnRouteDispatched.value,
                         onOutcome = currentOnOutcome.value,
                         onProtocolError = currentOnProtocolError.value
                     )
-                ) {
-                    currentOnRouteDispatched.value()
                 }
-            }
-        },
-        update = { host ->
-            if (
+            },
+            update = { host ->
                 host.setRoute(
                     routeId = routeId,
                     routeLaunchSequence = routeLaunchSequence,
                     routeIntent = routeIntent,
                     requestedCapabilities = requestedCapabilities,
+                    onRouteDispatched = currentOnRouteDispatched.value,
                     onOutcome = currentOnOutcome.value,
                     onProtocolError = currentOnProtocolError.value
                 )
-            ) {
-                currentOnRouteDispatched.value()
-            }
-        },
-        modifier = modifier.fillMaxSize()
-    )
+            },
+            onRelease = { host ->
+                host.destroyUnity()
+                if (hostState.value === host) hostState.value = null
+            },
+            modifier = modifier.fillMaxSize()
+        )
 
-    DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            val host = hostState.value ?: return@LifecycleEventObserver
-            when (event) {
-                Lifecycle.Event.ON_RESUME -> host.resumeUnity()
-                Lifecycle.Event.ON_PAUSE -> host.pauseUnity()
-                Lifecycle.Event.ON_STOP -> host.stopUnity()
-                Lifecycle.Event.ON_DESTROY -> host.destroyUnity()
-                else -> Unit
+        DisposableEffect(lifecycleOwner) {
+            val observer = LifecycleEventObserver { _, event ->
+                val host = hostState.value ?: return@LifecycleEventObserver
+                when (event) {
+                    Lifecycle.Event.ON_RESUME -> host.resumeUnity()
+                    Lifecycle.Event.ON_PAUSE -> host.pauseUnity()
+                    Lifecycle.Event.ON_STOP -> host.stopUnity()
+                    Lifecycle.Event.ON_DESTROY -> host.destroyUnity()
+                    else -> Unit
+                }
             }
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-        hostState.value?.synchronizeLifecycle(lifecycleOwner.lifecycle.currentState)
+            lifecycleOwner.lifecycle.addObserver(observer)
+            hostState.value?.synchronizeLifecycle(lifecycleOwner.lifecycle.currentState)
 
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-            hostState.value?.destroyUnity()
-            hostState.value = null
+            onDispose {
+                lifecycleOwner.lifecycle.removeObserver(observer)
+            }
         }
     }
 }
 
-private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
-    private val ownershipToken = UnityRuntimeHostOwnership.registry.tryAcquire()
-    private val unityPlayer = ownershipToken?.let { ReflectionUnityPlayer.create(context) }
-    private val lifecycleController = unityPlayer?.let { UnityHostLifecycleController(it) }
+internal interface UnityEmbeddedPlayer : UnityHostLifecycleRuntime<Configuration> {
+    val view: View
+
+    fun sendMessage(gameObject: String, method: String, payload: String): Boolean
+}
+
+internal fun interface UnityEmbeddedPlayerFactory {
+    fun create(context: Context): UnityEmbeddedPlayer?
+}
+
+internal fun interface UnityComponentCallbackRegistrarFactory {
+    fun create(context: Context): UnityHostCallbackRegistrar<ComponentCallbacks2>
+}
+
+internal data class UnityRuntimeHostDependencies(
+    val ownershipRegistry: UnityRuntimeHostRegistry,
+    val playerFactory: UnityEmbeddedPlayerFactory,
+    val callbackRegistrarFactory: UnityComponentCallbackRegistrarFactory
+) {
+    companion object {
+        val Production = UnityRuntimeHostDependencies(
+            ownershipRegistry = UnityRuntimeHostOwnership.registry,
+            playerFactory = UnityEmbeddedPlayerFactory(ReflectionUnityPlayer::create),
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory(
+                ::ApplicationComponentCallbackRegistrar
+            )
+        )
+    }
+}
+
+private class ApplicationComponentCallbackRegistrar(
+    context: Context
+) : UnityHostCallbackRegistrar<ComponentCallbacks2> {
+    private val application = context.applicationContext
+
+    override fun register(callback: ComponentCallbacks2): Boolean {
+        application.registerComponentCallbacks(callback)
+        return true
+    }
+
+    override fun unregister(callback: ComponentCallbacks2): Boolean {
+        application.unregisterComponentCallbacks(callback)
+        return true
+    }
+}
+
+internal class UnityRuntimeContainer internal constructor(
+    context: Context,
+    private val dependencies: UnityRuntimeHostDependencies
+) : FrameLayout(context) {
+    internal constructor(context: Context) : this(
+        context,
+        UnityRuntimeHostDependencies.Production
+    )
+
     private val statusView = createStatusView(context)
     private val bridgeSession = UnityBridgeSession()
-    private val callbackApplication = context.applicationContext
-    private val componentCallbacks = if (lifecycleController != null) {
-        object : ComponentCallbacks2 {
-            override fun onConfigurationChanged(newConfig: Configuration) {
-                configurationChangedUnity(newConfig)
-            }
-
-            @Suppress("OVERRIDE_DEPRECATION")
-            override fun onLowMemory() {
-                lowMemoryUnity()
-            }
-
-            override fun onTrimMemory(level: Int) {
-                trimMemoryUnity(level)
-            }
-        }
-    } else {
-        null
-    }
-    private var componentCallbacksRegistered = false
+    private val callbackAdmission = UnityBridgeCallbackAdmissionGate()
+    private var ownershipLease: UnityRuntimeHostLease? = null
+    private var ownershipWaitToken: UnityRuntimeHostWaitToken? = null
+    private var unityPlayer: UnityEmbeddedPlayer? = null
+    private var lifecycleController: UnityHostLifecycleController<Configuration>? = null
+    private var componentCallbackRegistration:
+        UnityHostCallbackRegistration<ComponentCallbacks2>? = null
+    private var callbackToken: UnityBridgeCallbackToken? = null
+    private var lifecycleState = Lifecycle.State.INITIALIZED
+    private var latestWindowFocus = false
+    private var terminalRuntimeFailure: String? = null
+    private var ownershipReleaseBlocked = false
     @Volatile
     private var destroyed = false
     private var activeLaunch: UnityRouteLaunch? = null
+    private var activeRoutePayload: String? = null
+    private var routeDispatchAttempted = false
+    private var onRouteDispatched: () -> Unit = {}
     private var onOutcome: (UnityRouteOutcome) -> Unit = {}
     private var onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
-    private val callbackToken = ownershipToken?.let {
-        UnityBridgeCallbacks.register { rawJson ->
-            post {
-                if (!destroyed) {
-                    handleOutcome(rawJson)
-                }
-            }
-        }
-    }
 
     init {
         setBackgroundColor(Color.BLACK)
-
-        componentCallbacks?.let { callbacks ->
-            componentCallbacksRegistered = runCatching {
-                callbackApplication.registerComponentCallbacks(callbacks)
-                true
-            }.getOrDefault(false)
-        }
-
-        if (ownershipToken == null) {
-            showStatus("Unity runtime unavailable\nHost already active")
-        } else if (unityPlayer != null) {
-            addView(
-                unityPlayer.view,
-                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
-            )
-        } else {
-            showStatus("Unity runtime unavailable")
-        }
+        requestOwnership()
     }
 
     fun setRoute(
@@ -176,11 +246,19 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
         routeLaunchSequence: Long,
         routeIntent: UnityRouteIntent,
         requestedCapabilities: List<String>,
+        onRouteDispatched: () -> Unit,
         onOutcome: (UnityRouteOutcome) -> Unit,
         onProtocolError: (UnityBridgeProtocolError) -> Unit
     ): Boolean {
+        this.onRouteDispatched = onRouteDispatched
         this.onOutcome = onOutcome
         this.onProtocolError = onProtocolError
+
+        if (destroyed) return false
+        terminalRuntimeFailure?.let {
+            showStatus(it)
+            return false
+        }
 
         val launch = UnityRouteLaunch(
             routeId = routeId,
@@ -189,7 +267,6 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
             requestedCapabilities = requestedCapabilities.toList()
         )
         if (launch == activeLaunch) return false
-        activeLaunch = launch
 
         val start = bridgeSession.startRoute(
             routeId = routeId,
@@ -202,28 +279,15 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
         }
 
         start as UnityBridgeSessionStart.Started
-        if (ownershipToken == null) {
-            showStatus("Unity runtime unavailable\nHost already active")
-            return false
-        }
-        val player = unityPlayer
-        if (player == null) {
-            showStatus("Unity runtime unavailable\nRoute: $routeId")
-            return false
-        }
-        if (!player.sendMessage("AndroidBridge", "SetRouteContext", start.encodedPayload)) {
-            showProtocolError(
-                UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SendUnavailable)
-            )
-            return false
-        }
-
-        hideStatus()
-        return true
+        activeLaunch = launch
+        activeRoutePayload = start.encodedPayload
+        routeDispatchAttempted = false
+        return dispatchActiveRoute()
     }
 
     fun resumeUnity() {
         if (destroyed) return
+        lifecycleState = Lifecycle.State.RESUMED
         val controller = lifecycleController ?: return
         controller.resume()
         closeAfterLifecycleFailure(controller)
@@ -231,6 +295,7 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
 
     fun pauseUnity() {
         if (destroyed) return
+        lifecycleState = Lifecycle.State.STARTED
         val controller = lifecycleController ?: return
         controller.pause()
         closeAfterLifecycleFailure(controller)
@@ -238,12 +303,14 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
 
     fun stopUnity() {
         if (destroyed) return
+        lifecycleState = Lifecycle.State.CREATED
         val controller = lifecycleController ?: return
         controller.stop()
         closeAfterLifecycleFailure(controller)
     }
 
     fun synchronizeLifecycle(state: Lifecycle.State) {
+        lifecycleState = state
         when {
             state == Lifecycle.State.DESTROYED -> destroyUnity()
             state.isAtLeast(Lifecycle.State.RESUMED) -> resumeUnity()
@@ -254,26 +321,26 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
     fun destroyUnity() {
         if (destroyed) return
         destroyed = true
+        callbackAdmission.close()
         bridgeSession.close()
         callbackToken?.let(UnityBridgeCallbacks::clear)
-        val componentCallbacksReleased = if (componentCallbacksRegistered) {
-            val released = componentCallbacks?.let { callbacks ->
-                runCatching {
-                    callbackApplication.unregisterComponentCallbacks(callbacks)
-                }.isSuccess
-            } ?: true
-            if (released) componentCallbacksRegistered = false
-            released
-        } else {
-            true
-        }
-        lifecycleController?.destroy()
-        removeAllViews()
+        callbackToken = null
+        ownershipWaitToken?.let(dependencies.ownershipRegistry::cancel)
+        ownershipWaitToken = null
+        val componentCallbacksReleased = componentCallbackRegistration?.release() != false
+        val controller = lifecycleController
+        controller?.destroy()
+        val player = unityPlayer
+        val viewsReleased = runCatching { removeAllViews() }.isSuccess &&
+            player?.view?.parent == null
         if (
             componentCallbacksReleased &&
-            lifecycleController?.canReleaseOwnership() != false
+            controller?.canReleaseOwnership() != false &&
+            viewsReleased &&
+            !ownershipReleaseBlocked
         ) {
-            ownershipToken?.let(UnityRuntimeHostOwnership.registry::release)
+            ownershipLease?.let(dependencies.ownershipRegistry::release)
+            ownershipLease = null
         }
     }
 
@@ -294,6 +361,7 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
 
     private fun windowFocusChangedUnity(hasWindowFocus: Boolean) {
         if (destroyed) return
+        latestWindowFocus = hasWindowFocus
         val controller = lifecycleController ?: return
         controller.onWindowFocusChanged(hasWindowFocus)
         closeAfterLifecycleFailure(controller)
@@ -326,6 +394,255 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
         if (!controller.isDestroyed() || destroyed) return
         destroyUnity()
         showStatus("Unity runtime unavailable\nLifecycle failure")
+    }
+
+    internal fun statusTextForTesting(): String = statusView.text.toString()
+
+    internal fun callbackAdmissionSnapshotForTesting() = callbackAdmission.snapshot()
+
+    private fun requestOwnership() {
+        when (
+            val acquisition = dependencies.ownershipRegistry.acquireOrQueue(
+                ::onOwnershipGranted
+            )
+        ) {
+            is UnityRuntimeHostAcquisition.Acquired -> activateOwnedRuntime(acquisition.lease)
+            is UnityRuntimeHostAcquisition.Waiting -> {
+                ownershipWaitToken = acquisition.token
+                showStatus("Unity runtime unavailable\nHost handoff pending")
+            }
+
+            UnityRuntimeHostAcquisition.CapacityReached -> {
+                val message =
+                    "Unity runtime unavailable\nHost handoff capacity reached"
+                terminalRuntimeFailure = message
+                showStatus(message)
+            }
+        }
+    }
+
+    private fun onOwnershipGranted(lease: UnityRuntimeHostLease) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            activateOwnedRuntime(lease)
+            return
+        }
+
+        val accepted = runCatching { post { activateOwnedRuntime(lease) } }.getOrDefault(false)
+        if (!accepted) {
+            dependencies.ownershipRegistry.release(lease)
+        }
+    }
+
+    private fun activateOwnedRuntime(lease: UnityRuntimeHostLease) {
+        ownershipWaitToken = null
+        if (destroyed) {
+            dependencies.ownershipRegistry.release(lease)
+            return
+        }
+
+        ownershipLease = lease
+        val playerResult = runCatching { dependencies.playerFactory.create(context) }
+        if (playerResult.isFailure) {
+            val message = "Unity runtime unavailable\nHost activation failed"
+            terminalRuntimeFailure = message
+            ownershipReleaseBlocked = true
+            callbackAdmission.close()
+            bridgeSession.close()
+            showStatus(message)
+            return
+        }
+        val player = playerResult.getOrNull()
+        if (player == null) {
+            registerBridgeCallback()
+            showStatus("Unity runtime unavailable")
+            return
+        }
+
+        val controller = UnityHostLifecycleController(player)
+        val callbacks = createComponentCallbacks()
+        val registrar = runCatching {
+            dependencies.callbackRegistrarFactory.create(context)
+        }.getOrNull()
+        if (registrar == null) {
+            rollBackActivation(
+                message = "Unity runtime unavailable\nLifecycle callback registration failed",
+                player = player,
+                controller = controller,
+                callbackRegistration = null,
+                lease = lease
+            )
+            return
+        }
+        val callbackRegistration = UnityHostCallbackRegistration(
+            registrar,
+            callbacks
+        )
+        if (!callbackRegistration.register()) {
+            rollBackActivation(
+                message = "Unity runtime unavailable\nLifecycle callback registration failed",
+                player = player,
+                controller = controller,
+                callbackRegistration = callbackRegistration,
+                lease = lease
+            )
+            return
+        }
+
+        val activated = runCatching {
+            unityPlayer = player
+            lifecycleController = controller
+            componentCallbackRegistration = callbackRegistration
+            registerBridgeCallback()
+            addView(
+                player.view,
+                LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
+            )
+            hideStatus()
+            applyRetainedHostState(controller)
+            if (!destroyed) dispatchActiveRoute()
+        }.isSuccess
+        if (!activated && !destroyed) {
+            rollBackActivation(
+                message = "Unity runtime unavailable\nHost activation failed",
+                player = player,
+                controller = controller,
+                callbackRegistration = callbackRegistration,
+                lease = lease
+            )
+        }
+    }
+
+    private fun rollBackActivation(
+        message: String,
+        player: UnityEmbeddedPlayer,
+        controller: UnityHostLifecycleController<Configuration>,
+        callbackRegistration: UnityHostCallbackRegistration<ComponentCallbacks2>?,
+        lease: UnityRuntimeHostLease
+    ) {
+        terminalRuntimeFailure = message
+        callbackAdmission.close()
+        bridgeSession.close()
+        callbackToken?.let(UnityBridgeCallbacks::clear)
+        callbackToken = null
+        val callbacksReleased = callbackRegistration?.release() != false
+        controller.destroy()
+        (player.view.parent as? ViewGroup)?.let { parent ->
+            runCatching { parent.removeView(player.view) }
+        }
+        unityPlayer = null
+        lifecycleController = null
+        componentCallbackRegistration = null
+        val viewDetached = player.view.parent == null
+        if (callbacksReleased && controller.canReleaseOwnership() && viewDetached) {
+            if (dependencies.ownershipRegistry.release(lease)) {
+                ownershipLease = null
+            } else {
+                ownershipReleaseBlocked = true
+            }
+        } else {
+            ownershipReleaseBlocked = true
+        }
+        showStatus(message)
+    }
+
+    private fun registerBridgeCallback() {
+        if (callbackToken != null || destroyed) return
+        callbackToken = UnityBridgeCallbacks.register(::enqueueOutcome)
+    }
+
+    private fun createComponentCallbacks() = object : ComponentCallbacks2 {
+        override fun onConfigurationChanged(newConfig: Configuration) {
+            configurationChangedUnity(newConfig)
+        }
+
+        @Suppress("OVERRIDE_DEPRECATION")
+        override fun onLowMemory() {
+            lowMemoryUnity()
+        }
+
+        override fun onTrimMemory(level: Int) {
+            trimMemoryUnity(level)
+        }
+    }
+
+    private fun applyRetainedHostState(
+        controller: UnityHostLifecycleController<Configuration>
+    ) {
+        controller.onWindowFocusChanged(latestWindowFocus)
+        when {
+            lifecycleState == Lifecycle.State.DESTROYED -> destroyUnity()
+            lifecycleState.isAtLeast(Lifecycle.State.RESUMED) -> controller.resume()
+            else -> controller.pause()
+        }
+        closeAfterLifecycleFailure(controller)
+    }
+
+    private fun dispatchActiveRoute(): Boolean {
+        if (destroyed || terminalRuntimeFailure != null || routeDispatchAttempted) return false
+        val payload = activeRoutePayload ?: return false
+        val player = unityPlayer
+        if (player == null) {
+            val routeId = activeLaunch?.routeId.orEmpty()
+            val status = if (ownershipWaitToken != null) {
+                "Unity runtime unavailable\nHost handoff pending"
+            } else {
+                "Unity runtime unavailable\nRoute: $routeId"
+            }
+            showStatus(status)
+            return false
+        }
+
+        routeDispatchAttempted = true
+        if (!player.sendMessage("AndroidBridge", "SetRouteContext", payload)) {
+            showProtocolError(
+                UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SendUnavailable)
+            )
+            return false
+        }
+
+        hideStatus()
+        runCatching(onRouteDispatched)
+        return true
+    }
+
+    // Admission and posting share this monitor so the one overflow sentinel cannot overtake work
+    // admitted before it when multiple JNI producer threads report concurrently.
+    @Synchronized
+    private fun enqueueOutcome(rawJson: String?) {
+        when (val admission = callbackAdmission.tryAdmit(rawJson)) {
+            is UnityBridgeCallbackAdmission.Payload -> postAdmission(admission) {
+                handleOutcome(admission.rawJson)
+            }
+
+            is UnityBridgeCallbackAdmission.ProtocolError -> postAdmission(admission) {
+                showProtocolError(admission.error)
+            }
+
+            UnityBridgeCallbackAdmission.Overflow -> postAdmission(admission) {
+                bridgeSession.close()
+                showProtocolError(
+                    UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SessionClosed)
+                )
+            }
+
+            UnityBridgeCallbackAdmission.Dropped -> Unit
+        }
+    }
+
+    private fun postAdmission(
+        admission: UnityBridgeCallbackAdmission,
+        action: () -> Unit
+    ) {
+        val accepted = runCatching {
+            post {
+                try {
+                    if (!destroyed && terminalRuntimeFailure == null) action()
+                } finally {
+                    callbackAdmission.complete(admission)
+                }
+            }
+        }.getOrDefault(false)
+        if (!accepted) callbackAdmission.complete(admission)
     }
 
     private fun handleOutcome(rawJson: String?) {
@@ -381,9 +698,9 @@ private class ReflectionUnityPlayer private constructor(
     private val lowMemoryMethod: Method,
     private val configurationChangedMethod: Method,
     private val sendMessageMethod: Method
-) : UnityHostLifecycleRuntime<Configuration> {
+) : UnityEmbeddedPlayer {
 
-    val view: View = instance as View
+    override val view: View = instance as View
 
     override fun resume() = resumeMethod.invokeSafely(instance)
 
@@ -399,7 +716,7 @@ private class ReflectionUnityPlayer private constructor(
     override fun configurationChanged(configuration: Configuration) =
         configurationChangedMethod.invokeSafely(instance, configuration)
 
-    fun sendMessage(gameObject: String, method: String, payload: String): Boolean {
+    override fun sendMessage(gameObject: String, method: String, payload: String): Boolean {
         return runCatching {
             sendMessageMethod.invoke(null, gameObject, method, payload)
             true
