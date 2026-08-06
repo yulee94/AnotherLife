@@ -6,7 +6,9 @@ can retain CRLF bytes after those attributes are introduced because Git does
 not rewrite an unchanged path during a fast-forward. ``--write`` repairs only
 files whose CRLF-to-LF result has the exact reviewed SHA-256. Any BOM, lone CR,
 content mutation, missing file, or other byte drift fails before anything is
-written.
+written. The all-target preflight is no-write, while replacement is atomic per
+file rather than transactional across the group. If I/O interruption leaves an
+exact-LF prefix and a legacy-CRLF suffix, a safe rerun completes the remainder.
 """
 
 from __future__ import annotations
@@ -14,14 +16,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import os
+import stat
 import sys
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Optional, Sequence
+from unittest import mock
 
 
 ERROR_PREFIX = "AnotherLife byte-identity migration failed"
+MIGRATION_HINT = (
+    "Re-run this tool with --write using the same Python interpreter."
+)
 
 
 @dataclass(frozen=True)
@@ -177,6 +184,16 @@ def inspect_targets(
     assessments: list[Assessment] = []
     for target in targets:
         path = repository_root / target.relative_path
+        if path.is_symlink():
+            assessments.append(
+                Assessment(
+                    target,
+                    "invalid",
+                    None,
+                    "target leaf is a symbolic link",
+                )
+            )
+            continue
         if not path.is_file():
             assessments.append(
                 Assessment(target, "invalid", None, "file is missing")
@@ -210,13 +227,47 @@ def write_migrations(
             raise MigrationError(
                 f"internal error: {item.target.relative_path} has no canonical bytes"
             )
-        temporary = path.with_name(path.name + ".byte-identity.tmp")
+        if path.is_symlink():
+            raise MigrationError(
+                f"target leaf became a symbolic link: {item.target.relative_path}"
+            )
+
+        original_mode = stat.S_IMODE(
+            os.stat(path, follow_symlinks=False).st_mode
+        )
+        descriptor = -1
+        temporary: Optional[Path] = None
         try:
-            temporary.write_bytes(canonical)
+            descriptor, temporary_name = tempfile.mkstemp(
+                prefix=f".{path.name}.byte-identity-",
+                suffix=".tmp",
+                dir=path.parent,
+            )
+            temporary = Path(temporary_name)
+            os.chmod(temporary, original_mode)
+            stream = os.fdopen(descriptor, "wb")
+            descriptor = -1
+            with stream:
+                stream.write(canonical)
+                stream.flush()
+                os.fsync(stream.fileno())
+
+            if path.is_symlink():
+                raise MigrationError(
+                    "target leaf became a symbolic link before replacement: "
+                    f"{item.target.relative_path}"
+                )
             os.replace(temporary, path)
+            temporary = None
         finally:
-            if temporary.exists():
-                temporary.unlink()
+            try:
+                if descriptor >= 0:
+                    os.close(descriptor)
+            finally:
+                if temporary is not None and (
+                    temporary.exists() or temporary.is_symlink()
+                ):
+                    temporary.unlink()
 
     final = inspect_targets(repository_root, tuple(item.target for item in assessments))
     validate_assessments(final)
@@ -237,8 +288,8 @@ def require_exact(assessments: Sequence[Assessment]) -> None:
             "legacy CRLF checkout bytes require the explicit safe migration; "
             "no files were changed:\n"
             + details
-            + "\nRun: python3 tools/game-data/"
-            "migrate_byte_stable_sources.py --write"
+            + "\n"
+            + MIGRATION_HINT
         )
 
 
@@ -247,9 +298,9 @@ def assert_self_test(condition: bool, message: str) -> None:
         raise MigrationError("self-test failed: " + message)
 
 
-def run_self_test() -> None:
+def run_self_test() -> bool:
     canonical = b'{\n  "value": "realm"\n}\n'
-    target = Target("fixture.json", sha256(canonical))
+    target = Target("fixture with spaces.json", sha256(canonical))
     legacy = canonical.replace(b"\n", b"\r\n")
 
     assert_self_test(assess_bytes(target, canonical).state == "exact", "exact")
@@ -259,6 +310,20 @@ def run_self_test() -> None:
         legacy_assessment.canonical_bytes == canonical,
         "legacy canonical recovery",
     )
+    try:
+        require_exact((legacy_assessment,))
+    except MigrationError as error:
+        failure = str(error)
+        assert_self_test(
+            failure.endswith(MIGRATION_HINT),
+            "interpreter-neutral actionable migration hint",
+        )
+        assert_self_test(
+            "python3" not in failure and "Run:" not in failure,
+            "migration hint does not require interpreter or path quoting",
+        )
+    else:
+        raise MigrationError("self-test failed: legacy exact check did not fail")
     assert_self_test(
         assess_bytes(target, canonical + b" ").state == "invalid",
         "mutated content rejection",
@@ -282,10 +347,21 @@ def run_self_test() -> None:
         root = Path(temp)
         path = root / target.relative_path
         path.write_bytes(legacy)
+        predictable = path.with_name(path.name + ".byte-identity.tmp")
+        sentinel = b"pre-existing-untracked-sentinel"
+        predictable.write_bytes(sentinel)
         assessments = inspect_targets(root, (target,))
         assert_self_test(assessments[0].state == "legacy-crlf", "fixture scan")
         assert_self_test(write_migrations(root, assessments) == 1, "fixture write")
         assert_self_test(path.read_bytes() == canonical, "fixture exact result")
+        assert_self_test(
+            predictable.read_bytes() == sentinel,
+            "pre-existing predictable sibling preservation",
+        )
+        assert_self_test(
+            not list(root.glob(f".{path.name}.byte-identity-*.tmp")),
+            "owned random temp cleanup",
+        )
 
         path.write_bytes(legacy)
         drift_target = Target("drift.json", sha256(b"expected\n"))
@@ -299,7 +375,90 @@ def run_self_test() -> None:
             pass
         else:
             raise MigrationError("self-test failed: drift did not block migration")
-        assert_self_test(path.read_bytes() == before, "two-phase no-write failure")
+        assert_self_test(path.read_bytes() == before, "preflight no-write failure")
+
+        symlink_supported = False
+        symlink_backing = root / "symlink-backing.json"
+        symlink_backing.write_bytes(legacy)
+        symlink_target = Target("symlink-fixture.json", target.sha256)
+        symlink_path = root / symlink_target.relative_path
+        try:
+            os.symlink(symlink_backing, symlink_path)
+        except (NotImplementedError, OSError):
+            pass
+        else:
+            symlink_supported = True
+            symlink_assessment = inspect_targets(root, (symlink_target,))[0]
+            assert_self_test(
+                symlink_assessment.state == "invalid" and
+                "symbolic link" in symlink_assessment.detail,
+                "target symlink rejection",
+            )
+            try:
+                write_migrations(root, (symlink_assessment,))
+            except MigrationError:
+                pass
+            else:
+                raise MigrationError(
+                    "self-test failed: target symlink migration was not blocked"
+                )
+            assert_self_test(symlink_path.is_symlink(), "symlink leaf preserved")
+            assert_self_test(
+                symlink_backing.read_bytes() == legacy,
+                "symlink backing bytes preserved",
+            )
+
+        first_target = Target("partial-first.json", target.sha256)
+        second_target = Target("partial-second.json", target.sha256)
+        first_path = root / first_target.relative_path
+        second_path = root / second_target.relative_path
+        first_path.write_bytes(legacy)
+        second_path.write_bytes(legacy)
+        partial = inspect_targets(root, (first_target, second_target))
+        real_replace = os.replace
+        replace_count = 0
+
+        def fail_second_replace(source: Path, destination: Path) -> None:
+            nonlocal replace_count
+            replace_count += 1
+            if replace_count == 2:
+                raise OSError("injected second replacement failure")
+            real_replace(source, destination)
+
+        with mock.patch.object(os, "replace", side_effect=fail_second_replace):
+            try:
+                write_migrations(root, partial)
+            except OSError as error:
+                assert_self_test(
+                    "injected second replacement failure" in str(error),
+                    "injected replacement failure identity",
+                )
+            else:
+                raise MigrationError(
+                    "self-test failed: injected replacement failure did not stop"
+                )
+
+        assert_self_test(
+            first_path.read_bytes() == canonical,
+            "completed first migration remains exact after interruption",
+        )
+        assert_self_test(
+            second_path.read_bytes() == legacy,
+            "unreplaced second migration remains legacy CRLF",
+        )
+        assert_self_test(
+            not list(root.glob(".*.byte-identity-*.tmp")),
+            "interrupted owned temp cleanup",
+        )
+        retry = inspect_targets(root, (first_target, second_target))
+        assert_self_test(write_migrations(root, retry) == 1, "partial retry count")
+        assert_self_test(
+            first_path.read_bytes() == canonical and
+            second_path.read_bytes() == canonical,
+            "idempotent retry reaches exact bytes",
+        )
+
+        return symlink_supported
 
 
 def main() -> int:
@@ -308,19 +467,33 @@ def main() -> int:
     action.add_argument(
         "--write",
         action="store_true",
-        help="rewrite only exact reviewed CRLF variants to canonical LF bytes",
+        help=(
+            "rewrite only exact reviewed CRLF variants to canonical LF bytes; "
+            "preflight is all-target/no-write and replacement is atomic per file, "
+            "with safe retry after partial I/O interruption"
+        ),
     )
     action.add_argument(
         "--self-test",
         action="store_true",
-        help="run exact/CRLF/drift/BOM/lone-CR/atomicity fixtures",
+        help=(
+            "run exact/CRLF/drift/BOM/lone-CR/preflight/temp-ownership/"
+            "partial-retry fixtures"
+        ),
     )
     args = parser.parse_args()
 
     try:
         if args.self_test:
-            run_self_test()
+            symlink_supported = run_self_test()
             print("PASS: byte-identity migration self-test")
+            if symlink_supported:
+                print("PASS: target symlink rejection fixture")
+            else:
+                print(
+                    "SKIP: target symlink rejection fixture; symlink creation "
+                    "is unavailable in this environment"
+                )
             return 0
 
         repository_root = Path(__file__).resolve().parents[2]
