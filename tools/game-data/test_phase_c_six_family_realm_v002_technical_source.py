@@ -4,12 +4,14 @@
 from __future__ import annotations
 
 import argparse
+import copy
 import hashlib
 import json
 import subprocess
 import sys
-from pathlib import Path
-from typing import Any
+import tempfile
+from pathlib import Path, PurePosixPath
+from typing import Any, Callable, Optional
 
 
 ERROR_PREFIX = "Phase C realm v002 technical-source validation failed"
@@ -30,6 +32,10 @@ V002_PATH = (
 BASE_REVISION = "5858967b17a8c802ba4aca6225e1b61e45cdf5d9"
 BASE_RAW_SHA256 = (
     "5ed847c448d39c4a87ab53e6230621c0bd931e9deb27f43e35b57fdfbfcefa3b"
+)
+V002_REVISION = "d219472073bee9fcd420d0cac1d94412019b865b"
+V002_RAW_SHA256 = (
+    "60498d1a071ea79eb37c1b8889a1faaa5c7aee69679c1043256535ef4d3c1685"
 )
 FAMILY_ORDER = [
     "realms",
@@ -304,6 +310,19 @@ def load_strict_json(
     if not path.is_file():
         fail(f"{label} is missing: {path}")
     raw = path.read_bytes()
+    return load_strict_json_bytes(
+        raw,
+        label,
+        require_canonical=require_canonical,
+    )
+
+
+def load_strict_json_bytes(
+    raw: bytes,
+    label: str,
+    *,
+    require_canonical: bool = True,
+) -> tuple[dict[str, Any], bytes]:
     if not raw:
         fail(f"{label} is empty")
     if raw.startswith(b"\xef\xbb\xbf"):
@@ -355,25 +374,64 @@ def git_blob(repo_root: Path, revision: str, relative_path: str) -> bytes:
     return result.stdout
 
 
-def validate_pinned_source(repo_root: Path, source: dict[str, str]) -> None:
-    source_path = repo_root / source["path"]
-    if not source_path.is_file():
-        fail(f"pinned source is missing: {source['path']}")
-    current = source_path.read_bytes()
+def validate_pinned_source(
+    repo_root: Path,
+    source: dict[str, str],
+) -> bytes:
+    required_fields = ["path", "sourceRevision", "rawSha256"]
+    for field in required_fields:
+        value = source.get(field)
+        if not isinstance(value, str) or not value:
+            fail(f"pinned source {field} is missing or invalid")
+    relative_path = source["path"]
+    normalized_path = PurePosixPath(relative_path)
+    if (
+        normalized_path.is_absolute()
+        or "\\" in relative_path
+        or ":" in relative_path
+        or relative_path != normalized_path.as_posix()
+        or any(part in ["", ".", ".."] for part in normalized_path.parts)
+    ):
+        fail(f"pinned source path is not repository-relative: {relative_path!r}")
+    revision = source["sourceRevision"]
+    if len(revision) != 40 or any(
+        character not in "0123456789abcdef" for character in revision
+    ):
+        fail(f"pinned source revision is not a lowercase 40-hex commit: {revision!r}")
+    expected_sha256 = source["rawSha256"]
+    if len(expected_sha256) != 64 or any(
+        character not in "0123456789abcdef" for character in expected_sha256
+    ):
+        fail(f"pinned source rawSha256 is not lowercase 64-hex: {expected_sha256!r}")
+    commit = subprocess.run(
+        ["git", "cat-file", "-e", f"{revision}^{{commit}}"],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+    )
+    if commit.returncode != 0:
+        fail(f"pinned source revision is not an available commit: {revision}")
     committed = git_blob(
         repo_root,
-        source["sourceRevision"],
-        source["path"],
+        revision,
+        relative_path,
     )
-    if sha256(committed) != source["rawSha256"]:
-        fail(f"pinned Git blob hash drifted for {source['path']}")
-    if current != committed:
-        fail(f"working source differs from pinned bytes: {source['path']}")
+    if sha256(committed) != expected_sha256:
+        fail(f"pinned Git blob hash drifted for {relative_path}")
+    return committed
 
 
 def validate_base(repo_root: Path) -> tuple[dict[str, Any], bytes]:
-    base, raw = load_strict_json(
-        repo_root / BASE_PATH,
+    raw = validate_pinned_source(
+        repo_root,
+        {
+            "path": BASE_PATH,
+            "sourceRevision": BASE_REVISION,
+            "rawSha256": BASE_RAW_SHA256,
+        },
+    )
+    base, raw = load_strict_json_bytes(
+        raw,
         "frozen v001 source",
         require_canonical=False,
     )
@@ -537,10 +595,29 @@ def validate_no_production_outputs(repo_root: Path) -> None:
 
 def validate_candidate(
     repo_root: Path,
-    source_path: Path,
+    source_path: Optional[Path],
 ) -> tuple[dict[str, Any], bytes]:
     base, _ = validate_base(repo_root)
-    candidate, raw = load_strict_json(source_path, "realm v002 source")
+    if source_path is None:
+        raw = validate_pinned_source(
+            repo_root,
+            {
+                "path": V002_PATH,
+                "sourceRevision": V002_REVISION,
+                "rawSha256": V002_RAW_SHA256,
+            },
+        )
+        candidate, raw = load_strict_json_bytes(
+            raw,
+            "pinned realm v002 Git blob",
+        )
+    else:
+        candidate, raw = load_strict_json(
+            source_path,
+            "explicit realm v002 source",
+        )
+    if sha256(raw) != V002_RAW_SHA256:
+        fail("realm v002 source raw SHA-256 drifted")
     assert_keys(
         candidate,
         [
@@ -618,26 +695,192 @@ def validate_candidate(
     return candidate, raw
 
 
+def fixture_git(repo_root: Path, *arguments: str) -> str:
+    result = subprocess.run(
+        ["git", *arguments],
+        cwd=repo_root,
+        check=False,
+        capture_output=True,
+    )
+    if result.returncode != 0:
+        fail(
+            "historical-source fixture Git command failed: "
+            f"git {' '.join(arguments)}: "
+            f"{result.stderr.decode('utf-8', errors='replace').strip()}"
+        )
+    return result.stdout.decode("utf-8").strip()
+
+
+def expect_validation_failure(name: str, action: Callable[[], None]) -> None:
+    try:
+        action()
+    except ValidationError:
+        return
+    fail(f"negative fixture unexpectedly passed: {name}")
+
+
+def fixture_json(value: dict[str, Any]) -> bytes:
+    return (
+        json.dumps(value, ensure_ascii=False, indent=2, separators=(",", ": "))
+        + "\n"
+    ).encode("utf-8")
+
+
+def run_historical_source_fixtures(repo_root: Path) -> tuple[int, int]:
+    positive_count = 0
+    negative_count = 0
+    with tempfile.TemporaryDirectory(prefix="anotherlife-c3h-history-") as temp_dir:
+        fixture_repo = Path(temp_dir) / "repo"
+        fixture_repo.mkdir()
+        fixture_git(fixture_repo, "init", "--quiet")
+        fixture_git(fixture_repo, "config", "user.name", "AnotherLife Fixture")
+        fixture_git(
+            fixture_repo,
+            "config",
+            "user.email",
+            "fixture@anotherlife.invalid",
+        )
+        relative_path = "authority/pinned-source.txt"
+        source_path = fixture_repo / relative_path
+        source_path.parent.mkdir(parents=True)
+        historical_raw = b"historical authority v1\n"
+        source_path.write_bytes(historical_raw)
+        fixture_git(fixture_repo, "add", "--", relative_path)
+        fixture_git(fixture_repo, "commit", "--quiet", "-m", "Pin v1 authority")
+        historical_revision = fixture_git(fixture_repo, "rev-parse", "HEAD")
+        source = {
+            "path": relative_path,
+            "sourceRevision": historical_revision,
+            "rawSha256": sha256(historical_raw),
+        }
+
+        validate_pinned_source(fixture_repo, source)
+        positive_count += 1
+
+        source_path.write_bytes(b"current authority v2\r\n")
+        fixture_git(fixture_repo, "add", "--", relative_path)
+        fixture_git(fixture_repo, "commit", "--quiet", "-m", "Advance authority")
+        current_revision = fixture_git(fixture_repo, "rev-parse", "HEAD")
+        validate_pinned_source(fixture_repo, source)
+        positive_count += 1
+
+        source_path.unlink()
+        validate_pinned_source(fixture_repo, source)
+        positive_count += 1
+
+        invalid_sources = [
+            (
+                "missing revision",
+                {**source, "sourceRevision": "0" * 40},
+            ),
+            (
+                "wrong path",
+                {**source, "path": "authority/missing-source.txt"},
+            ),
+            (
+                "wrong raw hash",
+                {**source, "rawSha256": "0" * 64},
+            ),
+            (
+                "later revision with historical hash",
+                {**source, "sourceRevision": current_revision},
+            ),
+        ]
+        for name, invalid_source in invalid_sources:
+            expect_validation_failure(
+                name,
+                lambda value=invalid_source: validate_pinned_source(
+                    fixture_repo,
+                    value,
+                ),
+            )
+            negative_count += 1
+
+        candidate_blob = git_blob(repo_root, V002_REVISION, V002_PATH)
+        if sha256(candidate_blob) != V002_RAW_SHA256:
+            fail("fixture could not recover the exact frozen v002 candidate")
+        candidate_path = Path(temp_dir) / "candidate-v002.json"
+        candidate_path.write_bytes(candidate_blob)
+        validate_candidate(repo_root, candidate_path)
+        positive_count += 1
+
+        default_candidate, default_raw = validate_candidate(repo_root, None)
+        if (
+            default_candidate["candidateId"] != V002_CANDIDATE_ID
+            or default_raw != candidate_blob
+        ):
+            fail("default validation did not consume the exact pinned v002 blob")
+        positive_count += 1
+
+        candidate = json.loads(
+            candidate_blob.decode("utf-8"),
+            object_pairs_hook=strict_object,
+        )
+        wrong_id = copy.deepcopy(candidate)
+        wrong_id["candidateId"] = f"{V002_CANDIDATE_ID}-mutated"
+        wrong_provenance = copy.deepcopy(candidate)
+        wrong_provenance["provenance"][0]["rawSha256"] = "0" * 64
+        invalid_candidates = [
+            ("candidate identity mutation", fixture_json(wrong_id)),
+            ("candidate provenance mutation", fixture_json(wrong_provenance)),
+            ("candidate CRLF bytes", candidate_blob.replace(b"\n", b"\r\n")),
+            ("candidate UTF-8 BOM", b"\xef\xbb\xbf" + candidate_blob),
+        ]
+        for index, (name, raw) in enumerate(invalid_candidates):
+            invalid_path = Path(temp_dir) / f"negative-candidate-{index}.json"
+            invalid_path.write_bytes(raw)
+            expect_validation_failure(
+                name,
+                lambda path=invalid_path: validate_candidate(repo_root, path),
+            )
+            negative_count += 1
+
+    return positive_count, negative_count
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--source",
-        default=V002_PATH,
-        help="repository-relative or absolute v002 candidate path",
+        default=None,
+        help=(
+            "explicit repository-relative or absolute v002 candidate path; "
+            "omit to validate the exact pinned v002 Git blob"
+        ),
     )
     parser.add_argument(
         "--require-production-eligible",
         action="store_true",
         help="validate first, then prove production generation is refused",
     )
+    parser.add_argument(
+        "--run-negative-fixtures",
+        action="store_true",
+        help=(
+            "prove historical Git pins survive working-tree evolution while "
+            "invalid pins and candidate bytes fail closed"
+        ),
+    )
     args = parser.parse_args()
 
     repo_root = Path(__file__).resolve().parents[2]
-    source_path = Path(args.source)
-    if not source_path.is_absolute():
-        source_path = repo_root / source_path
+    source_path: Optional[Path] = None
+    if args.source is not None:
+        source_path = Path(args.source)
+        if not source_path.is_absolute():
+            source_path = repo_root / source_path
 
     try:
+        if args.run_negative_fixtures:
+            positive_count, negative_count = run_historical_source_fixtures(
+                repo_root
+            )
+            print(
+                "PASS: "
+                f"{positive_count} historical-source positive fixtures and "
+                f"{negative_count} negative fixtures"
+            )
+            return 0
         candidate, raw = validate_candidate(repo_root, source_path)
         if args.require_production_eligible:
             fail(
