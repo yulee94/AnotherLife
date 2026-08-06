@@ -297,7 +297,10 @@ namespace AL.Narrative.Nvs01
             if (_snapshot.CurrentEncounter != null &&
                 (string.Equals(actionId, RequestArenaEvent, StringComparison.Ordinal) ||
                  string.Equals(actionId, RetryArenaEvent, StringComparison.Ordinal)))
-                return ReadOnlyDuplicate(actionId, _snapshot.CurrentEncounter);
+                return VerifyDurableDuplicate(
+                    actionId,
+                    _snapshot.CurrentEncounter,
+                    _snapshot.CurrentEncounter.CorrelationId);
 
             if (string.Equals(actionId, RequestArenaEvent, StringComparison.Ordinal))
             {
@@ -376,7 +379,27 @@ namespace AL.Narrative.Nvs01
                 string.Equals(_snapshot.LastEncounterCorrelationId, result.CorrelationId, StringComparison.Ordinal))
             {
                 if (LastResultMatches(result))
-                    return ReadOnlyDuplicate(result.EventId, null, result.CorrelationId);
+                {
+                    bool isCurrentOperation =
+                        _snapshot.LastOperation != null &&
+                        string.Equals(
+                            _snapshot.LastOperation.EventId,
+                            result.EventId,
+                            StringComparison.Ordinal) &&
+                        string.Equals(
+                            _snapshot.LastOperation.CorrelationId,
+                            result.CorrelationId,
+                            StringComparison.Ordinal);
+                    return isCurrentOperation
+                        ? VerifyDurableDuplicate(
+                            result.EventId,
+                            null,
+                            result.CorrelationId)
+                        : ReadOnlyDuplicate(
+                            result.EventId,
+                            null,
+                            result.CorrelationId);
+                }
                 return Reject("EVENT-MISMATCH", "result", "exact prior result payload", ResultFingerprint(_snapshot), result.EventId, result.CorrelationId);
             }
 
@@ -539,7 +562,10 @@ namespace AL.Narrative.Nvs01
                 string.Equals(_snapshot.LastOperation.OperationId, command.OperationId, StringComparison.Ordinal))
             {
                 disposition = string.Equals(_snapshot.LastOperation.PayloadFingerprint, fingerprint, StringComparison.Ordinal)
-                    ? ReadOnlyDuplicate(_snapshot.LastOperation.EventId, _snapshot.CurrentEncounter, _snapshot.LastOperation.CorrelationId)
+                    ? VerifyDurableDuplicate(
+                        _snapshot.LastOperation.EventId,
+                        _snapshot.CurrentEncounter,
+                        _snapshot.LastOperation.CorrelationId)
                     : Reject("EVENT-MISMATCH", "operation", _snapshot.LastOperation.PayloadFingerprint, fingerprint, eventId);
                 return false;
             }
@@ -857,6 +883,80 @@ namespace AL.Narrative.Nvs01
                 draft.ConsequenceIntentIds.Add(consequence.Id);
                 newlyAdded.Add(consequence.Id);
             }
+        }
+
+        private Nvs01CommandDisposition VerifyDurableDuplicate(
+            string eventId,
+            NvsEncounterRequest request,
+            string correlationId = "")
+        {
+            Nvs01OperationReceipt operation = _snapshot.LastOperation;
+            var verifier = _committer as INvs01ReplayVerifier;
+            if (operation == null ||
+                verifier == null)
+            {
+                return CommitFailed(
+                    "SAVE-READ-ONLY",
+                    eventId,
+                    "durable replay verifier unavailable");
+            }
+
+            bool verified;
+            Nvs01QuestSnapshot durable;
+            Nvs01RuntimeDiagnostic diagnostic;
+            try
+            {
+                verified = verifier.TryVerifyReplay(
+                    _snapshot,
+                    operation.OperationId,
+                    operation.PayloadFingerprint,
+                    out durable,
+                    out diagnostic);
+            }
+            catch (Exception exception)
+            {
+                return CommitFailed(
+                    "COMMIT-UNCERTAIN",
+                    eventId,
+                    exception.GetType().Name);
+            }
+
+            if (!verified)
+            {
+                if (diagnostic != null &&
+                    string.Equals(
+                        diagnostic.Code,
+                        Nvs01CatalogContract.DiagnosticCodePrefix +
+                        "COMMIT-UNCERTAIN",
+                        StringComparison.Ordinal))
+                {
+                    _commitUncertain = true;
+                }
+                return new Nvs01CommandDisposition(
+                    Nvs01CommandStatus.CommitFailed,
+                    _snapshot,
+                    diagnostic ?? Diagnostic(
+                        "SAVE-READ-ONLY",
+                        "replay",
+                        "current authority",
+                        "unverified",
+                        eventId,
+                        correlationId),
+                    null,
+                    EmptyIdentifiers);
+            }
+
+            if (durable == null ||
+                !SnapshotsEquivalent(_snapshot, durable))
+            {
+                return CommitFailed(
+                    "COMMIT-UNCERTAIN",
+                    eventId,
+                    "verified replay snapshot mismatch");
+            }
+
+            _snapshot = durable;
+            return ReadOnlyDuplicate(eventId, request, correlationId);
         }
 
         private Nvs01CommandDisposition ReadOnlyDuplicate(
@@ -1333,6 +1433,9 @@ namespace AL.Narrative.Nvs01
                    left.Status == right.Status && left.Revision == right.Revision &&
                    string.Equals(left.StateId, right.StateId, StringComparison.Ordinal) &&
                    string.Equals(left.EventId, right.EventId, StringComparison.Ordinal) &&
+                   // The save boundary verifies authority causality. Runtime
+                   // domain equality omits it so exact replay can adopt the
+                   // already-persisted causal receipt.
                    string.Equals(left.CorrelationId, right.CorrelationId, StringComparison.Ordinal);
         }
 
@@ -1405,7 +1508,9 @@ namespace AL.Narrative.Nvs01
         }
     }
 
-    internal sealed class Nvs01InMemoryMutationCommitter : INvs01MutationCommitter
+    internal sealed class Nvs01InMemoryMutationCommitter :
+        INvs01MutationCommitter,
+        INvs01ReplayVerifier
     {
         private string _nextFailureCode;
 
@@ -1444,6 +1549,46 @@ namespace AL.Narrative.Nvs01
             committed = plan.Candidate;
             diagnostic = null;
             return true;
+        }
+
+        public bool TryVerifyReplay(
+            Nvs01QuestSnapshot snapshot,
+            string operationId,
+            string payloadFingerprint,
+            out Nvs01QuestSnapshot verified,
+            out Nvs01RuntimeDiagnostic diagnostic)
+        {
+            Nvs01OperationReceipt operation = snapshot?.LastOperation;
+            bool exact = LastPlan != null &&
+                operation != null &&
+                string.Equals(
+                    operation.OperationId,
+                    operationId,
+                    StringComparison.Ordinal) &&
+                string.Equals(
+                    operation.PayloadFingerprint,
+                    payloadFingerprint,
+                    StringComparison.Ordinal) &&
+                Nvs01ProgressCodec.Equivalent(
+                    LastPlan.Candidate,
+                    snapshot);
+            if (exact)
+            {
+                verified = snapshot;
+                diagnostic = null;
+                return true;
+            }
+
+            verified = snapshot;
+            diagnostic = new Nvs01RuntimeDiagnostic(
+                "SAVE-READ-ONLY",
+                "in-memory replay verification",
+                "exact mutation committed by this committer",
+                "unverified replay",
+                snapshot?.StateId ?? string.Empty,
+                operation?.EventId ?? string.Empty,
+                operation?.CorrelationId ?? string.Empty);
+            return false;
         }
     }
 }

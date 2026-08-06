@@ -1,0 +1,25 @@
+{
+    "name": "AL.Nvs01.Persistence.Tests",
+    "rootNamespace": "AL.Tests.EditMode.Narrative",
+    "references": [
+        "AL.Runtime",
+        "AL.SaveAuthority",
+        "AL.GameDataCatalog"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
