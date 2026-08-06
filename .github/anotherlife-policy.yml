@@ -1,4 +1,4 @@
-version: 4
+version: 5
 status_names:
   classify: "policy / classify"
   hygiene: "repository / hygiene"
@@ -47,6 +47,8 @@ workflow_paths:
   - .github/workflows/
   - .github/anotherlife-policy.yml
   - tools/ci/
+engineering_tool_paths:
+  - tools/game-data/
 android_release_sensitive_paths:
   - app/
   - build.gradle.kts

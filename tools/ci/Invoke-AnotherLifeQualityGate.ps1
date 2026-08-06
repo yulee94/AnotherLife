@@ -10,8 +10,16 @@ $script:StrictUtf8Encoding = New-Object System.Text.UTF8Encoding($false, $true)
 function Invoke-GitLines {
     param([Parameter(Mandatory = $true)][string[]] $Arguments)
 
-    $output = & git @Arguments 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & git @Arguments 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($exitCode -ne 0) {
         throw "git $($Arguments -join ' ') failed:`n$output"
     }
 
@@ -612,12 +620,14 @@ function Invoke-Classify {
     $terrestrialPrefixes = Get-PolicyList "terrestrial_design_paths" @("unity/Assets/AL/Art/Terrestrials/", "unity/Assets/AL/Art/Designs/Terrestrial", "unity/Docs/Terrestrials/", "unity/Docs/Terrestrial")
     $runtimePrefixes = @(Get-PolicyList "runtime_paths" @("app/", "unity/Assets/AL/Scripts/", "unity/Assets/AL/Tests/"))
     $workflowPrefixes = @(Get-PolicyList "workflow_paths" @(".github/workflows/", ".github/anotherlife-policy.yml", "tools/ci/"))
-    $engineeringPrefixes = @($runtimePrefixes + $workflowPrefixes)
+    $engineeringToolPrefixes = @(Get-PolicyList "engineering_tool_paths" @("tools/game-data/"))
+    $engineeringPrefixes = @($runtimePrefixes + $workflowPrefixes + $engineeringToolPrefixes)
 
     $narrativeChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $narrativePrefixes })
     $terrestrialChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $terrestrialPrefixes })
     $runtimeChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $runtimePrefixes })
     $workflowChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $workflowPrefixes })
+    $engineeringToolChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringToolPrefixes })
     $engineeringChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringPrefixes })
     $nonTerrestrialChanged = @($changedFiles | Where-Object { -not (Test-AnyPathPrefix $_ $terrestrialPrefixes) })
 
@@ -630,6 +640,9 @@ function Invoke-Classify {
         }
         if ($workflowChanged.Count -gt 0) {
             Add-Failure $failures "A2 branches cannot change workflow paths."
+        }
+        if ($engineeringToolChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches cannot change engineering tool paths."
         }
         if ($nonTerrestrialChanged.Count -gt 0) {
             Add-Failure $failures "A2 branches may change only configured terrestrial-design source paths. Out-of-bound paths: $($nonTerrestrialChanged -join ', ')."
@@ -648,6 +661,7 @@ function Invoke-Classify {
 
     Write-SafeHost "Narrative paths changed: $($narrativeChanged.Count)"
     Write-SafeHost "Terrestrial design paths changed: $($terrestrialChanged.Count)"
+    Write-SafeHost "Engineering tool paths changed: $($engineeringToolChanged.Count)"
     Write-SafeHost "Engineering/workflow paths changed: $($engineeringChanged.Count)"
     Assert-NoFailures $failures
 }
@@ -657,8 +671,16 @@ function Invoke-Hygiene {
     $diffRange = Get-DiffRange
 
     Write-SafeHost "Running git diff --check against $diffRange"
-    $diffCheck = & git diff --check $diffRange 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $diffCheck = & git diff --check $diffRange 2>&1
+        $diffExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($diffExitCode -ne 0) {
         Add-Failure $failures "git diff --check failed:`n$diffCheck"
     }
 

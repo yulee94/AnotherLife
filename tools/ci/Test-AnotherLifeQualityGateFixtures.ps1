@@ -16,6 +16,7 @@ param(
         "RetiredPrefix",
         "A2Convention",
         "A2Authority",
+        "EngineeringToolClassification",
         "PolicyAuthority",
         "PushMain",
         "PullRequestRange",
@@ -81,7 +82,7 @@ function Invoke-Checked {
         }
     }
 
-    $text = ($output | Out-String)
+    $text = ($output | Out-String -Width 4096)
     if ($ExpectFailure) {
         if ($exitCode -eq 0) {
             throw "Expected failure from $FilePath $($Arguments -join ' '), but it succeeded.`n$text"
@@ -876,6 +877,13 @@ function Test-A2AuthorityFixture {
         @("A2 branches cannot change workflow paths.", "A2 branches may change only configured terrestrial-design source paths.")
 
     Invoke-A2AuthorityFailureFixture `
+        "a2-engineering-tool-path" `
+        "tools/game-data/a2-tool.py" `
+        $a2Body `
+        "a2/terrestrial-engineering-tool-path" `
+        @("A2 branches cannot change engineering tool paths.", "A2 branches may change only configured terrestrial-design source paths.")
+
+    Invoke-A2AuthorityFailureFixture `
         "a2-unclassified-path" `
         "unity/Docs/A2OutsideTerrestrialSource.md" `
         $a2Body `
@@ -888,6 +896,47 @@ function Test-A2AuthorityFixture {
         "$a2Body`n`nMixed-mode exception: separate PRs are impractical for this change." `
         "a2/terrestrial-mixed-mode-escape" `
         @("A2 branches cannot use a mixed-mode justification to escape their source-only boundary.")
+}
+
+function Test-EngineeringToolClassificationFixture {
+    $fixtureRepo = New-FixtureRepo "engineering-tool-classification"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
+    Invoke-Checked git @("add", ".github/anotherlife-policy.yml") $fixtureRepo | Out-Null
+    Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
+
+    $toolDirectory = Join-Path $fixtureRepo "tools/game-data"
+    New-Item -ItemType Directory -Force -Path $toolDirectory | Out-Null
+    Set-Content -LiteralPath (Join-Path $toolDirectory "validator.py") -Value "print('fixture')" -NoNewline
+    Invoke-Checked git @("add", "tools/game-data/validator.py") $fixtureRepo | Out-Null
+
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`n## Shared-file lock`n`nNone."
+    Write-PullRequestEvent $eventPath $base $base $body "main" "codex/engineering-tool-classification"
+
+    $output = Invoke-Checked $powerShellExecutable @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+        "-Mode",
+        "Classify",
+        "-BaseRef",
+        "HEAD"
+    ) $fixtureRepo @{
+        GITHUB_ACTIONS = ""
+        GITHUB_EVENT_NAME = "pull_request"
+        GITHUB_EVENT_PATH = $eventPath
+        GITHUB_BASE_REF = "main"
+        GITHUB_HEAD_REF = "codex/engineering-tool-classification"
+    }
+
+    Assert-Contains $output "Engineering tool paths changed: 1"
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
 }
 
 function Test-PolicyAuthorityFixture {
@@ -1166,6 +1215,7 @@ try {
         "RetiredPrefix" { Test-RetiredPrefixFixture }
         "A2Convention" { Test-A2ConventionFixture }
         "A2Authority" { Test-A2AuthorityFixture }
+        "EngineeringToolClassification" { Test-EngineeringToolClassificationFixture }
         "PolicyAuthority" { Test-PolicyAuthorityFixture }
         "PullRequestRange" { Test-PullRequestRangeFixture }
         "InvalidBase" { Test-InvalidBaseFixture }
@@ -1189,6 +1239,7 @@ try {
             Test-RetiredPrefixFixture
             Test-A2ConventionFixture
             Test-A2AuthorityFixture
+            Test-EngineeringToolClassificationFixture
             Test-PolicyAuthorityFixture
             Test-PullRequestRangeFixture
             Test-InvalidBaseFixture
