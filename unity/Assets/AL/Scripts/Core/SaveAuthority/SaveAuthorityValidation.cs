@@ -7,6 +7,53 @@ namespace AL.Core.SaveAuthority
 {
     public static class ProfileWriteAuthorityProviderGuard
     {
+        /// <summary>
+        /// Reads the provider once and validates the complete Writable shape
+        /// without allocating a normalized snapshot or diagnostic collection.
+        /// Consumers must call this at each mutation boundary rather than
+        /// caching the result.
+        /// </summary>
+        public static bool IsCurrentWritable(
+            IProfileWriteAuthorityProvider provider)
+        {
+            if (provider == null)
+                return false;
+
+            try
+            {
+                ProfileWriteAuthoritySnapshot snapshot =
+                    provider.GetCurrentAuthority();
+                return snapshot != null &&
+                       string.Equals(
+                           snapshot.ContractVersion,
+                           SaveAuthorityTechnicalLimits.ContractVersion,
+                           StringComparison.Ordinal) &&
+                       snapshot.Status ==
+                           ProfileWriteAuthorityStatus.Writable &&
+                       snapshot.HasSelectedSourceGeneration &&
+                       IsWritableSourceWithoutAllocation(
+                           snapshot.SelectedSourceGeneration) &&
+                       SaveAuthorityValidation.IsCanonicalProfileId(
+                           snapshot.ProfileId) &&
+                       HasCanonicalEpochWithoutAllocation(
+                           snapshot.AuthorityEpoch) &&
+                       SaveAuthorityValidation.IsCanonicalSha256(
+                           snapshot.VerifiedGenerationFingerprint) &&
+                       snapshot.SaveSchemaVersion ==
+                           SaveAuthorityTechnicalLimits
+                               .IdentityAwareSaveSchemaVersion &&
+                       snapshot.ProfileInitializationVersion ==
+                           SaveAuthorityTechnicalLimits
+                               .IdentityAwareProfileInitializationVersion &&
+                       HasValidDiagnosticsWithoutAllocation(
+                           snapshot.DiagnosticCodes);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static ProfileWriteAuthoritySnapshot ReadOrUnavailable(
             IProfileWriteAuthorityProvider provider)
         {
@@ -95,6 +142,73 @@ namespace AL.Core.SaveAuthority
                 snapshot.HasSelectedSourceGeneration,
                 snapshot.SelectedSourceGeneration,
                 diagnostics);
+        }
+
+        private static bool HasValidDiagnosticsWithoutAllocation(
+            IReadOnlyList<string> diagnostics)
+        {
+            if (diagnostics == null ||
+                diagnostics.Count >
+                    SaveAuthorityTechnicalLimits.MaximumDiagnosticCodes)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < diagnostics.Count; index++)
+            {
+                string current = diagnostics[index];
+                if (!SaveAuthorityValidation.IsDiagnosticCode(current))
+                    return false;
+
+                for (int prior = 0; prior < index; prior++)
+                {
+                    if (string.Equals(
+                            diagnostics[prior],
+                            current,
+                            StringComparison.Ordinal))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsWritableSourceWithoutAllocation(
+            ProfileAuthoritySourceGeneration source) =>
+            source == ProfileAuthoritySourceGeneration.Primary ||
+            source == ProfileAuthoritySourceGeneration.Backup ||
+            source == ProfileAuthoritySourceGeneration.Previous ||
+            source == ProfileAuthoritySourceGeneration.Temp;
+
+        private static bool HasCanonicalEpochWithoutAllocation(string value)
+        {
+            if (value == null ||
+                value.Length !=
+                    SaveAuthorityTechnicalLimits.AuthorityEpochCharacters)
+            {
+                return false;
+            }
+
+            bool nonceNonZero = false;
+            bool counterNonZero = false;
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!SaveAuthorityValidation.IsLowerHex(character))
+                    return false;
+
+                if (character == '0')
+                    continue;
+
+                if (index < 16)
+                    nonceNonZero = true;
+                else
+                    counterNonZero = true;
+            }
+
+            return nonceNonZero && counterNonZero;
         }
 
         private static bool HasValidStatusFields(

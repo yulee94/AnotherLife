@@ -13,6 +13,7 @@ namespace AL.Services.Local
         private readonly ISaveGameService _saveGameService;
         private readonly IResourceService _resourceService;
         private readonly IWarzoneCreditService _creditService;
+        private readonly EconomyWriteAuthorityGate _writeAuthorityGate;
 
         private Dictionary<string, QuestDefinition> _definitions =
             new Dictionary<string, QuestDefinition>(StringComparer.Ordinal);
@@ -22,10 +23,28 @@ namespace AL.Services.Local
         public event Action<QuestState> OnQuestCompleted;
 
         public LocalQuestService(ISaveGameService saveGameService, IResourceService resourceService, IWarzoneCreditService creditService)
+            : this(
+                saveGameService,
+                resourceService,
+                creditService,
+                EconomyWriteAuthorityGate.FromSaveService(saveGameService))
         {
-            _saveGameService = saveGameService;
-            _resourceService = resourceService;
-            _creditService = creditService;
+        }
+
+        private LocalQuestService(
+            ISaveGameService saveGameService,
+            IResourceService resourceService,
+            IWarzoneCreditService creditService,
+            EconomyWriteAuthorityGate writeAuthorityGate)
+        {
+            _saveGameService = saveGameService ??
+                throw new ArgumentNullException(nameof(saveGameService));
+            _resourceService = resourceService ??
+                throw new ArgumentNullException(nameof(resourceService));
+            _creditService = creditService ??
+                throw new ArgumentNullException(nameof(creditService));
+            _writeAuthorityGate = writeAuthorityGate ??
+                throw new ArgumentNullException(nameof(writeAuthorityGate));
 
             InitializeQuests();
         }
@@ -128,6 +147,13 @@ namespace AL.Services.Local
             if (!_definitions.TryGetValue(questId, out var def))
             {
                 Debug.LogWarning($"[AL-QST-UNKNOWN-ID] Quest reward claim ignored for unsupported quest id '{questId}'.");
+                return;
+            }
+
+            if (!_writeAuthorityGate.TryGetWritableSave(out _))
+            {
+                Debug.LogWarning(
+                    "[AL-QST-PROFILE-READ-ONLY] Quest reward claim rejected before any profile mutation.");
                 return;
             }
 

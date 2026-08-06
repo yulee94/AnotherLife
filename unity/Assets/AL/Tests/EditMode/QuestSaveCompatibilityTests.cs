@@ -6,6 +6,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using AL.Core.SaveAuthority;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -569,14 +570,50 @@ namespace AL.Tests.EditMode
         private static object CreateQuestService(object saveService, object resourceService, object creditService)
         {
             Type serviceType = GetRuntimeType("AL.Services.Local.LocalQuestService");
-            ConstructorInfo constructor = serviceType.GetConstructor(new[]
-            {
-                GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
-                GetRuntimeType("AL.Core.Interfaces.IResourceService"),
-                GetRuntimeType("AL.Core.Interfaces.IWarzoneCreditService")
-            });
+            Type gateType = GetRuntimeType(
+                "AL.Services.Local.EconomyWriteAuthorityGate");
+            ConstructorInfo constructor = serviceType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[]
+                {
+                    GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
+                    GetRuntimeType("AL.Core.Interfaces.IResourceService"),
+                    GetRuntimeType("AL.Core.Interfaces.IWarzoneCreditService"),
+                    gateType
+                },
+                null);
             Assert.NotNull(constructor);
-            return constructor.Invoke(new[] { saveService, resourceService, creditService });
+            return constructor.Invoke(
+                new[]
+                {
+                    saveService,
+                    resourceService,
+                    creditService,
+                    CreateWritableGate(saveService)
+                });
+        }
+
+        private static object CreateWritableGate(object saveService)
+        {
+            Type gateType = GetRuntimeType(
+                "AL.Services.Local.EconomyWriteAuthorityGate");
+            ConstructorInfo constructor = gateType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[]
+                {
+                    GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
+                    typeof(IProfileWriteAuthorityProvider)
+                },
+                null);
+            Assert.NotNull(constructor);
+            return constructor.Invoke(
+                new object[]
+                {
+                    saveService,
+                    new WritableAuthorityProvider()
+                });
         }
 
         private static object CreateSideQuestService(object saveService, object resourceService)
@@ -589,6 +626,23 @@ namespace AL.Tests.EditMode
             });
             Assert.NotNull(constructor);
             return constructor.Invoke(new[] { saveService, resourceService });
+        }
+
+        private sealed class WritableAuthorityProvider :
+            IProfileWriteAuthorityProvider
+        {
+            private static readonly ProfileWriteAuthoritySnapshot Snapshot =
+                ProfileWriteAuthoritySnapshotFactory.Writable(
+                    "alp_0123456789abcdef0123456789abcdef",
+                    "0123456789abcdef0000000000000001",
+                    new string(
+                        'a',
+                        SaveAuthorityTechnicalLimits.Sha256Characters),
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>());
+
+            public ProfileWriteAuthoritySnapshot GetCurrentAuthority() =>
+                Snapshot;
         }
 
         private static object InjectQuestDefinition(object service, string id, int targetValue, object questType)

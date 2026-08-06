@@ -2,6 +2,7 @@
     "name": "AL.Runtime",
     "rootNamespace": "AL",
     "references": [
+        "AL.SaveAuthority",
         "AL.GameDataCatalog",
         "Unity.TextMeshPro",
         "Unity.ugui"

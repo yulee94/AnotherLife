@@ -10,11 +10,26 @@ namespace AL.RealmWar.Warzone
     public class WarzoneService : ITerritoryService
     {
         private readonly ISaveGameService _saveGameService;
+        private readonly AL.Services.Local.EconomyWriteAuthorityGate
+            _writeAuthorityGate;
         public event Action<string, RealmId> OnTerritoryCaptured;
 
         public WarzoneService(ISaveGameService saveGameService)
+            : this(
+                saveGameService,
+                AL.Services.Local.EconomyWriteAuthorityGate.FromSaveService(
+                    saveGameService))
         {
-            _saveGameService = saveGameService;
+        }
+
+        private WarzoneService(
+            ISaveGameService saveGameService,
+            AL.Services.Local.EconomyWriteAuthorityGate writeAuthorityGate)
+        {
+            _saveGameService = saveGameService ??
+                throw new ArgumentNullException(nameof(saveGameService));
+            _writeAuthorityGate = writeAuthorityGate ??
+                throw new ArgumentNullException(nameof(writeAuthorityGate));
         }
 
         private List<TerritoryData> Territories
@@ -30,6 +45,13 @@ namespace AL.RealmWar.Warzone
 
         public void CaptureTerritory(string territoryId, RealmId capturer)
         {
+            if (!_writeAuthorityGate.TryGetWritableSave(out _))
+            {
+                Debug.LogWarning(
+                    "[AL-WARZONE-PROFILE-READ-ONLY] Territory capture rejected before any profile mutation.");
+                return;
+            }
+
             var territory = Territories?.FirstOrDefault(t => t.Id == territoryId);
             if (territory != null)
             {

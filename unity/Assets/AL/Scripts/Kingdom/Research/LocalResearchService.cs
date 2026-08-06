@@ -12,11 +12,28 @@ namespace AL.Services.Local
     {
         private readonly ISaveGameService _saveGameService;
         private readonly IResourceService _resourceService;
+        private readonly EconomyWriteAuthorityGate _writeAuthorityGate;
 
         public LocalResearchService(ISaveGameService saveGameService, IResourceService resourceService)
+            : this(
+                saveGameService,
+                resourceService,
+                EconomyWriteAuthorityGate.FromSaveService(saveGameService))
         {
-            _saveGameService = saveGameService;
-            _resourceService = resourceService;
+        }
+
+        private LocalResearchService(
+            ISaveGameService saveGameService,
+            IResourceService resourceService,
+            EconomyWriteAuthorityGate writeAuthorityGate)
+        {
+            _saveGameService = saveGameService ??
+                throw new System.ArgumentNullException(nameof(saveGameService));
+            _resourceService = resourceService ??
+                throw new System.ArgumentNullException(nameof(resourceService));
+            _writeAuthorityGate = writeAuthorityGate ??
+                throw new System.ArgumentNullException(
+                    nameof(writeAuthorityGate));
         }
 
         private List<ResearchState> Researches => _saveGameService.CurrentSave?.Researches;
@@ -40,6 +57,13 @@ namespace AL.Services.Local
 
         public void StartResearch(string researchId)
         {
+            if (!_writeAuthorityGate.TryGetWritableSave(out _))
+            {
+                Debug.LogWarning(
+                    "[AL-RSCH-PROFILE-READ-ONLY] Research start rejected before any profile mutation.");
+                return;
+            }
+
             var state = GetResearchState(researchId);
             if (state.IsResearching) return;
 

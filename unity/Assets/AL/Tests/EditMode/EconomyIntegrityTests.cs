@@ -244,6 +244,405 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void PublicEconomyConstructorsFailClosedWithoutTypedAuthorityProvider()
+        {
+            AssertOnlyPublicSaveConstructor(
+                "AL.Services.Local.LocalResourceService");
+            AssertOnlyPublicSaveConstructor(
+                "AL.Services.Local.LocalWarzoneCreditService");
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 25);
+            WalletSnapshot walletBefore = SnapshotWallet(save);
+            var fixture = CreateSaveFixture(save);
+            object resources = CreateRuntimeService(
+                "AL.Services.Local.LocalResourceService",
+                "AL.Core.Interfaces.ISaveGameService",
+                fixture.Proxy);
+            object credits = CreateRuntimeService(
+                "AL.Services.Local.LocalWarzoneCreditService",
+                "AL.Core.Interfaces.ISaveGameService",
+                fixture.Proxy);
+            var events = new List<ResourceEvent>();
+            AddResourceEventHandler(
+                resources,
+                (type, balance) =>
+                    events.Add(new ResourceEvent(type.ToString(), balance)));
+
+            AssertStatus(
+                Invoke(resources, "ReadResource", Resource("Gold")),
+                "AvailableReadOnly");
+            AssertStatus(Invoke(credits, "ReadCredits"), "AvailableReadOnly");
+            AssertStatus(
+                Invoke(resources, "TryAddResource", Resource("Gold"), 1L),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(resources, "TryConsumeResource", Resource("Gold"), 1L),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(credits, "TryAddCredits", 1),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(credits, "TrySpendCredits", 1),
+                "RejectedProfileNotWritable");
+
+            AssertWalletUnchanged(save, walletBefore);
+            Assert.AreEqual(25, GetField(save, "WarzoneCredits"));
+            Assert.IsEmpty(events);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+        }
+
+        [TestCase("MissingProvider")]
+        [TestCase("NullSnapshot")]
+        [TestCase("ThrowingProvider")]
+        [TestCase("InvalidSnapshot")]
+        [TestCase("MissingProfile")]
+        [TestCase("MigrationRequired")]
+        [TestCase("ForwardSchemaReadOnly")]
+        [TestCase("DegradedReadOnly")]
+        [TestCase("RecoveryRequired")]
+        [TestCase("CommitUncertain")]
+        [TestCase("Deleted")]
+        [TestCase("Unavailable")]
+        public void TypedNonWritableAuthorityPreservesReadsAndRejectsEveryEconomyMutation(
+            string scenario)
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 25);
+            WalletSnapshot walletBefore = SnapshotWallet(save);
+            var saveFixture = CreateSaveFixture(save);
+            AuthorityProviderFixture authority =
+                CreateAuthorityProviderForScenario(scenario);
+            ProductionProviderFixture production = CreateProductionProvider(
+                CreateProductionSnapshot(
+                    "Available",
+                    "revision-a",
+                    new ContributionSpec(Resource("Gold"), 0.5d)));
+            object resources = CreateResourceServiceWithAuthority(
+                saveFixture,
+                authority?.Proxy,
+                production.Proxy);
+            object credits = CreateCreditServiceWithAuthority(
+                saveFixture,
+                authority?.Proxy);
+            var events = new List<ResourceEvent>();
+            AddResourceEventHandler(
+                resources,
+                (type, balance) =>
+                    events.Add(new ResourceEvent(type.ToString(), balance)));
+
+            AssertStatus(
+                Invoke(resources, "ReadResource", Resource("Gold")),
+                "AvailableReadOnly");
+            AssertStatus(Invoke(credits, "ReadCredits"), "AvailableReadOnly");
+            AssertStatus(
+                Invoke(resources, "TryAddResource", Resource("Gold"), 1L),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(resources, "TryConsumeResource", Resource("Gold"), 1L),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(resources, "TryTickProduction", 0.5d),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(credits, "TryAddCredits", 1),
+                "RejectedProfileNotWritable");
+            AssertStatus(
+                Invoke(credits, "TrySpendCredits", 1),
+                "RejectedProfileNotWritable");
+
+            AssertWalletUnchanged(save, walletBefore);
+            Assert.AreEqual(25, GetField(save, "WarzoneCredits"));
+            Assert.IsEmpty(events);
+            Assert.AreEqual(0, saveFixture.State.SaveCount);
+            Assert.AreEqual(0, production.State.CallCount);
+            if (authority != null)
+            {
+                Assert.AreEqual(7, authority.State.CallCount);
+            }
+        }
+
+        [Test]
+        public void TypedWritableAuthorityIsReReadAtEveryEconomyBoundary()
+        {
+            object save = CreateValidSave();
+            SetField(save, "WarzoneCredits", 25);
+            var saveFixture = CreateSaveFixture(save);
+            AuthorityProviderFixture authority = CreateAuthorityProvider(
+                CreateAuthoritySnapshot("Writable"));
+            object resources = CreateResourceServiceWithAuthority(
+                saveFixture,
+                authority.Proxy);
+            object credits = CreateCreditServiceWithAuthority(
+                saveFixture,
+                authority.Proxy);
+
+            AssertStatus(
+                Invoke(resources, "ReadResource", Resource("Gold")),
+                "Available");
+            AssertStatus(
+                Invoke(resources, "TryAddResource", Resource("Gold"), 5L),
+                "Applied");
+            AssertStatus(Invoke(credits, "TryAddCredits", 5), "Applied");
+            Assert.AreEqual(3, authority.State.CallCount);
+
+            authority.State.Snapshot =
+                CreateAuthoritySnapshot("MigrationRequired");
+
+            AssertStatus(
+                Invoke(resources, "ReadResource", Resource("Gold")),
+                "AvailableReadOnly");
+            AssertStatus(
+                Invoke(resources, "TryAddResource", Resource("Gold"), 5L),
+                "RejectedProfileNotWritable");
+            AssertStatus(Invoke(credits, "ReadCredits"), "AvailableReadOnly");
+            AssertStatus(
+                Invoke(credits, "TryAddCredits", 5),
+                "RejectedProfileNotWritable");
+            Assert.AreEqual(7, authority.State.CallCount);
+            Assert.AreEqual(105L, GetField(FindResource(save, "Gold"), "Amount"));
+            Assert.AreEqual(30, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, saveFixture.State.SaveCount);
+        }
+
+        [Test]
+        public void ProductionCallbackAuthorityRevocationRejectsBeforeMutation()
+        {
+            object save = CreateValidSave();
+            WalletSnapshot walletBefore = SnapshotWallet(save);
+            var saveFixture = CreateSaveFixture(save);
+            AuthorityProviderFixture authority = CreateAuthorityProvider(
+                CreateAuthoritySnapshot("Writable"));
+            ProductionProviderFixture production = CreateProductionProvider(
+                CreateProductionSnapshot(
+                    "Available",
+                    "revision-a",
+                    new ContributionSpec(Resource("Gold"), 1d)),
+                onBuild: () => authority.State.Snapshot =
+                    CreateAuthoritySnapshot("MigrationRequired"));
+            object resources = CreateResourceServiceWithAuthority(
+                saveFixture,
+                authority.Proxy,
+                production.Proxy);
+            var events = new List<ResourceEvent>();
+            AddResourceEventHandler(
+                resources,
+                (type, balance) =>
+                    events.Add(new ResourceEvent(type.ToString(), balance)));
+
+            AssertStatus(
+                Invoke(resources, "TryTickProduction", 0.5d),
+                "RejectedProfileNotWritable");
+
+            AssertWalletUnchanged(save, walletBefore);
+            Assert.IsEmpty(events);
+            Assert.AreEqual(0, saveFixture.State.SaveCount);
+            Assert.AreEqual(1, production.State.CallCount);
+            Assert.AreEqual(2, authority.State.CallCount);
+        }
+
+        [Test]
+        public void ProductionCallbackPublishedSaveSwapRejectsBeforeMutation()
+        {
+            object save = CreateValidSave();
+            object replacement = CreateValidSave();
+            WalletSnapshot walletBefore = SnapshotWallet(save);
+            WalletSnapshot replacementBefore = SnapshotWallet(replacement);
+            var saveFixture = CreateSaveFixture(save);
+            AuthorityProviderFixture authority = CreateAuthorityProvider(
+                CreateAuthoritySnapshot("Writable"));
+            ProductionProviderFixture production = CreateProductionProvider(
+                CreateProductionSnapshot(
+                    "Available",
+                    "revision-a",
+                    new ContributionSpec(Resource("Gold"), 1d)),
+                onBuild: () => saveFixture.State.CurrentSave = replacement);
+            object resources = CreateResourceServiceWithAuthority(
+                saveFixture,
+                authority.Proxy,
+                production.Proxy);
+
+            AssertStatus(
+                Invoke(resources, "TryTickProduction", 0.5d),
+                "RejectedProfileNotWritable");
+
+            AssertWalletUnchanged(save, walletBefore);
+            AssertWalletUnchanged(replacement, replacementBefore);
+            Assert.AreEqual(0, saveFixture.State.SaveCount);
+            Assert.AreEqual(1, production.State.CallCount);
+            Assert.AreEqual(2, authority.State.CallCount);
+        }
+
+        [Test]
+        public void LocalSaveAuthorityKeepsLegacySchemaReadOnlyUntilMigration()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(
+                    saveService,
+                    "CreateNewSave",
+                    EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+                object authority = Invoke(saveService, "GetCurrentAuthority");
+                AssertStatus(authority, "MigrationRequired");
+
+                object resources = CreateRuntimeService(
+                    "AL.Services.Local.LocalResourceService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    saveService);
+                object credits = CreateRuntimeService(
+                    "AL.Services.Local.LocalWarzoneCreditService",
+                    "AL.Core.Interfaces.ISaveGameService",
+                    saveService);
+                object save = GetProperty(saveService, "CurrentSave");
+                WalletSnapshot before = SnapshotWallet(save);
+
+                AssertStatus(
+                    Invoke(resources, "ReadResource", Resource("Gold")),
+                    "AvailableReadOnly");
+                AssertStatus(Invoke(credits, "ReadCredits"), "AvailableReadOnly");
+                AssertStatus(
+                    Invoke(resources, "TryAddResource", Resource("Gold"), 1L),
+                    "RejectedProfileNotWritable");
+                AssertStatus(
+                    Invoke(credits, "TryAddCredits", 1),
+                    "RejectedProfileNotWritable");
+                AssertWalletUnchanged(save, before);
+                Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [TestCase("LoadedPrimaryNormalized")]
+        [TestCase("LoadedPrimaryWithPreservedUnknown")]
+        public void LocalSaveLegacyReadOnlyCompatibilityViewsRemainMigrationRequired(
+            string loadStatus)
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(
+                    saveService,
+                    "CreateNewSave",
+                    EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+                object legacyView = GetProperty(saveService, "CurrentSave");
+
+                SetField(saveService, "_currentSave", null);
+                SetField(saveService, "_readOnlyCandidate", legacyView);
+                SetField(saveService, "_profileWritable", false);
+                SetField(saveService, "_hasObservedAuthoritySource", true);
+                SetField(
+                    saveService,
+                    "_observedAuthoritySource",
+                    EnumValue(
+                        GetRuntimeType(
+                            "AL.Core.SaveAuthority.ProfileAuthoritySourceGeneration"),
+                        "Primary"));
+                SetProperty(
+                    saveService,
+                    "LastLoadStatus",
+                    EnumValue(
+                        GetRuntimeType("AL.Core.Interfaces.SaveLoadStatus"),
+                        loadStatus));
+
+                object authority = Invoke(saveService, "GetCurrentAuthority");
+                AssertStatus(authority, "MigrationRequired");
+                Assert.AreEqual(1, GetProperty(authority, "SaveSchemaVersion"));
+                Assert.AreEqual(
+                    1,
+                    GetProperty(authority, "ProfileInitializationVersion"));
+                Assert.AreEqual(
+                    "Primary",
+                    GetProperty(authority, "SelectedSourceGeneration")
+                        .ToString());
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void LocalSaveSuccessfulSaveAndCandidateCommitRebindSourceToPrimary()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(
+                    saveService,
+                    "CreateNewSave",
+                    EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+
+                SetObservedAuthoritySource(saveService, "Backup");
+                Invoke(saveService, "Save");
+                AssertAuthoritySource(saveService, "Primary");
+
+                SetObservedAuthoritySource(saveService, "Backup");
+                object commit = InvokePreparedCandidate(
+                    saveService,
+                    "authority-transition-chapter");
+                Assert.AreEqual(
+                    "Committed",
+                    GetProperty(commit, "Outcome").ToString());
+                AssertAuthoritySource(saveService, "Primary");
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void LocalSaveFailureAndRecoveryPrecedenceCannotReturnMigrationRequired()
+        {
+            string root = CreateTempRoot();
+            try
+            {
+                object saveService = CreateActualSaveService(root);
+                Invoke(
+                    saveService,
+                    "CreateNewSave",
+                    EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+                SetObservedAuthoritySource(saveService, "Primary");
+                SetField(saveService, "_profileWritable", false);
+                SetProperty(
+                    saveService,
+                    "LastSaveStatus",
+                    EnumValue(
+                        GetRuntimeType("AL.Core.Interfaces.SaveOperationStatus"),
+                        "SaveFailedPreviousPreserved"));
+                AssertStatus(
+                    Invoke(saveService, "GetCurrentAuthority"),
+                    "DegradedReadOnly");
+
+                SetProperty(
+                    saveService,
+                    "LastSaveStatus",
+                    EnumValue(
+                        GetRuntimeType("AL.Core.Interfaces.SaveOperationStatus"),
+                        "None"));
+                SetProperty(
+                    saveService,
+                    "LastLoadStatus",
+                    EnumValue(
+                        GetRuntimeType("AL.Core.Interfaces.SaveLoadStatus"),
+                        "RecoveryRequired"));
+                AssertStatus(
+                    Invoke(saveService, "GetCurrentAuthority"),
+                    "RecoveryRequired");
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
         public void TypedResourceMutationMatrixIsCheckedAndSaveFree()
         {
             object save = CreateValidSave();
@@ -1029,10 +1428,8 @@ namespace AL.Tests.EditMode
                 SetField(currentSave, "WarzoneCredits", 10);
                 Invoke(saveService, "Save");
 
-                object creditService = CreateRuntimeService(
-                    "AL.Services.Local.LocalWarzoneCreditService",
-                    "AL.Core.Interfaces.ISaveGameService",
-                    saveService);
+                object creditService =
+                    CreateCreditServiceForSaveServiceForTests(saveService);
                 AssertStatus(Invoke(creditService, "TryAddCredits", 5), "Applied");
 
                 object beforeExplicitSave = CreateActualSaveService(root);
@@ -1569,10 +1966,9 @@ namespace AL.Tests.EditMode
                     firstSaveService,
                     "CreateNewSave",
                     EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
-                object firstCredits = CreateRuntimeService(
-                    "AL.Services.Local.LocalWarzoneCreditService",
-                    "AL.Core.Interfaces.ISaveGameService",
-                    firstSaveService);
+                object firstCredits =
+                    CreateCreditServiceForSaveServiceForTests(
+                        firstSaveService);
                 var firstNotifications = CreateNotificationFixture();
                 object firstBossLoot = CreateBossLootService(
                     firstSaveService,
@@ -1588,10 +1984,9 @@ namespace AL.Tests.EditMode
 
                 object reloadedSaveService = CreateActualSaveService(root);
                 Invoke(reloadedSaveService, "Load");
-                object reloadedCredits = CreateRuntimeService(
-                    "AL.Services.Local.LocalWarzoneCreditService",
-                    "AL.Core.Interfaces.ISaveGameService",
-                    reloadedSaveService);
+                object reloadedCredits =
+                    CreateCreditServiceForSaveServiceForTests(
+                        reloadedSaveService);
                 var replayNotifications = CreateNotificationFixture();
                 object reloadedBossLoot = CreateBossLootService(
                     reloadedSaveService,
@@ -1841,29 +2236,281 @@ namespace AL.Tests.EditMode
             Func<bool> writable = null,
             object productionProvider = null)
         {
+            AuthorityProviderFixture authority =
+                CreateBooleanAuthorityProvider(
+                    writable ?? new Func<bool>(() => true));
+            return CreateResourceServiceWithAuthority(
+                save,
+                authority.Proxy,
+                productionProvider);
+        }
+
+        private static object CreateResourceServiceWithAuthority(
+            SaveFixture save,
+            object authorityProvider,
+            object productionProvider = null)
+        {
             Type serviceType = GetRuntimeType("AL.Services.Local.LocalResourceService");
             Type saveType = GetRuntimeType("AL.Core.Interfaces.ISaveGameService");
-            Type providerType = GetRuntimeType("AL.Core.Interfaces.IEconomyProductionContributionProvider");
+            Type gateType = GetRuntimeType(
+                "AL.Services.Local.EconomyWriteAuthorityGate");
+            Type productionType = GetRuntimeType(
+                "AL.Core.Interfaces.IEconomyProductionContributionProvider");
             ConstructorInfo constructor = serviceType.GetConstructor(
                 BindingFlags.Instance | BindingFlags.NonPublic,
                 null,
-                new[] { saveType, typeof(Func<bool>), providerType },
+                new[] { saveType, gateType, productionType },
                 null);
             Assert.NotNull(constructor);
-            return constructor.Invoke(new object[] { save.Proxy, writable ?? new Func<bool>(() => true), productionProvider });
+            return constructor.Invoke(
+                new[]
+                {
+                    save.Proxy,
+                    CreateWriteAuthorityGate(save.Proxy, authorityProvider),
+                    productionProvider
+                });
         }
 
         private static object CreateCreditService(SaveFixture save, Func<bool> writable = null)
         {
-            Type serviceType = GetRuntimeType("AL.Services.Local.LocalWarzoneCreditService");
+            AuthorityProviderFixture authority =
+                CreateBooleanAuthorityProvider(
+                    writable ?? new Func<bool>(() => true));
+            return CreateCreditServiceWithAuthority(save, authority.Proxy);
+        }
+
+        private static object CreateCreditServiceWithAuthority(
+            SaveFixture save,
+            object authorityProvider)
+        {
+            Type serviceType = GetRuntimeType(
+                "AL.Services.Local.LocalWarzoneCreditService");
             Type saveType = GetRuntimeType("AL.Core.Interfaces.ISaveGameService");
+            Type gateType = GetRuntimeType(
+                "AL.Services.Local.EconomyWriteAuthorityGate");
             ConstructorInfo constructor = serviceType.GetConstructor(
                 BindingFlags.Instance | BindingFlags.NonPublic,
                 null,
-                new[] { saveType, typeof(Func<bool>) },
+                new[] { saveType, gateType },
                 null);
             Assert.NotNull(constructor);
-            return constructor.Invoke(new object[] { save.Proxy, writable ?? new Func<bool>(() => true) });
+            return constructor.Invoke(
+                new[]
+                {
+                    save.Proxy,
+                    CreateWriteAuthorityGate(save.Proxy, authorityProvider)
+                });
+        }
+
+        private static object CreateCreditServiceForSaveServiceForTests(
+            object saveService)
+        {
+            Type serviceType = GetRuntimeType(
+                "AL.Services.Local.LocalWarzoneCreditService");
+            Type saveType = GetRuntimeType("AL.Core.Interfaces.ISaveGameService");
+            Type gateType = GetRuntimeType(
+                "AL.Services.Local.EconomyWriteAuthorityGate");
+            ConstructorInfo constructor = serviceType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { saveType, gateType },
+                null);
+            Assert.NotNull(constructor);
+            AuthorityProviderFixture authority =
+                CreateBooleanAuthorityProvider(() => true);
+            return constructor.Invoke(
+                new[]
+                {
+                    saveService,
+                    CreateWriteAuthorityGate(saveService, authority.Proxy)
+                });
+        }
+
+        private static object CreateWriteAuthorityGate(
+            object saveService,
+            object authorityProvider)
+        {
+            Type gateType = GetRuntimeType(
+                "AL.Services.Local.EconomyWriteAuthorityGate");
+            Type saveType = GetRuntimeType("AL.Core.Interfaces.ISaveGameService");
+            Type authorityType = GetRuntimeType(
+                "AL.Core.SaveAuthority.IProfileWriteAuthorityProvider");
+            ConstructorInfo constructor = gateType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { saveType, authorityType },
+                null);
+            Assert.NotNull(constructor);
+            return constructor.Invoke(
+                new[] { saveService, authorityProvider });
+        }
+
+        private static AuthorityProviderFixture
+            CreateBooleanAuthorityProvider(Func<bool> writable)
+        {
+            if (writable == null)
+                throw new ArgumentNullException(nameof(writable));
+
+            object writableSnapshot = CreateAuthoritySnapshot("Writable");
+            object readOnlySnapshot = CreateAuthoritySnapshot("Unavailable");
+            return CreateAuthorityProvider(
+                null,
+                false,
+                () => writable() ? writableSnapshot : readOnlySnapshot);
+        }
+
+        private static AuthorityProviderFixture CreateAuthorityProviderForScenario(
+            string scenario)
+        {
+            switch (scenario)
+            {
+                case "MissingProvider":
+                    return null;
+                case "NullSnapshot":
+                    return CreateAuthorityProvider(null);
+                case "ThrowingProvider":
+                    return CreateAuthorityProvider(null, true);
+                case "InvalidSnapshot":
+                    return CreateAuthorityProvider(CreateInvalidAuthoritySnapshot());
+                default:
+                    return CreateAuthorityProvider(
+                        CreateAuthoritySnapshot(scenario));
+            }
+        }
+
+        private static AuthorityProviderFixture CreateAuthorityProvider(
+            object snapshot,
+            bool throws = false,
+            Func<object> snapshotFactory = null)
+        {
+            Type interfaceType = GetRuntimeType(
+                "AL.Core.SaveAuthority.IProfileWriteAuthorityProvider");
+            object proxy = CreateDispatchProxy(
+                interfaceType,
+                typeof(ScriptedAuthorityProviderProxy));
+            var state = new ScriptedAuthorityProvider
+            {
+                Snapshot = snapshot,
+                Throw = throws,
+                SnapshotFactory = snapshotFactory
+            };
+            ((ScriptedAuthorityProviderProxy)proxy).State = state;
+            return new AuthorityProviderFixture(proxy, state);
+        }
+
+        private static object CreateAuthoritySnapshot(string status)
+        {
+            Type factoryType = GetRuntimeType(
+                "AL.Core.SaveAuthority.ProfileWriteAuthoritySnapshotFactory");
+            Type statusType = GetRuntimeType(
+                "AL.Core.SaveAuthority.ProfileWriteAuthorityStatus");
+            Type sourceType = GetRuntimeType(
+                "AL.Core.SaveAuthority.ProfileAuthoritySourceGeneration");
+            object primary = EnumValue(sourceType, "Primary");
+            var diagnostics = new[] { "AL-SAVE-AUTH-TEST-NONWRITABLE" };
+
+            if (status == "Writable")
+            {
+                MethodInfo writable = factoryType.GetMethod(
+                    "Writable",
+                    BindingFlags.Public | BindingFlags.Static);
+                Assert.NotNull(writable);
+                return writable.Invoke(
+                    null,
+                    new object[]
+                    {
+                        "alp_0123456789abcdef0123456789abcdef",
+                        "0123456789abcdef0000000000000001",
+                        new string('a', 64),
+                        primary,
+                        Array.Empty<string>()
+                    });
+            }
+
+            if (status == "MigrationRequired")
+            {
+                MethodInfo migration = factoryType.GetMethod(
+                    "MigrationRequired",
+                    BindingFlags.Public | BindingFlags.Static);
+                Assert.NotNull(migration);
+                return migration.Invoke(
+                    null,
+                    new object[] { primary, diagnostics });
+            }
+
+            if (status == "Unavailable")
+            {
+                MethodInfo unavailable = factoryType.GetMethod(
+                    "Unavailable",
+                    BindingFlags.Public | BindingFlags.Static);
+                Assert.NotNull(unavailable);
+                return unavailable.Invoke(
+                    null,
+                    new object[] { "AL-SAVE-AUTH-TEST-UNAVAILABLE" });
+            }
+
+            int saveSchemaVersion = 0;
+            int profileInitializationVersion = 0;
+            bool hasSource = false;
+            object selectedSource = EnumValue(sourceType, "None");
+            switch (status)
+            {
+                case "ForwardSchemaReadOnly":
+                    saveSchemaVersion = 3;
+                    profileInitializationVersion = 1;
+                    hasSource = true;
+                    selectedSource = primary;
+                    break;
+                case "DegradedReadOnly":
+                    saveSchemaVersion = 1;
+                    profileInitializationVersion = 1;
+                    hasSource = true;
+                    selectedSource = primary;
+                    break;
+            }
+
+            MethodInfo nonWritable = factoryType.GetMethod(
+                "NonWritable",
+                BindingFlags.Public | BindingFlags.Static);
+            Assert.NotNull(nonWritable);
+            return nonWritable.Invoke(
+                null,
+                new[]
+                {
+                    EnumValue(statusType, status),
+                    (object)saveSchemaVersion,
+                    profileInitializationVersion,
+                    hasSource,
+                    selectedSource,
+                    diagnostics
+                });
+        }
+
+        private static object CreateInvalidAuthoritySnapshot()
+        {
+            Type snapshotType = GetRuntimeType(
+                "AL.Core.SaveAuthority.ProfileWriteAuthoritySnapshot");
+            Type statusType = GetRuntimeType(
+                "AL.Core.SaveAuthority.ProfileWriteAuthorityStatus");
+            Type sourceType = GetRuntimeType(
+                "AL.Core.SaveAuthority.ProfileAuthoritySourceGeneration");
+            ConstructorInfo constructor = snapshotType.GetConstructors(
+                    BindingFlags.Instance | BindingFlags.NonPublic)
+                .Single();
+            return constructor.Invoke(
+                new object[]
+                {
+                    "invalid-contract",
+                    EnumValue(statusType, "Writable"),
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    0,
+                    0,
+                    false,
+                    EnumValue(sourceType, "None"),
+                    new[] { "AL-SAVE-AUTH-TEST-INVALID" }
+                });
         }
 
         private static object CreateThrowingCreditService()
@@ -1884,11 +2531,19 @@ namespace AL.Tests.EditMode
             return constructor.Invoke(new[] { save.Proxy, CreateCreditService(save) });
         }
 
-        private static ProductionProviderFixture CreateProductionProvider(object snapshot, bool throws = false)
+        private static ProductionProviderFixture CreateProductionProvider(
+            object snapshot,
+            bool throws = false,
+            Action onBuild = null)
         {
             Type interfaceType = GetRuntimeType("AL.Core.Interfaces.IEconomyProductionContributionProvider");
             object proxy = CreateDispatchProxy(interfaceType, typeof(ScriptedProductionProviderProxy));
-            var state = new ScriptedProductionProvider { Snapshot = snapshot, Throw = throws };
+            var state = new ScriptedProductionProvider
+            {
+                Snapshot = snapshot,
+                Throw = throws,
+                OnBuild = onBuild
+            };
             ((ScriptedProductionProviderProxy)proxy).State = state;
             return new ProductionProviderFixture(proxy, state);
         }
@@ -2027,12 +2682,88 @@ namespace AL.Tests.EditMode
             return constructor.Invoke(new object[] { root });
         }
 
+        private static void SetObservedAuthoritySource(
+            object saveService,
+            string source)
+        {
+            SetField(saveService, "_hasObservedAuthoritySource", true);
+            SetField(
+                saveService,
+                "_observedAuthoritySource",
+                EnumValue(
+                    GetRuntimeType(
+                        "AL.Core.SaveAuthority.ProfileAuthoritySourceGeneration"),
+                    source));
+        }
+
+        private static void AssertAuthoritySource(
+            object saveService,
+            string expected)
+        {
+            object authority = Invoke(saveService, "GetCurrentAuthority");
+            AssertStatus(authority, "MigrationRequired");
+            Assert.AreEqual(
+                expected,
+                GetProperty(authority, "SelectedSourceGeneration").ToString());
+        }
+
+        private static object InvokePreparedCandidate(
+            object saveService,
+            string chapterId)
+        {
+            Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+            Type preparationType = GetRuntimeType(
+                "AL.Services.Local.SaveCandidateMutationPreparation");
+            Type callbackType = typeof(Func<,>).MakeGenericType(
+                saveType,
+                preparationType);
+            ParameterExpression candidate = Expression.Parameter(
+                saveType,
+                "candidate");
+            MethodInfo prepared = preparationType.GetMethod(
+                "Prepared",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(prepared);
+            Delegate callback = Expression.Lambda(
+                    callbackType,
+                    Expression.Block(
+                        Expression.Assign(
+                            Expression.Field(
+                                candidate,
+                                "CurrentChapterId"),
+                            Expression.Constant(chapterId)),
+                        Expression.Call(prepared)),
+                    candidate)
+                .Compile();
+            Type storeType = GetRuntimeType(
+                "AL.Services.Local.ISaveGameCandidateStore");
+            MethodInfo commit = storeType.GetMethod("TryCommitCandidate");
+            Assert.NotNull(commit);
+            return commit.Invoke(saveService, new object[] { callback });
+        }
+
         private static object CreateRuntimeService(string serviceTypeName, string argumentTypeName, object argument)
         {
             Type serviceType = GetRuntimeType(serviceTypeName);
             ConstructorInfo constructor = serviceType.GetConstructor(new[] { GetRuntimeType(argumentTypeName) });
             Assert.NotNull(constructor);
             return constructor.Invoke(new[] { argument });
+        }
+
+        private static void AssertOnlyPublicSaveConstructor(
+            string serviceTypeName)
+        {
+            Type serviceType = GetRuntimeType(serviceTypeName);
+            ConstructorInfo[] publicConstructors = serviceType.GetConstructors(
+                BindingFlags.Instance | BindingFlags.Public);
+            Assert.AreEqual(1, publicConstructors.Length, serviceTypeName);
+            ParameterInfo[] parameters =
+                publicConstructors[0].GetParameters();
+            Assert.AreEqual(1, parameters.Length, serviceTypeName);
+            Assert.AreEqual(
+                GetRuntimeType("AL.Core.Interfaces.ISaveGameService"),
+                parameters[0].ParameterType,
+                serviceTypeName);
         }
 
         private static object CreateBossLootService(object saveService) =>
@@ -2138,6 +2869,19 @@ namespace AL.Tests.EditMode
             return property.GetValue(target);
         }
 
+        private static void SetProperty(
+            object target,
+            string name,
+            object value)
+        {
+            PropertyInfo property = target.GetType().GetProperty(
+                name,
+                BindingFlags.Instance | BindingFlags.Public |
+                BindingFlags.NonPublic);
+            Assert.NotNull(property, $"Expected property {name}.");
+            property.SetValue(target, value);
+        }
+
         private static object GetField(object target, string name)
         {
             FieldInfo field = target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
@@ -2200,6 +2944,20 @@ namespace AL.Tests.EditMode
 
             public object Proxy { get; }
             public ScriptedProductionProvider State { get; }
+        }
+
+        private sealed class AuthorityProviderFixture
+        {
+            public AuthorityProviderFixture(
+                object proxy,
+                ScriptedAuthorityProvider state)
+            {
+                Proxy = proxy;
+                State = state;
+            }
+
+            public object Proxy { get; }
+            public ScriptedAuthorityProvider State { get; }
         }
 
         private sealed class NotificationFixture
@@ -2318,6 +3076,40 @@ namespace AL.Tests.EditMode
             }
         }
 
+        public class ScriptedAuthorityProviderProxy : DispatchProxy
+        {
+            public ScriptedAuthorityProvider State { get; set; }
+
+            protected override object Invoke(MethodInfo targetMethod, object[] args) =>
+                State.Invoke(targetMethod);
+        }
+
+        public sealed class ScriptedAuthorityProvider
+        {
+            public object Snapshot;
+            public Func<object> SnapshotFactory;
+            public bool Throw;
+            public int CallCount;
+
+            public object Invoke(MethodInfo method)
+            {
+                if (method.Name != "GetCurrentAuthority")
+                {
+                    throw new NotSupportedException(method.Name);
+                }
+
+                CallCount++;
+                if (Throw)
+                {
+                    throw new InvalidOperationException("authority provider");
+                }
+
+                return SnapshotFactory == null
+                    ? Snapshot
+                    : SnapshotFactory();
+            }
+        }
+
         public class ThrowingCreditServiceProxy : DispatchProxy
         {
             protected override object Invoke(MethodInfo targetMethod, object[] args)
@@ -2377,6 +3169,7 @@ namespace AL.Tests.EditMode
         public sealed class ScriptedProductionProvider
         {
             public object Snapshot;
+            public Action OnBuild;
             public bool Throw;
             public int CallCount;
             public double LastDeltaSeconds;
@@ -2395,6 +3188,7 @@ namespace AL.Tests.EditMode
                     throw new InvalidOperationException("provider");
                 }
 
+                OnBuild?.Invoke();
                 return Snapshot;
             }
         }

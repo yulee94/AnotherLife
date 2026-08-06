@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Definitions;
 using AL.Data.Runtime;
 using AL.Services.Local;
@@ -336,12 +338,110 @@ namespace AL.Tests.EditMode
                     });
             }
 
-            var resources = new LocalResourceService(save);
-            var buildings = new LocalBuildingService(
-                save,
-                resources,
-                new LocalGameDataService());
+            LocalResourceService resources =
+                CreateWritableResourceServiceForTests(save);
+            LocalBuildingService buildings =
+                CreateWritableBuildingServiceForTests(
+                    save,
+                    resources,
+                    new LocalGameDataService());
             return new Fixture(save, buildings);
+        }
+
+        private static LocalBuildingService
+            CreateWritableBuildingServiceForTests(
+                ISaveGameService save,
+                IResourceService resources,
+                IGameDataService gameData)
+        {
+            Type gateType = typeof(LocalResourceService).Assembly.GetType(
+                "AL.Services.Local.EconomyWriteAuthorityGate",
+                true);
+            ConstructorInfo constructor = typeof(LocalBuildingService)
+                .GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[]
+                    {
+                        typeof(ISaveGameService),
+                        typeof(IResourceService),
+                        typeof(IGameDataService),
+                        gateType
+                    },
+                    null);
+            Assert.That(constructor, Is.Not.Null);
+            return (LocalBuildingService)constructor.Invoke(
+                new[]
+                {
+                    save,
+                    resources,
+                    gameData,
+                    CreateWritableGateForTests(save)
+                });
+        }
+
+        private static LocalResourceService
+            CreateWritableResourceServiceForTests(ISaveGameService save)
+        {
+            Type gateType = typeof(LocalResourceService).Assembly.GetType(
+                "AL.Services.Local.EconomyWriteAuthorityGate",
+                true);
+            ConstructorInfo constructor = typeof(LocalResourceService)
+                .GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    null,
+                    new[]
+                    {
+                        typeof(ISaveGameService),
+                        gateType,
+                        typeof(IEconomyProductionContributionProvider)
+                    },
+                    null);
+            Assert.That(constructor, Is.Not.Null);
+            return (LocalResourceService)constructor.Invoke(
+                new object[]
+                {
+                    save,
+                    CreateWritableGateForTests(save),
+                    null
+                });
+        }
+
+        private static object CreateWritableGateForTests(
+            ISaveGameService save)
+        {
+            Type gateType = typeof(LocalResourceService).Assembly.GetType(
+                "AL.Services.Local.EconomyWriteAuthorityGate",
+                true);
+            ConstructorInfo constructor = gateType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[]
+                {
+                    typeof(ISaveGameService),
+                    typeof(IProfileWriteAuthorityProvider)
+                },
+                null);
+            Assert.That(constructor, Is.Not.Null);
+            return constructor.Invoke(
+                new object[] { save, new WritableAuthorityProvider() });
+        }
+
+        private sealed class WritableAuthorityProvider :
+            IProfileWriteAuthorityProvider
+        {
+            private static readonly ProfileWriteAuthoritySnapshot Snapshot =
+                ProfileWriteAuthoritySnapshotFactory.Writable(
+                    "alp_0123456789abcdef0123456789abcdef",
+                    "0123456789abcdef0000000000000001",
+                    new string(
+                        'a',
+                        SaveAuthorityTechnicalLimits.Sha256Characters),
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>());
+
+            public ProfileWriteAuthoritySnapshot GetCurrentAuthority() =>
+                Snapshot;
         }
 
         private static void AssertProfile(

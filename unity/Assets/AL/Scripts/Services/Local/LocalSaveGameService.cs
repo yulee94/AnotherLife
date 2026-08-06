@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Catalogs;
 using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
@@ -205,11 +206,12 @@ namespace AL.Services.Local
         }
     }
 
-    public class LocalSaveGameService :
+    public sealed class LocalSaveGameService :
         ISaveGameService,
         ISaveLoadDispositionProvider,
         ISaveOperationDispositionProvider,
-        ISaveGameCandidateStore
+        ISaveGameCandidateStore,
+        IProfileWriteAuthorityProvider
     {
         private const string SaveFileName = "save.json";
         private const string BackupFileName = "save.backup.json";
@@ -222,6 +224,74 @@ namespace AL.Services.Local
         private const int MaxStageFiveQuarantineMarkers = 16;
         private const int Sha256Base64UrlLength = 43;
         private const int TransactionIdBase64UrlLength = 22;
+        private const string AuthorityLegacyMigrationCode =
+            "AL-SAVE-AUTH-LEGACY-MIGRATION-REQUIRED";
+        private const string AuthorityForwardSchemaCode =
+            "AL-SAVE-AUTH-FORWARD-SCHEMA-READ-ONLY";
+        private const string AuthorityDegradedCode =
+            "AL-SAVE-AUTH-DEGRADED-READ-ONLY";
+        private const string AuthorityRecoveryCode =
+            "AL-SAVE-AUTH-RECOVERY-REQUIRED";
+        private const string AuthorityDeletedCode =
+            "AL-SAVE-AUTH-DELETED";
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            MigrationRequiredPrimary =
+                ProfileWriteAuthoritySnapshotFactory.MigrationRequired(
+                    ProfileAuthoritySourceGeneration.Primary,
+                    new[] { AuthorityLegacyMigrationCode });
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            MigrationRequiredBackup =
+                ProfileWriteAuthoritySnapshotFactory.MigrationRequired(
+                    ProfileAuthoritySourceGeneration.Backup,
+                    new[] { AuthorityLegacyMigrationCode });
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            MigrationRequiredPrevious =
+                ProfileWriteAuthoritySnapshotFactory.MigrationRequired(
+                    ProfileAuthoritySourceGeneration.Previous,
+                    new[] { AuthorityLegacyMigrationCode });
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            MigrationRequiredTemp =
+                ProfileWriteAuthoritySnapshotFactory.MigrationRequired(
+                    ProfileAuthoritySourceGeneration.Temp,
+                    new[] { AuthorityLegacyMigrationCode });
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            RecoveryRequiredAuthority =
+                ProfileWriteAuthoritySnapshotFactory.NonWritable(
+                    ProfileWriteAuthorityStatus.RecoveryRequired,
+                    0,
+                    0,
+                    false,
+                    ProfileAuthoritySourceGeneration.None,
+                    new[] { AuthorityRecoveryCode });
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            CommitUncertainAuthority =
+                ProfileWriteAuthoritySnapshotFactory.NonWritable(
+                    ProfileWriteAuthorityStatus.CommitUncertain,
+                    0,
+                    0,
+                    false,
+                    ProfileAuthoritySourceGeneration.None,
+                    new[] { SaveAuthorityDiagnosticCodes.CommitUncertain });
+
+        private static readonly ProfileWriteAuthoritySnapshot DeletedAuthority =
+            ProfileWriteAuthoritySnapshotFactory.NonWritable(
+                ProfileWriteAuthorityStatus.Deleted,
+                0,
+                0,
+                false,
+                ProfileAuthoritySourceGeneration.None,
+                new[] { AuthorityDeletedCode });
+
+        private static readonly ProfileWriteAuthoritySnapshot
+            UnavailableAuthority =
+                ProfileWriteAuthoritySnapshotFactory.Unavailable(
+                    SaveAuthorityDiagnosticCodes.ProviderInvariants);
 
         private enum InvalidPrimaryRecoveryStage
         {
@@ -330,6 +400,20 @@ namespace AL.Services.Local
         private string _committedInvalidPrimaryQuarantinePath;
         private byte[] _committedInvalidPrimaryRecoveryMarkerBytes;
         private string _committedInvalidPrimaryRecoveryMarkerPath;
+        private bool _profileDeleted;
+        private bool _hasObservedAuthoritySource;
+        private ProfileAuthoritySourceGeneration _observedAuthoritySource;
+        private int _observedAuthoritySaveSchemaVersion;
+        private int _observedAuthorityProfileInitializationVersion;
+        private ProfileWriteAuthoritySnapshot
+            _cachedObservedNonWritableAuthority;
+        private ProfileWriteAuthorityStatus
+            _cachedObservedNonWritableStatus;
+        private ProfileAuthoritySourceGeneration
+            _cachedObservedNonWritableSource;
+        private int _cachedObservedNonWritableSaveSchemaVersion;
+        private int
+            _cachedObservedNonWritableProfileInitializationVersion;
 
         public SaveGameData CurrentSave => _currentSave;
         public SaveLoadStatus LastLoadStatus { get; private set; }
@@ -342,6 +426,107 @@ namespace AL.Services.Local
         public string LastPersistenceMessage => string.IsNullOrWhiteSpace(LastSaveMessage)
             ? LastLoadMessage
             : LastSaveMessage;
+
+        public ProfileWriteAuthoritySnapshot GetCurrentAuthority()
+        {
+            try
+            {
+                if (_profileDeleted)
+                {
+                    return DeletedAuthority;
+                }
+
+                if (LastSaveStatus == SaveOperationStatus.CommitUncertain)
+                {
+                    return CommitUncertainAuthority;
+                }
+
+                if (LastSaveStatus == SaveOperationStatus.DeleteFailed ||
+                    LastLoadStatus == SaveLoadStatus.RecoveryFailed ||
+                    LastLoadStatus == SaveLoadStatus.RecoveryRequired)
+                {
+                    return RecoveryRequiredAuthority;
+                }
+
+                if (!TryGetObservedAuthoritySource(
+                        out ProfileAuthoritySourceGeneration source))
+                {
+                    return UnavailableAuthority;
+                }
+
+                GetObservedAuthorityVersions(
+                    out int saveSchemaVersion,
+                    out int profileInitializationVersion);
+
+                if (LastLoadStatus ==
+                    SaveLoadStatus.LoadedForwardSchemaReadOnly)
+                {
+                    if (saveSchemaVersion >
+                            SaveAuthorityTechnicalLimits
+                                .IdentityAwareSaveSchemaVersion ||
+                        saveSchemaVersion ==
+                            SaveAuthorityTechnicalLimits
+                                .IdentityAwareSaveSchemaVersion &&
+                        profileInitializationVersion >
+                            SaveAuthorityTechnicalLimits
+                                .IdentityAwareProfileInitializationVersion)
+                    {
+                        return GetOrCreateObservedNonWritableAuthority(
+                            ProfileWriteAuthorityStatus
+                                .ForwardSchemaReadOnly,
+                            saveSchemaVersion,
+                            profileInitializationVersion,
+                            source);
+                    }
+
+                    return GetOrCreateDegradedAuthority(
+                        saveSchemaVersion,
+                        profileInitializationVersion,
+                        source);
+                }
+
+                if (LastLoadStatus == SaveLoadStatus.LoadedPrimaryDegraded)
+                {
+                    return GetOrCreateDegradedAuthority(
+                        saveSchemaVersion,
+                        profileInitializationVersion,
+                        source);
+                }
+
+                bool legacyCompatibilityView =
+                    LastLoadStatus == SaveLoadStatus.LoadedPrimaryNormalized ||
+                    LastLoadStatus ==
+                        SaveLoadStatus.LoadedPrimaryWithPreservedUnknown;
+                if (LastSaveStatus ==
+                        SaveOperationStatus.SaveFailedPreviousPreserved ||
+                    !_profileWritable && !legacyCompatibilityView ||
+                    _currentSave == null && !legacyCompatibilityView)
+                {
+                    return GetOrCreateDegradedAuthority(
+                        saveSchemaVersion,
+                        profileInitializationVersion,
+                        source);
+                }
+
+                if (saveSchemaVersion ==
+                        SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                    profileInitializationVersion ==
+                        SaveAuthorityTechnicalLimits
+                            .LegacyProfileInitializationVersion)
+                {
+                    return MigrationRequiredFor(source);
+                }
+
+                return GetOrCreateDegradedAuthority(
+                    saveSchemaVersion,
+                    profileInitializationVersion,
+                    source);
+            }
+            catch
+            {
+                return UnavailableAuthority;
+            }
+        }
 
         public LocalSaveGameService() : this(null)
         {
@@ -365,6 +550,166 @@ namespace AL.Services.Local
             _persistencePathOverride = persistencePathOverride;
             _fileOperations = fileOperations ?? throw new ArgumentNullException(nameof(fileOperations));
             _semanticPolicy = semanticPolicy ?? throw new ArgumentNullException(nameof(semanticPolicy));
+        }
+
+        private bool TryGetObservedAuthoritySource(
+            out ProfileAuthoritySourceGeneration source)
+        {
+            if (_hasObservedAuthoritySource)
+            {
+                source = _observedAuthoritySource;
+                return source != ProfileAuthoritySourceGeneration.None;
+            }
+
+            if (_currentSave != null)
+            {
+                source = ProfileAuthoritySourceGeneration.Primary;
+                return true;
+            }
+
+            source = ProfileAuthoritySourceGeneration.None;
+            return false;
+        }
+
+        private void GetObservedAuthorityVersions(
+            out int saveSchemaVersion,
+            out int profileInitializationVersion)
+        {
+            SaveGameData observed = _currentSave ?? _readOnlyCandidate;
+            if (observed != null)
+            {
+                saveSchemaVersion = observed.SaveSchemaVersion;
+                profileInitializationVersion =
+                    observed.ProfileInitializationVersion;
+                return;
+            }
+
+            saveSchemaVersion = _observedAuthoritySaveSchemaVersion;
+            profileInitializationVersion =
+                _observedAuthorityProfileInitializationVersion;
+        }
+
+        private static ProfileWriteAuthoritySnapshot MigrationRequiredFor(
+            ProfileAuthoritySourceGeneration source)
+        {
+            switch (source)
+            {
+                case ProfileAuthoritySourceGeneration.Primary:
+                    return MigrationRequiredPrimary;
+                case ProfileAuthoritySourceGeneration.Backup:
+                    return MigrationRequiredBackup;
+                case ProfileAuthoritySourceGeneration.Previous:
+                    return MigrationRequiredPrevious;
+                case ProfileAuthoritySourceGeneration.Temp:
+                    return MigrationRequiredTemp;
+                default:
+                    return UnavailableAuthority;
+            }
+        }
+
+        private ProfileWriteAuthoritySnapshot GetOrCreateDegradedAuthority(
+            int saveSchemaVersion,
+            int profileInitializationVersion,
+            ProfileAuthoritySourceGeneration source)
+        {
+            if (saveSchemaVersion <= 0 ||
+                profileInitializationVersion <= 0 ||
+                source == ProfileAuthoritySourceGeneration.None)
+            {
+                return UnavailableAuthority;
+            }
+
+            return GetOrCreateObservedNonWritableAuthority(
+                ProfileWriteAuthorityStatus.DegradedReadOnly,
+                saveSchemaVersion,
+                profileInitializationVersion,
+                source);
+        }
+
+        private ProfileWriteAuthoritySnapshot
+            GetOrCreateObservedNonWritableAuthority(
+                ProfileWriteAuthorityStatus status,
+                int saveSchemaVersion,
+                int profileInitializationVersion,
+                ProfileAuthoritySourceGeneration source)
+        {
+            if (_cachedObservedNonWritableAuthority != null &&
+                _cachedObservedNonWritableStatus == status &&
+                _cachedObservedNonWritableSaveSchemaVersion ==
+                    saveSchemaVersion &&
+                _cachedObservedNonWritableProfileInitializationVersion ==
+                    profileInitializationVersion &&
+                _cachedObservedNonWritableSource == source)
+            {
+                return _cachedObservedNonWritableAuthority;
+            }
+
+            string diagnosticCode;
+            switch (status)
+            {
+                case ProfileWriteAuthorityStatus.ForwardSchemaReadOnly:
+                    diagnosticCode = AuthorityForwardSchemaCode;
+                    break;
+                case ProfileWriteAuthorityStatus.DegradedReadOnly:
+                    diagnosticCode = AuthorityDegradedCode;
+                    break;
+                default:
+                    return UnavailableAuthority;
+            }
+
+            ProfileWriteAuthoritySnapshot created =
+                ProfileWriteAuthoritySnapshotFactory.NonWritable(
+                    status,
+                    saveSchemaVersion,
+                    profileInitializationVersion,
+                    true,
+                    source,
+                    new[] { diagnosticCode });
+            _cachedObservedNonWritableAuthority = created;
+            _cachedObservedNonWritableStatus = status;
+            _cachedObservedNonWritableSaveSchemaVersion =
+                saveSchemaVersion;
+            _cachedObservedNonWritableProfileInitializationVersion =
+                profileInitializationVersion;
+            _cachedObservedNonWritableSource = source;
+            return created;
+        }
+
+        private void ResetObservedNonWritableAuthorityCache()
+        {
+            _cachedObservedNonWritableAuthority = null;
+            _cachedObservedNonWritableStatus = default;
+            _cachedObservedNonWritableSource =
+                ProfileAuthoritySourceGeneration.None;
+            _cachedObservedNonWritableSaveSchemaVersion = 0;
+            _cachedObservedNonWritableProfileInitializationVersion = 0;
+        }
+
+        private void ResetObservedAuthority()
+        {
+            ResetObservedNonWritableAuthorityCache();
+            _hasObservedAuthoritySource = false;
+            _observedAuthoritySource =
+                ProfileAuthoritySourceGeneration.None;
+            _observedAuthoritySaveSchemaVersion = 0;
+            _observedAuthorityProfileInitializationVersion = 0;
+        }
+
+        private void ObservePrimaryAuthority(SaveGameData save)
+        {
+            ResetObservedNonWritableAuthorityCache();
+            if (save == null)
+            {
+                ResetObservedAuthority();
+                return;
+            }
+
+            _hasObservedAuthoritySource = true;
+            _observedAuthoritySource =
+                ProfileAuthoritySourceGeneration.Primary;
+            _observedAuthoritySaveSchemaVersion = save.SaveSchemaVersion;
+            _observedAuthorityProfileInitializationVersion =
+                save.ProfileInitializationVersion;
         }
 
         public void Save()
@@ -438,6 +783,7 @@ namespace AL.Services.Local
             if (status == SaveOperationStatus.SavedPrimary)
             {
                 _currentSave = persistedSave;
+                ObservePrimaryAuthority(persistedSave);
                 _readOnlyCandidate = null;
                 _profileWritable = true;
                 _committedRecoveryWitnessBytes = null;
@@ -618,6 +964,7 @@ namespace AL.Services.Local
             if (status == SaveOperationStatus.SavedPrimary)
             {
                 _currentSave = persistedSave;
+                ObservePrimaryAuthority(persistedSave);
                 _readOnlyCandidate = null;
                 _profileWritable = true;
                 _committedRecoveryWitnessBytes = null;
@@ -709,6 +1056,8 @@ namespace AL.Services.Local
         public void Load()
         {
             SaveGameData priorSave = _currentSave;
+            _profileDeleted = false;
+            ResetObservedAuthority();
             _readOnlyCandidate = null;
             _profileWritable = false;
             _committedRecoveryWitnessBytes = null;
@@ -1129,6 +1478,8 @@ namespace AL.Services.Local
 
         public void CreateNewSave(RealmId realmId)
         {
+            _profileDeleted = false;
+            ResetObservedAuthority();
             _currentSave = CreateDefaultSave(realmId);
             _readOnlyCandidate = null;
             _profileWritable = true;
@@ -1137,12 +1488,18 @@ namespace AL.Services.Local
             _committedInvalidPrimaryQuarantinePath = null;
             _committedInvalidPrimaryRecoveryMarkerBytes = null;
             _committedInvalidPrimaryRecoveryMarkerPath = null;
+            LastLoadStatus = SaveLoadStatus.None;
+            LastLoadMessage = string.Empty;
             LastLoadDisposition = null;
+            LastSaveStatus = SaveOperationStatus.None;
+            LastSaveMessage = string.Empty;
+            LastSaveDisposition = null;
             Save();
         }
 
         public void DeleteSave()
         {
+            _profileDeleted = false;
             var deletionTargets = new List<string>
             {
                 SavePath,
@@ -1181,6 +1538,8 @@ namespace AL.Services.Local
             _currentSave = null;
             _readOnlyCandidate = null;
             _profileWritable = false;
+            _profileDeleted = true;
+            ResetObservedAuthority();
             _committedRecoveryWitnessBytes = null;
             _committedInvalidPrimaryWitnessBytes = null;
             _committedInvalidPrimaryQuarantinePath = null;
@@ -4000,6 +4359,21 @@ namespace AL.Services.Local
                     : selected == null
                         ? SaveCandidateSourceGeneration.Unknown
                         : selected.SourceGeneration;
+            if (TryMapAuthoritySource(
+                    selectedSource,
+                    out ProfileAuthoritySourceGeneration authoritySource))
+            {
+                _hasObservedAuthoritySource = true;
+                _observedAuthoritySource = authoritySource;
+                SaveGameData observed = _currentSave ?? _readOnlyCandidate;
+                _observedAuthoritySaveSchemaVersion = selected != null
+                    ? selected.SaveSchemaVersion
+                    : observed?.SaveSchemaVersion ?? 0;
+                _observedAuthorityProfileInitializationVersion =
+                    selected != null
+                        ? selected.ProfileInitializationVersion
+                        : observed?.ProfileInitializationVersion ?? 0;
+            }
             LastLoadDisposition = new SaveLoadDisposition(
                 summaries,
                 selectedSource,
@@ -4009,6 +4383,30 @@ namespace AL.Services.Local
                 offlineProgressApplied: false,
                 diskChanged: diskChanged,
                 rawEvidencePreserved: true);
+        }
+
+        private static bool TryMapAuthoritySource(
+            SaveCandidateSourceGeneration source,
+            out ProfileAuthoritySourceGeneration mapped)
+        {
+            switch (source)
+            {
+                case SaveCandidateSourceGeneration.Primary:
+                    mapped = ProfileAuthoritySourceGeneration.Primary;
+                    return true;
+                case SaveCandidateSourceGeneration.Backup:
+                    mapped = ProfileAuthoritySourceGeneration.Backup;
+                    return true;
+                case SaveCandidateSourceGeneration.Previous:
+                    mapped = ProfileAuthoritySourceGeneration.Previous;
+                    return true;
+                case SaveCandidateSourceGeneration.Temp:
+                    mapped = ProfileAuthoritySourceGeneration.Temp;
+                    return true;
+                default:
+                    mapped = ProfileAuthoritySourceGeneration.None;
+                    return false;
+            }
         }
 
         private static bool TryDeserializeSelectedCandidate(
@@ -4407,6 +4805,7 @@ namespace AL.Services.Local
 
         private void SetLoadStatus(SaveLoadStatus status, string message, bool error)
         {
+            ResetObservedNonWritableAuthorityCache();
             LastLoadStatus = status;
             LastLoadMessage = message;
 
@@ -4428,6 +4827,7 @@ namespace AL.Services.Local
 
         private void SetSaveStatus(SaveOperationStatus status, string message, bool error)
         {
+            ResetObservedNonWritableAuthorityCache();
             LastSaveStatus = status;
             LastSaveMessage = message;
 
