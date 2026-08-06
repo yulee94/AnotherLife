@@ -32,14 +32,90 @@ is present.
 
 ## Packaging Model
 
-The Android project remains buildable without a checked-in Unity export. A production build that embeds Unity must add the exported Unity Android library to the Gradle project so `com.unity3d.player.UnityPlayer` is available at runtime.
+The selected intermediate packaging shape is Unity's generated `unityLibrary`
+Gradle module. An AAR is not the current source of truth. The export is a
+disposable build product and is never committed. The Android project remains
+buildable without it, and its existing `settings.gradle.kts`, app module, and
+dependency graph are not changed by the exporter.
 
-Supported packaging options:
+`AL.EditorTools.AndroidUnityLibraryExporter.ExportDevelopmentArm64Il2Cpp`
+defines the reproducible export boundary. Run it only from exact Unity
+`2022.3.62f3` with Android Build Support and the Android target already active:
 
-- Add a Unity-exported `unityLibrary` Gradle module and include it from `settings.gradle.kts`.
-- Add a Unity-generated Android archive and native libraries through the app module.
+```powershell
+& "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe" `
+  -batchmode -nographics -quit `
+  -projectPath "<AnotherLife-worktree>\unity" `
+  -buildTarget Android `
+  -executeMethod AL.EditorTools.AndroidUnityLibraryExporter.ExportDevelopmentArm64Il2Cpp `
+  -logFile "<AnotherLife-worktree>\unity\Logs\AndroidUnityLibraryExport.log"
+```
 
-The bridge intentionally uses reflection so regular Android CI can keep compiling before the Unity export is committed. Runtime availability is determined by loading `com.unity3d.player.UnityPlayer`.
+The command is fail-closed before mutation unless the production shell scene
+validator passes and both generated destinations are the exact ignored,
+untracked, non-reparse paths below:
+
+- export: `unity/Builds/AndroidExport`;
+- deterministic result summary:
+  `unity/Logs/AndroidUnityLibraryExportSummary.json`.
+
+The tool snapshots Android Player/build settings, temporarily selects IL2CPP,
+ARM64 only, minimum API 24, Gradle-project export, development build, and the
+three ordered ShellFoundation scenes, then restores every captured setting in
+a `finally` path. Restoration is not accepted until all five settings are
+recaptured and match the original snapshot exactly. Cleanup is restricted to
+the exact export directory and currently requires Windows no-follow handle
+attestation. It boundedly opens and retains at most 8,192 regular-file and 8,192
+regular-directory DELETE-capable handles with share-delete denied, rejects
+reparse, duplicate case-normalized path, and duplicate filesystem identities,
+then marks files through those exact handles and marks directories bottom-up
+with the root last. Handles are closed only after disposition; a new descendant
+makes its parent nonempty and fails closed. There is no dispose-then-path-delete
+window, recursive traversal primitive, or path-based deletion fallback. After
+creation, the output directory is re-attested by no-follow identity; that exact
+identity is checked again and held under a mutation lease across build and
+inspection. A successful result additionally
+requires a successful exact-target `BuildReport`, no build errors, no ABI other
+than `arm64-v8a`, and the expected Gradle root, `unityLibrary` manifest,
+`unity-classes.jar`, ProGuard rules, player data, Unity native libraries, and
+the staged IL2CPP source/toolchain under `Il2CppOutputProject`. Required
+artifacts must be nonempty; the JAR, exported ELF libraries, manifest, module
+inclusion, library plugin, generated minimum API 24 shape, and Gradle's explicit
+deferred `libil2cpp.so` generation receive bounded structural checks. The
+current-host IL2CPP tool is exact: Windows requires a credible PE `il2cpp.exe`;
+Linux requires executable extensionless ELF; macOS requires executable
+extensionless Mach-O/fat format. A wrong-host alternative or corrupt header
+fails closed. The Linux/macOS format rules are retained as pure future-host
+policy, but export and artifact inspection currently fail before any mutation
+or summary write on those hosts. Unity's pathname-only `BuildPipeline` cannot
+be bound to a Unix directory descriptor, and an open descriptor cannot prevent
+a swap-write-restore rename race. Windows Editor is therefore the only current
+execution host, using no-follow handles and share-deny-delete directory leases.
+Inventory traversal rejects every reparse entry before descent
+and is bounded to 8,192 files, 8,192 directories, and 2 GiB. Each file is opened
+once with the strongest available no-follow/share guard; its length, cumulative
+byte accounting, SHA-256, and structural prefix all come from that same stable
+handle/stream, with an extra-byte EOF probe and identity/length drift rejection.
+
+Summary writing repeats the exact ignored/untracked/non-reparse guard after
+creating its parent and immediately before temporary-file creation and atomic
+commit. The parent no-follow identity is retained across the write; both the
+temporary entry and any existing destination must be regular entries in that
+same directory.
+
+Unity's Gradle-project export does not itself place `libil2cpp.so` under
+`jniLibs`. It stages generated C++ and the IL2CPP toolchain, while the exported
+`unityLibrary/build.gradle` compiles that native library during a later Gradle
+assemble/package task. The exporter therefore proves the staged IL2CPP inputs
+and generation declaration, not a packaged native library or AAR. Native Gradle
+assembly must separately prove the resulting `libil2cpp.so` before integration.
+
+The generated launcher is not an application authority and must not be copied
+into source. Native Gradle inclusion, Unity/Android Gradle-plugin compatibility,
+packaging into the app, and device execution remain later #135 work. The bridge
+continues to use reflection so ordinary Android CI compiles before that
+integration; runtime availability remains determined by loading
+`com.unity3d.player.UnityPlayer`.
 
 ## Lifecycle Ownership
 
@@ -364,10 +440,40 @@ Required checks for bridge changes:
 - Android unit tests: `:app:testDebugUnitTest`
 - Android instrumentation: off-main callback delivery and disposed-host rejection
 - Android debug/release assembly and lint
+- Focused Unity EditMode exporter contract tests, including every preflight
+  rejection, exact-path cleanup, settings restoration, artifact drift, and
+  deterministic summary behavior
+- One authorized batch export with the exact command/profile above; retain the
+  ignored summary and log as local evidence and do not stage generated output
+- The export-stage check proves nonempty bounded IL2CPP generated source and
+  toolchain inputs plus the Gradle declaration that later produces
+  `libil2cpp.so`; it does not claim Gradle native compilation or AAR packaging
 - Device smoke test with a Unity export packaged into the app
 - Route startup test from Android to Unity
 - Outcome callback test from Unity to Android
 - Back, home, pause, resume, and destroy lifecycle test
+
+### Retained export evidence — 2026-08-06
+
+The guarded command above completed on Unity `2022.3.62f3` with status
+`Succeeded`, Android target, IL2CPP, ARM64 only, minimum API 24, and the ordered
+Boot, RealmSelection, and Kingdom scenes. The exact ignored export contained
+2,699 files / 436,882,793 bytes with deterministically computed inventory SHA-256
+`075141b8fb4a2f4fb459e8d717b5765f6e1b701bdf410142b1ab0f36ca1abd89`;
+the corrected contract's `BuildReport` recorded zero errors and zero warnings
+in `00:00:39.0483549`. The run began with the prior retained 2,699-file,
+225-descendant-directory export at the same total byte count, so successful
+recreation also exercised the bounded retained-handle cleanup against a
+representative generated tree before rebuild and inspection. The bounded staged
+`Il2CppOutputProject` contained 2,327 files / 386,572,461 bytes, one nonempty
+host-valid PE `il2cpp.exe` tool, generated registration/API source, and the Gradle
+declaration that later writes `jniLibs/arm64-v8a/libil2cpp.so`. Exported native
+ABI directories were exactly `arm64-v8a`; nonempty `libmain.so` and
+`libunity.so` passed ELF-signature checks.
+
+This evidence proves the export stage only. No exported Gradle assemble task,
+final `libil2cpp.so`, AAR, Android-app inclusion, installed-size delta, or
+device execution was produced or claimed.
 
 Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, duplicate request/outcome members, nullable Java/JNI boundary rejection, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
 
@@ -448,15 +554,21 @@ unperformed packaged/device round trip.
   and installed-size deltas remain build-dependent measurements.
 - No external binary, asset, AAR, package, assembly definition, or dependency
   is added.
-- Player build size, installed size, runtime-memory/startup allocation,
-  IL2CPP/linker behavior, Android package export, profiler measurements,
+- The Editor-only exporter and EditMode fixtures add no Player runtime code,
+  per-frame work, or install payload. A real ignored export temporarily consumes
+  bounded local disk and build CPU/RAM; its exact duration, peak memory, and
+  generated bytes must be measured by the authorized batch run.
+- Player build size, installed size, runtime-memory/startup allocation, final
+  Gradle IL2CPP native compilation/linker behavior, Android package assembly,
+  AAR output, profiler measurements,
   physical-device startup/frame pacing/thermal behavior, and low-end device
   compatibility remain unperformed.
 
 Still blocked for #135 completion:
 
 - production registration/wiring of the receiver and sender;
-- reproducible `unityLibrary`/AAR packaging;
+- successful exact-profile `unityLibrary` generation on the integration
+  baseline, followed by native Gradle inclusion and compatibility proof;
 - unknown-route end-to-end unavailable behavior;
 - packaged back/home/app-switch, rotation/recreation, multi-window, process-death/runtime-loss,
   audio/input/keyboard/controller, focus, low-memory, and repeated-launch lifecycle proof;
