@@ -6,8 +6,10 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Win32.SafeHandles;
 using AL.Core.Scenes;
 using UnityEditor;
 using UnityEditor.Build;
@@ -51,14 +53,11 @@ namespace AL.EditorTools
             "unityLibrary/src/main/jniLibs/arm64-v8a/libunity.so"
         };
 
-        private static readonly string[] RequiredIl2CppToolPaths =
-        {
-            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp",
-            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe"
-        };
-
-        private const string MissingIl2CppToolDescription =
-            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp(.exe)";
+        private const string Il2CppToolDirectory =
+            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/";
+        private const string WindowsIl2CppToolPath = Il2CppToolDirectory + "il2cpp.exe";
+        private const string UnixIl2CppToolPath = Il2CppToolDirectory + "il2cpp";
+        private const int ArtifactReadBufferBytes = 64 * 1024;
 
         /// <summary>Unity -executeMethod entry. A rejected export intentionally exits non-zero.</summary>
         public static void ExportDevelopmentArm64Il2Cpp()
@@ -84,6 +83,7 @@ namespace AL.EditorTools
             string projectRoot;
             string outputDirectory;
             string summaryPath;
+            string outputIdentity;
             try
             {
                 projectRoot = NormalizeFullPath(environment.ProjectRoot);
@@ -106,6 +106,26 @@ namespace AL.EditorTools
                     startedAtUtc,
                     SafeUtcNow(environment),
                     "Project/output path resolution failed: " + exception.GetType().Name + ".");
+            }
+
+            if (!environment.IsStrongPathAttestationSupported)
+            {
+                // BuildPipeline accepts only a pathname. On Unix, an open directory descriptor
+                // does not deny rename/unlink, so a swap-write-restore race cannot be excluded.
+                // Do not write even the summary until a capability-relative or namespace-locked
+                // export boundary exists for that host.
+                return AndroidUnityLibraryExportSummary.PreflightFailure(
+                    outputDirectory,
+                    BuildTarget.Android.ToString(),
+                    ProductionSceneDescriptor.ShellFoundationOrdered
+                        .Where(record => record != null)
+                        .Select(record => record.AssetPath ?? string.Empty)
+                        .ToArray(),
+                    environment.UnityVersion,
+                    startedAtUtc,
+                    SafeUtcNow(environment),
+                    "Strong no-follow output namespace attestation is unavailable on this Editor host; " +
+                    "Android unityLibrary export is currently Windows-only.");
             }
 
             BuildValidationSnapshot validation;
@@ -203,6 +223,11 @@ namespace AL.EditorTools
                 {
                     throw new IOException("Guarded Android export output could not be created.");
                 }
+                outputIdentity = environment.AttestOutputDirectory(plan.OutputDirectory);
+                if (string.IsNullOrEmpty(outputIdentity))
+                {
+                    throw new IOException("Guarded Android export output identity is unavailable.");
+                }
             }
             catch (Exception exception)
             {
@@ -229,14 +254,23 @@ namespace AL.EditorTools
             try
             {
                 environment.ApplyRequiredBuildSettings();
-                report = environment.BuildPlayer(plan.CreateBuildPlayerOptions()) ??
-                    AndroidUnityLibraryBuildReportSnapshot.NotRun(
-                        plan.Target.ToString(),
-                        plan.OutputDirectory,
-                        "BuildPipeline returned no BuildReport.");
-                artifacts = environment.InspectExport(plan.OutputDirectory) ??
-                    AndroidUnityLibraryArtifactSnapshot.NotInspected(
-                        "Export inspection returned no result.");
+                using (IDisposable outputLease = environment.AcquireOutputMutationLease(
+                           plan.OutputDirectory,
+                           outputIdentity))
+                {
+                    if (outputLease == null)
+                    {
+                        throw new IOException("Guarded Android export output mutation lease is unavailable.");
+                    }
+                    report = environment.BuildPlayer(plan.CreateBuildPlayerOptions()) ??
+                        AndroidUnityLibraryBuildReportSnapshot.NotRun(
+                            plan.Target.ToString(),
+                            plan.OutputDirectory,
+                            "BuildPipeline returned no BuildReport.");
+                    artifacts = environment.InspectExport(plan.OutputDirectory) ??
+                        AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                            "Export inspection returned no result.");
+                }
             }
             catch (Exception exception)
             {
@@ -249,14 +283,31 @@ namespace AL.EditorTools
             }
             finally
             {
+                var restoreFailures = new List<string>();
                 try
                 {
                     environment.RestoreBuildSettings(originalSettings);
                 }
                 catch (Exception exception)
                 {
-                    restorationFailure = exception.GetType().Name + ": " + exception.Message;
+                    restoreFailures.Add(exception.GetType().Name + ": " + exception.Message);
                 }
+
+                try
+                {
+                    AndroidUnityLibraryBuildSettingsSnapshot restored =
+                        environment.CaptureBuildSettings();
+                    string mismatch = DescribeBuildSettingsMismatch(originalSettings, restored);
+                    if (mismatch.Length > 0) restoreFailures.Add(mismatch);
+                }
+                catch (Exception exception)
+                {
+                    restoreFailures.Add(
+                        "Post-restore settings recapture failed: " + exception.GetType().Name +
+                        ": " + exception.Message);
+                }
+
+                restorationFailure = string.Join(" | ", restoreFailures);
             }
 
             AndroidUnityLibraryExportSummary completion;
@@ -444,16 +495,35 @@ namespace AL.EditorTools
                 outputDirectory,
                 MaximumArtifactFiles,
                 MaximumArtifactDirectories,
-                MaximumArtifactBytes);
+                MaximumArtifactBytes,
+                inspectionHook: null);
 
         internal static AndroidUnityLibraryArtifactSnapshot InspectExportTree(
             string outputDirectory,
             int maximumFiles,
             int maximumDirectories,
-            long maximumBytes)
+            long maximumBytes) => InspectExportTree(
+                outputDirectory,
+                maximumFiles,
+                maximumDirectories,
+                maximumBytes,
+                inspectionHook: null);
+
+        internal static AndroidUnityLibraryArtifactSnapshot InspectExportTree(
+            string outputDirectory,
+            int maximumFiles,
+            int maximumDirectories,
+            long maximumBytes,
+            Action<string, string> inspectionHook)
         {
             try
             {
+                if (!SupportsStrongPathAttestation(Application.platform))
+                {
+                    return AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                        "Strong no-follow artifact namespace attestation is unavailable on this Editor host; " +
+                        "inspection is currently Windows-only.");
+                }
                 string root = NormalizeFullPath(outputDirectory);
                 if (!Directory.Exists(root))
                 {
@@ -477,116 +547,132 @@ namespace AL.EditorTools
                         "Export root is not a regular non-reparse directory.");
                 }
 
+                string expectedTool = ExpectedIl2CppToolPath(Application.platform);
+                if (expectedTool.Length == 0)
+                {
+                    return AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                        "Current Unity Editor host is unsupported for IL2CPP tool validation: " +
+                        Application.platform + ".");
+                }
+
                 var pendingDirectories = new Queue<string>();
-                var acceptedFiles = new List<string>();
+                var acceptedFiles = new List<AttestedArtifactFile>();
+                var relativeDirectories = new HashSet<string>(StringComparer.Ordinal) { string.Empty };
                 pendingDirectories.Enqueue(root);
                 int directoryCount = 1;
+                long totalBytes = 0;
                 while (pendingDirectories.Count > 0)
                 {
                     string directory = pendingDirectories.Dequeue();
-                    foreach (string entry in Directory.EnumerateFileSystemEntries(
-                                 directory,
-                                 "*",
-                                 SearchOption.TopDirectoryOnly))
+                    using (IDisposable directoryLease = AcquireArtifactDirectoryLease(directory))
                     {
-                        string fullEntry = NormalizeFullPath(entry);
-                        if (!IsSameOrDescendant(fullEntry, root))
+                        foreach (string entry in Directory.EnumerateFileSystemEntries(
+                                     directory,
+                                     "*",
+                                     SearchOption.TopDirectoryOnly))
                         {
-                            return AndroidUnityLibraryArtifactSnapshot.NotInspected(
-                                "Artifact entry escaped the export root.");
-                        }
-
-                        FileAttributes attributes = File.GetAttributes(fullEntry);
-                        if (!IsSafeArtifactAttributes(attributes))
-                        {
-                            return AndroidUnityLibraryArtifactSnapshot.NotInspected(
-                                "Artifact tree contains a reparse-point/symlink entry: " +
-                                RelativePath(root, fullEntry) + ".");
-                        }
-
-                        if ((attributes & FileAttributes.Directory) != 0)
-                        {
-                            directoryCount++;
-                            if (directoryCount > maximumDirectories)
+                            string fullEntry = NormalizeFullPath(entry);
+                            if (!IsSameOrDescendant(fullEntry, root))
                             {
                                 return AndroidUnityLibraryArtifactSnapshot.NotInspected(
-                                    "Export exceeds the " + maximumDirectories +
-                                    " directory inspection bound.");
+                                    "Artifact entry escaped the export root.");
                             }
-                            pendingDirectories.Enqueue(fullEntry);
-                            continue;
-                        }
 
-                        acceptedFiles.Add(fullEntry);
-                        if (acceptedFiles.Count > maximumFiles)
-                        {
-                            return AndroidUnityLibraryArtifactSnapshot.NotInspected(
-                                "Export exceeds the " + maximumFiles +
-                                " file inspection bound.");
+                            string relative = RelativePath(root, fullEntry);
+                            FileAttributes attributes = File.GetAttributes(fullEntry);
+                            if (!IsSafeArtifactAttributes(attributes))
+                            {
+                                return AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                                    "Artifact tree contains a reparse-point/symlink entry: " +
+                                    relative + ".");
+                            }
+
+                            if ((attributes & FileAttributes.Directory) != 0)
+                            {
+                                directoryCount++;
+                                if (directoryCount > maximumDirectories)
+                                {
+                                    return AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                                        "Export exceeds the " + maximumDirectories +
+                                        " directory inspection bound.");
+                                }
+                                relativeDirectories.Add(relative);
+                                pendingDirectories.Enqueue(fullEntry);
+                                continue;
+                            }
+
+                            if (acceptedFiles.Count >= maximumFiles)
+                            {
+                                return AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                                    "Export exceeds the " + maximumFiles +
+                                    " file inspection bound.");
+                            }
+
+                            AttestedArtifactFile snapshot = ReadAttestedArtifact(
+                                fullEntry,
+                                relative,
+                                maximumBytes - totalBytes,
+                                Application.platform,
+                                inspectionHook);
+                            if (snapshot.Length < 0 || totalBytes > maximumBytes - snapshot.Length)
+                            {
+                                return AndroidUnityLibraryArtifactSnapshot.NotInspected(
+                                    "Export exceeds the " + maximumBytes +
+                                    " byte inspection bound.");
+                            }
+                            totalBytes += snapshot.Length;
+                            acceptedFiles.Add(snapshot);
                         }
                     }
                 }
 
-                string[] files = acceptedFiles
-                    .OrderBy(path => RelativePath(root, path), StringComparer.Ordinal)
+                AttestedArtifactFile[] files = acceptedFiles
+                    .OrderBy(file => file.RelativePath, StringComparer.Ordinal)
                     .ToArray();
-                long totalBytes = 0;
                 var inventory = new StringBuilder(Math.Max(256, files.Length * 128));
-                var relativeFiles = new HashSet<string>(StringComparer.Ordinal);
-                var fullPaths = new Dictionary<string, string>(StringComparer.Ordinal);
-                var lengths = new Dictionary<string, long>(StringComparer.Ordinal);
-                foreach (string file in files)
+                var snapshots = new Dictionary<string, AttestedArtifactFile>(StringComparer.Ordinal);
+                foreach (AttestedArtifactFile file in files)
                 {
-                    string relative = RelativePath(root, file);
-                    long length = new FileInfo(file).Length;
-                    if (length < 0 || totalBytes > maximumBytes - length)
+                    if (snapshots.ContainsKey(file.RelativePath))
                     {
                         return AndroidUnityLibraryArtifactSnapshot.NotInspected(
-                            "Export exceeds the " + maximumBytes + " byte inspection bound.");
+                            "Export contains a duplicate normalized artifact path: " +
+                            file.RelativePath + ".");
                     }
-                    totalBytes += length;
-                    relativeFiles.Add(relative);
-                    fullPaths[relative] = file;
-                    lengths[relative] = length;
-                    inventory.Append(relative).Append('\0')
-                        .Append(length.ToString(CultureInfo.InvariantCulture)).Append('\0')
-                        .Append(ComputeFileSha256(file)).Append('\n');
+                    snapshots.Add(file.RelativePath, file);
+                    inventory.Append(file.RelativePath).Append('\0')
+                        .Append(file.Length.ToString(CultureInfo.InvariantCulture)).Append('\0')
+                        .Append(file.Sha256).Append('\n');
                 }
 
                 var missingArtifacts = RequiredArtifactPaths
-                    .Where(required => !relativeFiles.Contains(required))
+                    .Where(required => !snapshots.ContainsKey(required))
                     .ToList();
-                if (!RequiredIl2CppToolPaths.Any(path =>
-                        relativeFiles.Contains(path) && lengths[path] > 0))
+                if (!snapshots.ContainsKey(expectedTool))
                 {
-                    missingArtifacts.Add(MissingIl2CppToolDescription);
+                    missingArtifacts.Add(expectedTool);
                 }
                 string[] missing = missingArtifacts
                     .OrderBy(value => value, StringComparer.Ordinal)
                     .ToArray();
                 string[] invalid = RequiredArtifactPaths
-                    .Where(relative => relativeFiles.Contains(relative))
-                    .Concat(RequiredIl2CppToolPaths.Where(relative => relativeFiles.Contains(relative)))
+                    .Where(relative => snapshots.ContainsKey(relative))
+                    .Concat(new[] { WindowsIl2CppToolPath, UnixIl2CppToolPath }
+                        .Where(relative => snapshots.ContainsKey(relative)))
                     .Select(relative => ValidateRequiredArtifact(
                         relative,
-                        fullPaths[relative],
-                        lengths[relative]))
+                        snapshots[relative],
+                        Application.platform))
                     .Where(failure => failure.Length > 0)
                     .OrderBy(value => value, StringComparer.Ordinal)
                     .ToArray();
-                string jniRoot = Path.Combine(
-                    root,
-                    "unityLibrary",
-                    "src",
-                    "main",
-                    "jniLibs");
-                string[] abiDirectories = Directory.Exists(jniRoot)
-                    ? Directory.GetDirectories(jniRoot)
-                        .Select(Path.GetFileName)
-                        .Where(name => !string.IsNullOrEmpty(name))
-                        .OrderBy(name => name, StringComparer.Ordinal)
-                        .ToArray()
-                    : Array.Empty<string>();
+                const string jniPrefix = "unityLibrary/src/main/jniLibs/";
+                string[] abiDirectories = relativeDirectories
+                    .Where(relative => relative.StartsWith(jniPrefix, StringComparison.Ordinal))
+                    .Select(relative => relative.Substring(jniPrefix.Length))
+                    .Where(relative => relative.Length > 0 && relative.IndexOf('/') < 0)
+                    .OrderBy(name => name, StringComparer.Ordinal)
+                    .ToArray();
                 string inventoryHash = ComputeSha256(
                     new UTF8Encoding(encoderShouldEmitUTF8Identifier: false).GetBytes(inventory.ToString()));
                 var concerns = new List<string>();
@@ -631,37 +717,47 @@ namespace AL.EditorTools
 
         private static string ValidateRequiredArtifact(
             string relativePath,
-            string fullPath,
-            long length)
+            AttestedArtifactFile artifact,
+            RuntimePlatform host)
         {
-            if (length <= 0) return relativePath + " (empty)";
+            if (artifact == null || artifact.Length <= 0) return relativePath + " (empty)";
+
+            if (string.Equals(relativePath, WindowsIl2CppToolPath, StringComparison.Ordinal) ||
+                string.Equals(relativePath, UnixIl2CppToolPath, StringComparison.Ordinal))
+            {
+                return ValidateIl2CppToolForHost(
+                    relativePath,
+                    artifact.PrefixBytes,
+                    artifact.IsUnixExecutable,
+                    host);
+            }
 
             if (string.Equals(
                     relativePath,
                     "unityLibrary/libs/unity-classes.jar",
                     StringComparison.Ordinal) &&
-                !HasZipSignature(fullPath))
+                !HasZipSignature(artifact.PrefixBytes))
             {
                 return relativePath + " (missing ZIP/JAR signature)";
             }
 
             if (relativePath.EndsWith(".so", StringComparison.Ordinal) &&
-                !StartsWithBytes(fullPath, new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' }))
+                !StartsWithBytes(artifact.PrefixBytes, new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' }))
             {
                 return relativePath + " (missing ELF signature)";
             }
 
             if (string.Equals(relativePath, "settings.gradle", StringComparison.Ordinal) &&
-                !PrefixContainsText(fullPath, "unityLibrary"))
+                !PrefixContainsText(artifact.PrefixBytes, "unityLibrary"))
             {
                 return relativePath + " (unityLibrary module is not included)";
             }
 
             if (string.Equals(relativePath, "unityLibrary/build.gradle", StringComparison.Ordinal) &&
-                (!PrefixContainsText(fullPath, "com.android.library") ||
-                 !PrefixContainsText(fullPath, "minSdkVersion 24") ||
-                 !PrefixContainsText(fullPath, "Il2CppOutputProject") ||
-                 !PrefixContainsText(fullPath, "libil2cpp.so")))
+                (!PrefixContainsText(artifact.PrefixBytes, "com.android.library") ||
+                 !PrefixContainsText(artifact.PrefixBytes, "minSdkVersion 24") ||
+                 !PrefixContainsText(artifact.PrefixBytes, "Il2CppOutputProject") ||
+                 !PrefixContainsText(artifact.PrefixBytes, "libil2cpp.so")))
             {
                 return relativePath +
                     " (library plugin, minimum API 24, or staged IL2CPP Gradle generation is missing)";
@@ -671,7 +767,7 @@ namespace AL.EditorTools
                     relativePath,
                     "unityLibrary/src/main/AndroidManifest.xml",
                     StringComparison.Ordinal) &&
-                !PrefixContainsText(fullPath, "<manifest"))
+                !PrefixContainsText(artifact.PrefixBytes, "<manifest"))
             {
                 return relativePath + " (manifest root is missing)";
             }
@@ -679,7 +775,88 @@ namespace AL.EditorTools
             return string.Empty;
         }
 
-        private static bool HasZipSignature(string path)
+        internal static string ValidateIl2CppToolForHost(
+            string relativePath,
+            byte[] prefixBytes,
+            bool unixExecutable,
+            RuntimePlatform host)
+        {
+            string expected = ExpectedIl2CppToolPath(host);
+            if (expected.Length == 0)
+            {
+                return relativePath + " (unsupported Editor host " + host + ")";
+            }
+            if (!string.Equals(relativePath, expected, StringComparison.Ordinal))
+            {
+                return relativePath + " (wrong tool name for " + host + "; expected " + expected + ")";
+            }
+
+            byte[] prefix = prefixBytes ?? Array.Empty<byte>();
+            if (host == RuntimePlatform.WindowsEditor)
+            {
+                return HasCrediblePortableExecutableHeader(prefix)
+                    ? string.Empty
+                    : relativePath + " (invalid or truncated PE executable)";
+            }
+            if (!unixExecutable)
+            {
+                return relativePath + " (tool is not executable on the Unix host)";
+            }
+            if (host == RuntimePlatform.LinuxEditor)
+            {
+                return StartsWithBytes(prefix, new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' })
+                    ? string.Empty
+                    : relativePath + " (invalid or truncated ELF executable)";
+            }
+            if (host == RuntimePlatform.OSXEditor)
+            {
+                return HasMachOOrFatMagic(prefix)
+                    ? string.Empty
+                    : relativePath + " (invalid or truncated Mach-O executable)";
+            }
+            return relativePath + " (unsupported Editor host " + host + ")";
+        }
+
+        internal static bool SupportsStrongPathAttestation(RuntimePlatform host) =>
+            host == RuntimePlatform.WindowsEditor;
+
+        private static string ExpectedIl2CppToolPath(RuntimePlatform host)
+        {
+            if (host == RuntimePlatform.WindowsEditor) return WindowsIl2CppToolPath;
+            if (host == RuntimePlatform.LinuxEditor || host == RuntimePlatform.OSXEditor)
+            {
+                return UnixIl2CppToolPath;
+            }
+            return string.Empty;
+        }
+
+        private static bool HasCrediblePortableExecutableHeader(IReadOnlyList<byte> bytes)
+        {
+            if (bytes == null || bytes.Count < 0x40 || bytes[0] != (byte)'M' || bytes[1] != (byte)'Z')
+            {
+                return false;
+            }
+            int peOffset = bytes[0x3c] |
+                (bytes[0x3d] << 8) |
+                (bytes[0x3e] << 16) |
+                (bytes[0x3f] << 24);
+            return peOffset >= 0x40 && peOffset <= bytes.Count - 4 &&
+                bytes[peOffset] == (byte)'P' && bytes[peOffset + 1] == (byte)'E' &&
+                bytes[peOffset + 2] == 0 && bytes[peOffset + 3] == 0;
+        }
+
+        private static bool HasMachOOrFatMagic(IReadOnlyList<byte> bytes)
+        {
+            if (bytes == null || bytes.Count < 4) return false;
+            uint magic = ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) |
+                ((uint)bytes[2] << 8) | bytes[3];
+            return magic == 0xfeedface || magic == 0xcefaedfe ||
+                magic == 0xfeedfacf || magic == 0xcffaedfe ||
+                magic == 0xcafebabe || magic == 0xbebafeca ||
+                magic == 0xcafebabf || magic == 0xbfbafeca;
+        }
+
+        private static bool HasZipSignature(IReadOnlyList<byte> bytes)
         {
             byte[][] signatures =
             {
@@ -687,37 +864,746 @@ namespace AL.EditorTools
                 new byte[] { 0x50, 0x4b, 0x05, 0x06 },
                 new byte[] { 0x50, 0x4b, 0x07, 0x08 }
             };
-            return signatures.Any(signature => StartsWithBytes(path, signature));
+            return signatures.Any(signature => StartsWithBytes(bytes, signature));
         }
 
-        private static bool StartsWithBytes(string path, IReadOnlyList<byte> expected)
+        private static bool StartsWithBytes(IReadOnlyList<byte> bytes, IReadOnlyList<byte> expected)
         {
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            if (bytes == null || expected == null || bytes.Count < expected.Count) return false;
+            for (int index = 0; index < expected.Count; index++)
             {
-                if (stream.Length < expected.Count) return false;
-                for (int index = 0; index < expected.Count; index++)
+                if (bytes[index] != expected[index]) return false;
+            }
+            return true;
+        }
+
+        private static bool PrefixContainsText(byte[] bytes, string expected)
+        {
+            string text = new UTF8Encoding(false, true).GetString(bytes ?? Array.Empty<byte>());
+            return text.IndexOf(expected, StringComparison.Ordinal) >= 0;
+        }
+
+        private static IDisposable AcquireArtifactDirectoryLease(string directory)
+        {
+            FileAttributes attributes = File.GetAttributes(directory);
+            if ((attributes & FileAttributes.Directory) == 0 || !IsSafeArtifactAttributes(attributes))
+            {
+                throw new IOException("Artifact directory is not a regular non-reparse directory: " + directory + ".");
+            }
+
+            if (!SupportsStrongPathAttestation(Application.platform))
+            {
+                throw new PlatformNotSupportedException(
+                    "Artifact directory leases are currently supported only on Windows Editor.");
+            }
+
+            SafeFileHandle handle = OpenWindowsPathNoFollow(directory, directory: true, writable: false);
+            try
+            {
+                WindowsFileIdentity identity = ReadWindowsIdentity(handle, directory);
+                if (!identity.IsDirectory || identity.IsReparsePoint)
                 {
-                    if (stream.ReadByte() != expected[index]) return false;
+                    throw new IOException("Artifact directory handle is not a regular non-reparse directory: " +
+                        directory + ".");
                 }
-                return true;
+                AssertWindowsHandlePath(handle, directory);
+                return new SafeHandleLease(handle);
+            }
+            catch
+            {
+                handle.Dispose();
+                throw;
             }
         }
 
-        private static bool PrefixContainsText(string path, string expected)
+        private static AttestedArtifactFile ReadAttestedArtifact(
+            string fullPath,
+            string relativePath,
+            long remainingBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook)
         {
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+            if (remainingBytes < 0)
             {
-                int count = (int)Math.Min(stream.Length, MaximumStructuralTextBytes);
-                var bytes = new byte[count];
-                int offset = 0;
-                while (offset < count)
+                throw new IOException("Export exceeds the cumulative artifact byte inspection bound.");
+            }
+            if (!SupportsStrongPathAttestation(host))
+            {
+                throw new PlatformNotSupportedException(
+                    "Artifact reads are currently supported only on Windows Editor.");
+            }
+            return ReadWindowsAttestedArtifact(
+                fullPath,
+                relativePath,
+                remainingBytes,
+                inspectionHook);
+        }
+
+        private static AttestedArtifactFile ReadWindowsAttestedArtifact(
+            string fullPath,
+            string relativePath,
+            long remainingBytes,
+            Action<string, string> inspectionHook)
+        {
+            using (SafeFileHandle handle = OpenWindowsPathNoFollow(
+                       fullPath,
+                       directory: false,
+                       writable: false))
+            {
+                WindowsFileIdentity before = ReadWindowsIdentity(handle, fullPath);
+                if (before.IsDirectory || before.IsReparsePoint)
                 {
-                    int read = stream.Read(bytes, offset, count - offset);
-                    if (read <= 0) break;
-                    offset += read;
+                    throw new IOException("Artifact file handle is not a regular non-reparse file: " +
+                        relativePath + ".");
                 }
-                string text = new UTF8Encoding(false, true).GetString(bytes, 0, offset);
-                return text.IndexOf(expected, StringComparison.Ordinal) >= 0;
+                AssertWindowsHandlePath(handle, fullPath);
+
+                using (var stream = new FileStream(
+                           handle,
+                           FileAccess.Read,
+                           ArtifactReadBufferBytes,
+                           isAsync: false))
+                {
+                    inspectionHook?.Invoke("after-open", relativePath);
+                    StreamAttestation attestation = ReadBoundedStream(stream, remainingBytes, relativePath);
+                    inspectionHook?.Invoke("after-read", relativePath);
+
+                    WindowsFileIdentity after = ReadWindowsIdentity(handle, fullPath);
+                    if (!before.Equals(after) || attestation.Length != before.Length)
+                    {
+                        throw new IOException(
+                            "Artifact identity or length drifted while its single attested handle was read: " +
+                            relativePath + ".");
+                    }
+
+                    return new AttestedArtifactFile(
+                        relativePath,
+                        attestation.Length,
+                        attestation.Sha256,
+                        attestation.PrefixBytes,
+                        isUnixExecutable: false);
+                }
+            }
+        }
+
+        private static StreamAttestation ReadBoundedStream(
+            Stream stream,
+            long remainingBytes,
+            string relativePath)
+        {
+            var buffer = new byte[ArtifactReadBufferBytes];
+            var prefix = new byte[MaximumStructuralTextBytes];
+            int prefixCount = 0;
+            long observedBytes = 0;
+            using (SHA256 algorithm = SHA256.Create())
+            {
+                while (true)
+                {
+                    long allowanceWithProbe = remainingBytes - observedBytes + 1L;
+                    if (allowanceWithProbe <= 0)
+                    {
+                        throw new IOException(
+                            "Export exceeds the cumulative artifact byte inspection bound while reading " +
+                            relativePath + ".");
+                    }
+                    int requested = (int)Math.Min(buffer.Length, allowanceWithProbe);
+                    int read = stream.Read(buffer, 0, requested);
+                    if (read <= 0) break;
+                    if (observedBytes > remainingBytes - read)
+                    {
+                        throw new IOException(
+                            "Export exceeds the cumulative artifact byte inspection bound while reading " +
+                            relativePath + ".");
+                    }
+
+                    int prefixRead = Math.Min(read, prefix.Length - prefixCount);
+                    if (prefixRead > 0)
+                    {
+                        Buffer.BlockCopy(buffer, 0, prefix, prefixCount, prefixRead);
+                        prefixCount += prefixRead;
+                    }
+                    algorithm.TransformBlock(buffer, 0, read, buffer, 0);
+                    observedBytes += read;
+                }
+                algorithm.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+                if (prefixCount != prefix.Length) Array.Resize(ref prefix, prefixCount);
+                return new StreamAttestation(observedBytes, Hex(algorithm.Hash), prefix);
+            }
+        }
+
+        private sealed class AttestedArtifactFile
+        {
+            public string RelativePath { get; }
+            public long Length { get; }
+            public string Sha256 { get; }
+            public byte[] PrefixBytes { get; }
+            public bool IsUnixExecutable { get; }
+
+            public AttestedArtifactFile(
+                string relativePath,
+                long length,
+                string sha256,
+                byte[] prefixBytes,
+                bool isUnixExecutable)
+            {
+                RelativePath = relativePath ?? string.Empty;
+                Length = length;
+                Sha256 = sha256 ?? string.Empty;
+                PrefixBytes = prefixBytes ?? Array.Empty<byte>();
+                IsUnixExecutable = isUnixExecutable;
+            }
+        }
+
+        private sealed class StreamAttestation
+        {
+            public long Length { get; }
+            public string Sha256 { get; }
+            public byte[] PrefixBytes { get; }
+
+            public StreamAttestation(long length, string sha256, byte[] prefixBytes)
+            {
+                Length = length;
+                Sha256 = sha256 ?? string.Empty;
+                PrefixBytes = prefixBytes ?? Array.Empty<byte>();
+            }
+        }
+
+        internal static string ReadDirectoryIdentityNoFollow(string directory)
+        {
+            string normalized = NormalizeFullPath(directory);
+            FileAttributes attributes = File.GetAttributes(normalized);
+            if ((attributes & FileAttributes.Directory) == 0 || !IsSafeArtifactAttributes(attributes))
+            {
+                throw new IOException("Path is not a regular non-reparse directory: " + normalized + ".");
+            }
+
+            if (SupportsStrongPathAttestation(Application.platform))
+            {
+                using (SafeFileHandle handle = OpenWindowsPathNoFollow(
+                           normalized,
+                           directory: true,
+                           writable: false))
+                {
+                    WindowsFileIdentity identity = ReadWindowsIdentity(handle, normalized);
+                    if (!identity.IsDirectory || identity.IsReparsePoint)
+                    {
+                        throw new IOException(
+                            "Directory identity handle is not a regular non-reparse directory.");
+                    }
+                    AssertWindowsHandlePath(handle, normalized);
+                    return identity.StableId;
+                }
+            }
+
+            throw new PlatformNotSupportedException(
+                "Strong no-follow directory identity is currently supported only on Windows Editor.");
+        }
+
+        internal static IDisposable AcquireDirectoryIdentityLease(
+            string directory,
+            string expectedIdentity)
+        {
+            string normalized = NormalizeFullPath(directory);
+            if (string.IsNullOrEmpty(expectedIdentity))
+            {
+                throw new IOException("Expected directory identity is missing.");
+            }
+
+            if (!SupportsStrongPathAttestation(Application.platform))
+            {
+                throw new PlatformNotSupportedException(
+                    "Strong no-follow directory leases are currently supported only on Windows Editor.");
+            }
+
+            SafeFileHandle handle = OpenWindowsPathNoFollow(
+                normalized,
+                directory: true,
+                writable: false);
+            try
+            {
+                WindowsFileIdentity identity = ReadWindowsIdentity(handle, normalized);
+                if (!identity.IsDirectory || identity.IsReparsePoint ||
+                    !string.Equals(identity.StableId, expectedIdentity, StringComparison.Ordinal))
+                {
+                    throw new IOException("Directory identity changed before the guarded mutation.");
+                }
+                AssertWindowsHandlePath(handle, normalized);
+                return new SafeHandleLease(handle);
+            }
+            catch
+            {
+                handle.Dispose();
+                throw;
+            }
+        }
+
+        private static SafeFileHandle OpenWindowsPathNoFollow(
+            string path,
+            bool directory,
+            bool writable)
+        {
+            uint desiredAccess = writable ? GenericWrite : (directory ? FileReadAttributes : GenericRead);
+            uint share = directory ? FileShareRead | FileShareWrite : FileShareRead;
+            uint flags = FileFlagOpenReparsePoint |
+                (directory ? FileFlagBackupSemantics : FileFlagSequentialScan);
+            SafeFileHandle handle = WindowsCreateFile(
+                path,
+                desiredAccess,
+                share,
+                IntPtr.Zero,
+                OpenExisting,
+                flags,
+                IntPtr.Zero);
+            if (handle == null || handle.IsInvalid)
+            {
+                int error = Marshal.GetLastWin32Error();
+                handle?.Dispose();
+                throw new IOException("No-follow open failed for guarded path (Win32 " + error + "): " +
+                    path + ".");
+            }
+            return handle;
+        }
+
+        private static WindowsFileIdentity ReadWindowsIdentity(SafeFileHandle handle, string path)
+        {
+            if (!WindowsGetFileInformationByHandle(handle, out WindowsByHandleFileInformation info))
+            {
+                throw new IOException("File identity read failed (Win32 " + Marshal.GetLastWin32Error() +
+                    "): " + path + ".");
+            }
+            return new WindowsFileIdentity(info);
+        }
+
+        private static void AssertWindowsHandlePath(SafeFileHandle handle, string expectedPath)
+        {
+            var buffer = new StringBuilder(32768);
+            uint length = WindowsGetFinalPathNameByHandle(handle, buffer, buffer.Capacity, 0);
+            if (length == 0 || length >= buffer.Capacity)
+            {
+                throw new IOException("Final path attestation failed (Win32 " +
+                    Marshal.GetLastWin32Error() + "): " + expectedPath + ".");
+            }
+            string actual = buffer.ToString();
+            if (actual.StartsWith(@"\\?\UNC\", StringComparison.OrdinalIgnoreCase))
+            {
+                actual = @"\\" + actual.Substring(8);
+            }
+            else if (actual.StartsWith(@"\\?\", StringComparison.OrdinalIgnoreCase))
+            {
+                actual = actual.Substring(4);
+            }
+            if (!SamePath(actual, expectedPath))
+            {
+                throw new IOException("Opened handle resolved to a different path than requested.");
+            }
+        }
+
+        private sealed class SafeHandleLease : IDisposable
+        {
+            private SafeFileHandle _handle;
+
+            public SafeHandleLease(SafeFileHandle handle)
+            {
+                _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+            }
+
+            public void Dispose()
+            {
+                SafeFileHandle handle = _handle;
+                _handle = null;
+                handle?.Dispose();
+            }
+        }
+
+        private sealed class GuardedCleanupHandle : IDisposable
+        {
+            private SafeFileHandle _handle;
+            private readonly WindowsFileIdentity _identity;
+
+            public string Path { get; }
+            public bool IsDirectory { get; }
+            public string StableId => _identity.StableId;
+
+            public GuardedCleanupHandle(
+                string path,
+                bool isDirectory,
+                SafeFileHandle handle,
+                WindowsFileIdentity identity)
+            {
+                Path = path ?? throw new ArgumentNullException(nameof(path));
+                IsDirectory = isDirectory;
+                _handle = handle ?? throw new ArgumentNullException(nameof(handle));
+                _identity = identity ?? throw new ArgumentNullException(nameof(identity));
+            }
+
+            public void AssertCurrentIdentity()
+            {
+                if (_handle == null || _handle.IsClosed || _handle.IsInvalid)
+                {
+                    throw new IOException("Guarded cleanup handle is unavailable: " + Path + ".");
+                }
+
+                WindowsFileIdentity current = ReadWindowsIdentity(_handle, Path);
+                if (!string.Equals(current.StableId, _identity.StableId, StringComparison.Ordinal) ||
+                    current.IsDirectory != IsDirectory ||
+                    current.IsReparsePoint)
+                {
+                    throw new IOException("Guarded cleanup handle identity changed: " + Path + ".");
+                }
+                AssertWindowsHandlePath(_handle, Path);
+            }
+
+            public void DeleteThroughHandle()
+            {
+                AssertCurrentIdentity();
+                var disposition = new WindowsFileDispositionInformation { DeleteFile = true };
+                if (!WindowsSetFileInformationByHandle(
+                        _handle,
+                        FileDispositionInfo,
+                        ref disposition,
+                        (uint)Marshal.SizeOf(typeof(WindowsFileDispositionInformation))))
+                {
+                    throw new IOException(
+                        "Guarded handle deletion failed (Win32 " + Marshal.GetLastWin32Error() + "): " +
+                        Path + ".");
+                }
+
+                SafeFileHandle handle = _handle;
+                _handle = null;
+                handle.Dispose();
+                bool stillExists = IsDirectory ? Directory.Exists(Path) : File.Exists(Path);
+                if (stillExists)
+                {
+                    throw new IOException("Guarded handle deletion did not remove the exact path: " + Path + ".");
+                }
+            }
+
+            public void Dispose()
+            {
+                SafeFileHandle handle = _handle;
+                _handle = null;
+                handle?.Dispose();
+            }
+        }
+
+        private sealed class WindowsFileIdentity : IEquatable<WindowsFileIdentity>
+        {
+            public uint Attributes { get; }
+            public uint VolumeSerial { get; }
+            public uint FileIndexHigh { get; }
+            public uint FileIndexLow { get; }
+            public long Length { get; }
+            public long LastWriteTime { get; }
+            public bool IsDirectory => (Attributes & FileAttributeDirectory) != 0;
+            public bool IsReparsePoint => (Attributes & FileAttributeReparsePoint) != 0;
+            public string StableId => "win:" + VolumeSerial.ToString("x8", CultureInfo.InvariantCulture) +
+                ":" + FileIndexHigh.ToString("x8", CultureInfo.InvariantCulture) +
+                FileIndexLow.ToString("x8", CultureInfo.InvariantCulture);
+
+            public WindowsFileIdentity(WindowsByHandleFileInformation info)
+            {
+                Attributes = info.FileAttributes;
+                VolumeSerial = info.VolumeSerialNumber;
+                FileIndexHigh = info.FileIndexHigh;
+                FileIndexLow = info.FileIndexLow;
+                Length = ((long)info.FileSizeHigh << 32) | info.FileSizeLow;
+                LastWriteTime = ((long)info.LastWriteTimeHigh << 32) | info.LastWriteTimeLow;
+            }
+
+            public bool Equals(WindowsFileIdentity other) => other != null &&
+                Attributes == other.Attributes &&
+                VolumeSerial == other.VolumeSerial &&
+                FileIndexHigh == other.FileIndexHigh &&
+                FileIndexLow == other.FileIndexLow &&
+                Length == other.Length &&
+                LastWriteTime == other.LastWriteTime;
+
+            public override bool Equals(object obj) => Equals(obj as WindowsFileIdentity);
+            public override int GetHashCode() => StableId.GetHashCode();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct WindowsByHandleFileInformation
+        {
+            public uint FileAttributes;
+            public uint CreationTimeLow;
+            public uint CreationTimeHigh;
+            public uint LastAccessTimeLow;
+            public uint LastAccessTimeHigh;
+            public uint LastWriteTimeLow;
+            public uint LastWriteTimeHigh;
+            public uint VolumeSerialNumber;
+            public uint FileSizeHigh;
+            public uint FileSizeLow;
+            public uint NumberOfLinks;
+            public uint FileIndexHigh;
+            public uint FileIndexLow;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct WindowsFileDispositionInformation
+        {
+            [MarshalAs(UnmanagedType.I1)]
+            public bool DeleteFile;
+        }
+
+        private const uint GenericRead = 0x80000000;
+        private const uint GenericWrite = 0x40000000;
+        private const uint DeleteAccess = 0x00010000;
+        private const uint FileReadAttributes = 0x00000080;
+        private const uint FileShareRead = 0x00000001;
+        private const uint FileShareWrite = 0x00000002;
+        private const uint OpenExisting = 3;
+        private const uint FileFlagSequentialScan = 0x08000000;
+        private const uint FileFlagBackupSemantics = 0x02000000;
+        private const uint FileFlagOpenReparsePoint = 0x00200000;
+        private const uint FileAttributeDirectory = 0x00000010;
+        private const uint FileAttributeReparsePoint = 0x00000400;
+        private const int FileDispositionInfo = 4;
+
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "CreateFileW",
+            CharSet = CharSet.Unicode,
+            SetLastError = true)]
+        private static extern SafeFileHandle WindowsCreateFile(
+            string fileName,
+            uint desiredAccess,
+            uint shareMode,
+            IntPtr securityAttributes,
+            uint creationDisposition,
+            uint flagsAndAttributes,
+            IntPtr templateFile);
+
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "GetFileInformationByHandle",
+            SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool WindowsGetFileInformationByHandle(
+            SafeFileHandle handle,
+            out WindowsByHandleFileInformation information);
+
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "GetFinalPathNameByHandleW",
+            CharSet = CharSet.Unicode,
+            SetLastError = true)]
+        private static extern uint WindowsGetFinalPathNameByHandle(
+            SafeFileHandle handle,
+            StringBuilder filePath,
+            int filePathLength,
+            uint flags);
+
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "SetFileInformationByHandle",
+            SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool WindowsSetFileInformationByHandle(
+            SafeFileHandle handle,
+            int fileInformationClass,
+            ref WindowsFileDispositionInformation fileInformation,
+            uint bufferSize);
+
+        private static GuardedCleanupHandle AcquireGuardedCleanupHandle(
+            string fullPath,
+            bool directory)
+        {
+            if (!SupportsStrongPathAttestation(Application.platform))
+            {
+                throw new PlatformNotSupportedException(
+                    "Guarded handle cleanup is currently supported only on Windows Editor.");
+            }
+
+            SafeFileHandle handle = WindowsCreateFile(
+                fullPath,
+                FileReadAttributes | DeleteAccess,
+                FileShareRead | FileShareWrite,
+                IntPtr.Zero,
+                OpenExisting,
+                FileFlagOpenReparsePoint |
+                    (directory ? FileFlagBackupSemantics : FileFlagSequentialScan),
+                IntPtr.Zero);
+            if (handle == null || handle.IsInvalid)
+            {
+                int error = Marshal.GetLastWin32Error();
+                handle?.Dispose();
+                throw new IOException(
+                    "No-follow cleanup open failed (Win32 " + error + "): " + fullPath + ".");
+            }
+
+            try
+            {
+                WindowsFileIdentity identity = ReadWindowsIdentity(handle, fullPath);
+                if (identity.IsDirectory != directory || identity.IsReparsePoint)
+                {
+                    throw new IOException(
+                        "Guarded cleanup opened an unexpected or reparse object: " + fullPath + ".");
+                }
+                AssertWindowsHandlePath(handle, fullPath);
+                return new GuardedCleanupHandle(fullPath, directory, handle, identity);
+            }
+            catch
+            {
+                handle.Dispose();
+                throw;
+            }
+        }
+
+
+        internal static void DeleteTreeWithoutFollowingReparsePoints(string directory) =>
+            DeleteTreeWithoutFollowingReparsePoints(
+                directory,
+                MaximumArtifactFiles,
+                MaximumArtifactDirectories,
+                File.GetAttributes,
+                mutationHook: null);
+
+        internal static void DeleteTreeWithoutFollowingReparsePoints(
+            string directory,
+            int maximumFiles,
+            int maximumDirectories,
+            Func<string, FileAttributes> attributeReader,
+            Action<string, string> mutationHook)
+        {
+            string root = NormalizeFullPath(directory);
+            if (maximumFiles <= 0 || maximumFiles > MaximumArtifactFiles ||
+                maximumDirectories <= 0 || maximumDirectories > MaximumArtifactDirectories)
+            {
+                throw new IOException("Guarded cleanup bounds are outside the production limits.");
+            }
+            if (attributeReader == null) throw new ArgumentNullException(nameof(attributeReader));
+
+            if (!SupportsStrongPathAttestation(Application.platform))
+            {
+                throw new PlatformNotSupportedException(
+                    "Guarded handle cleanup is currently supported only on Windows Editor.");
+            }
+
+            var pending = new Queue<GuardedCleanupHandle>();
+            var directories = new List<GuardedCleanupHandle>();
+            var files = new List<GuardedCleanupHandle>();
+            var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var identities = new HashSet<string>(StringComparer.Ordinal);
+            try
+            {
+                FileAttributes rootAttributes = attributeReader(root);
+                if ((rootAttributes & FileAttributes.Directory) == 0 ||
+                    !IsSafeArtifactAttributes(rootAttributes))
+                {
+                    throw new IOException(
+                        "Guarded cleanup found a non-directory or reparse root: " + root + ".");
+                }
+
+                GuardedCleanupHandle rootHandle = AcquireGuardedCleanupHandle(root, directory: true);
+                directories.Add(rootHandle);
+                pending.Enqueue(rootHandle);
+                paths.Add(root);
+                identities.Add(rootHandle.StableId);
+
+                while (pending.Count > 0)
+                {
+                    GuardedCleanupHandle current = pending.Dequeue();
+                    current.AssertCurrentIdentity();
+                    foreach (string entry in Directory.EnumerateFileSystemEntries(
+                                 current.Path,
+                                 "*",
+                                 SearchOption.TopDirectoryOnly))
+                    {
+                        string fullEntry = NormalizeFullPath(entry);
+                        if (!IsSameOrDescendant(fullEntry, root) || !paths.Add(fullEntry))
+                        {
+                            throw new IOException(
+                                "Guarded cleanup found an escaped or duplicate case-normalized path.");
+                        }
+
+                        FileAttributes attributes = attributeReader(fullEntry);
+                        if (!IsSafeArtifactAttributes(attributes))
+                        {
+                            throw new IOException(
+                                "Guarded cleanup refuses descendant reparse entry: " +
+                                RelativePath(root, fullEntry) + ".");
+                        }
+
+                        bool isDirectory = (attributes & FileAttributes.Directory) != 0;
+                        if (isDirectory && directories.Count >= maximumDirectories)
+                        {
+                            throw new IOException(
+                                "Guarded cleanup exceeds the directory inspection bound.");
+                        }
+                        if (!isDirectory && files.Count >= maximumFiles)
+                        {
+                            throw new IOException("Guarded cleanup exceeds the file inspection bound.");
+                        }
+
+                        GuardedCleanupHandle entryHandle = null;
+                        try
+                        {
+                            entryHandle = AcquireGuardedCleanupHandle(fullEntry, isDirectory);
+                            if (!identities.Add(entryHandle.StableId))
+                            {
+                                throw new IOException(
+                                    "Guarded cleanup found a duplicate filesystem identity.");
+                            }
+
+                            if (isDirectory)
+                            {
+                                directories.Add(entryHandle);
+                                pending.Enqueue(entryHandle);
+                            }
+                            else
+                            {
+                                files.Add(entryHandle);
+                            }
+                            entryHandle = null;
+                        }
+                        finally
+                        {
+                            entryHandle?.Dispose();
+                        }
+                    }
+                }
+
+                mutationHook?.Invoke("after-scan", root);
+                foreach (GuardedCleanupHandle file in files
+                             .OrderByDescending(item => item.Path.Length)
+                             .ThenBy(item => item.Path, StringComparer.OrdinalIgnoreCase))
+                {
+                    mutationHook?.Invoke("before-file-delete", file.Path);
+                    FileAttributes attributes = attributeReader(file.Path);
+                    if ((attributes & FileAttributes.Directory) != 0 ||
+                        !IsSafeArtifactAttributes(attributes))
+                    {
+                        throw new IOException("Guarded cleanup file identity changed before deletion.");
+                    }
+                    file.DeleteThroughHandle();
+                }
+
+                foreach (GuardedCleanupHandle child in directories
+                             .OrderByDescending(item => item.Path.Count(character =>
+                                 character == Path.DirectorySeparatorChar ||
+                                 character == Path.AltDirectorySeparatorChar))
+                             .ThenByDescending(item => item.Path.Length)
+                             .ThenBy(item => item.Path, StringComparer.OrdinalIgnoreCase))
+                {
+                    mutationHook?.Invoke("before-directory-delete", child.Path);
+                    FileAttributes attributes = attributeReader(child.Path);
+                    if ((attributes & FileAttributes.Directory) == 0 ||
+                        !IsSafeArtifactAttributes(attributes))
+                    {
+                        throw new IOException("Guarded cleanup directory identity changed before deletion.");
+                    }
+                    // Mark the already-attested exact handle, then close it. A newly introduced
+                    // descendant makes the directory disposition fail; there is no recursive or
+                    // path-based fallback.
+                    child.DeleteThroughHandle();
+                }
+            }
+            finally
+            {
+                foreach (GuardedCleanupHandle file in files) file.Dispose();
+                foreach (GuardedCleanupHandle child in directories) child.Dispose();
             }
         }
 
@@ -742,6 +1628,174 @@ namespace AL.EditorTools
                 "AndroidUnityLibraryExportSummary.json"));
             string assets = TryNormalize(Path.Combine(root, "Assets"));
             return SamePath(path, expected) && !IsSameOrDescendant(path, assets);
+        }
+
+        internal static void WriteAllTextGuarded(
+            string projectRoot,
+            string fullPath,
+            string contents,
+            Func<string, bool> isIgnored,
+            Func<string, bool> isTracked,
+            Func<string, bool> hasReparsePoint,
+            Action<string, string> mutationHook)
+        {
+            if (isIgnored == null) throw new ArgumentNullException(nameof(isIgnored));
+            if (isTracked == null) throw new ArgumentNullException(nameof(isTracked));
+            if (hasReparsePoint == null) throw new ArgumentNullException(nameof(hasReparsePoint));
+            string root = NormalizeFullPath(projectRoot);
+            string destination = NormalizeFullPath(fullPath);
+            AssertGuardedSummaryDestination(
+                root,
+                destination,
+                isIgnored,
+                isTracked,
+                hasReparsePoint);
+            string parent = NormalizeFullPath(Path.GetDirectoryName(destination) ?? root);
+            Directory.CreateDirectory(parent);
+            string parentIdentity = ReadDirectoryIdentityNoFollow(parent);
+            mutationHook?.Invoke("after-parent-attest", destination);
+            AssertGuardedSummaryDestination(
+                root,
+                destination,
+                isIgnored,
+                isTracked,
+                hasReparsePoint);
+
+            string temporary = destination + ".tmp-" + Process.GetCurrentProcess().Id + "-" +
+                Guid.NewGuid().ToString("N");
+            byte[] payload = new UTF8Encoding(false).GetBytes(contents ?? string.Empty);
+            try
+            {
+                using (IDisposable parentLease = AcquireDirectoryIdentityLease(parent, parentIdentity))
+                {
+                    mutationHook?.Invoke("before-temporary-create", destination);
+                    AssertGuardedSummaryDestination(
+                        root,
+                        destination,
+                        isIgnored,
+                        isTracked,
+                        hasReparsePoint);
+                    if (!SamePath(Path.GetDirectoryName(temporary), parent) ||
+                        File.Exists(temporary) ||
+                        Directory.Exists(temporary) ||
+                        hasReparsePoint(temporary))
+                    {
+                        throw new IOException("Refusing to create an unsafe export-summary temporary file.");
+                    }
+
+                    using (var stream = new FileStream(
+                               temporary,
+                               FileMode.CreateNew,
+                               FileAccess.Write,
+                               FileShare.None))
+                    {
+                        stream.Write(payload, 0, payload.Length);
+                        stream.Flush(flushToDisk: true);
+                    }
+
+                    mutationHook?.Invoke("before-commit", destination);
+                    AssertGuardedSummaryDestination(
+                        root,
+                        destination,
+                        isIgnored,
+                        isTracked,
+                        hasReparsePoint);
+                    if (!string.Equals(
+                            ReadDirectoryIdentityNoFollow(parent),
+                            parentIdentity,
+                            StringComparison.Ordinal))
+                    {
+                        throw new IOException("Export-summary parent identity changed before commit.");
+                    }
+                    FileAttributes temporaryAttributes = File.GetAttributes(temporary);
+                    if ((temporaryAttributes & FileAttributes.Directory) != 0 ||
+                        !IsSafeArtifactAttributes(temporaryAttributes))
+                    {
+                        throw new IOException("Export-summary temporary path is not a regular file.");
+                    }
+                    if (File.Exists(destination))
+                    {
+                        FileAttributes destinationAttributes = File.GetAttributes(destination);
+                        if ((destinationAttributes & FileAttributes.Directory) != 0 ||
+                            !IsSafeArtifactAttributes(destinationAttributes))
+                        {
+                            throw new IOException("Export-summary destination is not a regular file.");
+                        }
+                        File.Replace(temporary, destination, null);
+                    }
+                    else
+                    {
+                        File.Move(temporary, destination);
+                    }
+                }
+            }
+            finally
+            {
+                if (File.Exists(temporary))
+                {
+                    FileAttributes attributes = File.GetAttributes(temporary);
+                    if ((attributes & FileAttributes.Directory) == 0 &&
+                        IsSafeArtifactAttributes(attributes) &&
+                        SamePath(Path.GetDirectoryName(temporary), parent))
+                    {
+                        File.Delete(temporary);
+                    }
+                }
+            }
+        }
+
+        private static void AssertGuardedSummaryDestination(
+            string projectRoot,
+            string destination,
+            Func<string, bool> isIgnored,
+            Func<string, bool> isTracked,
+            Func<string, bool> hasReparsePoint)
+        {
+            if (!IsGuardedSummaryPath(projectRoot, destination) ||
+                !isIgnored(destination) ||
+                isTracked(destination) ||
+                hasReparsePoint(destination))
+            {
+                throw new IOException("Refusing to write an unguarded Android export summary.");
+            }
+        }
+
+        internal static string DescribeBuildSettingsMismatch(
+            AndroidUnityLibraryBuildSettingsSnapshot expected,
+            AndroidUnityLibraryBuildSettingsSnapshot actual)
+        {
+            if (expected == null) return "Original build settings snapshot is missing.";
+            if (actual == null) return "Post-restore build settings recapture is missing.";
+            var mismatches = new List<string>();
+            if (!string.Equals(
+                    expected.ScriptingBackend,
+                    actual.ScriptingBackend,
+                    StringComparison.Ordinal))
+            {
+                mismatches.Add("backend");
+            }
+            if (!string.Equals(
+                    expected.TargetArchitectures,
+                    actual.TargetArchitectures,
+                    StringComparison.Ordinal))
+            {
+                mismatches.Add("architectures");
+            }
+            if (expected.MinimumApiLevel != actual.MinimumApiLevel)
+            {
+                mismatches.Add("minimum-api");
+            }
+            if (expected.ExportAsGoogleAndroidProject != actual.ExportAsGoogleAndroidProject)
+            {
+                mismatches.Add("export-project");
+            }
+            if (expected.BuildAppBundle != actual.BuildAppBundle)
+            {
+                mismatches.Add("app-bundle");
+            }
+            return mismatches.Count == 0
+                ? string.Empty
+                : "Post-restore build settings mismatch: " + string.Join(", ", mismatches) + ".";
         }
 
         internal static string SerializeSummary(AndroidUnityLibraryExportSummary summary)
@@ -861,15 +1915,6 @@ namespace AL.EditorTools
             return normalizedPath.Substring(normalizedRoot.Length)
                 .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
                 .Replace(Path.DirectorySeparatorChar, '/');
-        }
-
-        private static string ComputeFileSha256(string path)
-        {
-            using (var algorithm = SHA256.Create())
-            using (var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                return Hex(algorithm.ComputeHash(stream));
-            }
         }
 
         private static string ComputeSha256(byte[] payload)
@@ -1345,6 +2390,7 @@ namespace AL.EditorTools
         bool HasCompilationErrors { get; }
         bool IsAndroidBuildSupported { get; }
         bool IsAndroidActiveBuildTarget { get; }
+        bool IsStrongPathAttestationSupported { get; }
         DateTime UtcNow();
         BuildValidationSnapshot ValidateCurrentShellFoundation();
         bool IsIgnoredPath(string fullPath);
@@ -1353,6 +2399,8 @@ namespace AL.EditorTools
         bool DirectoryExists(string fullPath);
         void DeleteDirectory(string fullPath);
         void CreateDirectory(string fullPath);
+        string AttestOutputDirectory(string fullPath);
+        IDisposable AcquireOutputMutationLease(string fullPath, string expectedIdentity);
         AndroidUnityLibraryBuildSettingsSnapshot CaptureBuildSettings();
         void ApplyRequiredBuildSettings();
         void RestoreBuildSettings(AndroidUnityLibraryBuildSettingsSnapshot snapshot);
@@ -1373,6 +2421,8 @@ namespace AL.EditorTools
             BuildTarget.Android);
         public bool IsAndroidActiveBuildTarget =>
             EditorUserBuildSettings.activeBuildTarget == BuildTarget.Android;
+        public bool IsStrongPathAttestationSupported =>
+            AndroidUnityLibraryExporter.SupportsStrongPathAttestation(Application.platform);
 
         public DateTime UtcNow() => DateTime.UtcNow;
 
@@ -1442,7 +2492,7 @@ namespace AL.EditorTools
             {
                 throw new IOException("Refusing cleanup outside the exact ignored, untracked, non-reparse export path.");
             }
-            Directory.Delete(candidate, recursive: true);
+            AndroidUnityLibraryExporter.DeleteTreeWithoutFollowingReparsePoints(candidate);
         }
 
         public void CreateDirectory(string fullPath)
@@ -1452,6 +2502,22 @@ namespace AL.EditorTools
                 throw new IOException("Refusing to create an unguarded Android export directory.");
             }
             Directory.CreateDirectory(fullPath);
+        }
+
+        public string AttestOutputDirectory(string fullPath)
+        {
+            string candidate = Normalize(fullPath);
+            AssertGuardedOutputDirectory(candidate);
+            return AndroidUnityLibraryExporter.ReadDirectoryIdentityNoFollow(candidate);
+        }
+
+        public IDisposable AcquireOutputMutationLease(string fullPath, string expectedIdentity)
+        {
+            string candidate = Normalize(fullPath);
+            AssertGuardedOutputDirectory(candidate);
+            return AndroidUnityLibraryExporter.AcquireDirectoryIdentityLease(
+                candidate,
+                expectedIdentity);
         }
 
         public AndroidUnityLibraryBuildSettingsSnapshot CaptureBuildSettings() =>
@@ -1531,35 +2597,26 @@ namespace AL.EditorTools
 
         public void WriteAllText(string fullPath, string contents)
         {
-            string destination = Normalize(fullPath);
-            if (!AndroidUnityLibraryExporter.IsGuardedSummaryPath(ProjectRoot, destination) ||
-                !IsIgnoredPath(destination) ||
-                IsTrackedPath(destination) ||
-                HasReparsePoint(destination))
-            {
-                throw new IOException("Refusing to write an unguarded Android export summary.");
-            }
+            AndroidUnityLibraryExporter.WriteAllTextGuarded(
+                ProjectRoot,
+                fullPath,
+                contents,
+                IsIgnoredPath,
+                IsTrackedPath,
+                HasReparsePoint,
+                mutationHook: null);
+        }
 
-            Directory.CreateDirectory(Path.GetDirectoryName(destination) ?? ProjectRoot);
-            string temporary = destination + ".tmp-" + Process.GetCurrentProcess().Id;
-            byte[] payload = new UTF8Encoding(false).GetBytes(contents ?? string.Empty);
-            try
+        private void AssertGuardedOutputDirectory(string candidate)
+        {
+            if (!AndroidUnityLibraryExporter.IsGuardedOutputDirectory(ProjectRoot, candidate) ||
+                !Directory.Exists(candidate) ||
+                !IsIgnoredPath(candidate) ||
+                IsTrackedPath(candidate) ||
+                HasReparsePoint(candidate))
             {
-                using (var stream = new FileStream(
-                           temporary,
-                           FileMode.CreateNew,
-                           FileAccess.Write,
-                           FileShare.None))
-                {
-                    stream.Write(payload, 0, payload.Length);
-                    stream.Flush(flushToDisk: true);
-                }
-                if (File.Exists(destination)) File.Replace(temporary, destination, null);
-                else File.Move(temporary, destination);
-            }
-            finally
-            {
-                if (File.Exists(temporary)) File.Delete(temporary);
+                throw new IOException(
+                    "Guarded Android export output changed identity or policy before mutation.");
             }
         }
 

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEditor;
@@ -88,6 +89,314 @@ namespace AL.Tests.EditMode.ProductionScenes
                 Path.Combine(root, "Logs", "AndroidUnityLibraryExportSummary-copy.json")));
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void CleanupRejectsPreexistingAndReracedDescendantReparseEntriesWithoutRecursion(
+            bool raceAfterScan)
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-cleanup-race-" + Guid.NewGuid().ToString("N"));
+            string child = Path.Combine(temporary, "child.bin");
+            try
+            {
+                Directory.CreateDirectory(temporary);
+                File.WriteAllText(child, "must-remain");
+                bool raced = false;
+                var attributes = new Func<string, FileAttributes>(path =>
+                {
+                    FileAttributes actual = File.GetAttributes(path);
+                    return PathsEqual(path, child) && (!raceAfterScan || raced)
+                        ? actual | FileAttributes.ReparsePoint
+                        : actual;
+                });
+                var hook = new Action<string, string>((stage, _) =>
+                {
+                    if (raceAfterScan && stage == "after-scan") raced = true;
+                });
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "DeleteTreeWithoutFollowingReparsePoints",
+                    temporary,
+                    32,
+                    32,
+                    attributes,
+                    hook));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsTrue(File.Exists(child));
+                Assert.AreEqual("must-remain", File.ReadAllText(child));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void CleanupRejectsRegularFileMoveAndReplacementRaceWithoutDeletingEitherSentinel()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-cleanup-file-replacement-" + Guid.NewGuid().ToString("N"));
+            string output = Path.Combine(temporary, "output");
+            string original = Path.Combine(output, "child.bin");
+            string displaced = Path.Combine(temporary, "displaced.bin");
+            string preparedReplacement = Path.Combine(temporary, "replacement.bin");
+            try
+            {
+                Directory.CreateDirectory(output);
+                File.WriteAllText(original, "original-must-remain");
+                File.WriteAllText(preparedReplacement, "replacement-must-remain");
+                var hook = new Action<string, string>((stage, _) =>
+                {
+                    if (stage != "after-scan") return;
+                    File.Move(original, displaced);
+                    File.Move(preparedReplacement, original);
+                });
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "DeleteTreeWithoutFollowingReparsePoints",
+                    output,
+                    32,
+                    32,
+                    new Func<string, FileAttributes>(File.GetAttributes),
+                    hook));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsTrue(File.Exists(original));
+                Assert.AreEqual("original-must-remain", File.ReadAllText(original));
+                Assert.IsTrue(File.Exists(preparedReplacement));
+                Assert.AreEqual("replacement-must-remain", File.ReadAllText(preparedReplacement));
+                Assert.IsFalse(File.Exists(displaced));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void CleanupRejectsRegularDirectoryMoveAndReplacementRaceWithoutDeletingEitherSentinel()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-cleanup-directory-replacement-" + Guid.NewGuid().ToString("N"));
+            string output = Path.Combine(temporary, "output");
+            string original = Path.Combine(output, "child");
+            string originalSentinel = Path.Combine(original, "original.txt");
+            string displaced = Path.Combine(temporary, "displaced");
+            string preparedReplacement = Path.Combine(temporary, "replacement");
+            string replacementSentinel = Path.Combine(preparedReplacement, "replacement.txt");
+            try
+            {
+                Directory.CreateDirectory(original);
+                Directory.CreateDirectory(preparedReplacement);
+                File.WriteAllText(originalSentinel, "original-must-remain");
+                File.WriteAllText(replacementSentinel, "replacement-must-remain");
+                var hook = new Action<string, string>((stage, _) =>
+                {
+                    if (stage != "after-scan") return;
+                    Directory.Move(original, displaced);
+                    Directory.Move(preparedReplacement, original);
+                });
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "DeleteTreeWithoutFollowingReparsePoints",
+                    output,
+                    32,
+                    32,
+                    new Func<string, FileAttributes>(File.GetAttributes),
+                    hook));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsTrue(File.Exists(originalSentinel));
+                Assert.AreEqual("original-must-remain", File.ReadAllText(originalSentinel));
+                Assert.IsTrue(File.Exists(replacementSentinel));
+                Assert.AreEqual("replacement-must-remain", File.ReadAllText(replacementSentinel));
+                Assert.IsFalse(Directory.Exists(displaced));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void CleanupFailsClosedWhenNewDescendantAppearsAfterScanWithoutRecursiveFallback()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-cleanup-new-descendant-" + Guid.NewGuid().ToString("N"));
+            string lateSentinel = Path.Combine(temporary, "late.txt");
+            try
+            {
+                Directory.CreateDirectory(temporary);
+                var hook = new Action<string, string>((stage, _) =>
+                {
+                    if (stage == "after-scan") File.WriteAllText(lateSentinel, "must-remain");
+                });
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "DeleteTreeWithoutFollowingReparsePoints",
+                    temporary,
+                    32,
+                    32,
+                    new Func<string, FileAttributes>(File.GetAttributes),
+                    hook));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsTrue(Directory.Exists(temporary));
+                Assert.IsTrue(File.Exists(lateSentinel));
+                Assert.AreEqual("must-remain", File.ReadAllText(lateSentinel));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void CleanupRejectsDuplicateHardLinkIdentityWithoutDeletingEitherName()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-cleanup-hard-link-" + Guid.NewGuid().ToString("N"));
+            string first = Path.Combine(temporary, "first.bin");
+            string second = Path.Combine(temporary, "second.bin");
+            try
+            {
+                Directory.CreateDirectory(temporary);
+                File.WriteAllText(first, "must-remain");
+                Assert.IsTrue(CreateHardLink(second, first, IntPtr.Zero),
+                    "CreateHardLinkW failed with Win32 " + Marshal.GetLastWin32Error() + ".");
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "DeleteTreeWithoutFollowingReparsePoints",
+                    temporary,
+                    32,
+                    32,
+                    new Func<string, FileAttributes>(File.GetAttributes),
+                    null));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsTrue(File.Exists(first));
+                Assert.IsTrue(File.Exists(second));
+                Assert.AreEqual("must-remain", File.ReadAllText(first));
+                Assert.AreEqual("must-remain", File.ReadAllText(second));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void CleanupDeletesExactRegularTreeOnlyThroughRetainedHandles()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-cleanup-handle-success-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                Directory.CreateDirectory(Path.Combine(temporary, "one", "two"));
+                File.WriteAllText(Path.Combine(temporary, "root.bin"), "root");
+                File.WriteAllText(Path.Combine(temporary, "one", "child.bin"), "child");
+                File.WriteAllText(Path.Combine(temporary, "one", "two", "leaf.bin"), "leaf");
+
+                Static(
+                    "DeleteTreeWithoutFollowingReparsePoints",
+                    temporary,
+                    32,
+                    32,
+                    new Func<string, FileAttributes>(File.GetAttributes),
+                    null);
+
+                Assert.IsFalse(Directory.Exists(temporary));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void SummaryWriteRejectsParentIdentityReplacementAfterCreation()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-summary-parent-race-" + Guid.NewGuid().ToString("N"));
+            string summary = Path.Combine(temporary, "Logs", "AndroidUnityLibraryExportSummary.json");
+            string displaced = Path.Combine(temporary, "Logs-displaced");
+            try
+            {
+                var hook = new Action<string, string>((stage, _) =>
+                {
+                    if (stage != "after-parent-attest") return;
+                    Directory.Move(Path.Combine(temporary, "Logs"), displaced);
+                    Directory.CreateDirectory(Path.Combine(temporary, "Logs"));
+                });
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "WriteAllTextGuarded",
+                    temporary,
+                    summary,
+                    "{}",
+                    new Func<string, bool>(_ => true),
+                    new Func<string, bool>(_ => false),
+                    new Func<string, bool>(_ => false),
+                    hook));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsFalse(File.Exists(summary));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [TestCase("before-temporary-create")]
+        [TestCase("before-commit")]
+        public void SummaryWriteRevalidatesPolicyAtBothMutationCheckpoints(string raceStage)
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-summary-guard-race-" + Guid.NewGuid().ToString("N"));
+            string summary = Path.Combine(temporary, "Logs", "AndroidUnityLibraryExportSummary.json");
+            try
+            {
+                bool raced = false;
+                var hook = new Action<string, string>((stage, _) =>
+                {
+                    if (stage == raceStage) raced = true;
+                });
+
+                TargetInvocationException thrown = Assert.Throws<TargetInvocationException>(() => Static(
+                    "WriteAllTextGuarded",
+                    temporary,
+                    summary,
+                    "{}",
+                    new Func<string, bool>(_ => true),
+                    new Func<string, bool>(_ => false),
+                    new Func<string, bool>(path => raced && PathsEqual(path, summary)),
+                    hook));
+
+                Assert.IsInstanceOf<IOException>(thrown.InnerException);
+                Assert.IsFalse(File.Exists(summary));
+                if (Directory.Exists(Path.GetDirectoryName(summary)))
+                {
+                    Assert.IsEmpty(Directory.GetFiles(
+                        Path.GetDirectoryName(summary),
+                        "AndroidUnityLibraryExportSummary.json.tmp-*"));
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
         [TestCase("version")]
         [TestCase("compiling")]
         [TestCase("compile-errors")]
@@ -140,6 +449,32 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
+        public void HostWithoutStrongNamespaceAttestationFailsBeforeAnyMutationOrSummaryWrite()
+        {
+            EnvironmentState state = ValidEnvironment();
+            state.IsStrongPathAttestationSupported = false;
+
+            object summary = Execute(state);
+
+            Assert.AreEqual("PreflightFailed", Prop(summary, "Status").ToString());
+            Assert.AreEqual(0, state.CaptureCallCount);
+            Assert.AreEqual(0, state.DeleteCallCount);
+            Assert.AreEqual(0, state.BuildCallCount);
+            Assert.IsNull(state.WrittenPath);
+            StringAssert.Contains("Windows-only", PropString(summary, "SummaryMessage"));
+        }
+
+        [TestCase(RuntimePlatform.WindowsEditor, true)]
+        [TestCase(RuntimePlatform.LinuxEditor, false)]
+        [TestCase(RuntimePlatform.OSXEditor, false)]
+        public void StrongNamespaceAttestationSupportIsExplicitPerEditorHost(
+            RuntimePlatform host,
+            bool expected)
+        {
+            Assert.AreEqual(expected, (bool)Static("SupportsStrongPathAttestation", host));
+        }
+
+        [Test]
         public void SuccessfulExecutionCleansOnlyGuardedOutputAndRestoresSettings()
         {
             EnvironmentState state = ValidEnvironment();
@@ -150,7 +485,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.AreEqual("Succeeded", Prop(summary, "Status").ToString(), PropString(summary, "SummaryMessage"));
             Assert.AreEqual(1, state.DeleteCallCount);
             CollectionAssert.AreEqual(new[] { ExpectedOutput(state.ProjectRoot) }, state.DeletedPaths);
-            Assert.AreEqual(1, state.CaptureCallCount);
+            Assert.AreEqual(2, state.CaptureCallCount);
             Assert.AreEqual(1, state.ApplyCallCount);
             Assert.AreEqual(1, state.BuildCallCount);
             Assert.AreEqual(1, state.InspectCallCount);
@@ -175,7 +510,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             object summary = Execute(state);
 
             Assert.AreNotEqual("Succeeded", Prop(summary, "Status").ToString());
-            Assert.AreEqual(1, state.CaptureCallCount);
+            Assert.AreEqual(2, state.CaptureCallCount);
             Assert.AreEqual(1, state.RestoreCallCount, "Settings restoration must run exactly once in finally.");
             Assert.AreSame(state.Settings, state.RestoredSettings);
             Assert.Greater(state.RestoreSequence, state.ApplySequence);
@@ -194,6 +529,71 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.AreEqual(1, state.BuildCallCount);
             Assert.AreEqual(1, state.RestoreCallCount);
             StringAssert.Contains("restoration", PropString(summary, "SummaryMessage").ToLowerInvariant());
+        }
+
+        [TestCase("backend")]
+        [TestCase("architectures")]
+        [TestCase("minimum-api")]
+        [TestCase("export-project")]
+        [TestCase("app-bundle")]
+        public void RestoreMustRecaptureAndMatchEveryOriginalSetting(string drift)
+        {
+            EnvironmentState state = ValidEnvironment();
+            state.PostRestoreSettings = NewSettings(
+                drift == "backend" ? "IL2CPP" : "Mono2x",
+                drift == "architectures" ? "ARM64" : "ARMv7",
+                drift == "minimum-api" ? 24 : 22,
+                drift == "export-project" || false,
+                drift != "app-bundle");
+
+            object summary = Execute(state);
+
+            Assert.AreEqual("SettingsRestoreFailed", Prop(summary, "Status").ToString());
+            Assert.AreEqual(2, state.CaptureCallCount);
+            Assert.AreEqual(1, state.RestoreCallCount);
+            StringAssert.Contains(drift, PropString(summary, "SummaryMessage").ToLowerInvariant());
+        }
+
+        [Test]
+        public void RestoreRecaptureExceptionFailsClosed()
+        {
+            EnvironmentState state = ValidEnvironment();
+            state.ThrowOnPostRestoreCapture = true;
+
+            object summary = Execute(state);
+
+            Assert.AreEqual("SettingsRestoreFailed", Prop(summary, "Status").ToString());
+            Assert.AreEqual(2, state.CaptureCallCount);
+            StringAssert.Contains("recapture", PropString(summary, "SummaryMessage").ToLowerInvariant());
+        }
+
+        [TestCase(2, 0)]
+        [TestCase(3, 0)]
+        public void OutputPathRaceAfterCreationOrImmediatelyBeforeBuildFailsClosed(
+            int reparseCheckThatDrifts,
+            int expectedBuildCalls)
+        {
+            EnvironmentState state = ValidEnvironment();
+            state.OutputReparseOnCheck = reparseCheckThatDrifts;
+
+            object summary = Execute(state);
+
+            Assert.AreNotEqual("Succeeded", Prop(summary, "Status").ToString());
+            Assert.AreEqual(expectedBuildCalls, state.BuildCallCount);
+            Assert.GreaterOrEqual(state.OutputReparseCheckCount, reparseCheckThatDrifts);
+        }
+
+        [Test]
+        public void OutputDirectoryIdentityChangeBeforeMutationLeaseFailsClosed()
+        {
+            EnvironmentState state = ValidEnvironment();
+            state.OutputIdentityBeforeBuild = "replacement-directory";
+
+            object summary = Execute(state);
+
+            Assert.AreNotEqual("Succeeded", Prop(summary, "Status").ToString());
+            Assert.AreEqual(0, state.BuildCallCount);
+            Assert.AreEqual(0, state.InspectCallCount);
         }
 
         [TestCase("report-result")]
@@ -344,7 +744,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                 Assert.IsFalse(PropBool(missingToolchain, "IsValid"));
                 Assert.That(
                     string.Join(" ", AsStrings(Prop(missingToolchain, "MissingArtifacts"))),
-                    Does.Contain("il2cpp(.exe)"));
+                    Does.Contain("IL2CPP/build/deploy/il2cpp.exe"));
             }
             finally
             {
@@ -352,39 +752,154 @@ namespace AL.Tests.EditMode.ProductionScenes
             }
         }
 
-        [TestCase("il2cpp.exe")]
-        [TestCase("il2cpp")]
-        public void ExportStageAcceptsThePlatformIl2CppToolNameAlternative(string toolName)
+        [Test]
+        public void ArtifactReadUsesRemainingBudgetPlusOneToProveOverflow()
         {
             string temporary = Path.Combine(
                 Path.GetTempPath(),
-                "al-android-export-il2cpp-tool-" + Guid.NewGuid().ToString("N"));
+                "al-android-export-byte-bound-" + Guid.NewGuid().ToString("N"));
             try
             {
                 CreateValidTree(temporary);
-                string deploy = Path.Combine(
+                object bounded = Static("InspectExportTree", temporary, 8192, 8192, 1L);
+
+                Assert.IsFalse(PropBool(bounded, "Inspected"));
+                StringAssert.Contains("byte inspection bound", PropString(bounded, "Summary"));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [TestCase(RuntimePlatform.WindowsEditor, "il2cpp.exe", true, 0x4d, 0x5a, true)]
+        [TestCase(RuntimePlatform.WindowsEditor, "il2cpp", true, 0x7f, 0x45, false)]
+        [TestCase(RuntimePlatform.WindowsEditor, "il2cpp.exe", true, 0x00, 0x00, false)]
+        [TestCase(RuntimePlatform.LinuxEditor, "il2cpp", true, 0x7f, 0x45, true)]
+        [TestCase(RuntimePlatform.LinuxEditor, "il2cpp.exe", true, 0x4d, 0x5a, false)]
+        [TestCase(RuntimePlatform.LinuxEditor, "il2cpp", false, 0x7f, 0x45, false)]
+        [TestCase(RuntimePlatform.OSXEditor, "il2cpp", true, 0xcf, 0xfa, true)]
+        [TestCase(RuntimePlatform.OSXEditor, "il2cpp.exe", true, 0x4d, 0x5a, false)]
+        public void Il2CppToolMustMatchCurrentHostNameExecutionAndBinaryFormat(
+            RuntimePlatform host,
+            string toolName,
+            bool executable,
+            byte first,
+            byte second,
+            bool expectedValid)
+        {
+            string relative =
+                "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/" + toolName;
+            byte[] prefix = expectedValid && host == RuntimePlatform.WindowsEditor
+                ? ValidPeHeader()
+                : expectedValid && host == RuntimePlatform.LinuxEditor
+                    ? new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' }
+                    : expectedValid && host == RuntimePlatform.OSXEditor
+                        ? new byte[] { 0xcf, 0xfa, 0xed, 0xfe }
+                        : new byte[] { first, second, 0x01, 0x02 };
+
+            string failure = (string)Static(
+                "ValidateIl2CppToolForHost",
+                relative,
+                prefix,
+                executable,
+                host);
+
+            Assert.AreEqual(expectedValid, failure.Length == 0, failure);
+        }
+
+        [Test]
+        public void WindowsIl2CppToolRejectsTruncatedAndSpoofedPortableExecutables()
+        {
+            const string relative =
+                "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe";
+            byte[] invalidOffset = new byte[128];
+            invalidOffset[0] = (byte)'M';
+            invalidOffset[1] = (byte)'Z';
+            invalidOffset[0x3c] = 0xff;
+            invalidOffset[0x3d] = 0xff;
+
+            Assert.That(
+                (string)Static(
+                    "ValidateIl2CppToolForHost",
+                    relative,
+                    new byte[] { (byte)'M', (byte)'Z' },
+                    true,
+                    RuntimePlatform.WindowsEditor),
+                Is.Not.Empty);
+            Assert.That(
+                (string)Static(
+                    "ValidateIl2CppToolForHost",
+                    relative,
+                    invalidOffset,
+                    true,
+                    RuntimePlatform.WindowsEditor),
+                Is.Not.Empty);
+            Assert.That(
+                (string)Static(
+                    "ValidateIl2CppToolForHost",
+                    relative,
+                    new byte[128],
+                    true,
+                    RuntimePlatform.WindowsEditor),
+                Is.Not.Empty);
+        }
+
+        [Test]
+        public void ExportRejectsAmbiguousWrongHostIl2CppToolAlongsideExpectedTool()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-export-il2cpp-ambiguous-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                CreateValidTree(temporary);
+                WriteFixtureBytes(
                     temporary,
-                    "unityLibrary",
-                    "src",
-                    "main",
-                    "Il2CppOutputProject",
-                    "IL2CPP",
-                    "build",
-                    "deploy");
-                string windowsTool = Path.Combine(deploy, "il2cpp.exe");
-                if (!string.Equals(toolName, "il2cpp.exe", StringComparison.Ordinal))
-                {
-                    File.Delete(windowsTool);
-                    WriteFixture(
-                        temporary,
-                        "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/" + toolName,
-                        "toolchain");
-                }
+                    "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp",
+                    new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' });
 
                 object artifacts = Static("InspectExportTree", temporary);
 
-                Assert.IsTrue(PropBool(artifacts, "IsValid"), PropString(artifacts, "Summary"));
-                Assert.IsEmpty(AsStrings(Prop(artifacts, "MissingArtifacts")));
+                Assert.IsFalse(PropBool(artifacts, "IsValid"));
+                Assert.That(
+                    string.Join(" ", AsStrings(Prop(artifacts, "InvalidArtifacts"))),
+                    Does.Contain("wrong tool name"));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void InspectionKeepsEachArtifactSingleOpenAndRejectsConcurrentMutation()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-export-race-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                CreateValidTree(temporary);
+                string target = Path.Combine(temporary, "settings.gradle");
+                var hook = new Action<string, string>((stage, relative) =>
+                {
+                    if (stage == "after-open" && relative == "settings.gradle")
+                    {
+                        File.WriteAllText(target, "include ':attacker'");
+                    }
+                });
+
+                object raced = Static(
+                    "InspectExportTree",
+                    temporary,
+                    8192,
+                    8192,
+                    2L * 1024L * 1024L * 1024L,
+                    hook);
+
+                Assert.IsFalse(PropBool(raced, "Inspected"));
+                StringAssert.Contains("inspection failed", PropString(raced, "Summary").ToLowerInvariant());
             }
             finally
             {
@@ -500,6 +1015,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                 UnityVersion = "2022.3.62f3",
                 IsAndroidBuildSupported = true,
                 IsAndroidActiveBuildTarget = true,
+                IsStrongPathAttestationSupported = true,
                 Validation = NewValidation(true, "valid"),
                 OutputIgnored = true,
                 SummaryIgnored = true,
@@ -641,6 +1157,28 @@ namespace AL.Tests.EditMode.ProductionScenes
         private static string ExpectedSummary(string root) =>
             Path.GetFullPath(Path.Combine(root, "Logs", "AndroidUnityLibraryExportSummary.json"));
         private static string Hash64() => new string('a', 64);
+        private static bool PathsEqual(string left, string right) => string.Equals(
+            Path.GetFullPath(left),
+            Path.GetFullPath(right),
+            StringComparison.OrdinalIgnoreCase);
+
+        private static byte[] ValidPeHeader()
+        {
+            var bytes = new byte[128];
+            bytes[0] = (byte)'M';
+            bytes[1] = (byte)'Z';
+            bytes[0x3c] = 0x40;
+            bytes[0x40] = (byte)'P';
+            bytes[0x41] = (byte)'E';
+            return bytes;
+        }
+
+        [DllImport("kernel32.dll", EntryPoint = "CreateHardLinkW", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool CreateHardLink(
+            string fileName,
+            string existingFileName,
+            IntPtr securityAttributes);
 
         private static void CreateValidTree(string root)
         {
@@ -664,10 +1202,10 @@ namespace AL.Tests.EditMode.ProductionScenes
             byte[] elf = { 0x7f, (byte)'E', (byte)'L', (byte)'F', 1 };
             WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libmain.so", elf);
             WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libunity.so", elf);
-            WriteFixture(
+            WriteFixtureBytes(
                 root,
                 "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe",
-                "toolchain");
+                ValidPeHeader());
             WriteFixture(
                 root,
                 "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/libil2cpp/il2cpp-api.cpp",
@@ -706,6 +1244,8 @@ namespace AL.Tests.EditMode.ProductionScenes
                     case "get_HasCompilationErrors": return State.HasCompilationErrors;
                     case "get_IsAndroidBuildSupported": return State.IsAndroidBuildSupported;
                     case "get_IsAndroidActiveBuildTarget": return State.IsAndroidActiveBuildTarget;
+                    case "get_IsStrongPathAttestationSupported":
+                        return State.IsStrongPathAttestationSupported;
                     case "UtcNow": return State.UtcBase.AddSeconds(State.UtcCallCount++);
                     case "ValidateCurrentShellFoundation": return State.Validation;
                     case "IsIgnoredPath":
@@ -717,9 +1257,14 @@ namespace AL.Tests.EditMode.ProductionScenes
                             ? State.OutputTracked
                             : State.SummaryTracked;
                     case "HasReparsePoint":
-                        return SamePath((string)args[0], ExpectedOutput(State.ProjectRoot))
-                            ? State.OutputHasReparsePoint
-                            : State.SummaryHasReparsePoint;
+                        if (SamePath((string)args[0], ExpectedOutput(State.ProjectRoot)))
+                        {
+                            State.OutputReparseCheckCount++;
+                            return State.OutputHasReparsePoint ||
+                                State.OutputReparseOnCheck == State.OutputReparseCheckCount;
+                        }
+                        State.SummaryReparseCheckCount++;
+                        return State.SummaryHasReparsePoint;
                     case "DirectoryExists":
                         return SamePath((string)args[0], ExpectedOutput(State.ProjectRoot)) &&
                             State.OutputDirectoryExists;
@@ -732,9 +1277,36 @@ namespace AL.Tests.EditMode.ProductionScenes
                     case "CreateDirectory":
                         State.OutputDirectoryExists = true;
                         return null;
+                    case "AttestOutputDirectory":
+                        State.OutputReparseCheckCount++;
+                        if (State.OutputHasReparsePoint ||
+                            State.OutputReparseOnCheck == State.OutputReparseCheckCount)
+                        {
+                            throw new IOException("scripted post-create reparse race");
+                        }
+                        return State.OutputIdentity;
+                    case "AcquireOutputMutationLease":
+                        State.OutputReparseCheckCount++;
+                        if (State.OutputHasReparsePoint ||
+                            State.OutputReparseOnCheck == State.OutputReparseCheckCount)
+                        {
+                            throw new IOException("scripted pre-build reparse race");
+                        }
+                        string actualIdentity = State.OutputIdentityBeforeBuild ?? State.OutputIdentity;
+                        if (!string.Equals(actualIdentity, (string)args[1], StringComparison.Ordinal))
+                        {
+                            throw new IOException("scripted output identity replacement");
+                        }
+                        return new ScriptedLease();
                     case "CaptureBuildSettings":
                         State.CaptureCallCount++;
-                        return State.Settings;
+                        if (State.CaptureCallCount > 1 && State.ThrowOnPostRestoreCapture)
+                        {
+                            throw new InvalidOperationException("scripted recapture failure");
+                        }
+                        return State.CaptureCallCount == 1 || State.PostRestoreSettings == null
+                            ? State.Settings
+                            : State.PostRestoreSettings;
                     case "ApplyRequiredBuildSettings":
                         State.ApplyCallCount++;
                         State.ApplySequence = ++State.Sequence;
@@ -779,6 +1351,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             public bool HasCompilationErrors;
             public bool IsAndroidBuildSupported;
             public bool IsAndroidActiveBuildTarget;
+            public bool IsStrongPathAttestationSupported;
             public object Validation;
             public bool OutputIgnored;
             public bool OutputTracked;
@@ -788,12 +1361,16 @@ namespace AL.Tests.EditMode.ProductionScenes
             public bool SummaryHasReparsePoint;
             public bool OutputDirectoryExists;
             public object Settings;
+            public object PostRestoreSettings;
+            public string OutputIdentity = "scripted-output-identity";
+            public string OutputIdentityBeforeBuild;
             public object Report;
             public object Artifacts;
             public bool ThrowOnApply;
             public bool ThrowOnBuild;
             public bool ThrowOnInspect;
             public bool ThrowOnRestore;
+            public bool ThrowOnPostRestoreCapture;
             public int CaptureCallCount;
             public int ApplyCallCount;
             public int BuildCallCount;
@@ -804,6 +1381,9 @@ namespace AL.Tests.EditMode.ProductionScenes
             public int ApplySequence;
             public int BuildSequence;
             public int RestoreSequence;
+            public int OutputReparseCheckCount;
+            public int SummaryReparseCheckCount;
+            public int OutputReparseOnCheck;
             public int UtcCallCount;
             public object RestoredSettings;
             public BuildPlayerOptions? CapturedOptions;
@@ -811,6 +1391,11 @@ namespace AL.Tests.EditMode.ProductionScenes
             public string WrittenPath;
             public string WrittenContents;
             public DateTime UtcBase;
+        }
+
+        private sealed class ScriptedLease : IDisposable
+        {
+            public void Dispose() { }
         }
     }
 }
