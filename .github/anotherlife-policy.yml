@@ -1,4 +1,4 @@
-version: 5
+version: 6
 status_names:
   classify: "policy / classify"
   hygiene: "repository / hygiene"
@@ -14,6 +14,9 @@ primary_modes:
   - Codex engineering
 a2_branch_prefix: a2/terrestrial-
 a2_primary_mode: A2 terrestrial design
+a2_source_paths:
+  - unity/Docs/Terrestrials/
+  - unity/Assets/AL/Art/Terrestrials/ConceptSheets/
 retired_agents_and_prefixes:
   - GPT
   - Android Studio

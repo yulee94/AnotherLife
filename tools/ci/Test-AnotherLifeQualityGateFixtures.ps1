@@ -757,7 +757,9 @@ function Test-A2ConventionFixture {
     New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
     Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
     New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs/Terrestrials") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets/AL/Art/Terrestrials/ConceptSheets") | Out-Null
     Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Terrestrials/A2.md") -Value "# A2 fixture"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/AL/Art/Terrestrials/ConceptSheets/A2.png") -Value "A2 source fixture" -NoNewline
     $eventPath = Join-Path $fixtureRepo "event.json"
     Set-Content -LiteralPath $eventPath -Value @"
 {
@@ -774,7 +776,11 @@ function Test-A2ConventionFixture {
     try {
         Invoke-Checked git @("add", ".github/anotherlife-policy.yml", "tools/ci/Invoke-AnotherLifeQualityGate.ps1") $fixtureRepo | Out-Null
         Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
-        Invoke-Checked git @("add", "unity/Docs/Terrestrials/A2.md") $fixtureRepo | Out-Null
+        Invoke-Checked git @(
+            "add",
+            "unity/Docs/Terrestrials/A2.md",
+            "unity/Assets/AL/Art/Terrestrials/ConceptSheets/A2.png"
+        ) $fixtureRepo | Out-Null
         $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
@@ -786,7 +792,7 @@ function Test-A2ConventionFixture {
         Pop-Location
     }
 
-    Assert-Contains $output "Terrestrial design paths changed: 1"
+    Assert-Contains $output "Terrestrial design paths changed: 2"
 }
 
 function Invoke-A2AuthorityFailureFixture {
@@ -860,35 +866,77 @@ function Test-A2AuthorityFixture {
         "unity/Docs/Narrative/A2Narrative.md" `
         $a2Body `
         "a2/terrestrial-narrative-path" `
-        @("A2 branches cannot change narrative paths.", "A2 branches may change only configured terrestrial-design source paths.")
+        @("A2 branches cannot change narrative paths.", "A2 branches may change only configured A2 source-only directory paths.")
 
     Invoke-A2AuthorityFailureFixture `
         "a2-runtime-path" `
         "unity/Assets/AL/Scripts/A2Runtime.cs" `
         $a2Body `
         "a2/terrestrial-runtime-path" `
-        @("A2 branches cannot change runtime paths.", "A2 branches may change only configured terrestrial-design source paths.")
+        @("A2 branches cannot change runtime paths.", "A2 branches may change only configured A2 source-only directory paths.")
 
     Invoke-A2AuthorityFailureFixture `
         "a2-workflow-path" `
         ".github/workflows/a2-workflow.yml" `
         $a2Body `
         "a2/terrestrial-workflow-path" `
-        @("A2 branches cannot change workflow paths.", "A2 branches may change only configured terrestrial-design source paths.")
+        @("A2 branches cannot change workflow paths.", "A2 branches may change only configured A2 source-only directory paths.")
 
     Invoke-A2AuthorityFailureFixture `
         "a2-engineering-tool-path" `
         "tools/game-data/a2-tool.py" `
         $a2Body `
         "a2/terrestrial-engineering-tool-path" `
-        @("A2 branches cannot change engineering tool paths.", "A2 branches may change only configured terrestrial-design source paths.")
+        @("A2 branches cannot change engineering tool paths.", "A2 branches may change only configured A2 source-only directory paths.")
 
     Invoke-A2AuthorityFailureFixture `
         "a2-unclassified-path" `
         "unity/Docs/A2OutsideTerrestrialSource.md" `
         $a2Body `
         "a2/terrestrial-unclassified-path" `
-        @("A2 branches may change only configured terrestrial-design source paths.")
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-coordination-spec" `
+        "unity/Docs/Terrestrial_Source_Packet_Validation_Spec.md" `
+        $a2Body `
+        "a2/terrestrial-coordination-spec" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-terrestrial-near-miss" `
+        "unity/Docs/TerrestrialPolicyEscape.md" `
+        $a2Body `
+        "a2/terrestrial-near-miss" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-material" `
+        "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Materials/MAT_Slagfall_Rock.mat" `
+        $a2Body `
+        "a2/terrestrial-runtime-material" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-mesh" `
+        "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshes/M_Slagfall_QuarryBowl_128m.asset" `
+        $a2Body `
+        "a2/terrestrial-runtime-mesh" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-prefab" `
+        "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/Slagfall_RepresentativeSlice.prefab" `
+        $a2Body `
+        "a2/terrestrial-runtime-prefab" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-export" `
+        "unity/Assets/AL/Art/Terrestrials/RuntimeExports/Slagfall_Runtime.asset" `
+        $a2Body `
+        "a2/terrestrial-runtime-export" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
 
     Invoke-A2AuthorityFailureFixture `
         "a2-mixed-mode-escape" `

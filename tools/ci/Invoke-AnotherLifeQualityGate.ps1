@@ -444,6 +444,35 @@ function Test-AnyPathPrefix {
     return $false
 }
 
+function Test-AnyPathWithinDirectory {
+    param(
+        [string] $Path,
+        [string[]] $Directories
+    )
+
+    $normalizedPath = ""
+    if ($null -ne $Path) {
+        $normalizedPath = $Path -replace "\\", "/"
+    }
+
+    foreach ($directory in $Directories) {
+        $normalizedDirectory = ""
+        if ($null -ne $directory) {
+            $normalizedDirectory = ($directory -replace "\\", "/").TrimEnd("/")
+        }
+        if (-not $normalizedDirectory) {
+            continue
+        }
+
+        if ($normalizedPath.Equals($normalizedDirectory, [System.StringComparison]::Ordinal) -or
+            $normalizedPath.StartsWith("$normalizedDirectory/", [System.StringComparison]::Ordinal)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
 function Test-IsSubstantiveMixedModeRationale {
     param([AllowNull()][string] $Text)
 
@@ -518,6 +547,10 @@ function Invoke-Classify {
     $branchPrefixes = Get-PolicyList "branch_prefixes" @("codex/")
     $a2BranchPrefix = Get-PolicyScalar "a2_branch_prefix" "a2/terrestrial-"
     $a2PrimaryMode = Get-PolicyScalar "a2_primary_mode" "A2 terrestrial design"
+    $a2SourceDirectories = Get-PolicyList "a2_source_paths" @(
+        "unity/Docs/Terrestrials/",
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/"
+    )
     $primaryModes = Get-PolicyList "primary_modes" @(
         "Codex coordination/review",
         "Codex narrative/content",
@@ -629,7 +662,7 @@ function Invoke-Classify {
     $workflowChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $workflowPrefixes })
     $engineeringToolChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringToolPrefixes })
     $engineeringChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringPrefixes })
-    $nonTerrestrialChanged = @($changedFiles | Where-Object { -not (Test-AnyPathPrefix $_ $terrestrialPrefixes) })
+    $nonA2SourceChanged = @($changedFiles | Where-Object { -not (Test-AnyPathWithinDirectory $_ $a2SourceDirectories) })
 
     if ($isA2Branch) {
         if ($narrativeChanged.Count -gt 0) {
@@ -644,8 +677,8 @@ function Invoke-Classify {
         if ($engineeringToolChanged.Count -gt 0) {
             Add-Failure $failures "A2 branches cannot change engineering tool paths."
         }
-        if ($nonTerrestrialChanged.Count -gt 0) {
-            Add-Failure $failures "A2 branches may change only configured terrestrial-design source paths. Out-of-bound paths: $($nonTerrestrialChanged -join ', ')."
+        if ($nonA2SourceChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches may change only configured A2 source-only directory paths. Out-of-bound paths: $($nonA2SourceChanged -join ', ')."
         }
         if (Test-HasMixedModeJustification $body) {
             Add-Failure $failures "A2 branches cannot use a mixed-mode justification to escape their source-only boundary."
