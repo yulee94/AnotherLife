@@ -1,14 +1,19 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "catalogId": "al_world_atlas_narrative_catalog",
   "game": "Another Life",
-  "sourcePacketId": "al_narrative_world_atlas_source_v001",
+  "sourcePacketId": "al_narrative_world_atlas_source_v002",
   "idFormat": "lowercase_snake_case",
   "sourceAuthorities": {
     "primaryMode": "codex_narrative_content",
     "realmCatalog": "al_realm_catalog",
     "mainQuestPacket": "ANOTHERLIFE_MAIN_QUEST_LINE",
     "nvsPacket": "OMEN_1",
+    "topologyContract": {
+      "id": "al_world_atlas_topology_query_contract_v001",
+      "path": "unity/Docs/World_Atlas_Topology_And_Query_Contract.md",
+      "mergeCommit": "a97d5e5cf0afc0701ff57d6d110ce056632b4eec"
+    },
     "technicalConsumerIssue": 181
   },
   "atlasPolicy": {
@@ -27,6 +32,395 @@
       "balance values"
     ]
   },
+  "abstractTopology": {
+    "topologyId": "topology_launch_world_ring_v001",
+    "macroNarrativeZoneId": "zone_crossroads_bridges",
+    "nodes": [
+      {
+        "id": "ring_slot_01",
+        "role": "realm_continent_slot",
+        "realmAssignmentStatus": "unresolved_user_gate"
+      },
+      {
+        "id": "ring_slot_02",
+        "role": "realm_continent_slot",
+        "realmAssignmentStatus": "unresolved_user_gate"
+      },
+      {
+        "id": "ring_slot_03",
+        "role": "realm_continent_slot",
+        "realmAssignmentStatus": "unresolved_user_gate"
+      },
+      {
+        "id": "ring_slot_04",
+        "role": "realm_continent_slot",
+        "realmAssignmentStatus": "unresolved_user_gate"
+      },
+      {
+        "id": "center_slot",
+        "role": "neutral_center_island",
+        "atlasZoneId": "zone_accordant_isle"
+      }
+    ],
+    "adjacency": [
+      {
+        "id": "adjacency_ring_01_02",
+        "nodeAId": "ring_slot_01",
+        "nodeBId": "ring_slot_02"
+      },
+      {
+        "id": "adjacency_ring_02_03",
+        "nodeAId": "ring_slot_02",
+        "nodeBId": "ring_slot_03"
+      },
+      {
+        "id": "adjacency_ring_03_04",
+        "nodeAId": "ring_slot_03",
+        "nodeBId": "ring_slot_04"
+      },
+      {
+        "id": "adjacency_ring_01_04",
+        "nodeAId": "ring_slot_01",
+        "nodeBId": "ring_slot_04"
+      }
+    ],
+    "bridges": [
+      {
+        "id": "bridge_ring_01_02_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_01",
+        "endpointAId": "endpoint_bridge_ring_01_02_01_ring_01",
+        "nodeBId": "ring_slot_02",
+        "endpointBId": "endpoint_bridge_ring_01_02_01_ring_02",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_01_02_02",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_01",
+        "endpointAId": "endpoint_bridge_ring_01_02_02_ring_01",
+        "nodeBId": "ring_slot_02",
+        "endpointBId": "endpoint_bridge_ring_01_02_02_ring_02",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_02_03_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_02",
+        "endpointAId": "endpoint_bridge_ring_02_03_01_ring_02",
+        "nodeBId": "ring_slot_03",
+        "endpointBId": "endpoint_bridge_ring_02_03_01_ring_03",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_02_03_02",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_02",
+        "endpointAId": "endpoint_bridge_ring_02_03_02_ring_02",
+        "nodeBId": "ring_slot_03",
+        "endpointBId": "endpoint_bridge_ring_02_03_02_ring_03",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_03_04_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_03",
+        "endpointAId": "endpoint_bridge_ring_03_04_01_ring_03",
+        "nodeBId": "ring_slot_04",
+        "endpointBId": "endpoint_bridge_ring_03_04_01_ring_04",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_03_04_02",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_03",
+        "endpointAId": "endpoint_bridge_ring_03_04_02_ring_03",
+        "nodeBId": "ring_slot_04",
+        "endpointBId": "endpoint_bridge_ring_03_04_02_ring_04",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_01_04_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_01",
+        "endpointAId": "endpoint_bridge_ring_01_04_01_ring_01",
+        "nodeBId": "ring_slot_04",
+        "endpointBId": "endpoint_bridge_ring_01_04_01_ring_04",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_ring_01_04_02",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_01",
+        "endpointAId": "endpoint_bridge_ring_01_04_02_ring_01",
+        "nodeBId": "ring_slot_04",
+        "endpointBId": "endpoint_bridge_ring_01_04_02_ring_04",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_center_ring_01_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_01",
+        "endpointAId": "endpoint_bridge_center_ring_01_01_ring_01",
+        "nodeBId": "center_slot",
+        "endpointBId": "endpoint_bridge_center_ring_01_01_center",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_center_ring_02_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_02",
+        "endpointAId": "endpoint_bridge_center_ring_02_01_ring_02",
+        "nodeBId": "center_slot",
+        "endpointBId": "endpoint_bridge_center_ring_02_01_center",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_center_ring_03_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_03",
+        "endpointAId": "endpoint_bridge_center_ring_03_01_ring_03",
+        "nodeBId": "center_slot",
+        "endpointBId": "endpoint_bridge_center_ring_03_01_center",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      },
+      {
+        "id": "bridge_center_ring_04_01",
+        "connectionType": "physical_bidirectional",
+        "nodeAId": "ring_slot_04",
+        "endpointAId": "endpoint_bridge_center_ring_04_01_ring_04",
+        "nodeBId": "center_slot",
+        "endpointBId": "endpoint_bridge_center_ring_04_01_center",
+        "hookStatus": "requested",
+        "mutationAuthority": "codex_engineering_future_contract"
+      }
+    ],
+    "endpoints": [
+      { "id": "endpoint_bridge_ring_01_02_01_ring_01", "bridgeId": "bridge_ring_01_02_01", "nodeId": "ring_slot_01" },
+      { "id": "endpoint_bridge_ring_01_02_01_ring_02", "bridgeId": "bridge_ring_01_02_01", "nodeId": "ring_slot_02" },
+      { "id": "endpoint_bridge_ring_01_02_02_ring_01", "bridgeId": "bridge_ring_01_02_02", "nodeId": "ring_slot_01" },
+      { "id": "endpoint_bridge_ring_01_02_02_ring_02", "bridgeId": "bridge_ring_01_02_02", "nodeId": "ring_slot_02" },
+      { "id": "endpoint_bridge_ring_02_03_01_ring_02", "bridgeId": "bridge_ring_02_03_01", "nodeId": "ring_slot_02" },
+      { "id": "endpoint_bridge_ring_02_03_01_ring_03", "bridgeId": "bridge_ring_02_03_01", "nodeId": "ring_slot_03" },
+      { "id": "endpoint_bridge_ring_02_03_02_ring_02", "bridgeId": "bridge_ring_02_03_02", "nodeId": "ring_slot_02" },
+      { "id": "endpoint_bridge_ring_02_03_02_ring_03", "bridgeId": "bridge_ring_02_03_02", "nodeId": "ring_slot_03" },
+      { "id": "endpoint_bridge_ring_03_04_01_ring_03", "bridgeId": "bridge_ring_03_04_01", "nodeId": "ring_slot_03" },
+      { "id": "endpoint_bridge_ring_03_04_01_ring_04", "bridgeId": "bridge_ring_03_04_01", "nodeId": "ring_slot_04" },
+      { "id": "endpoint_bridge_ring_03_04_02_ring_03", "bridgeId": "bridge_ring_03_04_02", "nodeId": "ring_slot_03" },
+      { "id": "endpoint_bridge_ring_03_04_02_ring_04", "bridgeId": "bridge_ring_03_04_02", "nodeId": "ring_slot_04" },
+      { "id": "endpoint_bridge_ring_01_04_01_ring_01", "bridgeId": "bridge_ring_01_04_01", "nodeId": "ring_slot_01" },
+      { "id": "endpoint_bridge_ring_01_04_01_ring_04", "bridgeId": "bridge_ring_01_04_01", "nodeId": "ring_slot_04" },
+      { "id": "endpoint_bridge_ring_01_04_02_ring_01", "bridgeId": "bridge_ring_01_04_02", "nodeId": "ring_slot_01" },
+      { "id": "endpoint_bridge_ring_01_04_02_ring_04", "bridgeId": "bridge_ring_01_04_02", "nodeId": "ring_slot_04" },
+      { "id": "endpoint_bridge_center_ring_01_01_ring_01", "bridgeId": "bridge_center_ring_01_01", "nodeId": "ring_slot_01" },
+      { "id": "endpoint_bridge_center_ring_01_01_center", "bridgeId": "bridge_center_ring_01_01", "nodeId": "center_slot" },
+      { "id": "endpoint_bridge_center_ring_02_01_ring_02", "bridgeId": "bridge_center_ring_02_01", "nodeId": "ring_slot_02" },
+      { "id": "endpoint_bridge_center_ring_02_01_center", "bridgeId": "bridge_center_ring_02_01", "nodeId": "center_slot" },
+      { "id": "endpoint_bridge_center_ring_03_01_ring_03", "bridgeId": "bridge_center_ring_03_01", "nodeId": "ring_slot_03" },
+      { "id": "endpoint_bridge_center_ring_03_01_center", "bridgeId": "bridge_center_ring_03_01", "nodeId": "center_slot" },
+      { "id": "endpoint_bridge_center_ring_04_01_ring_04", "bridgeId": "bridge_center_ring_04_01", "nodeId": "ring_slot_04" },
+      { "id": "endpoint_bridge_center_ring_04_01_center", "bridgeId": "bridge_center_ring_04_01", "nodeId": "center_slot" }
+    ],
+    "placement": {
+      "status": "unresolved_user_gate",
+      "assignments": [],
+      "compassOrientation": "unresolved",
+      "source": "user_decision_required"
+    }
+  },
+  "transitionZones": [
+    {
+      "id": "zone_transition_crownlands_gate",
+      "realmId": "crownlands",
+      "mainGateId": "gate_crownlands_meridian",
+      "zoneType": "controlled_main_gate_transition",
+      "sceneReferenceStatus": "requested",
+      "traversalStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "zone_transition_stonehold_gate",
+      "realmId": "stonehold",
+      "mainGateId": "gate_stonehold_faultline",
+      "zoneType": "controlled_main_gate_transition",
+      "sceneReferenceStatus": "requested",
+      "traversalStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "zone_transition_eldergrove_gate",
+      "realmId": "eldergrove",
+      "mainGateId": "gate_eldergrove_greenveil",
+      "zoneType": "controlled_main_gate_transition",
+      "sceneReferenceStatus": "requested",
+      "traversalStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "zone_transition_umbral_gate",
+      "realmId": "umbral",
+      "mainGateId": "gate_umbral_ashvein",
+      "zoneType": "controlled_main_gate_transition",
+      "sceneReferenceStatus": "requested",
+      "traversalStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    }
+  ],
+  "walls": [
+    {
+      "id": "wall_crownlands_inner",
+      "realmId": "crownlands",
+      "boundaryRole": "inner_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_crownlands_outer",
+      "realmId": "crownlands",
+      "boundaryRole": "outer_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_stonehold_inner",
+      "realmId": "stonehold",
+      "boundaryRole": "inner_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_stonehold_outer",
+      "realmId": "stonehold",
+      "boundaryRole": "outer_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_eldergrove_inner",
+      "realmId": "eldergrove",
+      "boundaryRole": "inner_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_eldergrove_outer",
+      "realmId": "eldergrove",
+      "boundaryRole": "outer_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_umbral_inner",
+      "realmId": "umbral",
+      "boundaryRole": "inner_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "wall_umbral_outer",
+      "realmId": "umbral",
+      "boundaryRole": "outer_wall",
+      "geometryStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    }
+  ],
+  "boundaries": [
+    {
+      "id": "boundary_crownlands_safe_to_warzone",
+      "realmId": "crownlands",
+      "innerRealmId": "inner_crownlands",
+      "innerAtlasZoneId": "zone_inner_crownlands",
+      "innerWallId": "wall_crownlands_inner",
+      "transitionZoneId": "zone_transition_crownlands_gate",
+      "mainGateId": "gate_crownlands_meridian",
+      "outerWallId": "wall_crownlands_outer",
+      "outerWarzoneId": "warzone_crownlands",
+      "outerAtlasZoneId": "zone_warzone_crownlands_gate",
+      "orderedStages": [
+        "protected_inner_safe_zone",
+        "inner_wall",
+        "controlled_main_gate_transition",
+        "outer_wall",
+        "outer_warzone"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "boundary_stonehold_safe_to_warzone",
+      "realmId": "stonehold",
+      "innerRealmId": "inner_stonehold",
+      "innerAtlasZoneId": "zone_inner_stonehold",
+      "innerWallId": "wall_stonehold_inner",
+      "transitionZoneId": "zone_transition_stonehold_gate",
+      "mainGateId": "gate_stonehold_faultline",
+      "outerWallId": "wall_stonehold_outer",
+      "outerWarzoneId": "warzone_stonehold",
+      "outerAtlasZoneId": "zone_warzone_stonehold_gate",
+      "orderedStages": [
+        "protected_inner_safe_zone",
+        "inner_wall",
+        "controlled_main_gate_transition",
+        "outer_wall",
+        "outer_warzone"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "boundary_eldergrove_safe_to_warzone",
+      "realmId": "eldergrove",
+      "innerRealmId": "inner_eldergrove",
+      "innerAtlasZoneId": "zone_inner_eldergrove",
+      "innerWallId": "wall_eldergrove_inner",
+      "transitionZoneId": "zone_transition_eldergrove_gate",
+      "mainGateId": "gate_eldergrove_greenveil",
+      "outerWallId": "wall_eldergrove_outer",
+      "outerWarzoneId": "warzone_eldergrove",
+      "outerAtlasZoneId": "zone_warzone_eldergrove_gate",
+      "orderedStages": [
+        "protected_inner_safe_zone",
+        "inner_wall",
+        "controlled_main_gate_transition",
+        "outer_wall",
+        "outer_warzone"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    },
+    {
+      "id": "boundary_umbral_safe_to_warzone",
+      "realmId": "umbral",
+      "innerRealmId": "inner_umbral",
+      "innerAtlasZoneId": "zone_inner_umbral",
+      "innerWallId": "wall_umbral_inner",
+      "transitionZoneId": "zone_transition_umbral_gate",
+      "mainGateId": "gate_umbral_ashvein",
+      "outerWallId": "wall_umbral_outer",
+      "outerWarzoneId": "warzone_umbral",
+      "outerAtlasZoneId": "zone_warzone_umbral_gate",
+      "orderedStages": [
+        "protected_inner_safe_zone",
+        "inner_wall",
+        "controlled_main_gate_transition",
+        "outer_wall",
+        "outer_warzone"
+      ],
+      "hookStatus": "requested",
+      "mutationAuthority": "codex_engineering_future_contract"
+    }
+  ],
   "zones": [
     {
       "id": "zone_inner_crownlands",
@@ -288,7 +682,14 @@
       "objective IDs are unique and lowercase snake-case",
       "realmId values resolve to realm catalog IDs or shared",
       "all displayNameKey and summaryKey values resolve in draftLocalization",
-      "requested hooks remain nonmutating until engineering contracts exist"
+      "requested hooks remain nonmutating until engineering contracts exist",
+      "abstract topology contains exactly five nodes, four adjacency pairs, twelve bridges, and twenty-four endpoints",
+      "each adjacent ring pair has exactly two bridges and every ring slot has exactly one center bridge",
+      "opposite, self, duplicate, reverse-duplicate, and unresolved realm-specific routes fail closed",
+      "all topology identities are globally unique lowercase snake-case values",
+      "realm placement remains unresolved with no inferred assignment or compass orientation",
+      "four transition zones, eight walls, and four boundary records preserve the exact safe-zone-to-warzone order",
+      "boundary realm, inner realm, atlas zone, wall, main gate, and outer warzone references resolve exactly"
     ],
     "blockedRuntimeClaims": [
       "scene references",
@@ -296,7 +697,11 @@
       "warzone scoring",
       "realm gem custody",
       "neutral-zone PvP enforcement",
-      "Dragon's Concordance behavior"
+      "Dragon's Concordance behavior",
+      "realm-to-slot placement",
+      "bridge traversal",
+      "wall and gate geometry or traversal",
+      "safe-zone and warzone boundary enforcement"
     ]
   }
 }
