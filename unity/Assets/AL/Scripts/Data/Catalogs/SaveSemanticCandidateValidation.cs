@@ -693,6 +693,7 @@ namespace AL.Data.Catalogs
                     "SaveFormatId",
                     "SaveSchemaVersion",
                     "ProfileInitializationVersion",
+                    "ProfileId",
                     "SelectedRealm",
                     "Resources",
                     "Buildings",
@@ -874,7 +875,8 @@ namespace AL.Data.Catalogs
                 "Revision",
                 "StateId",
                 "EventId",
-                "CorrelationId");
+                "CorrelationId",
+                "ExpectedGenerationFingerprint");
 
         public static SaveSemanticCandidate Validate(
             byte[] rawBytes,
@@ -1388,6 +1390,21 @@ namespace AL.Data.Catalogs
                 collector,
                 state);
             RequireInt64(root, "LastSavedTimestamp", SaveSemanticDomain.Envelope, false, collector, state);
+
+            StrictJsonValue profileIdValue;
+            if (root.TryGet("ProfileId", out profileIdValue))
+            {
+                var profileId = profileIdValue as StrictJsonString;
+                if (profileId == null || profileId.Value.Length != 0)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_SCHEMA_V1_PROFILE_ID_INVALID",
+                        "$.ProfileId",
+                        SaveSemanticDomain.Metadata);
+                }
+            }
 
             StrictJsonValue realmValue;
             int realm;
@@ -3962,6 +3979,25 @@ namespace AL.Data.Catalogs
                     collector,
                     state,
                     out ignoredString);
+            }
+
+            StrictJsonValue expectedFingerprintValue;
+            if (operation.TryGet(
+                    "ExpectedGenerationFingerprint",
+                    out expectedFingerprintValue))
+            {
+                var expectedFingerprint =
+                    expectedFingerprintValue as StrictJsonString;
+                if (expectedFingerprint == null ||
+                    expectedFingerprint.Value.Length != 0)
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_SCHEMA_V1_NVS01_EXPECTED_GENERATION_INVALID",
+                        path + ".ExpectedGenerationFingerprint",
+                        SaveSemanticDomain.Narrative);
+                }
             }
 
             int status;

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using AL.Core;
+using AL.Core.SaveAuthority;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
 
@@ -191,6 +192,27 @@ namespace AL.Narrative.Nvs01
             string stateId,
             string eventId,
             string correlationId)
+            : this(
+                operationId,
+                payloadFingerprint,
+                status,
+                revision,
+                stateId,
+                eventId,
+                correlationId,
+                string.Empty)
+        {
+        }
+
+        internal Nvs01OperationReceipt(
+            string operationId,
+            string payloadFingerprint,
+            Nvs01CommandStatus status,
+            long revision,
+            string stateId,
+            string eventId,
+            string correlationId,
+            string expectedGenerationFingerprint)
         {
             if (!Enum.IsDefined(typeof(Nvs01CommandStatus), status))
                 throw new ArgumentOutOfRangeException(nameof(status));
@@ -202,6 +224,16 @@ namespace AL.Narrative.Nvs01
             StateId = Nvs01ContractGuard.RequireIdentifier(stateId, nameof(stateId));
             EventId = Nvs01ContractGuard.RequireOptionalIdentifier(eventId, nameof(eventId));
             CorrelationId = Nvs01ContractGuard.RequireOptionalGuid(correlationId, nameof(correlationId));
+            ExpectedGenerationFingerprint =
+                expectedGenerationFingerprint ?? string.Empty;
+            if (ExpectedGenerationFingerprint.Length > 0 &&
+                !Nvs01AuthorityGuard.IsCanonicalSha256(
+                    ExpectedGenerationFingerprint))
+            {
+                throw new ArgumentException(
+                    "Expected generation fingerprint must be canonical SHA-256.",
+                    nameof(expectedGenerationFingerprint));
+            }
         }
 
         public string OperationId { get; }
@@ -211,6 +243,7 @@ namespace AL.Narrative.Nvs01
         public string StateId { get; }
         public string EventId { get; }
         public string CorrelationId { get; }
+        public string ExpectedGenerationFingerprint { get; }
     }
 
     public sealed class Nvs01QuestSnapshot
@@ -424,6 +457,23 @@ namespace AL.Narrative.Nvs01
             Nvs01QuestSnapshot candidate,
             string triggerEventId,
             IList<string> consequenceIntentIds)
+            : this(
+                expected,
+                candidate,
+                triggerEventId,
+                consequenceIntentIds,
+                null,
+                false)
+        {
+        }
+
+        private Nvs01MutationPlan(
+            Nvs01QuestSnapshot expected,
+            Nvs01QuestSnapshot candidate,
+            string triggerEventId,
+            IList<string> consequenceIntentIds,
+            ProfileAuthorityExpectation authority,
+            bool isReplayVerification)
         {
             Expected = expected ?? throw new ArgumentNullException(nameof(expected));
             Candidate = candidate ?? throw new ArgumentNullException(nameof(candidate));
@@ -431,19 +481,157 @@ namespace AL.Narrative.Nvs01
                 !string.Equals(expected.PacketSha256, candidate.PacketSha256, StringComparison.Ordinal) ||
                 !string.Equals(expected.QuestId, candidate.QuestId, StringComparison.Ordinal))
                 throw new ArgumentException("Mutation candidate identity must match the expected snapshot.", nameof(candidate));
-            if (expected.Revision == long.MaxValue || candidate.Revision != expected.Revision + 1)
-                throw new ArgumentException("Mutation candidate revision must advance exactly once.", nameof(candidate));
+            if (isReplayVerification)
+            {
+                if (candidate.Revision != expected.Revision ||
+                    !Nvs01ProgressCodec.Equivalent(expected, candidate))
+                {
+                    throw new ArgumentException(
+                        "Replay verification must preserve the exact mutation domain.",
+                        nameof(candidate));
+                }
+            }
+            else if (expected.Revision == long.MaxValue ||
+                     candidate.Revision != expected.Revision + 1)
+            {
+                throw new ArgumentException(
+                    "Mutation candidate revision must advance exactly once.",
+                    nameof(candidate));
+            }
             TriggerEventId = Nvs01ContractGuard.RequireIdentifier(triggerEventId, nameof(triggerEventId));
             ConsequenceIntentIds = Nvs01QuestSnapshot.FreezeIdentifiers(
                 consequenceIntentIds,
                 Nvs01RuntimeContract.MaximumConsequenceIntentCount,
                 nameof(consequenceIntentIds));
+            ProfileId = authority?.ProfileId ?? string.Empty;
+            AuthorityEpoch = authority?.AuthorityEpoch ?? string.Empty;
+            ExpectedGenerationFingerprint =
+                authority?.ExpectedGenerationFingerprint ?? string.Empty;
+            IsReplayVerification = isReplayVerification;
         }
 
         public Nvs01QuestSnapshot Expected { get; }
         public Nvs01QuestSnapshot Candidate { get; }
         public string TriggerEventId { get; }
         public IReadOnlyList<string> ConsequenceIntentIds { get; }
+        public string ProfileId { get; }
+        public string AuthorityEpoch { get; }
+        public string ExpectedGenerationFingerprint { get; }
+        internal bool IsReplayVerification { get; }
+
+        internal bool IsAuthorityBound =>
+            ProfileId.Length > 0 &&
+            AuthorityEpoch.Length > 0 &&
+            ExpectedGenerationFingerprint.Length > 0;
+
+        internal Nvs01MutationPlan BindAuthority(
+            ProfileAuthorityExpectation authority,
+            Nvs01QuestSnapshot authorityStampedCandidate)
+        {
+            if (IsAuthorityBound ||
+                !IsReplayVerification &&
+                !string.IsNullOrEmpty(
+                    Candidate.LastOperation?
+                        .ExpectedGenerationFingerprint))
+            {
+                throw new InvalidOperationException(
+                    "A mutation plan may be bound to profile authority only once.");
+            }
+
+            if (authority == null ||
+                !Nvs01AuthorityGuard.IsCanonicalProfileId(
+                    authority.ProfileId) ||
+                !AuthorityEpochAllocator.IsCanonical(
+                    authority.AuthorityEpoch) ||
+                !Nvs01AuthorityGuard.IsCanonicalSha256(
+                    authority.ExpectedGenerationFingerprint))
+            {
+                throw new ArgumentException(
+                    "A canonical profile authority expectation is required.",
+                    nameof(authority));
+            }
+
+            if (authorityStampedCandidate?.LastOperation == null ||
+                !string.Equals(
+                    authorityStampedCandidate.LastOperation
+                        .ExpectedGenerationFingerprint,
+                    authority.ExpectedGenerationFingerprint,
+                    StringComparison.Ordinal) ||
+                !Nvs01ProgressCodec.Equivalent(
+                    Candidate,
+                    authorityStampedCandidate))
+            {
+                throw new ArgumentException(
+                    "The authority-stamped candidate must preserve the plan and expectation.",
+                    nameof(authorityStampedCandidate));
+            }
+
+            return new Nvs01MutationPlan(
+                Expected,
+                authorityStampedCandidate,
+                TriggerEventId,
+                new List<string>(ConsequenceIntentIds),
+                authority,
+                IsReplayVerification);
+        }
+
+        internal static Nvs01MutationPlan ForExactReplay(
+            Nvs01QuestSnapshot snapshot)
+        {
+            if (snapshot?.LastOperation == null)
+                throw new ArgumentException(
+                    "Exact replay requires a durable operation receipt.",
+                    nameof(snapshot));
+            return new Nvs01MutationPlan(
+                snapshot,
+                snapshot,
+                snapshot.LastOperation.EventId,
+                Array.Empty<string>(),
+                null,
+                true);
+        }
+    }
+
+    internal static class Nvs01AuthorityGuard
+    {
+        internal static bool IsCanonicalProfileId(string value)
+        {
+            if (value == null ||
+                value.Length !=
+                SaveAuthorityTechnicalLimits.ProfileIdCharacters ||
+                !value.StartsWith("alp_", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            bool anyNonZero = false;
+            for (int index = 4; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!IsLowerHex(character)) return false;
+                anyNonZero |= character != '0';
+            }
+            return anyNonZero;
+        }
+
+        internal static bool IsCanonicalSha256(string value)
+        {
+            if (value == null ||
+                value.Length != SaveAuthorityTechnicalLimits.Sha256Characters)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < value.Length; index++)
+            {
+                if (!IsLowerHex(value[index])) return false;
+            }
+            return true;
+        }
+
+        private static bool IsLowerHex(char value) =>
+            value >= '0' && value <= '9' ||
+            value >= 'a' && value <= 'f';
     }
 
     public interface INvs01MutationCommitter
@@ -451,6 +639,16 @@ namespace AL.Narrative.Nvs01
         bool TryCommit(
             Nvs01MutationPlan plan,
             out Nvs01QuestSnapshot committed,
+            out Nvs01RuntimeDiagnostic diagnostic);
+    }
+
+    internal interface INvs01ReplayVerifier
+    {
+        bool TryVerifyReplay(
+            Nvs01QuestSnapshot snapshot,
+            string operationId,
+            string payloadFingerprint,
+            out Nvs01QuestSnapshot verified,
             out Nvs01RuntimeDiagnostic diagnostic);
     }
 

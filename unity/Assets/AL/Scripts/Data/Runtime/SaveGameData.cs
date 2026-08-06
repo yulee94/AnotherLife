@@ -14,6 +14,9 @@ namespace AL.Data.Runtime
         public string SaveFormatId;
         public int SaveSchemaVersion;
         public int ProfileInitializationVersion;
+        // Reserved for the witnessed schema-v2 migration. Schema v1 must
+        // serialize this as blank and remains MigrationRequired.
+        public string ProfileId = string.Empty;
         public RealmId SelectedRealm;
         public List<ResourceData> Resources = new List<ResourceData>();
         public List<BuildingState> Buildings = new List<BuildingState>();
@@ -108,6 +111,9 @@ namespace AL.Data.Runtime
         public string StateId = string.Empty;
         public string EventId = string.Empty;
         public string CorrelationId = string.Empty;
+        // Captures the verified generation that authorized this operation.
+        // Schema-v1 operations must leave it blank.
+        public string ExpectedGenerationFingerprint = string.Empty;
     }
 
     [Serializable]

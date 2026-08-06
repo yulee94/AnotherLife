@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using AL.Core.SaveAuthority;
 using AL.Data.Runtime;
 using AL.Narrative.Nvs01.Contracts;
 using AL.Services.Local;
@@ -355,7 +356,9 @@ namespace AL.Narrative.Nvs01
                 Revision = receipt.Revision,
                 StateId = receipt.StateId,
                 EventId = receipt.EventId,
-                CorrelationId = receipt.CorrelationId
+                CorrelationId = receipt.CorrelationId,
+                ExpectedGenerationFingerprint =
+                    receipt.ExpectedGenerationFingerprint
             };
         }
 
@@ -369,7 +372,8 @@ namespace AL.Narrative.Nvs01
                 receipt.Revision,
                 receipt.StateId,
                 receipt.EventId,
-                receipt.CorrelationId);
+                receipt.CorrelationId,
+                receipt.ExpectedGenerationFingerprint);
         }
 
         private static bool Equivalent(
@@ -406,6 +410,9 @@ namespace AL.Narrative.Nvs01
                    left.Revision == right.Revision &&
                    string.Equals(left.StateId, right.StateId, StringComparison.Ordinal) &&
                    string.Equals(left.EventId, right.EventId, StringComparison.Ordinal) &&
+                   // Authority causality is verified separately by the save
+                   // boundary; it is intentionally not domain equality so an
+                   // exact replay can match its already-persisted receipt.
                    string.Equals(left.CorrelationId, right.CorrelationId, StringComparison.Ordinal);
         }
 
@@ -467,7 +474,8 @@ namespace AL.Narrative.Nvs01
             data.Revision == 0 &&
             string.IsNullOrEmpty(data.StateId) &&
             string.IsNullOrEmpty(data.EventId) &&
-            string.IsNullOrEmpty(data.CorrelationId);
+            string.IsNullOrEmpty(data.CorrelationId) &&
+            string.IsNullOrEmpty(data.ExpectedGenerationFingerprint);
 
         private static Nvs01RuntimeDiagnostic Diagnostic(
             string code,
@@ -483,9 +491,12 @@ namespace AL.Narrative.Nvs01
                 string.Empty);
     }
 
-    internal sealed class Nvs01SaveGameMutationCommitter : INvs01MutationCommitter
+    internal sealed class Nvs01SaveGameMutationCommitter :
+        INvs01MutationCommitter,
+        INvs01ReplayVerifier
     {
         private readonly ISaveGameCandidateStore _store;
+        private readonly IProfileWriteAuthorityProvider _authorityProvider;
         private readonly Nvs01VerifiedCatalog _verifiedCatalog;
 
         internal Nvs01SaveGameMutationCommitter(
@@ -493,6 +504,7 @@ namespace AL.Narrative.Nvs01
             Nvs01VerifiedCatalog verifiedCatalog)
         {
             _store = store ?? throw new ArgumentNullException(nameof(store));
+            _authorityProvider = store as IProfileWriteAuthorityProvider;
             _verifiedCatalog = verifiedCatalog ?? throw new ArgumentNullException(nameof(verifiedCatalog));
         }
 
@@ -503,13 +515,104 @@ namespace AL.Narrative.Nvs01
         {
             if (plan == null) throw new ArgumentNullException(nameof(plan));
 
-            SaveCandidateCommitResult result = _store.TryCommitCandidate(candidateSave =>
+            ProfileWriteAuthoritySnapshot authority =
+                ProfileWriteAuthorityProviderGuard.ReadOrUnavailable(
+                    _authorityProvider);
+            bool legacy = authority.Status ==
+                          ProfileWriteAuthorityStatus.MigrationRequired;
+            IProfileBoundSaveGameCandidateStore boundStore = null;
+            Nvs01MutationPlan effectivePlan = plan;
+
+            if (legacy)
+            {
+                if (plan.IsAuthorityBound ||
+                    !string.IsNullOrEmpty(
+                        plan.Candidate.LastOperation?
+                            .ExpectedGenerationFingerprint))
+                {
+                    return RejectBeforeStore(
+                        plan,
+                        "SAVE-CONFLICT",
+                        "schema-v1 mutation plan carried profile authority",
+                        out committed,
+                        out diagnostic);
+                }
+            }
+            else if (authority.Status == ProfileWriteAuthorityStatus.Writable)
+            {
+                boundStore = _store as IProfileBoundSaveGameCandidateStore;
+                if (boundStore == null)
+                {
+                    return RejectBeforeStore(
+                        plan,
+                        "SAVE-READ-ONLY",
+                        "profile-bound candidate store unavailable",
+                        out committed,
+                        out diagnostic);
+                }
+
+                try
+                {
+                    ProfileAuthorityExpectation expectation =
+                        ProfileAuthorityExpectation.From(authority);
+                    effectivePlan = plan.BindAuthority(
+                        expectation,
+                        StampExpectedGeneration(
+                            plan.Candidate,
+                            expectation.ExpectedGenerationFingerprint));
+                }
+                catch (Exception exception)
+                {
+                    return RejectBeforeStore(
+                        plan,
+                        "SAVE-READ-ONLY",
+                        exception.GetType().Name,
+                        out committed,
+                        out diagnostic);
+                }
+            }
+            else
+            {
+                return RejectBeforeStore(
+                    plan,
+                    "SAVE-READ-ONLY",
+                    authority.Status.ToString(),
+                    out committed,
+                    out diagnostic);
+            }
+
+            Func<SaveGameData, SaveCandidateMutationPreparation> prepare =
+                candidateSave =>
             {
                 if (candidateSave == null)
                 {
                     return SaveCandidateMutationPreparation.Rejected(
                         Nvs01CatalogContract.DiagnosticCodePrefix +
                         "SAVE-PROGRESS-UNAVAILABLE");
+                }
+
+                string requiredProfileId = legacy
+                    ? string.Empty
+                    : effectivePlan.ProfileId;
+                int requiredSchemaVersion = legacy
+                    ? SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion
+                    : SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
+                int requiredInitializationVersion = legacy
+                    ? SaveAuthorityTechnicalLimits
+                        .LegacyProfileInitializationVersion
+                    : SaveAuthorityTechnicalLimits
+                        .IdentityAwareProfileInitializationVersion;
+                if (candidateSave.SaveSchemaVersion != requiredSchemaVersion ||
+                    candidateSave.ProfileInitializationVersion !=
+                        requiredInitializationVersion ||
+                    !string.Equals(
+                        candidateSave.ProfileId ?? string.Empty,
+                        requiredProfileId,
+                        StringComparison.Ordinal))
+                {
+                    return SaveCandidateMutationPreparation.Rejected(
+                        Nvs01CatalogContract.DiagnosticCodePrefix +
+                        "SAVE-AUTHORITY-CONFLICT");
                 }
 
                 if (!Nvs01ProgressCodec.TryDecode(
@@ -523,31 +626,98 @@ namespace AL.Narrative.Nvs01
                         Nvs01CatalogContract.DiagnosticCodePrefix + "SAVE-PROGRESS-UNAVAILABLE");
                 }
 
-                if (Nvs01ProgressCodec.Equivalent(durable, plan.Candidate))
+                if (Nvs01ProgressCodec.Equivalent(
+                        durable,
+                        effectivePlan.Candidate))
                 {
+                    if (!legacy &&
+                        (durable.LastOperation == null ||
+                         !Nvs01AuthorityGuard.IsCanonicalSha256(
+                             durable.LastOperation
+                                 .ExpectedGenerationFingerprint)))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            Nvs01CatalogContract.DiagnosticCodePrefix +
+                            "SAVE-REPLAY-UNVERIFIED");
+                    }
                     return SaveCandidateMutationPreparation.Duplicate();
                 }
 
-                if (!Nvs01ProgressCodec.Equivalent(durable, plan.Expected))
+                if (!Nvs01ProgressCodec.Equivalent(
+                        durable,
+                        effectivePlan.Expected))
                 {
                     return SaveCandidateMutationPreparation.Rejected(
                         Nvs01CatalogContract.DiagnosticCodePrefix + "SAVE-CONFLICT");
                 }
 
-                candidateSave.Nvs01Progress = Nvs01ProgressCodec.Encode(plan.Candidate);
+                candidateSave.Nvs01Progress =
+                    Nvs01ProgressCodec.Encode(effectivePlan.Candidate);
+                if (!string.Equals(
+                        candidateSave.ProfileId ?? string.Empty,
+                        requiredProfileId,
+                        StringComparison.Ordinal))
+                {
+                    return SaveCandidateMutationPreparation.Rejected(
+                        Nvs01CatalogContract.DiagnosticCodePrefix +
+                        "SAVE-AUTHORITY-CONFLICT");
+                }
                 return SaveCandidateMutationPreparation.Prepared();
-            });
+            };
+
+            ProfileBoundSaveCandidateCommitResult boundResult = null;
+            SaveCandidateCommitResult result;
+            if (legacy)
+            {
+                result = _store.TryCommitCandidate(prepare);
+            }
+            else
+            {
+                boundResult = boundStore.TryCommitCandidate(
+                    ProfileAuthorityExpectation.From(authority),
+                    effectivePlan.Candidate.LastOperation.OperationId,
+                    effectivePlan.Candidate.LastOperation.EventId,
+                    prepare);
+                result = boundResult?.CommitResult;
+            }
+
+            if (result == null)
+            {
+                return RejectBeforeStore(
+                    plan,
+                    "COMMIT-UNCERTAIN",
+                    "candidate store returned no result",
+                    out committed,
+                    out diagnostic);
+            }
+
+            ProfileWriteAuthoritySnapshot postAuthority = legacy
+                ? null
+                : ProfileWriteAuthorityProviderGuard.ReadOrUnavailable(
+                    _authorityProvider);
 
             if (result.IsCommitted &&
                 result.PublishedSave != null &&
+                string.Equals(
+                    result.PublishedSave.ProfileId ?? string.Empty,
+                    legacy ? string.Empty : effectivePlan.ProfileId,
+                    StringComparison.Ordinal) &&
                 Nvs01ProgressCodec.TryDecode(
                     result.PublishedSave.Nvs01Progress,
                     _verifiedCatalog,
                     out Nvs01QuestSnapshot persisted,
                     out _) &&
-                Nvs01ProgressCodec.Equivalent(persisted, plan.Candidate))
+                Nvs01ProgressCodec.Equivalent(
+                    persisted,
+                    effectivePlan.Candidate) &&
+                (legacy || HasVerifiedCausalReceipt(
+                    result.Outcome,
+                    persisted,
+                    effectivePlan,
+                    boundResult?.AuthorityReceipt,
+                    postAuthority)))
             {
-                committed = plan.Candidate;
+                committed = persisted;
                 diagnostic = null;
                 return true;
             }
@@ -581,6 +751,182 @@ namespace AL.Narrative.Nvs01
                 "save-backed NVS-01 commit",
                 "verified candidate",
                 result.Message,
+                plan.Expected.StateId,
+                plan.TriggerEventId,
+                plan.Expected.CurrentEncounter?.CorrelationId ?? string.Empty);
+            return false;
+        }
+
+        public bool TryVerifyReplay(
+            Nvs01QuestSnapshot snapshot,
+            string operationId,
+            string payloadFingerprint,
+            out Nvs01QuestSnapshot verified,
+            out Nvs01RuntimeDiagnostic diagnostic)
+        {
+            Nvs01OperationReceipt operation = snapshot?.LastOperation;
+            if (operation == null ||
+                !string.Equals(
+                    operation.OperationId,
+                    operationId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    operation.PayloadFingerprint,
+                    payloadFingerprint,
+                    StringComparison.Ordinal))
+            {
+                verified = snapshot;
+                diagnostic = new Nvs01RuntimeDiagnostic(
+                    "EVENT-MISMATCH",
+                    "save-backed exact replay",
+                    "matching durable operation and payload",
+                    "mismatched replay request",
+                    snapshot?.StateId ?? string.Empty,
+                    operation?.EventId ?? string.Empty,
+                    operation?.CorrelationId ?? string.Empty);
+                return false;
+            }
+
+            Nvs01MutationPlan replayPlan;
+            try
+            {
+                replayPlan = Nvs01MutationPlan.ForExactReplay(snapshot);
+            }
+            catch (Exception exception)
+            {
+                verified = snapshot;
+                diagnostic = new Nvs01RuntimeDiagnostic(
+                    "SAVE-READ-ONLY",
+                    "save-backed exact replay",
+                    "valid durable operation receipt",
+                    exception.GetType().Name,
+                    snapshot?.StateId ?? string.Empty,
+                    operation.EventId,
+                    operation.CorrelationId);
+                return false;
+            }
+
+            return TryCommit(
+                replayPlan,
+                out verified,
+                out diagnostic);
+        }
+
+        private static bool HasVerifiedCausalReceipt(
+            SaveCandidateCommitOutcome outcome,
+            Nvs01QuestSnapshot persisted,
+            Nvs01MutationPlan plan,
+            ProfileMutationReceipt authorityReceipt,
+            ProfileWriteAuthoritySnapshot postAuthority)
+        {
+            Nvs01OperationReceipt receipt = persisted?.LastOperation;
+            if (receipt == null ||
+                authorityReceipt == null ||
+                postAuthority == null ||
+                postAuthority.Status != ProfileWriteAuthorityStatus.Writable ||
+                authorityReceipt.Status !=
+                    ProfileMutationReceiptStatus.Committed ||
+                !authorityReceipt.MayHaveMutated ||
+                !string.Equals(
+                    authorityReceipt.ContractVersion,
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    authorityReceipt.ProfileId,
+                    plan.ProfileId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    receipt.ExpectedGenerationFingerprint,
+                    authorityReceipt.ExpectedGenerationFingerprint,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    receipt.OperationId,
+                    authorityReceipt.OperationId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    receipt.EventId,
+                    authorityReceipt.ResultId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    receipt.PayloadFingerprint,
+                    authorityReceipt.CommittedPayloadFingerprint,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    postAuthority.ProfileId,
+                    authorityReceipt.ProfileId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    postAuthority.AuthorityEpoch,
+                    authorityReceipt.CommittedAuthorityEpoch,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    postAuthority.VerifiedGenerationFingerprint,
+                    authorityReceipt.CommittedGenerationFingerprint,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return outcome == SaveCandidateCommitOutcome.Duplicate ||
+                   outcome == SaveCandidateCommitOutcome.Committed &&
+                   string.Equals(
+                       authorityReceipt.ExpectedGenerationFingerprint,
+                       plan.ExpectedGenerationFingerprint,
+                       StringComparison.Ordinal);
+        }
+
+        private static Nvs01QuestSnapshot StampExpectedGeneration(
+            Nvs01QuestSnapshot candidate,
+            string expectedGenerationFingerprint)
+        {
+            if (candidate?.LastOperation == null)
+                throw new ArgumentException("Candidate operation receipt is missing.");
+
+            Nvs01OperationReceipt operation = candidate.LastOperation;
+            var stampedOperation = new Nvs01OperationReceipt(
+                operation.OperationId,
+                operation.PayloadFingerprint,
+                operation.Status,
+                operation.Revision,
+                operation.StateId,
+                operation.EventId,
+                operation.CorrelationId,
+                expectedGenerationFingerprint);
+            return new Nvs01QuestSnapshot(
+                candidate.PacketVersion,
+                candidate.PacketSha256,
+                candidate.QuestId,
+                candidate.Revision,
+                candidate.StateId,
+                candidate.Objectives.ToArray(),
+                candidate.CurrentDialogueNodeId,
+                candidate.PendingChoice,
+                candidate.PendingSemanticActionId,
+                candidate.CommittedRealmId,
+                candidate.EncounterStatus,
+                candidate.CurrentEncounter,
+                candidate.LastEncounterCorrelationId,
+                candidate.LastEncounterOutcome,
+                candidate.LastEncounterEventId,
+                candidate.LastEncounterSnapshotVersion,
+                candidate.LastEncounterSnapshotReference,
+                stampedOperation,
+                candidate.ConsequenceIntentIds.ToArray());
+        }
+
+        private static bool RejectBeforeStore(
+            Nvs01MutationPlan plan,
+            string code,
+            string actual,
+            out Nvs01QuestSnapshot committed,
+            out Nvs01RuntimeDiagnostic diagnostic)
+        {
+            committed = plan.Expected;
+            diagnostic = new Nvs01RuntimeDiagnostic(
+                code,
+                "save-backed NVS-01 commit",
+                "verified candidate",
+                actual,
                 plan.Expected.StateId,
                 plan.TriggerEventId,
                 plan.Expected.CurrentEncounter?.CorrelationId ?? string.Empty);
