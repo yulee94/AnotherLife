@@ -45,10 +45,20 @@ namespace AL.EditorTools
             "unityLibrary/proguard-unity.txt",
             "unityLibrary/src/main/AndroidManifest.xml",
             "unityLibrary/src/main/assets/bin/Data/globalgamemanagers",
-            "unityLibrary/src/main/jniLibs/arm64-v8a/libil2cpp.so",
+            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/libil2cpp/il2cpp-api.cpp",
+            "unityLibrary/src/main/Il2CppOutputProject/Source/il2cppOutput/Il2CppCodeRegistration.cpp",
             "unityLibrary/src/main/jniLibs/arm64-v8a/libmain.so",
             "unityLibrary/src/main/jniLibs/arm64-v8a/libunity.so"
         };
+
+        private static readonly string[] RequiredIl2CppToolPaths =
+        {
+            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp",
+            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe"
+        };
+
+        private const string MissingIl2CppToolDescription =
+            "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp(.exe)";
 
         /// <summary>Unity -executeMethod entry. A rejected export intentionally exits non-zero.</summary>
         public static void ExportDevelopmentArm64Il2Cpp()
@@ -543,12 +553,20 @@ namespace AL.EditorTools
                         .Append(ComputeFileSha256(file)).Append('\n');
                 }
 
-                string[] missing = RequiredArtifactPaths
+                var missingArtifacts = RequiredArtifactPaths
                     .Where(required => !relativeFiles.Contains(required))
+                    .ToList();
+                if (!RequiredIl2CppToolPaths.Any(path =>
+                        relativeFiles.Contains(path) && lengths[path] > 0))
+                {
+                    missingArtifacts.Add(MissingIl2CppToolDescription);
+                }
+                string[] missing = missingArtifacts
                     .OrderBy(value => value, StringComparer.Ordinal)
                     .ToArray();
                 string[] invalid = RequiredArtifactPaths
                     .Where(relative => relativeFiles.Contains(relative))
+                    .Concat(RequiredIl2CppToolPaths.Where(relative => relativeFiles.Contains(relative)))
                     .Select(relative => ValidateRequiredArtifact(
                         relative,
                         fullPaths[relative],
@@ -641,9 +659,12 @@ namespace AL.EditorTools
 
             if (string.Equals(relativePath, "unityLibrary/build.gradle", StringComparison.Ordinal) &&
                 (!PrefixContainsText(fullPath, "com.android.library") ||
-                 !PrefixContainsText(fullPath, "minSdkVersion 24")))
+                 !PrefixContainsText(fullPath, "minSdkVersion 24") ||
+                 !PrefixContainsText(fullPath, "Il2CppOutputProject") ||
+                 !PrefixContainsText(fullPath, "libil2cpp.so")))
             {
-                return relativePath + " (library plugin or minimum API 24 is missing)";
+                return relativePath +
+                    " (library plugin, minimum API 24, or staged IL2CPP Gradle generation is missing)";
             }
 
             if (string.Equals(

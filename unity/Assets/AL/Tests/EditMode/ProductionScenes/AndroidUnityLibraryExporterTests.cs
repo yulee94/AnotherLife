@@ -286,6 +286,140 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
+        public void ExportStageRequiresBoundedIl2CppSourceAndToolchainWithoutPrebuiltLibrary()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-export-il2cpp-stage-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                CreateValidTree(temporary);
+                string packagedLibrary = Path.Combine(
+                    temporary,
+                    "unityLibrary",
+                    "src",
+                    "main",
+                    "jniLibs",
+                    "arm64-v8a",
+                    "libil2cpp.so");
+
+                Assert.IsFalse(
+                    File.Exists(packagedLibrary),
+                    "The exported Gradle stage must not require a native library compiled later by Gradle.");
+                object staged = Static("InspectExportTree", temporary);
+                Assert.IsTrue(PropBool(staged, "IsValid"), PropString(staged, "Summary"));
+
+                string generatedRegistration = Path.Combine(
+                    temporary,
+                    "unityLibrary",
+                    "src",
+                    "main",
+                    "Il2CppOutputProject",
+                    "Source",
+                    "il2cppOutput",
+                    "Il2CppCodeRegistration.cpp");
+                File.Delete(generatedRegistration);
+                object missingSource = Static("InspectExportTree", temporary);
+                Assert.IsFalse(PropBool(missingSource, "IsValid"));
+                Assert.That(
+                    string.Join(" ", AsStrings(Prop(missingSource, "MissingArtifacts"))),
+                    Does.Contain("Il2CppCodeRegistration.cpp"));
+
+                WriteFixture(
+                    temporary,
+                    "unityLibrary/src/main/Il2CppOutputProject/Source/il2cppOutput/Il2CppCodeRegistration.cpp",
+                    "// generated registration");
+                string toolchain = Path.Combine(
+                    temporary,
+                    "unityLibrary",
+                    "src",
+                    "main",
+                    "Il2CppOutputProject",
+                    "IL2CPP",
+                    "build",
+                    "deploy",
+                    "il2cpp.exe");
+                File.Delete(toolchain);
+                object missingToolchain = Static("InspectExportTree", temporary);
+                Assert.IsFalse(PropBool(missingToolchain, "IsValid"));
+                Assert.That(
+                    string.Join(" ", AsStrings(Prop(missingToolchain, "MissingArtifacts"))),
+                    Does.Contain("il2cpp(.exe)"));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [TestCase("il2cpp.exe")]
+        [TestCase("il2cpp")]
+        public void ExportStageAcceptsThePlatformIl2CppToolNameAlternative(string toolName)
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-export-il2cpp-tool-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                CreateValidTree(temporary);
+                string deploy = Path.Combine(
+                    temporary,
+                    "unityLibrary",
+                    "src",
+                    "main",
+                    "Il2CppOutputProject",
+                    "IL2CPP",
+                    "build",
+                    "deploy");
+                string windowsTool = Path.Combine(deploy, "il2cpp.exe");
+                if (!string.Equals(toolName, "il2cpp.exe", StringComparison.Ordinal))
+                {
+                    File.Delete(windowsTool);
+                    WriteFixture(
+                        temporary,
+                        "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/" + toolName,
+                        "toolchain");
+                }
+
+                object artifacts = Static("InspectExportTree", temporary);
+
+                Assert.IsTrue(PropBool(artifacts, "IsValid"), PropString(artifacts, "Summary"));
+                Assert.IsEmpty(AsStrings(Prop(artifacts, "MissingArtifacts")));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
+        public void ExportStageRequiresGradleToDeclareDeferredIl2CppNativeCompilation()
+        {
+            string temporary = Path.Combine(
+                Path.GetTempPath(),
+                "al-android-export-il2cpp-gradle-" + Guid.NewGuid().ToString("N"));
+            try
+            {
+                CreateValidTree(temporary);
+                WriteFixture(
+                    temporary,
+                    "unityLibrary/build.gradle",
+                    "apply plugin: 'com.android.library'\ndefaultConfig { minSdkVersion 24 }");
+
+                object missingGeneration = Static("InspectExportTree", temporary);
+
+                Assert.IsFalse(PropBool(missingGeneration, "IsValid"));
+                Assert.That(
+                    string.Join(" ", AsStrings(Prop(missingGeneration, "InvalidArtifacts"))),
+                    Does.Contain("staged IL2CPP Gradle generation is missing"));
+            }
+            finally
+            {
+                if (Directory.Exists(temporary)) Directory.Delete(temporary, recursive: true);
+            }
+        }
+
+        [Test]
         public void RealTreeInspectionRequiresUnityLibraryIl2CppArm64ShapeAndIsDeterministic()
         {
             string temporary = Path.Combine(Path.GetTempPath(), "al-android-export-fixture-" + Guid.NewGuid().ToString("N"));
@@ -516,7 +650,10 @@ namespace AL.Tests.EditMode.ProductionScenes
             WriteFixture(
                 root,
                 "unityLibrary/build.gradle",
-                "apply plugin: 'com.android.library'\ndefaultConfig { minSdkVersion 24 }");
+                "apply plugin: 'com.android.library'\n" +
+                "defaultConfig { minSdkVersion 24 }\n" +
+                "def generated = 'src/main/Il2CppOutputProject'\n" +
+                "def packaged = 'src/main/jniLibs/arm64-v8a/libil2cpp.so'");
             WriteFixture(root, "unityLibrary/src/main/AndroidManifest.xml", "<manifest />");
             WriteFixtureBytes(
                 root,
@@ -527,7 +664,18 @@ namespace AL.Tests.EditMode.ProductionScenes
             byte[] elf = { 0x7f, (byte)'E', (byte)'L', (byte)'F', 1 };
             WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libmain.so", elf);
             WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libunity.so", elf);
-            WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libil2cpp.so", elf);
+            WriteFixture(
+                root,
+                "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe",
+                "toolchain");
+            WriteFixture(
+                root,
+                "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/libil2cpp/il2cpp-api.cpp",
+                "// il2cpp api");
+            WriteFixture(
+                root,
+                "unityLibrary/src/main/Il2CppOutputProject/Source/il2cppOutput/Il2CppCodeRegistration.cpp",
+                "// generated registration");
         }
 
         private static void WriteFixture(string root, string relative, string contents)
