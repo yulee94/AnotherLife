@@ -1,6 +1,8 @@
 package com.example.anotherlife.ui.unity
 
+import android.content.ComponentCallbacks2
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Color
 import android.view.Gravity
 import android.view.View
@@ -19,6 +21,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier as ReflectionModifier
 
 /**
  * Hosts the Unity runtime when the exported Unity Android library is present.
@@ -89,11 +92,13 @@ fun UnityView(
             when (event) {
                 Lifecycle.Event.ON_RESUME -> host.resumeUnity()
                 Lifecycle.Event.ON_PAUSE -> host.pauseUnity()
+                Lifecycle.Event.ON_STOP -> host.stopUnity()
                 Lifecycle.Event.ON_DESTROY -> host.destroyUnity()
                 else -> Unit
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
+        hostState.value?.synchronizeLifecycle(lifecycleOwner.lifecycle.currentState)
 
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
@@ -104,18 +109,42 @@ fun UnityView(
 }
 
 private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
-    private val unityPlayer = ReflectionUnityPlayer.create(context)
+    private val ownershipToken = UnityRuntimeHostOwnership.registry.tryAcquire()
+    private val unityPlayer = ownershipToken?.let { ReflectionUnityPlayer.create(context) }
+    private val lifecycleController = unityPlayer?.let { UnityHostLifecycleController(it) }
     private val statusView = createStatusView(context)
     private val bridgeSession = UnityBridgeSession()
+    private val callbackApplication = context.applicationContext
+    private val componentCallbacks = if (lifecycleController != null) {
+        object : ComponentCallbacks2 {
+            override fun onConfigurationChanged(newConfig: Configuration) {
+                configurationChangedUnity(newConfig)
+            }
+
+            @Suppress("OVERRIDE_DEPRECATION")
+            override fun onLowMemory() {
+                lowMemoryUnity()
+            }
+
+            override fun onTrimMemory(level: Int) {
+                trimMemoryUnity(level)
+            }
+        }
+    } else {
+        null
+    }
+    private var componentCallbacksRegistered = false
     @Volatile
     private var destroyed = false
     private var activeLaunch: UnityRouteLaunch? = null
     private var onOutcome: (UnityRouteOutcome) -> Unit = {}
     private var onProtocolError: (UnityBridgeProtocolError) -> Unit = {}
-    private val callbackToken = UnityBridgeCallbacks.register { rawJson ->
-        post {
-            if (!destroyed) {
-                handleOutcome(rawJson)
+    private val callbackToken = ownershipToken?.let {
+        UnityBridgeCallbacks.register { rawJson ->
+            post {
+                if (!destroyed) {
+                    handleOutcome(rawJson)
+                }
             }
         }
     }
@@ -123,12 +152,20 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
     init {
         setBackgroundColor(Color.BLACK)
 
-        if (unityPlayer != null) {
+        componentCallbacks?.let { callbacks ->
+            componentCallbacksRegistered = runCatching {
+                callbackApplication.registerComponentCallbacks(callbacks)
+                true
+            }.getOrDefault(false)
+        }
+
+        if (ownershipToken == null) {
+            showStatus("Unity runtime unavailable\nHost already active")
+        } else if (unityPlayer != null) {
             addView(
                 unityPlayer.view,
                 LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT)
             )
-            unityPlayer.windowFocusChanged(true)
         } else {
             showStatus("Unity runtime unavailable")
         }
@@ -165,11 +202,16 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
         }
 
         start as UnityBridgeSessionStart.Started
-        if (unityPlayer == null) {
+        if (ownershipToken == null) {
+            showStatus("Unity runtime unavailable\nHost already active")
+            return false
+        }
+        val player = unityPlayer
+        if (player == null) {
             showStatus("Unity runtime unavailable\nRoute: $routeId")
             return false
         }
-        if (!unityPlayer.sendMessage("AndroidBridge", "SetRouteContext", start.encodedPayload)) {
+        if (!player.sendMessage("AndroidBridge", "SetRouteContext", start.encodedPayload)) {
             showProtocolError(
                 UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SendUnavailable)
             )
@@ -181,20 +223,109 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
     }
 
     fun resumeUnity() {
-        if (!destroyed) unityPlayer?.resume()
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.resume()
+        closeAfterLifecycleFailure(controller)
     }
 
     fun pauseUnity() {
-        if (!destroyed) unityPlayer?.pause()
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.pause()
+        closeAfterLifecycleFailure(controller)
+    }
+
+    fun stopUnity() {
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.stop()
+        closeAfterLifecycleFailure(controller)
+    }
+
+    fun synchronizeLifecycle(state: Lifecycle.State) {
+        when {
+            state == Lifecycle.State.DESTROYED -> destroyUnity()
+            state.isAtLeast(Lifecycle.State.RESUMED) -> resumeUnity()
+            else -> pauseUnity()
+        }
     }
 
     fun destroyUnity() {
         if (destroyed) return
         destroyed = true
         bridgeSession.close()
-        UnityBridgeCallbacks.clear(callbackToken)
-        unityPlayer?.destroy()
+        callbackToken?.let(UnityBridgeCallbacks::clear)
+        val componentCallbacksReleased = if (componentCallbacksRegistered) {
+            val released = componentCallbacks?.let { callbacks ->
+                runCatching {
+                    callbackApplication.unregisterComponentCallbacks(callbacks)
+                }.isSuccess
+            } ?: true
+            if (released) componentCallbacksRegistered = false
+            released
+        } else {
+            true
+        }
+        lifecycleController?.destroy()
         removeAllViews()
+        if (
+            componentCallbacksReleased &&
+            lifecycleController?.canReleaseOwnership() != false
+        ) {
+            ownershipToken?.let(UnityRuntimeHostOwnership.registry::release)
+        }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        windowFocusChangedUnity(hasWindowFocus())
+    }
+
+    override fun onDetachedFromWindow() {
+        windowFocusChangedUnity(false)
+        super.onDetachedFromWindow()
+    }
+
+    override fun onWindowFocusChanged(hasWindowFocus: Boolean) {
+        super.onWindowFocusChanged(hasWindowFocus)
+        windowFocusChangedUnity(hasWindowFocus)
+    }
+
+    private fun windowFocusChangedUnity(hasWindowFocus: Boolean) {
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.onWindowFocusChanged(hasWindowFocus)
+        closeAfterLifecycleFailure(controller)
+    }
+
+    private fun lowMemoryUnity() {
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.lowMemory()
+        closeAfterLifecycleFailure(controller)
+    }
+
+    private fun trimMemoryUnity(level: Int) {
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.trimMemory(level)
+        closeAfterLifecycleFailure(controller)
+    }
+
+    private fun configurationChangedUnity(configuration: Configuration) {
+        if (destroyed) return
+        val controller = lifecycleController ?: return
+        controller.configurationChanged(configuration)
+        closeAfterLifecycleFailure(controller)
+    }
+
+    private fun closeAfterLifecycleFailure(
+        controller: UnityHostLifecycleController<Configuration>
+    ) {
+        if (!controller.isDestroyed() || destroyed) return
+        destroyUnity()
+        showStatus("Unity runtime unavailable\nLifecycle failure")
     }
 
     private fun handleOutcome(rawJson: String?) {
@@ -243,59 +374,93 @@ private class UnityRuntimeContainer(context: Context) : FrameLayout(context) {
 
 private class ReflectionUnityPlayer private constructor(
     private val instance: Any,
-    private val playerClass: Class<*>
-) {
-    private val resumeMethod = playerClass.noArgMethod("resume")
-    private val pauseMethod = playerClass.noArgMethod("pause")
-    private val destroyMethod = playerClass.noArgMethod("destroy")
-    private val windowFocusChangedMethod = playerClass.methods.firstOrNull { method ->
-        method.name == "windowFocusChanged" &&
-            method.parameterTypes.contentEquals(arrayOf(java.lang.Boolean.TYPE))
-    }
-    private val sendMessageMethod = playerClass.methods.firstOrNull { method ->
-        method.name == "UnitySendMessage" &&
-            method.parameterTypes.contentEquals(
-                arrayOf(String::class.java, String::class.java, String::class.java)
-            )
-    }
+    private val resumeMethod: Method,
+    private val pauseMethod: Method,
+    private val destroyMethod: Method,
+    private val windowFocusChangedMethod: Method,
+    private val lowMemoryMethod: Method,
+    private val configurationChangedMethod: Method,
+    private val sendMessageMethod: Method
+) : UnityHostLifecycleRuntime<Configuration> {
 
     val view: View = instance as View
 
-    fun resume() = resumeMethod.invokeSafely()
+    override fun resume() = resumeMethod.invokeSafely(instance)
 
-    fun pause() = pauseMethod.invokeSafely()
+    override fun pause() = pauseMethod.invokeSafely(instance)
 
-    fun destroy() = destroyMethod.invokeSafely()
+    override fun destroy() = destroyMethod.invokeSafely(instance)
 
-    fun windowFocusChanged(hasFocus: Boolean) {
-        runCatching { windowFocusChangedMethod?.invoke(instance, hasFocus) }
-    }
+    override fun windowFocusChanged(hasFocus: Boolean) =
+        windowFocusChangedMethod.invokeSafely(instance, hasFocus)
+
+    override fun lowMemory() = lowMemoryMethod.invokeSafely(instance)
+
+    override fun configurationChanged(configuration: Configuration) =
+        configurationChangedMethod.invokeSafely(instance, configuration)
 
     fun sendMessage(gameObject: String, method: String, payload: String): Boolean {
-        val target = sendMessageMethod ?: return false
         return runCatching {
-            target.invoke(instance, gameObject, method, payload)
+            sendMessageMethod.invoke(null, gameObject, method, payload)
             true
         }.getOrDefault(false)
-    }
-
-    private fun Method?.invokeSafely() {
-        runCatching { this?.invoke(instance) }
     }
 
     companion object {
         fun create(context: Context): ReflectionUnityPlayer? {
             return runCatching {
                 val playerClass = Class.forName("com.unity3d.player.UnityPlayer")
+                if (!View::class.java.isAssignableFrom(playerClass)) return null
                 val constructor = playerClass.constructors
-                    .first { it.parameterTypes.size == 1 }
+                    .filter { candidate ->
+                        candidate.parameterTypes.size == 1 &&
+                            candidate.parameterTypes[0].isAssignableFrom(context.javaClass)
+                    }
+                    .minByOrNull { candidate ->
+                        if (candidate.parameterTypes[0] == Context::class.java) 0 else 1
+                    } ?: return null
+                val resumeMethod = playerClass.noArgMethod("resume") ?: return null
+                val pauseMethod = playerClass.noArgMethod("pause") ?: return null
+                val destroyMethod = playerClass.noArgMethod("destroy") ?: return null
+                val lowMemoryMethod = playerClass.noArgMethod("lowMemory") ?: return null
+                val windowFocusChangedMethod = playerClass.methods.firstOrNull { method ->
+                    method.name == "windowFocusChanged" &&
+                        method.parameterTypes.contentEquals(arrayOf(java.lang.Boolean.TYPE))
+                } ?: return null
+                val configurationChangedMethod = playerClass.methods.firstOrNull { method ->
+                    method.name == "configurationChanged" &&
+                        method.parameterTypes.contentEquals(arrayOf(Configuration::class.java))
+                } ?: return null
+                val sendMessageMethod = playerClass.methods.firstOrNull { method ->
+                    method.name == "UnitySendMessage" &&
+                        ReflectionModifier.isStatic(method.modifiers) &&
+                        method.parameterTypes.contentEquals(
+                            arrayOf(String::class.java, String::class.java, String::class.java)
+                        )
+                } ?: return null
                 val instance = constructor.newInstance(context)
 
                 if (instance !is View) return null
-                ReflectionUnityPlayer(instance, playerClass)
+                ReflectionUnityPlayer(
+                    instance = instance,
+                    resumeMethod = resumeMethod,
+                    pauseMethod = pauseMethod,
+                    destroyMethod = destroyMethod,
+                    windowFocusChangedMethod = windowFocusChangedMethod,
+                    lowMemoryMethod = lowMemoryMethod,
+                    configurationChangedMethod = configurationChangedMethod,
+                    sendMessageMethod = sendMessageMethod
+                )
             }.getOrNull()
         }
     }
+}
+
+private fun Method.invokeSafely(instance: Any, vararg arguments: Any?): Boolean {
+    return runCatching {
+        invoke(instance, *arguments)
+        true
+    }.getOrDefault(false)
 }
 
 private fun Class<*>.noArgMethod(name: String): Method? {

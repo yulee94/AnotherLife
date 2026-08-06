@@ -65,4 +65,36 @@ class UnityBridgeThreadingTest {
 
         assertEquals(0, callbackCount.get())
     }
+
+    @Test
+    fun replacementHostReceivesCallbacksAfterPriorHostIsDisposed() {
+        val firstCount = AtomicInteger()
+        val replacementCount = AtomicInteger()
+        var generation by mutableStateOf(1)
+        composeRule.setContent {
+            when (generation) {
+                1 -> UnityView(
+                    routeId = "bridge.smoke",
+                    onProtocolError = { firstCount.incrementAndGet() }
+                )
+
+                2 -> UnityView(
+                    routeId = "bridge.smoke",
+                    onProtocolError = { replacementCount.incrementAndGet() }
+                )
+            }
+        }
+        composeRule.waitForIdle()
+
+        composeRule.runOnUiThread { generation = 0 }
+        composeRule.waitForIdle()
+        composeRule.runOnUiThread { generation = 2 }
+        composeRule.waitForIdle()
+
+        UnityBridgeCallbacks.reportOutcome("{")
+        composeRule.waitForIdle()
+
+        assertEquals(0, firstCount.get())
+        assertEquals(1, replacementCount.get())
+    }
 }
