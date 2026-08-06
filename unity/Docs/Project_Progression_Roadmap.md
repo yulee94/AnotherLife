@@ -14,7 +14,7 @@ Use together:
 6. `unity/Docs/Three_Way_Collaboration_Plan.md` — NVS-01 plan; legacy filename retained.
 7. `.github/pull_request_template.md` — required PR declaration.
 
-`AGENTS.md` wins conflicts. The user decides creative and product direction. Codex A1 coordination/review mode resolves technical sequencing and acceptance disposition. Codex narrative/content and engineering modes perform their delivery; the user's co-developer owns A2 terrestrial source/design and fidelity through A1 sequencing.
+`AGENTS.md` wins conflicts. The user decides creative and product direction. A1 coordination/review resolves technical sequencing and integration disposition. Codex agents or the authorized co-developer may deliver coordination/review, narrative/content, and engineering work through the matching declared mode; the co-developer also owns A2 terrestrial source/design and fidelity through A1 sequencing.
 
 ## Operating principles
 
@@ -26,7 +26,8 @@ Use together:
 - Preserve old saves and service registrations.
 - Optimize continuously for broad device reach, low memory pressure, scalable visual quality, and the lowest feasible install size.
 - Reopen closed issues or create focused follow-ups when current source, Unity Hub play, or review evidence shows the issue still blocks the product direction.
-- Use one focused PR per major completion and one primary delivery mode. New co-developer A2 source uses `a2/terrestrial-<scope>` with primary mode `A2 terrestrial design`.
+- Use one focused PR per major completion and one primary delivery mode. The authorized co-developer uses the matching `codex/` prefix for coordination, narrative, or engineering work; A2 source uses `a2/terrestrial-<scope>` with primary mode `A2 terrestrial design`.
+- Full co-developer access does not waive A1 sequencing, shared locks, evidence, source fidelity, optimization, or user-owned approval gates.
 - Do not advance while the current phase gate is red unless the user reprioritizes.
 - Historical GPT artifacts may be consumed as technical specifications/evidence, but no future GPT action or approval is required.
 
@@ -307,13 +308,13 @@ Produce a reproducible traceable release candidate with frozen source and user a
 
 ## Recurring delivery cycle
 
-1. **Orient** — Codex coordination/review identifies phase, issue, upstream source, dependencies, PRs, locks, and evidence.
-2. **Author/design** — Codex narrative mode creates narrative source; A1 routes needed terrestrial source to the co-developer.
-3. **Specify** — Codex coordination/review defines implementation and acceptance.
-4. **Branch** — one focused Codex branch with the correct Codex mode; new A2 source waits for the recorded co-developer convention.
-5. **Implement** — Codex engineering stays within scope.
+1. **Orient** — A1 coordination/review identifies phase, issue, upstream source, dependencies, PRs, locks, and evidence.
+2. **Author/design** — the authorized narrative-mode contributor creates narrative source; A1 routes needed terrestrial source to the co-developer's A2 role.
+3. **Specify** — A1 coordination/review defines implementation and acceptance.
+4. **Branch** — one focused branch with the correct declared mode; `a2/terrestrial-` remains specific to A2 source.
+5. **Implement** — the authorized engineering-mode contributor stays within scope.
 6. **Validate** — exact relevant checks and retained evidence.
-7. **Review** — Codex coordination/review technical disposition plus applicable Codex narrative or co-developer terrestrial-fidelity disposition.
+7. **Review** — A1 coordination/review technical disposition plus the applicable narrative or terrestrial-fidelity disposition.
 8. **Playtest** — user milestone acceptance.
 9. **Merge/close** — dependency order, release locks, update status.
 

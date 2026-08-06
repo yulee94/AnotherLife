@@ -26,9 +26,9 @@ Before work:
 
 ## Ownership
 
-### This Codex agent — A1 coordination, narrative, and engineering owner
+### This Codex agent — A1 lead coordination and integration owner
 
-This Codex agent owns project coordination/review, narrative/content, and engineering responsibility through three declared modes. Effective 2026-07-30, the user's co-developer exclusively owns future A2 terrestrial design and concept work.
+This Codex agent remains the A1 lead sequencer, coordinator, architect, reviewer, and integrator. Effective 2026-08-06, after reviewing the co-developer's work in a meeting, the user granted the co-developer full project delivery authority across coordination/review, narrative/content, terrestrial design, and engineering. The mode names below describe the work being performed; they are not exclusive actor identities.
 
 #### Coordination/review mode
 
@@ -40,9 +40,17 @@ This mode must ground decisions in current source, written requirements, retaine
 
 Owns quests, chapters, dialogue, NPCs, lore, artifacts, localization-facing copy, continuity, consequences, relationships, factions, stable narrative IDs, narrative packets, and narrative-fidelity correction.
 
-### User's co-developer — A2 terrestrial design and concept
+### User's co-developer — full project collaborator
 
-Owns future terrestrial creature/fauna concepts, silhouettes, anatomy, palettes, materials, habitat presentation, motion intent, scale, variants, design sheets, source assets, and design-fidelity correction.
+The co-developer may plan, author, review, implement, validate, publish, and integrate work in every declared mode, using the branch prefix and PR mode appropriate to the actual change. A1 continues to coordinate sequencing, shared-file locks, collision prevention, integration review, and the blocker-first delivery train.
+
+Full project authority does not waive source fidelity, focused-PR, validation, compatibility, optimization, review, or shared-lock requirements. It also does not satisfy a user-owned creative, visual, balance, integrated-playtest, milestone, irreversible-profile, or release gate unless the user explicitly records that decision.
+
+The co-developer-authored changes merged through `main@e0cbf6c1845489be6bf1032bb8c4d3a8e6dc7103` are an authorized development baseline under the 2026-08-06 user decision. Open or draft PRs remain separately reviewable and are not approved or merged by that baseline decision.
+
+### A2 terrestrial design and concept mode
+
+The co-developer remains the source owner for terrestrial creature/fauna concepts, silhouettes, anatomy, palettes, materials, habitat presentation, motion intent, scale, variants, design sheets, source assets, and design-fidelity correction.
 
 Every terrestrial-source dependency, review request, or engineering need routes through A1 to the co-developer. No Codex agent may silently absorb A2 creative authority.
 
@@ -58,20 +66,20 @@ Engineering mode also owns the standing optimization requirement: runtime code, 
 
 The user owns final product, creative, visual-design, balance, irreversible-profile, milestone, integrated playtest, and release approval.
 
-Except for the user's explicitly designated co-developer in the A2 terrestrial role, GPT, Android Studio, Gemini, and other external assistants/tools receive no future project work, coordination assignment, review gate, or approval responsibility. Historical GPT-authored specifications and reviews remain repository evidence until this Codex agent or the user explicitly supersedes them.
+The authorized co-developer is the sole exception to the retired external-assistant restriction and may work in every declared mode. GPT, Android Studio, Gemini, and other assistants/tools do not independently acquire project ownership, a workload, a review gate, or approval responsibility. Historical GPT-authored specifications and reviews remain repository evidence until A1, the authorized co-developer within scope, or the user explicitly supersedes them.
 
 ## Mode separation and handoffs
 
-The same Codex agent may perform the three Codex modes, but coordination/review, narrative source authoring, and engineering implementation normally use separate branches and PRs so evidence and intent remain reviewable. Terrestrial source/design is an external co-developer handoff through A1.
+Codex agents and the authorized co-developer may perform the declared modes, but coordination/review, source authoring/design, and engineering implementation normally use separate branches and PRs so evidence and intent remain reviewable. A1 coordinates handoffs and integration regardless of which authorized contributor performs the work.
 
 Narrative flow:
 
 1. User decisions.
-2. Codex narrative/content packet.
-3. Codex coordination/review specification.
-4. Codex engineering implementation.
-5. Codex coordination/review integration disposition.
-6. Codex narrative/content fidelity disposition.
+2. Narrative/content packet in the declared narrative mode.
+3. A1 coordination/review specification.
+4. Engineering implementation in the declared engineering mode.
+5. A1 coordination/review integration disposition.
+6. Narrative/content fidelity disposition.
 7. User playtest and approval.
 
 Terrestrial-design flow:
@@ -95,7 +103,7 @@ Allowed prefixes:
 - `codex/<scope>` — engineering mode.
 - `a2/terrestrial-<scope>` — the user's co-developer's A2 terrestrial-design source and fidelity work.
 
-The A2 convention was recorded through A1 in issue #259 on 2026-07-30: branch prefix `a2/terrestrial-<scope>` and primary mode `A2 terrestrial design`. Existing `codex/terrestrial-*` branches remain historical or frozen only and do not authorize new Codex A2 work.
+The authorized co-developer may use any `codex/` prefix when performing its matching coordination, narrative, or engineering mode. The `a2/terrestrial-` prefix remains reserved for A2 terrestrial-design source/fidelity work and must not be used as a generic full-access branch. Existing `codex/terrestrial-*` branches remain historical or frozen.
 
 `gpt/`, `android-studio/`, and `gemini/` are retired for new work.
 

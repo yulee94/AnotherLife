@@ -2,6 +2,8 @@
 
 The legacy filename is retained for link stability. This document defines the first coordinated milestone for Codex and the user. `Ownership_Decision_Record.md` controls ownership chronology.
 
+Effective 2026-08-06, the authorized co-developer may contribute to any declared delivery mode in this plan. Owner labels below identify the responsibility/mode, not an exclusive actor. A1 retains sequencing and integration coordination, and the user retains the U1 and other final approval gates.
+
 Historical artifact labels `G0`, `G1`, and `G2` are retained for traceability, but their owner is now **Codex coordination/review mode**, not GPT.
 
 ## Goal
@@ -162,4 +164,4 @@ Search open PRs, declare locks, avoid parallel edits, update the later branch, p
 
 ## Definition of done
 
-NVS-01 is complete only when all task acceptance criteria pass, Codex-authored narrative remains the canonical source, runtime consumes approved data, save/reload and invalid-input tests pass, all locks are released, the integrated state is on `main`, and the user accepts the playtest.
+NVS-01 is complete only when all task acceptance criteria pass, the approved narrative remains the canonical source, runtime consumes approved data, save/reload and invalid-input tests pass, all locks are released, the integrated state is on `main`, and the user accepts the playtest.
