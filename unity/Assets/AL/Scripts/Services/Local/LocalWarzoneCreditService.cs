@@ -11,17 +11,22 @@ namespace AL.Services.Local
         private const string CreditsPath = "WarzoneCredits";
 
         private readonly ISaveGameService _saveGameService;
-        private readonly Func<bool> _isProfileWritable;
+        private readonly EconomyWriteAuthorityGate _writeAuthorityGate;
 
         public LocalWarzoneCreditService(ISaveGameService saveGameService)
-            : this(saveGameService, () => true)
+            : this(
+                saveGameService,
+                EconomyWriteAuthorityGate.FromSaveService(saveGameService))
         {
         }
 
-        internal LocalWarzoneCreditService(ISaveGameService saveGameService, Func<bool> isProfileWritable)
+        private LocalWarzoneCreditService(
+            ISaveGameService saveGameService,
+            EconomyWriteAuthorityGate writeAuthorityGate)
         {
             _saveGameService = saveGameService ?? throw new ArgumentNullException(nameof(saveGameService));
-            _isProfileWritable = isProfileWritable ?? throw new ArgumentNullException(nameof(isProfileWritable));
+            _writeAuthorityGate = writeAuthorityGate ??
+                throw new ArgumentNullException(nameof(writeAuthorityGate));
         }
 
         public EconomyBalanceReadResult ReadCredits()
@@ -41,7 +46,7 @@ namespace AL.Services.Local
             }
 
             return new EconomyBalanceReadResult(
-                IsProfileWritable()
+                IsProfileWritableFor(save)
                     ? EconomyBalanceReadStatus.Available
                     : EconomyBalanceReadStatus.AvailableReadOnly,
                 EconomyCurrencyKind.WarzoneCredits,
@@ -182,7 +187,7 @@ namespace AL.Services.Local
                 return false;
             }
 
-            if (!IsProfileWritable())
+            if (!IsProfileWritableFor(save))
             {
                 failure = MutationFailure(
                     EconomyMutationStatus.RejectedProfileNotWritable,
@@ -220,16 +225,9 @@ namespace AL.Services.Local
             }
         }
 
-        private bool IsProfileWritable()
+        private bool IsProfileWritableFor(SaveGameData expectedPublishedSave)
         {
-            try
-            {
-                return _isProfileWritable();
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return _writeAuthorityGate.IsWritableFor(expectedPublishedSave);
         }
 
         private static EconomyBalanceReadResult ReadFailure(

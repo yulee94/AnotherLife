@@ -17,8 +17,17 @@ namespace AL.Services.Local
                 new EconomyDiagnostic(EconomyDiagnosticCodes.ProductionDependency, "Production.Source")
             });
 
+        private static readonly IReadOnlyList<EconomyDiagnostic>
+            ProfileReadOnlyDiagnostics =
+                EconomyContractCollections.FreezeDiagnostics(new[]
+                {
+                    new EconomyDiagnostic(
+                        EconomyDiagnosticCodes.ProfileReadOnly,
+                        "Resources")
+                });
+
         private readonly ISaveGameService _saveGameService;
-        private readonly Func<bool> _isProfileWritable;
+        private readonly EconomyWriteAuthorityGate _writeAuthorityGate;
         private readonly IEconomyProductionContributionProvider _injectedProductionProvider;
 
         private readonly ResourceData[] _walletEntries;
@@ -41,17 +50,21 @@ namespace AL.Services.Local
         public event Action<ResourceType, long> OnResourceChanged;
 
         public LocalResourceService(ISaveGameService saveGameService)
-            : this(saveGameService, () => true, null)
+            : this(
+                saveGameService,
+                EconomyWriteAuthorityGate.FromSaveService(saveGameService),
+                null)
         {
         }
 
-        internal LocalResourceService(
+        private LocalResourceService(
             ISaveGameService saveGameService,
-            Func<bool> isProfileWritable,
+            EconomyWriteAuthorityGate writeAuthorityGate,
             IEconomyProductionContributionProvider productionProvider)
         {
             _saveGameService = saveGameService ?? throw new ArgumentNullException(nameof(saveGameService));
-            _isProfileWritable = isProfileWritable ?? throw new ArgumentNullException(nameof(isProfileWritable));
+            _writeAuthorityGate = writeAuthorityGate ??
+                throw new ArgumentNullException(nameof(writeAuthorityGate));
             _injectedProductionProvider = productionProvider;
 
             int resourceCount = ResourceRules.WalletResources.Count;
@@ -99,7 +112,7 @@ namespace AL.Services.Local
             }
 
             ResourceData entry = _walletEntries[resourceIndex];
-            bool writable = IsProfileWritable();
+            bool writable = IsProfileWritableFor(save);
             if (entry == null)
             {
                 IReadOnlyList<EconomyDiagnostic> missingDiagnostics = AppendDiagnostic(
@@ -305,13 +318,9 @@ namespace AL.Services.Local
                     "Resources");
             }
 
-            if (!IsProfileWritable())
+            if (!IsProfileWritableFor(save))
             {
-                return ProductionFailure(
-                    EconomyMutationStatus.RejectedProfileNotWritable,
-                    deltaSeconds,
-                    EconomyDiagnosticCodes.ProfileReadOnly,
-                    "Resources");
+                return ProductionReadOnly(deltaSeconds);
             }
 
             IEconomyProductionContributionProvider provider = ResolveProductionProvider();
@@ -388,6 +397,11 @@ namespace AL.Services.Local
                     OneDiagnostic(planDiagnostic.Code, planDiagnostic.RecordPath));
             }
 
+            if (!IsProfileWritableFor(save))
+            {
+                return ProductionReadOnly(deltaSeconds);
+            }
+
             if (planStatus == EconomyMutationStatus.NoChange)
             {
                 if (profileChanged)
@@ -424,6 +438,11 @@ namespace AL.Services.Local
             if (insertionCount > 0 && wallet.Capacity < wallet.Count + insertionCount)
             {
                 wallet.Capacity = wallet.Count + insertionCount;
+            }
+
+            if (!IsProfileWritableFor(save))
+            {
+                return ProductionReadOnly(deltaSeconds);
             }
 
             _productionProfileIdentity = source.ProfileIdentity;
@@ -559,7 +578,7 @@ namespace AL.Services.Local
                 return false;
             }
 
-            if (!IsProfileWritable())
+            if (!IsProfileWritableFor(save))
             {
                 wallet = null;
                 diagnostics = EconomyContractCollections.EmptyDiagnostics;
@@ -722,16 +741,9 @@ namespace AL.Services.Local
             }
         }
 
-        private bool IsProfileWritable()
+        private bool IsProfileWritableFor(SaveGameData expectedPublishedSave)
         {
-            try
-            {
-                return _isProfileWritable();
-            }
-            catch (Exception)
-            {
-                return false;
-            }
+            return _writeAuthorityGate.IsWritableFor(expectedPublishedSave);
         }
 
         private void NotifyResourceChanged(ResourceType type, long balance)
@@ -817,6 +829,14 @@ namespace AL.Services.Local
                 EconomyContractCollections.EmptyMutations,
                 OneDiagnostic(diagnosticCode, path));
         }
+
+        private static EconomyProductionTickResult ProductionReadOnly(
+            double deltaSeconds) =>
+            new EconomyProductionTickResult(
+                EconomyMutationStatus.RejectedProfileNotWritable,
+                deltaSeconds,
+                EconomyContractCollections.EmptyMutations,
+                ProfileReadOnlyDiagnostics);
 
         private static IReadOnlyList<EconomyDiagnostic> OneDiagnostic(string code, string path) =>
             Array.AsReadOnly(new[] { new EconomyDiagnostic(code, path) });

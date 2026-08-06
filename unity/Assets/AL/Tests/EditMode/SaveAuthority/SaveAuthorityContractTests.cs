@@ -195,6 +195,260 @@ namespace AL.Tests.EditMode.SaveAuthority
         }
 
         [Test]
+        public void AllocationFreeWritablePredicateMatchesGuardAcrossAdversarialInputs()
+        {
+            var snapshots = new[]
+            {
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion,
+                    SaveAuthorityTechnicalLimits
+                        .IdentityAwareProfileInitializationVersion,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    new[]
+                    {
+                        "AL-SAVE-AUTH-ZETA",
+                        "AL-SAVE-AUTH-ALPHA"
+                    }),
+                Unchecked(
+                    "wrong-contract",
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.MigrationRequired,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    1,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    new[] { "AL-SAVE-AUTH-MIGRATION" }),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    "alp_00000000000000000000000000000000",
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    "00000000000000000000000000000001",
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    "0123456789abcdef0000000000000000",
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint.ToUpperInvariant(),
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    1,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    2,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    false,
+                    ProfileAuthoritySourceGeneration.None,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    (ProfileAuthoritySourceGeneration)999,
+                    Array.Empty<string>()),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    null),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    new[] { "AL-SAVE-AUTH-DUP", "AL-SAVE-AUTH-DUP" }),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    new[] { "invalid diagnostic" }),
+                Unchecked(
+                    SaveAuthorityTechnicalLimits.ContractVersion,
+                    ProfileWriteAuthorityStatus.Writable,
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    2,
+                    1,
+                    true,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    Enumerable.Range(
+                            0,
+                            SaveAuthorityTechnicalLimits
+                                .MaximumDiagnosticCodes + 1)
+                        .Select(index => $"AL-SAVE-AUTH-{index:D2}")
+                        .ToArray())
+            };
+
+            foreach (ProfileWriteAuthoritySnapshot snapshot in snapshots)
+            {
+                var provider = new FixedProvider(snapshot);
+                bool normalizedWritable =
+                    ProfileWriteAuthorityProviderGuard
+                        .ReadOrUnavailable(provider)
+                        .Status == ProfileWriteAuthorityStatus.Writable;
+                Assert.AreEqual(
+                    normalizedWritable,
+                    ProfileWriteAuthorityProviderGuard
+                        .IsCurrentWritable(provider),
+                    snapshot.Status.ToString());
+            }
+
+            Assert.IsFalse(
+                ProfileWriteAuthorityProviderGuard.IsCurrentWritable(null));
+            Assert.IsFalse(
+                ProfileWriteAuthorityProviderGuard.IsCurrentWritable(
+                    new FixedProvider(null)));
+            Assert.IsFalse(
+                ProfileWriteAuthorityProviderGuard.IsCurrentWritable(
+                    new ThrowingProvider()));
+        }
+
+        [Test]
+        public void WritablePredicateReReadsProviderWithoutManagedAllocation()
+        {
+            ProfileWriteAuthoritySnapshot snapshot =
+                ProfileWriteAuthoritySnapshotFactory.Writable(
+                    ProfileId,
+                    Epoch,
+                    Fingerprint,
+                    ProfileAuthoritySourceGeneration.Primary,
+                    new[]
+                    {
+                        "AL-SAVE-AUTH-ZETA",
+                        "AL-SAVE-AUTH-ALPHA"
+                    });
+            var provider = new CountingFixedProvider(snapshot);
+            const int warmupCalls = 256;
+            const int measuredCalls = 4096;
+
+            for (int index = 0; index < warmupCalls; index++)
+            {
+                ProfileWriteAuthorityProviderGuard.IsCurrentWritable(provider);
+            }
+
+            long before = GC.GetAllocatedBytesForCurrentThread();
+            int writableCount = 0;
+            for (int index = 0; index < measuredCalls; index++)
+            {
+                if (ProfileWriteAuthorityProviderGuard.IsCurrentWritable(
+                        provider))
+                {
+                    writableCount++;
+                }
+            }
+
+            long allocated =
+                GC.GetAllocatedBytesForCurrentThread() - before;
+
+            Assert.AreEqual(measuredCalls, writableCount);
+            Assert.AreEqual(
+                warmupCalls + measuredCalls,
+                provider.CallCount,
+                "The predicate must re-read authority on every call.");
+            Assert.AreEqual(
+                0L,
+                allocated,
+                "The validated hot-path predicate must not allocate managed memory after warmup.");
+        }
+
+        [Test]
         public void ProviderRejectionPrecedenceIsDeterministic()
         {
             ProfileWriteAuthoritySnapshot malformed = Unchecked(
@@ -657,6 +911,26 @@ namespace AL.Tests.EditMode.SaveAuthority
             }
 
             public ProfileWriteAuthoritySnapshot GetCurrentAuthority() => _snapshot;
+        }
+
+        private sealed class CountingFixedProvider :
+            IProfileWriteAuthorityProvider
+        {
+            private readonly ProfileWriteAuthoritySnapshot _snapshot;
+
+            internal CountingFixedProvider(
+                ProfileWriteAuthoritySnapshot snapshot)
+            {
+                _snapshot = snapshot;
+            }
+
+            internal int CallCount { get; private set; }
+
+            public ProfileWriteAuthoritySnapshot GetCurrentAuthority()
+            {
+                CallCount++;
+                return _snapshot;
+            }
         }
 
         private sealed class ThrowingProvider : IProfileWriteAuthorityProvider
