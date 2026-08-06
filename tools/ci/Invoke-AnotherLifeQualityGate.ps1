@@ -5,12 +5,21 @@ param(
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
+$script:StrictUtf8Encoding = New-Object System.Text.UTF8Encoding($false, $true)
 
 function Invoke-GitLines {
     param([Parameter(Mandatory = $true)][string[]] $Arguments)
 
-    $output = & git @Arguments 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $output = & git @Arguments 2>&1
+        $exitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($exitCode -ne 0) {
         throw "git $($Arguments -join ' ') failed:`n$output"
     }
 
@@ -169,7 +178,16 @@ function Read-GitHubEvent {
         return $null
     }
 
-    return Get-Content -Raw -LiteralPath $env:GITHUB_EVENT_PATH | ConvertFrom-Json
+    return Read-StrictUtf8Text $env:GITHUB_EVENT_PATH | ConvertFrom-Json
+}
+
+function Read-StrictUtf8Text {
+    param([Parameter(Mandatory = $true)][string] $Path)
+
+    # PowerShell 5.1 defaults Get-Content to the active ANSI code page. A
+    # multibyte UTF-8 sequence can therefore consume a following JSON quote
+    # as a DBCS trail byte and make valid repository data look malformed.
+    return [System.IO.File]::ReadAllText($Path, $script:StrictUtf8Encoding)
 }
 
 function ConvertTo-SafeDiagnosticText {
@@ -426,6 +444,98 @@ function Test-AnyPathPrefix {
     return $false
 }
 
+function Test-AnyPathWithinDirectory {
+    param(
+        [string] $Path,
+        [string[]] $Directories
+    )
+
+    $normalizedPath = ""
+    if ($null -ne $Path) {
+        $normalizedPath = $Path -replace "\\", "/"
+    }
+
+    foreach ($directory in $Directories) {
+        $normalizedDirectory = ""
+        if ($null -ne $directory) {
+            $normalizedDirectory = ($directory -replace "\\", "/").TrimEnd("/")
+        }
+        if (-not $normalizedDirectory) {
+            continue
+        }
+
+        if ($normalizedPath.Equals($normalizedDirectory, [System.StringComparison]::Ordinal) -or
+            $normalizedPath.StartsWith("$normalizedDirectory/", [System.StringComparison]::Ordinal)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Test-IsSubstantiveMixedModeRationale {
+    param([AllowNull()][string] $Text)
+
+    if (-not $Text) {
+        return $false
+    }
+
+    $candidate = $Text.Trim()
+    $candidate = [regex]::Replace($candidate, "^(?:[-*+]\s+|>\s*)+", "").Trim()
+    if (-not $candidate -or
+        $candidate -match "(?i)^(?:n/?a|none|not applicable|no|tbd|todo|pending|-)\.?$" -or
+        $candidate -match "(?i)^(?:(?:this|it)\s+is\s+)?not\s+(?:a\s+)?mixed-mode\s+pr\.?$" -or
+        $candidate -match "(?i)^a\s+mixed-mode\s+pr\s+requires\s+a\s+written\s+codex\s+coordination/review\s+justification\s+explaining\s+why\s+separate\s+prs\s+are\s+impractical\.?$" -or
+        $candidate -match "(?i)^(?:\*\*|__)?mixed-mode\s+(?:justification(?:/exception)?|exception)(?:\*\*|__)?\s*:?$") {
+        return $false
+    }
+
+    return $true
+}
+
+function Test-HasMixedModeJustification {
+    param([AllowNull()][string] $Body)
+
+    if (-not $Body) {
+        return $false
+    }
+
+    # Only an affirmative marker plus a written explanation is authoritative.
+    # A plain label must explain itself on the same line. A Markdown heading may
+    # introduce one or more rationale lines, but cannot borrow text from the next
+    # section. Template guidance, denials, placeholders, and empty markers fail.
+    $labelPattern = "(?i)^\s*(?:[-*+]\s+)?(?:\*\*|__)?mixed-mode\s+(?:justification(?:/exception)?|exception)(?:\*\*|__)?\s*:\s*(?<rationale>.*?)\s*$"
+    $headingPattern = "(?i)^\s*#{1,6}\s+(?:\*\*|__)?mixed-mode\s+(?:justification(?:/exception)?|exception)(?:\*\*|__)?\s*:?\s*$"
+    $anyHeadingPattern = "^\s*#{1,6}(?:\s+|$)"
+    $lines = @([regex]::Split($Body, "\r?\n"))
+
+    for ($index = 0; $index -lt $lines.Count; $index++) {
+        $line = [string]$lines[$index]
+        if ($line -match $labelPattern) {
+            if (Test-IsSubstantiveMixedModeRationale $Matches["rationale"]) {
+                return $true
+            }
+            continue
+        }
+
+        if ($line -notmatch $headingPattern) {
+            continue
+        }
+
+        for ($rationaleIndex = $index + 1; $rationaleIndex -lt $lines.Count; $rationaleIndex++) {
+            $rationaleLine = [string]$lines[$rationaleIndex]
+            if ($rationaleLine -match $anyHeadingPattern) {
+                break
+            }
+            if (Test-IsSubstantiveMixedModeRationale $rationaleLine) {
+                return $true
+            }
+        }
+    }
+
+    return $false
+}
+
 function Invoke-Classify {
     $failures = [System.Collections.Generic.List[string]]::new()
     $event = Read-GitHubEvent
@@ -435,6 +545,12 @@ function Invoke-Classify {
     $baseBranch = $env:GITHUB_BASE_REF
     $headBranch = $env:GITHUB_HEAD_REF
     $branchPrefixes = Get-PolicyList "branch_prefixes" @("codex/")
+    $a2BranchPrefix = Get-PolicyScalar "a2_branch_prefix" "a2/terrestrial-"
+    $a2PrimaryMode = Get-PolicyScalar "a2_primary_mode" "A2 terrestrial design"
+    $a2SourceDirectories = Get-PolicyList "a2_source_paths" @(
+        "unity/Docs/Terrestrials/",
+        "unity/Assets/AL/Art/Terrestrials/ConceptSheets/"
+    )
     $primaryModes = Get-PolicyList "primary_modes" @(
         "Codex coordination/review",
         "Codex narrative/content",
@@ -442,6 +558,7 @@ function Invoke-Classify {
         "Codex engineering"
     )
     $retiredAgentsAndPrefixes = Get-PolicyList "retired_agents_and_prefixes" @("GPT", "Android Studio", "gpt/", "android-studio/", "gemini/")
+    $selectedMode = ""
 
     if ($null -ne $event -and $event.PSObject.Properties.Name -contains "pull_request") {
         $isPullRequest = $true
@@ -484,6 +601,8 @@ function Invoke-Classify {
 
         if ($modeMatches.Count -ne 1) {
             Add-Failure $failures "Exactly one primary delivery mode must be selected in the PR body."
+        } else {
+            $selectedMode = $modeMatches[0].Groups[1].Value
         }
 
         $retiredModeNames = @($retiredAgentsAndPrefixes | Where-Object { $_ -notmatch "/" })
@@ -505,6 +624,18 @@ function Invoke-Classify {
         Add-Failure $failures "Pull request body is unavailable or empty."
     }
 
+    $isA2Branch = $isPullRequest -and
+        $headBranch -and
+        $headBranch.StartsWith($a2BranchPrefix, [System.StringComparison]::Ordinal)
+    if ($isA2Branch -and $selectedMode -cne $a2PrimaryMode) {
+        Add-Failure $failures "A2 branch '$headBranch' must select exactly '$a2PrimaryMode'."
+    }
+    if ($isPullRequest -and
+        $selectedMode -ceq $a2PrimaryMode -and
+        -not $isA2Branch) {
+        Add-Failure $failures "Primary mode '$a2PrimaryMode' requires an '$a2BranchPrefix' branch."
+    }
+
     $sharedFiles = Get-PolicyList "shared_files" @(
         "unity/Assets/AL/Scripts/Core/Bootloader.cs",
         "unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs",
@@ -520,25 +651,50 @@ function Invoke-Classify {
 
     $narrativePrefixes = Get-PolicyList "narrative_source_paths" @("unity/Docs/NVS_01_A1", "unity/Docs/Narrative", "app/src/main/java/com/example/anotherlife/narrative/")
     $terrestrialPrefixes = Get-PolicyList "terrestrial_design_paths" @("unity/Assets/AL/Art/Terrestrials/", "unity/Assets/AL/Art/Designs/Terrestrial", "unity/Docs/Terrestrials/", "unity/Docs/Terrestrial")
-    $engineeringPrefixes = @(
-        Get-PolicyList "runtime_paths" @("app/", "unity/Assets/AL/Scripts/", "unity/Assets/AL/Tests/")
-    ) + @(
-        Get-PolicyList "workflow_paths" @(".github/workflows/", ".github/anotherlife-policy.yml", "tools/ci/")
-    )
+    $runtimePrefixes = @(Get-PolicyList "runtime_paths" @("app/", "unity/Assets/AL/Scripts/", "unity/Assets/AL/Tests/"))
+    $workflowPrefixes = @(Get-PolicyList "workflow_paths" @(".github/workflows/", ".github/anotherlife-policy.yml", "tools/ci/"))
+    $engineeringToolPrefixes = @(Get-PolicyList "engineering_tool_paths" @("tools/game-data/"))
+    $engineeringPrefixes = @($runtimePrefixes + $workflowPrefixes + $engineeringToolPrefixes)
 
     $narrativeChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $narrativePrefixes })
     $terrestrialChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $terrestrialPrefixes })
+    $runtimeChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $runtimePrefixes })
+    $workflowChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $workflowPrefixes })
+    $engineeringToolChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringToolPrefixes })
     $engineeringChanged = @($changedFiles | Where-Object { Test-AnyPathPrefix $_ $engineeringPrefixes })
+    $nonA2SourceChanged = @($changedFiles | Where-Object { -not (Test-AnyPathWithinDirectory $_ $a2SourceDirectories) })
+
+    if ($isA2Branch) {
+        if ($narrativeChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches cannot change narrative paths."
+        }
+        if ($runtimeChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches cannot change runtime paths."
+        }
+        if ($workflowChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches cannot change workflow paths."
+        }
+        if ($engineeringToolChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches cannot change engineering tool paths."
+        }
+        if ($nonA2SourceChanged.Count -gt 0) {
+            Add-Failure $failures "A2 branches may change only configured A2 source-only directory paths. Out-of-bound paths: $($nonA2SourceChanged -join ', ')."
+        }
+        if (Test-HasMixedModeJustification $body) {
+            Add-Failure $failures "A2 branches cannot use a mixed-mode justification to escape their source-only boundary."
+        }
+    }
 
     if ($isPullRequest -and
         ($narrativeChanged -or $terrestrialChanged) -and
         $engineeringChanged -and
-        $body -notmatch "(?i)mixed-mode|separate PRs are impractical") {
+        -not (Test-HasMixedModeJustification $body)) {
         Add-Failure $failures "Source-mode and engineering paths are mixed without an explicit mixed-mode justification."
     }
 
     Write-SafeHost "Narrative paths changed: $($narrativeChanged.Count)"
     Write-SafeHost "Terrestrial design paths changed: $($terrestrialChanged.Count)"
+    Write-SafeHost "Engineering tool paths changed: $($engineeringToolChanged.Count)"
     Write-SafeHost "Engineering/workflow paths changed: $($engineeringChanged.Count)"
     Assert-NoFailures $failures
 }
@@ -548,8 +704,16 @@ function Invoke-Hygiene {
     $diffRange = Get-DiffRange
 
     Write-SafeHost "Running git diff --check against $diffRange"
-    $diffCheck = & git diff --check $diffRange 2>&1
-    if ($LASTEXITCODE -ne 0) {
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $diffCheck = & git diff --check $diffRange 2>&1
+        $diffExitCode = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($diffExitCode -ne 0) {
         Add-Failure $failures "git diff --check failed:`n$diffCheck"
     }
 
@@ -632,7 +796,7 @@ function Invoke-Hygiene {
 
     foreach ($jsonFile in ($trackedFiles | Where-Object { $_ -like "*.json" })) {
         try {
-            Get-Content -Raw -LiteralPath $jsonFile | ConvertFrom-Json | Out-Null
+            Read-StrictUtf8Text $jsonFile | ConvertFrom-Json | Out-Null
         } catch {
             Add-Failure $failures "Malformed JSON file '$jsonFile': $($_.Exception.Message)"
         }

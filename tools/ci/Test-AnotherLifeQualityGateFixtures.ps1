@@ -6,12 +6,17 @@ param(
         "TestScene",
         "MissingScene",
         "MalformedJson",
+        "Utf8Json",
+        "Utf8Event",
         "MutableAction",
         "DiagnosticSanitization",
         "MixedScope",
+        "MixedModeRationale",
         "Coordination",
         "RetiredPrefix",
         "A2Convention",
+        "A2Authority",
+        "EngineeringToolClassification",
         "PolicyAuthority",
         "PushMain",
         "PullRequestRange",
@@ -77,7 +82,7 @@ function Invoke-Checked {
         }
     }
 
-    $text = ($output | Out-String)
+    $text = ($output | Out-String -Width 4096)
     if ($ExpectFailure) {
         if ($exitCode -eq 0) {
             throw "Expected failure from $FilePath $($Arguments -join ' '), but it succeeded.`n$text"
@@ -87,6 +92,20 @@ function Invoke-Checked {
     }
 
     return $text
+}
+
+function Get-FixturePowerShellExecutables {
+    $executables = [System.Collections.Generic.List[string]]::new()
+    $executables.Add($powerShellExecutable) | Out-Null
+    if ([System.Environment]::OSVersion.Platform -eq [System.PlatformID]::Win32NT) {
+        $windowsPowerShell = Join-Path $env:WINDIR "System32\WindowsPowerShell\v1.0\powershell.exe"
+        if ((Test-Path -LiteralPath $windowsPowerShell) -and
+            -not $windowsPowerShell.Equals($powerShellExecutable, [System.StringComparison]::OrdinalIgnoreCase)) {
+            $executables.Add($windowsPowerShell) | Out-Null
+        }
+    }
+
+    return @($executables)
 }
 
 function New-FixtureRepo {
@@ -323,6 +342,73 @@ function Test-MalformedJsonFixture {
     } "Malformed JSON file"
 }
 
+function Test-Utf8JsonFixture {
+    $fixtureRepo = New-FixtureRepo "utf8-json"
+    $jsonPath = Join-Path $fixtureRepo "multibyte.json"
+    $koreanValue = "equipment_unicode_" + [char]0xD55C
+    $json = '{"value":"' + $koreanValue + '"}'
+    $strictUtf8 = New-Object System.Text.UTF8Encoding($false, $true)
+    [System.IO.File]::WriteAllText($jsonPath, $json, $strictUtf8)
+
+    Push-Location $fixtureRepo
+    try {
+        Invoke-Checked git @("add", "multibyte.json") $fixtureRepo | Out-Null
+        foreach ($executable in (Get-FixturePowerShellExecutables)) {
+            $output = Invoke-Checked $executable @(
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+                "-Mode",
+                "Hygiene",
+                "-BaseRef",
+                "HEAD"
+            ) $fixtureRepo
+            Assert-Contains $output "Tracked files checked: 2"
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Test-Utf8EventFixture {
+    $fixtureRepo = New-FixtureRepo "utf8-event"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Governance.md") -Value "# Governance fixture" -NoNewline
+    Invoke-Checked git @("add", "unity/Docs/Governance.md") $fixtureRepo | Out-Null
+
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $koreanSuffix = [string]([char]0xD55C)
+    $body = "- [x] Codex coordination/review`n`nRefs #155`n`n## Shared-file lock`n`nNone.`n`n$koreanSuffix"
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Write-PullRequestEvent $eventPath $base $base $body "main" "codex/coordination-utf8-event"
+
+    foreach ($executable in (Get-FixturePowerShellExecutables)) {
+        $output = Invoke-Checked $executable @(
+            "-NoProfile",
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+            "-Mode",
+            "Classify",
+            "-BaseRef",
+            "HEAD"
+        ) $fixtureRepo @{
+            GITHUB_ACTIONS = ""
+            GITHUB_EVENT_NAME = "pull_request"
+            GITHUB_EVENT_PATH = $eventPath
+            GITHUB_BASE_REF = "main"
+            GITHUB_HEAD_REF = "codex/coordination-utf8-event"
+        }
+        Assert-Contains $output "Event: pull_request; PR metadata checks: True"
+        Assert-Contains $output "Narrative paths changed: 0"
+    }
+}
+
 function Test-MutableActionFixture {
     $fixtures = @(
         [pscustomobject]@{
@@ -452,7 +538,7 @@ function Test-MixedScopeFixture {
 {
   "pull_request": {
     "draft": false,
-    "body": "- [x] Codex engineering\n\nFixes #155\n\n## Shared-file lock\n\nNone.",
+    "body": "- [x] Codex engineering\n\nA mixed-mode PR requires a written Codex coordination/review justification explaining why separate PRs are impractical.\n\nThis is not a mixed-mode PR.\n\nFixes #155\n\n## Shared-file lock\n\nNone.",
     "base": { "ref": "main" },
     "head": { "ref": "codex/quality-gate-fixture" }
   }
@@ -476,6 +562,60 @@ function Test-MixedScopeFixture {
     Assert-Contains $output "Terrestrial design paths changed: 1"
     Assert-Contains $output "Engineering/workflow paths changed: 1"
     Assert-Contains $output "Source-mode and engineering paths are mixed"
+}
+
+function Invoke-MixedModeRationaleFixture {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][string] $RationaleBlock,
+        [switch] $ExpectFailure
+    )
+
+    $fixtureRepo = New-FixtureRepo $Name
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs/Terrestrials") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets/AL/Scripts") | Out-Null
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Terrestrials/Design.md") -Value "# Fixture" -NoNewline
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/AL/Scripts/RuntimeFixture.cs") -Value "public class RuntimeFixture {}" -NoNewline
+    $head = Add-FixtureCommit $fixtureRepo "mixed-mode rationale fixture"
+
+    $body = "- [x] Codex engineering`n`nFixes #155`n`n$RationaleBlock`n`n## Shared-file lock`n`nNone."
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Write-PullRequestEvent $eventPath $base $head $body
+    $output = if ($ExpectFailure) {
+        Invoke-PullRequestGate $fixtureRepo $eventPath -ExpectFailure
+    } else {
+        Invoke-PullRequestGate $fixtureRepo $eventPath
+    }
+
+    if ($ExpectFailure) {
+        Assert-Contains $output "Source-mode and engineering paths are mixed without an explicit mixed-mode justification."
+    } else {
+        Assert-Contains $output "Terrestrial design paths changed: 1"
+        Assert-Contains $output "Engineering/workflow paths changed: 1"
+    }
+}
+
+function Test-MixedModeRationaleFixture {
+    Invoke-MixedModeRationaleFixture `
+        "mixed-mode-valid-heading" `
+        "## Mixed-mode justification`n`nThis is a Codex engineering delivery that necessarily includes generated terrestrial asset paths and runtime validation. Separate PRs are impractical because one reproducible builder must generate and validate the exact approved source outputs."
+
+    Invoke-MixedModeRationaleFixture `
+        "mixed-mode-valid-label" `
+        "Mixed-mode justification: This exact engineering fixture must validate its generated terrestrial source and runtime consumer together."
+
+    Invoke-MixedModeRationaleFixture `
+        "mixed-mode-bare-heading" `
+        "## Mixed-mode justification`n`n## Validation`n`nNo rationale was supplied before this next heading." `
+        -ExpectFailure
+
+    Invoke-MixedModeRationaleFixture `
+        "mixed-mode-empty-label" `
+        "Mixed-mode justification:`n`nThis following line cannot backfill an empty same-line label." `
+        -ExpectFailure
 }
 
 function Test-CoordinationFixture {
@@ -617,13 +757,15 @@ function Test-A2ConventionFixture {
     New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
     Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
     New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Docs/Terrestrials") | Out-Null
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo "unity/Assets/AL/Art/Terrestrials/ConceptSheets") | Out-Null
     Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Docs/Terrestrials/A2.md") -Value "# A2 fixture"
+    Set-Content -LiteralPath (Join-Path $fixtureRepo "unity/Assets/AL/Art/Terrestrials/ConceptSheets/A2.png") -Value "A2 source fixture" -NoNewline
     $eventPath = Join-Path $fixtureRepo "event.json"
     Set-Content -LiteralPath $eventPath -Value @"
 {
   "pull_request": {
     "draft": false,
-    "body": "- [x] A2 terrestrial design\n\nRefs #259\n\n## Shared-file lock\n\nNone.",
+    "body": "- [x] A2 terrestrial design\n\nA mixed-mode PR requires a written Codex coordination/review justification explaining why separate PRs are impractical.\n\nThis is not a mixed-mode PR.\n\nRefs #259\n\n## Shared-file lock\n\nNone.",
     "base": { "ref": "main" },
     "head": { "ref": "a2/terrestrial-fixture" }
   }
@@ -634,7 +776,11 @@ function Test-A2ConventionFixture {
     try {
         Invoke-Checked git @("add", ".github/anotherlife-policy.yml", "tools/ci/Invoke-AnotherLifeQualityGate.ps1") $fixtureRepo | Out-Null
         Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
-        Invoke-Checked git @("add", "unity/Docs/Terrestrials/A2.md") $fixtureRepo | Out-Null
+        Invoke-Checked git @(
+            "add",
+            "unity/Docs/Terrestrials/A2.md",
+            "unity/Assets/AL/Art/Terrestrials/ConceptSheets/A2.png"
+        ) $fixtureRepo | Out-Null
         $output = Invoke-Checked $powerShellExecutable @("-NoProfile", "-ExecutionPolicy", "Bypass", "-File", ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1", "-Mode", "Classify", "-BaseRef", "HEAD") $fixtureRepo @{
             GITHUB_ACTIONS = ""
             GITHUB_EVENT_NAME = "pull_request"
@@ -646,7 +792,199 @@ function Test-A2ConventionFixture {
         Pop-Location
     }
 
-    Assert-Contains $output "Terrestrial design paths changed: 1"
+    Assert-Contains $output "Terrestrial design paths changed: 2"
+}
+
+function Invoke-A2AuthorityFailureFixture {
+    param(
+        [Parameter(Mandatory = $true)][string] $Name,
+        [Parameter(Mandatory = $true)][string] $ChangedPath,
+        [Parameter(Mandatory = $true)][string] $Body,
+        [Parameter(Mandatory = $true)][string] $HeadBranch,
+        [Parameter(Mandatory = $true)][string[]] $ExpectedMessages
+    )
+
+    $fixtureRepo = New-FixtureRepo $Name
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
+    Invoke-Checked git @("add", ".github/anotherlife-policy.yml") $fixtureRepo | Out-Null
+    Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
+
+    $absoluteChangedPath = Join-Path $fixtureRepo $ChangedPath
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $absoluteChangedPath) | Out-Null
+    Set-Content -LiteralPath $absoluteChangedPath -Value "# A2 authority fixture" -NoNewline
+    Invoke-Checked git @("add", $ChangedPath) $fixtureRepo | Out-Null
+
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    Write-PullRequestEvent $eventPath $base $base $Body "main" $HeadBranch
+
+    $output = Invoke-Checked $powerShellExecutable @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+        "-Mode",
+        "Classify",
+        "-BaseRef",
+        "HEAD"
+    ) $fixtureRepo @{
+        GITHUB_ACTIONS = ""
+        GITHUB_EVENT_NAME = "pull_request"
+        GITHUB_EVENT_PATH = $eventPath
+        GITHUB_BASE_REF = "main"
+        GITHUB_HEAD_REF = $HeadBranch
+    } -ExpectFailure
+
+    foreach ($expectedMessage in $ExpectedMessages) {
+        Assert-Contains $output $expectedMessage
+    }
+}
+
+function Test-A2AuthorityFixture {
+    $a2Body = "- [x] A2 terrestrial design`n`nRefs #259`n`n## Shared-file lock`n`nNone."
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-wrong-mode" `
+        "unity/Docs/Terrestrials/WrongMode.md" `
+        "- [x] Codex engineering`n`nRefs #259`n`n## Shared-file lock`n`nNone." `
+        "a2/terrestrial-wrong-mode" `
+        @("A2 branch 'a2/terrestrial-wrong-mode' must select exactly 'A2 terrestrial design'.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "codex-a2-mode" `
+        "unity/Docs/Terrestrials/WrongBranch.md" `
+        $a2Body `
+        "codex/wrong-a2-mode" `
+        @("Primary mode 'A2 terrestrial design' requires an 'a2/terrestrial-' branch.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-narrative-path" `
+        "unity/Docs/Narrative/A2Narrative.md" `
+        $a2Body `
+        "a2/terrestrial-narrative-path" `
+        @("A2 branches cannot change narrative paths.", "A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-path" `
+        "unity/Assets/AL/Scripts/A2Runtime.cs" `
+        $a2Body `
+        "a2/terrestrial-runtime-path" `
+        @("A2 branches cannot change runtime paths.", "A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-workflow-path" `
+        ".github/workflows/a2-workflow.yml" `
+        $a2Body `
+        "a2/terrestrial-workflow-path" `
+        @("A2 branches cannot change workflow paths.", "A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-engineering-tool-path" `
+        "tools/game-data/a2-tool.py" `
+        $a2Body `
+        "a2/terrestrial-engineering-tool-path" `
+        @("A2 branches cannot change engineering tool paths.", "A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-unclassified-path" `
+        "unity/Docs/A2OutsideTerrestrialSource.md" `
+        $a2Body `
+        "a2/terrestrial-unclassified-path" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-coordination-spec" `
+        "unity/Docs/Terrestrial_Source_Packet_Validation_Spec.md" `
+        $a2Body `
+        "a2/terrestrial-coordination-spec" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-terrestrial-near-miss" `
+        "unity/Docs/TerrestrialPolicyEscape.md" `
+        $a2Body `
+        "a2/terrestrial-near-miss" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-material" `
+        "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Materials/MAT_Slagfall_Rock.mat" `
+        $a2Body `
+        "a2/terrestrial-runtime-material" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-mesh" `
+        "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Meshes/M_Slagfall_QuarryBowl_128m.asset" `
+        $a2Body `
+        "a2/terrestrial-runtime-mesh" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-prefab" `
+        "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Environment/Prefabs/Slagfall_RepresentativeSlice.prefab" `
+        $a2Body `
+        "a2/terrestrial-runtime-prefab" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-runtime-export" `
+        "unity/Assets/AL/Art/Terrestrials/RuntimeExports/Slagfall_Runtime.asset" `
+        $a2Body `
+        "a2/terrestrial-runtime-export" `
+        @("A2 branches may change only configured A2 source-only directory paths.")
+
+    Invoke-A2AuthorityFailureFixture `
+        "a2-mixed-mode-escape" `
+        "unity/Docs/Terrestrials/MixedModeEscape.md" `
+        "$a2Body`n`nMixed-mode exception: separate PRs are impractical for this change." `
+        "a2/terrestrial-mixed-mode-escape" `
+        @("A2 branches cannot use a mixed-mode justification to escape their source-only boundary.")
+}
+
+function Test-EngineeringToolClassificationFixture {
+    $fixtureRepo = New-FixtureRepo "engineering-tool-classification"
+    New-Item -ItemType Directory -Force -Path (Join-Path $fixtureRepo ".github") | Out-Null
+    Copy-Item -LiteralPath (Join-Path $repoRoot ".github/anotherlife-policy.yml") -Destination (Join-Path $fixtureRepo ".github/anotherlife-policy.yml")
+    Invoke-Checked git @("add", ".github/anotherlife-policy.yml") $fixtureRepo | Out-Null
+    Invoke-Checked git @("commit", "-q", "-m", "policy") $fixtureRepo | Out-Null
+
+    $toolDirectory = Join-Path $fixtureRepo "tools/game-data"
+    New-Item -ItemType Directory -Force -Path $toolDirectory | Out-Null
+    Set-Content -LiteralPath (Join-Path $toolDirectory "validator.py") -Value "print('fixture')" -NoNewline
+    Invoke-Checked git @("add", "tools/game-data/validator.py") $fixtureRepo | Out-Null
+
+    $base = (
+        Invoke-Checked git @("rev-parse", "HEAD") $fixtureRepo
+    ).Trim()
+    $eventPath = Join-Path $fixtureRepo "event.json"
+    $body = "- [x] Codex engineering`n`nRefs #155`n`n## Shared-file lock`n`nNone."
+    Write-PullRequestEvent $eventPath $base $base $body "main" "codex/engineering-tool-classification"
+
+    $output = Invoke-Checked $powerShellExecutable @(
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        ".\tools\ci\Invoke-AnotherLifeQualityGate.ps1",
+        "-Mode",
+        "Classify",
+        "-BaseRef",
+        "HEAD"
+    ) $fixtureRepo @{
+        GITHUB_ACTIONS = ""
+        GITHUB_EVENT_NAME = "pull_request"
+        GITHUB_EVENT_PATH = $eventPath
+        GITHUB_BASE_REF = "main"
+        GITHUB_HEAD_REF = "codex/engineering-tool-classification"
+    }
+
+    Assert-Contains $output "Engineering tool paths changed: 1"
+    Assert-Contains $output "Engineering/workflow paths changed: 1"
 }
 
 function Test-PolicyAuthorityFixture {
@@ -812,7 +1150,7 @@ function Test-PathChangesFixture {
     $head = Add-FixtureCommit $fixtureRepo "path changes head"
 
     $eventPath = Join-Path $fixtureRepo "event.json"
-    $body = "- [x] Codex engineering`n`nRefs #155`n`nMixed-mode fixture: separate PRs are impractical for this exact path-classification proof.`n`n## Shared-file lock`n`nNone."
+    $body = "- [x] Codex engineering`n`nRefs #155`n`nMixed-mode justification: separate PRs are impractical for this exact path-classification proof.`n`n## Shared-file lock`n`nNone."
     Write-PullRequestEvent $eventPath $base $head $body
     $output = Invoke-PullRequestGate $fixtureRepo $eventPath
 
@@ -914,13 +1252,18 @@ try {
         "TestScene" { Test-TestSceneFixture }
         "MissingScene" { Test-MissingSceneFixture }
         "MalformedJson" { Test-MalformedJsonFixture }
+        "Utf8Json" { Test-Utf8JsonFixture }
+        "Utf8Event" { Test-Utf8EventFixture }
         "MutableAction" { Test-MutableActionFixture }
         "DiagnosticSanitization" { Test-DiagnosticSanitizationFixture }
         "MixedScope" { Test-MixedScopeFixture }
+        "MixedModeRationale" { Test-MixedModeRationaleFixture }
         "Coordination" { Test-CoordinationFixture }
         "PushMain" { Test-PushMainFixture }
         "RetiredPrefix" { Test-RetiredPrefixFixture }
         "A2Convention" { Test-A2ConventionFixture }
+        "A2Authority" { Test-A2AuthorityFixture }
+        "EngineeringToolClassification" { Test-EngineeringToolClassificationFixture }
         "PolicyAuthority" { Test-PolicyAuthorityFixture }
         "PullRequestRange" { Test-PullRequestRangeFixture }
         "InvalidBase" { Test-InvalidBaseFixture }
@@ -933,13 +1276,18 @@ try {
             Test-TestSceneFixture
             Test-MissingSceneFixture
             Test-MalformedJsonFixture
+            Test-Utf8JsonFixture
+            Test-Utf8EventFixture
             Test-MutableActionFixture
             Test-DiagnosticSanitizationFixture
             Test-MixedScopeFixture
+            Test-MixedModeRationaleFixture
             Test-CoordinationFixture
             Test-PushMainFixture
             Test-RetiredPrefixFixture
             Test-A2ConventionFixture
+            Test-A2AuthorityFixture
+            Test-EngineeringToolClassificationFixture
             Test-PolicyAuthorityFixture
             Test-PullRequestRangeFixture
             Test-InvalidBaseFixture

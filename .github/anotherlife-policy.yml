@@ -1,4 +1,4 @@
-version: 3
+version: 6
 status_names:
   classify: "policy / classify"
   hygiene: "repository / hygiene"
@@ -12,6 +12,11 @@ primary_modes:
   - Codex narrative/content
   - A2 terrestrial design
   - Codex engineering
+a2_branch_prefix: a2/terrestrial-
+a2_primary_mode: A2 terrestrial design
+a2_source_paths:
+  - unity/Docs/Terrestrials/
+  - unity/Assets/AL/Art/Terrestrials/ConceptSheets/
 retired_agents_and_prefixes:
   - GPT
   - Android Studio
@@ -45,6 +50,8 @@ workflow_paths:
   - .github/workflows/
   - .github/anotherlife-policy.yml
   - tools/ci/
+engineering_tool_paths:
+  - tools/game-data/
 android_release_sensitive_paths:
   - app/
   - build.gradle.kts
