@@ -45,12 +45,65 @@ The bridge intentionally uses reflection so regular Android CI can keep compilin
 
 `UnityView` owns the attached Unity player instance for the lifetime of the composable host.
 
+- A process-wide, reference-identity lease allows only one Android `UnityView` host to own a
+  player and callback registration at a time. Up to four overlapping incoming hosts wait in a
+  bounded FIFO handoff queue. Release atomically transfers a new identity lease to the oldest
+  live waiter, which then creates the runtime and dispatches its already-validated pending route;
+  a cancelled or stale waiter cannot acquire or release a replacement owner. Capacity exhaustion
+  is visible and does not create another player.
+- A transferred lease is retained before any main-thread post. Disposal of an unattached waiter
+  recovers and releases that exact lease, and its late deferred runnable cannot claim it. Claim to
+  activation-permit publication is synchronized with destruction. Close marks destruction
+  immediately, but it cannot take or release a lease while activation is in progress. The permit
+  holder checks close before and after each opaque construction, registration, view, lifecycle,
+  and route-dispatch step; when close wins, that holder performs the only partial cleanup and
+  returns the exact lease only after cleanup is proven. Grant callbacks drain through a
+  non-recursive bounded runner; enqueue during an opaque grant callback is rejected, so a
+  self-requeue-and-throw callback cannot grow the stack or handoff indefinitely.
+- The Compose host is keyed by the actual `LifecycleOwner`, and Unity destruction is bound to the
+  corresponding Android view's `onRelease`. An owner swap therefore releases the old view and
+  deterministically creates or waits for one replacement instead of destroying an unkeyed view
+  that Compose may retain.
+- A newly mounted host synchronizes immediately to the current Android lifecycle state; it does
+  not wait for a future lifecycle transition before resuming an already-resumed Activity.
 - `ON_RESUME` forwards to `UnityPlayer.resume()`.
 - `ON_PAUSE` forwards to `UnityPlayer.pause()`.
+- `ON_STOP` also enforces the paused state without issuing a duplicate pause.
 - `ON_DESTROY` and composable disposal close the route session, clear that host's callback token, forward to `UnityPlayer.destroy()`, and detach child views.
-- Focus is forwarded with `windowFocusChanged(true)` after attach.
+- Actual attach, detach, and window-focus changes are forwarded. Focus gained before resume is
+  retained and forwarded only after resume; pause and destroy clear forwarded focus first.
+- Application configuration callbacks forward the exact `Configuration` instance. Explicit low
+  memory and trim levels at or above Android's running-low boundary forward to
+  `UnityPlayer.lowMemory()`.
+- Application component-callback registration is a required part of runtime activation. A thrown
+  or rejected registration destroys that player, blocks route dispatch, displays a lifecycle
+  registration failure, and releases the host lease only when teardown is proven complete.
+- Lease grant, callback registration, player-view attachment, retained-state synchronization, and
+  pending-route dispatch form one fail-closed activation transaction. A failure after registration
+  clears the exact callback token, closes callback admission and the route session, attempts to
+  unregister application callbacks, destroys and detaches the player, and releases the lease only
+  after every cleanup step is proven. A replacement can then acquire without inheriting callbacks
+  or state. The player's exact view is observed immediately after successful construction and
+  before registrar work, so a clean registrar rejection can prove detachment and recover; a
+  throwing view lookup remains uncertain and deliberately retains the lease. Destruction during
+  construction, registration, pre-attachment, or post-attachment activation cannot let a
+  replacement acquire until the permit holder has completed cleanup.
+- Teardown is ordered `focus false -> pause -> destroy`, idempotent, and rejects later lifecycle,
+  configuration, and memory signals. Reflection invocation failures are contained at the Android
+  host boundary. A failed `destroy()` invocation or uncertain application-callback unregistration
+  deliberately retains the process-wide lease so a second native player cannot start over an
+  incomplete first teardown; process restart is the recovery boundary for that failure.
 - A replacement host gets a new callback token; disposal of the prior host cannot clear the replacement.
 - AndroidX `@Keep` preserves the exact `UnityBridgeCallbacks.reportOutcome(String)` JVM entry point in minified release builds while unused host and contract code can still be removed. The Java reference parameter is nullable at this external boundary; a null JNI/Unity argument is delivered as typed `bridge.null_message` failure instead of throwing across JNI.
+
+The reflection host loads the named class without initialization and accepts it only when it can
+prove a compatible public one-argument constructor on a `View`, exact instance `void` `resume`,
+`pause`, `destroy`, `windowFocusChanged(boolean)`, `lowMemory`, and
+`configurationChanged(Configuration)` methods, plus exact static `void`
+`UnitySendMessage(String,String,String)`. Missing classes and incompatible signatures remain
+visibly unavailable without construction. Class initialization or constructor failure propagates
+as uncertain activation and deliberately retains the lease instead of treating a potentially
+partial native runtime as safely absent.
 
 The bridge must stay behind one Android view container. Do not let independent screens create competing Unity player instances.
 
@@ -281,6 +334,22 @@ If the Unity runtime class is missing, `UnityView` shows `Unity runtime unavaila
 
 Malformed, stale, mismatched, unsupported, and duplicate outcomes surface a stable `bridge.*` protocol diagnostic through `onProtocolError`. They do not fabricate a route result or consume the active request. Callback delivery is posted to the host view before invoking UI/navigation callbacks, and a disposed host's registration token cannot clear a newer host.
 
+Before posting any JVM callback to the main thread, Android performs a non-allocating UTF-8 scan
+against the inclusive 32 KiB message limit. Null and oversized values enqueue only their typed
+diagnostic and never retain the raw value in a `Runnable`. At most 32 regular callbacks plus one
+payload-free overflow sentinel can wait for main-thread delivery. Overflow closes admission and
+the bridge session fail-closed with `bridge.session_closed`; later burst items are dropped. Host
+disposal closes admission immediately and revokes every posted delivery that has not reached its
+identity-permit start transition. A delivery whose start transition already won may finish, while
+no later UI callback can begin after close returns. Close never waits for callback completion, and
+a callback may close its own dispatcher without deadlock. Admission and `View.post` share one
+serialized producer boundary, so the overflow sentinel cannot overtake callbacks admitted before
+it, including under concurrent JNI producers.
+The count bound can retain up to 32 payload objects, runnables/lambdas, and raw strings of at most
+32 KiB UTF-8 each until the main thread drains them: roughly 1–2 MiB of Java/Kotlin string storage
+at the declared maximum, plus object, queue, and later parse overhead. It is not an aggregate-byte
+budget.
+
 Unity sender rejection, unavailability, busy/thread failure, retention
 exhaustion, and invocation failure remain local typed dispatch results. Direct
 callers receive them synchronously; each admitted receiver-facing `Publish`
@@ -301,6 +370,26 @@ Required checks for bridge changes:
 - Back, home, pause, resume, and destroy lifecycle test
 
 Current Android contract coverage includes valid/invalid request and outcome JSON, unsupported versions and exact enum values, malformed and oversized input, duplicate request/outcome members, nullable Java/JNI boundary rejection, bounded payloads, same-route retries, stale and duplicate outcomes, malformed-then-valid recovery, callback replacement, off-main UI dispatch, and host disposal.
+
+Current Android host-lifecycle coverage additionally includes deferred focus until resume,
+duplicate resume/pause/stop suppression, focus restoration after a real resume, ordered and
+idempotent focused teardown, post-destroy signal rejection, exact configuration/trim callback
+ordering, individually reached resume/focus-gain/direct-pause/low-memory/configuration failure
+paths, callback-exception containment, bounded non-recursive single-owner FIFO handoff,
+cancel-versus-dequeue races, self-requeue rejection, off-main unattached-waiter disposal,
+registration-failure teardown, post-registration activation rollback and clean replacement,
+strict pre-construction reflection signatures and constructor-failure containment,
+`LifecycleOwner`-keyed Android-view replacement, pre-post UTF-8 rejection, concurrent producer
+post ordering, exactly-one bounded burst overflow, close-versus-delivery-start linearization,
+re-entrant dispatcher close, disposal admission closure, stale-release protection, and
+replacement-host callback delivery. JVM state-machine tests prove close-before-publication,
+close-during-activation, concurrent close, successful ownership transfer, and unproven-cleanup
+retention. Compiled Android instrumentation fixtures additionally exercise destruction from a
+constructor, concurrent constructor blocking, external registration before attachment, and
+retained-state resume after attachment, plus clean registrar recovery and throwing-view
+uncertainty; current device execution remains separately disclosed below.
+These are controller/JVM and Android host tests; they do not substitute for a packaged Unity
+runtime or physical-device lifecycle proof.
 
 Current Unity contract coverage includes exact constants and wire values,
 valid/invalid route requests, decoded escaped-key duplicates, strict
@@ -347,6 +436,16 @@ unperformed packaged/device round trip.
   attempted callback. It retains no Java object or Android host registration.
 - The three runtime C# files add expected nonzero, linker/stripping-dependent
   managed Player assembly, build, and installed-size growth.
+- The Android lifecycle slice adds one host controller, one active lease object, at most four
+  lightweight FIFO waiter records, one application component-callback registration, and a
+  bounded activation permit. Callback admission is capped at 32 regular posts plus one
+  payload-free overflow sentinel; each posted item adds one lightweight identity delivery permit
+  and one once-only completion flag until delivery or disposal.
+  Those regular posts can retain roughly 1–2 MiB of bounded string storage at maximum payloads,
+  plus object/queue/parse overhead; the implementation bounds count rather than aggregate bytes.
+  It adds no timer, polling loop, per-frame work, content asset, native library, or dependency.
+  UTF-8 admission is one bounded O(n) scan and does not allocate a byte array. Exact optimized APK
+  and installed-size deltas remain build-dependent measurements.
 - No external binary, asset, AAR, package, assembly definition, or dependency
   is added.
 - Player build size, installed size, runtime-memory/startup allocation,
@@ -359,6 +458,7 @@ Still blocked for #135 completion:
 - production registration/wiring of the receiver and sender;
 - reproducible `unityLibrary`/AAR packaging;
 - unknown-route end-to-end unavailable behavior;
-- back/home/configuration/process/audio/input/focus/low-memory lifecycle proof;
+- packaged back/home/app-switch, rotation/recreation, multi-window, process-death/runtime-loss,
+  audio/input/keyboard/controller, focus, low-memory, and repeated-launch lifecycle proof;
 - packaged representative-device performance, memory, thermal, and size evidence;
 - any approved production gameplay route and its durable consequence authority.
