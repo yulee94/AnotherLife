@@ -11,7 +11,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path, PurePosixPath
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 
 ERROR_PREFIX = "Phase C realm v002 technical-source validation failed"
@@ -595,10 +595,27 @@ def validate_no_production_outputs(repo_root: Path) -> None:
 
 def validate_candidate(
     repo_root: Path,
-    source_path: Path,
+    source_path: Optional[Path],
 ) -> tuple[dict[str, Any], bytes]:
     base, _ = validate_base(repo_root)
-    candidate, raw = load_strict_json(source_path, "realm v002 source")
+    if source_path is None:
+        raw = validate_pinned_source(
+            repo_root,
+            {
+                "path": V002_PATH,
+                "sourceRevision": V002_REVISION,
+                "rawSha256": V002_RAW_SHA256,
+            },
+        )
+        candidate, raw = load_strict_json_bytes(
+            raw,
+            "pinned realm v002 Git blob",
+        )
+    else:
+        candidate, raw = load_strict_json(
+            source_path,
+            "explicit realm v002 source",
+        )
     if sha256(raw) != V002_RAW_SHA256:
         fail("realm v002 source raw SHA-256 drifted")
     assert_keys(
@@ -787,6 +804,14 @@ def run_historical_source_fixtures(repo_root: Path) -> tuple[int, int]:
         validate_candidate(repo_root, candidate_path)
         positive_count += 1
 
+        default_candidate, default_raw = validate_candidate(repo_root, None)
+        if (
+            default_candidate["candidateId"] != V002_CANDIDATE_ID
+            or default_raw != candidate_blob
+        ):
+            fail("default validation did not consume the exact pinned v002 blob")
+        positive_count += 1
+
         candidate = json.loads(
             candidate_blob.decode("utf-8"),
             object_pairs_hook=strict_object,
@@ -817,8 +842,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--source",
-        default=V002_PATH,
-        help="repository-relative or absolute v002 candidate path",
+        default=None,
+        help=(
+            "explicit repository-relative or absolute v002 candidate path; "
+            "omit to validate the exact pinned v002 Git blob"
+        ),
     )
     parser.add_argument(
         "--require-production-eligible",
@@ -836,9 +864,11 @@ def main() -> int:
     args = parser.parse_args()
 
     repo_root = Path(__file__).resolve().parents[2]
-    source_path = Path(args.source)
-    if not source_path.is_absolute():
-        source_path = repo_root / source_path
+    source_path: Optional[Path] = None
+    if args.source is not None:
+        source_path = Path(args.source)
+        if not source_path.is_absolute():
+            source_path = repo_root / source_path
 
     try:
         if args.run_negative_fixtures:

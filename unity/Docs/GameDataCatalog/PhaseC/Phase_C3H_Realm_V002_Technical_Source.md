@@ -202,11 +202,12 @@ whole-set readiness.
 ## 8. 2026-08-06 historical-validator correction
 
 This dated correction supersedes only the current-working-copy equality rule
-recorded in sections 1 and 4. The original rule was valid while C3H was the
-current authority surface, but successor overlays intentionally evolve some of
-the same repository paths. A frozen C3H candidate must continue to validate
-the source that it actually pinned rather than reinterpret that source through
-today's working copy.
+recorded in sections 1 and 4. That rule served as a same-checkout drift guard,
+but it is not stable historical proof: successor overlays intentionally evolve
+some of the same repository paths, and checkout line-ending policy can change
+working bytes without changing a committed blob. A frozen C3H candidate must
+continue to validate the source that it actually pinned rather than reinterpret
+that source through today's working copy.
 
 For the frozen v001 source, the v002 `supersedes` row, and every ordered v002
 provenance row, the authoritative evidence remains the exact tuple of:
@@ -221,14 +222,21 @@ not require the current working-tree path to exist or equal the historical
 blob. This prevents a legitimate successor overlay or checkout line-ending
 policy from rewriting or invalidating historical authority.
 
-The candidate supplied through `--source` remains independently strict. It
-must still be canonical UTF-8 JSON without a BOM, carry the exact frozen v002
+When `--source` is omitted, including on the production-eligibility refusal
+path, the validator reads `V002_REVISION:V002_PATH` directly from Git and
+verifies `V002_RAW_SHA256` before semantic validation. It does not read the
+same path from the working tree, so checkout line-ending conversion cannot
+change the historical default result.
+
+An explicitly supplied `--source` remains independently strict. The supplied
+file must be canonical UTF-8 JSON without a BOM, carry the exact frozen v002
 raw SHA-256 and semantic contract, and retain every production, approval, and
-runtime-authority boundary. Current realm asset bytes and GUIDs remain checked
-because those asset rows do not carry a historical source revision. This
-correction does not alter the v001 or v002 JSON artifacts, realm mappings,
-blockers, approval state, production eligibility, runtime authority, or any
-later v003/shadow validator.
+runtime-authority boundary. CRLF, BOM, mutated, or otherwise noncanonical
+explicit bytes fail closed even if their decoded JSON meaning appears equal.
+Current realm asset bytes and GUIDs remain checked because those asset rows do
+not carry a historical source revision. This correction does not alter the
+v001 or v002 JSON artifacts, realm mappings, blockers, approval state,
+production eligibility, runtime authority, or any later v003/shadow validator.
 
 Run the self-contained regression matrix with:
 
@@ -236,8 +244,10 @@ Run the self-contained regression matrix with:
 python3 tools/game-data/test_phase_c_six_family_realm_v002_technical_source.py --run-negative-fixtures
 ```
 
-The matrix creates an isolated temporary Git history and proves four positive
-cases, including current-path evolution and removal, plus eight negative cases
-covering invalid revision/path/hash pins and malformed or mutated candidate
-bytes. It writes no repository or production output. Working-tree line-ending
-normalization remains a separate build-health responsibility.
+The matrix creates an isolated temporary Git history and proves five positive
+cases, including current-path evolution, removal, an exact explicit candidate,
+and the default exact v002 Git-blob path. Its eight negative cases cover
+invalid revision/path/hash pins and malformed or mutated candidates supplied
+through an explicit path. It writes no repository or production output.
+Working-tree line-ending normalization remains a separate build-health
+responsibility; it cannot relax the explicit-source byte contract.
