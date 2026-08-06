@@ -17,11 +17,15 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import java.util.concurrent.CopyOnWriteArrayList
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -405,6 +409,136 @@ class UnityBridgeThreadingTest {
         composeRule.waitForIdle()
     }
 
+    @Test
+    fun offMainGrantToUnattachedDisposedWaiterReleasesForALaterReplacement() {
+        val registry = UnityRuntimeHostRegistry()
+        val reservedOwner = registry.tryAcquire()!!
+        val players = CopyOnWriteArrayList<RecordingEmbeddedPlayer>()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val dependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { context ->
+                RecordingEmbeddedPlayer(context).also(players::add)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        var waiting: UnityRuntimeContainer? = null
+        var replacement: UnityRuntimeContainer? = null
+
+        composeRule.runOnUiThread {
+            waiting = UnityRuntimeContainer(context, dependencies)
+            assertEquals(1, registry.waitingCount())
+        }
+        val released = CountDownLatch(1)
+        val releaseThread = thread(name = "off-main-registry-release") {
+            assertTrue(registry.release(reservedOwner))
+            released.countDown()
+        }
+        assertTrue(released.await(5, TimeUnit.SECONDS))
+        releaseThread.join(5_000)
+        assertFalse(releaseThread.isAlive)
+
+        composeRule.runOnUiThread {
+            waiting!!.destroyUnity()
+            replacement = UnityRuntimeContainer(context, dependencies)
+            assertTrue(
+                replacement!!.setRoute(
+                    routeId = "bridge.after-unattached-disposal",
+                    routeLaunchSequence = 1,
+                    routeIntent = UnityRouteIntent.Preview,
+                    requestedCapabilities = emptyList(),
+                    onRouteDispatched = {},
+                    onOutcome = {},
+                    onProtocolError = {}
+                )
+            )
+            replacement!!.destroyUnity()
+        }
+
+        assertEquals(1, players.size)
+        assertEquals(1, players.single().sendCount)
+        assertEquals(1, players.single().destroyCount)
+        assertEquals(1, registrar.registerCount)
+        assertEquals(1, registrar.unregisterCount)
+    }
+
+    @Test
+    fun reflectiveConstructorFailureRetainsLeaseAndPreventsASecondRuntime() {
+        val registry = UnityRuntimeHostRegistry()
+        val registrar = RecordingComponentCallbackRegistrar()
+        val replacementFactoryCalls = AtomicInteger()
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val failingDependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { reflectionContext ->
+                ReflectionUnityPlayer.createFromResolvedClass(
+                    reflectionContext,
+                    ThrowingReflectionPlayer::class.java
+                )
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+        val replacementDependencies = UnityRuntimeHostDependencies(
+            ownershipRegistry = registry,
+            playerFactory = UnityEmbeddedPlayerFactory { replacementContext ->
+                replacementFactoryCalls.incrementAndGet()
+                RecordingEmbeddedPlayer(replacementContext)
+            },
+            callbackRegistrarFactory = UnityComponentCallbackRegistrarFactory { registrar }
+        )
+
+        composeRule.runOnUiThread {
+            val failed = UnityRuntimeContainer(context, failingDependencies)
+            assertEquals(
+                "Unity runtime unavailable\nHost activation failed",
+                failed.statusTextForTesting()
+            )
+            val waiting = UnityRuntimeContainer(context, replacementDependencies)
+            assertEquals(0, replacementFactoryCalls.get())
+            assertEquals(1, registry.waitingCount())
+
+            failed.destroyUnity()
+            assertEquals(0, replacementFactoryCalls.get())
+            assertEquals(1, registry.waitingCount())
+            waiting.destroyUnity()
+            assertEquals(0, registry.waitingCount())
+        }
+
+        assertEquals(0, registrar.registerCount)
+        assertEquals(0, registrar.unregisterCount)
+    }
+
+    @Test
+    fun reflectiveFactoryRejectsStaticAndNonVoidApisBeforeConstruction() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+
+        composeRule.runOnUiThread {
+            assertNull(
+                ReflectionUnityPlayer.createFromResolvedClass(
+                    context,
+                    StaticLifecycleReflectionPlayer::class.java
+                )
+            )
+            assertNull(
+                ReflectionUnityPlayer.createFromResolvedClass(
+                    context,
+                    NonVoidLifecycleReflectionPlayer::class.java
+                )
+            )
+            assertNull(
+                ReflectionUnityPlayer.createFromResolvedClass(
+                    context,
+                    NonVoidSenderReflectionPlayer::class.java
+                )
+            )
+        }
+
+        assertEquals(0, StaticLifecycleReflectionPlayer.constructionCount.get())
+        assertEquals(0, NonVoidLifecycleReflectionPlayer.constructionCount.get())
+        assertEquals(0, NonVoidSenderReflectionPlayer.constructionCount.get())
+    }
+
     private fun testDependencies(
         players: MutableList<RecordingEmbeddedPlayer>,
         registrar: RecordingComponentCallbackRegistrar
@@ -473,6 +607,113 @@ class UnityBridgeThreadingTest {
             assertEquals("SetRouteContext", method)
             assertNotNull(payload)
             return true
+        }
+    }
+
+    @Suppress("FunctionName", "UNUSED_PARAMETER")
+    class ThrowingReflectionPlayer(context: Context) : FrameLayout(context) {
+        init {
+            error("synthetic reflective constructor failure")
+        }
+
+        fun resume() = Unit
+
+        fun pause() = Unit
+
+        fun destroy() = Unit
+
+        fun windowFocusChanged(hasFocus: Boolean) = Unit
+
+        fun lowMemory() = Unit
+
+        fun configurationChanged(configuration: Configuration) = Unit
+
+        companion object {
+            @JvmStatic
+            fun UnitySendMessage(gameObject: String, method: String, payload: String) = Unit
+        }
+    }
+
+    @Suppress("FunctionName", "UNUSED_PARAMETER")
+    class StaticLifecycleReflectionPlayer(context: Context) : FrameLayout(context) {
+        init {
+            constructionCount.incrementAndGet()
+        }
+
+        fun pause() = Unit
+
+        fun destroy() = Unit
+
+        fun windowFocusChanged(hasFocus: Boolean) = Unit
+
+        fun lowMemory() = Unit
+
+        fun configurationChanged(configuration: Configuration) = Unit
+
+        companion object {
+            val constructionCount = AtomicInteger()
+
+            @JvmStatic
+            fun resume() = Unit
+
+            @JvmStatic
+            fun UnitySendMessage(gameObject: String, method: String, payload: String) = Unit
+        }
+    }
+
+    @Suppress("FunctionName", "UNUSED_PARAMETER")
+    class NonVoidLifecycleReflectionPlayer(context: Context) : FrameLayout(context) {
+        init {
+            constructionCount.incrementAndGet()
+        }
+
+        fun resume(): Boolean = true
+
+        fun pause() = Unit
+
+        fun destroy() = Unit
+
+        fun windowFocusChanged(hasFocus: Boolean) = Unit
+
+        fun lowMemory() = Unit
+
+        fun configurationChanged(configuration: Configuration) = Unit
+
+        companion object {
+            val constructionCount = AtomicInteger()
+
+            @JvmStatic
+            fun UnitySendMessage(gameObject: String, method: String, payload: String) = Unit
+        }
+    }
+
+    @Suppress("FunctionName", "UNUSED_PARAMETER")
+    class NonVoidSenderReflectionPlayer(context: Context) : FrameLayout(context) {
+        init {
+            constructionCount.incrementAndGet()
+        }
+
+        fun resume() = Unit
+
+        fun pause() = Unit
+
+        fun destroy() = Unit
+
+        fun windowFocusChanged(hasFocus: Boolean) = Unit
+
+        fun lowMemory() = Unit
+
+        fun configurationChanged(configuration: Configuration) = Unit
+
+        companion object {
+            val constructionCount = AtomicInteger()
+
+            @JvmStatic
+            fun UnitySendMessage(
+                gameObject: String,
+                method: String,
+                payload: String
+            ): Boolean = true
         }
     }
 }

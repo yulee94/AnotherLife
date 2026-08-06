@@ -215,8 +215,19 @@ internal class UnityRuntimeContainer internal constructor(
 
     private val statusView = createStatusView(context)
     private val bridgeSession = UnityBridgeSession()
-    private val callbackAdmission = UnityBridgeCallbackAdmissionGate()
-    private var ownershipLease: UnityRuntimeHostLease? = null
+    private val grantedLeaseHandoff = UnityRuntimeGrantedLeaseHandoff()
+    private val ownedLeaseState = UnityRuntimeOwnedLeaseState()
+    private val callbackDispatcher = UnityBridgeCallbackDispatcher(
+        postToMain = { action -> post(action) },
+        onPayload = ::handleOutcome,
+        onProtocolError = ::showProtocolError,
+        onOverflow = {
+            bridgeSession.close()
+            showProtocolError(
+                UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SessionClosed)
+            )
+        }
+    )
     private var ownershipWaitToken: UnityRuntimeHostWaitToken? = null
     private var unityPlayer: UnityEmbeddedPlayer? = null
     private var lifecycleController: UnityHostLifecycleController<Configuration>? = null
@@ -227,8 +238,8 @@ internal class UnityRuntimeContainer internal constructor(
     private var latestWindowFocus = false
     private var terminalRuntimeFailure: String? = null
     private var ownershipReleaseBlocked = false
-    @Volatile
-    private var destroyed = false
+    private val destroyed: Boolean
+        get() = ownedLeaseState.isClosed()
     private var activeLaunch: UnityRouteLaunch? = null
     private var activeRoutePayload: String? = null
     private var routeDispatchAttempted = false
@@ -319,12 +330,12 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     fun destroyUnity() {
-        if (destroyed) return
-        destroyed = true
-        callbackAdmission.close()
+        val ownershipClosure = ownedLeaseState.close() ?: return
+        callbackDispatcher.close()
         bridgeSession.close()
         callbackToken?.let(UnityBridgeCallbacks::clear)
         callbackToken = null
+        grantedLeaseHandoff.close()?.let(dependencies.ownershipRegistry::release)
         ownershipWaitToken?.let(dependencies.ownershipRegistry::cancel)
         ownershipWaitToken = null
         val componentCallbacksReleased = componentCallbackRegistration?.release() != false
@@ -339,8 +350,7 @@ internal class UnityRuntimeContainer internal constructor(
             viewsReleased &&
             !ownershipReleaseBlocked
         ) {
-            ownershipLease?.let(dependencies.ownershipRegistry::release)
-            ownershipLease = null
+            ownershipClosure.lease?.let(dependencies.ownershipRegistry::release)
         }
     }
 
@@ -398,7 +408,7 @@ internal class UnityRuntimeContainer internal constructor(
 
     internal fun statusTextForTesting(): String = statusView.text.toString()
 
-    internal fun callbackAdmissionSnapshotForTesting() = callbackAdmission.snapshot()
+    internal fun callbackAdmissionSnapshotForTesting() = callbackDispatcher.snapshot()
 
     private fun requestOwnership() {
         when (
@@ -422,31 +432,46 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     private fun onOwnershipGranted(lease: UnityRuntimeHostLease) {
+        if (!grantedLeaseHandoff.retain(lease)) {
+            dependencies.ownershipRegistry.release(lease)
+            return
+        }
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            activateOwnedRuntime(lease)
+            activateGrantedLease(lease)
             return
         }
 
-        val accepted = runCatching { post { activateOwnedRuntime(lease) } }.getOrDefault(false)
+        val accepted = runCatching { post { activateGrantedLease(lease) } }.getOrDefault(false)
         if (!accepted) {
-            dependencies.ownershipRegistry.release(lease)
+            grantedLeaseHandoff.withdraw(lease)?.let(dependencies.ownershipRegistry::release)
         }
     }
 
-    private fun activateOwnedRuntime(lease: UnityRuntimeHostLease) {
-        ownershipWaitToken = null
+    private fun activateGrantedLease(lease: UnityRuntimeHostLease) {
+        if (!grantedLeaseHandoff.claim(lease)) return
         if (destroyed) {
             dependencies.ownershipRegistry.release(lease)
             return
         }
+        activateOwnedRuntime(lease)
+    }
 
-        ownershipLease = lease
+    private fun activateOwnedRuntime(lease: UnityRuntimeHostLease) {
+        ownershipWaitToken = null
+        if (!ownedLeaseState.publish(lease)) {
+            dependencies.ownershipRegistry.release(lease)
+            return
+        }
+        // Publication precedes the closed-state decision so a racing destroy owns the exact lease
+        // and performs the only release; activation cannot construct after observing that close.
+        if (destroyed) return
+
         val playerResult = runCatching { dependencies.playerFactory.create(context) }
         if (playerResult.isFailure) {
             val message = "Unity runtime unavailable\nHost activation failed"
             terminalRuntimeFailure = message
             ownershipReleaseBlocked = true
-            callbackAdmission.close()
+            callbackDispatcher.close()
             bridgeSession.close()
             showStatus(message)
             return
@@ -520,7 +545,7 @@ internal class UnityRuntimeContainer internal constructor(
         lease: UnityRuntimeHostLease
     ) {
         terminalRuntimeFailure = message
-        callbackAdmission.close()
+        callbackDispatcher.close()
         bridgeSession.close()
         callbackToken?.let(UnityBridgeCallbacks::clear)
         callbackToken = null
@@ -535,7 +560,7 @@ internal class UnityRuntimeContainer internal constructor(
         val viewDetached = player.view.parent == null
         if (callbacksReleased && controller.canReleaseOwnership() && viewDetached) {
             if (dependencies.ownershipRegistry.release(lease)) {
-                ownershipLease = null
+                ownedLeaseState.clear(lease)
             } else {
                 ownershipReleaseBlocked = true
             }
@@ -547,7 +572,7 @@ internal class UnityRuntimeContainer internal constructor(
 
     private fun registerBridgeCallback() {
         if (callbackToken != null || destroyed) return
-        callbackToken = UnityBridgeCallbacks.register(::enqueueOutcome)
+        callbackToken = UnityBridgeCallbacks.register(callbackDispatcher::enqueue)
     }
 
     private fun createComponentCallbacks() = object : ComponentCallbacks2 {
@@ -605,46 +630,6 @@ internal class UnityRuntimeContainer internal constructor(
         return true
     }
 
-    // Admission and posting share this monitor so the one overflow sentinel cannot overtake work
-    // admitted before it when multiple JNI producer threads report concurrently.
-    @Synchronized
-    private fun enqueueOutcome(rawJson: String?) {
-        when (val admission = callbackAdmission.tryAdmit(rawJson)) {
-            is UnityBridgeCallbackAdmission.Payload -> postAdmission(admission) {
-                handleOutcome(admission.rawJson)
-            }
-
-            is UnityBridgeCallbackAdmission.ProtocolError -> postAdmission(admission) {
-                showProtocolError(admission.error)
-            }
-
-            UnityBridgeCallbackAdmission.Overflow -> postAdmission(admission) {
-                bridgeSession.close()
-                showProtocolError(
-                    UnityBridgeProtocolError(UnityBridgeProtocolErrorCode.SessionClosed)
-                )
-            }
-
-            UnityBridgeCallbackAdmission.Dropped -> Unit
-        }
-    }
-
-    private fun postAdmission(
-        admission: UnityBridgeCallbackAdmission,
-        action: () -> Unit
-    ) {
-        val accepted = runCatching {
-            post {
-                try {
-                    if (!destroyed && terminalRuntimeFailure == null) action()
-                } finally {
-                    callbackAdmission.complete(admission)
-                }
-            }
-        }.getOrDefault(false)
-        if (!accepted) callbackAdmission.complete(admission)
-    }
-
     private fun handleOutcome(rawJson: String?) {
         when (val delivery = bridgeSession.consumeOutcome(rawJson)) {
             is UnityBridgeSessionDelivery.Delivered -> {
@@ -689,7 +674,7 @@ internal class UnityRuntimeContainer internal constructor(
     }
 }
 
-private class ReflectionUnityPlayer private constructor(
+internal class ReflectionUnityPlayer private constructor(
     private val instance: Any,
     private val resumeMethod: Method,
     private val pauseMethod: Method,
@@ -725,50 +710,68 @@ private class ReflectionUnityPlayer private constructor(
 
     companion object {
         fun create(context: Context): ReflectionUnityPlayer? {
-            return runCatching {
-                val playerClass = Class.forName("com.unity3d.player.UnityPlayer")
-                if (!View::class.java.isAssignableFrom(playerClass)) return null
-                val constructor = playerClass.constructors
-                    .filter { candidate ->
-                        candidate.parameterTypes.size == 1 &&
-                            candidate.parameterTypes[0].isAssignableFrom(context.javaClass)
-                    }
-                    .minByOrNull { candidate ->
-                        if (candidate.parameterTypes[0] == Context::class.java) 0 else 1
-                    } ?: return null
-                val resumeMethod = playerClass.noArgMethod("resume") ?: return null
-                val pauseMethod = playerClass.noArgMethod("pause") ?: return null
-                val destroyMethod = playerClass.noArgMethod("destroy") ?: return null
-                val lowMemoryMethod = playerClass.noArgMethod("lowMemory") ?: return null
-                val windowFocusChangedMethod = playerClass.methods.firstOrNull { method ->
-                    method.name == "windowFocusChanged" &&
-                        method.parameterTypes.contentEquals(arrayOf(java.lang.Boolean.TYPE))
-                } ?: return null
-                val configurationChangedMethod = playerClass.methods.firstOrNull { method ->
-                    method.name == "configurationChanged" &&
-                        method.parameterTypes.contentEquals(arrayOf(Configuration::class.java))
-                } ?: return null
-                val sendMessageMethod = playerClass.methods.firstOrNull { method ->
-                    method.name == "UnitySendMessage" &&
-                        ReflectionModifier.isStatic(method.modifiers) &&
-                        method.parameterTypes.contentEquals(
-                            arrayOf(String::class.java, String::class.java, String::class.java)
-                        )
-                } ?: return null
-                val instance = constructor.newInstance(context)
-
-                if (instance !is View) return null
-                ReflectionUnityPlayer(
-                    instance = instance,
-                    resumeMethod = resumeMethod,
-                    pauseMethod = pauseMethod,
-                    destroyMethod = destroyMethod,
-                    windowFocusChangedMethod = windowFocusChangedMethod,
-                    lowMemoryMethod = lowMemoryMethod,
-                    configurationChangedMethod = configurationChangedMethod,
-                    sendMessageMethod = sendMessageMethod
+            val playerClass = try {
+                Class.forName(
+                    "com.unity3d.player.UnityPlayer",
+                    false,
+                    context.classLoader ?: ReflectionUnityPlayer::class.java.classLoader
                 )
-            }.getOrNull()
+            } catch (_: ClassNotFoundException) {
+                return null
+            }
+            return createFromResolvedClass(context, playerClass)
+        }
+
+        internal fun createFromResolvedClass(
+            context: Context,
+            playerClass: Class<*>
+        ): ReflectionUnityPlayer? {
+            if (!View::class.java.isAssignableFrom(playerClass)) return null
+            val constructor = playerClass.constructors
+                .filter { candidate ->
+                    candidate.parameterTypes.size == 1 &&
+                        candidate.parameterTypes[0].isAssignableFrom(context.javaClass)
+                }
+                .minByOrNull { candidate ->
+                    if (candidate.parameterTypes[0] == Context::class.java) 0 else 1
+                } ?: return null
+            val resumeMethod = playerClass.instanceVoidNoArgMethod("resume") ?: return null
+            val pauseMethod = playerClass.instanceVoidNoArgMethod("pause") ?: return null
+            val destroyMethod = playerClass.instanceVoidNoArgMethod("destroy") ?: return null
+            val lowMemoryMethod = playerClass.instanceVoidNoArgMethod("lowMemory") ?: return null
+            val windowFocusChangedMethod = playerClass.methods.firstOrNull { method ->
+                method.isInstanceVoidMethod(
+                    "windowFocusChanged",
+                    arrayOf(java.lang.Boolean.TYPE)
+                )
+            } ?: return null
+            val configurationChangedMethod = playerClass.methods.firstOrNull { method ->
+                method.isInstanceVoidMethod(
+                    "configurationChanged",
+                    arrayOf(Configuration::class.java)
+                )
+            } ?: return null
+            val sendMessageMethod = playerClass.methods.firstOrNull { method ->
+                method.name == "UnitySendMessage" &&
+                    ReflectionModifier.isStatic(method.modifiers) &&
+                    method.returnType == java.lang.Void.TYPE &&
+                    method.parameterTypes.contentEquals(
+                        arrayOf(String::class.java, String::class.java, String::class.java)
+                    )
+            } ?: return null
+            val instance = constructor.newInstance(context)
+
+            if (instance !is View) return null
+            return ReflectionUnityPlayer(
+                instance = instance,
+                resumeMethod = resumeMethod,
+                pauseMethod = pauseMethod,
+                destroyMethod = destroyMethod,
+                windowFocusChangedMethod = windowFocusChangedMethod,
+                lowMemoryMethod = lowMemoryMethod,
+                configurationChangedMethod = configurationChangedMethod,
+                sendMessageMethod = sendMessageMethod
+            )
         }
     }
 }
@@ -780,11 +783,20 @@ private fun Method.invokeSafely(instance: Any, vararg arguments: Any?): Boolean 
     }.getOrDefault(false)
 }
 
-private fun Class<*>.noArgMethod(name: String): Method? {
+private fun Class<*>.instanceVoidNoArgMethod(name: String): Method? {
     return methods.firstOrNull { method ->
-        method.name == name && method.parameterTypes.isEmpty()
+        method.isInstanceVoidMethod(name, emptyArray())
     }
 }
+
+private fun Method.isInstanceVoidMethod(
+    expectedName: String,
+    expectedParameters: Array<Class<*>>
+): Boolean =
+    name == expectedName &&
+        !ReflectionModifier.isStatic(modifiers) &&
+        returnType == java.lang.Void.TYPE &&
+        parameterTypes.contentEquals(expectedParameters)
 
 private data class UnityRouteLaunch(
     val routeId: String,

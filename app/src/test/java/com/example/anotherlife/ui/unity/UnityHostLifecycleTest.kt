@@ -1,5 +1,12 @@
 package com.example.anotherlife.ui.unity
 
+import java.util.Collections
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -295,6 +302,31 @@ class UnityHostLifecycleTest {
     }
 
     @Test
+    fun selfRequeueingThrowingWaiterIsRejectedAndHandoffTerminatesWithoutRecursion() {
+        val registry = UnityRuntimeHostRegistry(maxWaiters = 1)
+        val owner = registry.tryAcquire()!!
+        val callbackCount = AtomicInteger()
+
+        assertTrue(
+            registry.acquireOrQueue {
+                callbackCount.incrementAndGet()
+                assertEquals(
+                    UnityRuntimeHostAcquisition.CapacityReached,
+                    registry.acquireOrQueue { error("must never be granted") }
+                )
+                error("synthetic self-requeueing waiter failure")
+            } is UnityRuntimeHostAcquisition.Waiting
+        )
+
+        assertTrue(registry.release(owner))
+        assertEquals(1, callbackCount.get())
+        assertEquals(0, registry.waitingCount())
+        val recovered = registry.tryAcquire()
+        assertNotNull(recovered)
+        assertTrue(registry.release(recovered!!))
+    }
+
+    @Test
     fun callbackRegistrationFailureStaysUnregisteredAndNeverUnregisters() {
         val registrar = RecordingCallbackRegistrar(registerResult = false)
         val registration = UnityHostCallbackRegistration(registrar, "callbacks")
@@ -420,6 +452,256 @@ class UnityHostLifecycleTest {
         assertEquals(1, admission.snapshot().pendingCount)
         admission.complete(admitted)
         assertEquals(0, admission.snapshot().pendingCount)
+    }
+
+    @Test
+    fun offMainGrantToUnattachedWaiterDisposalCannotStrandTheLease() {
+        val registry = UnityRuntimeHostRegistry()
+        val owner = registry.tryAcquire()!!
+        val handoff = UnityRuntimeGrantedLeaseHandoff()
+        val retained = CountDownLatch(1)
+        val deferredActivation = AtomicReference<() -> Unit>()
+        val activated = AtomicBoolean(false)
+
+        assertTrue(
+            registry.acquireOrQueue { lease ->
+                assertTrue(handoff.retain(lease))
+                deferredActivation.set {
+                    if (handoff.claim(lease)) activated.set(true)
+                }
+                retained.countDown()
+            } is UnityRuntimeHostAcquisition.Waiting
+        )
+        val releaseThread = thread(name = "off-main-host-release") {
+            registry.release(owner)
+        }
+
+        assertTrue(retained.await(5, TimeUnit.SECONDS))
+        releaseThread.join(5_000)
+        assertFalse(releaseThread.isAlive)
+        assertNull(registry.tryAcquire())
+
+        val strandedGrant = handoff.close()
+        assertNotNull(strandedGrant)
+        assertTrue(registry.release(strandedGrant!!))
+        deferredActivation.get().invoke()
+        assertFalse(activated.get())
+
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun destructionBetweenGrantClaimAndOwnershipPublicationReleasesExactlyOnce() {
+        val registry = UnityRuntimeHostRegistry()
+        val lease = registry.tryAcquire()!!
+        val handoff = UnityRuntimeGrantedLeaseHandoff()
+        val owned = UnityRuntimeOwnedLeaseState()
+        val claimed = CountDownLatch(1)
+        val allowPublication = CountDownLatch(1)
+        val published = AtomicBoolean(true)
+        assertTrue(handoff.retain(lease))
+
+        val activation = thread(name = "claim-before-publish") {
+            assertTrue(handoff.claim(lease))
+            claimed.countDown()
+            assertTrue(allowPublication.await(5, TimeUnit.SECONDS))
+            published.set(owned.publish(lease))
+            if (!published.get()) assertTrue(registry.release(lease))
+        }
+        assertTrue(claimed.await(5, TimeUnit.SECONDS))
+
+        val closure = owned.close()
+        assertNotNull(closure)
+        assertNull(closure!!.lease)
+        assertNull(handoff.close())
+        allowPublication.countDown()
+        activation.join(5_000)
+
+        assertFalse(activation.isAlive)
+        assertFalse(published.get())
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun oldestLiveWaiterWinsWhileAnIntermediateWaiterCancelsConcurrently() {
+        val registry = UnityRuntimeHostRegistry(maxWaiters = 3)
+        val owner = registry.tryAcquire()!!
+        val order = Collections.synchronizedList(mutableListOf<String>())
+        val firstGranted = CountDownLatch(1)
+        val continueFirst = CountDownLatch(1)
+
+        assertTrue(
+            registry.acquireOrQueue { lease ->
+                order += "first"
+                firstGranted.countDown()
+                assertTrue(continueFirst.await(5, TimeUnit.SECONDS))
+                assertTrue(registry.release(lease))
+            } is UnityRuntimeHostAcquisition.Waiting
+        )
+        val cancelled = registry.acquireOrQueue { order += "cancelled" }
+            as UnityRuntimeHostAcquisition.Waiting
+        assertTrue(
+            registry.acquireOrQueue { lease ->
+                order += "third"
+                assertTrue(registry.release(lease))
+            } is UnityRuntimeHostAcquisition.Waiting
+        )
+
+        val releaseThread = thread(name = "fifo-owner-release") {
+            registry.release(owner)
+        }
+        assertTrue(firstGranted.await(5, TimeUnit.SECONDS))
+        assertTrue(registry.cancel(cancelled.token))
+        continueFirst.countDown()
+        releaseThread.join(5_000)
+
+        assertFalse(releaseThread.isAlive)
+        assertEquals(listOf("first", "third"), order)
+        assertEquals(0, registry.waitingCount())
+        val replacement = registry.tryAcquire()
+        assertNotNull(replacement)
+        assertTrue(registry.release(replacement!!))
+    }
+
+    @Test
+    fun cancelRacingDequeueEitherCancelsOrGrantsExactlyOnceWithoutLeaking() {
+        repeat(64) { iteration ->
+            val registry = UnityRuntimeHostRegistry()
+            val owner = registry.tryAcquire()!!
+            val granted = AtomicReference<UnityRuntimeHostLease?>()
+            val waiting = registry.acquireOrQueue(granted::set)
+                as UnityRuntimeHostAcquisition.Waiting
+            val start = CountDownLatch(1)
+            val cancelled = AtomicBoolean(false)
+            val releaseResult = AtomicBoolean(false)
+
+            val cancelThread = thread(name = "cancel-$iteration") {
+                assertTrue(start.await(5, TimeUnit.SECONDS))
+                cancelled.set(registry.cancel(waiting.token))
+            }
+            val releaseThread = thread(name = "dequeue-$iteration") {
+                assertTrue(start.await(5, TimeUnit.SECONDS))
+                releaseResult.set(registry.release(owner))
+            }
+            start.countDown()
+            cancelThread.join(5_000)
+            releaseThread.join(5_000)
+
+            assertFalse(cancelThread.isAlive)
+            assertFalse(releaseThread.isAlive)
+            assertTrue(releaseResult.get())
+            assertEquals(cancelled.get(), granted.get() == null)
+            granted.get()?.let { assertTrue(registry.release(it)) }
+            val probe = registry.tryAcquire()
+            assertNotNull(probe)
+            assertTrue(registry.release(probe!!))
+        }
+    }
+
+    @Test
+    fun concurrentCallbackProducersPreserveAdmissionAndPostOrder() {
+        val posted = Collections.synchronizedList(mutableListOf<() -> Unit>())
+        val delivered = Collections.synchronizedList(mutableListOf<String>())
+        val postCount = AtomicInteger()
+        val firstPostEntered = CountDownLatch(1)
+        val allowFirstPost = CountDownLatch(1)
+        val secondProducerStarted = CountDownLatch(1)
+        val dispatcher = UnityBridgeCallbackDispatcher(
+            maxPendingCallbacks = 4,
+            postToMain = { action ->
+                if (postCount.incrementAndGet() == 1) {
+                    firstPostEntered.countDown()
+                    assertTrue(allowFirstPost.await(5, TimeUnit.SECONDS))
+                }
+                posted += action
+                true
+            },
+            onPayload = delivered::add,
+            onProtocolError = {},
+            onOverflow = {}
+        )
+
+        val first = thread(name = "callback-first") { dispatcher.enqueue("first") }
+        assertTrue(firstPostEntered.await(5, TimeUnit.SECONDS))
+        val second = thread(name = "callback-second") {
+            secondProducerStarted.countDown()
+            dispatcher.enqueue("second")
+        }
+        assertTrue(secondProducerStarted.await(5, TimeUnit.SECONDS))
+        assertEquals(1, postCount.get())
+        allowFirstPost.countDown()
+        first.join(5_000)
+        second.join(5_000)
+
+        assertFalse(first.isAlive)
+        assertFalse(second.isAlive)
+        assertEquals(2, posted.size)
+        posted.forEach { it.invoke() }
+        assertEquals(listOf("first", "second"), delivered)
+    }
+
+    @Test
+    fun concurrentOverflowPostsExactlyOnePayloadFreeSentinel() {
+        val posted = Collections.synchronizedList(mutableListOf<() -> Unit>())
+        val delivered = Collections.synchronizedList(mutableListOf<String>())
+        val overflowCount = AtomicInteger()
+        val dispatcher = UnityBridgeCallbackDispatcher(
+            maxPendingCallbacks = 2,
+            postToMain = { action -> posted.add(action) },
+            onPayload = delivered::add,
+            onProtocolError = {},
+            onOverflow = { overflowCount.incrementAndGet() }
+        )
+        dispatcher.enqueue("first")
+        dispatcher.enqueue("second")
+        val start = CountDownLatch(1)
+        val producers = (0 until 12).map { index ->
+            thread(name = "overflow-$index") {
+                assertTrue(start.await(5, TimeUnit.SECONDS))
+                dispatcher.enqueue("overflowing-$index")
+            }
+        }
+
+        start.countDown()
+        producers.forEach { producer ->
+            producer.join(5_000)
+            assertFalse(producer.isAlive)
+        }
+        assertEquals(3, posted.size)
+        posted.forEach { it.invoke() }
+
+        assertEquals(listOf("first", "second"), delivered)
+        assertEquals(1, overflowCount.get())
+        assertEquals(
+            UnityBridgeCallbackAdmissionSnapshot(0, false, true),
+            dispatcher.snapshot()
+        )
+    }
+
+    @Test
+    fun dispatcherCloseSuppressesAlreadyPostedAndLaterUiDelivery() {
+        val posted = mutableListOf<() -> Unit>()
+        val delivered = mutableListOf<String>()
+        val dispatcher = UnityBridgeCallbackDispatcher(
+            maxPendingCallbacks = 2,
+            postToMain = { action -> posted.add(action) },
+            onPayload = delivered::add,
+            onProtocolError = {},
+            onOverflow = {}
+        )
+        dispatcher.enqueue("already-posted")
+
+        dispatcher.close()
+        dispatcher.enqueue("after-close")
+        posted.forEach { it.invoke() }
+
+        assertTrue(delivered.isEmpty())
+        assertEquals(1, posted.size)
+        assertEquals(0, dispatcher.snapshot().pendingCount)
     }
 
     private class RecordingRuntime(

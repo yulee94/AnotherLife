@@ -162,6 +162,7 @@ internal class UnityRuntimeHostRegistry(
     private val maxWaiters: Int = DEFAULT_MAX_WAITERS
 ) {
     private var activeLease: UnityRuntimeHostLease? = null
+    private var handoffRunnerActive = false
     private val waiters = LinkedHashMap<
         UnityRuntimeHostWaitToken,
         (UnityRuntimeHostLease) -> Unit
@@ -173,7 +174,7 @@ internal class UnityRuntimeHostRegistry(
 
     @Synchronized
     fun tryAcquire(): UnityRuntimeHostLease? {
-        if (activeLease != null) return null
+        if (activeLease != null || handoffRunnerActive) return null
         return UnityRuntimeHostLease().also { activeLease = it }
     }
 
@@ -181,6 +182,10 @@ internal class UnityRuntimeHostRegistry(
     fun acquireOrQueue(
         onGranted: (UnityRuntimeHostLease) -> Unit
     ): UnityRuntimeHostAcquisition {
+        // A grant callback is opaque. Reject re-entrant or concurrent enqueue while the bounded
+        // handoff runner invokes it so a throw-and-self-requeue callback cannot grow the handoff
+        // without bound.
+        if (handoffRunnerActive) return UnityRuntimeHostAcquisition.CapacityReached
         if (activeLease == null) {
             return UnityRuntimeHostAcquisition.Acquired(
                 UnityRuntimeHostLease().also { activeLease = it }
@@ -199,23 +204,54 @@ internal class UnityRuntimeHostRegistry(
     fun isOwner(lease: UnityRuntimeHostLease): Boolean = activeLease === lease
 
     fun release(lease: UnityRuntimeHostLease): Boolean {
-        val grant = synchronized(this) {
+        val shouldDrain = synchronized(this) {
             if (activeLease !== lease) return false
             activeLease = null
-
-            val next = waiters.entries.firstOrNull() ?: return@synchronized null
-            waiters.remove(next.key)
-            val replacementLease = UnityRuntimeHostLease()
-            activeLease = replacementLease
-            next.value to replacementLease
-        }
-
-        grant?.let { (callback, replacementLease) ->
-            if (runCatching { callback(replacementLease) }.isFailure) {
-                release(replacementLease)
+            if (handoffRunnerActive) {
+                false
+            } else {
+                handoffRunnerActive = true
+                true
             }
         }
+
+        if (shouldDrain) drainWaitersWithoutRecursion()
         return true
+    }
+
+    private fun drainWaitersWithoutRecursion() {
+        while (true) {
+            val grant = synchronized(this) {
+                if (activeLease != null) {
+                    handoffRunnerActive = false
+                    return
+                }
+                val next = waiters.entries.firstOrNull()
+                if (next == null) {
+                    handoffRunnerActive = false
+                    return
+                }
+                waiters.remove(next.key)
+                val replacementLease = UnityRuntimeHostLease()
+                activeLease = replacementLease
+                next.value to replacementLease
+            }
+
+            val (callback, replacementLease) = grant
+            val callbackSucceeded = runCatching { callback(replacementLease) }.isSuccess
+            val shouldContinue = synchronized(this) {
+                if (!callbackSucceeded && activeLease === replacementLease) {
+                    activeLease = null
+                }
+                if (activeLease == null) {
+                    true
+                } else {
+                    handoffRunnerActive = false
+                    false
+                }
+            }
+            if (!shouldContinue) return
+        }
     }
 
     @Synchronized
@@ -227,6 +263,82 @@ internal class UnityRuntimeHostRegistry(
     private companion object {
         const val DEFAULT_MAX_WAITERS = 4
     }
+}
+
+/**
+ * Retains a transferred owner lease while main-thread activation is pending.
+ *
+ * A detached View may accept post() without ever dispatching its run queue. Closing the host can
+ * therefore recover the exact transferred lease, while a late runnable can no longer claim it.
+ */
+internal class UnityRuntimeGrantedLeaseHandoff {
+    private var pendingLease: UnityRuntimeHostLease? = null
+    private var closed = false
+
+    @Synchronized
+    fun retain(lease: UnityRuntimeHostLease): Boolean {
+        if (closed || pendingLease != null) return false
+        pendingLease = lease
+        return true
+    }
+
+    @Synchronized
+    fun claim(lease: UnityRuntimeHostLease): Boolean {
+        if (closed || pendingLease !== lease) return false
+        pendingLease = null
+        return true
+    }
+
+    @Synchronized
+    fun withdraw(lease: UnityRuntimeHostLease): UnityRuntimeHostLease? {
+        if (pendingLease !== lease) return null
+        pendingLease = null
+        return lease
+    }
+
+    @Synchronized
+    fun close(): UnityRuntimeHostLease? {
+        closed = true
+        return pendingLease.also { pendingLease = null }
+    }
+}
+
+internal data class UnityRuntimeOwnedLeaseClosure(
+    val lease: UnityRuntimeHostLease?
+)
+
+/**
+ * Atomically publishes a claimed lease or closes ownership before external teardown begins.
+ */
+internal class UnityRuntimeOwnedLeaseState {
+    private var ownedLease: UnityRuntimeHostLease? = null
+    private var closed = false
+
+    @Synchronized
+    fun publish(lease: UnityRuntimeHostLease): Boolean {
+        if (closed || ownedLease != null) return false
+        ownedLease = lease
+        return true
+    }
+
+    @Synchronized
+    fun clear(lease: UnityRuntimeHostLease): Boolean {
+        if (ownedLease !== lease) return false
+        ownedLease = null
+        return true
+    }
+
+    @Synchronized
+    fun close(): UnityRuntimeOwnedLeaseClosure? {
+        if (closed) return null
+        closed = true
+        return UnityRuntimeOwnedLeaseClosure(
+            ownedLease.also { ownedLease = null }
+        )
+    }
+
+    @Synchronized
+    fun isClosed(): Boolean = closed
 }
 
 internal object UnityRuntimeHostOwnership {
@@ -368,6 +480,73 @@ internal class UnityBridgeCallbackAdmissionGate(
         overflowPending = overflowPending,
         closed = closed
     )
+
+    private companion object {
+        const val DEFAULT_MAX_PENDING_CALLBACKS = 32
+    }
+}
+
+/**
+ * Serializes callback admission and posting while bounding every retained main-thread delivery.
+ */
+internal class UnityBridgeCallbackDispatcher(
+    maxPendingCallbacks: Int = DEFAULT_MAX_PENDING_CALLBACKS,
+    maxMessageBytes: Int = MAX_UNITY_BRIDGE_MESSAGE_BYTES,
+    private val postToMain: (() -> Unit) -> Boolean,
+    private val onPayload: (String) -> Unit,
+    private val onProtocolError: (UnityBridgeProtocolError) -> Unit,
+    private val onOverflow: () -> Unit
+) {
+    private val admission = UnityBridgeCallbackAdmissionGate(
+        maxPendingCallbacks = maxPendingCallbacks,
+        maxMessageBytes = maxMessageBytes
+    )
+    private var deliveryOpen = true
+
+    // Admission and posting share this monitor so the one overflow sentinel cannot overtake work
+    // admitted before it when multiple JNI producer threads report concurrently.
+    @Synchronized
+    fun enqueue(rawJson: String?) {
+        when (val admitted = admission.tryAdmit(rawJson)) {
+            is UnityBridgeCallbackAdmission.Payload -> postAdmission(admitted) {
+                onPayload(admitted.rawJson)
+            }
+
+            is UnityBridgeCallbackAdmission.ProtocolError -> postAdmission(admitted) {
+                onProtocolError(admitted.error)
+            }
+
+            UnityBridgeCallbackAdmission.Overflow -> postAdmission(admitted, onOverflow)
+            UnityBridgeCallbackAdmission.Dropped -> Unit
+        }
+    }
+
+    @Synchronized
+    fun close() {
+        deliveryOpen = false
+        admission.close()
+    }
+
+    fun snapshot(): UnityBridgeCallbackAdmissionSnapshot = admission.snapshot()
+
+    private fun postAdmission(
+        admitted: UnityBridgeCallbackAdmission,
+        action: () -> Unit
+    ) {
+        val accepted = runCatching {
+            postToMain {
+                try {
+                    if (isDeliveryOpen()) action()
+                } finally {
+                    admission.complete(admitted)
+                }
+            }
+        }.getOrDefault(false)
+        if (!accepted) admission.complete(admitted)
+    }
+
+    @Synchronized
+    private fun isDeliveryOpen(): Boolean = deliveryOpen
 
     private companion object {
         const val DEFAULT_MAX_PENDING_CALLBACKS = 32
