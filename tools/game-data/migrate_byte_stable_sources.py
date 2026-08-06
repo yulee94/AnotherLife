@@ -29,6 +29,14 @@ ERROR_PREFIX = "AnotherLife byte-identity migration failed"
 MIGRATION_HINT = (
     "Re-run this tool with --write using the same Python interpreter."
 )
+WORLD_ATLAS_RELATIVE_PATH = (
+    "unity/Assets/AL/StreamingAssets/GameData/"
+    "al_world_atlas_narrative_catalog.json"
+)
+WORLD_ATLAS_SHA256 = (
+    "d3db74638b55128a46581e31d0c9d0ef9861b743b0b33d1ddf7a5571c9cfd711"
+)
+WORLD_ATLAS_CANONICAL_LENGTH = 29_895
 
 
 @dataclass(frozen=True)
@@ -84,6 +92,7 @@ TARGETS: tuple[Target, ...] = (
         "unity/Assets/AL/StreamingAssets/GameData/al_realm_catalog.json",
         "33321936662b98f9c18edf4122ad163053d1aff3017b06556cad694420e9e8d8",
     ),
+    Target(WORLD_ATLAS_RELATIVE_PATH, WORLD_ATLAS_SHA256),
     Target(
         "unity/Assets/AL/StreamingAssets/GameData/"
         "al_notification_content_catalog.json",
@@ -298,7 +307,35 @@ def assert_self_test(condition: bool, message: str) -> None:
         raise MigrationError("self-test failed: " + message)
 
 
-def run_self_test() -> bool:
+def run_self_test(repository_root: Path) -> bool:
+    atlas_targets = tuple(
+        target
+        for target in TARGETS
+        if target.relative_path == WORLD_ATLAS_RELATIVE_PATH
+    )
+    assert_self_test(
+        len(atlas_targets) == 1,
+        "one production world-atlas target",
+    )
+    atlas_target = atlas_targets[0]
+    assert_self_test(
+        atlas_target.sha256 == WORLD_ATLAS_SHA256,
+        "production world-atlas reviewed identity",
+    )
+    atlas_assessment = inspect_targets(repository_root, atlas_targets)[0]
+    assert_self_test(
+        atlas_assessment.state in ("exact", "legacy-crlf"),
+        "production world-atlas exact-or-reviewed-CRLF acceptance: "
+        f"{atlas_assessment.detail}",
+    )
+    atlas_canonical = atlas_assessment.canonical_bytes
+    assert_self_test(
+        atlas_canonical is not None
+        and len(atlas_canonical) == WORLD_ATLAS_CANONICAL_LENGTH
+        and sha256(atlas_canonical) == WORLD_ATLAS_SHA256,
+        "production world-atlas canonical byte identity",
+    )
+
     canonical = b'{\n  "value": "realm"\n}\n'
     target = Target("fixture with spaces.json", sha256(canonical))
     legacy = canonical.replace(b"\n", b"\r\n")
@@ -345,6 +382,39 @@ def run_self_test() -> bool:
 
     with tempfile.TemporaryDirectory(prefix="anotherlife-byte-identity-") as temp:
         root = Path(temp)
+
+        atlas_path = root / atlas_target.relative_path
+        atlas_path.parent.mkdir(parents=True)
+        atlas_legacy = atlas_canonical.replace(b"\n", b"\r\n")
+        atlas_path.write_bytes(atlas_legacy)
+        isolated_atlas = inspect_targets(root, (atlas_target,))
+        assert_self_test(
+            isolated_atlas[0].state == "legacy-crlf",
+            "isolated production world-atlas CRLF scan",
+        )
+        assert_self_test(
+            write_migrations(root, isolated_atlas) == 1,
+            "isolated production world-atlas migration",
+        )
+        assert_self_test(
+            atlas_path.read_bytes() == atlas_canonical,
+            "isolated production world-atlas exact migration result",
+        )
+        exact_atlas = inspect_targets(root, (atlas_target,))
+        assert_self_test(
+            exact_atlas[0].state == "exact",
+            "isolated production world-atlas exact rescan",
+        )
+        before_idempotence = atlas_path.read_bytes()
+        assert_self_test(
+            write_migrations(root, exact_atlas) == 0,
+            "isolated production world-atlas idempotent migration count",
+        )
+        assert_self_test(
+            atlas_path.read_bytes() == before_idempotence,
+            "isolated production world-atlas idempotent bytes",
+        )
+
         path = root / target.relative_path
         path.write_bytes(legacy)
         predictable = path.with_name(path.name + ".byte-identity.tmp")
@@ -478,14 +548,15 @@ def main() -> int:
         action="store_true",
         help=(
             "run exact/CRLF/drift/BOM/lone-CR/preflight/temp-ownership/"
-            "partial-retry fixtures"
+            "partial-retry fixtures plus the production world-atlas target"
         ),
     )
     args = parser.parse_args()
 
     try:
+        repository_root = Path(__file__).resolve().parents[2]
         if args.self_test:
-            symlink_supported = run_self_test()
+            symlink_supported = run_self_test(repository_root)
             print("PASS: byte-identity migration self-test")
             if symlink_supported:
                 print("PASS: target symlink rejection fixture")
@@ -496,7 +567,6 @@ def main() -> int:
                 )
             return 0
 
-        repository_root = Path(__file__).resolve().parents[2]
         assessments = inspect_targets(repository_root, TARGETS)
         if args.write:
             migrated = write_migrations(repository_root, assessments)
