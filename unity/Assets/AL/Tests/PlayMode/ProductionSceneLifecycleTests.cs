@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using AL.RealmSelection;
+using AL.UI.RealmSelection;
 using NUnit.Framework;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -10,6 +12,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace AL.Tests.PlayMode
@@ -51,12 +54,14 @@ namespace AL.Tests.PlayMode
         private LogTap _logs;
         private object _controllableSave;
         private object _countingResource;
+        private bool _quiesceSceneControllers;
         private readonly Dictionary<string, int> _expectedActivations = new Dictionary<string, int>();
 
         [SetUp]
         public void SetUp()
         {
             _expectedActivations.Clear();
+            _quiesceSceneControllers = true;
             _originalIgnoreFailingMessages = LogAssert.ignoreFailingMessages;
             // Expected reverse-ordering handoff logs one [BOOT_STACK_RUNTIME_OWNER_REJECTED] error per
             // transition; classify logs ourselves rather than letting the runner auto-fail on them.
@@ -99,6 +104,11 @@ namespace AL.Tests.PlayMode
         // and the SceneStartupMarker stay enabled.
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            if (!_quiesceSceneControllers)
+            {
+                return;
+            }
+
             foreach (string typeName in ControllerTypeNames)
             {
                 Type type = AppDomain.CurrentDomain.GetAssemblies()
@@ -183,6 +193,90 @@ namespace AL.Tests.PlayMode
                 .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
                 .ToList();
             Assert.IsEmpty(unexpected, "Unexpected severe logs:\n" + string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator BootAutomaticallyReachesRealmSelectionWithReadyCatalogAndFourControls()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Production scene transition test drives editor path-based PlayMode loads.");
+            yield break;
+#else
+            _quiesceSceneControllers = false;
+            yield return LoadAndSettle(BootPath);
+
+            float transitionStarted = Time.realtimeSinceStartup;
+            while (!string.Equals(
+                       SceneManager.GetActiveScene().path,
+                       RealmSelectionPath,
+                       StringComparison.Ordinal))
+            {
+                if (Time.realtimeSinceStartup - transitionStarted > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("Boot did not transition to the canonical RealmSelection scene.");
+                }
+
+                yield return null;
+            }
+
+            float catalogStarted = Time.realtimeSinceStartup;
+            while (RealmCatalogRuntime.Status == RealmCatalogRuntimeStatus.NotStarted ||
+                   RealmCatalogRuntime.Status == RealmCatalogRuntimeStatus.Loading)
+            {
+                if (Time.realtimeSinceStartup - catalogStarted > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("Realm catalog loading timed out: " + RealmCatalogRuntime.TechnicalCode);
+                }
+
+                yield return null;
+            }
+
+            // Let RealmSelectionController.Start build the fallback UI and presentation camera.
+            yield return null;
+            yield return null;
+
+            Assert.That(RealmCatalogRuntime.Status, Is.EqualTo(RealmCatalogRuntimeStatus.Ready));
+            Assert.That(RealmCatalogRuntime.TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-READY"));
+            Assert.That(RealmCatalogRuntime.Current, Is.Not.Null);
+            Assert.That(LoadCount(), Is.EqualTo(1), "Boot must load the in-memory profile exactly once.");
+            Assert.That(
+                RealmCatalogRuntime.Current.Realms.Select(realm => realm.Id).ToArray(),
+                Is.EqualTo(new[] { "crownlands", "stonehold", "eldergrove", "umbral" }));
+
+            RealmSelectionController controller = Object.FindObjectOfType<RealmSelectionController>();
+            Assert.That(controller, Is.Not.Null);
+            Assert.That(controller.isActiveAndEnabled, Is.True);
+
+            GameObject fallbackCanvas = GameObject.Find("RealmSelectionCanvas");
+            Assert.That(fallbackCanvas, Is.Not.Null, "The production fallback realm UI must be active.");
+            Button[] realmButtons = fallbackCanvas.GetComponentsInChildren<Button>(true);
+            Assert.That(realmButtons, Has.Length.EqualTo(4));
+            Assert.That(
+                realmButtons.Select(button => button.name).Distinct(StringComparer.Ordinal).Count(),
+                Is.EqualTo(4),
+                "Each catalog realm must produce one distinct fallback control.");
+            Assert.That(
+                realmButtons.All(button => button.interactable),
+                Is.True,
+                "All four realm choices must be interactable before a selection is committed.");
+
+            Camera[] presentationCameras = Camera.allCameras
+                .Where(camera =>
+                    camera != null &&
+                    camera.isActiveAndEnabled &&
+                    camera.targetTexture == null &&
+                    camera.targetDisplay == 0)
+                .ToArray();
+            Assert.That(presentationCameras, Has.Length.EqualTo(1));
+            Assert.That(presentationCameras[0].name, Is.EqualTo("RealmSelectionCamera"));
+            Assert.That(presentationCameras[0].cullingMask, Is.Zero);
+
+            Assert.That(
+                _logs.Logs.Where(message =>
+                    message.IndexOf("AL-REALM-DEFINITION-UNAVAILABLE", StringComparison.Ordinal) >= 0),
+                Is.Empty,
+                "Realm Selection must not emit the catalog-unavailable failure after Boot.");
 #endif
         }
 

@@ -2,12 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
 using AL.Data.Runtime;
 using AL.RealmSelection;
 using AL.Services.Local;
+using AL.UI.RealmSelection;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -76,6 +78,253 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(
                 RealmCatalogRuntimeHost.BuildRequestUri("https://content.example.test/assets"),
                 Is.EqualTo("https://content.example.test/assets/GameData/al_realm_catalog.json"));
+        }
+
+        [Test]
+        public void EditorCatalogRequestResolvesTheCanonicalSharedSource()
+        {
+            MethodInfo resolver = typeof(RealmCatalogRuntimeHost).GetMethod(
+                "BuildEditorRequestUri",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+            Assert.That(resolver, Is.Not.Null, "Editor play needs an explicit shared-source resolver.");
+            string requestUri = (string)resolver.Invoke(
+                null,
+                new object[] { Application.dataPath });
+            string expected = Path.GetFullPath(Path.Combine(
+                Application.dataPath,
+                "AL",
+                "StreamingAssets",
+                RealmCatalogRuntime.RelativePath));
+
+            Assert.That(new Uri(requestUri).LocalPath, Is.EqualTo(expected));
+            Assert.That(File.Exists(expected), Is.True, "The resolved catalog must be the tracked authority source.");
+            Assert.That(
+                File.Exists(Path.Combine(Application.streamingAssetsPath, RealmCatalogRuntime.RelativePath)),
+                Is.False,
+                "The test must retain the reported missing-root reproduction.");
+        }
+
+        [Test]
+        public void EditorCatalogRequestFailsClosedWhenOnlyAStaleDuplicateExists()
+        {
+            MethodInfo resolver = typeof(RealmCatalogRuntimeHost).GetMethod(
+                "BuildEditorRequestUri",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmCatalogAuthorityTests",
+                Guid.NewGuid().ToString("N"));
+            string assetsRoot = Path.Combine(root, "Assets");
+            string staleDuplicate = Path.Combine(
+                assetsRoot,
+                "StreamingAssets",
+                RealmCatalogRuntime.RelativePath);
+            string canonical = Path.Combine(
+                assetsRoot,
+                "AL",
+                "StreamingAssets",
+                RealmCatalogRuntime.RelativePath);
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(staleDuplicate));
+                File.WriteAllText(staleDuplicate, _json);
+
+                string requestUri = (string)resolver.Invoke(null, new object[] { assetsRoot });
+
+                Assert.That(File.Exists(staleDuplicate), Is.True, "The stale valid duplicate must exist for this adversarial fixture.");
+                Assert.That(File.Exists(canonical), Is.False, "The authoritative source must remain absent for this fixture.");
+                Assert.That(new Uri(requestUri).LocalPath, Is.EqualTo(Path.GetFullPath(canonical)));
+                Assert.That(new Uri(requestUri).LocalPath, Is.Not.EqualTo(Path.GetFullPath(staleDuplicate)));
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void MissingMalformedAndOversizeCatalogsFailClosed()
+        {
+            AssertCatalogRejected(
+                RealmCatalogRuntime.Parse(null),
+                "AL-REALM-CATALOG-MISSING");
+            AssertCatalogRejected(
+                RealmCatalogRuntime.Parse(string.Empty),
+                "AL-REALM-CATALOG-MISSING");
+            AssertCatalogRejected(
+                RealmCatalogRuntime.Parse("{\"version\":"),
+                "AL-REALM-CATALOG-MALFORMED");
+            string utf8Oversize = new string(
+                '\u00e9',
+                (RealmCatalogRuntime.MaximumByteLength / 2) + 1);
+            Assert.That(utf8Oversize.Length, Is.LessThanOrEqualTo(RealmCatalogRuntime.MaximumByteLength));
+            Assert.That(Encoding.UTF8.GetByteCount(utf8Oversize), Is.GreaterThan(RealmCatalogRuntime.MaximumByteLength));
+            AssertCatalogRejected(
+                RealmCatalogRuntime.Parse(utf8Oversize),
+                "AL-REALM-CATALOG-OVERSIZE");
+
+            MethodInfo readFailure = typeof(RealmCatalogRuntime).GetMethod(
+                "ReadFailure",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.That(readFailure, Is.Not.Null);
+            AssertCatalogRejected(
+                (RealmCatalogLoadResult)readFailure.Invoke(null, null),
+                "AL-REALM-CATALOG-READ-FAILED");
+        }
+
+        [Test]
+        public void BoundedDownloadHandlerRejectsOverflowBeforePublishingBytes()
+        {
+            Type handlerType = typeof(RealmCatalogRuntimeHost).Assembly.GetType(
+                "AL.RealmSelection.BoundedRealmCatalogDownloadHandler",
+                throwOnError: true);
+            object handler = Activator.CreateInstance(
+                handlerType,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                binder: null,
+                args: new object[] { 8 },
+                culture: null);
+            try
+            {
+                MethodInfo receiveData = handlerType.GetMethod(
+                    "ReceiveData",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                PropertyInfo isOversize = handlerType.GetProperty(
+                    "IsOversize",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                MethodInfo getUtf8Text = handlerType.GetMethod(
+                    "GetUtf8Text",
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+                Assert.That(receiveData, Is.Not.Null);
+                Assert.That(isOversize, Is.Not.Null);
+                Assert.That(getUtf8Text, Is.Not.Null);
+
+                byte[] exactCapacity = Encoding.UTF8.GetBytes("12345678");
+                bool acceptedAtCapacity = (bool)receiveData.Invoke(
+                    handler,
+                    new object[] { exactCapacity, exactCapacity.Length });
+                bool acceptedOverflow = (bool)receiveData.Invoke(
+                    handler,
+                    new object[] { new byte[] { (byte)'9' }, 1 });
+
+                Assert.That(acceptedAtCapacity, Is.True);
+                Assert.That(acceptedOverflow, Is.False);
+                Assert.That((bool)isOversize.GetValue(handler), Is.True);
+                Assert.That((string)getUtf8Text.Invoke(handler, null), Is.EqualTo("12345678"),
+                    "The overflow byte must not be partially published.");
+            }
+            finally
+            {
+                (handler as IDisposable)?.Dispose();
+            }
+        }
+
+        [Test]
+        public void RealmSelectionCreatesOneBoundedPresentationCameraWhenNoCameraIsRendering()
+        {
+            MethodInfo ensure = typeof(RealmSelectionController).GetMethod(
+                "EnsurePresentationCamera",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.That(ensure, Is.Not.Null, "RealmSelection must prevent the Game view's no-camera state.");
+
+            Camera[] existing = UnityEngine.Object.FindObjectsOfType<Camera>();
+            var enabled = new bool[existing.Length];
+            Camera created = null;
+            try
+            {
+                for (int i = 0; i < existing.Length; i++)
+                {
+                    enabled[i] = existing[i].enabled;
+                    existing[i].enabled = false;
+                }
+
+                created = (Camera)ensure.Invoke(null, null);
+                Camera repeated = (Camera)ensure.Invoke(null, null);
+
+                Assert.That(created, Is.Not.Null);
+                Assert.That(repeated, Is.SameAs(created));
+                Assert.That(created.name, Is.EqualTo("RealmSelectionCamera"));
+                Assert.That(created.clearFlags, Is.EqualTo(CameraClearFlags.SolidColor));
+                Assert.That(created.cullingMask, Is.Zero);
+                Assert.That(created.depth, Is.EqualTo(-100f));
+                Assert.That(created.orthographic, Is.True);
+                Assert.That(created.CompareTag("MainCamera"), Is.True);
+            }
+            finally
+            {
+                if (created != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(created.gameObject);
+                }
+
+                for (int i = 0; i < existing.Length; i++)
+                {
+                    if (existing[i] != null)
+                    {
+                        existing[i].enabled = enabled[i];
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void RealmSelectionIgnoresRenderTextureAndAlternateDisplayCameras()
+        {
+            MethodInfo ensure = typeof(RealmSelectionController).GetMethod(
+                "EnsurePresentationCamera",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Camera[] existing = UnityEngine.Object.FindObjectsOfType<Camera>();
+            var enabled = new bool[existing.Length];
+            var renderTextureObject = new GameObject("RenderTextureCamera");
+            var alternateDisplayObject = new GameObject("AlternateDisplayCamera");
+            var renderTexture = new RenderTexture(8, 8, 0);
+            Camera created = null;
+            try
+            {
+                for (int i = 0; i < existing.Length; i++)
+                {
+                    enabled[i] = existing[i].enabled;
+                    existing[i].enabled = false;
+                }
+
+                renderTextureObject.tag = "MainCamera";
+                Camera renderTextureCamera = renderTextureObject.AddComponent<Camera>();
+                renderTextureCamera.targetTexture = renderTexture;
+                Camera alternateDisplayCamera = alternateDisplayObject.AddComponent<Camera>();
+                alternateDisplayCamera.targetDisplay = 1;
+
+                created = (Camera)ensure.Invoke(null, null);
+
+                Assert.That(created, Is.Not.Null);
+                Assert.That(created, Is.Not.SameAs(renderTextureCamera));
+                Assert.That(created, Is.Not.SameAs(alternateDisplayCamera));
+                Assert.That(created.targetTexture, Is.Null);
+                Assert.That(created.targetDisplay, Is.Zero);
+                Assert.That(created.name, Is.EqualTo("RealmSelectionCamera"));
+            }
+            finally
+            {
+                if (created != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(created.gameObject);
+                }
+
+                UnityEngine.Object.DestroyImmediate(renderTextureObject);
+                UnityEngine.Object.DestroyImmediate(alternateDisplayObject);
+                renderTexture.Release();
+                UnityEngine.Object.DestroyImmediate(renderTexture);
+                for (int i = 0; i < existing.Length; i++)
+                {
+                    if (existing[i] != null)
+                    {
+                        existing[i].enabled = enabled[i];
+                    }
+                }
+            }
         }
 
         [Test]
@@ -284,6 +533,17 @@ namespace AL.Tests.EditMode.RealmSelection
             definition.Id = id;
             definition.RealmName = id.ToString();
             return definition;
+        }
+
+        private static void AssertCatalogRejected(
+            RealmCatalogLoadResult result,
+            string expectedTechnicalCode)
+        {
+            Assert.That(result, Is.Not.Null);
+            Assert.That(result.IsSuccess, Is.False);
+            Assert.That(result.Snapshot, Is.Null);
+            Assert.That(result.TechnicalCode, Is.EqualTo(expectedTechnicalCode));
+            Assert.That(result.TechnicalCode, Is.Not.EqualTo("AL-REALM-CATALOG-READY"));
         }
     }
 }

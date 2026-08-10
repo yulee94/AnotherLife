@@ -36,8 +36,49 @@ namespace AL.UI.RealmSelection
 
         private void Start()
         {
+            EnsurePresentationCamera();
             Bootloader.InitializeIfMissing();
             PopulateRealms();
+        }
+
+        private static Camera EnsurePresentationCamera()
+        {
+            Camera main = Camera.main;
+            if (IsDisplayPresentationCamera(main))
+            {
+                return main;
+            }
+
+            Camera[] activeCameras = Camera.allCameras;
+            for (int i = 0; i < activeCameras.Length; i++)
+            {
+                if (IsDisplayPresentationCamera(activeCameras[i]))
+                {
+                    return activeCameras[i];
+                }
+            }
+
+            var cameraObject = new GameObject("RealmSelectionCamera");
+            cameraObject.tag = "MainCamera";
+            var camera = cameraObject.AddComponent<Camera>();
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.014f, 0.018f, 0.025f, 1f);
+            camera.cullingMask = 0;
+            camera.depth = -100f;
+            camera.orthographic = true;
+            camera.allowHDR = false;
+            camera.allowMSAA = false;
+            camera.allowDynamicResolution = false;
+            camera.useOcclusionCulling = false;
+            return camera;
+        }
+
+        private static bool IsDisplayPresentationCamera(Camera camera)
+        {
+            return camera != null &&
+                   camera.isActiveAndEnabled &&
+                   camera.targetTexture == null &&
+                   camera.targetDisplay == 0;
         }
 
         private void PopulateRealms()
