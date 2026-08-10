@@ -6,8 +6,10 @@ using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
+using AL.UI;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +21,17 @@ namespace AL.ChampionMode
 {
     public class ChampionArenaSceneController : MonoBehaviour
     {
+        private const bool ChampionCustomizationSurfaceActivationEnabled = false;
+        private const int ForgeMutationButtonCapacity = 24;
+        private static readonly Color ForgeReadOnlyButtonColor =
+            new Color(0.028f, 0.032f, 0.038f, 0.96f);
+        private static readonly Color ForgeReadOnlyButtonLabelColor =
+            new Color(0.58f, 0.62f, 0.67f, 0.86f);
+        private static readonly Color ForgeReadOnlyPlateColor =
+            new Color(0.018f, 0.022f, 0.028f, 0.94f);
+        private static readonly Color ForgeReadOnlyStatusColor =
+            new Color(0.66f, 0.70f, 0.75f, 0.94f);
+
         [SerializeField] private int _dummyCount = 16;
         [SerializeField] private int _botChampionCount = 40;
         [SerializeField] private string _kingdomSceneName = "Kingdom";
@@ -110,8 +123,14 @@ namespace AL.ChampionMode
         private Image _controlModeStrip;
         private readonly Text[] _controlModeButtonTexts = new Text[3];
         private readonly Image[] _controlModeButtonImages = new Image[3];
+        private readonly Button[] _forgeMutationButtons =
+            new Button[ForgeMutationButtonCapacity];
         private ChampionActionButtonFeedback _attackActionFeedback;
         private ChampionActionButtonFeedback _dodgeActionFeedback;
+        private string _forgePresentationStatusText =
+            "READ-ONLY — PROFILE AUTHORITY UNAVAILABLE";
+        private int _forgeMutationButtonCount;
+        private int _forgeMutationGuardInvocationCount;
         private float _skillHudTimer;
         private float _encounterStartTime;
         private float _appearanceFeedTimer;
@@ -123,6 +142,8 @@ namespace AL.ChampionMode
         private bool _encounterFailed;
         private bool _encounterIntroRunning;
         private bool _appearanceInspectionMode;
+        private bool _forgePresentationCaptured;
+        private bool _forgeMutationCommandsEnabled;
         private GameObject _inspectionShowcaseRoot;
         private GameObject _introStageCueRoot;
         private RuntimePlatformQualityController _qualityController;
@@ -795,8 +816,47 @@ namespace AL.ChampionMode
             }
         }
 
+        private void CaptureForgeMutationPresentationOnce()
+        {
+            if (_forgePresentationCaptured)
+            {
+                return;
+            }
+
+            _forgePresentationCaptured = true;
+            IProfileWriteAuthorityProvider provider = null;
+            try
+            {
+                if (ServiceLocator.TryGet<ISaveGameService>(
+                        out var saveGameService))
+                {
+                    provider = saveGameService as
+                        IProfileWriteAuthorityProvider;
+                }
+            }
+            catch (System.Exception)
+            {
+                provider = null;
+            }
+
+            ProfileMutationPresentationState profilePresentation =
+                ProfileMutationPresentationPolicy.Capture(provider);
+            ProfileMutationSurfacePresentationState forgePresentation =
+                ProfileMutationPresentationPolicy.ResolveSurface(
+                    profilePresentation,
+                    ChampionCustomizationSurfaceActivationEnabled);
+
+            _forgeMutationCommandsEnabled =
+                forgePresentation.MutationCommandsEnabled;
+            _forgePresentationStatusText =
+                (_forgeMutationCommandsEnabled ? "WRITABLE — " : "READ-ONLY — ") +
+                forgePresentation.ReasonText;
+        }
+
         private void BuildHud()
         {
+            CaptureForgeMutationPresentationOnce();
+
             var canvasObject = new GameObject("ChampionMode_HUD");
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -864,6 +924,10 @@ namespace AL.ChampionMode
             _appearanceProfilePlate = CreateHudPanel(appearancePanel.transform, "ForgeActiveProfilePlate", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -40f), new Vector2(206f, 22f), new Color(0.014f, 0.022f, 0.032f, 0.92f));
             CreateUiImage(_appearanceProfilePlate.transform, "ForgeProfilePlateRail", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero, new Vector2(4f, 22f), new Color(1f, 0.68f, 0.28f, 0.62f));
             _appearanceProfileText = CreateText(appearancePanel.transform, font, "PROFILE LOCKING", 11, new Vector2(28f, -42f), new Vector2(188f, 18f), TextAnchor.MiddleLeft, new Color(0.86f, 0.91f, 0.96f));
+            _appearanceProfileText.resizeTextForBestFit = true;
+            _appearanceProfileText.resizeTextMinSize = 6;
+            _appearanceProfileText.resizeTextMaxSize = 11;
+            RefreshForgeProfileText(string.Empty);
             CreateText(appearancePanel.transform, font, "COLORS", 12, new Vector2(244f, -16f), new Vector2(64f, 18f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             string[] swatchLabels = { "PRI", "HAI", "SKN", "EYE", "ACC" };
             for (int i = 0; i < _appearanceSwatches.Length; i++)
@@ -888,30 +952,31 @@ namespace AL.ChampionMode
             Color inquisitorButton = new Color(0.12f, 0.11f, 0.08f, 0.96f);
             Color wardenButton = new Color(0.06f, 0.14f, 0.10f, 0.96f);
             Color spellbladeButton = new Color(0.07f, 0.08f, 0.18f, 0.96f);
-            CreateHudButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CyclePrimaryColor(); RefreshAppearanceText(); }, 13, colorButton);
-            CreateHudButton(appearancePanel.transform, font, "Hair", new Vector2(144f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairColor(); RefreshAppearanceText(); }, 13, colorButton);
-            CreateHudButton(appearancePanel.transform, font, "Skin", new Vector2(270f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleSkinColor(); RefreshAppearanceText(); }, 13, colorButton);
-            CreateHudButton(appearancePanel.transform, font, "Hair Style", new Vector2(18f, -122f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairStyle(); RefreshAppearanceText(); }, 13, styleButton);
-            CreateHudButton(appearancePanel.transform, font, "Body", new Vector2(144f, -122f), new Vector2(112f, 32f), () => { _playerCustomization.CycleBodyPreset(); RefreshAppearanceText(); }, 13, styleButton);
-            CreateHudButton(appearancePanel.transform, font, "Armor", new Vector2(270f, -122f), new Vector2(112f, 32f), () => { _playerCustomization.CycleArmorStyle(); RefreshAppearanceText(); }, 13, styleButton);
-            CreateHudButton(appearancePanel.transform, font, "Eyes", new Vector2(18f, -160f), new Vector2(112f, 32f), () => { _playerCustomization.CycleEyeColor(); RefreshAppearanceText(); }, 13, colorButton);
-            CreateHudButton(appearancePanel.transform, font, "Accent", new Vector2(144f, -160f), new Vector2(112f, 32f), () => { _playerCustomization.CycleAccentColor(); RefreshAppearanceText(); }, 13, colorButton);
-            CreateHudButton(appearancePanel.transform, font, "Face", new Vector2(270f, -160f), new Vector2(112f, 32f), () => { _playerCustomization.CycleFaceMark(); RefreshAppearanceText(); }, 13, styleButton);
-            CreateHudButton(appearancePanel.transform, font, "Weapon", new Vector2(18f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.CycleWeaponStyle(); RefreshAppearanceText(); }, 13, gearButton);
-            CreateHudButton(appearancePanel.transform, font, "Offhand", new Vector2(144f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.CycleOffhandStyle(); RefreshAppearanceText(); }, 13, gearButton);
-            CreateHudButton(appearancePanel.transform, font, "Cape", new Vector2(270f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.ToggleCape(); RefreshAppearanceText(); }, 13, gearButton);
-            CreateHudButton(appearancePanel.transform, font, "Vanguard", new Vector2(18f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("vanguard"), 12, vanguardButton);
-            CreateHudButton(appearancePanel.transform, font, "Arcanist", new Vector2(144f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("arcanist"), 12, arcanistButton);
-            CreateHudButton(appearancePanel.transform, font, "Nightblade", new Vector2(270f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("nightblade"), 12, nightbladeButton);
-            CreateHudButton(appearancePanel.transform, font, "Dread", new Vector2(18f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("dreadknight"), 12, dreadknightButton);
-            CreateHudButton(appearancePanel.transform, font, "Oracle", new Vector2(144f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("oracle"), 12, oracleButton);
-            CreateHudButton(appearancePanel.transform, font, "Duelist", new Vector2(270f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("duelist"), 12, duelistButton);
-            CreateHudButton(appearancePanel.transform, font, "Inquisitor", new Vector2(18f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("inquisitor"), 12, inquisitorButton);
-            CreateHudButton(appearancePanel.transform, font, "Warden", new Vector2(144f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("warden"), 12, wardenButton);
-            CreateHudButton(appearancePanel.transform, font, "Spellblade", new Vector2(270f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("spellblade"), 12, spellbladeButton);
-            CreateHudButton(appearancePanel.transform, font, "Random", new Vector2(18f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
-            CreateHudButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Primary", new Vector2(18f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CyclePrimaryColor(); RefreshAppearanceText(); }, 13, colorButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Hair", new Vector2(144f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairColor(); RefreshAppearanceText(); }, 13, colorButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Skin", new Vector2(270f, -84f), new Vector2(112f, 32f), () => { _playerCustomization.CycleSkinColor(); RefreshAppearanceText(); }, 13, colorButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Hair Style", new Vector2(18f, -122f), new Vector2(112f, 32f), () => { _playerCustomization.CycleHairStyle(); RefreshAppearanceText(); }, 13, styleButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Body", new Vector2(144f, -122f), new Vector2(112f, 32f), () => { _playerCustomization.CycleBodyPreset(); RefreshAppearanceText(); }, 13, styleButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Armor", new Vector2(270f, -122f), new Vector2(112f, 32f), () => { _playerCustomization.CycleArmorStyle(); RefreshAppearanceText(); }, 13, styleButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Eyes", new Vector2(18f, -160f), new Vector2(112f, 32f), () => { _playerCustomization.CycleEyeColor(); RefreshAppearanceText(); }, 13, colorButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Accent", new Vector2(144f, -160f), new Vector2(112f, 32f), () => { _playerCustomization.CycleAccentColor(); RefreshAppearanceText(); }, 13, colorButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Face", new Vector2(270f, -160f), new Vector2(112f, 32f), () => { _playerCustomization.CycleFaceMark(); RefreshAppearanceText(); }, 13, styleButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Weapon", new Vector2(18f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.CycleWeaponStyle(); RefreshAppearanceText(); }, 13, gearButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Offhand", new Vector2(144f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.CycleOffhandStyle(); RefreshAppearanceText(); }, 13, gearButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Cape", new Vector2(270f, -204f), new Vector2(112f, 32f), () => { _playerCustomization.ToggleCape(); RefreshAppearanceText(); }, 13, gearButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Vanguard", new Vector2(18f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("vanguard"), 12, vanguardButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Arcanist", new Vector2(144f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("arcanist"), 12, arcanistButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Nightblade", new Vector2(270f, -262f), new Vector2(112f, 32f), () => ApplyChampionPreset("nightblade"), 12, nightbladeButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Dread", new Vector2(18f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("dreadknight"), 12, dreadknightButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Oracle", new Vector2(144f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("oracle"), 12, oracleButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Duelist", new Vector2(270f, -300f), new Vector2(112f, 32f), () => ApplyChampionPreset("duelist"), 12, duelistButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Inquisitor", new Vector2(18f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("inquisitor"), 12, inquisitorButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Warden", new Vector2(144f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("warden"), 12, wardenButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Spellblade", new Vector2(270f, -338f), new Vector2(112f, 32f), () => ApplyChampionPreset("spellblade"), 12, spellbladeButton);
+            CreateForgeMutationButton(appearancePanel.transform, font, "Random", new Vector2(18f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.RandomizeAppearance(); RefreshAppearanceText(); }, 13, new Color(0.16f, 0.13f, 0.08f, 0.95f));
+            CreateForgeMutationButton(appearancePanel.transform, font, "Reset", new Vector2(144f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ResetAppearance(); RefreshAppearanceText(); }, 13, new Color(0.10f, 0.11f, 0.13f, 0.95f));
+            CreateForgeMutationButton(appearancePanel.transform, font, "Helmet", new Vector2(270f, -382f), new Vector2(112f, 30f), () => { _playerCustomization.ToggleHelmet(); RefreshAppearanceText(); }, 13, gearButton);
+            FinalizeForgeMutationButtons();
             CreateHudPanel(appearancePanel.transform, "ForgeSummaryPlate", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -420f), new Vector2(238f, 68f), new Color(0.012f, 0.018f, 0.026f, 0.84f));
             CreateUiImage(appearancePanel.transform, "ForgeSummaryRail", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -420f), new Vector2(4f, 68f), new Color(0.24f, 0.56f, 1f, 0.50f));
             _appearanceInspectGlow = CreateUiImage(appearancePanel.transform, "InspectModeGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(266f, -416f), new Vector2(120f, 38f), new Color(0.24f, 0.56f, 1f, 0.10f));
@@ -1375,6 +1440,8 @@ namespace AL.ChampionMode
         {
             if (_playerCustomization == null)
             {
+                RefreshForgeProfileText(string.Empty);
+                RefreshAppearanceInspectionChrome();
                 return;
             }
 
@@ -1382,10 +1449,7 @@ namespace AL.ChampionMode
             {
                 string appearanceSummary = _playerCustomization.GetAppearanceSummary();
                 _appearanceSummaryText.text = appearanceSummary;
-                if (_appearanceProfileText != null)
-                {
-                    _appearanceProfileText.text = GetAppearanceProfilePlateText(appearanceSummary);
-                }
+                RefreshForgeProfileText(appearanceSummary);
             }
 
             SetSwatchColor(0, _playerCustomization.GetPrimaryColor());
@@ -1394,6 +1458,18 @@ namespace AL.ChampionMode
             SetSwatchColor(3, _playerCustomization.GetEyeColor());
             SetSwatchColor(4, _playerCustomization.GetAccentColor());
             RefreshAppearanceInspectionChrome();
+        }
+
+        private void RefreshForgeProfileText(string appearanceSummary)
+        {
+            if (_appearanceProfileText == null)
+            {
+                return;
+            }
+
+            _appearanceProfileText.text = _forgeMutationCommandsEnabled
+                ? GetAppearanceProfilePlateText(appearanceSummary)
+                : _forgePresentationStatusText;
         }
 
         private void SetSwatchColor(int index, Color color)
@@ -2033,14 +2109,20 @@ namespace AL.ChampionMode
 
             if (_appearanceProfilePlate != null)
             {
-                _appearanceProfilePlate.color = _appearanceInspectionMode
-                    ? new Color(0.026f, 0.044f, 0.066f, 0.94f)
-                    : new Color(0.014f, 0.022f, 0.032f, 0.92f);
+                _appearanceProfilePlate.color = _forgeMutationCommandsEnabled
+                    ? (_appearanceInspectionMode
+                        ? new Color(0.026f, 0.044f, 0.066f, 0.94f)
+                        : new Color(0.014f, 0.022f, 0.032f, 0.92f))
+                    : ForgeReadOnlyPlateColor;
             }
 
             if (_appearanceProfileText != null)
             {
-                _appearanceProfileText.color = _appearanceInspectionMode ? Color.Lerp(active, Color.white, 0.34f) : Color.Lerp(warm, Color.white, 0.32f);
+                _appearanceProfileText.color = _forgeMutationCommandsEnabled
+                    ? (_appearanceInspectionMode
+                        ? Color.Lerp(active, Color.white, 0.34f)
+                        : Color.Lerp(warm, Color.white, 0.32f))
+                    : ForgeReadOnlyStatusColor;
             }
         }
 
@@ -2742,6 +2824,122 @@ namespace AL.ChampionMode
             rect.offsetMin = new Vector2(2f, 2f);
             rect.offsetMax = new Vector2(-2f, -2f);
             return fill;
+        }
+
+        private Button CreateForgeMutationButton(
+            Transform parent,
+            Font font,
+            string label,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta,
+            UnityEngine.Events.UnityAction mutation,
+            int fontSize,
+            Color color)
+        {
+            Button button = CreateHudButton(
+                parent,
+                font,
+                label,
+                anchoredPosition,
+                sizeDelta,
+                () => TryInvokeForgeMutation(mutation),
+                fontSize,
+                color);
+
+            if (_forgeMutationButtonCount < _forgeMutationButtons.Length)
+            {
+                _forgeMutationButtons[_forgeMutationButtonCount] = button;
+                _forgeMutationButtonCount++;
+            }
+            else
+            {
+                _forgeMutationCommandsEnabled = false;
+                ApplyForgeMutationButtonPresentation(button);
+                for (int i = 0; i < _forgeMutationButtons.Length; i++)
+                {
+                    ApplyForgeMutationButtonPresentation(
+                        _forgeMutationButtons[i]);
+                }
+            }
+
+            return button;
+        }
+
+        private void FinalizeForgeMutationButtons()
+        {
+            bool completeRegistration =
+                _forgeMutationButtonCount == _forgeMutationButtons.Length;
+            if (completeRegistration)
+            {
+                for (int i = 0; i < _forgeMutationButtons.Length; i++)
+                {
+                    if (_forgeMutationButtons[i] == null)
+                    {
+                        completeRegistration = false;
+                        break;
+                    }
+                }
+            }
+
+            if (!completeRegistration)
+            {
+                _forgeMutationCommandsEnabled = false;
+            }
+
+            for (int i = 0; i < _forgeMutationButtons.Length; i++)
+            {
+                ApplyForgeMutationButtonPresentation(
+                    _forgeMutationButtons[i]);
+            }
+        }
+
+        private void TryInvokeForgeMutation(
+            UnityEngine.Events.UnityAction mutation)
+        {
+            _forgeMutationGuardInvocationCount++;
+            if (!_forgeMutationCommandsEnabled || mutation == null)
+            {
+                return;
+            }
+
+            mutation.Invoke();
+        }
+
+        private void ApplyForgeMutationButtonPresentation(Button button)
+        {
+            if (button == null)
+            {
+                _forgeMutationCommandsEnabled = false;
+                return;
+            }
+
+            button.interactable = _forgeMutationCommandsEnabled;
+            if (_forgeMutationCommandsEnabled)
+            {
+                return;
+            }
+
+            button.transition = Selectable.Transition.None;
+            button.transform.localScale = Vector3.one;
+
+            Image background = button.GetComponent<Image>();
+            if (background != null)
+            {
+                background.color = ForgeReadOnlyButtonColor;
+            }
+
+            Text label = button.GetComponentInChildren<Text>(true);
+            if (label != null)
+            {
+                label.color = ForgeReadOnlyButtonLabelColor;
+            }
+
+            Outline outline = button.GetComponent<Outline>();
+            if (outline != null)
+            {
+                outline.effectColor =
+                    new Color(0.24f, 0.28f, 0.34f, 0.20f);
+            }
         }
 
         private static Button CreateHudButton(

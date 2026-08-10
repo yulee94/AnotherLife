@@ -68,8 +68,11 @@ namespace AL.Tests.EditMode
 
             Assert.False(presentation.OrdinaryMutationCommandsEnabled);
             Assert.True(presentation.IsReadOnly);
-            Assert.That(presentation.DisplayText, Does.Contain("COMMAND DECK READ-ONLY"));
-            Assert.That(presentation.DisplayText, Does.Contain(expectedReason));
+            Assert.AreEqual(expectedReason, presentation.ReasonText);
+            Assert.AreEqual(
+                "COMMAND DECK READ-ONLY — " + expectedReason,
+                presentation.DisplayText,
+                "Kingdom copy must remain byte-stable while the reason becomes context-neutral.");
             Assert.AreEqual(1, provider.ReadCount);
         }
 
@@ -92,9 +95,17 @@ namespace AL.Tests.EditMode
 
             Assert.True(active.OrdinaryMutationCommandsEnabled);
             Assert.False(active.IsReadOnly);
-            Assert.That(active.DisplayText, Does.Contain("COMMAND DECK WRITABLE"));
+            Assert.AreEqual(
+                "COMMAND DECK WRITABLE — PROFILE AUTHORITY VERIFIED",
+                active.DisplayText);
+            Assert.AreEqual("PROFILE AUTHORITY VERIFIED", active.ReasonText);
             Assert.False(nonWritable.OrdinaryMutationCommandsEnabled);
-            Assert.That(nonWritable.DisplayText, Does.Contain("PROFILE MIGRATION REQUIRED"));
+            Assert.AreEqual(
+                "COMMAND DECK READ-ONLY — PROFILE MIGRATION REQUIRED",
+                nonWritable.DisplayText);
+            Assert.AreEqual(
+                "PROFILE MIGRATION REQUIRED",
+                nonWritable.ReasonText);
         }
 
         [Test]
