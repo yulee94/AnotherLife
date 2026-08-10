@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.SaveAuthority;
 using AL.Data.Runtime;
 using AL.Kingdom;
 using AL.Kingdom.Visuals;
@@ -41,6 +42,7 @@ namespace AL.UI.Kingdom
         private Image _messageStatusRule;
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
+        private Text _commandDeckAuthorityStatus;
         private KingdomVisualizer _kingdomVisualizer;
         private Nvs01KingdomPresenter _nvs01Presenter;
         private Nvs01KingdomView _nvs01View;
@@ -54,6 +56,8 @@ namespace AL.UI.Kingdom
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
         private bool _profileReady;
+        private bool _profileMutationPresentationCaptured;
+        private ProfileMutationPresentationState _profileMutationPresentation;
         private long _lastLiveRefreshTimestamp;
         private readonly List<Image> _messageSignalBars = new List<Image>();
         private readonly Text[] _readinessChipTexts = new Text[4];
@@ -181,6 +185,8 @@ namespace AL.UI.Kingdom
 
         private void BuildRuntimeUi()
         {
+            CaptureProfileMutationPresentationOnce();
+
             var canvas = CreateCanvas("KingdomCanvas");
             var font = GetDefaultFont();
 
@@ -246,6 +252,25 @@ namespace AL.UI.Kingdom
             var commandTitle = CreateText(commandDeck.transform, "CommandDeckTitle", font, 23, TextAnchor.UpperLeft, new Vector2(18f, -16f), new Vector2(380f, 34f));
             commandTitle.text = "COMMAND DECK";
             commandTitle.color = new Color(1f, 0.88f, 0.62f);
+            _commandDeckAuthorityStatus = CreateText(
+                commandDeck.transform,
+                "CommandDeckAuthorityStatus",
+                font,
+                9,
+                TextAnchor.UpperRight,
+                new Vector2(202f, -13f),
+                new Vector2(194f, 36f));
+            _commandDeckAuthorityStatus.text =
+                _profileMutationPresentation.DisplayText;
+            _commandDeckAuthorityStatus.color =
+                _profileMutationPresentation.IsReadOnly
+                    ? new Color(1f, 0.74f, 0.38f, 1f)
+                    : new Color(0.54f, 0.88f, 0.66f, 1f);
+            _commandDeckAuthorityStatus.resizeTextForBestFit = true;
+            _commandDeckAuthorityStatus.resizeTextMinSize = 6;
+            _commandDeckAuthorityStatus.resizeTextMaxSize = 9;
+            _commandDeckAuthorityStatus.verticalOverflow =
+                VerticalWrapMode.Truncate;
 
             CreateCommandDeck(commandDeck.transform, font);
 
@@ -1322,6 +1347,33 @@ namespace AL.UI.Kingdom
             CreateCommandSection(parent, font, descriptors, KingdomCommandCategory.RealmOps, "REALM OPS", new Vector2(18f, -586f), -626f);
         }
 
+        private void CaptureProfileMutationPresentationOnce()
+        {
+            if (_profileMutationPresentationCaptured)
+            {
+                return;
+            }
+
+            _profileMutationPresentationCaptured = true;
+            IProfileWriteAuthorityProvider provider = null;
+            try
+            {
+                if (ServiceLocator.TryGet<ISaveGameService>(
+                        out var saveGameService))
+                {
+                    provider = saveGameService as
+                        IProfileWriteAuthorityProvider;
+                }
+            }
+            catch (Exception)
+            {
+                provider = null;
+            }
+
+            _profileMutationPresentation =
+                ProfileMutationPresentationPolicy.Capture(provider);
+        }
+
         private KingdomCommandContext CreateCommandContext()
         {
             bool hasCommittedRealm = false;
@@ -1373,14 +1425,24 @@ namespace AL.UI.Kingdom
 
         private Button CreateDeckButton(Transform parent, Font font, KingdomCommandDescriptor descriptor, Vector2 anchoredPosition)
         {
-            Color fill = descriptor.IsInteractable
+            bool blockedByProfileAuthority =
+                descriptor.IsInteractable &&
+                KingdomCommandPolicy.TryGetBuildingId(
+                    descriptor.Id,
+                    out _) &&
+                !_profileMutationPresentation
+                    .OrdinaryMutationCommandsEnabled;
+            bool isInteractable =
+                descriptor.IsInteractable &&
+                !blockedByProfileAuthority;
+            Color fill = isInteractable
                 ? new Color(0.105f, 0.138f, 0.178f, 1f)
                 : new Color(0.062f, 0.073f, 0.088f, 0.94f);
             var button = CreateButton(parent, font, descriptor.Label, anchoredPosition, () => HandleCommandSelected(descriptor), new Vector2(190f, 40f), fill);
             button.name = descriptor.Id;
-            button.interactable = descriptor.IsInteractable;
+            button.interactable = isInteractable;
 
-            if (!descriptor.IsInteractable)
+            if (!isInteractable)
             {
                 var image = button.GetComponent<Image>();
                 if (image != null)
@@ -1396,7 +1458,9 @@ namespace AL.UI.Kingdom
 
                 var plate = CreatePanel(button.transform, "UnavailableStatus", new Vector2(-18f, -8f), new Vector2(46f, 13f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Color(0.18f, 0.13f, 0.08f, 0.88f));
                 var status = CreateText(plate.transform, "UnavailableStatusText", font, 8, TextAnchor.MiddleCenter, Vector2.zero, new Vector2(46f, 13f));
-                status.text = "LOCKED";
+                status.text = blockedByProfileAuthority
+                    ? "READ-ONLY"
+                    : "LOCKED";
                 status.color = new Color(1f, 0.78f, 0.42f, 0.92f);
             }
 
@@ -1421,6 +1485,16 @@ namespace AL.UI.Kingdom
                     descriptor.Id,
                     out string buildingId))
             {
+                if (!_profileMutationPresentation
+                        .OrdinaryMutationCommandsEnabled)
+                {
+                    SetMessage(string.IsNullOrWhiteSpace(
+                            _profileMutationPresentation.DisplayText)
+                        ? "COMMAND DECK READ-ONLY — PROFILE AUTHORITY UNAVAILABLE"
+                        : _profileMutationPresentation.DisplayText);
+                    return;
+                }
+
                 BuildingConstructionResult result =
                     ServiceLocator.Get<IBuildingService>().TryStartConstruction(
                         buildingId,
@@ -2011,6 +2085,7 @@ namespace AL.UI.Kingdom
         private Image _iconFrame;
         private Image _actionNotch;
         private Text _label;
+        private Selectable _selectable;
         private Color _baseColor;
         private Color _accentColor;
         private Color _accentBaseColor;
@@ -2026,6 +2101,7 @@ namespace AL.UI.Kingdom
         public void Configure(Image background, Text label, Image accent, Image topTrace, Image iconFrame, Image actionNotch, Color accentColor)
         {
             _rectTransform = GetComponent<RectTransform>();
+            _selectable = GetComponent<Selectable>();
             _background = background;
             _label = label;
             _accent = accent;
@@ -2042,6 +2118,12 @@ namespace AL.UI.Kingdom
 
         private void Update()
         {
+            if (!CanAnimate())
+            {
+                ResetDisabledVisuals();
+                return;
+            }
+
             float delta = Time.unscaledDeltaTime;
             _hoverAmount = Mathf.MoveTowards(_hoverAmount, _hovered ? 1f : 0f, delta * 9f);
             _pressAmount = Mathf.MoveTowards(_pressAmount, _pressed ? 1f : 0f, delta * 16f);
@@ -2095,25 +2177,99 @@ namespace AL.UI.Kingdom
 
         public void OnPointerEnter(PointerEventData eventData)
         {
+            if (!CanAnimate())
+            {
+                ResetDisabledVisuals();
+                return;
+            }
+
             _hovered = true;
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
+            if (!CanAnimate())
+            {
+                ResetDisabledVisuals();
+                return;
+            }
+
             _hovered = false;
             _pressed = false;
         }
 
         public void OnPointerDown(PointerEventData eventData)
         {
+            if (!CanAnimate())
+            {
+                ResetDisabledVisuals();
+                return;
+            }
+
             _pressed = true;
             _impactAmount = 0.75f;
         }
 
         public void OnPointerUp(PointerEventData eventData)
         {
+            if (!CanAnimate())
+            {
+                ResetDisabledVisuals();
+                return;
+            }
+
             _pressed = false;
             _impactAmount = Mathf.Max(_impactAmount, 0.58f);
+        }
+
+        private bool CanAnimate() =>
+            _selectable != null &&
+            _selectable.isActiveAndEnabled &&
+            _selectable.interactable;
+
+        private void ResetDisabledVisuals()
+        {
+            _hovered = false;
+            _pressed = false;
+            _hoverAmount = 0f;
+            _pressAmount = 0f;
+            _impactAmount = 0f;
+
+            if (_background != null)
+            {
+                _background.color = _baseColor;
+            }
+
+            if (_accent != null)
+            {
+                _accent.color = _accentBaseColor;
+                _accent.rectTransform.localScale = Vector3.one;
+            }
+
+            if (_topTrace != null)
+            {
+                _topTrace.color = _topTraceBaseColor;
+            }
+
+            if (_iconFrame != null)
+            {
+                _iconFrame.color = _iconFrameBaseColor;
+                _iconFrame.rectTransform.localScale = Vector3.one;
+            }
+
+            if (_actionNotch != null)
+            {
+                _actionNotch.color = _actionNotchBaseColor;
+                _actionNotch.rectTransform.localScale = Vector3.one;
+            }
+
+            if (_rectTransform != null)
+            {
+                _rectTransform.localScale = Vector3.one;
+            }
+
+            // The disabled-state owner intentionally paints the muted label.
+            // Do not replace it with the active feedback palette here.
         }
 
         private static Color WithAlpha(Color color, float alpha)
