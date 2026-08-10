@@ -14,6 +14,7 @@ using AL.Services.Local;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AL.UI.Kingdom
@@ -56,6 +57,7 @@ namespace AL.UI.Kingdom
         private float _messagePulseTimer;
         private bool _dashboardVisible = true;
         private bool _profileReady;
+        private bool _runtimeInitialized;
         private bool _profileMutationPresentationCaptured;
         private ProfileMutationPresentationState _profileMutationPresentation;
         private long _lastLiveRefreshTimestamp;
@@ -102,6 +104,7 @@ namespace AL.UI.Kingdom
             BuildRuntimeWorld();
             BuildRuntimeUi();
             Refresh();
+            _runtimeInitialized = true;
             StartCoroutine(InitializeNvs01QuestPresentation());
             _lastLiveRefreshTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
@@ -127,6 +130,14 @@ namespace AL.UI.Kingdom
 
         private void Update()
         {
+            // Start can fail before the runtime-generated UI exists (for example while recovering a
+            // presentation camera during a scene transition). Never turn one initialization failure
+            // into a per-frame null-reference loop against fields that were not constructed.
+            if (!_runtimeInitialized)
+            {
+                return;
+            }
+
             UpdateCommandMessagePulse();
             UpdateStrategicReadinessPulse();
             UpdateResourceTickerPulse();
@@ -141,21 +152,42 @@ namespace AL.UI.Kingdom
 
         private void BuildRuntimeWorld()
         {
-            ConfigureKingdomCamera();
-            ConfigureKingdomLighting();
+            Scene controllerScene = gameObject.scene;
+            ConfigureKingdomCamera(controllerScene);
+            ConfigureKingdomLighting(controllerScene);
 
             var visualizerObject = new GameObject("Kingdom_2_5D_Board");
             _kingdomVisualizer = visualizerObject.AddComponent<KingdomVisualizer>();
             _kingdomVisualizer.InitializeKingdom();
         }
 
-        private static void ConfigureKingdomCamera()
+        private static void ConfigureKingdomCamera(Scene controllerScene)
         {
-            var cameraObject = UnityEngine.Camera.main != null
-                ? UnityEngine.Camera.main.gameObject
-                : new GameObject("Main Camera");
+            // Cache Camera.main once and use Unity's overloaded null comparison explicitly. A camera
+            // from the scene being unloaded can be a CLR-non-null Unity "fake null"; `??` would retain
+            // that destroyed component and throw MissingComponentException when configured.
+            UnityEngine.Camera camera = UnityEngine.Camera.main;
+            GameObject cameraObject = camera != null &&
+                                      camera.gameObject.scene == controllerScene
+                ? camera.gameObject
+                : FindMainCameraObject(controllerScene);
+
+            if (cameraObject == null)
+            {
+                cameraObject = new GameObject("Main Camera");
+            }
+
             cameraObject.tag = "MainCamera";
-            var camera = cameraObject.GetComponent<UnityEngine.Camera>() ?? cameraObject.AddComponent<UnityEngine.Camera>();
+            if (camera == null || camera.gameObject != cameraObject)
+            {
+                camera = cameraObject.GetComponent<UnityEngine.Camera>();
+            }
+
+            if (camera == null)
+            {
+                camera = cameraObject.AddComponent<UnityEngine.Camera>();
+            }
+
             camera.orthographic = true;
             camera.orthographicSize = 8.6f;
             camera.transform.position = new Vector3(0f, 10.4f, -10.8f);
@@ -168,15 +200,46 @@ namespace AL.UI.Kingdom
                 cameraObject.AddComponent<AudioListener>();
             }
 
-            var controls = cameraObject.GetComponent<KingdomBoardCameraController>() ?? cameraObject.AddComponent<KingdomBoardCameraController>();
+            KingdomBoardCameraController controls =
+                cameraObject.GetComponent<KingdomBoardCameraController>();
+            if (controls == null)
+            {
+                controls = cameraObject.AddComponent<KingdomBoardCameraController>();
+            }
+
             controls.Configure(camera);
         }
 
-        private static void ConfigureKingdomLighting()
+        private static GameObject FindMainCameraObject(Scene controllerScene)
+        {
+            GameObject[] candidates = GameObject.FindGameObjectsWithTag("MainCamera");
+            for (int i = 0; i < candidates.Length; i++)
+            {
+                GameObject candidate = candidates[i];
+                if (candidate != null && candidate.scene == controllerScene)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
+        }
+
+        private static void ConfigureKingdomLighting(Scene controllerScene)
         {
             RenderSettings.ambientLight = new Color(0.20f, 0.22f, 0.24f);
-            var lightObject = GameObject.Find("Kingdom_KeyLight") ?? new GameObject("Kingdom_KeyLight");
-            var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
+            GameObject lightObject = GameObject.Find("Kingdom_KeyLight");
+            if (lightObject == null || lightObject.scene != controllerScene)
+            {
+                lightObject = new GameObject("Kingdom_KeyLight");
+            }
+
+            Light light = lightObject.GetComponent<Light>();
+            if (light == null)
+            {
+                light = lightObject.AddComponent<Light>();
+            }
+
             light.type = LightType.Directional;
             light.intensity = 1.15f;
             light.color = new Color(1f, 0.92f, 0.78f);

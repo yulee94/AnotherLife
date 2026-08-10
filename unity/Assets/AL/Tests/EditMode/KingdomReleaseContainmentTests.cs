@@ -324,6 +324,93 @@ namespace AL.Tests.EditMode
             Assert.False(ready, "Without a succeeded marker load the controller must not treat the profile as ready.");
         }
 
+        [Test]
+        public void CameraSetupRepairsTheExistingTaggedObjectWithoutDuplicatingIt()
+        {
+            Type controllerType = GetRuntimeType("AL.UI.Kingdom.KingdomSceneController");
+            MethodInfo configure = controllerType.GetMethod(
+                "ConfigureKingdomCamera",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.That(configure, Is.Not.Null);
+
+            GameObject[] preexisting = GameObject.FindGameObjectsWithTag("MainCamera");
+            foreach (GameObject candidate in preexisting)
+            {
+                candidate.SetActive(false);
+            }
+
+            var cameraObject = new GameObject("Main Camera");
+            cameraObject.tag = "MainCamera";
+            try
+            {
+                Assert.That(cameraObject.GetComponent<Camera>(), Is.Null);
+
+                configure.Invoke(null, new object[] { cameraObject.scene });
+
+                Camera camera = cameraObject.GetComponent<Camera>();
+                Assert.That(
+                    camera,
+                    Is.Not.Null,
+                    "Kingdom must repair the existing tagged presentation object instead of leaving it componentless.");
+                Assert.That(camera.isActiveAndEnabled, Is.True);
+                Assert.That(camera.orthographic, Is.True);
+                Assert.That(
+                    GameObject.FindGameObjectsWithTag("MainCamera"),
+                    Is.EqualTo(new[] { cameraObject }),
+                    "Camera recovery must not leave duplicate MainCamera-tagged objects.");
+            }
+            finally
+            {
+                foreach (GameObject candidate in GameObject.FindGameObjectsWithTag("MainCamera"))
+                {
+                    if (!preexisting.Contains(candidate))
+                    {
+                        UnityEngine.Object.DestroyImmediate(candidate);
+                    }
+                }
+
+                foreach (GameObject candidate in preexisting)
+                {
+                    if (candidate != null)
+                    {
+                        candidate.SetActive(true);
+                    }
+                }
+            }
+        }
+
+        [Test]
+        public void UpdateIsInertUntilRuntimeInitializationCompletes()
+        {
+            Type controllerType = GetRuntimeType("AL.UI.Kingdom.KingdomSceneController");
+            FieldInfo initialized = controllerType.GetField(
+                "_runtimeInitialized",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(
+                initialized,
+                Is.Not.Null,
+                "Kingdom needs an explicit initialization latch so a failed Start cannot enter its refresh loop.");
+
+            var host = new GameObject("KingdomPartialInitializationTest");
+            Component controller = host.AddComponent(controllerType);
+            try
+            {
+                SetInstanceField(controller, "_profileReady", true);
+                initialized.SetValue(controller, false);
+                SetInstanceField(controller, "_lastLiveRefreshTimestamp", 37L);
+
+                Assert.DoesNotThrow(() => Invoke(controller, "Update"));
+                Assert.That(
+                    GetInstanceField(controller, "_lastLiveRefreshTimestamp"),
+                    Is.EqualTo(37L),
+                    "A partial controller must not enter or advance the periodic Refresh path.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
         // ---------------------------------------------------------------------
         // Policy reflection helpers
         // ---------------------------------------------------------------------
