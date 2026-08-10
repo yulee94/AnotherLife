@@ -200,6 +200,15 @@ namespace AL.Narrative.Nvs01.Contracts
             {
                 throw new ArgumentException("Identifier exceeds the NVS-01 contract limit.", parameterName);
             }
+            for (var index = 0; index < value.Length; index++)
+            {
+                if (char.IsControl(value[index]))
+                {
+                    throw new ArgumentException(
+                        "Identifier cannot contain control characters.",
+                        parameterName);
+                }
+            }
             if (!string.Equals(value, value.Trim(), StringComparison.Ordinal))
             {
                 throw new ArgumentException("Identifier cannot contain leading or trailing whitespace.", parameterName);
