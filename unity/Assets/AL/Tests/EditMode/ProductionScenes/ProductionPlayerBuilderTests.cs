@@ -25,6 +25,116 @@ namespace AL.Tests.EditMode.ProductionScenes
         private static Type EnvironmentType => Runtime("AL.EditorTools.IProductionPlayerBuildEnvironment");
 
         [Test]
+        public void SharedGameDataBuildProcessorInjectsTheCanonicalSourceAtTheRuntimePath()
+        {
+            Type processor = Runtime("AL.EditorTools.SharedGameDataStreamingAssetsBuildProcessor");
+            Assert.That(
+                typeof(UnityEditor.Build.BuildPlayerProcessor).IsAssignableFrom(processor),
+                Is.True,
+                "The shared GameData registration must run for every Player build entry point.");
+
+            MethodInfo resolveSource = processor.GetMethod(
+                "ResolveSourceDirectory",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            MethodInfo resolveCatalogs = processor.GetMethod(
+                "ResolveCatalogFiles",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            MethodInfo resolveRegistrations = processor.GetMethod(
+                "ResolveCatalogRegistrations",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            FieldInfo destination = processor.GetField(
+                "DestinationPath",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.That(resolveSource, Is.Not.Null);
+            Assert.That(resolveCatalogs, Is.Not.Null);
+            Assert.That(resolveRegistrations, Is.Not.Null);
+            Assert.That(destination, Is.Not.Null);
+
+            string source = (string)resolveSource.Invoke(null, new object[] { Application.dataPath });
+            Assert.That(
+                source,
+                Is.EqualTo(Path.GetFullPath(Path.Combine(
+                    Application.dataPath,
+                    "AL",
+                    "StreamingAssets",
+                    "GameData"))));
+            Assert.That(Directory.Exists(source), Is.True);
+            Assert.That(File.Exists(Path.Combine(source, "al_realm_catalog.json")), Is.True);
+            Assert.That(destination.GetRawConstantValue(), Is.EqualTo("GameData"));
+
+            string[] catalogs = (string[])resolveCatalogs.Invoke(null, new object[] { Application.dataPath });
+            Assert.That(catalogs, Is.Not.Empty);
+            Assert.That(catalogs, Does.Contain(Path.Combine(source, "al_realm_catalog.json")));
+            CollectionAssert.AreEqual(
+                catalogs.OrderBy(path => path, StringComparer.Ordinal).ToArray(),
+                catalogs,
+                "Catalog injection order must be deterministic and ordinal.");
+            Assert.That(catalogs.Select(Path.GetExtension), Has.All.EqualTo(".json"));
+            Assert.That(catalogs.Select(Path.GetFileName), Is.Unique);
+            Assert.That(catalogs, Has.None.EndsWith(".meta"));
+
+            Array registrations = (Array)resolveRegistrations.Invoke(
+                null,
+                new object[] { Application.dataPath });
+            string[] registeredSources = registrations
+                .Cast<object>()
+                .Select(registration => PropString(registration, "Key"))
+                .ToArray();
+            string[] registeredDestinations = registrations
+                .Cast<object>()
+                .Select(registration => PropString(registration, "Value"))
+                .ToArray();
+            CollectionAssert.AreEqual(catalogs, registeredSources);
+            CollectionAssert.AreEqual(
+                catalogs.Select(path => "GameData/" + Path.GetFileName(path)).ToArray(),
+                registeredDestinations,
+                "PrepareForBuild must consume this exact source/destination registration plan.");
+        }
+
+        [Test]
+        public void SharedGameDataBuildProcessorRejectsMissingDuplicateEmptyAndOverBoundedSources()
+        {
+            Type processor = Runtime("AL.EditorTools.SharedGameDataStreamingAssetsBuildProcessor");
+            MethodInfo resolveCatalogs = processor.GetMethod(
+                "ResolveCatalogFiles",
+                BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SharedGameDataBuildTests",
+                Guid.NewGuid().ToString("N"));
+            string assetsRoot = Path.Combine(root, "Assets");
+            string source = Path.Combine(assetsRoot, "AL", "StreamingAssets", "GameData");
+            string duplicate = Path.Combine(assetsRoot, "StreamingAssets", "GameData");
+            try
+            {
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "source directory is missing");
+
+                Directory.CreateDirectory(source);
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+
+                File.WriteAllText(Path.Combine(source, "catalog-00.json"), "{}");
+                Directory.CreateDirectory(duplicate);
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "Duplicate GameData");
+
+                Directory.Delete(duplicate, true);
+                for (int i = 1; i < 33; i++)
+                {
+                    File.WriteAllText(
+                        Path.Combine(source, "catalog-" + i.ToString("00", CultureInfo.InvariantCulture) + ".json"),
+                        "{}");
+                }
+                AssertBuildRegistrationRejected(resolveCatalogs, assetsRoot, "within 1..32");
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
         public void PlanUsesDescriptorScenesExactWindows64DevelopmentOptionsAndGuardedOutput()
         {
             string root = ProjectRoot();
@@ -426,6 +536,20 @@ namespace AL.Tests.EditMode.ProductionScenes
                 .Single(candidate =>
                     candidate.Name == methodName && candidate.GetParameters().Length == (args?.Length ?? 0));
             return method.Invoke(target, args);
+        }
+
+        private static void AssertBuildRegistrationRejected(
+            MethodInfo resolver,
+            string assetsRoot,
+            string expectedMessage)
+        {
+            TargetInvocationException exception = Assert.Throws<TargetInvocationException>(
+                () => resolver.Invoke(null, new object[] { assetsRoot }));
+            Assert.That(exception.InnerException, Is.Not.Null);
+            Assert.That(
+                exception.InnerException.GetType().FullName,
+                Is.EqualTo("UnityEditor.Build.BuildFailedException"));
+            Assert.That(exception.InnerException.Message, Does.Contain(expectedMessage));
         }
 
         private static object CreateDispatchProxy(Type interfaceType, Type proxyType)

@@ -207,9 +207,27 @@ namespace AL.RealmSelection
             return new Uri(filePath).AbsoluteUri;
         }
 
+        internal static string BuildEditorRequestUri(string assetsRoot)
+        {
+            if (string.IsNullOrWhiteSpace(assetsRoot))
+            {
+                throw new ArgumentException("An Assets root is required.", nameof(assetsRoot));
+            }
+
+            string authorityPath = System.IO.Path.GetFullPath(
+                System.IO.Path.Combine(
+                    assetsRoot,
+                    "AL",
+                    "StreamingAssets",
+                    RealmCatalogRuntime.RelativePath));
+            return new Uri(authorityPath).AbsoluteUri;
+        }
+
         private IEnumerator Start()
         {
-            string path = BuildRequestUri(Application.streamingAssetsPath);
+            string path = Application.isEditor
+                ? BuildEditorRequestUri(Application.dataPath)
+                : BuildRequestUri(Application.streamingAssetsPath);
             var handler = new BoundedRealmCatalogDownloadHandler(RealmCatalogRuntime.MaximumByteLength);
             using (var request = new UnityWebRequest(path, "GET", handler, null))
             {
