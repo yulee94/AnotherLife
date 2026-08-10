@@ -67,34 +67,24 @@ namespace AL.Services.Local
             if (_saveGameService == null)
                 return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PROFILE-UNAVAILABLE");
 
-            RealmId existing = _saveGameService.CurrentSave == null ? RealmId.None : _saveGameService.CurrentSave.SelectedRealm;
-            if (existing != RealmId.None)
+            if (!(_saveGameService is ILegacyRealmSelectionCandidateStore candidateStore))
             {
-                if (!IsDefinedPlayable(existing) || !Catalog.TryGet(existing, out ignored))
-                    return Result(RealmSelectionStatus.ProfileUnavailable, request.RequestedRealmId, false, false, "AL-REALM-PERSISTED-ID-INVALID");
-                return existing == request.RequestedRealmId
-                    ? Result(RealmSelectionStatus.AlreadyCommittedSameRealm, request.RequestedRealmId, false, true, "AL-REALM-ALREADY-COMMITTED")
-                    : Result(RealmSelectionStatus.RejectedDifferentRealm, request.RequestedRealmId, false, true, "AL-REALM-DIFFERENT-REALM-REJECTED");
+                return Result(
+                    RealmSelectionStatus.ProfileUnavailable,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE");
             }
 
-            if (_saveGameService.CurrentSave == null) _saveGameService.CreateNewSave(request.RequestedRealmId);
-            else
+            RealmSelectionResult result =
+                candidateStore.TryCommitLegacyRealmSelection(request);
+            if (result.Status == RealmSelectionStatus.Committed)
             {
-                _saveGameService.CurrentSave.SelectedRealm = request.RequestedRealmId;
-                _saveGameService.Save();
+                Debug.Log($"Realm committed: {request.RequestedRealmId}");
             }
 
-            bool persisted = _saveGameService.LastSaveStatus == SaveOperationStatus.SavedPrimary &&
-                             _saveGameService.CurrentSave != null &&
-                             _saveGameService.CurrentSave.SelectedRealm == request.RequestedRealmId;
-            if (!persisted)
-            {
-                if (_saveGameService.CurrentSave != null) _saveGameService.CurrentSave.SelectedRealm = RealmId.None;
-                return Result(RealmSelectionStatus.SaveFailedPreviousPreserved, request.RequestedRealmId, false, false, "AL-REALM-SAVE-FAILED");
-            }
-
-            Debug.Log($"Realm committed: {request.RequestedRealmId}");
-            return Result(RealmSelectionStatus.Committed, request.RequestedRealmId, true, true, "AL-REALM-COMMITTED");
+            return result;
         }
 
         private RealmIdentitySnapshot Snapshot(RealmIdentityStatus status, RealmId id, string code)

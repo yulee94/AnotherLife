@@ -208,28 +208,42 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
-        public void SchemaV1CannotSmuggleAProfileIdentityIntoPersistence()
+        public void SchemaV1NvsAdapterRejectsCallerMutatedProfileIdentity()
         {
             LocalSaveGameService service = CreateSaveService(_saveRoot);
             service.CreateNewSave(RealmId.Crownlands);
             string primaryPath = Path.Combine(_saveRoot, "save.json");
             byte[] exactCleanPrimary = File.ReadAllBytes(primaryPath);
+            SaveGameData published = service.CurrentSave;
             service.CurrentSave.ProfileId = ProfileId;
-            LogAssert.Expect(
-                LogType.Error,
-                "AL-SAVE-TEMP-INVALID: Temporary save validation or exact-byte verification failed; existing authority was retained. SAVE_SCHEMA_V1_PROFILE_ID_INVALID");
-            service.Save();
+            string objectBefore = JsonUtility.ToJson(published);
+            var runtime = new Nvs01QuestRuntime(
+                _catalog,
+                null,
+                CreateSaveCommitter(service, _catalog),
+                () => "00000000-0000-0000-0000-000000000137");
+            var command = new Nvs01CommandEnvelope(
+                Nvs01RuntimeContract.ContractVersion,
+                "00000000-0000-0000-0000-000000013701",
+                Nvs01RuntimeContract.QuestId,
+                runtime.Snapshot.StateId,
+                runtime.Snapshot.Revision,
+                "NPC_VALERIUS",
+                "POST_REALM_PROLOGUE",
+                0);
+            var realm = new Nvs01RealmContext(
+                Nvs01RealmContextStatus.CommittedValid,
+                "crownlands");
 
-            Assert.AreNotEqual(
-                SaveOperationStatus.SavedPrimary,
-                service.LastSaveStatus);
-            StringAssert.Contains(
-                "SAVE_SCHEMA_V1_PROFILE_ID_INVALID",
-                service.LastSaveMessage);
-            Assert.AreEqual(
-                ProfileWriteAuthorityStatus.DegradedReadOnly,
-                ((IProfileWriteAuthorityProvider)service)
-                    .GetCurrentAuthority().Status);
+            Nvs01CommandDisposition result = runtime.SelectValerius(
+                command,
+                Nvs01InteractionKind.Offer,
+                realm);
+
+            Assert.False(result.IsCommitted);
+            Assert.NotNull(result.Diagnostic);
+            Assert.AreSame(published, service.CurrentSave);
+            Assert.AreEqual(objectBefore, JsonUtility.ToJson(published));
             CollectionAssert.AreEqual(
                 exactCleanPrimary,
                 File.ReadAllBytes(primaryPath));
@@ -238,14 +252,89 @@ namespace AL.Tests.EditMode.Narrative
             reloaded.Load();
             Assert.NotNull(reloaded.CurrentSave);
             Assert.AreEqual(string.Empty, reloaded.CurrentSave.ProfileId);
-            Assert.False(reloaded.LastLoadDisposition.IsWritable);
+            Assert.True(
+                reloaded.LastLoadDisposition.IsWritable,
+                "Schema-v1 bytes can be semantically writable while profile mutation authority remains MigrationRequired.");
             Assert.AreEqual(
-                ProfileWriteAuthorityStatus.DegradedReadOnly,
+                ProfileWriteAuthorityStatus.MigrationRequired,
                 ((IProfileWriteAuthorityProvider)reloaded)
                     .GetCurrentAuthority().Status);
             CollectionAssert.AreEqual(
                 exactCleanPrimary,
                 File.ReadAllBytes(primaryPath));
+        }
+
+        [TestCase("profile")]
+        [TestCase("realm")]
+        [TestCase("schema")]
+        [TestCase("source")]
+        [TestCase("generation")]
+        public void LegacyNvsAdapterRejectsWrongAuthorityWithoutPublishing(
+            string mismatch)
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            SaveGameData published = service.CurrentSave;
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+
+            switch (mismatch)
+            {
+                case "profile":
+                    published.ProfileId = ProfileId;
+                    break;
+                case "realm":
+                    published.SelectedRealm = RealmId.Stonehold;
+                    break;
+                case "schema":
+                    published.SaveSchemaVersion =
+                        SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
+                    break;
+                case "source":
+                    typeof(LocalSaveGameService).GetField(
+                            "_observedAuthoritySource",
+                            BindingFlags.Instance | BindingFlags.NonPublic)
+                        .SetValue(
+                            service,
+                            ProfileAuthoritySourceGeneration.Backup);
+                    break;
+                case "generation":
+                    File.WriteAllText(primaryPath, "{ external generation drift");
+                    break;
+                default:
+                    Assert.Fail("Unknown mismatch fixture.");
+                    break;
+            }
+
+            string objectBefore = JsonUtility.ToJson(published);
+            byte[] diskBefore = File.ReadAllBytes(primaryPath);
+            var runtime = new Nvs01QuestRuntime(
+                _catalog,
+                null,
+                CreateSaveCommitter(service, _catalog),
+                () => "00000000-0000-0000-0000-000000000137");
+            var command = new Nvs01CommandEnvelope(
+                Nvs01RuntimeContract.ContractVersion,
+                "00000000-0000-0000-0000-000000013700",
+                Nvs01RuntimeContract.QuestId,
+                runtime.Snapshot.StateId,
+                runtime.Snapshot.Revision,
+                "NPC_VALERIUS",
+                "POST_REALM_PROLOGUE",
+                0);
+            var realm = new Nvs01RealmContext(
+                Nvs01RealmContextStatus.CommittedValid,
+                "crownlands");
+
+            Nvs01CommandDisposition result = runtime.SelectValerius(
+                command,
+                Nvs01InteractionKind.Offer,
+                realm);
+
+            Assert.False(result.IsCommitted);
+            Assert.NotNull(result.Diagnostic);
+            Assert.AreSame(published, service.CurrentSave);
+            Assert.AreEqual(objectBefore, JsonUtility.ToJson(published));
+            CollectionAssert.AreEqual(diskBefore, File.ReadAllBytes(primaryPath));
         }
 
         [Test]

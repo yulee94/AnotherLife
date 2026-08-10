@@ -7,6 +7,9 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using AL.Data.Catalogs;
+using AL.Data.Runtime;
+using AL.Narrative.Nvs01;
+using AL.Narrative.Nvs01.Contracts;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -94,9 +97,9 @@ namespace AL.Tests.EditMode
 
                 SetField(currentSave, "CurrentChapterId", "C2_MUST_NOT_PERSIST");
                 LogAssert.Expect(
-                    LogType.Error,
+                    LogType.Log,
                     new System.Text.RegularExpressions.Regex(
-                        "AL-SAVE-READ-ONLY-DISPOSITION"));
+                        "AL-SAVE-MANUAL-WRITE-CONTAINED"));
                 Invoke(service, "Save");
 
                 Assert.AreEqual(
@@ -104,7 +107,7 @@ namespace AL.Tests.EditMode
                     GetProperty(service, "LastSaveStatus").ToString());
                 Assert.That(
                     (string)GetProperty(service, "LastSaveMessage"),
-                    Does.Contain("AL-SAVE-READ-ONLY-DISPOSITION"));
+                    Does.Contain("AL-SAVE-MANUAL-WRITE-CONTAINED"));
                 CollectionAssert.AreEqual(originalBytes, File.ReadAllBytes(primaryPath));
                 Assert.False(File.Exists(Path.Combine(root, "save.tmp.json")));
             }
@@ -147,7 +150,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void CandidateCommitPublishesOnlyTheTwiceVerifiedDetachedSave()
+        public void GenericCandidateCallbackIsContainedBeforeInvocationOrIo()
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -161,27 +164,27 @@ namespace AL.Tests.EditMode
                 Type realmType = GetRuntimeType("AL.Core.RealmId");
                 Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
                 object publishedBefore = GetProperty(service, "CurrentSave");
+                byte[] primaryBefore = File.ReadAllBytes(
+                    Path.Combine(root, "save.json"));
+                bool callbackInvoked = false;
 
                 object result = InvokePreparedCandidate(
                     service,
-                    "C1_CANDIDATE_COMMITTED");
+                    "C1_MUST_NOT_COMMIT",
+                    () => callbackInvoked = true);
 
                 Assert.AreEqual(
-                    "Committed",
+                    "ReadOnly",
                     GetProperty(result, "Outcome").ToString());
                 object publishedAfter = GetProperty(service, "CurrentSave");
-                Assert.AreNotSame(publishedBefore, publishedAfter);
+                Assert.AreSame(publishedBefore, publishedAfter);
                 Assert.AreEqual(
-                    "C1_CANDIDATE_COMMITTED",
+                    "C1",
                     GetField(publishedAfter, "CurrentChapterId"));
-
-                object reloaded = CreateSaveService(root);
-                Invoke(reloaded, "Load");
-                Assert.AreEqual(
-                    "C1_CANDIDATE_COMMITTED",
-                    GetField(
-                        GetProperty(reloaded, "CurrentSave"),
-                        "CurrentChapterId"));
+                Assert.False(callbackInvoked);
+                CollectionAssert.AreEqual(
+                    primaryBefore,
+                    File.ReadAllBytes(Path.Combine(root, "save.json")));
             }
             finally
             {
@@ -193,7 +196,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void CandidateCommitFailurePreservesTheExactPublishedReference()
+        public void GenericCandidateContainmentPrecedesConfiguredIoFailure()
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -209,19 +212,18 @@ namespace AL.Tests.EditMode
             object publishedBefore = GetProperty(service, "CurrentSave");
             string primaryPath = Path.Combine(root, "save.json");
             string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            fileSystem.ClearMutationLedger();
             fileSystem.WriteFailuresBeforeMutation.Add(
                 Path.Combine(root, "save.tmp.json"));
 
-            LogAssert.Expect(
-                LogType.Error,
-                new System.Text.RegularExpressions.Regex(
-                    "^AL-SAVE-TEMP-WRITE-FAILED:"));
+            bool callbackInvoked = false;
             object result = InvokePreparedCandidate(
                 service,
-                "C1_MUST_NOT_PUBLISH");
+                "C1_MUST_NOT_PUBLISH",
+                () => callbackInvoked = true);
 
             Assert.AreEqual(
-                "PreviousPreserved",
+                "ReadOnly",
                 GetProperty(result, "Outcome").ToString());
             Assert.AreSame(
                 publishedBefore,
@@ -230,10 +232,95 @@ namespace AL.Tests.EditMode
                 "C1",
                 GetField(publishedBefore, "CurrentChapterId"));
             Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.False(callbackInvoked);
+            Assert.IsEmpty(fileSystem.MutationLedger);
         }
 
         [Test]
-        public void DuplicateCandidateFreezesWhenCanonicalPrimaryCannotBeVerified()
+        public void GenericCandidateThrowingCallbackCannotEscapeContainment()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            object initial = InvokeRealmSelectionCandidate(
+                service,
+                Guid.NewGuid().ToString("N"),
+                "Crownlands");
+            Assert.AreEqual("Committed", GetProperty(initial, "Status").ToString());
+            object published = GetProperty(service, "CurrentSave");
+            string objectBefore = JsonUtility.ToJson(published);
+            string primaryPath = Path.Combine(root, "save.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            fileSystem.ClearMutationLedger();
+
+            object result = null;
+            Assert.DoesNotThrow(() => result = InvokePreparedCandidate(
+                service,
+                "C1_CALLBACK_MUST_NOT_RUN",
+                () => throw new InvalidOperationException(
+                    "Contained callback must never execute.")));
+
+            Assert.AreEqual("ReadOnly", GetProperty(result, "Outcome").ToString());
+            Assert.AreSame(published, GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(objectBefore, JsonUtility.ToJson(published));
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.IsEmpty(fileSystem.MutationLedger);
+        }
+
+        [Test]
+        public void LegacyCoordinatorRejectsReentrantRealmOperation()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            object nested = null;
+            bool attempted = false;
+            fileSystem.AfterDurableWriteObserver = (path, contents) =>
+            {
+                if (attempted)
+                {
+                    return;
+                }
+
+                attempted = true;
+                nested = InvokeRealmSelectionCandidate(
+                    service,
+                    Guid.NewGuid().ToString("N"),
+                    "Stonehold");
+            };
+
+            object outer = InvokeRealmSelectionCandidate(
+                service,
+                Guid.NewGuid().ToString("N"),
+                "Crownlands");
+
+            Assert.True(attempted);
+            Assert.AreEqual("Committed", GetProperty(outer, "Status").ToString());
+            Assert.NotNull(nested);
+            Assert.AreEqual(
+                "InvalidTransaction",
+                GetProperty(nested, "Status").ToString());
+            Assert.AreEqual(
+                "AL-REALM-TRANSACTION-BUSY",
+                GetProperty(nested, "TechnicalCode"));
+            Assert.AreEqual(
+                "Crownlands",
+                GetField(GetProperty(service, "CurrentSave"), "SelectedRealm")
+                    .ToString());
+        }
+
+        [Test]
+        public void CandidatePreflightFreezesWhenCanonicalPrimaryCannotBeVerified()
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -255,18 +342,29 @@ namespace AL.Tests.EditMode
                 LogAssert.Expect(
                     LogType.Error,
                     new System.Text.RegularExpressions.Regex(
-                        "^AL-SAVE-DUPLICATE-UNVERIFIED:"));
-                object result = InvokeDuplicateCandidate(service);
+                        "^AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT:"));
+                object result = InvokeRealmSelectionCandidate(
+                    service,
+                    "tx_duplicate_missing_primary",
+                    "Crownlands");
 
                 Assert.AreEqual(
-                    "CommitUncertain",
-                    GetProperty(result, "Outcome").ToString());
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(result, "Status").ToString());
                 Assert.AreSame(
                     publishedBefore,
                     GetProperty(service, "CurrentSave"));
                 Assert.AreEqual(
-                    "CommitUncertain",
+                    "SaveFailedPreviousPreserved",
                     GetProperty(service, "LastSaveStatus").ToString());
+                Assert.That(
+                    (string)GetProperty(service, "LastSaveMessage"),
+                    Does.StartWith(
+                        "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT:"));
+                CollectionAssert.Contains(
+                    GetDiagnosticCodes(
+                        GetProperty(service, "LastSaveDisposition")),
+                    "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT");
                 Assert.NotNull(
                     GetProperty(service, "ReadOnlyCandidateSnapshot"));
             }
@@ -298,11 +396,14 @@ namespace AL.Tests.EditMode
                     Enum.Parse(realmType, "Crownlands"));
                 object publishedBefore = GetProperty(service, "CurrentSave");
 
-                object result = InvokeDuplicateCandidate(service);
+                object result = InvokeRealmSelectionCandidate(
+                    service,
+                    "tx_duplicate_verified",
+                    "Crownlands");
 
                 Assert.AreEqual(
-                    "Duplicate",
-                    GetProperty(result, "Outcome").ToString());
+                    "AlreadyCommittedSameRealm",
+                    GetProperty(result, "Status").ToString());
                 Assert.AreSame(
                     publishedBefore,
                     GetProperty(service, "CurrentSave"));
@@ -314,6 +415,132 @@ namespace AL.Tests.EditMode
                     Directory.Delete(root, true);
                 }
             }
+        }
+
+        [Test]
+        public void RealmDuplicateBackupDriftAfterPreflightFreezesWithoutIo()
+        {
+            AssertTypedDuplicateBackupDriftFailsClosed("realm");
+        }
+
+        [Test]
+        public void NvsDuplicateBackupDriftAfterPreflightFreezesWithoutIo()
+        {
+            AssertTypedDuplicateBackupDriftFailsClosed("nvs");
+        }
+
+        [Test]
+        public void ExactRecoveredBackupNvsReplayRemainsDuplicateAndPreservesWitness()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object seed = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            object realmCommit = InvokeRealmSelectionCandidate(
+                seed,
+                Guid.NewGuid().ToString("N"),
+                "Crownlands");
+            Assert.AreEqual(
+                "Committed",
+                GetProperty(realmCommit, "Status").ToString());
+
+            Nvs01VerifiedCatalog catalog = VerifiedNvs01Catalog();
+            var seedRuntime = new Nvs01QuestRuntime(
+                catalog,
+                null,
+                CreateNvs01SaveCommitter(seed, catalog),
+                () => "00000000-0000-0000-0000-000000000001");
+            var command = new Nvs01CommandEnvelope(
+                Nvs01RuntimeContract.ContractVersion,
+                "00000000-0000-0000-0000-000000009001",
+                Nvs01RuntimeContract.QuestId,
+                seedRuntime.Snapshot.StateId,
+                seedRuntime.Snapshot.Revision,
+                "NPC_VALERIUS",
+                "POST_REALM_PROLOGUE",
+                0);
+            var realm = new Nvs01RealmContext(
+                Nvs01RealmContextStatus.CommittedValid,
+                "crownlands");
+            Nvs01CommandDisposition first = seedRuntime.SelectValerius(
+                command,
+                Nvs01InteractionKind.Offer,
+                realm);
+            Assert.True(first.IsCommitted, first.Diagnostic?.Code);
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string witness = fileSystem.ReadAllText(primaryPath);
+            fileSystem.Files[backupPath] = witness;
+            fileSystem.Files.Remove(primaryPath);
+            fileSystem.Files.Remove(tempPath);
+            fileSystem.Files.Remove(previousPath);
+            fileSystem.ClearMutationLedger();
+
+            object recovered = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            Invoke(recovered, "Load");
+            Assert.AreEqual(
+                "RecoveredFromBackup",
+                GetProperty(recovered, "LastLoadStatus").ToString());
+            object publishedBefore = GetProperty(recovered, "CurrentSave");
+            var progress = (Nvs01ProgressData)GetField(
+                publishedBefore,
+                "Nvs01Progress");
+            Assert.True(
+                Nvs01ProgressCodec.TryDecode(
+                    progress,
+                    catalog,
+                    out Nvs01QuestSnapshot durable,
+                    out Nvs01RuntimeDiagnostic decodeDiagnostic),
+                decodeDiagnostic?.Code);
+            INvs01MutationCommitter replayCommitter =
+                CreateNvs01SaveCommitter(recovered, catalog);
+            Nvs01MutationPlan replayPlan =
+                Nvs01MutationPlan.ForExactReplay(durable);
+            int createDirectoriesBefore = fileSystem.CreateDirectoryCount;
+            int tempWritesBefore = fileSystem.GetDurableWriteCount(tempPath);
+            int backupReadsBefore =
+                fileSystem.GetBoundedReadCount(backupPath);
+            fileSystem.ClearMutationLedger();
+
+            bool replayCommitted = replayCommitter.TryCommit(
+                replayPlan,
+                out Nvs01QuestSnapshot replayed,
+                out Nvs01RuntimeDiagnostic replayDiagnostic);
+
+            Assert.True(replayCommitted, replayDiagnostic?.Code);
+            Assert.Null(replayDiagnostic);
+            Assert.True(Nvs01ProgressCodec.Equivalent(durable, replayed));
+            Assert.AreEqual(
+                5,
+                fileSystem.GetBoundedReadCount(backupPath) -
+                backupReadsBefore,
+                "Exact recovered replay must traverse two recovery-witness inventories, the pinned authority baseline, and two duplicate-authority inventories.");
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(recovered, "CurrentSave"));
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                witness,
+                witness,
+                witness,
+                null);
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
+            Assert.AreEqual(
+                tempWritesBefore,
+                fileSystem.GetDurableWriteCount(tempPath));
+            Assert.AreEqual(
+                createDirectoriesBefore,
+                fileSystem.CreateDirectoryCount);
         }
 
         [Test]
@@ -713,7 +940,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void NarrativeCompatibilityFieldsCanMutateAndReloadAfterNormalization()
+        public void NarrativeCompatibilityWritersRemainContainedAcrossReload()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -773,9 +1000,9 @@ namespace AL.Tests.EditMode
                     "AL.Core.Interfaces.ISaveGameService",
                     reloadedService);
 
-                Assert.AreEqual(5.5f, Invoke(reloadedReputation, "GetAffinity", "ADVISOR_VALERIUS"));
-                Assert.AreEqual(12, Invoke(reloadedFaction, "GetReputation", "FACTION_VEIL_WATCH"));
-                Assert.AreEqual(3, Invoke(reloadedPersona, "GetTraitValue", diplomat));
+                Assert.AreEqual(0f, Invoke(reloadedReputation, "GetAffinity", "ADVISOR_VALERIUS"));
+                Assert.AreEqual(0, Invoke(reloadedFaction, "GetReputation", "FACTION_VEIL_WATCH"));
+                Assert.AreEqual(0, Invoke(reloadedPersona, "GetTraitValue", diplomat));
             }
             finally
             {
@@ -826,7 +1053,7 @@ namespace AL.Tests.EditMode
                 object recoveredSave = GetProperty(recoveredService, "CurrentSave");
                 Assert.NotNull(recoveredSave);
                 Assert.Null(GetProperty(recoveredService, "ReadOnlyCandidateSnapshot"));
-                Assert.AreEqual("C1_BACKUP", GetField(recoveredSave, "CurrentChapterId"));
+                Assert.AreEqual("C1", GetField(recoveredSave, "CurrentChapterId"));
                 Assert.True(File.Exists(primaryPath));
                 Assert.True(File.Exists(backupPath));
                 Assert.True(File.Exists(tempPath));
@@ -888,7 +1115,7 @@ namespace AL.Tests.EditMode
                 object recoveredSave = GetProperty(recoveredService, "CurrentSave");
                 Assert.NotNull(recoveredSave);
                 Assert.Null(GetProperty(recoveredService, "ReadOnlyCandidateSnapshot"));
-                Assert.AreEqual("C1_BACKUP_ONLY", GetField(recoveredSave, "CurrentChapterId"));
+                Assert.AreEqual("C1", GetField(recoveredSave, "CurrentChapterId"));
                 Assert.True(File.Exists(primaryPath));
                 Assert.True(File.Exists(backupPath));
                 Assert.True(File.Exists(tempPath));
@@ -989,14 +1216,14 @@ namespace AL.Tests.EditMode
                 object reloadedSave = GetProperty(reloadedService, "CurrentSave");
                 Assert.NotNull(reloadedSave);
                 Assert.Null(GetProperty(reloadedService, "ReadOnlyCandidateSnapshot"));
-                Assert.AreEqual("C1_PRIMARY", GetField(reloadedSave, "CurrentChapterId"));
+                Assert.AreEqual("C1", GetField(reloadedSave, "CurrentChapterId"));
                 object disposition = GetProperty(reloadedService, "LastLoadDisposition");
                 Assert.False((bool)GetProperty(disposition, "IsWritable"));
                 Assert.True((bool)GetProperty(disposition, "IsRuntimeUsable"));
                 LogAssert.Expect(
-                    LogType.Error,
+                    LogType.Log,
                     new System.Text.RegularExpressions.Regex(
-                        "^AL-SAVE-READ-ONLY-DISPOSITION:"));
+                        "^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(reloadedService, "Save");
                 Assert.AreEqual(
                     "SaveFailedPreviousPreserved",
@@ -1048,7 +1275,7 @@ namespace AL.Tests.EditMode
                 Assert.Null(GetProperty(recoveredService, "CurrentSave"));
                 object recoveredSave = GetProperty(recoveredService, "ReadOnlyCandidateSnapshot");
                 Assert.NotNull(recoveredSave);
-                Assert.AreEqual("C1_PREVIOUS_SAFE", GetField(recoveredSave, "CurrentChapterId"));
+                Assert.AreEqual("C1", GetField(recoveredSave, "CurrentChapterId"));
                 Assert.True(File.Exists(primaryPath));
                 Assert.False(File.Exists(backupPath));
                 Assert.True(File.Exists(previousPath));
@@ -1099,7 +1326,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void InvalidPrimaryNeverRotatesIntoBackupDuringSave()
+        public void ManualSaveCannotReplaceInvalidPrimaryOrRotateItIntoBackup()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -1122,12 +1349,20 @@ namespace AL.Tests.EditMode
 
                 currentSave = GetProperty(service, "CurrentSave");
                 SetField(currentSave, "CurrentChapterId", "C1_VALIDATED_CANDIDATE");
+                byte[] invalidPrimary = File.ReadAllBytes(primaryPath);
+                byte[] exactBackup = File.ReadAllBytes(backupPath);
+                LogAssert.Expect(
+                    LogType.Log,
+                    new System.Text.RegularExpressions.Regex(
+                        "^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(service, "Save");
 
-                Assert.AreEqual("SavedPrimary", GetProperty(service, "LastSaveStatus").ToString());
-                Assert.That(File.ReadAllText(backupPath), Does.Not.Contain("corrupt primary"));
-                Assert.That(File.ReadAllText(primaryPath), Does.Contain("C1_VALIDATED_CANDIDATE"));
-                Assert.AreEqual(1, Directory.GetFiles(root, "save.json.corrupt-*").Length);
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(service, "LastSaveStatus").ToString());
+                CollectionAssert.AreEqual(invalidPrimary, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(exactBackup, File.ReadAllBytes(backupPath));
+                Assert.AreEqual(0, Directory.GetFiles(root, "save.json.corrupt-*").Length);
             }
             finally
             {
@@ -1159,7 +1394,10 @@ namespace AL.Tests.EditMode
                 object noRealm = Enum.Parse(realmType, "None");
                 Invoke(service, "CreateNewSave", noRealm);
 
-                Assert.LessOrEqual(Directory.GetFiles(root, "save.json.corrupt-*").Length, 3);
+                Assert.AreEqual(
+                    5,
+                    Directory.GetFiles(root, "save.json.corrupt-*").Length,
+                    "A typed realm bootstrap must preserve unrelated recovery evidence and refuse implicit pruning.");
             }
             finally
             {
@@ -1171,7 +1409,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void DeleteSaveRemovesPrimaryBackupTransientAndQuarantineArtifacts()
+        public void DeleteSaveContainmentPreservesPrimaryBackupTransientAndQuarantineArtifacts()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(root);
@@ -1198,16 +1436,44 @@ namespace AL.Tests.EditMode
                     File.WriteAllText(Path.Combine(root, fileName), "artifact");
                 }
 
+                object published = GetProperty(service, "CurrentSave");
+                string objectBefore = JsonUtility.ToJson(published);
+                string loadStatusBefore =
+                    GetProperty(service, "LastLoadStatus").ToString();
+                string saveStatusBefore =
+                    GetProperty(service, "LastSaveStatus").ToString();
+                var filesBefore = Directory.GetFiles(root)
+                    .OrderBy(path => path, StringComparer.Ordinal)
+                    .ToDictionary(
+                        path => Path.GetFileName(path),
+                        File.ReadAllBytes,
+                        StringComparer.Ordinal);
+
                 Invoke(service, "DeleteSave");
 
-                Assert.False((bool)Invoke(service, "HasSave"));
-                Assert.False(
-                    File.Exists(
-                        Path.Combine(root, "save.recovery.stage5")));
-                Assert.Null(GetProperty(service, "CurrentSave"));
-                Assert.AreEqual("None", GetProperty(service, "LastLoadStatus").ToString());
-                Assert.AreEqual("None", GetProperty(service, "LastSaveStatus").ToString());
-                Assert.IsEmpty(Directory.GetFiles(root, "save*.json*"));
+                Assert.True((bool)Invoke(service, "HasSave"));
+                Assert.AreSame(published, GetProperty(service, "CurrentSave"));
+                Assert.AreEqual(objectBefore, JsonUtility.ToJson(published));
+                Assert.AreEqual(
+                    loadStatusBefore,
+                    GetProperty(service, "LastLoadStatus").ToString());
+                Assert.AreEqual(
+                    saveStatusBefore,
+                    GetProperty(service, "LastSaveStatus").ToString());
+                var filesAfter = Directory.GetFiles(root)
+                    .OrderBy(path => path, StringComparer.Ordinal)
+                    .ToDictionary(
+                        path => Path.GetFileName(path),
+                        File.ReadAllBytes,
+                        StringComparer.Ordinal);
+                CollectionAssert.AreEquivalent(filesBefore.Keys, filesAfter.Keys);
+                foreach (string fileName in filesBefore.Keys)
+                {
+                    CollectionAssert.AreEqual(
+                        filesBefore[fileName],
+                        filesAfter[fileName],
+                        fileName);
+                }
             }
             finally
             {
@@ -1219,7 +1485,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void DeleteSaveDoesNotClaimSuccessWhenAnArtifactSurvives()
+        public void DeleteSaveContainmentPrecedesConfiguredDeletionFailure()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
@@ -1231,14 +1497,21 @@ namespace AL.Tests.EditMode
 
             string backupPath = Path.Combine(root, "save.backup.json");
             fileSystem.DeleteFailures.Add(backupPath);
+            object published = GetProperty(service, "CurrentSave");
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            string saveStatusBefore =
+                GetProperty(service, "LastSaveStatus").ToString();
+            fileSystem.ClearMutationLedger();
 
-            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED: Could not delete save artifact"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED: Local save reset could not remove every profile artifact"));
             Invoke(service, "DeleteSave");
 
-            Assert.NotNull(GetProperty(service, "CurrentSave"));
-            Assert.AreEqual("DeleteFailed", GetProperty(service, "LastSaveStatus").ToString());
+            Assert.AreSame(published, GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(
+                saveStatusBefore,
+                GetProperty(service, "LastSaveStatus").ToString());
             Assert.True(fileSystem.FileExists(backupPath));
+            Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
+            Assert.IsEmpty(fileSystem.MutationLedger);
         }
 
         [TestCase("quarantine")]
@@ -1303,34 +1576,43 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void TempCleanupFailureStopsSaveBeforeActiveFilesChange()
+        public void StaleTempAllowsOnlyOneFailedCleanupAttemptBeforeRejectingTypedCandidate()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
 
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            object noRealm = Enum.Parse(realmType, "None");
+            object noRealm = Enum.Parse(realmType, "Crownlands");
             Invoke(service, "CreateNewSave", noRealm);
-
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_BEFORE_TEMP_FAILURE");
-            Invoke(service, "Save");
 
             string primaryPath = Path.Combine(root, "save.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string primaryBefore = fileSystem.ReadAllText(primaryPath);
             fileSystem.Files[tempPath] = "{ stale temp";
             fileSystem.DeleteFailures.Add(tempPath);
-            SetField(currentSave, "CurrentChapterId", "C1_AFTER_TEMP_FAILURE");
+            fileSystem.ClearMutationLedger();
 
-            LogAssert.Expect(LogType.Warning, new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED: Could not delete save artifact"));
-            LogAssert.Expect(LogType.Error, new System.Text.RegularExpressions.Regex("AL-SAVE-TEMP-CLEANUP-FAILED"));
-            Invoke(service, "Save");
+            LogAssert.Expect(
+                LogType.Error,
+                new System.Text.RegularExpressions.Regex(
+                    "^AL-SAVE-TEMP-CLEANUP-FAILED:"));
+            Nvs01CommandDisposition result =
+                InvokeNvs01OfferCandidate(service);
 
-            Assert.AreEqual("SaveFailedPreviousPreserved", GetProperty(service, "LastSaveStatus").ToString());
+            Assert.False(result.IsCommitted);
             Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
             Assert.AreEqual("{ stale temp", fileSystem.ReadAllText(tempPath));
+            Assert.AreEqual(
+                1,
+                fileSystem.GetMutationAttemptCount("Delete", tempPath, null));
+            Assert.True(
+                fileSystem.MutationLedger.All(
+                    entry => string.Equals(
+                        entry,
+                        $"Delete|BeforeMutation|{tempPath}|<null>",
+                        StringComparison.OrdinalIgnoreCase)),
+                "A failed stale-temp cleanup may be attempted once, but no mutation boundary may complete.");
         }
 
         [Test]
@@ -1407,7 +1689,7 @@ namespace AL.Tests.EditMode
                 "RecoveredFromBackup",
                 GetProperty(service, "LastLoadStatus").ToString());
             Assert.AreEqual(
-                "C1_STAGE5_INVALID_KINDS",
+                "C1",
                 GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
             AssertCanonicalLedger(
                 fileSystem,
@@ -2330,9 +2612,8 @@ namespace AL.Tests.EditMode
                 GetProperty(service, "LastLoadStatus").ToString();
 
             object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_STAGE5_AFTER_SAVE");
             fileSystem.ClearMutationLedger();
-            Invoke(service, "Save");
+            InvokeNvs01OfferCandidate(service);
 
             Assert.AreEqual(
                 "SavedPrimary",
@@ -2357,7 +2638,7 @@ namespace AL.Tests.EditMode
                 "LoadedPrimary",
                 GetProperty(reloaded, "LastLoadStatus").ToString());
             Assert.AreEqual(
-                "C1_STAGE5_AFTER_SAVE",
+                "C1",
                 GetField(GetProperty(reloaded, "CurrentSave"), "CurrentChapterId"));
 
             const string secondInvalidPrimary =
@@ -2412,11 +2693,14 @@ namespace AL.Tests.EditMode
             driftFileSystem.Files[driftQuarantinePath] =
                 "changed-quarantine";
             driftFileSystem.ClearMutationLedger();
-            InvokeAllowingFailureLogs(driftService, "Save");
+            object driftPublished = GetProperty(driftService, "CurrentSave");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(driftService);
             Assert.AreEqual(
                 "SaveFailedPreviousPreserved",
                 GetProperty(driftService, "LastSaveStatus").ToString());
-            Assert.Null(GetProperty(driftService, "CurrentSave"));
+            Assert.AreSame(
+                driftPublished,
+                GetProperty(driftService, "CurrentSave"));
             Assert.AreEqual(0, driftFileSystem.MutationLedger.Count);
             Assert.AreEqual(
                 primaryBeforeDriftCheck,
@@ -2459,7 +2743,8 @@ namespace AL.Tests.EditMode
                 timing,
                 ScriptedFaultException.Io);
 
-            InvokeAllowingFailureLogs(service, "Save");
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.AreEqual(
                 expectSaved,
@@ -2478,7 +2763,9 @@ namespace AL.Tests.EditMode
             {
                 Assert.AreEqual(exactMarker, fileSystem.ReadAllText(markerPath));
                 Assert.False(fileSystem.FileExists(archivePath));
-                Assert.Null(GetProperty(service, "CurrentSave"));
+                Assert.AreSame(
+                    publishedBefore,
+                    GetProperty(service, "CurrentSave"));
             }
         }
 
@@ -2525,12 +2812,15 @@ namespace AL.Tests.EditMode
                 }
             };
 
-            InvokeAllowingFailureLogs(service, "Save");
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.AreNotEqual(
                 "SavedPrimary",
                 GetProperty(service, "LastSaveStatus").ToString());
-            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
             Assert.False(fileSystem.FileExists(markerPath));
             Assert.AreEqual(driftedMarker, fileSystem.ReadAllText(archivePath));
             Assert.AreEqual(
@@ -2568,7 +2858,7 @@ namespace AL.Tests.EditMode
             string markerPath = Path.Combine(root, "save.recovery.stage5");
             string exactMarker = fileSystem.ReadAllText(markerPath);
 
-            Invoke(service, "Save");
+            InvokeNvs01OfferCandidate(service);
 
             Assert.AreEqual(
                 "SavedPrimary",
@@ -2611,7 +2901,7 @@ namespace AL.Tests.EditMode
                 "RecoveredFromBackup",
                 GetProperty(service, "LastLoadStatus").ToString());
             Assert.AreEqual(
-                "C1_STAGE4_RECOVERED",
+                "C1",
                 GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
             Assert.Null(GetProperty(service, "ReadOnlyCandidateSnapshot"));
             AssertCanonicalLedger(
@@ -2844,9 +3134,8 @@ namespace AL.Tests.EditMode
                 "C1_STAGE4_SOURCE_B0");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
-            string changedBackup = backupBytes.Replace(
-                "C1_STAGE4_SOURCE_B0",
-                "C1_STAGE4_SOURCE_CHANGED");
+            string changedBackup =
+                CreateTypedRealmFixtureBytes("Stonehold");
             Assert.AreNotEqual(backupBytes, changedBackup);
             int movesBefore = fileSystem.TotalMoveCount;
             int mutationRead = fileSystem.GetBoundedReadCount(backupPath) + 3;
@@ -2974,9 +3263,8 @@ namespace AL.Tests.EditMode
                 "C1_STAGE4_PRIMARY_RACE_B0");
             string primaryPath = Path.Combine(root, "save.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
-            string foreignPrimary = backupBytes.Replace(
-                "C1_STAGE4_PRIMARY_RACE_B0",
-                "C1_STAGE4_PRIMARY_RACE_FOREIGN");
+            string foreignPrimary =
+                CreateTypedRealmFixtureBytes("Stonehold");
             fileSystem.DurableWriteObserver = (path, contents) =>
             {
                 if (string.Equals(path, primaryPath, StringComparison.OrdinalIgnoreCase))
@@ -3010,9 +3298,8 @@ namespace AL.Tests.EditMode
                 "C1_STAGE4_EXACT_STAGE_B0");
             string primaryPath = Path.Combine(root, "save.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
-            string differentStage = backupBytes.Replace(
-                "C1_STAGE4_EXACT_STAGE_B0",
-                "C1_STAGE4_EXACT_STAGE_OTHER");
+            string differentStage =
+                CreateTypedRealmFixtureBytes("Stonehold");
             fileSystem.AfterDurableWriteObserver = (path, contents) =>
             {
                 if (string.Equals(path, tempPath, StringComparison.OrdinalIgnoreCase))
@@ -3122,9 +3409,8 @@ namespace AL.Tests.EditMode
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
-            string conflictingBytes = backupBytes.Replace(
-                "C1_STAGE4_INSTALL_CONFLICT_B0",
-                "C1_STAGE4_INSTALL_CONFLICT_OTHER");
+            string conflictingBytes =
+                CreateTypedRealmFixtureBytes("Stonehold");
             fileSystem.AfterDurableWriteObserver = (path, contents) =>
             {
                 if (!string.Equals(path, primaryPath, StringComparison.OrdinalIgnoreCase))
@@ -3185,7 +3471,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void RecoveredLoadStatusAndDispositionSurviveSubsequentSave()
+        public void RecoveredLoadStatusAndDispositionSurviveTypedNvsCommit()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
@@ -3197,10 +3483,9 @@ namespace AL.Tests.EditMode
             Invoke(service, "Load");
             object loadDisposition = GetProperty(service, "LastLoadDisposition");
             string loadMessage = (string)GetProperty(service, "LastLoadMessage");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_STAGE4_STATUS_SAVED");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
 
-            Invoke(service, "Save");
+            InvokeNvs01OfferCandidate(service);
 
             Assert.AreEqual("SavedPrimary", GetProperty(service, "LastSaveStatus").ToString());
             Assert.AreEqual(
@@ -3210,9 +3495,7 @@ namespace AL.Tests.EditMode
             Assert.AreSame(loadDisposition, GetProperty(service, "LastLoadDisposition"));
             Assert.False(
                 (bool)GetProperty(loadDisposition, "OfflineProgressApplied"));
-            Assert.That(
-                fileSystem.ReadAllText(primaryPath),
-                Does.Contain("C1_STAGE4_STATUS_SAVED"));
+            Assert.AreNotEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
             Assert.False(fileSystem.FileExists(tempPath));
             Assert.False(fileSystem.FileExists(previousPath));
         }
@@ -3234,9 +3517,8 @@ namespace AL.Tests.EditMode
             string previousPath = Path.Combine(root, "save.previous.json");
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Invoke(service, "Load");
-            string conflictingBytes = backupBytes.Replace(
-                "C1_STAGE4_SAVE_PREFLIGHT_B0",
-                "C1_STAGE4_SAVE_PREFLIGHT_OTHER");
+            string conflictingBytes =
+                CreateTypedRealmFixtureBytes("Stonehold");
             if (driftSource == "temp")
             {
                 fileSystem.Files[tempPath] = conflictingBytes;
@@ -3248,9 +3530,8 @@ namespace AL.Tests.EditMode
 
             fileSystem.ClearMutationLedger();
             int tempWritesBeforeSave = fileSystem.GetDurableWriteCount(tempPath);
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_STAGE4_MUST_NOT_SAVE");
-            InvokeAllowingFailureLogs(service, "Save");
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.AreEqual(
                 "SaveFailedPreviousPreserved",
@@ -3258,7 +3539,9 @@ namespace AL.Tests.EditMode
             Assert.That(
                 (string)GetProperty(service, "LastSaveMessage"),
                 Does.StartWith("AL-SAVE-RECOVERY-WITNESS-CHANGED:"));
-            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
             Assert.NotNull(GetProperty(service, "ReadOnlyCandidateSnapshot"));
             AssertCanonicalLedger(
                 fileSystem,
@@ -3290,10 +3573,9 @@ namespace AL.Tests.EditMode
             string tempPath = Path.Combine(root, "save.tmp.json");
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Invoke(service, "Load");
-            string conflictingTemp = backupBytes.Replace(
-                "C1_STAGE4_SAVE_BOUNDARY_B0",
-                "C1_STAGE4_SAVE_BOUNDARY_OTHER");
-            int boundaryRead = fileSystem.GetBoundedReadCount(primaryPath) + 4;
+            string conflictingTemp =
+                CreateTypedRealmFixtureBytes("Stonehold");
+            int boundaryRead = fileSystem.GetBoundedReadCount(primaryPath) + 8;
             fileSystem.BoundedReadObserver = (path, count) =>
             {
                 if (count == boundaryRead &&
@@ -3303,10 +3585,9 @@ namespace AL.Tests.EditMode
                 }
             };
             fileSystem.ClearMutationLedger();
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_STAGE4_BOUNDARY_MUST_NOT_SAVE");
+            object publishedBefore = GetProperty(service, "CurrentSave");
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.AreEqual(
                 "SaveFailedPreviousPreserved",
@@ -3314,7 +3595,9 @@ namespace AL.Tests.EditMode
             Assert.That(
                 (string)GetProperty(service, "LastSaveMessage"),
                 Does.StartWith("AL-SAVE-RECOVERY-WITNESS-CONSUME-BLOCKED:"));
-            Assert.Null(GetProperty(service, "CurrentSave"));
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
             AssertCanonicalLedger(
                 fileSystem,
                 root,
@@ -3332,7 +3615,7 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
@@ -3582,31 +3865,201 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void MissingBackupIsRecreatedFromExactPriorPrimary()
+        public void MissingBackupBlocksTypedCandidateWithoutImplicitRepair()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_PRIOR_PRIMARY");
-            Invoke(service, "Save");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            string publishedJsonBefore = JsonUtility.ToJson(publishedBefore);
             fileSystem.Files.Remove(backupPath);
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            int tempWritesBefore = fileSystem.GetDurableWriteCount(tempPath);
+            int createDirectoriesBefore = fileSystem.CreateDirectoryCount;
+            fileSystem.ClearMutationLedger();
 
-            currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_NEW_PRIMARY");
-            Invoke(service, "Save");
+            Nvs01CommandDisposition disposition =
+                InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
-            Assert.AreEqual("SavedPrimary", GetProperty(service, "LastSaveStatus").ToString());
-            Assert.AreEqual(priorPrimary, fileSystem.ReadAllText(backupPath));
-            Assert.That(fileSystem.ReadAllText(primaryPath), Does.Contain("C1_NEW_PRIMARY"));
-            Assert.False(fileSystem.FileExists(Path.Combine(root, "save.tmp.json")));
+            Assert.False(disposition.IsCommitted);
+            Assert.AreEqual(
+                "SaveFailedPreviousPreserved",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith(
+                    "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT:"));
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(
+                publishedJsonBefore,
+                JsonUtility.ToJson(publishedBefore));
+            Assert.NotNull(
+                GetProperty(service, "ReadOnlyCandidateSnapshot"));
+            Assert.AreEqual(priorPrimary, fileSystem.ReadAllText(primaryPath));
+            Assert.False(fileSystem.FileExists(backupPath));
+            Assert.False(fileSystem.FileExists(tempPath));
             Assert.False(fileSystem.FileExists(Path.Combine(root, "save.previous.json")));
+            Assert.AreEqual(
+                tempWritesBefore,
+                fileSystem.GetDurableWriteCount(tempPath));
+            Assert.AreEqual(
+                createDirectoriesBefore,
+                fileSystem.CreateDirectoryCount);
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
+        }
+
+        [TestCase("nvs", "primary", "different", 4)]
+        [TestCase("nvs", "backup", "missing", 2)]
+        [TestCase("nvs", "backup", "different", 3)]
+        [TestCase("realm", "primary", "different", 2)]
+        [TestCase("realm", "backup", "missing", 2)]
+        [TestCase("realm", "backup", "different", 3)]
+        public void TypedLegacyCandidatePinsExactPrimaryAndBackupAcrossPreparation(
+            string route,
+            string target,
+            string drift,
+            int targetReadOffset)
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Invoke(
+                service,
+                "CreateNewSave",
+                Enum.Parse(
+                    realmType,
+                    route == "realm" ? "None" : "Crownlands"));
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            string backupBefore = fileSystem.ReadAllText(backupPath);
+            string validDifferent = CreateTypedRealmFixtureBytes("Stonehold");
+            Assert.AreNotEqual(primaryBefore, validDifferent);
+            Assert.AreNotEqual(backupBefore, validDifferent);
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            string publishedJsonBefore = JsonUtility.ToJson(publishedBefore);
+            string targetPath = target == "primary"
+                ? primaryPath
+                : backupPath;
+            int hostileRead =
+                fileSystem.GetBoundedReadCount(targetPath) + targetReadOffset;
+            bool hostileObserverRan = false;
+            fileSystem.BoundedReadObserver = (path, count) =>
+            {
+                if (count != hostileRead ||
+                    !string.Equals(
+                        path,
+                        targetPath,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return;
+                }
+
+                hostileObserverRan = true;
+                if (drift == "missing")
+                {
+                    fileSystem.Files.Remove(path);
+                }
+                else
+                {
+                    fileSystem.Files[path] = validDifferent;
+                }
+            };
+            int tempWritesBefore = fileSystem.GetDurableWriteCount(tempPath);
+            int primaryWritesBefore =
+                fileSystem.GetDurableWriteCount(primaryPath);
+            int createDirectoriesBefore = fileSystem.CreateDirectoryCount;
+            fileSystem.ClearMutationLedger();
+
+            if (route == "realm")
+            {
+                object result = InvokeRealmSelectionCandidateAllowingFailureLogs(
+                    service,
+                    Guid.NewGuid().ToString("N"),
+                    "Crownlands");
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(result, "Status").ToString());
+            }
+            else
+            {
+                Nvs01CommandDisposition result =
+                    InvokeNvs01OfferCandidateAllowingFailureLogs(service);
+                Assert.False(result.IsCommitted);
+            }
+
+            fileSystem.BoundedReadObserver = null;
+            Assert.True(
+                hostileObserverRan,
+                "The hostile replacement must occur in the declared callback-to-persistence window.");
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith(
+                    target == "primary"
+                        ? "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT:"
+                        : "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT:"));
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(
+                publishedJsonBefore,
+                JsonUtility.ToJson(publishedBefore));
+            object readOnlySnapshot =
+                GetProperty(service, "ReadOnlyCandidateSnapshot");
+            Assert.NotNull(readOnlySnapshot);
+            Assert.AreEqual(
+                publishedJsonBefore,
+                JsonUtility.ToJson(readOnlySnapshot));
+            AssertSaveDisposition(
+                service,
+                "CommitUncertain",
+                false);
+            Assert.AreEqual(
+                target == "primary" ? validDifferent : primaryBefore,
+                fileSystem.ReadAllText(primaryPath));
+            if (target == "backup" && drift == "missing")
+            {
+                Assert.False(fileSystem.FileExists(backupPath));
+            }
+            else
+            {
+                Assert.AreEqual(
+                    target == "backup" ? validDifferent : backupBefore,
+                    fileSystem.ReadAllText(backupPath));
+            }
+
+            Assert.False(fileSystem.FileExists(tempPath));
+            Assert.False(fileSystem.FileExists(previousPath));
+            Assert.AreEqual(
+                tempWritesBefore,
+                fileSystem.GetDurableWriteCount(tempPath));
+            Assert.AreEqual(
+                primaryWritesBefore,
+                fileSystem.GetDurableWriteCount(primaryPath));
+            Assert.AreEqual(
+                createDirectoriesBefore,
+                fileSystem.CreateDirectoryCount);
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
         }
 
         [Test]
@@ -3616,7 +4069,7 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
@@ -3624,8 +4077,6 @@ namespace AL.Tests.EditMode
             string previousPath = Path.Combine(root, "save.previous.json");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
             string priorBackup = fileSystem.ReadAllText(backupPath);
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_CLEANUP_FAILURE");
             fileSystem.ReplaceObserver = (sourcePath, destinationPath, rollbackPath) =>
             {
                 if (string.Equals(destinationPath, backupPath, StringComparison.OrdinalIgnoreCase))
@@ -3640,13 +4091,13 @@ namespace AL.Tests.EditMode
             LogAssert.Expect(
                 LogType.Error,
                 new System.Text.RegularExpressions.Regex("^AL-SAVE-BACKUP-CLEANUP-FAILED:"));
-            Invoke(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.AreEqual(
                 "CommitUncertain",
                 GetProperty(service, "LastSaveStatus").ToString());
             string candidatePrimary = fileSystem.ReadAllText(primaryPath);
-            Assert.That(candidatePrimary, Does.Contain("C1_CLEANUP_FAILURE"));
+            Assert.AreNotEqual(priorPrimary, candidatePrimary);
             AssertCanonicalLedger(
                 fileSystem,
                 root,
@@ -3670,15 +4121,13 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
             string backupBefore = fileSystem.ReadAllText(backupPath);
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_NEW_VALIDATED");
             fileSystem.ReplaceObserver = (sourcePath, destinationPath, rollbackPath) =>
             {
                 if (string.Equals(sourcePath, tempPath, StringComparison.OrdinalIgnoreCase) &&
@@ -3691,13 +4140,13 @@ namespace AL.Tests.EditMode
             LogAssert.Expect(
                 LogType.Error,
                 new System.Text.RegularExpressions.Regex("^AL-SAVE-BACKUP-ROTATION-EVIDENCE-MISSING:"));
-            Invoke(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.AreEqual(
                 "CommitUncertain",
                 GetProperty(service, "LastSaveStatus").ToString());
             Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
-            Assert.That(fileSystem.ReadAllText(primaryPath), Does.Contain("C1_NEW_VALIDATED"));
+            Assert.That(fileSystem.ReadAllText(primaryPath), Does.Contain("\"Nvs01Progress\""));
             Assert.False(fileSystem.FileExists(tempPath));
             Assert.That(fileSystem.ReadAllText(previousPath), Does.Contain("changed after validation"));
             AssertSaveDisposition(
@@ -3710,38 +4159,50 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void StalePreviousCleanupFailureStopsInstallWithoutDeletingPrimary()
+        public void StalePreviousAllowsOnlyOneFailedCleanupAttemptBeforeRejectingTypedCandidate()
         {
             string root = Path.Combine(Path.GetTempPath(), "AnotherLife-SaveTests", Guid.NewGuid().ToString("N"));
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
             string primaryBefore = fileSystem.ReadAllText(primaryPath);
             string backupBefore = fileSystem.ReadAllText(backupPath);
             fileSystem.Files[previousPath] = "previous-sentinel";
             fileSystem.DeleteFailures.Add(previousPath);
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_NEW_CANDIDATE");
-
-            LogAssert.Expect(
-                LogType.Warning,
-                new System.Text.RegularExpressions.Regex("AL-SAVE-DELETE-FAILED:.*save.previous.json"));
+            int tempWritesBefore = fileSystem.GetDurableWriteCount(tempPath);
+            fileSystem.ClearMutationLedger();
             LogAssert.Expect(
                 LogType.Error,
-                new System.Text.RegularExpressions.Regex("^AL-SAVE-PREVIOUS-CLEANUP-FAILED:"));
-            Invoke(service, "Save");
+                new System.Text.RegularExpressions.Regex(
+                    "^AL-SAVE-PREVIOUS-CLEANUP-FAILED:"));
+            Nvs01CommandDisposition result =
+                InvokeNvs01OfferCandidate(service);
 
-            Assert.AreEqual(
-                "SaveFailedPreviousPreserved",
-                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.False(result.IsCommitted);
             Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
             Assert.AreEqual(backupBefore, fileSystem.ReadAllText(backupPath));
             Assert.AreEqual("previous-sentinel", fileSystem.ReadAllText(previousPath));
+            Assert.False(fileSystem.FileExists(tempPath));
+            Assert.AreEqual(
+                tempWritesBefore,
+                fileSystem.GetDurableWriteCount(tempPath));
+            Assert.AreEqual(1, fileSystem.MutationLedger.Count);
+            Assert.AreEqual(
+                1,
+                fileSystem.GetMutationAttemptCount("Delete", previousPath, null));
+            Assert.True(
+                fileSystem.MutationLedger.All(
+                    entry => string.Equals(
+                        entry,
+                        $"Delete|BeforeMutation|{previousPath}|<null>",
+                        StringComparison.OrdinalIgnoreCase)),
+                "Stale previous evidence must fail before candidate staging, with no completed mutation boundary.");
         }
 
         [Test]
@@ -3795,20 +4256,15 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_PRIOR_ATOMIC");
-            Invoke(service, "Save");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
             string priorBackup = fileSystem.ReadAllText(backupPath);
 
-            currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_ATOMIC_AFTER_MUTATION");
             string candidatePrimary = null;
             fileSystem.MutationObserver = (operation, sourcePath, destinationPath, timing) =>
             {
@@ -3834,7 +4290,7 @@ namespace AL.Tests.EditMode
                 ScriptedFaultException.Io);
             fileSystem.ClearMutationLedger();
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
@@ -3852,7 +4308,7 @@ namespace AL.Tests.EditMode
                 "CommitUncertain",
                 true,
                 candidatePrimaryVerified: true,
-                requiredBackupVerified: false,
+                requiredBackupVerified: true,
                 cleanupVerified: false);
             Assert.AreEqual(
                 1,
@@ -3869,7 +4325,7 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
@@ -3877,8 +4333,6 @@ namespace AL.Tests.EditMode
             string previousPath = Path.Combine(root, "save.previous.json");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
             string priorBackup = fileSystem.ReadAllText(backupPath);
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_MOVE_FALLBACK_WINDOW");
             string candidatePrimary = null;
             fileSystem.MutationObserver = (operation, sourcePath, destinationPath, timing) =>
             {
@@ -3910,7 +4364,7 @@ namespace AL.Tests.EditMode
                 ScriptedFaultException.Io);
             fileSystem.ClearMutationLedger();
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
@@ -3947,7 +4401,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void FirstGenerationMoveAfterMutationFreezesRepeatedSaveAsCommitUncertain()
+        public void FirstGenerationMoveAfterMutationPublishesTwiceVerifiedCompleteTarget()
         {
             string root = Path.Combine(
                 Path.GetTempPath(),
@@ -3981,17 +4435,118 @@ namespace AL.Tests.EditMode
             InvokeAllowingFailureLogs(
                 service,
                 "CreateNewSave",
-                Enum.Parse(realmType, "None"));
+                Enum.Parse(realmType, "Crownlands"));
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
-                "CommitUncertain",
+                "SavedPrimary",
                 GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith("AL-SAVE-COMMIT-RECONCILED:"));
             AssertCanonicalLedger(
                 fileSystem,
                 root,
                 candidatePrimary,
+                candidatePrimary,
                 null,
+                null);
+            AssertSaveDisposition(
+                service,
+                "SavedPrimary",
+                true,
+                candidatePrimaryVerified: true,
+                requiredBackupVerified: true,
+                cleanupVerified: true);
+            Assert.NotNull(
+                GetProperty(service, "CurrentSave"),
+                "A twice-verified complete first generation is canonical runtime authority despite the operation throwing after mutation.");
+        }
+
+        [Test]
+        public void FirstGenerationDriftBetweenReconciliationInventoriesRemainsUnpublished()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string validDifferentPrimary =
+                CreateTypedRealmFixtureBytes("Stonehold");
+            string candidatePrimary = null;
+            int secondInventoryPrimaryRead = -1;
+            fileSystem.MutationObserver =
+                (operation, sourcePath, destinationPath, timing) =>
+                {
+                    if (operation != "Move" ||
+                        !string.Equals(
+                            sourcePath,
+                            tempPath,
+                            StringComparison.OrdinalIgnoreCase) ||
+                        !string.Equals(
+                            destinationPath,
+                            primaryPath,
+                            StringComparison.OrdinalIgnoreCase))
+                    {
+                        return;
+                    }
+
+                    if (timing == ScriptedFaultTiming.BeforeMutation)
+                    {
+                        candidatePrimary = fileSystem.ReadAllText(tempPath);
+                    }
+                    else if (timing == ScriptedFaultTiming.AfterMutation)
+                    {
+                        secondInventoryPrimaryRead =
+                            fileSystem.GetBoundedReadCount(primaryPath) + 2;
+                        fileSystem.BoundedReadObserver = (path, count) =>
+                        {
+                            if (count == secondInventoryPrimaryRead &&
+                                string.Equals(
+                                    path,
+                                    primaryPath,
+                                    StringComparison.OrdinalIgnoreCase))
+                            {
+                                fileSystem.Files[primaryPath] =
+                                    validDifferentPrimary;
+                            }
+                        };
+                    }
+                };
+            fileSystem.AddMutationFault(
+                "Move",
+                tempPath,
+                primaryPath,
+                ScriptedFaultTiming.AfterMutation,
+                ScriptedFaultException.Io);
+
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            InvokeAllowingFailureLogs(
+                service,
+                "CreateNewSave",
+                Enum.Parse(realmType, "Crownlands"));
+
+            Assert.NotNull(candidatePrimary);
+            Assert.That(secondInventoryPrimaryRead, Is.GreaterThan(0));
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith("AL-SAVE-COMMIT-REVERIFY-FAILED:"));
+            Assert.Null(GetProperty(service, "CurrentSave"));
+            AssertCanonicalLedger(
+                fileSystem,
+                root,
+                validDifferentPrimary,
+                candidatePrimary,
                 null,
                 null);
             AssertSaveDisposition(
@@ -3999,36 +4554,8 @@ namespace AL.Tests.EditMode
                 "CommitUncertain",
                 true,
                 candidatePrimaryVerified: true,
-                requiredBackupVerified: false);
-            Assert.Null(
-                GetProperty(service, "CurrentSave"),
-                "A first-generation uncertain candidate must not become public runtime authority.");
-
-            int mutationCountAfterUncertainty = fileSystem.MutationLedger.Count;
-            object firstDisposition = GetProperty(service, "LastSaveDisposition");
-            IReadOnlyList<string> firstDiagnosticCodes =
-                GetDiagnosticCodes(firstDisposition);
-
-            InvokeAllowingFailureLogs(service, "Save");
-
-            Assert.AreEqual(
-                mutationCountAfterUncertainty,
-                fileSystem.MutationLedger.Count,
-                "Commit uncertainty must freeze repeated persistence attempts.");
-            Assert.AreEqual(
-                "CommitUncertain",
-                GetProperty(service, "LastSaveStatus").ToString());
-            CollectionAssert.AreEqual(
-                firstDiagnosticCodes,
-                GetDiagnosticCodes(
-                    GetProperty(service, "LastSaveDisposition")));
-            AssertCanonicalLedger(
-                fileSystem,
-                root,
-                candidatePrimary,
-                null,
-                null,
-                null);
+                requiredBackupVerified: true,
+                cleanupVerified: true);
         }
 
         [Test]
@@ -4041,19 +4568,14 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_SECOND_VERIFY_P0");
-            Invoke(service, "Save");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
 
-            currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_SECOND_VERIFY_N");
             string candidatePrimary = null;
             int previousDeleteCompletions = 0;
             fileSystem.MutationObserver =
@@ -4072,7 +4594,7 @@ namespace AL.Tests.EditMode
                         string.Equals(sourcePath, previousPath, StringComparison.OrdinalIgnoreCase))
                     {
                         previousDeleteCompletions++;
-                        if (previousDeleteCompletions == 3)
+                        if (previousDeleteCompletions == 2)
                         {
                             fileSystem.AddReadFault(
                                 primaryPath,
@@ -4082,7 +4604,7 @@ namespace AL.Tests.EditMode
                     }
                 };
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
@@ -4109,7 +4631,7 @@ namespace AL.Tests.EditMode
                 requiredBackupVerified: true,
                 cleanupVerified: true);
             Assert.AreEqual(
-                "C1_SECOND_VERIFY_P0",
+                "C1",
                 GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
         }
 
@@ -4123,20 +4645,15 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_BACKUP_REPLACE_P0");
-            Invoke(service, "Save");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
             string priorBackup = fileSystem.ReadAllText(backupPath);
 
-            currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_BACKUP_REPLACE_N");
             string candidatePrimary = null;
             fileSystem.MutationObserver =
                 (operation, sourcePath, destinationPath, timing) =>
@@ -4157,7 +4674,7 @@ namespace AL.Tests.EditMode
                 ScriptedFaultException.NotSupported);
             fileSystem.ClearMutationLedger();
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
@@ -4187,7 +4704,7 @@ namespace AL.Tests.EditMode
                     backupPath,
                     previousPath));
             Assert.AreEqual(
-                "C1_BACKUP_REPLACE_P0",
+                "C1",
                 GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
         }
 
@@ -4201,20 +4718,17 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_FINAL_EXACT_P0");
-            Invoke(service, "Save");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
             string priorBackup = fileSystem.ReadAllText(backupPath);
+            string validDifferentBackup =
+                CreateTypedRealmFixtureBytes("Stonehold");
 
-            currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_FINAL_EXACT_N");
             string candidatePrimary = null;
             fileSystem.MutationObserver =
                 (operation, sourcePath, destinationPath, timing) =>
@@ -4242,13 +4756,14 @@ namespace AL.Tests.EditMode
                             if (count == finalBackupRead &&
                                 string.Equals(path, backupPath, StringComparison.OrdinalIgnoreCase))
                             {
-                                fileSystem.Files[backupPath] = priorBackup;
+                                fileSystem.Files[backupPath] =
+                                    validDifferentBackup;
                             }
                         };
                     }
                 };
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
@@ -4261,7 +4776,7 @@ namespace AL.Tests.EditMode
                 fileSystem,
                 root,
                 candidatePrimary,
-                priorBackup,
+                validDifferentBackup,
                 null,
                 priorBackup);
             AssertSaveDisposition(
@@ -4272,7 +4787,7 @@ namespace AL.Tests.EditMode
                 requiredBackupVerified: false,
                 cleanupVerified: false);
             Assert.AreEqual(
-                "C1_FINAL_EXACT_P0",
+                "C1",
                 GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
         }
 
@@ -4286,20 +4801,17 @@ namespace AL.Tests.EditMode
             var fileSystem = new ScriptedSaveFileOperations();
             object service = CreateSaveService(root, CreateFileOperationsProxy(fileSystem));
             Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "None"));
+            Invoke(service, "CreateNewSave", Enum.Parse(realmType, "Crownlands"));
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
             string tempPath = Path.Combine(root, "save.tmp.json");
             string previousPath = Path.Combine(root, "save.previous.json");
-            object currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_EXACT_STAGE_P0");
-            Invoke(service, "Save");
             string priorPrimary = fileSystem.ReadAllText(primaryPath);
             string priorBackup = fileSystem.ReadAllText(backupPath);
+            string validDifferentBackup =
+                CreateTypedRealmFixtureBytes("Stonehold");
 
-            currentSave = GetProperty(service, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", "C1_EXACT_STAGE_N");
             string candidatePrimary = null;
             fileSystem.MutationObserver =
                 (operation, sourcePath, destinationPath, timing) =>
@@ -4317,11 +4829,11 @@ namespace AL.Tests.EditMode
                 if (string.Equals(sourcePath, previousPath, StringComparison.OrdinalIgnoreCase) &&
                     string.Equals(destinationPath, tempPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    fileSystem.Files[tempPath] = priorBackup;
+                    fileSystem.Files[tempPath] = validDifferentBackup;
                 }
             };
 
-            InvokeAllowingFailureLogs(service, "Save");
+            InvokeNvs01OfferCandidateAllowingFailureLogs(service);
 
             Assert.NotNull(candidatePrimary);
             Assert.AreEqual(
@@ -4332,17 +4844,17 @@ namespace AL.Tests.EditMode
                 root,
                 candidatePrimary,
                 priorBackup,
-                priorBackup,
+                validDifferentBackup,
                 priorPrimary);
             AssertSaveDisposition(
                 service,
                 "CommitUncertain",
                 true,
                 candidatePrimaryVerified: true,
-                requiredBackupVerified: false,
+                requiredBackupVerified: true,
                 cleanupVerified: false);
             Assert.AreEqual(
-                "C1_EXACT_STAGE_P0",
+                "C1",
                 GetField(GetProperty(service, "CurrentSave"), "CurrentChapterId"));
         }
 
@@ -4490,7 +5002,8 @@ namespace AL.Tests.EditMode
 
         private static object InvokePreparedCandidate(
             object service,
-            string chapterId)
+            string chapterId,
+            Action callbackObserved = null)
         {
             Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
             Type preparationType = GetRuntimeType(
@@ -4505,13 +5018,20 @@ namespace AL.Tests.EditMode
                 "Prepared",
                 BindingFlags.Static | BindingFlags.NonPublic);
             Assert.NotNull(prepared);
+            var expressions = new List<Expression>();
+            if (callbackObserved != null)
+            {
+                expressions.Add(Expression.Invoke(
+                    Expression.Constant(callbackObserved)));
+            }
+
+            expressions.Add(Expression.Assign(
+                Expression.Field(candidate, "CurrentChapterId"),
+                Expression.Constant(chapterId)));
+            expressions.Add(Expression.Call(prepared));
             Delegate callback = Expression.Lambda(
                     callbackType,
-                    Expression.Block(
-                        Expression.Assign(
-                            Expression.Field(candidate, "CurrentChapterId"),
-                            Expression.Constant(chapterId)),
-                        Expression.Call(prepared)),
+                    Expression.Block(expressions),
                     candidate)
                 .Compile();
 
@@ -4520,6 +5040,280 @@ namespace AL.Tests.EditMode
             MethodInfo commit = storeType.GetMethod("TryCommitCandidate");
             Assert.NotNull(commit);
             return commit.Invoke(service, new object[] { callback });
+        }
+
+        private static object InvokeRealmSelectionCandidate(
+            object service,
+            string transactionId,
+            string realmName)
+        {
+            Type realmType = GetRuntimeType("AL.Core.RealmId");
+            Type requestType = GetRuntimeType(
+                "AL.RealmSelection.RealmSelectionRequest");
+            object request = Activator.CreateInstance(
+                requestType,
+                transactionId,
+                Enum.Parse(realmType, realmName));
+            Type storeType = GetRuntimeType(
+                "AL.Services.Local.ILegacyRealmSelectionCandidateStore");
+            MethodInfo commit = storeType.GetMethod(
+                "TryCommitLegacyRealmSelection");
+            Assert.NotNull(commit);
+            return commit.Invoke(service, new[] { request });
+        }
+
+        private static object InvokeRealmSelectionCandidateAllowingFailureLogs(
+            object service,
+            string transactionId,
+            string realmName)
+        {
+            bool priorIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                return InvokeRealmSelectionCandidate(
+                    service,
+                    transactionId,
+                    realmName);
+            }
+            finally
+            {
+                LogAssert.ignoreFailingMessages = priorIgnore;
+            }
+        }
+
+        private static void AssertTypedDuplicateBackupDriftFailsClosed(
+            string route)
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            object realmCommit = InvokeRealmSelectionCandidate(
+                service,
+                Guid.NewGuid().ToString("N"),
+                "Crownlands");
+            Assert.AreEqual(
+                "Committed",
+                GetProperty(realmCommit, "Status").ToString());
+            INvs01MutationCommitter nvsReplayCommitter = null;
+            Nvs01MutationPlan nvsReplayPlan = null;
+            if (route == "nvs")
+            {
+                Nvs01CommandDisposition first =
+                    InvokeNvs01OfferCandidate(service);
+                Assert.True(first.IsCommitted, first.Diagnostic?.Code);
+
+                Nvs01VerifiedCatalog catalog = VerifiedNvs01Catalog();
+                var progress = (Nvs01ProgressData)GetField(
+                    GetProperty(service, "CurrentSave"),
+                    "Nvs01Progress");
+                Assert.True(
+                    Nvs01ProgressCodec.TryDecode(
+                        progress,
+                        catalog,
+                        out Nvs01QuestSnapshot durable,
+                        out Nvs01RuntimeDiagnostic decodeDiagnostic),
+                    decodeDiagnostic?.Code);
+                nvsReplayCommitter =
+                    CreateNvs01SaveCommitter(service, catalog);
+                nvsReplayPlan =
+                    Nvs01MutationPlan.ForExactReplay(durable);
+            }
+
+            string primaryPath = Path.Combine(root, "save.json");
+            string backupPath = Path.Combine(root, "save.backup.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            string primaryBefore = fileSystem.ReadAllText(primaryPath);
+            string validDifferentBackup =
+                CreateTypedRealmFixtureBytes("Stonehold");
+            Assert.AreNotEqual(
+                fileSystem.ReadAllText(backupPath),
+                validDifferentBackup);
+            int hostileBackupRead =
+                fileSystem.GetBoundedReadCount(backupPath) + 2;
+            bool hostileObserverRan = false;
+            fileSystem.BoundedReadObserver = (path, count) =>
+            {
+                if (count == hostileBackupRead &&
+                    string.Equals(
+                        path,
+                        backupPath,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    hostileObserverRan = true;
+                    fileSystem.Files[backupPath] = validDifferentBackup;
+                }
+            };
+            object publishedBefore = GetProperty(service, "CurrentSave");
+            string publishedJsonBefore = JsonUtility.ToJson(publishedBefore);
+            int createDirectoriesBefore = fileSystem.CreateDirectoryCount;
+            int tempWritesBefore = fileSystem.GetDurableWriteCount(tempPath);
+            fileSystem.ClearMutationLedger();
+
+            if (route == "realm")
+            {
+                object result = InvokeRealmSelectionCandidateAllowingFailureLogs(
+                    service,
+                    Guid.NewGuid().ToString("N"),
+                    "Crownlands");
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(result, "Status").ToString());
+            }
+            else
+            {
+                Assert.NotNull(nvsReplayCommitter);
+                Assert.NotNull(nvsReplayPlan);
+                LogAssert.Expect(
+                    LogType.Error,
+                    new System.Text.RegularExpressions.Regex(
+                        "^AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT:"));
+                bool committed = nvsReplayCommitter.TryCommit(
+                    nvsReplayPlan,
+                    out _,
+                    out Nvs01RuntimeDiagnostic diagnostic);
+                Assert.False(committed);
+                Assert.NotNull(diagnostic);
+                Assert.AreEqual(
+                    Nvs01CatalogContract.DiagnosticCodePrefix +
+                    "COMMIT-UNCERTAIN",
+                    diagnostic.Code);
+            }
+
+            fileSystem.BoundedReadObserver = null;
+            Assert.True(hostileObserverRan);
+            Assert.AreEqual(
+                "CommitUncertain",
+                GetProperty(service, "LastSaveStatus").ToString());
+            Assert.That(
+                (string)GetProperty(service, "LastSaveMessage"),
+                Does.StartWith(
+                    "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT:"));
+            Assert.AreSame(
+                publishedBefore,
+                GetProperty(service, "CurrentSave"));
+            Assert.AreEqual(
+                publishedJsonBefore,
+                JsonUtility.ToJson(publishedBefore));
+            Assert.NotNull(
+                GetProperty(service, "ReadOnlyCandidateSnapshot"));
+            Assert.AreEqual(primaryBefore, fileSystem.ReadAllText(primaryPath));
+            Assert.AreEqual(
+                validDifferentBackup,
+                fileSystem.ReadAllText(backupPath));
+            Assert.False(fileSystem.FileExists(tempPath));
+            Assert.False(fileSystem.FileExists(previousPath));
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
+            Assert.AreEqual(
+                tempWritesBefore,
+                fileSystem.GetDurableWriteCount(tempPath));
+            Assert.AreEqual(
+                createDirectoriesBefore,
+                fileSystem.CreateDirectoryCount);
+        }
+
+        private static INvs01MutationCommitter CreateNvs01SaveCommitter(
+            object service,
+            Nvs01VerifiedCatalog catalog)
+        {
+            Assembly runtimeAssembly = typeof(Nvs01QuestRuntime).Assembly;
+            Type committerType = runtimeAssembly.GetType(
+                "AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter",
+                throwOnError: true);
+            Type storeType = runtimeAssembly.GetType(
+                "AL.Services.Local.ISaveGameCandidateStore",
+                throwOnError: true);
+            ConstructorInfo constructor = committerType.GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                binder: null,
+                types: new[] { storeType, typeof(Nvs01VerifiedCatalog) },
+                modifiers: null);
+            Assert.NotNull(constructor);
+            return (INvs01MutationCommitter)constructor.Invoke(
+                new[] { service, catalog });
+        }
+
+        private static Nvs01CommandDisposition InvokeNvs01OfferCandidate(
+            object service)
+        {
+            Nvs01VerifiedCatalog catalog = VerifiedNvs01Catalog();
+            var questRuntime = new Nvs01QuestRuntime(
+                catalog,
+                null,
+                CreateNvs01SaveCommitter(service, catalog),
+                () => Guid.NewGuid().ToString("D"));
+            var command = new Nvs01CommandEnvelope(
+                Nvs01RuntimeContract.ContractVersion,
+                Guid.NewGuid().ToString("D"),
+                Nvs01RuntimeContract.QuestId,
+                questRuntime.Snapshot.StateId,
+                questRuntime.Snapshot.Revision,
+                "NPC_VALERIUS",
+                "POST_REALM_PROLOGUE",
+                0);
+            string realmId = CanonicalRealmId(
+                GetField(GetProperty(service, "CurrentSave"), "SelectedRealm")
+                    .ToString());
+            return questRuntime.SelectValerius(
+                command,
+                Nvs01InteractionKind.Offer,
+                new Nvs01RealmContext(
+                    Nvs01RealmContextStatus.CommittedValid,
+                    realmId));
+        }
+
+        private static Nvs01CommandDisposition
+            InvokeNvs01OfferCandidateAllowingFailureLogs(object service)
+        {
+            bool priorIgnore = LogAssert.ignoreFailingMessages;
+            LogAssert.ignoreFailingMessages = true;
+            try
+            {
+                return InvokeNvs01OfferCandidate(service);
+            }
+            finally
+            {
+                LogAssert.ignoreFailingMessages = priorIgnore;
+            }
+        }
+
+        private static Nvs01VerifiedCatalog VerifiedNvs01Catalog()
+        {
+            string path = Path.Combine(
+                Application.dataPath,
+                "StreamingAssets",
+                Nvs01CatalogContract.StreamingAssetsRelativePath.Replace(
+                    '/',
+                    Path.DirectorySeparatorChar));
+            Nvs01CatalogValidationResult validation =
+                Nvs01CatalogValidator.ValidateCanonicalArtifact(
+                    File.ReadAllBytes(path));
+            Assert.True(
+                validation.IsAccepted,
+                string.Join(
+                    Environment.NewLine,
+                    validation.Diagnostics.Select(item => item.Code)));
+            return validation.VerifiedCatalog;
+        }
+
+        private static string CanonicalRealmId(string realmName)
+        {
+            switch (realmName)
+            {
+                case "Crownlands": return "crownlands";
+                case "Stonehold": return "stonehold";
+                case "Eldergrove": return "eldergrove";
+                case "Umbral": return "umbral";
+                default:
+                    Assert.Fail("NVS fixture requires a committed launch realm.");
+                    return string.Empty;
+            }
         }
 
         private static object InvokeDuplicateCandidate(object service)
@@ -4553,16 +5347,19 @@ namespace AL.Tests.EditMode
         private static string ArrangeExactBackupOnly(
             string root,
             ScriptedSaveFileOperations fileSystem,
-            string chapterId)
+            string _)
         {
             object seedService = CreateSaveService(
                 root,
                 CreateFileOperationsProxy(fileSystem));
-            Type realmType = GetRuntimeType("AL.Core.RealmId");
-            Invoke(seedService, "CreateNewSave", Enum.Parse(realmType, "None"));
-            object currentSave = GetProperty(seedService, "CurrentSave");
-            SetField(currentSave, "CurrentChapterId", chapterId);
-            Invoke(seedService, "Save");
+            object realmCommit = InvokeRealmSelectionCandidate(
+                seedService,
+                Guid.NewGuid().ToString("N"),
+                "Crownlands");
+            Assert.AreEqual(
+                "Committed",
+                GetProperty(realmCommit, "Status").ToString(),
+                "Recovery fixtures must originate through the narrow typed realm coordinator.");
 
             string primaryPath = Path.Combine(root, "save.json");
             string backupPath = Path.Combine(root, "save.backup.json");
@@ -4591,6 +5388,26 @@ namespace AL.Tests.EditMode
             fileSystem.Files[primaryPath] = invalidPrimary;
             fileSystem.ClearMutationLedger();
             return backupBytes;
+        }
+
+        private static string CreateTypedRealmFixtureBytes(string realmName)
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                "typed-fixture-" + Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            object result = InvokeRealmSelectionCandidate(
+                service,
+                Guid.NewGuid().ToString("N"),
+                realmName);
+            Assert.AreEqual(
+                "Committed",
+                GetProperty(result, "Status").ToString());
+            return fileSystem.ReadAllText(Path.Combine(root, "save.json"));
         }
 
         private static string FindSingleStageFiveQuarantine(
@@ -4827,6 +5644,7 @@ namespace AL.Tests.EditMode
             private readonly List<ScriptedReadFault> _readFaults =
                 new List<ScriptedReadFault>();
             public int TotalMoveCount { get; private set; }
+            public int CreateDirectoryCount { get; private set; }
             public Action<string, int> BoundedReadObserver { get; set; }
             public Action<string, string, bool> CopyObserver { get; set; }
             public Action<string, string, bool> AfterCopyObserver { get; set; }
@@ -4877,6 +5695,7 @@ namespace AL.Tests.EditMode
 
             private void CreateDirectory(string path)
             {
+                CreateDirectoryCount++;
                 if (CreateDirectoryFailures.Contains(path))
                 {
                     throw new IOException(

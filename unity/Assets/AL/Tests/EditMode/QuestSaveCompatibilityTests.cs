@@ -420,7 +420,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void NullTopLevelQuestListNormalizesDuringPersistenceWithoutSeeding()
+        public void NullTopLevelQuestListIsNotNormalizedByContainedManualSave()
         {
             string root = CreateTempRoot();
             try
@@ -429,11 +429,17 @@ namespace AL.Tests.EditMode
                 CreateNewSave(saveService);
                 object save = GetProperty(saveService, "CurrentSave");
                 SetField(save, "Quests", null);
+                byte[] primaryBefore = File.ReadAllBytes(
+                    Path.Combine(root, "save.json"));
 
                 Invoke(saveService, "Save");
-                IList persisted = (IList)GetField(GetProperty(saveService, "CurrentSave"), "Quests");
-                Assert.NotNull(persisted);
-                Assert.AreEqual(0, persisted.Count);
+                Assert.IsNull(GetField(GetProperty(saveService, "CurrentSave"), "Quests"));
+                Assert.That(
+                    (string)GetProperty(saveService, "LastSaveMessage"),
+                    Does.StartWith("AL-SAVE-MANUAL-WRITE-CONTAINED:"));
+                CollectionAssert.AreEqual(
+                    primaryBefore,
+                    File.ReadAllBytes(Path.Combine(root, "save.json")));
 
                 object reloaded = CreateActualSaveService(root);
                 Invoke(reloaded, "Load");
@@ -475,15 +481,16 @@ namespace AL.Tests.EditMode
                 string backupPath = Path.Combine(root, "save.backup.json");
                 byte[] primaryBefore = File.ReadAllBytes(primaryPath);
                 byte[] backupBefore = File.ReadAllBytes(backupPath);
-                LogAssert.Expect(
-                    LogType.Error,
-                    new System.Text.RegularExpressions.Regex("^AL-SAVE-TEMP-INVALID:"));
                 Invoke(saveService, "Save");
                 Assert.AreEqual(
                     "SaveFailedPreviousPreserved",
                     GetProperty(saveService, "LastSaveStatus").ToString());
                 CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
                 CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
+                Assert.That(
+                    (string)GetProperty(saveService, "LastSaveMessage"),
+                    Does.StartWith("AL-SAVE-MANUAL-WRITE-CONTAINED:"));
+                Assert.AreSame(quests, GetField(save, "Quests"));
 
                 string diagnosticJson = JsonUtility.ToJson(save, true);
                 File.WriteAllText(primaryPath, diagnosticJson);

@@ -13,13 +13,23 @@ namespace AL.Services.Local
     {
         private readonly ISaveGameService _saveGameService;
         private readonly IProfileWriteAuthorityProvider _provider;
+        private readonly bool _requiresProductionContainment;
 
         private EconomyWriteAuthorityGate(
             ISaveGameService saveGameService,
             IProfileWriteAuthorityProvider provider)
+            : this(saveGameService, provider, false)
+        {
+        }
+
+        private EconomyWriteAuthorityGate(
+            ISaveGameService saveGameService,
+            IProfileWriteAuthorityProvider provider,
+            bool requiresProductionContainment)
         {
             _saveGameService = saveGameService;
             _provider = provider;
+            _requiresProductionContainment = requiresProductionContainment;
         }
 
         internal static EconomyWriteAuthorityGate FromSaveService(
@@ -28,12 +38,19 @@ namespace AL.Services.Local
             var canonical = saveGameService as LocalSaveGameService;
             return new EconomyWriteAuthorityGate(
                 saveGameService,
-                canonical);
+                canonical,
+                true);
         }
 
         internal bool TryGetWritableSave(out SaveGameData save)
         {
             save = null;
+            if (_requiresProductionContainment &&
+                !ProfileMutationContainment.ProductionWriteActivationEnabled)
+            {
+                return false;
+            }
+
             try
             {
                 save = _saveGameService?.CurrentSave;
@@ -48,7 +65,9 @@ namespace AL.Services.Local
 
         internal bool IsWritableFor(SaveGameData expectedPublishedSave)
         {
-            if (expectedPublishedSave == null ||
+            if (_requiresProductionContainment &&
+                    !ProfileMutationContainment.ProductionWriteActivationEnabled ||
+                expectedPublishedSave == null ||
                 !ProfileWriteAuthorityProviderGuard
                     .IsCurrentWritable(_provider))
             {

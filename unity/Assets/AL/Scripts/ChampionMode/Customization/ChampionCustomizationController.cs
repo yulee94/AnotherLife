@@ -107,7 +107,7 @@ namespace AL.ChampionMode.Customization
 
         public void ApplySavedCustomization()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             if (state == null)
             {
                 return;
@@ -444,7 +444,7 @@ namespace AL.ChampionMode.Customization
 
         public string GetAppearanceSummary()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             if (state == null)
             {
                 return "Appearance unavailable";
@@ -459,31 +459,31 @@ namespace AL.ChampionMode.Customization
 
         public Color GetPrimaryColor()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             return state == null ? PrimaryPalette[0] : new Color(state.PrimaryR, state.PrimaryG, state.PrimaryB);
         }
 
         public Color GetHairColor()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             return state == null ? HairPalette[0] : new Color(state.HairR, state.HairG, state.HairB);
         }
 
         public Color GetSkinColor()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             return state == null ? SkinPalette[0] : new Color(state.SkinR, state.SkinG, state.SkinB);
         }
 
         public Color GetEyeColor()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             return state == null ? EyePalette[0] : new Color(state.EyeR, state.EyeG, state.EyeB);
         }
 
         public Color GetAccentColor()
         {
-            var state = GetState();
+            var state = GetPresentationSnapshot();
             return state == null ? AccentPalette[0] : new Color(state.AccentR, state.AccentG, state.AccentB);
         }
 
@@ -811,8 +811,83 @@ namespace AL.ChampionMode.Customization
 
         private ChampionCustomizationState GetState()
         {
-            var save = ServiceLocator.Get<ISaveGameService>().CurrentSave;
+            if (!TryGetMutableSave(
+                    out _,
+                    out SaveGameData save))
+            {
+                return null;
+            }
+
             return save?.ChampionCustomization;
+        }
+
+        private static bool TryGetMutableSave(
+            out ISaveGameService saveGameService,
+            out SaveGameData save)
+        {
+            saveGameService = null;
+            save = null;
+            try
+            {
+                saveGameService = ServiceLocator.Get<ISaveGameService>();
+            }
+            catch
+            {
+                return false;
+            }
+
+            return AL.Services.Local.ProfileMutationContainment
+                .TryGetMutableSave(
+                    saveGameService,
+                    AL.Services.Local.ProfileMutationSurfaceIds
+                        .ChampionCustomization,
+                    out save);
+        }
+
+        private static ChampionCustomizationState GetPresentationSnapshot()
+        {
+            ChampionCustomizationState source;
+            try
+            {
+                source = ServiceLocator.Get<ISaveGameService>()
+                    .CurrentSave?.ChampionCustomization;
+            }
+            catch
+            {
+                return null;
+            }
+
+            if (source == null)
+            {
+                return null;
+            }
+
+            return new ChampionCustomizationState
+            {
+                BodyPresetId = source.BodyPresetId,
+                HairStyleId = source.HairStyleId,
+                ArmorStyleId = source.ArmorStyleId,
+                FaceMarkId = source.FaceMarkId,
+                WeaponStyleId = source.WeaponStyleId,
+                OffhandStyleId = source.OffhandStyleId,
+                PrimaryR = source.PrimaryR,
+                PrimaryG = source.PrimaryG,
+                PrimaryB = source.PrimaryB,
+                HairR = source.HairR,
+                HairG = source.HairG,
+                HairB = source.HairB,
+                SkinR = source.SkinR,
+                SkinG = source.SkinG,
+                SkinB = source.SkinB,
+                EyeR = source.EyeR,
+                EyeG = source.EyeG,
+                EyeB = source.EyeB,
+                AccentR = source.AccentR,
+                AccentG = source.AccentG,
+                AccentB = source.AccentB,
+                CapeEnabled = source.CapeEnabled,
+                HelmetEnabled = source.HelmetEnabled
+            };
         }
 
         private void NormalizeState(ChampionCustomizationState state)

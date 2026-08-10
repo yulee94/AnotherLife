@@ -91,6 +91,17 @@ namespace AL.Services.Local
                     validationCode);
             }
 
+            if (!ProfileMutationContainment.TryGetMutableSave(
+                    _saveGameService,
+                    ProfileMutationSurfaceIds.BossLoot,
+                    out SaveGameData save))
+            {
+                return Reject(
+                    request,
+                    BossLootApplicationStatus.RejectedCreditMutation,
+                    "AL-BOSS-LOOT-PROFILE-NOT-WRITABLE");
+            }
+
             var result = new BossLootResult
             {
                 EncounterId = request.EncounterId,
@@ -101,11 +112,6 @@ namespace AL.Services.Local
                 Drops = RollDrops(request, request.BossId)
             };
             string digest = ComputeRewardDigest(result);
-            SaveGameData save = _saveGameService?.CurrentSave;
-            if (save == null)
-            {
-                return Reject(request, BossLootApplicationStatus.RejectedNoCurrentSave, "AL-BOSS-LOOT-NO-CURRENT-SAVE");
-            }
 
             if (_saveGameService.LastSaveStatus == SaveOperationStatus.CommitUncertain)
             {
@@ -172,7 +178,7 @@ namespace AL.Services.Local
 
                 foreach (BossLootDrop drop in result.Drops)
                 {
-                    if (!TryAddOwnedEquipment(drop, request.BossId))
+                    if (!TryAddOwnedEquipment(save, drop, request.BossId))
                     {
                         Restore(save, previousCredits, previousEquipment, previousLedger);
                         return Reject(request, BossLootApplicationStatus.RejectedMalformedState, "AL-BOSS-LOOT-EQUIPMENT-MUTATION-REJECTED");
@@ -314,9 +320,11 @@ namespace AL.Services.Local
             return true;
         }
 
-        private bool TryAddOwnedEquipment(BossLootDrop drop, string bossId)
+        private static bool TryAddOwnedEquipment(
+            SaveGameData save,
+            BossLootDrop drop,
+            string bossId)
         {
-            var save = _saveGameService.CurrentSave;
             if (save == null ||
                 drop == null ||
                 string.IsNullOrWhiteSpace(drop.EquipmentId) ||

@@ -62,7 +62,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void DropGemCannotLeaveGemBothHomeAndDropped()
+        public void DropGemIsContainedBeforeCustodyMutationOrSave()
         {
             var save = NewSave();
             save.RealmGems.Add(new RealmGemState
@@ -80,10 +80,10 @@ namespace AL.Tests.EditMode
 
             RealmGemState backing = save.RealmGems.Single();
             Assert.That(backing.IsAtHome, Is.False);
-            Assert.That(backing.IsDropped, Is.True);
-            Assert.That(backing.CarrierId, Is.Null);
-            Assert.That(backing.LastDroppedTimestamp, Is.GreaterThan(0));
-            Assert.That(fixture.SaveCount, Is.EqualTo(1));
+            Assert.That(backing.IsDropped, Is.False);
+            Assert.That(backing.CarrierId, Is.EqualTo("carrier_a"));
+            Assert.That(backing.LastDroppedTimestamp, Is.Zero);
+            Assert.That(fixture.SaveCount, Is.Zero);
         }
 
         [Test]
@@ -107,7 +107,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void RealmGemCustodyTransitionsAreCoherentAndDuplicateSafe()
+        public void RealmGemCustodyWritersRemainContainedWithoutStateDrift()
         {
             var save = NewSave();
             var gem = new RealmGemState
@@ -121,21 +121,20 @@ namespace AL.Tests.EditMode
             var fixture = new FakeSaveService(save);
             var service = new LocalRealmGemService(fixture);
 
-            Assert.That(service.PickUpGem(gem.GemId, "carrier_a"), Is.True);
+            Assert.That(service.PickUpGem(gem.GemId, "carrier_a"), Is.False);
             Assert.That(service.PickUpGem(gem.GemId, "carrier_a"), Is.False);
             Assert.That(service.PickUpGem(gem.GemId, "carrier_b"), Is.False);
-            Assert.That(fixture.SaveCount, Is.EqualTo(1));
+            Assert.That(fixture.SaveCount, Is.Zero);
 
             service.DropGem(gem.GemId);
             long droppedAt = gem.LastDroppedTimestamp;
             service.DropGem(gem.GemId);
-            Assert.That(gem.IsDropped, Is.True);
+            Assert.That(gem.IsAtHome, Is.True);
+            Assert.That(gem.IsDropped, Is.False);
             Assert.That(gem.LastDroppedTimestamp, Is.EqualTo(droppedAt));
-            Assert.That(fixture.SaveCount, Is.EqualTo(2));
+            Assert.That(fixture.SaveCount, Is.Zero);
 
             Assert.That(service.PickUpGem(gem.GemId, "carrier_b"), Is.False);
-            gem.LastDroppedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() - 10;
-            Assert.That(service.PickUpGem(gem.GemId, "carrier_b"), Is.True);
             service.ReturnGemHome(gem.GemId);
             service.ReturnGemHome(gem.GemId);
 
@@ -143,7 +142,7 @@ namespace AL.Tests.EditMode
             Assert.That(gem.IsDropped, Is.False);
             Assert.That(gem.CarrierId, Is.Null);
             Assert.That(gem.LastDroppedTimestamp, Is.Zero);
-            Assert.That(fixture.SaveCount, Is.EqualTo(4));
+            Assert.That(fixture.SaveCount, Is.Zero);
         }
 
         [Test]
@@ -183,7 +182,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void WishgateRejectsBlankInputsAndMissingSaveWithoutMutation()
+        public void WishgateWritersRejectBlankMissingAndValidInputsWhileContained()
         {
             var nullFixture = new FakeSaveService(null);
             var nullService = new LocalRealmGemService(nullFixture);
@@ -202,9 +201,11 @@ namespace AL.Tests.EditMode
             service.MarkWishgateEarned("complete_eight_gems");
             service.ChooseWishReward("");
 
-            Assert.That(save.Wishgate.IsEarned, Is.True);
+            Assert.That(save.Wishgate.IsEarned, Is.False);
+            Assert.That(save.Wishgate.EarnReason, Is.Null);
             Assert.That(save.Wishgate.LastRewardId, Is.Null);
-            Assert.That(fixture.SaveCount, Is.EqualTo(1));
+            Assert.That(save.Wishgate.LastRewardChosenTimestamp, Is.Zero);
+            Assert.That(fixture.SaveCount, Is.Zero);
         }
 
         private static SaveGameData NewSave()

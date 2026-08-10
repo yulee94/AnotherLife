@@ -21,11 +21,20 @@ namespace AL.Services.Local
 
         public void StartTraining(TroopType type, int count)
         {
+            if (count <= 0 ||
+                !ProfileMutationContainment.TryGetMutableSave(
+                    _saveGameService,
+                    ProfileMutationSurfaceIds.Training,
+                    out SaveGameData save))
+            {
+                return;
+            }
+
             long cost = count * 10; // Food cost
             if (_resourceService.ConsumeResource(ResourceType.Food, cost))
             {
                 // Simple instant training for prototype, or logic for timers
-                AddTroops(type, count);
+                AddTroops(save, type, count);
                 Debug.Log($"Trained {count} {type}");
 
                 // Trigger Quest Update
@@ -49,37 +58,39 @@ namespace AL.Services.Local
 
         public int GetTroopCount(TroopType type)
         {
-            return GetTroopState(type)?.Count ?? 0;
+            return FindTroopState(_saveGameService?.CurrentSave, type)?.Count ?? 0;
         }
 
-        private void AddTroops(TroopType type, int count)
+        private static void AddTroops(
+            SaveGameData save,
+            TroopType type,
+            int count)
         {
-            var state = GetTroopState(type);
-            if (state == null)
+            if (save == null)
             {
                 return;
+            }
+
+            save.Troops ??= new List<TroopInventoryData>();
+            TroopInventoryData state = FindTroopState(save, type);
+            if (state == null)
+            {
+                state = new TroopInventoryData
+                {
+                    Type = type,
+                    Count = 0,
+                    WoundedCount = 0
+                };
+                save.Troops.Add(state);
             }
 
             state.Count += count;
         }
 
-        private TroopInventoryData GetTroopState(TroopType type)
-        {
-            var save = _saveGameService.CurrentSave;
-            if (save == null)
-            {
-                return null;
-            }
-
-            save.Troops ??= new List<TroopInventoryData>();
-            var state = save.Troops.FirstOrDefault(t => t.Type == type);
-            if (state == null)
-            {
-                state = new TroopInventoryData { Type = type, Count = 0, WoundedCount = 0 };
-                save.Troops.Add(state);
-            }
-
-            return state;
-        }
+        private static TroopInventoryData FindTroopState(
+            SaveGameData save,
+            TroopType type) =>
+            save?.Troops?.FirstOrDefault(state =>
+                state != null && state.Type == type);
     }
 }

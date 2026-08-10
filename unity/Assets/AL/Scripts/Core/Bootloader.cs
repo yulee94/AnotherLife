@@ -454,7 +454,13 @@ namespace AL.Core
             }
 
             if (!marker.IsRuntimeOwner(_runtimeOwnerId) ||
-                saveGameService.CurrentSave == null)
+                !ProfileMutationContainment.CanInvokeLifecycleSave(
+                    saveGameService))
+            {
+                return;
+            }
+
+            if (saveGameService.CurrentSave == null)
             {
                 Debug.LogError("[BOOT_STACK_SAVE_FAILED] Bootloader save skipped because this owner has no valid current save.");
                 return;
@@ -954,6 +960,16 @@ namespace AL.Core
                 [typeof(IBossLootService)] = bossLootService
             };
 
+            ProfileMutationCatalogValidationResult mutationCoverage =
+                ProfileMutationSurfaceCatalog.ValidateProductionCoverage(
+                    requiredInstances.Keys);
+            if (!mutationCoverage.IsValid)
+            {
+                throw new InvalidOperationException(
+                    "Profile mutation surface coverage is incomplete: " +
+                    string.Join(",", mutationCoverage.Diagnostics));
+            }
+
             if (RequiredServiceTypes.Any(type => !requiredInstances.ContainsKey(type) || requiredInstances[type] == null))
             {
                 throw new InvalidOperationException("Offline service stack required-instance map is incomplete.");
@@ -992,6 +1008,7 @@ namespace AL.Core
 
         internal int LoadCount;
         internal int SaveCount;
+        internal int CurrentSaveReadCount;
         internal int FailLoadTimes = 0;
         internal bool ThrowOnSave = false;
         internal bool ProvideCurrentSaveOnLoad = true;
@@ -999,7 +1016,14 @@ namespace AL.Core
         internal SaveOperationStatus SaveStatusToReport = SaveOperationStatus.SavedPrimary;
         internal Action LoadCallback = null;
 
-        public SaveGameData CurrentSave => _currentSave;
+        public SaveGameData CurrentSave
+        {
+            get
+            {
+                CurrentSaveReadCount++;
+                return _currentSave;
+            }
+        }
         public SaveLoadStatus LastLoadStatus { get; private set; }
         public string LastLoadMessage { get; private set; } = string.Empty;
         public SaveOperationStatus LastSaveStatus { get; private set; }

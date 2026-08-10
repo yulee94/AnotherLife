@@ -520,11 +520,23 @@ namespace AL.Narrative.Nvs01
                     _authorityProvider);
             bool legacy = authority.Status ==
                           ProfileWriteAuthorityStatus.MigrationRequired;
+            INvs01LegacyCandidateStore legacyStore = null;
             IProfileBoundSaveGameCandidateStore boundStore = null;
             Nvs01MutationPlan effectivePlan = plan;
 
             if (legacy)
             {
+                legacyStore = _store as INvs01LegacyCandidateStore;
+                if (legacyStore == null)
+                {
+                    return RejectBeforeStore(
+                        plan,
+                        "SAVE-READ-ONLY",
+                        "schema-v1 NVS-01 candidate store unavailable",
+                        out committed,
+                        out diagnostic);
+                }
+
                 if (plan.IsAuthorityBound ||
                     !string.IsNullOrEmpty(
                         plan.Candidate.LastOperation?
@@ -582,94 +594,19 @@ namespace AL.Narrative.Nvs01
             }
 
             Func<SaveGameData, SaveCandidateMutationPreparation> prepare =
-                candidateSave =>
-            {
-                if (candidateSave == null)
-                {
-                    return SaveCandidateMutationPreparation.Rejected(
-                        Nvs01CatalogContract.DiagnosticCodePrefix +
-                        "SAVE-PROGRESS-UNAVAILABLE");
-                }
-
-                string requiredProfileId = legacy
-                    ? string.Empty
-                    : effectivePlan.ProfileId;
-                int requiredSchemaVersion = legacy
-                    ? SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion
-                    : SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
-                int requiredInitializationVersion = legacy
-                    ? SaveAuthorityTechnicalLimits
-                        .LegacyProfileInitializationVersion
-                    : SaveAuthorityTechnicalLimits
-                        .IdentityAwareProfileInitializationVersion;
-                if (candidateSave.SaveSchemaVersion != requiredSchemaVersion ||
-                    candidateSave.ProfileInitializationVersion !=
-                        requiredInitializationVersion ||
-                    !string.Equals(
-                        candidateSave.ProfileId ?? string.Empty,
-                        requiredProfileId,
-                        StringComparison.Ordinal))
-                {
-                    return SaveCandidateMutationPreparation.Rejected(
-                        Nvs01CatalogContract.DiagnosticCodePrefix +
-                        "SAVE-AUTHORITY-CONFLICT");
-                }
-
-                if (!Nvs01ProgressCodec.TryDecode(
-                        candidateSave.Nvs01Progress,
-                        _verifiedCatalog,
-                        out Nvs01QuestSnapshot durable,
-                        out Nvs01RuntimeDiagnostic decodeDiagnostic))
-                {
-                    return SaveCandidateMutationPreparation.Rejected(
-                        decodeDiagnostic?.Code ??
-                        Nvs01CatalogContract.DiagnosticCodePrefix + "SAVE-PROGRESS-UNAVAILABLE");
-                }
-
-                if (Nvs01ProgressCodec.Equivalent(
-                        durable,
-                        effectivePlan.Candidate))
-                {
-                    if (!legacy &&
-                        (durable.LastOperation == null ||
-                         !Nvs01AuthorityGuard.IsCanonicalSha256(
-                             durable.LastOperation
-                                 .ExpectedGenerationFingerprint)))
-                    {
-                        return SaveCandidateMutationPreparation.Rejected(
-                            Nvs01CatalogContract.DiagnosticCodePrefix +
-                            "SAVE-REPLAY-UNVERIFIED");
-                    }
-                    return SaveCandidateMutationPreparation.Duplicate();
-                }
-
-                if (!Nvs01ProgressCodec.Equivalent(
-                        durable,
-                        effectivePlan.Expected))
-                {
-                    return SaveCandidateMutationPreparation.Rejected(
-                        Nvs01CatalogContract.DiagnosticCodePrefix + "SAVE-CONFLICT");
-                }
-
-                candidateSave.Nvs01Progress =
-                    Nvs01ProgressCodec.Encode(effectivePlan.Candidate);
-                if (!string.Equals(
-                        candidateSave.ProfileId ?? string.Empty,
-                        requiredProfileId,
-                        StringComparison.Ordinal))
-                {
-                    return SaveCandidateMutationPreparation.Rejected(
-                        Nvs01CatalogContract.DiagnosticCodePrefix +
-                        "SAVE-AUTHORITY-CONFLICT");
-                }
-                return SaveCandidateMutationPreparation.Prepared();
-            };
+                candidateSave => PrepareCandidate(
+                    candidateSave,
+                    effectivePlan,
+                    _verifiedCatalog,
+                    legacy);
 
             ProfileBoundSaveCandidateCommitResult boundResult = null;
             SaveCandidateCommitResult result;
             if (legacy)
             {
-                result = _store.TryCommitCandidate(prepare);
+                result = legacyStore.TryCommitNvs01LegacyCandidate(
+                    effectivePlan,
+                    _verifiedCatalog);
             }
             else
             {
@@ -755,6 +692,102 @@ namespace AL.Narrative.Nvs01
                 plan.TriggerEventId,
                 plan.Expected.CurrentEncounter?.CorrelationId ?? string.Empty);
             return false;
+        }
+
+        internal static SaveCandidateMutationPreparation
+            PrepareLegacyCandidate(
+                SaveGameData candidateSave,
+                Nvs01MutationPlan plan,
+                Nvs01VerifiedCatalog verifiedCatalog) =>
+            PrepareCandidate(
+                candidateSave,
+                plan,
+                verifiedCatalog,
+                true);
+
+        private static SaveCandidateMutationPreparation PrepareCandidate(
+            SaveGameData candidateSave,
+            Nvs01MutationPlan plan,
+            Nvs01VerifiedCatalog verifiedCatalog,
+            bool legacy)
+        {
+            if (candidateSave == null || plan == null || verifiedCatalog == null)
+            {
+                return SaveCandidateMutationPreparation.Rejected(
+                    Nvs01CatalogContract.DiagnosticCodePrefix +
+                    "SAVE-PROGRESS-UNAVAILABLE");
+            }
+
+            string requiredProfileId = legacy
+                ? string.Empty
+                : plan.ProfileId;
+            int requiredSchemaVersion = legacy
+                ? SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion
+                : SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
+            int requiredInitializationVersion = legacy
+                ? SaveAuthorityTechnicalLimits.LegacyProfileInitializationVersion
+                : SaveAuthorityTechnicalLimits
+                    .IdentityAwareProfileInitializationVersion;
+            if (candidateSave.SaveSchemaVersion != requiredSchemaVersion ||
+                candidateSave.ProfileInitializationVersion !=
+                    requiredInitializationVersion ||
+                !string.Equals(
+                    candidateSave.ProfileId ?? string.Empty,
+                    requiredProfileId,
+                    StringComparison.Ordinal))
+            {
+                return SaveCandidateMutationPreparation.Rejected(
+                    Nvs01CatalogContract.DiagnosticCodePrefix +
+                    "SAVE-AUTHORITY-CONFLICT");
+            }
+
+            if (!Nvs01ProgressCodec.TryDecode(
+                    candidateSave.Nvs01Progress,
+                    verifiedCatalog,
+                    out Nvs01QuestSnapshot durable,
+                    out Nvs01RuntimeDiagnostic decodeDiagnostic))
+            {
+                return SaveCandidateMutationPreparation.Rejected(
+                    decodeDiagnostic?.Code ??
+                    Nvs01CatalogContract.DiagnosticCodePrefix +
+                    "SAVE-PROGRESS-UNAVAILABLE");
+            }
+
+            if (Nvs01ProgressCodec.Equivalent(durable, plan.Candidate))
+            {
+                if (!legacy &&
+                    (durable.LastOperation == null ||
+                     !Nvs01AuthorityGuard.IsCanonicalSha256(
+                         durable.LastOperation.ExpectedGenerationFingerprint)))
+                {
+                    return SaveCandidateMutationPreparation.Rejected(
+                        Nvs01CatalogContract.DiagnosticCodePrefix +
+                        "SAVE-REPLAY-UNVERIFIED");
+                }
+
+                return SaveCandidateMutationPreparation.Duplicate();
+            }
+
+            if (!Nvs01ProgressCodec.Equivalent(durable, plan.Expected))
+            {
+                return SaveCandidateMutationPreparation.Rejected(
+                    Nvs01CatalogContract.DiagnosticCodePrefix +
+                    "SAVE-CONFLICT");
+            }
+
+            candidateSave.Nvs01Progress =
+                Nvs01ProgressCodec.Encode(plan.Candidate);
+            if (!string.Equals(
+                    candidateSave.ProfileId ?? string.Empty,
+                    requiredProfileId,
+                    StringComparison.Ordinal))
+            {
+                return SaveCandidateMutationPreparation.Rejected(
+                    Nvs01CatalogContract.DiagnosticCodePrefix +
+                    "SAVE-AUTHORITY-CONFLICT");
+            }
+
+            return SaveCandidateMutationPreparation.Prepared();
         }
 
         public bool TryVerifyReplay(

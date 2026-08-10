@@ -47,7 +47,11 @@ namespace AL.Services.Local
 
         public void UnlockSet(string setId)
         {
-            var save = _saveGameService.CurrentSave;
+            if (!TryGetMutableSave(out SaveGameData save))
+            {
+                return;
+            }
+
             var state = save?.Warmaster;
             if (state == null || !IsKnownSet(setId) || !TryValidateState(state, out _))
             {
@@ -73,7 +77,11 @@ namespace AL.Services.Local
 
         public void EquipSet(string setId)
         {
-            var save = _saveGameService.CurrentSave;
+            if (!TryGetMutableSave(out SaveGameData save))
+            {
+                return;
+            }
+
             var state = save?.Warmaster;
             if (state == null || !IsKnownSet(setId) || !TryValidateState(state, out _))
             {
@@ -100,7 +108,11 @@ namespace AL.Services.Local
 
         public bool PurchasePiece(string pieceId, int warzoneCreditCost)
         {
-            var save = _saveGameService.CurrentSave;
+            if (!TryGetMutableSave(out SaveGameData save))
+            {
+                return false;
+            }
+
             var state = save?.Warmaster;
             if (state == null ||
                 !IsKnownPiece(pieceId) ||
@@ -178,6 +190,12 @@ namespace AL.Services.Local
                    TryValidateState(state, out HashSet<string> validPurchasedPieces) &&
                    (state.IsTrueWarmaster || validPurchasedPieces.Count >= RequiredTrueWarmasterPieces);
         }
+
+        private bool TryGetMutableSave(out SaveGameData save) =>
+            ProfileMutationContainment.TryGetMutableSave(
+                _saveGameService,
+                ProfileMutationSurfaceIds.Warmaster,
+                out save);
 
         private static bool TryValidateState(
             WarmasterState state,

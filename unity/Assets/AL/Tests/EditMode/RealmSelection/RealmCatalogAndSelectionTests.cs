@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
@@ -35,7 +37,7 @@ namespace AL.Tests.EditMode.RealmSelection
         public void TearDown()
         {
             for (int i = 0; i < _definitions.Count; i++)
-                Object.DestroyImmediate(_definitions[i]);
+                UnityEngine.Object.DestroyImmediate(_definitions[i]);
             _definitions.Clear();
         }
 
@@ -113,28 +115,46 @@ namespace AL.Tests.EditMode.RealmSelection
         [Test]
         public void FirstCommitPersistsAndDifferentRealmIsRejectedWithoutSecondSave()
         {
-            var save = new FakeSaveService();
-            var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
-            RealmSelectionResult first = service.TrySelectRealm(new RealmSelectionRequest("tx_first", RealmId.Stonehold));
-            RealmSelectionResult repeated = service.TrySelectRealm(new RealmSelectionRequest("tx_same", RealmId.Stonehold));
-            RealmSelectionResult different = service.TrySelectRealm(new RealmSelectionRequest("tx_other", RealmId.Umbral));
-            Assert.That(first.Status, Is.EqualTo(RealmSelectionStatus.Committed));
-            Assert.That(repeated.Status, Is.EqualTo(RealmSelectionStatus.AlreadyCommittedSameRealm));
-            Assert.That(different.Status, Is.EqualTo(RealmSelectionStatus.RejectedDifferentRealm));
-            Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.Stonehold));
-            Assert.That(save.SaveCount, Is.EqualTo(1));
-            Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.CommittedValid));
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+            try
+            {
+                LocalSaveGameService save = CreateLocalSave(root);
+                var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
+                RealmSelectionResult first = service.TrySelectRealm(new RealmSelectionRequest("tx_first", RealmId.Stonehold));
+                byte[] exactPrimary = File.ReadAllBytes(Path.Combine(root, "save.json"));
+                byte[] exactBackup = File.ReadAllBytes(Path.Combine(root, "save.backup.json"));
+                SaveGameData published = save.CurrentSave;
+                RealmSelectionResult repeated = service.TrySelectRealm(new RealmSelectionRequest("tx_same", RealmId.Stonehold));
+                RealmSelectionResult different = service.TrySelectRealm(new RealmSelectionRequest("tx_other", RealmId.Umbral));
+                Assert.That(first.Status, Is.EqualTo(RealmSelectionStatus.Committed));
+                Assert.That(repeated.Status, Is.EqualTo(RealmSelectionStatus.AlreadyCommittedSameRealm));
+                Assert.That(different.Status, Is.EqualTo(RealmSelectionStatus.RejectedDifferentRealm));
+                Assert.That(save.CurrentSave, Is.SameAs(published));
+                Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.Stonehold));
+                CollectionAssert.AreEqual(exactPrimary, File.ReadAllBytes(Path.Combine(root, "save.json")));
+                CollectionAssert.AreEqual(exactBackup, File.ReadAllBytes(Path.Combine(root, "save.backup.json")));
+                Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.CommittedValid));
+            }
+            finally
+            {
+                if (Directory.Exists(root)) Directory.Delete(root, true);
+            }
         }
 
         [Test]
-        public void InvalidRequestsAndSaveFailureNeverBecomeAuthoritative()
+        public void InvalidRequestsAndUntypedSaveServiceNeverBecomeAuthoritative()
         {
             var save = new FakeSaveService { FailSave = true };
             var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
             Assert.That(service.TrySelectRealm(new RealmSelectionRequest("", RealmId.Crownlands)).Status, Is.EqualTo(RealmSelectionStatus.InvalidTransaction));
             Assert.That(service.TrySelectRealm(new RealmSelectionRequest("tx_none", RealmId.None)).Status, Is.EqualTo(RealmSelectionStatus.InvalidRealm));
             RealmSelectionResult failed = service.TrySelectRealm(new RealmSelectionRequest("tx_fail", RealmId.Eldergrove));
-            Assert.That(failed.Status, Is.EqualTo(RealmSelectionStatus.SaveFailedPreviousPreserved));
+            Assert.That(failed.Status, Is.EqualTo(RealmSelectionStatus.ProfileUnavailable));
+            Assert.That(failed.TechnicalCode, Is.EqualTo("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE"));
             Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
             Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.Uncommitted));
         }
@@ -217,6 +237,19 @@ namespace AL.Tests.EditMode.RealmSelection
             public void CreateNewSave(RealmId realmId) { CurrentSave = NewSave(); CurrentSave.SelectedRealm = realmId; Save(); }
             public void DeleteSave() { CurrentSave = null; }
             private static SaveGameData NewSave() => new SaveGameData { SaveFormatId = SaveGameData.CurrentSaveFormatId, SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion, ProfileInitializationVersion = SaveGameData.CurrentProfileInitializationVersion, SelectedRealm = RealmId.None };
+        }
+
+        private static LocalSaveGameService CreateLocalSave(string root)
+        {
+            ConstructorInfo constructor = typeof(LocalSaveGameService)
+                .GetConstructor(
+                    BindingFlags.Instance | BindingFlags.NonPublic,
+                    binder: null,
+                    types: new[] { typeof(string) },
+                    modifiers: null);
+            Assert.NotNull(constructor);
+            return (LocalSaveGameService)constructor.Invoke(
+                new object[] { root });
         }
 
         private sealed class FakeGameDataService : IGameDataService
