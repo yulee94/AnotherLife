@@ -25,13 +25,21 @@ namespace AL.Services.Local
 
         public void ChangeAffinity(string npcId, float delta)
         {
-            if (ReputationData == null) return;
+            if (!ProfileMutationContainment.TryGetMutableSave(
+                    _saveGameService,
+                    ProfileMutationSurfaceIds.Reputation,
+                    out SaveGameData save) ||
+                save.Reputation == null)
+            {
+                return;
+            }
 
-            var data = ReputationData.FirstOrDefault(r => r.NpcId == npcId);
+            List<NpcAffinityData> reputation = save.Reputation;
+            var data = reputation.FirstOrDefault(r => r.NpcId == npcId);
             if (data == null)
             {
                 data = new NpcAffinityData { NpcId = npcId, Affinity = 0f };
-                ReputationData.Add(data);
+                reputation.Add(data);
             }
 
             data.Affinity = Mathf.Clamp(data.Affinity + delta, -100f, 100f);

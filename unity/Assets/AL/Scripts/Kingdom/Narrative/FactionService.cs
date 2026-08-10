@@ -25,13 +25,21 @@ namespace AL.Services.Local
 
         public void AdjustReputation(string factionId, int delta)
         {
-            if (FactionData == null) return;
+            if (!ProfileMutationContainment.TryGetMutableSave(
+                    _saveGameService,
+                    ProfileMutationSurfaceIds.Faction,
+                    out SaveGameData save) ||
+                save.FactionReputations == null)
+            {
+                return;
+            }
 
-            var data = FactionData.FirstOrDefault(f => f.FactionId == factionId);
+            List<FactionRepData> factions = save.FactionReputations;
+            var data = factions.FirstOrDefault(f => f.FactionId == factionId);
             if (data == null)
             {
                 data = new FactionRepData { FactionId = factionId, Reputation = 0 };
-                FactionData.Add(data);
+                factions.Add(data);
             }
 
             data.Reputation += delta;

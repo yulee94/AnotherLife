@@ -86,7 +86,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void FirstSelectionCommitsAndSameRealmSelectionIsDuplicateSafe()
+        public void UntypedSaveServiceCannotEnterSchemaOneRealmCoordinator()
         {
             var save = new FakeSaveGameService();
             var service = Service(save);
@@ -94,14 +94,14 @@ namespace AL.Tests.EditMode
             RealmSelectionResult first = service.TrySelectRealm(new RealmSelectionRequest("tx-a", RealmId.Eldergrove));
             RealmSelectionResult duplicate = service.TrySelectRealm(new RealmSelectionRequest("tx-b", RealmId.Eldergrove));
 
-            Assert.AreEqual(RealmSelectionStatus.Committed, first.Status);
-            Assert.AreEqual(RealmSelectionStatus.AlreadyCommittedSameRealm, duplicate.Status);
-            Assert.True(first.AllowsNavigation);
-            Assert.True(duplicate.AllowsNavigation);
-            Assert.AreEqual(RealmId.Eldergrove, save.CurrentSave.SelectedRealm);
-            Assert.AreEqual(RealmId.Eldergrove, service.CurrentRealmId);
-            Assert.AreEqual(1, save.CreateCallCount);
-            Assert.AreEqual(1, save.SaveCallCount);
+            Assert.AreEqual(RealmSelectionStatus.ProfileUnavailable, first.Status);
+            Assert.AreEqual(RealmSelectionStatus.ProfileUnavailable, duplicate.Status);
+            Assert.False(first.AllowsNavigation);
+            Assert.False(duplicate.AllowsNavigation);
+            Assert.IsNull(save.CurrentSave);
+            Assert.AreEqual(RealmId.None, service.CurrentRealmId);
+            Assert.AreEqual(0, save.CreateCallCount);
+            Assert.AreEqual(0, save.SaveCallCount);
         }
 
         [Test]
@@ -115,16 +115,16 @@ namespace AL.Tests.EditMode
 
             RealmSelectionResult result = service.TrySelectRealm(new RealmSelectionRequest("tx", RealmId.Crownlands));
 
-            Assert.AreEqual(RealmSelectionStatus.RejectedDifferentRealm, result.Status);
-            Assert.AreEqual("AL-REALM-DIFFERENT-REALM-REJECTED", result.TechnicalCode);
+            Assert.AreEqual(RealmSelectionStatus.ProfileUnavailable, result.Status);
+            Assert.AreEqual("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE", result.TechnicalCode);
             Assert.False(result.MutationOccurred);
-            Assert.True(result.Persisted);
+            Assert.False(result.Persisted);
             Assert.AreEqual(RealmId.Stonehold, save.CurrentSave.SelectedRealm);
             Assert.AreEqual(0, save.SaveCallCount);
         }
 
         [Test]
-        public void FailedSaveRollsBackUncommittedRealmSelection()
+        public void UntypedFailingSaveCannotBeUsedAsRealmTransactionFallback()
         {
             var save = new FakeSaveGameService
             {
@@ -135,12 +135,12 @@ namespace AL.Tests.EditMode
 
             RealmSelectionResult result = service.TrySelectRealm(new RealmSelectionRequest("tx", RealmId.Umbral));
 
-            Assert.AreEqual(RealmSelectionStatus.SaveFailedPreviousPreserved, result.Status);
-            Assert.AreEqual("AL-REALM-SAVE-FAILED", result.TechnicalCode);
+            Assert.AreEqual(RealmSelectionStatus.ProfileUnavailable, result.Status);
+            Assert.AreEqual("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE", result.TechnicalCode);
             Assert.False(result.AllowsNavigation);
             Assert.AreEqual(RealmId.None, save.CurrentSave.SelectedRealm);
             Assert.AreEqual(RealmId.None, service.CurrentRealmId);
-            Assert.AreEqual(1, save.SaveCallCount);
+            Assert.AreEqual(0, save.SaveCallCount);
         }
 
         [Test]

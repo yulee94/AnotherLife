@@ -2,6 +2,9 @@ using System;
 using System.Runtime.CompilerServices;
 using AL.Core.SaveAuthority;
 using AL.Data.Runtime;
+using AL.Narrative.Nvs01;
+using AL.Narrative.Nvs01.Contracts;
+using AL.RealmSelection;
 
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
 
@@ -91,6 +94,28 @@ namespace AL.Services.Local
     {
         SaveCandidateCommitResult TryCommitCandidate(
             Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate);
+    }
+
+    /// <summary>
+    /// The only schema-v1 realm/bootstrap mutation entry point. It carries no
+    /// caller-provided mutation callback.
+    /// </summary>
+    internal interface ILegacyRealmSelectionCandidateStore
+    {
+        RealmSelectionResult TryCommitLegacyRealmSelection(
+            RealmSelectionRequest request);
+    }
+
+    /// <summary>
+    /// The only schema-v1 narrative mutation entry point. The complete typed
+    /// NVS-01 plan and verified catalog are interpreted inside the save root;
+    /// callers cannot supply an arbitrary save mutation callback.
+    /// </summary>
+    internal interface INvs01LegacyCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitNvs01LegacyCandidate(
+            Nvs01MutationPlan plan,
+            Nvs01VerifiedCatalog verifiedCatalog);
     }
 
     /// <summary>

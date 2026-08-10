@@ -567,7 +567,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void LocalSaveSuccessfulSaveAndCandidateCommitRebindSourceToPrimary()
+        public void ManualAndGenericCandidateWritesStayContainedBeforeMutation()
         {
             string root = CreateTempRoot();
             try
@@ -577,19 +577,32 @@ namespace AL.Tests.EditMode
                     saveService,
                     "CreateNewSave",
                     EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
+                object published = GetProperty(saveService, "CurrentSave");
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
 
-                SetObservedAuthoritySource(saveService, "Backup");
+                LogAssert.Expect(
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(saveService, "Save");
-                AssertAuthoritySource(saveService, "Primary");
+                Assert.AreEqual(
+                    "SaveFailedPreviousPreserved",
+                    GetProperty(saveService, "LastSaveStatus").ToString());
 
-                SetObservedAuthoritySource(saveService, "Backup");
                 object commit = InvokePreparedCandidate(
                     saveService,
                     "authority-transition-chapter");
                 Assert.AreEqual(
-                    "Committed",
+                    "ReadOnly",
                     GetProperty(commit, "Outcome").ToString());
-                AssertAuthoritySource(saveService, "Primary");
+                Assert.AreSame(published, GetProperty(saveService, "CurrentSave"));
+                Assert.AreNotEqual(
+                    "authority-transition-chapter",
+                    GetField(published, "CurrentChapterId"));
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
             }
             finally
             {
@@ -1417,7 +1430,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void CallerOwnedSavePersistsTypedMutationsExactlyWhenRequested()
+        public void TestOnlyAuthorityMutationCannotCrossManualSaveContainment()
         {
             string root = CreateTempRoot();
             try
@@ -1425,21 +1438,29 @@ namespace AL.Tests.EditMode
                 object saveService = CreateActualSaveService(root);
                 Invoke(saveService, "CreateNewSave", EnumValue(GetRuntimeType("AL.Core.RealmId"), "Crownlands"));
                 object currentSave = GetProperty(saveService, "CurrentSave");
+                string primaryPath = Path.Combine(root, "save.json");
+                string backupPath = Path.Combine(root, "save.backup.json");
+                byte[] primaryBefore = File.ReadAllBytes(primaryPath);
+                byte[] backupBefore = File.ReadAllBytes(backupPath);
                 SetField(currentSave, "WarzoneCredits", 10);
+                LogAssert.Expect(
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(saveService, "Save");
 
                 object creditService =
                     CreateCreditServiceForSaveServiceForTests(saveService);
-                AssertStatus(Invoke(creditService, "TryAddCredits", 5), "Applied");
+                AssertStatus(
+                    Invoke(creditService, "TryAddCredits", 5),
+                    "Applied");
 
-                object beforeExplicitSave = CreateActualSaveService(root);
-                Invoke(beforeExplicitSave, "Load");
-                Assert.AreEqual(10, GetField(GetProperty(beforeExplicitSave, "CurrentSave"), "WarzoneCredits"));
-
+                LogAssert.Expect(
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(saveService, "Save");
-                object afterExplicitSave = CreateActualSaveService(root);
-                Invoke(afterExplicitSave, "Load");
-                Assert.AreEqual(15, GetField(GetProperty(afterExplicitSave, "CurrentSave"), "WarzoneCredits"));
+                Assert.AreEqual(15, GetField(currentSave, "WarzoneCredits"));
+                CollectionAssert.AreEqual(primaryBefore, File.ReadAllBytes(primaryPath));
+                CollectionAssert.AreEqual(backupBefore, File.ReadAllBytes(backupPath));
             }
             finally
             {
@@ -1526,7 +1547,7 @@ namespace AL.Tests.EditMode
                 object bossLoot = CreateBossLootService(saveService);
                 object drop = CreateBossLootDrop("equipment_duplicate", 1);
                 LogAssert.Expect(LogType.Error, "AL-EQUIPMENT-INVENTORY-MALFORMED: Owned equipment mutation was rejected without changing persisted state.");
-                Assert.False((bool)Invoke(bossLoot, "TryAddOwnedEquipment", drop, "boss_a"));
+                Assert.False(InvokeOwnedEquipmentMutation(save, drop, "boss_a"));
                 Assert.AreEqual(1, GetField(first, "Quantity"));
                 Assert.AreEqual(3, GetField(duplicate, "Quantity"));
 
@@ -1535,7 +1556,7 @@ namespace AL.Tests.EditMode
                 inventory.Add(maximum);
                 object overflow = CreateBossLootDrop("equipment_maximum", 1);
                 LogAssert.Expect(LogType.Error, "AL-EQUIPMENT-QUANTITY-OVERFLOW: Owned equipment mutation was rejected without changing persisted state.");
-                Assert.False((bool)Invoke(bossLoot, "TryAddOwnedEquipment", overflow, "boss_a"));
+                Assert.False(InvokeOwnedEquipmentMutation(save, overflow, "boss_a"));
                 Assert.AreEqual(int.MaxValue, GetField(maximum, "Quantity"));
             }
             finally
@@ -1575,14 +1596,14 @@ namespace AL.Tests.EditMode
                 LogAssert.Expect(
                     LogType.Error,
                     "AL-EQUIPMENT-DEFINITION-DRIFT: Owned equipment mutation was rejected because the persisted definition does not match the awarded definition.");
-                Assert.False((bool)Invoke(bossLoot, "TryAddOwnedEquipment", driftedDrop, "boss_new"));
+                Assert.False(InvokeOwnedEquipmentMutation(save, driftedDrop, "boss_new"));
                 Assert.AreEqual(2, GetField(persisted, "Quantity"));
                 Assert.AreEqual(1L, GetField(persisted, "LastAcquiredTimestamp"));
                 Assert.IsNull(GetField(persisted, "SourceBossId"));
 
                 SetField(driftedDrop, "DisplayName", "Persisted Blade");
                 SetField(driftedDrop, "AttackBonus", 5);
-                Assert.True((bool)Invoke(bossLoot, "TryAddOwnedEquipment", driftedDrop, "boss_new"));
+                Assert.True(InvokeOwnedEquipmentMutation(save, driftedDrop, "boss_new"));
                 Assert.AreEqual(3, GetField(persisted, "Quantity"));
                 Assert.AreEqual("boss_new", GetField(persisted, "SourceBossId"));
             }
@@ -1623,7 +1644,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void BossLootApplicationCommitsOnceAndReplayIsNotificationFree()
+        public void BossLootApplicationAndReplayAreContainedBeforeMutation()
         {
             object save = CreateValidSave();
             var fixture = CreateSaveFixture(save);
@@ -1636,20 +1657,18 @@ namespace AL.Tests.EditMode
             object first = Invoke(service, "RollLoot", request);
             object replay = Invoke(service, "RollLoot", request);
 
-            AssertApplicationStatus(first, "Committed");
-            AssertApplicationStatus(replay, "AlreadyCommitted");
-            Assert.AreEqual(25, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
-            Assert.AreEqual(1, fixture.State.SaveCount);
-            Assert.AreEqual(1, notifications.State.Messages.Count);
+            AssertBossLootContained(first);
+            AssertBossLootContained(replay);
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.IsEmpty(notifications.State.Messages);
         }
 
-        [TestCase("SaveFailedPreviousPreserved", "SaveFailedRolledBack", false)]
-        [TestCase("CommitUncertain", "CommitUncertain", true)]
-        public void BossLootSaveBoundaryRollsBackOnlyWhenPreviousFileIsConfirmedPreserved(
-            string saveStatus,
-            string expectedApplicationStatus,
-            bool retainsPendingMutation)
+        [TestCase("SaveFailedPreviousPreserved")]
+        [TestCase("CommitUncertain")]
+        public void BossLootContainmentPrecedesDownstreamSaveStatus(
+            string saveStatus)
         {
             object save = CreateValidSave();
             var fixture = CreateSaveFixture(save);
@@ -1662,12 +1681,10 @@ namespace AL.Tests.EditMode
 
             object result = Invoke(service, "RollLoot", request);
 
-            AssertApplicationStatus(result, expectedApplicationStatus);
-            Assert.AreEqual(retainsPendingMutation ? 10 : 0, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(
-                retainsPendingMutation ? 1 : 0,
-                ((IList)GetField(save, "AppliedBossLootRewards")).Count);
-            Assert.AreEqual(1, fixture.State.SaveCount);
+            AssertBossLootContained(result);
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
             Assert.IsEmpty(notifications.State.Messages);
         }
 
@@ -1690,14 +1707,11 @@ namespace AL.Tests.EditMode
             object first = Invoke(service, "RollLoot", request);
             object retry = Invoke(service, "RollLoot", request);
 
-            AssertApplicationStatus(first, "CommitUncertain");
-            AssertApplicationStatus(retry, "CommitUncertain");
-            Assert.AreEqual(
-                "AL-BOSS-LOOT-COMMIT-UNCERTAIN-RECONCILIATION-REQUIRED",
-                GetField(retry, "DiagnosticCode"));
-            Assert.AreEqual(10, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
-            Assert.AreEqual(1, fixture.State.SaveCount);
+            AssertBossLootContained(first);
+            AssertBossLootContained(retry);
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
             Assert.IsEmpty(notifications.State.Messages);
         }
 
@@ -1722,10 +1736,7 @@ namespace AL.Tests.EditMode
                     "boss_throw",
                     10));
 
-            AssertApplicationStatus(result, "MutationFailedRolledBack");
-            Assert.AreEqual(
-                "AL-BOSS-LOOT-MUTATION-FAILED-ROLLED-BACK",
-                GetField(result, "DiagnosticCode"));
+            AssertBossLootContained(result);
             Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
             Assert.AreEqual(0, ((IList)GetField(save, "OwnedEquipment")).Count);
             Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
@@ -1774,23 +1785,16 @@ namespace AL.Tests.EditMode
                     Task.WaitAll(new Task[] { first, second }, TimeSpan.FromSeconds(10)),
                     "Concurrent boss-loot applications did not complete.");
 
-                CollectionAssert.AreEquivalent(
-                    new[] { "Committed", "AlreadyCommitted" },
-                    new[]
-                    {
-                        GetField(first.Result, "ApplicationStatus").ToString(),
-                        GetField(second.Result, "ApplicationStatus").ToString()
-                    });
+                AssertBossLootContained(first.Result);
+                AssertBossLootContained(second.Result);
             }
 
-            Assert.AreEqual(1, fixture.State.MaximumConcurrentCurrentSaveReads);
-            Assert.AreEqual(10, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
-            Assert.AreEqual(1, fixture.State.SaveCount);
-            Assert.AreEqual(
-                1,
-                firstNotifications.State.Messages.Count +
-                secondNotifications.State.Messages.Count);
+            Assert.AreEqual(0, fixture.State.MaximumConcurrentCurrentSaveReads);
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.IsEmpty(firstNotifications.State.Messages);
+            Assert.IsEmpty(secondNotifications.State.Messages);
         }
 
         [Test]
@@ -1816,7 +1820,7 @@ namespace AL.Tests.EditMode
                 "RollLoot",
                 CreateBossLootRequest("encounter_c", "new_result", "boss_c", 5));
 
-            AssertApplicationStatus(result, "RejectedMalformedState");
+            AssertBossLootContained(result);
             Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
             Assert.AreEqual(1, ledger.Count);
             Assert.AreEqual(0, fixture.State.SaveCount);
@@ -1869,7 +1873,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void WarmasterPurchaseCommitsOnceAndDuplicateIsFree()
+        public void WarmasterPurchaseAndDuplicateRemainContained()
         {
             object save = CreateValidSave();
             SetField(save, "WarzoneCredits", 100);
@@ -1877,15 +1881,15 @@ namespace AL.Tests.EditMode
             fixture.State.LastSaveStatus = "SavedPrimary";
             object service = CreateWarmasterService(fixture);
 
-            Assert.True((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
-            Assert.True((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
+            Assert.False((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
+            Assert.False((bool)Invoke(service, "PurchasePiece", "warmaster_piece_01", 10));
 
             object warmaster = GetField(save, "Warmaster");
-            Assert.AreEqual(90, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(1, ((IList)GetField(warmaster, "PurchasedPieceIds")).Count);
-            Assert.AreEqual(1, GetField(warmaster, "Level"));
-            Assert.AreEqual(25, GetField(warmaster, "Experience"));
-            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(100, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(warmaster, "PurchasedPieceIds")).Count);
+            Assert.AreEqual(0, GetField(warmaster, "Level"));
+            Assert.AreEqual(0, GetField(warmaster, "Experience"));
+            Assert.AreEqual(0, fixture.State.SaveCount);
         }
 
         [Test]
@@ -1905,11 +1909,11 @@ namespace AL.Tests.EditMode
             Assert.AreEqual(0, GetField(warmaster, "Level"));
             Assert.AreEqual(0, GetField(warmaster, "Experience"));
             Assert.False((bool)GetField(warmaster, "IsTrueWarmaster"));
-            Assert.AreEqual(1, fixture.State.SaveCount);
+            Assert.AreEqual(0, fixture.State.SaveCount);
         }
 
         [Test]
-        public void WarmasterThresholdUsesValidUniqueCatalogPieces()
+        public void WarmasterThresholdCannotBeReachedWhileWritesAreContained()
         {
             object save = CreateValidSave();
             SetField(save, "WarzoneCredits", 1000);
@@ -1919,16 +1923,17 @@ namespace AL.Tests.EditMode
 
             for (int index = 1; index <= 10; index++)
             {
-                Assert.True((bool)Invoke(service, "PurchasePiece", $"warmaster_piece_{index:00}", 10));
+                Assert.False((bool)Invoke(service, "PurchasePiece", $"warmaster_piece_{index:00}", 10));
             }
 
             object warmaster = GetField(save, "Warmaster");
-            Assert.AreEqual(900, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(10, Invoke(service, "GetPurchasedPieceCount"));
-            Assert.True((bool)Invoke(service, "IsTrueWarmaster"));
-            Assert.True((bool)GetField(warmaster, "IsTrueWarmaster"));
-            Assert.Contains("prototype_true_warmaster", (IList)GetField(warmaster, "UnlockedSetIds"));
-            Assert.AreEqual("prototype_true_warmaster", GetField(warmaster, "EquippedSetId"));
+            Assert.AreEqual(1000, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, Invoke(service, "GetPurchasedPieceCount"));
+            Assert.False((bool)Invoke(service, "IsTrueWarmaster"));
+            Assert.False((bool)GetField(warmaster, "IsTrueWarmaster"));
+            Assert.IsEmpty((IList)GetField(warmaster, "UnlockedSetIds"));
+            Assert.IsNull(GetField(warmaster, "EquippedSetId"));
+            Assert.AreEqual(0, fixture.State.SaveCount);
         }
 
         [Test]
@@ -1956,7 +1961,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void BossLootReplayAfterSaveReloadDoesNotRepeatRewardOrNotification()
+        public void BossLootContainmentPersistsAcrossReloadWithoutRewardOrNotification()
         {
             string root = CreateTempRoot();
             try
@@ -1980,7 +1985,7 @@ namespace AL.Tests.EditMode
                     "boss_reload",
                     25);
 
-                AssertApplicationStatus(Invoke(firstBossLoot, "RollLoot", request), "Committed");
+                AssertBossLootContained(Invoke(firstBossLoot, "RollLoot", request));
 
                 object reloadedSaveService = CreateActualSaveService(root);
                 Invoke(reloadedSaveService, "Load");
@@ -1993,14 +1998,13 @@ namespace AL.Tests.EditMode
                     reloadedCredits,
                     replayNotifications.Proxy);
 
-                AssertApplicationStatus(
-                    Invoke(reloadedBossLoot, "RollLoot", request),
-                    "AlreadyCommitted");
+                AssertBossLootContained(
+                    Invoke(reloadedBossLoot, "RollLoot", request));
                 object reloadedSave = GetProperty(reloadedSaveService, "CurrentSave");
-                Assert.AreEqual(25, GetField(reloadedSave, "WarzoneCredits"));
-                Assert.AreEqual(1, ((IList)GetField(reloadedSave, "AppliedBossLootRewards")).Count);
+                Assert.AreEqual(0, GetField(reloadedSave, "WarzoneCredits"));
+                Assert.AreEqual(0, ((IList)GetField(reloadedSave, "AppliedBossLootRewards")).Count);
                 Assert.IsEmpty(replayNotifications.State.Messages);
-                Assert.AreEqual(1, firstNotifications.State.ShowMessageCount);
+                Assert.AreEqual(0, firstNotifications.State.ShowMessageCount);
             }
             finally
             {
@@ -2009,7 +2013,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void BossLootInvalidRequestAndExplicitNoLootAreDistinctFailClosedOutcomes()
+        public void BossLootInvalidRequestAndValidNoLootRemainDistinctWhileContained()
         {
             object save = CreateValidSave();
             var fixture = CreateSaveFixture(save);
@@ -2027,14 +2031,14 @@ namespace AL.Tests.EditMode
                 "result_no_loot",
                 "boss_no_loot",
                 0);
-            AssertApplicationStatus(Invoke(service, "RollLoot", noLoot), "Committed");
-            Assert.AreEqual(1, fixture.State.SaveCount);
-            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            AssertBossLootContained(Invoke(service, "RollLoot", noLoot));
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
             Assert.IsEmpty(notifications.State.Messages);
         }
 
         [Test]
-        public void BossLootNotificationFailureCannotUndoDurableCommit()
+        public void BossLootContainmentPreventsNotificationBoundaryInvocation()
         {
             object save = CreateValidSave();
             var fixture = CreateSaveFixture(save);
@@ -2044,17 +2048,16 @@ namespace AL.Tests.EditMode
             notifications.State.ThrowOnMessage = true;
             object service = CreateBossLootService(fixture.Proxy, credits, notifications.Proxy);
 
-            LogAssert.Expect(LogType.Warning, new Regex("AL-BOSS-LOOT-NOTIFICATION-FAILED"));
             object result = Invoke(
                 service,
                 "RollLoot",
                 CreateBossLootRequest("encounter_notify", "result_notify", "boss_notify", 5));
 
-            AssertApplicationStatus(result, "Committed");
-            Assert.AreEqual(5, GetField(save, "WarzoneCredits"));
-            Assert.AreEqual(1, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
-            Assert.AreEqual(1, fixture.State.SaveCount);
-            Assert.AreEqual(1, notifications.State.ShowMessageCount);
+            AssertBossLootContained(result);
+            Assert.AreEqual(0, GetField(save, "WarzoneCredits"));
+            Assert.AreEqual(0, ((IList)GetField(save, "AppliedBossLootRewards")).Count);
+            Assert.AreEqual(0, fixture.State.SaveCount);
+            Assert.AreEqual(0, notifications.State.ShowMessageCount);
         }
 
         private static void AssertTryRare(MethodInfo method, object realm, string expectedResource, bool expectedSuccess)
@@ -2084,6 +2087,14 @@ namespace AL.Tests.EditMode
         {
             Assert.NotNull(result);
             Assert.AreEqual(expected, GetField(result, "ApplicationStatus").ToString());
+        }
+
+        private static void AssertBossLootContained(object result)
+        {
+            AssertApplicationStatus(result, "RejectedCreditMutation");
+            Assert.AreEqual(
+                "AL-BOSS-LOOT-PROFILE-NOT-WRITABLE",
+                GetField(result, "DiagnosticCode"));
         }
 
         private static void AssertMutation(
@@ -2849,6 +2860,20 @@ namespace AL.Tests.EditMode
                 .FirstOrDefault(candidate => candidate.Name == methodName && candidate.GetParameters().Length == args.Length);
             Assert.NotNull(method, $"Expected method {methodName}.");
             return method.Invoke(target, args);
+        }
+
+        private static bool InvokeOwnedEquipmentMutation(
+            object save,
+            object drop,
+            string bossId)
+        {
+            Type serviceType = GetRuntimeType(
+                "AL.Services.Local.LocalBossLootService");
+            MethodInfo method = serviceType.GetMethod(
+                "TryAddOwnedEquipment",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(method, "Expected isolated equipment mutation helper.");
+            return (bool)method.Invoke(null, new[] { save, drop, bossId });
         }
 
         private static object EnumValue(Type enumType, string value) => Enum.Parse(enumType, value);

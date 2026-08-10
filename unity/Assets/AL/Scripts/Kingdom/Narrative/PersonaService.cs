@@ -32,17 +32,34 @@ namespace AL.Services.Local
 
         public void AdjustTrait(PersonaTrait trait, int delta)
         {
-            if (Persona == null) return;
+            if (!ProfileMutationContainment.TryGetMutableSave(
+                    _saveGameService,
+                    ProfileMutationSurfaceIds.Persona,
+                    out SaveGameData save) ||
+                save.LordPersona == null)
+            {
+                return;
+            }
+
+            PersonaData persona = save.LordPersona;
 
             switch (trait)
             {
-                case PersonaTrait.Warlord: Persona.Warlord += delta; break;
-                case PersonaTrait.Diplomat: Persona.Diplomat += delta; break;
-                case PersonaTrait.Sage: Persona.Sage += delta; break;
-                case PersonaTrait.Rogue: Persona.Rogue += delta; break;
+                case PersonaTrait.Warlord: persona.Warlord += delta; break;
+                case PersonaTrait.Diplomat: persona.Diplomat += delta; break;
+                case PersonaTrait.Sage: persona.Sage += delta; break;
+                case PersonaTrait.Rogue: persona.Rogue += delta; break;
             }
 
-            Debug.Log($"[Persona] {trait} adjusted by {delta}. Current: {GetTraitValue(trait)}");
+            int current = trait switch
+            {
+                PersonaTrait.Warlord => persona.Warlord,
+                PersonaTrait.Diplomat => persona.Diplomat,
+                PersonaTrait.Sage => persona.Sage,
+                PersonaTrait.Rogue => persona.Rogue,
+                _ => 0
+            };
+            Debug.Log($"[Persona] {trait} adjusted by {delta}. Current: {current}");
             _saveGameService.Save();
         }
 

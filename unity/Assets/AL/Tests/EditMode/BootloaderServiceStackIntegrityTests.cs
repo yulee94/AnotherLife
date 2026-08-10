@@ -939,7 +939,7 @@ namespace AL.Tests.EditMode
         // ---------------------------------------------------------------------
 
         [Test]
-        public void OwnerPauseSavesExactlyOnce()
+        public void OwnerPauseIsContainedBeforeCurrentSaveReadOrSaveCall()
         {
             object fake = InstallControllableSaveOwner(false, out var bootloader, out var host);
             try
@@ -949,7 +949,8 @@ namespace AL.Tests.EditMode
 
                 Invoke(bootloader, "OnApplicationPause", true);
 
-                Assert.AreEqual(1, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "CurrentSaveReadCount"));
                 Assert.AreSame(fake, GetService(Iface("ISaveGameService")));
             }
             finally
@@ -959,14 +960,14 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void PauseWithNullCurrentSaveLogsSaveFailedWithoutThrow()
+        public void PauseWithNullCurrentSaveIsContainedWithoutReadingIt()
         {
             object fake = InstallControllableSaveOwner(false, out var bootloader, out var host);
             try
             {
-                LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_SAVE_FAILED\]"));
                 Assert.DoesNotThrow(() => Invoke(bootloader, "OnApplicationPause", true));
                 Assert.AreEqual(0, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "CurrentSaveReadCount"));
             }
             finally
             {
@@ -975,7 +976,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void PauseWithThrowingSaveIsCaught()
+        public void PauseContainmentPrecedesThrowingSaveImplementation()
         {
             object fake = InstallControllableSaveOwner(false, out var bootloader, out var host);
             try
@@ -983,9 +984,9 @@ namespace AL.Tests.EditMode
                 Invoke(fake, "SeedCurrentSave");
                 SetInstanceField(fake, "ThrowOnSave", true);
 
-                LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_SAVE_FAILED\]"));
                 Assert.DoesNotThrow(() => Invoke(bootloader, "OnApplicationQuit"));
-                Assert.AreEqual(1, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "CurrentSaveReadCount"));
             }
             finally
             {
@@ -994,7 +995,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void PauseWithNonPrimarySaveStatusLogsFailure()
+        public void PauseContainmentPrecedesExistingNonPrimaryStatus()
         {
             object fake = InstallControllableSaveOwner(false, out var bootloader, out var host);
             try
@@ -1003,9 +1004,9 @@ namespace AL.Tests.EditMode
                 SetInstanceField(fake, "SaveStatusToReport",
                     EnumValue("AL.Core.Interfaces.SaveOperationStatus", "SaveFailedPreviousPreserved"));
 
-                LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_SAVE_FAILED\]"));
                 Invoke(bootloader, "OnApplicationPause", true);
-                Assert.AreEqual(1, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "CurrentSaveReadCount"));
             }
             finally
             {
@@ -1068,7 +1069,7 @@ namespace AL.Tests.EditMode
         // ---------------------------------------------------------------------
 
         [Test]
-        public void TwoOwnersProduceOneLoadOneTickOneSave()
+        public void TwoOwnersProduceOneLoadOneTickAndNoContainedLifecycleSave()
         {
             object save = InstallControllableSave();
             object resource = NewInternal("AL.Core.CountingResourceService");
@@ -1085,7 +1086,8 @@ namespace AL.Tests.EditMode
                 LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_RUNTIME_OWNER_REJECTED\]"));
                 Invoke(second, "Awake");
                 // Second stays enabled in standby but never becomes the owner while the first is alive,
-                // so it contributes zero loads/ticks/saves and the one-load/one-tick/one-save invariant holds.
+                // so it contributes zero loads/ticks/saves; the active owner is
+                // independently contained before a lifecycle save.
                 Assert.True(second.enabled);
 
                 Invoke(first, "Update");
@@ -1096,7 +1098,11 @@ namespace AL.Tests.EditMode
 
                 Assert.AreEqual(1, GetInstanceField(save, "LoadCount"));
                 Assert.AreEqual(1, GetInstanceField(resource, "TickCount"));
-                Assert.AreEqual(1, GetInstanceField(save, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(save, "SaveCount"));
+                Assert.AreEqual(
+                    1,
+                    GetInstanceField(save, "CurrentSaveReadCount"),
+                    "The one active-owner Update reads the published save; both lifecycle callbacks remain contained before any additional read.");
             }
             finally
             {
@@ -1257,10 +1263,10 @@ namespace AL.Tests.EditMode
                 Assert.True((bool)Invoke(marker, "TryReleaseRuntimeOwner", OwnerIdOf(bootloader)));
                 Assert.True((bool)Invoke(marker, "TryClaimRuntimeOwner", "foreign-owner"));
 
-                LogAssert.Expect(LogType.Error, new Regex(@"\[BOOT_STACK_SAVE_FAILED\]"));
                 Invoke(bootloader, "OnApplicationPause", true);
 
                 Assert.AreEqual(0, GetInstanceField(fake, "SaveCount"));
+                Assert.AreEqual(0, GetInstanceField(fake, "CurrentSaveReadCount"));
             }
             finally
             {

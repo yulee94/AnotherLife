@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
@@ -12,6 +13,7 @@ using AL.Data.Catalogs;
 using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
+using AL.RealmSelection;
 
 namespace AL.Services.Local
 {
@@ -211,6 +213,8 @@ namespace AL.Services.Local
         ISaveLoadDispositionProvider,
         ISaveOperationDispositionProvider,
         ISaveGameCandidateStore,
+        ILegacyRealmSelectionCandidateStore,
+        INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
     {
         private const string SaveFileName = "save.json";
@@ -234,6 +238,10 @@ namespace AL.Services.Local
             "AL-SAVE-AUTH-RECOVERY-REQUIRED";
         private const string AuthorityDeletedCode =
             "AL-SAVE-AUTH-DELETED";
+        private const string LegacyRealmOperationId =
+            "al.save.schema1.realm-selection.v1";
+        private const string LegacyNvs01OperationId =
+            "al.save.schema1.nvs01.v1";
 
         private static readonly ProfileWriteAuthoritySnapshot
             MigrationRequiredPrimary =
@@ -414,6 +422,7 @@ namespace AL.Services.Local
         private int _cachedObservedNonWritableSaveSchemaVersion;
         private int
             _cachedObservedNonWritableProfileInitializationVersion;
+        private int _legacyCandidateCommitActive;
 
         public SaveGameData CurrentSave => _currentSave;
         public SaveLoadStatus LastLoadStatus { get; private set; }
@@ -714,10 +723,30 @@ namespace AL.Services.Local
 
         public void Save()
         {
-            if (!_profileWritable && LastSaveStatus == SaveOperationStatus.CommitUncertain)
+            if (!_profileWritable &&
+                LastSaveStatus == SaveOperationStatus.CommitUncertain)
             {
                 Debug.LogError(
                     "AL-SAVE-COMMIT-UNCERTAIN-BLOCKED: Persistence remains frozen until the canonical save inventory is reloaded and reconciled.");
+                return;
+            }
+
+            if (!ProfileMutationContainment.CanInvokeManualSave(this))
+            {
+                const string containedMessage =
+                    "AL-SAVE-MANUAL-WRITE-CONTAINED: Arbitrary profile persistence is disabled until the profile-bound migration train is explicitly approved and activated.";
+                LastSaveDisposition = CreateSaveDisposition(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    containedMessage);
+                SetSaveStatus(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    containedMessage,
+                    false);
                 return;
             }
 
@@ -775,6 +804,7 @@ namespace AL.Services.Local
             SaveOperationStatus status = PersistCandidate(
                 CloneSave(_currentSave),
                 requiredRecoveryWitnessBytes,
+                null,
                 out SaveGameData persistedSave,
                 out SaveOperationDisposition disposition,
                 out string message);
@@ -817,7 +847,235 @@ namespace AL.Services.Local
             SetSaveStatus(status, message, true);
         }
 
+        RealmSelectionResult
+            ILegacyRealmSelectionCandidateStore.TryCommitLegacyRealmSelection(
+                RealmSelectionRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.InvalidTransaction,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-TRANSACTION-INVALID");
+            }
+
+            if (!Enum.IsDefined(typeof(RealmId), request.RequestedRealmId))
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.InvalidRealm,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-REQUEST-INVALID");
+            }
+
+            if (!TryEnterLegacyCandidateCoordinator(LegacyRealmOperationId))
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.InvalidTransaction,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (_currentSave == null)
+                {
+                    return TryCommitFirstLegacyRealm(request);
+                }
+
+                if (!TryGetExactLegacyPrimaryProfile(out SaveGameData published))
+                {
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.ProfileUnavailable,
+                        request.RequestedRealmId,
+                        false,
+                        false,
+                        "AL-REALM-PROFILE-READ-ONLY");
+                }
+
+                RealmId existing = published.SelectedRealm;
+                if (existing != RealmId.None &&
+                    existing != request.RequestedRealmId)
+                {
+                    return LegacyRealmResult(
+                        RealmSelectionStatus.RejectedDifferentRealm,
+                        request.RequestedRealmId,
+                        false,
+                        true,
+                        "AL-REALM-DIFFERENT-REALM-REJECTED");
+                }
+
+                SaveCandidateCommitResult commit =
+                    TryCommitLegacyCandidateCore(candidate =>
+                    {
+                        if (candidate == null ||
+                            candidate.SaveSchemaVersion !=
+                                SaveAuthorityTechnicalLimits
+                                    .LegacySaveSchemaVersion ||
+                            candidate.ProfileInitializationVersion !=
+                                SaveAuthorityTechnicalLimits
+                                    .LegacyProfileInitializationVersion ||
+                            !string.IsNullOrEmpty(candidate.ProfileId) ||
+                            candidate.SelectedRealm != existing)
+                        {
+                            return SaveCandidateMutationPreparation.Rejected(
+                                "AL-REALM-AUTHORITY-CONFLICT");
+                        }
+
+                        if (existing == request.RequestedRealmId)
+                        {
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        }
+
+                        candidate.SelectedRealm = request.RequestedRealmId;
+                        return SaveCandidateMutationPreparation.Prepared();
+                    });
+
+                switch (commit.Outcome)
+                {
+                    case SaveCandidateCommitOutcome.Committed:
+                        return LegacyRealmResult(
+                            RealmSelectionStatus.Committed,
+                            request.RequestedRealmId,
+                            true,
+                            true,
+                            "AL-REALM-COMMITTED");
+                    case SaveCandidateCommitOutcome.Duplicate:
+                        return LegacyRealmResult(
+                            RealmSelectionStatus.AlreadyCommittedSameRealm,
+                            request.RequestedRealmId,
+                            false,
+                            true,
+                            "AL-REALM-ALREADY-COMMITTED");
+                    case SaveCandidateCommitOutcome.CommitUncertain:
+                    case SaveCandidateCommitOutcome.PreviousPreserved:
+                        return LegacyRealmResult(
+                            RealmSelectionStatus.SaveFailedPreviousPreserved,
+                            request.RequestedRealmId,
+                            false,
+                            false,
+                            "AL-REALM-SAVE-FAILED");
+                    default:
+                        return LegacyRealmResult(
+                            RealmSelectionStatus.ProfileUnavailable,
+                            request.RequestedRealmId,
+                            false,
+                            false,
+                            "AL-REALM-PROFILE-READ-ONLY");
+                }
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
+        SaveCandidateCommitResult
+            INvs01LegacyCandidateStore.TryCommitNvs01LegacyCandidate(
+                Nvs01MutationPlan plan,
+                Nvs01VerifiedCatalog verifiedCatalog)
+        {
+            if (plan?.Expected == null ||
+                plan.Candidate == null ||
+                verifiedCatalog == null)
+            {
+                return LegacyCandidateRejected(
+                    "AL-NVS01-SAVE-PROGRESS-UNAVAILABLE");
+            }
+
+            if (!TryEnterLegacyCandidateCoordinator(LegacyNvs01OperationId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-NVS01-SAVE-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyNvsProfile(
+                        out SaveGameData published))
+                {
+                    return LegacyCandidateRejected(
+                        "AL-NVS01-SAVE-AUTHORITY-CONFLICT");
+                }
+
+                if (published.SelectedRealm == RealmId.None ||
+                    !TryMapRealmIdToCanonical(
+                        published.SelectedRealm,
+                        out string committedRealmId) ||
+                    !string.Equals(
+                        plan.Candidate.CommittedRealmId,
+                        committedRealmId,
+                        StringComparison.Ordinal) ||
+                    !string.IsNullOrEmpty(plan.Expected.CommittedRealmId) &&
+                    !string.Equals(
+                        plan.Expected.CommittedRealmId,
+                        committedRealmId,
+                        StringComparison.Ordinal))
+                {
+                    return LegacyCandidateRejected(
+                        "AL-NVS01-SAVE-AUTHORITY-CONFLICT");
+                }
+
+                if (!TryVerifyExactPublishedPrimaryTwice(
+                        published,
+                        out _))
+                {
+                    return LegacyCandidateRejected(
+                        "AL-NVS01-SAVE-GENERATION-CONFLICT");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits
+                                .LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits
+                                .LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-NVS01-SAVE-AUTHORITY-CONFLICT");
+                    }
+
+                    SaveCandidateMutationPreparation preparation =
+                        Nvs01SaveGameMutationCommitter.PrepareLegacyCandidate(
+                            candidate,
+                            plan,
+                            verifiedCatalog);
+                    if (candidate.SelectedRealm != expectedRealm)
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-NVS01-SAVE-AUTHORITY-CONFLICT");
+                    }
+
+                    return preparation;
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
         SaveCandidateCommitResult ISaveGameCandidateStore.TryCommitCandidate(
+            Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate)
+        {
+            return new SaveCandidateCommitResult(
+                SaveCandidateCommitOutcome.ReadOnly,
+                _currentSave,
+                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only the typed realm-selection and NVS-01 adapters.");
+        }
+
+        private SaveCandidateCommitResult TryCommitLegacyCandidateCore(
             Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate)
         {
             if (prepareCandidate == null)
@@ -849,26 +1107,17 @@ namespace AL.Services.Local
                     out _,
                     out _))
             {
-                const string witnessChangedMessage =
-                    "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact recovery evidence changed before the candidate commit; persistence was frozen.";
-                _profileWritable = false;
-                _readOnlyCandidate = CloneSave(publishedBefore);
-                LastSaveDisposition = CreateSaveDisposition(
-                    SaveOperationStatus.SaveFailedPreviousPreserved,
-                    false,
-                    false,
-                    false,
-                    false,
-                    false,
-                    witnessChangedMessage);
-                SetSaveStatus(
-                    SaveOperationStatus.SaveFailedPreviousPreserved,
-                    witnessChangedMessage,
-                    true);
-                return new SaveCandidateCommitResult(
-                    SaveCandidateCommitOutcome.PreviousPreserved,
+                return RejectChangedCommittedRecoveryWitness(publishedBefore);
+            }
+
+            if (!TryCaptureLegacyCandidateAuthority(
                     publishedBefore,
-                    witnessChangedMessage);
+                    out SaveAuthorityBaseline requiredLegacyBaseline,
+                    out string authorityConflictMessage))
+            {
+                return RejectTypedLegacyAuthorityConflict(
+                    publishedBefore,
+                    authorityConflictMessage);
             }
 
             SaveGameData candidate = CloneSave(publishedBefore);
@@ -898,6 +1147,8 @@ namespace AL.Services.Local
             {
                 if (!TryVerifyPublishedCandidateAuthorityTwice(
                         publishedBefore,
+                        requiredLegacyBaseline,
+                        requiredRecoveryWitnessBytes,
                         out string duplicateVerificationMessage))
                 {
                     _profileWritable = false;
@@ -956,6 +1207,7 @@ namespace AL.Services.Local
             SaveOperationStatus status = PersistCandidate(
                 candidate,
                 requiredRecoveryWitnessBytes,
+                requiredLegacyBaseline,
                 out SaveGameData persistedSave,
                 out SaveOperationDisposition disposition,
                 out string message);
@@ -999,12 +1251,233 @@ namespace AL.Services.Local
                 message);
         }
 
-        private bool TryVerifyPublishedCandidateAuthorityTwice(
+        private RealmSelectionResult TryCommitFirstLegacyRealm(
+            RealmSelectionRequest request)
+        {
+            if (!AllCanonicalPathsMissing(includeTemp: true))
+            {
+                return LegacyRealmResult(
+                    RealmSelectionStatus.ProfileUnavailable,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-PROFILE-EVIDENCE-REQUIRES-LOAD");
+            }
+
+            SaveGameData candidate = CreateDefaultSave(request.RequestedRealmId);
+            SaveOperationDisposition firstGenerationDisposition = null;
+            bool coreSucceeded = TryCreateFirstGenerationCandidate(
+                candidate,
+                out SaveGameData persisted,
+                out string message,
+                out bool diskChanged);
+            SaveOperationStatus reconciledStatus =
+                ReconcileFirstGenerationAttempt(
+                    candidate,
+                    coreSucceeded,
+                    diskChanged,
+                    ref persisted,
+                    out firstGenerationDisposition,
+                    ref message);
+            if (reconciledStatus != SaveOperationStatus.SavedPrimary ||
+                persisted == null)
+            {
+                _profileWritable = false;
+                _readOnlyCandidate = CloneSave(candidate);
+                LastSaveDisposition = firstGenerationDisposition;
+                SetSaveStatus(reconciledStatus, message, true);
+                return LegacyRealmResult(
+                    RealmSelectionStatus.SaveFailedPreviousPreserved,
+                    request.RequestedRealmId,
+                    false,
+                    false,
+                    "AL-REALM-SAVE-FAILED");
+            }
+
+            _profileDeleted = false;
+            _currentSave = persisted;
+            _readOnlyCandidate = null;
+            _profileWritable = true;
+            _committedRecoveryWitnessBytes = null;
+            _committedInvalidPrimaryWitnessBytes = null;
+            _committedInvalidPrimaryQuarantinePath = null;
+            _committedInvalidPrimaryRecoveryMarkerBytes = null;
+            _committedInvalidPrimaryRecoveryMarkerPath = null;
+            ObservePrimaryAuthority(persisted);
+            LastLoadStatus = SaveLoadStatus.None;
+            LastLoadMessage = string.Empty;
+            LastLoadDisposition = null;
+            LastSaveDisposition = firstGenerationDisposition;
+            SetSaveStatus(SaveOperationStatus.SavedPrimary, message, false);
+            return LegacyRealmResult(
+                RealmSelectionStatus.Committed,
+                request.RequestedRealmId,
+                true,
+                true,
+                "AL-REALM-COMMITTED");
+        }
+
+        private bool TryGetExactLegacyPrimaryProfile(
+            out SaveGameData published)
+        {
+            published = _currentSave;
+            if (!HasExactLegacyProfileMetadata(published))
+            {
+                return false;
+            }
+
+            ProfileWriteAuthoritySnapshot authority = GetCurrentAuthority();
+            return authority != null &&
+                authority.Status ==
+                    ProfileWriteAuthorityStatus.MigrationRequired &&
+                authority.HasSelectedSourceGeneration &&
+                authority.SelectedSourceGeneration ==
+                    ProfileAuthoritySourceGeneration.Primary &&
+                authority.SaveSchemaVersion ==
+                    SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+                authority.ProfileInitializationVersion ==
+                    SaveAuthorityTechnicalLimits
+                        .LegacyProfileInitializationVersion;
+        }
+
+        private bool TryGetExactLegacyNvsProfile(
+            out SaveGameData published)
+        {
+            if (TryGetExactLegacyPrimaryProfile(out published))
+            {
+                return true;
+            }
+
+            published = _currentSave;
+            if (!HasExactLegacyProfileMetadata(published) ||
+                LastLoadStatus != SaveLoadStatus.RecoveredFromBackup ||
+                _committedRecoveryWitnessBytes == null)
+            {
+                return false;
+            }
+
+            ProfileWriteAuthoritySnapshot authority = GetCurrentAuthority();
+            if (authority == null ||
+                authority.Status !=
+                    ProfileWriteAuthorityStatus.MigrationRequired ||
+                !authority.HasSelectedSourceGeneration ||
+                authority.SelectedSourceGeneration !=
+                    ProfileAuthoritySourceGeneration.Backup ||
+                authority.SaveSchemaVersion !=
+                    SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                authority.ProfileInitializationVersion !=
+                    SaveAuthorityTechnicalLimits
+                        .LegacyProfileInitializationVersion)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool HasExactLegacyProfileMetadata(SaveGameData published) =>
+            _profileWritable &&
+            published != null &&
+            published.SaveSchemaVersion ==
+                SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+            published.ProfileInitializationVersion ==
+                SaveAuthorityTechnicalLimits
+                    .LegacyProfileInitializationVersion &&
+            string.IsNullOrEmpty(published.ProfileId);
+
+        private bool TryEnterLegacyCandidateCoordinator(string operationId)
+        {
+            if (!string.Equals(
+                    operationId,
+                    LegacyRealmOperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyNvs01OperationId,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            return Interlocked.CompareExchange(
+                ref _legacyCandidateCommitActive,
+                1,
+                0) == 0;
+        }
+
+        private void ExitLegacyCandidateCoordinator()
+        {
+            Volatile.Write(ref _legacyCandidateCommitActive, 0);
+        }
+
+        private SaveCandidateCommitResult LegacyCandidateRejected(
+            string message) =>
+            new SaveCandidateCommitResult(
+                SaveCandidateCommitOutcome.ReadOnly,
+                _currentSave,
+                message);
+
+        private SaveCandidateCommitResult
+            RejectChangedCommittedRecoveryWitness(
+                SaveGameData publishedBefore)
+        {
+            const string witnessChangedMessage =
+                "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact recovery evidence changed before the candidate commit; persistence was frozen.";
+            _profileWritable = false;
+            _readOnlyCandidate = CloneSave(publishedBefore);
+            LastSaveDisposition = CreateSaveDisposition(
+                SaveOperationStatus.SaveFailedPreviousPreserved,
+                false,
+                false,
+                false,
+                false,
+                false,
+                witnessChangedMessage);
+            SetSaveStatus(
+                SaveOperationStatus.SaveFailedPreviousPreserved,
+                witnessChangedMessage,
+                true);
+            return new SaveCandidateCommitResult(
+                SaveCandidateCommitOutcome.PreviousPreserved,
+                publishedBefore,
+                witnessChangedMessage);
+        }
+
+        private SaveCandidateCommitResult RejectTypedLegacyAuthorityConflict(
+            SaveGameData publishedBefore,
+            string message)
+        {
+            string conflictMessage = string.IsNullOrWhiteSpace(message)
+                ? "AL-SAVE-TYPED-AUTHORITY-CONFLICT: Exact primary and backup authority could not be pinned before candidate preparation."
+                : message;
+            _profileWritable = false;
+            _readOnlyCandidate = CloneSave(publishedBefore);
+            LastSaveDisposition = CreateSaveDisposition(
+                SaveOperationStatus.SaveFailedPreviousPreserved,
+                false,
+                false,
+                false,
+                false,
+                false,
+                conflictMessage);
+            SetSaveStatus(
+                SaveOperationStatus.SaveFailedPreviousPreserved,
+                conflictMessage,
+                true);
+            return new SaveCandidateCommitResult(
+                SaveCandidateCommitOutcome.PreviousPreserved,
+                publishedBefore,
+                conflictMessage);
+        }
+
+        private bool TryCaptureLegacyCandidateAuthority(
             SaveGameData publishedSave,
+            out SaveAuthorityBaseline baseline,
             out string message)
         {
+            baseline = null;
             message =
-                "AL-SAVE-DUPLICATE-UNVERIFIED: The published save no longer has an exact, stable canonical authority; persistence was frozen.";
+                "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT: The published legacy save could not be pinned to an exact primary generation.";
             if (publishedSave == null ||
                 !TrySerializeBounded(
                     publishedSave,
@@ -1015,42 +1488,230 @@ namespace AL.Services.Local
             }
 
             byte[] publishedBytes = StrictUtf8.GetBytes(publishedJson);
-            SaveCanonicalLedger first = CaptureCanonicalLedger();
+            SaveFileReadResult primary = ReadCanonicalPath(SavePath);
             if (!IsExactValidGeneration(
-                    first.Primary,
+                    primary,
                     publishedBytes,
-                    out _) ||
-                first.Backup.Disposition != SaveFileReadDisposition.Read ||
+                    out _))
+            {
+                return false;
+            }
+
+            SaveFileReadResult backup = ReadCanonicalPath(BackupPath);
+            if (backup.Disposition != SaveFileReadDisposition.Read ||
                 !TryDeserializeValidSaveBytes(
-                    first.Backup.Bytes,
+                    backup.Bytes,
                     out _,
                     out _,
-                    SaveCandidateSourceGeneration.Backup) ||
-                first.Temp.Disposition != SaveFileReadDisposition.Missing ||
-                first.Previous.Disposition != SaveFileReadDisposition.Missing ||
-                !IsCommittedRecoveryMarkerCleanupVerified() ||
-                !IsCommittedInvalidPrimaryQuarantineIntact())
+                    SaveCandidateSourceGeneration.Backup))
+            {
+                message =
+                    "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT: A valid exact backup generation is required before typed legacy candidate preparation.";
+                return false;
+            }
+
+            baseline = new SaveAuthorityBaseline(primary, backup);
+            message = string.Empty;
+            return true;
+        }
+
+        private static bool TryMatchPinnedLegacyAuthority(
+            SaveAuthorityBaseline actual,
+            SaveAuthorityBaseline expected,
+            out string message)
+        {
+            if (actual == null || expected == null ||
+                !MatchesExactState(actual.Primary, expected.Primary))
+            {
+                message =
+                    "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT: Primary authority changed after typed candidate preflight; no filesystem mutation was attempted.";
+                return false;
+            }
+
+            if (!MatchesExactState(actual.Backup, expected.Backup))
+            {
+                message =
+                    "AL-SAVE-TYPED-BACKUP-GENERATION-CONFLICT: Backup authority changed after typed candidate preflight; no filesystem mutation was attempted.";
+                return false;
+            }
+
+            message = string.Empty;
+            return true;
+        }
+
+        private RealmSelectionResult LegacyRealmResult(
+            RealmSelectionStatus status,
+            RealmId requested,
+            bool mutationOccurred,
+            bool persisted,
+            string technicalCode) =>
+            new RealmSelectionResult(
+                status,
+                requested,
+                _currentSave?.SelectedRealm ?? RealmId.None,
+                mutationOccurred,
+                persisted,
+                technicalCode);
+
+        private static bool TryMapRealmIdToCanonical(
+            RealmId realmId,
+            out string canonical)
+        {
+            switch (realmId)
+            {
+                case RealmId.Crownlands:
+                    canonical = "crownlands";
+                    return true;
+                case RealmId.Stonehold:
+                    canonical = "stonehold";
+                    return true;
+                case RealmId.Eldergrove:
+                    canonical = "eldergrove";
+                    return true;
+                case RealmId.Umbral:
+                    canonical = "umbral";
+                    return true;
+                default:
+                    canonical = string.Empty;
+                    return false;
+            }
+        }
+
+        private bool TryVerifyPublishedCandidateAuthorityTwice(
+            SaveGameData publishedSave,
+            SaveAuthorityBaseline requiredLegacyBaseline,
+            byte[] requiredRecoveryWitnessBytes,
+            out string message)
+        {
+            message =
+                "AL-SAVE-DUPLICATE-UNVERIFIED: The published save no longer has an exact, stable canonical authority; persistence was frozen.";
+            if (publishedSave == null ||
+                requiredLegacyBaseline == null ||
+                !TrySerializeBounded(
+                    publishedSave,
+                    out string publishedJson,
+                    out _))
+            {
+                return false;
+            }
+
+            byte[] publishedBytes = StrictUtf8.GetBytes(publishedJson);
+            SaveCanonicalLedger first = CaptureCanonicalLedger();
+            if (!TryVerifyPublishedCandidateAuthority(
+                    first,
+                    publishedBytes,
+                    requiredLegacyBaseline,
+                    requiredRecoveryWitnessBytes,
+                    out message))
             {
                 return false;
             }
 
             SaveCanonicalLedger second = CaptureCanonicalLedger();
-            if (!IsExactValidGeneration(
-                    second.Primary,
+            if (!TryVerifyPublishedCandidateAuthority(
+                    second,
                     publishedBytes,
-                    out _) ||
-                !MatchesExactState(second.Backup, first.Backup) ||
-                second.Temp.Disposition != SaveFileReadDisposition.Missing ||
-                second.Previous.Disposition != SaveFileReadDisposition.Missing ||
-                !IsCommittedRecoveryMarkerCleanupVerified() ||
-                !IsCommittedInvalidPrimaryQuarantineIntact())
+                    requiredLegacyBaseline,
+                    requiredRecoveryWitnessBytes,
+                    out message))
             {
                 return false;
             }
 
-            message =
-                "AL-SAVE-DUPLICATE-VERIFIED: The published save and canonical authority matched exactly across two bounded inventories.";
+            message = requiredRecoveryWitnessBytes == null
+                ? "AL-SAVE-DUPLICATE-VERIFIED: The published save and pinned primary/backup authority matched exactly across two bounded inventories."
+                : "AL-SAVE-DUPLICATE-RECOVERY-VERIFIED: The published save and complete committed recovery witness matched exactly across two bounded inventories.";
             return true;
+        }
+
+        private bool TryVerifyPublishedCandidateAuthority(
+            SaveCanonicalLedger ledger,
+            byte[] publishedBytes,
+            SaveAuthorityBaseline requiredLegacyBaseline,
+            byte[] requiredRecoveryWitnessBytes,
+            out string message)
+        {
+            message =
+                "AL-SAVE-DUPLICATE-UNVERIFIED: The canonical authority inventory was unavailable during duplicate verification.";
+            if (ledger == null)
+            {
+                return false;
+            }
+
+            if (!TryMatchPinnedLegacyAuthority(
+                    new SaveAuthorityBaseline(
+                        ledger.Primary,
+                        ledger.Backup),
+                    requiredLegacyBaseline,
+                    out message))
+            {
+                return false;
+            }
+
+            if (!IsExactValidGeneration(
+                    ledger.Primary,
+                    publishedBytes,
+                    out _))
+            {
+                message =
+                    "AL-SAVE-TYPED-PRIMARY-GENERATION-CONFLICT: The published save no longer matches the exact primary authority captured before duplicate preparation.";
+                return false;
+            }
+
+            if (requiredRecoveryWitnessBytes != null)
+            {
+                if (!IsCommittedRecoveryWitnessTarget(
+                        ledger,
+                        requiredRecoveryWitnessBytes,
+                        out _))
+                {
+                    message =
+                        "AL-SAVE-RECOVERY-WITNESS-CHANGED: Exact primary, backup, staged witness, previous-generation, or committed quarantine identity changed during duplicate verification; persistence was frozen.";
+                    return false;
+                }
+
+                message = string.Empty;
+                return true;
+            }
+
+            if (ledger.Temp.Disposition != SaveFileReadDisposition.Missing ||
+                ledger.Previous.Disposition != SaveFileReadDisposition.Missing ||
+                !IsCommittedRecoveryMarkerCleanupVerified() ||
+                !IsCommittedInvalidPrimaryQuarantineIntact())
+            {
+                message =
+                    "AL-SAVE-DUPLICATE-UNVERIFIED: Temp, previous-generation, recovery-marker, or quarantine authority was not the exact normal duplicate target.";
+                return false;
+            }
+
+            message = string.Empty;
+            return true;
+        }
+
+        private bool TryVerifyExactPublishedPrimaryTwice(
+            SaveGameData publishedSave,
+            out string message)
+        {
+            message =
+                "AL-NVS01-SAVE-GENERATION-CONFLICT: The published legacy save no longer matches a stable exact primary generation.";
+            if (publishedSave == null ||
+                !TrySerializeBounded(
+                    publishedSave,
+                    out string publishedJson,
+                    out _))
+            {
+                return false;
+            }
+
+            byte[] publishedBytes = StrictUtf8.GetBytes(publishedJson);
+            SaveFileReadResult first = ReadCanonicalPath(SavePath);
+            if (!IsExactValidGeneration(first, publishedBytes, out _))
+            {
+                return false;
+            }
+
+            SaveFileReadResult second = ReadCanonicalPath(SavePath);
+            return IsExactValidGeneration(second, publishedBytes, out _);
         }
 
         public void Load()
@@ -1478,27 +2139,20 @@ namespace AL.Services.Local
 
         public void CreateNewSave(RealmId realmId)
         {
-            _profileDeleted = false;
-            ResetObservedAuthority();
-            _currentSave = CreateDefaultSave(realmId);
-            _readOnlyCandidate = null;
-            _profileWritable = true;
-            _committedRecoveryWitnessBytes = null;
-            _committedInvalidPrimaryWitnessBytes = null;
-            _committedInvalidPrimaryQuarantinePath = null;
-            _committedInvalidPrimaryRecoveryMarkerBytes = null;
-            _committedInvalidPrimaryRecoveryMarkerPath = null;
-            LastLoadStatus = SaveLoadStatus.None;
-            LastLoadMessage = string.Empty;
-            LastLoadDisposition = null;
-            LastSaveStatus = SaveOperationStatus.None;
-            LastSaveMessage = string.Empty;
-            LastSaveDisposition = null;
-            Save();
+            ((ILegacyRealmSelectionCandidateStore)this)
+                .TryCommitLegacyRealmSelection(
+                    new RealmSelectionRequest(
+                        Guid.NewGuid().ToString("N"),
+                        realmId));
         }
 
         public void DeleteSave()
         {
+            if (!ProfileMutationContainment.CanInvokeDeleteSave(this))
+            {
+                return;
+            }
+
             _profileDeleted = false;
             var deletionTargets = new List<string>
             {
@@ -1609,6 +2263,7 @@ namespace AL.Services.Local
         private SaveOperationStatus PersistCandidate(
             SaveGameData candidate,
             byte[] requiredRecoveryWitnessBytes,
+            SaveAuthorityBaseline requiredLegacyBaseline,
             out SaveGameData persistedSave,
             out SaveOperationDisposition disposition,
             out string message)
@@ -1628,6 +2283,23 @@ namespace AL.Services.Local
             catch (Exception ex)
             {
                 message = $"AL-SAVE-BASELINE-READ-FAILED: Canonical authority could not be inventoried before persistence. {ex.GetType().Name}";
+                disposition = CreateSaveDisposition(
+                    SaveOperationStatus.CommitUncertain,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    message);
+                return SaveOperationStatus.CommitUncertain;
+            }
+
+            if (requiredLegacyBaseline != null &&
+                !TryMatchPinnedLegacyAuthority(
+                    baseline,
+                    requiredLegacyBaseline,
+                    out message))
+            {
                 disposition = CreateSaveDisposition(
                     SaveOperationStatus.CommitUncertain,
                     false,
@@ -1710,6 +2382,7 @@ namespace AL.Services.Local
                     baseline.Primary,
                     priorPrimaryValid,
                     requiredRecoveryWitnessBytes,
+                    requiredLegacyBaseline,
                     trace,
                     out message,
                     out bool coreMayHaveMutated);
@@ -1751,6 +2424,7 @@ namespace AL.Services.Local
             SaveFileReadResult baselinePrimary,
             bool primaryValid,
             byte[] requiredRecoveryWitnessBytes,
+            SaveAuthorityBaseline requiredLegacyBaseline,
             SaveTransactionTrace trace,
             out string message,
             out bool mayHaveMutated)
@@ -1758,7 +2432,20 @@ namespace AL.Services.Local
             mayHaveMutated = false;
             try
             {
-                _fileOperations.CreateDirectory(PersistencePath);
+                if (requiredLegacyBaseline != null)
+                {
+                    var consumptionBaseline = new SaveAuthorityBaseline(
+                        ReadCanonicalPath(SavePath),
+                        ReadCanonicalPath(BackupPath));
+                    if (!TryMatchPinnedLegacyAuthority(
+                            consumptionBaseline,
+                            requiredLegacyBaseline,
+                            out message))
+                    {
+                        return false;
+                    }
+                }
+
                 if (requiredRecoveryWitnessBytes != null &&
                     !IsCommittedRecoveryWitnessTarget(
                         CaptureCanonicalLedger(),
@@ -1770,8 +2457,20 @@ namespace AL.Services.Local
                     return false;
                 }
 
+                _fileOperations.CreateDirectory(PersistencePath);
+
+                bool previousExisted =
+                    _fileOperations.FileExists(PreviousPath);
+                if (previousExisted && !TryDelete(PreviousPath))
+                {
+                    mayHaveMutated = true;
+                    message = "AL-SAVE-PREVIOUS-CLEANUP-FAILED: The stale previous generation could not be removed before candidate staging.";
+                    return false;
+                }
+
+                mayHaveMutated |= previousExisted;
                 bool tempExisted = _fileOperations.FileExists(TempPath);
-                if (!TryDelete(TempPath))
+                if (tempExisted && !TryDelete(TempPath))
                 {
                     mayHaveMutated |= tempExisted;
                     message = "AL-SAVE-TEMP-CLEANUP-FAILED: Existing temporary save could not be removed before preparing a new candidate.";
@@ -1997,6 +2696,58 @@ namespace AL.Services.Local
                 previousAuthorityVerified,
                 message);
             return status;
+        }
+
+        private SaveOperationStatus ReconcileFirstGenerationAttempt(
+            SaveGameData candidate,
+            bool coreSucceeded,
+            bool mayHaveMutated,
+            ref SaveGameData persistedSave,
+            out SaveOperationDisposition disposition,
+            ref string message)
+        {
+            if (!TrySerializeBounded(
+                    candidate,
+                    out string candidateJson,
+                    out string serializationMessage))
+            {
+                SaveOperationStatus unavailableStatus = mayHaveMutated
+                    ? SaveOperationStatus.CommitUncertain
+                    : SaveOperationStatus.SaveFailedPreviousPreserved;
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = serializationMessage;
+                }
+
+                disposition = CreateSaveDisposition(
+                    unavailableStatus,
+                    mayHaveMutated,
+                    false,
+                    false,
+                    false,
+                    false,
+                    message);
+                return unavailableStatus;
+            }
+
+            var missing = new SaveFileReadResult(
+                SaveFileReadDisposition.Missing,
+                null,
+                0,
+                "SAVE_FILE_MISSING");
+            var baseline = new SaveAuthorityBaseline(missing, missing);
+            byte[] candidateBytes = StrictUtf8.GetBytes(candidateJson);
+            return ReconcileSaveAttempt(
+                baseline,
+                candidateBytes,
+                candidateBytes,
+                coreSucceeded,
+                mayHaveMutated,
+                candidate,
+                null,
+                ref persistedSave,
+                out disposition,
+                ref message);
         }
 
         private SaveFileReadResult ReadCanonicalPath(string path)
@@ -3521,9 +4272,9 @@ namespace AL.Services.Local
             bool primaryInstalled = false;
             try
             {
-                if (!TryDelete(PreviousPath))
+                if (_fileOperations.FileExists(PreviousPath))
                 {
-                    message = "AL-SAVE-PREVIOUS-CLEANUP-FAILED: The stale previous generation could not be removed before atomic install.";
+                    message = "AL-SAVE-PREVIOUS-APPEARED: Previous-generation evidence appeared after candidate staging; no atomic install was attempted.";
                     return false;
                 }
 
@@ -3579,9 +4330,9 @@ namespace AL.Services.Local
         {
             try
             {
-                if (!TryDelete(PreviousPath))
+                if (_fileOperations.FileExists(PreviousPath))
                 {
-                    message = "AL-SAVE-PREVIOUS-CLEANUP-FAILED: The stale previous generation could not be removed before fallback install.";
+                    message = "AL-SAVE-PREVIOUS-APPEARED: Previous-generation evidence appeared after candidate staging; no move fallback was attempted.";
                     return false;
                 }
 
@@ -4169,15 +4920,23 @@ namespace AL.Services.Local
             IReadOnlyList<SaveCandidateInventoryEntry> inventory)
         {
             SaveGameData newSave = CreateDefaultSave(RealmId.None);
-            _currentSave = newSave;
-            _readOnlyCandidate = null;
-            _profileWritable = true;
+            SaveGameData firstGenerationCandidate = CloneSave(newSave);
 
-            if (!TryCreateFirstGenerationCandidate(
-                    CloneSave(newSave),
+            bool coreSucceeded = TryCreateFirstGenerationCandidate(
+                    firstGenerationCandidate,
                     out SaveGameData persistedNewSave,
                     out string createMessage,
-                    out bool diskChanged))
+                    out bool diskChanged);
+            SaveOperationStatus reconciledStatus =
+                ReconcileFirstGenerationAttempt(
+                    firstGenerationCandidate,
+                    coreSucceeded,
+                    diskChanged,
+                    ref persistedNewSave,
+                    out _,
+                    ref createMessage);
+            if (reconciledStatus != SaveOperationStatus.SavedPrimary ||
+                persistedNewSave == null)
             {
                 _profileWritable = false;
                 _readOnlyCandidate = CloneSave(newSave);

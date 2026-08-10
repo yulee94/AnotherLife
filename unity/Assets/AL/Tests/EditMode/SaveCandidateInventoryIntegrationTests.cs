@@ -189,8 +189,8 @@ namespace AL.Tests.EditMode
                         "SemanticOutcome").ToString());
 
                 LogAssert.Expect(
-                    LogType.Error,
-                    new Regex("^AL-SAVE-READ-ONLY-DISPOSITION:"));
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(service, "Save");
                 Assert.AreEqual(
                     "SaveFailedPreviousPreserved",
@@ -261,8 +261,8 @@ namespace AL.Tests.EditMode
                 AssertDirectoryUnchanged(root, originalDirectory);
 
                 LogAssert.Expect(
-                    LogType.Error,
-                    new Regex("^AL-SAVE-READ-ONLY-DISPOSITION:"));
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(service, "Save");
 
                 Assert.AreEqual(
@@ -349,8 +349,8 @@ namespace AL.Tests.EditMode
                         "SemanticOutcome").ToString());
 
                 LogAssert.Expect(
-                    LogType.Error,
-                    new Regex("^AL-SAVE-READ-ONLY-DISPOSITION:"));
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(service, "Save");
 
                 Assert.AreEqual(
@@ -436,8 +436,8 @@ namespace AL.Tests.EditMode
                 Dictionary<string, byte[]> originalDirectory = SnapshotDirectory(root);
 
                 LogAssert.Expect(
-                    LogType.Error,
-                    new Regex("^AL-SAVE-CANDIDATE-TOO-LARGE:"));
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(service, "Save");
 
                 Assert.AreEqual(
@@ -445,7 +445,7 @@ namespace AL.Tests.EditMode
                     GetProperty(service, "LastSaveStatus").ToString());
                 Assert.That(
                     (string)GetProperty(service, "LastSaveMessage"),
-                    Does.StartWith("AL-SAVE-CANDIDATE-TOO-LARGE:"));
+                    Does.StartWith("AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 AssertDirectoryUnchanged(root, originalDirectory);
                 Assert.False(
                     Directory.GetFiles(root)
@@ -706,8 +706,8 @@ namespace AL.Tests.EditMode
                 Dictionary<string, byte[]> originalDirectory = SnapshotDirectory(root);
 
                 LogAssert.Expect(
-                    LogType.Error,
-                    new Regex("^AL-SAVE-CANDIDATE-TOO-LARGE:"));
+                    LogType.Log,
+                    new Regex("^AL-SAVE-MANUAL-WRITE-CONTAINED:"));
                 Invoke(service, "Save");
 
                 Assert.AreEqual(

@@ -93,7 +93,12 @@ namespace AL.Services.Local
 
         public void MarkWishgateEarned(string reason)
         {
-            var wishgate = _saveGameService.CurrentSave?.Wishgate;
+            if (!TryGetMutableSave(out SaveGameData save))
+            {
+                return;
+            }
+
+            var wishgate = save.Wishgate;
             if (wishgate == null || string.IsNullOrWhiteSpace(reason))
             {
                 return;
@@ -106,7 +111,12 @@ namespace AL.Services.Local
 
         public void ChooseWishReward(string rewardId)
         {
-            var wishgate = _saveGameService.CurrentSave?.Wishgate;
+            if (!TryGetMutableSave(out SaveGameData save))
+            {
+                return;
+            }
+
+            var wishgate = save.Wishgate;
             if (wishgate == null || !wishgate.IsEarned || string.IsNullOrWhiteSpace(rewardId))
             {
                 return;
@@ -159,7 +169,12 @@ namespace AL.Services.Local
                 return false;
             }
 
-            List<RealmGemState> gems = _saveGameService.CurrentSave?.RealmGems;
+            if (!TryGetMutableSave(out SaveGameData save))
+            {
+                return false;
+            }
+
+            List<RealmGemState> gems = save.RealmGems;
             if (gems == null)
             {
                 return false;
@@ -179,6 +194,12 @@ namespace AL.Services.Local
             gem = matches[0];
             return true;
         }
+
+        private bool TryGetMutableSave(out SaveGameData save) =>
+            ProfileMutationContainment.TryGetMutableSave(
+                _saveGameService,
+                ProfileMutationSurfaceIds.RealmGem,
+                out save);
 
         private static bool HasValidCustody(RealmGemState gem, long now) =>
             gem != null &&
