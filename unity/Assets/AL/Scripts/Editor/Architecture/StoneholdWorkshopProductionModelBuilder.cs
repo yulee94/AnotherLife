@@ -441,7 +441,7 @@ namespace AL.Editor.Architecture
             var mesh = new Mesh
             {
                 name = name,
-                indexFormat = IndexFormat.UInt32
+                indexFormat = IndexFormat.UInt16
             };
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);

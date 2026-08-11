@@ -525,7 +525,7 @@ namespace AL.Editor.Architecture
                 var final = new Mesh
                 {
                     name = name,
-                    indexFormat = IndexFormat.UInt32
+                    indexFormat = IndexFormat.UInt16
                 };
                 var combines = categoryMeshes
                     .Select(mesh => new CombineInstance
@@ -587,7 +587,7 @@ namespace AL.Editor.Architecture
                 var combined = new Mesh
                 {
                     name = name,
-                    indexFormat = IndexFormat.UInt32
+                    indexFormat = IndexFormat.UInt16
                 };
                 combined.CombineMeshes(combines, true, true, false);
                 combined.RecalculateBounds();

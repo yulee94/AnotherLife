@@ -210,6 +210,34 @@ namespace AL.Tests.EditMode.Architecture
         }
 
         [Test]
+        public void ProductionMeshesUseSixteenBitIndices()
+        {
+            string[] meshGuids = AssetDatabase.FindAssets(
+                "t:Mesh",
+                new[] { GeneratedArchitectureFolder });
+            Assert.That(
+                meshGuids,
+                Has.Length.EqualTo(264),
+                "The production architecture mesh inventory changed; review the " +
+                "mobile-memory budget before updating this expectation.");
+
+            foreach (string guid in meshGuids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
+                Assert.That(mesh, Is.Not.Null, assetPath);
+                Assert.That(
+                    mesh.vertexCount,
+                    Is.LessThanOrEqualTo(ushort.MaxValue),
+                    $"{assetPath} exceeds the sixteen-bit vertex budget.");
+                Assert.That(
+                    mesh.indexFormat,
+                    Is.EqualTo(IndexFormat.UInt16),
+                    $"{assetPath} uses an unnecessary 32-bit index buffer.");
+            }
+        }
+
+        [Test]
         public void EldergroveWorkshopLevelProgressionRemainsAValidatedSourceOnlyAsset()
         {
             Texture2D sheet =
