@@ -1337,6 +1337,11 @@ namespace AL.Development
 
         private static void EnsureBannerNoLock(bool blocked)
         {
+            if (!Application.isPlaying)
+            {
+                return;
+            }
+
             if (_bannerObject != null)
             {
                 var existing = _bannerObject.GetComponent<EditorGameTestModeBanner>();

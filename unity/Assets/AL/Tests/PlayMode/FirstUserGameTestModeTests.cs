@@ -177,7 +177,11 @@ namespace AL.Tests.PlayMode
             EditorGameTestModeBootstrap.EnterFailClosedState(
                 Guid.NewGuid().ToString("N"),
                 "tampered recovery metadata");
+            Assert.IsNotNull(UnityEngine.GameObject.Find("[AL] Isolated Game Test Mode"));
 
+            LogAssert.Expect(
+                UnityEngine.LogType.Error,
+                "[BOOT_STACK_CONSTRUCTION_FAILED] Could not construct offline service stack: AL-ISOLATED-TEST-FAIL-CLOSED: tampered recovery metadata");
             BootloaderInitializationResult initialization = Bootloader.InitializeIfMissing();
 
             Assert.IsFalse(initialization.Succeeded);

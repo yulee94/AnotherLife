@@ -300,10 +300,19 @@ namespace AL.Tests.EditMode
             Func<object> foreignFactory = () => new object();
             _saveFactoryField.SetValue(null, foreignFactory);
 
-            EditorGameTestModeBootstrap.EnterFailClosedState(
+            Assert.DoesNotThrow(() => EditorGameTestModeBootstrap.EnterFailClosedState(
                 Guid.NewGuid().ToString("N"),
-                "forced recovery failure");
+                "forced recovery failure"));
+            Assert.IsNull(GameObject.Find("[AL] Isolated Game Test Mode"));
             Assert.AreNotSame(foreignFactory, _saveFactoryField.GetValue(null));
+
+            var failClosedFactory = (Delegate)_saveFactoryField.GetValue(null);
+            TargetInvocationException exception = Assert.Throws<TargetInvocationException>(
+                () => failClosedFactory.DynamicInvoke());
+            Assert.IsInstanceOf<InvalidOperationException>(exception.InnerException);
+            StringAssert.Contains(
+                "AL-ISOLATED-TEST-FAIL-CLOSED: forced recovery failure",
+                exception.InnerException.Message);
 
             EditorGameTestModeBootstrap.Disarm();
             Assert.AreSame(foreignFactory, _saveFactoryField.GetValue(null));
@@ -391,16 +400,39 @@ namespace AL.Tests.EditMode
                 generated.Add(path);
             }
 
-            Assert.IsFalse(EditorGameTestModeBootstrap.TryDeleteOwnedRoot(
-                plan,
-                out EditorGameTestModeFailure failure,
-                out _));
-            Assert.AreEqual(EditorGameTestModeFailure.CleanupInventoryTooLarge, failure);
-            Assert.IsTrue(Directory.Exists(plan.IsolatedSaveRoot));
-
-            foreach (string path in generated)
+            try
             {
-                File.Delete(path);
+                Assert.IsFalse(EditorGameTestModeBootstrap.TryDeleteOwnedRoot(
+                    plan,
+                    out EditorGameTestModeFailure failure,
+                    out _));
+                Assert.AreEqual(EditorGameTestModeFailure.CleanupInventoryTooLarge, failure);
+                Assert.IsTrue(Directory.Exists(plan.IsolatedSaveRoot));
+            }
+            finally
+            {
+                Assert.IsTrue(EditorGameTestModeBootstrap.TryValidateOwnedRoot(
+                    plan,
+                    requireFreshRoot: false,
+                    out _,
+                    out string cleanupMessage), cleanupMessage);
+                string validatedRoot = Path.GetFullPath(plan.IsolatedSaveRoot);
+                foreach (string path in generated)
+                {
+                    string validatedPath = Path.GetFullPath(path);
+                    Assert.AreEqual(validatedRoot, Path.GetDirectoryName(validatedPath));
+                    var file = new FileInfo(validatedPath);
+                    file.Refresh();
+                    if (!file.Exists)
+                    {
+                        continue;
+                    }
+
+                    Assert.IsFalse(
+                        (file.Attributes & FileAttributes.ReparsePoint) != 0,
+                        "Test cleanup refused to follow a replaced inventory entry.");
+                    file.Delete();
+                }
             }
         }
 
