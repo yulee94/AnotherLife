@@ -52,6 +52,9 @@ namespace AL.Tests.EditMode.Architecture
         private const string ConceptSheetFolder =
             "Assets/AL/Art/Architecture/ConceptSheets";
 
+        private const string GeneratedArchitectureFolder =
+            "Assets/AL/Art/Generated/Architecture";
+
         private const string EldergroveWorkshopLevelProgressionPath =
             ConceptSheetFolder +
             "/architecture_eldergrove_workshop_level_progression_v001.png";
@@ -179,6 +182,58 @@ namespace AL.Tests.EditMode.Architecture
                     importer.npotScale,
                     Is.EqualTo(TextureImporterNPOTScale.None),
                     assetPath);
+            }
+        }
+
+        [Test]
+        public void ProductionMeshesReleaseCpuCopies()
+        {
+            string[] meshGuids = AssetDatabase.FindAssets(
+                "t:Mesh",
+                new[] { GeneratedArchitectureFolder });
+            Assert.That(
+                meshGuids,
+                Has.Length.EqualTo(264),
+                "The production architecture mesh inventory changed; review the " +
+                "mobile-memory budget before updating this expectation.");
+
+            foreach (string guid in meshGuids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
+                Assert.That(mesh, Is.Not.Null, assetPath);
+                Assert.That(
+                    mesh.isReadable,
+                    Is.False,
+                    $"{assetPath} retains a duplicate CPU-side mesh copy.");
+            }
+        }
+
+        [Test]
+        public void ProductionMeshesUseSixteenBitIndices()
+        {
+            string[] meshGuids = AssetDatabase.FindAssets(
+                "t:Mesh",
+                new[] { GeneratedArchitectureFolder });
+            Assert.That(
+                meshGuids,
+                Has.Length.EqualTo(264),
+                "The production architecture mesh inventory changed; review the " +
+                "mobile-memory budget before updating this expectation.");
+
+            foreach (string guid in meshGuids)
+            {
+                string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                Mesh mesh = AssetDatabase.LoadAssetAtPath<Mesh>(assetPath);
+                Assert.That(mesh, Is.Not.Null, assetPath);
+                Assert.That(
+                    mesh.vertexCount,
+                    Is.LessThanOrEqualTo(ushort.MaxValue),
+                    $"{assetPath} exceeds the sixteen-bit vertex budget.");
+                Assert.That(
+                    mesh.indexFormat,
+                    Is.EqualTo(IndexFormat.UInt16),
+                    $"{assetPath} uses an unnecessary 32-bit index buffer.");
             }
         }
 
