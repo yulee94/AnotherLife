@@ -6,6 +6,8 @@ import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Looper
 import android.view.Gravity
+import android.view.KeyEvent
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -217,6 +219,15 @@ internal class UnityRuntimeContainer internal constructor(
     private val bridgeSession = UnityBridgeSession()
     private val grantedLeaseHandoff = UnityRuntimeGrantedLeaseHandoff()
     private val activationLeaseState = UnityRuntimeActivationLeaseState()
+    private val runtimeStatus = UnityRuntimeContainerStatusPublisher(
+        UnityRuntimeContainerSnapshot(
+            phase = UnityRuntimeContainerPhase.RequestingOwnership,
+            ownership = UnityRuntimeContainerOwnership.NeverCreated,
+            teardown = UnityRuntimeContainerTeardownEvidence.NotStarted
+        )
+    ) { observer, snapshot ->
+        post { runCatching { observer.onChanged(snapshot) } }
+    }
     private val callbackDispatcher = UnityBridgeCallbackDispatcher(
         postToMain = { action -> post(action) },
         onPayload = ::handleOutcome,
@@ -238,6 +249,7 @@ internal class UnityRuntimeContainer internal constructor(
     private var latestWindowFocus = false
     private var terminalRuntimeFailure: String? = null
     private var ownershipReleaseBlocked = false
+    private var inputRevoked = false
     private val destroyed: Boolean
         get() = activationLeaseState.isClosed()
     private var activeLaunch: UnityRouteLaunch? = null
@@ -297,7 +309,7 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     fun resumeUnity() {
-        if (destroyed) return
+        if (destroyed || inputRevoked) return
         lifecycleState = Lifecycle.State.RESUMED
         val controller = lifecycleController ?: return
         controller.resume()
@@ -320,7 +332,38 @@ internal class UnityRuntimeContainer internal constructor(
         closeAfterLifecycleFailure(controller)
     }
 
+    /** Fences Android input and Unity focus before a launch owner requests teardown. */
+    internal fun revokeInputAndFocus(): Boolean {
+        inputRevoked = true
+        lifecycleState = Lifecycle.State.CREATED
+        val androidInputFenced = runCatching {
+            isEnabled = false
+            isClickable = false
+            isFocusable = false
+            isFocusableInTouchMode = false
+            isPressed = false
+            importantForAccessibility = IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
+            descendantFocusability = FOCUS_BLOCK_DESCENDANTS
+            clearFocus()
+        }.isSuccess
+
+        latestWindowFocus = false
+        val controller = lifecycleController
+        controller?.onWindowFocusChanged(false)
+        controller?.stop()
+        if (controller != null) closeAfterLifecycleFailure(controller)
+        val lifecycleFenced = controller?.snapshot()?.let { snapshot ->
+            snapshot.state != UnityHostLifecycleState.Resumed &&
+                !snapshot.forwardedWindowFocus
+        } != false
+        return androidInputFenced && inputRevoked && lifecycleFenced
+    }
+
     fun synchronizeLifecycle(state: Lifecycle.State) {
+        if (inputRevoked && state != Lifecycle.State.DESTROYED) {
+            lifecycleState = Lifecycle.State.CREATED
+            return
+        }
         lifecycleState = state
         when {
             state == Lifecycle.State.DESTROYED -> destroyUnity()
@@ -329,17 +372,30 @@ internal class UnityRuntimeContainer internal constructor(
         }
     }
 
-    fun destroyUnity() {
-        val closeDecision = activationLeaseState.close() ?: return
+    fun destroyUnity(): UnityRuntimeContainerTeardownResult {
+        val closeDecision = activationLeaseState.close()
+            ?: return runtimeStatus.teardownResult()
+        runtimeStatus.update { current ->
+            current.copy(
+                phase = UnityRuntimeContainerPhase.Destroying,
+                teardown = UnityRuntimeContainerTeardownEvidence.InProgress
+            )
+        }
         callbackDispatcher.close()
         bridgeSession.close()
-        grantedLeaseHandoff.close()?.let(dependencies.ownershipRegistry::release)
+        grantedLeaseHandoff.close()?.let { lease ->
+            if (!dependencies.ownershipRegistry.release(lease)) {
+                ownershipReleaseBlocked = true
+            }
+        }
         ownershipWaitToken?.let(dependencies.ownershipRegistry::cancel)
         ownershipWaitToken = null
 
         // An activation permit owns all partial resources until its next close checkpoint. It
         // performs the only cleanup and cannot return the lease until that cleanup is proven.
-        if (closeDecision is UnityRuntimeActivationCloseDecision.ActivationWillClean) return
+        if (closeDecision is UnityRuntimeActivationCloseDecision.ActivationWillClean) {
+            return UnityRuntimeContainerTeardownResult.AwaitingCleanup
+        }
 
         closeDecision as UnityRuntimeActivationCloseDecision.DestroyWillClean
         callbackToken?.let(UnityBridgeCallbacks::clear)
@@ -351,14 +407,34 @@ internal class UnityRuntimeContainer internal constructor(
         val playerView = runCatching { player?.view }.getOrNull()
         val viewsReleased = runCatching { removeAllViews() }.isSuccess &&
             (player == null || (playerView != null && playerView.parent == null))
-        if (
+        val resourcesReleased =
             componentCallbacksReleased &&
             controller?.canReleaseOwnership() != false &&
             viewsReleased &&
             !ownershipReleaseBlocked
-        ) {
-            closeDecision.lease?.let(dependencies.ownershipRegistry::release)
+        val leaseReleased = if (resourcesReleased) {
+            closeDecision.lease?.let(dependencies.ownershipRegistry::release) != false
+        } else {
+            false
         }
+        val teardownConfirmed = resourcesReleased && leaseReleased
+        if (!teardownConfirmed) ownershipReleaseBlocked = true
+        runtimeStatus.update { current ->
+            current.copy(
+                phase = UnityRuntimeContainerPhase.Destroyed,
+                ownership = if (teardownConfirmed) {
+                    UnityRuntimeContainerOwnership.NeverCreated
+                } else {
+                    UnityRuntimeContainerOwnership.Uncertain
+                },
+                teardown = if (teardownConfirmed) {
+                    UnityRuntimeContainerTeardownEvidence.Confirmed
+                } else {
+                    UnityRuntimeContainerTeardownEvidence.Uncertain
+                }
+            )
+        }
+        return runtimeStatus.teardownResult()
     }
 
     override fun onAttachedToWindow() {
@@ -376,11 +452,21 @@ internal class UnityRuntimeContainer internal constructor(
         windowFocusChangedUnity(hasWindowFocus)
     }
 
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean =
+        if (inputRevoked) true else super.dispatchTouchEvent(event)
+
+    override fun dispatchGenericMotionEvent(event: MotionEvent): Boolean =
+        if (inputRevoked) true else super.dispatchGenericMotionEvent(event)
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean =
+        if (inputRevoked) true else super.dispatchKeyEvent(event)
+
     private fun windowFocusChangedUnity(hasWindowFocus: Boolean) {
         if (destroyed) return
-        latestWindowFocus = hasWindowFocus
+        val admittedFocus = hasWindowFocus && !inputRevoked
+        latestWindowFocus = admittedFocus
         val controller = lifecycleController ?: return
-        controller.onWindowFocusChanged(hasWindowFocus)
+        controller.onWindowFocusChanged(admittedFocus)
         closeAfterLifecycleFailure(controller)
     }
 
@@ -409,6 +495,12 @@ internal class UnityRuntimeContainer internal constructor(
         controller: UnityHostLifecycleController<Configuration>
     ) {
         if (!controller.isDestroyed() || destroyed) return
+        runtimeStatus.update { current ->
+            current.copy(
+                phase = UnityRuntimeContainerPhase.Failed,
+                failure = UnityRuntimeContainerFailure.LifecycleFailed
+            )
+        }
         destroyUnity()
         showStatus("Unity runtime unavailable\nLifecycle failure")
     }
@@ -416,6 +508,13 @@ internal class UnityRuntimeContainer internal constructor(
     internal fun statusTextForTesting(): String = statusView.text.toString()
 
     internal fun callbackAdmissionSnapshotForTesting() = callbackDispatcher.snapshot()
+
+    internal fun runtimeStatusSnapshot(): UnityRuntimeContainerSnapshot =
+        runtimeStatus.snapshot()
+
+    internal fun observeRuntimeStatus(observer: UnityRuntimeContainerObserver?) {
+        runtimeStatus.observe(observer)
+    }
 
     private fun requestOwnership() {
         when (
@@ -426,6 +525,9 @@ internal class UnityRuntimeContainer internal constructor(
             is UnityRuntimeHostAcquisition.Acquired -> activateOwnedRuntime(acquisition.lease)
             is UnityRuntimeHostAcquisition.Waiting -> {
                 ownershipWaitToken = acquisition.token
+                runtimeStatus.update { current ->
+                    current.copy(phase = UnityRuntimeContainerPhase.WaitingForOwnership)
+                }
                 showStatus("Unity runtime unavailable\nHost handoff pending")
             }
 
@@ -433,6 +535,12 @@ internal class UnityRuntimeContainer internal constructor(
                 val message =
                     "Unity runtime unavailable\nHost handoff capacity reached"
                 terminalRuntimeFailure = message
+                runtimeStatus.update { current ->
+                    current.copy(
+                        phase = UnityRuntimeContainerPhase.Failed,
+                        failure = UnityRuntimeContainerFailure.OwnershipCapacityReached
+                    )
+                }
                 showStatus(message)
             }
         }
@@ -450,7 +558,21 @@ internal class UnityRuntimeContainer internal constructor(
 
         val accepted = runCatching { post { activateGrantedLease(lease) } }.getOrDefault(false)
         if (!accepted) {
-            grantedLeaseHandoff.withdraw(lease)?.let(dependencies.ownershipRegistry::release)
+            val released = grantedLeaseHandoff.withdraw(lease)?.let(
+                dependencies.ownershipRegistry::release
+            ) == true
+            if (!released) ownershipReleaseBlocked = true
+            runtimeStatus.update { current ->
+                current.copy(
+                    phase = UnityRuntimeContainerPhase.Failed,
+                    ownership = if (released) {
+                        UnityRuntimeContainerOwnership.NeverCreated
+                    } else {
+                        UnityRuntimeContainerOwnership.Uncertain
+                    },
+                    failure = UnityRuntimeContainerFailure.ActivationFailed
+                )
+            }
         }
     }
 
@@ -470,6 +592,9 @@ internal class UnityRuntimeContainer internal constructor(
             dependencies.ownershipRegistry.release(lease)
             return
         }
+        runtimeStatus.update { current ->
+            current.copy(phase = UnityRuntimeContainerPhase.Activating)
+        }
         var player: UnityEmbeddedPlayer? = null
         var controller: UnityHostLifecycleController<Configuration>? = null
         var callbackRegistration: UnityHostCallbackRegistration<ComponentCallbacks2>? = null
@@ -479,11 +604,14 @@ internal class UnityRuntimeContainer internal constructor(
 
         fun abortActivation(
             message: String?,
-            cleanupUncertain: Boolean = false
+            cleanupUncertain: Boolean = false,
+            failure: UnityRuntimeContainerFailure =
+                UnityRuntimeContainerFailure.ActivationFailed
         ) {
             finishActivationCleanup(
                 permit = permit,
                 message = message,
+                failure = failure,
                 player = player,
                 controller = controller,
                 callbackRegistration = callbackRegistration,
@@ -504,7 +632,8 @@ internal class UnityRuntimeContainer internal constructor(
             // A throwing constructor may have initialized native state without returning a handle.
             abortActivation(
                 message = "Unity runtime unavailable\nHost activation failed",
-                cleanupUncertain = true
+                cleanupUncertain = true,
+                failure = UnityRuntimeContainerFailure.ConstructionFailed
             )
             return
         }
@@ -530,8 +659,22 @@ internal class UnityRuntimeContainer internal constructor(
                 )
                 return
             }
-            if (!activationLeaseState.complete(permit)) abortActivation(message = null)
+            if (!activationLeaseState.complete(permit)) {
+                abortActivation(message = null)
+            } else {
+                runtimeStatus.update { current ->
+                    current.copy(
+                        phase = UnityRuntimeContainerPhase.Failed,
+                        ownership = UnityRuntimeContainerOwnership.NeverCreated,
+                        failure = UnityRuntimeContainerFailure.RuntimeUnavailable
+                    )
+                }
+            }
             return
+        }
+
+        runtimeStatus.update { current ->
+            current.copy(ownership = UnityRuntimeContainerOwnership.Active)
         }
 
         controller = UnityHostLifecycleController(player!!)
@@ -564,7 +707,8 @@ internal class UnityRuntimeContainer internal constructor(
         }
         if (registrarResult.isFailure) {
             abortActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+                message = "Unity runtime unavailable\nLifecycle callback registration failed",
+                failure = UnityRuntimeContainerFailure.LifecycleCallbacksUnavailable
             )
             return
         }
@@ -575,7 +719,8 @@ internal class UnityRuntimeContainer internal constructor(
         val registrar = registrarResult.getOrNull()
         if (registrar == null) {
             abortActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+                message = "Unity runtime unavailable\nLifecycle callback registration failed",
+                failure = UnityRuntimeContainerFailure.LifecycleCallbacksUnavailable
             )
             return
         }
@@ -588,7 +733,8 @@ internal class UnityRuntimeContainer internal constructor(
         }
         if (!callbacksRegistered) {
             abortActivation(
-                message = "Unity runtime unavailable\nLifecycle callback registration failed"
+                message = "Unity runtime unavailable\nLifecycle callback registration failed",
+                failure = UnityRuntimeContainerFailure.LifecycleCallbacksUnavailable
             )
             return
         }
@@ -659,12 +805,23 @@ internal class UnityRuntimeContainer internal constructor(
 
         // The success transition is deliberately last. If close wins this race, activation still
         // owns all resources and performs the only cleanup/release path.
-        if (!activationLeaseState.complete(permit)) abortActivation(message = null)
+        if (!activationLeaseState.complete(permit)) {
+            abortActivation(message = null)
+        } else {
+            runtimeStatus.update { current ->
+                if (current.phase == UnityRuntimeContainerPhase.Failed) {
+                    current
+                } else {
+                    current.copy(phase = UnityRuntimeContainerPhase.Active)
+                }
+            }
+        }
     }
 
     private fun finishActivationCleanup(
         permit: UnityRuntimeActivationPermit,
         message: String?,
+        failure: UnityRuntimeContainerFailure,
         player: UnityEmbeddedPlayer?,
         controller: UnityHostLifecycleController<Configuration>?,
         callbackRegistration: UnityHostCallbackRegistration<ComponentCallbacks2>?,
@@ -708,12 +865,35 @@ internal class UnityRuntimeContainer internal constructor(
             ownedViewsRemoved &&
             viewDetached
         val releasableLease = activationLeaseState.finishCleanup(permit, cleanupProven)
-        if (cleanupProven && releasableLease != null) {
-            if (!dependencies.ownershipRegistry.release(releasableLease)) {
-                ownershipReleaseBlocked = true
-            }
-        } else if (!cleanupProven) {
-            ownershipReleaseBlocked = true
+        val leaseReleased = cleanupProven &&
+            releasableLease != null &&
+            dependencies.ownershipRegistry.release(releasableLease)
+        val cleanupAndReleaseProven = cleanupProven && leaseReleased
+        if (!cleanupAndReleaseProven) ownershipReleaseBlocked = true
+
+        runtimeStatus.update { current ->
+            current.copy(
+                phase = if (destroyed) {
+                    UnityRuntimeContainerPhase.Destroyed
+                } else {
+                    UnityRuntimeContainerPhase.Failed
+                },
+                ownership = if (cleanupAndReleaseProven) {
+                    UnityRuntimeContainerOwnership.NeverCreated
+                } else {
+                    UnityRuntimeContainerOwnership.Uncertain
+                },
+                teardown = if (destroyed) {
+                    if (cleanupAndReleaseProven) {
+                        UnityRuntimeContainerTeardownEvidence.Confirmed
+                    } else {
+                        UnityRuntimeContainerTeardownEvidence.Uncertain
+                    }
+                } else {
+                    current.teardown
+                },
+                failure = if (message != null) failure else current.failure
+            )
         }
 
         if (!destroyed && message != null) runCatching { showStatus(message) }
@@ -738,6 +918,7 @@ internal class UnityRuntimeContainer internal constructor(
         controller: UnityHostLifecycleController<Configuration>,
         permit: UnityRuntimeActivationPermit
     ): Boolean {
+        if (inputRevoked) return false
         controller.onWindowFocusChanged(latestWindowFocus)
         if (!activationLeaseState.canContinue(permit)) return false
         when {
@@ -786,6 +967,12 @@ internal class UnityRuntimeContainer internal constructor(
         hideStatus()
         if (!canContinueDispatch(activationPermit)) return false
         runCatching(onRouteDispatched)
+        runtimeStatus.update { current ->
+            current.copy(
+                phase = UnityRuntimeContainerPhase.Active,
+                routeDispatched = true
+            )
+        }
         return canContinueDispatch(activationPermit)
     }
 
@@ -804,6 +991,12 @@ internal class UnityRuntimeContainer internal constructor(
     }
 
     private fun showProtocolError(error: UnityBridgeProtocolError) {
+        runtimeStatus.update { current ->
+            current.copy(
+                phase = UnityRuntimeContainerPhase.Failed,
+                failure = UnityRuntimeContainerFailure.BridgeProtocolFailed
+            )
+        }
         showStatus("Unity bridge unavailable\nCode: ${error.code.wireValue}")
         onProtocolError(error)
     }

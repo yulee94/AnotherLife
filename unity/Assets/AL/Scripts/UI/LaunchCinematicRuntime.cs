@@ -10,6 +10,7 @@ namespace AL.UI
         Playing,
         SkipEligible,
         Completing,
+        AwaitingContinue,
         Transitioned,
         Failed,
         Fallback
@@ -18,7 +19,8 @@ namespace AL.UI
     public enum LaunchCinematicPlatform
     {
         Desktop,
-        Android
+        Android,
+        Ios
     }
 
     public enum LaunchCinematicDiagnosticSeverity
@@ -140,7 +142,7 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-PROBE", "Launch cinematic probe evidence is missing or unapproved."));
             }
 
-            long maximumBytes = buildPlatform == LaunchCinematicPlatform.Android
+            long maximumBytes = IsMobile(buildPlatform)
                 ? AndroidMaximumBytes
                 : DesktopMaximumBytes;
             if (record.ByteLength <= 0)
@@ -215,7 +217,7 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-CONTAINER", "Launch cinematic container must be mp4."));
             }
 
-            string expectedCodecProfile = buildPlatform == LaunchCinematicPlatform.Android
+            string expectedCodecProfile = IsMobile(buildPlatform)
                 ? "h264-main"
                 : "h264-high";
             if (!string.Equals(record.CodecProfile, expectedCodecProfile, StringComparison.OrdinalIgnoreCase))
@@ -228,8 +230,8 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-DIMENSIONS", "Launch cinematic dimensions, FPS, and frame count must be positive."));
             }
 
-            int expectedWidth = buildPlatform == LaunchCinematicPlatform.Android ? AndroidWidth : DesktopWidth;
-            int expectedHeight = buildPlatform == LaunchCinematicPlatform.Android ? AndroidHeight : DesktopHeight;
+            int expectedWidth = IsMobile(buildPlatform) ? AndroidWidth : DesktopWidth;
+            int expectedHeight = IsMobile(buildPlatform) ? AndroidHeight : DesktopHeight;
             if (record.Width != expectedWidth || record.Height != expectedHeight)
             {
                 diagnostics.Add(Error("AL-LAUNCH-RESOLUTION", "Launch cinematic resolution does not match the approved platform container."));
@@ -273,6 +275,12 @@ namespace AL.UI
             }
 
             return true;
+        }
+
+        private static bool IsMobile(LaunchCinematicPlatform platform)
+        {
+            return platform == LaunchCinematicPlatform.Android ||
+                   platform == LaunchCinematicPlatform.Ios;
         }
 
         private static LaunchCinematicDiagnostic Error(string code, string message)
@@ -325,6 +333,35 @@ namespace AL.UI
 
             State = LaunchCinematicState.Fallback;
             return CompleteOnce(string.IsNullOrWhiteSpace(reason) ? "fallback" : reason);
+        }
+
+        public void MarkFallbackReady(string reason)
+        {
+            if (_transitioned)
+            {
+                return;
+            }
+
+            TransitionReason = string.IsNullOrWhiteSpace(reason) ? "fallback-ready" : reason;
+            State = LaunchCinematicState.Fallback;
+        }
+
+        public void MarkAwaitingContinue()
+        {
+            if (!_transitioned && State == LaunchCinematicState.Fallback)
+            {
+                State = LaunchCinematicState.AwaitingContinue;
+            }
+        }
+
+        public bool TryContinue()
+        {
+            if (_transitioned || State != LaunchCinematicState.AwaitingContinue)
+            {
+                return false;
+            }
+
+            return CompleteOnce("continue");
         }
 
         public bool CompleteOnce(string reason)

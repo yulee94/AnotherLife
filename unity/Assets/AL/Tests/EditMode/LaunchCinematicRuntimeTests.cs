@@ -36,6 +36,25 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void ValidIosRuntimeRecordPassesForMatchingPlatform()
+        {
+            LaunchCinematicRuntimeRecord record = ValidRecord();
+            record.Platform = LaunchCinematicPlatform.Ios;
+            record.StreamingAssetsPath = "LaunchCinematic/iOS/launch_omen_01.mp4";
+            record.CodecProfile = "h264-main";
+            record.Width = 1280;
+            record.Height = 720;
+            record.ByteLength = 42000000;
+
+            LaunchCinematicValidationResult result = LaunchCinematicRuntimeValidator.Validate(
+                record,
+                LaunchCinematicPlatform.Ios,
+                releaseBuild: true);
+
+            Assert.IsTrue(result.IsValid, string.Join(", ", result.Diagnostics.Select(d => d.Code)));
+        }
+
+        [Test]
         public void MissingApprovedEncodeFailsClosed()
         {
             LaunchCinematicValidationResult result = LaunchCinematicRuntimeValidator.Validate(
@@ -184,6 +203,27 @@ namespace AL.Tests.EditMode
 
             Assert.AreEqual(LaunchCinematicState.Transitioned, lifecycle.State);
             Assert.AreEqual("skip", lifecycle.TransitionReason);
+            Assert.AreEqual(1, lifecycle.TransitionCount);
+        }
+
+        [Test]
+        public void FallbackWaitsForFreshContinueBeforeTransitioning()
+        {
+            var lifecycle = new LaunchCinematicLifecycle();
+
+            lifecycle.MarkPreparing();
+            Assert.IsFalse(lifecycle.TryContinue());
+
+            lifecycle.MarkFallbackReady("approved-media-unavailable");
+            lifecycle.MarkAwaitingContinue();
+
+            Assert.AreEqual(LaunchCinematicState.AwaitingContinue, lifecycle.State);
+            Assert.AreEqual(0, lifecycle.TransitionCount);
+            Assert.IsTrue(lifecycle.TryContinue());
+            Assert.IsFalse(lifecycle.TryContinue());
+            Assert.IsFalse(lifecycle.FailToFallback("late-error"));
+            Assert.AreEqual(LaunchCinematicState.Transitioned, lifecycle.State);
+            Assert.AreEqual("continue", lifecycle.TransitionReason);
             Assert.AreEqual(1, lifecycle.TransitionCount);
         }
 

@@ -1,89 +1,97 @@
 using System.Collections;
-using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AL.UI
 {
-    public class BootController : MonoBehaviour
+    /// <summary>
+    /// Cross-platform launch presentation. It owns the truthful service/media preparation surface,
+    /// then waits for a fresh player action before entering the committed realm flow.
+    /// </summary>
+    public sealed class BootController : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float _minSplashScreenTime = 0.8f;
         [SerializeField] private string _realmSelectionScene = "RealmSelection";
         [SerializeField] private string _kingdomScene = "Kingdom";
 
         [Header("Presentation")]
         [SerializeField] private bool _buildRuntimeSplash = true;
         [SerializeField] private string _buildLabel = "PRE-ALPHA RUNTIME";
+        [SerializeField] private string _continueLabel = "ENTER ANOTHER LIFE";
+        [SerializeField] private Texture2D _brandMark;
 
-        private const float ProgressWidth = 760f;
-        private const float ProgressHeight = 8f;
+        private const float IndicatorTrackWidth = 420f;
+        private const float IndicatorSegmentWidth = 92f;
+        private const float IndicatorHeight = 3f;
 
-        private readonly List<BootParticle> _particles = new List<BootParticle>(36);
-        private readonly List<Image> _pulseTargets = new List<Image>(8);
-        private CanvasGroup _splashGroup;
-        private Image _progressFill;
-        private Text _statusText;
-        private Text _percentText;
-        private RectTransform _scanLine;
-        private RectTransform _leftGate;
-        private RectTransform _rightGate;
+        private static readonly Color MidnightSlate = Hex(0x07, 0x10, 0x17);
+        private static readonly Color DeepInk = Hex(0x0d, 0x16, 0x20);
+        private static readonly Color MoonIvory = Hex(0xee, 0xe6, 0xd2);
+        private static readonly Color AgedGold = Hex(0xb9, 0x93, 0x55);
+        private static readonly Color QuietSteel = Hex(0x8b, 0x98, 0xa3);
+
         private LaunchCinematicLifecycle _launchLifecycle;
+        private CanvasGroup _loadingGroup;
+        private CanvasGroup _standbyGroup;
+        private RectTransform _indicatorSegment;
+        private RectTransform _continueButtonRect;
+        private Button _continueButton;
+        private Text _statusText;
+        private bool _continueRequested;
+        private int _inputArmedFrame = int.MaxValue;
+        private int _activeTouchFingerId = -1;
 
         private IEnumerator Start()
         {
             Debug.Log("AL Boot Sequence Started...");
             _launchLifecycle = new LaunchCinematicLifecycle();
-            Bootloader.InitializeIfMissing();
 
             if (_buildRuntimeSplash)
             {
-                BuildRuntimeSplash();
-            }
-
-            yield return RunLaunchFallbackSequence();
-
-            var realmService = ServiceLocator.Get<IRealmService>();
-
-            if (realmService.CurrentRealmId == RealmId.None)
-            {
-                Debug.Log("No Realm Selected. Transitioning to Realm Selection...");
-                SceneManager.LoadScene(_realmSelectionScene);
-            }
-            else
-            {
-                Debug.Log($"Realm {realmService.CurrentRealmId} detected. Loading Kingdom...");
-                SceneManager.LoadScene(_kingdomScene);
-            }
-        }
-
-        private IEnumerator RunLaunchFallbackSequence()
-        {
-            _launchLifecycle.MarkPreparing();
-            float duration = Mathf.Max(0.8f, _minSplashScreenTime);
-            float elapsed = 0f;
-
-            while (elapsed < duration)
-            {
-                elapsed += Time.unscaledDeltaTime;
-                float normalizedTime = Mathf.Clamp01(elapsed / duration);
-                UpdateSplash(normalizedTime, elapsed);
+                BuildLaunchPresentation();
+                // Give the loading surface one rendered frame before synchronous service setup.
                 yield return null;
             }
 
-            UpdateSplash(1f, duration);
-            yield return new WaitForSecondsRealtime(0.12f);
-            _launchLifecycle.FailToFallback("approved-media-unavailable");
+            _launchLifecycle.MarkPreparing();
+            Bootloader.InitializeIfMissing();
+
+            // The current build has no approved cinematic encode. Waiting one end-of-frame proves the
+            // Unity UI is present without manufacturing a progress percentage or a fake patch delay.
+            yield return new WaitForEndOfFrame();
+            _launchLifecycle.MarkFallbackReady("approved-media-unavailable");
+            _launchLifecycle.MarkAwaitingContinue();
+
+            if (_buildRuntimeSplash)
+            {
+                ShowStandby();
+                while (!_continueRequested)
+                {
+                    AnimateStandby();
+                    if (CanAcceptDeliberateContinue())
+                    {
+                        RequestContinue();
+                    }
+
+                    yield return null;
+                }
+            }
+
+            if (!_launchLifecycle.TryContinue())
+            {
+                Debug.LogError("AL launch entry gate rejected the committed Continue action.");
+                yield break;
+            }
+
+            LoadCommittedDestination();
         }
 
-        private void BuildRuntimeSplash()
+        private void BuildLaunchPresentation()
         {
-            _particles.Clear();
-            _pulseTargets.Clear();
-
             var canvasObject = new GameObject("LaunchFallbackCanvas");
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -91,229 +99,379 @@ namespace AL.UI
 
             var scaler = canvasObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            scaler.referenceResolution = new Vector2(1080f, 1920f);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            _splashGroup = canvasObject.AddComponent<CanvasGroup>();
-            _splashGroup.alpha = 0f;
+            CreatePanel(
+                canvasObject.transform,
+                "LaunchBackground",
+                MidnightSlate,
+                Vector2.zero,
+                Vector2.one,
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                Vector2.zero);
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
-                       Resources.GetBuiltinResource<Font>("Arial.ttf");
+            BuildThresholdFrame(canvasObject.transform);
 
-            CreatePanel(canvasObject.transform, "FallbackBackground", new Color(0.006f, 0.008f, 0.012f, 1f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
+                        Resources.GetBuiltinResource<Font>("Arial.ttf");
 
-            var title = CreateText(canvasObject.transform, "Title", font, "ANOTHER LIFE", 54, new Vector2(0f, -318f), new Vector2(980f, 74f), TextAnchor.MiddleCenter);
-            title.color = new Color(0.88f, 0.88f, 0.86f, 1f);
+            Text thresholdMessage = CreateText(
+                canvasObject.transform,
+                "ThresholdMessage",
+                font,
+                "THE VEIL REMEMBERS",
+                15,
+                new Vector2(0f, 510f),
+                new Vector2(720f, 40f),
+                TextAnchor.MiddleCenter);
+            thresholdMessage.color = QuietSteel;
+            thresholdMessage.fontStyle = FontStyle.Bold;
+
+            if (_brandMark != null)
+            {
+                CreateBrandMark(canvasObject.transform, _brandMark);
+            }
+
+            Text title = CreateText(
+                canvasObject.transform,
+                "Title",
+                font,
+                "ANOTHER\nLIFE",
+                58,
+                new Vector2(0f, 4f),
+                new Vector2(520f, 164f),
+                TextAnchor.MiddleCenter);
+            title.color = MoonIvory;
             title.resizeTextForBestFit = true;
-            title.resizeTextMinSize = 32;
-            title.resizeTextMaxSize = 54;
+            title.resizeTextMinSize = 36;
+            title.resizeTextMaxSize = 58;
 
-            var subtitle = CreateText(canvasObject.transform, "Subtitle", font, "Preparing launch", 18, new Vector2(0f, -374f), new Vector2(660f, 30f), TextAnchor.MiddleCenter);
-            subtitle.color = new Color(0.70f, 0.76f, 0.82f, 0.90f);
+            Text chapter = CreateText(
+                canvasObject.transform,
+                "Chapter",
+                font,
+                "A world shaped by the life you choose—\nand the one you leave behind.",
+                19,
+                new Vector2(0f, -156f),
+                new Vector2(720f, 88f),
+                TextAnchor.MiddleCenter);
+            chapter.color = MoonIvory;
 
-            var buildLabel = CreateText(canvasObject.transform, "BuildLabel", font, _buildLabel, 13, new Vector2(0f, -409f), new Vector2(520f, 22f), TextAnchor.MiddleCenter);
-            buildLabel.color = new Color(0.70f, 0.70f, 0.66f, 0.78f);
+            _loadingGroup = CreateGroup(canvasObject.transform, "LoadingState");
+            _statusText = CreateText(
+                _loadingGroup.transform,
+                "LoadingStatus",
+                font,
+                "Preparing your realm",
+                22,
+                new Vector2(0f, -452f),
+                new Vector2(720f, 48f),
+                TextAnchor.MiddleCenter);
+            _statusText.color = QuietSteel;
+            BuildIndeterminateIndicator(_loadingGroup.transform);
 
-            _statusText = CreateText(canvasObject.transform, "Status", font, "Initializing required services", 16, new Vector2(-270f, -948f), new Vector2(520f, 30f), TextAnchor.MiddleLeft);
-            _statusText.color = new Color(0.80f, 0.88f, 0.94f, 0.92f);
+            _standbyGroup = CreateGroup(canvasObject.transform, "StandbyState");
+            _standbyGroup.alpha = 0f;
+            _standbyGroup.interactable = false;
+            _standbyGroup.blocksRaycasts = false;
 
-            BuildProgressBar(canvasObject.transform);
+            Text readyText = CreateText(
+                _standbyGroup.transform,
+                "ReadyStatus",
+                font,
+                "Ready when you are",
+                22,
+                new Vector2(0f, -466f),
+                new Vector2(720f, 48f),
+                TextAnchor.MiddleCenter);
+            readyText.color = QuietSteel;
+
+            _continueButton = CreateContinueButton(_standbyGroup.transform, font);
+
+            string inputHintValue = Application.isMobilePlatform
+                ? "Tap the gold button to continue"
+                : "Press Return, Space, or controller A";
+            Text inputHint = CreateText(
+                _standbyGroup.transform,
+                "InputHint",
+                font,
+                inputHintValue,
+                16,
+                new Vector2(0f, -692f),
+                new Vector2(720f, 38f),
+                TextAnchor.MiddleCenter);
+            inputHint.color = new Color(QuietSteel.r, QuietSteel.g, QuietSteel.b, 0.78f);
+
+            Text buildLabel = CreateText(
+                canvasObject.transform,
+                "BuildLabel",
+                font,
+                _buildLabel,
+                14,
+                new Vector2(0f, -770f),
+                new Vector2(680f, 36f),
+                TextAnchor.MiddleCenter);
+            buildLabel.color = new Color(QuietSteel.r, QuietSteel.g, QuietSteel.b, 0.66f);
         }
 
-        private void BuildGateSigil(Transform parent)
+        private static void BuildThresholdFrame(Transform parent)
         {
-            var outer = CreatePanel(parent, "GateOuter", new Color(0.92f, 0.70f, 0.38f, 0.30f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(212f, 212f));
-            outer.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            _pulseTargets.Add(outer);
+            const float width = 760f;
+            const float height = 1380f;
+            Color line = new Color(AgedGold.r, AgedGold.g, AgedGold.b, 0.42f);
 
-            var mid = CreatePanel(parent, "GateMiddle", new Color(0.20f, 0.46f, 0.70f, 0.24f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(158f, 158f));
-            mid.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            _pulseTargets.Add(mid);
-
-            var core = CreatePanel(parent, "GateCore", new Color(0.012f, 0.018f, 0.026f, 0.92f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(102f, 102f));
-            core.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-
-            CreatePanel(parent, "GateVerticalTrace", new Color(1f, 0.82f, 0.46f, 0.74f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(5f, 154f));
-            CreatePanel(parent, "GateHorizontalTrace", new Color(0.28f, 0.56f, 0.78f, 0.56f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(154f, 4f));
-
-            var scan = CreatePanel(parent, "GateScanLine", new Color(0.74f, 0.92f, 1f, 0.56f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 45f), new Vector2(132f, 2f));
-            _scanLine = scan.rectTransform;
-
-            var left = CreatePanel(parent, "GateLeftPlate", new Color(0.013f, 0.020f, 0.029f, 0.94f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-18f, 90f), new Vector2(150f, 112f));
-            var right = CreatePanel(parent, "GateRightPlate", new Color(0.013f, 0.020f, 0.029f, 0.94f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(18f, 90f), new Vector2(150f, 112f));
-            _leftGate = left.rectTransform;
-            _rightGate = right.rectTransform;
+            CreatePanel(parent, "ThresholdTop", line,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(0f, height * 0.5f),
+                new Vector2(width, 2f));
+            CreatePanel(parent, "ThresholdLeft", line,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(-width * 0.5f, 0f),
+                new Vector2(2f, height));
+            CreatePanel(parent, "ThresholdRight", line,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(width * 0.5f, 0f),
+                new Vector2(2f, height));
         }
 
-        private void BuildCitadelSilhouette(Transform parent)
+        private void BuildIndeterminateIndicator(Transform parent)
         {
-            CreatePanel(parent, "HorizonRidgeFar", new Color(0.020f, 0.025f, 0.031f, 0.92f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 126f), new Vector2(1560f, 78f));
-            CreatePanel(parent, "HorizonRidgeNear", new Color(0.008f, 0.012f, 0.017f, 0.98f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(1920f, 116f));
+            CreatePanel(parent, "IndicatorTrack", DeepInk,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(0f, -522f),
+                new Vector2(IndicatorTrackWidth, IndicatorHeight));
 
-            for (int i = 0; i < 11; i++)
+            Image segment = CreatePanel(parent, "IndicatorSegment", MoonIvory,
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                new Vector2(-(IndicatorTrackWidth - IndicatorSegmentWidth) * 0.5f, -522f),
+                new Vector2(IndicatorSegmentWidth, IndicatorHeight));
+            _indicatorSegment = segment.rectTransform;
+        }
+
+        private Button CreateContinueButton(Transform parent, Font font)
+        {
+            CreatePanel(parent, "ContinueButtonFocusRing", new Color(MoonIvory.r, MoonIvory.g, MoonIvory.b, 0.72f),
+                new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f),
+                new Vector2(0.5f, 0.5f), new Vector2(0f, -590f),
+                new Vector2(656f, 120f));
+
+            var buttonObject = new GameObject("ContinueButton");
+            buttonObject.transform.SetParent(parent, false);
+            var image = buttonObject.AddComponent<Image>();
+            image.color = AgedGold;
+
+            var button = buttonObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            if (Application.isMobilePlatform)
             {
-                float x = -820f + i * 164f;
-                float height = 34f + (i % 4) * 20f;
-                float width = 42f + (i % 3) * 16f;
-                var tower = CreatePanel(parent, "CitadelTower_" + i, new Color(0.006f, 0.009f, 0.013f, 0.96f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(x, 124f), new Vector2(width, height));
-                if (i % 3 == 0)
+                // Mobile entry is handled from a fresh touch-down/touch-up pair below. Leaving the
+                // Button callback disconnected prevents startup submit or stale pointer events from
+                // skipping the player's deliberate choice.
+                button.navigation = new Navigation { mode = Navigation.Mode.None };
+            }
+            else
+            {
+                button.onClick.AddListener(RequestContinue);
+                button.navigation = new Navigation { mode = Navigation.Mode.Automatic };
+            }
+            ColorBlock colors = button.colors;
+            colors.normalColor = AgedGold;
+            colors.highlightedColor = Hex(0xd0, 0xb0, 0x75);
+            colors.pressedColor = Hex(0x93, 0x70, 0x3d);
+            colors.selectedColor = Hex(0xd0, 0xb0, 0x75);
+            colors.disabledColor = new Color(AgedGold.r, AgedGold.g, AgedGold.b, 0.35f);
+            colors.fadeDuration = 0.08f;
+            button.colors = colors;
+
+            RectTransform rect = buttonObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0f, -590f);
+            rect.sizeDelta = new Vector2(640f, 104f);
+            _continueButtonRect = rect;
+
+            Text label = CreateText(
+                buttonObject.transform,
+                "Label",
+                font,
+                _continueLabel,
+                24,
+                Vector2.zero,
+                Vector2.zero,
+                TextAnchor.MiddleCenter,
+                stretch: true);
+            label.color = MidnightSlate;
+            label.fontStyle = FontStyle.Bold;
+            return button;
+        }
+
+        private void ShowStandby()
+        {
+            if (_loadingGroup != null)
+            {
+                _loadingGroup.alpha = 0f;
+                _loadingGroup.interactable = false;
+                _loadingGroup.blocksRaycasts = false;
+            }
+
+            if (_standbyGroup != null)
+            {
+                _standbyGroup.alpha = 1f;
+                _standbyGroup.interactable = true;
+                _standbyGroup.blocksRaycasts = true;
+            }
+
+            _inputArmedFrame = Time.frameCount + 1;
+            // Mobile entry is touch-only. Selecting the button on iOS/Android lets a startup
+            // controller submit event activate it without the player touching the screen.
+            if (!Application.isMobilePlatform && _continueButton != null && EventSystem.current != null)
+            {
+                EventSystem.current.SetSelectedGameObject(_continueButton.gameObject);
+            }
+        }
+
+        private void AnimateStandby()
+        {
+            if (_indicatorSegment != null && _loadingGroup != null && _loadingGroup.alpha > 0f)
+            {
+                float range = IndicatorTrackWidth - IndicatorSegmentWidth;
+                float offset = Mathf.PingPong(Time.unscaledTime * 190f, range) - range * 0.5f;
+                _indicatorSegment.anchoredPosition = new Vector2(offset, -522f);
+            }
+        }
+
+        private static void CreateBrandMark(Transform parent, Texture2D texture)
+        {
+            var markObject = new GameObject("ApprovedBrandMark");
+            markObject.transform.SetParent(parent, false);
+            var mark = markObject.AddComponent<RawImage>();
+            mark.texture = texture;
+            mark.color = Color.white;
+            mark.raycastTarget = false;
+
+            RectTransform rect = mark.rectTransform;
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.anchoredPosition = new Vector2(0f, 278f);
+            rect.sizeDelta = new Vector2(280f, 280f);
+        }
+
+        private bool CanAcceptDeliberateContinue()
+        {
+            if (Application.isMobilePlatform)
+            {
+                return CanAcceptMobileTouchContinue();
+            }
+
+            if (Time.frameCount < _inputArmedFrame)
+            {
+                return false;
+            }
+
+            return Input.GetKeyDown(KeyCode.Return) ||
+                   Input.GetKeyDown(KeyCode.KeypadEnter) ||
+                   Input.GetKeyDown(KeyCode.Space) ||
+                   Input.GetKeyDown(KeyCode.JoystickButton0);
+        }
+
+        private bool CanAcceptMobileTouchContinue()
+        {
+            if (Time.frameCount < _inputArmedFrame || _continueButtonRect == null)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < Input.touchCount; index++)
+            {
+                Touch touch = Input.GetTouch(index);
+                bool insideButton = RectTransformUtility.RectangleContainsScreenPoint(
+                    _continueButtonRect,
+                    touch.position);
+
+                if (touch.phase == TouchPhase.Began && _activeTouchFingerId < 0 && insideButton)
                 {
-                    _pulseTargets.Add(CreatePanel(tower.transform, "TowerWindow", new Color(1f, 0.62f, 0.26f, 0.36f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -12f), new Vector2(5f, 18f)));
+                    _activeTouchFingerId = touch.fingerId;
+                    continue;
                 }
-            }
-        }
 
-        private void BuildProgressBar(Transform parent)
-        {
-            CreatePanel(parent, "ProgressOuter", new Color(0.006f, 0.009f, 0.014f, 0.94f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 112f), new Vector2(ProgressWidth + 36f, 26f));
-            CreatePanel(parent, "ProgressTopTrace", new Color(0.60f, 0.66f, 0.72f, 0.46f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 126f), new Vector2(ProgressWidth + 20f, 2f));
-            CreatePanel(parent, "ProgressTrack", new Color(0.035f, 0.046f, 0.058f, 0.95f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 112f), new Vector2(ProgressWidth, ProgressHeight));
-            _progressFill = CreatePanel(parent, "ProgressFill", new Color(0.74f, 0.80f, 0.86f, 0.98f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0.5f), new Vector2(-ProgressWidth * 0.5f, 112f), new Vector2(1f, ProgressHeight));
-            _pulseTargets.Add(_progressFill);
-        }
-
-        private void BuildParticleField(Transform parent)
-        {
-            for (int i = 0; i < 36; i++)
-            {
-                float x = -910f + (i * 151f) % 1820f;
-                float y = -760f + (i * 89f) % 920f;
-                float size = 2.5f + i % 5;
-                float alpha = 0.10f + (i % 6) * 0.025f;
-                var image = CreatePanel(parent, "BootAsh_" + i, new Color(1f, 0.66f, 0.30f, alpha), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(x, y), new Vector2(size, size));
-                _particles.Add(new BootParticle
-                {
-                    Image = image,
-                    RectTransform = image.rectTransform,
-                    Velocity = new Vector2(-6f + i % 7 * 2.5f, 14f + i % 9 * 4f),
-                    BaseAlpha = alpha,
-                    Phase = i * 0.47f,
-                    PulseSpeed = 1.1f + i % 5 * 0.18f
-                });
-            }
-        }
-
-        private void UpdateSplash(float normalizedTime, float elapsed)
-        {
-            float easedProgress = 1f - Mathf.Pow(1f - normalizedTime, 2.65f);
-            float entryFade = Mathf.Clamp01(normalizedTime / 0.16f);
-
-            if (_splashGroup != null)
-            {
-                _splashGroup.alpha = entryFade;
-            }
-
-            if (_progressFill != null)
-            {
-                _progressFill.rectTransform.sizeDelta = new Vector2(Mathf.Max(1f, ProgressWidth * easedProgress), ProgressHeight);
-            }
-
-            if (_percentText != null)
-            {
-                _percentText.text = string.Empty;
-            }
-
-            if (_statusText != null)
-            {
-                _statusText.text = GetStatusLine(normalizedTime);
-            }
-
-            if (_scanLine != null)
-            {
-                float scanY = Mathf.Lerp(36f, 144f, Mathf.PingPong(elapsed * 0.48f, 1f));
-                _scanLine.anchoredPosition = new Vector2(0f, scanY);
-            }
-
-            if (_leftGate != null && _rightGate != null)
-            {
-                float open = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((normalizedTime - 0.18f) / 0.64f));
-                _leftGate.anchoredPosition = new Vector2(Mathf.Lerp(-18f, -96f, open), 90f);
-                _rightGate.anchoredPosition = new Vector2(Mathf.Lerp(18f, 96f, open), 90f);
-            }
-
-            for (int i = 0; i < _pulseTargets.Count; i++)
-            {
-                var image = _pulseTargets[i];
-                if (image == null)
+                if (touch.fingerId != _activeTouchFingerId)
                 {
                     continue;
                 }
 
-                Color color = image.color;
-                float pulse = 0.74f + Mathf.Sin(elapsed * 1.65f + i * 0.93f) * 0.18f;
-                color.a = Mathf.Clamp01(color.a * 0.86f + pulse * 0.14f);
-                image.color = color;
-            }
-
-            AnimateParticles(elapsed);
-        }
-
-        private void AnimateParticles(float elapsed)
-        {
-            for (int i = 0; i < _particles.Count; i++)
-            {
-                BootParticle particle = _particles[i];
-                if (particle.RectTransform == null || particle.Image == null)
+                if (touch.phase == TouchPhase.Canceled)
                 {
+                    _activeTouchFingerId = -1;
                     continue;
                 }
 
-                Vector2 position = particle.RectTransform.anchoredPosition;
-                position += particle.Velocity * Time.unscaledDeltaTime;
-                position.x += Mathf.Sin(elapsed * 0.8f + particle.Phase) * Time.unscaledDeltaTime * 10f;
-
-                if (position.y > 560f)
+                if (touch.phase == TouchPhase.Ended)
                 {
-                    position.y = -540f;
-                    position.x = -910f + (i * 151f + Mathf.FloorToInt(elapsed * 37f)) % 1820f;
+                    _activeTouchFingerId = -1;
+                    return insideButton;
                 }
-
-                if (position.x > 960f)
-                {
-                    position.x = -960f;
-                }
-                else if (position.x < -960f)
-                {
-                    position.x = 960f;
-                }
-
-                particle.RectTransform.anchoredPosition = position;
-                Color color = particle.Image.color;
-                color.a = particle.BaseAlpha * (0.62f + Mathf.Sin(elapsed * particle.PulseSpeed + particle.Phase) * 0.28f);
-                particle.Image.color = color;
             }
+
+            return false;
         }
 
-        private static string GetStatusLine(float normalizedTime)
+        private void RequestContinue()
         {
-            if (normalizedTime < 0.34f)
+            if (Time.frameCount >= _inputArmedFrame)
             {
-                return "Initializing required services";
+                _continueRequested = true;
             }
-
-            if (normalizedTime < 0.66f)
-            {
-                return "Checking launch media availability";
-            }
-
-            if (normalizedTime < 0.92f)
-            {
-                return "Using fallback launch path";
-            }
-
-            return "Entering realm flow";
         }
 
-        private static Image CreatePanel(Transform parent, string name, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
+        private void LoadCommittedDestination()
+        {
+            IRealmService realmService = ServiceLocator.Get<IRealmService>();
+            if (realmService.CurrentRealmId == RealmId.None)
+            {
+                Debug.Log("No Realm Selected. Transitioning to Realm Selection...");
+                SceneManager.LoadScene(_realmSelectionScene);
+                return;
+            }
+
+            Debug.Log($"Realm {realmService.CurrentRealmId} detected. Loading Kingdom...");
+            SceneManager.LoadScene(_kingdomScene);
+        }
+
+        private static CanvasGroup CreateGroup(Transform parent, string name)
+        {
+            var groupObject = new GameObject(name);
+            groupObject.transform.SetParent(parent, false);
+            var rect = groupObject.AddComponent<RectTransform>();
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            return groupObject.AddComponent<CanvasGroup>();
+        }
+
+        private static Image CreatePanel(
+            Transform parent,
+            string name,
+            Color color,
+            Vector2 anchorMin,
+            Vector2 anchorMax,
+            Vector2 pivot,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta)
         {
             var panelObject = new GameObject(name);
             panelObject.transform.SetParent(parent, false);
             var image = panelObject.AddComponent<Image>();
             image.color = color;
             image.raycastTarget = false;
-            var rect = panelObject.GetComponent<RectTransform>();
+            RectTransform rect = panelObject.GetComponent<RectTransform>();
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
             rect.pivot = pivot;
@@ -322,66 +480,16 @@ namespace AL.UI
             return image;
         }
 
-        private static Image CreateGradientPanel(Transform parent, string name, Color topColor, Color bottomColor, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
-        {
-            var image = CreatePanel(parent, name, Color.white, anchorMin, anchorMax, pivot, anchoredPosition, sizeDelta);
-            image.sprite = CreateVerticalGradientSprite(name + "_Sprite", topColor, bottomColor);
-            return image;
-        }
-
-        private static Sprite CreateVerticalGradientSprite(string name, Color topColor, Color bottomColor)
-        {
-            const int width = 8;
-            const int height = 96;
-            var texture = new Texture2D(width, height, TextureFormat.RGBA32, false)
-            {
-                name = name + "_Texture",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp
-            };
-
-            for (int y = 0; y < height; y++)
-            {
-                float t = y / (height - 1f);
-                Color color = Color.Lerp(bottomColor, topColor, t);
-                for (int x = 0; x < width; x++)
-                {
-                    texture.SetPixel(x, y, color);
-                }
-            }
-
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 100f);
-        }
-
-        private static Sprite CreateRadialGlowSprite(string name, Color centerColor, Color edgeColor)
-        {
-            const int size = 96;
-            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
-            {
-                name = name + "_Texture",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp
-            };
-
-            Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
-            float radius = size * 0.5f;
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float distance = Vector2.Distance(new Vector2(x, y), center) / radius;
-                    float t = Mathf.Clamp01(distance);
-                    float falloff = 1f - Mathf.SmoothStep(0f, 1f, t);
-                    texture.SetPixel(x, y, Color.Lerp(edgeColor, centerColor, falloff));
-                }
-            }
-
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
-        }
-
-        private static Text CreateText(Transform parent, string name, Font font, string textValue, int fontSize, Vector2 anchoredPosition, Vector2 sizeDelta, TextAnchor alignment)
+        private static Text CreateText(
+            Transform parent,
+            string name,
+            Font font,
+            string textValue,
+            int fontSize,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta,
+            TextAnchor alignment,
+            bool stretch = false)
         {
             var textObject = new GameObject(name);
             textObject.transform.SetParent(parent, false);
@@ -394,23 +502,29 @@ namespace AL.UI
             text.verticalOverflow = VerticalWrapMode.Truncate;
             text.raycastTarget = false;
 
-            var rect = text.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = sizeDelta;
+            RectTransform rect = text.GetComponent<RectTransform>();
+            if (stretch)
+            {
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = Vector2.zero;
+                rect.offsetMax = Vector2.zero;
+            }
+            else
+            {
+                rect.anchorMin = new Vector2(0.5f, 0.5f);
+                rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.pivot = new Vector2(0.5f, 0.5f);
+                rect.anchoredPosition = anchoredPosition;
+                rect.sizeDelta = sizeDelta;
+            }
+
             return text;
         }
 
-        private sealed class BootParticle
+        private static Color Hex(byte red, byte green, byte blue)
         {
-            public Image Image;
-            public RectTransform RectTransform;
-            public Vector2 Velocity;
-            public float BaseAlpha;
-            public float Phase;
-            public float PulseSpeed;
+            return new Color32(red, green, blue, 0xff);
         }
     }
 }

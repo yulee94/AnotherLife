@@ -1,4 +1,13 @@
 <resources>
     <string name="app_name">Another Life</string>
+    <string name="launch_fallback_title">Another Life</string>
+    <string name="launch_fallback_preparing">Preparing the 3D experience.</string>
+    <string name="launch_fallback_static">Static launch presentation selected.</string>
+    <string name="launch_fallback_stopping">Closing the 3D experience safely.</string>
+    <string name="launch_fallback_available">The 3D experience is unavailable. You can retry or exit.</string>
+    <string name="launch_fallback_terminal">Close and reopen Another Life to continue safely.</string>
+    <string name="launch_fallback_generic">Another Life cannot continue from this screen. Exit and reopen the app.</string>
+    <string name="launch_fallback_retry">Retry</string>
+    <string name="launch_fallback_exit">Exit</string>
     <string name="quest_preview_open">Open quest source</string>
 </resources>
