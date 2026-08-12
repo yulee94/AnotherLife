@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using AL.RealmSelection;
+using AL.UI.Kingdom;
 using AL.UI.RealmSelection;
 using NUnit.Framework;
 #if UNITY_EDITOR
@@ -277,6 +278,161 @@ namespace AL.Tests.PlayMode
                     message.IndexOf("AL-REALM-DEFINITION-UNAVAILABLE", StringComparison.Ordinal) >= 0),
                 Is.Empty,
                 "Realm Selection must not emit the catalog-unavailable failure after Boot.");
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator BootWithCommittedRealmInitializesKingdomCameraUiAndRefreshWithoutExceptions()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Production scene transition test drives editor path-based PlayMode loads.");
+            yield break;
+#else
+            SeedCurrentSave();
+            object seededSave = InstanceField(_controllableSave, "_currentSave");
+            FieldInfo selectedRealm = seededSave.GetType().GetField(
+                "SelectedRealm",
+                BindingFlags.Instance | BindingFlags.Public);
+            Assert.That(selectedRealm, Is.Not.Null);
+            selectedRealm.SetValue(
+                seededSave,
+                Enum.Parse(selectedRealm.FieldType, "Crownlands"));
+
+            _quiesceSceneControllers = false;
+            yield return LoadAndSettle(BootPath);
+
+            float transitionStarted = Time.realtimeSinceStartup;
+            while (!string.Equals(
+                       SceneManager.GetActiveScene().path,
+                       KingdomPath,
+                       StringComparison.Ordinal))
+            {
+                if (Time.realtimeSinceStartup - transitionStarted > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("Boot did not transition to the canonical Kingdom scene for a committed realm.");
+                }
+
+                yield return null;
+            }
+
+            // Let KingdomSceneController.Start construct its world/UI and enter the steady-state loop.
+            yield return null;
+            yield return null;
+
+            KingdomSceneController controller = Object.FindObjectOfType<KingdomSceneController>();
+            Assert.That(controller, Is.Not.Null);
+            Assert.That(controller.isActiveAndEnabled, Is.True);
+            Assert.That(
+                InstanceField(controller, "_runtimeInitialized"),
+                Is.EqualTo(true),
+                "Kingdom must publish its runtime-ready latch only after camera and UI construction complete.");
+
+            GameObject canvas = GameObject.Find("KingdomCanvas");
+            Assert.That(canvas, Is.Not.Null);
+            Assert.That(canvas.scene, Is.EqualTo(SceneManager.GetActiveScene()));
+            Assert.That(
+                canvas.GetComponentsInChildren<Text>(true).Any(text => text.name == "RealmText"),
+                Is.True,
+                "The realm command header must exist after Kingdom initialization.");
+
+            Camera[] kingdomCameras = Camera.allCameras
+                .Where(camera =>
+                    camera != null &&
+                    camera.isActiveAndEnabled &&
+                    camera.gameObject.scene == SceneManager.GetActiveScene() &&
+                    camera.targetTexture == null &&
+                    camera.targetDisplay == 0)
+                .ToArray();
+            Assert.That(kingdomCameras, Has.Length.EqualTo(1));
+            Assert.That(kingdomCameras[0].orthographic, Is.True);
+
+            long initialRefresh = (long)InstanceField(controller, "_lastLiveRefreshTimestamp");
+            float refreshStarted = Time.realtimeSinceStartup;
+            while ((long)InstanceField(controller, "_lastLiveRefreshTimestamp") <= initialRefresh)
+            {
+                if (Time.realtimeSinceStartup - refreshStarted > 3f)
+                {
+                    Assert.Fail("Kingdom did not complete its first periodic live refresh.");
+                }
+
+                yield return null;
+            }
+
+            var unexpected = _logs.Errors
+                .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
+                .ToList();
+            Assert.IsEmpty(
+                unexpected,
+                "Kingdom initialization/refresh emitted unexpected severe logs:\n" +
+                string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator RealmSelectionCameraIsDestroyedBeforeKingdomBuildsItsPresentationCamera()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Production scene transition test drives editor path-based PlayMode loads.");
+            yield break;
+#else
+            _quiesceSceneControllers = false;
+            yield return LoadAndSettle(RealmSelectionPath);
+
+            // Let RealmSelectionController.Start build the fallback presentation camera.
+            yield return null;
+            yield return null;
+
+            Camera realmCamera = Camera.allCameras.Single(camera =>
+                camera != null &&
+                camera.isActiveAndEnabled &&
+                camera.gameObject.scene == SceneManager.GetActiveScene() &&
+                camera.targetTexture == null &&
+                camera.targetDisplay == 0);
+            Assert.That(realmCamera.name, Is.EqualTo("RealmSelectionCamera"));
+
+            SeedCurrentSave();
+            object seededSave = InstanceField(_controllableSave, "_currentSave");
+            FieldInfo selectedRealm = seededSave.GetType().GetField(
+                "SelectedRealm",
+                BindingFlags.Instance | BindingFlags.Public);
+            Assert.That(selectedRealm, Is.Not.Null);
+            selectedRealm.SetValue(
+                seededSave,
+                Enum.Parse(selectedRealm.FieldType, "Crownlands"));
+
+            yield return LoadAndSettle(KingdomPath);
+            yield return null;
+            yield return null;
+
+            Assert.That(
+                realmCamera == null,
+                Is.True,
+                "The Realm Selection presentation camera must be destroyed with its unloaded scene.");
+
+            KingdomSceneController controller = Object.FindObjectOfType<KingdomSceneController>();
+            Assert.That(controller, Is.Not.Null);
+            Assert.That(controller.isActiveAndEnabled, Is.True);
+            Assert.That(InstanceField(controller, "_runtimeInitialized"), Is.EqualTo(true));
+            Assert.That(GameObject.Find("KingdomCanvas"), Is.Not.Null);
+
+            Camera[] kingdomCameras = Camera.allCameras
+                .Where(camera =>
+                    camera != null &&
+                    camera.isActiveAndEnabled &&
+                    camera.gameObject.scene == SceneManager.GetActiveScene() &&
+                    camera.targetTexture == null &&
+                    camera.targetDisplay == 0)
+                .ToArray();
+            Assert.That(kingdomCameras, Has.Length.EqualTo(1));
+            Assert.That(kingdomCameras[0].orthographic, Is.True);
+
+            var unexpected = _logs.Errors
+                .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
+                .ToList();
+            Assert.IsEmpty(
+                unexpected,
+                "Realm Selection to Kingdom emitted unexpected severe logs:\n" +
+                string.Join("\n", unexpected));
 #endif
         }
 
