@@ -1,7 +1,7 @@
 # Cinematic Terrestrial Asset Priority and Meshy Authorization
 
 > Status: `DRAFT_COORDINATION_REVIEW_ONLY`
-> Verified baseline: `main@426316d29923fc3f037890c7f009b900b315e0df`
+> Verified baseline: `main@6102638a41e1d944e267801df4cb22bbbd0af5eb`
 > Primary delivery mode: Codex coordination/review
 > Upstream: issues `#460`, `#284`, and `#259`; issue `#456` is referenced only to prevent guardian-dragon source transfer; draft PR `#472` is historical sanitized retention evidence
 > Authority: A1 sequencing and per-operation paid-call authorization; authorized co-developer A2 terrestrial source selection/fidelity; user final creative, visual, integrated-cinematic, and release approval
@@ -39,7 +39,7 @@ The following values describe the original PR-head snapshot at `main@6b79dcbbeb2
 
 | Current control | Verified value |
 | --- | --- |
-| `verifiedMain` | `426316d29923fc3f037890c7f009b900b315e0df` |
+| `verifiedMain` | `6102638a41e1d944e267801df4cb22bbbd0af5eb` |
 | `exclusiveMeshyTask` | `019fef94-af14-7671-a739-447391cfb7a5` |
 | `executedBatchId` | `priority_spend_20260812_v001` |
 | `executedBatchCredits` | `7,675 - 1,014 = 6,661` |
@@ -56,7 +56,7 @@ The following values describe the original PR-head snapshot at `main@6b79dcbbeb2
 
 ### Hosted current-main facts
 
-- The authorized base is exactly `main@426316d29923fc3f037890c7f009b900b315e0df`.
+- The authorized base is exactly `main@6102638a41e1d944e267801df4cb22bbbd0af5eb`.
 - Issue `#460` is the open coordination source for the proposed 60-second moving-3D launch baseline. Its historical title/body contains earlier no-spend framing; the later user policy permits spend-as-work-becomes-ready only after exact per-operation cost and stop-rule authorization. The issue remains `DRAFT / NOT APPROVED / NOT IN UNITY` and requires genuine moving 3D rather than still-image motion.
 - Issue `#284` is an active engineering specification whose media-production lane remains blocked. It may define later playback, fallback, packaging, and device validation, but it does not manufacture or approve cinematic pixels.
 - Issue `#259` preserves terrestrial source evidence and scalability direction. Merged source, reviewable sheets, and task success do not grant production, runtime, or user approval.
@@ -312,7 +312,7 @@ For every family:
 
 | Check | Failure condition | Result |
 | --- | --- | --- |
-| `CTMA-BASE-001` | Base or merge-base is not exact `426316d29923fc3f037890c7f009b900b315e0df` | Block publication or refresh/reconcile through A1 |
+| `CTMA-BASE-001` | Base or merge-base is not exact `6102638a41e1d944e267801df4cb22bbbd0af5eb` | Block publication or refresh/reconcile through A1 |
 | `CTMA-SCOPE-001` | Diff contains anything except this Markdown path, including `.meta`, images, manifests, scripts, or local evidence | Reject diff |
 | `CTMA-AUTH-001` | A new paid operation lacks a fresh exact A1 one-shot decision, current further authorization is represented as nonzero without evidence, or any approval state advances automatically | Stop; retain `NotAuthorized`; reject |
 | `CTMA-VENUE-001` | Any Meshy authorization, execution, polling, download, QA, retention, or credit reporting occurs outside task `019fef94-af14-7671-a739-447391cfb7a5` | Stop before operation; reject evidence as operational authority |
@@ -347,7 +347,7 @@ All new-operation failures leave the item `Deferred / NotAuthorized / NotSelecte
 
 - Authorized repository path: `unity/Docs/Terrestrials/Cinematics/Cinematic_Terrestrial_Asset_Priority_and_Meshy_Authorization.md`
 - Authorized branch: `codex/coordination-cinematic-terrestrial-meshy-authority`
-- Authorized base: `main@426316d29923fc3f037890c7f009b900b315e0df`
+- Authorized base: `main@6102638a41e1d944e267801df4cb22bbbd0af5eb`
 - Draft PR title: `coordination: define cinematic terrestrial asset priority and Meshy authorization gates`
 - Expected diff: exactly one Markdown file; zero binary/LFS/runtime/Player/install bytes; no Unity `.meta` file; no shared lock
 - Validation: exact base and merge-base, one-path diff, whitespace check, arithmetic and link reconciliation, dedicated-task exclusivity, historical-versus-current ledger accuracy, Wish Dragon rejection/current state, explicit 3D-vs-VFX/audio routing, A2-approved rights/source hash gates, exact cinematic plus named gameplay reuse binding, cinematic/gameplay package split, and no stale approval claim
