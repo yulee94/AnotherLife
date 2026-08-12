@@ -471,7 +471,7 @@ namespace AL.Editor.Architecture
             var mesh = new Mesh
             {
                 name = name,
-                indexFormat = IndexFormat.UInt32
+                indexFormat = IndexFormat.UInt16
             };
             mesh.SetVertices(vertices);
             mesh.SetNormals(normals);
@@ -1530,10 +1530,13 @@ namespace AL.Editor.Architecture
             if (existing == null)
             {
                 AssetDatabase.CreateAsset(generated, path);
+                generated.UploadMeshData(true);
+                EditorUtility.SetDirty(generated);
                 return generated;
             }
 
             EditorUtility.CopySerialized(generated, existing);
+            existing.UploadMeshData(true);
             Object.DestroyImmediate(generated);
             EditorUtility.SetDirty(existing);
             return existing;
