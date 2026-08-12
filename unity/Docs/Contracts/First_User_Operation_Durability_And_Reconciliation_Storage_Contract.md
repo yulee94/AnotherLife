@@ -103,8 +103,13 @@ PRIMARY KEY (
   commitmentKeyVersion,
   operationIdCommitment
 )
-UNIQUE (evidenceId)
-UNIQUE (evidenceId, semanticRequestFingerprint)
+UNIQUE (tenantScopeRef, principalScopeRef, evidenceId)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  evidenceId,
+  semanticRequestFingerprint
+)
 
 evidenceId                 RecordId
 tenantScopeRef             TenantScopeRef
@@ -120,6 +125,7 @@ lastWriteSequence          SafeSequence
 settledWriteSequence       SafeSequence?
 bindingId                  RecordId?
 settleReason               closed discriminator?
+settlementDigest           Digest32?
 createdAtServer            SafeTimestamp
 ```
 
@@ -136,7 +142,7 @@ TERMINAL -> RETENTION_BOUNDARY             policy-gated
 SETTLED_NO_BIND -> RETENTION_BOUNDARY      policy-gated
 ```
 
-No transition leaves `TERMINAL`, `SETTLED_NO_BIND`, or `RETENTION_BOUNDARY` except the two explicit policy-gated boundary transitions above. `BOUND` and `TERMINAL` require `bindingId`; `SETTLED_NO_BIND` forbids it and requires a settlement sequence, reason, and fence that disables every earlier worker.
+No transition leaves `TERMINAL`, `SETTLED_NO_BIND`, or `RETENTION_BOUNDARY` except the two explicit policy-gated boundary transitions above. `BOUND` and `TERMINAL` require `bindingId`; `SETTLED_NO_BIND` forbids it and requires a settlement sequence, reason, digest, and fence that disables every earlier worker. `settlementDigest` is absent before settlement and immutable afterward.
 
 ### 5.3 `OnboardingOperationBinding` (`B`)
 
@@ -144,9 +150,24 @@ Purpose: immutable identity/fingerprint binding and base terminal locator.
 
 ```text
 PRIMARY KEY (bindingId)
-UNIQUE (evidenceId)
-FOREIGN KEY (evidenceId, semanticRequestFingerprint)
-  REFERENCES W (evidenceId, semanticRequestFingerprint)
+UNIQUE (tenantScopeRef, principalScopeRef, evidenceId)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  bindingId,
+  semanticRequestFingerprint
+)
+FOREIGN KEY (
+  tenantScopeRef,
+  principalScopeRef,
+  evidenceId,
+  semanticRequestFingerprint
+) REFERENCES W (
+  tenantScopeRef,
+  principalScopeRef,
+  evidenceId,
+  semanticRequestFingerprint
+)
 
 bindingId                   RecordId
 evidenceId                  RecordId
@@ -163,6 +184,7 @@ terminalWriteSequence       SafeSequence?
 terminalAtServer            SafeTimestamp?
 receiptId                   RecordId?
 receiptResponseDigest       Digest32?
+receiptCoreDigest           Digest32?
 receiptProofDigest          Digest32?
 ledgerBatchId               RecordId?
 ledgerBatchDigest           Digest32?
@@ -186,14 +208,36 @@ Commit-time assertions:
 - `COMMITTED` and `TERMINAL_REJECTED` are immutable.
 - Composite foreign keys bind every locator to the exact stored digest; a partial locator is invalid.
 
+Every nullable locator tuple uses `MATCH FULL` semantics: either every member is absent or every member is present. The following scope-prefixed candidate keys and deferred composite foreign keys, or an exactly equivalent commit-time constraint, are mandatory:
+
+- committed `B -> R` binds scope, binding, receipt ID, response digest, core digest, ledger-batch ID, and ledger-batch digest;
+- committed `B -> P` binds the same receipt identity plus proof digest;
+- committed `B -> LB` binds scope, binding, batch ID, and batch digest;
+- rejected `B -> T` binds scope, binding, fingerprint, terminal-decision ID, and decision digest;
+- `P -> R` and `R -> LB` bind the same scoped IDs and digests;
+- `R`, `P`, `T`, and `LB` each bind back to the same scoped `B` candidate key.
+
+The executable candidate keys are the field tuples printed above and in the fixture catalog. The foreign-key source and target field names are explicit even where the physical column names differ (`B.receiptResponseDigest -> R.responseBodyDigest`, `B.receiptProofDigest -> P.proofDigest`, and each `ledgerBatchDigest -> LB.batchDigest`). A conforming schema cannot replace these tuples with an unscoped ID-only key.
+
+All circular terminal relationships are inserted in one atomic resource and checked at transaction commit. Application-only post-write validation is nonconforming. No unscoped locator probe, uniqueness test, or constraint error may become a cross-tenant or cross-principal existence oracle.
+
 ### 5.4 `CommittedReceiptBody` (`R`)
 
 Purpose: immutable exact successful response.
 
 ```text
 PRIMARY KEY (receiptId)
-UNIQUE (bindingId)
-UNIQUE (receiptId, responseBodyDigest, receiptCoreDigest)
+UNIQUE (tenantScopeRef, principalScopeRef, bindingId)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  bindingId,
+  receiptId,
+  responseBodyDigest,
+  receiptCoreDigest,
+  ledgerBatchId,
+  ledgerBatchDigest
+)
 
 receiptId                   RecordId
 bindingId                   RecordId
@@ -219,12 +263,26 @@ The exact stored status/body is returned on original success and every exact rep
 Purpose: immutable integrity/proof material pinned to the exact receipt and historical verification profile.
 
 ```text
-PRIMARY KEY / FOREIGN KEY (receiptId) REFERENCES R
-UNIQUE (receiptId, responseBodyDigest, proofDigest)
+PRIMARY KEY (tenantScopeRef, principalScopeRef, receiptId)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  bindingId,
+  receiptId,
+  responseBodyDigest,
+  receiptCoreDigest,
+  ledgerBatchId,
+  ledgerBatchDigest,
+  proofDigest
+)
 
 receiptId                   RecordId
+bindingId                   RecordId
+tenantScopeRef              TenantScopeRef
+principalScopeRef           PrincipalScopeRef
 responseBodyDigest          Digest32
 receiptCoreDigest           Digest32
+ledgerBatchId               RecordId
 ledgerBatchDigest           Digest32
 proofProfileVersion         UInt16
 proofKeyVersion             UInt16
@@ -235,14 +293,23 @@ createdAtServer             SafeTimestamp
 
 Historical rows are never silently re-signed or rewritten during key rotation.
 
+An available trusted verifier returning a bad proof is `PROOF_MISMATCH`. An unavailable or retired historical verifier is `VERIFICATION_UNAVAILABLE`/`UNKNOWN`; it is not a mismatch. A known-compromised verification key is `SECURITY_INTEGRITY_FAULT` and quarantines the result. All three dispositions are zero-mutation and never re-sign historical bytes.
+
 ### 5.6 `TerminalDecision` (`T`)
 
 Purpose: immutable exact durable rejection.
 
 ```text
 PRIMARY KEY (terminalDecisionId)
-UNIQUE (bindingId)
-UNIQUE (terminalDecisionId, terminalDecisionDigest)
+UNIQUE (tenantScopeRef, principalScopeRef, bindingId)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  bindingId,
+  terminalDecisionId,
+  semanticRequestFingerprint,
+  terminalDecisionDigest
+)
 
 terminalDecisionId          RecordId
 bindingId                   RecordId
@@ -267,7 +334,9 @@ Only stable decisions established after binding under the primary transaction ma
 `LedgerStreamHead`:
 
 ```text
-PRIMARY KEY (tenantScopeRef, streamKind, streamId)
+PRIMARY KEY (tenantScopeRef, principalScopeRef, streamKind, streamId)
+tenantScopeRef            TenantScopeRef
+principalScopeRef         PrincipalScopeRef
 nextRevision               SafeSequence
 headEventDigest            Digest32?
 lastWriteSequence          SafeSequence
@@ -278,10 +347,19 @@ rowRevision                SafeSequence
 
 ```text
 PRIMARY KEY (ledgerBatchId)
-UNIQUE (bindingId, batchKind, batchRevision)
+UNIQUE (tenantScopeRef, principalScopeRef, bindingId, batchKind, batchRevision)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  bindingId,
+  ledgerBatchId,
+  batchDigest
+)
 
 ledgerBatchId              RecordId
 bindingId                  RecordId
+tenantScopeRef             TenantScopeRef
+principalScopeRef          PrincipalScopeRef
 batchKind                  FIRST_USER_COMMIT | COMPENSATION | SUPPRESSION
 batchRevision              SafeSequence
 eventCount                 integer 1..64
@@ -299,14 +377,15 @@ committedAtServer          SafeTimestamp
 `LedgerEvent`:
 
 ```text
-PRIMARY KEY (ledgerBatchId, batchOrdinal)
-UNIQUE (eventId)
-UNIQUE (tenantScopeRef, streamKind, streamId, streamRevision)
+PRIMARY KEY (tenantScopeRef, principalScopeRef, ledgerBatchId, batchOrdinal)
+UNIQUE (tenantScopeRef, principalScopeRef, eventId)
+UNIQUE (tenantScopeRef, principalScopeRef, streamKind, streamId, streamRevision)
 
 eventId                    RecordId
 ledgerBatchId              RecordId
 batchOrdinal               integer 0..4095
 tenantScopeRef             TenantScopeRef
+principalScopeRef          PrincipalScopeRef
 streamKind                 closed discriminator
 streamId                   RecordId
 streamRevision             SafeSequence
@@ -328,7 +407,20 @@ Commit-time ledger assertions:
 - the batch digest binds the ordered event-digest list;
 - no event or head may be renumbered, truncated, or reconstructed from request data after commit.
 
-### 5.8 `AuditEntry` (`A`)
+### 5.8 `AuditStreamHead` (`AH`) and `AuditEntry` (`A`)
+
+`AuditStreamHead` makes tenant-scoped audit allocation executable under concurrent principals:
+
+```text
+PRIMARY KEY (tenantScopeRef)
+tenantScopeRef              TenantScopeRef       immutable
+nextAuditSequence           SafeSequence         monotonic
+headAuditDigest             Digest32?
+lastWriteSequence           SafeSequence         monotonic
+rowRevision                 SafeSequence         monotonic CAS
+```
+
+Every transaction that appends `A` locks `AH`, allocates `A.auditSequence = AH.nextAuditSequence`, requires `A.previousAuditDigest = AH.headAuditDigest` (null exactly when the sequence is zero), inserts `A`, and CAS-advances `AH` to the next sequence, new digest, write sequence, and revision in the same transaction. Restore verifies the contiguous range `0..nextAuditSequence-1` and the final digest. Concurrent principals remain independent until they append tenant audit evidence, when they serialize briefly on `AH` without reversing the global lock order.
 
 Purpose: privacy-minimal immutable operational evidence.
 
@@ -343,7 +435,8 @@ auditSequence              SafeSequence
 bindingId                  RecordId?
 overlayId                  RecordId?
 kind                       COMMITTED | TERMINAL_REJECTED |
-                           COMPENSATED | SUPPRESSED | INTEGRITY_INCIDENT
+                           COMPENSATED | SUPPRESSED | RETENTION_MARKED |
+                           INTEGRITY_INCIDENT
 actorPseudonym             purpose-separated protected bytes
 safeMetadataBytes          bounded canonical bytes
 safeMetadataDigest         Digest32
@@ -362,10 +455,11 @@ Purpose: atomic logical publication after an authoritative transaction.
 
 ```text
 PRIMARY KEY (logicalMessageId)
-UNIQUE (sourceKind, sourceId, publicationKind)
+UNIQUE (tenantScopeRef, principalScopeRef, sourceKind, sourceId, publicationKind)
 
 logicalMessageId           RecordId
 tenantScopeRef             TenantScopeRef
+principalScopeRef          PrincipalScopeRef
 sourceKind                 LEDGER_BATCH | SUPPRESSION | COMPENSATION
 sourceId                   RecordId
 publicationKind            closed discriminator
@@ -389,26 +483,42 @@ Purpose: monotonic correction after a committed base without rewriting accepted 
 
 ```text
 PRIMARY KEY (compensationId)
-UNIQUE (bindingId, compensationRevision)
-UNIQUE (bindingId, compensationCommandCommitment)
+UNIQUE (tenantScopeRef, principalScopeRef, bindingId, compensationRevision)
+UNIQUE (tenantScopeRef, principalScopeRef, bindingId, compensationCommandCommitment)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  compensationId,
+  compensationDigest
+)
 
 compensationId             RecordId
 bindingId                  RecordId
+tenantScopeRef             TenantScopeRef
+principalScopeRef          PrincipalScopeRef
 compensationRevision       SafeSequence
 compensationCommandCommitment Commitment32
 expectedReceiptId          RecordId
-expectedReceiptDigest      Digest32
+expectedReceiptResponseDigest Digest32
+expectedReceiptCoreDigest  Digest32
+expectedReceiptProofDigest Digest32
+expectedBaseLedgerBatchId  RecordId
+expectedBaseLedgerBatchDigest Digest32
+expectedBaseLocatorDigest  Digest32
 reasonCode                 closed discriminator
 reasonDigest               Digest32
-state                      REQUESTED | APPLIED | FAILED
-resultDigest               Digest32?
-ledgerBatchId              RecordId?
-ledgerBatchDigest          Digest32?
+state                      constant APPLIED
+resultDigest               Digest32
+ledgerBatchId              RecordId
+ledgerBatchDigest          Digest32
+compensationDigest         Digest32
 createdWriteSequence       SafeSequence
-completedWriteSequence     SafeSequence?
+completedWriteSequence     SafeSequence
 ```
 
-Allowed transitions are `REQUESTED -> APPLIED` and `REQUESTED -> FAILED`. The bounded synchronous profile inserts `APPLIED` atomically with its authoritative reversal, one deterministic event batch, audit, and outbox. An asynchronous adapter is future work and must define additional crash/count fixtures before use. A failed compensation never changes the base terminal to rejection.
+Version 1 permits only `ABSENT -> APPLIED`. `C=APPLIED`, the authoritative reversal, one deterministic compensation batch, exact base and overlay locators, audit plus `AH` advance, outbox, and `Q` advance commit atomically. `createdWriteSequence` equals `completedWriteSequence`. A stable denial or application failure persists no `C`, ledger, audit, outbox, or domain mutation. An unknown commit result is exactly the prior committed base or the complete applied set. Durable `REQUESTED`/`FAILED` states, asynchronous workers, and two-phase apply/fail schedules are outside version 1.
+
+Scope-prefixed composite foreign keys bind `C` to exact `B`, base `R/P/LB`, and its `LB(kind=COMPENSATION)`. `expectedBaseLocatorDigest` is recomputed from those direct locators at commit; the base terminal is never rewritten.
 
 ### 5.11 `SuppressionRecord` (`S`)
 
@@ -416,37 +526,62 @@ Purpose: irreversible logical denial after authorized deletion/suppression while
 
 ```text
 PRIMARY KEY (suppressionId)
-UNIQUE (bindingId)
+UNIQUE (tenantScopeRef, principalScopeRef, bindingId)
+UNIQUE (
+  tenantScopeRef,
+  principalScopeRef,
+  suppressionId,
+  suppressionDigest
+)
 
 suppressionId              RecordId
 bindingId                  RecordId
+tenantScopeRef             TenantScopeRef
+principalScopeRef          PrincipalScopeRef
 deletionEpoch              SafeSequence
 reasonCode                 closed discriminator
 reasonDigest               Digest32
 expectedBaseLocatorDigest  Digest32
+expectedReceiptId          RecordId
+expectedReceiptResponseDigest Digest32
+expectedReceiptCoreDigest  Digest32
+expectedReceiptProofDigest Digest32
+expectedBaseLedgerBatchId  RecordId
+expectedBaseLedgerBatchDigest Digest32
+coveredCompensationId      RecordId?
+coveredCompensationDigest  Digest32?
 state                      LOGICALLY_SUPPRESSED |
-                           ERASURE_PENDING | ERASURE_CONFIRMED
+                           ERASURE_PENDING
 ledgerBatchId              RecordId
 ledgerBatchDigest          Digest32
+suppressionDigest           Digest32
 createdWriteSequence       SafeSequence
 updatedWriteSequence       SafeSequence
 ```
 
-Allowed transitions are `LOGICALLY_SUPPRESSED -> ERASURE_PENDING -> ERASURE_CONFIRMED`. No transition restores access. Suppression is authoritative immediately at the initial transaction commit and outranks compensation regardless of wall-clock time.
+The version 1 transition is `LOGICALLY_SUPPRESSED -> ERASURE_PENDING`; no transition restores access. `ERASURE_CONFIRMED` is reserved for a future contract and is not claimed by the version 1 fixture catalog. That future contract must specify external key-destruction proof, provider failure/unknown results, idempotency, backup/restore, and its verified bridge. Suppression is authoritative immediately at the initial transaction commit and outranks compensation regardless of wall-clock time.
+
+Scope-prefixed composite foreign keys bind `S` to exact `B`, base `R/P/LB`, optional `C` using `MATCH FULL`, and its `LB(kind=SUPPRESSION)`.
 
 ### 5.12 `RetentionTombstone` (`X`)
 
-Purpose: immutable metadata for a policy-authorized retention boundary or cryptographic erasure.
+Purpose: immutable metadata for a policy-authorized retention boundary. Version 1 does not claim completed cryptographic erasure.
 
 ```text
 PRIMARY KEY (tombstoneId)
-UNIQUE (targetKind, targetId)
 
 tombstoneId                RecordId
 tenantScopeRef             TenantScopeRef
 principalScopeRef          PrincipalScopeRef
-targetKind                 closed discriminator
-targetId                   RecordId
+targetKind                 INGRESS_SETTLEMENT |
+                           COMPENSATION | SUPPRESSION
+targetBindingId            RecordId?
+targetEvidenceId           RecordId?
+targetSettlementDigest     Digest32?
+targetCompensationId       RecordId?
+targetCompensationDigest   Digest32?
+targetSuppressionId        RecordId?
+targetSuppressionDigest    Digest32?
 originalLocatorDigest      Digest32
 suppressionId              RecordId?
 erasurePolicyId            bounded protected ref
@@ -457,7 +592,81 @@ createdWriteSequence       SafeSequence
 createdAtServer            SafeTimestamp
 ```
 
-Version 1 does not authorize physical deletion of immutable locator rows. A cryptographic-erasure test profile keeps the encrypted artifact, its digest/proof metadata, and all foreign-key targets while recording external key destruction in `X`. Any future physical-row deletion requires a new reviewed contract version and migration that preserves locator integrity and suppression precedence.
+One checked target discriminator activates exactly one typed ID/digest pair and forbids the other four nullable target columns. `INGRESS_SETTLEMENT` also requires `targetBindingId` absent; `COMPENSATION` and `SUPPRESSION` require it present. Each kind has its own complete scope-prefixed composite foreign key to `W`, `C`, or `S`, plus a scope-prefixed conditional unique constraint over its complete active source tuple. `originalLocatorDigest` must equal the selected typed target digest. Generic polymorphic target lookup and unscoped `UNIQUE(targetKind,targetId)` are prohibited. A settlement target binds scope plus `W.evidenceId + W.settlementDigest`; compensation and suppression targets bind scope plus `targetBindingId`, typed ID, and exact overlay digest.
+
+Version 1 does not authorize physical deletion of immutable locator rows or claim completed cryptographic erasure. It records a mark-only boundary while keeping every foreign-key target. Any future physical-row deletion or confirmed erasure requires a new reviewed contract version that preserves locator integrity and suppression precedence.
+
+### 5.12a Executable scoped constraint appendix
+
+The following tuples are literal candidate keys. `scope` below expands exactly to `(tenantScopeRef, principalScopeRef)` and is physically present in every listed record:
+
+```text
+W:  UNIQUE(scope, evidenceId, semanticRequestFingerprint)
+W:  UNIQUE(scope, evidenceId, settlementDigest)
+B:  UNIQUE(scope, bindingId)
+B:  UNIQUE(scope, bindingId, semanticRequestFingerprint)
+R:  UNIQUE(scope, bindingId, receiptId, responseBodyDigest,
+           receiptCoreDigest, ledgerBatchId, ledgerBatchDigest)
+P:  UNIQUE(scope, bindingId, receiptId, responseBodyDigest,
+           receiptCoreDigest, ledgerBatchId, ledgerBatchDigest, proofDigest)
+T:  UNIQUE(scope, bindingId, terminalDecisionId,
+           semanticRequestFingerprint, terminalDecisionDigest)
+LB: UNIQUE(scope, bindingId, ledgerBatchId, batchDigest)
+C:  UNIQUE(scope, bindingId, compensationId, compensationDigest)
+S:  UNIQUE(scope, bindingId, suppressionId, suppressionDigest)
+```
+
+The literal `MATCH FULL`, deferred/commit-time foreign-key mappings are:
+
+```text
+B(scope,evidenceId,semanticRequestFingerprint)
+  -> W(scope,evidenceId,semanticRequestFingerprint)
+
+B.COMMITTED(scope,bindingId,receiptId,receiptResponseDigest,
+            receiptCoreDigest,ledgerBatchId,ledgerBatchDigest)
+  -> R(scope,bindingId,receiptId,responseBodyDigest,
+       receiptCoreDigest,ledgerBatchId,ledgerBatchDigest)
+B.COMMITTED(scope,bindingId,receiptId,receiptResponseDigest,
+            receiptCoreDigest,ledgerBatchId,ledgerBatchDigest,
+            receiptProofDigest)
+  -> P(scope,bindingId,receiptId,responseBodyDigest,
+       receiptCoreDigest,ledgerBatchId,ledgerBatchDigest,proofDigest)
+B.COMMITTED(scope,bindingId,ledgerBatchId,ledgerBatchDigest)
+  -> LB(scope,bindingId,ledgerBatchId,batchDigest)
+B.TERMINAL_REJECTED(scope,bindingId,terminalDecisionId,
+                    semanticRequestFingerprint,terminalDecisionDigest)
+  -> T(scope,bindingId,terminalDecisionId,
+       semanticRequestFingerprint,terminalDecisionDigest)
+
+P(scope,bindingId,receiptId,responseBodyDigest,receiptCoreDigest,
+  ledgerBatchId,ledgerBatchDigest)
+  -> R(scope,bindingId,receiptId,responseBodyDigest,receiptCoreDigest,
+       ledgerBatchId,ledgerBatchDigest)
+R(scope,bindingId,ledgerBatchId,ledgerBatchDigest)
+  -> LB(scope,bindingId,ledgerBatchId,batchDigest)
+R/P/T/LB(scope,bindingId) -> B(scope,bindingId)
+```
+
+Both `C` and `S` carry direct physical base-locator columns. Each has commit-time links to `B(scope,bindingId)`, the complete `R` and `P` tuples above, and `LB(scope,bindingId,expectedBaseLedgerBatchId,expectedBaseLedgerBatchDigest)`. Each also links `(scope,bindingId,ledgerBatchId,ledgerBatchDigest)` to an `LB` whose checked kind is respectively `COMPENSATION` or `SUPPRESSION`. `S(scope,bindingId,coveredCompensationId,coveredCompensationDigest)` optionally links with `MATCH FULL` to `C(scope,bindingId,compensationId,compensationDigest)`. For both overlays, the constraint recomputes `baseSuccessLocatorDigest` from the direct base columns and requires exact equality to `expectedBaseLocatorDigest`.
+
+Typed tombstone constraints are separate by discriminator and cannot probe a generic target:
+
+```text
+INGRESS_SETTLEMENT:
+  X(scope,targetEvidenceId,targetSettlementDigest)
+    -> W(scope,evidenceId,settlementDigest)
+  targetBindingId MUST be null
+
+COMPENSATION:
+  X(scope,targetBindingId,targetCompensationId,targetCompensationDigest)
+    -> C(scope,bindingId,compensationId,compensationDigest)
+
+SUPPRESSION:
+  X(scope,targetBindingId,targetSuppressionId,targetSuppressionDigest)
+    -> S(scope,bindingId,suppressionId,suppressionDigest)
+```
+
+Each discriminator has a conditional `UNIQUE` over its complete scoped source tuple. The checked discriminator requires exactly its active typed ID/digest pair, requires overlay `targetBindingId` only for overlay kinds, makes every inactive typed field null, and requires `originalLocatorDigest` to equal the active target digest. Constraint errors are mapped only after authenticated scope selection and are nondisclosing.
 
 ### 5.13 Key lifecycle metadata
 
@@ -471,7 +680,7 @@ Key material is never stored in these records. No KMS, provider, algorithm, or r
 
 ## 6. Global indexes, isolation, and immutability
 
-1. Every operational index begins with `tenantScopeRef, principalScopeRef` unless the table is reached only through a scoped parent FK.
+1. Every lookup-visible operational candidate key and index begins with `tenantScopeRef, principalScopeRef` unless the table is reached only through a mandatory scoped composite parent FK. `AH` and the tenant-global audit-sequence key are the sole exceptions because tenant scope is their complete authorization/chain scope. Surrogate primary keys may exist only behind these scoped access paths and may never be probed before authenticated scope selection.
 2. There is no global commitment or fingerprint lookup.
 3. Candidate commitments are computed transiently for every retained key version, sorted by `(keyVersion, commitment)`, and probed under `Q`.
 4. More than one retained-version match is an integrity fault. No arbitrary winner is selected.
@@ -504,6 +713,20 @@ operationIdCommitment = KeyedCommitment32(
     tenantScopeRef,
     principalScopeRef,
     rawOperationIdUtf8))
+
+settlementDigest = Digest32(
+  digestProfileVersion,
+  FrameV1("AL.INGRESS.SETTLEMENT.v1",
+    tenantScopeRef,
+    principalScopeRef,
+    evidenceId,
+    commitmentKeyVersion,
+    operationIdCommitment,
+    semanticRequestFingerprint,
+    ingressSequence,
+    attemptFence,
+    settledWriteSequence,
+    settleReason))
 
 receiptCoreDigest = Digest32(
   digestProfileVersion,
@@ -561,6 +784,8 @@ ledgerBatchDigest = Digest32(
 auditDigest = Digest32(
   digestProfileVersion,
   FrameV1("AL.AUDIT.v1",
+    tenantScopeRef,
+    principalScopeRef,
     auditEntryId,
     auditSequence,
     bindingId,
@@ -577,9 +802,84 @@ outboxPayloadDigest = Digest32(
     sourceId,
     publicationKind,
     safePayloadBytes))
+
+baseSuccessLocatorDigest = Digest32(
+  digestProfileVersion,
+  FrameV1("AL.BASE.SUCCESS.LOCATOR.v1",
+    tenantScopeRef,
+    principalScopeRef,
+    bindingId,
+    receiptId,
+    responseBodyDigest,
+    receiptCoreDigest,
+    receiptProofDigest,
+    ledgerBatchId,
+    ledgerBatchDigest))
+
+compensationDigest = Digest32(
+  digestProfileVersion,
+  FrameV1("AL.COMPENSATION.v1",
+    tenantScopeRef,
+    principalScopeRef,
+    compensationId,
+    bindingId,
+    compensationRevision,
+    compensationCommandCommitment,
+    expectedReceiptId,
+    expectedReceiptResponseDigest,
+    expectedReceiptCoreDigest,
+    expectedReceiptProofDigest,
+    expectedBaseLedgerBatchId,
+    expectedBaseLedgerBatchDigest,
+    expectedBaseLocatorDigest,
+    reasonCode,
+    reasonDigest,
+    asciiAppliedState,
+    resultDigest,
+    ledgerBatchId,
+    ledgerBatchDigest,
+    createdWriteSequence,
+    completedWriteSequence))
+
+suppressionDigest = Digest32(
+  digestProfileVersion,
+  FrameV1("AL.SUPPRESSION.v1",
+    tenantScopeRef,
+    principalScopeRef,
+    suppressionId,
+    bindingId,
+    deletionEpoch,
+    reasonCode,
+    reasonDigest,
+    expectedBaseLocatorDigest,
+    state,
+    coveredCompensationId,
+    coveredCompensationDigest,
+    ledgerBatchId,
+    ledgerBatchDigest,
+    createdWriteSequence,
+    updatedWriteSequence))
+
+evidenceDigest = Digest32(
+  digestProfileVersion,
+  FrameV1("AL.RETENTION.TOMBSTONE.v1",
+    tenantScopeRef,
+    principalScopeRef,
+    tombstoneId,
+    targetKind,
+    targetBindingId,
+    selectedTypedTargetId,
+    selectedTypedTargetDigest,
+    originalLocatorDigest,
+    suppressionId,
+    erasurePolicyId,
+    destroyedKeyRef,
+    destroyedKeyVersion,
+    createdWriteSequence,
+    createdAtServer))
 ```
 
-Compensation, suppression, and tombstone digests use the same framing and bind record ID, base binding/locator digest, monotonic revision/state, policy/reason digest, and write sequence. No digest includes itself. Proof bytes and fields inserted into the final response are excluded from `receiptCoreBytes`; `responseBodyDigest` is computed only after the final response body is encoded.
+The listed order is the exact one-based field ordinal order. `selectedTypedTarget*` is the single pair activated by `targetKind`, not a concatenation of nullable alternatives. Optional fields use the `FrameV1` absent marker. No digest includes itself. `expectedBaseLocatorDigest` is recomputed from the independently constrained direct locators. Proof bytes and fields inserted into the final response are excluded from `receiptCoreBytes`; `responseBodyDigest` is computed only after the final response body is encoded.
 
 Write-only secrets affect persistence only through their separately approved purpose commitment. `writeOnly` in an API schema is not redaction and creates no permission to log or store the secret.
 
@@ -591,11 +891,13 @@ Every authoritative transaction uses this exact order:
 2. All candidate `W` rows for retained commitment-key versions, ordered by `(keyVersion, operationCommitment)`.
 3. Matching `B`.
 4. Principal first-user uniqueness/CAS guard and opaque semantic authority rows, ordered by stable physical key.
-5. Touched `H` rows ordered by `(streamKind, streamId)`, then existing terminal/overlay locators ordered by ID.
-6. Inserts and domain updates.
-7. `B`, `W`, and `Q` outcome/fence CAS updates last.
+5. Touched `H` rows ordered by `(streamKind, streamId)`.
+6. Tenant `AH`, when the transaction appends audit evidence.
+7. Existing terminal/overlay locators ordered by scoped logical ID.
+8. Inserts and domain updates.
+9. Outcome/fence CAS updates are last in the declared write order: terminal/overlay state first, then `B`/`W` as applicable, then `AH`, and finally `Q`. `AH` is never advanced before its `A` row or before a later insert in the same transaction.
 
-No retry, worker, compensation, suppression, restore, or repair path may reverse this order. Concurrent principals may proceed independently. Distinct operation commitments for one principal serialize at `Q` and the first-user uniqueness guard.
+No retry, worker, compensation, suppression, retention, restore, or repair path may reverse this order. Concurrent principals may proceed independently until a transaction appends tenant audit, when it briefly serializes on `AH`. Distinct operation commitments for one principal serialize at `Q` and the first-user uniqueness guard.
 
 ## 9. Transaction blueprints
 
@@ -630,6 +932,20 @@ The token binds authenticated scope, commitment/key version, fingerprint, ingres
 
 A crash before commit leaves `W=REGISTERED`; after commit it leaves `W=BOUND` and `B=IN_PROGRESS`.
 
+### 9.3a Settlement without a binding
+
+This is the only version 1 path to `W=SETTLED_NO_BIND`:
+
+1. Authenticate the exact tenant/principal scope and validate the fingerprint and reconcile token before persistence.
+2. On the linearizable primary, begin a serializable transaction and lock `Q`, then every retained-version `W` candidate.
+3. Require exactly one matching `W=REGISTERED`, no `B` or terminal under any retained-version candidate, the exact expected attempt fence, a valid token ingress/required sequence, primary catch-up, and a fenced prior leader.
+4. Increment `Q.leaderEpoch`; CAS `W.attemptFence` above every issued worker fence; allocate the one new `Q.writeSequence` value.
+5. From those final fenced values compute `settlementDigest = Digest32(profile, FrameV1("AL.INGRESS.SETTLEMENT.v1", ...))` using the exact preimage in section 7.
+6. Atomically CAS `W REGISTERED -> SETTLED_NO_BIND`, keep `bindingId` null, store the closed `settleReason` and `settlementDigest`, and set `settledWriteSequence = lastWriteSequence = Q.writeSequence`.
+7. CAS `Q`, commit, then issue updated authenticated barrier evidence.
+
+The exact write set is `Q+W`. It creates no `B/R/P/T/LB/LE/H/AH/A/O/C/S/X` or domain effect. An unknown commit reconciles to the exact prior `REGISTERED` state or the complete `SETTLED_NO_BIND` state. Any failed precondition returns `UNKNOWN`, `BARRIER_TIMEOUT`, a nondisclosing scope result, or `INTEGRITY_FAULT` as appropriate, with zero mutation and no retry/new-key authority.
+
 ### 9.4 New successful terminal
 
 Read/lock set:
@@ -637,7 +953,8 @@ Read/lock set:
 ```text
 Q, every candidate W, B, first-user uniqueness guard,
 opaque semantic/CAS/authority rows, touched H rows,
-and deterministic-ID uniqueness probes
+  deterministic-ID uniqueness probes, tenant AH,
+  and scoped terminal/overlay locator probes
 ```
 
 One finalization transaction:
@@ -651,7 +968,7 @@ One finalization transaction:
 7. Insert `R`, `P`, `A`, and `O=PENDING`.
 8. CAS `B IN_PROGRESS -> COMMITTED` with the complete locator/digest tuple.
 9. CAS `W BOUND -> TERMINAL`.
-10. Increment/stamp `Q.writeSequence` and commit.
+10. CAS `AH` to the allocated audit sequence/digest, increment/stamp `Q.writeSequence`, and commit.
 
 That commit is the sole authoritative commit point. A response is sent only afterward. No broker, cache, analytics, or other nontransactional call occurs inside finalization.
 
@@ -660,11 +977,12 @@ That commit is the sole authoritative commit point. A response is sent only afte
 A durable rejection requires a stable post-admission fact proven under primary locks. In one transaction:
 
 ```text
-read/lock Q, W, B, and exact deciding authority rows
+read/lock Q, W, B, exact deciding authority rows, AH, and scoped locators
 insert immutable T
 insert minimal A
 CAS B IN_PROGRESS -> TERMINAL_REJECTED with complete locator/digest
 CAS W BOUND -> TERMINAL
+CAS AH to the allocated audit sequence/digest
 increment/stamp Q.writeSequence
 commit
 ```
@@ -705,21 +1023,35 @@ Resolve only through the primary barrier. Partial visibility is corruption, not 
 
 ### 9.11 Compensation append
 
-For a verified committed base without suppression:
+For a verified committed base without suppression, version 1 is synchronous only:
 
 1. Lock in the global order and verify base receipt/proof and current overlays.
 2. Exact compensation-command replay returns zero mutation.
-3. In one transaction apply the compensating opaque domain delta, append `C=APPLIED`, one deterministic one-event ledger batch, audit, outbox, and head/watermark advances.
+3. In one transaction apply the compensating opaque domain delta, insert immutable `C=APPLIED`, one deterministic one-event ledger batch, audit plus `AH` CAS, outbox, and head/watermark advances.
 4. Commit without modifying `B`, `R`, `P`, or the original ledger batch.
+
+A stable denial/application failure leaves the base unchanged and persists no `C`. Unknown commit resolves to the exact prior base or the complete applied overlay. Version 1 has no durable `REQUESTED` or `FAILED` state and no asynchronous compensation worker.
 
 ### 9.12 Suppression append
 
 1. Lock and verify the base and any compensation.
 2. Exact suppression replay returns zero mutation.
-3. In one transaction insert logical access denial, `S=LOGICALLY_SUPPRESSED`, one deterministic one-event ledger batch, audit, outbox, and head/watermark advances.
+3. In one transaction insert logical access denial, `S=LOGICALLY_SUPPRESSED`, one deterministic one-event ledger batch, audit plus `AH` CAS, outbox, and head/watermark advances.
 4. Keep the base terminal and compensation immutable.
 
 Logical suppression is authoritative at commit and immediately wins reconciliation. Policy-controlled erasure may follow idempotently and can never restore access.
+
+### 9.13 Mark-only retention boundary
+
+Version 1 starts from a verified `S=LOGICALLY_SUPPRESSED` base. Acquire locks in the global order: `Q`, retained-version `W`, `B`, no opaque/H locks, `AH`, then scoped base/S/typed-X locator probes. Verify there is no existing `X`, allocate one `Q` write sequence and one audit sequence, compute the new suppression/tombstone/audit digests, then atomically:
+
+- insert typed `X(targetKind=SUPPRESSION)` bound to the new `S` digest;
+- insert one `A`;
+- CAS `S LOGICALLY_SUPPRESSED -> ERASURE_PENDING`;
+- CAS `W TERMINAL -> RETENTION_BOUNDARY`;
+- CAS `AH`, then CAS `Q` and commit.
+
+The exact delta is monotonic `W/S`, `+1 X`, `+1 A`, and `AH/Q` advance. It has zero domain, `C`, `R/P/T`, `LB/LE/H`, or `O` change. Exact replay is zero mutation. Unknown commit is the exact prior suppressed state or the full marked state; partial visibility is corruption. This is a retention marker, not retention-duration, deletion-law, key-destruction, or erasure-confirmation approval.
 
 ## 10. Primary barrier and reconciliation
 
@@ -759,6 +1091,8 @@ Every condition is mandatory:
 - serializable all-retained-version read finds no `B`, terminal, or covering tombstone;
 - evidence and required key versions remain within the guaranteed reconciliation horizon;
 - no ambiguity, corruption, or partial locator exists.
+
+The executable catalog represents those predicates as the closed `NFAB_VALID` barrier profile. It also contains a committed `REGISTERED -> SETTLED_NO_BIND` settlement schedule and negative profiles for missing/mismatched token or scope, low settled sequence, insufficient attempt fence, replica/not-caught-up primary, retained-key coverage failure, a present binding/terminal/tombstone, expired horizon, multiple matches, and corruption. Only `NFAB_VALID` may yield `NOT_FOUND_AFTER_BARRIER`.
 
 `NOT_FOUND_AFTER_BARRIER` is informational only. It grants no automatic retry, new key, uniqueness bypass, or suppression bypass. Ordinary primary absence without matching settled evidence is `UNPROVEN_ABSENCE`/`UNKNOWN`.
 
@@ -801,6 +1135,9 @@ Legend: `Z` no operation-owned state; `REG` registered evidence; `IP` bound/in-p
 | after `Q` CAS or `W` insert, before ingress commit | `Z` after rollback | none | token issuance |
 | connection loss during ingress commit | `Z` or `REG` | primary barrier | assuming result |
 | ingress committed, response/token lost | `REG` | scoped lookup and replacement token | duplicate `W` |
+| any settlement write before settlement commit | `REG` after rollback | retry same fenced settlement | exposing partial settled evidence |
+| connection loss during settlement commit | `REG` or complete `SETTLED_NO_BIND` | primary barrier | inferring not-found from absence |
+| settlement committed, token lost | complete `SETTLED_NO_BIND` | issue replacement authenticated evidence after exact primary read | reopen with a new key |
 | binding writes before binding commit | `REG` after rollback | retry same binding CAS | exposing uncommitted `B` |
 | connection loss during binding commit | `REG` or `IP` | primary barrier | blind second insert |
 | binding committed before finalization | `IP` | fenced continuation with exact core | new logical operation |
@@ -811,8 +1148,10 @@ Legend: `Z` no operation-owned state; `REG` registered evidence; `IP` bound/in-p
 | connection loss during rejection commit | `IP` or `FULL-T` | primary barrier | converting transient failure |
 | overlay write before overlay commit | `PRE` | retry fenced command | partial overlay |
 | connection loss during overlay commit | `PRE` or complete overlay | primary barrier | blind second effect |
-| suppression committed before erasure worker | suppressed, erasure pending | idempotent worker | reopening access |
-| crash during physical erasure | suppressed, pending/unknown erase | verify erasure evidence | unsuppressing |
+| compensation denial or apply failure before commit | `PRE` | return stable denial/failure | durable `C=REQUESTED/FAILED` |
+| compensation connection loss during commit | base or complete `C=APPLIED` overlay | primary barrier | asynchronous partial completion |
+| any retention-mark write before commit | suppressed `PRE` | retry exact marked-boundary command | partial `W/S/X/A` repair |
+| connection loss during retention-mark commit | suppressed `PRE` or complete retention boundary | primary barrier | claiming completed erasure |
 | broker accepts, acknowledgement lost | delivery may exist; outbox pending | republish same logical ID | new ID/effect |
 | worker marks published after commit, response lost | outbox published | read row, no new publish | republish as new event |
 | duplicate worker or consumer delivery | unchanged source rows | consumer dedupe | second domain effect |
@@ -829,11 +1168,14 @@ Legend: `Z` no operation-owned state; `REG` registered evidence; `IP` bound/in-p
 | corrupt compensation without suppression | integrity fault | exact restore | ordinary committed result |
 | retained lookup key unavailable | unknown/key unavailable | restore approved access | treat as absent |
 | multiple retained-version matches | integrity fault | investigate/quarantine | choose arbitrarily |
-| historical proof key unavailable/compromised | unverifiable/incident | approved incident process | silent re-sign |
+| historical proof verifier unavailable/retired | verification unavailable/unknown | restore approved verifier access | report mismatch or silently re-sign |
+| historical proof key known compromised | security integrity incident/quarantine | approved incident process | return receipt or silently re-sign |
 | evidence outside retention boundary | retention-qualified unknown | policy response | retry authority |
 | body inaccessible without covering tombstone | integrity fault | exact restore/quarantine | never-committed inference |
 
 No valid crash point permits a partially durable domain effect, ledger, receipt, audit, outbox, or terminal locator. If such a combination is observed, it is corruption or an atomicity breach.
+
+Corrupt `C` or `S` is checked before overlay precedence. It never falls through to the valid base or to the other overlay, never mutates the corrupt record, and is represented by dedicated injected-corruption vectors/profiles/fixtures.
 
 ## 12. Outbox publication semantics
 
@@ -904,28 +1246,39 @@ The local projection revision and local `ProfileId` never cross the server bound
 
 ## 17. Executable fixture contract
 
-`First_User_Operation_Durability_Fixtures.v1.json` is the executable catalog for this document. It fixes:
+`First_User_Operation_Durability_Fixtures.v1.json` is the executable catalog for this document. It contains exactly 115 stable fixture IDs: 112 executable scenario bodies plus three explicit alias/coverage IDs. It contains 20 named state vectors and 18 distinct record-count tuples; state or integrity may distinguish vectors whose counts coincide. The aliases do not add behavior or double-count execution:
 
-- vector order `Q/W/B/R/P/T/LB/LE/H/A/O/C/S/X`;
+- `DUR-PRV-001-CROSSPRINCIPAL -> DUR-BAR-004-WRONGPRINCIPAL`;
+- `DUR-PRV-002-CROSSTENANT -> DUR-BAR-005-WRONGTENANT`;
+- `DUR-KEY-006-MULTIMATCH -> DUR-BAR-006-MULTIMATCH`.
+
+The catalog fixes:
+
+- vector order `Q/W/B/R/P/T/LB/LE/H/AH/A/O/C/S/X`;
 - canonical record-count states;
 - allowed monotonic transitions;
 - exact lock order;
 - terminal xor and locator assertions;
+- per-result expectations for every unknown commit alternative;
+- exact settlement and primary-barrier predicates;
 - deterministic ledger continuity and batch profiles;
 - crash schedules and allowed before/after states;
 - outbox logical deduplication;
 - prohibited persistence/log fields;
 - admission, replay, collision, concurrency, unknown-outcome, reconciliation, corruption, overlay, retention, rotation, privacy, outbox, barrier, restore, and local-projection fixtures.
 
-Every fixture must run all five oracles:
+Every concrete fixture must run all six oracles; aliases execute their canonical target and add only coverage attribution. Each allowed result also names an exact audit profile: zero entries or the complete contiguous tenant audit sequence, entry-kind order, previous-digest chain, and head-advance count for that vector.
 
 1. `OR-COUNT`: exact vector and zero unexpected records/effects.
 2. `OR-LEDGER`: exact zero or contiguous ordinals/revisions, prior-digest chain, declared count, deterministic batch membership/digest, and head advance.
 3. `OR-RECEIPT`: exact zero or complete body/core digest, proof, locator, and authoritative revision verification.
 4. `OR-PROHIBITED`: scan rows, indexes, diagnostics, exceptions, logs, fixtures, and serialization for forbidden data.
 5. `OR-PRIVLOG`: only bounded nondisclosing code, ephemeral trace, and approved rotating pseudonym.
+6. `OR-BARRIER`: exact settlement/token/scope/fingerprint/sequence/fence/primary/key-horizon/absence predicates, or an explicit non-NFAB result.
 
 Any newly admitted opaque semantic field must change the semantic fingerprint. The mutation fixture intentionally names no product-domain field.
+
+`ERASURE_CONFIRMED` is explicitly outside version 1 fixture scope. No state machine edge, outcome, or fixture in this catalog claims completed erasure.
 
 ## 18. Resource and optimization impact
 
