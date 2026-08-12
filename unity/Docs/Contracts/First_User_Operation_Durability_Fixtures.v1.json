@@ -103,6 +103,29 @@
         "W": "SETTLED_NO_BIND"
       }
     },
+    "CORRUPT_BOUND_MISSING_BINDING": {
+      "counts": [
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "states": {
+        "W": "BOUND"
+      },
+      "corruptionOnly": true
+    },
     "CORRUPT_SUPPRESSION": {
       "counts": [
         1,
@@ -582,12 +605,17 @@
         [
           "TERMINAL",
           "RETENTION_BOUNDARY"
-        ],
-        [
-          "SETTLED_NO_BIND",
-          "RETENTION_BOUNDARY"
         ]
-      ]
+      ],
+      "edgeGuards": {
+        "TERMINAL>RETENTION_BOUNDARY": {
+          "scheduleProfile": "RETENTION_MARK",
+          "bindingState": "COMMITTED",
+          "suppressionState": "LOGICALLY_SUPPRESSED",
+          "existingTombstone": "ABSENT",
+          "newTombstoneTargetKind": "SUPPRESSION"
+        }
+      }
     },
     "B": {
       "initial": "ABSENT",
@@ -642,8 +670,7 @@
     "O": {
       "initial": "ABSENT",
       "terminal": [
-        "PUBLISHED",
-        "DEAD_LETTER"
+        "PUBLISHED"
       ],
       "allowedEdges": [
         [
@@ -657,10 +684,6 @@
         [
           "PENDING",
           "PUBLISHED"
-        ],
-        [
-          "PENDING",
-          "DEAD_LETTER"
         ]
       ],
       "monotonicFields": [
@@ -686,9 +709,14 @@
     "AH": {
       "monotonicFields": [
         "nextAuditSequence",
-        "lastWriteSequence",
         "rowRevision"
-      ]
+      ],
+      "headFields": [
+        "headAuditEntryId",
+        "headAuditSequence",
+        "headAuditDigest"
+      ],
+      "emptyHeadIffNextSequenceZero": true
     },
     "immutableRecords": [
       "R",
@@ -766,6 +794,10 @@
       }
     ],
     "successWriteOrder": [
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST",
       "OPAQUE_DOMAIN",
       "LB",
       "LE_ASC",
@@ -780,6 +812,10 @@
       "Q_CAS"
     ],
     "rejectionWriteOrder": [
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST",
       "T",
       "A",
       "B_TERMINAL_REJECTED",
@@ -788,6 +824,10 @@
       "Q_CAS"
     ],
     "compensationWriteOrder": [
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST",
       "OPAQUE_REVERSAL",
       "C_APPLIED",
       "LB",
@@ -799,6 +839,10 @@
       "Q_CAS"
     ],
     "suppressionWriteOrder": [
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST",
       "S_LOGICAL",
       "OPAQUE_ACCESS_DENIAL",
       "LB",
@@ -810,12 +854,22 @@
       "Q_CAS"
     ],
     "retentionMarkWriteOrder": [
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST",
       "X_TYPED",
       "A",
       "S_ERASURE_PENDING",
       "W_RETENTION_BOUNDARY",
       "AH_CAS",
       "Q_CAS"
+    ],
+    "auditPreparationOrder": [
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST"
     ]
   },
   "scheduleProfiles": {
@@ -891,6 +945,10 @@
         "TERMINAL_AND_OVERLAY_LOCATORS"
       ],
       "steps": [
+        "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+        "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+        "FINALIZE_AUDIT_FIELDS",
+        "COMPUTE_AUDIT_DIGEST",
         "OPAQUE_DOMAIN",
         "LB",
         "LE_ASC",
@@ -919,6 +977,10 @@
         "TERMINAL_AND_OVERLAY_LOCATORS"
       ],
       "steps": [
+        "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+        "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+        "FINALIZE_AUDIT_FIELDS",
+        "COMPUTE_AUDIT_DIGEST",
         "T",
         "A",
         "B_TERMINAL_REJECTED",
@@ -975,6 +1037,10 @@
       ],
       "steps": [
         "VERIFY_BASE_AND_NO_SUPPRESSION",
+        "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+        "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+        "FINALIZE_AUDIT_FIELDS",
+        "COMPUTE_AUDIT_DIGEST",
         "OPAQUE_REVERSAL",
         "C_APPLIED",
         "LB",
@@ -1000,6 +1066,10 @@
         "TERMINAL_AND_OVERLAY_LOCATORS"
       ],
       "steps": [
+        "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+        "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+        "FINALIZE_AUDIT_FIELDS",
+        "COMPUTE_AUDIT_DIGEST",
         "S_LOGICAL",
         "OPAQUE_ACCESS_DENIAL",
         "LB",
@@ -1024,6 +1094,10 @@
       ],
       "steps": [
         "VERIFY_SUPPRESSED_AND_NO_X",
+        "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+        "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+        "FINALIZE_AUDIT_FIELDS",
+        "COMPUTE_AUDIT_DIGEST",
         "X_TYPED",
         "A",
         "S_ERASURE_PENDING",
@@ -1037,7 +1111,7 @@
       "primaryRead": true,
       "isolation": "READ_COMMITTED_WITH_CAS",
       "locks": [
-        "O_LOGICAL_ID"
+        "O_SCOPED_LOGICAL_ID"
       ],
       "steps": [
         "CLAIM_EPOCH_CAS",
@@ -1185,6 +1259,14 @@
       "digestChain": false
     }
   },
+  "ledgerAssertions": {
+    "payloadDigestEqualsStoredProtectedPayloadFrame": true,
+    "eventSchemaEqualsOwningBatchSchema": true,
+    "schemaPairPinnedByBindingCommitContractVersion": true,
+    "eventDigestBindsScopeTypeSchemaPayloadStreamOrdinalAndPriorDigest": true,
+    "batchDigestBindsScopeMetadataSchemaCommitStampAndOrderedEventDigests": true,
+    "allEqualityAndDigestChecksEnforcedAtCommitRestoreAndReconcile": true
+  },
   "integrityProfiles": {
     "NONE": {
       "receipt": "ABSENT",
@@ -1300,6 +1382,31 @@
       "terminalXor": "VALID_PER_BINDING",
       "retainedVersionCandidateCount": 2,
       "selection": "PROHIBITED"
+    },
+    "MISSING_BINDING_FOR_BOUND_EVIDENCE": {
+      "receipt": "ABSENT",
+      "rejection": "ABSENT",
+      "ledger": "ABSENT",
+      "binding": "MISSING_FOR_BOUND_EVIDENCE"
+    },
+    "PROOF_VERIFIER_VERIFY_ONLY_VALID": {
+      "receipt": "BODY_CORE_PROOF_VALID",
+      "rejection": "ABSENT",
+      "ledger": "VALID",
+      "proofVerifier": "HISTORICAL_VERIFY_ONLY_VALID",
+      "proofResign": "PROHIBITED"
+    },
+    "OUTBOX_PAYLOAD_DIGEST_MISMATCH": {
+      "receipt": "BODY_CORE_PROOF_VALID",
+      "rejection": "ABSENT",
+      "ledger": "VALID",
+      "outbox": "PAYLOAD_DIGEST_MISMATCH"
+    },
+    "OUTBOX_SOURCE_LOCATOR_MISMATCH": {
+      "receipt": "BODY_CORE_PROOF_VALID",
+      "rejection": "ABSENT",
+      "ledger": "VALID",
+      "outbox": "SCOPED_SOURCE_ID_OR_DIGEST_MISMATCH"
     }
   },
   "oracleProfiles": {
@@ -2469,16 +2576,16 @@
     {
       "id": "DUR-REC-010-BOUNDMISSINGB",
       "category": "corruption",
-      "initialVector": "CORRUPT_SUPPRESSION",
+      "initialVector": "CORRUPT_BOUND_MISSING_BINDING",
       "scheduleProfile": "RECONCILE",
-      "faultPoint": "CORRUPTION_INJECTION",
+      "faultPoint": "BOUND_EVIDENCE_MISSING_BINDING",
       "commitResult": "NOT_ATTEMPTED",
       "corruptionInjection": true,
       "expected": {
         "outcome": "INTEGRITY_FAULT",
         "allowedResults": [
           {
-            "finalVector": "CORRUPT_SUPPRESSION",
+            "finalVector": "CORRUPT_BOUND_MISSING_BINDING",
             "authoritativeMutationCounts": [
               0
             ],
@@ -2497,19 +2604,19 @@
             "consumerApplicationCounts": [
               0
             ],
-            "ledgerProfile": "BASE_E5_H1",
-            "integrityProfile": "SUPPRESSION_LOCATOR_MISMATCH",
+            "ledgerProfile": "NONE",
+            "integrityProfile": "MISSING_BINDING_FOR_BOUND_EVIDENCE",
             "oracleProfile": "ALL_V1",
-            "receiptExpectation": "BODY_CORE_PROOF_VALID",
+            "receiptExpectation": "ABSENT",
             "rejectionExpectation": "ABSENT",
-            "auditProfile": "BASE_COMMITTED_ONE"
+            "auditProfile": "NONE"
           }
         ]
       },
       "barrierProfile": "NOT_APPLICABLE",
       "coverageTags": [
-        "LEGACY_ID",
-        "CORRUPT_SUPPRESSION"
+        "BOUND_WITHOUT_BINDING",
+        "CORRUPTION"
       ]
     },
     {
@@ -2602,16 +2709,16 @@
     {
       "id": "DUR-REC-013-REJECTIONDIGEST",
       "category": "corruption",
-      "initialVector": "SETTLED_NO_BIND",
+      "initialVector": "REJECTED",
       "scheduleProfile": "RECONCILE",
-      "faultPoint": "SETTLEMENT_DIGEST_MISMATCH",
+      "faultPoint": "TERMINAL_DECISION_DIGEST_MISMATCH",
       "commitResult": "NOT_ATTEMPTED",
       "corruptionInjection": true,
       "expected": {
         "outcome": "INTEGRITY_FAULT",
         "allowedResults": [
           {
-            "finalVector": "SETTLED_NO_BIND",
+            "finalVector": "REJECTED",
             "authoritativeMutationCounts": [
               0
             ],
@@ -2631,7 +2738,52 @@
               0
             ],
             "ledgerProfile": "NONE",
-            "integrityProfile": "SETTLEMENT_DIGEST_MISMATCH",
+            "integrityProfile": "REJECTION_DIGEST_MISMATCH",
+            "oracleProfile": "ALL_V1",
+            "receiptExpectation": "ABSENT",
+            "rejectionExpectation": "DECISION_DIGEST_MISMATCH",
+            "auditProfile": "BASE_REJECTED_ONE"
+          }
+        ]
+      },
+      "barrierProfile": "NOT_APPLICABLE",
+      "coverageTags": [
+        "REJECTION_DIGEST_MISMATCH",
+        "CORRUPTION"
+      ]
+    },
+    {
+      "id": "DUR-REC-014-BARRIERTIMEOUT",
+      "category": "barrier",
+      "initialVector": "SETTLED_NO_BIND",
+      "scheduleProfile": "RECONCILE",
+      "faultPoint": "PRIMARY_BARRIER_TIMEOUT",
+      "commitResult": "NOT_ATTEMPTED",
+      "expected": {
+        "outcome": "BARRIER_TIMEOUT",
+        "allowedResults": [
+          {
+            "finalVector": "SETTLED_NO_BIND",
+            "authoritativeMutationCounts": [
+              0
+            ],
+            "opaqueDomainApplicationCounts": [
+              0
+            ],
+            "operationLookupCounts": [
+              0
+            ],
+            "transportDeliveryCounts": [
+              0
+            ],
+            "logicalPublicationCounts": [
+              0
+            ],
+            "consumerApplicationCounts": [
+              0
+            ],
+            "ledgerProfile": "NONE",
+            "integrityProfile": "NONE",
             "oracleProfile": "ALL_V1",
             "receiptExpectation": "ABSENT",
             "rejectionExpectation": "ABSENT",
@@ -2639,15 +2791,14 @@
           }
         ]
       },
-      "barrierProfile": "NFAB_CORRUPT",
+      "barrierProfile": "NFAB_TIMEOUT",
       "coverageTags": [
-        "LEGACY_ID",
-        "NFAB_NEGATIVE",
-        "CORRUPT_SETTLEMENT"
+        "NFAB_TIMEOUT",
+        "NFAB_NEGATIVE"
       ]
     },
     {
-      "id": "DUR-REC-014-BARRIERTIMEOUT",
+      "id": "DUR-BAR-007-ATTEMPTFENCE",
       "category": "barrier",
       "initialVector": "SETTLED_NO_BIND",
       "scheduleProfile": "RECONCILE",
@@ -2688,8 +2839,53 @@
       "barrierProfile": "NFAB_ATTEMPT_FENCE_INSUFFICIENT",
       "coverageTags": [
         "ATTEMPT_FENCE_INSUFFICIENT",
-        "LEGACY_ID",
         "NFAB_NEGATIVE"
+      ]
+    },
+    {
+      "id": "DUR-BAR-008-SETTLEMENTCORRUPT",
+      "category": "corruption",
+      "initialVector": "SETTLED_NO_BIND",
+      "scheduleProfile": "RECONCILE",
+      "faultPoint": "SETTLEMENT_DIGEST_MISMATCH",
+      "commitResult": "NOT_ATTEMPTED",
+      "corruptionInjection": true,
+      "expected": {
+        "outcome": "INTEGRITY_FAULT",
+        "allowedResults": [
+          {
+            "finalVector": "SETTLED_NO_BIND",
+            "authoritativeMutationCounts": [
+              0
+            ],
+            "opaqueDomainApplicationCounts": [
+              0
+            ],
+            "operationLookupCounts": [
+              1
+            ],
+            "transportDeliveryCounts": [
+              0
+            ],
+            "logicalPublicationCounts": [
+              0
+            ],
+            "consumerApplicationCounts": [
+              0
+            ],
+            "ledgerProfile": "NONE",
+            "integrityProfile": "SETTLEMENT_DIGEST_MISMATCH",
+            "oracleProfile": "ALL_V1",
+            "receiptExpectation": "ABSENT",
+            "rejectionExpectation": "ABSENT",
+            "auditProfile": "NONE"
+          }
+        ]
+      },
+      "barrierProfile": "NFAB_CORRUPT",
+      "coverageTags": [
+        "NFAB_NEGATIVE",
+        "CORRUPT_SETTLEMENT"
       ]
     },
     {
@@ -4605,6 +4801,52 @@
       "barrierProfile": "NOT_APPLICABLE"
     },
     {
+      "id": "DUR-COR-005-SUPPRESSIONLOCATOR",
+      "category": "corruption",
+      "initialVector": "CORRUPT_SUPPRESSION",
+      "scheduleProfile": "RECONCILE",
+      "faultPoint": "SUPPRESSION_LOCATOR_DIGEST_MISMATCH",
+      "commitResult": "NOT_ATTEMPTED",
+      "corruptionInjection": true,
+      "expected": {
+        "outcome": "INTEGRITY_FAULT",
+        "allowedResults": [
+          {
+            "finalVector": "CORRUPT_SUPPRESSION",
+            "authoritativeMutationCounts": [
+              0
+            ],
+            "opaqueDomainApplicationCounts": [
+              0
+            ],
+            "operationLookupCounts": [
+              1
+            ],
+            "transportDeliveryCounts": [
+              0
+            ],
+            "logicalPublicationCounts": [
+              0
+            ],
+            "consumerApplicationCounts": [
+              0
+            ],
+            "ledgerProfile": "BASE_E5_H1",
+            "integrityProfile": "SUPPRESSION_LOCATOR_MISMATCH",
+            "oracleProfile": "ALL_V1",
+            "receiptExpectation": "BODY_CORE_PROOF_VALID",
+            "rejectionExpectation": "ABSENT",
+            "auditProfile": "BASE_COMMITTED_ONE"
+          }
+        ]
+      },
+      "barrierProfile": "NOT_APPLICABLE",
+      "coverageTags": [
+        "CORRUPT_SUPPRESSION",
+        "SUPPRESSION_LOCATOR_INTEGRITY"
+      ]
+    },
+    {
       "id": "DUR-CMP-001-REQUEST",
       "category": "overlay",
       "initialVector": "COMMITTED_E5_H1",
@@ -5480,7 +5722,7 @@
               0
             ],
             "ledgerProfile": "BASE_E5_H1",
-            "integrityProfile": "COMMITTED_VALID",
+            "integrityProfile": "OUTBOX_PAYLOAD_DIGEST_MISMATCH",
             "oracleProfile": "ALL_V1",
             "receiptExpectation": "BODY_CORE_PROOF_VALID",
             "rejectionExpectation": "ABSENT",
@@ -5488,7 +5730,58 @@
           }
         ]
       },
-      "barrierProfile": "NOT_APPLICABLE"
+      "barrierProfile": "NOT_APPLICABLE",
+      "coverageTags": [
+        "OUTBOX_PAYLOAD_DIGEST",
+        "CORRUPTION"
+      ]
+    },
+    {
+      "id": "DUR-OBX-006-SOURCELOCATOR",
+      "category": "corruption",
+      "initialVector": "COMMITTED_E5_H1",
+      "scheduleProfile": "OUTBOX",
+      "faultPoint": "SCOPED_SOURCE_ID_OR_DIGEST_MISMATCH",
+      "commitResult": "NOT_ATTEMPTED",
+      "corruptionInjection": true,
+      "expected": {
+        "outcome": "INTEGRITY_FAULT_QUARANTINED",
+        "allowedResults": [
+          {
+            "finalVector": "COMMITTED_E5_H1",
+            "authoritativeMutationCounts": [
+              0
+            ],
+            "opaqueDomainApplicationCounts": [
+              0
+            ],
+            "operationLookupCounts": [
+              0
+            ],
+            "transportDeliveryCounts": [
+              0
+            ],
+            "logicalPublicationCounts": [
+              0
+            ],
+            "consumerApplicationCounts": [
+              0
+            ],
+            "ledgerProfile": "BASE_E5_H1",
+            "integrityProfile": "OUTBOX_SOURCE_LOCATOR_MISMATCH",
+            "oracleProfile": "ALL_V1",
+            "receiptExpectation": "BODY_CORE_PROOF_VALID",
+            "rejectionExpectation": "ABSENT",
+            "auditProfile": "BASE_COMMITTED_ONE"
+          }
+        ]
+      },
+      "barrierProfile": "NOT_APPLICABLE",
+      "coverageTags": [
+        "OUTBOX_SCOPED_SOURCE",
+        "OUTBOX_SOURCE_DIGEST",
+        "CORRUPTION"
+      ]
     },
     {
       "id": "DUR-FOV-001-NOTCAUGHTUP",
@@ -5753,15 +6046,15 @@
     {
       "id": "DUR-KEY-004-PROOFVERIFYONLY",
       "category": "key_rotation",
-      "initialVector": "SETTLED_NO_BIND",
+      "initialVector": "COMMITTED_E5_H1",
       "scheduleProfile": "RECONCILE",
-      "faultPoint": "TOKEN_COMMITMENT_KEY_VERSION_MISMATCH",
+      "faultPoint": "HISTORICAL_PROOF_VERIFY_ONLY",
       "commitResult": "NOT_ATTEMPTED",
       "expected": {
-        "outcome": "KEY_VERSION_MISMATCH_UNKNOWN",
+        "outcome": "COMMITTED_EXACT_REPLAY",
         "allowedResults": [
           {
-            "finalVector": "SETTLED_NO_BIND",
+            "finalVector": "COMMITTED_E5_H1",
             "authoritativeMutationCounts": [
               0
             ],
@@ -5769,7 +6062,7 @@
               0
             ],
             "operationLookupCounts": [
-              0
+              1
             ],
             "transportDeliveryCounts": [
               0
@@ -5780,20 +6073,20 @@
             "consumerApplicationCounts": [
               0
             ],
-            "ledgerProfile": "NONE",
-            "integrityProfile": "NONE",
+            "ledgerProfile": "BASE_E5_H1",
+            "integrityProfile": "PROOF_VERIFIER_VERIFY_ONLY_VALID",
             "oracleProfile": "ALL_V1",
-            "receiptExpectation": "ABSENT",
+            "receiptExpectation": "BODY_CORE_PROOF_VALID",
             "rejectionExpectation": "ABSENT",
-            "auditProfile": "NONE"
+            "auditProfile": "BASE_COMMITTED_ONE"
           }
         ]
       },
-      "barrierProfile": "NFAB_KEY_VERSION_MISMATCH",
+      "barrierProfile": "NOT_APPLICABLE",
       "coverageTags": [
-        "COMMITMENT_KEY_VERSION_MISMATCH",
-        "LEGACY_ID",
-        "NFAB_NEGATIVE"
+        "HISTORICAL_PROOF",
+        "VERIFY_ONLY",
+        "NO_RESIGN"
       ]
     },
     {
@@ -5847,6 +6140,51 @@
       "coverageTags": [
         "KEY_ROTATION_ALIAS",
         "MULTI_MATCH"
+      ]
+    },
+    {
+      "id": "DUR-KEY-007-TOKENVERSIONMISMATCH",
+      "category": "key_rotation",
+      "initialVector": "SETTLED_NO_BIND",
+      "scheduleProfile": "RECONCILE",
+      "faultPoint": "TOKEN_COMMITMENT_KEY_VERSION_MISMATCH",
+      "commitResult": "NOT_ATTEMPTED",
+      "expected": {
+        "outcome": "KEY_VERSION_MISMATCH_UNKNOWN",
+        "allowedResults": [
+          {
+            "finalVector": "SETTLED_NO_BIND",
+            "authoritativeMutationCounts": [
+              0
+            ],
+            "opaqueDomainApplicationCounts": [
+              0
+            ],
+            "operationLookupCounts": [
+              0
+            ],
+            "transportDeliveryCounts": [
+              0
+            ],
+            "logicalPublicationCounts": [
+              0
+            ],
+            "consumerApplicationCounts": [
+              0
+            ],
+            "ledgerProfile": "NONE",
+            "integrityProfile": "NONE",
+            "oracleProfile": "ALL_V1",
+            "receiptExpectation": "ABSENT",
+            "rejectionExpectation": "ABSENT",
+            "auditProfile": "NONE"
+          }
+        ]
+      },
+      "barrierProfile": "NFAB_KEY_VERSION_MISMATCH",
+      "coverageTags": [
+        "COMMITMENT_KEY_VERSION_MISMATCH",
+        "NFAB_NEGATIVE"
       ]
     },
     {
@@ -6888,70 +7226,6 @@
       }
     ],
     "typedTombstoneTargets": {
-      "INGRESS_SETTLEMENT": {
-        "idField": "targetEvidenceId",
-        "digestField": "targetSettlementDigest",
-        "targetRecord": "W",
-        "targetCandidate": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "evidenceId",
-          "settlementDigest"
-        ],
-        "bindingField": null,
-        "sourceFields": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "targetEvidenceId",
-          "targetSettlementDigest"
-        ],
-        "targetFields": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "evidenceId",
-          "settlementDigest"
-        ],
-        "conditionalUniqueFields": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "targetKind",
-          "targetEvidenceId"
-        ]
-      },
-      "COMPENSATION": {
-        "idField": "targetCompensationId",
-        "digestField": "targetCompensationDigest",
-        "targetRecord": "C",
-        "targetCandidate": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "bindingId",
-          "compensationId",
-          "compensationDigest"
-        ],
-        "bindingField": "targetBindingId",
-        "sourceFields": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "targetBindingId",
-          "targetCompensationId",
-          "targetCompensationDigest"
-        ],
-        "targetFields": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "bindingId",
-          "compensationId",
-          "compensationDigest"
-        ],
-        "conditionalUniqueFields": [
-          "tenantScopeRef",
-          "principalScopeRef",
-          "targetKind",
-          "targetBindingId",
-          "targetCompensationId"
-        ]
-      },
       "SUPPRESSION": {
         "idField": "targetSuppressionId",
         "digestField": "targetSuppressionDigest",
@@ -6988,12 +7262,12 @@
       }
     },
     "tombstoneCheck": {
-      "exactlyOneTypedPair": true,
-      "inactiveTypedPairsMustBeNull": true,
-      "originalLocatorDigestEqualsSelectedTargetDigest": true,
+      "targetKindConstant": "SUPPRESSION",
+      "targetBindingIdMustBePresent": true,
+      "targetSuppressionPairMustBePresent": true,
+      "originalLocatorDigestEqualsTargetSuppressionDigest": true,
       "genericTargetIdForbidden": true,
-      "ingressTargetBindingIdMustBeNull": true,
-      "overlayTargetBindingIdMustBePresent": true
+      "redundantSuppressionIdForbiddenOnX": true
     },
     "overlayBaseLocatorEquality": {
       "C.expectedBaseLocatorDigest": {
@@ -7004,27 +7278,132 @@
         "equals": "recomputed(baseSuccessLocatorDigest)",
         "enforcement": "AT_TRANSACTION_COMMIT"
       }
-    }
+    },
+    "v1AllowedTombstoneTargetKinds": [
+      "SUPPRESSION"
+    ]
   },
   "auditAssertions": {
     "headRecord": "AH",
     "chainScope": "TENANT",
     "sequenceStartsAt": 0,
-    "allocation": "LOCK_AH_THEN_INSERT_A_THEN_CAS_AH",
+    "tenantAllocationSequence": "AH.nextAuditSequence",
+    "tenantAllocationIndependentOfPrincipalQ": true,
+    "allocation": "LOCK_AH_ALLOCATE_INSERT_A_CAS_AH",
+    "principalWriteSequence": "EXACT_RESERVED_TARGET_Q_WRITE_SEQUENCE",
+    "samePrincipalStrictlyIncreasingWithAllowedGaps": true,
+    "crossPrincipalWriteSequenceComparisonForbidden": true,
+    "crossPrincipalEqualValuesAllowed": true,
     "previousDigestEqualsHead": true,
     "concurrentPrincipalsSerializeOnAh": true,
-    "candidateKey": [
+    "entryCandidateKey": [
       "tenantScopeRef",
       "auditEntryId",
       "auditSequence",
       "auditDigest"
     ],
+    "principalSequenceCandidateKey": [
+      "tenantScopeRef",
+      "principalScopeRef",
+      "principalWriteSequence"
+    ],
+    "headCandidateForeignKey": {
+      "sourceFields": [
+        "tenantScopeRef",
+        "headAuditEntryId",
+        "headAuditSequence",
+        "headAuditDigest"
+      ],
+      "targetRecord": "A",
+      "targetFields": [
+        "tenantScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "auditDigest"
+      ],
+      "match": "FULL",
+      "enforcement": "AT_TRANSACTION_COMMIT"
+    },
     "headLockRank": 6,
     "appendRequiresHeadCas": true,
+    "appendRequiresPrincipalQTargetCas": true,
+    "privatePayloadRefDigestMatch": "FULL",
+    "auditDigestBoundFields": [
+      "tenantScopeRef",
+      "principalScopeRef",
+      "auditEntryId",
+      "auditSequence",
+      "principalWriteSequence",
+      "bindingId",
+      "overlayId",
+      "kind",
+      "actorPseudonym",
+      "safeMetadataDigest",
+      "privatePayloadRef",
+      "privatePayloadDigest",
+      "createdAtServer",
+      "previousAuditDigest"
+    ],
     "restoreRequiresContiguousRangeAndHeadDigest": true,
+    "restoreRejectsEntrySequenceAbovePrincipalQ": true,
     "crossPrincipalSameTenantNoFork": true
   },
   "digestProfiles": {
+    "ledgerPayloadDigest": {
+      "tag": "AL.LEDGER.PAYLOAD.v1",
+      "orderedFields": [
+        "protectedPayloadBytes"
+      ],
+      "selfDigestExcluded": true,
+      "preimageEncoding": "FrameV1",
+      "outerProfileField": "digestProfileVersion",
+      "fieldOrdinalBase": 1
+    },
+    "eventDigest": {
+      "tag": "AL.LEDGER.EVENT.v1",
+      "orderedFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "eventId",
+        "ledgerBatchId",
+        "batchOrdinal",
+        "streamKind",
+        "streamId",
+        "streamRevision",
+        "eventType",
+        "eventSchemaVersion",
+        "eventSchemaDigest",
+        "payloadDigest",
+        "previousStreamEventDigest"
+      ],
+      "selfDigestExcluded": true,
+      "preimageEncoding": "FrameV1",
+      "outerProfileField": "digestProfileVersion",
+      "fieldOrdinalBase": 1
+    },
+    "ledgerBatchDigest": {
+      "tag": "AL.LEDGER.BATCH.v1",
+      "orderedFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "ledgerBatchId",
+        "bindingId",
+        "batchKind",
+        "batchRevision",
+        "eventCount",
+        "firstOrdinal",
+        "lastOrdinal",
+        "eventSchemaVersion",
+        "eventSchemaDigest",
+        "committedWriteSequence",
+        "committedAtServer",
+        "orderedConcatenationOfEventDigests"
+      ],
+      "selfDigestExcluded": true,
+      "preimageEncoding": "FrameV1",
+      "outerProfileField": "digestProfileVersion",
+      "fieldOrdinalBase": 1
+    },
     "baseSuccessLocatorDigest": {
       "tag": "AL.BASE.SUCCESS.LOCATOR.v1",
       "orderedFields": [
@@ -7105,10 +7484,9 @@
         "tombstoneId",
         "targetKind",
         "targetBindingId",
-        "selectedTypedTargetId",
-        "selectedTypedTargetDigest",
+        "targetSuppressionId",
+        "targetSuppressionDigest",
         "originalLocatorDigest",
-        "suppressionId",
         "erasurePolicyId",
         "destroyedKeyRef",
         "destroyedKeyVersion",
@@ -7133,6 +7511,47 @@
         "attemptFence",
         "settledWriteSequence",
         "settleReason"
+      ],
+      "selfDigestExcluded": true,
+      "preimageEncoding": "FrameV1",
+      "outerProfileField": "digestProfileVersion",
+      "fieldOrdinalBase": 1
+    },
+    "auditDigest": {
+      "tag": "AL.AUDIT.v1",
+      "orderedFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ],
+      "selfDigestExcluded": true,
+      "preimageEncoding": "FrameV1",
+      "outerProfileField": "digestProfileVersion",
+      "fieldOrdinalBase": 1
+    },
+    "outboxPayloadDigest": {
+      "tag": "AL.OUTBOX.v1",
+      "orderedFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "logicalMessageId",
+        "sourceKind",
+        "sourceBindingId",
+        "selectedSourceId",
+        "selectedSourceDigest",
+        "publicationKind",
+        "safePayloadBytes"
       ],
       "selfDigestExcluded": true,
       "preimageEncoding": "FrameV1",
@@ -7530,7 +7949,7 @@
       "DUR-BAR-005-WRONGTENANT"
     ],
     "commitmentKeyVersionMatch": [
-      "DUR-KEY-004-PROOFVERIFYONLY"
+      "DUR-KEY-007-TOKENVERSIONMISMATCH"
     ],
     "fingerprintMatch": [
       "DUR-IDM-005-FINGERPRINTCOLLISION"
@@ -7542,13 +7961,14 @@
       "DUR-BAR-002-PRIMARYBELOW"
     ],
     "attemptFenceCoversEarlierWorkers": [
-      "DUR-REC-014-BARRIERTIMEOUT"
+      "DUR-BAR-007-ATTEMPTFENCE"
     ],
     "linearizablePrimary": [
       "DUR-BAR-003-REPLICA"
     ],
     "primaryCaughtUp": [
-      "DUR-FOV-001-NOTCAUGHTUP"
+      "DUR-FOV-001-NOTCAUGHTUP",
+      "DUR-REC-014-BARRIERTIMEOUT"
     ],
     "allRetainedKeysSearched": [
       "DUR-KEY-003-LOOKUPUNAVAILABLE"
@@ -7569,7 +7989,7 @@
       "DUR-BAR-006-MULTIMATCH"
     ],
     "uncorrupted": [
-      "DUR-REC-013-REJECTIONDIGEST"
+      "DUR-BAR-008-SETTLEMENTCORRUPT"
     ],
     "ordinaryAbsenceNeverNfab": [
       "DUR-REC-009-EMPTYPRIMARY"
@@ -7579,20 +7999,33 @@
     "ERASURE_CONFIRMED": {
       "status": "OUTSIDE_V1",
       "reason": "Requires separately approved external key-destruction proof and provider fault contract"
+    },
+    "INGRESS_SETTLEMENT_TOMBSTONE": {
+      "status": "OUTSIDE_V1",
+      "reason": "Requires a separately reviewed settlement-retention schedule and reconciliation contract"
+    },
+    "COMPENSATION_TOMBSTONE": {
+      "status": "OUTSIDE_V1",
+      "reason": "Requires a separately reviewed compensation-retention schedule and precedence contract"
+    },
+    "DEAD_LETTER": {
+      "status": "OUTSIDE_V1",
+      "reason": "Requires approved retry-budget, operator-remediation, and publication-failure policy"
     }
   },
   "fixtureAccounting": {
-    "fixtureIds": 115,
-    "concreteScenarios": 112,
+    "fixtureIds": 120,
+    "concreteScenarios": 117,
     "aliases": 3,
-    "namedVectors": 20,
+    "namedVectors": 21,
     "distinctCountTuples": 18,
     "aliasMap": {
       "DUR-PRV-001-CROSSPRINCIPAL": "DUR-BAR-004-WRONGPRINCIPAL",
       "DUR-PRV-002-CROSSTENANT": "DUR-BAR-005-WRONGTENANT",
       "DUR-KEY-006-MULTIMATCH": "DUR-BAR-006-MULTIMATCH"
     },
-    "distinctExecutableRuns": "112 concrete scenario bodies; crashModel additionally enumerates every transactional step without adding fixture IDs"
+    "distinctExecutableRuns": "117 concrete primary fixture bodies plus 11 audit-allocation/tamper/crash/restore cases; crashModel additionally enumerates every transactional step without adding primary fixture IDs",
+    "auditAllocationCaseIds": 11
   },
   "recordPolicies": {
     "immutable": [
@@ -7661,6 +8094,7 @@
       "W_REGISTERED",
       "B_IN_PROGRESS",
       "W_BOUND",
+      "Q_LEADER_FENCE_CAS",
       "COMPUTE_SETTLEMENT_DIGEST",
       "W_SETTLED_NO_BIND",
       "OPAQUE_DOMAIN",
@@ -7672,6 +8106,10 @@
       "LB",
       "LE_ASC",
       "H_CAS",
+      "RESERVE_PRINCIPAL_WRITE_SEQUENCE",
+      "ALLOCATE_TENANT_AUDIT_SEQUENCE",
+      "FINALIZE_AUDIT_FIELDS",
+      "COMPUTE_AUDIT_DIGEST",
       "A",
       "AH_CAS",
       "O_PENDING",
@@ -7686,7 +8124,13 @@
       "COMMIT",
       "RESPONSE",
       "ISSUE_TOKEN"
-    ]
+    ],
+    "audit": {
+      "afterABeforeAhCas": "PRIOR_A_AH_Q_AFTER_ROLLBACK",
+      "afterAhCasBeforeQCas": "PRIOR_A_AH_Q_AFTER_ROLLBACK",
+      "connectionLossDuringCommit": "PRIOR_OR_COMPLETE_A_AH_Q_SOURCE_SET",
+      "partialAHeadOrPrincipalSequence": "PROHIBITED_INTEGRITY_FAULT"
+    }
   },
   "digestFraming": {
     "encoding": "FrameV1",
@@ -7703,7 +8147,10 @@
       "entryCount": 0,
       "sequenceOrdinals": [],
       "previousDigestChain": true,
-      "headAdvanceCount": 0
+      "headAdvanceCount": 0,
+      "principalWriteSequenceRelation": "NOT_APPLICABLE",
+      "headEntryMatchesLast": false,
+      "digestBoundFields": []
     },
     "BASE_COMMITTED_ONE": {
       "entryCount": 1,
@@ -7714,7 +8161,25 @@
         "COMMITTED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 1
+      "headAdvanceCount": 1,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     },
     "BASE_REJECTED_ONE": {
       "entryCount": 1,
@@ -7725,7 +8190,25 @@
         "TERMINAL_REJECTED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 1
+      "headAdvanceCount": 1,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     },
     "MIXED_TWO": {
       "entryCount": 2,
@@ -7738,7 +8221,25 @@
         "TERMINAL_REJECTED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 2
+      "headAdvanceCount": 2,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     },
     "COMPENSATED_TWO": {
       "entryCount": 2,
@@ -7751,7 +8252,25 @@
         "COMPENSATED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 2
+      "headAdvanceCount": 2,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     },
     "SUPPRESSED_TWO": {
       "entryCount": 2,
@@ -7764,7 +8283,25 @@
         "SUPPRESSED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 2
+      "headAdvanceCount": 2,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     },
     "COMPENSATED_SUPPRESSED_THREE": {
       "entryCount": 3,
@@ -7779,7 +8316,25 @@
         "SUPPRESSED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 3
+      "headAdvanceCount": 3,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     },
     "RETENTION_MARKED_THREE": {
       "entryCount": 3,
@@ -7794,7 +8349,307 @@
         "RETENTION_MARKED"
       ],
       "previousDigestChain": true,
-      "headAdvanceCount": 3
+      "headAdvanceCount": 3,
+      "principalWriteSequenceRelation": "EXACT_SOURCE_Q_TARGET",
+      "headEntryMatchesLast": true,
+      "digestBoundFields": [
+        "tenantScopeRef",
+        "principalScopeRef",
+        "auditEntryId",
+        "auditSequence",
+        "principalWriteSequence",
+        "bindingId",
+        "overlayId",
+        "kind",
+        "actorPseudonym",
+        "safeMetadataDigest",
+        "privatePayloadRef",
+        "privatePayloadDigest",
+        "createdAtServer",
+        "previousAuditDigest"
+      ]
     }
+  },
+  "outboxAssertions": {
+    "scopePrefix": [
+      "tenantScopeRef",
+      "principalScopeRef"
+    ],
+    "primaryKey": [
+      "tenantScopeRef",
+      "principalScopeRef",
+      "logicalMessageId"
+    ],
+    "candidateKey": [
+      "tenantScopeRef",
+      "principalScopeRef",
+      "logicalMessageId",
+      "payloadDigest"
+    ],
+    "v1SourceKinds": [
+      "LEDGER_BATCH",
+      "COMPENSATION",
+      "SUPPRESSION"
+    ],
+    "exactlyOneTypedSourcePair": true,
+    "inactiveTypedSourcePairsMustBeNull": true,
+    "payloadDigestStoredEquality": "recomputed(outboxPayloadDigest)",
+    "enforcement": "AT_TRANSACTION_COMMIT",
+    "workerLock": "O_SCOPED_LOGICAL_ID",
+    "unscopedLookupAllowed": false,
+    "typedSources": {
+      "LEDGER_BATCH": {
+        "idField": "sourceLedgerBatchId",
+        "digestField": "sourceLedgerBatchDigest",
+        "sourceFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "sourceBindingId",
+          "sourceLedgerBatchId",
+          "sourceLedgerBatchDigest"
+        ],
+        "targetRecord": "LB",
+        "targetFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "bindingId",
+          "ledgerBatchId",
+          "batchDigest"
+        ],
+        "requiredBatchKind": "FIRST_USER_COMMIT",
+        "match": "FULL",
+        "conditionalUniqueFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "sourceKind",
+          "sourceBindingId",
+          "sourceLedgerBatchId",
+          "publicationKind"
+        ]
+      },
+      "COMPENSATION": {
+        "idField": "sourceCompensationId",
+        "digestField": "sourceCompensationDigest",
+        "sourceFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "sourceBindingId",
+          "sourceCompensationId",
+          "sourceCompensationDigest"
+        ],
+        "targetRecord": "C",
+        "targetFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "bindingId",
+          "compensationId",
+          "compensationDigest"
+        ],
+        "match": "FULL",
+        "conditionalUniqueFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "sourceKind",
+          "sourceBindingId",
+          "sourceCompensationId",
+          "publicationKind"
+        ]
+      },
+      "SUPPRESSION": {
+        "idField": "sourceSuppressionId",
+        "digestField": "sourceSuppressionDigest",
+        "sourceFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "sourceBindingId",
+          "sourceSuppressionId",
+          "sourceSuppressionDigest"
+        ],
+        "targetRecord": "S",
+        "targetFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "bindingId",
+          "suppressionId",
+          "suppressionDigest"
+        ],
+        "match": "FULL",
+        "conditionalUniqueFields": [
+          "tenantScopeRef",
+          "principalScopeRef",
+          "sourceKind",
+          "sourceBindingId",
+          "sourceSuppressionId",
+          "publicationKind"
+        ]
+      }
+    }
+  },
+  "auditAllocationCases": {
+    "caseIds": 11,
+    "cases": [
+      {
+        "id": "AUD-ALLOC-001-P0-FIRST",
+        "caseType": "CONCURRENT_TENANT_ALLOCATION",
+        "initial": {
+          "tenant": "T0",
+          "principalQ": {
+            "P0": 2,
+            "P1": 2
+          },
+          "ahNext": 0,
+          "ahHead": null
+        },
+        "ahLockOrder": [
+          "P0",
+          "P1"
+        ],
+        "expected": {
+          "auditSequences": {
+            "P0": 0,
+            "P1": 1
+          },
+          "principalWriteSequences": {
+            "P0": 3,
+            "P1": 3
+          },
+          "previousDigestChain": [
+            null,
+            "digest(A0)"
+          ],
+          "finalPrincipalQ": {
+            "P0": 3,
+            "P1": 3
+          },
+          "finalAh": {
+            "nextAuditSequence": 2,
+            "headAuditEntryId": "A1",
+            "headAuditSequence": 1,
+            "headAuditDigest": "digest(A1)",
+            "rowRevision": 2
+          },
+          "rowCounts": {
+            "Q": 2,
+            "AH": 1,
+            "A": 2
+          },
+          "fork": false
+        }
+      },
+      {
+        "id": "AUD-ALLOC-002-P1-FIRST",
+        "caseType": "CONCURRENT_TENANT_ALLOCATION",
+        "initial": {
+          "tenant": "T0",
+          "principalQ": {
+            "P0": 2,
+            "P1": 2
+          },
+          "ahNext": 0,
+          "ahHead": null
+        },
+        "ahLockOrder": [
+          "P1",
+          "P0"
+        ],
+        "expected": {
+          "auditSequences": {
+            "P1": 0,
+            "P0": 1
+          },
+          "principalWriteSequences": {
+            "P0": 3,
+            "P1": 3
+          },
+          "previousDigestChain": [
+            null,
+            "digest(A0)"
+          ],
+          "finalPrincipalQ": {
+            "P0": 3,
+            "P1": 3
+          },
+          "finalAh": {
+            "nextAuditSequence": 2,
+            "headAuditEntryId": "A1",
+            "headAuditSequence": 1,
+            "headAuditDigest": "digest(A1)",
+            "rowRevision": 2
+          },
+          "rowCounts": {
+            "Q": 2,
+            "AH": 1,
+            "A": 2
+          },
+          "fork": false
+        }
+      },
+      {
+        "id": "AUD-DIG-001-OVERLAY",
+        "caseType": "DIGEST_MUTATION",
+        "mutatedField": "overlayId",
+        "expectedOutcome": "INTEGRITY_FAULT",
+        "authoritativeMutationCount": 0
+      },
+      {
+        "id": "AUD-DIG-002-ACTOR",
+        "caseType": "DIGEST_MUTATION",
+        "mutatedField": "actorPseudonym",
+        "expectedOutcome": "INTEGRITY_FAULT",
+        "authoritativeMutationCount": 0
+      },
+      {
+        "id": "AUD-DIG-003-PRIVATE-REF",
+        "caseType": "DIGEST_MUTATION",
+        "mutatedField": "privatePayloadRef",
+        "expectedOutcome": "INTEGRITY_FAULT",
+        "authoritativeMutationCount": 0
+      },
+      {
+        "id": "AUD-DIG-004-CREATED-AT",
+        "caseType": "DIGEST_MUTATION",
+        "mutatedField": "createdAtServer",
+        "expectedOutcome": "INTEGRITY_FAULT",
+        "authoritativeMutationCount": 0
+      },
+      {
+        "id": "AUD-DIG-005-PRINCIPAL-SEQUENCE",
+        "caseType": "DIGEST_MUTATION",
+        "mutatedField": "principalWriteSequence",
+        "expectedOutcome": "INTEGRITY_FAULT",
+        "authoritativeMutationCount": 0
+      },
+      {
+        "id": "AUD-CR-001-A-BEFORE-AH",
+        "caseType": "PRECOMMIT_CRASH",
+        "faultPoint": "AFTER_A_BEFORE_AH_CAS",
+        "expectedDurableState": "PRIOR_A_AH_Q"
+      },
+      {
+        "id": "AUD-CR-002-AH-BEFORE-Q",
+        "caseType": "PRECOMMIT_CRASH",
+        "faultPoint": "AFTER_AH_CAS_BEFORE_Q_CAS",
+        "expectedDurableState": "PRIOR_A_AH_Q"
+      },
+      {
+        "id": "AUD-CR-003-UNKNOWN-COMMIT",
+        "caseType": "UNKNOWN_COMMIT",
+        "faultPoint": "CONNECTION_LOSS_DURING_COMMIT",
+        "allowedDurableStates": [
+          "PRIOR_A_AH_Q_SOURCE",
+          "COMPLETE_A_AH_Q_SOURCE"
+        ],
+        "partialStateAllowed": false
+      },
+      {
+        "id": "AUD-RST-001-Q-BEHIND-A",
+        "caseType": "RESTORE_INTEGRITY",
+        "faultPoint": "A_PRINCIPAL_SEQUENCE_ABOVE_RESTORED_Q",
+        "expectedOutcome": "INTEGRITY_FAULT_UNAVAILABLE",
+        "authoritativeMutationCount": 0
+      }
+    ],
+    "allCasesRequireNoFork": true,
+    "allMutationAndRestoreFailuresAreZeroMutation": true
   }
 }
