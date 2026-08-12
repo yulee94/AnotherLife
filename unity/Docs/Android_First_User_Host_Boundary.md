@@ -35,7 +35,7 @@ This approval does not approve:
 - packaged Android-to-Unity round-trip behavior;
 - player, milestone, release, or irreversible-profile acceptance.
 
-The user retains final product, visual, player, milestone, and release approval. The authorized co-developer review requested through #463 is a required publication review, not automatic runtime approval.
+The user retains final product, visual, player, milestone, and release approval. The draft PR and linked #463 status record make this contract visible to the authorized co-developer. His review is welcome but is not a mandatory readiness gate and is not automatic runtime approval.
 
 ## 3. Current Source Baseline
 
@@ -661,7 +661,7 @@ That child must:
 - avoid MainActivity, routes, and production mounting;
 - wait for A1 acceptance of the A6 executable machine contract;
 - publish separately as an engineering draft PR;
-- request A1 and authorized co-developer review.
+- request A1 review and keep the linked GitHub record visible to the authorized co-developer; his review is optional unless a later explicit gate requires it.
 
 This allowlist is not implementation authorization.
 
@@ -700,7 +700,7 @@ The focused documentation PR must prove:
 - git diff whitespace checks pass;
 - repository classify and hygiene checks pass;
 - hosted policy, classify, hygiene, and applicability gates reach terminal state;
-- @rslee94 review is requested.
+- the linked PR/status record is visible to @rslee94; his review is optional and does not block readiness.
 
 Android/Unity compile, runtime, device, backend, visual, and player checks are not applicable to this one-file planning change and must be reported as unperformed.
 
@@ -710,7 +710,7 @@ This document is complete when:
 
 - the exact one-file draft PR is published;
 - issue #135 and status PR #463 are linked;
-- @rslee94 review is requested;
+- the linked PR/status record is visible to @rslee94 without making his review a mandatory gate;
 - A1 records exact-head disposition;
 - every approval limit remains explicit.
 
