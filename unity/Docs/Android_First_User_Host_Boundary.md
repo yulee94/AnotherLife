@@ -1,10 +1,10 @@
 # Android First-User Host Boundary
 
-**Status:** A1-approved planning contract; dormant and non-executable  
-**Primary delivery mode:** coordination/review specification  
-**Exact publication base:** main@6b79dcbbeb2f9917ae30b42548742b7fc70307b0  
-**Upstream issues:** [#135](https://github.com/yulee94/AnotherLife/issues/135), [#463](https://github.com/yulee94/AnotherLife/pull/463)  
-**Runtime activation:** not authorized  
+**Status:** A1-approved planning contract; dormant and non-executable
+**Primary delivery mode:** coordination/review specification
+**Exact publication base:** main@6b79dcbbeb2f9917ae30b42548742b7fc70307b0
+**Upstream issues:** [#135](https://github.com/yulee94/AnotherLife/issues/135), [#463](https://github.com/yulee94/AnotherLife/pull/463)
+**Runtime activation:** not authorized
 **Shared-file lock:** none
 
 ## 1. Purpose
