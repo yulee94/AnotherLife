@@ -1,25 +1,32 @@
 # Cinematic Terrestrial Asset Priority and Meshy Authorization
 
 > Status: `DRAFT_COORDINATION_REVIEW_ONLY`
-> Verified baseline: `main@6b79dcbbeb2f9917ae30b42548742b7fc70307b0`
+> Verified baseline: `main@426316d29923fc3f037890c7f009b900b315e0df`
 > Primary delivery mode: Codex coordination/review
-> Upstream: issues `#460`, `#284`, and `#259`; issue `#456` is referenced only to prevent guardian-dragon source transfer
-> Authority: A1 sequencing and paid-call authorization; authorized co-developer A2 terrestrial source selection/fidelity; user final creative, visual, integrated-cinematic, and release approval
+> Upstream: issues `#460`, `#284`, and `#259`; issue `#456` is referenced only to prevent guardian-dragon source transfer; draft PR `#472` is historical sanitized retention evidence
+> Authority: A1 sequencing and per-operation paid-call authorization; authorized co-developer A2 terrestrial source selection/fidelity; user final creative, visual, integrated-cinematic, and release approval
+> Operational venue: dedicated Meshy task `019fef94-af14-7671-a739-447391cfb7a5` exclusively
 > Scope: this Markdown file only; no Unity/runtime/source-asset change; no shared-file lock
 
 ## Decision
 
 Meshy is the project's designated execution tool for generated 3D models. That designation is not blanket permission to generate, a creative or source-selection authority, a production acceptance event, or a requirement to route fundamentally VFX, shader, material, audio, 2D, or compositing work through Meshy.
 
-Every Meshy creation, refinement, conversion, rigging, animation, remesh, or texture operation requires a new task-specific A1 authorization binding the exact input, endpoint, payload, attempt count, and maximum credit ceiling. The co-developer owns terrestrial source selection and fidelity. The user retains final creative and visual selection and integrated-cinematic approval. A successful provider task advances none of those gates automatically.
+Every future Meshy creation, refinement, conversion, rigging, animation, remesh, or texture operation requires a new task-specific A1 authorization binding the exact A2-approved source, rights evidence, input hash, endpoint, payload, attempt count, maximum credit ceiling, exact cinematic dependency, and named future gameplay reuse binding. Authorization, execution, polling, downloads, QA, retention, and credit reporting may occur only in dedicated Meshy task `019fef94-af14-7671-a739-447391cfb7a5`. This document and every other task or PR are coordination/evidence consumers and may not invoke Meshy. The co-developer owns terrestrial source selection and fidelity. The user retains final creative and visual selection and integrated-cinematic approval. A successful provider task advances none of those gates automatically.
 
-The priority order in this document is scheduling guidance only. It is not A2 source selection, user approval, Meshy permission, production acceptance, cinematic selection, gameplay authority, runtime integration, purchasing approval, or release approval. GitHub visibility to `@rslee94` is required; a co-developer review is welcome but is not a mandatory readiness gate. No agent may self-approve.
+The spending policy is spend-as-work-becomes-ready: there is no generic credit-hoarding target, blanket reserve target, automatic next batch, or authorization inferred from the displayed balance. Each paid operation still requires an exact one-shot A1 decision and stop rule. Billing changes remain prohibited; no recharge, purchase, renewal, payment-method, or subscription mutation is authorized.
 
-| Control | Initial value |
+The priority order in this document is scheduling guidance only. It is not A2 source selection, user approval, Meshy permission, production acceptance, cinematic selection, gameplay authority, runtime integration, purchasing approval, or release approval. GitHub visibility to `@rslee94` is sufficient; a co-developer review is welcome but is not a mandatory readiness gate. No agent may self-approve.
+
+### Historical opening snapshot
+
+The following values describe the original PR-head snapshot at `main@6b79dcbbeb2f9917ae30b42548742b7fc70307b0`, before the later paid batch. They are retained only to explain the document's chronology and are not the current operational ledger.
+
+| Historical control | Opening value |
 | --- | --- |
 | `activeMeshyAuthorizationCount` | `0` |
 | `authorizedCreditCeiling` | `0` |
-| `creditsConsumedByThisPacket` | `0` |
+| `creditsConsumedAtOpeningSnapshot` | `0` |
 | `generationState` | `Deferred` |
 | `a2SourceDisposition` | `NotRequested` |
 | `userCreativeState` | `NotRequested` |
@@ -27,16 +34,39 @@ The priority order in this document is scheduling guidance only. It is not A2 so
 | `gameplayUseState` | `NotAuthorized` |
 | `runtimeIntegrationState` | `Blocked` |
 | `releaseState` | `Blocked` |
+
+### Current operational snapshot
+
+| Current control | Verified value |
+| --- | --- |
+| `verifiedMain` | `426316d29923fc3f037890c7f009b900b315e0df` |
+| `exclusiveMeshyTask` | `019fef94-af14-7671-a739-447391cfb7a5` |
+| `executedBatchId` | `priority_spend_20260812_v001` |
+| `executedBatchCredits` | `7,675 - 1,014 = 6,661` |
+| `executedBatchComposition` | `26 * 9 + 26 * 30 = 1,014` credits |
+| `executedBatchState` | `ExecutedStopped`; no retry; `GeneratedUnreviewed / NON_PRODUCTION` |
+| `currentFurtherPaidAuthorizationCount` | `0` |
+| `currentFurtherPaidCreditCeiling` | `0` |
+| `currentFurtherPaidState` | `NotAuthorized` |
+| `wishDragonCurrentState` | `SOURCE_REQUIRED / Meshy NotAuthorized` |
+| Approval effects | none: no A2 source, user creative, cinematic, gameplay, runtime, production, or release gate advanced |
 | Billing changes | prohibited; no recharge, purchase, renewal, payment-method, or subscription mutation |
 
 ## Verified evidence baseline
 
 ### Hosted current-main facts
 
-- The authorized base is exactly `main@6b79dcbbeb2f9917ae30b42548742b7fc70307b0`.
-- Issue `#460` is the open coordination source for the proposed zero-budget 60-second moving-3D launch baseline. It states `DRAFT / NOT APPROVED / NOT IN UNITY` and requires genuine moving 3D rather than still-image motion.
+- The authorized base is exactly `main@426316d29923fc3f037890c7f009b900b315e0df`.
+- Issue `#460` is the open coordination source for the proposed 60-second moving-3D launch baseline. Its historical title/body contains earlier no-spend framing; the later user policy permits spend-as-work-becomes-ready only after exact per-operation cost and stop-rule authorization. The issue remains `DRAFT / NOT APPROVED / NOT IN UNITY` and requires genuine moving 3D rather than still-image motion.
 - Issue `#284` is an active engineering specification whose media-production lane remains blocked. It may define later playback, fallback, packaging, and device validation, but it does not manufacture or approve cinematic pixels.
 - Issue `#259` preserves terrestrial source evidence and scalability direction. Merged source, reviewable sheets, and task success do not grant production, runtime, or user approval.
+
+### Executed batch and retained Meshy evidence
+
+- Dedicated task `019fef94-af14-7671-a739-447391cfb7a5` records batch `priority_spend_20260812_v001`: starting balance `7,675`, verified ending balance `6,661`, and exact spend `1,014` credits.
+- The arithmetic is exact: `26` source-image tasks at `9` credits plus `26` Meshy-6 PBR model tasks at `30` credits gives `26 * 9 + 26 * 30 = 1,014`; `7,675 - 1,014 = 6,661`.
+- The batch is terminal `ExecutedStopped`: no retry and no further paid operation is currently authorized. Every output remains `GeneratedUnreviewed / NON_PRODUCTION`; provider completion grants no A2 source, user creative, cinematic, gameplay, runtime, production, or release approval.
+- Draft PR [#472](https://github.com/yulee94/AnotherLife/pull/472), head `216a1d272c7f6ff3dc35217bc88818524462d877`, is a separate sanitized historical retention cutoff. Its `7,675 -> 7,675` zero-credit snapshot predates the paid batch and must remain historical. It grants no promotion, spend, source, or runtime authority and is not the current balance ledger.
 
 ### Retained but non-canonical cinematic evidence
 
@@ -68,7 +98,7 @@ The local commit `b33d0e65c9d5e54d9330eaa14fd5be9bcdefabbf` and the following fo
 - `unity/Docs/Launch_Cinematic_Media_Manifest.json`
 - `unity/Docs/Launch_Cinematic_Asset_Audit.md`
 
-Any issue prose calling those paths authoritative is ahead of `main@6b79dc...` and must not be treated as a current-main source binding. Their local existence cannot authorize input reuse, Meshy credits, source selection, media production, or runtime packaging.
+Any issue prose calling those paths authoritative is not represented by `main@426316d...` and must not be treated as a current-main source binding. Their local existence cannot authorize input reuse, Meshy credits, source selection, media production, or runtime packaging.
 
 ## Sixty-second cinematic dependency order
 
@@ -125,12 +155,14 @@ Every family is blocked until the exact beat/shot dependency, camera and coverag
 
 | Family | Correct production routing | Meshy disposition | Required source and acceptance gate |
 | --- | --- | --- | --- |
-| Wish Dragon or other hero terrestrial subject | A source-approved 3D candidate may be generated, then must receive DCC anatomy, topology, UV, rig, skin, material, deformation, animation, and shot-fidelity work | Potentially justified only after exact co-developer source selection and rights binding; currently `Deferred / 0 credits` | Exact stable profile/source/concept/input hashes, rights, scale, anatomy, motion, shot coverage, and separate user approval are `SOURCE_REQUIRED`. Do not infer this identity from issue `#456` realm guardians or local dragon files |
+| Wish Dragon or other hero terrestrial subject | A source-approved 3D candidate may be generated, then must receive DCC anatomy, topology, UV, rig, skin, material, deformation, animation, and shot-fidelity work | Current state: `SOURCE_REQUIRED / Meshy NotAuthorized`; the retained rejected result is evidence only and cannot be retried or used as a new input | Exact A2-approved cardinal source views, stable profile/source/concept/input hashes, rights, scale, anatomy, cross-view consistency, motion, exact cinematic coverage, named future gameplay reuse binding, and separate user approval are required. Do not infer this identity from issue `#456` realm guardians or local dragon files |
 | Trees | Modular DCC trunk/major-branch silhouettes, leaf/needle cards or bounded clusters, shader wind, instancing; distant matte layers only where parallax permits | Only a unique close hero tree may justify Meshy; bulk forest generation does not | Realm species/form, age, season, density, hero/background role, wind state, shot coverage, source hash, and rights are `SOURCE_REQUIRED` |
 | Burnt trees / ashwood | DCC hero silhouette and breakage, authored char/bark material, cards for fine branches, source-approved smoke/ember VFX and compositing | Conditional only for one close unique silhouette; otherwise DCC. `Deferred / 0 credits` | Habitat/species, burn cause and degree, intact/dead state, smoke/ember permission, source hash, and rights are `SOURCE_REQUIRED`; generic burnt trees do not automatically equal Umbral ashwood |
 | Rocks | Procedural/DCC modular kit, sculpt/bake for close hero faces, shared atlas/trim, instancing; 2D only for distant background | Conditional for a unique close hero formation that modular DCC cannot satisfy; never bulk scatter | Realm geology, scale, breakage, wetness/weather, camera distance, collision intent, source hash, and rights are `SOURCE_REQUIRED` |
 | Ores | DCC host rock plus bounded ore inserts, decals or masks and material/shader; composited glints only when sourced | Conditional only for a unique close formation; ordinary veins/clusters stay DCC/material | Ore identity, host geology, shape, reflectance/emission, extraction state, source hash, and rights are `SOURCE_REQUIRED`; no automatic glow |
 | Sculptural hero plant | Authored DCC refinement after exact source selection; cards/atlas for fine foliage | Conditional only for a shot-critical unique plant, not general flowers/grass | Exact fantasy anatomy/species, realm, scale, motion, source hash, and rights are `SOURCE_REQUIRED` |
+
+The retained Wish Dragon result is A2-rejected exact-source-fidelity evidence from [issue #460 comment 5263093044](https://github.com/yulee94/AnotherLife/issues/460#issuecomment-5263093044): `wish_dragon_review_master.glb`, `53,457,548` bytes, SHA-256 `5a846774341c6e38a8f59df617cbec0b52135f5898a591db271094b3d4bb1270`, with `9 + 30 = 39` credits consumed. Its disposition is `REJECTED_FOR_EXACT_SOURCE_FIDELITY / GeneratedUnreviewed / NON_PRODUCTION / evidence only`. It is `inputEligible=false`. No retry, regenerate, remesh, rig, animation, retexture, import, promotion, or paid follow-up is authorized. A future request requires four independently A2-approved cardinal views plus exact source hashes, rights, anatomy, and cross-view gates.
 
 ### P2 — weather, light, surface motion, sound, and compositing
 
@@ -179,10 +211,11 @@ Exactly one state applies to an item.
 | State | Required behavior |
 | --- | --- |
 | `Deferred` | Method, endpoint, payload, and task ID are unset. Estimated, maximum, authorized, and actual credits are all `0`. Creation, upload, retry, refinement, conversion, and retrieval calls are false |
-| `A1AuthorizedOneShot` | Every required field below is complete; exactly one task attempt; expiration and fail-closed stop rules active; any retry or changed endpoint/input/payload requires a new A1 authorization |
-| `RetentionGetOnly` | Exact pre-existing task/output identity; GET only; zero incremental credits; bounded retrieval of already-produced status/bytes; no creation, continuation, retry, refinement, conversion, upload, mutation, polling, or approval |
+| `A1AuthorizedOneShot` | Every required field below is complete; exactly one task attempt in dedicated task `019fef94-af14-7671-a739-447391cfb7a5`; expiration and fail-closed stop rules active; any retry or changed endpoint/input/payload requires a new A1 authorization |
+| `ExecutedStopped` | The authorized attempt reached a terminal provider result or terminal error; actual credits and evidence are recorded; no continuation, retry, refinement, remesh, rig, animation, retexture, conversion, alternate endpoint, or substitute input is permitted without a new A1 authorization |
+| `RetentionGetOnly` | Exact pre-existing task/output identity; GET only in the dedicated Meshy task; zero incremental credits; bounded retrieval of already-produced status/bytes; no creation, continuation, retry, refinement, conversion, upload, mutation, unbounded polling, or approval |
 
-An existing A1 retention-rescue lane may operate only when its separate record binds the exact pre-existing task/output. This document supplies no task ID and authorizes or executes no GET. A retention record permits at most one status GET and one GET per already-enumerated ready artifact; ordinary signed-storage redirects are part of that retrieval. A pending/not-ready response stops the session. Any unknown cost or possible mutation fails closed.
+All Meshy authorization, execution, polling, downloads, QA, retention, and credit reporting are exclusive to dedicated task `019fef94-af14-7671-a739-447391cfb7a5`. A separate bounded retention record must bind the exact pre-existing task/output. This document supplies no operational task ID and authorizes or executes no GET. A retention record permits at most one status GET and one GET per already-enumerated ready artifact; ordinary signed-storage redirects are part of that retrieval. A pending/not-ready response stops the session. Any unknown cost or possible mutation fails closed.
 
 ## Required future per-item authorization record
 
@@ -193,14 +226,16 @@ No field may be inferred from a file name, task success, balance display, merged
 - `authorizationId`
 - `priorityItemId`
 - `subjectProfileId`
-- `shotDependencyIds[]`
+- `shotDependencyIds[]`: one or more exact prioritized cinematic shot/beat dependencies
+- `namedGameplayReuseBinding`: exact future gameplay entity or reusable module identity
 - `purpose`: `exploratory_nonproduction | source_candidate | production_candidate`
-- `reuseIntent`: `offline_cinematic_only | future_shared_candidate`
+- `reuseIntent`: exactly `cinematic_and_named_gameplay_candidate`
 - `maximumAcceptanceCeiling`
 
 ### Authority and attempt boundary
 
 - `authorizationState`
+- `executionTaskId`: exactly `019fef94-af14-7671-a739-447391cfb7a5`
 - `authorizedBy`: exactly `A1`
 - `decisionReference`
 - `authorizedAtUtc` and `expiresAtUtc`
@@ -216,7 +251,7 @@ No field may be inferred from a file name, task success, balance display, merged
 - ordered `inputAssets[]`, each with repository-relative or durable logical locator, byte length, SHA-256, rights-record ID, and rights-evidence SHA-256
 - rights evidence recording creator/provider, terms/license URL or repository record, retrieval/effective date, evidence SHA-256, commercial/project-use scope, derivative/AI-use scope, attribution/redistribution limits, and `rightsState`
 
-Unknown, pending, expired, or incompatible rights block execution for production candidacy. Exploratory use from provisional source is permitted only when A1 explicitly authorizes it and `maximumAcceptanceCeiling=ObservedLocal_NON_PRODUCTION`; task success cannot cure missing rights or source authority.
+Every paid candidate, including an exploratory nonproduction candidate, requires an exact A2-approved source, retained source bytes and hashes, and compatible rights evidence before execution. Provisional, composite, inferred, similarly named, provider-generated, or merely visible source cannot be authorized as a paid input. `ObservedLocal_NON_PRODUCTION` and task success cannot cure missing rights or source authority.
 
 ### Provider request and credit ceiling
 
@@ -263,7 +298,7 @@ A Meshy result, DCC preview, PR merge, green validation, or co-developer visibil
 
 ## Cinematic and gameplay separation
 
-Meshy produces at most a reusable source candidate. It owns no final topology, rig, blendshapes, equipment fit, animation quality, camera, weather, VFX, audio, edit, encode, gameplay stats, AI, spawning, loot, hitboxes, colliders, or Player packaging.
+Meshy produces at most a reusable source candidate. Every future paid candidate must be bound before execution to both an exact prioritized cinematic dependency and a named future gameplay entity or reusable module. That reuse binding is lineage and planning only; it grants no gameplay output or runtime approval. Meshy owns no final topology, rig, blendshapes, equipment fit, animation quality, camera, weather, VFX, audio, edit, encode, gameplay stats, AI, spawning, loot, hitboxes, colliders, or Player packaging.
 
 For every family:
 
@@ -277,9 +312,10 @@ For every family:
 
 | Check | Failure condition | Result |
 | --- | --- | --- |
-| `CTMA-BASE-001` | Base or merge-base is not exact `6b79dcbbeb2f9917ae30b42548742b7fc70307b0` | Block publication or rebase/reconcile through A1 |
+| `CTMA-BASE-001` | Base or merge-base is not exact `426316d29923fc3f037890c7f009b900b315e0df` | Block publication or refresh/reconcile through A1 |
 | `CTMA-SCOPE-001` | Diff contains anything except this Markdown path, including `.meta`, images, manifests, scripts, or local evidence | Reject diff |
-| `CTMA-AUTH-001` | Initial active authorization is nonzero or any approval state advances | Reset to `Deferred/Blocked`; reject |
+| `CTMA-AUTH-001` | A new paid operation lacks a fresh exact A1 one-shot decision, current further authorization is represented as nonzero without evidence, or any approval state advances automatically | Stop; retain `NotAuthorized`; reject |
+| `CTMA-VENUE-001` | Any Meshy authorization, execution, polling, download, QA, retention, or credit reporting occurs outside task `019fef94-af14-7671-a739-447391cfb7a5` | Stop before operation; reject evidence as operational authority |
 | `CTMA-METHOD-001` | POST/PUT/PATCH/DELETE/upload/generation is enabled without a complete `A1AuthorizedOneShot` record | Stop before call |
 | `CTMA-CREDIT-001` | Cost is null/unknown, estimate exceeds ceiling, actual exceeds ceiling, or billing action appears | Stop before or immediately after evidence capture; no retry |
 | `CTMA-SOURCE-001` | Missing/mismatched packet/profile/concept/input hash, wrong profile binding, or provisional source presented as selected | Quarantine and block |
@@ -287,31 +323,34 @@ For every family:
 | `CTMA-RETRY-001` | More than one attempt, auto-retry, or changed endpoint/operation without new A1 decision | Stop; require new authorization |
 | `CTMA-GET-001` | GET lacks pre-existing task ID, may mutate/charge, polls, retrieves unenumerated output, or status is not ready | Stop and defer |
 | `CTMA-EVIDENCE-001` | Response/output lacks task ID, bytes/hash, actual cost, or rejected-output retention | Evidence incomplete; no approval |
+| `CTMA-HISTORY-001` | Batch `priority_spend_20260812_v001`, `7,675 - 1,014 = 6,661`, or `26 * 9 + 26 * 30 = 1,014` is misstated; PR #472 is presented as a current balance ledger | Reject stale or contradictory ledger claim |
+| `CTMA-WISH-001` | Rejected Wish Dragon bytes/hash/cost/state changes, its output is reused, or a follow-up is implied without a new A2-approved source | Preserve evidence; remain `SOURCE_REQUIRED / Meshy NotAuthorized`; reject |
 | `CTMA-A2-001` | This document selects/redesigns/approves terrestrial identity or elevates local nonproduction evidence | Reject authority leak |
 | `CTMA-CIN-001` | Candidate/task success becomes cinematic accepted without source-owner, A1, and user gates | Reject approval leak |
 | `CTMA-GAME-001` | Gameplay/combat/AI/spawn/loot/stat/runtime authority is inferred | Reject authority leak |
 | `CTMA-PROVENANCE-001` | Local/unmerged `b33d0e6...` evidence is described as current-main canonical | Reject stale source claim |
 
-All failures leave the item `Deferred / NotAuthorized / NotSelected / NotApproved / NotInUnity`. There is no fallback generation, substitute asset, or cross-packet approval transfer.
+All new-operation failures leave the item `Deferred / NotAuthorized / NotSelected / NotApproved / NotInUnity`. Historical terminal evidence remains `ExecutedStopped` and cannot be reopened by a failure or later observation. There is no fallback generation, substitute asset, or cross-packet approval transfer.
 
-## Initial disposition and next gates
+## Current disposition and next gates
 
-1. The first credit-consuming cinematic Meshy batch is `DEFERRED`; maximum authorized credits remain `0`.
-2. No tree, burnt tree, rock, ore, sculptural plant, Wish Dragon, or other hero 3D candidate currently has the complete co-developer-selected source, retained input, exact hash, and rights chain required for a paid call.
-3. Lava is confirmed as an environment surface/flow family. It routes primarily to VFX, shader, material, volumetric, audio, and compositing work; lava alone authorizes no Meshy credit.
-4. The co-developer must select or author the exact terrestrial source and fidelity constraints before any production-candidate request. Visibility through this GitHub record is sufficient for coordination readiness; a formal co-developer review is not mandatory.
-5. A1 must issue a new per-item one-shot authorization with exact input, endpoint, payload hash, attempt count, and maximum credit ceiling.
-6. The user must separately approve the exact visual source/result and later integrated cinematic.
-7. DCC, cinematic production, editorial, engineering, runtime packaging, device profiling, and release remain later, separately reviewed lanes.
+1. Batch `priority_spend_20260812_v001` is complete and terminal `ExecutedStopped`: `1,014` credits consumed, balance `7,675 -> 6,661`, no retry, and all outputs `GeneratedUnreviewed / NON_PRODUCTION`.
+2. No further paid Meshy operation is currently authorized. `currentFurtherPaidAuthorizationCount=0`, `currentFurtherPaidCreditCeiling=0`, and `currentFurtherPaidState=NotAuthorized` describe only the post-batch present state; they do not erase the executed batch.
+3. Wish Dragon is `SOURCE_REQUIRED / Meshy NotAuthorized`. Its rejected `53,457,548`-byte GLB, SHA-256 `5a846774341c6e38a8f59df617cbec0b52135f5898a591db271094b3d4bb1270`, and `39`-credit history are retained evidence only with no follow-up.
+4. Draft PR #472 remains the sanitized historical retention cutoff at `7,675 -> 7,675`; it is not the current balance ledger and grants no promotion or spend authority.
+5. Lava is confirmed as an environment surface/flow family. It routes primarily to VFX, shader, material, volumetric, audio, and compositing work; lava alone authorizes no Meshy credit.
+6. The co-developer must select or author each exact terrestrial source and fidelity constraint, and the record must bind rights, retained bytes/hashes, an exact cinematic dependency, and a named future gameplay reuse target before A1 may authorize another paid candidate.
+7. Spend-as-work-becomes-ready permits no automatic next batch and establishes no balance-preservation target. A1 must issue a new per-item one-shot authorization in the dedicated Meshy task with exact input, endpoint, payload hash, attempt count, maximum credit ceiling, and stop rule.
+8. The user must separately approve the exact visual source/result and later integrated cinematic. DCC, cinematic production, editorial, engineering, runtime packaging, device profiling, and release remain later, separately reviewed lanes.
 
 ## Publication and validation boundary
 
 - Authorized repository path: `unity/Docs/Terrestrials/Cinematics/Cinematic_Terrestrial_Asset_Priority_and_Meshy_Authorization.md`
 - Authorized branch: `codex/coordination-cinematic-terrestrial-meshy-authority`
-- Authorized base: `main@6b79dcbbeb2f9917ae30b42548742b7fc70307b0`
+- Authorized base: `main@426316d29923fc3f037890c7f009b900b315e0df`
 - Draft PR title: `coordination: define cinematic terrestrial asset priority and Meshy authorization gates`
 - Expected diff: exactly one Markdown file; zero binary/LFS/runtime/Player/install bytes; no Unity `.meta` file; no shared lock
-- Validation: exact base and merge-base, one-path diff, whitespace check, issue/source reconciliation, every initial item deferred at zero credits, explicit 3D-vs-VFX/audio routing, rights/source hash gates, cinematic/gameplay package split, and no stale approval claim
+- Validation: exact base and merge-base, one-path diff, whitespace check, arithmetic and link reconciliation, dedicated-task exclusivity, historical-versus-current ledger accuracy, Wish Dragon rejection/current state, explicit 3D-vs-VFX/audio routing, A2-approved rights/source hash gates, exact cinematic plus named gameplay reuse binding, cinematic/gameplay package split, and no stale approval claim
 - Not run: Meshy/API/plugin operations, because prohibited and unnecessary; Unity/build/device checks, because this is documentation-only with zero runtime impact
 
 Current phase: coordination/review specification. Acceptance state: ready for A1 review after the exact one-file draft is published; not source-approved, not user-approved, not production-approved, not runtime-approved, and not release-approved.
