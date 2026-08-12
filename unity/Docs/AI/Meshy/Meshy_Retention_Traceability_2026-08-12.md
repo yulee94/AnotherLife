@@ -5,9 +5,13 @@
 **Related coordination PR:** #463
 **Evidence cutoff:** 2026-08-12 13:10:29 KST
 
+> **NONCURRENT HISTORICAL CUTOFF:** This ledger immutably records the 22-task, 124-role retention state and 7,675-to-7,675 zero-credit rescue balance at its evidence cutoff. It is superseded for current balance, completed-batch, and future-spend policy by merged PR #469 (`main@7f3759eb9acdbecc131826ca1801b533612391c6`): the later `priority_spend_20260812_v001` batch consumed 1,014 credits and left a recorded balance of 6,661. Do not read the cutoff values below as present account state or new spending authority.
+
 ## Executive disposition
 
-The retained Meshy campaign contains 22 API tasks. The accepted GET-only reconciliation found 22/22 HTTP 200 responses, 22/22 provider states at SUCCEEDED and 100 percent progress, and 425 historical credits consumed. The authorized retention rescue changed the balance by zero credits: 7,675 before and 7,675 after.
+At this immutable cutoff, the retained Meshy campaign contained 22 API tasks. The accepted GET-only reconciliation found 22/22 HTTP 200 responses, 22/22 provider states at SUCCEEDED and 100 percent progress, and 425 historical credits consumed. The authorized retention rescue changed the cutoff balance by zero credits: 7,675 before and 7,675 after.
+
+Current policy is instead the merged PR #469 state: the later batch consumed 1,014 credits, the latest recorded balance is 6,661, and paid generation/uploads remain on hold because no new exact source-admitted paid task is currently safe. This currentness correction neither rewrites the historical rescue evidence nor authorizes a provider operation.
 
 The provider advertised 124 output roles:
 
@@ -32,7 +36,7 @@ The continuation used:
 - no retry of the seven v001 saves;
 - no overwrite of an existing artifact;
 - file-backed progress and output logs;
-- balance gates fixed at 7,675 before and after;
+- cutoff balance gates fixed at 7,675 before and after;
 - nonzero-byte, extension, magic, parse, and SHA-256 checks before a file could be classified valid.
 
 The four interrupted transfers stopped after their single attempts. Regeneration or retry was not authorized and did not occur.
@@ -106,7 +110,7 @@ The final reconciliation independently verified:
 - zero live rescue processes;
 - zero `.partial`, `.download`, or `.invalid` temporary residue files; the four separately classified, hashed `.incomplete` fragments remain retained as failure evidence;
 - zero stderr bytes;
-- balance exactly 7,675 before and after.
+- cutoff balance exactly 7,675 before and after.
 
 No Unity import, rig validation, animation validation, LOD review, equipment-fit test, target-device performance measurement, cinematic render, gameplay integration, A2 terrestrial fidelity review, or user playtest was performed. Those checks are outside this retention-only scope and remain blocking where applicable.
 
@@ -114,7 +118,9 @@ No Unity import, rig validation, animation validation, LOD review, equipment-fit
 
 Cinematic remains the prioritized player-experience path, but this retention evidence alone unlocks no shot. Meshy supplies reusable model/reference sources only. Unity remains responsible for deterministic staging, animation, camera, weather, lighting, VFX, audio, and rendering.
 
-Future paid Meshy work requires one exact A1-authorized task with:
+Merged PR #469 controls current Meshy authorization policy. Paid generation and uploads remain on hold because no new exact source-admitted paid task is currently safe. A2 read-only fidelity review of the later batch and separately approved corrected source packets must precede any candidate handoff.
+
+Any future paid Meshy work requires one exact A1-authorized task with:
 
 - approved source identity and hash;
 - intended 1,440-frame cinematic shot dependency;
@@ -140,6 +146,6 @@ No broad campaign, habitat expansion, fort/castle set, terrestrial, dragon, boss
 
 The active roadmap gate remains blocked; this cross-lane retention evidence does not advance Phase 1 or first-user cinematic acceptance. The draft PR may establish durable traceability only. Asset promotion, future Meshy spending, Unity integration, cinematic acceptance, gameplay reuse, merge readiness, milestone acceptance, and release approval all remain separately gated.
 
-## Next authority
+## Current authority after the cutoff
 
-A1 must select or reject the next Meshy task. The Meshy execution lane has requested at most one exact, source-approved, cinematic-critical and later-gameplay-reusable paid task with a disclosed credit ceiling. Until A1 provides that authorization, the recorded balance remains 7,675 and all paid work stays on hold.
+Paid generation and uploads are on hold. No new exact source-admitted paid task is currently safe. The recorded current balance is 6,661 after the later 1,014-credit batch documented by merged PR #469; the 7,675 values in this ledger remain historical cutoff evidence only. When an A2-accepted candidate also has complete source/input hashes and rights evidence, the dedicated Meshy lane must submit the standing exact authorization packet before any GitHub or paid action. A1 must then reply with an exact scope and credit ceiling or `HOLD`; no automatic retry, campaign, recharge, purchase, renewal, billing change, asset promotion, or production approval follows from this ledger.

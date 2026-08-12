@@ -3,6 +3,19 @@
   "ledger_id": "al_meshy_retention_traceability_2026_08_12_v001",
   "created_at": "2026-08-12T13:21:20+09:00",
   "evidence_cutoff_at": "2026-08-12T13:10:29+09:00",
+  "currentness": {
+    "status": "NONCURRENT_HISTORICAL_CUTOFF",
+    "historical_cutoff_values_immutable": true,
+    "superseded_for_current_balance_batch_and_spend_policy": true,
+    "superseding_pull_request": 469,
+    "superseding_merge_commit": "7f3759eb9acdbecc131826ca1801b533612391c6",
+    "later_batch_id": "priority_spend_20260812_v001",
+    "later_batch_credits_consumed": 1014,
+    "latest_recorded_balance": 6661,
+    "paid_generation_and_upload_state": "HOLD_NO_EXACT_SOURCE_ADMITTED_TASK_CURRENTLY_SAFE",
+    "next_candidate_gate": "A2_acceptance_plus_complete_source_input_hashes_and_rights_then_A1_exact_authorization",
+    "cutoff_balance_values_are_current_account_state": false
+  },
   "primary_delivery_mode": "Codex coordination/review",
   "upstream_pull_request": 463,
   "publication_scope": {
@@ -32,7 +45,7 @@
     "application_level_retries": 0,
     "previously_saved_role_retries": 0,
     "recharge_purchase_renewal_or_billing_changes": 0,
-    "future_credit_authority": "A1_only"
+    "future_credit_authority": "A1_exact_per_task_authorization_only"
   },
   "account_snapshot": {
     "historical_credits_consumed": 425,
@@ -40,7 +53,7 @@
     "balance_after_v001": 7675,
     "balance_before_v002": 7675,
     "balance_after_v002": 7675,
-    "current_recorded_balance": 7675,
+    "cutoff_recorded_balance": 7675,
     "balance_unchanged_by_rescue": true,
     "account_identity_published": false
   },
@@ -1034,15 +1047,16 @@
     "exact_repository_file_scope": "required_before_commit"
   },
   "gates": {
-    "evidence_publication": "ready_after_repository_validation",
+    "evidence_publication": "draft_unmerged_currentness_refreshed",
     "asset_promotion": "not_authorized",
-    "new_meshy_spend": "not_authorized",
+    "new_meshy_spend": "hold_no_exact_source_admitted_paid_task_currently_safe",
     "cinematic_acceptance": "unchanged_blocked",
     "gameplay_reuse_acceptance": "unchanged_blocked",
     "terrestrial_design_fidelity": "A2_and_user_gated",
     "unity_validation": "not_run_out_of_scope",
     "shared_file_locks": [],
-    "merge_disposition": "draft_evidence_only",
-    "next_authority": "A1"
+    "merge_disposition": "draft_unmerged_evidence_only",
+    "current_policy_source": "merged_pr_469_at_7f3759eb9acdbecc131826ca1801b533612391c6",
+    "next_authority": "A1_exact_authorization_after_A2_fidelity_and_source_rights_hash_complete"
   }
 }
