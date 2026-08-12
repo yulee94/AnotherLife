@@ -1,0 +1,1047 @@
+{
+  "schema_version": 1,
+  "ledger_id": "al_meshy_retention_traceability_2026_08_12_v001",
+  "created_at": "2026-08-12T13:21:20+09:00",
+  "evidence_cutoff_at": "2026-08-12T13:10:29+09:00",
+  "primary_delivery_mode": "Codex coordination/review",
+  "upstream_pull_request": 463,
+  "publication_scope": {
+    "branch": "codex/coordination-meshy-retention-traceability",
+    "files": [
+      "unity/Docs/AI/Meshy/Meshy_Retention_Traceability_2026-08-12.md",
+      "unity/Docs/AI/Meshy/meshy_retention_traceability_manifest_v001.json"
+    ],
+    "metadata_only": true,
+    "binary_assets_included": false,
+    "private_source_files_included": false,
+    "private_output_files_included": false,
+    "prompts_included": false,
+    "signed_urls_included": false,
+    "credentials_included": false,
+    "account_or_workspace_identity_included": false,
+    "absolute_private_paths_included": false
+  },
+  "authority": {
+    "maximum_credits": 0,
+    "allowed_http_methods": [
+      "GET"
+    ],
+    "post_calls": 0,
+    "generation_calls": 0,
+    "mutation_calls": 0,
+    "application_level_retries": 0,
+    "previously_saved_role_retries": 0,
+    "recharge_purchase_renewal_or_billing_changes": 0,
+    "future_credit_authority": "A1_only"
+  },
+  "account_snapshot": {
+    "historical_credits_consumed": 425,
+    "balance_before_v001": 7675,
+    "balance_after_v001": 7675,
+    "balance_before_v002": 7675,
+    "balance_after_v002": 7675,
+    "current_recorded_balance": 7675,
+    "balance_unchanged_by_rescue": true,
+    "account_identity_published": false
+  },
+  "api_audit": {
+    "task_count": 22,
+    "http_200_count": 22,
+    "succeeded_count": 22,
+    "progress_100_count": 22,
+    "consumed_credit_sum": 425,
+    "status_as_of": "2026-08-12",
+    "task_access_state": "available_by_authenticated_API_task_id_at_audit",
+    "web_library_visibility_state": "API_task_absence_from_web_My_Assets_is_not_by_itself_loss_or_account_mismatch",
+    "account_or_workspace_mismatch_indicators": [
+      "authenticated API balance materially differs from the expected account balance",
+      "known task IDs are absent from the correct endpoint list under the configured key",
+      "the correct endpoint and task ID return an ownership-aware error under the configured key"
+    ],
+    "official_documentation_refs": [
+      "https://docs.meshy.ai/en/api/quick-start",
+      "https://docs.meshy.ai/en/api/image-to-3d",
+      "https://docs.meshy.ai/en/api/remesh",
+      "https://docs.meshy.ai/en/api/rigging",
+      "https://docs.meshy.ai/en/api/animation",
+      "https://docs.meshy.ai/en/api/asset-retention",
+      "https://docs.meshy.ai/en/api/balance"
+    ]
+  },
+  "retention_summary": {
+    "provider_advertised_roles": 124,
+    "role_family_counts": {
+      "image_urls": 27,
+      "model_url": 11,
+      "model_urls_fbx": 12,
+      "model_urls_pre_remeshed_glb": 9,
+      "thumbnail_url": 12,
+      "texture_base_color": 12,
+      "texture_metallic": 12,
+      "texture_roughness": 12,
+      "texture_normal": 12,
+      "texture_metallic_roughness": 1,
+      "texture_emission": 4
+    },
+    "local_present_before_rescue": 87,
+    "v001": {
+      "status": "stopped_partial_no_retry",
+      "planned_roles": 37,
+      "valid_saved_roles": 7,
+      "valid_saved_bytes": 184410999,
+      "residual_roles": 30,
+      "application_level_retries": 0
+    },
+    "v002": {
+      "status": "complete_with_concerns",
+      "planned_roles": 30,
+      "attempted_roles": 30,
+      "valid_saved_roles": 26,
+      "valid_saved_bytes": 548487383,
+      "incomplete_download_fragments": 4,
+      "incomplete_fragment_bytes": 82911232,
+      "unattempted_roles": 0,
+      "application_level_retries": 0,
+      "v001_saved_roles_verified_not_retried": 7,
+      "partial_residue_files": 0,
+      "download_residue_files": 0,
+      "invalid_files": 0,
+      "stderr_bytes": 0,
+      "processes_remaining": 0
+    },
+    "combined_valid_rescued_roles": 33,
+    "combined_valid_rescued_bytes": 732898382,
+    "local_present_final": 120,
+    "residual_roles_final": 4,
+    "coverage_percent": 96.7742,
+    "coverage_complete": false
+  },
+  "artifact_summary": {
+    "api_task_records_retained_locally": 22,
+    "api_task_records_published": 0,
+    "private_source_or_generated_images_published": 0,
+    "fbx_glb_texture_thumbnail_files_published": 0,
+    "dcc_derivatives_published": 0,
+    "local_artifact_classes_retained_privately": [
+      "task JSON",
+      "source and generated image evidence",
+      "FBX",
+      "GLB",
+      "PBR textures",
+      "thumbnails",
+      "DCC intake and QA derivatives",
+      "non-production rigid previs"
+    ],
+    "api_retention_risk": "Non-Enterprise generated output is documented as retained for at most three days; task IDs and signed result URLs are not durable artifact storage.",
+    "durable_record": "local artifact copies plus sanitized task, role, size, hash, status, and disposition metadata"
+  },
+  "task_records": [
+    {
+      "task_id": "019feff9-2da1-7714-a808-1448178a25b3",
+      "task_type": "image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [],
+      "entity_binding_state": "unapproved_prototype_binding",
+      "source_evidence_state": "private_source_not_published",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pbr_texture_set",
+        "thumbnail"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 7,
+      "valid_local_roles": 7,
+      "residual_roles": 0,
+      "asset_disposition": "PrototypeOnly_rejected_multi_subject",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff053-052e-771b-8c52-4f4a794dc310",
+      "task_type": "image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [],
+      "entity_binding_state": "unapproved_prototype_binding",
+      "source_evidence_state": "private_local_source_retained",
+      "source_sha256": "79a58ac7a8d054fc80d4c0fc6417dec42609568b781582c318a58cc45d42ebde",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pbr_texture_set",
+        "thumbnail"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 7,
+      "valid_local_roles": 7,
+      "residual_roles": 0,
+      "asset_disposition": "PrototypeOnly_superseded_one_off_character",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff06a-e3b7-7380-a45e-882c3fbf1401",
+      "task_type": "remesh",
+      "consumed_credits": 5,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [],
+      "entity_binding_state": "unapproved_prototype_binding",
+      "source_evidence_state": "derived_from_superseded_prototype",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "pbr_texture_set",
+        "thumbnail"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 7,
+      "valid_local_roles": 7,
+      "residual_roles": 0,
+      "asset_disposition": "Reject_PrototypeOnly_topology_and_pivot_defects",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff16f-4bb7-79a3-9b6e-4b3c7d2b8c3c",
+      "task_type": "image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_crownlands_dawn_regent",
+        "aurelius"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "approved_source_hash_retained_source_binary_absent",
+      "source_sha256": "60bbb2a30bd795346e7ae458b02007aab0f7c576b8e668983b50de07ba3a90e8",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "thumbnail"
+      ],
+      "local_derivative_state": "non_production_dcc_intake_and_visual_qa",
+      "advertised_roles": 8,
+      "valid_local_roles": 8,
+      "residual_roles": 0,
+      "asset_disposition": "NON_PRODUCTION_DCC_INTAKE_VISUAL_QA_ONLY",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff181-255e-7e7e-8c44-f81007e29023",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_stonehold_iron_wyrm",
+        "ferrum"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_upstream_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 2,
+      "valid_local_roles": 2,
+      "residual_roles": 0,
+      "asset_disposition": "source_multiview_passed_no_3d_or_production_acceptance",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff18a-1893-70a7-812b-15d54f8e27d4",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_stonehold_iron_wyrm",
+        "ferrum"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "thumbnail"
+      ],
+      "local_derivative_state": "non_production_dcc_intake_and_visual_qa",
+      "advertised_roles": 8,
+      "valid_local_roles": 8,
+      "residual_roles": 0,
+      "asset_disposition": "PrototypeOnly_fidelity_failed",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff18e-34d8-73d0-a35c-0b192b63b296",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_eldergrove_moonbough",
+        "virens"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_upstream_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "source_multiview_passed_no_3d_or_production_acceptance",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff192-8dfe-72c0-b1b2-3ba2a839ebc9",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_eldergrove_moonbough",
+        "virens"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "pbr_texture_set",
+        "thumbnail",
+        "incomplete_glb_fragments"
+      ],
+      "local_derivative_state": "non_production_dcc_intake_and_visual_qa",
+      "advertised_roles": 8,
+      "valid_local_roles": 6,
+      "residual_roles": 2,
+      "asset_disposition": "PassWithConcern_NON_PRODUCTION_silhouette_only",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff193-6c34-74df-9835-a90bdeaf833e",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_umbral_void_seraph",
+        "nox"
+      ],
+      "entity_binding_state": "superseded_source_iteration",
+      "source_evidence_state": "private_upstream_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "Reject_two_legged_anatomy_superseded",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff195-5f5f-765d-a465-519f6b61cb79",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "NPC_VAELORYN",
+        "npc_vaeloryn"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_upstream_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 2,
+      "valid_local_roles": 2,
+      "residual_roles": 0,
+      "asset_disposition": "source_multiview_passed_no_3d_or_production_acceptance",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff198-c142-75f5-a2b3-b7ee4dbf2ddc",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "NPC_VAELORYN",
+        "npc_vaeloryn"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "thumbnail",
+        "incomplete_primary_glb_fragment"
+      ],
+      "local_derivative_state": "non_production_dcc_intake_and_rigid_previs",
+      "advertised_roles": 8,
+      "valid_local_roles": 7,
+      "residual_roles": 1,
+      "asset_disposition": "pass_non_production_intake_silhouette",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff19c-e54d-76d9-9e7d-fb503dd1b670",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_umbral_void_seraph",
+        "nox"
+      ],
+      "entity_binding_state": "corrected_source_iteration_not_runtime_binding",
+      "source_evidence_state": "private_upstream_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 2,
+      "valid_local_roles": 2,
+      "residual_roles": 0,
+      "asset_disposition": "corrected_source_multiview_passed_no_3d_or_production_acceptance",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff19f-43b1-7792-b33a-9d75512c628c",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "dragon_umbral_void_seraph",
+        "nox"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pbr_texture_set",
+        "thumbnail",
+        "incomplete_pre_remeshed_glb_fragment"
+      ],
+      "local_derivative_state": "non_production_dcc_intake_material_lookdev_and_rig_schema_proof",
+      "advertised_roles": 8,
+      "valid_local_roles": 7,
+      "residual_roles": 1,
+      "asset_disposition": "pass_non_production_intake_silhouette",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1a0-df34-78fd-b787-c60bf421f10c",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_eldergrove_hollowbark_stalker"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_A2_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "source_passed_with_concern_missing_front_view",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1a4-97dd-77d1-87b9-cb23ac26c618",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_eldergrove_hollowbark_stalker"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained_A2_fidelity_unaccepted",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "emission_texture",
+        "thumbnail"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 9,
+      "valid_local_roles": 9,
+      "residual_roles": 0,
+      "asset_disposition": "ReviewCandidate_NON_PRODUCTION_unaccepted",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1a9-a06e-773b-bf69-b34aa94871c3",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_stonehold_rimehorn_breaker"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_A2_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "source_passed_with_concern_missing_rear_view",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1ab-e7fd-77ef-9962-1b5d39b15be4",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_stonehold_rimehorn_breaker"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained_A2_fidelity_unaccepted",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "emission_texture",
+        "thumbnail"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 9,
+      "valid_local_roles": 9,
+      "residual_roles": 0,
+      "asset_disposition": "ReviewCandidate_NON_PRODUCTION_unaccepted",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1b2-1908-7b3e-962f-a30db47953b0",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_crownlands_reliquary_basilisk"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_A2_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "source_passed_with_concern_missing_rear_view",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1b4-4ff4-767f-96bf-32f7dafaaead",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_crownlands_reliquary_basilisk"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained_A2_fidelity_unaccepted",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "emission_texture",
+        "thumbnail"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 9,
+      "valid_local_roles": 9,
+      "residual_roles": 0,
+      "asset_disposition": "ReviewCandidate_NON_PRODUCTION_unaccepted",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1b9-9a34-7a55-8310-4448f7c0739d",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_umbral_veilspine_widow"
+      ],
+      "entity_binding_state": "rejected_source_iteration",
+      "source_evidence_state": "private_A2_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "none",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "Reject_inconsistent_spine_count_no_3d_task",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1bc-6c72-787f-9517-70c2cf2f0a62",
+      "task_type": "image-to-image",
+      "consumed_credits": 9,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_umbral_cindermaw_salamander"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "private_A2_source_not_published_provider_multiview_retained",
+      "local_artifact_classes": [
+        "task_json",
+        "generated_multiview_images"
+      ],
+      "local_derivative_state": "source_multiview_only",
+      "advertised_roles": 3,
+      "valid_local_roles": 3,
+      "residual_roles": 0,
+      "asset_disposition": "source_multiview_passed_no_3d_or_production_acceptance",
+      "promotion_state": "unchanged_not_promoted"
+    },
+    {
+      "task_id": "019ff1be-a0ac-7b63-b1b7-7e6353522a3e",
+      "task_type": "multi-image-to-3d",
+      "consumed_credits": 30,
+      "http_status": 200,
+      "provider_status": "SUCCEEDED",
+      "progress_percent": 100,
+      "intended_entity_ids": [
+        "tdf_elite_umbral_cindermaw_salamander"
+      ],
+      "entity_binding_state": "intended_mapping_not_runtime_binding",
+      "source_evidence_state": "provider_multiview_inputs_retained_A2_fidelity_unaccepted",
+      "local_artifact_classes": [
+        "task_json",
+        "fbx",
+        "primary_glb",
+        "pre_remeshed_glb",
+        "pbr_texture_set",
+        "emission_texture",
+        "thumbnail"
+      ],
+      "local_derivative_state": "non_production_rigid_previs",
+      "advertised_roles": 9,
+      "valid_local_roles": 9,
+      "residual_roles": 0,
+      "asset_disposition": "intake_visual_qa_only_NOT_FINAL_ART",
+      "promotion_state": "unchanged_not_promoted"
+    }
+  ],
+  "rescued_valid_artifacts": [
+    {
+      "batch": "v001",
+      "task_id": "019feff9-2da1-7714-a808-1448178a25b3",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 82874788,
+      "sha256": "dd7edc8d1a09f6b05b828adc3739d00317e2745037b6ea52b8c2bdb53eedac75"
+    },
+    {
+      "batch": "v001",
+      "task_id": "019feff9-2da1-7714-a808-1448178a25b3",
+      "provider_role": "texture_urls[0].base_color",
+      "format": "png",
+      "bytes": 6567555,
+      "sha256": "f7abe83ccd35e32e6eabd66a0e2b7284c9e1678798798107955e6620690af0ba"
+    },
+    {
+      "batch": "v001",
+      "task_id": "019feff9-2da1-7714-a808-1448178a25b3",
+      "provider_role": "texture_urls[0].metallic",
+      "format": "png",
+      "bytes": 1396570,
+      "sha256": "7fa0bed9114616ff172c9569eb2f1e443b99271a9b751f6d4e8c1d71b641e60d"
+    },
+    {
+      "batch": "v001",
+      "task_id": "019feff9-2da1-7714-a808-1448178a25b3",
+      "provider_role": "texture_urls[0].roughness",
+      "format": "png",
+      "bytes": 1641820,
+      "sha256": "9163ad7e2ebf7985e6c10f76d5cc30f676b2baf28be92bbad3b8faf07f321c2a"
+    },
+    {
+      "batch": "v001",
+      "task_id": "019feff9-2da1-7714-a808-1448178a25b3",
+      "provider_role": "texture_urls[0].normal",
+      "format": "png",
+      "bytes": 5509958,
+      "sha256": "e96ab7747c9c480b1e999242156d7078a7709106354a45a4ed0543eb09310a32"
+    },
+    {
+      "batch": "v001",
+      "task_id": "019ff053-052e-771b-8c52-4f4a794dc310",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 80281648,
+      "sha256": "c24b0ee4939839b474f06b09df216956017cbfe6c1d41eea5b295c4c108b225d"
+    },
+    {
+      "batch": "v001",
+      "task_id": "019ff053-052e-771b-8c52-4f4a794dc310",
+      "provider_role": "texture_urls[0].base_color",
+      "format": "png",
+      "bytes": 6138660,
+      "sha256": "971a44b8c4d51f22ea6b18f2d5f6ce9a5b3a1f90265d731e554e79da1dbf890e"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff053-052e-771b-8c52-4f4a794dc310",
+      "provider_role": "texture_urls[0].metallic",
+      "format": "png",
+      "bytes": 1577491,
+      "sha256": "2d38f9b14888468c835696feb36f2b4a97de325bf978de99429167d6f31a5b55"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff053-052e-771b-8c52-4f4a794dc310",
+      "provider_role": "texture_urls[0].roughness",
+      "format": "png",
+      "bytes": 1627181,
+      "sha256": "661f2c4da5e202c2731797a205021de8d94d47a9a9fcf74113f2be0315f1936a"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff053-052e-771b-8c52-4f4a794dc310",
+      "provider_role": "texture_urls[0].normal",
+      "format": "png",
+      "bytes": 4969775,
+      "sha256": "7fdca877154a329a7e67836f2feac22783316429ce8c62d6d369767839a5c2ed"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff06a-e3b7-7380-a45e-882c3fbf1401",
+      "provider_role": "texture_urls[0].base_color",
+      "format": "png",
+      "bytes": 6680264,
+      "sha256": "df41ce9f908ed9ae03b6f7fa20d352c3420772aa5162969a73b7d6e0343e4a3a"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff06a-e3b7-7380-a45e-882c3fbf1401",
+      "provider_role": "texture_urls[0].metallic",
+      "format": "png",
+      "bytes": 5255323,
+      "sha256": "164ce61baddae469f90cfca272be940025d0207c6f25e0a8bb4ade8b5f829161"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff06a-e3b7-7380-a45e-882c3fbf1401",
+      "provider_role": "texture_urls[0].roughness",
+      "format": "png",
+      "bytes": 4901980,
+      "sha256": "310502bc40998cc444c694b539f608ef83876d44e39ebff893b0326996d10b84"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff06a-e3b7-7380-a45e-882c3fbf1401",
+      "provider_role": "texture_urls[0].normal",
+      "format": "png",
+      "bytes": 6287726,
+      "sha256": "22e32e38af0d2be6a7121b937d87ee3368910478a167e81bebd7892434c08d0b"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff06a-e3b7-7380-a45e-882c3fbf1401",
+      "provider_role": "texture_urls[0].metallic_roughness",
+      "format": "png",
+      "bytes": 16455309,
+      "sha256": "7c2d720c8c5317cc559dcd79c1d18b5ebf8be04bb164fa7792607b95e04f3108"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff16f-4bb7-79a3-9b6e-4b3c7d2b8c3c",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 37437704,
+      "sha256": "efc17cab00c413c77e6943560581c674ec36e218a49f2b2a1f4be7e71ea001e5"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff16f-4bb7-79a3-9b6e-4b3c7d2b8c3c",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 35765880,
+      "sha256": "881fa09c7d829fdbc14498415f97752c3de0b467e8eb14a3e30eaa8e7807afc8"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff18a-1893-70a7-812b-15d54f8e27d4",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 43356744,
+      "sha256": "f19794e03d559a341d3459b5faac66058770310c09893744ca91c62d4c4ac3f1"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff18a-1893-70a7-812b-15d54f8e27d4",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 35807408,
+      "sha256": "1419e3776db1c7dcb2381d9acf03697640768c42d65460f4b9a9e1358e8377b3"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff198-c142-75f5-a2b3-b7ee4dbf2ddc",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 35478252,
+      "sha256": "0dd79a0bda5cd862efdefe89a995e065f6ed2ed13bad424518ee2e81d1347baa"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff19f-43b1-7792-b33a-9d75512c628c",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 42784908,
+      "sha256": "2898ce650a6d1461d87201a7222749c2aaa3fcc4f92b7831656b8227e0f68a3d"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1a4-97dd-77d1-87b9-cb23ac26c618",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 35888096,
+      "sha256": "09a84b5c8abcc0f1bc419404c8cc6c4fc6bd780ccf9a11094a1da0057e131acf"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1a4-97dd-77d1-87b9-cb23ac26c618",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 33668592,
+      "sha256": "080caff675ad7274346f97b5f2921fc17517c16dc84786d28af67f51ec7139dd"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1a4-97dd-77d1-87b9-cb23ac26c618",
+      "provider_role": "texture_urls[0].emission",
+      "format": "png",
+      "bytes": 104874,
+      "sha256": "a83d644aa8725b8773c5574f69b7d244d795ffd9985264b0cf23859f9bc60859"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1ab-e7fd-77ef-9962-1b5d39b15be4",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 40761952,
+      "sha256": "71e6651abb0d0b617feaf2d73734376bcbeefbd194b553fee98a3b9f0ff0ae38"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1ab-e7fd-77ef-9962-1b5d39b15be4",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 35612724,
+      "sha256": "940c5287dbe06a0b97fad7b26d54f817a499e4f2d4387efbcb4ed8ad0fc307d4"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1ab-e7fd-77ef-9962-1b5d39b15be4",
+      "provider_role": "texture_urls[0].emission",
+      "format": "png",
+      "bytes": 110369,
+      "sha256": "309b201c6458f575226fa50e9a96d62605bcd8369a5f44bbf0ce53c03b1c3462"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1b4-4ff4-767f-96bf-32f7dafaaead",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 41108520,
+      "sha256": "f5eabdaca90f56a4061b171b953b4390ef25404f7f6265f3a9469f8407f876ff"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1b4-4ff4-767f-96bf-32f7dafaaead",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 29991072,
+      "sha256": "41f490870785453cac410c3f741c4a764f3ac3c6da5118831f8f2f656ad9f8d7"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1b4-4ff4-767f-96bf-32f7dafaaead",
+      "provider_role": "texture_urls[0].emission",
+      "format": "png",
+      "bytes": 90693,
+      "sha256": "875bc505e10166cf61fb29f30733d4e9e20b23eb65204a959a01630abbe24d44"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1be-a0ac-7b63-b1b7-7e6353522a3e",
+      "provider_role": "model_url",
+      "format": "glb",
+      "bytes": 30643876,
+      "sha256": "4640d00c7aa79cb15c84ccfdd58eaff04113c3e95772fa3746bad1c204214cc7"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1be-a0ac-7b63-b1b7-7e6353522a3e",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb",
+      "bytes": 22029248,
+      "sha256": "46e411632efa056617baa25cc6ca7ca5feb7146a05beded96647279f20839a72"
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff1be-a0ac-7b63-b1b7-7e6353522a3e",
+      "provider_role": "texture_urls[0].emission",
+      "format": "png",
+      "bytes": 91422,
+      "sha256": "af183922e0dd1a5fa46339bad4dc78c22460ee933bdd3da4c44179901068e094"
+    }
+  ],
+  "incomplete_download_fragments": [
+    {
+      "batch": "v002",
+      "task_id": "019ff192-8dfe-72c0-b1b2-3ba2a839ebc9",
+      "provider_role": "model_url",
+      "format": "glb_fragment",
+      "bytes": 13901824,
+      "sha256": "2c51ba2a855d36fc20034bd0039f9bf8dd936cab0b9dc7d8e4383015c2e5ac32",
+      "safe_error_category": "ChunkedEncodingError",
+      "disposition": "incomplete_download_fragment_not_valid_artifact",
+      "attempts": 1,
+      "retry_performed": false
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff192-8dfe-72c0-b1b2-3ba2a839ebc9",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb_fragment",
+      "bytes": 13877248,
+      "sha256": "f7be6375e80b775de1c7e22599eee9d1ed52d6ba065011d601bdf1866514ac60",
+      "safe_error_category": "ChunkedEncodingError",
+      "disposition": "incomplete_download_fragment_not_valid_artifact",
+      "attempts": 1,
+      "retry_performed": false
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff198-c142-75f5-a2b3-b7ee4dbf2ddc",
+      "provider_role": "model_url",
+      "format": "glb_fragment",
+      "bytes": 25919488,
+      "sha256": "41482264f75bcbdc3ea6164eba93831c34c5c5fd7561325be6d120d0ef71663e",
+      "safe_error_category": "ChunkedEncodingError",
+      "disposition": "incomplete_download_fragment_not_valid_artifact",
+      "attempts": 1,
+      "retry_performed": false
+    },
+    {
+      "batch": "v002",
+      "task_id": "019ff19f-43b1-7792-b33a-9d75512c628c",
+      "provider_role": "model_urls.pre_remeshed_glb",
+      "format": "glb_fragment",
+      "bytes": 29212672,
+      "sha256": "713e24ca1f68116eb0020a7c157aa309272c6dc2fd056e163581f97b645513b6",
+      "safe_error_category": "ChunkedEncodingError",
+      "disposition": "incomplete_download_fragment_not_valid_artifact",
+      "attempts": 1,
+      "retry_performed": false
+    }
+  ],
+  "validation": {
+    "json_parse": "pass",
+    "unique_task_ids": "22_of_22",
+    "task_credit_sum": "425",
+    "role_accounting": "124_equals_120_valid_plus_4_residual",
+    "rescue_role_accounting": "37_equals_33_valid_plus_4_incomplete",
+    "sha256_format": "pass",
+    "nonzero_saved_bytes": "pass",
+    "saved_hash_and_size_recheck": "33_of_33_pass",
+    "v002_glb_magic_declared_length_and_json_chunk": "14_of_14_pass",
+    "v002_png_signature_IHDR_dimensions_and_IEND": "12_of_12_pass",
+    "incomplete_hash_and_size_recheck": "4_of_4_pass",
+    "balance_invariant": "7675_before_and_after",
+    "no_overwrite": "pass",
+    "one_process_only": "pass",
+    "no_partial_download_or_invalid_residue": "pass",
+    "stderr_empty": "pass",
+    "sanitization_scan": "required_before_commit",
+    "exact_repository_file_scope": "required_before_commit"
+  },
+  "gates": {
+    "evidence_publication": "ready_after_repository_validation",
+    "asset_promotion": "not_authorized",
+    "new_meshy_spend": "not_authorized",
+    "cinematic_acceptance": "unchanged_blocked",
+    "gameplay_reuse_acceptance": "unchanged_blocked",
+    "terrestrial_design_fidelity": "A2_and_user_gated",
+    "unity_validation": "not_run_out_of_scope",
+    "shared_file_locks": [],
+    "merge_disposition": "draft_evidence_only",
+    "next_authority": "A1"
+  }
+}
