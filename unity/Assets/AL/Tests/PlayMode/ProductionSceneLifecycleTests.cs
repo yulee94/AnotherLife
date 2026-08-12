@@ -198,7 +198,7 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator BootAutomaticallyReachesRealmSelectionWithReadyCatalogAndFourControls()
+        public IEnumerator BootDeliberateEntryReachesRealmSelectionWithReadyCatalogAndFourControls()
         {
 #if !UNITY_EDITOR
             Assert.Ignore("Production scene transition test drives editor path-based PlayMode loads.");
@@ -206,6 +206,26 @@ namespace AL.Tests.PlayMode
 #else
             _quiesceSceneControllers = false;
             yield return LoadAndSettle(BootPath);
+
+            Button continueButton = null;
+            CanvasGroup standbyState = null;
+            float standbyStarted = Time.realtimeSinceStartup;
+            while (continueButton == null || standbyState == null || !standbyState.blocksRaycasts)
+            {
+                GameObject continueObject = GameObject.Find("ContinueButton");
+                continueButton = continueObject != null ? continueObject.GetComponent<Button>() : null;
+                GameObject standbyObject = GameObject.Find("StandbyState");
+                standbyState = standbyObject != null ? standbyObject.GetComponent<CanvasGroup>() : null;
+                if (Time.realtimeSinceStartup - standbyStarted > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("Boot did not expose its deliberate entry action.");
+                }
+
+                yield return null;
+            }
+
+            Assert.That(continueButton.interactable, Is.True);
+            continueButton.onClick.Invoke();
 
             float transitionStarted = Time.realtimeSinceStartup;
             while (!string.Equals(
@@ -261,6 +281,26 @@ namespace AL.Tests.PlayMode
                 realmButtons.All(button => button.interactable),
                 Is.True,
                 "All four realm choices must be interactable before a selection is committed.");
+
+            RectTransform[] selectionSurfaces = fallbackCanvas
+                .GetComponentsInChildren<RectTransform>(true)
+                .Where(rect => rect.name.EndsWith("_SelectButtonSurface", StringComparison.Ordinal))
+                .ToArray();
+            Assert.That(selectionSurfaces, Has.Length.EqualTo(4));
+            Assert.That(
+                selectionSurfaces.All(rect => rect.anchorMin.x == 0f && rect.anchorMax.x == 1f),
+                Is.True,
+                "Every realm action must span the width of its card.");
+            Assert.That(
+                selectionSurfaces.All(rect => rect.sizeDelta.y >= 54f),
+                Is.True,
+                "Every realm action must provide a comfortable mobile touch target.");
+            Assert.That(
+                selectionSurfaces.All(rect => rect
+                    .GetComponentsInChildren<Text>(true)
+                    .Any(label => label.text.StartsWith("SELECT ", StringComparison.Ordinal))),
+                Is.True,
+                "Every realm action must name the realm it selects.");
 
             Camera[] presentationCameras = Camera.allCameras
                 .Where(camera =>

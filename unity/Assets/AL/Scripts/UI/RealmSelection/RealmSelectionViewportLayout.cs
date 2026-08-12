@@ -23,7 +23,7 @@ namespace AL.UI.RealmSelection
         private const float PortraitCardHeight = 220f;
         private const float PortraitRowSpacing = 24f;
         private const float LandscapeMaximumCardWidth = 790f;
-        private const float LandscapeCardHeight = 148f;
+        private const float LandscapeCardHeight = 220f;
         private const float LandscapeColumnSpacing = 28f;
         private const float LandscapeRowSpacing = 36f;
 

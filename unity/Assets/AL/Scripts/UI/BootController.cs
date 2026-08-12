@@ -62,7 +62,15 @@ namespace AL.UI
 
             // The current build has no approved cinematic encode. Waiting one end-of-frame proves the
             // Unity UI is present without manufacturing a progress percentage or a fake patch delay.
-            yield return new WaitForEndOfFrame();
+            // Batch-mode verification has no rendered end-of-frame, so advance one frame there instead.
+            if (Application.isBatchMode)
+            {
+                yield return null;
+            }
+            else
+            {
+                yield return new WaitForEndOfFrame();
+            }
             _launchLifecycle.MarkFallbackReady("approved-media-unavailable");
             _launchLifecycle.MarkAwaitingContinue();
 

@@ -254,15 +254,35 @@ namespace AL.UI.RealmSelection
             realmName.alignment = TextAnchor.UpperLeft;
             realmName.color = Color.Lerp(realmColor, Color.white, 0.46f);
 
-            var selectText = CreateText(buttonObject.transform, realm.RealmName + "_Select", font, "SELECT", 14, new Vector2(-30f, 16f), new Vector2(126f, 24f));
-            AnchorBottomRight(selectText, new Vector2(-30f, 16f), new Vector2(126f, 24f));
-            selectText.alignment = TextAnchor.UpperRight;
-            selectText.color = new Color(1f, 0.84f, 0.52f);
-
             var text = CreateText(buttonObject.transform, realm.RealmName + "_Text", font, realm.Description, 17, new Vector2(30f, -76f), new Vector2(585f, 70f));
             AnchorTopStretch(text, new Vector2(30f, -76f), 175f, 70f);
             text.alignment = TextAnchor.UpperLeft;
             text.color = new Color(0.84f, 0.88f, 0.92f);
+
+            Image selectSurface = CreatePanel(
+                buttonObject.transform,
+                realm.RealmName + "_SelectButtonSurface",
+                new Color(0.73f, 0.58f, 0.33f, 1f),
+                new Vector2(0f, 0f),
+                new Vector2(1f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0f, 14f),
+                new Vector2(-48f, 54f));
+            var selectOutline = selectSurface.gameObject.AddComponent<Outline>();
+            selectOutline.effectColor = new Color(0.93f, 0.90f, 0.82f, 0.70f);
+            selectOutline.effectDistance = new Vector2(1.5f, -1.5f);
+
+            Text selectText = CreateText(
+                selectSurface.transform,
+                realm.RealmName + "_Select",
+                font,
+                "SELECT " + realm.RealmName.ToUpperInvariant(),
+                18,
+                Vector2.zero,
+                Vector2.zero);
+            StretchToParent(selectText);
+            selectText.fontStyle = FontStyle.Bold;
+            selectText.color = new Color(0.027f, 0.045f, 0.063f, 1f);
         }
 
         private void ShowCommitOverlay(RealmId id)
@@ -460,7 +480,7 @@ namespace AL.UI.RealmSelection
             rect.sizeDelta = new Vector2(-anchoredPosition.x - rightInset, height);
         }
 
-        private static void AnchorBottomRight(Text text, Vector2 anchoredPosition, Vector2 sizeDelta)
+        private static void StretchToParent(Text text)
         {
             if (text == null)
             {
@@ -468,11 +488,13 @@ namespace AL.UI.RealmSelection
             }
 
             var rect = text.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(1f, 0f);
-            rect.anchorMax = new Vector2(1f, 0f);
-            rect.pivot = new Vector2(1f, 0f);
-            rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = sizeDelta;
+            rect.anchorMin = Vector2.zero;
+            rect.anchorMax = Vector2.one;
+            rect.pivot = new Vector2(0.5f, 0.5f);
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
+            rect.anchoredPosition = Vector2.zero;
+            rect.sizeDelta = Vector2.zero;
         }
 
         private static void StretchAcrossTop(Text text)
