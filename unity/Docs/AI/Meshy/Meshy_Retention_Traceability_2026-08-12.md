@@ -104,7 +104,7 @@ The final reconciliation independently verified:
 - all four incomplete fragments present and byte/hash-matching their receipts;
 - no overlapping task/role key between the 7 v001 saves and 26 v002 saves;
 - zero live rescue processes;
-- zero partial, download-residue, or invalid files;
+- zero `.partial`, `.download`, or `.invalid` temporary residue files; the four separately classified, hashed `.incomplete` fragments remain retained as failure evidence;
 - zero stderr bytes;
 - balance exactly 7,675 before and after.
 

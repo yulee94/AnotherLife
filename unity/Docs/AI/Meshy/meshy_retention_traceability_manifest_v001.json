@@ -103,7 +103,7 @@
       "unattempted_roles": 0,
       "application_level_retries": 0,
       "v001_saved_roles_verified_not_retried": 7,
-      "partial_residue_files": 0,
+      "temporary_partial_residue_files": 0,
       "download_residue_files": 0,
       "invalid_files": 0,
       "stderr_bytes": 0,
@@ -118,7 +118,8 @@
   },
   "artifact_summary": {
     "api_task_records_retained_locally": 22,
-    "api_task_records_published": 0,
+    "raw_api_task_json_files_published": 0,
+    "sanitized_task_metadata_records_published": 22,
     "private_source_or_generated_images_published": 0,
     "fbx_glb_texture_thumbnail_files_published": 0,
     "dcc_derivatives_published": 0,
