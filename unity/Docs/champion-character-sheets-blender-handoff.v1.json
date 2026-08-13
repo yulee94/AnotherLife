@@ -1,10 +1,16 @@
 {
   "schemaVersion": 1,
   "handoffId": "al-champion-character-sheets-v001",
-  "status": "owner-approved-visual-source",
+  "status": "owner-approved-visual-source-navigation",
   "scope": "four-realm-vanguard-character-sheets",
+  "blenderExecutionAuthority": false,
   "runtimeAuthority": false,
   "productionModelApproval": false,
+  "numericTopologyAuthority": false,
+  "bodyPresetShapeAuthority": false,
+  "blendshapeMorphAuthority": false,
+  "bodyScaleCompatibilityAuthority": false,
+  "firstUserRuntimeBindingAuthority": false,
   "gitLfsRequired": true,
   "designAuthority": [
     "unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md",
@@ -62,17 +68,24 @@
     "unityUnitsPerMeter": 1,
     "unityForwardAxis": "+Z",
     "pivot": "ground-center",
-    "rig": "Unity Humanoid compatible shared skeleton",
-    "triangleTargets": {
-      "high": "8000-18000",
-      "medium": "3000-6000",
-      "low": "800-1500",
-      "far": "marker-or-silhouette"
+    "rig": "future Unity Humanoid compatible shared-skeleton requirement; not approved by this handoff",
+    "topologyAuthority": {
+      "state": "item-specific-a1-handoff-required",
+      "sourceReviewAuthority": "unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md",
+      "runtimeDerivativeDirection": "unity/Assets/AL/Art/Designs/ModularChampionCustomization.md",
+      "numericTargetsAuthorizedByThisManifest": false,
+      "precedence": "The item-specific A1 handoff must name the deliverable and controlling authority; absence or conflict is a stop. Do not collapse the two source documents into one topology ladder."
     }
   },
   "excludedFromThisHandoff": [
     "class-specific-character-sheets",
     "final-face-identity",
+    "body-preset-shape-authority",
+    "body-type-range",
+    "blendshape-and-morph-target-authority",
+    "body-scale-and-equipment-compatibility",
+    "first-user-test-mode-or-runtime-binding",
+    "production-save-or-player-routing",
     "production-topology",
     "uv-and-texture-authority",
     "final-rig-and-animation",
