@@ -53,6 +53,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             new Dictionary<string, GameObject>(StringComparer.Ordinal);
         private readonly List<string> _visitedScenes = new List<string>();
         private readonly List<string> _severeLogs = new List<string>();
+        private readonly List<string> _tutorialSessionIds = new List<string>();
 
         private FieldInfo _servicesField;
         private Type _stackType;
@@ -97,6 +98,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             _generatedRoots.Clear();
             _visitedScenes.Clear();
             _severeLogs.Clear();
+            _tutorialSessionIds.Clear();
             _persistentBefore = ReadOnlyPersistentInventory.Capture(Application.persistentDataPath);
 
             _originalIgnoreFailingMessages = LogAssert.ignoreFailingMessages;
@@ -152,6 +154,11 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 {
                     cleanupFailure += cleanupMessage + "\n";
                 }
+            }
+
+            foreach (string sessionId in _tutorialSessionIds)
+            {
+                FirstUserGameTestTutorialSessionStore.EraseForTests(sessionId);
             }
 
             RestoreRuntimeState();
@@ -329,6 +336,29 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.EqualTo(FirstUserGameTestRuntimeHost.ChampionArenaGuid));
             AssertSingleEventSystem();
 
+            FirstUserGameTestTutorialPresenter tutorial =
+                host.DestinationMarker.TutorialPresenter;
+            Assert.That(tutorial, Is.Not.Null);
+            Assert.That(tutorial.State.Step,
+                Is.EqualTo(FirstUserGameTestTutorialStep.Move));
+            Assert.That(tutorial.TitleAction.interactable, Is.False);
+            Assert.That(tutorial.ObjectiveAction.interactable, Is.False);
+            string initialTutorialCopy = string.Join(
+                "\n",
+                tutorial.GetComponentsInChildren<Text>(true).Select(text => text.text));
+            foreach (string machineToken in new[]
+                     {
+                         "TUTORIAL_",
+                         "OBJ_",
+                         "EVENT_",
+                         "OMEN_1",
+                         "ACTION_",
+                         "RESULT_"
+                     })
+            {
+                Assert.That(initialTutorialCopy, Does.Not.Contain(machineToken));
+            }
+
             Assert.That(EditorGameTestModeBootstrap.TryVerifyActiveRuntime(
                 out _,
                 out string runtimeMessage), Is.True, runtimeMessage);
@@ -353,26 +383,139 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(host.ReverifyVerifiedDevelopmentBoundaryForTests(), Is.True,
                 "Restoring the exact marker-bound service must restore the verified development boundary.");
 
+            int questCountBefore = save.CurrentSave.Quests.Count;
+            string nvsBefore = JsonUtility.ToJson(save.CurrentSave.Nvs01Progress);
+
+            host.DestinationMarker.AttackButton.onClick.Invoke();
+            Assert.That(tutorial.State.Step,
+                Is.EqualTo(FirstUserGameTestTutorialStep.Move),
+                "An out-of-order basic attack cannot progress the tutorial.");
+
             Vector3 before = host.DestinationMarker.Controller.transform.position;
-            host.DestinationMarker.Controller.SetExternalMoveInput(Vector2.up);
-            for (int frame = 0; frame < 12; frame++)
+            host.DestinationMarker.MoveForwardButton.onClick.Invoke();
+            Assert.That(tutorial.MovementIntentPendingForTests, Is.True,
+                "The same button path must enter the player-originated movement admission latch.");
+            float movementDeadline = Time.realtimeSinceStartup + 2f;
+            while (tutorial.State.Step == FirstUserGameTestTutorialStep.Move &&
+                   Time.realtimeSinceStartup < movementDeadline)
             {
                 yield return null;
             }
 
-            host.DestinationMarker.Controller.SetExternalMoveInput(Vector2.zero);
+            Vector3 horizontalMovement =
+                host.DestinationMarker.Controller.transform.position - before;
+            horizontalMovement.y = 0f;
             Assert.That(
-                Vector3.Distance(before, host.DestinationMarker.Controller.transform.position),
+                horizontalMovement.magnitude,
                 Is.GreaterThan(0.05f),
-                "The isolated destination must expose controllable movement.");
+                "The isolated destination must expose real horizontal controllable movement; gravity is not evidence.");
+            Assert.That(tutorial.State.Step,
+                Is.EqualTo(FirstUserGameTestTutorialStep.BasicAttack));
+            Assert.That(tutorial.State.MovementConfirmationCount, Is.EqualTo(1));
+            host.DestinationMarker.MoveForwardButton.onClick.Invoke();
+            yield return null;
+            Assert.That(tutorial.State.Step,
+                Is.EqualTo(FirstUserGameTestTutorialStep.BasicAttack));
+            Assert.That(tutorial.State.MovementConfirmationCount, Is.EqualTo(1));
 
             host.DestinationMarker.AttackButton.onClick.Invoke();
+            host.DestinationMarker.AttackButton.onClick.Invoke();
+            Assert.That(tutorial.State.Step,
+                Is.EqualTo(FirstUserGameTestTutorialStep.Complete));
+            Assert.That(tutorial.State.BasicAttackConfirmationCount, Is.EqualTo(1));
+            Assert.That(tutorial.State.CompletionEventCount, Is.EqualTo(1));
+            Assert.That(tutorial.State.CompletionEventId,
+                Is.EqualTo(FirstUserGameTestTutorialContract.TutorialCompletedEventId));
+            Assert.That(tutorial.State.OmenOfferCount, Is.EqualTo(1));
+            Assert.That(tutorial.State.ForegroundQuestId,
+                Is.EqualTo(FirstUserGameTestTutorialContract.OmenQuestId));
+            Assert.That(tutorial.State.ForegroundQuestState,
+                Is.EqualTo(FirstUserGameTestTutorialContract.OmenOfferedState));
+            Assert.That(tutorial.ChampionInputSuppressed, Is.True,
+                "The offered UI must own the isolated raw-input boundary before it is actionable.");
+            Assert.That(host.DestinationMarker.Controller.enabled, Is.False,
+                "ChampionController.Update must be disabled before a real pointer can reach follow UI.");
+            Assert.That(tutorial.EvaluateChampionControllerInputForTests(followUiActive: true),
+                Is.False,
+                "The PlayMode path must exercise the same raw-input admission decision as runtime.");
+
             yield return WaitForAndAdoptExactCombatRuntimeRoots();
             float combatSettledAt = Time.realtimeSinceStartup + 0.75f;
             while (Time.realtimeSinceStartup < combatSettledAt)
             {
                 yield return null;
             }
+
+            float offerReadyDeadline = Time.realtimeSinceStartup + 2f;
+            while ((!tutorial.TitleAction.interactable ||
+                    !tutorial.ObjectiveAction.interactable) &&
+                   Time.realtimeSinceStartup < offerReadyDeadline)
+            {
+                yield return null;
+            }
+
+            Assert.That(tutorial.TitleAction.interactable, Is.True);
+            Assert.That(tutorial.ObjectiveAction.interactable, Is.True);
+            Assert.That(tutorial.TryInspectChampionInputForTests(
+                out _,
+                out bool attackInProgressBeforeFollow), Is.True);
+            Assert.That(attackInProgressBeforeFollow, Is.False,
+                "The accepted tutorial attack must settle before follow controls become actionable.");
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.TitleAction.gameObject),
+                "The offered objective title must receive initial semantic focus.");
+            string offeredCopy = string.Join(
+                "\n",
+                tutorial.GetComponentsInChildren<Text>(true).Select(text => text.text));
+            foreach (string machineToken in new[]
+                     {
+                         "TUTORIAL_",
+                         "OBJ_",
+                         "EVENT_",
+                         "OMEN_1",
+                         "ACTION_",
+                         "RESULT_"
+                     })
+            {
+                Assert.That(offeredCopy, Does.Not.Contain(machineToken));
+            }
+
+            FirstUserGameTestTutorialState completedState = tutorial.State;
+            Vector3 beforeFollow = host.DestinationMarker.Controller.transform.position;
+            string combatBeforeFollow = CaptureCombatRuntimeObservation();
+            var pointer = new PointerEventData(EventSystem.current)
+            {
+                button = PointerEventData.InputButton.Left
+            };
+            ExecuteEvents.Execute(
+                tutorial.TitleAction.gameObject,
+                pointer,
+                ExecuteEvents.pointerClickHandler);
+            Assert.That(tutorial.LastFollowResult.ResultId,
+                Is.EqualTo(FirstUserGameTestTutorialContract.ActiveObjectiveFocusedResultId));
+            EventSystem.current.SetSelectedGameObject(tutorial.ObjectiveAction.gameObject);
+            ExecuteEvents.Execute(
+                tutorial.ObjectiveAction.gameObject,
+                new BaseEventData(EventSystem.current),
+                ExecuteEvents.submitHandler);
+            Assert.That(tutorial.LastFollowResult.ResultId,
+                Is.EqualTo(FirstUserGameTestTutorialContract.ActiveObjectiveFocusedResultId));
+            Assert.That(tutorial.State.ValueEquals(completedState), Is.True,
+                "Pointer and submit follow actions cannot mutate tutorial or quest state.");
+            Assert.That(host.DestinationMarker.Controller.transform.position,
+                Is.EqualTo(beforeFollow),
+                "Following the offered objective cannot move or teleport the player.");
+            Assert.That(tutorial.TryInspectChampionInputForTests(
+                out _,
+                out bool attackInProgressAfterFollow), Is.True);
+            Assert.That(attackInProgressAfterFollow, Is.False,
+                "Pointer/submit follow activation cannot request another basic attack.");
+            Assert.That(tutorial.State.BasicAttackConfirmationCount, Is.EqualTo(1));
+            Assert.That(CaptureCombatRuntimeObservation(), Is.EqualTo(combatBeforeFollow),
+                "Follow activation cannot change combat audio/VFX ownership or active counts.");
+            Assert.That(save.CurrentSave.Quests.Count, Is.EqualTo(questCountBefore));
+            Assert.That(JsonUtility.ToJson(save.CurrentSave.Nvs01Progress), Is.EqualTo(nvsBefore));
+            AssertSingleEventSystem();
 
             ReadOnlyPersistentInventory during =
                 ReadOnlyPersistentInventory.Capture(Application.persistentDataPath);
@@ -715,6 +858,48 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.SameAs(feedbackRoot));
         }
 
+        private static string CaptureCombatRuntimeObservation()
+        {
+            AudioSource audioSource = GetRequiredStaticField<AudioSource>(
+                typeof(RuntimeCombatAudio),
+                "_source");
+            RuntimeVfxPool vfxPool = GetRequiredStaticField<RuntimeVfxPool>(
+                typeof(RuntimeVfxPool),
+                "_instance");
+            var clips = GetRequiredStaticField<IDictionary>(
+                typeof(RuntimeCombatAudio),
+                "Clips");
+            var pools = GetRequiredStaticField<IDictionary>(
+                typeof(RuntimeVfxPool),
+                "Pools");
+            var activeCounts = GetRequiredStaticField<IDictionary>(
+                typeof(RuntimeVfxPool),
+                "ActiveCounts");
+            int activeTotal = 0;
+            foreach (DictionaryEntry entry in activeCounts)
+            {
+                activeTotal += Convert.ToInt32(
+                    entry.Value,
+                    CultureInfo.InvariantCulture);
+            }
+
+            return string.Join(
+                "|",
+                audioSource == null ? 0 : audioSource.gameObject.GetInstanceID(),
+                audioSource != null && audioSource.isPlaying ? 1 : 0,
+                audioSource == null || audioSource.clip == null
+                    ? 0
+                    : audioSource.clip.GetInstanceID(),
+                clips.Count,
+                vfxPool == null ? 0 : vfxPool.gameObject.GetInstanceID(),
+                pools.Count,
+                activeCounts.Count,
+                activeTotal,
+                FindSingleExactSceneRoot(CombatFeedbackRootName) == null
+                    ? 0
+                    : FindSingleExactSceneRoot(CombatFeedbackRootName).GetInstanceID());
+        }
+
         private void DestroyOwnedCombatRuntimeState(Action<string> recordFailure)
         {
             if (_ownedLateCombatRoots.Count == 0)
@@ -887,6 +1072,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
         private EditorGameTestModePlan CreateOwnedPlan()
         {
             string sessionId = Guid.NewGuid().ToString("N");
+            _tutorialSessionIds.Add(sessionId);
             string temporaryRoot = Path.GetTempPath();
             string isolatedRoot = EditorGameTestModeBootstrap.BuildExpectedIsolatedRoot(
                 temporaryRoot,

@@ -44,6 +44,15 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private static void HandlePlayModeStateChanged(PlayModeStateChange state)
         {
+            if (state == PlayModeStateChange.ExitingPlayMode)
+            {
+                FirstUserGameTestTutorialSessionStore.EraseSession(
+                    SessionState.GetString(
+                        EditorGameTestModeBootstrap.SessionIdKey,
+                        string.Empty));
+                return;
+            }
+
             if (state != PlayModeStateChange.EnteredPlayMode)
             {
                 return;
@@ -83,17 +92,24 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal void Configure(
             FirstUserGameTestSelection selection,
             ChampionController controller,
-            Button attackButton)
+            Button attackButton,
+            Button moveForwardButton,
+            FirstUserGameTestTutorialPresenter tutorialPresenter)
         {
             Selection = selection;
             Controller = controller;
             AttackButton = attackButton;
-            IsReady = selection != null && controller != null && attackButton != null;
+            MoveForwardButton = moveForwardButton;
+            TutorialPresenter = tutorialPresenter;
+            IsReady = selection != null && controller != null && attackButton != null &&
+                      moveForwardButton != null && tutorialPresenter != null;
         }
 
         internal FirstUserGameTestSelection Selection { get; private set; }
         internal ChampionController Controller { get; private set; }
         internal Button AttackButton { get; private set; }
+        internal Button MoveForwardButton { get; private set; }
+        internal FirstUserGameTestTutorialPresenter TutorialPresenter { get; private set; }
         internal bool IsReady { get; private set; }
     }
 
@@ -143,6 +159,7 @@ namespace AL.Editor.Development.FirstUserGameTest
         private int _destinationLoadRequestCount;
         private FirstUserIdentityDraftSnapshot _identitySnapshot;
         private FirstUserGameTestDestinationMarker _destinationMarker;
+        private FirstUserGameTestTutorialPresenter _tutorialPresenter;
         private EditorGameTestModeHostDriver _driver;
 
         internal static FirstUserGameTestRuntimeHost Active { get; private set; }
@@ -150,6 +167,7 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal FirstUserIdentityDraftPresenter IdentityPresenter => _identityPresenter;
         internal FirstUserGameTestCustomizationPanel CustomizationPanel => _customizationPanel;
         internal FirstUserGameTestDestinationMarker DestinationMarker => _destinationMarker;
+        internal FirstUserGameTestTutorialPresenter TutorialPresenter => _tutorialPresenter;
         internal string LastFailure => _lastFailure;
         internal int DestinationLoadRequestCount => _destinationLoadRequestCount;
         internal bool ReverifyVerifiedDevelopmentBoundaryForTests() =>
@@ -267,6 +285,9 @@ namespace AL.Editor.Development.FirstUserGameTest
                 _failureCanvas = null;
             }
 
+            _tutorialPresenter = null;
+            _destinationMarker = null;
+
             _initialized = false;
             if (ReferenceEquals(Active, this))
             {
@@ -276,8 +297,14 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private void HandleTick()
         {
-            if (!_initialized || _destinationBuilt || _commitInProgress)
+            if (!_initialized || _commitInProgress)
             {
+                return;
+            }
+
+            if (_destinationBuilt)
+            {
+                _tutorialPresenter?.Tick();
                 return;
             }
 
@@ -744,6 +771,29 @@ namespace AL.Editor.Development.FirstUserGameTest
             }
 
             DestroyOwnedSelectionUi();
+            if (!FirstUserGameTestTutorialGeneration.TryCreate(
+                    _sessionId,
+                    _verifiedResult.Receipt,
+                    _verifiedResult.Projection,
+                    out string tutorialGeneration))
+            {
+                FailClosed("The exact development tutorial generation could not be derived.");
+                return;
+            }
+
+            FirstUserGameTestTutorialSessionStore tutorialStore;
+            try
+            {
+                tutorialStore = new FirstUserGameTestTutorialSessionStore(
+                    _sessionId,
+                    tutorialGeneration);
+            }
+            catch (ArgumentException)
+            {
+                FailClosed("The exact development tutorial state boundary was invalid.");
+                return;
+            }
+
             var root = new GameObject(DestinationRootName);
 
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -788,11 +838,30 @@ namespace AL.Editor.Development.FirstUserGameTest
             Canvas canvas = BuildDestinationHud(
                 root.transform,
                 controller,
-                out Button attackButton);
+                tutorialStore,
+                out Button attackButton,
+                out Button moveForwardButton,
+                out FirstUserGameTestTutorialPresenter tutorialPresenter,
+                out string tutorialMessage);
+            if (canvas == null || tutorialPresenter == null)
+            {
+                UnityEngine.Object.Destroy(root);
+                FailClosed(string.IsNullOrEmpty(tutorialMessage)
+                    ? "The development tutorial HUD could not be created."
+                    : tutorialMessage);
+                return;
+            }
+
             canvas.sortingOrder = 1800;
 
             _destinationMarker = root.AddComponent<FirstUserGameTestDestinationMarker>();
-            _destinationMarker.Configure(_verifiedResult.Selection, controller, attackButton);
+            _tutorialPresenter = tutorialPresenter;
+            _destinationMarker.Configure(
+                _verifiedResult.Selection,
+                controller,
+                attackButton,
+                moveForwardButton,
+                tutorialPresenter);
             _destinationBuilt = true;
             _commitInProgress = false;
         }
@@ -800,8 +869,16 @@ namespace AL.Editor.Development.FirstUserGameTest
         private Canvas BuildDestinationHud(
             Transform parent,
             ChampionController controller,
-            out Button attackButton)
+            FirstUserGameTestTutorialSessionStore tutorialStore,
+            out Button attackButton,
+            out Button moveForwardButton,
+            out FirstUserGameTestTutorialPresenter tutorialPresenter,
+            out string tutorialMessage)
         {
+            attackButton = null;
+            moveForwardButton = null;
+            tutorialPresenter = null;
+            tutorialMessage = string.Empty;
             var canvasObject = new GameObject(
                 "FirstUserGameTestDestinationCanvas",
                 typeof(RectTransform),
@@ -865,10 +942,24 @@ namespace AL.Editor.Development.FirstUserGameTest
                 new Vector2(0f, 12f),
                 new Vector2(-20f, 34f));
 
-            CreateMoveButton(canvasObject.transform, font, controller, "MoveLeft", "◀", new Vector2(56f, 104f), Vector2.left);
-            CreateMoveButton(canvasObject.transform, font, controller, "MoveRight", "▶", new Vector2(168f, 104f), Vector2.right);
-            CreateMoveButton(canvasObject.transform, font, controller, "MoveForward", "▲", new Vector2(112f, 160f), Vector2.up);
-            CreateMoveButton(canvasObject.transform, font, controller, "MoveBack", "▼", new Vector2(112f, 48f), Vector2.down);
+            if (!FirstUserGameTestTutorialPresenter.TryCreate(
+                    canvasObject.transform,
+                    font,
+                    controller,
+                    tutorialStore,
+                    FailClosed,
+                    out tutorialPresenter,
+                    out tutorialMessage))
+            {
+                UnityEngine.Object.Destroy(canvasObject);
+                return null;
+            }
+
+            FirstUserGameTestTutorialPresenter presenter = tutorialPresenter;
+            CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveLeft", "◀", new Vector2(56f, 104f), Vector2.left);
+            CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveRight", "▶", new Vector2(168f, 104f), Vector2.right);
+            moveForwardButton = CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveForward", "▲", new Vector2(112f, 160f), Vector2.up);
+            CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveBack", "▼", new Vector2(112f, 48f), Vector2.down);
 
             attackButton = CreateButton(
                 canvasObject.transform,
@@ -878,14 +969,15 @@ namespace AL.Editor.Development.FirstUserGameTest
                 new Vector2(-86f, 90f),
                 new Vector2(148f, 72f),
                 new Vector2(1f, 0f));
-            attackButton.onClick.AddListener(controller.RequestBasicAttack);
+            attackButton.onClick.AddListener(() => presenter.RequestPlayerBasicAttack());
             return canvas;
         }
 
-        private void CreateMoveButton(
+        private Button CreateMoveButton(
             Transform parent,
             Font font,
             ChampionController controller,
+            FirstUserGameTestTutorialPresenter tutorialPresenter,
             string name,
             string label,
             Vector2 anchoredPosition,
@@ -900,7 +992,14 @@ namespace AL.Editor.Development.FirstUserGameTest
                 new Vector2(64f, 64f),
                 Vector2.zero);
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(controller, direction);
-            button.onClick.AddListener(() => _driver.RunCoroutine(PulseMove(controller, direction)));
+            button.onClick.AddListener(() =>
+            {
+                if (tutorialPresenter.RecordPlayerMovementIntent(direction))
+                {
+                    _driver.RunCoroutine(PulseMove(controller, direction));
+                }
+            });
+            return button;
         }
 
         private static IEnumerator PulseMove(ChampionController controller, Vector2 direction)
@@ -912,9 +1011,12 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             controller.SetExternalMoveInput(direction);
             float until = Time.unscaledTime + 0.18f;
-            while (controller != null && Time.unscaledTime < until)
+            int completedFrames = 0;
+            while (controller != null &&
+                   (completedFrames < 2 || Time.unscaledTime < until))
             {
                 yield return null;
+                completedFrames++;
             }
 
             controller?.SetExternalMoveInput(Vector2.zero);
