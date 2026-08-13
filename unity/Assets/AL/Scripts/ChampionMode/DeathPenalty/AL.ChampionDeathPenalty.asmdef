@@ -1,0 +1,14 @@
+{
+    "name": "AL.ChampionDeathPenalty",
+    "rootNamespace": "AL.ChampionMode.DeathPenalty",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
