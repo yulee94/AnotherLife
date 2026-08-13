@@ -151,7 +151,42 @@ namespace AL.Tests.EditMode
 
             Assert.IsFalse(result.IsValid);
             Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-FRAME-COUNT"));
+            Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-MASTER-FRAMES"));
             Assert.That(result.Diagnostics.Select(d => d.Code), Contains.Item("AL-LAUNCH-SKIP-FRAME"));
+        }
+
+        [TestCase(1439, 60f)]
+        [TestCase(1441, 60f)]
+        [TestCase(1440, 59.5f)]
+        [TestCase(1440, 60.5f)]
+        public void MasterRequiresExactly1440FramesAt24Fps(
+            int frameCount,
+            float durationSeconds)
+        {
+            LaunchCinematicRuntimeRecord record = ValidRecord();
+            record.FrameCount = frameCount;
+            record.DurationSeconds = durationSeconds;
+
+            LaunchCinematicValidationResult result =
+                LaunchCinematicRuntimeValidator.Validate(
+                    record,
+                    LaunchCinematicPlatform.Desktop,
+                    releaseBuild: true);
+
+            Assert.IsFalse(result.IsValid);
+            if (frameCount != 1440)
+            {
+                Assert.That(
+                    result.Diagnostics.Select(d => d.Code),
+                    Contains.Item("AL-LAUNCH-MASTER-FRAMES"));
+            }
+
+            if (durationSeconds != 60f)
+            {
+                Assert.That(
+                    result.Diagnostics.Select(d => d.Code),
+                    Contains.Item("AL-LAUNCH-DURATION"));
+            }
         }
 
         [Test]
@@ -170,7 +205,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void LifecycleTransitionsExactlyOnceAcrossCompletionSkipAndFallback()
+        public void MediaTerminalRequiresReadyExplicitContinueAndTransitionsExactlyOnce()
         {
             var lifecycle = new LaunchCinematicLifecycle();
 
@@ -179,11 +214,17 @@ namespace AL.Tests.EditMode
 
             Assert.IsFalse(lifecycle.TrySkip(119, 120));
             Assert.IsTrue(lifecycle.TrySkip(120, 120));
+            Assert.AreEqual(LaunchCinematicState.Fallback, lifecycle.State);
+            Assert.AreEqual(0, lifecycle.TransitionCount);
             Assert.IsFalse(lifecycle.CompleteOnce("ended"));
+            Assert.IsFalse(lifecycle.MarkAwaitingContinue(mandatoryReadinessReady: false));
+            Assert.IsTrue(lifecycle.MarkAwaitingContinue(mandatoryReadinessReady: true));
+            Assert.IsTrue(lifecycle.TryContinue(mandatoryReadinessReady: true));
+            Assert.IsFalse(lifecycle.TryContinue(mandatoryReadinessReady: true));
             Assert.IsFalse(lifecycle.FailToFallback("error"));
 
             Assert.AreEqual(LaunchCinematicState.Transitioned, lifecycle.State);
-            Assert.AreEqual("skip", lifecycle.TransitionReason);
+            Assert.AreEqual("explicit-continue", lifecycle.TransitionReason);
             Assert.AreEqual(1, lifecycle.TransitionCount);
         }
 
