@@ -232,6 +232,34 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             FirstUserGameTestRuntimeHost host =
                 FirstUserGameTestRuntimeHost.Install(plan.SessionId);
             Assert.That(host, Is.Not.Null);
+            Assert.That(host.PlaytestPhase, Is.EqualTo(FirstUserGameTestPlaytestPhase.Loading));
+            Assert.That(
+                host.ProgressBreadcrumb.text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.LoadingBreadcrumb));
+            Assert.That(host.ExitButton, Is.Not.Null);
+            Assert.That(
+                host.ExitButton.GetComponentInChildren<Text>(true).text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.ExitAction));
+            AssertInteractiveTargetAtLeast48(host.ExitButton);
+            GameObject disclosure = GameObject.Find(
+                FirstUserGameTestRuntimeHost.DisclosureObjectName);
+            Assert.That(disclosure, Is.Not.Null);
+            AssertRenderedCopyIsFriendly(disclosure, allowUserInputText: false);
+            MonoBehaviour legacyTechnicalBanner = Resources
+                .FindObjectsOfTypeAll<MonoBehaviour>()
+                .SingleOrDefault(candidate =>
+                    candidate != null &&
+                    candidate.gameObject.name ==
+                    FirstUserGameTestRuntimeHost.LegacyTechnicalBannerObjectName &&
+                    candidate.GetType().FullName ==
+                    FirstUserGameTestRuntimeHost.LegacyTechnicalBannerTypeName);
+            if (legacyTechnicalBanner != null)
+            {
+                Assert.That(
+                    legacyTechnicalBanner.enabled,
+                    Is.False,
+                    "The friendly persistent disclosure must replace the technical session-ID banner.");
+            }
 
             GameObject launchCanvas = null;
             Button continueButton = null;
@@ -273,6 +301,14 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
 
             FirstUserIdentityDraftPresenter presenter = host.IdentityPresenter;
             Assert.That(presenter, Is.Not.Null);
+            Assert.That(host.PlaytestPhase, Is.EqualTo(FirstUserGameTestPlaytestPhase.Identity));
+            Assert.That(
+                host.ProgressBreadcrumb.text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.IdentityBreadcrumb));
+            Assert.That(
+                EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(presenter.GetRealmChoiceButton(RealmId.Crownlands).gameObject),
+                "The first identity choice must receive deterministic initial focus.");
             AdoptExactLateRoot(
                 presenter.transform.root.gameObject,
                 "FirstUserGameTestIdentityCanvas",
@@ -285,6 +321,12 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
 
             FirstUserGameTestCustomizationPanel panel = host.CustomizationPanel;
             Assert.That(panel, Is.Not.Null);
+            Assert.That(
+                host.PlaytestPhase,
+                Is.EqualTo(FirstUserGameTestPlaytestPhase.AppearanceAndName));
+            Assert.That(
+                host.ProgressBreadcrumb.text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.AppearanceBreadcrumb));
             AdoptExactLateRoot(
                 panel.transform.root.gameObject,
                 FirstUserGameTestRuntimeHost.CustomizationCanvasName,
@@ -292,6 +334,14 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             panel.SelectForTests("average");
             panel.HandleInput.text = "Eldergrove Scout";
             Assert.That(panel.ConfirmButton.interactable, Is.True);
+            Assert.That(
+                ((Text)panel.HandleInput.placeholder).text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.NamePlaceholder));
+            AssertRenderedCopyIsFriendly(panel.gameObject, allowUserInputText: true);
+            foreach (Button button in panel.GetComponentsInChildren<Button>(true))
+            {
+                AssertInteractiveTargetAtLeast48(button);
+            }
             panel.ConfirmButton.onClick.Invoke();
             panel.ConfirmButton.onClick.Invoke();
 
@@ -323,6 +373,12 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(host.DestinationMarker.Selection.Identity.ClassFamily, Is.EqualTo(ClassFamily.Ranger));
             Assert.That(host.DestinationMarker.Selection.CustomizationId, Is.EqualTo("average"));
             Assert.That(host.DestinationMarker.Selection.DevelopmentHandle, Is.EqualTo("Eldergrove Scout"));
+            Assert.That(
+                host.PlaytestPhase,
+                Is.EqualTo(FirstUserGameTestPlaytestPhase.WorldTutorial));
+            Assert.That(
+                host.ProgressBreadcrumb.text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.TutorialBreadcrumb));
             Assert.That(host.DestinationLoadRequestCount, Is.EqualTo(1),
                 "Duplicate Confirm input must remain an inert one-shot replay boundary.");
             Assert.That(
@@ -343,6 +399,23 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.EqualTo(FirstUserGameTestTutorialStep.Move));
             Assert.That(tutorial.TitleAction.interactable, Is.False);
             Assert.That(tutorial.ObjectiveAction.interactable, Is.False);
+            Assert.That(
+                EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(host.DestinationMarker.MoveForwardButton.gameObject),
+                "The active movement action must receive deterministic focus.");
+            AssertRenderedCopyIsFriendly(
+                host.DestinationMarker.transform.root.gameObject,
+                allowUserInputText: false);
+            string destinationCopy = string.Join(
+                "\n",
+                host.DestinationMarker.GetComponentsInChildren<Text>(true)
+                    .Select(text => text.text));
+            Assert.That(destinationCopy, Does.Not.Contain("average"));
+            Assert.That(destinationCopy, Does.Not.Contain("Eldergrove Scout"));
+            foreach (Button button in host.DestinationMarker.GetComponentsInChildren<Button>(true))
+            {
+                AssertInteractiveTargetAtLeast48(button);
+            }
             string initialTutorialCopy = string.Join(
                 "\n",
                 tutorial.GetComponentsInChildren<Text>(true).Select(text => text.text));
@@ -412,6 +485,10 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(tutorial.State.Step,
                 Is.EqualTo(FirstUserGameTestTutorialStep.BasicAttack));
             Assert.That(tutorial.State.MovementConfirmationCount, Is.EqualTo(1));
+            Assert.That(
+                EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(host.DestinationMarker.AttackButton.gameObject),
+                "Basic Attack must receive focus when it becomes the active tutorial action.");
             host.DestinationMarker.MoveForwardButton.onClick.Invoke();
             yield return null;
             Assert.That(tutorial.State.Step,
@@ -456,6 +533,10 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
 
             Assert.That(tutorial.TitleAction.interactable, Is.True);
             Assert.That(tutorial.ObjectiveAction.interactable, Is.True);
+            Assert.That(host.PlaytestPhase, Is.EqualTo(FirstUserGameTestPlaytestPhase.Omen));
+            Assert.That(
+                host.ProgressBreadcrumb.text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.OmenBreadcrumb));
             Assert.That(tutorial.TryInspectChampionInputForTests(
                 out _,
                 out bool attackInProgressBeforeFollow), Is.True);
@@ -516,6 +597,13 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(save.CurrentSave.Quests.Count, Is.EqualTo(questCountBefore));
             Assert.That(JsonUtility.ToJson(save.CurrentSave.Nvs01Progress), Is.EqualTo(nvsBefore));
             AssertSingleEventSystem();
+
+            int exitTransitions = 0;
+            Assert.That(host.RequestExitForTests(() => exitTransitions++), Is.True);
+            Assert.That(host.RequestExitForTests(() => exitTransitions++), Is.False);
+            Assert.That(exitTransitions, Is.EqualTo(1));
+            Assert.That(host.ExitRequested, Is.True);
+            Assert.That(host.ExitButton.interactable, Is.False);
 
             ReadOnlyPersistentInventory during =
                 ReadOnlyPersistentInventory.Capture(Application.persistentDataPath);
@@ -592,6 +680,63 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(eventSystems, Has.Length.EqualTo(1));
             Assert.That(modules, Has.Length.EqualTo(1));
             Assert.That(modules[0].gameObject, Is.SameAs(eventSystems[0].gameObject));
+        }
+
+        private static void AssertInteractiveTargetAtLeast48(Button button)
+        {
+            Assert.That(button, Is.Not.Null);
+            Canvas.ForceUpdateCanvases();
+            Rect rect = button.GetComponent<RectTransform>().rect;
+            Assert.That(rect.width, Is.GreaterThanOrEqualTo(48f), button.name);
+            Assert.That(rect.height, Is.GreaterThanOrEqualTo(48f), button.name);
+        }
+
+        private static void AssertRenderedCopyIsFriendly(
+            GameObject root,
+            bool allowUserInputText)
+        {
+            Assert.That(root, Is.Not.Null);
+            Text userInputText = null;
+            if (allowUserInputText)
+            {
+                InputField input = root.GetComponentInChildren<InputField>(true);
+                userInputText = input == null ? null : input.textComponent;
+            }
+
+            string[] forbidden =
+            {
+                "DEVELOPMENT_EMULATOR_V1",
+                "receipt",
+                "projection",
+                "hash",
+                "code-unit",
+                "byte",
+                "customizationId",
+                "developmentHandle",
+                "TUTORIAL_",
+                "EVENT_",
+                "ACTION_",
+                "RESULT_",
+                "OMEN_1",
+                "DarkElves"
+            };
+            foreach (Text text in root.GetComponentsInChildren<Text>(true))
+            {
+                if (ReferenceEquals(text, userInputText))
+                {
+                    continue;
+                }
+
+                foreach (string token in forbidden)
+                {
+                    Assert.That(
+                        (text.text ?? string.Empty).IndexOf(
+                            token,
+                            StringComparison.OrdinalIgnoreCase),
+                        Is.EqualTo(-1),
+                        text.name + " leaked '" + token + "': " + text.text);
+                }
+            }
         }
 
         private void RecordScene(Scene scene, LoadSceneMode mode)

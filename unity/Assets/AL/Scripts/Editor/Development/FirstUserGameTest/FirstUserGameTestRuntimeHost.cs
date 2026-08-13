@@ -58,6 +58,14 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return;
             }
 
+            if (!FirstUserGameTestRuntimeHost.TrySuppressLegacyTechnicalBannerNow(
+                    out string disclosureMessage))
+            {
+                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
+                    disclosureMessage);
+                return;
+            }
+
             EditorApplication.delayCall += InstallForActiveSession;
         }
 
@@ -121,6 +129,10 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal const string CustomizationCanvasName = "FirstUserGameTestCustomizationCanvas";
         internal const string FailureCanvasName = "FirstUserGameTestFailureCanvas";
         internal const string DestinationRootName = "[AL DEV] Isolated Character Game Test";
+        internal const string LegacyTechnicalBannerObjectName =
+            "[AL] Isolated Game Test Mode";
+        internal const string LegacyTechnicalBannerTypeName =
+            "AL.Development.EditorGameTestModeBanner";
         internal const string ChampionArenaPath = "Assets/AL/Scenes/ChampionArena.unity";
         internal const string ChampionArenaGuid = "9c8e973279bb149b49b9938b1781c775";
         internal const string RealmSelectionPath = "Assets/AL/Scenes/RealmSelection.unity";
@@ -150,6 +162,8 @@ namespace AL.Editor.Development.FirstUserGameTest
         private FirstUserGameTestCustomizationPanel _customizationPanel;
         private GameObject _disclosureCanvas;
         private GameObject _failureCanvas;
+        private Text _progressBreadcrumb;
+        private Button _exitButton;
         private FirstUserGameTestAdapter _adapter;
         private FirstUserGameTestAdapterResult _verifiedResult;
         private ISaveGameService _boundIsolatedSaveService;
@@ -161,6 +175,9 @@ namespace AL.Editor.Development.FirstUserGameTest
         private FirstUserGameTestDestinationMarker _destinationMarker;
         private FirstUserGameTestTutorialPresenter _tutorialPresenter;
         private EditorGameTestModeHostDriver _driver;
+        private FirstUserGameTestPlaytestPhase _playtestPhase;
+        private bool _exitRequested;
+        private bool _technicalBannerSuppressed;
 
         internal static FirstUserGameTestRuntimeHost Active { get; private set; }
 
@@ -168,13 +185,61 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal FirstUserGameTestCustomizationPanel CustomizationPanel => _customizationPanel;
         internal FirstUserGameTestDestinationMarker DestinationMarker => _destinationMarker;
         internal FirstUserGameTestTutorialPresenter TutorialPresenter => _tutorialPresenter;
+        internal Text ProgressBreadcrumb => _progressBreadcrumb;
+        internal Button ExitButton => _exitButton;
+        internal FirstUserGameTestPlaytestPhase PlaytestPhase => _playtestPhase;
         internal string LastFailure => _lastFailure;
         internal int DestinationLoadRequestCount => _destinationLoadRequestCount;
+        internal bool ExitRequested => _exitRequested;
         internal bool ReverifyVerifiedDevelopmentBoundaryForTests() =>
             _verifiedResult != null &&
             IsDevelopmentWritable(
                 _verifiedResult.Receipt,
                 _verifiedResult.Projection);
+
+        internal bool RequestExitForTests(Action transition)
+        {
+            return TryRequestExit(transition);
+        }
+
+        internal static bool TrySuppressLegacyTechnicalBannerNow(out string message)
+        {
+            MonoBehaviour[] candidates = Resources
+                .FindObjectsOfTypeAll<MonoBehaviour>()
+                .Where(candidate =>
+                    candidate != null &&
+                    candidate.gameObject != null &&
+                    string.Equals(
+                        candidate.gameObject.name,
+                        LegacyTechnicalBannerObjectName,
+                        StringComparison.Ordinal) &&
+                    string.Equals(
+                        candidate.GetType().FullName,
+                        LegacyTechnicalBannerTypeName,
+                        StringComparison.Ordinal))
+                .ToArray();
+            if (candidates.Length == 0)
+            {
+                message = string.Empty;
+                return true;
+            }
+
+            if (candidates.Length != 1)
+            {
+                message = "The isolated Editor disclosure boundary was ambiguous.";
+                return false;
+            }
+
+            candidates[0].enabled = false;
+            if (candidates[0].enabled)
+            {
+                message = "The isolated Editor disclosure boundary could not be secured.";
+                return false;
+            }
+
+            message = string.Empty;
+            return true;
+        }
 
         internal static FirstUserGameTestRuntimeHost Install(string sessionId)
         {
@@ -285,8 +350,12 @@ namespace AL.Editor.Development.FirstUserGameTest
                 _failureCanvas = null;
             }
 
+            _progressBreadcrumb = null;
+            _exitButton = null;
             _tutorialPresenter = null;
             _destinationMarker = null;
+            _exitRequested = false;
+            _technicalBannerSuppressed = false;
 
             _initialized = false;
             if (ReferenceEquals(Active, this))
@@ -297,7 +366,12 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private void HandleTick()
         {
-            if (!_initialized || _commitInProgress)
+            if (!_initialized || _commitInProgress || _exitRequested)
+            {
+                return;
+            }
+
+            if (!TrySuppressLegacyTechnicalBanner())
             {
                 return;
             }
@@ -305,18 +379,53 @@ namespace AL.Editor.Development.FirstUserGameTest
             if (_destinationBuilt)
             {
                 _tutorialPresenter?.Tick();
+                SetPlaytestPhase(
+                    _tutorialPresenter != null &&
+                    _tutorialPresenter.State != null &&
+                    _tutorialPresenter.State.IsOmenOffered
+                        ? FirstUserGameTestPlaytestPhase.Omen
+                        : FirstUserGameTestPlaytestPhase.WorldTutorial);
+                if (IsCancelPressed())
+                {
+                    RequestExitIsolatedTest();
+                }
+
                 return;
             }
 
-            if (_customizationPanel != null && Input.GetKeyDown(KeyCode.Escape))
+            if (!IsCancelPressed())
+            {
+                return;
+            }
+
+            if (_customizationPanel != null)
             {
                 ReturnToIdentitySelection();
+                return;
             }
+
+            if (_identityPresenter != null &&
+                _identityPresenter.CurrentDraft.Step ==
+                FirstUserIdentityDraftStep.ClassFamily &&
+                _identityPresenter.ReturnToRealmButton != null &&
+                _identityPresenter.ReturnToRealmButton.interactable)
+            {
+                _identityPresenter.ReturnToRealmButton.onClick.Invoke();
+                return;
+            }
+
+            RequestExitIsolatedTest();
         }
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             if (!_initialized || !scene.IsValid() || !scene.isLoaded)
+            {
+                return;
+            }
+
+            _technicalBannerSuppressed = false;
+            if (!TrySuppressLegacyTechnicalBanner())
             {
                 return;
             }
@@ -333,6 +442,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                     EditorGameTestModeBootstrap.ExpectedBootScenePath,
                     StringComparison.Ordinal))
             {
+                SetPlaytestPhase(FirstUserGameTestPlaytestPhase.Loading);
                 if (_destinationAuthorized || _verifiedResult != null)
                 {
                     DisableBehavioursInScene<BootController>(scene);
@@ -344,6 +454,7 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             if (string.Equals(scene.path, RealmSelectionPath, StringComparison.Ordinal))
             {
+                SetPlaytestPhase(FirstUserGameTestPlaytestPhase.Identity);
                 if (_destinationAuthorized)
                 {
                     DisableBehavioursInScene<RealmSelectionController>(scene);
@@ -409,6 +520,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             }
 
             _identityPresenter.CustomizationReady += HandleCustomizationReady;
+            SetPlaytestPhase(FirstUserGameTestPlaytestPhase.Identity);
         }
 
         private void HandleCustomizationReady(FirstUserIdentityDraftSnapshot snapshot)
@@ -451,11 +563,13 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             _identityPresenter = null;
             _identityCanvas = null;
+            SetPlaytestPhase(FirstUserGameTestPlaytestPhase.AppearanceAndName);
             _customizationPanel = FirstUserGameTestCustomizationPanel.Create(
                 bodyPresets,
                 snapshot,
                 HandleCustomizationConfirmed,
-                ReturnToIdentitySelection);
+                ReturnToIdentitySelection,
+                _exitButton);
         }
 
         private void ReturnToIdentitySelection()
@@ -491,12 +605,18 @@ namespace AL.Editor.Development.FirstUserGameTest
                     out bool firstHostReady,
                     out string firstBoundaryMessage))
             {
-                _customizationPanel?.SetBusy(false, firstBoundaryMessage);
+                Debug.LogWarning(
+                    "[AL-FIRST-USER-GAME-TEST-WAITING] " + firstBoundaryMessage);
+                _customizationPanel?.SetBusy(
+                    false,
+                    FirstUserGameTestPlaytestCopy.FriendlyBlockedStatus);
                 return;
             }
 
             _commitInProgress = true;
-            _customizationPanel?.SetBusy(true, "Verifying development receipt and local projection…");
+            _customizationPanel?.SetBusy(
+                true,
+                FirstUserGameTestPlaytestCopy.PreparingWorld);
             var selection = new FirstUserGameTestSelection(
                 _sessionId,
                 _identitySnapshot,
@@ -509,10 +629,13 @@ namespace AL.Editor.Development.FirstUserGameTest
             if (!first.CanEnterIsolatedCharacterGameTest)
             {
                 _commitInProgress = false;
+                Debug.LogError(
+                    "[AL-FIRST-USER-GAME-TEST-BLOCKED] Development verification failed: " +
+                    first.Failure + " / " + first.AuthorityFailure + " / " +
+                    first.RoutePlan.Diagnostic);
                 _customizationPanel?.SetBusy(
                     false,
-                    "Development verification failed: " + first.Failure + " / " +
-                    first.AuthorityFailure + " / " + first.RoutePlan.Diagnostic);
+                    FirstUserGameTestPlaytestCopy.FriendlyBlockedStatus);
                 return;
             }
 
@@ -794,6 +917,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return;
             }
 
+            SetPlaytestPhase(FirstUserGameTestPlaytestPhase.WorldTutorial);
             var root = new GameObject(DestinationRootName);
 
             var ground = GameObject.CreatePrimitive(PrimitiveType.Plane);
@@ -898,7 +1022,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text disclosure = CreateText(
                 canvasObject.transform,
                 "IsolatedDestinationDisclosure",
-                "DEVELOPMENT GAME TEST — MEMORY ONLY — NOT PRODUCTION / NOT SAVED",
+                FirstUserGameTestPlaytestCopy.NonProductionBadge,
                 font,
                 20,
                 TextAnchor.MiddleCenter);
@@ -911,12 +1035,19 @@ namespace AL.Editor.Development.FirstUserGameTest
             disclosure.color = new Color(1f, 0.72f, 0.22f, 1f);
 
             FirstUserGameTestSelection selection = _verifiedResult.Selection;
+            if (!FirstUserGameTestPlaytestCopy.TryDescribeIdentity(
+                    selection.Identity,
+                    out string identityDescription))
+            {
+                tutorialMessage = "The friendly identity summary was unavailable.";
+                UnityEngine.Object.Destroy(canvasObject);
+                return null;
+            }
+
             Text summary = CreateText(
                 canvasObject.transform,
                 "IsolatedDestinationSummary",
-                selection.Identity.Realm + " / " + selection.Identity.Race + " / " +
-                selection.Identity.ClassFamily.Value + " / " + selection.CustomizationId +
-                " / " + selection.DevelopmentHandle,
+                identityDescription + "  •  Appearance chosen",
                 font,
                 18,
                 TextAnchor.MiddleLeft);
@@ -931,7 +1062,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text controls = CreateText(
                 canvasObject.transform,
                 "IsolatedDestinationControls",
-                "Move: W/A/S/D, arrows, controller, or touch controls    Attack: left mouse or ATTACK",
+                "Move with keys, controller, or touch  •  Use Basic Attack with the action key or on-screen button",
                 font,
                 17,
                 TextAnchor.MiddleCenter);
@@ -956,20 +1087,57 @@ namespace AL.Editor.Development.FirstUserGameTest
             }
 
             FirstUserGameTestTutorialPresenter presenter = tutorialPresenter;
-            CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveLeft", "◀", new Vector2(56f, 104f), Vector2.left);
-            CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveRight", "▶", new Vector2(168f, 104f), Vector2.right);
+            Button moveLeftButton = CreateMoveButton(
+                canvasObject.transform,
+                font,
+                controller,
+                presenter,
+                "MoveLeft",
+                "◀",
+                new Vector2(56f, 104f),
+                Vector2.left);
+            Button moveRightButton = CreateMoveButton(
+                canvasObject.transform,
+                font,
+                controller,
+                presenter,
+                "MoveRight",
+                "▶",
+                new Vector2(168f, 104f),
+                Vector2.right);
             moveForwardButton = CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveForward", "▲", new Vector2(112f, 160f), Vector2.up);
-            CreateMoveButton(canvasObject.transform, font, controller, presenter, "MoveBack", "▼", new Vector2(112f, 48f), Vector2.down);
+            Button moveBackButton = CreateMoveButton(
+                canvasObject.transform,
+                font,
+                controller,
+                presenter,
+                "MoveBack",
+                "▼",
+                new Vector2(112f, 48f),
+                Vector2.down);
 
             attackButton = CreateButton(
                 canvasObject.transform,
                 "IsolatedBasicAttack",
-                "ATTACK",
+                "Basic Attack",
                 font,
                 new Vector2(-86f, 90f),
                 new Vector2(148f, 72f),
                 new Vector2(1f, 0f));
             attackButton.onClick.AddListener(() => presenter.RequestPlayerBasicAttack());
+            ConfigureDestinationNavigation(
+                moveLeftButton,
+                moveRightButton,
+                moveForwardButton,
+                moveBackButton,
+                attackButton,
+                presenter.TitleAction,
+                presenter.ObjectiveAction,
+                _exitButton);
+            presenter.BindNavigationActions(
+                moveForwardButton,
+                attackButton,
+                _exitButton);
             return canvas;
         }
 
@@ -1143,7 +1311,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text text = CreateText(
                 _disclosureCanvas.transform,
                 "PersistentGameTestDisclosure",
-                "ISOLATED EDITOR GAME TEST — DEVELOPMENT EMULATOR — NO PRODUCTION AUTHORITY",
+                FirstUserGameTestPlaytestCopy.NonProductionBadge,
                 BuiltInFont(),
                 14,
                 TextAnchor.MiddleCenter);
@@ -1152,9 +1320,38 @@ namespace AL.Editor.Development.FirstUserGameTest
                 new Vector2(0f, 1f),
                 new Vector2(1f, 1f),
                 new Vector2(0f, 0f),
-                new Vector2(0f, 24f));
+                new Vector2(-250f, 26f));
             text.color = new Color(1f, 0.76f, 0.30f, 1f);
             text.raycastTarget = false;
+
+            _progressBreadcrumb = CreateText(
+                _disclosureCanvas.transform,
+                "FirstUserGameTestProgressBreadcrumb",
+                FirstUserGameTestPlaytestCopy.Breadcrumb(
+                    FirstUserGameTestPlaytestPhase.Loading),
+                BuiltInFont(),
+                15,
+                TextAnchor.MiddleCenter);
+            SetAnchoredRect(
+                _progressBreadcrumb.rectTransform,
+                new Vector2(0f, 1f),
+                new Vector2(1f, 1f),
+                new Vector2(-110f, -28f),
+                new Vector2(-300f, 32f));
+            _progressBreadcrumb.color = new Color(0.84f, 0.90f, 1f, 1f);
+            _progressBreadcrumb.raycastTarget = false;
+
+            _exitButton = CreateButton(
+                _disclosureCanvas.transform,
+                "ExitIsolatedTest",
+                FirstUserGameTestPlaytestCopy.ExitAction,
+                BuiltInFont(),
+                new Vector2(-16f, -8f),
+                new Vector2(214f, 52f),
+                Vector2.one);
+            _exitButton.onClick.AddListener(RequestExitIsolatedTest);
+            SetPlaytestPhase(FirstUserGameTestPlaytestPhase.Loading);
+            TrySuppressLegacyTechnicalBanner();
         }
 
         private void DestroyOwnedSelectionUi()
@@ -1191,11 +1388,11 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             if (_initialized && EditorApplication.isPlaying)
             {
-                BuildFailurePanel(_lastFailure);
+                BuildFailurePanel();
             }
         }
 
-        private void BuildFailurePanel(string message)
+        private void BuildFailurePanel()
         {
             if (_failureCanvas != null)
             {
@@ -1214,8 +1411,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text text = CreateText(
                 _failureCanvas.transform,
                 "FirstUserGameTestFailure",
-                "ISOLATED GAME TEST BLOCKED\n\n" + message +
-                "\n\nExit Play Mode. No production route or save was activated.",
+                FirstUserGameTestPlaytestCopy.FriendlyFailurePanel,
                 BuiltInFont(),
                 24,
                 TextAnchor.MiddleCenter);
@@ -1226,6 +1422,116 @@ namespace AL.Editor.Development.FirstUserGameTest
                 Vector2.zero,
                 Vector2.zero);
             text.color = new Color(1f, 0.55f, 0.42f, 1f);
+        }
+
+        private static bool IsCancelPressed()
+        {
+            return Input.GetKeyDown(KeyCode.Escape) ||
+                   Input.GetKeyDown(KeyCode.JoystickButton1);
+        }
+
+        private bool TrySuppressLegacyTechnicalBanner()
+        {
+            if (_technicalBannerSuppressed)
+            {
+                return true;
+            }
+
+            if (!TrySuppressLegacyTechnicalBannerNow(out string message))
+            {
+                FailClosed(message);
+                return false;
+            }
+
+            _technicalBannerSuppressed = true;
+            return true;
+        }
+
+        private void SetPlaytestPhase(FirstUserGameTestPlaytestPhase phase)
+        {
+            if (phase == FirstUserGameTestPlaytestPhase.Invalid)
+            {
+                phase = FirstUserGameTestPlaytestPhase.Loading;
+            }
+
+            if (_playtestPhase == phase)
+            {
+                return;
+            }
+
+            _playtestPhase = phase;
+            if (_progressBreadcrumb != null)
+            {
+                _progressBreadcrumb.text = FirstUserGameTestPlaytestCopy.Breadcrumb(phase);
+            }
+        }
+
+        private void RequestExitIsolatedTest()
+        {
+            TryRequestExit(() => EditorApplication.isPlaying = false);
+        }
+
+        private bool TryRequestExit(Action transition)
+        {
+            if (_exitRequested || transition == null)
+            {
+                return false;
+            }
+
+            _exitRequested = true;
+            if (_exitButton != null)
+            {
+                _exitButton.interactable = false;
+                Text label = _exitButton.GetComponentInChildren<Text>(true);
+                if (label != null)
+                {
+                    label.text = FirstUserGameTestPlaytestCopy.ExitingStatus;
+                }
+            }
+
+            transition();
+            return true;
+        }
+
+        private static void ConfigureDestinationNavigation(
+            Button moveLeft,
+            Button moveRight,
+            Button moveForward,
+            Button moveBack,
+            Button attack,
+            Button title,
+            Button objective,
+            Button exit)
+        {
+            SetExplicitNavigation(moveLeft, exit, moveForward, moveForward, moveBack);
+            SetExplicitNavigation(moveForward, moveLeft, moveRight, exit, moveBack);
+            SetExplicitNavigation(moveRight, moveForward, exit, exit, moveBack);
+            SetExplicitNavigation(moveBack, moveLeft, moveRight, moveForward, attack);
+            SetExplicitNavigation(attack, moveBack, exit, moveBack, exit);
+            SetExplicitNavigation(title, moveForward, exit, exit, objective);
+            SetExplicitNavigation(objective, moveForward, exit, title, attack);
+            SetExplicitNavigation(exit, attack, moveLeft, objective, moveForward);
+        }
+
+        internal static void SetExplicitNavigation(
+            Selectable selectable,
+            Selectable left,
+            Selectable right,
+            Selectable up,
+            Selectable down)
+        {
+            if (selectable == null)
+            {
+                return;
+            }
+
+            Navigation navigation = selectable.navigation;
+            navigation.mode = Navigation.Mode.Explicit;
+            navigation.selectOnLeft = left;
+            navigation.selectOnRight = right;
+            navigation.selectOnUp = up;
+            navigation.selectOnDown = down;
+            selectable.navigation = navigation;
         }
 
         private static int DisableBehavioursInScene<T>(Scene scene) where T : Behaviour
@@ -1358,16 +1664,21 @@ namespace AL.Editor.Development.FirstUserGameTest
         private InputField _handleInput;
         private Text _status;
         private Button _confirmButton;
+        private Button _backButton;
 
         internal string SelectedCustomizationId => _selectedId;
         internal InputField HandleInput => _handleInput;
         internal Button ConfirmButton => _confirmButton;
+        internal Button BackButton => _backButton;
+        internal Text Status => _status;
+        internal IReadOnlyList<Button> ChoiceButtons => _choiceButtons;
 
         internal static FirstUserGameTestCustomizationPanel Create(
             IReadOnlyList<BodyPresetData> bodyPresets,
             FirstUserIdentityDraftSnapshot identity,
             Action<string, string> confirmed,
-            Action back)
+            Action back,
+            Button exitButton)
         {
             var canvasObject = new GameObject(
                 FirstUserGameTestRuntimeHost.CustomizationCanvasName,
@@ -1385,7 +1696,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             scaler.matchWidthOrHeight = 0.5f;
 
             var panel = canvasObject.AddComponent<FirstUserGameTestCustomizationPanel>();
-            panel.Build(bodyPresets, identity, confirmed, back);
+            panel.Build(bodyPresets, identity, confirmed, back, exitButton);
             return panel;
         }
 
@@ -1393,7 +1704,8 @@ namespace AL.Editor.Development.FirstUserGameTest
             IReadOnlyList<BodyPresetData> bodyPresets,
             FirstUserIdentityDraftSnapshot identity,
             Action<string, string> confirmed,
-            Action back)
+            Action back,
+            Button exitButton)
         {
             _confirmed = confirmed ?? throw new ArgumentNullException(nameof(confirmed));
             _back = back ?? throw new ArgumentNullException(nameof(back));
@@ -1413,7 +1725,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text disclosure = FirstUserGameTestRuntimeHost.CreateText(
                 transform,
                 "CustomizationDisclosure",
-                "DEVELOPMENT GAME TEST — SESSION ONLY — NO PRODUCTION USERNAME OR SAVE",
+                FirstUserGameTestPlaytestCopy.NonProductionBadge,
                 font,
                 18,
                 TextAnchor.MiddleCenter);
@@ -1428,7 +1740,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text heading = FirstUserGameTestRuntimeHost.CreateText(
                 transform,
                 "CustomizationHeading",
-                "Choose a cosmetic body preset",
+                FirstUserGameTestPlaytestCopy.AppearanceHeading,
                 font,
                 30,
                 TextAnchor.MiddleCenter);
@@ -1439,10 +1751,19 @@ namespace AL.Editor.Development.FirstUserGameTest
                 Vector2.zero,
                 Vector2.zero);
 
+            if (!FirstUserGameTestPlaytestCopy.TryDescribeIdentity(
+                    identity,
+                    out string identityDescription))
+            {
+                throw new ArgumentException(
+                    "A supported identity draft is required.",
+                    nameof(identity));
+            }
+
             Text identitySummary = FirstUserGameTestRuntimeHost.CreateText(
                 transform,
                 "IdentitySummary",
-                identity.Realm + " → " + identity.Race + " • " + identity.ClassFamily.Value,
+                identityDescription,
                 font,
                 20,
                 TextAnchor.MiddleCenter);
@@ -1519,7 +1840,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Text placeholder = FirstUserGameTestRuntimeHost.CreateText(
                 inputObject.transform,
                 "DevelopmentHandlePlaceholder",
-                "Development handle (transport-only, not reserved)",
+                FirstUserGameTestPlaytestCopy.NamePlaceholder,
                 font,
                 18,
                 TextAnchor.MiddleLeft);
@@ -1539,7 +1860,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             _status = FirstUserGameTestRuntimeHost.CreateText(
                 transform,
                 "DevelopmentAuthorityStatus",
-                "Select a cosmetic preset and enter a development handle.",
+                FirstUserGameTestPlaytestCopy.AppearancePrompt,
                 font,
                 17,
                 TextAnchor.MiddleCenter);
@@ -1550,7 +1871,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 Vector2.zero,
                 Vector2.zero);
 
-            Button backButton = FirstUserGameTestRuntimeHost.CreateButton(
+            _backButton = FirstUserGameTestRuntimeHost.CreateButton(
                 transform,
                 "BackToRealmAndClass",
                 "Back",
@@ -1558,17 +1879,18 @@ namespace AL.Editor.Development.FirstUserGameTest
                 new Vector2(30f, 34f),
                 new Vector2(170f, 58f),
                 Vector2.zero);
-            backButton.onClick.AddListener(() => _back());
+            _backButton.onClick.AddListener(() => _back());
 
             _confirmButton = FirstUserGameTestRuntimeHost.CreateButton(
                 transform,
                 "VerifyDevelopmentHandle",
-                "Verify & Enter Isolated Test",
+                "Continue to World Tutorial",
                 font,
                 new Vector2(-30f, 34f),
                 new Vector2(300f, 58f),
                 new Vector2(1f, 0f));
             _confirmButton.onClick.AddListener(Confirm);
+            ConfigureNavigation(exitButton);
             Refresh();
 
             if (_choiceButtons.Count > 0 && EventSystem.current != null)
@@ -1620,10 +1942,54 @@ namespace AL.Editor.Development.FirstUserGameTest
             bool canConfirm = CanConfirm();
             _confirmButton.interactable = canConfirm;
             _status.text = string.IsNullOrEmpty(_selectedId)
-                ? "Choose one catalog-backed cosmetic preset."
+                ? FirstUserGameTestPlaytestCopy.AppearanceRequired
                 : !FirstUserGameTestAdapter.IsValidDevelopmentHandle(_handleInput.text)
-                    ? "Enter a 1–32 code-unit / 64-byte development handle without boundary whitespace or controls."
-                    : "Ready to verify a DEVELOPMENT_EMULATOR_V1 receipt and local projection.";
+                    ? FirstUserGameTestPlaytestCopy.NameRequired
+                    : FirstUserGameTestPlaytestCopy.ReadyForTutorial;
+        }
+
+        private void ConfigureNavigation(Button exitButton)
+        {
+            for (int index = 0; index < _choiceButtons.Count; index++)
+            {
+                Button current = _choiceButtons[index];
+                Button previous = index > 0 ? _choiceButtons[index - 1] : _backButton;
+                Button next = index + 1 < _choiceButtons.Count
+                    ? _choiceButtons[index + 1]
+                    : _confirmButton;
+                FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                    current,
+                    previous,
+                    next,
+                    exitButton,
+                    _handleInput);
+            }
+
+            Selectable firstChoice = _choiceButtons.Count > 0 ? _choiceButtons[0] : _backButton;
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                _handleInput,
+                _backButton,
+                _confirmButton,
+                firstChoice,
+                _confirmButton);
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                _backButton,
+                exitButton,
+                _confirmButton,
+                _handleInput,
+                exitButton);
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                _confirmButton,
+                _backButton,
+                exitButton,
+                _handleInput,
+                exitButton);
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                exitButton,
+                _confirmButton,
+                firstChoice,
+                _backButton,
+                firstChoice);
         }
 
         private bool CanConfirm()
