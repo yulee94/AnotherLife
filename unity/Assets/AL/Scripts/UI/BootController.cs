@@ -33,6 +33,7 @@ namespace AL.UI
         private Button _retryButton;
         private int _readyFrame = -1;
         private int _focusedGeneration;
+        private Button _focusedAction;
         private bool _submitArmed;
         private int _lastScreenWidth = -1;
         private int _lastScreenHeight = -1;
@@ -84,6 +85,7 @@ namespace AL.UI
             _submitArmed = false;
             _readyFrame = -1;
             _focusedGeneration = 0;
+            _focusedAction = null;
         }
 
         private void OnDestroy()
@@ -248,7 +250,7 @@ namespace AL.UI
             }
             else if (failed && snapshot.RetryAllowed)
             {
-                _readyFrame = -1;
+                _readyFrame = Time.frameCount;
                 _submitArmed = false;
                 FocusCurrentAction(snapshot.AttemptGeneration, _retryButton);
             }
@@ -256,26 +258,53 @@ namespace AL.UI
             {
                 _readyFrame = -1;
                 _submitArmed = false;
+                ClearFocusedAction();
             }
         }
 
         private void FocusCurrentAction(int generation, Button button)
         {
-            if (button == null ||
-                EventSystem.current == null ||
-                _focusedGeneration == generation)
+            if (button == null)
+            {
+                return;
+            }
+
+            bool alreadyFocused =
+                _focusedGeneration == generation &&
+                _focusedAction == button;
+            _focusedGeneration = generation;
+            _focusedAction = button;
+
+            if (EventSystem.current == null ||
+                (alreadyFocused &&
+                 EventSystem.current.currentSelectedGameObject == button.gameObject))
             {
                 return;
             }
 
             EventSystem.current.SetSelectedGameObject(button.gameObject);
-            _focusedGeneration = generation;
+        }
+
+        private void ClearFocusedAction()
+        {
+            if (_focusedAction != null &&
+                EventSystem.current != null &&
+                EventSystem.current.currentSelectedGameObject == _focusedAction.gameObject)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            _focusedAction = null;
         }
 
         private void PollExplicitSubmit()
         {
             LaunchReadinessSnapshot snapshot = _readiness.Snapshot;
-            if (!snapshot.CanContinue || Time.frameCount <= _readyFrame)
+            bool canContinue = snapshot.CanContinue;
+            bool canRetry =
+                snapshot.State == LaunchReadinessState.Failed &&
+                snapshot.RetryAllowed;
+            if ((!canContinue && !canRetry) || Time.frameCount <= _readyFrame)
             {
                 return;
             }
@@ -295,7 +324,14 @@ namespace AL.UI
                 Input.GetKeyDown(KeyCode.Space) ||
                 Input.GetButtonDown("Submit"))
             {
-                OnContinueRequested();
+                if (canContinue)
+                {
+                    OnContinueRequested();
+                }
+                else
+                {
+                    OnRetryRequested();
+                }
             }
         }
 
@@ -361,7 +397,7 @@ namespace AL.UI
 
         private void OnRetryRequested()
         {
-            if (_readiness == null)
+            if (_readiness == null || Time.frameCount <= _readyFrame)
             {
                 return;
             }
@@ -376,6 +412,7 @@ namespace AL.UI
             _bootReceipt = null;
             _catalogReceipt = null;
             _focusedGeneration = 0;
+            _focusedAction = null;
             _launchLifecycle = new LaunchCinematicLifecycle();
             _launchLifecycle.MarkPreparing();
             _launchLifecycle.FailToFallback("approved-media-unavailable");
@@ -560,9 +597,13 @@ namespace AL.UI
             switch (snapshot.Failure)
             {
                 case LaunchReadinessFailure.RequiredCatalogUnavailable:
-                    return "Realm choices could not be loaded. Retry this launch check.";
+                    return snapshot.RetryAllowed
+                        ? "Realm choices could not be loaded. Retry this launch check."
+                        : "Realm choices could not be loaded. Restart the game.";
                 case LaunchReadinessFailure.DestinationUnavailable:
-                    return "Character setup is unavailable. Retry this launch check.";
+                    return snapshot.RetryAllowed
+                        ? "Character setup is unavailable. Retry this launch check."
+                        : "Character setup is unavailable. Restart the game.";
                 case LaunchReadinessFailure.RetryLimitReached:
                     return "Launch could not recover after several attempts. Restart the game.";
                 case LaunchReadinessFailure.EvidenceStale:

@@ -1,6 +1,10 @@
+using System.Reflection;
 using AL.Core.Interfaces;
 using AL.UI;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace AL.Tests.EditMode
 {
@@ -152,6 +156,73 @@ namespace AL.Tests.EditMode
                 Is.EqualTo(LaunchReadinessState.Failed));
             Assert.That(coordinator.Snapshot.RetryAllowed, Is.True);
             Assert.That(coordinator.TryBeginRetry(), Is.True);
+        }
+
+        [Test]
+        public void SameGenerationFailureReplacesTrackedActionWithRetry()
+        {
+            var eventSystemObject = new GameObject("LaunchTestEventSystem");
+            var controllerObject = new GameObject("LaunchTestController");
+            var continueObject = new GameObject("LaunchTestContinue");
+            var retryObject = new GameObject("LaunchTestRetry");
+
+            try
+            {
+                eventSystemObject.AddComponent<EventSystem>();
+                var controller = controllerObject.AddComponent<BootController>();
+                var continueButton = continueObject.AddComponent<Button>();
+                var retryButton = retryObject.AddComponent<Button>();
+                MethodInfo focus = typeof(BootController).GetMethod(
+                    "FocusCurrentAction",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+                FieldInfo focusedAction = typeof(BootController).GetField(
+                    "_focusedAction",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+
+                Assert.That(focus, Is.Not.Null);
+                Assert.That(focusedAction, Is.Not.Null);
+                focus.Invoke(controller, new object[] { 7, continueButton });
+                Assert.That(
+                    focusedAction.GetValue(controller),
+                    Is.SameAs(continueButton));
+
+                focus.Invoke(controller, new object[] { 7, retryButton });
+                Assert.That(
+                    focusedAction.GetValue(controller),
+                    Is.SameAs(retryButton));
+            }
+            finally
+            {
+                Object.DestroyImmediate(retryObject);
+                Object.DestroyImmediate(continueObject);
+                Object.DestroyImmediate(controllerObject);
+                Object.DestroyImmediate(eventSystemObject);
+            }
+        }
+
+        [Test]
+        public void ExhaustedDestinationFailureCopyDoesNotOfferUnavailableRetry()
+        {
+            var coordinator = ReadyCoordinator();
+            int generation = coordinator.AttemptGeneration;
+            Assert.That(coordinator.TryBeginTransition(generation), Is.True);
+            Assert.That(
+                coordinator.TryFailTransition(
+                    generation,
+                    LaunchReadinessFailure.DestinationUnavailable,
+                    retryAllowed: false),
+                Is.True);
+
+            MethodInfo detailFor = typeof(BootController).GetMethod(
+                "DetailFor",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.That(detailFor, Is.Not.Null);
+            var detail = (string)detailFor.Invoke(
+                null,
+                new object[] { coordinator.Snapshot });
+
+            Assert.That(detail, Does.Contain("Restart"));
+            Assert.That(detail, Does.Not.Contain("Retry"));
         }
 
         private static LaunchReadinessCoordinator ReadyCoordinator()
