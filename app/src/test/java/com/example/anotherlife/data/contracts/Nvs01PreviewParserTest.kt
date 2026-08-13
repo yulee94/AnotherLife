@@ -1,6 +1,7 @@
 package com.example.anotherlife.data.contracts
 
 import java.io.File
+import java.security.MessageDigest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertThrows
@@ -33,6 +34,24 @@ class Nvs01PreviewParserTest {
         assertEquals(QuestPreviewRole.ReadOnlyCatalog, preview.role)
         assertFalse(preview.hasAuthoritativeProgress)
         assertFalse(preview.hasRuntimeActions)
+    }
+
+    @Test
+    fun canonicalCatalogPinsV004HashAndRemovesKingdomCommandAuthority() {
+        val bytes = canonicalCatalog.toByteArray(Charsets.UTF_8)
+        val hash = MessageDigest.getInstance("SHA-256")
+            .digest(bytes)
+            .joinToString("") { byte -> "%02x".format(byte) }
+
+        assertEquals(8_247, bytes.size)
+        assertEquals(EXPECTED_NVS01_CATALOG_SHA256, hash)
+        assertTrue(
+            canonicalCatalog.contains(
+                "\"completionDestination\": \"CH1_REALM_INTRO\""
+            )
+        )
+        assertTrue(canonicalCatalog.contains("\"id\":\"CH1_REALM_INTRO\""))
+        assertFalse(canonicalCatalog.contains("KINGDOM_COMMAND_VIEW"))
     }
 
     @Test
