@@ -3,6 +3,7 @@
     "rootNamespace": "AL.Tests.EditMode.FirstUserGameTest",
     "references": [
         "AL.Runtime",
+        "AL.Editor",
         "AL.Development.OnboardingAuthority.Emulator",
         "AL.Development.FirstUserGameTest.Editor"
     ],

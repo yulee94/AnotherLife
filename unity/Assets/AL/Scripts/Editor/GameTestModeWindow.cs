@@ -1,11 +1,14 @@
 #if UNITY_EDITOR
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 using AL.Core.Scenes;
 using AL.Development;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+
+[assembly: InternalsVisibleTo("AL.Development.FirstUserGameTest.Editor.Tests")]
 
 namespace AL.EditorTools
 {
@@ -31,6 +34,194 @@ namespace AL.EditorTools
         internal const string ReloadInterrupted = "AL.GameTestMode.ReloadInterrupted";
         internal const string LastStatus = "AL.GameTestMode.LastStatus";
         internal const string LastRoot = "AL.GameTestMode.LastRoot";
+    }
+
+    internal readonly struct GameTestModeControlPanelView
+    {
+        internal GameTestModeControlPanelView(
+            string currentState,
+            string blocker,
+            string primaryAction,
+            bool primaryActionEnabled)
+        {
+            CurrentState = currentState ?? string.Empty;
+            Blocker = blocker ?? string.Empty;
+            PrimaryAction = primaryAction ?? string.Empty;
+            PrimaryActionEnabled = primaryActionEnabled;
+        }
+
+        internal string CurrentState { get; }
+        internal string Blocker { get; }
+        internal string PrimaryAction { get; }
+        internal bool PrimaryActionEnabled { get; }
+    }
+
+    internal static class GameTestModeControlPanelPresentation
+    {
+        internal const string StartAction = "Start First User Experience";
+        internal const string StopAction = "Stop & Clean Up Safely";
+        internal const string CleanupAction = "Clean Up Previous Isolated Test";
+        internal const string ForgetAction =
+            "Forget Invalid Recovery Record (Delete No Files)";
+        internal const string JourneyChecklist =
+            "1. Loading\n" +
+            "2. Identity\n" +
+            "3. Appearance & Name\n" +
+            "4. World Tutorial\n" +
+            "5. OMEN";
+        internal const string StartControlName = "AL.FirstUserExperience.Start";
+        internal const string StopControlName = "AL.FirstUserExperience.Stop";
+        internal const string CleanupControlName = "AL.FirstUserExperience.Cleanup";
+        internal const string ForgetControlName = "AL.FirstUserExperience.Forget";
+
+        internal static GameTestModeControlPanelView Build(
+            bool sessionActive,
+            bool recoveryPending,
+            bool invalidRecoveryRecord,
+            bool playModeActive,
+            bool canStart,
+            string rawStatus,
+            string rawBlocker)
+        {
+            _ = rawStatus;
+            if (invalidRecoveryRecord)
+            {
+                return new GameTestModeControlPanelView(
+                    "Safe cleanup needs attention.",
+                    "A previous isolated test record is unreadable. Forgetting this record removes project-scoped Editor metadata only and deletes no files.",
+                    ForgetAction,
+                    !playModeActive);
+            }
+
+            if (sessionActive)
+            {
+                return new GameTestModeControlPanelView(
+                    "The First User Experience is running.",
+                    "Use Exit Isolated Test in the playtest, or stop and clean up safely here.",
+                    StopAction,
+                    true);
+            }
+
+            if (recoveryPending)
+            {
+                return new GameTestModeControlPanelView(
+                    "A previous isolated test is waiting for cleanup.",
+                    "Clean up the isolated session before starting again. Your normal save remains untouched.",
+                    CleanupAction,
+                    !playModeActive);
+            }
+
+            if (playModeActive)
+            {
+                return new GameTestModeControlPanelView(
+                    "Another Unity Play session is running.",
+                    "Stop the current Play session before starting this experience.",
+                    StartAction,
+                    false);
+            }
+
+            if (canStart)
+            {
+                return new GameTestModeControlPanelView(
+                    "Ready to begin.",
+                    string.Empty,
+                    StartAction,
+                    true);
+            }
+
+            return new GameTestModeControlPanelView(
+                "Start is temporarily unavailable.",
+                FriendlyBlocker(rawBlocker),
+                StartAction,
+                false);
+        }
+
+        private static string FriendlyBlocker(string rawBlocker)
+        {
+            if (string.IsNullOrWhiteSpace(rawBlocker))
+            {
+                return "Wait for the Unity Editor to become ready, then try again.";
+            }
+
+            if (rawBlocker.IndexOf("compil", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Scripts are still compiling. Start will unlock when compilation finishes.";
+            }
+
+            if (rawBlocker.IndexOf("Asset Database", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Project assets are still updating. Start will unlock when the update finishes.";
+            }
+
+            if (rawBlocker.IndexOf("Play Mode", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Stop the current Play session before starting this experience.";
+            }
+
+            if (rawBlocker.IndexOf("reload", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Enable full Domain Reload and Scene Reload in the Editor before starting.";
+            }
+
+            if (rawBlocker.IndexOf("Boot", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "The required launch scene is unavailable. Review the Console before continuing.";
+            }
+
+            if (rawBlocker.IndexOf("session", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                rawBlocker.IndexOf("recover", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                rawBlocker.IndexOf("clean", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return "Clean up the previous isolated test before starting again.";
+            }
+
+            return "The isolated playtest is not ready. Review the Console, then try again.";
+        }
+    }
+
+    internal sealed class GameTestModeControlPanelCommandGate
+    {
+        private bool _commandIssued;
+
+        internal bool TryStart(Func<bool> start)
+        {
+            if (_commandIssued || start == null)
+            {
+                return false;
+            }
+
+            _commandIssued = true;
+            bool started = false;
+            try
+            {
+                started = start();
+                return started;
+            }
+            finally
+            {
+                if (!started)
+                {
+                    _commandIssued = false;
+                }
+            }
+        }
+
+        internal bool TryCleanUp(Action cleanUp)
+        {
+            if (_commandIssued || cleanUp == null)
+            {
+                return false;
+            }
+
+            _commandIssued = true;
+            cleanUp();
+            return true;
+        }
+
+        internal void Reset()
+        {
+            _commandIssued = false;
+        }
     }
 
     [InitializeOnLoad]
@@ -980,12 +1171,16 @@ namespace AL.EditorTools
     {
         private const string WindowTitle = "AL Test Mode";
         private static GameTestModeWindow _openWindow;
+        private readonly GameTestModeControlPanelCommandGate _commandGate =
+            new GameTestModeControlPanelCommandGate();
+        private string _lastPrimaryControl = string.Empty;
+        private bool _initialFocusPending = true;
 
         [MenuItem("Another Life/Test Mode/Control Panel", priority = 1)]
         private static void Open()
         {
             _openWindow = GetWindow<GameTestModeWindow>(utility: false, title: WindowTitle, focus: true);
-            _openWindow.minSize = new Vector2(440f, 300f);
+            _openWindow.minSize = new Vector2(500f, 480f);
         }
 
         internal static void RepaintOpenWindow()
@@ -999,6 +1194,7 @@ namespace AL.EditorTools
         private void OnEnable()
         {
             _openWindow = this;
+            _initialFocusPending = true;
             EditorApplication.update -= Repaint;
             EditorApplication.update += Repaint;
         }
@@ -1014,76 +1210,137 @@ namespace AL.EditorTools
 
         private void OnGUI()
         {
+            bool invalidRecovery = GameTestModeEditorCoordinator.HasInvalidDurableRecoveryRecord;
+            bool sessionActive = GameTestModeEditorCoordinator.IsSessionActive;
+            bool recoveryPending = GameTestModeEditorCoordinator.IsRecoveryPending;
+            bool playModeActive = EditorApplication.isPlayingOrWillChangePlaymode;
+            bool canStart = GameTestModeEditorCoordinator.CanStart(out string rawBlocker);
+            GameTestModeControlPanelView view = GameTestModeControlPanelPresentation.Build(
+                sessionActive,
+                recoveryPending,
+                invalidRecovery,
+                playModeActive,
+                canStart,
+                GameTestModeEditorCoordinator.CurrentStatus,
+                rawBlocker);
+
+            if (!sessionActive && !recoveryPending)
+            {
+                _commandGate.Reset();
+            }
+
             EditorGUILayout.Space(10f);
-            EditorGUILayout.LabelField("Another Life — Isolated Game Test Mode", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Another Life — First User Experience", EditorStyles.boldLabel);
             EditorGUILayout.Space(4f);
             EditorGUILayout.HelpBox(
-                "Starts the production Boot scene with a new GUID-owned profile under the system temp folder. It never moves, replaces, or opens your normal Another Life save root.",
+                "Runs a temporary, isolated Editor playtest. It never opens, replaces, or deletes your normal Another Life save.",
                 MessageType.Info);
             EditorGUILayout.HelpBox(
-                "This exercises what is currently built. It is not release, cinematic, device, balance, or visual-approval evidence.",
+                "DEVELOPMENT PLAYTEST — NOT PRODUCTION — SESSION ONLY",
                 MessageType.Warning);
 
             EditorGUILayout.Space(8f);
-            EditorGUILayout.LabelField("Status", EditorStyles.boldLabel);
-            EditorGUILayout.SelectableLabel(
-                GameTestModeEditorCoordinator.CurrentStatus,
-                EditorStyles.textArea,
-                GUILayout.MinHeight(58f));
+            EditorGUILayout.LabelField("Journey", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(
+                GameTestModeControlPanelPresentation.JourneyChecklist,
+                MessageType.None);
 
-            string lastRoot = GameTestModeEditorCoordinator.LastRoot;
-            if (!string.IsNullOrWhiteSpace(lastRoot))
+            EditorGUILayout.Space(6f);
+            EditorGUILayout.LabelField("Current state", EditorStyles.boldLabel);
+            EditorGUILayout.HelpBox(view.CurrentState, MessageType.Info);
+            if (!string.IsNullOrEmpty(view.Blocker))
             {
-                EditorGUILayout.LabelField("Last isolated root", EditorStyles.miniBoldLabel);
-                EditorGUILayout.SelectableLabel(lastRoot, EditorStyles.textField, GUILayout.Height(20f));
+                EditorGUILayout.HelpBox(view.Blocker, MessageType.Warning);
             }
 
             GUILayout.FlexibleSpace();
-            if (GameTestModeEditorCoordinator.HasInvalidDurableRecoveryRecord &&
-                !EditorApplication.isPlayingOrWillChangePlaymode)
+            string primaryControl;
+            if (invalidRecovery)
             {
-                EditorGUILayout.HelpBox(
-                    "The retained recovery record is malformed. You may forget only that project-scoped record; this action deletes no file or directory.",
-                    MessageType.Error);
+                primaryControl = GameTestModeControlPanelPresentation.ForgetControlName;
+                GUI.SetNextControlName(primaryControl);
+                GUI.enabled = view.PrimaryActionEnabled;
                 if (GUILayout.Button(
-                        "Forget Invalid Record — Delete No Files",
-                        GUILayout.Height(40f)))
+                        GameTestModeControlPanelPresentation.ForgetAction,
+                        GUILayout.Height(52f)))
                 {
-                    GameTestModeEditorCoordinator
-                        .ForgetInvalidRecoveryRecordWithoutDeletingFiles();
+                    _commandGate.TryCleanUp(
+                        GameTestModeEditorCoordinator
+                            .ForgetInvalidRecoveryRecordWithoutDeletingFiles);
                 }
+
+                GUI.enabled = true;
             }
-            else if (GameTestModeEditorCoordinator.IsSessionActive ||
-                GameTestModeEditorCoordinator.IsRecoveryPending)
+            else if (sessionActive || recoveryPending)
             {
-                string action = EditorApplication.isPlayingOrWillChangePlaymode
-                    ? "Stop Isolated Test"
-                    : "Recover / Clean Up Isolated Session";
-                if (GUILayout.Button(action, GUILayout.Height(40f)))
+                bool running = sessionActive;
+                primaryControl = running
+                    ? GameTestModeControlPanelPresentation.StopControlName
+                    : GameTestModeControlPanelPresentation.CleanupControlName;
+                GUI.SetNextControlName(primaryControl);
+                GUI.enabled = view.PrimaryActionEnabled;
+                string action = running
+                    ? GameTestModeControlPanelPresentation.StopAction
+                    : GameTestModeControlPanelPresentation.CleanupAction;
+                if (GUILayout.Button(action, GUILayout.Height(52f)))
                 {
-                    GameTestModeEditorCoordinator.StopActiveSession();
+                    _commandGate.TryCleanUp(GameTestModeEditorCoordinator.StopActiveSession);
                 }
+
+                GUI.enabled = true;
             }
             else
             {
-                bool canStart = GameTestModeEditorCoordinator.CanStart(out string blocker);
-                GUI.enabled = canStart;
-                if (GUILayout.Button("Fresh First User (Isolated)", GUILayout.Height(44f)))
+                primaryControl = GameTestModeControlPanelPresentation.StartControlName;
+                GUI.SetNextControlName(primaryControl);
+                GUI.enabled = view.PrimaryActionEnabled;
+                if (GUILayout.Button(
+                        GameTestModeControlPanelPresentation.StartAction,
+                        GUILayout.Height(58f)))
                 {
-                    if (!GameTestModeEditorCoordinator.TryStartFreshFirstUser(out string message))
+                    string message = string.Empty;
+                    if (!_commandGate.TryStart(() =>
+                            GameTestModeEditorCoordinator.TryStartFreshFirstUser(out message)) &&
+                        !string.IsNullOrWhiteSpace(message))
                     {
-                        EditorUtility.DisplayDialog("Another Life Test Mode", message, "Close");
+                        EditorUtility.DisplayDialog(
+                            "Another Life Test Mode",
+                            GameTestModeControlPanelPresentation.Build(
+                                false,
+                                false,
+                                false,
+                                false,
+                                false,
+                                string.Empty,
+                                message).Blocker,
+                            "Close");
                     }
                 }
 
                 GUI.enabled = true;
-                if (!canStart)
-                {
-                    EditorGUILayout.HelpBox(blocker, MessageType.Error);
-                }
             }
 
+            ApplyInitialFocus(primaryControl);
+
             EditorGUILayout.Space(8f);
+        }
+
+        private void ApplyInitialFocus(string primaryControl)
+        {
+            if (!string.Equals(
+                    _lastPrimaryControl,
+                    primaryControl,
+                    StringComparison.Ordinal))
+            {
+                _lastPrimaryControl = primaryControl;
+                _initialFocusPending = true;
+            }
+
+            if (_initialFocusPending && Event.current.type == EventType.Repaint)
+            {
+                GUI.FocusControl(primaryControl);
+                _initialFocusPending = false;
+            }
         }
     }
 }

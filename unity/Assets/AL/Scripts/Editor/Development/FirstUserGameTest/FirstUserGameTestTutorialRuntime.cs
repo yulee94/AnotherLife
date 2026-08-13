@@ -297,11 +297,16 @@ namespace AL.Editor.Development.FirstUserGameTest
         private Text _titleLabel;
         private Text _objectiveLabel;
         private Text _detail;
+        private Button _moveAction;
+        private Button _attackAction;
+        private Button _exitAction;
         private bool _movementIntentPending;
         private Vector3 _movementOrigin;
         private bool _mouseAttackPending;
         private bool _followTargetAvailable = true;
         private bool _offeredFocusApplied;
+        private bool _moveFocusApplied;
+        private bool _attackFocusApplied;
         private bool _championInputSuppressed;
         private bool _failed;
         private FirstUserGameTestFollowResult _lastFollowResult;
@@ -313,6 +318,23 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal FirstUserGameTestFollowResult LastFollowResult => _lastFollowResult;
         internal bool ChampionInputSuppressed => _championInputSuppressed;
         internal bool MovementIntentPendingForTests => _movementIntentPending;
+
+        internal void BindNavigationActions(
+            Button moveAction,
+            Button attackAction,
+            Button exitAction)
+        {
+            _moveAction = moveAction;
+            _attackAction = attackAction;
+            _exitAction = exitAction;
+            if (_moveAction == null || _attackAction == null || _exitAction == null)
+            {
+                FailClosed("The isolated tutorial navigation boundary was incomplete.");
+                return;
+            }
+
+            TryFocusCurrentStep();
+        }
 
         internal static bool TryCreate(
             Transform parent,
@@ -565,13 +587,12 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             if (_lastFollowResult.Outcome == FirstUserGameTestFollowOutcome.Focused)
             {
-                _detail.text =
-                    "Development-only offer detail is focused. Nothing was accepted, moved, or rewarded.";
+                _detail.text = FirstUserGameTestPlaytestCopy.OmenFocusDetail;
                 EventSystem.current?.SetSelectedGameObject(_objectiveAction.gameObject);
             }
             else if (_lastFollowResult.Outcome == FirstUserGameTestFollowOutcome.NoTarget)
             {
-                _detail.text = "No safe development detail target is available.";
+                _detail.text = FirstUserGameTestPlaytestCopy.NoSafeTargetDetail;
             }
 
             if (!before.ValueEquals(_state) ||
@@ -717,30 +738,32 @@ namespace AL.Editor.Development.FirstUserGameTest
             _objectiveAction.interactable = offeredReady;
             if (_state == null)
             {
-                _titleLabel.text = "DEVELOPMENT TUTORIAL — UNAVAILABLE";
-                _objectiveLabel.text = "Objective unavailable";
-                _detail.text = "The isolated tutorial state is unavailable.";
+                _titleLabel.text = "First Steps";
+                _objectiveLabel.text = "Tutorial unavailable";
+                _detail.text = "Exit the isolated playtest and review the Console.";
                 return;
             }
 
             switch (_state.Step)
             {
                 case FirstUserGameTestTutorialStep.Move:
-                    _titleLabel.text = "DEVELOPMENT TUTORIAL — NONPRODUCTION";
-                    _objectiveLabel.text = "MOVE — move the character";
-                    _detail.text = "Use player movement input. Elapsed time cannot complete this step.";
+                    _titleLabel.text = FirstUserGameTestPlaytestCopy.MoveTitle;
+                    _objectiveLabel.text = FirstUserGameTestPlaytestCopy.MoveObjective;
+                    _detail.text = FirstUserGameTestPlaytestCopy.MoveDetail;
+                    TryFocusCurrentStep();
                     break;
                 case FirstUserGameTestTutorialStep.BasicAttack:
-                    _titleLabel.text = "DEVELOPMENT TUTORIAL — NONPRODUCTION";
-                    _objectiveLabel.text = "BASIC ATTACK — submit one common attack";
-                    _detail.text = "A hit, target, damage, kill, or reward is not required.";
+                    _titleLabel.text = FirstUserGameTestPlaytestCopy.AttackTitle;
+                    _objectiveLabel.text = FirstUserGameTestPlaytestCopy.AttackObjective;
+                    _detail.text = FirstUserGameTestPlaytestCopy.AttackDetail;
+                    TryFocusCurrentStep();
                     break;
                 case FirstUserGameTestTutorialStep.Complete:
-                    _titleLabel.text = "DEVELOPMENT MAIN QUEST OFFER";
-                    _objectiveLabel.text = "Review the offered objective";
+                    _titleLabel.text = FirstUserGameTestPlaytestCopy.OmenTitle;
+                    _objectiveLabel.text = FirstUserGameTestPlaytestCopy.OmenObjective;
                     _detail.text = offeredReady
-                        ? "Offered only — not accepted, progressed, completed, or rewarded."
-                        : "Finishing the accepted tutorial attack before enabling the offer controls.";
+                        ? FirstUserGameTestPlaytestCopy.OmenDetail
+                        : "Preparing the quest preview…";
                     if (offeredReady && !_offeredFocusApplied && EventSystem.current != null)
                     {
                         EventSystem.current.SetSelectedGameObject(_titleAction.gameObject);
@@ -751,6 +774,29 @@ namespace AL.Editor.Development.FirstUserGameTest
                 default:
                     FailClosed("The development tutorial step was invalid.");
                     break;
+            }
+        }
+
+        private void TryFocusCurrentStep()
+        {
+            if (_state == null || EventSystem.current == null)
+            {
+                return;
+            }
+
+            if (_state.Step == FirstUserGameTestTutorialStep.Move &&
+                !_moveFocusApplied && _moveAction != null && _moveAction.interactable)
+            {
+                EventSystem.current.SetSelectedGameObject(_moveAction.gameObject);
+                _moveFocusApplied = true;
+                return;
+            }
+
+            if (_state.Step == FirstUserGameTestTutorialStep.BasicAttack &&
+                !_attackFocusApplied && _attackAction != null && _attackAction.interactable)
+            {
+                EventSystem.current.SetSelectedGameObject(_attackAction.gameObject);
+                _attackFocusApplied = true;
             }
         }
 
@@ -784,6 +830,9 @@ namespace AL.Editor.Development.FirstUserGameTest
             _store = null;
             _failClosed = null;
             _state = null;
+            _moveAction = null;
+            _attackAction = null;
+            _exitAction = null;
         }
     }
 }
