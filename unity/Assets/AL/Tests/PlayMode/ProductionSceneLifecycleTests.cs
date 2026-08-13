@@ -27,8 +27,8 @@ namespace AL.Tests.PlayMode
     /// determinism (distinct per-scene owner ids, single live owner each step).
     ///
     /// The scene controllers are quiesced in the sceneLoaded callback (which runs after Awake/OnEnable but
-    /// before Start): disabling the controller prevents BootController's name-based auto-transition and the
-    /// heavy Kingdom/ChampionArena world build, leaving the Bootloader owner and startup marker intact.
+    /// before Start): disabling the controller prevents interactive scene work and the heavy
+    /// Kingdom/ChampionArena world build, leaving the Bootloader owner and startup marker intact.
     ///
     /// Isolation: the offline save service is replaced with an in-memory controllable double via the
     /// OfflineServiceStack save-factory seam, so NO developer profile is read or written (decision D5).
@@ -198,15 +198,49 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator BootAutomaticallyReachesRealmSelectionWithReadyCatalogAndFourControls()
+        public IEnumerator BootWaitsForExplicitContinueThenReachesRealmSelectionWithFourControls()
         {
 #if !UNITY_EDITOR
             Assert.Ignore("Production scene transition test drives editor path-based PlayMode loads.");
             yield break;
 #else
+            SeedCurrentSave();
             _quiesceSceneControllers = false;
             yield return LoadAndSettle(BootPath);
 
+            float readyStarted = Time.realtimeSinceStartup;
+            Button continueButton = null;
+            while (continueButton == null ||
+                   !continueButton.gameObject.activeInHierarchy ||
+                   !continueButton.interactable)
+            {
+                if (Time.realtimeSinceStartup - readyStarted > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("Boot did not expose the truthful Finished Loading action.");
+                }
+
+                GameObject canvas = GameObject.Find("LaunchReadinessCanvas");
+                continueButton = canvas == null
+                    ? null
+                    : canvas.GetComponentsInChildren<Button>(true)
+                        .FirstOrDefault(button => button.name == "FinishedLoadingAction");
+                yield return null;
+            }
+
+            Assert.That(
+                SceneManager.GetActiveScene().path,
+                Is.EqualTo(BootPath),
+                "Readiness must never auto-route without a fresh explicit action.");
+            Text status = GameObject.Find("LaunchReadinessCanvas")
+                .GetComponentsInChildren<Text>(true)
+                .FirstOrDefault(text => text.name == "ReadinessStatus");
+            Assert.That(status, Is.Not.Null);
+            Assert.That(status.text, Is.EqualTo("Finished Loading"));
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(BootPath));
+
+            continueButton.onClick.Invoke();
+            continueButton.onClick.Invoke();
             float transitionStarted = Time.realtimeSinceStartup;
             while (!string.Equals(
                        SceneManager.GetActiveScene().path,
@@ -215,7 +249,7 @@ namespace AL.Tests.PlayMode
             {
                 if (Time.realtimeSinceStartup - transitionStarted > LoadTimeoutSeconds)
                 {
-                    Assert.Fail("Boot did not transition to the canonical RealmSelection scene.");
+                    Assert.Fail("Explicit Continue did not transition to RealmSelection.");
                 }
 
                 yield return null;
@@ -282,7 +316,7 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
-        public IEnumerator BootWithCommittedRealmInitializesKingdomCameraUiAndRefreshWithoutExceptions()
+        public IEnumerator BootWithCommittedRealmStillRequiresContinueAndCannotBypassOnboarding()
         {
 #if !UNITY_EDITOR
             Assert.Ignore("Production scene transition test drives editor path-based PlayMode loads.");
@@ -301,69 +335,62 @@ namespace AL.Tests.PlayMode
             _quiesceSceneControllers = false;
             yield return LoadAndSettle(BootPath);
 
+            float readyStarted = Time.realtimeSinceStartup;
+            Button continueButton = null;
+            while (continueButton == null ||
+                   !continueButton.gameObject.activeInHierarchy ||
+                   !continueButton.interactable)
+            {
+                if (Time.realtimeSinceStartup - readyStarted > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("Committed realm profile did not reach the explicit launch gate.");
+                }
+
+                GameObject canvas = GameObject.Find("LaunchReadinessCanvas");
+                continueButton = canvas == null
+                    ? null
+                    : canvas.GetComponentsInChildren<Button>(true)
+                        .FirstOrDefault(button => button.name == "FinishedLoadingAction");
+                yield return null;
+            }
+
+            Assert.That(
+                SceneManager.GetActiveScene().path,
+                Is.EqualTo(BootPath),
+                "A committed realm is not authority to bypass the explicit launch action.");
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(BootPath));
+
+            continueButton.onClick.Invoke();
             float transitionStarted = Time.realtimeSinceStartup;
             while (!string.Equals(
                        SceneManager.GetActiveScene().path,
-                       KingdomPath,
+                       RealmSelectionPath,
                        StringComparison.Ordinal))
             {
                 if (Time.realtimeSinceStartup - transitionStarted > LoadTimeoutSeconds)
                 {
-                    Assert.Fail("Boot did not transition to the canonical Kingdom scene for a committed realm.");
+                    Assert.Fail("Committed realm profile did not route to the remaining onboarding boundary.");
                 }
 
                 yield return null;
             }
 
-            // Let KingdomSceneController.Start construct its world/UI and enter the steady-state loop.
-            yield return null;
-            yield return null;
-
-            KingdomSceneController controller = Object.FindObjectOfType<KingdomSceneController>();
-            Assert.That(controller, Is.Not.Null);
-            Assert.That(controller.isActiveAndEnabled, Is.True);
             Assert.That(
-                InstanceField(controller, "_runtimeInitialized"),
-                Is.EqualTo(true),
-                "Kingdom must publish its runtime-ready latch only after camera and UI construction complete.");
-
-            GameObject canvas = GameObject.Find("KingdomCanvas");
-            Assert.That(canvas, Is.Not.Null);
-            Assert.That(canvas.scene, Is.EqualTo(SceneManager.GetActiveScene()));
+                Object.FindObjectOfType<RealmSelectionController>(),
+                Is.Not.Null,
+                "Realm-only evidence must route to onboarding, never Kingdom.");
             Assert.That(
-                canvas.GetComponentsInChildren<Text>(true).Any(text => text.name == "RealmText"),
-                Is.True,
-                "The realm command header must exist after Kingdom initialization.");
-
-            Camera[] kingdomCameras = Camera.allCameras
-                .Where(camera =>
-                    camera != null &&
-                    camera.isActiveAndEnabled &&
-                    camera.gameObject.scene == SceneManager.GetActiveScene() &&
-                    camera.targetTexture == null &&
-                    camera.targetDisplay == 0)
-                .ToArray();
-            Assert.That(kingdomCameras, Has.Length.EqualTo(1));
-            Assert.That(kingdomCameras[0].orthographic, Is.True);
-
-            long initialRefresh = (long)InstanceField(controller, "_lastLiveRefreshTimestamp");
-            float refreshStarted = Time.realtimeSinceStartup;
-            while ((long)InstanceField(controller, "_lastLiveRefreshTimestamp") <= initialRefresh)
-            {
-                if (Time.realtimeSinceStartup - refreshStarted > 3f)
-                {
-                    Assert.Fail("Kingdom did not complete its first periodic live refresh.");
-                }
-
-                yield return null;
-            }
+                Object.FindObjectOfType<KingdomSceneController>(),
+                Is.Null,
+                "Kingdom must not activate from realm-only evidence.");
 
             var unexpected = _logs.Errors
                 .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
                 .ToList();
             Assert.IsEmpty(
                 unexpected,
-                "Kingdom initialization/refresh emitted unexpected severe logs:\n" +
+                "Realm-only launch containment emitted unexpected severe logs:\n" +
                 string.Join("\n", unexpected));
 #endif
         }
@@ -534,6 +561,15 @@ namespace AL.Tests.PlayMode
             _controllableSave.GetType()
                 .GetMethod("SeedCurrentSave", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
                 .Invoke(_controllableSave, null);
+
+            object save = InstanceField(_controllableSave, "_currentSave");
+            Type saveType = save.GetType();
+            saveType.GetField("SaveFormatId", BindingFlags.Instance | BindingFlags.Public)
+                .SetValue(save, "anotherlife.local-save");
+            saveType.GetField("SaveSchemaVersion", BindingFlags.Instance | BindingFlags.Public)
+                .SetValue(save, 1);
+            saveType.GetField("ProfileInitializationVersion", BindingFlags.Instance | BindingFlags.Public)
+                .SetValue(save, 1);
         }
 
         private static object GetMarker()
