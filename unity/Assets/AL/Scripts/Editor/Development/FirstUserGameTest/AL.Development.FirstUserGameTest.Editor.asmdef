@@ -1,0 +1,22 @@
+{
+    "name": "AL.Development.FirstUserGameTest.Editor",
+    "rootNamespace": "AL.Editor.Development.FirstUserGameTest",
+    "references": [
+        "AL.Runtime",
+        "AL.SaveAuthority",
+        "AL.Development.OnboardingAuthority.Emulator"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [
+        "UNITY_EDITOR"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

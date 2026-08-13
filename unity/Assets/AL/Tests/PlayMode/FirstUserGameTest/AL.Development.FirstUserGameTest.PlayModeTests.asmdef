@@ -1,0 +1,25 @@
+{
+    "name": "AL.Development.FirstUserGameTest.PlayModeTests",
+    "rootNamespace": "AL.Tests.PlayMode.FirstUserGameTest",
+    "references": [
+        "AL.Runtime",
+        "AL.SaveAuthority",
+        "AL.Development.OnboardingAuthority.Emulator",
+        "AL.Development.FirstUserGameTest.Editor"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_EDITOR",
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false,
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ]
+}
