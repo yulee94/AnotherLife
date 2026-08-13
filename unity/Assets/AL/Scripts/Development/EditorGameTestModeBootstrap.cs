@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -41,10 +42,42 @@ namespace AL.Development
         RegisteredSaveServiceMismatch,
         OfflineStackMarkerMissing,
         OfflineStackMarkerMismatch,
+        OfflineStackLoadIncomplete,
+        FreshProfileLoadInvalid,
+        CurrentSaveMissing,
+        DurableRecoveryRecordMissing,
+        DurableRecoveryRecordInvalid,
         CleanupWhileArmed,
         CleanupInventoryTooLarge,
         CleanupInventoryChanged,
         CleanupFailed
+    }
+
+    public enum EditorGameTestModeRecoveryStage
+    {
+        Starting,
+        Running,
+        Recovery
+    }
+
+    public readonly struct EditorGameTestModeRecoveryRecord
+    {
+        public EditorGameTestModeRecoveryRecord(
+            EditorGameTestModePlan plan,
+            EditorGameTestModeRecoveryStage stage,
+            string previousStartSceneGuid,
+            bool previousStartSceneWasNull)
+        {
+            Plan = plan;
+            Stage = stage;
+            PreviousStartSceneGuid = previousStartSceneGuid ?? string.Empty;
+            PreviousStartSceneWasNull = previousStartSceneWasNull;
+        }
+
+        public EditorGameTestModePlan Plan { get; }
+        public EditorGameTestModeRecoveryStage Stage { get; }
+        public string PreviousStartSceneGuid { get; }
+        public bool PreviousStartSceneWasNull { get; }
     }
 
     public readonly struct EditorGameTestModePlan
@@ -81,6 +114,7 @@ namespace AL.Development
     public static class EditorGameTestModeBootstrap
     {
         public const string ContractVersion = "al.editor.game-test-mode.v1";
+        public const string RecoveryContractVersion = "al.editor.game-test-mode.recovery.v1";
         public const string MarkerFileName = ".anotherlife-isolated-game-test";
         public const string TemporaryProductFolder = "AnotherLife";
         public const string TemporaryModeFolder = "GameTestMode";
@@ -96,12 +130,17 @@ namespace AL.Development
         public const string SessionFullDomainReloadKey = "AL.GameTestMode.FullDomainReload";
         public const string SessionFullSceneReloadKey = "AL.GameTestMode.FullSceneReload";
 
+        private const string RecoveryHeader = "ANOTHER_LIFE_ISOLATED_GAME_TEST_RECOVERY";
+        private const string RecoveryPreferencePrefix = "AL.GameTestMode.DurableRecovery.";
+
         private const int MaximumCleanupEntries = 256;
         private static readonly object Sync = new object();
         private static readonly StringComparison PathComparison =
             RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
                 ? StringComparison.OrdinalIgnoreCase
                 : StringComparison.Ordinal;
+        private static readonly string ProjectRecoveryPreferenceKey =
+            RecoveryPreferencePrefix + ComputeProjectIdentityToken();
 
         private static EditorGameTestModePlan _activePlan;
         private static bool _armed;
@@ -110,6 +149,7 @@ namespace AL.Development
         private static ISaveGameService _createdSaveService;
         private static GameObject _bannerObject;
         private static string _lastFailure = string.Empty;
+        private static string _recoveryPreferenceKeyOverrideForTests = string.Empty;
 
         public static bool IsArmed
         {
@@ -155,11 +195,337 @@ namespace AL.Development
             }
         }
 
+        public static string DurableRecoveryPreferenceKey =>
+            string.IsNullOrEmpty(_recoveryPreferenceKeyOverrideForTests)
+                ? ProjectRecoveryPreferenceKey
+                : _recoveryPreferenceKeyOverrideForTests;
+
+        public static bool HasDurableRecoveryRecord =>
+            EditorPrefs.HasKey(DurableRecoveryPreferenceKey);
+
+        internal static void SetDurableRecoveryPreferenceKeyOverrideForTests(string key)
+        {
+            const string requiredPrefix = "AL.GameTestMode.Tests.";
+            if (string.IsNullOrWhiteSpace(key) ||
+                !key.StartsWith(requiredPrefix, StringComparison.Ordinal) ||
+                key.Length > 128)
+            {
+                throw new ArgumentException(
+                    "The test recovery preference key must use the bounded AL.GameTestMode.Tests namespace.",
+                    nameof(key));
+            }
+
+            _recoveryPreferenceKeyOverrideForTests = key;
+        }
+
+        internal static void ClearDurableRecoveryPreferenceKeyOverrideForTests()
+        {
+            _recoveryPreferenceKeyOverrideForTests = string.Empty;
+        }
+
         public static string BuildMarkerContents(string sessionId)
         {
             return "ANOTHER_LIFE_ISOLATED_GAME_TEST\n" +
                 ContractVersion + "\n" +
                 (sessionId ?? string.Empty) + "\n";
+        }
+
+        public static bool TryWriteDurableRecoveryRecord(
+            EditorGameTestModeRecoveryRecord record,
+            out EditorGameTestModeFailure failure,
+            out string message)
+        {
+            EditorGameTestModePlan source = record.Plan;
+            if (!TryCreatePlan(
+                    source.SessionId,
+                    source.SystemTemporaryRoot,
+                    source.PersistentDataRoot,
+                    source.IsolatedSaveRoot,
+                    source.BootScenePath,
+                    source.BootSceneGuid,
+                    fullDomainReload: true,
+                    fullSceneReload: true,
+                    out EditorGameTestModePlan rebound,
+                    out failure,
+                    out message))
+            {
+                return false;
+            }
+
+            if (!string.Equals(rebound.SessionId, source.SessionId, StringComparison.Ordinal) ||
+                !string.Equals(rebound.IsolatedSaveRoot, source.IsolatedSaveRoot, PathComparison))
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The recovery record is not bound to the current project environment.",
+                    out failure,
+                    out message);
+            }
+
+            if (record.PreviousStartSceneWasNull)
+            {
+                if (!string.IsNullOrEmpty(record.PreviousStartSceneGuid))
+                {
+                    return Fail(
+                        EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                        "A null prior start scene cannot carry an asset GUID.",
+                        out failure,
+                        out message);
+                }
+            }
+            else if (!IsCanonicalAssetGuid(record.PreviousStartSceneGuid))
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The prior Play Mode start-scene GUID is invalid.",
+                    out failure,
+                    out message);
+            }
+
+            if (EditorPrefs.HasKey(DurableRecoveryPreferenceKey))
+            {
+                if (!TryReadDurableRecoveryRecord(
+                        out EditorGameTestModeRecoveryRecord existing,
+                        out _,
+                        out string existingMessage))
+                {
+                    return Fail(
+                        EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                        "An invalid durable recovery record already exists and was not overwritten: " +
+                        existingMessage,
+                        out failure,
+                        out message);
+                }
+
+                if (!string.Equals(
+                        existing.Plan.SessionId,
+                        record.Plan.SessionId,
+                        StringComparison.Ordinal))
+                {
+                    return Fail(
+                        EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                        "A different isolated session already owns the durable recovery record.",
+                        out failure,
+                        out message);
+                }
+            }
+
+            try
+            {
+                EditorPrefs.SetString(
+                    DurableRecoveryPreferenceKey,
+                    BuildDurableRecoveryContents(record));
+                failure = EditorGameTestModeFailure.None;
+                message = string.Empty;
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The project-scoped recovery record could not be written: " + ex.Message,
+                    out failure,
+                    out message);
+            }
+        }
+
+        public static bool TryReadDurableRecoveryRecord(
+            out EditorGameTestModeRecoveryRecord record,
+            out EditorGameTestModeFailure failure,
+            out string message)
+        {
+            record = default;
+            string preferenceKey = DurableRecoveryPreferenceKey;
+            if (!EditorPrefs.HasKey(preferenceKey))
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordMissing,
+                    "No project-scoped isolated test recovery record exists.",
+                    out failure,
+                    out message);
+            }
+
+            string encoded;
+            try
+            {
+                encoded = EditorPrefs.GetString(preferenceKey, string.Empty);
+            }
+            catch (Exception ex)
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The project-scoped recovery record could not be read: " + ex.Message,
+                    out failure,
+                    out message);
+            }
+
+            if (string.IsNullOrEmpty(encoded) || encoded.Length > 512 || encoded.IndexOf('\r') >= 0)
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The project-scoped recovery record has an invalid byte shape.",
+                    out failure,
+                    out message);
+            }
+
+            string[] lines = encoded.Split(new[] { '\n' }, StringSplitOptions.None);
+            if (lines.Length != 8 ||
+                !string.Equals(lines[0], RecoveryHeader, StringComparison.Ordinal) ||
+                !string.Equals(lines[1], RecoveryContractVersion, StringComparison.Ordinal) ||
+                !string.IsNullOrEmpty(lines[7]) ||
+                !IsCanonicalSessionId(lines[2]))
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The project-scoped recovery record is malformed or unsupported.",
+                    out failure,
+                    out message);
+            }
+
+            EditorGameTestModeRecoveryStage stage;
+            switch (lines[3])
+            {
+                case "starting":
+                    stage = EditorGameTestModeRecoveryStage.Starting;
+                    break;
+                case "running":
+                    stage = EditorGameTestModeRecoveryStage.Running;
+                    break;
+                case "recovery":
+                    stage = EditorGameTestModeRecoveryStage.Recovery;
+                    break;
+                default:
+                    return Fail(
+                        EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                        "The project-scoped recovery record has an invalid lifecycle stage.",
+                        out failure,
+                        out message);
+            }
+
+            bool previousWasNull;
+            if (string.Equals(lines[4], "null", StringComparison.Ordinal))
+            {
+                previousWasNull = true;
+                if (!string.IsNullOrEmpty(lines[5]))
+                {
+                    return Fail(
+                        EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                        "The project-scoped recovery record has contradictory start-scene data.",
+                        out failure,
+                        out message);
+                }
+            }
+            else if (string.Equals(lines[4], "guid", StringComparison.Ordinal) &&
+                     IsCanonicalAssetGuid(lines[5]))
+            {
+                previousWasNull = false;
+            }
+            else
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The project-scoped recovery record has invalid start-scene data.",
+                    out failure,
+                    out message);
+            }
+
+            string temporaryRoot = lines[6];
+            if (string.IsNullOrWhiteSpace(temporaryRoot))
+            {
+                return Fail(
+                    EditorGameTestModeFailure.DurableRecoveryRecordInvalid,
+                    "The project-scoped recovery record does not include a temporary root.",
+                    out failure,
+                    out message);
+            }
+
+            string isolatedRoot = BuildExpectedIsolatedRoot(temporaryRoot, lines[2]);
+            if (!TryCreatePlan(
+                    lines[2],
+                    temporaryRoot,
+                    Application.persistentDataPath,
+                    isolatedRoot,
+                    ExpectedBootScenePath,
+                    ExpectedBootSceneGuid,
+                    fullDomainReload: true,
+                    fullSceneReload: true,
+                    out EditorGameTestModePlan plan,
+                    out failure,
+                    out message))
+            {
+                return false;
+            }
+
+            record = new EditorGameTestModeRecoveryRecord(
+                plan,
+                stage,
+                lines[5],
+                previousWasNull);
+            failure = EditorGameTestModeFailure.None;
+            message = string.Empty;
+            return true;
+        }
+
+        public static bool TryUpdateDurableRecoveryStage(
+            string expectedSessionId,
+            EditorGameTestModeRecoveryStage stage,
+            out string message)
+        {
+            if (!TryReadDurableRecoveryRecord(
+                    out EditorGameTestModeRecoveryRecord record,
+                    out _,
+                    out message) ||
+                !string.Equals(record.Plan.SessionId, expectedSessionId, StringComparison.Ordinal))
+            {
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = "The recovery record did not belong to the active isolated session.";
+                }
+
+                return false;
+            }
+
+            return TryWriteDurableRecoveryRecord(
+                new EditorGameTestModeRecoveryRecord(
+                    record.Plan,
+                    stage,
+                    record.PreviousStartSceneGuid,
+                    record.PreviousStartSceneWasNull),
+                out _,
+                out message);
+        }
+
+        public static bool TryClearDurableRecoveryRecord(
+            string expectedSessionId,
+            out string message)
+        {
+            message = string.Empty;
+            if (!EditorPrefs.HasKey(DurableRecoveryPreferenceKey))
+            {
+                return true;
+            }
+
+            if (!TryReadDurableRecoveryRecord(
+                    out EditorGameTestModeRecoveryRecord record,
+                    out _,
+                    out message) ||
+                !string.Equals(record.Plan.SessionId, expectedSessionId, StringComparison.Ordinal))
+            {
+                if (string.IsNullOrWhiteSpace(message))
+                {
+                    message = "The durable record was retained because its session did not match.";
+                }
+
+                return false;
+            }
+
+            EditorPrefs.DeleteKey(DurableRecoveryPreferenceKey);
+            return true;
+        }
+
+        public static void ForgetInvalidDurableRecoveryRecordWithoutDeletingFiles()
+        {
+            EditorPrefs.DeleteKey(DurableRecoveryPreferenceKey);
         }
 
         public static string BuildExpectedIsolatedRoot(string systemTemporaryRoot, string sessionId)
@@ -698,6 +1064,34 @@ namespace AL.Development
                         out message);
                 }
 
+                if (marker.LoadState != OfflineStackLoadState.Succeeded)
+                {
+                    return FailAndRemember(
+                        EditorGameTestModeFailure.OfflineStackLoadIncomplete,
+                        "Production Boot has not completed the isolated save load.",
+                        out failure,
+                        out message);
+                }
+
+                if (_createdSaveService.LastLoadStatus != SaveLoadStatus.CreatedNew)
+                {
+                    return FailAndRemember(
+                        EditorGameTestModeFailure.FreshProfileLoadInvalid,
+                        "The isolated fresh root did not produce an exact CreatedNew load.",
+                        out failure,
+                        out message);
+                }
+
+                var currentSave = _createdSaveService.CurrentSave;
+                if (currentSave == null || currentSave.SelectedRealm != RealmId.None)
+                {
+                    return FailAndRemember(
+                        EditorGameTestModeFailure.CurrentSaveMissing,
+                        "The isolated load did not publish a fresh realm-unselected current save.",
+                        out failure,
+                        out message);
+                }
+
                 failure = EditorGameTestModeFailure.None;
                 message = string.Empty;
                 return true;
@@ -909,6 +1303,47 @@ namespace AL.Development
                         ? "Isolation could not be proven before scene Awake."
                         : diagnostic);
                 EnsureBannerNoLock(blocked: true);
+            }
+        }
+
+        public static void FailClosedForLifecycleBoundary(string trigger)
+        {
+            string sessionId;
+            string diagnostic;
+            lock (Sync)
+            {
+                if (!_armed)
+                {
+                    return;
+                }
+
+                sessionId = _activePlan.SessionId;
+                bool runtimeValid = TryVerifyActiveRuntime(out _, out string validationMessage);
+                diagnostic = (string.IsNullOrWhiteSpace(trigger)
+                    ? "An editor lifecycle boundary"
+                    : trigger) + " stopped the isolated session before it could continue in the background.";
+                if (!runtimeValid && !string.IsNullOrWhiteSpace(validationMessage))
+                {
+                    diagnostic += " Isolation validation: " + validationMessage;
+                }
+
+                InstallThrowingFactoryNoLock(diagnostic);
+                BlockBootloadersBeforeAwakeNoLock();
+                EnsureBannerNoLock(blocked: true);
+            }
+
+            if (IsCanonicalSessionId(sessionId))
+            {
+                TryUpdateDurableRecoveryStage(
+                    sessionId,
+                    EditorGameTestModeRecoveryStage.Recovery,
+                    out _);
+            }
+
+            Debug.LogError("[AL-ISOLATED-TEST-BLOCKED] " + diagnostic);
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                EditorApplication.isPlaying = false;
             }
         }
 
@@ -1380,6 +1815,92 @@ namespace AL.Development
                 parsed != Guid.Empty;
         }
 
+        private static bool IsCanonicalAssetGuid(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value.Length != 32)
+            {
+                return false;
+            }
+
+            int nonZero = 0;
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                bool decimalDigit = character >= '0' && character <= '9';
+                bool lowerHex = character >= 'a' && character <= 'f';
+                if (!decimalDigit && !lowerHex)
+                {
+                    return false;
+                }
+
+                nonZero |= character == '0' ? 0 : 1;
+            }
+
+            return nonZero != 0;
+        }
+
+        private static string BuildDurableRecoveryContents(
+            EditorGameTestModeRecoveryRecord record)
+        {
+            string stage;
+            switch (record.Stage)
+            {
+                case EditorGameTestModeRecoveryStage.Starting:
+                    stage = "starting";
+                    break;
+                case EditorGameTestModeRecoveryStage.Running:
+                    stage = "running";
+                    break;
+                case EditorGameTestModeRecoveryStage.Recovery:
+                    stage = "recovery";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(record));
+            }
+
+            return RecoveryHeader + "\n" +
+                RecoveryContractVersion + "\n" +
+                record.Plan.SessionId + "\n" +
+                stage + "\n" +
+                (record.PreviousStartSceneWasNull ? "null" : "guid") + "\n" +
+                record.PreviousStartSceneGuid + "\n" +
+                record.Plan.SystemTemporaryRoot + "\n";
+        }
+
+        private static string ComputeProjectIdentityToken()
+        {
+            string projectPath;
+            try
+            {
+                projectPath = Path.GetFullPath(Application.dataPath)
+                    .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+            }
+            catch
+            {
+                projectPath = Application.dataPath ?? string.Empty;
+            }
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                projectPath = projectPath.ToUpperInvariant();
+            }
+
+            byte[] digest;
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                digest = sha256.ComputeHash(Encoding.UTF8.GetBytes(projectPath));
+            }
+
+            var builder = new StringBuilder(digest.Length * 2);
+            foreach (byte value in digest)
+            {
+                builder.Append(value.ToString("x2"));
+            }
+
+            return builder.ToString();
+        }
+
         private static bool BytesEqual(byte[] first, byte[] second)
         {
             if (first == null || second == null || first.Length != second.Length)
@@ -1478,6 +1999,24 @@ namespace AL.Development
             _label = blocked
                 ? "ISOLATED TEST MODE BLOCKED • REAL SAVES NOT USED • " + diagnostic
                 : "ISOLATED GAME TEST MODE • TEMP PROFILE • NOT RELEASE EVIDENCE • " + shortSession;
+        }
+
+        private void OnApplicationFocus(bool hasFocus)
+        {
+            if (!hasFocus && !_blocked)
+            {
+                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
+                    "Editor focus loss");
+            }
+        }
+
+        private void OnApplicationPause(bool pauseStatus)
+        {
+            if (pauseStatus && !_blocked)
+            {
+                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
+                    "Application pause");
+            }
         }
 
         private void OnGUI()

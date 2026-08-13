@@ -24,6 +24,11 @@ namespace AL.EditorTools
         internal const string PreviousStartSceneGuid = "AL.GameTestMode.PreviousStartSceneGuid";
         internal const string PreviousStartSceneWasNull = "AL.GameTestMode.PreviousStartSceneWasNull";
         internal const string RecoveryPending = "AL.GameTestMode.RecoveryPending";
+        internal const string TransitioningToPlay = "AL.GameTestMode.TransitioningToPlay";
+        internal const string PreAwakeRearmCompleted =
+            "AL.GameTestMode.PreAwakeRearmCompleted";
+        internal const string Stopping = "AL.GameTestMode.Stopping";
+        internal const string ReloadInterrupted = "AL.GameTestMode.ReloadInterrupted";
         internal const string LastStatus = "AL.GameTestMode.LastStatus";
         internal const string LastRoot = "AL.GameTestMode.LastRoot";
     }
@@ -37,6 +42,13 @@ namespace AL.EditorTools
         {
             EditorApplication.playModeStateChanged -= HandlePlayModeStateChanged;
             EditorApplication.playModeStateChanged += HandlePlayModeStateChanged;
+            AssemblyReloadEvents.beforeAssemblyReload -= HandleBeforeAssemblyReload;
+            AssemblyReloadEvents.beforeAssemblyReload += HandleBeforeAssemblyReload;
+            EditorApplication.focusChanged -= HandleEditorFocusChanged;
+            EditorApplication.focusChanged += HandleEditorFocusChanged;
+            EditorApplication.pauseStateChanged -= HandleEditorPauseStateChanged;
+            EditorApplication.pauseStateChanged += HandleEditorPauseStateChanged;
+            RecoverDurableRecordAfterEditorRestart();
             EditorApplication.delayCall += RecoverOrVerifyAfterReload;
         }
 
@@ -44,15 +56,46 @@ namespace AL.EditorTools
             SessionState.GetBool(GameTestModeSessionKeys.Active, false);
 
         internal static bool IsRecoveryPending =>
-            SessionState.GetBool(GameTestModeSessionKeys.RecoveryPending, false);
+            SessionState.GetBool(GameTestModeSessionKeys.RecoveryPending, false) ||
+            EditorGameTestModeBootstrap.HasDurableRecoveryRecord;
+
+        internal static bool HasInvalidDurableRecoveryRecord
+        {
+            get
+            {
+                return EditorGameTestModeBootstrap.HasDurableRecoveryRecord &&
+                       !EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                           out _,
+                           out _,
+                           out _);
+            }
+        }
 
         internal static string CurrentStatus =>
             SessionState.GetString(
                 GameTestModeSessionKeys.LastStatus,
                 "Ready for an isolated fresh-profile run.");
 
-        internal static string LastRoot =>
-            SessionState.GetString(GameTestModeSessionKeys.LastRoot, string.Empty);
+        internal static string LastRoot
+        {
+            get
+            {
+                string sessionRoot = SessionState.GetString(
+                    GameTestModeSessionKeys.LastRoot,
+                    string.Empty);
+                if (!string.IsNullOrWhiteSpace(sessionRoot))
+                {
+                    return sessionRoot;
+                }
+
+                return EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                        out EditorGameTestModeRecoveryRecord record,
+                        out _,
+                        out _)
+                    ? record.Plan.IsolatedSaveRoot
+                    : string.Empty;
+            }
+        }
 
         [MenuItem(MenuRoot + "Fresh First User (Isolated)", priority = 10)]
         private static void StartFreshFromMenu()
@@ -95,7 +138,12 @@ namespace AL.EditorTools
                     FailClosedAndAbort(
                         expectedSession,
                         "Isolation could not be re-armed before Play Mode: " + message);
+                    return;
                 }
+
+                SessionState.SetBool(
+                    GameTestModeSessionKeys.PreAwakeRearmCompleted,
+                    true);
             }
             catch (Exception ex)
             {
@@ -199,10 +247,25 @@ namespace AL.EditorTools
             string priorStartSceneGuid = string.IsNullOrEmpty(priorStartScenePath)
                 ? string.Empty
                 : AssetDatabase.AssetPathToGUID(priorStartScenePath);
-            bool rootCreated = false;
+            var recoveryRecord = new EditorGameTestModeRecoveryRecord(
+                plan,
+                EditorGameTestModeRecoveryStage.Starting,
+                priorStartSceneGuid,
+                priorStartSceneWasNull);
+            if (!EditorGameTestModeBootstrap.TryWriteDurableRecoveryRecord(
+                    recoveryRecord,
+                    out _,
+                    out message))
+            {
+                SetStatus(message);
+                return false;
+            }
+
+            bool rootMayExist = false;
 
             try
             {
+                rootMayExist = true;
                 if (!EditorGameTestModeBootstrap.TryCreateOwnedRoot(
                         plan,
                         out _,
@@ -210,8 +273,6 @@ namespace AL.EditorTools
                 {
                     throw new InvalidOperationException(message);
                 }
-
-                rootCreated = true;
 
                 if (!EditorGameTestModeBootstrap.TryArm(plan, out _, out message))
                 {
@@ -225,6 +286,11 @@ namespace AL.EditorTools
                     priorStartSceneWasNull);
                 EditorSceneManager.playModeStartScene = bootScene;
                 SetStatus("Starting fresh isolated profile " + plan.SessionId.Substring(0, 8) + "…");
+                SessionState.SetBool(GameTestModeSessionKeys.TransitioningToPlay, true);
+                SessionState.EraseBool(
+                    GameTestModeSessionKeys.PreAwakeRearmCompleted);
+                SessionState.EraseBool(GameTestModeSessionKeys.Stopping);
+                SessionState.EraseBool(GameTestModeSessionKeys.ReloadInterrupted);
                 EditorApplication.isPlaying = true;
                 message = string.Empty;
                 return true;
@@ -234,16 +300,21 @@ namespace AL.EditorTools
                 EditorGameTestModeBootstrap.Disarm();
                 EditorSceneManager.playModeStartScene = priorStartScene;
 
-                if (rootCreated &&
+                if (rootMayExist && Directory.Exists(plan.IsolatedSaveRoot) &&
                     !EditorGameTestModeBootstrap.TryDeleteOwnedRoot(plan, out _, out string cleanupMessage))
                 {
-                    WriteRecoveryPlan(plan);
+                    WriteRecoveryPlan(
+                        plan,
+                        priorStartSceneGuid,
+                        priorStartSceneWasNull);
                     SessionState.SetString(GameTestModeSessionKeys.LastRoot, plan.IsolatedSaveRoot);
                     message = ex.Message + " " + cleanupMessage;
                 }
                 else
                 {
-                    ClearActiveSession(retainRecoveryPlan: false);
+                    ClearActiveSession(
+                        retainRecoveryPlan: false,
+                        expectedSessionId: plan.SessionId);
                     message = ex.Message;
                 }
 
@@ -286,10 +357,55 @@ namespace AL.EditorTools
             return IsSessionActive || IsRecoveryPending;
         }
 
+        [MenuItem(
+            MenuRoot + "Forget Invalid Recovery Record (Delete No Files)",
+            priority = 21)]
+        private static void ForgetInvalidRecoveryRecordFromMenu()
+        {
+            ForgetInvalidRecoveryRecordWithoutDeletingFiles();
+        }
+
+        [MenuItem(
+            MenuRoot + "Forget Invalid Recovery Record (Delete No Files)",
+            validate = true)]
+        private static bool ValidateForgetInvalidRecoveryRecordFromMenu()
+        {
+            return HasInvalidDurableRecoveryRecord &&
+                   !EditorApplication.isPlayingOrWillChangePlaymode;
+        }
+
+        internal static void ForgetInvalidRecoveryRecordWithoutDeletingFiles()
+        {
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                SetStatus(
+                    "Exit Play Mode before forgetting an invalid recovery record. No files were changed.");
+                return;
+            }
+
+            if (!HasInvalidDurableRecoveryRecord)
+            {
+                SetStatus("No invalid isolated-test recovery record was found.");
+                return;
+            }
+
+            EditorGameTestModeBootstrap.ForgetInvalidDurableRecoveryRecordWithoutDeletingFiles();
+            ClearActiveSession(retainRecoveryPlan: false, expectedSessionId: string.Empty);
+            SetStatus(
+                "The invalid project-scoped recovery record was forgotten. No file or directory was deleted.");
+        }
+
         private static void HandlePlayModeStateChanged(PlayModeStateChange state)
         {
             if (!IsSessionActive)
             {
+                if (state == PlayModeStateChange.ExitingEditMode && IsRecoveryPending)
+                {
+                    SetStatus(
+                        "Play Mode was blocked because an isolated-test recovery record still requires recovery or an explicit no-file-delete forget action.");
+                    EditorApplication.isPlaying = false;
+                }
+
                 return;
             }
 
@@ -304,6 +420,7 @@ namespace AL.EditorTools
                     break;
                 }
                 case PlayModeStateChange.ExitingPlayMode:
+                    SessionState.SetBool(GameTestModeSessionKeys.Stopping, true);
                     SetStatus("Stopping isolated game-test session…");
                     break;
                 case PlayModeStateChange.EnteredEditMode:
@@ -312,8 +429,136 @@ namespace AL.EditorTools
             }
         }
 
+        private static void HandleBeforeAssemblyReload()
+        {
+            if (!IsSessionActive ||
+                !EditorApplication.isPlaying ||
+                SessionState.GetBool(GameTestModeSessionKeys.Stopping, false))
+            {
+                return;
+            }
+
+            bool transitioning = SessionState.GetBool(
+                GameTestModeSessionKeys.TransitioningToPlay,
+                false);
+            bool preAwakeRearmCompleted = SessionState.GetBool(
+                GameTestModeSessionKeys.PreAwakeRearmCompleted,
+                false);
+            if (transitioning && !preAwakeRearmCompleted)
+            {
+                // The initial full-domain reload has not yet reached the
+                // pre-Awake re-arm callback. Once re-armed, any further reload
+                // in the transition-verification window must fail closed.
+                return;
+            }
+
+            string sessionId = SessionState.GetString(
+                GameTestModeSessionKeys.SessionId,
+                string.Empty);
+            SessionState.SetBool(GameTestModeSessionKeys.ReloadInterrupted, true);
+            EditorGameTestModeBootstrap.TryUpdateDurableRecoveryStage(
+                sessionId,
+                EditorGameTestModeRecoveryStage.Recovery,
+                out _);
+            SetStatus(
+                "An unexpected script/domain reload interrupted the isolated run. Play Mode is stopping; the exact temp root will be retained or safely cleaned in Edit Mode.");
+            EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
+                "Unexpected script/domain reload");
+        }
+
+        private static void HandleEditorFocusChanged(bool hasFocus)
+        {
+            if (hasFocus || !IsSessionActive || !EditorApplication.isPlaying)
+            {
+                return;
+            }
+
+            SetStatus("Editor focus was lost. The isolated run is stopping instead of continuing in the background.");
+            EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary("Editor focus loss");
+        }
+
+        private static void HandleEditorPauseStateChanged(PauseState state)
+        {
+            if (state != PauseState.Paused || !IsSessionActive || !EditorApplication.isPlaying)
+            {
+                return;
+            }
+
+            SetStatus("The Editor was paused. The isolated run is stopping before it can resume with stale authority.");
+            EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary("Editor pause");
+        }
+
+        private static void RecoverDurableRecordAfterEditorRestart()
+        {
+            if (SessionState.GetBool(GameTestModeSessionKeys.Active, false) ||
+                SessionState.GetBool(GameTestModeSessionKeys.RecoveryPending, false) ||
+                !EditorGameTestModeBootstrap.HasDurableRecoveryRecord)
+            {
+                return;
+            }
+
+            if (!EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                    out EditorGameTestModeRecoveryRecord record,
+                    out _,
+                    out string message))
+            {
+                SessionState.SetBool(GameTestModeSessionKeys.RecoveryPending, true);
+                SetStatus(
+                    "A malformed project-scoped recovery record was retained without deleting any path. Preference key: " +
+                    EditorGameTestModeBootstrap.DurableRecoveryPreferenceKey + ". " + message);
+                return;
+            }
+
+            WriteRecoveryPlan(
+                record.Plan,
+                record.PreviousStartSceneGuid,
+                record.PreviousStartSceneWasNull);
+            SessionState.SetString(
+                GameTestModeSessionKeys.PreviousStartScenePath,
+                record.PreviousStartSceneWasNull
+                    ? string.Empty
+                    : AssetDatabase.GUIDToAssetPath(record.PreviousStartSceneGuid));
+            SessionState.SetString(
+                GameTestModeSessionKeys.LastRoot,
+                record.Plan.IsolatedSaveRoot);
+
+            bool startSceneRestored = RestorePreviousStartScene(
+                record.Plan.SessionId,
+                out string restoreMessage);
+            SetStatus(
+                "Recovered a stale isolated-session record. No path was auto-deleted. " +
+                (startSceneRestored
+                    ? "The prior Play Mode start scene was restored. "
+                    : restoreMessage + " ") +
+                "Review or clean the exact retained root: " + record.Plan.IsolatedSaveRoot);
+
+            if (EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                EditorGameTestModeBootstrap.EnterFailClosedState(
+                    record.Plan.SessionId,
+                    "A stale durable recovery record was found while Play Mode was active.");
+                EditorApplication.isPlaying = false;
+            }
+        }
+
         private static void RecoverOrVerifyAfterReload()
         {
+            RecoverDurableRecordAfterEditorRestart();
+
+            if (EditorApplication.isPlaying &&
+                EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                    out EditorGameTestModeRecoveryRecord durableRecord,
+                    out _,
+                    out _) &&
+                durableRecord.Stage != EditorGameTestModeRecoveryStage.Starting &&
+                !SessionState.GetBool(GameTestModeSessionKeys.TransitioningToPlay, false))
+            {
+                FailClosedAndAbort(
+                    durableRecord.Plan.SessionId,
+                    "A running isolated session crossed an unexpected script/domain reload and was blocked.");
+                return;
+            }
+
             if (!IsSessionActive)
             {
                 return;
@@ -346,13 +591,30 @@ namespace AL.EditorTools
 
             if (!EditorGameTestModeBootstrap.TryVerifyActiveRuntime(out _, out string message))
             {
-                AbortTransition("Runtime isolation verification failed: " + message);
+                FailClosedAndAbort(
+                    expectedSession,
+                    "Runtime isolation verification failed: " + message);
                 return;
             }
 
+            if (!EditorGameTestModeBootstrap.TryUpdateDurableRecoveryStage(
+                    expectedSession,
+                    EditorGameTestModeRecoveryStage.Running,
+                    out message))
+            {
+                FailClosedAndAbort(
+                    expectedSession,
+                    "Durable recovery publication failed: " + message);
+                return;
+            }
+
+            SessionState.EraseBool(GameTestModeSessionKeys.TransitioningToPlay);
+            SessionState.EraseBool(GameTestModeSessionKeys.PreAwakeRearmCompleted);
+            SessionState.EraseBool(GameTestModeSessionKeys.ReloadInterrupted);
+
             SetStatus(
                 "Running isolated test profile " + expectedSession.Substring(0, 8) +
-                ". Real developer saves are untouched.");
+                ". Exact temp root: " + EditorGameTestModeBootstrap.ActiveSaveRoot);
         }
 
         private static void CompleteActiveSession()
@@ -371,6 +633,11 @@ namespace AL.EditorTools
                 out EditorGameTestModePlan plan,
                 out string planMessage);
 
+            EditorGameTestModeBootstrap.TryUpdateDurableRecoveryStage(
+                expectedSession,
+                EditorGameTestModeRecoveryStage.Recovery,
+                out _);
+
             EditorGameTestModeBootstrap.Disarm();
             bool startSceneRestored = RestorePreviousStartScene(
                 expectedSession,
@@ -380,6 +647,10 @@ namespace AL.EditorTools
             if (!planRead)
             {
                 finalStatus = "Isolation stopped, but its plan could not be reconstructed: " + planMessage;
+            }
+            else if (!Directory.Exists(plan.IsolatedSaveRoot))
+            {
+                finalStatus = "Isolated session stopped; its GUID-owned temp root was already absent.";
             }
             else if (EditorGameTestModeBootstrap.TryDeleteOwnedRoot(plan, out _, out string cleanupMessage))
             {
@@ -397,8 +668,8 @@ namespace AL.EditorTools
                 finalStatus += " " + restoreMessage;
             }
 
-            bool retainRecoveryPlan = planRead && Directory.Exists(plan.IsolatedSaveRoot);
-            ClearActiveSession(retainRecoveryPlan);
+            bool retainRecoveryPlan = !planRead || Directory.Exists(plan.IsolatedSaveRoot);
+            ClearActiveSession(retainRecoveryPlan, expectedSession);
             SetStatus(finalStatus);
         }
 
@@ -420,13 +691,31 @@ namespace AL.EditorTools
             }
 
             EditorGameTestModeBootstrap.Disarm();
+            bool startSceneRestored = RestorePreviousStartScene(
+                plan.SessionId,
+                out string restoreMessage);
+            if (!Directory.Exists(plan.IsolatedSaveRoot))
+            {
+                ClearActiveSession(
+                    retainRecoveryPlan: false,
+                    expectedSessionId: plan.SessionId);
+                SetStatus(
+                    "The stale isolated record had no remaining temp root. " +
+                    (startSceneRestored ? "The prior Play Mode start scene was restored." : restoreMessage));
+                return;
+            }
+
             if (EditorGameTestModeBootstrap.TryDeleteOwnedRoot(
                     plan,
                     out _,
                     out string cleanupMessage))
             {
-                ClearActiveSession(retainRecoveryPlan: false);
-                SetStatus("The retained GUID-owned isolated profile was safely removed.");
+                ClearActiveSession(
+                    retainRecoveryPlan: false,
+                    expectedSessionId: plan.SessionId);
+                SetStatus(
+                    "The retained GUID-owned isolated profile was safely removed. " +
+                    (startSceneRestored ? string.Empty : restoreMessage));
                 return;
             }
 
@@ -530,7 +819,10 @@ namespace AL.EditorTools
             SessionState.EraseBool(GameTestModeSessionKeys.RecoveryPending);
         }
 
-        private static void WriteRecoveryPlan(EditorGameTestModePlan plan)
+        private static void WriteRecoveryPlan(
+            EditorGameTestModePlan plan,
+            string previousStartSceneGuid,
+            bool previousStartSceneWasNull)
         {
             SessionState.EraseBool(GameTestModeSessionKeys.Active);
             SessionState.SetBool(GameTestModeSessionKeys.RecoveryPending, true);
@@ -540,9 +832,30 @@ namespace AL.EditorTools
             SessionState.SetString(GameTestModeSessionKeys.IsolatedRoot, plan.IsolatedSaveRoot);
             SessionState.SetString(GameTestModeSessionKeys.BootScenePath, plan.BootScenePath);
             SessionState.SetString(GameTestModeSessionKeys.BootSceneGuid, plan.BootSceneGuid);
+            SessionState.SetString(
+                GameTestModeSessionKeys.PreviousStartSceneGuid,
+                previousStartSceneGuid ?? string.Empty);
+            SessionState.SetString(
+                GameTestModeSessionKeys.PreviousStartScenePath,
+                previousStartSceneWasNull || string.IsNullOrEmpty(previousStartSceneGuid)
+                    ? string.Empty
+                    : AssetDatabase.GUIDToAssetPath(previousStartSceneGuid));
+            SessionState.SetBool(
+                GameTestModeSessionKeys.PreviousStartSceneWasNull,
+                previousStartSceneWasNull);
+            EditorGameTestModeBootstrap.TryWriteDurableRecoveryRecord(
+                new EditorGameTestModeRecoveryRecord(
+                    plan,
+                    EditorGameTestModeRecoveryStage.Recovery,
+                    previousStartSceneGuid,
+                    previousStartSceneWasNull),
+                out _,
+                out _);
         }
 
-        private static void ClearActiveSession(bool retainRecoveryPlan = false)
+        private static void ClearActiveSession(
+            bool retainRecoveryPlan = false,
+            string expectedSessionId = "")
         {
             SessionState.EraseBool(GameTestModeSessionKeys.Active);
             if (retainRecoveryPlan)
@@ -558,13 +871,26 @@ namespace AL.EditorTools
                 SessionState.EraseString(GameTestModeSessionKeys.IsolatedRoot);
                 SessionState.EraseString(GameTestModeSessionKeys.BootScenePath);
                 SessionState.EraseString(GameTestModeSessionKeys.BootSceneGuid);
+                if (!string.IsNullOrWhiteSpace(expectedSessionId))
+                {
+                    EditorGameTestModeBootstrap.TryClearDurableRecoveryRecord(
+                        expectedSessionId,
+                        out _);
+                }
             }
 
             SessionState.EraseBool(GameTestModeSessionKeys.FullDomainReload);
             SessionState.EraseBool(GameTestModeSessionKeys.FullSceneReload);
-            SessionState.EraseString(GameTestModeSessionKeys.PreviousStartScenePath);
-            SessionState.EraseString(GameTestModeSessionKeys.PreviousStartSceneGuid);
-            SessionState.EraseBool(GameTestModeSessionKeys.PreviousStartSceneWasNull);
+            SessionState.EraseBool(GameTestModeSessionKeys.TransitioningToPlay);
+            SessionState.EraseBool(GameTestModeSessionKeys.PreAwakeRearmCompleted);
+            SessionState.EraseBool(GameTestModeSessionKeys.Stopping);
+            SessionState.EraseBool(GameTestModeSessionKeys.ReloadInterrupted);
+            if (!retainRecoveryPlan)
+            {
+                SessionState.EraseString(GameTestModeSessionKeys.PreviousStartScenePath);
+                SessionState.EraseString(GameTestModeSessionKeys.PreviousStartSceneGuid);
+                SessionState.EraseBool(GameTestModeSessionKeys.PreviousStartSceneWasNull);
+            }
         }
 
         private static void GetReloadPolicy(out bool fullDomainReload, out bool fullSceneReload)
@@ -614,6 +940,10 @@ namespace AL.EditorTools
 
         private static void FailClosedAndAbort(string sessionId, string message)
         {
+            EditorGameTestModeBootstrap.TryUpdateDurableRecoveryStage(
+                sessionId,
+                EditorGameTestModeRecoveryStage.Recovery,
+                out _);
             try
             {
                 EditorGameTestModeBootstrap.EnterFailClosedState(sessionId, message);
@@ -709,7 +1039,21 @@ namespace AL.EditorTools
             }
 
             GUILayout.FlexibleSpace();
-            if (GameTestModeEditorCoordinator.IsSessionActive ||
+            if (GameTestModeEditorCoordinator.HasInvalidDurableRecoveryRecord &&
+                !EditorApplication.isPlayingOrWillChangePlaymode)
+            {
+                EditorGUILayout.HelpBox(
+                    "The retained recovery record is malformed. You may forget only that project-scoped record; this action deletes no file or directory.",
+                    MessageType.Error);
+                if (GUILayout.Button(
+                        "Forget Invalid Record — Delete No Files",
+                        GUILayout.Height(40f)))
+                {
+                    GameTestModeEditorCoordinator
+                        .ForgetInvalidRecoveryRecordWithoutDeletingFiles();
+                }
+            }
+            else if (GameTestModeEditorCoordinator.IsSessionActive ||
                 GameTestModeEditorCoordinator.IsRecoveryPending)
             {
                 string action = EditorApplication.isPlayingOrWillChangePlaymode

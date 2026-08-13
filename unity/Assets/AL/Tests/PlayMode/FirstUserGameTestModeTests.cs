@@ -8,6 +8,9 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Development;
 using NUnit.Framework;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 
 namespace AL.Tests.PlayMode
@@ -15,15 +18,20 @@ namespace AL.Tests.PlayMode
     [TestFixture]
     public sealed class FirstUserGameTestModeTests
     {
+        private const string RealmSelectionScenePath = "Assets/AL/Scenes/RealmSelection.unity";
+        private const string KingdomScenePath = "Assets/AL/Scenes/Kingdom.unity";
+        private const float SceneTransitionTimeoutSeconds = 30f;
+
         private readonly List<string> _generatedRoots = new List<string>();
         private readonly Dictionary<FieldInfo, object> _originalFactoryValues =
             new Dictionary<FieldInfo, object>();
         private readonly Dictionary<object, object> _originalServices =
             new Dictionary<object, object>();
+        private readonly List<GameObject> _createdObjects = new List<GameObject>();
         private FieldInfo _servicesField;
         private Type _stackType;
-        private string _boundarySentinelRoot;
-        private string _boundarySentinelPath;
+        private string _unrelatedTemporarySiblingRoot;
+        private string _unrelatedTemporarySiblingPath;
 
         [SetUp]
         public void SetUp()
@@ -38,20 +46,43 @@ namespace AL.Tests.PlayMode
             SnapshotAndClearRuntimeState();
             _generatedRoots.Clear();
 
-            _boundarySentinelRoot = Path.Combine(
+            _createdObjects.Clear();
+            _unrelatedTemporarySiblingRoot = Path.Combine(
                 Path.GetTempPath(),
                 "AnotherLife-TestBoundary-Sentinel-" + Guid.NewGuid().ToString("N"));
-            _boundarySentinelPath = Path.Combine(_boundarySentinelRoot, "sentinel.bin");
-            Directory.CreateDirectory(_boundarySentinelRoot);
-            File.WriteAllBytes(_boundarySentinelPath, new byte[] { 9, 4, 2, 7, 1 });
+            _unrelatedTemporarySiblingPath = Path.Combine(
+                _unrelatedTemporarySiblingRoot,
+                "sentinel.bin");
+            Directory.CreateDirectory(_unrelatedTemporarySiblingRoot);
+            File.WriteAllBytes(
+                _unrelatedTemporarySiblingPath,
+                new byte[] { 9, 4, 2, 7, 1 });
         }
 
         [TearDown]
         public void TearDown()
         {
+            string cleanupFailure = string.Empty;
             try
             {
+                foreach (Bootloader bootloader in UnityEngine.Object.FindObjectsOfType<Bootloader>(
+                             includeInactive: true))
+                {
+                    if (bootloader != null)
+                    {
+                        UnityEngine.Object.DestroyImmediate(bootloader.gameObject);
+                    }
+                }
+
                 EditorGameTestModeBootstrap.Disarm();
+
+                foreach (GameObject createdObject in _createdObjects)
+                {
+                    if (createdObject != null)
+                    {
+                        UnityEngine.Object.DestroyImmediate(createdObject);
+                    }
+                }
 
                 foreach (string root in _generatedRoots)
                 {
@@ -63,28 +94,33 @@ namespace AL.Tests.PlayMode
                                 out _,
                                 out string cleanupMessage))
                         {
-                            TestContext.Out.WriteLine(cleanupMessage);
+                            cleanupFailure += cleanupMessage + "\n";
                         }
                     }
                 }
 
-                if (File.Exists(_boundarySentinelPath))
+                if (File.Exists(_unrelatedTemporarySiblingPath))
                 {
-                    File.Delete(_boundarySentinelPath);
+                    File.Delete(_unrelatedTemporarySiblingPath);
                 }
 
-                if (Directory.Exists(_boundarySentinelRoot))
+                if (Directory.Exists(_unrelatedTemporarySiblingRoot))
                 {
-                    Directory.Delete(_boundarySentinelRoot, recursive: false);
+                    Directory.Delete(_unrelatedTemporarySiblingRoot, recursive: false);
                 }
             }
             catch (Exception ex)
             {
-                TestContext.Out.WriteLine("Test cleanup retained evidence: " + ex.Message);
+                cleanupFailure += "Test cleanup retained evidence: " + ex.Message + "\n";
             }
             finally
             {
                 RestoreRuntimeState();
+            }
+
+            if (!string.IsNullOrEmpty(cleanupFailure))
+            {
+                Assert.Fail(cleanupFailure);
             }
         }
 
@@ -94,10 +130,8 @@ namespace AL.Tests.PlayMode
             EditorGameTestModePlan plan = CreateOwnedPlan();
             Assert.IsTrue(EditorGameTestModeBootstrap.TryArm(plan, out _, out string armMessage), armMessage);
 
-            BootloaderInitializationResult initialization = Bootloader.InitializeIfMissing();
-            Assert.IsTrue(initialization.Succeeded, initialization.Message);
+            CreateBootloaderOwner("IsolatedBootOwner");
             ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
-            save.Load();
 
             Assert.AreEqual(SaveLoadStatus.CreatedNew, save.LastLoadStatus);
             Assert.IsNotNull(save.CurrentSave);
@@ -108,7 +142,7 @@ namespace AL.Tests.PlayMode
                 out string verifyMessage), verifyMessage);
             CollectionAssert.AreEqual(
                 new byte[] { 9, 4, 2, 7, 1 },
-                File.ReadAllBytes(_boundarySentinelPath));
+                File.ReadAllBytes(_unrelatedTemporarySiblingPath));
 
             yield return null;
         }
@@ -118,9 +152,8 @@ namespace AL.Tests.PlayMode
         {
             EditorGameTestModePlan first = CreateOwnedPlan();
             Assert.IsTrue(EditorGameTestModeBootstrap.TryArm(first, out _, out string firstMessage), firstMessage);
-            Assert.IsTrue(Bootloader.InitializeIfMissing().Succeeded);
+            CreateBootloaderOwner("FirstIsolatedBootOwner");
             ISaveGameService firstSave = ServiceLocator.Get<ISaveGameService>();
-            firstSave.Load();
             Assert.IsTrue(File.Exists(Path.Combine(first.IsolatedSaveRoot, "save.json")));
 
             ClearSubjectRuntimeState();
@@ -129,18 +162,97 @@ namespace AL.Tests.PlayMode
             Assert.AreNotEqual(first.SessionId, second.SessionId);
             Assert.AreNotEqual(first.IsolatedSaveRoot, second.IsolatedSaveRoot);
             Assert.IsTrue(EditorGameTestModeBootstrap.TryArm(second, out _, out string secondMessage), secondMessage);
-            Assert.IsTrue(Bootloader.InitializeIfMissing().Succeeded);
+            CreateBootloaderOwner("SecondIsolatedBootOwner");
             ISaveGameService secondSave = ServiceLocator.Get<ISaveGameService>();
-            secondSave.Load();
 
             Assert.AreEqual(SaveLoadStatus.CreatedNew, secondSave.LastLoadStatus);
             Assert.AreNotSame(firstSave, secondSave);
             Assert.IsTrue(File.Exists(Path.Combine(second.IsolatedSaveRoot, "save.json")));
             CollectionAssert.AreEqual(
                 new byte[] { 9, 4, 2, 7, 1 },
-                File.ReadAllBytes(_boundarySentinelPath));
+                File.ReadAllBytes(_unrelatedTemporarySiblingPath));
 
             yield return null;
+        }
+
+        [UnityTest]
+        public IEnumerator ProductionBootWithFreshIsolatedProfileStopsAtRealmSelection()
+        {
+            EditorGameTestModePlan plan = CreateOwnedPlan();
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryArm(
+                plan,
+                out _,
+                out string armMessage), armMessage);
+
+            var visitedScenes = new List<string>();
+            void RecordScene(Scene scene, LoadSceneMode _) => visitedScenes.Add(scene.path);
+            SceneManager.sceneLoaded += RecordScene;
+            try
+            {
+                AsyncOperation load = EditorSceneManager.LoadSceneAsyncInPlayMode(
+                    EditorGameTestModeBootstrap.ExpectedBootScenePath,
+                    new LoadSceneParameters(LoadSceneMode.Single));
+                Assert.IsNotNull(load);
+
+                float started = Time.realtimeSinceStartup;
+                while (!string.Equals(
+                           SceneManager.GetActiveScene().path,
+                           RealmSelectionScenePath,
+                           StringComparison.Ordinal))
+                {
+                    if (Time.realtimeSinceStartup - started > SceneTransitionTimeoutSeconds)
+                    {
+                        Assert.Fail(
+                            "Production Boot did not reach the currently implemented RealmSelection stop. Visited: " +
+                            string.Join(", ", visitedScenes));
+                    }
+
+                    yield return null;
+                }
+
+                yield return null;
+                yield return null;
+
+                Assert.IsFalse(
+                    visitedScenes.Contains(KingdomScenePath),
+                    "A fresh isolated profile must not fabricate realm authority or enter Kingdom.");
+                Assert.IsTrue(visitedScenes.Contains(
+                    EditorGameTestModeBootstrap.ExpectedBootScenePath));
+                Assert.IsTrue(visitedScenes.Contains(RealmSelectionScenePath));
+
+                ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
+                Assert.AreEqual(SaveLoadStatus.CreatedNew, save.LastLoadStatus);
+                Assert.IsNotNull(save.CurrentSave);
+                Assert.AreEqual(RealmId.None, save.CurrentSave.SelectedRealm);
+                Assert.IsTrue(File.Exists(Path.Combine(plan.IsolatedSaveRoot, "save.json")));
+                Assert.IsTrue(EditorGameTestModeBootstrap.TryVerifyActiveRuntime(
+                    out _,
+                    out string verifyMessage), verifyMessage);
+                CollectionAssert.AreEqual(
+                    new byte[] { 9, 4, 2, 7, 1 },
+                    File.ReadAllBytes(_unrelatedTemporarySiblingPath));
+            }
+            finally
+            {
+                SceneManager.sceneLoaded -= RecordScene;
+            }
+        }
+
+        [Test]
+        public void RuntimeVerificationRejectsBeforeProductionBootOwnsTheLoad()
+        {
+            EditorGameTestModePlan plan = CreateOwnedPlan();
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryArm(
+                plan,
+                out _,
+                out string armMessage), armMessage);
+            Assert.IsTrue(Bootloader.InitializeIfMissing().Succeeded);
+
+            Assert.IsFalse(EditorGameTestModeBootstrap.TryVerifyActiveRuntime(
+                out EditorGameTestModeFailure failure,
+                out _));
+            Assert.AreEqual(EditorGameTestModeFailure.OfflineStackLoadIncomplete, failure);
+            Assert.IsFalse(File.Exists(Path.Combine(plan.IsolatedSaveRoot, "save.json")));
         }
 
         private EditorGameTestModePlan CreateOwnedPlan()
@@ -188,7 +300,7 @@ namespace AL.Tests.PlayMode
             Assert.IsFalse(ServiceLocator.TryGet<ISaveGameService>(out _));
             CollectionAssert.AreEqual(
                 new byte[] { 9, 4, 2, 7, 1 },
-                File.ReadAllBytes(_boundarySentinelPath));
+                File.ReadAllBytes(_unrelatedTemporarySiblingPath));
         }
 
         private EditorGameTestModePlan CreatePlanForExistingRoot(string root)
@@ -207,6 +319,13 @@ namespace AL.Tests.PlayMode
                 out _,
                 out string message), message);
             return plan;
+        }
+
+        private Bootloader CreateBootloaderOwner(string objectName)
+        {
+            var owner = new GameObject(objectName);
+            _createdObjects.Add(owner);
+            return owner.AddComponent<Bootloader>();
         }
 
         private void SnapshotAndClearRuntimeState()
@@ -244,6 +363,15 @@ namespace AL.Tests.PlayMode
 
         private void ClearSubjectRuntimeState()
         {
+            foreach (GameObject createdObject in _createdObjects)
+            {
+                if (createdObject != null)
+                {
+                    UnityEngine.Object.DestroyImmediate(createdObject);
+                }
+            }
+
+            _createdObjects.Clear();
             EditorGameTestModeBootstrap.Disarm();
             foreach (FieldInfo field in _originalFactoryValues.Keys)
             {

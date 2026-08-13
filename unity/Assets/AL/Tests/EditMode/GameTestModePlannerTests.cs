@@ -2,10 +2,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using AL.Development;
 using NUnit.Framework;
+using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
 
 namespace AL.Tests.EditMode
@@ -17,6 +20,7 @@ namespace AL.Tests.EditMode
             new List<EditorGameTestModePlan>();
         private FieldInfo _saveFactoryField;
         private object _originalSaveFactory;
+        private string _testRecoveryPreferenceKey;
 
         [SetUp]
         public void SetUp()
@@ -32,11 +36,17 @@ namespace AL.Tests.EditMode
             _originalSaveFactory = _saveFactoryField.GetValue(null);
             _saveFactoryField.SetValue(null, null);
             _plans.Clear();
+            _testRecoveryPreferenceKey =
+                "AL.GameTestMode.Tests." + Guid.NewGuid().ToString("N");
+            EditorGameTestModeBootstrap.SetDurableRecoveryPreferenceKeyOverrideForTests(
+                _testRecoveryPreferenceKey);
+            EditorPrefs.DeleteKey(_testRecoveryPreferenceKey);
         }
 
         [TearDown]
         public void TearDown()
         {
+            string cleanupFailure = string.Empty;
             try
             {
                 EditorGameTestModeBootstrap.Disarm();
@@ -58,17 +68,24 @@ namespace AL.Tests.EditMode
                             out _,
                             out cleanupMessage))
                     {
-                        TestContext.Out.WriteLine(
+                        cleanupFailure +=
                             "Retained isolated test evidence: " +
                             (string.IsNullOrWhiteSpace(validationMessage)
                                 ? cleanupMessage
-                                : validationMessage));
+                                : validationMessage) + "\n";
                     }
                 }
             }
             finally
             {
                 _saveFactoryField.SetValue(null, _originalSaveFactory);
+                EditorPrefs.DeleteKey(_testRecoveryPreferenceKey);
+                EditorGameTestModeBootstrap.ClearDurableRecoveryPreferenceKeyOverrideForTests();
+            }
+
+            if (!string.IsNullOrEmpty(cleanupFailure))
+            {
+                Assert.Fail(cleanupFailure);
             }
         }
 
@@ -84,6 +101,194 @@ namespace AL.Tests.EditMode
                 out string message), message);
             Assert.AreEqual(EditorGameTestModeFailure.None, failure);
             StringAssert.EndsWith(plan.SessionId, plan.IsolatedSaveRoot);
+        }
+
+        [Test]
+        public void DurableRecoveryRecordRoundTripsAndUpdatesExactSessionStage()
+        {
+            EditorGameTestModePlan plan = CreatePlan(createRoot: false);
+            var starting = new EditorGameTestModeRecoveryRecord(
+                plan,
+                EditorGameTestModeRecoveryStage.Starting,
+                string.Empty,
+                previousStartSceneWasNull: true);
+
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryWriteDurableRecoveryRecord(
+                starting,
+                out _,
+                out string writeMessage), writeMessage);
+            Assert.IsTrue(EditorGameTestModeBootstrap.HasDurableRecoveryRecord);
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                out EditorGameTestModeRecoveryRecord read,
+                out _,
+                out string readMessage), readMessage);
+            Assert.AreEqual(plan.SessionId, read.Plan.SessionId);
+            Assert.AreEqual(plan.IsolatedSaveRoot, read.Plan.IsolatedSaveRoot);
+            Assert.AreEqual(EditorGameTestModeRecoveryStage.Starting, read.Stage);
+            Assert.IsTrue(read.PreviousStartSceneWasNull);
+
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryUpdateDurableRecoveryStage(
+                plan.SessionId,
+                EditorGameTestModeRecoveryStage.Running,
+                out string updateMessage), updateMessage);
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                out read,
+                out _,
+                out readMessage), readMessage);
+            Assert.AreEqual(EditorGameTestModeRecoveryStage.Running, read.Stage);
+
+            Assert.IsFalse(EditorGameTestModeBootstrap.TryClearDurableRecoveryRecord(
+                Guid.NewGuid().ToString("N"),
+                out _));
+            Assert.IsTrue(EditorGameTestModeBootstrap.HasDurableRecoveryRecord);
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryClearDurableRecoveryRecord(
+                plan.SessionId,
+                out string clearMessage), clearMessage);
+            Assert.IsFalse(EditorGameTestModeBootstrap.HasDurableRecoveryRecord);
+        }
+
+        [Test]
+        public void MalformedDurableRecoveryRecordIsRetainedUntilExplicitForget()
+        {
+            string recoveryKey = EditorGameTestModeBootstrap.DurableRecoveryPreferenceKey;
+            EditorPrefs.SetString(recoveryKey, "malformed\nrecord\n");
+
+            Assert.IsFalse(EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                out _,
+                out EditorGameTestModeFailure failure,
+                out _));
+            Assert.AreEqual(EditorGameTestModeFailure.DurableRecoveryRecordInvalid, failure);
+            Assert.IsFalse(EditorGameTestModeBootstrap.TryClearDurableRecoveryRecord(
+                Guid.NewGuid().ToString("N"),
+                out _));
+            Assert.IsTrue(EditorPrefs.HasKey(recoveryKey));
+
+            EditorGameTestModeBootstrap.ForgetInvalidDurableRecoveryRecordWithoutDeletingFiles();
+            Assert.IsFalse(EditorPrefs.HasKey(recoveryKey));
+        }
+
+        [Test]
+        public void CoordinatorForgetInvalidRecordDeletesNoFileOrDirectory()
+        {
+            string recoveryKey = EditorGameTestModeBootstrap.DurableRecoveryPreferenceKey;
+            string sentinelRoot = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-Recovery-Forget-Sentinel-" + Guid.NewGuid().ToString("N"));
+            string sentinelPath = Path.Combine(sentinelRoot, "retain.bin");
+            Directory.CreateDirectory(sentinelRoot);
+            File.WriteAllBytes(sentinelPath, new byte[] { 7, 1, 4, 2 });
+            EditorPrefs.SetString(recoveryKey, "malformed\nrecord\n");
+
+            try
+            {
+                Type coordinator = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(assembly => assembly.GetType(
+                        "AL.EditorTools.GameTestModeEditorCoordinator",
+                        throwOnError: false))
+                    .FirstOrDefault(type => type != null);
+                Assert.IsNotNull(coordinator);
+                PropertyInfo invalidRecord = coordinator.GetProperty(
+                    "HasInvalidDurableRecoveryRecord",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                MethodInfo forget = coordinator.GetMethod(
+                    "ForgetInvalidRecoveryRecordWithoutDeletingFiles",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                Assert.IsNotNull(invalidRecord);
+                Assert.IsNotNull(forget);
+                Assert.IsTrue((bool)invalidRecord.GetValue(null));
+
+                forget.Invoke(null, null);
+
+                Assert.IsFalse(EditorPrefs.HasKey(recoveryKey));
+                Assert.IsTrue(Directory.Exists(sentinelRoot));
+                CollectionAssert.AreEqual(
+                    new byte[] { 7, 1, 4, 2 },
+                    File.ReadAllBytes(sentinelPath));
+            }
+            finally
+            {
+                if (File.Exists(sentinelPath))
+                {
+                    File.Delete(sentinelPath);
+                }
+
+                if (Directory.Exists(sentinelRoot))
+                {
+                    Directory.Delete(sentinelRoot, recursive: false);
+                }
+            }
+        }
+
+        [Test]
+        public void DurableRecordCanPrecedeRootCreationWithoutCreatingAnyPath()
+        {
+            EditorGameTestModePlan plan = CreatePlan(createRoot: false);
+            Assert.IsFalse(Directory.Exists(plan.IsolatedSaveRoot));
+
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryWriteDurableRecoveryRecord(
+                new EditorGameTestModeRecoveryRecord(
+                    plan,
+                    EditorGameTestModeRecoveryStage.Starting,
+                    EditorGameTestModeBootstrap.ExpectedBootSceneGuid,
+                    previousStartSceneWasNull: false),
+                out _,
+                out string writeMessage), writeMessage);
+            Assert.IsTrue(EditorGameTestModeBootstrap.TryReadDurableRecoveryRecord(
+                out EditorGameTestModeRecoveryRecord recovered,
+                out _,
+                out string readMessage), readMessage);
+            Assert.AreEqual(plan.IsolatedSaveRoot, recovered.Plan.IsolatedSaveRoot);
+            Assert.IsFalse(Directory.Exists(plan.IsolatedSaveRoot));
+        }
+
+        [Test]
+        public void CoordinatorRestoresThePriorPlayModeStartSceneByExactGuid()
+        {
+            SceneAsset originalStartScene = EditorSceneManager.playModeStartScene;
+            SceneAsset boot = AssetDatabase.LoadAssetAtPath<SceneAsset>(
+                EditorGameTestModeBootstrap.ExpectedBootScenePath);
+            const string priorPath = "Assets/AL/Scenes/RealmSelection.unity";
+            SceneAsset prior = AssetDatabase.LoadAssetAtPath<SceneAsset>(priorPath);
+            Assert.IsNotNull(boot);
+            Assert.IsNotNull(prior);
+
+            string sessionId = Guid.NewGuid().ToString("N");
+            const string sessionKey = "AL.GameTestMode.SessionId";
+            const string priorPathKey = "AL.GameTestMode.PreviousStartScenePath";
+            const string priorGuidKey = "AL.GameTestMode.PreviousStartSceneGuid";
+            const string priorWasNullKey = "AL.GameTestMode.PreviousStartSceneWasNull";
+
+            try
+            {
+                EditorSceneManager.playModeStartScene = boot;
+                SessionState.SetString(sessionKey, sessionId);
+                SessionState.SetString(priorPathKey, priorPath);
+                SessionState.SetString(priorGuidKey, AssetDatabase.AssetPathToGUID(priorPath));
+                SessionState.SetBool(priorWasNullKey, false);
+
+                Type coordinator = AppDomain.CurrentDomain.GetAssemblies()
+                    .Select(assembly => assembly.GetType(
+                        "AL.EditorTools.GameTestModeEditorCoordinator",
+                        throwOnError: false))
+                    .FirstOrDefault(type => type != null);
+                Assert.IsNotNull(coordinator);
+                MethodInfo restore = coordinator.GetMethod(
+                    "RestorePreviousStartScene",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                Assert.IsNotNull(restore);
+                object[] arguments = { sessionId, null };
+
+                Assert.IsTrue((bool)restore.Invoke(null, arguments), arguments[1] as string);
+                Assert.AreSame(prior, EditorSceneManager.playModeStartScene);
+            }
+            finally
+            {
+                EditorSceneManager.playModeStartScene = originalStartScene;
+                SessionState.EraseString(sessionKey);
+                SessionState.EraseString(priorPathKey);
+                SessionState.EraseString(priorGuidKey);
+                SessionState.EraseBool(priorWasNullKey);
+            }
         }
 
         [TestCase(false, true, EditorGameTestModeFailure.FullDomainReloadRequired)]
