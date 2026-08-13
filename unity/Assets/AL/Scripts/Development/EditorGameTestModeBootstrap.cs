@@ -1,5 +1,6 @@
 #if UNITY_EDITOR
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -1980,6 +1981,41 @@ namespace AL.Development
             {
                 _lastFailure = message ?? string.Empty;
             }
+        }
+    }
+
+    [DefaultExecutionOrder(-31990)]
+    [DisallowMultipleComponent]
+    public sealed class EditorGameTestModeHostDriver : MonoBehaviour
+    {
+        public event Action Tick;
+        public event Action Destroyed;
+
+        public Coroutine RunCoroutine(IEnumerator routine)
+        {
+            if (routine == null)
+            {
+                throw new ArgumentNullException(nameof(routine));
+            }
+
+            return StartCoroutine(routine);
+        }
+
+        private void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
+        private void Update()
+        {
+            Tick?.Invoke();
+        }
+
+        private void OnDestroy()
+        {
+            Destroyed?.Invoke();
+            Tick = null;
+            Destroyed = null;
         }
     }
 
