@@ -1043,8 +1043,8 @@
     "one_process_only": "pass",
     "no_partial_download_or_invalid_residue": "pass",
     "stderr_empty": "pass",
-    "sanitization_scan": "required_before_commit",
-    "exact_repository_file_scope": "required_before_commit"
+    "sanitization_scan": "pass_on_currentness_refresh",
+    "exact_repository_file_scope": "pass_exactly_two_paths_on_current_main"
   },
   "gates": {
     "evidence_publication": "draft_unmerged_currentness_refreshed",
