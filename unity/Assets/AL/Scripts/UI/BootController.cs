@@ -1,8 +1,8 @@
+using System;
 using System.Collections;
-using System.Collections.Generic;
-using AL.Core;
-using AL.Core.Interfaces;
+using AL.RealmSelection;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -11,406 +11,687 @@ namespace AL.UI
     public class BootController : MonoBehaviour
     {
         [Header("Settings")]
-        [SerializeField] private float _minSplashScreenTime = 0.8f;
         [SerializeField] private string _realmSelectionScene = "RealmSelection";
+
+        // Retained only for scene/descriptor compatibility while the first-user route contract is
+        // integrated. Realm identity is deliberately never used to activate this route.
         [SerializeField] private string _kingdomScene = "Kingdom";
 
         [Header("Presentation")]
         [SerializeField] private bool _buildRuntimeSplash = true;
         [SerializeField] private string _buildLabel = "PRE-ALPHA RUNTIME";
 
-        private const float ProgressWidth = 760f;
-        private const float ProgressHeight = 8f;
-
-        private readonly List<BootParticle> _particles = new List<BootParticle>(36);
-        private readonly List<Image> _pulseTargets = new List<Image>(8);
-        private CanvasGroup _splashGroup;
-        private Image _progressFill;
-        private Text _statusText;
-        private Text _percentText;
-        private RectTransform _scanLine;
-        private RectTransform _leftGate;
-        private RectTransform _rightGate;
+        private LaunchReadinessCoordinator _readiness;
         private LaunchCinematicLifecycle _launchLifecycle;
+        private CurrentBootLoadReceipt _bootReceipt;
+        private CurrentRealmCatalogReceipt _catalogReceipt;
 
-        private IEnumerator Start()
+        private RectTransform _safeAreaRoot;
+        private Text _statusText;
+        private Text _detailText;
+        private Button _continueButton;
+        private Button _retryButton;
+        private int _readyFrame = -1;
+        private int _focusedGeneration;
+        private Button _focusedAction;
+        private bool _submitArmed;
+        private int _lastScreenWidth = -1;
+        private int _lastScreenHeight = -1;
+        private Rect _lastSafeArea = new Rect(-1f, -1f, -1f, -1f);
+        private LaunchReadinessState _lastRenderedState = (LaunchReadinessState)(-1);
+        private LaunchReadinessFailure _lastRenderedFailure = (LaunchReadinessFailure)(-1);
+        private int _lastRenderedGeneration = -1;
+
+        private void Start()
         {
             Debug.Log("AL Boot Sequence Started...");
+            _readiness = new LaunchReadinessCoordinator();
             _launchLifecycle = new LaunchCinematicLifecycle();
-            Bootloader.InitializeIfMissing();
+            _launchLifecycle.MarkPreparing();
 
             if (_buildRuntimeSplash)
             {
                 BuildRuntimeSplash();
             }
-
-            yield return RunLaunchFallbackSequence();
-
-            var realmService = ServiceLocator.Get<IRealmService>();
-
-            if (realmService.CurrentRealmId == RealmId.None)
-            {
-                Debug.Log("No Realm Selected. Transitioning to Realm Selection...");
-                SceneManager.LoadScene(_realmSelectionScene);
-            }
             else
             {
-                Debug.Log($"Realm {realmService.CurrentRealmId} detected. Loading Kingdom...");
-                SceneManager.LoadScene(_kingdomScene);
+                // The current production Boot scene has no authored launch UI. Keep the gate visible
+                // even if an old serialized flag is disabled instead of silently auto-routing.
+                BuildRuntimeSplash();
+            }
+
+            _launchLifecycle.FailToFallback("approved-media-unavailable");
+            _readiness.TryEstablishMedia(
+                _readiness.AttemptGeneration,
+                LaunchMediaPresentation.StaticFallbackEstablished);
+            RefreshPresentation(force: true);
+        }
+
+        private void Update()
+        {
+            if (_readiness == null)
+            {
+                return;
+            }
+
+            UpdateSafeAreaIfNeeded();
+            RefreshReadinessEvidence();
+            RefreshPresentation(force: false);
+            PollExplicitSubmit();
+        }
+
+        private void OnDisable()
+        {
+            _submitArmed = false;
+            _readyFrame = -1;
+            _focusedGeneration = 0;
+            _focusedAction = null;
+        }
+
+        private void OnDestroy()
+        {
+            if (_continueButton != null)
+            {
+                _continueButton.onClick.RemoveListener(OnContinueRequested);
+            }
+
+            if (_retryButton != null)
+            {
+                _retryButton.onClick.RemoveListener(OnRetryRequested);
             }
         }
 
-        private IEnumerator RunLaunchFallbackSequence()
+        private void OnApplicationPause(bool paused)
         {
-            _launchLifecycle.MarkPreparing();
-            float duration = Mathf.Max(0.8f, _minSplashScreenTime);
-            float elapsed = 0f;
-
-            while (elapsed < duration)
+            if (paused)
             {
-                elapsed += Time.unscaledDeltaTime;
-                float normalizedTime = Mathf.Clamp01(elapsed / duration);
-                UpdateSplash(normalizedTime, elapsed);
-                yield return null;
+                _submitArmed = false;
+            }
+        }
+
+        private void OnApplicationFocus(bool focused)
+        {
+            if (!focused)
+            {
+                _submitArmed = false;
+            }
+        }
+
+        private void RefreshReadinessEvidence()
+        {
+            LaunchReadinessSnapshot snapshot = _readiness.Snapshot;
+            if (snapshot.State == LaunchReadinessState.Failed ||
+                snapshot.State == LaunchReadinessState.Transitioning)
+            {
+                return;
             }
 
-            UpdateSplash(1f, duration);
-            yield return new WaitForSecondsRealtime(0.12f);
+            int generation = snapshot.AttemptGeneration;
+            if (_bootReceipt == null)
+            {
+                BootLoadReadinessProbeStatus bootStatus =
+                    BootLoadReadinessProbe.TryCapture(generation, out _bootReceipt);
+                if (bootStatus == BootLoadReadinessProbeStatus.Ready)
+                {
+                    _readiness.TryPublishBootLoad(_bootReceipt.Evidence);
+                }
+                else if (bootStatus == BootLoadReadinessProbeStatus.Unavailable)
+                {
+                    _readiness.TryFail(
+                        generation,
+                        LaunchReadinessFailure.BootLoadUnavailable,
+                        retryAllowed: false);
+                    return;
+                }
+            }
+            else if (!BootLoadReadinessProbe.IsCurrent(_bootReceipt))
+            {
+                _readiness.TryFail(
+                    generation,
+                    LaunchReadinessFailure.EvidenceStale,
+                    retryAllowed: false);
+                return;
+            }
+
+            if (_catalogReceipt == null)
+            {
+                if (RealmCatalogReadinessProbe.TryCapture(generation, out _catalogReceipt))
+                {
+                    _readiness.TryPublishCatalog(_catalogReceipt.Evidence);
+                }
+                else if (RealmCatalogRuntime.Status == RealmCatalogRuntimeStatus.Unavailable)
+                {
+                    _readiness.TryFail(
+                        generation,
+                        LaunchReadinessFailure.RequiredCatalogUnavailable,
+                        retryAllowed: true);
+                    return;
+                }
+            }
+            else if (!RealmCatalogReadinessProbe.IsCurrent(_catalogReceipt))
+            {
+                _readiness.TryFail(
+                    generation,
+                    LaunchReadinessFailure.EvidenceStale,
+                    retryAllowed: true);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(_realmSelectionScene) ||
+                string.Equals(
+                    _realmSelectionScene,
+                    _kingdomScene,
+                    StringComparison.Ordinal))
+            {
+                _readiness.TryFail(
+                    generation,
+                    LaunchReadinessFailure.DestinationUnavailable,
+                    retryAllowed: false);
+            }
+            else if (Application.CanStreamedLevelBeLoaded(_realmSelectionScene))
+            {
+                _readiness.TryPublishDestination(
+                    new LaunchDestinationEvidence(generation, _realmSelectionScene));
+            }
+            else if (_catalogReceipt != null)
+            {
+                _readiness.TryFail(
+                    generation,
+                    LaunchReadinessFailure.DestinationUnavailable,
+                    retryAllowed: true);
+            }
+        }
+
+        private void RefreshPresentation(bool force)
+        {
+            LaunchReadinessSnapshot snapshot = _readiness.Snapshot;
+            if (!force &&
+                snapshot.State == _lastRenderedState &&
+                snapshot.Failure == _lastRenderedFailure &&
+                snapshot.AttemptGeneration == _lastRenderedGeneration)
+            {
+                return;
+            }
+
+            _lastRenderedState = snapshot.State;
+            _lastRenderedFailure = snapshot.Failure;
+            _lastRenderedGeneration = snapshot.AttemptGeneration;
+
+            bool ready = snapshot.CanContinue;
+            bool failed = snapshot.State == LaunchReadinessState.Failed;
+            if (_continueButton != null)
+            {
+                _continueButton.gameObject.SetActive(ready);
+                _continueButton.interactable = ready;
+            }
+
+            if (_retryButton != null)
+            {
+                _retryButton.gameObject.SetActive(failed && snapshot.RetryAllowed);
+                _retryButton.interactable = failed && snapshot.RetryAllowed;
+            }
+
+            if (_statusText != null)
+            {
+                _statusText.text = StatusFor(snapshot);
+            }
+
+            if (_detailText != null)
+            {
+                _detailText.text = DetailFor(snapshot);
+            }
+
+            if (ready)
+            {
+                _launchLifecycle.MarkAwaitingContinue(mandatoryReadinessReady: true);
+                _readyFrame = Time.frameCount;
+                _submitArmed = false;
+                FocusCurrentAction(snapshot.AttemptGeneration, _continueButton);
+            }
+            else if (failed && snapshot.RetryAllowed)
+            {
+                _readyFrame = Time.frameCount;
+                _submitArmed = false;
+                FocusCurrentAction(snapshot.AttemptGeneration, _retryButton);
+            }
+            else
+            {
+                _readyFrame = -1;
+                _submitArmed = false;
+                ClearFocusedAction();
+            }
+        }
+
+        private void FocusCurrentAction(int generation, Button button)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            bool alreadyFocused =
+                _focusedGeneration == generation &&
+                _focusedAction == button;
+            _focusedGeneration = generation;
+            _focusedAction = button;
+
+            if (EventSystem.current == null ||
+                (alreadyFocused &&
+                 EventSystem.current.currentSelectedGameObject == button.gameObject))
+            {
+                return;
+            }
+
+            EventSystem.current.SetSelectedGameObject(button.gameObject);
+        }
+
+        private void ClearFocusedAction()
+        {
+            if (_focusedAction != null &&
+                EventSystem.current != null &&
+                EventSystem.current.currentSelectedGameObject == _focusedAction.gameObject)
+            {
+                EventSystem.current.SetSelectedGameObject(null);
+            }
+
+            _focusedAction = null;
+        }
+
+        private void PollExplicitSubmit()
+        {
+            LaunchReadinessSnapshot snapshot = _readiness.Snapshot;
+            bool canContinue = snapshot.CanContinue;
+            bool canRetry =
+                snapshot.State == LaunchReadinessState.Failed &&
+                snapshot.RetryAllowed;
+            if ((!canContinue && !canRetry) || Time.frameCount <= _readyFrame)
+            {
+                return;
+            }
+
+            if (!_submitArmed)
+            {
+                if (!AnySubmitControlHeld())
+                {
+                    _submitArmed = true;
+                }
+
+                return;
+            }
+
+            if (Input.GetKeyDown(KeyCode.Return) ||
+                Input.GetKeyDown(KeyCode.KeypadEnter) ||
+                Input.GetKeyDown(KeyCode.Space) ||
+                Input.GetButtonDown("Submit"))
+            {
+                if (canContinue)
+                {
+                    OnContinueRequested();
+                }
+                else
+                {
+                    OnRetryRequested();
+                }
+            }
+        }
+
+        private static bool AnySubmitControlHeld()
+        {
+            return Input.GetKey(KeyCode.Return) ||
+                Input.GetKey(KeyCode.KeypadEnter) ||
+                Input.GetKey(KeyCode.Space) ||
+                Input.GetButton("Submit");
+        }
+
+        private void OnContinueRequested()
+        {
+            if (_readiness == null || Time.frameCount <= _readyFrame)
+            {
+                return;
+            }
+
+            int generation = _readiness.AttemptGeneration;
+            if (!_readiness.TryBeginTransition(generation))
+            {
+                return;
+            }
+
+            if (_continueButton != null)
+            {
+                _continueButton.interactable = false;
+            }
+
+            _submitArmed = false;
+            _launchLifecycle.TryContinue(mandatoryReadinessReady: true);
+            RefreshPresentation(force: true);
+            StartCoroutine(LoadFirstUserDestination(generation));
+        }
+
+        private IEnumerator LoadFirstUserDestination(int attemptGeneration)
+        {
+            AsyncOperation operation = null;
+            try
+            {
+                operation = SceneManager.LoadSceneAsync(_realmSelectionScene, LoadSceneMode.Single);
+            }
+            catch (Exception exception)
+            {
+                Debug.LogError("[AL-LAUNCH-DESTINATION-FAILED] " + exception.GetType().Name);
+            }
+
+            if (operation == null)
+            {
+                _readiness.TryFailTransition(
+                    attemptGeneration,
+                    LaunchReadinessFailure.DestinationUnavailable,
+                    retryAllowed: true);
+                RefreshPresentation(force: true);
+                yield break;
+            }
+
+            while (!operation.isDone)
+            {
+                yield return null;
+            }
+        }
+
+        private void OnRetryRequested()
+        {
+            if (_readiness == null || Time.frameCount <= _readyFrame)
+            {
+                return;
+            }
+
+            LaunchReadinessFailure previousFailure = _readiness.Snapshot.Failure;
+            if (!_readiness.TryBeginRetry())
+            {
+                RefreshPresentation(force: true);
+                return;
+            }
+
+            _bootReceipt = null;
+            _catalogReceipt = null;
+            _focusedGeneration = 0;
+            _focusedAction = null;
+            _launchLifecycle = new LaunchCinematicLifecycle();
+            _launchLifecycle.MarkPreparing();
             _launchLifecycle.FailToFallback("approved-media-unavailable");
+            _readiness.TryEstablishMedia(
+                _readiness.AttemptGeneration,
+                LaunchMediaPresentation.StaticFallbackEstablished);
+
+            if (previousFailure == LaunchReadinessFailure.RequiredCatalogUnavailable ||
+                previousFailure == LaunchReadinessFailure.EvidenceStale)
+            {
+                RealmCatalogRuntime.TryRetry();
+            }
+
+            RefreshPresentation(force: true);
         }
 
         private void BuildRuntimeSplash()
         {
-            _particles.Clear();
-            _pulseTargets.Clear();
-
-            var canvasObject = new GameObject("LaunchFallbackCanvas");
+            var canvasObject = new GameObject("LaunchReadinessCanvas");
+            canvasObject.transform.SetParent(transform, false);
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 100;
 
             var scaler = canvasObject.AddComponent<CanvasScaler>();
             scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
+            // Treat layout units as mobile-density-independent planning units so the 64-unit
+            // action floor remains comfortably above the 48 dp interaction target on narrow screens.
+            scaler.referenceResolution = new Vector2(390f, 844f);
             scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
             scaler.matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            _splashGroup = canvasObject.AddComponent<CanvasGroup>();
-            _splashGroup.alpha = 0f;
+            CreatePanel(
+                canvasObject.transform,
+                "StaticFallbackBackground",
+                new Color(0.006f, 0.008f, 0.014f, 1f),
+                Vector2.zero,
+                Vector2.one);
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
-                       Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var safeAreaObject = new GameObject("SafeArea");
+            safeAreaObject.transform.SetParent(canvasObject.transform, false);
+            _safeAreaRoot = safeAreaObject.AddComponent<RectTransform>();
 
-            CreatePanel(canvasObject.transform, "FallbackBackground", new Color(0.006f, 0.008f, 0.012f, 1f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
+            var contentObject = new GameObject("LaunchContent");
+            contentObject.transform.SetParent(_safeAreaRoot, false);
+            var contentRect = contentObject.AddComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0.08f, 0.14f);
+            contentRect.anchorMax = new Vector2(0.92f, 0.86f);
+            contentRect.offsetMin = Vector2.zero;
+            contentRect.offsetMax = Vector2.zero;
 
-            var title = CreateText(canvasObject.transform, "Title", font, "ANOTHER LIFE", 54, new Vector2(0f, -318f), new Vector2(980f, 74f), TextAnchor.MiddleCenter);
-            title.color = new Color(0.88f, 0.88f, 0.86f, 1f);
-            title.resizeTextForBestFit = true;
-            title.resizeTextMinSize = 32;
-            title.resizeTextMaxSize = 54;
+            var layout = contentObject.AddComponent<VerticalLayoutGroup>();
+            layout.padding = new RectOffset(20, 20, 20, 20);
+            layout.spacing = 20f;
+            layout.childAlignment = TextAnchor.MiddleCenter;
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
 
-            var subtitle = CreateText(canvasObject.transform, "Subtitle", font, "Preparing launch", 18, new Vector2(0f, -374f), new Vector2(660f, 30f), TextAnchor.MiddleCenter);
-            subtitle.color = new Color(0.70f, 0.76f, 0.82f, 0.90f);
+            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
+                Resources.GetBuiltinResource<Font>("Arial.ttf");
 
-            var buildLabel = CreateText(canvasObject.transform, "BuildLabel", font, _buildLabel, 13, new Vector2(0f, -409f), new Vector2(520f, 22f), TextAnchor.MiddleCenter);
-            buildLabel.color = new Color(0.70f, 0.70f, 0.66f, 0.78f);
+            Text title = CreateText(
+                contentObject.transform,
+                "Title",
+                font,
+                "ANOTHER LIFE",
+                52,
+                84f);
+            title.color = new Color(0.92f, 0.92f, 0.88f, 1f);
 
-            _statusText = CreateText(canvasObject.transform, "Status", font, "Initializing required services", 16, new Vector2(-270f, -948f), new Vector2(520f, 30f), TextAnchor.MiddleLeft);
-            _statusText.color = new Color(0.80f, 0.88f, 0.94f, 0.92f);
+            Text build = CreateText(
+                contentObject.transform,
+                "BuildLabel",
+                font,
+                _buildLabel,
+                16,
+                36f);
+            build.color = new Color(0.66f, 0.69f, 0.72f, 0.9f);
 
-            BuildProgressBar(canvasObject.transform);
+            _statusText = CreateText(
+                contentObject.transform,
+                "ReadinessStatus",
+                font,
+                "Loading saved journey",
+                30,
+                72f);
+            _statusText.color = new Color(0.86f, 0.90f, 0.95f, 1f);
+
+            _detailText = CreateText(
+                contentObject.transform,
+                "ReadinessDetail",
+                font,
+                "Required game data is still being verified.",
+                20,
+                76f);
+            _detailText.color = new Color(0.70f, 0.76f, 0.82f, 1f);
+
+            _continueButton = CreateButton(
+                contentObject.transform,
+                "FinishedLoadingAction",
+                font,
+                "Continue");
+            _continueButton.onClick.AddListener(OnContinueRequested);
+            _continueButton.gameObject.SetActive(false);
+
+            _retryButton = CreateButton(
+                contentObject.transform,
+                "RetryReadinessAction",
+                font,
+                "Retry");
+            _retryButton.onClick.AddListener(OnRetryRequested);
+            _retryButton.gameObject.SetActive(false);
+
+            UpdateSafeAreaIfNeeded();
         }
 
-        private void BuildGateSigil(Transform parent)
+        private void UpdateSafeAreaIfNeeded()
         {
-            var outer = CreatePanel(parent, "GateOuter", new Color(0.92f, 0.70f, 0.38f, 0.30f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(212f, 212f));
-            outer.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            _pulseTargets.Add(outer);
+            if (_safeAreaRoot == null ||
+                Screen.width <= 0 ||
+                Screen.height <= 0)
+            {
+                return;
+            }
 
-            var mid = CreatePanel(parent, "GateMiddle", new Color(0.20f, 0.46f, 0.70f, 0.24f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(158f, 158f));
-            mid.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            _pulseTargets.Add(mid);
+            Rect safeArea = Screen.safeArea;
+            if (_lastScreenWidth == Screen.width &&
+                _lastScreenHeight == Screen.height &&
+                _lastSafeArea == safeArea)
+            {
+                return;
+            }
 
-            var core = CreatePanel(parent, "GateCore", new Color(0.012f, 0.018f, 0.026f, 0.92f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(102f, 102f));
-            core.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-
-            CreatePanel(parent, "GateVerticalTrace", new Color(1f, 0.82f, 0.46f, 0.74f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(5f, 154f));
-            CreatePanel(parent, "GateHorizontalTrace", new Color(0.28f, 0.56f, 0.78f, 0.56f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 90f), new Vector2(154f, 4f));
-
-            var scan = CreatePanel(parent, "GateScanLine", new Color(0.74f, 0.92f, 1f, 0.56f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 45f), new Vector2(132f, 2f));
-            _scanLine = scan.rectTransform;
-
-            var left = CreatePanel(parent, "GateLeftPlate", new Color(0.013f, 0.020f, 0.029f, 0.94f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-18f, 90f), new Vector2(150f, 112f));
-            var right = CreatePanel(parent, "GateRightPlate", new Color(0.013f, 0.020f, 0.029f, 0.94f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0f, 0.5f), new Vector2(18f, 90f), new Vector2(150f, 112f));
-            _leftGate = left.rectTransform;
-            _rightGate = right.rectTransform;
+            _lastScreenWidth = Screen.width;
+            _lastScreenHeight = Screen.height;
+            _lastSafeArea = safeArea;
+            _safeAreaRoot.anchorMin = new Vector2(
+                safeArea.xMin / Screen.width,
+                safeArea.yMin / Screen.height);
+            _safeAreaRoot.anchorMax = new Vector2(
+                safeArea.xMax / Screen.width,
+                safeArea.yMax / Screen.height);
+            _safeAreaRoot.offsetMin = Vector2.zero;
+            _safeAreaRoot.offsetMax = Vector2.zero;
         }
 
-        private void BuildCitadelSilhouette(Transform parent)
+        private static string StatusFor(LaunchReadinessSnapshot snapshot)
         {
-            CreatePanel(parent, "HorizonRidgeFar", new Color(0.020f, 0.025f, 0.031f, 0.92f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 126f), new Vector2(1560f, 78f));
-            CreatePanel(parent, "HorizonRidgeNear", new Color(0.008f, 0.012f, 0.017f, 0.98f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 66f), new Vector2(1920f, 116f));
-
-            for (int i = 0; i < 11; i++)
+            switch (snapshot.State)
             {
-                float x = -820f + i * 164f;
-                float height = 34f + (i % 4) * 20f;
-                float width = 42f + (i % 3) * 16f;
-                var tower = CreatePanel(parent, "CitadelTower_" + i, new Color(0.006f, 0.009f, 0.013f, 0.96f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(x, 124f), new Vector2(width, height));
-                if (i % 3 == 0)
-                {
-                    _pulseTargets.Add(CreatePanel(tower.transform, "TowerWindow", new Color(1f, 0.62f, 0.26f, 0.36f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -12f), new Vector2(5f, 18f)));
-                }
+                case LaunchReadinessState.WaitingForBootLoad:
+                    return "Loading saved journey";
+                case LaunchReadinessState.WaitingForRequiredCatalogs:
+                    return "Loading realm choices";
+                case LaunchReadinessState.WaitingForMediaPresentation:
+                    return "Preparing launch presentation";
+                case LaunchReadinessState.WaitingForDestination:
+                    return "Preparing character setup";
+                case LaunchReadinessState.AwaitingExplicitContinue:
+                    return "Finished Loading";
+                case LaunchReadinessState.Transitioning:
+                    return "Opening character setup";
+                case LaunchReadinessState.Failed:
+                    return "Launch needs attention";
+                default:
+                    return "Preparing launch";
             }
         }
 
-        private void BuildProgressBar(Transform parent)
+        private static string DetailFor(LaunchReadinessSnapshot snapshot)
         {
-            CreatePanel(parent, "ProgressOuter", new Color(0.006f, 0.009f, 0.014f, 0.94f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 112f), new Vector2(ProgressWidth + 36f, 26f));
-            CreatePanel(parent, "ProgressTopTrace", new Color(0.60f, 0.66f, 0.72f, 0.46f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 126f), new Vector2(ProgressWidth + 20f, 2f));
-            CreatePanel(parent, "ProgressTrack", new Color(0.035f, 0.046f, 0.058f, 0.95f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 112f), new Vector2(ProgressWidth, ProgressHeight));
-            _progressFill = CreatePanel(parent, "ProgressFill", new Color(0.74f, 0.80f, 0.86f, 0.98f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 0.5f), new Vector2(-ProgressWidth * 0.5f, 112f), new Vector2(1f, ProgressHeight));
-            _pulseTargets.Add(_progressFill);
-        }
-
-        private void BuildParticleField(Transform parent)
-        {
-            for (int i = 0; i < 36; i++)
+            if (snapshot.State != LaunchReadinessState.Failed)
             {
-                float x = -910f + (i * 151f) % 1820f;
-                float y = -760f + (i * 89f) % 920f;
-                float size = 2.5f + i % 5;
-                float alpha = 0.10f + (i % 6) * 0.025f;
-                var image = CreatePanel(parent, "BootAsh_" + i, new Color(1f, 0.66f, 0.30f, alpha), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Vector2(x, y), new Vector2(size, size));
-                _particles.Add(new BootParticle
-                {
-                    Image = image,
-                    RectTransform = image.rectTransform,
-                    Velocity = new Vector2(-6f + i % 7 * 2.5f, 14f + i % 9 * 4f),
-                    BaseAlpha = alpha,
-                    Phase = i * 0.47f,
-                    PulseSpeed = 1.1f + i % 5 * 0.18f
-                });
+                return snapshot.CanContinue
+                    ? "Press Continue, Enter, Space, or your controller Submit button."
+                    : "Required game data is still being verified.";
+            }
+
+            switch (snapshot.Failure)
+            {
+                case LaunchReadinessFailure.RequiredCatalogUnavailable:
+                    return snapshot.RetryAllowed
+                        ? "Realm choices could not be loaded. Retry this launch check."
+                        : "Realm choices could not be loaded. Restart the game.";
+                case LaunchReadinessFailure.DestinationUnavailable:
+                    return snapshot.RetryAllowed
+                        ? "Character setup is unavailable. Retry this launch check."
+                        : "Character setup is unavailable. Restart the game.";
+                case LaunchReadinessFailure.RetryLimitReached:
+                    return "Launch could not recover after several attempts. Restart the game.";
+                case LaunchReadinessFailure.EvidenceStale:
+                    return snapshot.RetryAllowed
+                        ? "Launch data changed while loading. Retry this launch check."
+                        : "Launch data changed unexpectedly. Restart the game.";
+                default:
+                    return "Your saved journey could not be verified. Restart the game.";
             }
         }
 
-        private void UpdateSplash(float normalizedTime, float elapsed)
-        {
-            float easedProgress = 1f - Mathf.Pow(1f - normalizedTime, 2.65f);
-            float entryFade = Mathf.Clamp01(normalizedTime / 0.16f);
-
-            if (_splashGroup != null)
-            {
-                _splashGroup.alpha = entryFade;
-            }
-
-            if (_progressFill != null)
-            {
-                _progressFill.rectTransform.sizeDelta = new Vector2(Mathf.Max(1f, ProgressWidth * easedProgress), ProgressHeight);
-            }
-
-            if (_percentText != null)
-            {
-                _percentText.text = string.Empty;
-            }
-
-            if (_statusText != null)
-            {
-                _statusText.text = GetStatusLine(normalizedTime);
-            }
-
-            if (_scanLine != null)
-            {
-                float scanY = Mathf.Lerp(36f, 144f, Mathf.PingPong(elapsed * 0.48f, 1f));
-                _scanLine.anchoredPosition = new Vector2(0f, scanY);
-            }
-
-            if (_leftGate != null && _rightGate != null)
-            {
-                float open = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((normalizedTime - 0.18f) / 0.64f));
-                _leftGate.anchoredPosition = new Vector2(Mathf.Lerp(-18f, -96f, open), 90f);
-                _rightGate.anchoredPosition = new Vector2(Mathf.Lerp(18f, 96f, open), 90f);
-            }
-
-            for (int i = 0; i < _pulseTargets.Count; i++)
-            {
-                var image = _pulseTargets[i];
-                if (image == null)
-                {
-                    continue;
-                }
-
-                Color color = image.color;
-                float pulse = 0.74f + Mathf.Sin(elapsed * 1.65f + i * 0.93f) * 0.18f;
-                color.a = Mathf.Clamp01(color.a * 0.86f + pulse * 0.14f);
-                image.color = color;
-            }
-
-            AnimateParticles(elapsed);
-        }
-
-        private void AnimateParticles(float elapsed)
-        {
-            for (int i = 0; i < _particles.Count; i++)
-            {
-                BootParticle particle = _particles[i];
-                if (particle.RectTransform == null || particle.Image == null)
-                {
-                    continue;
-                }
-
-                Vector2 position = particle.RectTransform.anchoredPosition;
-                position += particle.Velocity * Time.unscaledDeltaTime;
-                position.x += Mathf.Sin(elapsed * 0.8f + particle.Phase) * Time.unscaledDeltaTime * 10f;
-
-                if (position.y > 560f)
-                {
-                    position.y = -540f;
-                    position.x = -910f + (i * 151f + Mathf.FloorToInt(elapsed * 37f)) % 1820f;
-                }
-
-                if (position.x > 960f)
-                {
-                    position.x = -960f;
-                }
-                else if (position.x < -960f)
-                {
-                    position.x = 960f;
-                }
-
-                particle.RectTransform.anchoredPosition = position;
-                Color color = particle.Image.color;
-                color.a = particle.BaseAlpha * (0.62f + Mathf.Sin(elapsed * particle.PulseSpeed + particle.Phase) * 0.28f);
-                particle.Image.color = color;
-            }
-        }
-
-        private static string GetStatusLine(float normalizedTime)
-        {
-            if (normalizedTime < 0.34f)
-            {
-                return "Initializing required services";
-            }
-
-            if (normalizedTime < 0.66f)
-            {
-                return "Checking launch media availability";
-            }
-
-            if (normalizedTime < 0.92f)
-            {
-                return "Using fallback launch path";
-            }
-
-            return "Entering realm flow";
-        }
-
-        private static Image CreatePanel(Transform parent, string name, Color color, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
+        private static Image CreatePanel(
+            Transform parent,
+            string name,
+            Color color,
+            Vector2 anchorMin,
+            Vector2 anchorMax)
         {
             var panelObject = new GameObject(name);
             panelObject.transform.SetParent(parent, false);
             var image = panelObject.AddComponent<Image>();
             image.color = color;
             image.raycastTarget = false;
-            var rect = panelObject.GetComponent<RectTransform>();
+            RectTransform rect = image.rectTransform;
             rect.anchorMin = anchorMin;
             rect.anchorMax = anchorMax;
-            rect.pivot = pivot;
-            rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = sizeDelta;
+            rect.offsetMin = Vector2.zero;
+            rect.offsetMax = Vector2.zero;
             return image;
         }
 
-        private static Image CreateGradientPanel(Transform parent, string name, Color topColor, Color bottomColor, Vector2 anchorMin, Vector2 anchorMax, Vector2 pivot, Vector2 anchoredPosition, Vector2 sizeDelta)
-        {
-            var image = CreatePanel(parent, name, Color.white, anchorMin, anchorMax, pivot, anchoredPosition, sizeDelta);
-            image.sprite = CreateVerticalGradientSprite(name + "_Sprite", topColor, bottomColor);
-            return image;
-        }
-
-        private static Sprite CreateVerticalGradientSprite(string name, Color topColor, Color bottomColor)
-        {
-            const int width = 8;
-            const int height = 96;
-            var texture = new Texture2D(width, height, TextureFormat.RGBA32, false)
-            {
-                name = name + "_Texture",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp
-            };
-
-            for (int y = 0; y < height; y++)
-            {
-                float t = y / (height - 1f);
-                Color color = Color.Lerp(bottomColor, topColor, t);
-                for (int x = 0; x < width; x++)
-                {
-                    texture.SetPixel(x, y, color);
-                }
-            }
-
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, width, height), new Vector2(0.5f, 0.5f), 100f);
-        }
-
-        private static Sprite CreateRadialGlowSprite(string name, Color centerColor, Color edgeColor)
-        {
-            const int size = 96;
-            var texture = new Texture2D(size, size, TextureFormat.RGBA32, false)
-            {
-                name = name + "_Texture",
-                filterMode = FilterMode.Bilinear,
-                wrapMode = TextureWrapMode.Clamp
-            };
-
-            Vector2 center = new Vector2((size - 1) * 0.5f, (size - 1) * 0.5f);
-            float radius = size * 0.5f;
-            for (int y = 0; y < size; y++)
-            {
-                for (int x = 0; x < size; x++)
-                {
-                    float distance = Vector2.Distance(new Vector2(x, y), center) / radius;
-                    float t = Mathf.Clamp01(distance);
-                    float falloff = 1f - Mathf.SmoothStep(0f, 1f, t);
-                    texture.SetPixel(x, y, Color.Lerp(edgeColor, centerColor, falloff));
-                }
-            }
-
-            texture.Apply();
-            return Sprite.Create(texture, new Rect(0f, 0f, size, size), new Vector2(0.5f, 0.5f), 100f);
-        }
-
-        private static Text CreateText(Transform parent, string name, Font font, string textValue, int fontSize, Vector2 anchoredPosition, Vector2 sizeDelta, TextAnchor alignment)
+        private static Text CreateText(
+            Transform parent,
+            string name,
+            Font font,
+            string value,
+            int fontSize,
+            float preferredHeight)
         {
             var textObject = new GameObject(name);
             textObject.transform.SetParent(parent, false);
             var text = textObject.AddComponent<Text>();
-            text.text = textValue;
             text.font = font;
+            text.text = value;
             text.fontSize = fontSize;
-            text.alignment = alignment;
+            text.alignment = TextAnchor.MiddleCenter;
             text.horizontalOverflow = HorizontalWrapMode.Wrap;
             text.verticalOverflow = VerticalWrapMode.Truncate;
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = Math.Max(14, fontSize / 2);
+            text.resizeTextMaxSize = fontSize;
             text.raycastTarget = false;
-
-            var rect = text.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(0.5f, 1f);
-            rect.anchorMax = new Vector2(0.5f, 1f);
-            rect.pivot = new Vector2(0.5f, 0.5f);
-            rect.anchoredPosition = anchoredPosition;
-            rect.sizeDelta = sizeDelta;
+            var layout = textObject.AddComponent<LayoutElement>();
+            layout.preferredHeight = preferredHeight;
             return text;
         }
 
-        private sealed class BootParticle
+        private static Button CreateButton(
+            Transform parent,
+            string name,
+            Font font,
+            string label)
         {
-            public Image Image;
-            public RectTransform RectTransform;
-            public Vector2 Velocity;
-            public float BaseAlpha;
-            public float Phase;
-            public float PulseSpeed;
+            var buttonObject = new GameObject(name);
+            buttonObject.transform.SetParent(parent, false);
+            var image = buttonObject.AddComponent<Image>();
+            image.color = new Color(0.18f, 0.38f, 0.58f, 1f);
+            var button = buttonObject.AddComponent<Button>();
+            button.targetGraphic = image;
+            button.navigation = new Navigation { mode = Navigation.Mode.None };
+            var layout = buttonObject.AddComponent<LayoutElement>();
+            layout.preferredHeight = 72f;
+            layout.minHeight = 64f;
+
+            Text text = CreateText(
+                buttonObject.transform,
+                "Label",
+                font,
+                label,
+                25,
+                64f);
+            RectTransform textRect = text.rectTransform;
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(18f, 8f);
+            textRect.offsetMax = new Vector2(-18f, -8f);
+            text.color = Color.white;
+            return button;
         }
     }
 }

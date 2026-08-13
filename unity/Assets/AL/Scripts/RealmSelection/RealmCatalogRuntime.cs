@@ -60,17 +60,58 @@ namespace AL.RealmSelection
 
         public static RealmCatalogRuntimeStatus Status { get; private set; }
         public static RealmCatalogSnapshot Current { get; private set; }
+        public static int CurrentGeneration { get; private set; }
         public static string TechnicalCode { get; private set; } = "AL-REALM-CATALOG-NOT-STARTED";
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetRuntimeState()
+        {
+            Status = RealmCatalogRuntimeStatus.NotStarted;
+            Current = null;
+            CurrentGeneration = 0;
+            TechnicalCode = "AL-REALM-CATALOG-NOT-STARTED";
+        }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void BeginLoad()
         {
-            if (Status == RealmCatalogRuntimeStatus.Loading || Status == RealmCatalogRuntimeStatus.Ready) return;
+            TryStartAttempt();
+        }
+
+        public static bool TryRetry()
+        {
+            if (Status != RealmCatalogRuntimeStatus.Unavailable &&
+                Status != RealmCatalogRuntimeStatus.NotStarted)
+            {
+                return false;
+            }
+
+            return TryStartAttempt();
+        }
+
+        private static bool TryStartAttempt()
+        {
+            if (Status == RealmCatalogRuntimeStatus.Loading ||
+                Status == RealmCatalogRuntimeStatus.Ready)
+            {
+                return false;
+            }
+
+            if (CurrentGeneration == int.MaxValue)
+            {
+                Current = null;
+                Status = RealmCatalogRuntimeStatus.Unavailable;
+                TechnicalCode = "AL-REALM-CATALOG-GENERATION-EXHAUSTED";
+                return false;
+            }
+
+            CurrentGeneration++;
             MarkLoading();
             var host = new GameObject("AL.RealmCatalogRuntime");
             UnityEngine.Object.DontDestroyOnLoad(host);
             host.hideFlags = HideFlags.HideAndDontSave;
-            host.AddComponent<RealmCatalogRuntimeHost>();
+            host.AddComponent<RealmCatalogRuntimeHost>().Initialize(CurrentGeneration);
+            return true;
         }
 
         public static RealmCatalogLoadResult Parse(string json)
@@ -126,6 +167,18 @@ namespace AL.RealmSelection
 
         internal static void Publish(RealmCatalogLoadResult result)
         {
+            Publish(CurrentGeneration, result);
+        }
+
+        internal static void Publish(int attemptGeneration, RealmCatalogLoadResult result)
+        {
+            if (attemptGeneration != CurrentGeneration ||
+                Status != RealmCatalogRuntimeStatus.Loading ||
+                result == null)
+            {
+                return;
+            }
+
             Current = result.Snapshot;
             TechnicalCode = result.TechnicalCode;
             Status = Current == null ? RealmCatalogRuntimeStatus.Unavailable : RealmCatalogRuntimeStatus.Ready;
@@ -188,6 +241,13 @@ namespace AL.RealmSelection
 
     public sealed class RealmCatalogRuntimeHost : MonoBehaviour
     {
+        private int _attemptGeneration;
+
+        internal void Initialize(int attemptGeneration)
+        {
+            _attemptGeneration = attemptGeneration;
+        }
+
         public static string BuildRequestUri(string streamingAssetsRoot)
         {
             if (string.IsNullOrWhiteSpace(streamingAssetsRoot))
@@ -225,6 +285,9 @@ namespace AL.RealmSelection
 
         private IEnumerator Start()
         {
+            int attemptGeneration = _attemptGeneration > 0
+                ? _attemptGeneration
+                : RealmCatalogRuntime.CurrentGeneration;
             string path = Application.isEditor
                 ? BuildEditorRequestUri(Application.dataPath)
                 : BuildRequestUri(Application.streamingAssetsPath);
@@ -240,7 +303,7 @@ namespace AL.RealmSelection
                     result = RealmCatalogRuntime.Parse(handler.GetUtf8Text());
                 else
                     result = RealmCatalogRuntime.ReadFailure();
-                RealmCatalogRuntime.Publish(result);
+                RealmCatalogRuntime.Publish(attemptGeneration, result);
             }
             Destroy(gameObject);
         }

@@ -10,6 +10,7 @@ namespace AL.UI
         Playing,
         SkipEligible,
         Completing,
+        AwaitingContinue,
         Transitioned,
         Failed,
         Fallback
@@ -87,6 +88,8 @@ namespace AL.UI
     public static class LaunchCinematicRuntimeValidator
     {
         private const int ApprovedFramesPerSecond = 24;
+        private const int ApprovedFrameCount = 1440;
+        private const float ApprovedDurationSeconds = 60f;
         private const int DesktopWidth = 1920;
         private const int DesktopHeight = 1080;
         private const int AndroidWidth = 1280;
@@ -240,9 +243,18 @@ namespace AL.UI
                 diagnostics.Add(Error("AL-LAUNCH-FPS", "Launch cinematic frame rate must be 24 FPS."));
             }
 
-            if (record.DurationSeconds < 59.5f || record.DurationSeconds > 60.5f || float.IsNaN(record.DurationSeconds) || float.IsInfinity(record.DurationSeconds))
+            if (float.IsNaN(record.DurationSeconds) ||
+                float.IsInfinity(record.DurationSeconds) ||
+                Math.Abs(record.DurationSeconds - ApprovedDurationSeconds) > 0.001f)
             {
-                diagnostics.Add(Error("AL-LAUNCH-DURATION", "Launch cinematic duration must match the approved one-minute runtime envelope."));
+                diagnostics.Add(Error("AL-LAUNCH-DURATION", "Launch cinematic duration must be exactly 60 seconds."));
+            }
+
+            if (record.FrameCount != ApprovedFrameCount)
+            {
+                diagnostics.Add(Error(
+                    "AL-LAUNCH-MASTER-FRAMES",
+                    "Launch cinematic master must contain exactly 1,440 frames on [0, 1440)."));
             }
 
             if (record.FramesPerSecond > 0 && record.FrameCount > 0)
@@ -284,6 +296,7 @@ namespace AL.UI
     public sealed class LaunchCinematicLifecycle
     {
         private bool _transitioned;
+        private bool _presentationTerminal;
 
         public LaunchCinematicState State { get; private set; } = LaunchCinematicState.Initializing;
         public string TransitionReason { get; private set; } = string.Empty;
@@ -291,7 +304,7 @@ namespace AL.UI
 
         public void MarkPreparing()
         {
-            if (!_transitioned)
+            if (!_transitioned && !_presentationTerminal)
             {
                 State = LaunchCinematicState.PreparingMedia;
             }
@@ -299,7 +312,7 @@ namespace AL.UI
 
         public void MarkPlaying()
         {
-            if (!_transitioned)
+            if (!_transitioned && !_presentationTerminal)
             {
                 State = LaunchCinematicState.Playing;
             }
@@ -307,29 +320,57 @@ namespace AL.UI
 
         public bool TrySkip(int currentFrame, int eligibilityFrame)
         {
-            if (_transitioned || currentFrame < eligibilityFrame)
+            if (_transitioned || _presentationTerminal || currentFrame < eligibilityFrame)
             {
                 return false;
             }
 
-            State = LaunchCinematicState.SkipEligible;
-            return CompleteOnce("skip");
+            _presentationTerminal = true;
+            TransitionReason = "skip";
+            State = LaunchCinematicState.Fallback;
+            return true;
         }
 
         public bool FailToFallback(string reason)
         {
-            if (_transitioned)
+            if (_transitioned || _presentationTerminal)
             {
                 return false;
             }
 
+            _presentationTerminal = true;
+            TransitionReason = string.IsNullOrWhiteSpace(reason) ? "fallback" : reason;
             State = LaunchCinematicState.Fallback;
-            return CompleteOnce(string.IsNullOrWhiteSpace(reason) ? "fallback" : reason);
+            return true;
+        }
+
+        public bool MarkAwaitingContinue(bool mandatoryReadinessReady)
+        {
+            if (_transitioned || !_presentationTerminal || !mandatoryReadinessReady)
+            {
+                return false;
+            }
+
+            State = LaunchCinematicState.AwaitingContinue;
+            return true;
+        }
+
+        public bool TryContinue(bool mandatoryReadinessReady)
+        {
+            if (_transitioned ||
+                !_presentationTerminal ||
+                !mandatoryReadinessReady ||
+                State != LaunchCinematicState.AwaitingContinue)
+            {
+                return false;
+            }
+
+            return CompleteOnce("explicit-continue");
         }
 
         public bool CompleteOnce(string reason)
         {
-            if (_transitioned)
+            if (_transitioned || State != LaunchCinematicState.AwaitingContinue)
             {
                 return false;
             }
