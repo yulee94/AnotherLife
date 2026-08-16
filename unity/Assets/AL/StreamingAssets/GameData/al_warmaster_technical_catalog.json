@@ -1,0 +1,37 @@
+{
+  "catalogId": "al_warmaster_catalog",
+  "schemaVersion": 1,
+  "revision": "pending-user-balance-approval-v1",
+  "activation": "inactive",
+  "contentSourceCatalogId": "al_warmaster_content_catalog",
+  "currencyId": "warzone_credit",
+  "set": {
+    "id": "prototype_true_warmaster",
+    "requiredPieceCount": null,
+    "completionRewardId": null,
+    "pieceIds": [
+      "warmaster_piece_01",
+      "warmaster_piece_02",
+      "warmaster_piece_03",
+      "warmaster_piece_04",
+      "warmaster_piece_05",
+      "warmaster_piece_06",
+      "warmaster_piece_07",
+      "warmaster_piece_08",
+      "warmaster_piece_09",
+      "warmaster_piece_10"
+    ]
+  },
+  "pieces": [
+    { "id": "warmaster_piece_01", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_02", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_03", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_04", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_05", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_06", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_07", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_08", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_09", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null },
+    { "id": "warmaster_piece_10", "setId": "prototype_true_warmaster", "warzoneCreditPrice": null, "requiredOwnedPieceCount": null, "purchaseExperienceAward": null, "equipmentSlotId": null, "statModifiers": null }
+  ]
+}
