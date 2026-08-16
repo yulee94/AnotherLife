@@ -42,6 +42,7 @@ namespace AL.Tests.EditMode
             Assert.That(result.Snapshot.RealmGems.Select(gem => gem.Id), Is.Ordered);
             Assert.That(result.Snapshot.RealmGems.Count, Is.EqualTo(8));
             Assert.That(result.Snapshot.Wishgate.Id, Is.EqualTo("wishgate_eightfold_concordance"));
+            Assert.That(result.Snapshot.Wishgate.EligibilityAuthorityAvailable, Is.False);
             Assert.That(result.Snapshot.Wishgate.RewardAuthorityAvailable, Is.False);
 
             RealmGemWishgateRuntimeCatalog.MarkLoadingForTests(1);
