@@ -1,0 +1,30 @@
+{
+  "gameId": "another-life",
+  "catalogId": "al_realm_gem_wishgate_runtime_catalog",
+  "schemaVersion": 1,
+  "contentVersion": 1,
+  "authorityId": "another-life.realm-gem-wishgate.production",
+  "authorityVersion": 1,
+  "sourceCatalogId": "al_realm_gem_wishgate_content_catalog",
+  "sourcePacketId": "al_narrative_realm_gem_wishgate_source_v001",
+  "sourceSha256": "899892f08ecb330359586f3d2ba767c193e4e6c9c91f380cb5c35ccec9a057ce",
+  "custodyAuthorityAvailable": true,
+  "realmGems": [
+    { "id": "gem_crownlands_sun", "realmId": "crownlands", "runtimeRealmId": "Crownlands", "gemIndex": 1 },
+    { "id": "gem_crownlands_oath", "realmId": "crownlands", "runtimeRealmId": "Crownlands", "gemIndex": 2 },
+    { "id": "gem_stonehold_forge", "realmId": "stonehold", "runtimeRealmId": "Stonehold", "gemIndex": 1 },
+    { "id": "gem_stonehold_depth", "realmId": "stonehold", "runtimeRealmId": "Stonehold", "gemIndex": 2 },
+    { "id": "gem_eldergrove_root", "realmId": "eldergrove", "runtimeRealmId": "Eldergrove", "gemIndex": 1 },
+    { "id": "gem_eldergrove_moon", "realmId": "eldergrove", "runtimeRealmId": "Eldergrove", "gemIndex": 2 },
+    { "id": "gem_umbral_veil", "realmId": "umbral", "runtimeRealmId": "Umbral", "gemIndex": 1 },
+    { "id": "gem_umbral_ember", "realmId": "umbral", "runtimeRealmId": "Umbral", "gemIndex": 2 }
+  ],
+  "wishgate": {
+    "id": "wishgate_eightfold_concordance",
+    "entryZoneId": "zone_accordant_isle",
+    "requiredGemCount": 8,
+    "eligibilityAuthorityAvailable": false,
+    "rewardAuthorityAvailable": false,
+    "approvedRewardIds": []
+  }
+}

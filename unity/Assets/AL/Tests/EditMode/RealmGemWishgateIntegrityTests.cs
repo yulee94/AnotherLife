@@ -4,6 +4,7 @@ using System;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.RealmGems;
 using AL.Services.Local;
 using NUnit.Framework;
 
@@ -83,6 +84,49 @@ namespace AL.Tests.EditMode
             Assert.That(backing.IsDropped, Is.False);
             Assert.That(backing.CarrierId, Is.EqualTo("carrier_a"));
             Assert.That(backing.LastDroppedTimestamp, Is.Zero);
+            Assert.That(fixture.SaveCount, Is.Zero);
+        }
+
+        [Test]
+        public void RealmGemAndWishgateMutationsRequireReadyRecognizedCatalogAuthority()
+        {
+            var save = NewSave();
+            var gem = new RealmGemState
+            {
+                GemId = "gem_crownlands_sun",
+                HomeRealm = RealmId.Crownlands,
+                GemIndex = 1,
+                IsAtHome = true
+            };
+            save.RealmGems.Add(gem);
+            var fixture = new FakeSaveService(save);
+            var service = new LocalRealmGemService(fixture, () => null);
+
+            Assert.That(service.PickUpGem(gem.GemId, "carrier"), Is.False);
+            service.MarkWishgateEarned("complete_eight_gems");
+            service.ChooseWishReward("unknown_reward");
+
+            Assert.That(gem.IsAtHome, Is.True);
+            Assert.That(save.Wishgate.IsEarned, Is.False);
+            Assert.That(fixture.SaveCount, Is.Zero);
+        }
+
+        [Test]
+        public void RealmGemMutationsRejectStateThatContradictsReadyCatalogEntry()
+        {
+            RealmGemWishgateCatalogSnapshot catalog = LoadValidRuntimeCatalog();
+            var save = NewSave();
+            save.RealmGems.Add(new RealmGemState
+            {
+                GemId = "gem_crownlands_sun",
+                HomeRealm = RealmId.Umbral,
+                GemIndex = 1,
+                IsAtHome = true
+            });
+            var fixture = new FakeSaveService(save);
+            var service = new LocalRealmGemService(fixture, () => catalog);
+
+            Assert.That(service.PickUpGem("gem_crownlands_sun", "carrier"), Is.False);
             Assert.That(fixture.SaveCount, Is.Zero);
         }
 
@@ -206,6 +250,18 @@ namespace AL.Tests.EditMode
             Assert.That(save.Wishgate.LastRewardId, Is.Null);
             Assert.That(save.Wishgate.LastRewardChosenTimestamp, Is.Zero);
             Assert.That(fixture.SaveCount, Is.Zero);
+        }
+
+        private static RealmGemWishgateCatalogSnapshot LoadValidRuntimeCatalog()
+        {
+            string path = System.IO.Path.Combine(
+                UnityEngine.Application.dataPath,
+                "StreamingAssets",
+                RealmGemWishgateRuntimeCatalog.RelativePath);
+            RealmGemWishgateCatalogLoadResult result =
+                RealmGemWishgateRuntimeCatalog.Parse(System.IO.File.ReadAllText(path));
+            Assert.That(result.IsSuccess, Is.True, result.TechnicalCode);
+            return result.Snapshot;
         }
 
         private static SaveGameData NewSave()

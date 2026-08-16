@@ -4,6 +4,7 @@ using System.Linq;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.RealmGems;
 using UnityEngine;
 
 namespace AL.Services.Local
@@ -11,10 +12,19 @@ namespace AL.Services.Local
     public class LocalRealmGemService : IRealmGemService
     {
         private readonly ISaveGameService _saveGameService;
+        private readonly Func<RealmGemWishgateCatalogSnapshot> _catalogProvider;
 
         public LocalRealmGemService(ISaveGameService saveGameService)
+            : this(saveGameService, () => RealmGemWishgateRuntimeCatalog.Current)
+        {
+        }
+
+        internal LocalRealmGemService(
+            ISaveGameService saveGameService,
+            Func<RealmGemWishgateCatalogSnapshot> catalogProvider)
         {
             _saveGameService = saveGameService;
+            _catalogProvider = catalogProvider ?? (() => null);
         }
 
         public IEnumerable<RealmGemState> GetRealmGems()
@@ -93,6 +103,12 @@ namespace AL.Services.Local
 
         public void MarkWishgateEarned(string reason)
         {
+            RealmGemWishgateCatalogSnapshot catalog = GetCatalogAuthority();
+            if (catalog == null || !catalog.Wishgate.EligibilityAuthorityAvailable)
+            {
+                return;
+            }
+
             if (!TryGetMutableSave(out SaveGameData save))
             {
                 return;
@@ -111,6 +127,12 @@ namespace AL.Services.Local
 
         public void ChooseWishReward(string rewardId)
         {
+            RealmGemWishgateCatalogSnapshot catalog = GetCatalogAuthority();
+            if (catalog == null || !catalog.IsApprovedReward(rewardId))
+            {
+                return;
+            }
+
             if (!TryGetMutableSave(out SaveGameData save))
             {
                 return;
@@ -169,6 +191,14 @@ namespace AL.Services.Local
                 return false;
             }
 
+            RealmGemWishgateCatalogSnapshot catalog = GetCatalogAuthority();
+            if (catalog == null ||
+                !catalog.CustodyAuthorityAvailable ||
+                !catalog.TryGetRealmGem(gemId, out RealmGemCatalogEntry catalogEntry))
+            {
+                return false;
+            }
+
             if (!TryGetMutableSave(out SaveGameData save))
             {
                 return false;
@@ -186,13 +216,28 @@ namespace AL.Services.Local
                     string.Equals(candidate.GemId, gemId, StringComparison.Ordinal))
                 .Take(2)
                 .ToArray();
-            if (matches.Length != 1 || !HasValidCustody(matches[0], now))
+            if (matches.Length != 1 ||
+                matches[0].HomeRealm != catalogEntry.RuntimeRealmId ||
+                matches[0].GemIndex != catalogEntry.GemIndex ||
+                !HasValidCustody(matches[0], now))
             {
                 return false;
             }
 
             gem = matches[0];
             return true;
+        }
+
+        private RealmGemWishgateCatalogSnapshot GetCatalogAuthority()
+        {
+            try
+            {
+                return _catalogProvider();
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         private bool TryGetMutableSave(out SaveGameData save) =>
