@@ -66,11 +66,6 @@ namespace AL.Battle.Simulator
                 Summary = BuildSummary(attackerWins, rounds, attackerPower, defenderPower, credits)
             };
 
-            if (attackerWins)
-            {
-                TryUpdateWinQuest();
-            }
-
             return report;
         }
 
@@ -349,16 +344,5 @@ namespace AL.Battle.Simulator
             return $"{outcome} after {rounds} rounds. Attacker power {attackerPower}, defender power {defenderPower}.{credits}";
         }
 
-        private static void TryUpdateWinQuest()
-        {
-            try
-            {
-                ServiceLocator.Get<IQuestService>().UpdateProgress(QuestType.WinBattle, 1);
-            }
-            catch (Exception)
-            {
-                // Battle simulation can run in isolated tests without quest services.
-            }
-        }
     }
 }

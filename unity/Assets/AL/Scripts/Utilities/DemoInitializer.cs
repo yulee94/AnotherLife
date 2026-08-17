@@ -1,5 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using AL.Battle.Application;
+using AL.Battle.Contracts;
+using AL.Battle.Profiles;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.ChampionMode.AI;
@@ -16,6 +19,7 @@ namespace AL.Utilities
     {
         private Text _statusText;
         private Text _modeText;
+        private int _battlePreviewSequence;
         private readonly Dictionary<MaterialStyle, Material> _materials = new Dictionary<MaterialStyle, Material>();
         private readonly Color _gold = new Color(0.92f, 0.66f, 0.30f, 1f);
         private readonly Color _blue = new Color(0.36f, 0.58f, 0.82f, 1f);
@@ -375,23 +379,48 @@ namespace AL.Utilities
 
         private void RunTestBattle()
         {
-            var request = new BattleRequest
+            RealmId playerRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+            if (playerRealm == RealmId.None)
             {
-                Type = BattleType.PvE,
-                AttackerTroops = new List<TroopStack>
+                SetStatus("BATTLE PREVIEW UNAVAILABLE: select a realm first. No rewards were committed.");
+                return;
+            }
+
+            RealmId opponentRealm = playerRealm == RealmId.Umbral
+                ? RealmId.Crownlands
+                : RealmId.Umbral;
+            string invocationId = "war_drill_" + (++_battlePreviewSequence);
+            BattleAuthoritativeSourceState source = BattlePreviewSourceFactory.CreateWarDrillPreview(
+                invocationId,
+                playerRealm,
+                new[]
                 {
                     new TroopStack { Type = TroopType.Infantry, Count = 60 },
                     new TroopStack { Type = TroopType.Ranged, Count = 40 }
                 },
-                DefenderTroops = new List<TroopStack>
+                opponentRealm,
+                new[]
                 {
                     new TroopStack { Type = TroopType.Infantry, Count = 45 },
                     new TroopStack { Type = TroopType.Cavalry, Count = 20 }
-                }
-            };
+                },
+                randomSeed: 12345);
+            BattlePreviewResult preview = new BattlePreviewPipeline().Execute(source);
+            if (preview.Status != BattlePreviewStatus.Computed)
+            {
+                SetStatus("BATTLE PREVIEW REJECTED: " + preview.Status + ". No rewards were committed.");
+                return;
+            }
 
-            var report = ServiceLocator.Get<IBattleSimulator>().Simulate(request);
-            SetStatus(report.Summary);
+            BattleComputedResult result = preview.ComputedResult;
+            string outcome = result.Outcome == BattleOutcome.AttackerVictory ? "Victory" : "Defeat";
+            SetStatus(
+                "PREVIEW ONLY — " + outcome + " after " + result.Rounds.Count +
+                " rounds. Proposed credits " + result.RewardProposal.Credits +
+                ", food " + result.RewardProposal.Food +
+                ", gold " + result.RewardProposal.Gold +
+                ", XP " + result.RewardProposal.Experience +
+                ". No rewards or progression were committed.");
         }
 
         private Text CreateText(Transform parent, string name, Vector2 anchoredPosition, Vector2 sizeDelta, int fontSize, Color color)
