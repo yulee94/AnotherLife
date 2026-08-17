@@ -1,8 +1,8 @@
 # Game-Data Production Authority Ledger
 
-**Status date:** 2026-08-17  
-**Issue:** [#183 — Version and validate game-data authority](https://github.com/yulee94/AnotherLife/issues/183)  
-**Audited baseline:** `main@2383b61a57f999e59ba4298a7378ea27163e5027`  
+**Status date:** 2026-08-17
+**Issue:** [#183 — Version and validate game-data authority](https://github.com/yulee94/AnotherLife/issues/183)
+**Audited baseline:** `main@2383b61a57f999e59ba4298a7378ea27163e5027`
 **Disposition:** production generation is **ineligible**
 
 ## Purpose and counting rule
