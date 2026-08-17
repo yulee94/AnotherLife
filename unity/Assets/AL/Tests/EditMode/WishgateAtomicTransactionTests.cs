@@ -265,6 +265,68 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void RetryAfterDefinitePreCommitFailureCommitsExactlyOnce()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            fixture.SaveStatuses.Enqueue(SaveOperationStatus.SaveFailedPreviousPreserved);
+            var publisher = new RecordingOutcomePublisher(fixture);
+            LocalRealmGemService service = CreateService(fixture, publisher: publisher);
+
+            WishgateRewardResult failed = service.ApplyWishgateReward(Request("wish-op-retry-before-commit"));
+            WishgateRewardResult committed = service.ApplyWishgateReward(Request("wish-op-retry-before-commit"));
+            WishgateRewardResult replay = service.ApplyWishgateReward(Request("wish-op-retry-before-commit"));
+
+            Assert.That(failed.Status, Is.EqualTo(WishgateRewardStatus.SaveFailedRolledBack));
+            Assert.That(committed.Status, Is.EqualTo(WishgateRewardStatus.Committed));
+            Assert.That(replay.Status, Is.EqualTo(WishgateRewardStatus.AlreadyCommitted));
+            Assert.That(replay.OperationId, Is.EqualTo(committed.OperationId));
+            Assert.That(replay.CommittedTimestamp, Is.EqualTo(committed.CommittedTimestamp));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(save.Wishgate.CommittedReward.CommitUncertain, Is.False);
+            Assert.That(publisher.Payloads, Has.Count.EqualTo(1));
+        }
+
+        [Test]
+        public void ReacquireFailureRecoversOriginalCandidateAfterRestartWithoutDuplicateEffect()
+        {
+            SaveGameData save = NewSave();
+            var interruptedFixture = new ConfigurableSaveService(save)
+            {
+                DropCurrentSaveAfterSaveNumber = 1
+            };
+            var interruptedPublisher = new RecordingOutcomePublisher(interruptedFixture);
+
+            WishgateRewardResult interrupted = CreateService(
+                    interruptedFixture,
+                    publisher: interruptedPublisher)
+                .ApplyWishgateReward(Request("wish-op-reacquire-restart"));
+
+            Assert.That(interrupted.Status, Is.EqualTo(WishgateRewardStatus.CommitUncertain));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(save.Wishgate.CommittedReward.CommitUncertain, Is.True);
+            Assert.That(interruptedPublisher.Payloads, Is.Empty);
+            string originalOperationId = save.Wishgate.CommittedReward.OperationId;
+            long originalCommittedTimestamp = save.Wishgate.CommittedReward.CommittedTimestamp;
+
+            SaveGameData reloaded = UnityEngine.JsonUtility.FromJson<SaveGameData>(
+                UnityEngine.JsonUtility.ToJson(save));
+            var restartedFixture = new ConfigurableSaveService(reloaded);
+            var restartedPublisher = new RecordingOutcomePublisher(restartedFixture);
+            WishgateRewardResult recovered = CreateService(
+                    restartedFixture,
+                    publisher: restartedPublisher)
+                .ApplyWishgateReward(Request("wish-op-reacquire-restart"));
+
+            Assert.That(recovered.Status, Is.EqualTo(WishgateRewardStatus.AlreadyCommitted));
+            Assert.That(recovered.OperationId, Is.EqualTo(originalOperationId));
+            Assert.That(recovered.CommittedTimestamp, Is.EqualTo(originalCommittedTimestamp));
+            Assert.That(reloaded.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(reloaded.Wishgate.CommittedReward.CommitUncertain, Is.False);
+            Assert.That(restartedPublisher.Payloads, Has.Count.EqualTo(1));
+        }
+
+        [Test]
         public void CommitUncertainKeepsCandidateIntactForRecoveryAndRetry()
         {
             SaveGameData save = NewSave();
@@ -325,6 +387,135 @@ namespace AL.Tests.EditMode
             Assert.That(results.Count(result => result.Status == WishgateRewardStatus.EntitlementAlreadyConsumed), Is.EqualTo(1));
             Assert.That(save.WarzoneCredits, Is.EqualTo(300));
             Assert.That(fixture.SaveCount, Is.EqualTo(2));
+        }
+
+        [Test]
+        [Timeout(5000)]
+        public void ConcurrentDuplicateOperationKeysReturnOneCommittedEffectAndTheSameResult()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            var publisher = new RecordingOutcomePublisher(fixture);
+            LocalRealmGemService first = CreateService(fixture, publisher: publisher);
+            LocalRealmGemService second = CreateService(fixture, publisher: publisher);
+
+            WishgateRewardResult[] results = Task.WhenAll(
+                    Task.Run(() => first.ApplyWishgateReward(Request("wish-op-concurrent-same"))),
+                    Task.Run(() => second.ApplyWishgateReward(Request("wish-op-concurrent-same"))))
+                .GetAwaiter()
+                .GetResult();
+
+            Assert.That(results.Count(result => result.Status == WishgateRewardStatus.Committed), Is.EqualTo(1));
+            Assert.That(results.Count(result => result.Status == WishgateRewardStatus.AlreadyCommitted), Is.EqualTo(1));
+            Assert.That(results.Select(result => result.OperationId).Distinct(),
+                Is.EqualTo(new[] { "wish-op-concurrent-same" }));
+            Assert.That(results.Select(result => result.CommittedTimestamp).Distinct().Count(), Is.EqualTo(1));
+            Assert.That(results.Select(result => result.WarzoneCreditsAwarded).Distinct(),
+                Is.EqualTo(new[] { 300 }));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(publisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(publisher.Payloads[0].OperationId, Is.EqualTo("wish-op-concurrent-same"));
+        }
+
+        [Test]
+        public void ConfirmationSaveFailureStaysUncertainUntilRetryCommitsOriginalEffectOnce()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            fixture.SaveStatuses.Enqueue(SaveOperationStatus.SavedPrimary);
+            fixture.SaveStatuses.Enqueue(SaveOperationStatus.SaveFailedPreviousPreserved);
+            var publisher = new RecordingOutcomePublisher(fixture);
+            LocalRealmGemService service = CreateService(fixture, publisher: publisher);
+
+            WishgateRewardResult uncertain = service.ApplyWishgateReward(Request("wish-op-confirm-retry"));
+
+            Assert.That(uncertain.Status, Is.EqualTo(WishgateRewardStatus.CommitUncertain));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(save.Wishgate.CommittedReward.CommitUncertain, Is.True);
+            Assert.That(publisher.Payloads, Is.Empty);
+
+            WishgateRewardResult retry = service.ApplyWishgateReward(Request("wish-op-confirm-retry"));
+            WishgateRewardResult committedReplay = service.ApplyWishgateReward(Request("wish-op-confirm-retry"));
+
+            Assert.That(retry.Status, Is.EqualTo(WishgateRewardStatus.AlreadyCommitted));
+            Assert.That(committedReplay.Status, Is.EqualTo(WishgateRewardStatus.AlreadyCommitted));
+            Assert.That(retry.OperationId, Is.EqualTo(uncertain.OperationId));
+            Assert.That(retry.CommittedTimestamp, Is.EqualTo(uncertain.CommittedTimestamp));
+            Assert.That(committedReplay.CommittedTimestamp, Is.EqualTo(retry.CommittedTimestamp));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(save.Wishgate.CommittedReward.CommitUncertain, Is.False);
+            Assert.That(publisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(publisher.Payloads[0].CommittedTimestamp, Is.EqualTo(uncertain.CommittedTimestamp));
+        }
+
+        [Test]
+        public void SelectedPreCommitDenialsLeaveRewardStateAndNotificationUntouched()
+        {
+            var cases = new[]
+            {
+                new DenialCase(
+                    "missing-catalog",
+                    Request("wish-op-missing-catalog"),
+                    null,
+                    Authority(),
+                    WishgateRewardStatus.CatalogUnavailable),
+                new DenialCase(
+                    "unknown-reward",
+                    new WishgateRewardRequest("wish-op-unknown", ActorId, ZoneId, "unknown_reward"),
+                    RewardCatalog(),
+                    Authority(),
+                    WishgateRewardStatus.UnknownReward),
+                new DenialCase(
+                    "ineligible-actor",
+                    Request("wish-op-ineligible"),
+                    RewardCatalog(),
+                    Authority(actorEligible: false),
+                    WishgateRewardStatus.IneligibleActor),
+                new DenialCase(
+                    "neutral-zone-mismatch",
+                    new WishgateRewardRequest("wish-op-zone", ActorId, "zone_not_neutral", RewardId),
+                    RewardCatalog(),
+                    Authority(),
+                    WishgateRewardStatus.UnverifiableAuthority),
+                new DenialCase(
+                    "malformed-operation",
+                    new WishgateRewardRequest(" wish-op-space ", ActorId, ZoneId, RewardId),
+                    RewardCatalog(),
+                    Authority(),
+                    WishgateRewardStatus.MissingContext),
+                new DenialCase(
+                    "missing-entitlement",
+                    Request("wish-op-no-entitlement"),
+                    RewardCatalog(),
+                    AuthorityWithEntitlement(false),
+                    WishgateRewardStatus.EntitlementMissing)
+            };
+
+            foreach (DenialCase testCase in cases)
+            {
+                SaveGameData save = NewSave();
+                save.WarzoneCredits = 23;
+                var fixture = new ConfigurableSaveService(save);
+                var publisher = new RecordingOutcomePublisher(fixture);
+                var authority = new FixedAuthorityProvider(testCase.Authority);
+                var service = new LocalRealmGemService(
+                    fixture,
+                    () => testCase.Catalog,
+                    authority,
+                    () => fixture.CurrentSave,
+                    publisher);
+
+                WishgateRewardResult result = service.ApplyWishgateReward(testCase.Request);
+
+                Assert.That(result.Status, Is.EqualTo(testCase.ExpectedStatus), testCase.Name);
+                Assert.That(save.WarzoneCredits, Is.EqualTo(23), testCase.Name);
+                Assert.That(save.Wishgate.IsEarned, Is.False, testCase.Name);
+                Assert.That(save.Wishgate.LastRewardId, Is.Null.Or.Empty, testCase.Name);
+                Assert.That(save.Wishgate.HasCommittedReward, Is.False, testCase.Name);
+                Assert.That(save.Wishgate.CommittedReward, Is.Null, testCase.Name);
+                Assert.That(fixture.SaveCount, Is.Zero, testCase.Name);
+                Assert.That(publisher.Payloads, Is.Empty, testCase.Name);
+            }
         }
 
         [Test]
@@ -450,7 +641,12 @@ namespace AL.Tests.EditMode
                 () => fixture.CurrentSave,
                 publisher);
 
-        private static RealmGemWishgateAuthoritySnapshot Authority(bool actorEligible = true)
+        private static RealmGemWishgateAuthoritySnapshot Authority(bool actorEligible = true) =>
+            AuthorityWithEntitlement(true, actorEligible);
+
+        private static RealmGemWishgateAuthoritySnapshot AuthorityWithEntitlement(
+            bool entitlementAvailable,
+            bool actorEligible = true)
         {
             RealmGemWishgateCatalogSnapshot catalog = RewardCatalog();
             return new RealmGemWishgateAuthoritySnapshot(
@@ -462,8 +658,8 @@ namespace AL.Tests.EditMode
                 ZoneId,
                 RealmId.None,
                 true,
-                true,
-                8);
+                entitlementAvailable,
+                entitlementAvailable ? 8 : 7);
         }
 
         private static RealmGemWishgateCatalogSnapshot RewardCatalog()
@@ -510,6 +706,29 @@ namespace AL.Tests.EditMode
             Wishgate = new WishgateState()
         };
 
+        private sealed class DenialCase
+        {
+            public DenialCase(
+                string name,
+                WishgateRewardRequest request,
+                RealmGemWishgateCatalogSnapshot catalog,
+                RealmGemWishgateAuthoritySnapshot authority,
+                WishgateRewardStatus expectedStatus)
+            {
+                Name = name;
+                Request = request;
+                Catalog = catalog;
+                Authority = authority;
+                ExpectedStatus = expectedStatus;
+            }
+
+            public string Name { get; }
+            public WishgateRewardRequest Request { get; }
+            public RealmGemWishgateCatalogSnapshot Catalog { get; }
+            public RealmGemWishgateAuthoritySnapshot Authority { get; }
+            public WishgateRewardStatus ExpectedStatus { get; }
+        }
+
         private sealed class FixedAuthorityProvider : IRealmGemWishgateAuthorityProvider
         {
             private readonly RealmGemWishgateAuthoritySnapshot _snapshot;
@@ -530,6 +749,7 @@ namespace AL.Tests.EditMode
             public SaveOperationStatus NextSaveStatus { get; set; } = SaveOperationStatus.SavedPrimary;
             public Queue<SaveOperationStatus> SaveStatuses { get; } = new Queue<SaveOperationStatus>();
             public bool CloneOnSuccessfulSave { get; set; }
+            public int DropCurrentSaveAfterSaveNumber { get; set; }
             public int SaveCount { get; private set; }
 
             public void Save()
@@ -543,6 +763,8 @@ namespace AL.Tests.EditMode
                         CurrentSave = UnityEngine.JsonUtility.FromJson<SaveGameData>(
                             UnityEngine.JsonUtility.ToJson(CurrentSave));
                     }
+                    if (DropCurrentSaveAfterSaveNumber > 0 && DropCurrentSaveAfterSaveNumber == SaveCount)
+                        CurrentSave = null;
                 }
             }
 

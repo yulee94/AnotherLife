@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using AL.RealmGems;
 using NUnit.Framework;
 using UnityEngine;
@@ -125,6 +126,39 @@ namespace AL.Tests.EditMode
                 valid.Replace("\"realmId\": \"crownlands\", \"runtimeRealmId\": \"Crownlands\"",
                     "\"realmId\": \"crownlands\", \"runtimeRealmId\": \"Umbral\""),
                 "AL-RGW-CATALOG-GEM");
+        }
+
+        [Test]
+        public void RuntimeCodeDoesNotCrossIntoRealmGemWishgateSourceOnlyFiles()
+        {
+            string scriptsRoot = Path.Combine(Application.dataPath, "AL", "Scripts");
+            Assert.That(Directory.Exists(scriptsRoot), Is.True, "Runtime scripts directory is missing.");
+            string[] scriptPaths = Directory.GetFiles(
+                scriptsRoot,
+                "*.cs",
+                SearchOption.AllDirectories);
+            string[] forbiddenSourceReferences =
+            {
+                "al_realm_gem_wishgate_content_catalog.json",
+                "Realm_Gem_Wishgate_Source_Handoff.md",
+                "docs/narrative/gamedata"
+            };
+
+            Assert.That(scriptPaths, Is.Not.Empty, "Runtime boundary scan found no C# scripts.");
+            foreach (string scriptPath in scriptPaths)
+            {
+                string runtimeSource = File.ReadAllText(scriptPath)
+                    .ToLowerInvariant();
+                runtimeSource = Regex.Replace(runtimeSource, @"[\\/]+", "/");
+                foreach (string forbiddenReference in forbiddenSourceReferences)
+                {
+                    Assert.That(
+                        runtimeSource,
+                        Does.Not.Contain(forbiddenReference.ToLowerInvariant()),
+                        $"Runtime script crossed the source-only boundary via " +
+                        $"'{forbiddenReference}': {scriptPath}");
+                }
+            }
         }
 
         private static void AssertRejected(string json, string code)
