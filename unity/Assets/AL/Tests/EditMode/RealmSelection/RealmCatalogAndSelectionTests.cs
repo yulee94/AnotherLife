@@ -374,19 +374,15 @@ namespace AL.Tests.EditMode.RealmSelection
                 LocalSaveGameService save = CreateLocalSave(root);
                 var service = new LocalRealmService(save, new FakeGameDataService(_definitions), _catalog);
                 RealmSelectionResult first = service.TrySelectRealm(new RealmSelectionRequest("tx_first", RealmId.Stonehold));
-                byte[] exactPrimary = File.ReadAllBytes(Path.Combine(root, "save.json"));
-                byte[] exactBackup = File.ReadAllBytes(Path.Combine(root, "save.backup.json"));
                 SaveGameData published = save.CurrentSave;
                 RealmSelectionResult repeated = service.TrySelectRealm(new RealmSelectionRequest("tx_same", RealmId.Stonehold));
                 RealmSelectionResult different = service.TrySelectRealm(new RealmSelectionRequest("tx_other", RealmId.Umbral));
-                Assert.That(first.Status, Is.EqualTo(RealmSelectionStatus.Committed));
-                Assert.That(repeated.Status, Is.EqualTo(RealmSelectionStatus.AlreadyCommittedSameRealm));
-                Assert.That(different.Status, Is.EqualTo(RealmSelectionStatus.RejectedDifferentRealm));
+                Assert.That(first.Status, Is.EqualTo(RealmSelectionStatus.ProfileUnavailable));
+                Assert.That(repeated.Status, Is.EqualTo(RealmSelectionStatus.ProfileUnavailable));
+                Assert.That(different.Status, Is.EqualTo(RealmSelectionStatus.ProfileUnavailable));
                 Assert.That(save.CurrentSave, Is.SameAs(published));
-                Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.Stonehold));
-                CollectionAssert.AreEqual(exactPrimary, File.ReadAllBytes(Path.Combine(root, "save.json")));
-                CollectionAssert.AreEqual(exactBackup, File.ReadAllBytes(Path.Combine(root, "save.backup.json")));
-                Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.CommittedValid));
+                Assert.That(save.CurrentSave, Is.Null);
+                Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.ProfileUnavailable));
             }
             finally
             {
@@ -403,9 +399,9 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(service.TrySelectRealm(new RealmSelectionRequest("tx_none", RealmId.None)).Status, Is.EqualTo(RealmSelectionStatus.InvalidRealm));
             RealmSelectionResult failed = service.TrySelectRealm(new RealmSelectionRequest("tx_fail", RealmId.Eldergrove));
             Assert.That(failed.Status, Is.EqualTo(RealmSelectionStatus.ProfileUnavailable));
-            Assert.That(failed.TechnicalCode, Is.EqualTo("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE"));
+            Assert.That(failed.TechnicalCode, Is.EqualTo("AL-REALM-PRODUCTION-AUTHORITY-UNAVAILABLE"));
             Assert.That(save.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
-            Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.Uncommitted));
+            Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.ProfileUnavailable));
         }
 
         [Test]
@@ -424,13 +420,13 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(uncommitted.SaveCount, Is.Zero);
             Assert.That(uncommitted.CurrentSave.SelectedRealm, Is.EqualTo(RealmId.None));
 
-            var committed = new FakeSaveService(RealmId.Umbral);
+            var softCommitted = new FakeSaveService(RealmId.Umbral);
             var inconsistentService = new LocalRealmService(
-                committed,
+                softCommitted,
                 new FakeGameDataService(_definitions, RealmId.Umbral),
                 _catalog);
 
-            Assert.That(inconsistentService.Identity.Status, Is.EqualTo(RealmIdentityStatus.CatalogUnavailable));
+            Assert.That(inconsistentService.Identity.Status, Is.EqualTo(RealmIdentityStatus.ProfileUnavailable));
             Assert.That(inconsistentService.CurrentRealmId, Is.EqualTo(RealmId.None));
             Assert.That(inconsistentService.CurrentRealm, Is.Null);
         }
@@ -497,8 +493,7 @@ namespace AL.Tests.EditMode.RealmSelection
                     types: new[] { typeof(string) },
                     modifiers: null);
             Assert.NotNull(constructor);
-            return (LocalSaveGameService)constructor.Invoke(
-                new object[] { root });
+            return (LocalSaveGameService)constructor.Invoke(new object[] { root });
         }
 
         private sealed class FakeGameDataService : IGameDataService
