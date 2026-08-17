@@ -23,7 +23,8 @@ namespace AL.Tests.EditMode
             SaveGameData save = NewSave();
             save.WarzoneCredits = 17;
             var fixture = new ConfigurableSaveService(save);
-            LocalRealmGemService service = CreateService(fixture);
+            var publisher = new RecordingOutcomePublisher(fixture);
+            LocalRealmGemService service = CreateService(fixture, publisher: publisher);
 
             WishgateRewardResult result = service.ApplyWishgateReward(Request("wish-op-001"));
 
@@ -36,7 +37,160 @@ namespace AL.Tests.EditMode
             Assert.That(save.Wishgate.LastRewardId, Is.EqualTo(RewardId));
             Assert.That(save.Wishgate.CommittedReward.OperationId, Is.EqualTo("wish-op-001"));
             Assert.That(save.Wishgate.CommittedReward.CommitUncertain, Is.False);
-            Assert.That(fixture.SaveCount, Is.EqualTo(2));
+            Assert.That(save.Wishgate.CommittedReward.OutcomeNotificationDelivered, Is.True);
+            Assert.That(publisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(publisher.SaveCountsAtPublish, Is.EqualTo(new[] { 2 }));
+            Assert.That(publisher.Payloads[0].OperationId, Is.EqualTo("wish-op-001"));
+            Assert.That(publisher.Payloads[0].CatalogItemId, Is.EqualTo(RewardId));
+            Assert.That(publisher.Payloads[0].ActorId, Is.EqualTo(ActorId));
+            Assert.That(publisher.Payloads[0].RecipientId, Is.EqualTo(ActorId));
+            Assert.That(publisher.Payloads[0].WarzoneCreditsAwarded, Is.EqualTo(300));
+            Assert.That(publisher.Payloads[0].CommittedTimestamp, Is.EqualTo(result.CommittedTimestamp));
+            Assert.That(publisher.Payloads[0].OutcomeIdentity, Is.Not.Empty);
+            Assert.That(fixture.SaveCount, Is.EqualTo(3));
+        }
+
+        [Test]
+        public void RolledBackAndUncertainTransactionsNeverPublishSuccess()
+        {
+            SaveGameData failedSave = NewSave();
+            var failedFixture = new ConfigurableSaveService(failedSave)
+            {
+                NextSaveStatus = SaveOperationStatus.SaveFailedPreviousPreserved
+            };
+            var failedPublisher = new RecordingOutcomePublisher(failedFixture);
+
+            WishgateRewardResult failed = CreateService(failedFixture, publisher: failedPublisher)
+                .ApplyWishgateReward(Request("wish-op-no-notify-failed"));
+
+            SaveGameData uncertainSave = NewSave();
+            var uncertainFixture = new ConfigurableSaveService(uncertainSave)
+            {
+                NextSaveStatus = SaveOperationStatus.CommitUncertain
+            };
+            var uncertainPublisher = new RecordingOutcomePublisher(uncertainFixture);
+            WishgateRewardResult uncertain = CreateService(uncertainFixture, publisher: uncertainPublisher)
+                .ApplyWishgateReward(Request("wish-op-no-notify-uncertain"));
+
+            Assert.That(failed.Status, Is.EqualTo(WishgateRewardStatus.SaveFailedRolledBack));
+            Assert.That(uncertain.Status, Is.EqualTo(WishgateRewardStatus.CommitUncertain));
+            Assert.That(failedPublisher.Payloads, Is.Empty);
+            Assert.That(uncertainPublisher.Payloads, Is.Empty);
+        }
+
+        [Test]
+        public void RestartRecoveryPublishesCommittedPendingOutcomeWithoutReissuingReward()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            var unavailablePublisher = new RecordingOutcomePublisher(fixture) { ThrowOnPublish = true };
+            WishgateRewardResult committed = CreateService(fixture, publisher: unavailablePublisher)
+                .ApplyWishgateReward(Request("wish-op-recover-notification"));
+            string identity = unavailablePublisher.Payloads.Single().OutcomeIdentity;
+            long timestamp = committed.CommittedTimestamp;
+
+            var recoveredFixture = new ConfigurableSaveService(save);
+            var recoveredPublisher = new RecordingOutcomePublisher(recoveredFixture);
+            WishgateOutcomeDeliveryResult recovered = CreateService(
+                    recoveredFixture,
+                    publisher: recoveredPublisher)
+                .RecoverPendingWishgateOutcome();
+
+            Assert.That(committed.Status, Is.EqualTo(WishgateRewardStatus.Committed));
+            Assert.That(recovered.Status, Is.EqualTo(WishgateOutcomeDeliveryStatus.Delivered));
+            Assert.That(recoveredPublisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(recoveredPublisher.Payloads[0].OutcomeIdentity, Is.EqualTo(identity));
+            Assert.That(recoveredPublisher.Payloads[0].CommittedTimestamp, Is.EqualTo(timestamp));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+            Assert.That(save.Wishgate.CommittedReward.OutcomeNotificationDelivered, Is.True);
+        }
+
+        [Test]
+        public void DeliveryReceiptSaveFailureRetriesTheSameCommittedPayload()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            fixture.SaveStatuses.Enqueue(SaveOperationStatus.SavedPrimary);
+            fixture.SaveStatuses.Enqueue(SaveOperationStatus.SavedPrimary);
+            fixture.SaveStatuses.Enqueue(SaveOperationStatus.SaveFailedPreviousPreserved);
+            var firstPublisher = new RecordingOutcomePublisher(fixture);
+
+            WishgateRewardResult committed = CreateService(fixture, publisher: firstPublisher)
+                .ApplyWishgateReward(Request("wish-op-delivery-retry"));
+
+            var retryFixture = new ConfigurableSaveService(save);
+            var retryPublisher = new RecordingOutcomePublisher(retryFixture);
+            WishgateOutcomeDeliveryResult retry = CreateService(retryFixture, publisher: retryPublisher)
+                .RecoverPendingWishgateOutcome();
+
+            Assert.That(committed.Status, Is.EqualTo(WishgateRewardStatus.Committed));
+            Assert.That(firstPublisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(retryPublisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(retryPublisher.Payloads[0].OutcomeIdentity,
+                Is.EqualTo(firstPublisher.Payloads[0].OutcomeIdentity));
+            Assert.That(retryPublisher.Payloads[0].PayloadFingerprint,
+                Is.EqualTo(firstPublisher.Payloads[0].PayloadFingerprint));
+            Assert.That(retry.Status, Is.EqualTo(WishgateOutcomeDeliveryStatus.Delivered));
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
+        }
+
+        [Test]
+        public void PersistedCloneIsReacquiredBeforeCommitConfirmationAndPublication()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save) { CloneOnSuccessfulSave = true };
+            var publisher = new RecordingOutcomePublisher(fixture);
+
+            WishgateRewardResult result = CreateService(fixture, publisher: publisher)
+                .ApplyWishgateReward(Request("wish-op-cloned-save"));
+
+            Assert.That(result.Status, Is.EqualTo(WishgateRewardStatus.Committed));
+            Assert.That(publisher.Payloads, Has.Count.EqualTo(1));
+            Assert.That(fixture.CurrentSave.Wishgate.CommittedReward.CommitUncertain, Is.False);
+            Assert.That(
+                fixture.CurrentSave.Wishgate.CommittedReward.OutcomeNotificationDelivered,
+                Is.True);
+            Assert.That(fixture.CurrentSave.WarzoneCredits, Is.EqualTo(300));
+        }
+
+        [Test]
+        public void ReentrantRecoveryCannotRepublishAnOutcomeInFlight()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            var publisher = new ReentrantOutcomePublisher();
+            LocalRealmGemService service = CreateService(fixture, publisher: publisher);
+            publisher.Service = service;
+
+            WishgateRewardResult result = service.ApplyWishgateReward(Request("wish-op-reentrant"));
+
+            Assert.That(result.Status, Is.EqualTo(WishgateRewardStatus.Committed));
+            Assert.That(publisher.PublishCount, Is.EqualTo(1));
+            Assert.That(publisher.ReentrantResult.Status,
+                Is.EqualTo(WishgateOutcomeDeliveryStatus.DeliveryFailed));
+            Assert.That(save.Wishgate.CommittedReward.OutcomeNotificationDelivered, Is.True);
+        }
+
+        [Test]
+        public void RecoveryWithPersistedDeliveredReceiptDoesNotRepublish()
+        {
+            SaveGameData save = NewSave();
+            var fixture = new ConfigurableSaveService(save);
+            var firstPublisher = new RecordingOutcomePublisher(fixture);
+            CreateService(fixture, publisher: firstPublisher)
+                .ApplyWishgateReward(Request("wish-op-already-delivered"));
+
+            var restartedFixture = new ConfigurableSaveService(save);
+            var restartedPublisher = new RecordingOutcomePublisher(restartedFixture);
+            WishgateOutcomeDeliveryResult recovered = CreateService(
+                    restartedFixture,
+                    publisher: restartedPublisher)
+                .RecoverPendingWishgateOutcome();
+
+            Assert.That(recovered.Status, Is.EqualTo(WishgateOutcomeDeliveryStatus.AlreadyDelivered));
+            Assert.That(recovered.OperationId, Is.EqualTo("wish-op-already-delivered"));
+            Assert.That(restartedPublisher.Payloads, Is.Empty);
+            Assert.That(save.WarzoneCredits, Is.EqualTo(300));
         }
 
         [Test]
@@ -194,12 +348,14 @@ namespace AL.Tests.EditMode
 
         private static LocalRealmGemService CreateService(
             ConfigurableSaveService fixture,
-            IRealmGemWishgateAuthorityProvider authority = null) =>
+            IRealmGemWishgateAuthorityProvider authority = null,
+            IWishgateOutcomePublisher publisher = null) =>
             new LocalRealmGemService(
                 fixture,
                 RewardCatalog,
                 authority ?? new FixedAuthorityProvider(Authority()),
-                () => fixture.CurrentSave);
+                () => fixture.CurrentSave,
+                publisher);
 
         private static RealmGemWishgateAuthoritySnapshot Authority(bool actorEligible = true)
         {
@@ -279,6 +435,8 @@ namespace AL.Tests.EditMode
             public SaveOperationStatus LastSaveStatus { get; private set; }
             public string LastSaveMessage => string.Empty;
             public SaveOperationStatus NextSaveStatus { get; set; } = SaveOperationStatus.SavedPrimary;
+            public Queue<SaveOperationStatus> SaveStatuses { get; } = new Queue<SaveOperationStatus>();
+            public bool CloneOnSuccessfulSave { get; set; }
             public int SaveCount { get; private set; }
 
             public void Save()
@@ -286,7 +444,12 @@ namespace AL.Tests.EditMode
                 lock (_gate)
                 {
                     SaveCount++;
-                    LastSaveStatus = NextSaveStatus;
+                    LastSaveStatus = SaveStatuses.Count > 0 ? SaveStatuses.Dequeue() : NextSaveStatus;
+                    if (CloneOnSuccessfulSave && LastSaveStatus == SaveOperationStatus.SavedPrimary)
+                    {
+                        CurrentSave = UnityEngine.JsonUtility.FromJson<SaveGameData>(
+                            UnityEngine.JsonUtility.ToJson(CurrentSave));
+                    }
                 }
             }
 
@@ -294,6 +457,36 @@ namespace AL.Tests.EditMode
             public bool HasSave() => CurrentSave != null;
             public void CreateNewSave(RealmId realmId) { }
             public void DeleteSave() { CurrentSave = null; }
+        }
+
+        private sealed class RecordingOutcomePublisher : IWishgateOutcomePublisher
+        {
+            private readonly ConfigurableSaveService _fixture;
+
+            public RecordingOutcomePublisher(ConfigurableSaveService fixture) { _fixture = fixture; }
+            public List<WishgateCommittedOutcome> Payloads { get; } = new List<WishgateCommittedOutcome>();
+            public List<int> SaveCountsAtPublish { get; } = new List<int>();
+            public bool ThrowOnPublish { get; set; }
+
+            public void Publish(WishgateCommittedOutcome payload)
+            {
+                Payloads.Add(payload);
+                SaveCountsAtPublish.Add(_fixture.SaveCount);
+                if (ThrowOnPublish) throw new InvalidOperationException("publisher unavailable");
+            }
+        }
+
+        private sealed class ReentrantOutcomePublisher : IWishgateOutcomePublisher
+        {
+            public LocalRealmGemService Service { get; set; }
+            public int PublishCount { get; private set; }
+            public WishgateOutcomeDeliveryResult ReentrantResult { get; private set; }
+
+            public void Publish(WishgateCommittedOutcome payload)
+            {
+                PublishCount++;
+                ReentrantResult = Service.RecoverPendingWishgateOutcome();
+            }
         }
     }
 }

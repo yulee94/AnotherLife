@@ -214,12 +214,14 @@ namespace AL.Data.Runtime
     {
         public string OperationId = string.Empty;
         public string PayloadFingerprint = string.Empty;
+        public string OutcomeIdentity = string.Empty;
         public string ActorId = string.Empty;
         public string ZoneId = string.Empty;
         public string RewardId = string.Empty;
         public int WarzoneCreditsAwarded;
         public long CommittedTimestamp;
         public bool CommitUncertain;
+        public bool OutcomeNotificationDelivered;
     }
 
     [Serializable]

@@ -18,6 +18,7 @@ namespace AL.Core.Interfaces
         void MarkWishgateEarned(string reason);
         void ChooseWishReward(string rewardId);
         WishgateRewardResult ApplyWishgateReward(WishgateRewardRequest request);
+        WishgateOutcomeDeliveryResult RecoverPendingWishgateOutcome();
     }
 }
 

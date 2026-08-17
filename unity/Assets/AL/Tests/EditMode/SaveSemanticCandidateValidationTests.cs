@@ -1349,6 +1349,50 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void AbsentWishgateReceiptAcceptsJsonUtilityNeutralObject()
+        {
+            const string neutralReceipt =
+                "{\"OperationId\":\"\",\"PayloadFingerprint\":\"\",\"OutcomeIdentity\":\"\"," +
+                "\"ActorId\":\"\",\"ZoneId\":\"\",\"RewardId\":\"\"," +
+                "\"WarzoneCreditsAwarded\":0,\"CommittedTimestamp\":0," +
+                "\"CommitUncertain\":false,\"OutcomeNotificationDelivered\":false}";
+            string wishgate =
+                "{\"IsEarned\":false,\"EarnReason\":\"\",\"LastRewardId\":\"\"," +
+                "\"LastRewardChosenTimestamp\":0,\"HasCommittedReward\":false," +
+                "\"CommittedReward\":" + neutralReceipt + "}";
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(wishgate: wishgate),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(SaveSemanticCandidateOutcome.Valid, candidate.Outcome);
+        }
+
+        [Test]
+        public void PriorCommittedWishgateReceiptDefaultsNotificationFields()
+        {
+            const string priorReceipt =
+                "{\"OperationId\":\"wish-op-prior\"," +
+                "\"PayloadFingerprint\":\"sha256:prior\"," +
+                "\"ActorId\":\"actor_crownlands_01\",\"ZoneId\":\"zone_accordant_isle\"," +
+                "\"RewardId\":\"warmaster_credits\",\"WarzoneCreditsAwarded\":300," +
+                "\"CommittedTimestamp\":123,\"CommitUncertain\":false}";
+            string wishgate =
+                "{\"IsEarned\":true,\"EarnReason\":\"complete_eight_gems\"," +
+                "\"LastRewardId\":\"warmaster_credits\",\"LastRewardChosenTimestamp\":123," +
+                "\"HasCommittedReward\":true,\"CommittedReward\":" + priorReceipt + "}";
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(wishgate: wishgate),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(
+                SaveSemanticCandidateOutcome.CompatiblePreservedUnknown,
+                candidate.Outcome);
+            Assert.True(candidate.IsWritable);
+        }
+
+        [Test]
         public void PreviousIsConsideredOnlyAfterBothActiveCandidates()
         {
             SaveSemanticCandidate invalidPrimary = Validate(

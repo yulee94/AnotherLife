@@ -759,7 +759,26 @@ namespace AL.Data.Catalogs
                 "LastDroppedTimestamp");
 
         private static readonly HashSet<string> WishgateFields =
-            Fields("IsEarned", "EarnReason", "LastRewardId", "LastRewardChosenTimestamp");
+            Fields(
+                "IsEarned",
+                "EarnReason",
+                "LastRewardId",
+                "LastRewardChosenTimestamp",
+                "HasCommittedReward",
+                "CommittedReward");
+
+        private static readonly HashSet<string> WishgateCommittedRewardFields =
+            Fields(
+                "OperationId",
+                "PayloadFingerprint",
+                "OutcomeIdentity",
+                "ActorId",
+                "ZoneId",
+                "RewardId",
+                "WarzoneCreditsAwarded",
+                "CommittedTimestamp",
+                "CommitUncertain",
+                "OutcomeNotificationDelivered");
 
         private static readonly HashSet<string> WarmasterFields =
             Fields(
@@ -2805,6 +2824,195 @@ namespace AL.Data.Catalogs
                     path,
                     SaveSemanticDomain.Envelope);
             }
+
+            ValidateWishgateCommittedReward(
+                wishgate,
+                rewardId,
+                timestamp,
+                collector,
+                state);
+        }
+
+        private static void ValidateWishgateCommittedReward(
+            StrictJsonObject wishgate,
+            string selectedRewardId,
+            long selectedTimestamp,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.Wishgate";
+            StrictJsonValue hasReceiptValue;
+            StrictJsonValue receiptValue;
+            bool hasPresence = wishgate.TryGet("HasCommittedReward", out hasReceiptValue);
+            bool hasPayload = wishgate.TryGet("CommittedReward", out receiptValue);
+            if (!hasPresence && !hasPayload) return;
+
+            var presence = hasReceiptValue as StrictJsonBoolean;
+            if (presence == null)
+            {
+                MarkMalformed(state, collector, "SAVE_WISHGATE_RECEIPT_PRESENCE_INVALID",
+                    path + ".HasCommittedReward", SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            var receipt = receiptValue as StrictJsonObject;
+            if (!presence.Value)
+            {
+                if (hasPayload &&
+                    !(receiptValue is StrictJsonNull) &&
+                    !IsNeutralWishgateCommittedReward(receipt))
+                {
+                    MarkMalformed(state, collector, "SAVE_WISHGATE_RECEIPT_CONTRADICTORY",
+                        path + ".CommittedReward", SaveSemanticDomain.Envelope);
+                }
+                return;
+            }
+
+            if (receipt == null)
+            {
+                MarkMalformed(state, collector, "SAVE_WISHGATE_RECEIPT_MISSING",
+                    path + ".CommittedReward", SaveSemanticDomain.Envelope);
+                return;
+            }
+
+            const string receiptPath = "$.Wishgate.CommittedReward";
+            InspectUnexpectedProperties(
+                receipt,
+                WishgateCommittedRewardFields,
+                receiptPath,
+                SaveSemanticDomain.Envelope,
+                collector,
+                state);
+
+            string operationId;
+            string fingerprint;
+            string outcomeIdentity;
+            string actorId;
+            string zoneId;
+            string rewardId;
+            TryReadRequiredString(receipt, "OperationId", receiptPath, SaveSemanticDomain.Envelope,
+                false, collector, state, out operationId);
+            TryReadRequiredString(receipt, "PayloadFingerprint", receiptPath, SaveSemanticDomain.Envelope,
+                false, collector, state, out fingerprint);
+            StrictJsonValue outcomeIdentityValue;
+            if (receipt.TryGet("OutcomeIdentity", out outcomeIdentityValue))
+            {
+                TryReadRequiredString(receipt, "OutcomeIdentity", receiptPath, SaveSemanticDomain.Envelope,
+                    true, collector, state, out outcomeIdentity);
+            }
+            else
+            {
+                outcomeIdentity = string.Empty;
+            }
+            TryReadRequiredString(receipt, "ActorId", receiptPath, SaveSemanticDomain.Envelope,
+                false, collector, state, out actorId);
+            TryReadRequiredString(receipt, "ZoneId", receiptPath, SaveSemanticDomain.Envelope,
+                false, collector, state, out zoneId);
+            bool rewardIdValid = TryReadRequiredString(
+                receipt, "RewardId", receiptPath, SaveSemanticDomain.Envelope,
+                false, collector, state, out rewardId);
+
+            int credits;
+            bool creditsValid = TryReadRequiredInt32(
+                receipt, "WarzoneCreditsAwarded", receiptPath, SaveSemanticDomain.Envelope,
+                collector, state, out credits);
+            long committedTimestamp;
+            bool timestampValid = TryReadRequiredInt64(
+                receipt, "CommittedTimestamp", receiptPath, SaveSemanticDomain.Envelope,
+                collector, state, out committedTimestamp);
+            bool commitUncertain;
+            bool outcomeDelivered;
+            bool uncertainValid = TryReadRequiredBoolean(receipt, "CommitUncertain", receiptPath,
+                SaveSemanticDomain.Envelope, collector, state, out commitUncertain);
+            StrictJsonValue outcomeDeliveredValue;
+            bool deliveredValid;
+            if (receipt.TryGet("OutcomeNotificationDelivered", out outcomeDeliveredValue))
+            {
+                deliveredValid = TryReadRequiredBoolean(receipt, "OutcomeNotificationDelivered", receiptPath,
+                    SaveSemanticDomain.Envelope, collector, state, out outcomeDelivered);
+            }
+            else
+            {
+                outcomeDelivered = false;
+                deliveredValid = true;
+            }
+
+            if ((rewardIdValid && !string.Equals(selectedRewardId, rewardId, StringComparison.Ordinal)) ||
+                (creditsValid && credits <= 0) ||
+                (timestampValid && committedTimestamp != selectedTimestamp))
+            {
+                MarkMalformed(state, collector, "SAVE_WISHGATE_RECEIPT_CONTRADICTORY",
+                    receiptPath, SaveSemanticDomain.Envelope);
+            }
+            if (uncertainValid && deliveredValid && commitUncertain && outcomeDelivered)
+            {
+                MarkMalformed(state, collector, "SAVE_WISHGATE_RECEIPT_DELIVERY_UNCERTAIN",
+                    receiptPath, SaveSemanticDomain.Envelope);
+            }
+        }
+
+        private static bool IsNeutralWishgateCommittedReward(StrictJsonObject receipt)
+        {
+            if (receipt == null ||
+                (receipt.Properties.Count != WishgateCommittedRewardFields.Count &&
+                 receipt.Properties.Count != WishgateCommittedRewardFields.Count - 2))
+            {
+                return false;
+            }
+
+            return IsEmptyJsonString(receipt, "OperationId") &&
+                   IsEmptyJsonString(receipt, "PayloadFingerprint") &&
+                   IsMissingOrEmptyJsonString(receipt, "OutcomeIdentity") &&
+                   IsEmptyJsonString(receipt, "ActorId") &&
+                   IsEmptyJsonString(receipt, "ZoneId") &&
+                   IsEmptyJsonString(receipt, "RewardId") &&
+                   IsZeroJsonNumber(receipt, "WarzoneCreditsAwarded") &&
+                   IsZeroJsonNumber(receipt, "CommittedTimestamp") &&
+                   IsFalseJsonBoolean(receipt, "CommitUncertain") &&
+                   IsMissingOrFalseJsonBoolean(receipt, "OutcomeNotificationDelivered");
+        }
+
+        private static bool IsMissingOrEmptyJsonString(StrictJsonObject value, string propertyName)
+        {
+            StrictJsonValue property;
+            return !value.TryGet(propertyName, out property) ||
+                   property is StrictJsonString text && text.Value.Length == 0;
+        }
+
+        private static bool IsMissingOrFalseJsonBoolean(StrictJsonObject value, string propertyName)
+        {
+            StrictJsonValue property;
+            return !value.TryGet(propertyName, out property) ||
+                   property is StrictJsonBoolean boolean && !boolean.Value;
+        }
+
+        private static bool IsEmptyJsonString(StrictJsonObject value, string propertyName)
+        {
+            StrictJsonValue property;
+            var text = value.TryGet(propertyName, out property)
+                ? property as StrictJsonString
+                : null;
+            return text != null && text.Value.Length == 0;
+        }
+
+        private static bool IsZeroJsonNumber(StrictJsonObject value, string propertyName)
+        {
+            StrictJsonValue property;
+            var number = value.TryGet(propertyName, out property)
+                ? property as StrictJsonNumber
+                : null;
+            return number != null &&
+                   number.HasFiniteDoubleValue &&
+                   number.Value == 0d;
+        }
+
+        private static bool IsFalseJsonBoolean(StrictJsonObject value, string propertyName)
+        {
+            StrictJsonValue property;
+            var boolean = value.TryGet(propertyName, out property)
+                ? property as StrictJsonBoolean
+                : null;
+            return boolean != null && !boolean.Value;
         }
 
         private static void ValidateWarmaster(

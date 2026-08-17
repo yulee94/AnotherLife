@@ -1,6 +1,7 @@
 using UnityEngine;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.RealmGems;
 using AL.Services.Local;
 using System;
 using System.Collections.Generic;
@@ -928,7 +929,12 @@ namespace AL.Core
             INotificationService notificationService = NotificationFactoryOverride != null
                 ? (INotificationService)NotificationFactoryOverride()
                 : new LocalNotificationService();
-            var realmGemService = new LocalRealmGemService(saveGame);
+            var realmGemService = new LocalRealmGemService(
+                saveGame,
+                () => RealmGemWishgateRuntimeCatalog.Current,
+                null,
+                () => saveGame.CurrentSave,
+                WishgateOutcomeNotificationHub.Shared);
             var worldStateService = new WorldStateService(saveGame, notificationService);
             var worldAtlasService = new AL.RealmWar.World.LocalWorldAtlasService(storyService);
             IBossLootService bossLootService = BossLootFactoryOverride != null

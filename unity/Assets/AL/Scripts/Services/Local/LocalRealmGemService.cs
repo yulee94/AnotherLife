@@ -15,13 +15,15 @@ namespace AL.Services.Local
         private const int WarmasterCreditRewardAmount = 300;
         private const string WarmasterCreditRewardId = "warmaster_credits";
 
-        private static readonly ConditionalWeakTable<SaveGameData, object> TransactionGates =
-            new ConditionalWeakTable<SaveGameData, object>();
+        private static readonly ConditionalWeakTable<ISaveGameService, TransactionState> TransactionStates =
+            new ConditionalWeakTable<ISaveGameService, TransactionState>();
 
         private readonly ISaveGameService _saveGameService;
         private readonly Func<RealmGemWishgateCatalogSnapshot> _catalogProvider;
         private readonly IRealmGemWishgateAuthorityProvider _authorityProvider;
         private readonly Func<SaveGameData> _mutableSaveProvider;
+        private readonly IWishgateOutcomePublisher _outcomePublisher;
+
 
 
         public LocalRealmGemService(ISaveGameService saveGameService)
@@ -40,7 +42,16 @@ namespace AL.Services.Local
             ISaveGameService saveGameService,
             Func<RealmGemWishgateCatalogSnapshot> catalogProvider,
             IRealmGemWishgateAuthorityProvider authorityProvider)
-            : this(saveGameService, catalogProvider, authorityProvider, null)
+            : this(saveGameService, catalogProvider, authorityProvider, null, null)
+        {
+        }
+
+        public LocalRealmGemService(
+            ISaveGameService saveGameService,
+            Func<RealmGemWishgateCatalogSnapshot> catalogProvider,
+            IRealmGemWishgateAuthorityProvider authorityProvider,
+            IWishgateOutcomePublisher outcomePublisher)
+            : this(saveGameService, catalogProvider, authorityProvider, null, outcomePublisher)
         {
         }
 
@@ -48,12 +59,14 @@ namespace AL.Services.Local
             ISaveGameService saveGameService,
             Func<RealmGemWishgateCatalogSnapshot> catalogProvider,
             IRealmGemWishgateAuthorityProvider authorityProvider,
-            Func<SaveGameData> mutableSaveProvider)
+            Func<SaveGameData> mutableSaveProvider,
+            IWishgateOutcomePublisher outcomePublisher = null)
         {
             _saveGameService = saveGameService;
             _catalogProvider = catalogProvider ?? (() => null);
             _authorityProvider = authorityProvider;
             _mutableSaveProvider = mutableSaveProvider;
+            _outcomePublisher = outcomePublisher;
         }
 
         public IEnumerable<RealmGemState> GetRealmGems()
@@ -175,14 +188,17 @@ namespace AL.Services.Local
             if (!TryGetMutableSave(out SaveGameData save) || save.Wishgate == null)
                 return RewardFailure(WishgateRewardStatus.InvalidState, "AL-RGW-REWARD-STATE");
 
-            lock (TransactionGates.GetValue(save, _ => new object()))
+            lock (GetTransactionGate())
             {
 
                 string fingerprint = request.PayloadFingerprint();
                 WishgateRewardReceiptData prior = save.Wishgate.CommittedReward;
                 if (save.Wishgate.HasCommittedReward)
                 {
-                    if (!IsValidCommittedReceipt(save.Wishgate, prior))
+                    if (!IsValidCommittedReceipt(
+                            save.Wishgate,
+                            prior,
+                            allowMissingOutcomeIdentity: true))
                         return RewardFailure(WishgateRewardStatus.InvalidState, "AL-RGW-REWARD-RECEIPT-MALFORMED");
                     if (!string.Equals(prior.OperationId, request.OperationId, StringComparison.Ordinal))
                         return RewardFailure(
@@ -200,6 +216,17 @@ namespace AL.Services.Local
                         _saveGameService.Save();
                         if (_saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
                             return WishgateRewardResult.FromReceipt(prior, WishgateRewardStatus.CommitUncertain);
+                        if (!TryReacquireCommittedReceipt(
+                                request.OperationId,
+                                fingerprint,
+                                out save,
+                                out prior))
+                        {
+                            return RewardFailure(
+                                WishgateRewardStatus.InvalidState,
+                                "AL-RGW-REWARD-RECEIPT-REACQUIRE");
+                        }
+
                         prior.CommitUncertain = false;
                         _saveGameService.Save();
                         if (_saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
@@ -207,8 +234,31 @@ namespace AL.Services.Local
                             prior.CommitUncertain = true;
                             return WishgateRewardResult.FromReceipt(prior, WishgateRewardStatus.CommitUncertain);
                         }
+                        if (!TryReacquireCommittedReceipt(
+                                request.OperationId,
+                                fingerprint,
+                                out save,
+                                out prior) ||
+                            prior.CommitUncertain)
+                        {
+                            return RewardFailure(
+                                WishgateRewardStatus.CommitUncertain,
+                                "AL-RGW-REWARD-COMMIT-UNCERTAIN");
+                        }
                     }
 
+                    if (!EnsureOutcomeIdentityCommitted(
+                            request.OperationId,
+                            fingerprint,
+                            ref save,
+                            ref prior))
+                    {
+                        return RewardFailure(
+                            WishgateRewardStatus.CommitUncertain,
+                            "AL-RGW-REWARD-OUTCOME-IDENTITY-COMMIT");
+                    }
+
+                    DeliverCommittedOutcome(prior);
                     return WishgateRewardResult.FromReceipt(prior, WishgateRewardStatus.AlreadyCommitted);
                 }
 
@@ -258,6 +308,7 @@ namespace AL.Services.Local
                         CommittedTimestamp = committedTimestamp,
                         CommitUncertain = true
                     };
+                    receipt.OutcomeIdentity = WishgateCommittedOutcome.ComputeOutcomeIdentity(receipt);
 
                     save.WarzoneCredits = nextCredits;
                     save.Wishgate.IsEarned = true;
@@ -289,6 +340,17 @@ namespace AL.Services.Local
                             "AL-RGW-REWARD-SAVE-FAILED");
                     }
 
+                    if (!TryReacquireCommittedReceipt(
+                            request.OperationId,
+                            fingerprint,
+                            out save,
+                            out receipt))
+                    {
+                        return RewardFailure(
+                            WishgateRewardStatus.CommitUncertain,
+                            "AL-RGW-REWARD-COMMIT-REACQUIRE");
+                    }
+
                     receipt.CommitUncertain = false;
                     _saveGameService.Save();
                     if (_saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
@@ -297,7 +359,22 @@ namespace AL.Services.Local
                         return WishgateRewardResult.FromReceipt(receipt, WishgateRewardStatus.CommitUncertain);
                     }
 
-                    return WishgateRewardResult.FromReceipt(receipt, WishgateRewardStatus.Committed);
+                    if (!TryReacquireCommittedReceipt(
+                            request.OperationId,
+                            fingerprint,
+                            out save,
+                            out receipt) ||
+                        receipt.CommitUncertain)
+                    {
+                        return RewardFailure(
+                            WishgateRewardStatus.CommitUncertain,
+                            "AL-RGW-REWARD-COMMIT-REVERIFY");
+                    }
+
+                    WishgateRewardResult committed =
+                        WishgateRewardResult.FromReceipt(receipt, WishgateRewardStatus.Committed);
+                    DeliverCommittedOutcome(receipt);
+                    return committed;
                 }
                 catch (OverflowException)
                 {
@@ -338,6 +415,138 @@ namespace AL.Services.Local
                         "AL-RGW-REWARD-COMMIT-UNCERTAIN");
                 }
             }
+        }
+
+        public WishgateOutcomeDeliveryResult RecoverPendingWishgateOutcome()
+        {
+            if (!TryGetMutableSave(out SaveGameData save) || save.Wishgate == null)
+                return new WishgateOutcomeDeliveryResult(WishgateOutcomeDeliveryStatus.NoCommittedOutcome);
+
+            lock (GetTransactionGate())
+            {
+                WishgateRewardReceiptData receipt = save.Wishgate.CommittedReward;
+                if (!save.Wishgate.HasCommittedReward || receipt == null)
+                    return new WishgateOutcomeDeliveryResult(WishgateOutcomeDeliveryStatus.NoCommittedOutcome);
+                if (!IsValidCommittedReceipt(save.Wishgate, receipt, allowMissingOutcomeIdentity: true))
+                    return new WishgateOutcomeDeliveryResult(WishgateOutcomeDeliveryStatus.InvalidCommittedOutcome);
+                if (string.IsNullOrWhiteSpace(receipt.OutcomeIdentity))
+                {
+                    receipt.OutcomeIdentity = WishgateCommittedOutcome.ComputeOutcomeIdentity(receipt);
+                    _saveGameService.Save();
+                    if (_saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary ||
+                        !TryReacquireCommittedReceipt(
+                            receipt.OperationId,
+                            receipt.PayloadFingerprint,
+                            out save,
+                            out receipt))
+                    {
+                        return new WishgateOutcomeDeliveryResult(
+                            WishgateOutcomeDeliveryStatus.DeliveryReceiptNotCommitted,
+                            receipt.OperationId,
+                            receipt.OutcomeIdentity);
+                    }
+                }
+                return DeliverCommittedOutcome(receipt);
+            }
+        }
+
+        private WishgateOutcomeDeliveryResult DeliverCommittedOutcome(WishgateRewardReceiptData receipt)
+        {
+            if (receipt.CommitUncertain)
+            {
+                return new WishgateOutcomeDeliveryResult(
+                    WishgateOutcomeDeliveryStatus.CommitUncertain,
+                    receipt.OperationId,
+                    receipt.OutcomeIdentity);
+            }
+            if (receipt.OutcomeNotificationDelivered)
+            {
+                return new WishgateOutcomeDeliveryResult(
+                    WishgateOutcomeDeliveryStatus.AlreadyDelivered,
+                    receipt.OperationId,
+                    receipt.OutcomeIdentity);
+            }
+            if (_outcomePublisher == null)
+            {
+                return new WishgateOutcomeDeliveryResult(
+                    WishgateOutcomeDeliveryStatus.PublisherUnavailable,
+                    receipt.OperationId,
+                    receipt.OutcomeIdentity);
+            }
+            TransactionState transactionState = GetTransactionState();
+            if (transactionState.OutcomeDeliveryInProgress)
+            {
+                return new WishgateOutcomeDeliveryResult(
+                    WishgateOutcomeDeliveryStatus.DeliveryFailed,
+                    receipt.OperationId,
+                    receipt.OutcomeIdentity);
+            }
+
+            try
+            {
+                transactionState.OutcomeDeliveryInProgress = true;
+                _outcomePublisher.Publish(new WishgateCommittedOutcome(receipt));
+            }
+            catch (Exception)
+            {
+                return new WishgateOutcomeDeliveryResult(
+                    WishgateOutcomeDeliveryStatus.DeliveryFailed,
+                    receipt.OperationId,
+                    receipt.OutcomeIdentity);
+            }
+            finally
+            {
+                transactionState.OutcomeDeliveryInProgress = false;
+            }
+
+            try
+            {
+                if (!TryReacquireCommittedReceipt(
+                        receipt.OperationId,
+                        receipt.PayloadFingerprint,
+                        out _,
+                        out receipt) ||
+                    receipt.CommitUncertain ||
+                    receipt.OutcomeNotificationDelivered)
+                {
+                    return new WishgateOutcomeDeliveryResult(
+                        receipt != null && receipt.OutcomeNotificationDelivered
+                            ? WishgateOutcomeDeliveryStatus.AlreadyDelivered
+                            : WishgateOutcomeDeliveryStatus.DeliveryReceiptNotCommitted,
+                        receipt?.OperationId,
+                        receipt?.OutcomeIdentity);
+                }
+
+                receipt.OutcomeNotificationDelivered = true;
+                _saveGameService.Save();
+                if (_saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary ||
+                    !TryReacquireCommittedReceipt(
+                        receipt.OperationId,
+                        receipt.PayloadFingerprint,
+                        out _,
+                        out WishgateRewardReceiptData persistedReceipt) ||
+                    !persistedReceipt.OutcomeNotificationDelivered)
+                {
+                    receipt.OutcomeNotificationDelivered = false;
+                    return new WishgateOutcomeDeliveryResult(
+                        WishgateOutcomeDeliveryStatus.DeliveryReceiptNotCommitted,
+                        receipt.OperationId,
+                        receipt.OutcomeIdentity);
+                }
+            }
+            catch (Exception)
+            {
+                receipt.OutcomeNotificationDelivered = false;
+                return new WishgateOutcomeDeliveryResult(
+                    WishgateOutcomeDeliveryStatus.DeliveryReceiptNotCommitted,
+                    receipt.OperationId,
+                    receipt.OutcomeIdentity);
+            }
+
+            return new WishgateOutcomeDeliveryResult(
+                WishgateOutcomeDeliveryStatus.Delivered,
+                receipt.OperationId,
+                receipt.OutcomeIdentity);
         }
 
         private RealmGemWishgatePolicyResult AuthorizeRealmGem(
@@ -383,12 +592,14 @@ namespace AL.Services.Local
             {
                 OperationId = source.OperationId,
                 PayloadFingerprint = source.PayloadFingerprint,
+                OutcomeIdentity = source.OutcomeIdentity,
                 ActorId = source.ActorId,
                 ZoneId = source.ZoneId,
                 RewardId = source.RewardId,
                 WarzoneCreditsAwarded = source.WarzoneCreditsAwarded,
                 CommittedTimestamp = source.CommittedTimestamp,
-                CommitUncertain = source.CommitUncertain
+                CommitUncertain = source.CommitUncertain,
+                OutcomeNotificationDelivered = source.OutcomeNotificationDelivered
             };
         }
 
@@ -458,9 +669,44 @@ namespace AL.Services.Local
 
         private object GetTransactionGate()
         {
-            if (TryGetMutableSave(out SaveGameData save))
-                return TransactionGates.GetValue(save, _ => new object());
-            return this;
+            return GetTransactionState().Gate;
+        }
+
+        private TransactionState GetTransactionState()
+        {
+            return _saveGameService == null
+                ? new TransactionState(this)
+                : TransactionStates.GetValue(_saveGameService, _ => new TransactionState());
+        }
+
+        private bool EnsureOutcomeIdentityCommitted(
+            string operationId,
+            string fingerprint,
+            ref SaveGameData save,
+            ref WishgateRewardReceiptData receipt)
+        {
+            if (!string.IsNullOrWhiteSpace(receipt.OutcomeIdentity)) return true;
+
+            receipt.OutcomeIdentity = WishgateCommittedOutcome.ComputeOutcomeIdentity(receipt);
+            _saveGameService.Save();
+            return _saveGameService.LastSaveStatus == SaveOperationStatus.SavedPrimary &&
+                   TryReacquireCommittedReceipt(
+                       operationId,
+                       fingerprint,
+                       out save,
+                       out receipt) &&
+                   !string.IsNullOrWhiteSpace(receipt.OutcomeIdentity);
+        }
+
+        private sealed class TransactionState
+        {
+            public TransactionState(object gate = null)
+            {
+                Gate = gate ?? new object();
+            }
+
+            public object Gate { get; }
+            public bool OutcomeDeliveryInProgress { get; set; }
         }
 
         private static bool HasValidCustody(RealmGemState gem, long now) =>
@@ -482,14 +728,32 @@ namespace AL.Services.Local
             !gem.IsDropped &&
             !string.IsNullOrWhiteSpace(gem.CarrierId);
 
+        private bool TryReacquireCommittedReceipt(
+            string operationId,
+            string fingerprint,
+            out SaveGameData save,
+            out WishgateRewardReceiptData receipt)
+        {
+            receipt = null;
+            if (!TryGetMutableSave(out save) || save.Wishgate == null)
+                return false;
+            receipt = save.Wishgate.CommittedReward;
+            return save.Wishgate.HasCommittedReward &&
+                   IsValidCommittedReceipt(save.Wishgate, receipt) &&
+                   string.Equals(receipt.OperationId, operationId, StringComparison.Ordinal) &&
+                   string.Equals(receipt.PayloadFingerprint, fingerprint, StringComparison.Ordinal);
+        }
+
         private static bool IsValidCommittedReceipt(
             WishgateState wishgate,
-            WishgateRewardReceiptData receipt) =>
+            WishgateRewardReceiptData receipt,
+            bool allowMissingOutcomeIdentity = false) =>
             wishgate != null &&
             receipt != null &&
             wishgate.IsEarned &&
             !string.IsNullOrWhiteSpace(receipt.OperationId) &&
             !string.IsNullOrWhiteSpace(receipt.PayloadFingerprint) &&
+            (allowMissingOutcomeIdentity || !string.IsNullOrWhiteSpace(receipt.OutcomeIdentity)) &&
             !string.IsNullOrWhiteSpace(receipt.ActorId) &&
             !string.IsNullOrWhiteSpace(receipt.ZoneId) &&
             !string.IsNullOrWhiteSpace(receipt.RewardId) &&
@@ -497,6 +761,12 @@ namespace AL.Services.Local
             string.Equals(wishgate.LastRewardId, receipt.RewardId, StringComparison.Ordinal) &&
             wishgate.LastRewardChosenTimestamp == receipt.CommittedTimestamp &&
             receipt.WarzoneCreditsAwarded == WarmasterCreditRewardAmount &&
+            (string.IsNullOrWhiteSpace(receipt.OutcomeIdentity)
+                ? allowMissingOutcomeIdentity
+                : string.Equals(
+                    receipt.OutcomeIdentity,
+                    WishgateCommittedOutcome.ComputeOutcomeIdentity(receipt),
+                    StringComparison.Ordinal)) &&
             string.Equals(
                 receipt.PayloadFingerprint,
                 new WishgateRewardRequest(
