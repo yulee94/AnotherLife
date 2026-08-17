@@ -111,11 +111,94 @@ and generation declaration, not a packaged native library or AAR. Native Gradle
 assembly must separately prove the resulting `libil2cpp.so` before integration.
 
 The generated launcher is not an application authority and must not be copied
-into source. Native Gradle inclusion, Unity/Android Gradle-plugin compatibility,
-packaging into the app, and device execution remain later #135 work. The bridge
-continues to use reflection so ordinary Android CI compiles before that
-integration; runtime availability remains determined by loading
-`com.unity3d.player.UnityPlayer`.
+into source. The bridge continues to use reflection so ordinary Android CI
+compiles without generated artifacts; runtime availability remains determined
+by loading `com.unity3d.player.UnityPlayer`.
+
+### Production AAR assembly and host integration
+
+The production boundary is two isolated Gradle builds. Unity's generated Gradle
+7.5.1/AGP 7.4.2/JDK 11 project performs the final IL2CPP link and emits an AAR;
+the tracked Android Gradle 9.4.1/AGP 9.2.1/JDK 21 project consumes only the
+verified AAR. Never include the generated `unityLibrary` project in
+`settings.gradle.kts`, copy the generated launcher, commit generated output, or
+use `pickFirst` to hide duplicate native libraries.
+
+On the authorized Windows runner, generate and package each distinct profile:
+
+```powershell
+$Unity = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Unity.exe"
+
+# Debug: Development + IL2CPP Debug + Minimal managed stripping, ARM64/API 24.
+& $Unity -batchmode -nographics -quit -projectPath "<repo>\unity" `
+  -buildTarget Android `
+  -executeMethod AL.EditorTools.AndroidUnityLibraryExporter.ExportDevelopmentArm64Il2Cpp `
+  -logFile "<repo>\unity\Logs\AndroidUnityLibraryExport-debug.log"
+py -3 tools\android_unity_package.py --variant debug --repo-root .
+
+# Release: non-Development + IL2CPP Release + Medium managed stripping,
+# ARM64/API 24. This is a separate export; never relabel the debug AAR.
+& $Unity -batchmode -nographics -quit -projectPath "<repo>\unity" `
+  -buildTarget Android `
+  -executeMethod AL.EditorTools.AndroidUnityLibraryExporter.ExportReleaseArm64Il2Cpp `
+  -logFile "<repo>\unity\Logs\AndroidUnityLibraryExport-release.log"
+py -3 tools\android_unity_package.py --variant release --repo-root .
+```
+
+`android_unity_package.py` runs the generated wrapper's
+`:unityLibrary:clean :unityLibrary:assemble<Variant>`, requires exactly the
+ARM64 native family (`libmain.so`, `libunity.so`, and the finally linked
+`libil2cpp.so`), verifies AArch64 ELF headers, Unity player data,
+`UnityPlayer.class`, manifest, and ProGuard rules, then atomically stages:
+
+- `unity/Builds/AndroidArtifacts/debug/unityLibrary-debug.aar`;
+- `unity/Builds/AndroidArtifacts/release/unityLibrary-release.aar`;
+- one deterministic `inventory.json` beside each AAR.
+
+The inventory binds the AAR and required entries by size/SHA-256 to the exact
+repository commit, Unity version, ABI, API, scripting backend, and variant
+optimization profile. Host verification rejects missing, stale, wrong-profile,
+wrong-ABI, duplicate-entry, malformed, or modified artifacts.
+
+Build the opted-in host from the repository root with JDK 21 and the Android
+SDK used by the host:
+
+```powershell
+.\gradlew.bat clean :app:testDebugUnitTest :app:assembleDebug `
+  :app:assembleDebugAndroidTest :app:lintDebug -PwithUnity=true --rerun-tasks
+.\gradlew.bat clean :app:testDebugUnitTest :app:assembleRelease `
+  -PwithUnity=true --rerun-tasks
+```
+
+`-PwithUnity=true` is mandatory for a Unity-enabled package. It selects the
+matching AAR per Android variant, filters the final package to `arm64-v8a`, and
+makes the corresponding pre-build task verify its inventory. Without the flag,
+the ordinary visible-unavailable Android shell remains intentionally buildable;
+it must not be reported as a packaged Unity result.
+
+Before accepting either generated package, inspect it rather than trusting the
+build result alone:
+
+```powershell
+# AAR/APK contents: require Unity assets/classes and only arm64-v8a Unity ELFs.
+tar -tf unity\Builds\AndroidArtifacts\debug\unityLibrary-debug.aar
+tar -tf app\build\outputs\apk\debug\app-debug.apk
+
+# Use Unity NDK 23.1.7779620's llvm-readelf on each extracted native library.
+$ReadElf = "C:\Program Files\Unity\Hub\Editor\2022.3.62f3\Editor\Data\PlaybackEngines\AndroidPlayer\NDK\toolchains\llvm\prebuilt\windows-x86_64\bin\llvm-readelf.exe"
+& $ReadElf -h -d -Ws <extracted>\libmain.so
+& $ReadElf -h -d -Ws <extracted>\libunity.so
+& $ReadElf -h -d -Ws <extracted>\libil2cpp.so
+```
+
+Require `Machine: AArch64`, no text relocations, no unexpected unresolved
+non-platform dependency, and a closed `DT_NEEDED` set against packaged Unity
+libraries plus Android platform libraries. Verify the final APK/AAB contains
+all three libraries and `assets/bin/Data/**`; verify the AAR's `classes.jar`
+contains `com/unity3d/player/UnityPlayer.class`. Install only the signed debug
+APK (or a properly signed release artifact) on an API 24+ ARM64 target. The
+packaged round trip, lifecycle/recovery stress, and representative-device
+performance evidence are separate dependent #135 gates.
 
 ## Lifecycle Ownership
 
