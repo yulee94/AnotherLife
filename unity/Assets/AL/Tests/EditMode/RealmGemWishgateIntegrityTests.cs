@@ -103,11 +103,16 @@ namespace AL.Tests.EditMode
             var service = new LocalRealmGemService(fixture, () => null);
 
             Assert.That(service.PickUpGem(gem.GemId, "carrier"), Is.False);
-            service.MarkWishgateEarned("complete_eight_gems");
-            service.ChooseWishReward("unknown_reward");
+            WishgateRewardResult reward = service.ApplyWishgateReward(
+                new WishgateRewardRequest(
+                    "wish-op-missing-catalog",
+                    "carrier",
+                    "zone_accordant_isle",
+                    "unknown_reward"));
 
             Assert.That(gem.IsAtHome, Is.True);
             Assert.That(save.Wishgate.IsEarned, Is.False);
+            Assert.That(reward.IsCommitted, Is.False);
             Assert.That(fixture.SaveCount, Is.Zero);
         }
 
@@ -226,25 +231,27 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void WishgateWritersRejectBlankMissingAndValidInputsWhileContained()
+        public void WishgateRewardWriterRejectsMissingAndMalformedContextWhileContained()
         {
             var nullFixture = new FakeSaveService(null);
             var nullService = new LocalRealmGemService(nullFixture);
-            Assert.DoesNotThrow(() => nullService.MarkWishgateEarned("complete_eight_gems"));
-            Assert.DoesNotThrow(() => nullService.ChooseWishReward("wish_reward"));
+            WishgateRewardResult missingState = nullService.ApplyWishgateReward(
+                new WishgateRewardRequest(
+                    "wish-op-no-state",
+                    "actor",
+                    "zone_accordant_isle",
+                    "warmaster_credits"));
+            Assert.That(missingState.Status, Is.EqualTo(WishgateRewardStatus.InvalidState));
             Assert.That(nullFixture.SaveCount, Is.Zero);
 
             var save = NewSave();
             var fixture = new FakeSaveService(save);
             var service = new LocalRealmGemService(fixture);
 
-            service.MarkWishgateEarned(" ");
-            Assert.That(save.Wishgate.IsEarned, Is.False);
-            Assert.That(fixture.SaveCount, Is.Zero);
+            WishgateRewardResult malformed = service.ApplyWishgateReward(
+                new WishgateRewardRequest("", "actor", "zone_accordant_isle", ""));
 
-            service.MarkWishgateEarned("complete_eight_gems");
-            service.ChooseWishReward("");
-
+            Assert.That(malformed.Status, Is.EqualTo(WishgateRewardStatus.MissingContext));
             Assert.That(save.Wishgate.IsEarned, Is.False);
             Assert.That(save.Wishgate.EarnReason, Is.Null);
             Assert.That(save.Wishgate.LastRewardId, Is.Null);

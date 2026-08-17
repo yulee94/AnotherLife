@@ -10,6 +10,7 @@ using AL.Kingdom;
 using AL.Kingdom.Visuals;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
+using AL.RealmGems;
 using AL.Services.Local;
 using System.Linq;
 using UnityEngine;
@@ -58,6 +59,7 @@ namespace AL.UI.Kingdom
         private bool _dashboardVisible = true;
         private bool _profileReady;
         private bool _runtimeInitialized;
+        private IDisposable _wishgateOutcomeSubscription;
         private bool _profileMutationPresentationCaptured;
         private ProfileMutationPresentationState _profileMutationPresentation;
         private long _lastLiveRefreshTimestamp;
@@ -84,12 +86,15 @@ namespace AL.UI.Kingdom
         {
             CityLayoutEngine.OnBuildingSelected += HandleBuildingSelected;
             KingdomVisualizer.OnTerritorySelected += HandleTerritorySelected;
+            SubscribeToCommittedWishgateOutcomes();
         }
 
         private void OnDisable()
         {
             CityLayoutEngine.OnBuildingSelected -= HandleBuildingSelected;
             KingdomVisualizer.OnTerritorySelected -= HandleTerritorySelected;
+            _wishgateOutcomeSubscription?.Dispose();
+            _wishgateOutcomeSubscription = null;
         }
 
         private void Start()
@@ -105,8 +110,36 @@ namespace AL.UI.Kingdom
             BuildRuntimeUi();
             Refresh();
             _runtimeInitialized = true;
+            SubscribeToCommittedWishgateOutcomes();
             StartCoroutine(InitializeNvs01QuestPresentation());
             _lastLiveRefreshTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
+        private void SubscribeToCommittedWishgateOutcomes()
+        {
+            if (!_profileReady || _wishgateOutcomeSubscription != null) return;
+            if (!ServiceLocator.TryGet<IRealmGemService>(out var realmGemService) ||
+                realmGemService == null)
+            {
+                return;
+            }
+
+            _wishgateOutcomeSubscription =
+                WishgateOutcomeNotificationHub.Shared.Subscribe(HandleCommittedWishgateOutcome);
+            realmGemService.RecoverPendingWishgateOutcome();
+        }
+
+        private void HandleCommittedWishgateOutcome(WishgateCommittedOutcome outcome)
+        {
+            if (outcome == null ||
+                !string.Equals(outcome.Outcome, "committed", StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            SetMessage(
+                $"WISHGATE: {outcome.WarzoneCreditsAwarded} Warmaster Credits committed to the war chest.");
+            Refresh();
         }
 
         // Reads the merged #241 offline-stack marker to decide whether a ready profile exists. It never

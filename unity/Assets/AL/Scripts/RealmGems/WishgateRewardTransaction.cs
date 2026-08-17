@@ -46,7 +46,8 @@ namespace AL.RealmGems
     public sealed class WishgateOutcomeNotificationHub : IWishgateOutcomePublisher
     {
         private readonly object _gate = new object();
-        private Action<WishgateCommittedOutcome> _subscribers;
+        private readonly System.Collections.Generic.List<Subscription> _subscriptions =
+            new System.Collections.Generic.List<Subscription>();
 
         public static WishgateOutcomeNotificationHub Shared { get; } =
             new WishgateOutcomeNotificationHub();
@@ -54,29 +55,47 @@ namespace AL.RealmGems
         public IDisposable Subscribe(Action<WishgateCommittedOutcome> subscriber)
         {
             if (subscriber == null) throw new ArgumentNullException(nameof(subscriber));
-            lock (_gate) _subscribers += subscriber;
-            return new Subscription(this, subscriber);
+            var subscription = new Subscription(this, subscriber);
+            lock (_gate) _subscriptions.Add(subscription);
+            return subscription;
         }
 
         public void Publish(WishgateCommittedOutcome payload)
         {
-            if (payload == null) throw new ArgumentNullException(nameof(payload));
-            Delegate[] subscribers;
-            lock (_gate) subscribers = _subscribers?.GetInvocationList() ?? Array.Empty<Delegate>();
+            if (payload == null || string.IsNullOrWhiteSpace(payload.OutcomeIdentity))
+                throw new ArgumentException("A committed Wishgate outcome identity is required.", nameof(payload));
+
+            Subscription[] subscribers;
+            lock (_gate) subscribers = _subscriptions.ToArray();
             if (subscribers.Length == 0)
                 throw new InvalidOperationException("No Wishgate outcome consumer is registered.");
 
-            foreach (Action<WishgateCommittedOutcome> subscriber in subscribers.Cast<Action<WishgateCommittedOutcome>>())
-                subscriber(payload);
+            Exception firstFailure = null;
+            foreach (Subscription subscription in subscribers)
+            {
+                try
+                {
+                    subscription.DeliverOnce(payload);
+                }
+                catch (Exception exception)
+                {
+                    if (firstFailure == null) firstFailure = exception;
+                }
+            }
+
+            if (firstFailure != null) throw firstFailure;
         }
 
-        private void Unsubscribe(Action<WishgateCommittedOutcome> subscriber)
+        private void Unsubscribe(Subscription subscription)
         {
-            lock (_gate) _subscribers -= subscriber;
+            lock (_gate) _subscriptions.Remove(subscription);
         }
 
         private sealed class Subscription : IDisposable
         {
+            private readonly object _gate = new object();
+            private readonly System.Collections.Generic.HashSet<string> _delivered =
+                new System.Collections.Generic.HashSet<string>(StringComparer.Ordinal);
             private WishgateOutcomeNotificationHub _owner;
             private Action<WishgateCommittedOutcome> _subscriber;
 
@@ -88,13 +107,37 @@ namespace AL.RealmGems
                 _subscriber = subscriber;
             }
 
+            public void DeliverOnce(WishgateCommittedOutcome payload)
+            {
+                Action<WishgateCommittedOutcome> subscriber;
+                lock (_gate)
+                {
+                    subscriber = _subscriber;
+                    if (subscriber == null || !_delivered.Add(payload.OutcomeIdentity)) return;
+                }
+
+                try
+                {
+                    subscriber(payload);
+                }
+                catch
+                {
+                    lock (_gate) _delivered.Remove(payload.OutcomeIdentity);
+                    throw;
+                }
+            }
+
             public void Dispose()
             {
-                WishgateOutcomeNotificationHub owner = _owner;
-                Action<WishgateCommittedOutcome> subscriber = _subscriber;
-                _owner = null;
-                _subscriber = null;
-                owner?.Unsubscribe(subscriber);
+                WishgateOutcomeNotificationHub owner;
+                lock (_gate)
+                {
+                    owner = _owner;
+                    _owner = null;
+                    _subscriber = null;
+                    _delivered.Clear();
+                }
+                owner?.Unsubscribe(this);
             }
         }
     }

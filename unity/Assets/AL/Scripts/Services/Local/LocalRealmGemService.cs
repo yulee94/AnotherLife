@@ -176,11 +176,6 @@ namespace AL.Services.Local
             }
         }
 
-        // These untyped Wishgate writers cannot prove actor, realm, location, or
-        // entitlement authority and remain deliberately unavailable.
-        public void MarkWishgateEarned(string reason) { }
-        public void ChooseWishReward(string rewardId) { }
-
         public WishgateRewardResult ApplyWishgateReward(WishgateRewardRequest request)
         {
             if (request == null || !request.HasValidIdentity)

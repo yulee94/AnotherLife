@@ -15,8 +15,6 @@ namespace AL.Core.Interfaces
         RealmGemMutationResult DropGem(RealmGemMutationRequest request);
         void ReturnGemHome(string gemId);
         RealmGemMutationResult ReturnGemHome(RealmGemMutationRequest request);
-        void MarkWishgateEarned(string reason);
-        void ChooseWishReward(string rewardId);
         WishgateRewardResult ApplyWishgateReward(WishgateRewardRequest request);
         WishgateOutcomeDeliveryResult RecoverPendingWishgateOutcome();
     }

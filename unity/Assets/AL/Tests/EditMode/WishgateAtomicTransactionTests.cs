@@ -343,6 +343,99 @@ namespace AL.Tests.EditMode
             Assert.That(fixture.SaveCount, Is.EqualTo(2));
         }
 
+        [Test]
+        public void DuplicateCommittedOutcomeDeliveryInvokesEachUiConsumerOnce()
+        {
+            var hub = new WishgateOutcomeNotificationHub();
+            WishgateCommittedOutcome outcome = Outcome("wish-op-duplicate-notification");
+            int firstConsumerCount = 0;
+            int secondConsumerCount = 0;
+            using (hub.Subscribe(_ => firstConsumerCount++))
+            using (hub.Subscribe(_ => secondConsumerCount++))
+            {
+                hub.Publish(outcome);
+                hub.Publish(outcome);
+            }
+
+            Assert.That(firstConsumerCount, Is.EqualTo(1));
+            Assert.That(secondConsumerCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void FailingConsumerDoesNotBlockOtherConsumersOrTheirRetryDeduplication()
+        {
+            var hub = new WishgateOutcomeNotificationHub();
+            WishgateCommittedOutcome outcome = Outcome("wish-op-failing-consumer");
+            int failingConsumerCount = 0;
+            int healthyConsumerCount = 0;
+            using (hub.Subscribe(_ =>
+                   {
+                       failingConsumerCount++;
+                       throw new InvalidOperationException("consumer failed");
+                   }))
+            using (hub.Subscribe(_ => healthyConsumerCount++))
+            {
+                Assert.Throws<InvalidOperationException>(() => hub.Publish(outcome));
+                Assert.Throws<InvalidOperationException>(() => hub.Publish(outcome));
+            }
+
+            Assert.That(failingConsumerCount, Is.EqualTo(2));
+            Assert.That(healthyConsumerCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void DuplicateCommittedOutcomeRemainsSuppressedAfterManyLaterOutcomes()
+        {
+            var hub = new WishgateOutcomeNotificationHub();
+            WishgateCommittedOutcome first = Outcome("wish-op-old-notification");
+            int firstOutcomeCount = 0;
+            using (hub.Subscribe(outcome =>
+                   {
+                       if (outcome.OutcomeIdentity == first.OutcomeIdentity) firstOutcomeCount++;
+                   }))
+            {
+                hub.Publish(first);
+                for (int index = 0; index < 300; index++)
+                    hub.Publish(Outcome($"wish-op-later-{index}"));
+                hub.Publish(first);
+            }
+
+            Assert.That(firstOutcomeCount, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void RuntimeContractDoesNotExposeLegacyUntypedGrantOrCustodyWriters()
+        {
+            string[] legacyMethods =
+            {
+                "MarkWishgateEarned",
+                "ChooseWishReward"
+            };
+
+            foreach (string method in legacyMethods)
+            {
+                Assert.That(typeof(IRealmGemService).GetMethod(method), Is.Null, method);
+                Assert.That(typeof(LocalRealmGemService).GetMethod(method), Is.Null, method);
+            }
+        }
+
+        private static WishgateCommittedOutcome Outcome(string operationId)
+        {
+            var receipt = new WishgateRewardReceiptData
+            {
+                OperationId = operationId,
+                ActorId = ActorId,
+                ZoneId = ZoneId,
+                RewardId = RewardId,
+                WarzoneCreditsAwarded = 300,
+                CommittedTimestamp = 1234,
+                PayloadFingerprint = Request(operationId).PayloadFingerprint(),
+                CommitUncertain = false
+            };
+            receipt.OutcomeIdentity = WishgateCommittedOutcome.ComputeOutcomeIdentity(receipt);
+            return new WishgateCommittedOutcome(receipt);
+        }
+
         private static WishgateRewardRequest Request(string operationId) =>
             new WishgateRewardRequest(operationId, ActorId, ZoneId, RewardId);
 
