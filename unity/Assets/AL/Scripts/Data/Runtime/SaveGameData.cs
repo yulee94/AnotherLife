@@ -204,6 +204,22 @@ namespace AL.Data.Runtime
         public string EarnReason;
         public string LastRewardId;
         public long LastRewardChosenTimestamp;
+        // Explicit presence survives JsonUtility's null-object normalization.
+        public bool HasCommittedReward;
+        public WishgateRewardReceiptData CommittedReward;
+    }
+
+    [Serializable]
+    public class WishgateRewardReceiptData
+    {
+        public string OperationId = string.Empty;
+        public string PayloadFingerprint = string.Empty;
+        public string ActorId = string.Empty;
+        public string ZoneId = string.Empty;
+        public string RewardId = string.Empty;
+        public int WarzoneCreditsAwarded;
+        public long CommittedTimestamp;
+        public bool CommitUncertain;
     }
 
     [Serializable]
