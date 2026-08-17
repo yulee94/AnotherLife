@@ -26,6 +26,27 @@ AnotherLife is an adult high-fantasy realm-war game, not a childlike prototype o
 14. **Wish Dragon consideration and shared language.** Normal realm language barriers should prevent cross-realm communication. On the center island, the Wish Dragon's consideration permits different realms to speak and trade through one shared language. Permanent naming for the Wish Dragon, the shared language, and the center island belongs to Codex narrative/content mode and must preserve existing realm-dragon and Veil Watch continuity.
 15. **Final wish goal.** Collecting all eight gems enables the global/final wish to the dragon. This is a major long-term game objective and must be protected by durable save, economy, reward, notification, world-state, PvP-state, trade, chat, spawn, and anti-duplication rules.
 
+### Private kingdom namespace clarification — 2026-08-14
+
+- The account-owned private kingdom is an isolated, owner-only 2.5D virtual
+  management world shared by the account's same-realm characters. It is not a
+  co-rendered or simultaneously controllable 3D space and has no visitors or
+  enemies.
+- Guild City and Warzone Stronghold are separate namespaces with separate
+  ownership, coordinates, revisions, and authority.
+- Entry and return use the Shared Menu only. While managing, the public 3D
+  avatar remains server-simulated and vulnerable; a qualifying interruption
+  immediately exits management and restores 3D control.
+- Private placement uses a bounded cell grid unlocked by Castle/milestone
+  progression through the permanent Castle Level 10 maximum.
+- Confirmed buildings receive permanent instance identity. Pre-placement
+  rotation and active-construction cancellation are approved; completed
+  relocation and demolition remain gated.
+- Construction concurrency starts at one and may grow to at most three.
+  Workers/citizens/guards are visual miniatures and never alter production.
+- No paid/premium rush is allowed. Any Rush must use authoritative Oathmarks
+  under an accepted cost policy.
+
 ## Character Progression Direction
 
 - The initial maximum player level is 50.
