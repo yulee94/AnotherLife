@@ -71,14 +71,33 @@ namespace AL.Core.Relationships
     public sealed class RelationshipCommittedChange
     {
         internal RelationshipCommittedChange(RelationshipMutationPlan plan)
+            : this(
+                plan.Domain,
+                plan.CanonicalTargetId,
+                plan.PreviousValue,
+                plan.NewValue,
+                plan.AppliedDelta,
+                plan.OperationId,
+                plan.CorrelationId)
         {
-            Domain = plan.Domain;
-            CanonicalTargetId = plan.CanonicalTargetId;
-            PreviousValue = plan.PreviousValue;
-            NewValue = plan.NewValue;
-            AppliedDelta = plan.AppliedDelta;
-            OperationId = plan.OperationId;
-            CorrelationId = plan.CorrelationId;
+        }
+
+        internal RelationshipCommittedChange(
+            RelationshipDomain domain,
+            string canonicalTargetId,
+            double previousValue,
+            double newValue,
+            double appliedDelta,
+            string operationId,
+            string correlationId)
+        {
+            Domain = domain;
+            CanonicalTargetId = canonicalTargetId;
+            PreviousValue = previousValue;
+            NewValue = newValue;
+            AppliedDelta = appliedDelta;
+            OperationId = operationId;
+            CorrelationId = correlationId;
         }
 
         public RelationshipDomain Domain { get; }
