@@ -13,3 +13,7 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Local AI service credentials and generated Meshy outputs.
+/.env.local
+/meshy_output/
