@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.RealmSelection;
 using UnityEngine;
 using System;
 
@@ -10,6 +11,7 @@ namespace AL.RealmWar.Warzone
     public class WarzoneService : ITerritoryService
     {
         private readonly ISaveGameService _saveGameService;
+        private readonly IRealmService _realmService;
         private readonly AL.Services.Local.EconomyWriteAuthorityGate
             _writeAuthorityGate;
         public event Action<string, RealmId> OnTerritoryCaptured;
@@ -17,6 +19,18 @@ namespace AL.RealmWar.Warzone
         public WarzoneService(ISaveGameService saveGameService)
             : this(
                 saveGameService,
+                null,
+                AL.Services.Local.EconomyWriteAuthorityGate.FromSaveService(
+                    saveGameService))
+        {
+        }
+
+        public WarzoneService(
+            ISaveGameService saveGameService,
+            IRealmService realmService)
+            : this(
+                saveGameService,
+                realmService,
                 AL.Services.Local.EconomyWriteAuthorityGate.FromSaveService(
                     saveGameService))
         {
@@ -24,10 +38,12 @@ namespace AL.RealmWar.Warzone
 
         private WarzoneService(
             ISaveGameService saveGameService,
+            IRealmService realmService,
             AL.Services.Local.EconomyWriteAuthorityGate writeAuthorityGate)
         {
             _saveGameService = saveGameService ??
                 throw new ArgumentNullException(nameof(saveGameService));
+            _realmService = realmService;
             _writeAuthorityGate = writeAuthorityGate ??
                 throw new ArgumentNullException(nameof(writeAuthorityGate));
         }
@@ -83,7 +99,7 @@ namespace AL.RealmWar.Warzone
 
         public long CalculatePassiveIncome(ResourceType type)
         {
-            var selectedRealm = _saveGameService.CurrentSave?.SelectedRealm ?? RealmId.None;
+            RealmId selectedRealm = GetCommittedRealmId();
             List<TerritoryData> territories = Territories;
             if (territories == null)
             {
@@ -103,6 +119,27 @@ namespace AL.RealmWar.Warzone
             }
 
             return total;
+        }
+
+        private RealmId GetCommittedRealmId()
+        {
+            RealmIdentitySnapshot identity;
+            if (_realmService != null)
+            {
+                identity = _realmService.Identity;
+            }
+            else if (_saveGameService is IProfileBoundRealmSelectionStore committedStore)
+            {
+                identity = committedStore.GetCommittedRealm();
+            }
+            else
+            {
+                return RealmId.None;
+            }
+
+            return identity.IsCommittedValid
+                ? identity.RealmId
+                : RealmId.None;
         }
 
         private bool EnsureTerritories(AL.Data.Runtime.SaveGameData save)

@@ -116,7 +116,7 @@ namespace AL.Tests.EditMode
             RealmSelectionResult result = service.TrySelectRealm(new RealmSelectionRequest("tx", RealmId.Crownlands));
 
             Assert.AreEqual(RealmSelectionStatus.ProfileUnavailable, result.Status);
-            Assert.AreEqual("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE", result.TechnicalCode);
+            Assert.AreEqual("AL-REALM-PRODUCTION-AUTHORITY-UNAVAILABLE", result.TechnicalCode);
             Assert.False(result.MutationOccurred);
             Assert.False(result.Persisted);
             Assert.AreEqual(RealmId.Stonehold, save.CurrentSave.SelectedRealm);
@@ -136,7 +136,7 @@ namespace AL.Tests.EditMode
             RealmSelectionResult result = service.TrySelectRealm(new RealmSelectionRequest("tx", RealmId.Umbral));
 
             Assert.AreEqual(RealmSelectionStatus.ProfileUnavailable, result.Status);
-            Assert.AreEqual("AL-REALM-TYPED-CANDIDATE-STORE-UNAVAILABLE", result.TechnicalCode);
+            Assert.AreEqual("AL-REALM-PRODUCTION-AUTHORITY-UNAVAILABLE", result.TechnicalCode);
             Assert.False(result.AllowsNavigation);
             Assert.AreEqual(RealmId.None, save.CurrentSave.SelectedRealm);
             Assert.AreEqual(RealmId.None, service.CurrentRealmId);
@@ -155,7 +155,7 @@ namespace AL.Tests.EditMode
                 new FakeGameDataService(Realm(RealmId.Crownlands)),
                 null);
 
-            Assert.AreEqual(RealmIdentityStatus.CatalogUnavailable, service.Identity.Status);
+            Assert.AreEqual(RealmIdentityStatus.ProfileUnavailable, service.Identity.Status);
             Assert.AreEqual(RealmId.None, service.CurrentRealmId);
             Assert.IsNull(service.CurrentRealm);
             Assert.AreEqual(RealmId.Crownlands, save.CurrentSave.SelectedRealm);

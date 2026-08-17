@@ -6,6 +6,7 @@ using AL.Core.SaveAuthority;
 using AL.Data.Definitions;
 using AL.Data.Runtime;
 using AL.RealmSelection;
+using AL.RealmWar.Warzone;
 using AL.Services.Local;
 using NUnit.Framework;
 using UnityEngine;
@@ -60,6 +61,43 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(service.Identity.Status, Is.EqualTo(RealmIdentityStatus.Uncommitted));
             Assert.That(service.CurrentRealmId, Is.EqualTo(RealmId.None));
             Assert.That(service.CurrentRealm, Is.Null);
+        }
+
+        [Test]
+        public void WarzoneIncomeUsesCommittedRealmInsteadOfSoftSelectedRealm()
+        {
+            var store = new FakeProductionStore(
+                RealmIdentityStatus.CommittedValid,
+                RealmId.Stonehold)
+            {
+                SoftSelectedRealm = RealmId.Umbral
+            };
+            store.CurrentSave.Territories = new List<TerritoryData>
+            {
+                new TerritoryData
+                {
+                    Id = "committed",
+                    OwnerRealm = RealmId.Stonehold,
+                    BonusType = ResourceType.Gold,
+                    BonusAmount = 7
+                },
+                new TerritoryData
+                {
+                    Id = "soft",
+                    OwnerRealm = RealmId.Umbral,
+                    BonusType = ResourceType.Gold,
+                    BonusAmount = 99
+                }
+            };
+            var realmService = new LocalRealmService(
+                store,
+                new FakeGameDataService(_definitions),
+                _catalog);
+            var warzone = new WarzoneService(store, realmService);
+
+            Assert.That(
+                warzone.CalculatePassiveIncome(ResourceType.Gold),
+                Is.EqualTo(7));
         }
 
         [Test]
