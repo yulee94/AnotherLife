@@ -1,0 +1,16 @@
+{
+    "name": "AL.ChampionEncounterIntegration",
+    "rootNamespace": "AL.ChampionMode.Integration",
+    "references": [
+        "AL.ChampionCombat.C1"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": true
+}
