@@ -14,6 +14,7 @@ namespace AL.Tests.EditMode
     public sealed class RealmSelectionMigrationRecoveryTests
     {
         [Test]
+        [Category("RealmDurabilityAcceptance")]
         public void LegacySelectedRealmMigratesToOneCommittedSchemaTwoRealm()
         {
             string root = NewRoot();
@@ -33,6 +34,11 @@ namespace AL.Tests.EditMode
                     service.CurrentSave.SaveSchemaVersion);
                 Assert.That(service.CurrentSave.ProfileId, Does.Match("^alp_[0-9a-f]{32}$"));
                 Assert.AreEqual(RealmId.Eldergrove, service.CurrentSave.SelectedRealm);
+                Assert.AreEqual("C1", service.CurrentSave.CurrentChapterId);
+                Assert.AreEqual(10, service.CurrentSave.Resources.Find(
+                    resource => resource.Type == ResourceType.Food).Amount);
+                Assert.AreEqual(40, service.CurrentSave.Resources.Find(
+                    resource => resource.Type == ResourceType.Gold).Amount);
                 AssertLegacyCommit(service.CurrentSave, RealmId.Eldergrove);
                 Assert.False(File.Exists(Path.Combine(root, "save.tmp.json")));
                 Assert.False(File.Exists(Path.Combine(root, "save.previous.json")));
@@ -99,6 +105,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        [Category("RealmDurabilityAcceptance")]
         public void LegacyMigrationIgnoresStagedNonAuthoritativeMetadata()
         {
             string root = NewRoot();
@@ -128,6 +135,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        [Category("RealmDurabilityAcceptance")]
         public void InterruptedCommittedInstallCompletesWithoutPublishingAnotherRealm()
         {
             string root = NewRoot();
@@ -182,6 +190,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        [Category("RealmDurabilityAcceptance")]
         public void MalformedPrimaryRecoversOneCommittedRealmFromExactBackup()
         {
             string root = NewRoot();
@@ -273,6 +282,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        [Category("RealmDurabilityAcceptance")]
         public void ReplayedCommittedRecordAndStaleSoftLockRemainOneRealm()
         {
             string root = NewRoot();

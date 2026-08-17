@@ -2,7 +2,8 @@
     "name": "AL.PlayMode.Tests",
     "rootNamespace": "AL.Tests.PlayMode",
     "references": [
-        "AL.Runtime"
+        "AL.Runtime",
+        "AL.SaveAuthority"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

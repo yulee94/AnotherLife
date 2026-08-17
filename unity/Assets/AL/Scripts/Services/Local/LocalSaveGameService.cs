@@ -6856,8 +6856,11 @@ namespace AL.Services.Local
 
             EnsureSaveDefaults(save);
             save.SaveFormatId = SaveGameData.CurrentSaveFormatId;
-            save.SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion;
-            save.ProfileInitializationVersion = SaveGameData.CurrentProfileInitializationVersion;
+            save.SaveSchemaVersion =
+                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
+            save.ProfileInitializationVersion =
+                SaveAuthorityTechnicalLimits.IdentityAwareProfileInitializationVersion;
+            save.ProfileId = "alp_" + Guid.NewGuid().ToString("N");
             return save;
         }
 
