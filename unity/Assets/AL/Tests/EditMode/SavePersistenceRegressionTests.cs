@@ -6,10 +6,15 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using AL.Data.Catalogs;
 using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
+using AL.Core;
+using AL.Core.SaveAuthority;
+using AL.RealmSelection;
+using AL.Services.Local;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -427,6 +432,315 @@ namespace AL.Tests.EditMode
         public void NvsDuplicateBackupDriftAfterPreflightFreezesWithoutIo()
         {
             AssertTypedDuplicateBackupDriftFailsClosed("nvs");
+        }
+
+        [Test]
+        public void TypedRealmCommitPersistsVerifiedCommitDataAndDeliversSingleEvent()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            LocalSaveGameService service = CreateIdentityAwareSaveService(
+                root,
+                fileSystem);
+            IProfileBoundRealmSelectionStore store = service;
+            var delivered = new List<RealmSelectionCommittedEvent>();
+            store.RealmSelectionCommitted += delivered.Add;
+
+            RealmSelectionCommitResult result = store.TryCommitRealmSelection(
+                CreateRealmSelectionCommand(
+                    "rsel_11111111111111111111111111111111",
+                    RealmId.Eldergrove,
+                    service.GetCurrentAuthority()));
+
+            Assert.AreEqual(RealmSelectionCommitStatus.Committed, result.Status);
+            Assert.True(result.MutationOccurred);
+            Assert.True(result.PersistedAndVerified);
+            Assert.AreEqual(RealmId.Eldergrove, service.CurrentSave.SelectedRealm);
+            Assert.NotNull(service.CurrentSave.RealmSelectionCommit);
+            Assert.AreEqual(
+                RealmSelectionCommitState.Committed,
+                (RealmSelectionCommitState)service.CurrentSave
+                    .RealmSelectionCommit.State);
+            Assert.AreEqual(
+                RealmSelectionCommitPublicationState.Delivered,
+                (RealmSelectionCommitPublicationState)service.CurrentSave
+                    .RealmSelectionCommit.PublicationState);
+            Assert.AreEqual(
+                "eldergrove",
+                service.CurrentSave.RealmSelectionCommit.CanonicalRealmId);
+            Assert.AreEqual(
+                result.CommittedTransactionId,
+                service.CurrentSave.RealmSelectionCommit.TransactionId);
+            Assert.AreEqual(
+                result.CommittedEventId,
+                service.CurrentSave.RealmSelectionCommit.CommittedEventId);
+            Assert.AreEqual(1, delivered.Count);
+            Assert.AreEqual(
+                result.CommittedEventId,
+                delivered[0].EventId);
+            Assert.AreEqual(
+                result.ResultingGenerationFingerprint,
+                delivered[0].ResultingGenerationFingerprint);
+        }
+
+        [Test]
+        public void TypedRealmDuplicateReturnsOriginalReceiptWithoutMutationOrRedelivery()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            LocalSaveGameService service = CreateIdentityAwareSaveService(
+                root,
+                fileSystem);
+            IProfileBoundRealmSelectionStore store = service;
+            RealmSelectionCommand command = CreateRealmSelectionCommand(
+                "rsel_22222222222222222222222222222222",
+                RealmId.Crownlands,
+                service.GetCurrentAuthority());
+
+            RealmSelectionCommitResult first =
+                store.TryCommitRealmSelection(command);
+            Assert.AreEqual(RealmSelectionCommitStatus.Committed, first.Status);
+
+            fileSystem.ClearMutationLedger();
+            LocalSaveGameService restarted = CreateReloadedSaveService(
+                root,
+                fileSystem);
+            IProfileBoundRealmSelectionStore replayStore = restarted;
+            var delivered = new List<RealmSelectionCommittedEvent>();
+            replayStore.RealmSelectionCommitted += delivered.Add;
+
+            RealmSelectionCommitResult replay = replayStore
+                .TryCommitRealmSelection(
+                    CreateRealmSelectionCommand(
+                        "rsel_22222222222222222222222222222222",
+                        RealmId.Crownlands,
+                        restarted.GetCurrentAuthority()));
+
+            Assert.AreEqual(
+                RealmSelectionCommitStatus.DuplicateTransaction,
+                replay.Status);
+            Assert.False(replay.MutationOccurred);
+            Assert.True(replay.PersistedAndVerified);
+            Assert.AreEqual(first.CommittedTransactionId, replay.CommittedTransactionId);
+            Assert.AreEqual(first.CommittedEventId, replay.CommittedEventId);
+            Assert.AreEqual(0, delivered.Count);
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
+        }
+
+        [Test]
+        public void TypedRealmConcurrentSameTransactionCommitsExactlyOnce()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            LocalSaveGameService service = CreateIdentityAwareSaveService(root);
+            IProfileBoundRealmSelectionStore store = service;
+            RealmSelectionCommand command = CreateRealmSelectionCommand(
+                "rsel_33333333333333333333333333333333",
+                RealmId.Umbral,
+                service.GetCurrentAuthority());
+            var gate = new Barrier(2);
+            RealmSelectionCommitResult left = default;
+            RealmSelectionCommitResult right = default;
+
+            Thread first = new Thread(() =>
+            {
+                gate.SignalAndWait();
+                left = store.TryCommitRealmSelection(command);
+            });
+            Thread second = new Thread(() =>
+            {
+                gate.SignalAndWait();
+                right = store.TryCommitRealmSelection(command);
+            });
+
+            first.Start();
+            second.Start();
+            first.Join();
+            second.Join();
+
+            RealmSelectionCommitStatus[] statuses =
+            {
+                left.Status,
+                right.Status
+            };
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    RealmSelectionCommitStatus.Committed,
+                    RealmSelectionCommitStatus.DuplicateTransaction
+                },
+                statuses);
+            Assert.AreEqual(RealmId.Umbral, service.CurrentSave.SelectedRealm);
+        }
+
+        [Test]
+        public void TypedRealmPreCommitFailurePreservesPriorGenerationAndPublishesNoEvent()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            LocalSaveGameService service = CreateIdentityAwareSaveService(
+                root,
+                fileSystem);
+            IProfileBoundRealmSelectionStore store = service;
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            fileSystem.WriteFailuresBeforeMutation.Add(tempPath);
+            var delivered = new List<RealmSelectionCommittedEvent>();
+            store.RealmSelectionCommitted += delivered.Add;
+
+            RealmSelectionCommitResult result = store.TryCommitRealmSelection(
+                CreateRealmSelectionCommand(
+                    "rsel_44444444444444444444444444444444",
+                    RealmId.Stonehold,
+                    service.GetCurrentAuthority()));
+
+            Assert.AreEqual(
+                RealmSelectionCommitStatus.SaveFailedPreviousPreserved,
+                result.Status);
+            Assert.False(result.MutationOccurred);
+            Assert.False(result.PersistedAndVerified);
+            Assert.AreEqual(RealmId.None, service.CurrentSave.SelectedRealm);
+            Assert.AreEqual(
+                RealmSelectionCommitState.Uncommitted,
+                (RealmSelectionCommitState)service.CurrentSave
+                    .RealmSelectionCommit.State);
+            Assert.AreEqual(0, delivered.Count);
+            Assert.AreEqual(0, fileSystem.MutationLedger.Count);
+        }
+
+        [Test]
+        public void TypedRealmUncertainCommitFreezesAuthorityAndSuppressesPublication()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            LocalSaveGameService service = CreateIdentityAwareSaveService(
+                root,
+                fileSystem);
+            IProfileBoundRealmSelectionStore store = service;
+            string primaryPath = Path.Combine(root, "save.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            string previousPath = Path.Combine(root, "save.previous.json");
+            fileSystem.AddMutationFault(
+                "Replace",
+                tempPath,
+                primaryPath,
+                ScriptedFaultTiming.AfterMutation,
+                ScriptedFaultException.Io);
+            fileSystem.AddMutationFault(
+                "Copy",
+                previousPath,
+                primaryPath,
+                ScriptedFaultTiming.BeforeMutation,
+                ScriptedFaultException.Io);
+            var delivered = new List<RealmSelectionCommittedEvent>();
+            store.RealmSelectionCommitted += delivered.Add;
+            LogAssert.Expect(
+                LogType.Error,
+                "AL-SAVE-ROLLBACK-FAILED: Could not prove exact restoration of the previous primary. IOException");
+
+            RealmSelectionCommitResult result = store.TryCommitRealmSelection(
+                CreateRealmSelectionCommand(
+                    "rsel_55555555555555555555555555555555",
+                    RealmId.Crownlands,
+                    service.GetCurrentAuthority()));
+
+            Assert.AreEqual(
+                RealmSelectionCommitStatus.CommitUncertain,
+                result.Status);
+            Assert.False(result.MutationOccurred);
+            Assert.False(result.PersistedAndVerified);
+            Assert.AreEqual(
+                ProfileWriteAuthorityStatus.CommitUncertain,
+                service.GetCurrentAuthority().Status);
+            Assert.AreEqual(RealmId.None, service.CurrentSave.SelectedRealm);
+            Assert.AreEqual(
+                RealmSelectionCommitState.Uncommitted,
+                (RealmSelectionCommitState)service.CurrentSave
+                    .RealmSelectionCommit.State);
+            Assert.AreEqual(0, delivered.Count);
+        }
+
+        [Test]
+        public void TypedRealmPublicationOccursAfterCurrentSavePublishAndBeforeDeliveryAck()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            LocalSaveGameService service = CreateIdentityAwareSaveService(root);
+            IProfileBoundRealmSelectionStore store = service;
+            RealmSelectionCommittedEvent observedEvent = null;
+            RealmId observedCurrentRealm = RealmId.None;
+            RealmSelectionCommitPublicationState observedPublicationState =
+                RealmSelectionCommitPublicationState.None;
+
+            store.RealmSelectionCommitted += committedEvent =>
+            {
+                observedEvent = committedEvent;
+                observedCurrentRealm = service.CurrentSave.SelectedRealm;
+                observedPublicationState =
+                    (RealmSelectionCommitPublicationState)service.CurrentSave
+                        .RealmSelectionCommit.PublicationState;
+            };
+
+            RealmSelectionCommitResult result = store.TryCommitRealmSelection(
+                CreateRealmSelectionCommand(
+                    "rsel_66666666666666666666666666666666",
+                    RealmId.Crownlands,
+                    service.GetCurrentAuthority()));
+
+            Assert.NotNull(observedEvent);
+            Assert.AreEqual(RealmId.Crownlands, observedCurrentRealm);
+            Assert.AreEqual(
+                RealmSelectionCommitPublicationState.Pending,
+                observedPublicationState);
+            Assert.AreEqual(result.CommittedEventId, observedEvent.EventId);
+            Assert.AreEqual(
+                RealmSelectionCommitPublicationState.Delivered,
+                (RealmSelectionCommitPublicationState)service.CurrentSave
+                    .RealmSelectionCommit.PublicationState);
+        }
+
+        [Test]
+        public void TypedRealmSubscriberFailureLeavesDurableEventPendingForRedelivery()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-RealmSelectionTests",
+                Guid.NewGuid().ToString("N"));
+            LocalSaveGameService service = CreateIdentityAwareSaveService(root);
+            IProfileBoundRealmSelectionStore store = service;
+            store.RealmSelectionCommitted += _ =>
+                throw new InvalidOperationException("subscriber failed");
+            LogAssert.Expect(
+                LogType.Error,
+                "AL-REALM-TYPED-PUBLICATION-FAILED: InvalidOperationException");
+
+            RealmSelectionCommitResult result = store.TryCommitRealmSelection(
+                CreateRealmSelectionCommand(
+                    "rsel_77777777777777777777777777777777",
+                    RealmId.Eldergrove,
+                    service.GetCurrentAuthority()));
+
+            Assert.AreEqual(RealmSelectionCommitStatus.Committed, result.Status);
+            Assert.AreEqual(RealmId.Eldergrove, service.CurrentSave.SelectedRealm);
+            Assert.AreEqual(
+                RealmSelectionCommitPublicationState.Pending,
+                (RealmSelectionCommitPublicationState)service.CurrentSave
+                    .RealmSelectionCommit.PublicationState);
         }
 
         [Test]
@@ -5000,6 +5314,101 @@ namespace AL.Tests.EditMode
             return constructor.Invoke(new object[] { root });
         }
 
+        private static LocalSaveGameService CreateIdentityAwareSaveService(
+            string root,
+            ScriptedSaveFileOperations fileSystem = null)
+        {
+            LocalSaveGameService service = fileSystem == null
+                ? (LocalSaveGameService)CreateSaveService(root)
+                : (LocalSaveGameService)CreateSaveService(
+                    root,
+                    CreateFileOperationsProxy(fileSystem));
+            SeedIdentityAwareNeutralLedger(root, fileSystem);
+            service.Load();
+            Assert.AreEqual(
+                ProfileWriteAuthorityStatus.Writable,
+                service.GetCurrentAuthority().Status);
+            Assert.NotNull(service.CurrentSave);
+            Assert.AreEqual(RealmId.None, service.CurrentSave.SelectedRealm);
+            return service;
+        }
+
+        private static LocalSaveGameService CreateReloadedSaveService(
+            string root,
+            ScriptedSaveFileOperations fileSystem = null)
+        {
+            LocalSaveGameService service = fileSystem == null
+                ? (LocalSaveGameService)CreateSaveService(root)
+                : (LocalSaveGameService)CreateSaveService(
+                    root,
+                    CreateFileOperationsProxy(fileSystem));
+            service.Load();
+            return service;
+        }
+
+        private static RealmSelectionCommand CreateRealmSelectionCommand(
+            string transactionId,
+            RealmId requestedRealmId,
+            ProfileWriteAuthoritySnapshot authority)
+        {
+            return new RealmSelectionCommand(
+                transactionId,
+                requestedRealmId,
+                CanonicalRealmId(requestedRealmId),
+                "al_realm_catalog",
+                RealmCatalogRuntime.SupportedVersion,
+                ProfileAuthorityExpectation.From(authority));
+        }
+
+        private static void SeedIdentityAwareNeutralLedger(
+            string root,
+            ScriptedSaveFileOperations fileSystem)
+        {
+            const string profileId =
+                "alp_aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var save = new SaveGameData
+            {
+                SaveFormatId = SaveGameData.CurrentSaveFormatId,
+                SaveSchemaVersion =
+                    SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion,
+                ProfileInitializationVersion =
+                    SaveAuthorityTechnicalLimits
+                        .IdentityAwareProfileInitializationVersion,
+                ProfileId = profileId,
+                SelectedRealm = RealmId.None,
+                RealmSelectionCommit = new RealmSelectionCommitData(),
+                LastSavedTimestamp = 1
+            };
+            InvokeEnsureSaveDefaults(save);
+            string json = JsonUtility.ToJson(save);
+
+            if (fileSystem == null)
+            {
+                Directory.CreateDirectory(root);
+                File.WriteAllText(Path.Combine(root, "save.json"), json);
+                File.WriteAllText(Path.Combine(root, "save.backup.json"), json);
+                string tempPath = Path.Combine(root, "save.tmp.json");
+                string previousPath = Path.Combine(root, "save.previous.json");
+                if (File.Exists(tempPath))
+                {
+                    File.Delete(tempPath);
+                }
+
+                if (File.Exists(previousPath))
+                {
+                    File.Delete(previousPath);
+                }
+
+                return;
+            }
+
+            fileSystem.Files[Path.Combine(root, "save.json")] = json;
+            fileSystem.Files[Path.Combine(root, "save.backup.json")] = json;
+            fileSystem.Files.Remove(Path.Combine(root, "save.tmp.json"));
+            fileSystem.Files.Remove(Path.Combine(root, "save.previous.json"));
+            fileSystem.ClearMutationLedger();
+        }
+
         private static object InvokePreparedCandidate(
             object service,
             string chapterId,
@@ -5312,6 +5721,20 @@ namespace AL.Tests.EditMode
                 case "Umbral": return "umbral";
                 default:
                     Assert.Fail("NVS fixture requires a committed launch realm.");
+                    return string.Empty;
+            }
+        }
+
+        private static string CanonicalRealmId(RealmId realmId)
+        {
+            switch (realmId)
+            {
+                case RealmId.Crownlands: return "crownlands";
+                case RealmId.Stonehold: return "stonehold";
+                case RealmId.Eldergrove: return "eldergrove";
+                case RealmId.Umbral: return "umbral";
+                default:
+                    Assert.Fail("Expected a canonical launch realm.");
                     return string.Empty;
             }
         }

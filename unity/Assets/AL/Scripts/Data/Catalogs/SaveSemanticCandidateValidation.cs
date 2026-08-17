@@ -695,6 +695,7 @@ namespace AL.Data.Catalogs
                     "ProfileInitializationVersion",
                     "ProfileId",
                     "SelectedRealm",
+                    "RealmSelectionCommit",
                     "Resources",
                     "Buildings",
                     "Troops",
@@ -759,7 +760,13 @@ namespace AL.Data.Catalogs
                 "LastDroppedTimestamp");
 
         private static readonly HashSet<string> WishgateFields =
-            Fields("IsEarned", "EarnReason", "LastRewardId", "LastRewardChosenTimestamp");
+            Fields(
+                "IsEarned",
+                "EarnReason",
+                "LastRewardId",
+                "LastRewardChosenTimestamp",
+                "HasCommittedReward",
+                "CommittedReward");
 
         private static readonly HashSet<string> WarmasterFields =
             Fields(
@@ -1197,6 +1204,7 @@ namespace AL.Data.Catalogs
             ValidateTopLevelShape(
                 root,
                 isLegacySchema,
+                schemaVersion,
                 policy.Authority,
                 collector,
                 state);
@@ -1320,11 +1328,22 @@ namespace AL.Data.Catalogs
         private static void ValidateTopLevelShape(
             StrictJsonObject root,
             bool isLegacySchema,
+            int schemaVersion,
             SaveSemanticValidationAuthority authority,
             DiagnosticCollector collector,
             ValidationState state)
         {
             RequireInt32(root, "SelectedRealm", SaveSemanticDomain.Envelope, false, collector, state);
+            if (schemaVersion >= 2)
+            {
+                RequireObject(
+                    root,
+                    "RealmSelectionCommit",
+                    SaveSemanticDomain.Envelope,
+                    false,
+                    collector,
+                    state);
+            }
             RequireArray(root, "Resources", SaveSemanticDomain.Resources, false, collector, state);
             RequireArray(root, "Buildings", SaveSemanticDomain.Buildings, false, collector, state);
             RequireArray(root, "Troops", SaveSemanticDomain.Troops, false, collector, state);
@@ -1395,12 +1414,17 @@ namespace AL.Data.Catalogs
             if (root.TryGet("ProfileId", out profileIdValue))
             {
                 var profileId = profileIdValue as StrictJsonString;
-                if (profileId == null || profileId.Value.Length != 0)
+                if (profileId == null ||
+                    isLegacySchema && profileId.Value.Length != 0 ||
+                    !isLegacySchema &&
+                    !IsCanonicalProfileId(profileId.Value))
                 {
                     MarkMalformed(
                         state,
                         collector,
-                        "SAVE_SCHEMA_V1_PROFILE_ID_INVALID",
+                        isLegacySchema
+                            ? "SAVE_SCHEMA_V1_PROFILE_ID_INVALID"
+                            : "SAVE_SCHEMA_V2_PROFILE_ID_INVALID",
                         "$.ProfileId",
                         SaveSemanticDomain.Metadata);
                 }
@@ -5035,6 +5059,36 @@ namespace AL.Data.Catalogs
         private static bool IsIdentifierPart(char value)
         {
             return IsIdentifierStart(value) || (value >= '0' && value <= '9');
+        }
+
+        private static bool IsCanonicalProfileId(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value.Length != 36)
+            {
+                return false;
+            }
+
+            if (!value.StartsWith("alp_", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            bool allZero = true;
+            for (int index = 4; index < value.Length; index++)
+            {
+                char character = value[index];
+                bool lowerHex =
+                    character >= '0' && character <= '9' ||
+                    character >= 'a' && character <= 'f';
+                if (!lowerHex)
+                {
+                    return false;
+                }
+
+                allZero &= character == '0';
+            }
+
+            return !allZero;
         }
 
         private sealed class ValidationState

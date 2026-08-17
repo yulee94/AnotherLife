@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AL.Core;
+using AL.RealmSelection;
 
 namespace AL.Data.Runtime
 {
@@ -18,6 +19,8 @@ namespace AL.Data.Runtime
         // serialize this as blank and remains MigrationRequired.
         public string ProfileId = string.Empty;
         public RealmId SelectedRealm;
+        public RealmSelectionCommitData RealmSelectionCommit =
+            new RealmSelectionCommitData();
         public List<ResourceData> Resources = new List<ResourceData>();
         public List<BuildingState> Buildings = new List<BuildingState>();
         public List<TroopInventoryData> Troops = new List<TroopInventoryData>();
@@ -114,6 +117,28 @@ namespace AL.Data.Runtime
         // Captures the verified generation that authorized this operation.
         // Schema-v1 operations must leave it blank.
         public string ExpectedGenerationFingerprint = string.Empty;
+    }
+
+    [Serializable]
+    public sealed class RealmSelectionCommitData
+    {
+        public const int CurrentContractVersion = 1;
+
+        public int ContractVersion;
+        public int State;
+        public RealmId RealmId;
+        public string CanonicalRealmId = string.Empty;
+        public string TransactionId = string.Empty;
+        public string IntentSha256 = string.Empty;
+        public string CatalogAuthorityId = string.Empty;
+        public string CatalogVersion = string.Empty;
+        public long CommitRevision;
+        public long CommittedUnixTimeMilliseconds;
+        public int Provenance;
+        public int SourceSaveSchemaVersion;
+        public int MigrationVersion;
+        public int PublicationState;
+        public string CommittedEventId = string.Empty;
     }
 
     [Serializable]

@@ -215,7 +215,8 @@ namespace AL.Services.Local
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
         INvs01LegacyCandidateStore,
-        IProfileWriteAuthorityProvider
+        IProfileWriteAuthorityProvider,
+        IProfileBoundRealmSelectionStore
     {
         private const string SaveFileName = "save.json";
         private const string BackupFileName = "save.backup.json";
@@ -423,6 +424,13 @@ namespace AL.Services.Local
         private int
             _cachedObservedNonWritableProfileInitializationVersion;
         private int _legacyCandidateCommitActive;
+        private readonly object _realmSelectionCommitGate = new object();
+        private string _currentAuthorityEpoch = string.Empty;
+        private string _currentVerifiedGenerationFingerprint = string.Empty;
+        private RealmSelectionCommittedEvent _pendingRealmSelectionEvent;
+
+        public event Action<RealmSelectionCommittedEvent>
+            RealmSelectionCommitted;
 
         public SaveGameData CurrentSave => _currentSave;
         public SaveLoadStatus LastLoadStatus { get; private set; }
@@ -524,6 +532,28 @@ namespace AL.Services.Local
                             .LegacyProfileInitializationVersion)
                 {
                     return MigrationRequiredFor(source);
+                }
+
+                if (_profileWritable &&
+                    _currentSave != null &&
+                    saveSchemaVersion ==
+                        SaveAuthorityTechnicalLimits
+                            .IdentityAwareSaveSchemaVersion &&
+                    profileInitializationVersion ==
+                        SaveAuthorityTechnicalLimits
+                            .IdentityAwareProfileInitializationVersion &&
+                    IsCanonicalProfileId(_currentSave.ProfileId) &&
+                    AuthorityEpochAllocator.IsCanonical(
+                        _currentAuthorityEpoch) &&
+                    IsCanonicalSha256Hex(
+                        _currentVerifiedGenerationFingerprint))
+                {
+                    return ProfileWriteAuthoritySnapshotFactory.Writable(
+                        _currentSave.ProfileId,
+                        _currentAuthorityEpoch,
+                        _currentVerifiedGenerationFingerprint,
+                        source,
+                        Array.Empty<string>());
                 }
 
                 return GetOrCreateDegradedAuthority(
@@ -702,6 +732,8 @@ namespace AL.Services.Local
                 ProfileAuthoritySourceGeneration.None;
             _observedAuthoritySaveSchemaVersion = 0;
             _observedAuthorityProfileInitializationVersion = 0;
+            _currentAuthorityEpoch = string.Empty;
+            _currentVerifiedGenerationFingerprint = string.Empty;
         }
 
         private void ObservePrimaryAuthority(SaveGameData save)
@@ -719,6 +751,24 @@ namespace AL.Services.Local
             _observedAuthoritySaveSchemaVersion = save.SaveSchemaVersion;
             _observedAuthorityProfileInitializationVersion =
                 save.ProfileInitializationVersion;
+            if (save.SaveSchemaVersion !=
+                    SaveAuthorityTechnicalLimits
+                        .IdentityAwareSaveSchemaVersion ||
+                save.ProfileInitializationVersion !=
+                    SaveAuthorityTechnicalLimits
+                        .IdentityAwareProfileInitializationVersion ||
+                !IsCanonicalProfileId(save.ProfileId))
+            {
+                _currentAuthorityEpoch = string.Empty;
+                _currentVerifiedGenerationFingerprint = string.Empty;
+                return;
+            }
+
+            if (!TryRefreshWritableAuthoritySnapshot(save))
+            {
+                _currentAuthorityEpoch = string.Empty;
+                _currentVerifiedGenerationFingerprint = string.Empty;
+            }
         }
 
         public void Save()
@@ -1073,6 +1123,265 @@ namespace AL.Services.Local
                 SaveCandidateCommitOutcome.ReadOnly,
                 _currentSave,
                 "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only the typed realm-selection and NVS-01 adapters.");
+        }
+
+        RealmIdentitySnapshot IProfileBoundRealmSelectionStore
+            .GetCommittedRealm() => GetTypedCommittedRealm();
+
+        RealmSelectionCommitResult IProfileBoundRealmSelectionStore
+            .TryCommitRealmSelection(RealmSelectionCommand command)
+        {
+            RealmSelectionCommitResult result;
+            lock (_realmSelectionCommitGate)
+            {
+                result = TryCommitRealmSelectionCore(command);
+            }
+
+            if (result.Status == RealmSelectionCommitStatus.Committed &&
+                DispatchPendingRealmSelectionEvent())
+            {
+                lock (_realmSelectionCommitGate)
+                {
+                    AcknowledgeRealmSelectionDelivery();
+                }
+            }
+
+            return result;
+        }
+
+        private RealmSelectionCommitResult TryCommitRealmSelectionCore(
+            RealmSelectionCommand command)
+        {
+            RealmId requestedRealmId = command.RequestedRealmId;
+            if (!IsCanonicalTransactionId(command.TransactionId))
+            {
+                return RealmCommitResult(
+                    RealmSelectionCommitStatus.InvalidTransaction,
+                    requestedRealmId,
+                    RealmId.None,
+                    string.Empty,
+                    command.TransactionId,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    string.Empty,
+                    0,
+                    string.Empty,
+                    false,
+                    false,
+                    "AL-REALM-TYPED-TRANSACTION-INVALID");
+            }
+
+            if (!TryMapRealmIdToCanonical(
+                    requestedRealmId,
+                    out string expectedCanonicalRealmId) ||
+                !string.Equals(
+                    expectedCanonicalRealmId,
+                    command.RequestedCanonicalRealmId,
+                    StringComparison.Ordinal))
+            {
+                return RealmCommitResult(
+                    RealmSelectionCommitStatus.InvalidRealm,
+                    requestedRealmId,
+                    RealmId.None,
+                    string.Empty,
+                    command.TransactionId,
+                    string.Empty,
+                    string.Empty,
+                    command.CatalogAuthorityId,
+                    command.CatalogVersion,
+                    0,
+                    string.Empty,
+                    false,
+                    false,
+                    "AL-REALM-TYPED-REQUEST-INVALID");
+            }
+
+            if (_currentSave == null)
+            {
+                return RealmCommitResult(
+                    RealmSelectionCommitStatus.ProfileUnavailable,
+                    requestedRealmId,
+                    RealmId.None,
+                    string.Empty,
+                    command.TransactionId,
+                    string.Empty,
+                    string.Empty,
+                    command.CatalogAuthorityId,
+                    command.CatalogVersion,
+                    0,
+                    string.Empty,
+                    false,
+                    false,
+                    "AL-REALM-TYPED-PROFILE-UNAVAILABLE");
+            }
+
+            ProfileWriteAuthoritySnapshot authority = GetCurrentAuthority();
+            RealmSelectionCommitData committed =
+                _currentSave.RealmSelectionCommit ??
+                new RealmSelectionCommitData();
+            string intentSha256 = ComputeIntentSha256(
+                _currentSave.ProfileId,
+                command.TransactionId,
+                expectedCanonicalRealmId,
+                command.CatalogAuthorityId,
+                command.CatalogVersion,
+                "initial-selection");
+            if (TryClassifyCommittedReplay(
+                    committed,
+                    requestedRealmId,
+                    expectedCanonicalRealmId,
+                    command.TransactionId,
+                    intentSha256,
+                    command.CatalogAuthorityId,
+                    command.CatalogVersion,
+                    out RealmSelectionCommitResult replay))
+            {
+                return replay;
+            }
+
+            RealmSelectionCommitStatus authorityStatus =
+                ClassifyRealmCommitAuthority(authority, command.Authority);
+            if (authorityStatus != RealmSelectionCommitStatus.Committed)
+            {
+                return RealmCommitResult(
+                    authorityStatus,
+                    requestedRealmId,
+                    _currentSave.SelectedRealm,
+                    CurrentCanonicalRealmId(),
+                    command.TransactionId,
+                    string.Empty,
+                    string.Empty,
+                    command.CatalogAuthorityId,
+                    command.CatalogVersion,
+                    CurrentCommitRevision(),
+                    CurrentCommittedEventId(),
+                    false,
+                    false,
+                    RealmCommitTechnicalCode(authorityStatus));
+            }
+
+            SaveGameData publishedBefore = _currentSave;
+            SaveGameData candidate = CloneSave(_currentSave);
+            ApplyNeutralPersistenceDefaults(candidate);
+            long commitRevision = Math.Max(
+                    committed.CommitRevision,
+                    0L) + 1L;
+            long committedUnixTimeMilliseconds =
+                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            string committedEventId =
+                "rsevt_" + command.TransactionId.Substring(5);
+            candidate.SelectedRealm = requestedRealmId;
+            candidate.RealmSelectionCommit ??= new RealmSelectionCommitData();
+            candidate.RealmSelectionCommit.ContractVersion =
+                RealmSelectionCommitData.CurrentContractVersion;
+            candidate.RealmSelectionCommit.State =
+                (int)RealmSelectionCommitState.Committed;
+            candidate.RealmSelectionCommit.RealmId = requestedRealmId;
+            candidate.RealmSelectionCommit.CanonicalRealmId =
+                expectedCanonicalRealmId;
+            candidate.RealmSelectionCommit.TransactionId =
+                command.TransactionId;
+            candidate.RealmSelectionCommit.IntentSha256 = intentSha256;
+            candidate.RealmSelectionCommit.CatalogAuthorityId =
+                command.CatalogAuthorityId ?? string.Empty;
+            candidate.RealmSelectionCommit.CatalogVersion =
+                command.CatalogVersion ?? string.Empty;
+            candidate.RealmSelectionCommit.CommitRevision = commitRevision;
+            candidate.RealmSelectionCommit.CommittedUnixTimeMilliseconds =
+                committedUnixTimeMilliseconds;
+            candidate.RealmSelectionCommit.Provenance =
+                (int)RealmSelectionCommitProvenance.InitialSelection;
+            candidate.RealmSelectionCommit.SourceSaveSchemaVersion =
+                _currentSave.SaveSchemaVersion;
+            candidate.RealmSelectionCommit.MigrationVersion = 0;
+            candidate.RealmSelectionCommit.PublicationState =
+                (int)RealmSelectionCommitPublicationState.Pending;
+            candidate.RealmSelectionCommit.CommittedEventId =
+                committedEventId;
+
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                _committedRecoveryWitnessBytes,
+                null,
+                out SaveGameData persistedSave,
+                out SaveOperationDisposition disposition,
+                out string message);
+            LastSaveDisposition = disposition;
+
+            if (status == SaveOperationStatus.SavedPrimary &&
+                persistedSave != null)
+            {
+                _currentSave = persistedSave;
+                _readOnlyCandidate = null;
+                _profileWritable = true;
+                ObservePrimaryAuthority(persistedSave);
+
+                RealmSelectionCommittedEvent committedEvent =
+                    CreateCommittedEvent(
+                        persistedSave.RealmSelectionCommit,
+                        persistedSave.ProfileId,
+                        _currentVerifiedGenerationFingerprint);
+                _pendingRealmSelectionEvent = committedEvent;
+
+                return RealmCommitResult(
+                    RealmSelectionCommitStatus.Committed,
+                    requestedRealmId,
+                    requestedRealmId,
+                    expectedCanonicalRealmId,
+                    command.TransactionId,
+                    command.TransactionId,
+                    intentSha256,
+                    command.CatalogAuthorityId,
+                    command.CatalogVersion,
+                    commitRevision,
+                    committedEventId,
+                    true,
+                    true,
+                    committedEvent.ResultingGenerationFingerprint,
+                    "AL-REALM-TYPED-COMMITTED");
+            }
+
+            _currentSave = publishedBefore;
+            if (status == SaveOperationStatus.CommitUncertain)
+            {
+                _profileWritable = false;
+                SetSaveStatus(status, message, false);
+                return RealmCommitResult(
+                    RealmSelectionCommitStatus.CommitUncertain,
+                    requestedRealmId,
+                    publishedBefore.SelectedRealm,
+                    CurrentCanonicalRealmId(),
+                    command.TransactionId,
+                    string.Empty,
+                    string.Empty,
+                    command.CatalogAuthorityId,
+                    command.CatalogVersion,
+                    CurrentCommitRevision(),
+                    CurrentCommittedEventId(),
+                    false,
+                    false,
+                    "AL-REALM-TYPED-COMMIT-UNCERTAIN");
+            }
+
+            SetSaveStatus(status, message, false);
+            return RealmCommitResult(
+                RealmSelectionCommitStatus.SaveFailedPreviousPreserved,
+                requestedRealmId,
+                publishedBefore.SelectedRealm,
+                CurrentCanonicalRealmId(),
+                command.TransactionId,
+                string.Empty,
+                string.Empty,
+                command.CatalogAuthorityId,
+                command.CatalogVersion,
+                CurrentCommitRevision(),
+                CurrentCommittedEventId(),
+                false,
+                false,
+                string.IsNullOrWhiteSpace(message)
+                    ? "AL-REALM-TYPED-SAVE-FAILED"
+                    : "AL-REALM-TYPED-SAVE-FAILED");
         }
 
         private SaveCandidateCommitResult TryCommitLegacyCandidateCore(
@@ -1552,6 +1861,443 @@ namespace AL.Services.Local
                 mutationOccurred,
                 persisted,
                 technicalCode);
+
+        private RealmIdentitySnapshot GetTypedCommittedRealm()
+        {
+            if (_currentSave == null)
+            {
+                return new RealmIdentitySnapshot(
+                    RealmIdentityStatus.ProfileUnavailable,
+                    RealmId.None,
+                    RealmCatalogRuntime.SupportedVersion,
+                    "AL-REALM-TYPED-PROFILE-UNAVAILABLE");
+            }
+
+            RealmSelectionCommitData commit =
+                _currentSave.RealmSelectionCommit;
+            if (!IsCommittedRealmSelectionRecord(commit))
+            {
+                return new RealmIdentitySnapshot(
+                    RealmIdentityStatus.Uncommitted,
+                    RealmId.None,
+                    RealmCatalogRuntime.SupportedVersion,
+                    "AL-REALM-TYPED-UNCOMMITTED");
+            }
+
+            return new RealmIdentitySnapshot(
+                RealmIdentityStatus.CommittedValid,
+                commit.RealmId,
+                commit.CatalogVersion,
+                "AL-REALM-TYPED-COMMITTED-VALID");
+        }
+
+        private RealmSelectionCommitResult RealmCommitResult(
+            RealmSelectionCommitStatus status,
+            RealmId requestedRealmId,
+            RealmId committedRealmId,
+            string canonicalCommittedRealmId,
+            string submittedTransactionId,
+            string committedTransactionId,
+            string intentSha256,
+            string catalogAuthorityId,
+            string catalogVersion,
+            long commitRevision,
+            string committedEventId,
+            bool mutationOccurred,
+            bool persistedAndVerified,
+            string technicalCode) =>
+            new RealmSelectionCommitResult(
+                status,
+                _currentSave?.ProfileId ?? string.Empty,
+                requestedRealmId,
+                committedRealmId,
+                canonicalCommittedRealmId,
+                submittedTransactionId,
+                committedTransactionId,
+                intentSha256,
+                catalogAuthorityId,
+                catalogVersion,
+                commitRevision,
+                committedEventId,
+                mutationOccurred,
+                persistedAndVerified,
+                _currentVerifiedGenerationFingerprint,
+                technicalCode);
+
+        private RealmSelectionCommitResult RealmCommitResult(
+            RealmSelectionCommitStatus status,
+            RealmId requestedRealmId,
+            RealmId committedRealmId,
+            string canonicalCommittedRealmId,
+            string submittedTransactionId,
+            string committedTransactionId,
+            string intentSha256,
+            string catalogAuthorityId,
+            string catalogVersion,
+            long commitRevision,
+            string committedEventId,
+            bool mutationOccurred,
+            bool persistedAndVerified,
+            string resultingGenerationFingerprint,
+            string technicalCode) =>
+            new RealmSelectionCommitResult(
+                status,
+                _currentSave?.ProfileId ?? string.Empty,
+                requestedRealmId,
+                committedRealmId,
+                canonicalCommittedRealmId,
+                submittedTransactionId,
+                committedTransactionId,
+                intentSha256,
+                catalogAuthorityId,
+                catalogVersion,
+                commitRevision,
+                committedEventId,
+                mutationOccurred,
+                persistedAndVerified,
+                resultingGenerationFingerprint,
+                technicalCode);
+
+        private static string RealmCommitTechnicalCode(
+            RealmSelectionCommitStatus status)
+        {
+            switch (status)
+            {
+                case RealmSelectionCommitStatus.StaleAuthority:
+                    return "AL-REALM-TYPED-STALE-AUTHORITY";
+                case RealmSelectionCommitStatus.ProfileNotWritable:
+                    return "AL-REALM-TYPED-PROFILE-NOT-WRITABLE";
+                case RealmSelectionCommitStatus.ForwardSchemaReadOnly:
+                    return "AL-REALM-TYPED-FORWARD-SCHEMA";
+                case RealmSelectionCommitStatus.CommitUncertain:
+                    return "AL-REALM-TYPED-COMMIT-UNCERTAIN";
+                case RealmSelectionCommitStatus.RecoveryRequired:
+                    return "AL-REALM-TYPED-RECOVERY-REQUIRED";
+                case RealmSelectionCommitStatus.ProfileUnavailable:
+                    return "AL-REALM-TYPED-PROFILE-UNAVAILABLE";
+                default:
+                    return "AL-REALM-TYPED-REJECTED";
+            }
+        }
+
+        private RealmSelectionCommitStatus ClassifyRealmCommitAuthority(
+            ProfileWriteAuthoritySnapshot authority,
+            ProfileAuthorityExpectation expectation)
+        {
+            if (authority == null)
+            {
+                return RealmSelectionCommitStatus.ProfileUnavailable;
+            }
+
+            if (authority.Status == ProfileWriteAuthorityStatus.Writable)
+            {
+                if (!string.Equals(
+                        authority.ProfileId,
+                        expectation?.ProfileId ?? string.Empty,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
+                        authority.AuthorityEpoch,
+                        expectation?.AuthorityEpoch ?? string.Empty,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
+                        authority.VerifiedGenerationFingerprint,
+                        expectation?.ExpectedGenerationFingerprint ??
+                        string.Empty,
+                        StringComparison.Ordinal))
+                {
+                    return RealmSelectionCommitStatus.StaleAuthority;
+                }
+
+                return RealmSelectionCommitStatus.Committed;
+            }
+
+            switch (authority.Status)
+            {
+                case ProfileWriteAuthorityStatus.ForwardSchemaReadOnly:
+                    return RealmSelectionCommitStatus.ForwardSchemaReadOnly;
+                case ProfileWriteAuthorityStatus.CommitUncertain:
+                    return RealmSelectionCommitStatus.CommitUncertain;
+                case ProfileWriteAuthorityStatus.RecoveryRequired:
+                    return RealmSelectionCommitStatus.RecoveryRequired;
+                case ProfileWriteAuthorityStatus.MigrationRequired:
+                case ProfileWriteAuthorityStatus.DegradedReadOnly:
+                case ProfileWriteAuthorityStatus.MissingProfile:
+                case ProfileWriteAuthorityStatus.Deleted:
+                case ProfileWriteAuthorityStatus.Unavailable:
+                default:
+                    return RealmSelectionCommitStatus.ProfileNotWritable;
+            }
+        }
+
+        private bool TryClassifyCommittedReplay(
+            RealmSelectionCommitData commit,
+            RealmId requestedRealmId,
+            string canonicalRealmId,
+            string submittedTransactionId,
+            string intentSha256,
+            string catalogAuthorityId,
+            string catalogVersion,
+            out RealmSelectionCommitResult result)
+        {
+            result = null;
+            if (!IsCommittedRealmSelectionRecord(commit))
+            {
+                return false;
+            }
+
+            if (string.Equals(
+                    commit.TransactionId,
+                    submittedTransactionId,
+                    StringComparison.Ordinal))
+            {
+                result = RealmCommitResult(
+                    string.Equals(
+                        commit.IntentSha256,
+                        intentSha256,
+                        StringComparison.Ordinal)
+                        ? RealmSelectionCommitStatus.DuplicateTransaction
+                        : RealmSelectionCommitStatus.TransactionMismatch,
+                    requestedRealmId,
+                    commit.RealmId,
+                    commit.CanonicalRealmId,
+                    submittedTransactionId,
+                    commit.TransactionId,
+                    commit.IntentSha256,
+                    commit.CatalogAuthorityId,
+                    commit.CatalogVersion,
+                    commit.CommitRevision,
+                    commit.CommittedEventId,
+                    false,
+                    true,
+                    string.Equals(
+                        commit.IntentSha256,
+                        intentSha256,
+                        StringComparison.Ordinal)
+                        ? "AL-REALM-TYPED-DUPLICATE"
+                        : "AL-REALM-TYPED-TRANSACTION-MISMATCH");
+                return true;
+            }
+
+            result = RealmCommitResult(
+                commit.RealmId == requestedRealmId &&
+                string.Equals(
+                    commit.CanonicalRealmId,
+                    canonicalRealmId,
+                    StringComparison.Ordinal)
+                    ? RealmSelectionCommitStatus.AlreadyCommittedSameRealm
+                    : RealmSelectionCommitStatus.RejectedDifferentRealm,
+                requestedRealmId,
+                commit.RealmId,
+                commit.CanonicalRealmId,
+                submittedTransactionId,
+                commit.TransactionId,
+                commit.IntentSha256,
+                catalogAuthorityId,
+                catalogVersion,
+                commit.CommitRevision,
+                commit.CommittedEventId,
+                false,
+                true,
+                commit.RealmId == requestedRealmId
+                    ? "AL-REALM-TYPED-ALREADY-COMMITTED"
+                    : "AL-REALM-TYPED-DIFFERENT-REALM-REJECTED");
+            return true;
+        }
+
+        private static bool IsCommittedRealmSelectionRecord(
+            RealmSelectionCommitData commit) =>
+            commit != null &&
+            commit.ContractVersion ==
+                RealmSelectionCommitData.CurrentContractVersion &&
+            commit.State == (int)RealmSelectionCommitState.Committed &&
+            commit.RealmId != RealmId.None &&
+            !string.IsNullOrWhiteSpace(commit.CanonicalRealmId) &&
+            !string.IsNullOrWhiteSpace(commit.TransactionId) &&
+            !string.IsNullOrWhiteSpace(commit.IntentSha256);
+
+        private static bool IsCanonicalTransactionId(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value.Length != 37)
+            {
+                return false;
+            }
+
+            if (!value.StartsWith("rsel_", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            bool allZero = true;
+            for (int index = 5; index < value.Length; index++)
+            {
+                char character = value[index];
+                bool lowerHex =
+                    character >= '0' && character <= '9' ||
+                    character >= 'a' && character <= 'f';
+                if (!lowerHex)
+                {
+                    return false;
+                }
+
+                allZero &= character == '0';
+            }
+
+            return !allZero;
+        }
+
+        private static bool IsCanonicalProfileId(string value)
+        {
+            if (string.IsNullOrEmpty(value) || value.Length != 36)
+            {
+                return false;
+            }
+
+            if (!value.StartsWith("alp_", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            bool allZero = true;
+            for (int index = 4; index < value.Length; index++)
+            {
+                char character = value[index];
+                bool lowerHex =
+                    character >= '0' && character <= '9' ||
+                    character >= 'a' && character <= 'f';
+                if (!lowerHex)
+                {
+                    return false;
+                }
+
+                allZero &= character == '0';
+            }
+
+            return !allZero;
+        }
+
+        private static bool IsCanonicalSha256Hex(string value)
+        {
+            if (string.IsNullOrEmpty(value) ||
+                value.Length != SaveAuthorityTechnicalLimits.Sha256Characters)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!((character >= '0' && character <= '9') ||
+                      (character >= 'a' && character <= 'f')))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static string ComputeIntentSha256(
+            string profileId,
+            string transactionId,
+            string canonicalRealmId,
+            string catalogAuthorityId,
+            string catalogVersion,
+            string source)
+        {
+            string payload =
+                string.Join(
+                    "\n",
+                    "1",
+                    profileId ?? string.Empty,
+                    transactionId ?? string.Empty,
+                    canonicalRealmId ?? string.Empty,
+                    catalogAuthorityId ?? string.Empty,
+                    catalogVersion ?? string.Empty,
+                    source ?? string.Empty);
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                return LowerHex(sha256.ComputeHash(StrictUtf8.GetBytes(payload)));
+            }
+        }
+
+        private RealmSelectionCommittedEvent CreateCommittedEvent(
+            RealmSelectionCommitData commit,
+            string profileId,
+            string resultingGenerationFingerprint) =>
+            new RealmSelectionCommittedEvent(
+                RealmSelectionCommitData.CurrentContractVersion,
+                commit?.CommittedEventId ?? string.Empty,
+                profileId ?? string.Empty,
+                commit?.TransactionId ?? string.Empty,
+                commit?.IntentSha256 ?? string.Empty,
+                commit?.RealmId ?? RealmId.None,
+                commit?.CanonicalRealmId ?? string.Empty,
+                commit?.CatalogAuthorityId ?? string.Empty,
+                commit?.CatalogVersion ?? string.Empty,
+                commit?.CommitRevision ?? 0,
+                commit?.CommittedUnixTimeMilliseconds ?? 0,
+                resultingGenerationFingerprint ?? string.Empty,
+                (RealmSelectionCommitProvenance)(commit?.Provenance ?? 0));
+
+        private bool DispatchPendingRealmSelectionEvent()
+        {
+            RealmSelectionCommittedEvent pending = _pendingRealmSelectionEvent;
+            if (pending == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                RealmSelectionCommitted?.Invoke(pending);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError(
+                    $"AL-REALM-TYPED-PUBLICATION-FAILED: {ex.GetType().Name}");
+                return false;
+            }
+        }
+
+        private void AcknowledgeRealmSelectionDelivery()
+        {
+            if (_currentSave?.RealmSelectionCommit == null ||
+                _currentSave.RealmSelectionCommit.PublicationState !=
+                    (int)RealmSelectionCommitPublicationState.Pending)
+            {
+                _pendingRealmSelectionEvent = null;
+                return;
+            }
+
+            SaveGameData candidate = CloneSave(_currentSave);
+            candidate.RealmSelectionCommit.PublicationState =
+                (int)RealmSelectionCommitPublicationState.Delivered;
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                _committedRecoveryWitnessBytes,
+                null,
+                out SaveGameData persistedSave,
+                out _,
+                out _);
+            if (status == SaveOperationStatus.SavedPrimary &&
+                persistedSave != null)
+            {
+                _currentSave = persistedSave;
+                ObservePrimaryAuthority(persistedSave);
+            }
+
+            _pendingRealmSelectionEvent = null;
+        }
+
+        private string CurrentCanonicalRealmId() =>
+            _currentSave?.RealmSelectionCommit?.CanonicalRealmId ?? string.Empty;
+
+        private long CurrentCommitRevision() =>
+            _currentSave?.RealmSelectionCommit?.CommitRevision ?? 0;
+
+        private string CurrentCommittedEventId() =>
+            _currentSave?.RealmSelectionCommit?.CommittedEventId ?? string.Empty;
 
         private static bool TryMapRealmIdToCanonical(
             RealmId realmId,
@@ -2049,6 +2795,7 @@ namespace AL.Services.Local
             {
                 _currentSave = selectedSave;
                 _readOnlyCandidate = null;
+                ObservePrimaryAuthority(selectedSave);
                 _committedRecoveryWitnessBytes =
                     hasCommittedBackupRecoveryWitness
                         ? committedBackupRecoveryWitnessBytes
@@ -4701,6 +5448,11 @@ namespace AL.Services.Local
                 return false;
             }
 
+            if (!ValidateRealmSelectionCommitData(save, out error))
+            {
+                return false;
+            }
+
             if (!Nvs01ProgressCodec.TryValidateStoredData(
                     save.Nvs01Progress,
                     out error))
@@ -4776,6 +5528,7 @@ namespace AL.Services.Local
             save.OwnedEquipment = RemoveNullEntries(save.OwnedEquipment);
             save.AppliedBossLootRewards ??= new List<AppliedBossLootRewardState>();
             save.LordPersona ??= new PersonaData();
+            save.RealmSelectionCommit ??= new RealmSelectionCommitData();
             save.Wishgate ??= new WishgateState();
             save.Warmaster ??= new WarmasterState();
             save.Warmaster.UnlockedSetIds = RemoveNullStrings(save.Warmaster.UnlockedSetIds);
@@ -4840,6 +5593,59 @@ namespace AL.Services.Local
             save.Nvs01Progress.AcquiredArtifactIds ??= new List<string>();
             save.Nvs01Progress.AppliedEffectKeys ??= new List<string>();
             save.Nvs01Progress.UnlockedChapterId ??= string.Empty;
+        }
+
+        private static bool ValidateRealmSelectionCommitData(
+            SaveGameData save,
+            out string error)
+        {
+            RealmSelectionCommitData commit = save.RealmSelectionCommit;
+            if (commit == null)
+            {
+                error = "Realm selection commit data is null.";
+                return false;
+            }
+
+            commit.CanonicalRealmId ??= string.Empty;
+            commit.TransactionId ??= string.Empty;
+            commit.IntentSha256 ??= string.Empty;
+            commit.CatalogAuthorityId ??= string.Empty;
+            commit.CatalogVersion ??= string.Empty;
+            commit.CommittedEventId ??= string.Empty;
+
+            bool hasCommittedRecord =
+                commit.State == (int)RealmSelectionCommitState.Committed;
+            if (!hasCommittedRecord)
+            {
+                if (save.SelectedRealm != RealmId.None)
+                {
+                    error =
+                        "SelectedRealm cannot be committed while realm selection metadata is uncommitted.";
+                    return false;
+                }
+
+                error = string.Empty;
+                return true;
+            }
+
+            if (commit.ContractVersion !=
+                    RealmSelectionCommitData.CurrentContractVersion ||
+                commit.RealmId == RealmId.None ||
+                save.SelectedRealm != commit.RealmId ||
+                string.IsNullOrWhiteSpace(commit.CanonicalRealmId) ||
+                string.IsNullOrWhiteSpace(commit.TransactionId) ||
+                string.IsNullOrWhiteSpace(commit.IntentSha256) ||
+                string.IsNullOrWhiteSpace(commit.CatalogAuthorityId) ||
+                string.IsNullOrWhiteSpace(commit.CatalogVersion) ||
+                commit.CommitRevision <= 0 ||
+                commit.CommittedUnixTimeMilliseconds <= 0)
+            {
+                error = "Committed realm selection metadata is incomplete.";
+                return false;
+            }
+
+            error = string.Empty;
+            return true;
         }
 
         private static void EnsureResource(SaveGameData save, ResourceType type, long startingAmount)
@@ -5669,7 +6475,7 @@ namespace AL.Services.Local
                 });
             return new SaveSemanticValidationPolicy(
                 SaveGameData.CurrentSaveFormatId,
-                SaveGameData.CurrentSaveSchemaVersion,
+                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion,
                 SaveGameData.CurrentProfileInitializationVersion,
                 authority,
                 maximumInputBytes:
@@ -5734,9 +6540,111 @@ namespace AL.Services.Local
                 save.SaveFormatId,
                 SaveGameData.CurrentSaveFormatId,
                 StringComparison.Ordinal) &&
-            save.SaveSchemaVersion == SaveGameData.CurrentSaveSchemaVersion &&
+            (save.SaveSchemaVersion ==
+                 SaveGameData.CurrentSaveSchemaVersion ||
+             save.SaveSchemaVersion ==
+                 SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion) &&
             save.ProfileInitializationVersion ==
                 SaveGameData.CurrentProfileInitializationVersion;
+
+        private bool TryRefreshWritableAuthoritySnapshot(SaveGameData save)
+        {
+            if (save == null || !IsCanonicalProfileId(save.ProfileId))
+            {
+                return false;
+            }
+
+            string fingerprint = ComputeCurrentGenerationFingerprint(save);
+            if (!IsCanonicalSha256Hex(fingerprint))
+            {
+                return false;
+            }
+
+            AuthorityEpochAllocationResult epoch =
+                AuthorityEpochAllocator.ProcessLocal.Allocate();
+            if (epoch.Status != AuthorityEpochAllocationStatus.Allocated)
+            {
+                return false;
+            }
+
+            _currentAuthorityEpoch = epoch.AuthorityEpoch;
+            _currentVerifiedGenerationFingerprint = fingerprint;
+            return true;
+        }
+
+        private string ComputeCurrentGenerationFingerprint(SaveGameData save)
+        {
+            SaveFileReadResult primary = ReadCanonicalPath(SavePath);
+            SaveFileReadResult backup = ReadCanonicalPath(BackupPath);
+            SaveFileReadResult temp = ReadCanonicalPath(TempPath);
+            SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
+            var frame = new VerifiedGenerationFingerprintFrame(
+                save.ProfileId,
+                SaveAuthorityTechnicalLimits.SaveFormatId,
+                save.SaveSchemaVersion,
+                save.ProfileInitializationVersion,
+                ProfileAuthoritySourceGeneration.Primary,
+                VerifiedAuthorityLedgerState.CanonicalCurrent,
+                CreateArtifactIdentity(primary, AuthorityArtifactRole.Primary),
+                CreateArtifactIdentity(backup, AuthorityArtifactRole.Backup),
+                CreateArtifactIdentity(temp, AuthorityArtifactRole.Temp),
+                CreateArtifactIdentity(
+                    previous,
+                    AuthorityArtifactRole.CanonicalPrevious),
+                CreateMissingArtifact(AuthorityArtifactRole.LegacyPrevious),
+                CreateMissingArtifact(AuthorityArtifactRole.RecoveryWitness));
+            VerifiedGenerationFingerprintResult fingerprint =
+                VerifiedGenerationFingerprint.Compute(frame);
+            return fingerprint.Status ==
+                   VerifiedGenerationFingerprintStatus.Computed
+                ? fingerprint.Value
+                : string.Empty;
+        }
+
+        private static SerializedAuthorityArtifactIdentity CreateArtifactIdentity(
+            SaveFileReadResult readResult,
+            AuthorityArtifactRole role)
+        {
+            if (readResult == null ||
+                readResult.Disposition != SaveFileReadDisposition.Read ||
+                readResult.Bytes == null)
+            {
+                return CreateMissingArtifact(role);
+            }
+
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                return new SerializedAuthorityArtifactIdentity(
+                    role,
+                    AuthorityArtifactDisposition.VerifiedExact,
+                    readResult.Bytes.LongLength,
+                    LowerHex(sha256.ComputeHash(readResult.Bytes)));
+            }
+        }
+
+        private static SerializedAuthorityArtifactIdentity CreateMissingArtifact(
+            AuthorityArtifactRole role) =>
+            new SerializedAuthorityArtifactIdentity(
+                role,
+                AuthorityArtifactDisposition.Missing,
+                0,
+                string.Empty);
+
+        private static string LowerHex(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length == 0)
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder(bytes.Length * 2);
+            for (int index = 0; index < bytes.Length; index++)
+            {
+                builder.Append(bytes[index].ToString("x2"));
+            }
+
+            return builder.ToString();
+        }
 
     }
 }
