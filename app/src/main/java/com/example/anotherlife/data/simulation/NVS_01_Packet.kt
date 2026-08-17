@@ -16,7 +16,7 @@ object NVS_01_Packet {
     const val QUEST_ID = "OMEN_1"
     
     // Stable IDs for handoff
-    const val ADVISOR_ID = "ADVISOR_VALERIUS"
+    const val ADVISOR_ID = "npc_valerius"
     const val ARENA_HOOK_ID = "HOOK_SKY_CASTLE_ARENA"
     const val REWARD_ARTIFACT_ID = "REW_OMEN_1_TEAR"
     
@@ -96,7 +96,7 @@ object NVS_01_Packet {
     // Format: "DIALOGUE_ID" -> List of "COMMAND:PAYLOAD"
     val consequences = mapOf(
         "DLG_OMEN_1_GO" to listOf(
-            "SET_AFFINITY:ADVISOR_VALERIUS:+5",
+            "SET_AFFINITY:npc_valerius:+5",
             "TRANSITION_STATE:INVESTIGATE_SKY_CASTLE",
             "REQUEST_HANDOFF:HOOK_SKY_CASTLE_ARENA"
         ),

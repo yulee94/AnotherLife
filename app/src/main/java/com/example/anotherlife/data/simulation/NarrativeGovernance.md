@@ -4,7 +4,7 @@ This document defines the strict naming rules and ID registry policies to ensure
 
 ## 1. ID Naming Conventions
 
-All IDs must be **UPPER_SNAKE_CASE** and globally unique.
+Narrative workflow IDs use **UPPER_SNAKE_CASE**. Relationship identity is the explicit exception: NPC/advisor and faction records use the lowercase stable IDs from `al_relationship_authority_content_catalog.json`. Legacy uppercase IDs are compatibility aliases only; labels are presentation, never identity.
 
 | Content Type | ID Prefix | Example |
 | --- | --- | --- |
@@ -12,8 +12,8 @@ All IDs must be **UPPER_SNAKE_CASE** and globally unique.
 | Quest | `Q_` or `QUEST_` | `QUEST_OMEN_1`, `Q_CL_REBUILD_1` |
 | Dialogue Node | `DLG_` | `DLG_OMEN_1_START`, `DLG_SMITH_GOSSIP` |
 | Objective | `OBJ_` | `OBJ_OMEN_1_TALK` |
-| NPC / Advisor | `NPC_` or `ADVISOR_` | `ADVISOR_VALERIUS`, `NPC_SMITH_GRUFF` |
-| Faction | `FACT_` | `FACT_HUMAN_COUNCIL` |
+| NPC / Advisor relationship identity | `npc_` | `npc_valerius`, `npc_gruff` |
+| Faction relationship identity | `faction_` | `faction_crownlands_radiant_council` |
 | Reward | `REW_` | `REW_GOLD_500`, `REW_OMEN_1_TEAR` |
 | Gameplay Hook | `HOOK_` | `HOOK_SKY_CASTLE_ARENA` |
 | Event | `EVENT_` | `EVENT_ARENA_CLEAR`, `EVENT_REALM_SELECTED` |

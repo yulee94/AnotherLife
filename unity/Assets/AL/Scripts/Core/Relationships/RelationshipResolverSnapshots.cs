@@ -84,13 +84,15 @@ namespace AL.Core.Relationships
             string canonicalId,
             IEnumerable<string> aliases,
             bool relationshipEnabled,
-            string classificationProfileId)
+            string classificationProfileId,
+            string displayLabel)
         {
             Domain = domain;
             CanonicalId = canonicalId;
             LegacyAliases = Array.AsReadOnly((aliases ?? Enumerable.Empty<string>()).ToArray());
             RelationshipEnabled = relationshipEnabled;
             ClassificationProfileId = classificationProfileId;
+            DisplayLabel = displayLabel;
         }
 
         public RelationshipDomain Domain { get; }
@@ -98,6 +100,7 @@ namespace AL.Core.Relationships
         public IReadOnlyList<string> LegacyAliases { get; }
         public bool RelationshipEnabled { get; }
         public string ClassificationProfileId { get; }
+        public string DisplayLabel { get; }
     }
 
     public sealed class RelationshipIdentityResolution
@@ -261,11 +264,13 @@ namespace AL.Core.Relationships
             StrictJsonArray affinityProfiles;
             StrictJsonArray factionProfiles;
             StrictJsonObject personaPolicy;
+            StrictJsonArray localizationRows;
             if (!TryArray(root, "npcRecords", out npcRows) || npcRows.Items.Count != 6 ||
                 !TryArray(root, "factionRecords", out factionRows) || factionRows.Items.Count != 5 ||
                 !TryArray(root, "affinityClassificationProfiles", out affinityProfiles) || affinityProfiles.Items.Count != 1 ||
                 !TryArray(root, "factionClassificationProfiles", out factionProfiles) || factionProfiles.Items.Count != 1 ||
                 !TryObject(root, "personaPolicy", out personaPolicy) ||
+                !TryArray(root, "draftLocalization", out localizationRows) ||
                 !ValidatePolicy(affinityProfiles, factionProfiles, personaPolicy))
             {
                 return BuildResult.Invalid();
@@ -275,8 +280,10 @@ namespace AL.Core.Relationships
             Dictionary<string, RelationshipIdentity> npcAliases;
             Dictionary<string, RelationshipIdentity> factions;
             Dictionary<string, RelationshipIdentity> factionAliases;
-            if (!TryIdentities(npcRows, RelationshipDomain.NpcAffinity, out npcs, out npcAliases) ||
-                !TryIdentities(factionRows, RelationshipDomain.FactionReputation, out factions, out factionAliases))
+            Dictionary<string, string> localization;
+            if (!TryLocalization(localizationRows, out localization) ||
+                !TryIdentities(npcRows, RelationshipDomain.NpcAffinity, localization, out npcs, out npcAliases) ||
+                !TryIdentities(factionRows, RelationshipDomain.FactionReputation, localization, out factions, out factionAliases))
             {
                 return BuildResult.Invalid();
             }
@@ -309,6 +316,7 @@ namespace AL.Core.Relationships
         private static bool TryIdentities(
             StrictJsonArray rows,
             RelationshipDomain domain,
+            IReadOnlyDictionary<string, string> localization,
             out Dictionary<string, RelationshipIdentity> canonical,
             out Dictionary<string, RelationshipIdentity> aliases)
         {
@@ -319,10 +327,14 @@ namespace AL.Core.Relationships
                 StrictJsonObject row = value as StrictJsonObject;
                 string id;
                 string profile;
+                string displayNameKey;
+                string displayLabel;
                 bool enabled;
                 StrictJsonArray aliasRows;
                 if (row == null || !TryString(row, "id", out id) || !IsCanonicalId(id) ||
                     !TryString(row, "classificationProfileId", out profile) ||
+                    !TryString(row, "displayNameKey", out displayNameKey) ||
+                    !localization.TryGetValue(displayNameKey, out displayLabel) ||
                     !TryBoolean(row, "relationshipEnabled", out enabled) ||
                     !TryArray(row, "legacyAliases", out aliasRows) ||
                     canonical.ContainsKey(id) || aliases.ContainsKey(id))
@@ -345,12 +357,42 @@ namespace AL.Core.Relationships
                     aliasValues[index] = alias.Value;
                 }
 
-                var identity = new RelationshipIdentity(domain, id, aliasValues, enabled, profile);
+                var identity = new RelationshipIdentity(
+                    domain,
+                    id,
+                    aliasValues,
+                    enabled,
+                    profile,
+                    displayLabel);
                 canonical.Add(id, identity);
                 foreach (string alias in aliasValues)
                 {
                     aliases.Add(alias, identity);
                 }
+            }
+
+            return true;
+        }
+
+        private static bool TryLocalization(
+            StrictJsonArray rows,
+            out Dictionary<string, string> localization)
+        {
+            localization = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (StrictJsonValue value in rows.Items)
+            {
+                StrictJsonObject row = value as StrictJsonObject;
+                string key;
+                string text;
+                if (row == null ||
+                    !TryString(row, "key", out key) ||
+                    !TryString(row, "text", out text) ||
+                    localization.ContainsKey(key))
+                {
+                    return false;
+                }
+
+                localization.Add(key, text);
             }
 
             return true;

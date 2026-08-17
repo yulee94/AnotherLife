@@ -13,28 +13,28 @@ object Chapter1_Packet {
             id = "C1_CL",
             title = "The King's Decree",
             lore = "Rebuilding the capital and seeking the blessing of Aurelius the Gold Dragon.",
-            initialNpc = "ADVISOR_VALERIUS",
+            initialNpc = "npc_valerius",
             mainQuestChain = listOf("OMEN_1", "CL_REBUILD_1", "CL_DRAGON_TRIAL")
         ),
         "Stonehold" to ChapterData(
             id = "C1_SH",
             title = "The Echoes of Iron",
             lore = "Re-opening the ancestral Deep Forge and defeating Ferrum the Iron Dragon.",
-            initialNpc = "ADVISOR_GRUFF",
+            initialNpc = "npc_gruff",
             mainQuestChain = listOf("OMEN_1", "SH_FORGE_1", "SH_DRAGON_TRIAL")
         ),
         "Eldergrove" to ChapterData(
             id = "C1_EG",
             title = "Whispers of the Sapling",
             lore = "Investigating a blight on the World Tree and purging Virens the Blighted Dragon.",
-            initialNpc = "ADVISOR_MOLLY",
+            initialNpc = "npc_molly",
             mainQuestChain = listOf("OMEN_1", "EG_BLIGHT_1", "EG_DRAGON_TRIAL")
         ),
         "Umbral" to ChapterData(
             id = "C1_UM",
             title = "Shadows of the Void",
             lore = "Rituals to stabilize the volcanic rifts and taming Nox the Void Dragon.",
-            initialNpc = "ADVISOR_XERATH",
+            initialNpc = "npc_xerath",
             mainQuestChain = listOf("OMEN_1", "UM_RIFT_1", "UM_DRAGON_TRIAL")
         )
     )
@@ -49,10 +49,10 @@ object Chapter1_Packet {
 
     // Strategic Narrative Goals for Chapter 1
     val strategicGoals = mapOf(
-        "ADVISOR_VALERIUS" to "Consolidate defense of the capital (+10% Wall Durability)",
-        "ADVISOR_GRUFF" to "Re-ignite the ancestral forge (+15% Ore Production)",
-        "ADVISOR_MOLLY" to "Purge the blight from the World Tree (+20% Wood Production)",
-        "ADVISOR_XERATH" to "Stabilize the volcanic rifts (+10% Mana Stone yield)"
+        "npc_valerius" to "Consolidate defense of the capital (+10% Wall Durability)",
+        "npc_gruff" to "Re-ignite the ancestral forge (+15% Ore Production)",
+        "npc_molly" to "Purge the blight from the World Tree (+20% Wood Production)",
+        "npc_xerath" to "Stabilize the volcanic rifts (+10% Mana Stone yield)"
     )
 
     // NPC Arcs & Consequences
@@ -81,8 +81,8 @@ object Chapter1_Packet {
     const val NEXT_CHAPTER_ID = "CH2_THE_TREASURE_HUNT"
 
     // Key NPC IDs for Chapter 1
-    const val NPC_VALERIUS = "ADVISOR_VALERIUS"
-    const val NPC_GRUFF = "ADVISOR_GRUFF"
-    const val NPC_MOLLY = "ADVISOR_MOLLY"
-    const val NPC_XERATH = "ADVISOR_XERATH"
+    const val NPC_VALERIUS = "npc_valerius"
+    const val NPC_GRUFF = "npc_gruff"
+    const val NPC_MOLLY = "npc_molly"
+    const val NPC_XERATH = "npc_xerath"
 }

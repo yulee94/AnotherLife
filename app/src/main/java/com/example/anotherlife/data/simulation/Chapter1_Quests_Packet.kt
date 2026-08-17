@@ -13,7 +13,7 @@ object Chapter1_Quests_Packet {
             type = QuestType.MAIN,
             handoff = "HOOK_KINGDOM_WALL_REPAIR",
             consequences = mapOf(
-                "COMPLETION" to listOf("REPUTATION:FACT_HUMAN_COUNCIL:+20", "UNSTABLE_CELESTIAL_SIGNAL")
+                "COMPLETION" to listOf("REPUTATION:faction_crownlands_radiant_council:+20", "UNSTABLE_CELESTIAL_SIGNAL")
             )
         ),
         QuestTemplate(
@@ -23,7 +23,7 @@ object Chapter1_Quests_Packet {
             type = QuestType.MAIN,
             handoff = "HOOK_KINGDOM_FORGE_PUMP",
             consequences = mapOf(
-                "COMPLETION" to listOf("REPUTATION:FACT_DWARVEN_FORGE:+20", "ORE_PRODUCTION:+15%")
+                "COMPLETION" to listOf("REPUTATION:faction_stonehold_assembly:+20", "ORE_PRODUCTION:+15%")
             )
         )
     )

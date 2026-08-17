@@ -6,7 +6,7 @@ package com.example.anotherlife.data.simulation
 object AdvisorPersonas {
     
     val valerius = Persona(
-        id = "ADVISOR_VALERIUS",
+        id = "npc_valerius",
         name = "Captain Valerius",
         role = "Military Commander",
         strategicBias = StrategicBias.MILITARY,
@@ -15,7 +15,7 @@ object AdvisorPersonas {
     )
 
     val gruff = Persona(
-        id = "ADVISOR_GRUFF",
+        id = "npc_gruff",
         name = "Master Gruff",
         role = "Chief Architect & Smith",
         strategicBias = StrategicBias.ECONOMIC,
@@ -24,7 +24,7 @@ object AdvisorPersonas {
     )
 
     val molly = Persona(
-        id = "ADVISOR_MOLLY",
+        id = "npc_molly",
         name = "Molly",
         role = "Royal Archivist & Innkeeper",
         strategicBias = StrategicBias.DIPLOMATIC,
@@ -33,7 +33,7 @@ object AdvisorPersonas {
     )
 
     val xerath = Persona(
-        id = "ADVISOR_XERATH",
+        id = "npc_xerath",
         name = "Xerath",
         role = "Void Seer",
         strategicBias = StrategicBias.SHADOW,
