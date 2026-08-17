@@ -2610,7 +2610,43 @@ namespace AL.Services.Local
                 return;
             }
 
+            if (IsExactLegacySchemaOne(selectedSave))
+            {
+                TryMigrateLegacyRealmProfile(inventory, selected, selectedSave);
+                return;
+            }
+
             if (!ValidateSaveSemantics(selectedSave, out _))
+            {
+                _currentSave = null;
+                _readOnlyCandidate = selectedSave;
+                _profileWritable = false;
+                bool realmRecoveryRequired =
+                    selectedSave.SelectedRealm != RealmId.None ||
+                    selectedSave.RealmSelectionCommit != null &&
+                    selectedSave.RealmSelectionCommit.State !=
+                        (int)RealmSelectionCommitState.Uncommitted;
+                PublishDisposition(
+                    inventory,
+                    selected,
+                    realmRecoveryRequired
+                        ? "SAVE_SELECT_REALM_METADATA_RECOVERY_REQUIRED"
+                        : selection.ReasonCode,
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    realmRecoveryRequired
+                        ? SaveLoadStatus.RecoveryRequired
+                        : SaveLoadStatus.LoadedPrimaryDegraded,
+                    realmRecoveryRequired
+                        ? "AL-SAVE-REALM-METADATA-RECOVERY-REQUIRED: Partial or contradictory realm metadata was preserved and no realm was published."
+                        : "AL-SAVE-SELECTED-SEMANTIC-FAILED: The selected candidate contains runtime-inconsistent state and remains available only as a read-only diagnostic snapshot.",
+                    false);
+                return;
+            }
+
+            if (HasConflictingCommittedRealmCandidates(inventory, selectedSave))
             {
                 _currentSave = null;
                 _readOnlyCandidate = selectedSave;
@@ -2618,13 +2654,13 @@ namespace AL.Services.Local
                 PublishDisposition(
                     inventory,
                     selected,
-                    selection.ReasonCode,
+                    "SAVE_SELECT_COMMITTED_REALM_CONFLICT",
                     false,
                     false,
                     false);
                 SetLoadStatus(
-                    SaveLoadStatus.LoadedPrimaryDegraded,
-                    "AL-SAVE-SELECTED-SEMANTIC-FAILED: The selected candidate contains runtime-inconsistent state and remains available only as a read-only diagnostic snapshot.",
+                    SaveLoadStatus.RecoveryRequired,
+                    "AL-SAVE-COMMITTED-REALM-CONFLICT: Canonical generations contain different coherent committed realms; no file order, timestamp, or duplicate record was allowed to choose one.",
                     false);
                 return;
             }
@@ -2713,6 +2749,8 @@ namespace AL.Services.Local
                 TryGetCommittedBackupRecoveryWitness(
                     inventory,
                     out byte[] committedBackupRecoveryWitnessBytes);
+            bool completedExactCommittedInstall = false;
+
             if (selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
                 HasWritableTempEvidence(inventory) &&
                 !hasCommittedBackupRecoveryWitness)
@@ -2782,6 +2820,30 @@ namespace AL.Services.Local
                 return;
             }
 
+            if (hasCommittedBackupRecoveryWitness &&
+                selected.SourceGeneration == SaveCandidateSourceGeneration.Primary)
+            {
+                completedExactCommittedInstall = TryDelete(TempPath);
+                if (!completedExactCommittedInstall)
+                {
+                    _currentSave = null;
+                    _readOnlyCandidate = selectedSave;
+                    _profileWritable = false;
+                    PublishDisposition(
+                        inventory,
+                        selected,
+                        "SAVE_SELECT_COMMITTED_TEMP_CLEANUP_FAILED",
+                        false,
+                        false,
+                        false);
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryRequired,
+                        "AL-SAVE-COMMITTED-TEMP-CLEANUP-FAILED: A fully replayed committed generation was proven, but stale staged metadata could not be removed; authority remains read-only.",
+                        false);
+                    return;
+                }
+            }
+
             bool runtimeUsable =
                 selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
                 selected.IsWritable &&
@@ -2806,10 +2868,12 @@ namespace AL.Services.Local
                     selection.ReasonCode,
                     writable,
                     runtimeUsable,
-                    false);
+                    completedExactCommittedInstall);
                 SetLoadStatus(
                     SaveLoadStatus.LoadedPrimary,
-                    selected.Outcome == SaveSemanticCandidateOutcome.Valid
+                    completedExactCommittedInstall
+                        ? "AL-SAVE-COMMITTED-INSTALL-RECOVERED: Exact primary, backup, and staged committed generations matched; stale staged metadata was removed without changing the realm."
+                        : selected.Outcome == SaveSemanticCandidateOutcome.Valid
                         ? "AL-SAVE-LOAD-PRIMARY: A semantically valid primary was loaded without disk mutation or offline progression."
                         : "AL-SAVE-LOAD-PRIMARY-COMPATIBLE: A round-trippable primary using only approved compatibility handling was loaded without disk mutation or offline progression.",
                     false);
@@ -5721,6 +5785,279 @@ namespace AL.Services.Local
         private bool HasSaveEvidence(string path) =>
             _fileOperations.ReadAllBytesBounded(path, 1).Disposition !=
             SaveFileReadDisposition.Missing;
+
+        private static bool HasConflictingCommittedRealmCandidates(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveGameData selectedSave)
+        {
+            RealmSelectionCommitData selectedCommit =
+                selectedSave?.RealmSelectionCommit;
+            bool selectedIsCommitted =
+                IsCommittedRealmSelectionRecord(selectedCommit);
+
+            foreach (SaveCandidateInventoryEntry entry in inventory)
+            {
+                if (entry.Source != SaveCandidateSourceGeneration.Primary &&
+                    entry.Source != SaveCandidateSourceGeneration.Backup)
+                {
+                    continue;
+                }
+
+                SaveSemanticCandidate semantic = entry.SemanticCandidate;
+                if (semantic == null ||
+                    !semantic.HasRetainedRawBytes ||
+                    !IsRuntimeRoundTrippable(semantic) ||
+                    !TryDeserializeSelectedCandidate(semantic, out SaveGameData other) ||
+                    other == null ||
+                    !string.Equals(
+                        other.ProfileId,
+                        selectedSave?.ProfileId,
+                        StringComparison.Ordinal) ||
+                    !ValidateSaveSemantics(other, out _) ||
+                    !IsCommittedRealmSelectionRecord(other.RealmSelectionCommit))
+                {
+                    continue;
+                }
+
+                if (!selectedIsCommitted ||
+                    other.RealmSelectionCommit.RealmId != selectedCommit.RealmId ||
+                    !string.Equals(
+                        other.RealmSelectionCommit.CanonicalRealmId,
+                        selectedCommit.CanonicalRealmId,
+                        StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private void TryMigrateLegacyRealmProfile(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveSemanticCandidate selected,
+            SaveGameData legacySave)
+        {
+            SaveCandidateInventoryEntry primary = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Primary);
+            SaveCandidateInventoryEntry backup = Find(
+                inventory,
+                SaveCandidateSourceGeneration.Backup);
+            byte[] predecessorBytes = selected?.CopyRawBytes();
+            byte[] primaryBytes = primary.SemanticCandidate?.CopyRawBytes();
+            byte[] backupBytes = backup.SemanticCandidate?.CopyRawBytes();
+            bool exactAuthority =
+                selected != null &&
+                selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
+                predecessorBytes != null &&
+                primary.ReadResult.Disposition == SaveFileReadDisposition.Read &&
+                backup.ReadResult.Disposition == SaveFileReadDisposition.Read &&
+                BytesEqual(primaryBytes, predecessorBytes) &&
+                BytesEqual(backupBytes, predecessorBytes);
+            RealmId legacyRealm = legacySave.SelectedRealm;
+            bool hasLegacyRealm = legacyRealm != RealmId.None;
+            string legacyCanonicalRealmId = string.Empty;
+            if (!exactAuthority ||
+                hasLegacyRealm &&
+                (!Enum.IsDefined(typeof(RealmId), legacyRealm) ||
+                 !TryMapRealmIdToCanonical(
+                     legacyRealm,
+                     out legacyCanonicalRealmId)))
+            {
+                PublishLegacyMigrationFailure(
+                    inventory,
+                    selected,
+                    legacySave,
+                    "AL-SAVE-REALM-MIGRATION-EVIDENCE-CONFLICT: Legacy realm migration requires one exact primary/backup authority and a supported selected realm.");
+                return;
+            }
+
+            SaveGameData candidate = CloneSave(legacySave);
+            string predecessorSha256;
+            using (SHA256 predecessorHasher = SHA256.Create())
+            {
+                predecessorSha256 = LowerHex(
+                    predecessorHasher.ComputeHash(predecessorBytes));
+            }
+
+            candidate.ProfileId = CreateMigratedProfileId(predecessorSha256);
+            candidate.SaveSchemaVersion =
+                SaveAuthorityTechnicalLimits.IdentityAwareSaveSchemaVersion;
+            candidate.ProfileInitializationVersion =
+                SaveAuthorityTechnicalLimits
+                    .IdentityAwareProfileInitializationVersion;
+            candidate.RealmSelectionCommit = new RealmSelectionCommitData();
+            ApplyNeutralPersistenceDefaults(candidate);
+            EnsureResource(candidate, ResourceType.ManaStone, 0);
+            EnsureResource(candidate, ResourceType.Ore, 0);
+
+            if (hasLegacyRealm)
+            {
+                string transactionId = CreateLegacyRealmTransactionId(
+                    candidate.ProfileId,
+                    predecessorBytes,
+                    legacyCanonicalRealmId);
+                candidate.RealmSelectionCommit.ContractVersion =
+                    RealmSelectionCommitData.CurrentContractVersion;
+                candidate.RealmSelectionCommit.State =
+                    (int)RealmSelectionCommitState.Committed;
+                candidate.RealmSelectionCommit.RealmId = legacyRealm;
+                candidate.RealmSelectionCommit.CanonicalRealmId =
+                    legacyCanonicalRealmId;
+                candidate.RealmSelectionCommit.TransactionId = transactionId;
+                candidate.RealmSelectionCommit.IntentSha256 = ComputeIntentSha256(
+                    candidate.ProfileId,
+                    transactionId,
+                    legacyCanonicalRealmId,
+                    "al_realm_catalog",
+                    RealmCatalogRuntime.SupportedVersion,
+                    "legacy-migration");
+                candidate.RealmSelectionCommit.CatalogAuthorityId =
+                    "al_realm_catalog";
+                candidate.RealmSelectionCommit.CatalogVersion =
+                    RealmCatalogRuntime.SupportedVersion;
+                candidate.RealmSelectionCommit.CommitRevision = 1;
+                candidate.RealmSelectionCommit.CommittedUnixTimeMilliseconds =
+                    Math.Max(1L, legacySave.LastSavedTimestamp * 1000L);
+                candidate.RealmSelectionCommit.Provenance =
+                    (int)RealmSelectionCommitProvenance.LegacyMigration;
+                candidate.RealmSelectionCommit.SourceSaveSchemaVersion =
+                    SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion;
+                candidate.RealmSelectionCommit.MigrationVersion = 1;
+                candidate.RealmSelectionCommit.PublicationState =
+                    (int)RealmSelectionCommitPublicationState.NotApplicable;
+            }
+
+            string migrationError = string.Empty;
+            if (candidate.SelectedRealm != legacyRealm ||
+                !ValidateSaveSemantics(candidate, out migrationError))
+            {
+                PublishLegacyMigrationFailure(
+                    inventory,
+                    selected,
+                    legacySave,
+                    "AL-SAVE-REALM-MIGRATION-CANDIDATE-INVALID: The upgraded candidate did not preserve a coherent legacy profile. " +
+                    migrationError);
+                return;
+            }
+
+            var baseline = new SaveAuthorityBaseline(
+                ReadCanonicalPath(SavePath),
+                ReadCanonicalPath(BackupPath));
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                null,
+                baseline,
+                out SaveGameData persisted,
+                out SaveOperationDisposition disposition,
+                out string message);
+            LastSaveDisposition = disposition;
+            if (status != SaveOperationStatus.SavedPrimary || persisted == null)
+            {
+                PublishLegacyMigrationFailure(
+                    inventory,
+                    selected,
+                    legacySave,
+                    status == SaveOperationStatus.CommitUncertain
+                        ? "AL-SAVE-REALM-MIGRATION-COMMIT-UNCERTAIN: Legacy migration could not prove either the complete upgraded generation or the exact predecessor. " + message
+                        : "AL-SAVE-REALM-MIGRATION-PREVIOUS-PRESERVED: The legacy predecessor remained authoritative because the upgrade did not commit. " + message);
+                return;
+            }
+
+            _currentSave = persisted;
+            _readOnlyCandidate = null;
+            _profileWritable = true;
+            ObservePrimaryAuthority(persisted);
+            PublishDisposition(
+                inventory,
+                selected,
+                "SAVE_SELECT_LEGACY_REALM_MIGRATED",
+                true,
+                true,
+                true,
+                SaveCandidateSourceGeneration.Primary);
+            SetLoadStatus(
+                SaveLoadStatus.LoadedPrimary,
+                "AL-SAVE-REALM-MIGRATED: The exact schema-1 authority was upgraded and verified without changing its realm or player data.",
+                false);
+        }
+
+        private void PublishLegacyMigrationFailure(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveSemanticCandidate selected,
+            SaveGameData legacySave,
+            string message)
+        {
+            _currentSave = null;
+            _readOnlyCandidate = CloneSave(legacySave);
+            _profileWritable = false;
+            PublishDisposition(
+                inventory,
+                selected,
+                "SAVE_SELECT_LEGACY_REALM_MIGRATION_RECOVERY_REQUIRED",
+                false,
+                false,
+                false);
+            SetLoadStatus(SaveLoadStatus.RecoveryRequired, message, false);
+        }
+
+        private string CreateMigratedProfileId(string predecessorSha256)
+        {
+            string input =
+                "anotherlife.profile.legacy.v1\n" +
+                Path.GetFullPath(PersistencePath) + "\n" +
+                predecessorSha256;
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                string suffix = LowerHex(
+                    sha256.ComputeHash(StrictUtf8.GetBytes(input)));
+                return "alp_" + suffix.Substring(0, 32);
+            }
+        }
+
+        private static string CreateLegacyRealmTransactionId(
+            string profileId,
+            byte[] predecessorBytes,
+            string canonicalRealmId)
+        {
+            using (SHA256 predecessorHasher = SHA256.Create())
+            using (SHA256 transactionHasher = SHA256.Create())
+            {
+                byte[] predecessorHash =
+                    predecessorHasher.ComputeHash(predecessorBytes);
+                byte[] domain = StrictUtf8.GetBytes(
+                    "anotherlife.realm-selection.legacy.v1\n");
+                byte[] profile = StrictUtf8.GetBytes(profileId);
+                byte[] realm = StrictUtf8.GetBytes(canonicalRealmId);
+                byte[] payload = new byte[
+                    domain.Length + profile.Length + 1 +
+                    predecessorHash.Length + realm.Length];
+                int offset = 0;
+                Buffer.BlockCopy(domain, 0, payload, offset, domain.Length);
+                offset += domain.Length;
+                Buffer.BlockCopy(profile, 0, payload, offset, profile.Length);
+                offset += profile.Length + 1;
+                Buffer.BlockCopy(
+                    predecessorHash,
+                    0,
+                    payload,
+                    offset,
+                    predecessorHash.Length);
+                offset += predecessorHash.Length;
+                Buffer.BlockCopy(realm, 0, payload, offset, realm.Length);
+                return "rsel_" + LowerHex(
+                    transactionHasher.ComputeHash(payload)).Substring(0, 32);
+            }
+        }
+
+        private static bool IsExactLegacySchemaOne(SaveGameData save) =>
+            save != null &&
+            save.SaveSchemaVersion ==
+                SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion &&
+            save.ProfileInitializationVersion ==
+                SaveAuthorityTechnicalLimits.LegacyProfileInitializationVersion &&
+            string.IsNullOrWhiteSpace(save.ProfileId);
 
         private void CreateNewProfileAfterAllMissing(
             IReadOnlyList<SaveCandidateInventoryEntry> inventory)
