@@ -1,0 +1,305 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-six-family.schema.json",
+  "title": "Another Life Six-Family Technical Catalogs",
+  "description": "JSON shape for the six technical game-data families (realms, buildings, research, troops, champions, skills), mirroring the field rules in unity/Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataSixFamilySchemas.cs. Enforces Decision 1 (15-building enum, no mana_shrine/mine) and Decision 5 (lowercase realm IDs with PascalCase legacy alias). Warzone Credits, territory income, and Chapter-1 IDs are governed by al-canonical-contracts.schema.json.",
+  "type": "object",
+  "required": ["schemaVersion", "families"],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "families": {
+      "type": "object",
+      "required": ["realms", "buildings", "research", "troops", "champions", "skills"],
+      "properties": {
+        "realms": { "$ref": "#/$defs/realmsFamily" },
+        "buildings": { "$ref": "#/$defs/buildingsFamily" },
+        "research": { "$ref": "#/$defs/researchFamily" },
+        "troops": { "$ref": "#/$defs/troopsFamily" },
+        "champions": { "$ref": "#/$defs/championsFamily" },
+        "skills": { "$ref": "#/$defs/skillsFamily" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "familyEnvelope": {
+      "type": "object",
+      "required": ["schemaVersion", "contentVersion", "records"],
+      "properties": {
+        "schemaVersion": { "const": 1 },
+        "contentVersion": { "type": "string" },
+        "records": { "type": "array", "minItems": 1 }
+      },
+      "additionalProperties": false
+    },
+    "realmId": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral"]
+    },
+    "legacyRealmName": {
+      "type": "string",
+      "enum": ["Crownlands", "Stonehold", "Eldergrove", "Umbral"]
+    },
+    "buildingId": {
+      "type": "string",
+      "enum": [
+        "town_hall", "farm", "lumber_mill", "quarry", "gold_mine",
+        "barracks", "academy", "market", "storehouse", "forge",
+        "stable", "workshop", "embassy", "wall", "watchtower"
+      ]
+    },
+    "legacyBuildingId": {
+      "type": "string",
+      "enum": [
+        "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine",
+        "Barracks", "Academy", "Market", "Storehouse", "Forge",
+        "Stable", "Workshop", "Embassy", "Wall", "Watchtower"
+      ]
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "contentReference": {
+      "type": "string",
+      "minLength": 1
+    },
+    "realmsFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/familyEnvelope" },
+        {
+          "properties": {
+            "records": {
+              "type": "array",
+              "minItems": 4,
+              "maxItems": 4,
+              "items": { "$ref": "#/$defs/realmRecord" }
+            }
+          }
+        }
+      ]
+    },
+    "realmRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacy_realm_id", "legacy_realm_value", "name_ref",
+        "description_ref", "inner_realm_id", "main_gate_id",
+        "outer_warzone_id", "rare_resource_id", "capability_profile_ids",
+        "asset_ref"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/realmId" },
+        "legacy_realm_id": { "$ref": "#/$defs/legacyRealmName" },
+        "legacy_realm_value": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "name_ref": { "$ref": "#/$defs/contentReference" },
+        "description_ref": { "$ref": "#/$defs/contentReference" },
+        "inner_realm_id": { "$ref": "#/$defs/stableId" },
+        "main_gate_id": { "$ref": "#/$defs/stableId" },
+        "outer_warzone_id": { "$ref": "#/$defs/stableId" },
+        "rare_resource_id": { "$ref": "#/$defs/stableId" },
+        "capability_profile_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 1,
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "asset_ref": { "$ref": "#/$defs/contentReference" }
+      },
+      "additionalProperties": false
+    },
+    "buildingsFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/familyEnvelope" },
+        {
+          "properties": {
+            "records": {
+              "type": "array",
+              "minItems": 15,
+              "maxItems": 15,
+              "items": { "$ref": "#/$defs/buildingRecord" }
+            }
+          }
+        }
+      ]
+    },
+    "buildingRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacy_building_id", "name_ref", "initial_level", "max_level",
+        "production_profile_ids", "cost_profile_id", "duration_profile_id",
+        "prerequisite_profile_id", "realm_eligibility_profile_id", "asset_ref"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/buildingId" },
+        "legacy_building_id": { "$ref": "#/$defs/legacyBuildingId" },
+        "name_ref": { "$ref": "#/$defs/contentReference" },
+        "initial_level": { "type": "integer", "minimum": 0 },
+        "max_level": { "type": "integer", "minimum": 1 },
+        "production_profile_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "cost_profile_id": { "$ref": "#/$defs/stableId" },
+        "duration_profile_id": { "$ref": "#/$defs/stableId" },
+        "prerequisite_profile_id": { "$ref": "#/$defs/stableId" },
+        "realm_eligibility_profile_id": { "$ref": "#/$defs/stableId" },
+        "asset_ref": { "$ref": "#/$defs/contentReference" }
+      },
+      "additionalProperties": false
+    },
+    "researchFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/familyEnvelope" },
+        {
+          "properties": {
+            "records": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/researchRecord" }
+            }
+          }
+        }
+      ]
+    },
+    "researchRecord": {
+      "type": "object",
+      "required": [
+        "id", "name_ref", "max_level", "cost_profile_id",
+        "duration_profile_id", "effect_ids", "prerequisite_research_ids"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name_ref": { "$ref": "#/$defs/contentReference" },
+        "max_level": { "type": "integer", "minimum": 1 },
+        "cost_profile_id": { "$ref": "#/$defs/stableId" },
+        "duration_profile_id": { "$ref": "#/$defs/stableId" },
+        "effect_ids": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "prerequisite_research_ids": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stableId" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "troopsFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/familyEnvelope" },
+        {
+          "properties": {
+            "records": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/troopRecord" }
+            }
+          }
+        }
+      ]
+    },
+    "troopRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacy_troop_type", "legacy_troop_value", "name_ref",
+        "base_attack", "base_defense", "training_profile_id", "asset_ref"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "legacy_troop_type": {
+          "type": "string",
+          "enum": ["Infantry", "Cavalry", "Ranged", "Siege"]
+        },
+        "legacy_troop_value": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "name_ref": { "$ref": "#/$defs/contentReference" },
+        "base_attack": { "type": "integer", "minimum": 0 },
+        "base_defense": { "type": "integer", "minimum": 0 },
+        "training_profile_id": { "$ref": "#/$defs/stableId" },
+        "asset_ref": { "$ref": "#/$defs/contentReference" }
+      },
+      "additionalProperties": false
+    },
+    "championsFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/familyEnvelope" },
+        {
+          "properties": {
+            "records": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/championRecord" }
+            }
+          }
+        }
+      ]
+    },
+    "championRecord": {
+      "type": "object",
+      "required": [
+        "id", "name_ref", "realm_id", "class_family_id",
+        "portrait_asset_ref", "model_asset_ref", "base_skill_ids",
+        "stat_profile_id"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name_ref": { "$ref": "#/$defs/contentReference" },
+        "realm_id": { "$ref": "#/$defs/realmId" },
+        "class_family_id": {
+          "type": "string",
+          "enum": ["warrior", "mage", "ranger", "assassin"]
+        },
+        "portrait_asset_ref": { "$ref": "#/$defs/contentReference" },
+        "model_asset_ref": { "$ref": "#/$defs/contentReference" },
+        "base_skill_ids": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 16,
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "stat_profile_id": { "$ref": "#/$defs/stableId" }
+      },
+      "additionalProperties": false
+    },
+    "skillsFamily": {
+      "allOf": [
+        { "$ref": "#/$defs/familyEnvelope" },
+        {
+          "properties": {
+            "records": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/skillRecord" }
+            }
+          }
+        }
+      ]
+    },
+    "skillRecord": {
+      "type": "object",
+      "required": [
+        "id", "name_ref", "behavior_profile_id", "presentation_profile_id",
+        "target_type", "cooldown_seconds", "power", "mana_cost",
+        "cast_time_seconds", "range_meters", "vfx_asset_ref", "audio_asset_ref"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "name_ref": { "$ref": "#/$defs/contentReference" },
+        "behavior_profile_id": { "$ref": "#/$defs/stableId" },
+        "presentation_profile_id": { "$ref": "#/$defs/stableId" },
+        "target_type": {
+          "type": "string",
+          "enum": ["single", "aoe", "self", "ally", "enemy"]
+        },
+        "cooldown_seconds": { "type": "number", "minimum": 0 },
+        "power": { "type": "number", "minimum": 0 },
+        "mana_cost": { "type": "number", "minimum": 0 },
+        "cast_time_seconds": { "type": "number", "minimum": 0 },
+        "range_meters": { "type": "number", "minimum": 0 },
+        "vfx_asset_ref": { "$ref": "#/$defs/contentReference" },
+        "audio_asset_ref": { "$ref": "#/$defs/contentReference" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
