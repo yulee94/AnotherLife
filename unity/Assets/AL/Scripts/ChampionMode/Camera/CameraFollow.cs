@@ -3,6 +3,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
 using AL.Input;
+using AL.Core;
 using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace AL.ChampionMode.Camera
@@ -222,7 +223,7 @@ namespace AL.ChampionMode.Camera
                 if (controller != null)
                 {
                     _target = controller.transform;
-                    Debug.Log("<color=green>[Camera] Type-based lock achieved on ChampionController.</color>");
+                    GameDebug.Log("<color=green>[Camera] Type-based lock achieved on ChampionController.</color>");
                 }
             }
 

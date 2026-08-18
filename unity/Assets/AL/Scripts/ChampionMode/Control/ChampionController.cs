@@ -149,7 +149,7 @@ namespace AL.ChampionMode.Control
             }
 
             _isAttacking = true;
-            Debug.Log("<color=orange>[Combat] Attacking!</color>");
+            GameDebug.Log("<color=orange>[Combat] Attacking!</color>");
             RuntimeCombatAudio.PlayBasicAttack();
 
             // 1. Lunge Forward
@@ -180,7 +180,7 @@ namespace AL.ChampionMode.Control
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
                 {
                     hitAnything = true;
-                    Debug.Log("<color=red>[Combat] Enemy Defeated!</color>");
+                    GameDebug.Log("<color=red>[Combat] Enemy Defeated!</color>");
 
                     // Visual Feedback
                     CreateHitVFX(hitCollider.transform.position);
@@ -207,7 +207,7 @@ namespace AL.ChampionMode.Control
 
             if (!hitAnything)
             {
-                Debug.Log("[Combat] Attack Missed.");
+                GameDebug.Log("[Combat] Attack Missed.");
                 Vector3 whiffCenter = transform.position + transform.forward * 1.35f;
                 SkillEffectFactory.SpawnBasicAttackWhiff(whiffCenter, transform.forward, realmId);
                 SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.55f + transform.forward * 0.65f, "MISS", new Color(0.68f, 0.76f, 0.86f), 0.20f, 0.55f);
@@ -230,7 +230,7 @@ namespace AL.ChampionMode.Control
 
             if (remaining <= 0)
             {
-                Debug.Log("<color=gold>[Victory] REALM SECURED!</color>");
+                GameDebug.Log("<color=gold>[Victory] REALM SECURED!</color>");
                 ShowVictoryUI();
             }
         }
@@ -260,7 +260,7 @@ namespace AL.ChampionMode.Control
 
         private void UseSkill(int index)
         {
-            Debug.Log($"[Champion] Using Skill {index + 1}");
+            GameDebug.Log($"[Champion] Using Skill {index + 1}");
             _skillCaster?.TryCastSkill(index);
         }
 

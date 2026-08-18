@@ -95,7 +95,7 @@ namespace AL.ChampionMode.AI
             model.transform.localRotation = Quaternion.identity;
             model.transform.localScale = Vector3.one;
             SetMaterialColor(model, realmColor);
-            ProceduralChampionModelBuilder.EnsureModel(model);
+            ProceduralChampionModelBuilder.EnsureModel(model, fullDetail: false);
             ApplyBotVisualVariant(model, realmId, realmColor, index);
             return model;
         }

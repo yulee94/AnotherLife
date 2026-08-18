@@ -25,6 +25,7 @@ namespace AL.ChampionMode.Skills
 
         private static int _activeFloatingTexts;
         private static RuntimeWeatherController _cachedWeather;
+        private static ChampionCameraFollow _cachedCameraFollow;
 
         public static GameObject SpawnForgeBurst(Vector3 position)
         {
@@ -459,8 +460,12 @@ namespace AL.ChampionMode.Skills
 
         public static void ShakeCamera(float strength, float duration)
         {
-            var cameraFollow = Object.FindObjectOfType<ChampionCameraFollow>();
-            cameraFollow?.AddShake(strength, duration);
+            if (_cachedCameraFollow == null)
+            {
+                _cachedCameraFollow = Object.FindObjectOfType<ChampionCameraFollow>();
+            }
+
+            _cachedCameraFollow?.AddShake(strength, duration);
         }
 
         public static void RequestHitPause(float duration = 0.045f, float timeScale = 0.12f)
