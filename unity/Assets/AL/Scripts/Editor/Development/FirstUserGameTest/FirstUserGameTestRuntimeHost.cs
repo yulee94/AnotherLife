@@ -18,6 +18,7 @@ using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
 using AL.Development;
 using AL.Editor.Development.OnboardingAuthority;
+using AL.Input;
 using AL.UI;
 using AL.UI.FirstUserIdentity;
 using AL.UI.RealmSelection;
@@ -1426,8 +1427,7 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private static bool IsCancelPressed()
         {
-            return Input.GetKeyDown(KeyCode.Escape) ||
-                   Input.GetKeyDown(KeyCode.JoystickButton1);
+            return GameInput.CancelPressed();
         }
 
         private bool TrySuppressLegacyTechnicalBanner()

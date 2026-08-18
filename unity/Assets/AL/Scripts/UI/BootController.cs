@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using AL.Input;
 using AL.RealmSelection;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -319,10 +320,7 @@ namespace AL.UI
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Return) ||
-                Input.GetKeyDown(KeyCode.KeypadEnter) ||
-                Input.GetKeyDown(KeyCode.Space) ||
-                Input.GetButtonDown("Submit"))
+            if (GameInput.SubmitPressed())
             {
                 if (canContinue)
                 {
@@ -337,10 +335,7 @@ namespace AL.UI
 
         private static bool AnySubmitControlHeld()
         {
-            return Input.GetKey(KeyCode.Return) ||
-                Input.GetKey(KeyCode.KeypadEnter) ||
-                Input.GetKey(KeyCode.Space) ||
-                Input.GetButton("Submit");
+            return GameInput.SubmitHeld();
         }
 
         private void OnContinueRequested()

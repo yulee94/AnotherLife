@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using AL.ChampionMode.Control;
 using AL.Editor.Development.OnboardingAuthority;
+using AL.Input;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -443,9 +444,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             {
                 if (!_movementIntentPending)
                 {
-                    Vector2 playerInput = new Vector2(
-                        Input.GetAxisRaw("Horizontal"),
-                        Input.GetAxisRaw("Vertical"));
+                    Vector2 playerInput = GameInput.ReadMove();
                     RecordPlayerMovementIntent(playerInput);
                 }
 
@@ -489,7 +488,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return;
             }
 
-            if (Input.GetMouseButtonDown(0) &&
+            if (GameInput.AttackPressed() &&
                 TryReadChampionState(out bool controlsLocked, out bool isAttacking, out int realm) &&
                 !controlsLocked && !isAttacking && realm != 0)
             {
