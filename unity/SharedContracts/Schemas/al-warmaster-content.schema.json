@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-warmaster-content.schema.json",
+  "title": "Another Life Warmaster Content Catalog",
+  "description": "Schema for al_warmaster_content_catalog.json. Set and piece IDs are lowercase snake_case (setId of every piece must resolve to a declared set).",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "authority", "warmasterPolicy", "sets", "pieces", "statusCopy",
+    "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_warmaster_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case_for_catalog_ids" },
+    "authority": { "type": "object" },
+    "warmasterPolicy": { "type": "object" },
+    "sets": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/setRecord" }
+    },
+    "pieces": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/pieceRecord" }
+    },
+    "statusCopy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/statusCopyRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "setRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey", "status", "pieceIds"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "status": { "type": "string" },
+        "pieceIds": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^warmaster_piece_" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "pieceRecord": {
+      "type": "object",
+      "required": ["id", "setId", "displayNameKey", "summaryKey"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^warmaster_piece_" },
+        "setId": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "statusCopyRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
