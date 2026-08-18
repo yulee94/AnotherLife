@@ -1,0 +1,335 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_realm_catalog",
+  "game": "Another Life",
+  "idFormat": "lowercase_snake_case",
+  "selectionPolicy": {
+    "selectionMode": "one_realm_per_account",
+    "realmLockScope": "account",
+    "subCharacterPolicy": "same_realm_only",
+    "sharedStoragePolicy": "same_realm_account_storage",
+    "crossRealmCreationPolicy": "reject",
+    "realmChangePolicy": "not_supported_after_commit",
+    "uncommittedProfileState": "realm_unselected",
+    "committedProfileState": "realm_locked",
+    "narrativeWarningKey": "realm.lock.warning"
+  },
+  "narrativeContinuity": {
+    "sourcePacketId": "al_narrative_four_realm_launch_source_v001",
+    "sourceMode": "codex_narrative_content",
+    "accountLockSummary": "A player account commits to exactly one realm identity for the current product phase. Sub-characters inherit that realm and share same-realm account storage.",
+    "selectionWarningMeaning": "The confirmation warning must communicate durable allegiance without implying a paid transfer, partial reset, or story-supported realm change exists.",
+    "uncommittedMeaning": "Before commitment, realm browsing is preview-only and must not grant resources, Realm Gems, territory, quest state, or chapter eligibility.",
+    "committedMeaning": "After commitment, the realm identity becomes the source for inner-realm presentation, sub-character filtering, realm-specific naming, and NVS eligibility checks.",
+    "handoffStatus": "ready_for_codex_unity_realm_hooks"
+  },
+  "realmOrder": [
+    "crownlands",
+    "stonehold",
+    "eldergrove",
+    "umbral"
+  ],
+  "realms": [
+    {
+      "id": "crownlands",
+      "legacyRuntimeId": "Crownlands",
+      "displayName": "Crownlands",
+      "peopleName": "Crownlands Humans",
+      "adjective": "Crownland",
+      "languageId": "lang_crown_speech",
+      "capitalId": "capital_crownspire",
+      "innerRealmId": "inner_crownlands",
+      "outerWarzoneId": "warzone_crownlands",
+      "mainGateId": "gate_crownlands_meridian",
+      "dragonId": "dragon_crownlands_dawn_regent",
+      "realmGemIds": [
+        "gem_stonehold_forge",
+        "gem_stonehold_depth"
+      ],
+      "sigil": "golden crown over a storm-blue field",
+      "palette": {
+        "primary": "royal_blue",
+        "secondary": "polished_steel",
+        "accent": "royal_gold"
+      },
+      "namingConventions": {
+        "characterTitles": [
+          "Lord",
+          "Marshal",
+          "Banneret"
+        ],
+        "settlementTerms": [
+          "keep",
+          "market",
+          "road",
+          "watch"
+        ],
+        "assetPrefix": "crn"
+      },
+      "lore": {
+        "summary": "The Crownlands are a disciplined human realm of oath-bound roads, fortified markets, and banners carried into every border storm.",
+        "identityPillars": [
+          "royal command",
+          "trade discipline",
+          "balanced arms",
+          "public oaths"
+        ],
+        "playerPromise": "A Crownlands account begins as a sworn banner-holder whose authority is measured by service, order, and the defense of realm roads."
+      },
+      "continuityHooks": {
+        "accountIdentity": "sworn_banner_holder",
+        "subCharacterInheritance": "all sub-characters are Crownland retainers, officers, or oathbound specialists attached to the same banner.",
+        "innerRealmTone": "ordered roads, fortified courts, supply discipline, public vows, and border-watch command.",
+        "outerWarzoneMotif": "main-gate defense, banner lines, cavalry pressure, and contested trade roads.",
+        "realmGemMeaning": "the Sun and Oath gems represent public legitimacy and binding service."
+      },
+      "startingHooks": {
+        "realmSelectionLineKey": "realm.crownlands.selection.line",
+        "firstQuestArcId": "quest_arc_crownlands_oathroad",
+        "starterClassBias": [
+          "vanguard",
+          "duelist",
+          "inquisitor"
+        ]
+      }
+    },
+    {
+      "id": "stonehold",
+      "legacyRuntimeId": "Stonehold",
+      "displayName": "Stonehold",
+      "peopleName": "Stonehold Dwarves",
+      "adjective": "Stonehold",
+      "languageId": "lang_deep_rune",
+      "capitalId": "capital_anvildeep",
+      "innerRealmId": "inner_stonehold",
+      "outerWarzoneId": "warzone_stonehold",
+      "mainGateId": "gate_stonehold_faultline",
+      "dragonId": "dragon_stonehold_iron_wyrm",
+      "realmGemIds": [
+        "gem_stonehold_forge",
+        "gem_stonehold_depth"
+      ],
+      "sigil": "black anvil beneath a copper mountain",
+      "palette": {
+        "primary": "slate_iron",
+        "secondary": "dark_stone",
+        "accent": "forge_copper"
+      },
+      "namingConventions": {
+        "characterTitles": [
+          "Thane",
+          "Forge-Lord",
+          "Shieldcaptain"
+        ],
+        "settlementTerms": [
+          "hold",
+          "forge",
+          "shaft",
+          "gate"
+        ],
+        "assetPrefix": "sth"
+      },
+      "lore": {
+        "summary": "Stonehold endures beneath mountain pressure, binding clan law, siege craft, and rune-forged memory into one unbroken realm.",
+        "identityPillars": [
+          "clan endurance",
+          "rune craft",
+          "siege engines",
+          "mountain law"
+        ],
+        "playerPromise": "A Stonehold account begins as a sworn keeper of forge and gate, expected to outlast any enemy that reaches the mountain road."
+      },
+      "continuityHooks": {
+        "accountIdentity": "forge_gate_keeper",
+        "subCharacterInheritance": "all sub-characters are Stonehold clan-bound heirs, shieldkin, or oath workers from the same hold.",
+        "innerRealmTone": "deep halls, forge rolls, clan ledgers, rune memory, and defensive preparation.",
+        "outerWarzoneMotif": "faultline gates, siege engines, stone redoubts, and attrition warfare.",
+        "realmGemMeaning": "the Forge and Depth gems represent made law and ancestral endurance."
+      },
+      "startingHooks": {
+        "realmSelectionLineKey": "realm.stonehold.selection.line",
+        "firstQuestArcId": "quest_arc_stonehold_anvil_oath",
+        "starterClassBias": [
+          "vanguard",
+          "warden",
+          "dreadknight"
+        ]
+      }
+    },
+    {
+      "id": "eldergrove",
+      "legacyRuntimeId": "Eldergrove",
+      "displayName": "Eldergrove",
+      "peopleName": "Eldergrove Elves",
+      "adjective": "Eldergrove",
+      "languageId": "lang_leafsong",
+      "capitalId": "capital_worldroot",
+      "innerRealmId": "inner_eldergrove",
+      "outerWarzoneId": "warzone_eldergrove",
+      "mainGateId": "gate_eldergrove_greenveil",
+      "dragonId": "dragon_eldergrove_moonbough",
+      "realmGemIds": [
+        "gem_eldergrove_root",
+        "gem_eldergrove_moon"
+      ],
+      "sigil": "silver leaf over a living green moon",
+      "palette": {
+        "primary": "worldroot_green",
+        "secondary": "moonlit_silver",
+        "accent": "pale_gold"
+      },
+      "namingConventions": {
+        "characterTitles": [
+          "Warden",
+          "Oracle",
+          "Thorn-Singer"
+        ],
+        "settlementTerms": [
+          "grove",
+          "bough",
+          "mere",
+          "sanctum"
+        ],
+        "assetPrefix": "eld"
+      },
+      "lore": {
+        "summary": "Eldergrove is a living court of root, moonlit water, and old vows where memory grows through trees and border paths answer to wardens.",
+        "identityPillars": [
+          "living sanctuaries",
+          "healing vows",
+          "moonlit archery",
+          "ancient memory"
+        ],
+        "playerPromise": "An Eldergrove account begins as a guardian of living borders, balancing mercy, precision, and the cost of old promises."
+      },
+      "continuityHooks": {
+        "accountIdentity": "living_border_guardian",
+        "subCharacterInheritance": "all sub-characters are Eldergrove wardens, oracles, hunters, or caretakers bound to the same living border.",
+        "innerRealmTone": "root sanctuaries, moonlit councils, healing vows, hidden paths, and guarded mercy.",
+        "outerWarzoneMotif": "greenveil ambushes, living defenses, archer lines, and contested sacred crossings.",
+        "realmGemMeaning": "the Root and Moon gems represent memory that survives and judgment made in quiet light."
+      },
+      "startingHooks": {
+        "realmSelectionLineKey": "realm.eldergrove.selection.line",
+        "firstQuestArcId": "quest_arc_eldergrove_rootwatch",
+        "starterClassBias": [
+          "oracle",
+          "warden",
+          "spellblade"
+        ]
+      }
+    },
+    {
+      "id": "umbral",
+      "legacyRuntimeId": "Umbral",
+      "displayName": "Umbral",
+      "peopleName": "Umbral Dark Elves",
+      "adjective": "Umbral",
+      "languageId": "lang_ash_cant",
+      "capitalId": "capital_veilspire",
+      "innerRealmId": "inner_umbral",
+      "outerWarzoneId": "warzone_umbral",
+      "mainGateId": "gate_umbral_ashvein",
+      "dragonId": "dragon_umbral_void_seraph",
+      "realmGemIds": [
+        "gem_umbral_veil",
+        "gem_umbral_ember"
+      ],
+      "sigil": "crimson eye inside an obsidian veil",
+      "palette": {
+        "primary": "obsidian_black",
+        "secondary": "shadow_violet",
+        "accent": "blood_ember"
+      },
+      "namingConventions": {
+        "characterTitles": [
+          "Shade-Lord",
+          "Veilblade",
+          "Ash Oracle"
+        ],
+        "settlementTerms": [
+          "spire",
+          "vault",
+          "veil",
+          "ashcourt"
+        ],
+        "assetPrefix": "umb"
+      },
+      "lore": {
+        "summary": "Umbral survives where ash, secrecy, and forbidden bargains meet; its nobles treat every border as a mask and every oath as a blade.",
+        "identityPillars": [
+          "shadow courts",
+          "curse craft",
+          "assassins",
+          "forbidden archives"
+        ],
+        "playerPromise": "An Umbral account begins as a claimant beneath the veil, rewarded for patience, precision, and ruthless control of hidden knowledge."
+      },
+      "continuityHooks": {
+        "accountIdentity": "veiled_claimant",
+        "subCharacterInheritance": "all sub-characters are Umbral claimants, agents, archivists, or blades belonging to the same hidden court.",
+        "innerRealmTone": "ash courts, veiled bargains, forbidden archives, rival masks, and quiet tests of control.",
+        "outerWarzoneMotif": "ashvein gates, ambush routes, curse craft, intelligence denial, and precision strikes.",
+        "realmGemMeaning": "the Veil and Ember gems represent secrecy preserved and power kept alive under ash."
+      },
+      "startingHooks": {
+        "realmSelectionLineKey": "realm.umbral.selection.line",
+        "firstQuestArcId": "quest_arc_umbral_veilclaim",
+        "starterClassBias": [
+          "nightblade",
+          "dreadknight",
+          "spellblade"
+        ]
+      }
+    }
+  ],
+  "localizationKeys": [
+    "realm.lock.warning",
+    "realm.crownlands.selection.line",
+    "realm.stonehold.selection.line",
+    "realm.eldergrove.selection.line",
+    "realm.umbral.selection.line"
+  ],
+  "localizationDrafts": [
+    {
+      "key": "realm.lock.warning",
+      "text": "This account will be bound to the chosen realm. Future characters on this account must belong to the same realm."
+    },
+    {
+      "key": "realm.crownlands.selection.line",
+      "text": "Take the banner road, hold the oath in public, and let no border storm break Crownlands order."
+    },
+    {
+      "key": "realm.stonehold.selection.line",
+      "text": "Keep forge and gate, remember the deep law, and make the mountain answer in iron."
+    },
+    {
+      "key": "realm.eldergrove.selection.line",
+      "text": "Guard the living border, listen where roots remember, and choose mercy only when it can survive."
+    },
+    {
+      "key": "realm.umbral.selection.line",
+      "text": "Claim the veil, keep power beneath ash, and let every oath cut before it is seen."
+    }
+  ],
+  "engineeringHandoff": {
+    "consumer": "codex/unity-realm-hooks",
+    "parseOnLaunch": true,
+    "requiredValidation": [
+      "catalog version is supported",
+      "realm IDs are unique and lowercase snake-case",
+      "realmOrder references exactly the four realm IDs",
+      "legacyRuntimeId mappings are unique",
+      "each realm has two realmGemIds",
+      "account realm-lock policy is one_realm_per_account",
+      "sub-character policy is same_realm_only"
+    ],
+    "nonGoalsForThisCatalog": [
+      "runtime save mutation",
+      "account creation implementation",
+      "realm balance values",
+      "combat stats",
+      "ECS entity spawning"
+    ]
+  }
+}
