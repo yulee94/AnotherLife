@@ -9,6 +9,7 @@ using AL.Data.Runtime;
 using AL.VerticalSlice;
 using AL.VerticalSlice.Combat;
 using AL.Kingdom.Greybox;
+using AL.Slice;
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -67,10 +68,36 @@ namespace AL.Utilities
 
         private void Start()
         {
-            // 0. Ensure Services are initialized (Plug-and-Play)
+            // 0. Ensure Services are initialized (Plug-and-Play) so the arena debug UI below keeps working.
             Bootloader.InitializeIfMissing();
             EnsureSaveLoaded();
 
+            // Greybox vertical-slice opening: realm selection -> character creation -> arena.
+            // Realm selection and character-creation-entry use hardcoded LocalGameDataService data and
+            // the process-local GreyboxRunState only; they do not touch catalog/save/determinism authority.
+            BeginGreyboxSliceFlow();
+        }
+
+        private void BeginGreyboxSliceFlow()
+        {
+            GreyboxRunState.Reset();
+
+            var realmSelection = gameObject.AddComponent<GreyboxRealmSelectionController>();
+            realmSelection.OnRealmCommitted += OnRealmCommitted;
+            realmSelection.Present();
+        }
+
+        private void OnRealmCommitted(RealmId realmId)
+        {
+            Debug.Log($"[GREYBOX-SLICE] Advancing from realm selection to character creation for realm {realmId}.");
+
+            var characterCreation = gameObject.AddComponent<GreyboxCharacterCreationEntryController>();
+            characterCreation.OnCharacterConfirmed += OnCharacterConfirmed;
+            characterCreation.Present();
+        }
+
+        private void OnCharacterConfirmed()
+        {
             SetupDemoScene();
             Debug.Log("<color=green><b>Welcome to Another Life!</b></color>");
             Debug.Log("Press <b>Play</b> in the Unity Editor to start your journey as a Realm Lord.");
