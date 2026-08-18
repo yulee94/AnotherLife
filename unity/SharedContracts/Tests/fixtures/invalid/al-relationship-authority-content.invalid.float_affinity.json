@@ -1,0 +1,635 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_relationship_authority_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_relationship_authority_source_v001",
+  "idFormat": "lowercase_snake_case",
+  "sourceAuthorities": {
+    "primaryMode": "codex_narrative_content",
+    "consumerIssue": 176,
+    "relationshipSpec": "unity/Docs/Relationship_Integrity_Transaction_Spec.md",
+    "mainQuestPacket": "ANOTHERLIFE_MAIN_QUEST_LINE",
+    "omenPacket": "OMEN_1_A1",
+    "legacyAndroidSources": [
+      "AdvisorPersonas.kt",
+      "FactionProfiles.kt",
+      "NarrativeGovernance.md"
+    ]
+  },
+  "contentPolicy": {
+    "identityRule": "Supported relationship IDs are lowercase snake-case canonical IDs. Legacy uppercase IDs are exact aliases only and must not be guessed, trimmed, or display-name matched.",
+    "sparseDefaultRule": "Supported NPC affinity and faction reputation default to 0 when absent. Nonzero Android simulation values are legacy preview hints, not save initialization authority.",
+    "labelRule": "Player-facing rank, affiliation, trait, and persona-state copy resolves through localization/content keys. Technical services must not author English labels.",
+    "mutationRule": "This catalog authorizes identity and labels only. It does not authorize save mutation, nested persistence, idempotency ledgers, notifications, affinity deltas, faction deltas, or persona deltas.",
+    "unknownRule": "Unknown nonblank IDs should be preserved by future save compatibility work but excluded from supported mutation and classification until a source record exists.",
+    "nonGoals": [
+      "runtime service implementation",
+      "save repair or migration",
+      "relationship mutation",
+      "idempotency ledger",
+      "notification delivery",
+      "NVS-01 report transaction",
+      "numeric balance changes",
+      "Android UI changes",
+      "hard-coded label replacement in this PR"
+    ]
+  },
+  "npcRecords": [
+    {
+      "id": "npc_valerius",
+      "legacyAliases": [
+        "NPC_VALERIUS",
+        "ADVISOR_VALERIUS"
+      ],
+      "relationshipEnabled": true,
+      "initialAffinity": 0.5,
+      "legacyPreviewAffinity": 60,
+      "classificationProfileId": "affinity_legacy_five_band",
+      "displayNameKey": "relationship.npc.valerius.name",
+      "roleKey": "relationship.npc.valerius.role",
+      "relationshipContextKey": "relationship.npc.valerius.context"
+    },
+    {
+      "id": "npc_gruff",
+      "legacyAliases": [
+        "ADVISOR_GRUFF",
+        "NPC_SMITH_GRUFF"
+      ],
+      "relationshipEnabled": true,
+      "initialAffinity": 0,
+      "legacyPreviewAffinity": 50,
+      "classificationProfileId": "affinity_legacy_five_band",
+      "displayNameKey": "relationship.npc.gruff.name",
+      "roleKey": "relationship.npc.gruff.role",
+      "relationshipContextKey": "relationship.npc.gruff.context"
+    },
+    {
+      "id": "npc_molly",
+      "legacyAliases": [
+        "ADVISOR_MOLLY",
+        "NPC_ARCHIVIST_MOLLY"
+      ],
+      "relationshipEnabled": true,
+      "initialAffinity": 0,
+      "legacyPreviewAffinity": 55,
+      "classificationProfileId": "affinity_legacy_five_band",
+      "displayNameKey": "relationship.npc.molly.name",
+      "roleKey": "relationship.npc.molly.role",
+      "relationshipContextKey": "relationship.npc.molly.context"
+    },
+    {
+      "id": "npc_xerath",
+      "legacyAliases": [
+        "ADVISOR_XERATH",
+        "NPC_VOID_SEER_XERATH"
+      ],
+      "relationshipEnabled": true,
+      "initialAffinity": 0,
+      "legacyPreviewAffinity": 40,
+      "classificationProfileId": "affinity_legacy_five_band",
+      "displayNameKey": "relationship.npc.xerath.name",
+      "roleKey": "relationship.npc.xerath.role",
+      "relationshipContextKey": "relationship.npc.xerath.context"
+    },
+    {
+      "id": "npc_vaeloryn",
+      "legacyAliases": [
+        "NPC_VAELORYN"
+      ],
+      "relationshipEnabled": false,
+      "initialAffinity": 0,
+      "classificationProfileId": "affinity_legacy_five_band",
+      "displayNameKey": "relationship.npc.vaeloryn.name",
+      "roleKey": "relationship.npc.vaeloryn.role",
+      "relationshipContextKey": "relationship.npc.vaeloryn.context"
+    },
+    {
+      "id": "npc_edras_veyr",
+      "legacyAliases": [
+        "NPC_EDRAS_VEYR"
+      ],
+      "relationshipEnabled": false,
+      "initialAffinity": 0,
+      "classificationProfileId": "affinity_legacy_five_band",
+      "displayNameKey": "relationship.npc.edras_veyr.name",
+      "roleKey": "relationship.npc.edras_veyr.role",
+      "relationshipContextKey": "relationship.npc.edras_veyr.context"
+    }
+  ],
+  "factionRecords": [
+    {
+      "id": "faction_crownlands_radiant_council",
+      "legacyAliases": [
+        "FACT_HUMAN_COUNCIL"
+      ],
+      "relationshipEnabled": true,
+      "initialReputation": 0,
+      "legacyPreviewReputation": 50,
+      "classificationProfileId": "faction_legacy_five_band",
+      "parentRealmId": "crownlands",
+      "displayNameKey": "relationship.faction.crownlands_radiant_council.name",
+      "summaryKey": "relationship.faction.crownlands_radiant_council.summary"
+    },
+    {
+      "id": "faction_stonehold_assembly",
+      "legacyAliases": [
+        "FACT_DWARVEN_FORGE"
+      ],
+      "relationshipEnabled": true,
+      "initialReputation": 0,
+      "legacyPreviewReputation": 50,
+      "classificationProfileId": "faction_legacy_five_band",
+      "parentRealmId": "stonehold",
+      "displayNameKey": "relationship.faction.stonehold_assembly.name",
+      "summaryKey": "relationship.faction.stonehold_assembly.summary"
+    },
+    {
+      "id": "faction_eldergrove_wardens",
+      "legacyAliases": [
+        "FACT_ELVEN_GLADE"
+      ],
+      "relationshipEnabled": true,
+      "initialReputation": 0,
+      "legacyPreviewReputation": 50,
+      "classificationProfileId": "faction_legacy_five_band",
+      "parentRealmId": "eldergrove",
+      "displayNameKey": "relationship.faction.eldergrove_wardens.name",
+      "summaryKey": "relationship.faction.eldergrove_wardens.summary"
+    },
+    {
+      "id": "faction_umbral_cabal",
+      "legacyAliases": [
+        "FACT_DARK_ELF_RIFT"
+      ],
+      "relationshipEnabled": true,
+      "initialReputation": 0,
+      "legacyPreviewReputation": 30,
+      "classificationProfileId": "faction_legacy_five_band",
+      "parentRealmId": "umbral",
+      "displayNameKey": "relationship.faction.umbral_cabal.name",
+      "summaryKey": "relationship.faction.umbral_cabal.summary"
+    },
+    {
+      "id": "faction_veil_watch",
+      "legacyAliases": [
+        "FACTION_VEIL_WATCH"
+      ],
+      "relationshipEnabled": true,
+      "initialReputation": 0,
+      "classificationProfileId": "faction_legacy_five_band",
+      "parentRealmId": "shared",
+      "displayNameKey": "relationship.faction.veil_watch.name",
+      "summaryKey": "relationship.faction.veil_watch.summary"
+    }
+  ],
+  "affinityClassificationProfiles": [
+    {
+      "id": "affinity_legacy_five_band",
+      "minimum": -100,
+      "maximum": 100,
+      "bands": [
+        {
+          "id": "affinity_exalted",
+          "minimumInclusive": 80,
+          "maximumInclusive": 100,
+          "displayNameKey": "relationship.affinity.exalted.name",
+          "summaryKey": "relationship.affinity.exalted.summary"
+        },
+        {
+          "id": "affinity_friendly",
+          "minimumInclusive": 50,
+          "maximumExclusive": 80,
+          "displayNameKey": "relationship.affinity.friendly.name",
+          "summaryKey": "relationship.affinity.friendly.summary"
+        },
+        {
+          "id": "affinity_neutral",
+          "minimumInclusive": 0,
+          "maximumExclusive": 50,
+          "displayNameKey": "relationship.affinity.neutral.name",
+          "summaryKey": "relationship.affinity.neutral.summary"
+        },
+        {
+          "id": "affinity_hostile",
+          "minimumInclusive": -50,
+          "maximumExclusive": 0,
+          "displayNameKey": "relationship.affinity.hostile.name",
+          "summaryKey": "relationship.affinity.hostile.summary"
+        },
+        {
+          "id": "affinity_nemesis",
+          "minimumInclusive": -100,
+          "maximumExclusive": -50,
+          "displayNameKey": "relationship.affinity.nemesis.name",
+          "summaryKey": "relationship.affinity.nemesis.summary"
+        }
+      ]
+    }
+  ],
+  "factionClassificationProfiles": [
+    {
+      "id": "faction_legacy_five_band",
+      "bands": [
+        {
+          "id": "faction_ally",
+          "minimumInclusive": 500,
+          "maximumInclusive": 2147483647,
+          "displayNameKey": "relationship.faction_band.ally.name",
+          "summaryKey": "relationship.faction_band.ally.summary"
+        },
+        {
+          "id": "faction_supporter",
+          "minimumInclusive": 100,
+          "maximumExclusive": 500,
+          "displayNameKey": "relationship.faction_band.supporter.name",
+          "summaryKey": "relationship.faction_band.supporter.summary"
+        },
+        {
+          "id": "faction_neutral",
+          "minimumExclusive": -100,
+          "maximumExclusive": 100,
+          "displayNameKey": "relationship.faction_band.neutral.name",
+          "summaryKey": "relationship.faction_band.neutral.summary"
+        },
+        {
+          "id": "faction_opponent",
+          "minimumExclusive": -500,
+          "maximumInclusive": -100,
+          "displayNameKey": "relationship.faction_band.opponent.name",
+          "summaryKey": "relationship.faction_band.opponent.summary"
+        },
+        {
+          "id": "faction_enemy",
+          "minimumInclusive": -2147483648,
+          "maximumInclusive": -500,
+          "displayNameKey": "relationship.faction_band.enemy.name",
+          "summaryKey": "relationship.faction_band.enemy.summary"
+        }
+      ]
+    }
+  ],
+  "personaPolicy": {
+    "id": "persona_legacy_four_trait_policy",
+    "supportedTraits": [
+      {
+        "id": "warlord",
+        "legacyEnum": "Warlord",
+        "displayNameKey": "relationship.persona_trait.warlord.name",
+        "summaryKey": "relationship.persona_trait.warlord.summary"
+      },
+      {
+        "id": "diplomat",
+        "legacyEnum": "Diplomat",
+        "displayNameKey": "relationship.persona_trait.diplomat.name",
+        "summaryKey": "relationship.persona_trait.diplomat.summary"
+      },
+      {
+        "id": "sage",
+        "legacyEnum": "Sage",
+        "displayNameKey": "relationship.persona_trait.sage.name",
+        "summaryKey": "relationship.persona_trait.sage.summary"
+      },
+      {
+        "id": "rogue",
+        "legacyEnum": "Rogue",
+        "displayNameKey": "relationship.persona_trait.rogue.name",
+        "summaryKey": "relationship.persona_trait.rogue.summary"
+      }
+    ],
+    "classificationStates": [
+      {
+        "id": "persona_unique_dominant",
+        "displayNameKey": "relationship.persona_state.unique_dominant.name",
+        "summaryKey": "relationship.persona_state.unique_dominant.summary"
+      },
+      {
+        "id": "persona_tie",
+        "displayNameKey": "relationship.persona_state.tie.name",
+        "summaryKey": "relationship.persona_state.tie.summary"
+      },
+      {
+        "id": "persona_all_zero",
+        "displayNameKey": "relationship.persona_state.all_zero.name",
+        "summaryKey": "relationship.persona_state.all_zero.summary"
+      },
+      {
+        "id": "persona_unavailable",
+        "displayNameKey": "relationship.persona_state.unavailable.name",
+        "summaryKey": "relationship.persona_state.unavailable.summary"
+      },
+      {
+        "id": "persona_malformed",
+        "displayNameKey": "relationship.persona_state.malformed.name",
+        "summaryKey": "relationship.persona_state.malformed.summary"
+      }
+    ],
+    "allZeroPolicy": "no_dominant_trait",
+    "tiePolicy": "return_deterministic_tie_set",
+    "missingPolicy": "unavailable_until_top_level_normalization"
+  },
+  "approvedConsequences": [
+    {
+      "id": "relationship_consequence_omen1_valerius_affinity",
+      "sourceQuestId": "OMEN_1",
+      "sourceConsequenceId": "GRANT_VALERIUS_AFFINITY_5",
+      "targetNpcId": "npc_valerius",
+      "delta": 5,
+      "repeatability": "once_inside_future_report_transaction",
+      "status": "source_ready_runtime_transaction_unimplemented"
+    }
+  ],
+  "draftLocalization": [
+    {
+      "key": "relationship.npc.valerius.name",
+      "text": "Captain Valerius"
+    },
+    {
+      "key": "relationship.npc.valerius.role",
+      "text": "Veil Watch military liaison"
+    },
+    {
+      "key": "relationship.npc.valerius.context",
+      "text": "A disciplined cross-realm officer who becomes the first trusted witness to the Sky Castle omen."
+    },
+    {
+      "key": "relationship.npc.gruff.name",
+      "text": "Master Gruff"
+    },
+    {
+      "key": "relationship.npc.gruff.role",
+      "text": "Chief architect and smith"
+    },
+    {
+      "key": "relationship.npc.gruff.context",
+      "text": "A practical forge-builder whose trust is earned through work that outlasts speeches."
+    },
+    {
+      "key": "relationship.npc.molly.name",
+      "text": "Molly"
+    },
+    {
+      "key": "relationship.npc.molly.role",
+      "text": "Archivist and innkeeper"
+    },
+    {
+      "key": "relationship.npc.molly.context",
+      "text": "A warm observer who remembers how ordinary people carry the cost of realm decisions."
+    },
+    {
+      "key": "relationship.npc.xerath.name",
+      "text": "Xerath"
+    },
+    {
+      "key": "relationship.npc.xerath.role",
+      "text": "Void seer"
+    },
+    {
+      "key": "relationship.npc.xerath.context",
+      "text": "A calculating reader of shadowed signs whose loyalty requires patience, precision, and proof."
+    },
+    {
+      "key": "relationship.npc.vaeloryn.name",
+      "text": "Vaeloryn"
+    },
+    {
+      "key": "relationship.npc.vaeloryn.role",
+      "text": "Keeper of Unmade Wishes"
+    },
+    {
+      "key": "relationship.npc.vaeloryn.context",
+      "text": "The wish dragon may be referenced by relationship-aware systems, but ordinary affinity mutation is not enabled."
+    },
+    {
+      "key": "relationship.npc.edras_veyr.name",
+      "text": "Edras Veyr"
+    },
+    {
+      "key": "relationship.npc.edras_veyr.role",
+      "text": "The Hollow Regent"
+    },
+    {
+      "key": "relationship.npc.edras_veyr.context",
+      "text": "The antagonist's identity may be referenced by relationship-aware systems, but ordinary affinity mutation is not enabled."
+    },
+    {
+      "key": "relationship.faction.crownlands_radiant_council.name",
+      "text": "Radiant Council"
+    },
+    {
+      "key": "relationship.faction.crownlands_radiant_council.summary",
+      "text": "Crownlands governors focused on order, road authority, and public legitimacy."
+    },
+    {
+      "key": "relationship.faction.stonehold_assembly.name",
+      "text": "Stonehold Assembly"
+    },
+    {
+      "key": "relationship.faction.stonehold_assembly.summary",
+      "text": "Stonehold clan and forge voices that value endurance, tradition, and work proven under pressure."
+    },
+    {
+      "key": "relationship.faction.eldergrove_wardens.name",
+      "text": "Eldergrove Wardens"
+    },
+    {
+      "key": "relationship.faction.eldergrove_wardens.summary",
+      "text": "Guardians of living borders, sanctuary vows, and old memory under moonlit judgment."
+    },
+    {
+      "key": "relationship.faction.umbral_cabal.name",
+      "text": "Umbral Cabal"
+    },
+    {
+      "key": "relationship.faction.umbral_cabal.summary",
+      "text": "Umbral shadow-court practitioners driven by survival, secrecy, and careful control of forbidden knowledge."
+    },
+    {
+      "key": "relationship.faction.veil_watch.name",
+      "text": "Veil Watch"
+    },
+    {
+      "key": "relationship.faction.veil_watch.summary",
+      "text": "A cross-realm military and scholarly order that monitors breaches in the Veil."
+    },
+    {
+      "key": "relationship.affinity.exalted.name",
+      "text": "Exalted"
+    },
+    {
+      "key": "relationship.affinity.exalted.summary",
+      "text": "Deep personal trust, visible respect, and unusual willingness to stand with the player under pressure."
+    },
+    {
+      "key": "relationship.affinity.friendly.name",
+      "text": "Friendly"
+    },
+    {
+      "key": "relationship.affinity.friendly.summary",
+      "text": "Established goodwill and cooperative confidence without implying total loyalty."
+    },
+    {
+      "key": "relationship.affinity.neutral.name",
+      "text": "Neutral"
+    },
+    {
+      "key": "relationship.affinity.neutral.summary",
+      "text": "Unestablished or balanced personal standing; neither special trust nor active hostility is implied."
+    },
+    {
+      "key": "relationship.affinity.hostile.name",
+      "text": "Hostile"
+    },
+    {
+      "key": "relationship.affinity.hostile.summary",
+      "text": "Open distrust, resentment, or opposition that should remain recoverable unless a quest states otherwise."
+    },
+    {
+      "key": "relationship.affinity.nemesis.name",
+      "text": "Nemesis"
+    },
+    {
+      "key": "relationship.affinity.nemesis.summary",
+      "text": "Severe personal opposition; this label must never be produced from invalid numeric data."
+    },
+    {
+      "key": "relationship.faction_band.ally.name",
+      "text": "Ally"
+    },
+    {
+      "key": "relationship.faction_band.ally.summary",
+      "text": "A faction-level relationship strong enough to support public cooperation where future rules allow it."
+    },
+    {
+      "key": "relationship.faction_band.supporter.name",
+      "text": "Supporter"
+    },
+    {
+      "key": "relationship.faction_band.supporter.summary",
+      "text": "A favorable faction stance that can support dialogue or presentation without authorizing rewards by itself."
+    },
+    {
+      "key": "relationship.faction_band.neutral.name",
+      "text": "Neutral"
+    },
+    {
+      "key": "relationship.faction_band.neutral.summary",
+      "text": "No strong faction stance is established."
+    },
+    {
+      "key": "relationship.faction_band.opponent.name",
+      "text": "Opponent"
+    },
+    {
+      "key": "relationship.faction_band.opponent.summary",
+      "text": "A faction stance of organized disagreement or rivalry, short of declared enemy status."
+    },
+    {
+      "key": "relationship.faction_band.enemy.name",
+      "text": "Enemy"
+    },
+    {
+      "key": "relationship.faction_band.enemy.summary",
+      "text": "A hostile faction stance; this label must never be produced from overflow or malformed data."
+    },
+    {
+      "key": "relationship.persona_trait.warlord.name",
+      "text": "Warlord"
+    },
+    {
+      "key": "relationship.persona_trait.warlord.summary",
+      "text": "Command through force, defense, pressure, and decisive battlefield action."
+    },
+    {
+      "key": "relationship.persona_trait.diplomat.name",
+      "text": "Diplomat"
+    },
+    {
+      "key": "relationship.persona_trait.diplomat.summary",
+      "text": "Command through negotiation, restraint, witness, and the careful keeping of promises."
+    },
+    {
+      "key": "relationship.persona_trait.sage.name",
+      "text": "Sage"
+    },
+    {
+      "key": "relationship.persona_trait.sage.summary",
+      "text": "Command through knowledge, memory, pattern recognition, and patient interpretation."
+    },
+    {
+      "key": "relationship.persona_trait.rogue.name",
+      "text": "Rogue"
+    },
+    {
+      "key": "relationship.persona_trait.rogue.summary",
+      "text": "Command through subtle action, risk, stealth, and opportunistic precision."
+    },
+    {
+      "key": "relationship.persona_state.unique_dominant.name",
+      "text": "Dominant Trait"
+    },
+    {
+      "key": "relationship.persona_state.unique_dominant.summary",
+      "text": "Exactly one persona trait is currently highest and may be presented as dominant."
+    },
+    {
+      "key": "relationship.persona_state.tie.name",
+      "text": "Trait Tie"
+    },
+    {
+      "key": "relationship.persona_state.tie.summary",
+      "text": "Two or more traits share the highest value; presentation must show the tie rather than invent one winner."
+    },
+    {
+      "key": "relationship.persona_state.all_zero.name",
+      "text": "No Dominant Trait"
+    },
+    {
+      "key": "relationship.persona_state.all_zero.summary",
+      "text": "All persona values are zero, so no unique persona meaning has been earned yet."
+    },
+    {
+      "key": "relationship.persona_state.unavailable.name",
+      "text": "Persona Unavailable"
+    },
+    {
+      "key": "relationship.persona_state.unavailable.summary",
+      "text": "Persona cannot be classified until a valid source and save snapshot are available."
+    },
+    {
+      "key": "relationship.persona_state.malformed.name",
+      "text": "Persona Malformed"
+    },
+    {
+      "key": "relationship.persona_state.malformed.summary",
+      "text": "Persona data is malformed and must not be converted into a story label."
+    }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 176,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "canonical IDs are unique and lowercase snake-case",
+      "legacy aliases are unique within their domain",
+      "every classificationProfileId resolves",
+      "every displayNameKey, roleKey, relationshipContextKey, summaryKey, and persona key resolves in draftLocalization",
+      "affinity thresholds preserve [-100,100] legacy bands without gaps or overlap",
+      "faction thresholds preserve signed Int32 legacy bands without gaps or overlap",
+      "persona all-zero and tie policies do not return a fabricated dominant trait",
+      "approved OMEN_1 +5 Valerius consequence targets npc_valerius only and remains transaction-unimplemented"
+    ],
+    "blockedRuntimeClaims": [
+      "relationship save mutation is implemented",
+      "relationship idempotency ledger exists",
+      "NVS-01 report transaction can apply affinity",
+      "hard-coded service labels have been removed",
+      "legacy Android preview values initialize saves",
+      "unknown IDs can be mutated"
+    ],
+    "optimizationImpact": {
+      "performance": "source-only JSON; no runtime service loop, ECS entity, scene, or allocation behavior added",
+      "memory": "bounded catalog for six NPCs, five factions, five affinity bands, five faction bands, four persona traits, and five persona states",
+      "buildSize": "small text-only addition; no binary assets",
+      "deviceCompatibility": "no device-specific runtime requirement"
+    }
+  }
+}
