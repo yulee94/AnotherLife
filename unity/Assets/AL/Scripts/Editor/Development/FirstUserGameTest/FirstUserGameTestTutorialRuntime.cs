@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using AL.ChampionMode.Control;
+using AL.Core;
 using AL.Editor.Development.OnboardingAuthority;
 using UnityEditor;
 using UnityEngine;
@@ -136,6 +137,9 @@ namespace AL.Editor.Development.FirstUserGameTest
             _generation = generation;
             _key = KeyPrefix + sessionId;
         }
+
+        internal string SessionId => _sessionId;
+        internal string Generation => _generation;
 
         internal bool TryLoadOrCreate(
             out FirstUserGameTestTutorialState state,
@@ -275,6 +279,8 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal const string TitleActionName = "FirstUserGameTestActiveTitleAction";
         internal const string ObjectiveActionName = "FirstUserGameTestActiveObjectiveAction";
         internal const string DetailName = "FirstUserGameTestActiveObjectiveDetail";
+        internal const string HearValeriusActionName =
+            "FirstUserGameTestHearValeriusAction";
 
         private const float MovementDistanceThreshold = 0.02f;
 
@@ -294,6 +300,7 @@ namespace AL.Editor.Development.FirstUserGameTest
         private FirstUserGameTestTutorialState _state;
         private Button _titleAction;
         private Button _objectiveAction;
+        private Button _hearValeriusAction;
         private Text _titleLabel;
         private Text _objectiveLabel;
         private Text _detail;
@@ -307,15 +314,21 @@ namespace AL.Editor.Development.FirstUserGameTest
         private bool _offeredFocusApplied;
         private bool _moveFocusApplied;
         private bool _attackFocusApplied;
+        private bool _detailsOpen;
+        private bool _valeriusActionFocusApplied;
         private bool _championInputSuppressed;
         private bool _failed;
         private FirstUserGameTestFollowResult _lastFollowResult;
+        private FirstUserGameTestOmenInteraction _omenInteraction;
 
         internal FirstUserGameTestTutorialState State => _state;
         internal Button TitleAction => _titleAction;
         internal Button ObjectiveAction => _objectiveAction;
+        internal Button HearValeriusAction => _hearValeriusAction;
         internal Text Detail => _detail;
         internal FirstUserGameTestFollowResult LastFollowResult => _lastFollowResult;
+        internal FirstUserGameTestOmenInteraction OmenInteraction => _omenInteraction;
+        internal bool OmenDetailsOpen => _detailsOpen;
         internal bool ChampionInputSuppressed => _championInputSuppressed;
         internal bool MovementIntentPendingForTests => _movementIntentPending;
 
@@ -333,6 +346,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return;
             }
 
+            RefreshOmenNavigation();
             TryFocusCurrentStep();
         }
 
@@ -341,6 +355,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Font font,
             ChampionController controller,
             FirstUserGameTestTutorialSessionStore store,
+            RealmId realm,
             Action<string> failClosed,
             out FirstUserGameTestTutorialPresenter presenter,
             out string message)
@@ -359,6 +374,33 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return false;
             }
 
+            if (!FirstUserGameTestOmenInteraction.TryCreate(
+                    store.SessionId,
+                    store.Generation,
+                    realm,
+                    out FirstUserGameTestOmenInteraction omenInteraction,
+                    out string omenMessage,
+                    out string omenDiagnostic))
+            {
+                if (!string.IsNullOrEmpty(omenDiagnostic))
+                {
+                    Debug.LogError(
+                        "[AL DEV][OMEN] " + omenDiagnostic);
+                }
+
+                message = string.IsNullOrEmpty(omenMessage)
+                    ? "Valerius's report is unavailable in this isolated playtest."
+                    : omenMessage;
+                return false;
+            }
+
+            if (omenInteraction.IsReportOpen && !state.IsOmenOffered)
+            {
+                message =
+                    "The retained quest report did not match the completed tutorial.";
+                return false;
+            }
+
             var panel = new GameObject(
                 PanelName,
                 typeof(RectTransform),
@@ -370,7 +412,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             panelRect.anchorMax = new Vector2(0f, 1f);
             panelRect.pivot = new Vector2(0f, 1f);
             panelRect.anchoredPosition = new Vector2(18f, -102f);
-            panelRect.sizeDelta = new Vector2(460f, 236f);
+            panelRect.sizeDelta = new Vector2(460f, 330f);
             panel.GetComponent<Image>().color = new Color(0.025f, 0.045f, 0.075f, 0.94f);
 
             presenter = panel.GetComponent<FirstUserGameTestTutorialPresenter>();
@@ -378,6 +420,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             presenter._store = store;
             presenter._failClosed = failClosed;
             presenter._state = state;
+            presenter._omenInteraction = omenInteraction;
 
             presenter._titleAction = FirstUserGameTestRuntimeHost.CreateButton(
                 panel.transform,
@@ -413,11 +456,26 @@ namespace AL.Editor.Development.FirstUserGameTest
             detailRect.anchorMax = new Vector2(0f, 1f);
             detailRect.pivot = new Vector2(0f, 1f);
             detailRect.anchoredPosition = new Vector2(18f, -158f);
-            detailRect.sizeDelta = new Vector2(424f, 62f);
+            detailRect.sizeDelta = new Vector2(424f, 82f);
             presenter._detail.color = new Color(0.78f, 0.86f, 0.95f, 1f);
+
+            presenter._hearValeriusAction =
+                FirstUserGameTestRuntimeHost.CreateButton(
+                    panel.transform,
+                    HearValeriusActionName,
+                    FirstUserGameTestPlaytestCopy.HearValeriusReportAction,
+                    font,
+                    new Vector2(16f, -252f),
+                    new Vector2(428f, 58f),
+                    new Vector2(0f, 1f));
+            presenter._hearValeriusAction.GetComponent<RectTransform>().pivot =
+                new Vector2(0f, 1f);
+            presenter._hearValeriusAction.gameObject.SetActive(false);
 
             presenter._titleAction.onClick.AddListener(presenter.FollowActiveObjective);
             presenter._objectiveAction.onClick.AddListener(presenter.FollowActiveObjective);
+            presenter._hearValeriusAction.onClick.AddListener(
+                presenter.HearValeriusReport);
             presenter.RefreshPresentation();
             return true;
         }
@@ -587,8 +645,16 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             if (_lastFollowResult.Outcome == FirstUserGameTestFollowOutcome.Focused)
             {
-                _detail.text = FirstUserGameTestPlaytestCopy.OmenFocusDetail;
-                EventSystem.current?.SetSelectedGameObject(_objectiveAction.gameObject);
+                _detailsOpen = true;
+                RefreshPresentation();
+                if (_hearValeriusAction != null &&
+                    _hearValeriusAction.gameObject.activeInHierarchy &&
+                    _hearValeriusAction.interactable)
+                {
+                    EventSystem.current?.SetSelectedGameObject(
+                        _hearValeriusAction.gameObject);
+                    _valeriusActionFocusApplied = true;
+                }
             }
             else if (_lastFollowResult.Outcome == FirstUserGameTestFollowOutcome.NoTarget)
             {
@@ -600,6 +666,66 @@ namespace AL.Editor.Development.FirstUserGameTest
             {
                 FailClosed("Following the active objective attempted to mutate gameplay state.");
             }
+        }
+
+        internal bool HearValeriusReportForTests()
+        {
+            return TryHearValeriusReport();
+        }
+
+        private void HearValeriusReport()
+        {
+            TryHearValeriusReport();
+        }
+
+        private bool TryHearValeriusReport()
+        {
+            if (_failed || !TryRefreshState() || !_state.IsOmenOffered ||
+                !_detailsOpen || _omenInteraction == null ||
+                !ApplyChampionControllerInputPolicy(followUiActive: true) ||
+                !_championInputSuppressed || _controller == null ||
+                _controller.enabled ||
+                !TryReadChampionState(out _, out bool isAttacking, out _) ||
+                isAttacking)
+            {
+                return false;
+            }
+
+            FirstUserGameTestTutorialState before = _state;
+            Vector3 playerPosition = _controller.transform.position;
+            if (!_omenInteraction.TryOpenReport(
+                    out bool changed,
+                    out string friendlyMessage,
+                    out string technicalDiagnostic))
+            {
+                if (!string.IsNullOrEmpty(technicalDiagnostic))
+                {
+                    Debug.LogError("[AL DEV][OMEN] " + technicalDiagnostic);
+                }
+
+                FailClosed(string.IsNullOrEmpty(friendlyMessage)
+                    ? "Valerius's report could not be opened."
+                    : friendlyMessage);
+                return false;
+            }
+
+            _detailsOpen = true;
+            RefreshPresentation();
+            if (changed && EventSystem.current != null && _titleAction != null &&
+                _titleAction.gameObject.activeInHierarchy && _titleAction.interactable)
+            {
+                EventSystem.current.SetSelectedGameObject(_titleAction.gameObject);
+            }
+
+            if (!before.ValueEquals(_state) ||
+                _controller.transform.position != playerPosition)
+            {
+                FailClosed(
+                    "Opening Valerius's report attempted to mutate tutorial or player state.");
+                return false;
+            }
+
+            return changed;
         }
 
         private bool ApplyEvidence(FirstUserGameTestTutorialEvidenceKind kind)
@@ -716,7 +842,9 @@ namespace AL.Editor.Development.FirstUserGameTest
         private void RefreshPresentation()
         {
             if (_titleAction == null || _objectiveAction == null ||
-                _titleLabel == null || _objectiveLabel == null || _detail == null)
+                _hearValeriusAction == null || _titleLabel == null ||
+                _objectiveLabel == null || _detail == null ||
+                _omenInteraction == null)
             {
                 FailClosed("The development tutorial presentation was incomplete.");
                 return;
@@ -747,12 +875,16 @@ namespace AL.Editor.Development.FirstUserGameTest
             switch (_state.Step)
             {
                 case FirstUserGameTestTutorialStep.Move:
+                    SetHearValeriusActionVisible(false);
+                    _detailsOpen = false;
                     _titleLabel.text = FirstUserGameTestPlaytestCopy.MoveTitle;
                     _objectiveLabel.text = FirstUserGameTestPlaytestCopy.MoveObjective;
                     _detail.text = FirstUserGameTestPlaytestCopy.MoveDetail;
                     TryFocusCurrentStep();
                     break;
                 case FirstUserGameTestTutorialStep.BasicAttack:
+                    SetHearValeriusActionVisible(false);
+                    _detailsOpen = false;
                     _titleLabel.text = FirstUserGameTestPlaytestCopy.AttackTitle;
                     _objectiveLabel.text = FirstUserGameTestPlaytestCopy.AttackObjective;
                     _detail.text = FirstUserGameTestPlaytestCopy.AttackDetail;
@@ -760,14 +892,65 @@ namespace AL.Editor.Development.FirstUserGameTest
                     break;
                 case FirstUserGameTestTutorialStep.Complete:
                     _titleLabel.text = FirstUserGameTestPlaytestCopy.OmenTitle;
-                    _objectiveLabel.text = FirstUserGameTestPlaytestCopy.OmenObjective;
-                    _detail.text = offeredReady
-                        ? FirstUserGameTestPlaytestCopy.OmenDetail
-                        : "Preparing the quest preview…";
-                    if (offeredReady && !_offeredFocusApplied && EventSystem.current != null)
+                    if (_omenInteraction.IsReportOpen)
+                    {
+                        _detailsOpen = true;
+                        _objectiveLabel.text =
+                            FirstUserGameTestPlaytestCopy.ValeriusReportOpenObjective;
+                        SetHearValeriusActionVisible(false);
+                        if (!FirstUserGameTestPlaytestCopy.TryBuildValeriusReport(
+                                _omenInteraction.View,
+                                out string reportDetails))
+                        {
+                            FailClosed(
+                                "The friendly Valerius report presentation was unavailable.");
+                            return;
+                        }
+
+                        _detail.text = reportDetails;
+                    }
+                    else if (_detailsOpen && offeredReady)
+                    {
+                        _objectiveLabel.text =
+                            FirstUserGameTestPlaytestCopy.OmenObjective;
+                        if (!FirstUserGameTestPlaytestCopy.TryBuildOmenOfferDetails(
+                                _omenInteraction.View,
+                                out string offerDetails))
+                        {
+                            FailClosed(
+                                "The friendly OMEN offer presentation was unavailable.");
+                            return;
+                        }
+
+                        _detail.text = offerDetails;
+                        SetHearValeriusActionVisible(true);
+                    }
+                    else
+                    {
+                        _objectiveLabel.text =
+                            FirstUserGameTestPlaytestCopy.OmenObjective;
+                        _detail.text = offeredReady
+                            ? FirstUserGameTestPlaytestCopy.OmenDetail
+                            : "Preparing the quest preview…";
+                        SetHearValeriusActionVisible(false);
+                    }
+
+                    if (offeredReady && !_offeredFocusApplied &&
+                        EventSystem.current != null)
                     {
                         EventSystem.current.SetSelectedGameObject(_titleAction.gameObject);
                         _offeredFocusApplied = true;
+                    }
+
+                    if (offeredReady && _detailsOpen &&
+                        !_omenInteraction.IsReportOpen &&
+                        !_valeriusActionFocusApplied &&
+                        _hearValeriusAction.gameObject.activeInHierarchy &&
+                        EventSystem.current != null)
+                    {
+                        EventSystem.current.SetSelectedGameObject(
+                            _hearValeriusAction.gameObject);
+                        _valeriusActionFocusApplied = true;
                     }
 
                     break;
@@ -775,6 +958,60 @@ namespace AL.Editor.Development.FirstUserGameTest
                     FailClosed("The development tutorial step was invalid.");
                     break;
             }
+
+            RefreshOmenNavigation();
+        }
+
+        private void SetHearValeriusActionVisible(bool visible)
+        {
+            if (_hearValeriusAction == null)
+            {
+                return;
+            }
+
+            _hearValeriusAction.interactable = visible;
+            if (_hearValeriusAction.gameObject.activeSelf != visible)
+            {
+                _hearValeriusAction.gameObject.SetActive(visible);
+            }
+        }
+
+        private void RefreshOmenNavigation()
+        {
+            if (_titleAction == null || _objectiveAction == null ||
+                _hearValeriusAction == null || _moveAction == null ||
+                _attackAction == null || _exitAction == null)
+            {
+                return;
+            }
+
+            bool hearVisible = _hearValeriusAction.gameObject.activeSelf &&
+                               _hearValeriusAction.interactable;
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                _titleAction,
+                _moveAction,
+                _exitAction,
+                _exitAction,
+                _objectiveAction);
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                _objectiveAction,
+                _moveAction,
+                _exitAction,
+                _titleAction,
+                hearVisible ? _hearValeriusAction : _attackAction);
+            FirstUserGameTestRuntimeHost.SetExplicitNavigation(
+                _hearValeriusAction,
+                _moveAction,
+                _exitAction,
+                _objectiveAction,
+                _exitAction);
+
+            Navigation exitNavigation = _exitAction.navigation;
+            exitNavigation.mode = Navigation.Mode.Explicit;
+            exitNavigation.selectOnUp = hearVisible
+                ? _hearValeriusAction
+                : _objectiveAction;
+            _exitAction.navigation = exitNavigation;
         }
 
         private void TryFocusCurrentStep()
@@ -826,10 +1063,16 @@ namespace AL.Editor.Development.FirstUserGameTest
                 _objectiveAction.onClick.RemoveListener(FollowActiveObjective);
             }
 
+            if (_hearValeriusAction != null)
+            {
+                _hearValeriusAction.onClick.RemoveListener(HearValeriusReport);
+            }
+
             _controller = null;
             _store = null;
             _failClosed = null;
             _state = null;
+            _omenInteraction = null;
             _moveAction = null;
             _attackAction = null;
             _exitAction = null;

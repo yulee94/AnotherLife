@@ -16,6 +16,7 @@ using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
 using AL.Development;
 using AL.Editor.Development.FirstUserGameTest;
+using AL.Narrative.Nvs01;
 using AL.UI;
 using AL.UI.FirstUserIdentity;
 using AL.UI.RealmSelection;
@@ -158,6 +159,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
 
             foreach (string sessionId in _tutorialSessionIds)
             {
+                FirstUserGameTestOmenSessionStore.EraseSession(sessionId);
                 FirstUserGameTestTutorialSessionStore.EraseForTests(sessionId);
             }
 
@@ -594,6 +596,100 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(tutorial.State.BasicAttackConfirmationCount, Is.EqualTo(1));
             Assert.That(CaptureCombatRuntimeObservation(), Is.EqualTo(combatBeforeFollow),
                 "Follow activation cannot change combat audio/VFX ownership or active counts.");
+            Assert.That(save.CurrentSave.Quests.Count, Is.EqualTo(questCountBefore));
+            Assert.That(JsonUtility.ToJson(save.CurrentSave.Nvs01Progress), Is.EqualTo(nvsBefore));
+
+            Assert.That(tutorial.OmenDetailsOpen, Is.True);
+            Assert.That(tutorial.HearValeriusAction, Is.Not.Null);
+            Assert.That(tutorial.HearValeriusAction.gameObject.activeInHierarchy, Is.True);
+            Assert.That(tutorial.HearValeriusAction.interactable, Is.True);
+            Assert.That(
+                tutorial.HearValeriusAction.GetComponentInChildren<Text>(true).text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.HearValeriusReportAction));
+            AssertInteractiveTargetAtLeast48(tutorial.HearValeriusAction);
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.HearValeriusAction.gameObject),
+                "Opening the offered quest must focus the single report action.");
+            Assert.That(host.DestinationMarker.Controller.enabled, Is.False,
+                "Quest details must continue owning the isolated gameplay-input boundary.");
+
+            FirstUserGameTestTutorialState beforeReport = tutorial.State;
+            Vector3 positionBeforeReport =
+                host.DestinationMarker.Controller.transform.position;
+            string combatBeforeReport = CaptureCombatRuntimeObservation();
+            ExecuteEvents.Execute(
+                tutorial.HearValeriusAction.gameObject,
+                new BaseEventData(EventSystem.current),
+                ExecuteEvents.submitHandler);
+
+            FirstUserGameTestOmenInteraction omen = tutorial.OmenInteraction;
+            Assert.That(omen, Is.Not.Null);
+            Assert.That(omen.IsReportOpen, Is.True);
+            Assert.That(omen.SelectValeriusInvocationCount, Is.EqualTo(1));
+            Assert.That(omen.CommitAttemptCount, Is.EqualTo(1));
+            Assert.That(omen.Snapshot.Revision, Is.EqualTo(1));
+            Assert.That(omen.Snapshot.StateId, Is.EqualTo("OFFERED"));
+            Assert.That(omen.Snapshot.CurrentDialogueNodeId,
+                Is.EqualTo("DLG_OMEN_1_OFFER"));
+            Assert.That(omen.Snapshot.PendingChoice, Is.True);
+            Assert.That(omen.Snapshot.PendingSemanticActionId, Is.Empty);
+            Assert.That(omen.Snapshot.CommittedRealmId, Is.EqualTo("eldergrove"));
+            Assert.That(omen.Snapshot.EncounterStatus,
+                Is.EqualTo(Nvs01EncounterStatus.None));
+            Assert.That(omen.Snapshot.CurrentEncounter, Is.Null);
+            Assert.That(omen.Snapshot.ConsequenceIntentIds, Is.Empty);
+            Assert.That(omen.Snapshot.LastOperation, Is.Not.Null);
+            Assert.That(omen.Snapshot.LastOperation.EventId,
+                Is.EqualTo("SELECT_VALERIUS"));
+            Assert.That(omen.Snapshot.LastOperation.Status,
+                Is.EqualTo(Nvs01CommandStatus.Committed));
+            Assert.That(omen.View.StateId, Is.EqualTo("OFFERED"));
+            Assert.That(omen.View.HasDialogue, Is.True);
+            Assert.That(omen.View.Choices.Count, Is.EqualTo(2),
+                "The production pending dialogue remains exact internally; this slice renders no choice controls.");
+            Assert.That(tutorial.State.ValueEquals(beforeReport), Is.True,
+                "Hearing the report cannot mutate tutorial progress.");
+            Assert.That(host.DestinationMarker.Controller.transform.position,
+                Is.EqualTo(positionBeforeReport));
+            Assert.That(CaptureCombatRuntimeObservation(), Is.EqualTo(combatBeforeReport));
+            Assert.That(tutorial.HearValeriusAction.gameObject.activeSelf, Is.False,
+                "The one-shot report action must disappear after the exact commit.");
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.TitleAction.gameObject),
+                "After opening the report, focus must return to a safe passive quest control.");
+            Assert.That(tutorial.HearValeriusReportForTests(), Is.False,
+                "A duplicate report request must be inert.");
+            Assert.That(omen.SelectValeriusInvocationCount, Is.EqualTo(1));
+            Assert.That(omen.CommitAttemptCount, Is.EqualTo(1));
+
+            string reportCopy = string.Join(
+                "\n",
+                tutorial.GetComponentsInChildren<Text>(true).Select(text => text.text));
+            Assert.That(reportCopy,
+                Does.Contain(FirstUserGameTestPlaytestCopy.ValeriusReportOpenObjective));
+            Assert.That(reportCopy,
+                Does.Contain("Quest acceptance is intentionally unavailable"));
+            foreach (string machineToken in new[]
+                     {
+                         "OMEN_1",
+                         "OFFERED",
+                         "DLG_",
+                         "OBJ_",
+                         "SELECT_",
+                         "choice.",
+                         "QUEST_ACCEPTED",
+                         "TALK_TO_VALERIUS"
+                     })
+            {
+                Assert.That(reportCopy, Does.Not.Contain(machineToken));
+            }
+
+            Assert.That(
+                tutorial.GetComponentsInChildren<Button>(true)
+                    .Select(button => button.GetComponentInChildren<Text>(true)?.text ?? string.Empty)
+                    .Any(label => label.IndexOf("accept", StringComparison.OrdinalIgnoreCase) >= 0),
+                Is.False,
+                "This bounded slice must not expose an OMEN acceptance control.");
             Assert.That(save.CurrentSave.Quests.Count, Is.EqualTo(questCountBefore));
             Assert.That(JsonUtility.ToJson(save.CurrentSave.Nvs01Progress), Is.EqualTo(nvsBefore));
             AssertSingleEventSystem();

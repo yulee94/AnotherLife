@@ -4,6 +4,7 @@
 
 using AL.Core;
 using AL.UI.FirstUserIdentity;
+using AL.UI.Kingdom;
 
 namespace AL.Editor.Development.FirstUserGameTest
 {
@@ -65,6 +66,12 @@ namespace AL.Editor.Development.FirstUserGameTest
             "Quest details are in focus. Review them when you are ready.";
         internal const string NoSafeTargetDetail =
             "Quest details are not available right now.";
+        internal const string HearValeriusReportAction =
+            "Hear Valerius's report";
+        internal const string ValeriusReportOpenObjective =
+            "Valerius's report is open";
+        internal const string ValeriusReportPendingNotice =
+            "The report is open for review. Quest acceptance is intentionally unavailable in this playtest step.";
 
         private static readonly DevelopmentFirstUserIdentityDraftCopyProvider IdentityCopy =
             new DevelopmentFirstUserIdentityDraftCopyProvider();
@@ -105,6 +112,52 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             description = realmLabel + "  •  " + raceLabel + "  •  " + classLabel;
             return true;
+        }
+
+        internal static bool TryBuildOmenOfferDetails(
+            Nvs01KingdomView view,
+            out string details)
+        {
+            details = string.Empty;
+            if (!IsFriendlyReadyView(view) ||
+                string.IsNullOrWhiteSpace(view.Description) ||
+                string.IsNullOrWhiteSpace(view.ObjectiveText) ||
+                string.IsNullOrWhiteSpace(view.SpeakerName) ||
+                string.IsNullOrWhiteSpace(view.SpeakerRole) ||
+                view.HasDialogue)
+            {
+                return false;
+            }
+
+            details = view.SpeakerName + " — " + view.SpeakerRole + "\n" +
+                      view.Description + "\n" + view.ObjectiveText;
+            return true;
+        }
+
+        internal static bool TryBuildValeriusReport(
+            Nvs01KingdomView view,
+            out string details)
+        {
+            details = string.Empty;
+            if (!IsFriendlyReadyView(view) ||
+                string.IsNullOrWhiteSpace(view.SpeakerName) ||
+                string.IsNullOrWhiteSpace(view.DialogueText) ||
+                !view.HasDialogue)
+            {
+                return false;
+            }
+
+            details = view.SpeakerName + "\n" + view.DialogueText + "\n\n" +
+                      ValeriusReportPendingNotice;
+            return true;
+        }
+
+        private static bool IsFriendlyReadyView(Nvs01KingdomView view)
+        {
+            return view != null &&
+                   view.Status == Nvs01KingdomViewStatus.Ready &&
+                   !view.HasDiagnostic &&
+                   string.IsNullOrEmpty(view.PlayerMessage);
         }
     }
 }
