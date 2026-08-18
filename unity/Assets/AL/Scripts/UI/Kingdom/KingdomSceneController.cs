@@ -578,7 +578,7 @@ namespace AL.UI.Kingdom
             _nvs01Presenter = new Nvs01KingdomPresenter(
                 runtime,
                 ResolveNvs01RealmContext,
-                () => BuildNvs01CapabilitySnapshot(verifiedCatalog.Catalog),
+                () => BuildNvs01CapabilitySnapshot(verifiedCatalog),
                 () => Guid.NewGuid().ToString("D"),
                 () => DateTimeOffset.UtcNow.ToUnixTimeMilliseconds());
 
@@ -610,23 +610,12 @@ namespace AL.UI.Kingdom
             }
         }
 
-        private static Nvs01CapabilitySnapshot BuildNvs01CapabilitySnapshot(Nvs01Catalog catalog)
-        {
-            var availability = new Dictionary<string, bool>(StringComparer.Ordinal);
-            foreach (Nvs01ExternalCapability capability in catalog.ExternalCapabilities)
-            {
-                // The command view is present in this slice. Champion location, deploy, hook, and
-                // result-delivery capabilities remain false until their production owners are wired.
-                availability.Add(
-                    capability.Id,
-                    string.Equals(
-                        capability.Id,
-                        catalog.Placement.CompletionDestination,
-                        StringComparison.Ordinal));
-            }
-
-            return new Nvs01CapabilitySnapshot(availability);
-        }
+        private static Nvs01CapabilitySnapshot BuildNvs01CapabilitySnapshot(
+            Nvs01VerifiedCatalog verifiedCatalog) =>
+            // No CH1 consumer is approved or mounted. A future consumer must
+            // register its exact typed capability and current packet identity;
+            // scene/catalog ID coincidence never grants capability authority.
+            Nvs01MountedConsumerRegistry.Empty.Capture(verifiedCatalog);
 
         private void RenderNvs01CatalogUnavailable(Nvs01CatalogDiagnostic diagnostic)
         {

@@ -1071,25 +1071,73 @@ namespace AL.Narrative.Nvs01
                    snapshot.TryGetObjectiveStatus(ReportObjective, out status) && status == Nvs01ObjectiveStatus.Inactive;
         }
 
-        private void ValidateSnapshotOrThrow(Nvs01QuestSnapshot snapshot, string parameterName)
+        internal static bool TryValidateSnapshot(
+            Nvs01QuestSnapshot snapshot,
+            out string error)
         {
-            if (!string.Equals(snapshot.PacketVersion, Catalog.PacketVersion, StringComparison.Ordinal) ||
-                !string.Equals(snapshot.PacketSha256, _verifiedCatalog.CanonicalSha256, StringComparison.Ordinal) ||
-                !string.Equals(snapshot.QuestId, Catalog.QuestId, StringComparison.Ordinal))
-                throw new ArgumentException("Snapshot catalog identity mismatch.", parameterName);
-            if (!Catalog.StatesById.ContainsKey(snapshot.StateId))
-                throw new ArgumentException("Snapshot state is not in the verified catalog.", parameterName);
-            if (snapshot.Objectives.Count != Catalog.Objectives.Count)
-                throw new ArgumentException("Snapshot objective count mismatch.", parameterName);
-            for (var index = 0; index < Catalog.Objectives.Count; index++)
+            if (snapshot == null)
             {
-                if (!string.Equals(snapshot.Objectives[index].ObjectiveId, Catalog.Objectives[index].Id, StringComparison.Ordinal))
+                error = "Snapshot is missing.";
+                return false;
+            }
+
+            try
+            {
+                ValidateSnapshotOrThrow(
+                    snapshot,
+                    Nvs01CatalogContract.PacketVersion,
+                    Nvs01CatalogContract.CanonicalSha256,
+                    Nvs01CatalogContract.QuestId,
+                    nameof(snapshot));
+                error = string.Empty;
+                return true;
+            }
+            catch (ArgumentException exception)
+            {
+                error = exception.Message;
+                return false;
+            }
+        }
+
+        private void ValidateSnapshotOrThrow(
+            Nvs01QuestSnapshot snapshot,
+            string parameterName) =>
+            ValidateSnapshotOrThrow(
+                snapshot,
+                Catalog.PacketVersion,
+                _verifiedCatalog.CanonicalSha256,
+                Catalog.QuestId,
+                parameterName);
+
+        private static void ValidateSnapshotOrThrow(
+            Nvs01QuestSnapshot snapshot,
+            string packetVersion,
+            string packetSha256,
+            string questId,
+            string parameterName)
+        {
+            if (!string.Equals(snapshot.PacketVersion, packetVersion, StringComparison.Ordinal) ||
+                !string.Equals(snapshot.PacketSha256, packetSha256, StringComparison.Ordinal) ||
+                !string.Equals(snapshot.QuestId, questId, StringComparison.Ordinal))
+                throw new ArgumentException("Snapshot catalog identity mismatch.", parameterName);
+            if (!Nvs01CatalogValidator.IsExactCurrentStateId(snapshot.StateId))
+                throw new ArgumentException("Snapshot state is not in the verified catalog.", parameterName);
+            if (snapshot.Objectives.Count != Nvs01CatalogValidator.ExactCurrentObjectiveCount)
+                throw new ArgumentException("Snapshot objective count mismatch.", parameterName);
+            for (var index = 0; index < snapshot.Objectives.Count; index++)
+            {
+                if (!Nvs01CatalogValidator.IsExactCurrentObjectiveId(
+                        index,
+                        snapshot.Objectives[index].ObjectiveId))
                     throw new ArgumentException("Snapshot objective order mismatch.", parameterName);
             }
-            if (snapshot.CurrentDialogueNodeId.Length > 0 && !Catalog.DialogueById.ContainsKey(snapshot.CurrentDialogueNodeId))
+            if (snapshot.CurrentDialogueNodeId.Length > 0 &&
+                !Nvs01CatalogValidator.IsExactCurrentDialogueId(
+                    snapshot.CurrentDialogueNodeId))
                 throw new ArgumentException("Snapshot dialogue is not in the verified catalog.", parameterName);
             if (snapshot.CommittedRealmId.Length > 0 &&
-                !Catalog.Placement.EligibleRealmIds.Contains(snapshot.CommittedRealmId, StringComparer.Ordinal))
+                !Nvs01CatalogValidator.IsExactCurrentEligibleRealmId(
+                    snapshot.CommittedRealmId))
                 throw new ArgumentException("Snapshot realm is not eligible.", parameterName);
             if (snapshot.CommittedRealmId.Length == 0 &&
                 (!string.Equals(snapshot.StateId, Offered, StringComparison.Ordinal) ||
@@ -1098,7 +1146,7 @@ namespace AL.Narrative.Nvs01
                 throw new ArgumentException("A progressed snapshot requires a committed realm.", parameterName);
             foreach (var intent in snapshot.ConsequenceIntentIds)
             {
-                if (!Catalog.ConsequencesById.ContainsKey(intent))
+                if (!Nvs01CatalogValidator.IsExactCurrentConsequenceId(intent))
                     throw new ArgumentException("Snapshot consequence intent is not in the catalog.", parameterName);
             }
             if (snapshot.CurrentEncounter != null)
@@ -1246,7 +1294,7 @@ namespace AL.Narrative.Nvs01
             if (!valid) throw new ArgumentException("Snapshot objective topology does not match its state.", parameterName);
         }
 
-        private void ValidatePendingAction(Nvs01QuestSnapshot snapshot, string parameterName)
+        private static void ValidatePendingAction(Nvs01QuestSnapshot snapshot, string parameterName)
         {
             if (snapshot.PendingSemanticActionId.Length == 0) return;
             if (!string.Equals(snapshot.PendingSemanticActionId, RequestArenaEvent, StringComparison.Ordinal) &&
@@ -1264,14 +1312,15 @@ namespace AL.Narrative.Nvs01
                 return;
             }
 
-            Nvs01DialogueNode node;
-            Catalog.TryGetDialogue(snapshot.CurrentDialogueNodeId, out node);
-            var declared = string.Equals(node.SemanticAction, snapshot.PendingSemanticActionId, StringComparison.Ordinal) ||
-                           node.Choices.Any(choice => string.Equals(choice.SemanticAction, snapshot.PendingSemanticActionId, StringComparison.Ordinal));
+            var declared =
+                string.Equals(snapshot.CurrentDialogueNodeId, ArenaStartDialogue, StringComparison.Ordinal) &&
+                string.Equals(snapshot.PendingSemanticActionId, RequestArenaEvent, StringComparison.Ordinal) ||
+                string.Equals(snapshot.CurrentDialogueNodeId, FailureDialogue, StringComparison.Ordinal) &&
+                string.Equals(snapshot.PendingSemanticActionId, RetryArenaEvent, StringComparison.Ordinal);
             if (!declared) throw new ArgumentException("Snapshot semantic action is not declared by the current node.", parameterName);
         }
 
-        private void ValidateDialogueTopology(Nvs01QuestSnapshot snapshot, string parameterName)
+        private static void ValidateDialogueTopology(Nvs01QuestSnapshot snapshot, string parameterName)
         {
             var hasDialogue = snapshot.CurrentDialogueNodeId.Length > 0;
             var hasAction = snapshot.PendingSemanticActionId.Length > 0;
@@ -1320,9 +1369,10 @@ namespace AL.Narrative.Nvs01
 
             if (!hasDialogue) return;
 
-            Nvs01DialogueNode node;
-            Catalog.TryGetDialogue(snapshot.CurrentDialogueNodeId, out node);
-            if (snapshot.PendingChoice && node.Choices.Count == 0)
+            if (snapshot.PendingChoice &&
+                (string.Equals(snapshot.CurrentDialogueNodeId, ArenaStartDialogue, StringComparison.Ordinal) ||
+                 !Nvs01CatalogValidator.IsExactCurrentDialogueId(
+                     snapshot.CurrentDialogueNodeId)))
                 throw new ArgumentException("Snapshot marks a choice pending on a node without choices.", parameterName);
         }
 

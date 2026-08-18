@@ -8,12 +8,12 @@ namespace AL.Narrative.Nvs01.Contracts
     {
         public const string CatalogId = "al.narrative.nvs01";
         public const int SchemaVersion = 1;
-        public const string PacketVersion = "omen1-a1-2026-07-29-v003";
+        public const string PacketVersion = "omen1-a1-2026-08-13-v004";
         public const string MilestoneId = "NVS-01";
         public const string QuestId = "OMEN_1";
-        public const int CanonicalByteLength = 8317;
+        public const int CanonicalByteLength = 8247;
         public const int MaximumByteLength = 65536;
-        public const string CanonicalSha256 = "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732";
+        public const string CanonicalSha256 = "25a5170334fca571abe1035eacf448955e8eab1124ff08643f7d16be9a1b69dd";
         public const string StreamingAssetsRelativePath = "AL/Narrative/OMEN_1.catalog.json";
         public const string DiagnosticCodePrefix = "AL-NVS01-";
     }

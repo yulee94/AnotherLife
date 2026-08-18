@@ -11,6 +11,10 @@ namespace AL.Narrative.Nvs01
     internal static class Nvs01ProgressCodec
     {
         private const string PersistenceUnavailable = "SAVE-PROGRESS-UNAVAILABLE";
+        internal const string MigratablePacketVersion =
+            "omen1-a1-2026-07-29-v003";
+        internal const string MigratablePacketSha256 =
+            "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732";
 
         internal static Nvs01ProgressData Encode(Nvs01QuestSnapshot snapshot)
         {
@@ -83,7 +87,13 @@ namespace AL.Narrative.Nvs01
                 return true;
             }
 
-            if (!TryBuildSnapshot(data, out snapshot, out string error))
+            if (!TryBuildSnapshot(
+                    data,
+                    Nvs01RuntimeContract.PacketVersion,
+                    Nvs01RuntimeContract.PacketSha256,
+                    Nvs01RuntimeContract.QuestId,
+                    out snapshot,
+                    out string error))
             {
                 diagnostic = Diagnostic(PersistenceUnavailable, "valid persisted progress", error);
                 return false;
@@ -110,6 +120,87 @@ namespace AL.Narrative.Nvs01
             }
         }
 
+        internal static bool TryMigrateExactV003(
+            Nvs01ProgressData source,
+            out Nvs01ProgressData migrated,
+            out Nvs01RuntimeDiagnostic diagnostic)
+        {
+            migrated = null;
+            diagnostic = null;
+            if (source == null ||
+                source.Version != Nvs01ProgressData.CurrentVersion ||
+                !string.Equals(
+                    source.PacketVersion,
+                    MigratablePacketVersion,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    source.PacketSha256,
+                    MigratablePacketSha256,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    source.QuestId,
+                    Nvs01RuntimeContract.QuestId,
+                    StringComparison.Ordinal))
+            {
+                diagnostic = Diagnostic(
+                    "SAVE-MIGRATION-INELIGIBLE",
+                    "exact retained v003 OMEN_1 identity",
+                    "identity mismatch");
+                return false;
+            }
+
+            if (!string.IsNullOrEmpty(
+                    source.LastOperation?
+                        .ExpectedGenerationFingerprint))
+            {
+                diagnostic = Diagnostic(
+                    "SAVE-MIGRATION-INELIGIBLE",
+                    "blank schema-1 generation fingerprint",
+                    "profile-bound generation evidence");
+                return false;
+            }
+
+            if (!TryBuildSnapshot(
+                    source,
+                    MigratablePacketVersion,
+                    MigratablePacketSha256,
+                    Nvs01RuntimeContract.QuestId,
+                    out _,
+                    out string legacyError))
+            {
+                diagnostic = Diagnostic(
+                    PersistenceUnavailable,
+                    "valid retained v003 progress",
+                    legacyError);
+                return false;
+            }
+
+            Nvs01ProgressData detached = Clone(source);
+            detached.PacketVersion = Nvs01RuntimeContract.PacketVersion;
+            detached.PacketSha256 = Nvs01RuntimeContract.PacketSha256;
+            if (!TryBuildSnapshot(
+                    detached,
+                    Nvs01RuntimeContract.PacketVersion,
+                    Nvs01RuntimeContract.PacketSha256,
+                    Nvs01RuntimeContract.QuestId,
+                    out Nvs01QuestSnapshot migratedSnapshot,
+                    out string migratedError) ||
+                !Nvs01QuestRuntime.TryValidateSnapshot(
+                    migratedSnapshot,
+                    out migratedError))
+            {
+                diagnostic = Diagnostic(
+                    PersistenceUnavailable,
+                    "exact v004 catalog-valid retained D16 progress",
+                    migratedError);
+                return false;
+            }
+
+            migrated = detached;
+            diagnostic = null;
+            return true;
+        }
+
         internal static bool TryValidateStoredData(
             Nvs01ProgressData data,
             out string error)
@@ -132,7 +223,13 @@ namespace AL.Narrative.Nvs01
                 return true;
             }
 
-            return TryBuildSnapshot(data, out _, out error);
+            return TryBuildSnapshot(
+                data,
+                Nvs01RuntimeContract.PacketVersion,
+                Nvs01RuntimeContract.PacketSha256,
+                Nvs01RuntimeContract.QuestId,
+                out _,
+                out error);
         }
 
         internal static bool Equivalent(
@@ -192,6 +289,9 @@ namespace AL.Narrative.Nvs01
 
         private static bool TryBuildSnapshot(
             Nvs01ProgressData data,
+            string expectedPacketVersion,
+            string expectedPacketSha256,
+            string expectedQuestId,
             out Nvs01QuestSnapshot snapshot,
             out string error)
         {
@@ -210,9 +310,9 @@ namespace AL.Narrative.Nvs01
                 return false;
             }
 
-            if (!string.Equals(data.PacketVersion, Nvs01RuntimeContract.PacketVersion, StringComparison.Ordinal) ||
-                !string.Equals(data.PacketSha256, Nvs01RuntimeContract.PacketSha256, StringComparison.Ordinal) ||
-                !string.Equals(data.QuestId, Nvs01RuntimeContract.QuestId, StringComparison.Ordinal))
+            if (!string.Equals(data.PacketVersion, expectedPacketVersion, StringComparison.Ordinal) ||
+                !string.Equals(data.PacketSha256, expectedPacketSha256, StringComparison.Ordinal) ||
+                !string.Equals(data.QuestId, expectedQuestId, StringComparison.Ordinal))
             {
                 error = "packet identity mismatch";
                 return false;
@@ -301,6 +401,84 @@ namespace AL.Narrative.Nvs01
                 error = exception.GetType().Name;
                 return false;
             }
+        }
+
+        private static Nvs01ProgressData Clone(Nvs01ProgressData source)
+        {
+            return new Nvs01ProgressData
+            {
+                Version = source.Version,
+                PacketVersion = source.PacketVersion,
+                PacketSha256 = source.PacketSha256,
+                QuestId = source.QuestId,
+                Revision = source.Revision,
+                StateId = source.StateId,
+                Objectives = source.Objectives
+                    .Select(item => new Nvs01ObjectiveProgressData
+                    {
+                        ObjectiveId = item.ObjectiveId,
+                        Status = item.Status
+                    })
+                    .ToList(),
+                CurrentDialogueNodeId = source.CurrentDialogueNodeId,
+                PendingChoice = source.PendingChoice,
+                PendingSemanticActionId = source.PendingSemanticActionId,
+                CommittedRealmId = source.CommittedRealmId,
+                EncounterStatus = source.EncounterStatus,
+                HasCurrentEncounter = source.HasCurrentEncounter,
+                CurrentEncounter = Clone(source.CurrentEncounter),
+                LastEncounterCorrelationId = source.LastEncounterCorrelationId,
+                HasLastEncounterOutcome = source.HasLastEncounterOutcome,
+                LastEncounterOutcome = source.LastEncounterOutcome,
+                LastEncounterEventId = source.LastEncounterEventId,
+                LastEncounterSnapshotVersion = source.LastEncounterSnapshotVersion,
+                LastEncounterSnapshotReference = source.LastEncounterSnapshotReference,
+                HasLastOperation = source.HasLastOperation,
+                LastOperation = Clone(source.LastOperation),
+                ConsequenceIntentIds = new List<string>(source.ConsequenceIntentIds),
+                AcquiredArtifactIds = new List<string>(source.AcquiredArtifactIds),
+                AppliedEffectKeys = new List<string>(source.AppliedEffectKeys),
+                UnlockedChapterId = source.UnlockedChapterId
+            };
+        }
+
+        private static Nvs01EncounterRequestData Clone(
+            Nvs01EncounterRequestData source)
+        {
+            return new Nvs01EncounterRequestData
+            {
+                ContractVersion = source.ContractVersion,
+                RequestId = source.RequestId,
+                CorrelationId = source.CorrelationId,
+                QuestId = source.QuestId,
+                StateId = source.StateId,
+                ObjectiveId = source.ObjectiveId,
+                HookId = source.HookId,
+                LocationId = source.LocationId,
+                RealmId = source.RealmId,
+                SuccessEventId = source.SuccessEventId,
+                FailureEventId = source.FailureEventId,
+                CancelledEventId = source.CancelledEventId,
+                UnavailableEventId = source.UnavailableEventId,
+                ReturnScene = source.ReturnScene
+            };
+        }
+
+        private static Nvs01OperationReceiptData Clone(
+            Nvs01OperationReceiptData source)
+        {
+            return new Nvs01OperationReceiptData
+            {
+                OperationId = source.OperationId,
+                PayloadFingerprint = source.PayloadFingerprint,
+                Status = source.Status,
+                Revision = source.Revision,
+                StateId = source.StateId,
+                EventId = source.EventId,
+                CorrelationId = source.CorrelationId,
+                ExpectedGenerationFingerprint =
+                    source.ExpectedGenerationFingerprint
+            };
         }
 
         private static Nvs01EncounterRequestData Encode(NvsEncounterRequest request)
