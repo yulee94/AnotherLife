@@ -6,6 +6,7 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
+using AL.Kingdom.Greybox;
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -285,6 +286,14 @@ namespace AL.Utilities
 
             CreateButton(canvasObj.transform, "BATTLE SIM", new Vector2(252, -716), RunTestBattle);
             CreateButton(canvasObj.transform, "RESET TARGETS", new Vector2(460, -716), SpawnArenaTargets);
+
+            // Post-combat kingdom build scene (greybox vertical slice). The build action
+            // spends combat loot (a fixed slice budget) and writes to the local run state.
+            CreateButton(canvasObj.transform, "KINGDOM BUILD", new Vector2(252, -770), () =>
+            {
+                GreyboxKingdomBuildController.Toggle();
+                SetStatus("Kingdom build scene toggled. Construct or upgrade a structure with your combat loot.");
+            });
 
             StartCoroutine(UpdateResourceText(text));
         }
