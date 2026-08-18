@@ -4,7 +4,8 @@
     "references": [
         "AL.Runtime",
         "AL.SaveAuthority",
-        "AL.Development.OnboardingAuthority.Emulator"
+        "AL.Development.OnboardingAuthority.Emulator",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

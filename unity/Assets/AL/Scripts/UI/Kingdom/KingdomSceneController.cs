@@ -14,8 +14,12 @@ using AL.Services.Local;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using AL.Input;
+using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace AL.UI.Kingdom
 {
@@ -2369,51 +2373,57 @@ namespace AL.UI.Kingdom
 
         private void HandleMouse()
         {
-            if (Input.touchCount > 0)
+            if (GameInput.TouchCount > 0)
             {
                 return;
             }
 
-            if (!IsPointerOverUi() && Mathf.Abs(Input.mouseScrollDelta.y) > 0.01f)
+            Mouse mouse = Mouse.current;
+            if (mouse == null)
             {
-                Zoom(-Input.mouseScrollDelta.y * 0.65f);
+                return;
             }
 
-            if (Input.GetMouseButtonDown(1))
+            if (!IsPointerOverUi() && Mathf.Abs(mouse.scroll.y.ReadValue()) > 0.01f)
             {
-                _lastPointerPosition = Input.mousePosition;
+                Zoom(-mouse.scroll.y.ReadValue() * 0.65f);
             }
 
-            if (Input.GetMouseButton(1) && !IsPointerOverUi())
+            if (mouse.rightButton.wasPressedThisFrame)
             {
-                Vector3 delta = Input.mousePosition - _lastPointerPosition;
+                _lastPointerPosition = (Vector3)mouse.position.ReadValue();
+            }
+
+            if (mouse.rightButton.isPressed && !IsPointerOverUi())
+            {
+                Vector3 delta = (Vector3)mouse.position.ReadValue() - _lastPointerPosition;
                 Pan(delta, _mousePanSpeed);
-                _lastPointerPosition = Input.mousePosition;
+                _lastPointerPosition = (Vector3)mouse.position.ReadValue();
             }
         }
 
         private void HandleTouch()
         {
-            if (Input.touchCount == 1)
+            if (GameInput.TouchCount == 1)
             {
-                Touch touch = Input.GetTouch(0);
-                if (touch.phase == TouchPhase.Began)
+                EnhancedTouch touch = GameInput.GetTouch(0);
+                if (touch.phase == UnityEngine.InputSystem.TouchPhase.Began)
                 {
-                    _lastPointerPosition = touch.position;
+                    _lastPointerPosition = touch.screenPosition;
                 }
-                else if (touch.phase == TouchPhase.Moved && !IsPointerOverUi(touch.fingerId))
+                else if (touch.phase == UnityEngine.InputSystem.TouchPhase.Moved && !IsPointerOverUi(touch.touchId))
                 {
-                    Vector3 delta = (Vector3)touch.position - _lastPointerPosition;
+                    Vector3 delta = (Vector3)touch.screenPosition - _lastPointerPosition;
                     Pan(delta, _touchPanSpeed);
-                    _lastPointerPosition = touch.position;
+                    _lastPointerPosition = touch.screenPosition;
                 }
             }
-            else if (Input.touchCount >= 2)
+            else if (GameInput.TouchCount >= 2)
             {
-                Touch a = Input.GetTouch(0);
-                Touch b = Input.GetTouch(1);
-                float distance = Vector2.Distance(a.position, b.position);
-                if (a.phase == TouchPhase.Began || b.phase == TouchPhase.Began)
+                EnhancedTouch a = GameInput.GetTouch(0);
+                EnhancedTouch b = GameInput.GetTouch(1);
+                float distance = Vector2.Distance(a.screenPosition, b.screenPosition);
+                if (a.phase == UnityEngine.InputSystem.TouchPhase.Began || b.phase == UnityEngine.InputSystem.TouchPhase.Began)
                 {
                     _lastPinchDistance = distance;
                     return;

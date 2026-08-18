@@ -1,5 +1,9 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.EnhancedTouch;
+using AL.Input;
+using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch.Touch;
 
 namespace AL.ChampionMode.Camera
 {
@@ -136,7 +140,7 @@ namespace AL.ChampionMode.Camera
             _distance = Mathf.Clamp(_distance, _minDistance, _maxDistance);
 
             // Escape key release
-            if (Input.GetKeyDown(KeyCode.Escape))
+            if (GameInput.CancelPressed())
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
@@ -145,19 +149,20 @@ namespace AL.ChampionMode.Camera
 
         private void HandleMouseInput()
         {
-            if (Input.touchCount > 0)
+            if (GameInput.TouchCount > 0)
             {
                 return;
             }
 
-            bool canOrbit = !_inspectionMode || Input.GetMouseButton(1);
+            bool canOrbit = !_inspectionMode || (Mouse.current != null && Mouse.current.rightButton.isPressed);
             if (canOrbit)
             {
-                _yaw += Input.GetAxis("Mouse X") * _mouseSensitivity;
-                _pitch -= Input.GetAxis("Mouse Y") * _mouseSensitivity;
+                Vector2 look = GameInput.ReadLook();
+                _yaw += look.x * _mouseSensitivity;
+                _pitch -= look.y * _mouseSensitivity;
             }
 
-            float wheel = Input.GetAxis("Mouse ScrollWheel");
+            float wheel = GameInput.ReadScroll();
             if (Mathf.Abs(wheel) > 0.001f)
             {
                 _distance -= wheel * _zoomSensitivity;
@@ -166,17 +171,17 @@ namespace AL.ChampionMode.Camera
 
         private void HandleTouchInput()
         {
-            if (Input.touchCount == 0)
+            if (GameInput.TouchCount == 0)
             {
                 _lastPinchDistance = -1f;
                 return;
             }
 
-            if (Input.touchCount >= 2)
+            if (GameInput.TouchCount >= 2)
             {
-                Touch first = Input.GetTouch(0);
-                Touch second = Input.GetTouch(1);
-                float pinchDistance = Vector2.Distance(first.position, second.position);
+                EnhancedTouch first = GameInput.GetTouch(0);
+                EnhancedTouch second = GameInput.GetTouch(1);
+                float pinchDistance = Vector2.Distance(first.screenPosition, second.screenPosition);
                 if (_lastPinchDistance > 0f)
                 {
                     _distance -= (pinchDistance - _lastPinchDistance) * _touchZoomSensitivity;
@@ -187,19 +192,19 @@ namespace AL.ChampionMode.Camera
             }
 
             _lastPinchDistance = -1f;
-            Touch touch = Input.GetTouch(0);
-            if (touch.phase != TouchPhase.Moved || touch.position.x < Screen.width * _touchOrbitScreenMinX || IsTouchOverUi(touch))
+            EnhancedTouch touch = GameInput.GetTouch(0);
+            if (touch.phase != UnityEngine.InputSystem.TouchPhase.Moved || touch.screenPosition.x < Screen.width * _touchOrbitScreenMinX || IsTouchOverUi(touch))
             {
                 return;
             }
 
-            _yaw += touch.deltaPosition.x * _touchOrbitSensitivity;
-            _pitch -= touch.deltaPosition.y * _touchOrbitSensitivity;
+            _yaw += touch.delta.x * _touchOrbitSensitivity;
+            _pitch -= touch.delta.y * _touchOrbitSensitivity;
         }
 
-        private static bool IsTouchOverUi(Touch touch)
+        private static bool IsTouchOverUi(EnhancedTouch touch)
         {
-            return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.fingerId);
+            return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.touchId);
         }
 
         private void LateUpdate()

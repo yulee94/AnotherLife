@@ -1,5 +1,6 @@
 using AL.ChampionMode.Control;
 using AL.Core;
+using AL.Input;
 using UnityEngine;
 
 namespace AL.ChampionMode.AI
@@ -121,11 +122,12 @@ namespace AL.ChampionMode.AI
 
         private static bool HasManualOverrideInput()
         {
-            return Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f ||
-                   Mathf.Abs(Input.GetAxis("Vertical")) > 0.1f ||
-                   Input.GetMouseButtonDown(0) ||
-                   Input.GetKeyDown(KeyCode.Space) ||
-                   Input.GetKeyDown(KeyCode.LeftShift);
+            Vector2 move = GameInput.ReadMove();
+            return Mathf.Abs(move.x) > 0.1f ||
+                   Mathf.Abs(move.y) > 0.1f ||
+                   GameInput.AttackPressed() ||
+                   GameInput.DodgePressed() ||
+                   GameInput.BlockPressed();
         }
     }
 }
