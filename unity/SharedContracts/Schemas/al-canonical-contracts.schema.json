@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-canonical-contracts.schema.json",
+  "title": "Another Life Canonical Data Contracts",
+  "description": "Machine-readable authority for the six data-contract decisions in unity/Docs/Game_Data_Contract_Decisions.md. (1) ManaShrine/Mine are rejected non-buildings; the buildings catalog contains exactly 15 lowercase IDs. (2) Warzone Credits are non-negative int32 (long is a result-envelope widening only; float/double forbidden). (3) Territory income is a whole non-negative per-minute integer (income_per_minute). (4) Eight gems, exactly two per realm, lowercase canonical IDs. (5) Realm IDs are lowercase snake_case; PascalCase/UPPERCASE are legacy aliases. (6) Chapter-1 = ch01_proof_of_worth plus ch01_<realm> variants with a C1/C1_* alias table.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "realmIds",
+    "legacyRealmNames",
+    "gemIds",
+    "buildingIds",
+    "legacyBuildingIds",
+    "warzoneCredits",
+    "territoryIncomePerMinute",
+    "chapter1Ids",
+    "legacyChapterReferences"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "realmIds": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/realmId" }
+    },
+    "legacyRealmNames": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/legacyRealmName" }
+    },
+    "gemIds": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/gemId" }
+    },
+    "buildingIds": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/buildingId" }
+    },
+    "legacyBuildingIds": {
+      "type": "array",
+      "minItems": 15,
+      "maxItems": 15,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/legacyBuildingId" }
+    },
+    "warzoneCredits": {
+      "$ref": "#/$defs/warzoneCredits"
+    },
+    "territoryIncomePerMinute": {
+      "$ref": "#/$defs/incomePerMinute"
+    },
+    "chapter1Ids": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/chapter1Id" }
+    },
+    "legacyChapterReferences": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/legacyChapterReference" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$",
+      "description": "Canonical technical ID: lowercase snake_case. No PascalCase or UPPERCASE is accepted as a canonical ID."
+    },
+    "realmId": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral"],
+      "description": "Canonical realm ID (Decision 5). Lowercase only; PascalCase/UPPERCASE are legacy aliases and reject as canonical ids."
+    },
+    "legacyRealmName": {
+      "type": "string",
+      "enum": ["Crownlands", "Stonehold", "Eldergrove", "Umbral"],
+      "description": "PascalCase RealmId enum name, retained only as a legacy alias for ordinal resolution. Not a canonical id."
+    },
+    "gemId": {
+      "type": "string",
+      "enum": [
+        "gem_crownlands_sun",
+        "gem_crownlands_oath",
+        "gem_stonehold_forge",
+        "gem_stonehold_depth",
+        "gem_eldergrove_root",
+        "gem_eldergrove_moon",
+        "gem_umbral_veil",
+        "gem_umbral_ember"
+      ],
+      "description": "Canonical gem ID (Decision 4). Exactly eight gems, two per realm."
+    },
+    "buildingId": {
+      "type": "string",
+      "enum": [
+        "town_hall",
+        "farm",
+        "lumber_mill",
+        "quarry",
+        "gold_mine",
+        "barracks",
+        "academy",
+        "market",
+        "storehouse",
+        "forge",
+        "stable",
+        "workshop",
+        "embassy",
+        "wall",
+        "watchtower"
+      ],
+      "description": "Canonical building ID (Decision 1). Exactly 15 buildings. mana_shrine and mine are NOT building IDs and are rejected."
+    },
+    "legacyBuildingId": {
+      "type": "string",
+      "enum": [
+        "TownHall",
+        "Farm",
+        "LumberMill",
+        "Quarry",
+        "GoldMine",
+        "Barracks",
+        "Academy",
+        "Market",
+        "Storehouse",
+        "Forge",
+        "Stable",
+        "Workshop",
+        "Embassy",
+        "Wall",
+        "Watchtower"
+      ],
+      "description": "Legacy PascalCase building enum name, retained only for alias resolution. Never admits ManaShrine or Mine."
+    },
+    "warzoneCredits": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "description": "Canonical Warzone Credits (Decision 2): a whole, non-negative int32. No float/double/number form is permitted. int64 is a result-envelope widening only, never a catalog currency field."
+    },
+    "incomePerMinute": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Canonical territory income (Decision 3): a whole, non-negative PER-MINUTE integer. Per-second rates are runtime-derived and never stored as authored definition data."
+    },
+    "chapter1Id": {
+      "type": "string",
+      "enum": [
+        "ch01_proof_of_worth",
+        "ch01_stonehold",
+        "ch01_eldergrove",
+        "ch01_crownlands",
+        "ch01_umbral"
+      ],
+      "description": "Canonical Chapter-1 ID (Decision 6): ch01_proof_of_worth plus the four ch01_<realm> realm variants."
+    },
+    "legacyChapterReference": {
+      "type": "string",
+      "enum": ["C1", "C1_SH", "C1_EG", "C1_CL", "C1_UM", "CH01_PROOF_OF_WORTH"],
+      "description": "Legacy Chapter-1 identifiers, retained as aliases only. C1 is a save-normalization default, not a standalone canonical chapter."
+    }
+  }
+}

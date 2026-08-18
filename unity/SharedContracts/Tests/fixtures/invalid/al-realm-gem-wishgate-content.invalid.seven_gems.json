@@ -1,0 +1,430 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_realm_gem_wishgate_content_catalog",
+  "game": "Another Life",
+  "sourcePacketId": "al_narrative_realm_gem_wishgate_source_v001",
+  "idFormat": "lowercase_snake_case",
+  "sourceAuthorities": {
+    "primaryMode": "codex_narrative_content",
+    "consumerIssue": 169,
+    "realmCatalog": "al_realm_catalog",
+    "worldAtlasCatalog": "al_world_atlas_narrative_catalog",
+    "mainQuestPacket": "ANOTHERLIFE_MAIN_QUEST_LINE",
+    "notificationCatalog": "al_notification_content_catalog"
+  },
+  "contentPolicy": {
+    "realmGemMeaning": "Realm Gems are sacred objective artifacts and custody markers. They are never permanent conquest trophies, account ownership proofs, or direct reward containers.",
+    "custodyRule": "Player-facing copy may describe temporary witnessed custody, signature synchronization, theft risk, return duty, and final restoration. Runtime custody state remains a future engineering contract.",
+    "wishgateRule": "Collecting all eight Realm Gem signatures may enable the final wish path only after future engineering validates eligibility, idempotency, save safety, notification delivery, and reward authority.",
+    "unavailableRuntimeBehavior": "requested_hook_visible_nonmutating_status",
+    "debugIdPolicy": "Technical gem, Wishgate, realm, quest, and objective IDs remain debug-only and must not replace localization-facing names in release UI.",
+    "nonGoals": [
+      "runtime save mutation",
+      "realm gem custody state machine",
+      "wish entitlement implementation",
+      "reward balances or grant values",
+      "economy mutation",
+      "notification delivery",
+      "territory ownership changes",
+      "scene loading",
+      "PvP-state enforcement",
+      "chat or trade permission changes"
+    ]
+  },
+  "realmGems": [
+    {
+      "id": "gem_crownlands_sun",
+      "realmId": "crownlands",
+      "displayNameKey": "realm_gem.gem_crownlands_sun.name",
+      "summaryKey": "realm_gem.gem_crownlands_sun.summary",
+      "custodyMeaningKey": "realm_gem.gem_crownlands_sun.custody",
+      "signatureKey": "realm_gem.gem_crownlands_sun.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    },
+    {
+      "id": "gem_crownlands_oath",
+      "realmId": "crownlands",
+      "displayNameKey": "realm_gem.gem_crownlands_oath.name",
+      "summaryKey": "realm_gem.gem_crownlands_oath.summary",
+      "custodyMeaningKey": "realm_gem.gem_crownlands_oath.custody",
+      "signatureKey": "realm_gem.gem_crownlands_oath.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    },
+    {
+      "id": "gem_stonehold_forge",
+      "realmId": "stonehold",
+      "displayNameKey": "realm_gem.gem_stonehold_forge.name",
+      "summaryKey": "realm_gem.gem_stonehold_forge.summary",
+      "custodyMeaningKey": "realm_gem.gem_stonehold_forge.custody",
+      "signatureKey": "realm_gem.gem_stonehold_forge.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    },
+    {
+      "id": "gem_stonehold_depth",
+      "realmId": "stonehold",
+      "displayNameKey": "realm_gem.gem_stonehold_depth.name",
+      "summaryKey": "realm_gem.gem_stonehold_depth.summary",
+      "custodyMeaningKey": "realm_gem.gem_stonehold_depth.custody",
+      "signatureKey": "realm_gem.gem_stonehold_depth.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    },
+    {
+      "id": "gem_eldergrove_root",
+      "realmId": "eldergrove",
+      "displayNameKey": "realm_gem.gem_eldergrove_root.name",
+      "summaryKey": "realm_gem.gem_eldergrove_root.summary",
+      "custodyMeaningKey": "realm_gem.gem_eldergrove_root.custody",
+      "signatureKey": "realm_gem.gem_eldergrove_root.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    },
+    {
+      "id": "gem_eldergrove_moon",
+      "realmId": "eldergrove",
+      "displayNameKey": "realm_gem.gem_eldergrove_moon.name",
+      "summaryKey": "realm_gem.gem_eldergrove_moon.summary",
+      "custodyMeaningKey": "realm_gem.gem_eldergrove_moon.custody",
+      "signatureKey": "realm_gem.gem_eldergrove_moon.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    },
+    {
+      "id": "gem_umbral_veil",
+      "realmId": "umbral",
+      "displayNameKey": "realm_gem.gem_umbral_veil.name",
+      "summaryKey": "realm_gem.gem_umbral_veil.summary",
+      "custodyMeaningKey": "realm_gem.gem_umbral_veil.custody",
+      "signatureKey": "realm_gem.gem_umbral_veil.signature",
+      "status": "source_ready_runtime_custody_unimplemented"
+    }
+  ],
+  "custodyStates": [
+    {
+      "id": "custody_unseen",
+      "displayNameKey": "realm_gem.custody.unseen.name",
+      "summaryKey": "realm_gem.custody.unseen.summary",
+      "runtimeMeaning": "no trusted objective record exists"
+    },
+    {
+      "id": "custody_contested",
+      "displayNameKey": "realm_gem.custody.contested.name",
+      "summaryKey": "realm_gem.custody.contested.summary",
+      "runtimeMeaning": "future objective contract may mark a gem signature as at risk or in transit"
+    },
+    {
+      "id": "custody_witnessed",
+      "displayNameKey": "realm_gem.custody.witnessed.name",
+      "summaryKey": "realm_gem.custody.witnessed.summary",
+      "runtimeMeaning": "future objective contract may mark a valid temporary custody record"
+    },
+    {
+      "id": "custody_restored",
+      "displayNameKey": "realm_gem.custody.restored.name",
+      "summaryKey": "realm_gem.custody.restored.summary",
+      "runtimeMeaning": "future objective contract may mark a gem returned to its rightful realm custodian"
+    }
+  ],
+  "wishgate": {
+    "id": "wishgate_eightfold_concordance",
+    "displayNameKey": "wishgate.eightfold_concordance.name",
+    "summaryKey": "wishgate.eightfold_concordance.summary",
+    "entryZoneId": "zone_accordant_isle",
+    "guardianDragonNameKey": "wishgate.vaeloryn.name",
+    "eligibilitySource": "all_eight_realm_gem_signatures_future_engineering_contract",
+    "defaultStatus": "requested_unavailable",
+    "rewardPolicy": "future_engineering_entitlement_contract",
+    "approvedWishEmphases": [
+      {
+        "id": "wish_emphasis_bridges",
+        "displayNameKey": "wishgate.emphasis.bridges.name",
+        "summaryKey": "wishgate.emphasis.bridges.summary",
+        "effectBoundary": "epilogue_and_cosmetic_emphasis_only_until_future_reward_contract"
+      },
+      {
+        "id": "wish_emphasis_vigil",
+        "displayNameKey": "wishgate.emphasis.vigil.name",
+        "summaryKey": "wishgate.emphasis.vigil.summary",
+        "effectBoundary": "epilogue_and_cosmetic_emphasis_only_until_future_reward_contract"
+      },
+      {
+        "id": "wish_emphasis_renewal",
+        "displayNameKey": "wishgate.emphasis.renewal.name",
+        "summaryKey": "wishgate.emphasis.renewal.summary",
+        "effectBoundary": "epilogue_and_cosmetic_emphasis_only_until_future_reward_contract"
+      }
+    ],
+    "blockedRuntimeClaims": [
+      "the Wishgate is claimable",
+      "a final wish has been consumed",
+      "a reward has been granted",
+      "a gem has been permanently captured",
+      "neutral-zone PvP, chat, or trade rules are enforced"
+    ]
+  },
+  "statusCopy": [
+    {
+      "id": "status_realm_gems_unavailable",
+      "displayNameKey": "realm_gem.status.unavailable.name",
+      "bodyKey": "realm_gem.status.unavailable.body"
+    },
+    {
+      "id": "status_wishgate_unavailable",
+      "displayNameKey": "wishgate.status.unavailable.name",
+      "bodyKey": "wishgate.status.unavailable.body"
+    },
+    {
+      "id": "status_custody_requires_contract",
+      "displayNameKey": "realm_gem.status.contract_required.name",
+      "bodyKey": "realm_gem.status.contract_required.body"
+    }
+  ],
+  "draftLocalization": [
+    {
+      "key": "realm_gem.gem_crownlands_sun.name",
+      "text": "Sun Gem"
+    },
+    {
+      "key": "realm_gem.gem_crownlands_sun.summary",
+      "text": "The Crownlands gem of public legitimacy, witnessed command, and light kept in service to the road."
+    },
+    {
+      "key": "realm_gem.gem_crownlands_sun.custody",
+      "text": "Temporary custody must be witnessed as protection, not proof that Crownlands sovereignty has been taken."
+    },
+    {
+      "key": "realm_gem.gem_crownlands_sun.signature",
+      "text": "A dawn-bright seal answers only when oath and witness agree."
+    },
+    {
+      "key": "realm_gem.gem_crownlands_oath.name",
+      "text": "Oath Gem"
+    },
+    {
+      "key": "realm_gem.gem_crownlands_oath.summary",
+      "text": "The Crownlands gem of binding service, sworn roads, and promises that become public law."
+    },
+    {
+      "key": "realm_gem.gem_crownlands_oath.custody",
+      "text": "Temporary custody carries a duty to return the oath intact after the final convergence."
+    },
+    {
+      "key": "realm_gem.gem_crownlands_oath.signature",
+      "text": "A clear vow rings through the gem when no witness is coerced."
+    },
+    {
+      "key": "realm_gem.gem_stonehold_forge.name",
+      "text": "Forge Gem"
+    },
+    {
+      "key": "realm_gem.gem_stonehold_forge.summary",
+      "text": "The Stonehold gem of made law, rune craft, and work that survives pressure."
+    },
+    {
+      "key": "realm_gem.gem_stonehold_forge.custody",
+      "text": "Temporary custody must record the clan witness and cannot claim the forge's output or vaults."
+    },
+    {
+      "key": "realm_gem.gem_stonehold_forge.signature",
+      "text": "Hammer-light holds steady when the accord is shaped without fraud."
+    },
+    {
+      "key": "realm_gem.gem_stonehold_depth.name",
+      "text": "Depth Gem"
+    },
+    {
+      "key": "realm_gem.gem_stonehold_depth.summary",
+      "text": "The Stonehold gem of ancestral endurance, deep memory, and mountain law."
+    },
+    {
+      "key": "realm_gem.gem_stonehold_depth.custody",
+      "text": "Temporary custody carries the burden of returning what the mountain remembers."
+    },
+    {
+      "key": "realm_gem.gem_stonehold_depth.signature",
+      "text": "A low rune hum marks endurance without surrender."
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_root.name",
+      "text": "Root Gem"
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_root.summary",
+      "text": "The Eldergrove gem of living memory, sanctuary vows, and paths that remember who harmed them."
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_root.custody",
+      "text": "Temporary custody must preserve the living border's consent and restore the root to its grove."
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_root.signature",
+      "text": "A green pulse answers when care is stronger than possession."
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_moon.name",
+      "text": "Moon Gem"
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_moon.summary",
+      "text": "The Eldergrove gem of quiet judgment, moonlit mercy, and old promises kept in shadowed water."
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_moon.custody",
+      "text": "Temporary custody must not turn mercy into ownership or silence Eldergrove witness."
+    },
+    {
+      "key": "realm_gem.gem_eldergrove_moon.signature",
+      "text": "Silver light settles only around voluntary judgment."
+    },
+    {
+      "key": "realm_gem.gem_umbral_veil.name",
+      "text": "Veil Gem"
+    },
+    {
+      "key": "realm_gem.gem_umbral_veil.summary",
+      "text": "The Umbral gem of secrecy preserved, hidden courts, and power that survives by choosing when to be seen."
+    },
+    {
+      "key": "realm_gem.gem_umbral_veil.custody",
+      "text": "Temporary custody must protect hidden knowledge without turning secrecy into blackmail."
+    },
+    {
+      "key": "realm_gem.gem_umbral_veil.signature",
+      "text": "A dark mirror opens only when the mask is not forced away."
+    },
+    {
+      "key": "realm_gem.gem_umbral_ember.name",
+      "text": "Ember Gem"
+    },
+    {
+      "key": "realm_gem.gem_umbral_ember.summary",
+      "text": "The Umbral gem of power kept alive under ash, patient heat, and survival after betrayal."
+    },
+    {
+      "key": "realm_gem.gem_umbral_ember.custody",
+      "text": "Temporary custody must return the ember before survival becomes another realm's weapon."
+    },
+    {
+      "key": "realm_gem.gem_umbral_ember.signature",
+      "text": "A red coal brightens when restraint holds longer than hunger."
+    },
+    {
+      "key": "realm_gem.custody.unseen.name",
+      "text": "Unseen"
+    },
+    {
+      "key": "realm_gem.custody.unseen.summary",
+      "text": "No trusted objective record has confirmed this gem's current story state."
+    },
+    {
+      "key": "realm_gem.custody.contested.name",
+      "text": "Contested"
+    },
+    {
+      "key": "realm_gem.custody.contested.summary",
+      "text": "The gem is part of an unresolved future objective and cannot be treated as safely held."
+    },
+    {
+      "key": "realm_gem.custody.witnessed.name",
+      "text": "Witnessed Custody"
+    },
+    {
+      "key": "realm_gem.custody.witnessed.summary",
+      "text": "A future contract may show the gem under temporary witnessed custody for the eightfold path."
+    },
+    {
+      "key": "realm_gem.custody.restored.name",
+      "text": "Restored"
+    },
+    {
+      "key": "realm_gem.custody.restored.summary",
+      "text": "A future contract may show the gem returned to its rightful realm custodian."
+    },
+    {
+      "key": "wishgate.eightfold_concordance.name",
+      "text": "Eightfold Concordance"
+    },
+    {
+      "key": "wishgate.eightfold_concordance.summary",
+      "text": "The Accordant Isle threshold where all eight gem signatures may be presented to Vaeloryn for a voluntary final wish."
+    },
+    {
+      "key": "wishgate.vaeloryn.name",
+      "text": "Vaeloryn"
+    },
+    {
+      "key": "wishgate.emphasis.bridges.name",
+      "text": "Bridges"
+    },
+    {
+      "key": "wishgate.emphasis.bridges.summary",
+      "text": "Ask the final wish to emphasize voluntary routes between realms while preserving each realm's identity."
+    },
+    {
+      "key": "wishgate.emphasis.vigil.name",
+      "text": "Vigil"
+    },
+    {
+      "key": "wishgate.emphasis.vigil.summary",
+      "text": "Ask the final wish to emphasize watchfulness against forced unity and future coercion."
+    },
+    {
+      "key": "wishgate.emphasis.renewal.name",
+      "text": "Renewal"
+    },
+    {
+      "key": "wishgate.emphasis.renewal.summary",
+      "text": "Ask the final wish to emphasize restoration for people and places harmed by Edras."
+    },
+    {
+      "key": "realm_gem.status.unavailable.name",
+      "text": "Realm Gem Objective Unavailable"
+    },
+    {
+      "key": "realm_gem.status.unavailable.body",
+      "text": "Realm Gem custody needs the future objective contract before it can change progress, rewards, or saves."
+    },
+    {
+      "key": "wishgate.status.unavailable.name",
+      "text": "Wishgate Unavailable"
+    },
+    {
+      "key": "wishgate.status.unavailable.body",
+      "text": "The final wish path is waiting for all eight-gem validation, reward authority, and save-safe implementation."
+    },
+    {
+      "key": "realm_gem.status.contract_required.name",
+      "text": "Contract Required"
+    },
+    {
+      "key": "realm_gem.status.contract_required.body",
+      "text": "This source names the story meaning only; runtime custody, return, theft, and claim behavior must fail closed until engineering owns the transaction."
+    }
+  ],
+  "engineeringHandoff": {
+    "consumerIssue": 169,
+    "requiredValidation": [
+      "catalog parses as JSON",
+      "catalog realmGem IDs exactly match the flattened realmGemIds in al_realm_catalog",
+      "each realmGem realmId matches its owning realm in al_realm_catalog",
+      "realmGem IDs are unique",
+      "custody state IDs are unique",
+      "wish emphasis IDs are unique",
+      "all displayNameKey, summaryKey, custodyMeaningKey, signatureKey, guardianDragonNameKey, and bodyKey references resolve in draftLocalization",
+      "Wishgate remains unavailable until eligibility, reward, notification, save, rollback, and idempotency contracts exist"
+    ],
+    "blockedRuntimeClaims": [
+      "gem earned",
+      "gem stolen",
+      "gem returned",
+      "all eight gems collected",
+      "Wishgate unlocked",
+      "wish claimed",
+      "reward granted",
+      "neutral island rules enforced"
+    ],
+    "optimizationImpact": {
+      "performance": "source-only JSON; no runtime loop, ECS entity, scene, VFX, or allocation behavior is added by this packet",
+      "memory": "bounded catalog for eight gems, four custody states, one Wishgate, and localization drafts",
+      "buildSize": "small text-only addition; no binary asset or generated media",
+      "deviceCompatibility": "no device-specific runtime requirement"
+    }
+  }
+}

@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-world-event-content.schema.json",
+  "title": "Another Life World Event Content Catalog",
+  "description": "Schema for al_world_event_content_catalog.json. Event IDs are lowercase snake_case. notificationDefinitionId MUST reference canonical al_notify_* definition IDs from al_notification_content_catalog (the current source's notification.world_event.* dotted placeholders are a known defect, inventory conflict #5, to be corrected by the data-generation task).",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "sourceAuthorities", "contentPolicy", "eventDefinitions",
+    "lifecycleStatusCopy", "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_world_event_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "sourceAuthorities": { "type": "object" },
+    "contentPolicy": { "type": "object" },
+    "eventDefinitions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/eventDefinitionRecord" }
+    },
+    "lifecycleStatusCopy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/lifecycleStatusRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "eventDefinitionRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacyEffect", "displayNameKey", "summaryKey",
+        "startMessageKey", "endMessageKey", "unavailableMessageKey",
+        "notificationDefinitionId", "narrativeIntent", "technicalEffectClaims",
+        "consumerStatus"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^world_event_[a-z][a-z0-9_]*$" },
+        "legacyEffect": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "startMessageKey": { "type": "string" },
+        "endMessageKey": { "type": "string" },
+        "unavailableMessageKey": { "type": "string" },
+        "notificationDefinitionId": {
+          "type": "string",
+          "pattern": "^al_notify_[a-z][a-z0-9_]*$"
+        },
+        "narrativeIntent": { "type": "string" },
+        "technicalEffectClaims": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "consumerStatus": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "lifecycleStatusRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "bodyKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "bodyKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
