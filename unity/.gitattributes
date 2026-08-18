@@ -39,6 +39,7 @@
 /Docs/GameDataCatalog/PhaseC/Shadow/*.json                                unity-json
 /Docs/GameDataCatalog/PhaseC/Phase_C4A_Building_Authority_Convergence.md  text eol=lf
 /Docs/Narrative/GameData/phase-c-six-family-content-map.json              unity-json
+/Docs/Narrative/GameData/stonehold-content-authoring-map.json             unity-json
 /Assets/AL/StreamingAssets/GameData/al_realm_catalog.json                 unity-json
 /Assets/AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json unity-json
 /Assets/AL/Scripts/Services/Local/LocalGameDataService.cs                  text eol=lf
