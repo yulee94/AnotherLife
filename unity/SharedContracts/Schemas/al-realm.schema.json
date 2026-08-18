@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-realm.schema.json",
+  "title": "Another Life Realm Catalog",
+  "description": "Schema for al_realm_catalog.json. Enforces Decision 5 (realm ids are lowercase snake_case; PascalCase legacyRuntimeId is an alias only) and Decision 4 (each realm has exactly two realmGemIds matching its own realm).",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "idFormat", "selectionPolicy",
+    "narrativeContinuity", "realmOrder", "realms", "localizationKeys",
+    "localizationDrafts", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_realm_catalog" },
+    "game": { "const": "Another Life" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "selectionPolicy": { "type": "object" },
+    "narrativeContinuity": { "type": "object" },
+    "realmOrder": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/realmId" }
+    },
+    "realms": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/realmRecord" }
+    },
+    "localizationKeys": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "localizationDrafts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "$ref": "#/$defs/engineeringHandoff" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "realmId": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral"],
+      "description": "Canonical realm ID (Decision 5). Lowercase only; PascalCase/UPPERCASE reject."
+    },
+    "legacyRealmName": {
+      "type": "string",
+      "enum": ["Crownlands", "Stonehold", "Eldergrove", "Umbral"],
+      "description": "PascalCase RealmId enum name retained as a legacy alias only."
+    },
+    "gemId": {
+      "type": "string",
+      "enum": [
+        "gem_crownlands_sun", "gem_crownlands_oath",
+        "gem_stonehold_forge", "gem_stonehold_depth",
+        "gem_eldergrove_root", "gem_eldergrove_moon",
+        "gem_umbral_veil", "gem_umbral_ember"
+      ]
+    },
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "engineeringHandoff": {
+      "type": "object",
+      "required": ["consumer", "parseOnLaunch", "requiredValidation", "nonGoalsForThisCatalog"],
+      "properties": {
+        "consumer": { "type": "string" },
+        "parseOnLaunch": { "type": "boolean" },
+        "requiredValidation": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "nonGoalsForThisCatalog": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "realmRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacyRuntimeId", "displayName", "peopleName", "adjective",
+        "languageId", "capitalId", "innerRealmId", "outerWarzoneId",
+        "mainGateId", "dragonId", "realmGemIds", "sigil", "palette",
+        "namingConventions", "lore", "continuityHooks", "startingHooks"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/realmId" },
+        "legacyRuntimeId": { "$ref": "#/$defs/legacyRealmName" },
+        "displayName": { "type": "string" },
+        "peopleName": { "type": "string" },
+        "adjective": { "type": "string" },
+        "languageId": { "type": "string" },
+        "capitalId": { "type": "string" },
+        "innerRealmId": { "type": "string" },
+        "outerWarzoneId": { "type": "string" },
+        "mainGateId": { "type": "string" },
+        "dragonId": { "type": "string" },
+        "realmGemIds": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/gemId" }
+        },
+        "sigil": { "type": "string" },
+        "palette": {
+          "type": "object",
+          "required": ["primary", "secondary", "accent"],
+          "properties": {
+            "primary": { "type": "string" },
+            "secondary": { "type": "string" },
+            "accent": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "namingConventions": {
+          "type": "object",
+          "required": ["characterTitles", "settlementTerms", "assetPrefix"],
+          "properties": {
+            "characterTitles": { "type": "array", "items": { "type": "string" } },
+            "settlementTerms": { "type": "array", "items": { "type": "string" } },
+            "assetPrefix": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "lore": {
+          "type": "object",
+          "required": ["summary", "identityPillars", "playerPromise"],
+          "properties": {
+            "summary": { "type": "string" },
+            "identityPillars": { "type": "array", "items": { "type": "string" } },
+            "playerPromise": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "continuityHooks": {
+          "type": "object",
+          "required": [
+            "accountIdentity", "subCharacterInheritance", "innerRealmTone",
+            "outerWarzoneMotif", "realmGemMeaning"
+          ],
+          "properties": {
+            "accountIdentity": { "type": "string" },
+            "subCharacterInheritance": { "type": "string" },
+            "innerRealmTone": { "type": "string" },
+            "outerWarzoneMotif": { "type": "string" },
+            "realmGemMeaning": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        "startingHooks": {
+          "type": "object",
+          "required": ["realmSelectionLineKey", "firstQuestArcId", "starterClassBias"],
+          "properties": {
+            "realmSelectionLineKey": { "type": "string" },
+            "firstQuestArcId": { "type": "string" },
+            "starterClassBias": { "type": "array", "items": { "type": "string" } }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "id": { "const": "crownlands" } }, "required": ["id"] },
+          "then": { "properties": { "realmGemIds": { "items": { "pattern": "^gem_crownlands_" } } } }
+        },
+        {
+          "if": { "properties": { "id": { "const": "stonehold" } }, "required": ["id"] },
+          "then": { "properties": { "realmGemIds": { "items": { "pattern": "^gem_stonehold_" } } } }
+        },
+        {
+          "if": { "properties": { "id": { "const": "eldergrove" } }, "required": ["id"] },
+          "then": { "properties": { "realmGemIds": { "items": { "pattern": "^gem_eldergrove_" } } } }
+        },
+        {
+          "if": { "properties": { "id": { "const": "umbral" } }, "required": ["id"] },
+          "then": { "properties": { "realmGemIds": { "items": { "pattern": "^gem_umbral_" } } } }
+        }
+      ]
+    }
+  }
+}

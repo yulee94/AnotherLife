@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-character-customization-content.schema.json",
+  "title": "Another Life Character Customization Content Catalog",
+  "description": "Schema for al_character_customization_content_catalog.json, the player-facing label twin of the technical al_character_customization_catalog (0.5.0). Family and option IDs are lowercase snake_case and must resolve in the technical catalog.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "authority", "localizationPolicy", "families", "forgePresets",
+    "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_character_customization_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "authority": { "type": "object" },
+    "localizationPolicy": { "type": "object" },
+    "families": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/familyRecord" }
+    },
+    "forgePresets": {
+      "type": "array",
+      "minItems": 9,
+      "maxItems": 9,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/forgePresetRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "lowercaseId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "familyRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "optionKeys"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "enum": [
+            "body_presets", "hair_styles", "armor_styles",
+            "face_marks", "weapon_styles", "offhand_styles"
+          ]
+        },
+        "displayNameKey": { "type": "string" },
+        "optionKeys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/optionKeyRecord" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "optionKeyRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey"],
+      "properties": {
+        "id": { "$ref": "#/$defs/lowercaseId" },
+        "displayNameKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "forgePresetRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey", "identityMeaning"],
+      "properties": {
+        "id": { "$ref": "#/$defs/lowercaseId" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "identityMeaning": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
