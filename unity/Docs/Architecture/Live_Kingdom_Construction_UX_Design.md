@@ -17,6 +17,17 @@ approve a mechanic. The existing Level `0`–`10` definitions, resource costs,
 durations, stable slots, save behavior, and confirmed-level presentation
 remain the only gameplay facts.
 
+> **2026-08-14 private-kingdom supersession:** The hold list and stable-slot UX
+> below describe the legacy local single-order implementation. The owner has
+> now approved, specifically for the isolated account-owned
+> `PRIVATE_KINGDOM`, a bounded unlocked-cell grid, pre-placement rotation,
+> active-construction cancellation, queue capacity `1` growing to at most `3`,
+> and authoritative Oathmark-only Rush. The canonical layout is a bottom-center
+> construction dock plus right-side selected-building inspector with at least
+> 60% clear viewport. Cosmetic workers never change duration. The complete
+> authority and migration boundary is
+> `Private_Kingdom_Save_And_State_Synchronization_Architecture.md`.
+
 ## Evidence reviewed
 
 Observed implementation and approved contracts:
@@ -37,9 +48,11 @@ The direct-spend BUILD interaction is an observed current implementation, not
 an approved final UX. The select → quote → explicit action flow below is a
 design recommendation and remains unimplemented.
 
-## Owner-approved hold boundary
+## Historical legacy-implementation hold boundary
 
-The following elements remain out of product and out of implementation:
+The following elements remain out of the legacy fixed-slot implementation.
+The private-kingdom supersession above governs its separately approved future
+product surface:
 
 - cancellation and refunds;
 - builder rosters/capacity and local or global build queues;

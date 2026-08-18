@@ -12,6 +12,16 @@
 
 This document defines how live kingdom buildings occupy stable locations, progress from an unbuilt plot through Level 10, and consume the approved four-realm construction motion system. It now also records the first gameplay-authoritative local construction transaction. Production rates, cross-building prerequisites, cancellation/refunds, network order identity, and unlisted final-model families remain outside this approval.
 
+> **2026-08-14 private-kingdom supersession:** The fixed-slot placement and
+> owner-approved hold sections below remain historical authority for the
+> current legacy local implementation only. For the account-owned
+> `PRIVATE_KINGDOM` product direction, bounded unlocked cells replace fixed
+> plots; pre-placement rotation, active-construction cancellation, queue
+> capacity `1` growing to at most `3`, and Oathmark-only Rush are approved in
+> `Private_Kingdom_Save_And_State_Synchronization_Architecture.md`. Completed
+> relocation/demolition remain gated. Guild City and Warzone Stronghold remain
+> separate namespaces and do not inherit private placement state.
+
 The proposed player-facing selection, quote, affordability, action, and result
 experience is defined separately in
 `Live_Kingdom_Construction_UX_Design.md`. That UX remains design-only until its
@@ -204,11 +214,13 @@ Quarry and Gold Mine use Wood/Stone at `40/60`; Barracks uses
 Stone/Wood/Gold at `55/30/15`. Other supported definitions already carry
 their own exact recipes for later UI exposure.
 
-### Owner-approved product hold
+### Historical legacy-implementation hold
 
-The following are explicitly held. They are not inferred, implemented, or
-shown as disabled/future controls. Reopening any item requires a separate
-owner decision:
+The following remain absent from the legacy fixed-slot local implementation.
+The 2026-08-14 private-kingdom supersession above now supplies the separate
+product authority for its approved cell-grid, rotation, cancellation, queue,
+and Oathmark-Rush features; it does not silently retrofit them into this
+legacy transaction:
 
 - cancellation or partial/full refunds after an accepted spend;
 - builder rosters/capacity, parallel-build limits, or queued orders across

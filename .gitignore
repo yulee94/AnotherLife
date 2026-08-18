@@ -13,3 +13,14 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Local AI service credentials and generated Meshy outputs.
+/.env
+/meshy_output/
+
+# Superseded/scratch archive (out of read path)
+/archive/
+
+# Git worktrees (separate checkouts; never track in main tree)
+/.codex-worktrees/
+/Unity-launch-readiness-gate/

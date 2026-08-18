@@ -6,6 +6,9 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
+using AL.VerticalSlice;
+using AL.VerticalSlice.Combat;
+using AL.Kingdom.Greybox;
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -16,6 +19,7 @@ namespace AL.Utilities
     {
         private Text _statusText;
         private Text _modeText;
+        private GreyboxCombatEncounter _championDuel;
         private readonly Dictionary<MaterialStyle, Material> _materials = new Dictionary<MaterialStyle, Material>();
         private readonly Color _gold = new Color(0.92f, 0.66f, 0.30f, 1f);
         private readonly Color _blue = new Color(0.36f, 0.58f, 0.82f, 1f);
@@ -285,8 +289,40 @@ namespace AL.Utilities
 
             CreateButton(canvasObj.transform, "BATTLE SIM", new Vector2(252, -716), RunTestBattle);
             CreateButton(canvasObj.transform, "RESET TARGETS", new Vector2(460, -716), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "CHAMPION DUEL", new Vector2(44, -770), StartChampionDuel);
+
+            // Post-combat kingdom build scene (greybox vertical slice). The build action
+            // spends combat loot (a fixed slice budget) and writes to the local run state.
+            CreateButton(canvasObj.transform, "KINGDOM BUILD", new Vector2(252, -770), () =>
+            {
+                GreyboxKingdomBuildController.Toggle();
+                SetStatus("Kingdom build scene toggled. Construct or upgrade a structure with your combat loot.");
+            });
 
             StartCoroutine(UpdateResourceText(text));
+        }
+
+        private void StartChampionDuel()
+        {
+            if (_championDuel == null)
+            {
+                var encounterObject = new GameObject("GreyboxCombatEncounter");
+                _championDuel = encounterObject.AddComponent<GreyboxCombatEncounter>();
+                _championDuel.Completed += OnChampionDuelCompleted;
+                _championDuel.ReturnRequested += OnChampionDuelReturn;
+            }
+
+            _championDuel.BeginEncounter();
+        }
+
+        private void OnChampionDuelCompleted(SliceCombatResult result)
+        {
+            SetStatus($"Champion duel {result.Outcome.ToString().ToUpperInvariant()} — {result.ChampionDisplayName} vs {result.OpponentDisplayName} in {result.TurnsTaken} turn(s).");
+        }
+
+        private void OnChampionDuelReturn()
+        {
+            SetStatus("Champion duel concluded. Command board restored.");
         }
 
         private void EnsureSaveLoaded()

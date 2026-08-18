@@ -46,10 +46,11 @@ namespace AL.Editor.Development.FirstUserGameTest
         {
             if (state == PlayModeStateChange.ExitingPlayMode)
             {
-                FirstUserGameTestTutorialSessionStore.EraseSession(
-                    SessionState.GetString(
-                        EditorGameTestModeBootstrap.SessionIdKey,
-                        string.Empty));
+                string sessionId = SessionState.GetString(
+                    EditorGameTestModeBootstrap.SessionIdKey,
+                    string.Empty);
+                FirstUserGameTestOmenSessionStore.EraseSession(sessionId);
+                FirstUserGameTestTutorialSessionStore.EraseSession(sessionId);
                 return;
             }
 
@@ -1078,6 +1079,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                     font,
                     controller,
                     tutorialStore,
+                    selection.Identity.Realm,
                     FailClosed,
                     out tutorialPresenter,
                     out tutorialMessage))
