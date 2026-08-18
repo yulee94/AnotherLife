@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "documentKind": "anotherlife.collaborator-asset-coverage-audit.v1",
+  "status": "PASS_COMPLETE_LOCAL_VISUAL_INVENTORY_CATEGORIZATION",
+  "auditedDate": "2026-08-17",
+  "sourceRootDisclosure": "LOCAL_MESHY_OUTPUT_ROOT_OMITTED_FROM_PUBLIC_CONTRACT",
+  "totalLocalModelFiles": 144,
+  "totalLocalImageFiles": 657,
+  "coveredSourcePathCount": 956,
+  "uniquePublishedHashCount": 764,
+  "uncoveredModelFileCount": 0,
+  "uncoveredImageFileCount": 0,
+  "duplicateModelHashCount": 1,
+  "newCategoryReleaseCount": 9,
+  "newReleaseFileCount": 38,
+  "newReleaseBytes": 2967576113,
+  "newPackageCount": 21,
+  "newDirectAssetCount": 8,
+  "existingAssetReferenceCount": 18,
+  "archiveValidation": {
+    "zipArchiveCount": 21,
+    "zipArchivesPassingSevenZipTest": 21,
+    "invalidZipArchiveCount": 0,
+    "categoryManifestCount": 9,
+    "categoryManifestsParsing": 9,
+    "forbiddenArchiveNameMatchCount": 0,
+    "credentialPatternMatchCount": 0
+  },
+  "exclusions": [
+    "environment and credential files",
+    "provider request and response payloads",
+    "provider execution locks",
+    "temporary logs",
+    "incomplete downloads",
+    "exact duplicate binaries already published on GitHub"
+  ],
+  "coverageMeaning": "Every model and review image found under the audited local visual-output root is either carried by one separated release artifact or represented by an exact-hash reference to the prior retained release. Coverage does not mean creative, runtime, rights, or release approval.",
+  "categoryReleaseTags": [
+    "collab-assets-terrestrial-2d-2026-08-17-v001",
+    "collab-assets-terrestrial-3d-2026-08-17-v001",
+    "collab-assets-kingdom-2d-25d-2026-08-17-v001",
+    "collab-assets-realm-architecture-3d-2026-08-17-v001",
+    "collab-assets-worldkit-3d-2026-08-17-v001",
+    "collab-assets-champion-3d-2026-08-17-v001",
+    "collab-assets-realm-dragons-3d-2026-08-17-v001",
+    "collab-assets-equipment-3d-2026-08-17-v001",
+    "collab-assets-first-user-planning-2026-08-17-v001"
+  ]
+}
