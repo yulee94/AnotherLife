@@ -80,7 +80,7 @@ public class MeshyBridgeWindow : EditorWindow
 		if (IsRunning) GUI.backgroundColor = new Color(0.4f, 0.6f, 1.0f);
 		GUIContent currentContent = IsRunning ? stopButtonContent : runButtonContent;
 		if (GUILayout.Button(currentContent, buttonStyle)) ToggleBridgeState();
-		GUI.backgroundColor = originalColor; 
+		GUI.backgroundColor = originalColor;
 		GUILayout.Space(5);
 		_standOnGround = EditorGUILayout.Toggle(new GUIContent("Stand on Ground", "If enabled, imported models will be placed on the Y=0 plane."), _standOnGround);
 		EditorGUILayout.EndVertical();
@@ -629,7 +629,7 @@ public class MeshyBridgeWindow : EditorWindow
 	{
 		Renderer renderer = obj.GetComponent<Renderer>();
 		if (renderer == null || renderer.sharedMaterials.Any(m => m != null)) return;
-	
+
 		RenderPipeline pipeline = GetActiveRenderPipeline();
 		Shader shader;
 		switch (pipeline)
@@ -644,15 +644,15 @@ public class MeshyBridgeWindow : EditorWindow
 				shader = Shader.Find("Standard");
 				break;
 		}
-	
+
 		if (shader == null)
 		{
 			Debug.LogWarning("[Meshy Bridge] Could not find a default shader for the current render pipeline. Falling back to Standard.");
 			shader = Shader.Find("Standard");
 		}
-	
+
 		Material material = new(shader) { name = "Meshy_Material" };
-	
+
 		if (renderer.sharedMaterials.Length == 0)
 			renderer.sharedMaterial = material;
 		else
@@ -668,11 +668,11 @@ public class MeshyBridgeWindow : EditorWindow
 	static void ProcessZipFile(MeshTransfer transfer)
 	{
 		string extractPath = Path.Combine(_tempCachePath, "extracted");
-		
+
 		// Clean up existing extraction directory if it exists
 		if (Directory.Exists(extractPath))
 			Directory.Delete(extractPath, true);
-			
+
 		ZipFile.ExtractToDirectory(transfer.path, extractPath);
 
 		foreach (string file in Directory.GetFiles(extractPath, "*.glb", SearchOption.AllDirectories))
@@ -844,7 +844,7 @@ public class MeshyBridgeWindow : EditorWindow
 	{
 		RenderPipeline pipeline = GetActiveRenderPipeline();
 		Renderer[] renderers = fbxObject.GetComponentsInChildren<Renderer>();
-		
+
 		foreach (Renderer renderer in renderers)
 		{
 			Material[] sharedMaterials = renderer.sharedMaterials;
@@ -852,7 +852,7 @@ public class MeshyBridgeWindow : EditorWindow
 			for (int i = 0; i < sharedMaterials.Length; i++)
 			{
 				Material originalMaterial = sharedMaterials[i];
-				if (originalMaterial == null) 
+				if (originalMaterial == null)
 				{
 					newMaterials[i] = null;
 					continue;
@@ -893,7 +893,7 @@ public class MeshyBridgeWindow : EditorWindow
 						material.SetFloat("_BumpScale", 0.5f);
 					// Also fix existing normal map texture type if already assigned
 					EnsureNormalMapTextureType(material, "_BumpMap");
-					
+
 					CheckAndAssignTexture(material, "_MetallicGlossMap", modelDir, "metallic", "Metallic");
 					CheckAndAssignTexture(material, "_OcclusionMap", modelDir, "occlusion", "AO", "ambient_occlusion");
 					CheckAndAssignTexture(material, "_EmissionMap", modelDir, "emission", "Emissive");
@@ -906,7 +906,7 @@ public class MeshyBridgeWindow : EditorWindow
 					CheckAndAssignTexture(material, "_NormalMap", modelDir, "normal", "Normal");
 					// Also fix existing normal map texture type if already assigned
 					EnsureNormalMapTextureType(material, "_NormalMap");
-					
+
 					CheckAndAssignTexture(material, "_EmissiveColorMap", modelDir, "emission", "Emissive");
 				}
 				else
@@ -914,7 +914,7 @@ public class MeshyBridgeWindow : EditorWindow
 					CheckAndAssignTexture(material, "_BumpMap", modelDir, "normal", "Normal");
 					// Also fix existing normal map texture type if already assigned
 					EnsureNormalMapTextureType(material, "_BumpMap");
-					
+
 					CheckAndAssignTexture(material, "_MetallicGlossMap", modelDir, "metallic", "Metallic");
 					CheckAndAssignTexture(material, "_OcclusionMap", modelDir, "occlusion", "AO", "ambient_occlusion");
 					CheckAndAssignTexture(material, "_EmissionMap", modelDir, "emission", "Emissive");
@@ -1383,7 +1383,7 @@ public class MeshyBridgeWindow : EditorWindow
 	static void EnsureNormalMapTextureType(Material material, string propertyName)
 	{
 		if (!material.HasProperty(propertyName)) return;
-		
+
 		Texture texture = material.GetTexture(propertyName);
 		if (texture == null) return;
 
@@ -1451,7 +1451,7 @@ public class MeshyBridgeWindow : EditorWindow
 			Debug.LogError($"Error cleaning up: {e.Message}");
 		}
 	}
-	
+
 	static void CreateAnimatorControllerForMultipleClips(GameObject sceneObject, string modelPath)
 	{
 		AnimationClip[] clips = AssetDatabase.LoadAllAssetsAtPath(modelPath).OfType<AnimationClip>().ToArray();
@@ -1476,7 +1476,7 @@ public class MeshyBridgeWindow : EditorWindow
 
 		Debug.Log($"[Meshy Bridge] Created AnimatorController with {clips.Length} animation clips");
 	}
-	
+
 	public static RenderPipeline GetActiveRenderPipeline()
 	{
 		if (GraphicsSettings.currentRenderPipeline == null)
@@ -1486,7 +1486,7 @@ public class MeshyBridgeWindow : EditorWindow
 
 		if (pipelineAssetName.Contains("UniversalRenderPipelineAsset"))
 			return RenderPipeline.URP;
-            
+
 		if (pipelineAssetName.Contains("HDRenderPipelineAsset"))
 			return RenderPipeline.HDRP;
 
