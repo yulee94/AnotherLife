@@ -14,12 +14,14 @@ namespace AL.Services.Local
         private Dictionary<RealmId, RealmDefinition> _realms = new Dictionary<RealmId, RealmDefinition>();
         private Dictionary<string, BuildingDefinition> _buildings = new Dictionary<string, BuildingDefinition>();
         private Dictionary<string, ResearchState> _researchDefaults = new Dictionary<string, ResearchState>();
+        private Dictionary<string, ChampionDefinition> _champions = new Dictionary<string, ChampionDefinition>();
 
         public LocalGameDataService()
         {
             InitializeFallbackData();
             InitializeAutomatedContent();
             InitializeStoryData();
+            InitializeChampionArchetypes();
         }
 
         private void InitializeFallbackData()
@@ -51,6 +53,88 @@ namespace AL.Services.Local
             {
                 _researchDefaults[tech] = new ResearchState { ResearchId = tech, Level = 0 };
             }
+        }
+
+        private void InitializeChampionArchetypes()
+        {
+            // Greybox champion archetypes (hardcoded, one per class family, realm-aligned).
+            // These are the "hardcoded LocalGameDataService archetypes" the character creation
+            // screen surfaces. IDs are lowercase snake_case per the data-ID convention.
+            AddChampion(
+                "champion_stonehold_vanguard",
+                "Bronn Ironhide",
+                RealmId.Stonehold,
+                ClassFamily.Warrior,
+                SubclassId.Vanguard,
+                new ChampionBaseStats { MaxHealth = 1250, MaxMana = 80, Attack = 55, Defense = 45, Speed = 8, CritRate = 5 },
+                "greataxe", "towershield",
+                new[] { ("skill_iron_bulwark", "Iron Bulwark", SkillTargetType.Self), ("skill_shield_slam", "Shield Slam", SkillTargetType.Single) });
+
+            AddChampion(
+                "champion_eldergrove_archmage",
+                "Lyra Moonshadow",
+                RealmId.Eldergrove,
+                ClassFamily.Mage,
+                SubclassId.Archmage,
+                new ChampionBaseStats { MaxHealth = 820, MaxMana = 150, Attack = 78, Defense = 18, Speed = 10, CritRate = 8 },
+                "staff", "tome",
+                new[] { ("skill_arcane_bolt", "Arcane Bolt", SkillTargetType.Single), ("skill_verdant_nova", "Verdant Nova", SkillTargetType.AoE) });
+
+            AddChampion(
+                "champion_crownlands_sharpshooter",
+                "Aurelia Dawnblade",
+                RealmId.Crownlands,
+                ClassFamily.Ranger,
+                SubclassId.Sharpshooter,
+                new ChampionBaseStats { MaxHealth = 900, MaxMana = 110, Attack = 62, Defense = 26, Speed = 15, CritRate = 20 },
+                "longbow", "quiver",
+                new[] { ("skill_piercing_shot", "Piercing Shot", SkillTargetType.Single), ("skill_hawk_eye", "Hawk Eye", SkillTargetType.Self) });
+
+            AddChampion(
+                "champion_umbral_shadowblade",
+                "Vex Nocturne",
+                RealmId.Umbral,
+                ClassFamily.Assassin,
+                SubclassId.Shadowblade,
+                new ChampionBaseStats { MaxHealth = 850, MaxMana = 100, Attack = 72, Defense = 16, Speed = 22, CritRate = 30 },
+                "twinblades", "shroud",
+                new[] { ("skill_shadowstep", "Shadowstep", SkillTargetType.Self), ("skill_umbral_execute", "Umbral Execute", SkillTargetType.Single) });
+        }
+
+        private void AddChampion(
+            string id,
+            string displayName,
+            RealmId realm,
+            ClassFamily family,
+            SubclassId subclass,
+            ChampionBaseStats baseStats,
+            string weaponStyleId,
+            string offhandStyleId,
+            (string Id, string DisplayName, SkillTargetType TargetType)[] skills)
+        {
+            var champion = ScriptableObject.CreateInstance<ChampionDefinition>();
+            champion.Id = id;
+            champion.DisplayName = displayName;
+            champion.Realm = realm;
+            champion.Family = family;
+            champion.Subclass = subclass;
+            champion.BaseStats = baseStats;
+            champion.WeaponStyleId = weaponStyleId;
+            champion.OffhandStyleId = offhandStyleId;
+
+            champion.BaseSkills = new SkillDefinition[skills.Length];
+            for (int i = 0; i < skills.Length; i++)
+            {
+                var skill = ScriptableObject.CreateInstance<SkillDefinition>();
+                skill.Id = skills[i].Id;
+                skill.DisplayName = skills[i].DisplayName;
+                skill.TargetType = skills[i].TargetType;
+                skill.Cooldown = 6f;
+                skill.Power = 1f;
+                champion.BaseSkills[i] = skill;
+            }
+
+            _champions[id] = champion;
         }
 
         private void InitializeStoryData()
@@ -335,7 +419,9 @@ namespace AL.Services.Local
         public IEnumerable<RealmDefinition> GetAllRealms() => _realms.Values;
         public BuildingDefinition GetBuilding(string id) => _buildings.TryGetValue(id, out var b) ? b : null;
         public TroopDefinition GetTroop(string id) => null; // To be implemented
-        public ChampionDefinition GetChampion(string id) => null; // To be implemented
+        public ChampionDefinition GetChampion(string id) =>
+            string.IsNullOrEmpty(id) || !_champions.TryGetValue(id, out var c) ? null : c;
+        public IEnumerable<ChampionDefinition> GetAllChampions() => _champions.Values;
         public SkillDefinition GetSkill(string id) => null; // To be implemented
     }
 }

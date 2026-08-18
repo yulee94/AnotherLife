@@ -11,7 +11,36 @@ from pathlib import Path
 from typing import Any
 
 PACKET_VERSION = "anotherlife-main-quest-line-2026-07-23-v001"
-OMEN_1_PACKET_VERSION = "omen1-a1-2026-07-29-v003"
+OMEN_1_PACKET_VERSION = "omen1-a1-2026-08-13-v004"
+BLOCKED_COPY_STATUS = "UNAPPROVED_COPY_BLOCKED"
+C1_OBJECTIVE_IDS = [
+    "OBJ_C1_MEET_REALM_GUIDE",
+    "OBJ_C1_RESTORE_COVENANT",
+    "OBJ_C1_FACE_GUARDIAN",
+    "OBJ_C1_ACCEPT_MARK",
+    "OBJ_C1_RECEIVE_LORD_APPOINTMENT",
+    "OBJ_C1_RECEIVE_KINGDOM_GRANT",
+    "OBJ_C1_REVIEW_KINGDOM_MANAGEMENT",
+    "OBJ_C1_ENTER_KINGDOM_MANAGEMENT",
+    "OBJ_C1_RETURN_TO_CHARACTER_MODE",
+]
+C1_BLOCKED_OBJECTIVE_KEYS = [
+    ("OBJ_C1_RECEIVE_LORD_APPOINTMENT", "objective.obj_c1_receive_lord_appointment"),
+    ("OBJ_C1_RECEIVE_KINGDOM_GRANT", "objective.obj_c1_receive_kingdom_grant"),
+    ("OBJ_C1_REVIEW_KINGDOM_MANAGEMENT", "objective.obj_c1_review_kingdom_management"),
+    ("OBJ_C1_ENTER_KINGDOM_MANAGEMENT", "objective.obj_c1_enter_kingdom_management"),
+    ("OBJ_C1_RETURN_TO_CHARACTER_MODE", "objective.obj_c1_return_to_character_mode"),
+]
+C1_BLOCKED_LOCALIZATION_KEYS = {key for _, key in C1_BLOCKED_OBJECTIVE_KEYS}
+C1_HANDOFFS = [
+    "HOOK_REALM_GUARDIAN_TRIAL",
+    "EVENT_REALM_COVENANT_RESTORED",
+    "EVENT_LORD_APPOINTMENT_COMMITTED",
+    "EVENT_KINGDOM_GRANT_COMMITTED",
+    "EVENT_KINGDOM_MANAGEMENT_UNLOCK_COMMITTED",
+    "ACTION_ENTER_KINGDOM_MANAGEMENT",
+    "ACTION_RETURN_TO_CHARACTER_MODE",
+]
 REALMS = {"CROWNLANDS", "STONEHOLD", "ELDERGROVE", "UMBRAL"}
 VARIANT_QUESTS = {
     "MQ_C1_PROOF_OF_WORTH",
@@ -89,11 +118,20 @@ def unique(values: list[str], context: str) -> None:
 
 
 def add_localized(authority: dict[str, str], localized: dict[str, Any], context: str) -> None:
-    require(set(localized) == {"key", "text"}, f"{context} has invalid localized shape")
+    shape = set(localized)
+    require(
+        shape in ({"key", "text"}, {"key", "copyStatus"}),
+        f"{context} has invalid localized shape",
+    )
     key = nonblank(localized["key"], f"{context} key")
-    text = nonblank(localized["text"], f"{context} text")
+    if shape == {"key", "text"}:
+        value = nonblank(localized["text"], f"{context} text")
+    else:
+        require(key in C1_BLOCKED_LOCALIZATION_KEYS, f"unauthorized copy-blocked key: {key}")
+        require(localized["copyStatus"] == BLOCKED_COPY_STATUS, f"{context} copy status drift")
+        value = BLOCKED_COPY_STATUS
     require(key not in authority, f"duplicate localization authority: {key}")
-    authority[key] = text
+    authority[key] = value
 
 
 def load_packet_set(manifest_path: Path) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -105,8 +143,9 @@ def load_packet_set(manifest_path: Path) -> tuple[dict[str, Any], list[dict[str,
         component_path = repo_root / meta["path"]
         require(component_path.is_file(), f"missing component: {meta['path']}")
         raw = component_path.read_bytes()
+        hash_bytes = raw.replace(b"\r\n", b"\n")
         require(
-            hashlib.sha256(raw).hexdigest() == meta["sha256"],
+            hashlib.sha256(hash_bytes).hexdigest() == meta["sha256"],
             f"component hash mismatch: {meta['path']}",
         )
         component = json.loads(raw.decode("utf-8"))
@@ -249,6 +288,27 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
             require(previous["unlocks"] == main["id"], f"main chain unlock drift: {previous['id']}")
     require(main_quests[-1]["unlocks"] is None, "final quest unlock drift")
 
+    c1 = chapter_by_id["CH01_PROOF_OF_WORTH"]["mainQuest"]
+    require(c1["prerequisites"] == ["OMEN_1"], "C1 prerequisite drift")
+    require(c1["unlocks"] == "MQ_C2_BORDER_OATHS", "C1 unlock drift")
+    require([item["id"] for item in c1["objectives"]] == C1_OBJECTIVE_IDS, "C1 objective order drift")
+    require(
+        [(item["id"], item["text"]["key"]) for item in c1["objectives"][4:]]
+        == C1_BLOCKED_OBJECTIVE_KEYS,
+        "C1 copy-blocked objective key/order drift",
+    )
+    require(c1["handoffs"] == C1_HANDOFFS, "C1 handoff drift")
+    require(
+        c1["summary"]["text"]
+        == "Restore a failing realm covenant, face the realm guardian, and earn the right to lead.",
+        "C1 appointment-order summary drift",
+    )
+    require(
+        c1["completionOutcome"]
+        == "After proof of worth, the realm formally appoints the champion as Lord, grants one kingdom, and unlocks the bounded Kingdom Management introduction and shared-menu round trip without replacing the later strategic chapter.",
+        "C1 completion outcome drift",
+    )
+
     for main in main_quests:
         realms = {v["realmId"] for v in main.get("realmVariants", [])}
         if main["id"] in VARIANT_QUESTS:
@@ -259,7 +319,7 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
 
     unique(objectives, "objective IDs")
     unique(legacy_refs, "legacy chapter references")
-    require(len(objectives) == 153, "objective count drift")
+    require(len(objectives) == 158, "objective count drift")
     require(len(legacy_refs) == 29, "legacy reference count drift")
     require(set(MILESTONES).issubset(covered_milestones), "product milestone coverage incomplete")
 
@@ -297,7 +357,12 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
             f"wish mechanics drift: {option['id']}",
         )
     require(all(ending["canonicalInvariants"].values()), "ending invariant drift")
-    require(len(localization) == 410, "localization authority count drift")
+    require(len(localization) == 415, "localization authority count drift")
+    require(
+        {key for key, value in localization.items() if value == BLOCKED_COPY_STATUS}
+        == C1_BLOCKED_LOCALIZATION_KEYS,
+        "copy-blocked localization inventory drift",
+    )
 
     require(chapter_by_id["CH08_GATE_UNSEALED"]["order"] < chapter_by_id["CH12_EIGHT_LIGHTS"]["order"], "gate order drift")
     require(chapter_by_id["CH12_EIGHT_LIGHTS"]["order"] < chapter_by_id["CH13_ACCORDANT_ISLE"]["order"], "isle order drift")
@@ -311,6 +376,7 @@ def validate_model(manifest: dict[str, Any], chapters: list[dict[str, Any]]) -> 
         "objectives": len(objectives),
         "realmGems": len(gems),
         "localizationAuthorities": len(localization),
+        "copyBlockedAuthorities": sum(value == BLOCKED_COPY_STATUS for value in localization.values()),
     }
 
 
@@ -329,6 +395,12 @@ def run_negative_fixtures(manifest: dict[str, Any], chapters: list[dict[str, Any
         ("ending invariant false", lambda m, c: m["ending"]["canonicalInvariants"].__setitem__("allEightGemsReturned", False)),
         ("realm variant removed", lambda m, c: c[1]["mainQuest"].__setitem__("realmVariants", c[1]["mainQuest"]["realmVariants"][:3])),
         ("main chain broken", lambda m, c: c[1]["mainQuest"].__setitem__("prerequisites", ["MISSING"])),
+        ("OMEN authority version drift", lambda m, c: m["authorities"]["prologueQuest"].__setitem__("packetVersion", "omen1-a1-2026-07-29-v003")),
+        ("C1 objective order drift", lambda m, c: c[1]["mainQuest"]["objectives"].reverse()),
+        ("C1 copy status approved without copy", lambda m, c: c[1]["mainQuest"]["objectives"][4]["text"].__setitem__("copyStatus", "APPROVED")),
+        ("C1 blocked objective gains text", lambda m, c: c[1]["mainQuest"]["objectives"][4]["text"].__setitem__("text", "Unauthorized copy")),
+        ("C1 Kingdom handoff removed", lambda m, c: c[1]["mainQuest"].__setitem__("handoffs", c[1]["mainQuest"]["handoffs"][:-1])),
+        ("C1 pre-appointment summary restored", lambda m, c: c[1]["mainQuest"]["summary"].__setitem__("text", "Restore a failing realm covenant, face the realm guardian, and earn the right to lead beyond ceremonial title.")),
     ]
     for name, mutate in cases:
         manifest_copy = copy.deepcopy(manifest)

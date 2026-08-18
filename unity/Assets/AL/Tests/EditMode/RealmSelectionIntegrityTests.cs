@@ -228,6 +228,8 @@ namespace AL.Tests.EditMode
             public BuildingDefinition GetBuilding(string id) => null;
             public TroopDefinition GetTroop(string id) => null;
             public ChampionDefinition GetChampion(string id) => null;
+            public IEnumerable<ChampionDefinition> GetAllChampions() =>
+                System.Linq.Enumerable.Empty<ChampionDefinition>();
             public SkillDefinition GetSkill(string id) => null;
         }
 

@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-notification-production.schema.json",
+  "title": "Another Life Notification Production Catalog",
+  "description": "Schema for al_notification_production_catalog.json, the production registry that pins the notification content source by byteLength and sha256 and declares required/blocked requirements. Uses an integer schemaVersion (distinct from the semver 'version' envelope used by the content catalogs).",
+  "type": "object",
+  "required": [
+    "schemaVersion", "catalogId", "authority", "source",
+    "requiredDefinitionIds", "entries", "blockedRequirements", "resolutionPolicy"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "integer", "const": 1 },
+    "catalogId": { "const": "al_notification_production_catalog" },
+    "authority": { "const": "production_notification_source_of_truth" },
+    "source": { "$ref": "#/$defs/sourcePin" },
+    "requiredDefinitionIds": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/notificationId" }
+    },
+    "entries": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/entryRecord" }
+    },
+    "blockedRequirements": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/blockedRequirementRecord" }
+    },
+    "resolutionPolicy": { "$ref": "#/$defs/resolutionPolicy" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "notificationId": {
+      "type": "string",
+      "pattern": "^al_notify_[a-z][a-z0-9_]*$"
+    },
+    "sourceId": {
+      "type": "string",
+      "enum": [
+        "al_source_save", "al_source_boss_loot", "al_source_world_state",
+        "al_source_nvs", "al_source_bridge", "al_source_catalog"
+      ]
+    },
+    "sourcePin": {
+      "type": "object",
+      "required": [
+        "path", "catalogId", "version", "sourcePacketId", "byteLength", "sha256"
+      ],
+      "properties": {
+        "path": { "type": "string" },
+        "catalogId": { "const": "al_notification_content_catalog" },
+        "version": { "type": "string" },
+        "sourcePacketId": { "type": "string" },
+        "byteLength": { "type": "integer", "minimum": 0 },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      },
+      "additionalProperties": false
+    },
+    "entryRecord": {
+      "type": "object",
+      "required": ["id", "sourceId", "consumers", "availability"],
+      "properties": {
+        "id": { "$ref": "#/$defs/notificationId" },
+        "sourceId": { "$ref": "#/$defs/sourceId" },
+        "consumers": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "availability": { "type": "string", "enum": ["available"] }
+      },
+      "additionalProperties": false
+    },
+    "blockedRequirementRecord": {
+      "type": "object",
+      "required": [
+        "requirementId", "consumers", "dependencies", "reason", "requiredBeforeActivation"
+      ],
+      "properties": {
+        "requirementId": { "type": "string" },
+        "consumers": { "type": "array", "items": { "type": "string" } },
+        "dependencies": { "type": "array", "items": { "type": "string" } },
+        "reason": { "type": "string" },
+        "requiredBeforeActivation": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "resolutionPolicy": {
+      "type": "object",
+      "required": [
+        "unknownId", "missingSource", "sourceIdentityMismatch",
+        "blockedRequirement", "fallbackContent"
+      ],
+      "properties": {
+        "unknownId": { "type": "string", "enum": ["explicit_failure"] },
+        "missingSource": { "type": "string", "enum": ["explicit_failure"] },
+        "sourceIdentityMismatch": { "type": "string", "enum": ["explicit_failure"] },
+        "blockedRequirement": { "type": "string", "enum": ["explicit_failure"] },
+        "fallbackContent": { "type": "string", "enum": ["prohibited"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}
