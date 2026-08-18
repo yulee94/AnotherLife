@@ -2,7 +2,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using AL.Battle.Computation;
 using AL.Battle.Contracts;
 using NUnit.Framework;
 using UnityEngine;
@@ -89,7 +88,7 @@ namespace AL.Tests.EditMode.Battle
         }
 
         [Test]
-        public void PureComputationIsDormantAndLegacySimulatorOwnsNoReferenceToIt()
+        public void LegacyFloatSimulatorIsRemovedAndBootloaderRegistersFixedPointAdapter()
         {
             string legacyPath = Path.Combine(
                 Application.dataPath,
@@ -98,10 +97,14 @@ namespace AL.Tests.EditMode.Battle
                 Application.dataPath,
                 "AL/Scripts/Core/Bootloader.cs");
 
-            Assert.That(File.ReadAllText(legacyPath),
-                Does.Not.Contain(nameof(DeterministicBattleComputation)));
-            Assert.That(File.ReadAllText(bootloaderPath),
-                Does.Not.Contain(nameof(DeterministicBattleComputation)));
+            Assert.That(File.Exists(legacyPath), Is.False,
+                "The retired float simulator must not remain in the read path.");
+            Assert.That(
+                File.ReadAllText(bootloaderPath),
+                Does.Contain("FixedPointBattleSimulator"));
+            Assert.That(
+                File.ReadAllText(bootloaderPath),
+                Does.Not.Contain("System.Random"));
         }
     }
 }

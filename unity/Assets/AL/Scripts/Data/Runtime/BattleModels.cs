@@ -44,6 +44,9 @@ namespace AL.Data.Runtime
         public string RealmPerkContribution;
         public string TerrainContribution;
         public string Summary;
+        // Populated by the deterministic fixed-point engine adapter; empty when
+        // computation failed validation. Enables exact determinism verification.
+        public string ComputationSha256;
     }
 
     [Serializable]
