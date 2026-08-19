@@ -7,127 +7,127 @@
   "sourceRevision": "t_d4892ee5",
   "records": [
     {
-      "id": "character_slot.BodyPreset",
+      "id": "character_slot_body_preset",
       "kind": "character_slot",
       "legacy_id": "BodyPreset",
       "slot": "BodyPreset"
     },
     {
-      "id": "character_slot.Head",
+      "id": "character_slot_head",
       "kind": "character_slot",
       "legacy_id": "Head",
       "slot": "Head"
     },
     {
-      "id": "character_slot.Hair",
+      "id": "character_slot_hair",
       "kind": "character_slot",
       "legacy_id": "Hair",
       "slot": "Hair"
     },
     {
-      "id": "character_slot.Ears",
+      "id": "character_slot_ears",
       "kind": "character_slot",
       "legacy_id": "Ears",
       "slot": "Ears"
     },
     {
-      "id": "character_slot.Brows",
+      "id": "character_slot_brows",
       "kind": "character_slot",
       "legacy_id": "Brows",
       "slot": "Brows"
     },
     {
-      "id": "character_slot.Eyes",
+      "id": "character_slot_eyes",
       "kind": "character_slot",
       "legacy_id": "Eyes",
       "slot": "Eyes"
     },
     {
-      "id": "character_slot.Skin",
+      "id": "character_slot_skin",
       "kind": "character_slot",
       "legacy_id": "Skin",
       "slot": "Skin"
     },
     {
-      "id": "character_slot.ArmorChest",
+      "id": "character_slot_armor_chest",
       "kind": "character_slot",
       "legacy_id": "ArmorChest",
       "slot": "ArmorChest"
     },
     {
-      "id": "character_slot.ArmorTrim",
+      "id": "character_slot_armor_trim",
       "kind": "character_slot",
       "legacy_id": "ArmorTrim",
       "slot": "ArmorTrim"
     },
     {
-      "id": "character_slot.Belt",
+      "id": "character_slot_belt",
       "kind": "character_slot",
       "legacy_id": "Belt",
       "slot": "Belt"
     },
     {
-      "id": "character_slot.Robe",
+      "id": "character_slot_robe",
       "kind": "character_slot",
       "legacy_id": "Robe",
       "slot": "Robe"
     },
     {
-      "id": "character_slot.Hood",
+      "id": "character_slot_hood",
       "kind": "character_slot",
       "legacy_id": "Hood",
       "slot": "Hood"
     },
     {
-      "id": "character_slot.Gloves",
+      "id": "character_slot_gloves",
       "kind": "character_slot",
       "legacy_id": "Gloves",
       "slot": "Gloves"
     },
     {
-      "id": "character_slot.Boots",
+      "id": "character_slot_boots",
       "kind": "character_slot",
       "legacy_id": "Boots",
       "slot": "Boots"
     },
     {
-      "id": "character_slot.Cape",
+      "id": "character_slot_cape",
       "kind": "character_slot",
       "legacy_id": "Cape",
       "slot": "Cape"
     },
     {
-      "id": "character_slot.WeaponMain",
+      "id": "character_slot_weapon_main",
       "kind": "character_slot",
       "legacy_id": "WeaponMain",
       "slot": "WeaponMain"
     },
     {
-      "id": "character_slot.WeaponOff",
+      "id": "character_slot_weapon_off",
       "kind": "character_slot",
       "legacy_id": "WeaponOff",
       "slot": "WeaponOff"
     },
     {
-      "id": "character_slot.BackAttachment",
+      "id": "character_slot_back_attachment",
       "kind": "character_slot",
       "legacy_id": "BackAttachment",
       "slot": "BackAttachment"
     },
     {
-      "id": "character_slot.PetAnchor",
+      "id": "character_slot_pet_anchor",
       "kind": "character_slot",
       "legacy_id": "PetAnchor",
       "slot": "PetAnchor"
     },
     {
-      "id": "character_slot.MountAnchor",
+      "id": "character_slot_mount_anchor",
       "kind": "character_slot",
       "legacy_id": "MountAnchor",
       "slot": "MountAnchor"
     },
     {
-      "id": "body_preset.average",
+      "id": "body_preset_average",
       "kind": "body_preset",
       "legacy_id": "average",
       "display_name": "Average",
@@ -138,7 +138,7 @@
       ]
     },
     {
-      "id": "body_preset.slim",
+      "id": "body_preset_slim",
       "kind": "body_preset",
       "legacy_id": "slim",
       "display_name": "Slim",
@@ -149,7 +149,7 @@
       ]
     },
     {
-      "id": "body_preset.broad",
+      "id": "body_preset_broad",
       "kind": "body_preset",
       "legacy_id": "broad",
       "display_name": "Broad",
@@ -160,7 +160,7 @@
       ]
     },
     {
-      "id": "body_preset.tall",
+      "id": "body_preset_tall",
       "kind": "body_preset",
       "legacy_id": "tall",
       "display_name": "Tall",
@@ -171,7 +171,7 @@
       ]
     },
     {
-      "id": "body_preset.stout",
+      "id": "body_preset_stout",
       "kind": "body_preset",
       "legacy_id": "stout",
       "display_name": "Stout",
@@ -182,7 +182,7 @@
       ]
     },
     {
-      "id": "body_preset.duelist",
+      "id": "body_preset_duelist",
       "kind": "body_preset",
       "legacy_id": "duelist",
       "display_name": "Duelist",
@@ -193,7 +193,7 @@
       ]
     },
     {
-      "id": "body_preset.statuesque",
+      "id": "body_preset_statuesque",
       "kind": "body_preset",
       "legacy_id": "statuesque",
       "display_name": "Statuesque",
@@ -204,7 +204,7 @@
       ]
     },
     {
-      "id": "body_preset.massive",
+      "id": "body_preset_massive",
       "kind": "body_preset",
       "legacy_id": "massive",
       "display_name": "Massive",
@@ -215,7 +215,7 @@
       ]
     },
     {
-      "id": "body_preset.compact",
+      "id": "body_preset_compact",
       "kind": "body_preset",
       "legacy_id": "compact",
       "display_name": "Compact",
@@ -226,73 +226,73 @@
       ]
     },
     {
-      "id": "hair_style.short",
+      "id": "hair_style_short",
       "kind": "hair_style",
       "legacy_id": "short",
       "display_name": "Short"
     },
     {
-      "id": "hair_style.long",
+      "id": "hair_style_long",
       "kind": "hair_style",
       "legacy_id": "long",
       "display_name": "Long"
     },
     {
-      "id": "hair_style.braid",
+      "id": "hair_style_braid",
       "kind": "hair_style",
       "legacy_id": "braid",
       "display_name": "Braid"
     },
     {
-      "id": "hair_style.mohawk",
+      "id": "hair_style_mohawk",
       "kind": "hair_style",
       "legacy_id": "mohawk",
       "display_name": "Mohawk"
     },
     {
-      "id": "hair_style.topknot",
+      "id": "hair_style_topknot",
       "kind": "hair_style",
       "legacy_id": "topknot",
       "display_name": "Topknot"
     },
     {
-      "id": "armor_style.realm_basic",
+      "id": "armor_style_realm_basic",
       "kind": "armor_style",
       "legacy_id": "realm_basic",
       "display_name": "Realm Basic"
     },
     {
-      "id": "armor_style.light_scout",
+      "id": "armor_style_light_scout",
       "kind": "armor_style",
       "legacy_id": "light_scout",
       "display_name": "Light Scout"
     },
     {
-      "id": "armor_style.heavy_plate",
+      "id": "armor_style_heavy_plate",
       "kind": "armor_style",
       "legacy_id": "heavy_plate",
       "display_name": "Heavy Plate"
     },
     {
-      "id": "armor_style.warmaster_plate",
+      "id": "armor_style_warmaster_plate",
       "kind": "armor_style",
       "legacy_id": "warmaster_plate",
       "display_name": "Warmaster Plate"
     },
     {
-      "id": "armor_style.arcane_robes",
+      "id": "armor_style_arcane_robes",
       "kind": "armor_style",
       "legacy_id": "arcane_robes",
       "display_name": "Arcane Robes"
     },
     {
-      "id": "armor_style.assassin_leathers",
+      "id": "armor_style_assassin_leathers",
       "kind": "armor_style",
       "legacy_id": "assassin_leathers",
       "display_name": "Assassin Leathers"
     },
     {
-      "id": "primary_color.crown_blue",
+      "id": "primary_color_crown_blue",
       "kind": "primary_color",
       "legacy_id": "crown_blue",
       "display_name": "Crown Blue",
@@ -303,7 +303,7 @@
       ]
     },
     {
-      "id": "primary_color.stone_bronze",
+      "id": "primary_color_stone_bronze",
       "kind": "primary_color",
       "legacy_id": "stone_bronze",
       "display_name": "Stone Bronze",
@@ -314,7 +314,7 @@
       ]
     },
     {
-      "id": "primary_color.grove_green",
+      "id": "primary_color_grove_green",
       "kind": "primary_color",
       "legacy_id": "grove_green",
       "display_name": "Grove Green",
@@ -325,7 +325,7 @@
       ]
     },
     {
-      "id": "primary_color.royal_gold",
+      "id": "primary_color_royal_gold",
       "kind": "primary_color",
       "legacy_id": "royal_gold",
       "display_name": "Royal Gold",
@@ -336,7 +336,7 @@
       ]
     },
     {
-      "id": "primary_color.umbral_violet",
+      "id": "primary_color_umbral_violet",
       "kind": "primary_color",
       "legacy_id": "umbral_violet",
       "display_name": "Umbral Violet",
@@ -347,7 +347,7 @@
       ]
     },
     {
-      "id": "primary_color.obsidian_steel",
+      "id": "primary_color_obsidian_steel",
       "kind": "primary_color",
       "legacy_id": "obsidian_steel",
       "display_name": "Obsidian Steel",
@@ -358,7 +358,7 @@
       ]
     },
     {
-      "id": "primary_color.blood_wine",
+      "id": "primary_color_blood_wine",
       "kind": "primary_color",
       "legacy_id": "blood_wine",
       "display_name": "Blood Wine",
@@ -369,7 +369,7 @@
       ]
     },
     {
-      "id": "primary_color.ivory_battlecloth",
+      "id": "primary_color_ivory_battlecloth",
       "kind": "primary_color",
       "legacy_id": "ivory_battlecloth",
       "display_name": "Ivory Battlecloth",
@@ -380,7 +380,7 @@
       ]
     },
     {
-      "id": "primary_color.duelist_steel",
+      "id": "primary_color_duelist_steel",
       "kind": "primary_color",
       "legacy_id": "duelist_steel",
       "display_name": "Duelist Steel",
@@ -391,7 +391,7 @@
       ]
     },
     {
-      "id": "hair_color.raven",
+      "id": "hair_color_raven",
       "kind": "hair_color",
       "legacy_id": "raven",
       "display_name": "Raven",
@@ -402,7 +402,7 @@
       ]
     },
     {
-      "id": "hair_color.chestnut",
+      "id": "hair_color_chestnut",
       "kind": "hair_color",
       "legacy_id": "chestnut",
       "display_name": "Chestnut",
@@ -413,7 +413,7 @@
       ]
     },
     {
-      "id": "hair_color.sun_blonde",
+      "id": "hair_color_sun_blonde",
       "kind": "hair_color",
       "legacy_id": "sun_blonde",
       "display_name": "Sun Blonde",
@@ -424,7 +424,7 @@
       ]
     },
     {
-      "id": "hair_color.silver",
+      "id": "hair_color_silver",
       "kind": "hair_color",
       "legacy_id": "silver",
       "display_name": "Silver",
@@ -435,7 +435,7 @@
       ]
     },
     {
-      "id": "hair_color.ember_black",
+      "id": "hair_color_ember_black",
       "kind": "hair_color",
       "legacy_id": "ember_black",
       "display_name": "Ember Black",
@@ -446,7 +446,7 @@
       ]
     },
     {
-      "id": "hair_color.ivory",
+      "id": "hair_color_ivory",
       "kind": "hair_color",
       "legacy_id": "ivory",
       "display_name": "Ivory",
@@ -457,7 +457,7 @@
       ]
     },
     {
-      "id": "hair_color.ash_black",
+      "id": "hair_color_ash_black",
       "kind": "hair_color",
       "legacy_id": "ash_black",
       "display_name": "Ash Black",
@@ -468,7 +468,7 @@
       ]
     },
     {
-      "id": "hair_color.copper",
+      "id": "hair_color_copper",
       "kind": "hair_color",
       "legacy_id": "copper",
       "display_name": "Copper",
@@ -479,7 +479,7 @@
       ]
     },
     {
-      "id": "skin_color.sunlit",
+      "id": "skin_color_sunlit",
       "kind": "skin_color",
       "legacy_id": "sunlit",
       "display_name": "Sunlit",
@@ -490,7 +490,7 @@
       ]
     },
     {
-      "id": "skin_color.deep_earth",
+      "id": "skin_color_deep_earth",
       "kind": "skin_color",
       "legacy_id": "deep_earth",
       "display_name": "Deep Earth",
@@ -501,7 +501,7 @@
       ]
     },
     {
-      "id": "skin_color.fair",
+      "id": "skin_color_fair",
       "kind": "skin_color",
       "legacy_id": "fair",
       "display_name": "Fair",
@@ -512,7 +512,7 @@
       ]
     },
     {
-      "id": "skin_color.rose_ash",
+      "id": "skin_color_rose_ash",
       "kind": "skin_color",
       "legacy_id": "rose_ash",
       "display_name": "Rose Ash",
@@ -523,7 +523,7 @@
       ]
     },
     {
-      "id": "skin_color.umbral",
+      "id": "skin_color_umbral",
       "kind": "skin_color",
       "legacy_id": "umbral",
       "display_name": "Umbral",
@@ -534,7 +534,7 @@
       ]
     },
     {
-      "id": "skin_color.warm_umber",
+      "id": "skin_color_warm_umber",
       "kind": "skin_color",
       "legacy_id": "warm_umber",
       "display_name": "Warm Umber",
@@ -545,7 +545,7 @@
       ]
     },
     {
-      "id": "skin_color.porcelain_rose",
+      "id": "skin_color_porcelain_rose",
       "kind": "skin_color",
       "legacy_id": "porcelain_rose",
       "display_name": "Porcelain Rose",
@@ -556,7 +556,7 @@
       ]
     },
     {
-      "id": "skin_color.storm_ash",
+      "id": "skin_color_storm_ash",
       "kind": "skin_color",
       "legacy_id": "storm_ash",
       "display_name": "Storm Ash",
@@ -567,7 +567,7 @@
       ]
     },
     {
-      "id": "eye_color.storm_blue",
+      "id": "eye_color_storm_blue",
       "kind": "eye_color",
       "legacy_id": "storm_blue",
       "display_name": "Storm Blue",
@@ -578,7 +578,7 @@
       ]
     },
     {
-      "id": "eye_color.grove_green",
+      "id": "eye_color_grove_green",
       "kind": "eye_color",
       "legacy_id": "grove_green",
       "display_name": "Grove Green",
@@ -589,7 +589,7 @@
       ]
     },
     {
-      "id": "eye_color.amber",
+      "id": "eye_color_amber",
       "kind": "eye_color",
       "legacy_id": "amber",
       "display_name": "Amber",
@@ -600,7 +600,7 @@
       ]
     },
     {
-      "id": "eye_color.moonlit",
+      "id": "eye_color_moonlit",
       "kind": "eye_color",
       "legacy_id": "moonlit",
       "display_name": "Moonlit",
@@ -611,7 +611,7 @@
       ]
     },
     {
-      "id": "eye_color.curse_red",
+      "id": "eye_color_curse_red",
       "kind": "eye_color",
       "legacy_id": "curse_red",
       "display_name": "Curse Red",
@@ -622,7 +622,7 @@
       ]
     },
     {
-      "id": "eye_color.pale_gold",
+      "id": "eye_color_pale_gold",
       "kind": "eye_color",
       "legacy_id": "pale_gold",
       "display_name": "Pale Gold",
@@ -633,7 +633,7 @@
       ]
     },
     {
-      "id": "eye_color.jade_fire",
+      "id": "eye_color_jade_fire",
       "kind": "eye_color",
       "legacy_id": "jade_fire",
       "display_name": "Jade Fire",
@@ -644,7 +644,7 @@
       ]
     },
     {
-      "id": "eye_color.void_red",
+      "id": "eye_color_void_red",
       "kind": "eye_color",
       "legacy_id": "void_red",
       "display_name": "Void Red",
@@ -655,7 +655,7 @@
       ]
     },
     {
-      "id": "accent_color.royal_gold",
+      "id": "accent_color_royal_gold",
       "kind": "accent_color",
       "legacy_id": "royal_gold",
       "display_name": "Royal Gold",
@@ -666,7 +666,7 @@
       ]
     },
     {
-      "id": "accent_color.arcane_blue",
+      "id": "accent_color_arcane_blue",
       "kind": "accent_color",
       "legacy_id": "arcane_blue",
       "display_name": "Arcane Blue",
@@ -677,7 +677,7 @@
       ]
     },
     {
-      "id": "accent_color.worldsap",
+      "id": "accent_color_worldsap",
       "kind": "accent_color",
       "legacy_id": "worldsap",
       "display_name": "Worldsap",
@@ -688,7 +688,7 @@
       ]
     },
     {
-      "id": "accent_color.ember",
+      "id": "accent_color_ember",
       "kind": "accent_color",
       "legacy_id": "ember",
       "display_name": "Ember",
@@ -699,7 +699,7 @@
       ]
     },
     {
-      "id": "accent_color.shadow_violet",
+      "id": "accent_color_shadow_violet",
       "kind": "accent_color",
       "legacy_id": "shadow_violet",
       "display_name": "Shadow Violet",
@@ -710,7 +710,7 @@
       ]
     },
     {
-      "id": "accent_color.blood_ember",
+      "id": "accent_color_blood_ember",
       "kind": "accent_color",
       "legacy_id": "blood_ember",
       "display_name": "Blood Ember",
@@ -721,7 +721,7 @@
       ]
     },
     {
-      "id": "accent_color.oracle_green",
+      "id": "accent_color_oracle_green",
       "kind": "accent_color",
       "legacy_id": "oracle_green",
       "display_name": "Oracle Green",
@@ -732,7 +732,7 @@
       ]
     },
     {
-      "id": "accent_color.burnished_gold",
+      "id": "accent_color_burnished_gold",
       "kind": "accent_color",
       "legacy_id": "burnished_gold",
       "display_name": "Burnished Gold",
@@ -743,121 +743,121 @@
       ]
     },
     {
-      "id": "face_mark.none",
+      "id": "face_mark_none",
       "kind": "face_mark",
       "legacy_id": "none",
       "display_name": "None"
     },
     {
-      "id": "face_mark.scar",
+      "id": "face_mark_scar",
       "kind": "face_mark",
       "legacy_id": "scar",
       "display_name": "Scar"
     },
     {
-      "id": "face_mark.warpaint",
+      "id": "face_mark_warpaint",
       "kind": "face_mark",
       "legacy_id": "warpaint",
       "display_name": "Warpaint"
     },
     {
-      "id": "face_mark.realm_mark",
+      "id": "face_mark_realm_mark",
       "kind": "face_mark",
       "legacy_id": "realm_mark",
       "display_name": "Realm Mark"
     },
     {
-      "id": "face_mark.rune",
+      "id": "face_mark_rune",
       "kind": "face_mark",
       "legacy_id": "rune",
       "display_name": "Rune"
     },
     {
-      "id": "face_mark.tattoo",
+      "id": "face_mark_tattoo",
       "kind": "face_mark",
       "legacy_id": "tattoo",
       "display_name": "Tattoo"
     },
     {
-      "id": "face_mark.beard",
+      "id": "face_mark_beard",
       "kind": "face_mark",
       "legacy_id": "beard",
       "display_name": "Beard"
     },
     {
-      "id": "face_mark.duelist_scar",
+      "id": "face_mark_duelist_scar",
       "kind": "face_mark",
       "legacy_id": "duelist_scar",
       "display_name": "Duelist Scar"
     },
     {
-      "id": "face_mark.ash_mask",
+      "id": "face_mark_ash_mask",
       "kind": "face_mark",
       "legacy_id": "ash_mask",
       "display_name": "Ash Mask"
     },
     {
-      "id": "weapon_style.sword",
+      "id": "weapon_style_sword",
       "kind": "weapon_style",
       "legacy_id": "sword",
       "display_name": "Sword"
     },
     {
-      "id": "weapon_style.axe",
+      "id": "weapon_style_axe",
       "kind": "weapon_style",
       "legacy_id": "axe",
       "display_name": "Axe"
     },
     {
-      "id": "weapon_style.staff",
+      "id": "weapon_style_staff",
       "kind": "weapon_style",
       "legacy_id": "staff",
       "display_name": "Staff"
     },
     {
-      "id": "weapon_style.bow",
+      "id": "weapon_style_bow",
       "kind": "weapon_style",
       "legacy_id": "bow",
       "display_name": "Bow"
     },
     {
-      "id": "weapon_style.hammer",
+      "id": "weapon_style_hammer",
       "kind": "weapon_style",
       "legacy_id": "hammer",
       "display_name": "Hammer"
     },
     {
-      "id": "offhand_style.shield",
+      "id": "offhand_style_shield",
       "kind": "offhand_style",
       "legacy_id": "shield",
       "display_name": "Shield"
     },
     {
-      "id": "offhand_style.orb",
+      "id": "offhand_style_orb",
       "kind": "offhand_style",
       "legacy_id": "orb",
       "display_name": "Orb"
     },
     {
-      "id": "offhand_style.dagger",
+      "id": "offhand_style_dagger",
       "kind": "offhand_style",
       "legacy_id": "dagger",
       "display_name": "Dagger"
     },
     {
-      "id": "offhand_style.tome",
+      "id": "offhand_style_tome",
       "kind": "offhand_style",
       "legacy_id": "tome",
       "display_name": "Tome"
     },
     {
-      "id": "offhand_style.none",
+      "id": "offhand_style_none",
       "kind": "offhand_style",
       "legacy_id": "none",
       "display_name": "None"
     },
     {
-      "id": "forge_preset.vanguard",
+      "id": "forge_preset_vanguard",
       "kind": "forge_preset",
       "legacy_id": "vanguard",
       "display_name": "Vanguard",
@@ -897,7 +897,7 @@
       "helmet_enabled": true
     },
     {
-      "id": "forge_preset.arcanist",
+      "id": "forge_preset_arcanist",
       "kind": "forge_preset",
       "legacy_id": "arcanist",
       "display_name": "Arcanist",
@@ -937,7 +937,7 @@
       "helmet_enabled": false
     },
     {
-      "id": "forge_preset.nightblade",
+      "id": "forge_preset_nightblade",
       "kind": "forge_preset",
       "legacy_id": "nightblade",
       "display_name": "Nightblade",
@@ -977,7 +977,7 @@
       "helmet_enabled": false
     },
     {
-      "id": "forge_preset.dreadknight",
+      "id": "forge_preset_dreadknight",
       "kind": "forge_preset",
       "legacy_id": "dreadknight",
       "display_name": "Dreadknight",
@@ -1017,7 +1017,7 @@
       "helmet_enabled": true
     },
     {
-      "id": "forge_preset.oracle",
+      "id": "forge_preset_oracle",
       "kind": "forge_preset",
       "legacy_id": "oracle",
       "display_name": "Oracle",
@@ -1057,7 +1057,7 @@
       "helmet_enabled": false
     },
     {
-      "id": "forge_preset.duelist",
+      "id": "forge_preset_duelist",
       "kind": "forge_preset",
       "legacy_id": "duelist",
       "display_name": "Duelist",
@@ -1097,7 +1097,7 @@
       "helmet_enabled": false
     },
     {
-      "id": "forge_preset.inquisitor",
+      "id": "forge_preset_inquisitor",
       "kind": "forge_preset",
       "legacy_id": "inquisitor",
       "display_name": "Inquisitor",
@@ -1137,7 +1137,7 @@
       "helmet_enabled": true
     },
     {
-      "id": "forge_preset.warden",
+      "id": "forge_preset_warden",
       "kind": "forge_preset",
       "legacy_id": "warden",
       "display_name": "Warden",
@@ -1177,7 +1177,7 @@
       "helmet_enabled": false
     },
     {
-      "id": "forge_preset.spellblade",
+      "id": "forge_preset_spellblade",
       "kind": "forge_preset",
       "legacy_id": "spellblade",
       "display_name": "Spellblade",
@@ -1217,7 +1217,7 @@
       "helmet_enabled": false
     },
     {
-      "id": "realm_customization.Stonehold",
+      "id": "realm_customization_stonehold",
       "kind": "realm_customization",
       "legacy_id": "Stonehold",
       "display_name": "Stonehold Dwarves",
@@ -1236,7 +1236,7 @@
       ]
     },
     {
-      "id": "realm_customization.Eldergrove",
+      "id": "realm_customization_eldergrove",
       "kind": "realm_customization",
       "legacy_id": "Eldergrove",
       "display_name": "Eldergrove Elves",
@@ -1255,7 +1255,7 @@
       ]
     },
     {
-      "id": "realm_customization.Crownlands",
+      "id": "realm_customization_crownlands",
       "kind": "realm_customization",
       "legacy_id": "Crownlands",
       "display_name": "Crownlands Humans",
@@ -1274,7 +1274,7 @@
       ]
     },
     {
-      "id": "realm_customization.Umbral",
+      "id": "realm_customization_umbral",
       "kind": "realm_customization",
       "legacy_id": "Umbral",
       "display_name": "Umbral Dark Elves",
@@ -1304,1316 +1304,2107 @@
   "aliases": [
     {
       "legacyId": "Amber",
-      "canonicalId": "eye_color.amber",
+      "canonicalId": "eye_color_amber",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Arcane Blue",
-      "canonicalId": "accent_color.arcane_blue",
+      "canonicalId": "accent_color_arcane_blue",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Arcane Robes",
-      "canonicalId": "armor_style.arcane_robes",
+      "canonicalId": "armor_style_arcane_robes",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Arcanist",
-      "canonicalId": "forge_preset.arcanist",
+      "canonicalId": "forge_preset_arcanist",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ArmorChest",
-      "canonicalId": "character_slot.ArmorChest",
+      "canonicalId": "character_slot_armor_chest",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ArmorTrim",
-      "canonicalId": "character_slot.ArmorTrim",
+      "canonicalId": "character_slot_armor_trim",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ash Black",
-      "canonicalId": "hair_color.ash_black",
+      "canonicalId": "hair_color_ash_black",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ash Mask",
-      "canonicalId": "face_mark.ash_mask",
+      "canonicalId": "face_mark_ash_mask",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Assassin Leathers",
-      "canonicalId": "armor_style.assassin_leathers",
+      "canonicalId": "armor_style_assassin_leathers",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Average",
-      "canonicalId": "body_preset.average",
+      "canonicalId": "body_preset_average",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Axe",
-      "canonicalId": "weapon_style.axe",
+      "canonicalId": "weapon_style_axe",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "BackAttachment",
-      "canonicalId": "character_slot.BackAttachment",
+      "canonicalId": "character_slot_back_attachment",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Beard",
-      "canonicalId": "face_mark.beard",
+      "canonicalId": "face_mark_beard",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Belt",
-      "canonicalId": "character_slot.Belt",
+      "canonicalId": "character_slot_belt",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Blood Ember",
-      "canonicalId": "accent_color.blood_ember",
+      "canonicalId": "accent_color_blood_ember",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Blood Wine",
-      "canonicalId": "primary_color.blood_wine",
+      "canonicalId": "primary_color_blood_wine",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "BodyPreset",
-      "canonicalId": "character_slot.BodyPreset",
+      "canonicalId": "character_slot_body_preset",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Boots",
-      "canonicalId": "character_slot.Boots",
+      "canonicalId": "character_slot_boots",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Bow",
-      "canonicalId": "weapon_style.bow",
+      "canonicalId": "weapon_style_bow",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Braid",
-      "canonicalId": "hair_style.braid",
+      "canonicalId": "hair_style_braid",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Broad",
-      "canonicalId": "body_preset.broad",
+      "canonicalId": "body_preset_broad",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Brows",
-      "canonicalId": "character_slot.Brows",
+      "canonicalId": "character_slot_brows",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Burnished Gold",
-      "canonicalId": "accent_color.burnished_gold",
+      "canonicalId": "accent_color_burnished_gold",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Cape",
-      "canonicalId": "character_slot.Cape",
+      "canonicalId": "character_slot_cape",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Chestnut",
-      "canonicalId": "hair_color.chestnut",
+      "canonicalId": "hair_color_chestnut",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Compact",
-      "canonicalId": "body_preset.compact",
+      "canonicalId": "body_preset_compact",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Copper",
-      "canonicalId": "hair_color.copper",
+      "canonicalId": "hair_color_copper",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Crown Blue",
-      "canonicalId": "primary_color.crown_blue",
+      "canonicalId": "primary_color_crown_blue",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Crownlands",
-      "canonicalId": "realm_customization.Crownlands",
+      "canonicalId": "realm_customization_crownlands",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Crownlands Humans",
-      "canonicalId": "realm_customization.Crownlands",
+      "canonicalId": "realm_customization_crownlands",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Curse Red",
-      "canonicalId": "eye_color.curse_red",
+      "canonicalId": "eye_color_curse_red",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Dagger",
-      "canonicalId": "offhand_style.dagger",
+      "canonicalId": "offhand_style_dagger",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Deep Earth",
-      "canonicalId": "skin_color.deep_earth",
+      "canonicalId": "skin_color_deep_earth",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Dreadknight",
-      "canonicalId": "forge_preset.dreadknight",
+      "canonicalId": "forge_preset_dreadknight",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Duelist Scar",
-      "canonicalId": "face_mark.duelist_scar",
+      "canonicalId": "face_mark_duelist_scar",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Duelist Steel",
-      "canonicalId": "primary_color.duelist_steel",
+      "canonicalId": "primary_color_duelist_steel",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ears",
-      "canonicalId": "character_slot.Ears",
+      "canonicalId": "character_slot_ears",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Eldergrove",
-      "canonicalId": "realm_customization.Eldergrove",
+      "canonicalId": "realm_customization_eldergrove",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Eldergrove Elves",
-      "canonicalId": "realm_customization.Eldergrove",
+      "canonicalId": "realm_customization_eldergrove",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ember",
-      "canonicalId": "accent_color.ember",
+      "canonicalId": "accent_color_ember",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ember Black",
-      "canonicalId": "hair_color.ember_black",
+      "canonicalId": "hair_color_ember_black",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Eyes",
-      "canonicalId": "character_slot.Eyes",
+      "canonicalId": "character_slot_eyes",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Fair",
-      "canonicalId": "skin_color.fair",
+      "canonicalId": "skin_color_fair",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Gloves",
-      "canonicalId": "character_slot.Gloves",
+      "canonicalId": "character_slot_gloves",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Hair",
-      "canonicalId": "character_slot.Hair",
+      "canonicalId": "character_slot_hair",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Hammer",
-      "canonicalId": "weapon_style.hammer",
+      "canonicalId": "weapon_style_hammer",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Head",
-      "canonicalId": "character_slot.Head",
+      "canonicalId": "character_slot_head",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Heavy Plate",
-      "canonicalId": "armor_style.heavy_plate",
+      "canonicalId": "armor_style_heavy_plate",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Hood",
-      "canonicalId": "character_slot.Hood",
+      "canonicalId": "character_slot_hood",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Inquisitor",
-      "canonicalId": "forge_preset.inquisitor",
+      "canonicalId": "forge_preset_inquisitor",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ivory",
-      "canonicalId": "hair_color.ivory",
+      "canonicalId": "hair_color_ivory",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Ivory Battlecloth",
-      "canonicalId": "primary_color.ivory_battlecloth",
+      "canonicalId": "primary_color_ivory_battlecloth",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Jade Fire",
-      "canonicalId": "eye_color.jade_fire",
+      "canonicalId": "eye_color_jade_fire",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Light Scout",
-      "canonicalId": "armor_style.light_scout",
+      "canonicalId": "armor_style_light_scout",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Long",
-      "canonicalId": "hair_style.long",
+      "canonicalId": "hair_style_long",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Massive",
-      "canonicalId": "body_preset.massive",
+      "canonicalId": "body_preset_massive",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Mohawk",
-      "canonicalId": "hair_style.mohawk",
+      "canonicalId": "hair_style_mohawk",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Moonlit",
-      "canonicalId": "eye_color.moonlit",
+      "canonicalId": "eye_color_moonlit",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "MountAnchor",
-      "canonicalId": "character_slot.MountAnchor",
+      "canonicalId": "character_slot_mount_anchor",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Nightblade",
-      "canonicalId": "forge_preset.nightblade",
+      "canonicalId": "forge_preset_nightblade",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Obsidian Steel",
-      "canonicalId": "primary_color.obsidian_steel",
+      "canonicalId": "primary_color_obsidian_steel",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Oracle",
-      "canonicalId": "forge_preset.oracle",
+      "canonicalId": "forge_preset_oracle",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Oracle Green",
-      "canonicalId": "accent_color.oracle_green",
+      "canonicalId": "accent_color_oracle_green",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Orb",
-      "canonicalId": "offhand_style.orb",
+      "canonicalId": "offhand_style_orb",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Pale Gold",
-      "canonicalId": "eye_color.pale_gold",
+      "canonicalId": "eye_color_pale_gold",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "PetAnchor",
-      "canonicalId": "character_slot.PetAnchor",
+      "canonicalId": "character_slot_pet_anchor",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Porcelain Rose",
-      "canonicalId": "skin_color.porcelain_rose",
+      "canonicalId": "skin_color_porcelain_rose",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Raven",
-      "canonicalId": "hair_color.raven",
+      "canonicalId": "hair_color_raven",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Realm Basic",
-      "canonicalId": "armor_style.realm_basic",
+      "canonicalId": "armor_style_realm_basic",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Realm Mark",
-      "canonicalId": "face_mark.realm_mark",
+      "canonicalId": "face_mark_realm_mark",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Robe",
-      "canonicalId": "character_slot.Robe",
+      "canonicalId": "character_slot_robe",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Rose Ash",
-      "canonicalId": "skin_color.rose_ash",
+      "canonicalId": "skin_color_rose_ash",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Rune",
-      "canonicalId": "face_mark.rune",
+      "canonicalId": "face_mark_rune",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Scar",
-      "canonicalId": "face_mark.scar",
+      "canonicalId": "face_mark_scar",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Shadow Violet",
-      "canonicalId": "accent_color.shadow_violet",
+      "canonicalId": "accent_color_shadow_violet",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Shield",
-      "canonicalId": "offhand_style.shield",
+      "canonicalId": "offhand_style_shield",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Short",
-      "canonicalId": "hair_style.short",
+      "canonicalId": "hair_style_short",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Silver",
-      "canonicalId": "hair_color.silver",
+      "canonicalId": "hair_color_silver",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Skin",
-      "canonicalId": "character_slot.Skin",
+      "canonicalId": "character_slot_skin",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Slim",
-      "canonicalId": "body_preset.slim",
+      "canonicalId": "body_preset_slim",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Spellblade",
-      "canonicalId": "forge_preset.spellblade",
+      "canonicalId": "forge_preset_spellblade",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Staff",
-      "canonicalId": "weapon_style.staff",
+      "canonicalId": "weapon_style_staff",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Statuesque",
-      "canonicalId": "body_preset.statuesque",
+      "canonicalId": "body_preset_statuesque",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Stone Bronze",
-      "canonicalId": "primary_color.stone_bronze",
+      "canonicalId": "primary_color_stone_bronze",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Stonehold",
-      "canonicalId": "realm_customization.Stonehold",
+      "canonicalId": "realm_customization_stonehold",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Stonehold Dwarves",
-      "canonicalId": "realm_customization.Stonehold",
+      "canonicalId": "realm_customization_stonehold",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Storm Ash",
-      "canonicalId": "skin_color.storm_ash",
+      "canonicalId": "skin_color_storm_ash",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Storm Blue",
-      "canonicalId": "eye_color.storm_blue",
+      "canonicalId": "eye_color_storm_blue",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Stout",
-      "canonicalId": "body_preset.stout",
+      "canonicalId": "body_preset_stout",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Sun Blonde",
-      "canonicalId": "hair_color.sun_blonde",
+      "canonicalId": "hair_color_sun_blonde",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Sunlit",
-      "canonicalId": "skin_color.sunlit",
+      "canonicalId": "skin_color_sunlit",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Sword",
-      "canonicalId": "weapon_style.sword",
+      "canonicalId": "weapon_style_sword",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Tall",
-      "canonicalId": "body_preset.tall",
+      "canonicalId": "body_preset_tall",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Tattoo",
-      "canonicalId": "face_mark.tattoo",
+      "canonicalId": "face_mark_tattoo",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Tome",
-      "canonicalId": "offhand_style.tome",
+      "canonicalId": "offhand_style_tome",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Topknot",
-      "canonicalId": "hair_style.topknot",
+      "canonicalId": "hair_style_topknot",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Umbral Dark Elves",
-      "canonicalId": "realm_customization.Umbral",
+      "canonicalId": "realm_customization_umbral",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Umbral Violet",
-      "canonicalId": "primary_color.umbral_violet",
+      "canonicalId": "primary_color_umbral_violet",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Vanguard",
-      "canonicalId": "forge_preset.vanguard",
+      "canonicalId": "forge_preset_vanguard",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Void Red",
-      "canonicalId": "eye_color.void_red",
+      "canonicalId": "eye_color_void_red",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Warden",
-      "canonicalId": "forge_preset.warden",
+      "canonicalId": "forge_preset_warden",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Warm Umber",
-      "canonicalId": "skin_color.warm_umber",
+      "canonicalId": "skin_color_warm_umber",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Warmaster Plate",
-      "canonicalId": "armor_style.warmaster_plate",
+      "canonicalId": "armor_style_warmaster_plate",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Warpaint",
-      "canonicalId": "face_mark.warpaint",
+      "canonicalId": "face_mark_warpaint",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "WeaponMain",
-      "canonicalId": "character_slot.WeaponMain",
+      "canonicalId": "character_slot_weapon_main",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "WeaponOff",
-      "canonicalId": "character_slot.WeaponOff",
+      "canonicalId": "character_slot_weapon_off",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "Worldsap",
-      "canonicalId": "accent_color.worldsap",
+      "canonicalId": "accent_color_worldsap",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.arcane_blue",
+      "canonicalId": "accent_color_arcane_blue",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.blood_ember",
+      "canonicalId": "accent_color_blood_ember",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.burnished_gold",
+      "canonicalId": "accent_color_burnished_gold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.ember",
+      "canonicalId": "accent_color_ember",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.oracle_green",
+      "canonicalId": "accent_color_oracle_green",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.royal_gold",
+      "canonicalId": "accent_color_royal_gold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.shadow_violet",
+      "canonicalId": "accent_color_shadow_violet",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "accent_color.worldsap",
+      "canonicalId": "accent_color_worldsap",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "amber",
-      "canonicalId": "eye_color.amber",
+      "canonicalId": "eye_color_amber",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "arcane_blue",
-      "canonicalId": "accent_color.arcane_blue",
+      "canonicalId": "accent_color_arcane_blue",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "arcane_robes",
-      "canonicalId": "armor_style.arcane_robes",
+      "canonicalId": "armor_style_arcane_robes",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "arcanist",
-      "canonicalId": "forge_preset.arcanist",
+      "canonicalId": "forge_preset_arcanist",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "armor_style.arcane_robes",
+      "canonicalId": "armor_style_arcane_robes",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "armor_style.assassin_leathers",
+      "canonicalId": "armor_style_assassin_leathers",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "armor_style.heavy_plate",
+      "canonicalId": "armor_style_heavy_plate",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "armor_style.light_scout",
+      "canonicalId": "armor_style_light_scout",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "armor_style.realm_basic",
+      "canonicalId": "armor_style_realm_basic",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "armor_style.warmaster_plate",
+      "canonicalId": "armor_style_warmaster_plate",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ash_black",
-      "canonicalId": "hair_color.ash_black",
+      "canonicalId": "hair_color_ash_black",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ash_mask",
-      "canonicalId": "face_mark.ash_mask",
+      "canonicalId": "face_mark_ash_mask",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "assassin_leathers",
-      "canonicalId": "armor_style.assassin_leathers",
+      "canonicalId": "armor_style_assassin_leathers",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "average",
-      "canonicalId": "body_preset.average",
+      "canonicalId": "body_preset_average",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "axe",
-      "canonicalId": "weapon_style.axe",
+      "canonicalId": "weapon_style_axe",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "beard",
-      "canonicalId": "face_mark.beard",
+      "canonicalId": "face_mark_beard",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "blood_ember",
-      "canonicalId": "accent_color.blood_ember",
+      "canonicalId": "accent_color_blood_ember",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "blood_wine",
-      "canonicalId": "primary_color.blood_wine",
+      "canonicalId": "primary_color_blood_wine",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.average",
+      "canonicalId": "body_preset_average",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.broad",
+      "canonicalId": "body_preset_broad",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.compact",
+      "canonicalId": "body_preset_compact",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.duelist",
+      "canonicalId": "body_preset_duelist",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.massive",
+      "canonicalId": "body_preset_massive",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.slim",
+      "canonicalId": "body_preset_slim",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.statuesque",
+      "canonicalId": "body_preset_statuesque",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.stout",
+      "canonicalId": "body_preset_stout",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "body_preset.tall",
+      "canonicalId": "body_preset_tall",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "bow",
-      "canonicalId": "weapon_style.bow",
+      "canonicalId": "weapon_style_bow",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "braid",
-      "canonicalId": "hair_style.braid",
+      "canonicalId": "hair_style_braid",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "broad",
-      "canonicalId": "body_preset.broad",
+      "canonicalId": "body_preset_broad",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "burnished_gold",
-      "canonicalId": "accent_color.burnished_gold",
+      "canonicalId": "accent_color_burnished_gold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.ArmorChest",
+      "canonicalId": "character_slot_armor_chest",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.ArmorTrim",
+      "canonicalId": "character_slot_armor_trim",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.BackAttachment",
+      "canonicalId": "character_slot_back_attachment",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Belt",
+      "canonicalId": "character_slot_belt",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.BodyPreset",
+      "canonicalId": "character_slot_body_preset",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Boots",
+      "canonicalId": "character_slot_boots",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Brows",
+      "canonicalId": "character_slot_brows",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Cape",
+      "canonicalId": "character_slot_cape",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Ears",
+      "canonicalId": "character_slot_ears",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Eyes",
+      "canonicalId": "character_slot_eyes",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Gloves",
+      "canonicalId": "character_slot_gloves",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Hair",
+      "canonicalId": "character_slot_hair",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Head",
+      "canonicalId": "character_slot_head",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Hood",
+      "canonicalId": "character_slot_hood",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.MountAnchor",
+      "canonicalId": "character_slot_mount_anchor",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.PetAnchor",
+      "canonicalId": "character_slot_pet_anchor",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Robe",
+      "canonicalId": "character_slot_robe",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.Skin",
+      "canonicalId": "character_slot_skin",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.WeaponMain",
+      "canonicalId": "character_slot_weapon_main",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "character_slot.WeaponOff",
+      "canonicalId": "character_slot_weapon_off",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "chestnut",
-      "canonicalId": "hair_color.chestnut",
+      "canonicalId": "hair_color_chestnut",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "compact",
-      "canonicalId": "body_preset.compact",
+      "canonicalId": "body_preset_compact",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "copper",
-      "canonicalId": "hair_color.copper",
+      "canonicalId": "hair_color_copper",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "crown_blue",
-      "canonicalId": "primary_color.crown_blue",
+      "canonicalId": "primary_color_crown_blue",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "curse_red",
-      "canonicalId": "eye_color.curse_red",
+      "canonicalId": "eye_color_curse_red",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "dagger",
-      "canonicalId": "offhand_style.dagger",
+      "canonicalId": "offhand_style_dagger",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "deep_earth",
-      "canonicalId": "skin_color.deep_earth",
+      "canonicalId": "skin_color_deep_earth",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "dreadknight",
-      "canonicalId": "forge_preset.dreadknight",
+      "canonicalId": "forge_preset_dreadknight",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "duelist_scar",
-      "canonicalId": "face_mark.duelist_scar",
+      "canonicalId": "face_mark_duelist_scar",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "duelist_steel",
-      "canonicalId": "primary_color.duelist_steel",
+      "canonicalId": "primary_color_duelist_steel",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ember",
-      "canonicalId": "accent_color.ember",
+      "canonicalId": "accent_color_ember",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ember_black",
-      "canonicalId": "hair_color.ember_black",
+      "canonicalId": "hair_color_ember_black",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.amber",
+      "canonicalId": "eye_color_amber",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.curse_red",
+      "canonicalId": "eye_color_curse_red",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.grove_green",
+      "canonicalId": "eye_color_grove_green",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.jade_fire",
+      "canonicalId": "eye_color_jade_fire",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.moonlit",
+      "canonicalId": "eye_color_moonlit",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.pale_gold",
+      "canonicalId": "eye_color_pale_gold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.storm_blue",
+      "canonicalId": "eye_color_storm_blue",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "eye_color.void_red",
+      "canonicalId": "eye_color_void_red",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.ash_mask",
+      "canonicalId": "face_mark_ash_mask",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.beard",
+      "canonicalId": "face_mark_beard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.duelist_scar",
+      "canonicalId": "face_mark_duelist_scar",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.none",
+      "canonicalId": "face_mark_none",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.realm_mark",
+      "canonicalId": "face_mark_realm_mark",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.rune",
+      "canonicalId": "face_mark_rune",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.scar",
+      "canonicalId": "face_mark_scar",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.tattoo",
+      "canonicalId": "face_mark_tattoo",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "face_mark.warpaint",
+      "canonicalId": "face_mark_warpaint",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "fair",
-      "canonicalId": "skin_color.fair",
+      "canonicalId": "skin_color_fair",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.arcanist",
+      "canonicalId": "forge_preset_arcanist",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.dreadknight",
+      "canonicalId": "forge_preset_dreadknight",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.duelist",
+      "canonicalId": "forge_preset_duelist",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.inquisitor",
+      "canonicalId": "forge_preset_inquisitor",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.nightblade",
+      "canonicalId": "forge_preset_nightblade",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.oracle",
+      "canonicalId": "forge_preset_oracle",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.spellblade",
+      "canonicalId": "forge_preset_spellblade",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.vanguard",
+      "canonicalId": "forge_preset_vanguard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "forge_preset.warden",
+      "canonicalId": "forge_preset_warden",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.ash_black",
+      "canonicalId": "hair_color_ash_black",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.chestnut",
+      "canonicalId": "hair_color_chestnut",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.copper",
+      "canonicalId": "hair_color_copper",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.ember_black",
+      "canonicalId": "hair_color_ember_black",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.ivory",
+      "canonicalId": "hair_color_ivory",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.raven",
+      "canonicalId": "hair_color_raven",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.silver",
+      "canonicalId": "hair_color_silver",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_color.sun_blonde",
+      "canonicalId": "hair_color_sun_blonde",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_style.braid",
+      "canonicalId": "hair_style_braid",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_style.long",
+      "canonicalId": "hair_style_long",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_style.mohawk",
+      "canonicalId": "hair_style_mohawk",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_style.short",
+      "canonicalId": "hair_style_short",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "hair_style.topknot",
+      "canonicalId": "hair_style_topknot",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "hammer",
-      "canonicalId": "weapon_style.hammer",
+      "canonicalId": "weapon_style_hammer",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "heavy_plate",
-      "canonicalId": "armor_style.heavy_plate",
+      "canonicalId": "armor_style_heavy_plate",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "inquisitor",
-      "canonicalId": "forge_preset.inquisitor",
+      "canonicalId": "forge_preset_inquisitor",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ivory",
-      "canonicalId": "hair_color.ivory",
+      "canonicalId": "hair_color_ivory",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "ivory_battlecloth",
-      "canonicalId": "primary_color.ivory_battlecloth",
+      "canonicalId": "primary_color_ivory_battlecloth",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "jade_fire",
-      "canonicalId": "eye_color.jade_fire",
+      "canonicalId": "eye_color_jade_fire",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "light_scout",
-      "canonicalId": "armor_style.light_scout",
+      "canonicalId": "armor_style_light_scout",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "long",
-      "canonicalId": "hair_style.long",
+      "canonicalId": "hair_style_long",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "massive",
-      "canonicalId": "body_preset.massive",
+      "canonicalId": "body_preset_massive",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "mohawk",
-      "canonicalId": "hair_style.mohawk",
+      "canonicalId": "hair_style_mohawk",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "moonlit",
-      "canonicalId": "eye_color.moonlit",
+      "canonicalId": "eye_color_moonlit",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "nightblade",
-      "canonicalId": "forge_preset.nightblade",
+      "canonicalId": "forge_preset_nightblade",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "obsidian_steel",
-      "canonicalId": "primary_color.obsidian_steel",
+      "canonicalId": "primary_color_obsidian_steel",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "offhand_style.dagger",
+      "canonicalId": "offhand_style_dagger",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "offhand_style.none",
+      "canonicalId": "offhand_style_none",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "offhand_style.orb",
+      "canonicalId": "offhand_style_orb",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "offhand_style.shield",
+      "canonicalId": "offhand_style_shield",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "offhand_style.tome",
+      "canonicalId": "offhand_style_tome",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "oracle",
-      "canonicalId": "forge_preset.oracle",
+      "canonicalId": "forge_preset_oracle",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "oracle_green",
-      "canonicalId": "accent_color.oracle_green",
+      "canonicalId": "accent_color_oracle_green",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "orb",
-      "canonicalId": "offhand_style.orb",
+      "canonicalId": "offhand_style_orb",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "pale_gold",
-      "canonicalId": "eye_color.pale_gold",
+      "canonicalId": "eye_color_pale_gold",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "porcelain_rose",
-      "canonicalId": "skin_color.porcelain_rose",
+      "canonicalId": "skin_color_porcelain_rose",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.blood_wine",
+      "canonicalId": "primary_color_blood_wine",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.crown_blue",
+      "canonicalId": "primary_color_crown_blue",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.duelist_steel",
+      "canonicalId": "primary_color_duelist_steel",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.grove_green",
+      "canonicalId": "primary_color_grove_green",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.ivory_battlecloth",
+      "canonicalId": "primary_color_ivory_battlecloth",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.obsidian_steel",
+      "canonicalId": "primary_color_obsidian_steel",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.royal_gold",
+      "canonicalId": "primary_color_royal_gold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.stone_bronze",
+      "canonicalId": "primary_color_stone_bronze",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "primary_color.umbral_violet",
+      "canonicalId": "primary_color_umbral_violet",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "raven",
-      "canonicalId": "hair_color.raven",
+      "canonicalId": "hair_color_raven",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "realm_basic",
-      "canonicalId": "armor_style.realm_basic",
+      "canonicalId": "armor_style_realm_basic",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm_customization.Crownlands",
+      "canonicalId": "realm_customization_crownlands",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm_customization.Eldergrove",
+      "canonicalId": "realm_customization_eldergrove",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm_customization.Stonehold",
+      "canonicalId": "realm_customization_stonehold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm_customization.Umbral",
+      "canonicalId": "realm_customization_umbral",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "realm_mark",
-      "canonicalId": "face_mark.realm_mark",
+      "canonicalId": "face_mark_realm_mark",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "rose_ash",
-      "canonicalId": "skin_color.rose_ash",
+      "canonicalId": "skin_color_rose_ash",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "rune",
-      "canonicalId": "face_mark.rune",
+      "canonicalId": "face_mark_rune",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "scar",
-      "canonicalId": "face_mark.scar",
+      "canonicalId": "face_mark_scar",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "shadow_violet",
-      "canonicalId": "accent_color.shadow_violet",
+      "canonicalId": "accent_color_shadow_violet",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "shield",
-      "canonicalId": "offhand_style.shield",
+      "canonicalId": "offhand_style_shield",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "short",
-      "canonicalId": "hair_style.short",
+      "canonicalId": "hair_style_short",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "silver",
-      "canonicalId": "hair_color.silver",
+      "canonicalId": "hair_color_silver",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.deep_earth",
+      "canonicalId": "skin_color_deep_earth",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.fair",
+      "canonicalId": "skin_color_fair",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.porcelain_rose",
+      "canonicalId": "skin_color_porcelain_rose",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.rose_ash",
+      "canonicalId": "skin_color_rose_ash",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.storm_ash",
+      "canonicalId": "skin_color_storm_ash",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.sunlit",
+      "canonicalId": "skin_color_sunlit",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.umbral",
+      "canonicalId": "skin_color_umbral",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skin_color.warm_umber",
+      "canonicalId": "skin_color_warm_umber",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "slim",
-      "canonicalId": "body_preset.slim",
+      "canonicalId": "body_preset_slim",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "spellblade",
-      "canonicalId": "forge_preset.spellblade",
+      "canonicalId": "forge_preset_spellblade",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "staff",
-      "canonicalId": "weapon_style.staff",
+      "canonicalId": "weapon_style_staff",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "statuesque",
-      "canonicalId": "body_preset.statuesque",
+      "canonicalId": "body_preset_statuesque",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "stone_bronze",
-      "canonicalId": "primary_color.stone_bronze",
+      "canonicalId": "primary_color_stone_bronze",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "storm_ash",
-      "canonicalId": "skin_color.storm_ash",
+      "canonicalId": "skin_color_storm_ash",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "storm_blue",
-      "canonicalId": "eye_color.storm_blue",
+      "canonicalId": "eye_color_storm_blue",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "stout",
-      "canonicalId": "body_preset.stout",
+      "canonicalId": "body_preset_stout",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "sun_blonde",
-      "canonicalId": "hair_color.sun_blonde",
+      "canonicalId": "hair_color_sun_blonde",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "sunlit",
-      "canonicalId": "skin_color.sunlit",
+      "canonicalId": "skin_color_sunlit",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "sword",
-      "canonicalId": "weapon_style.sword",
+      "canonicalId": "weapon_style_sword",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "tall",
-      "canonicalId": "body_preset.tall",
+      "canonicalId": "body_preset_tall",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "tattoo",
-      "canonicalId": "face_mark.tattoo",
+      "canonicalId": "face_mark_tattoo",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "tome",
-      "canonicalId": "offhand_style.tome",
+      "canonicalId": "offhand_style_tome",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "topknot",
-      "canonicalId": "hair_style.topknot",
+      "canonicalId": "hair_style_topknot",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "umbral",
-      "canonicalId": "skin_color.umbral",
+      "canonicalId": "skin_color_umbral",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "umbral_violet",
-      "canonicalId": "primary_color.umbral_violet",
+      "canonicalId": "primary_color_umbral_violet",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "vanguard",
-      "canonicalId": "forge_preset.vanguard",
+      "canonicalId": "forge_preset_vanguard",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "void_red",
-      "canonicalId": "eye_color.void_red",
+      "canonicalId": "eye_color_void_red",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "warden",
-      "canonicalId": "forge_preset.warden",
+      "canonicalId": "forge_preset_warden",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "warm_umber",
-      "canonicalId": "skin_color.warm_umber",
+      "canonicalId": "skin_color_warm_umber",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "warmaster_plate",
-      "canonicalId": "armor_style.warmaster_plate",
+      "canonicalId": "armor_style_warmaster_plate",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "warpaint",
-      "canonicalId": "face_mark.warpaint",
+      "canonicalId": "face_mark_warpaint",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weapon_style.axe",
+      "canonicalId": "weapon_style_axe",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weapon_style.bow",
+      "canonicalId": "weapon_style_bow",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weapon_style.hammer",
+      "canonicalId": "weapon_style_hammer",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weapon_style.staff",
+      "canonicalId": "weapon_style_staff",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weapon_style.sword",
+      "canonicalId": "weapon_style_sword",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "worldsap",
-      "canonicalId": "accent_color.worldsap",
+      "canonicalId": "accent_color_worldsap",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"

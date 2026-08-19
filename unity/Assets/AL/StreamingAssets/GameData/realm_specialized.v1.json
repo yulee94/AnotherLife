@@ -301,31 +301,31 @@
       "sort_order": 3
     },
     {
-      "id": "realm.lock.warning",
+      "id": "realm_lock_warning",
       "kind": "localization_draft",
       "key": "realm.lock.warning",
       "text": "This account will be bound to the chosen realm. Future characters on this account must belong to the same realm."
     },
     {
-      "id": "realm.crownlands.selection.line",
+      "id": "realm_crownlands_selection_line",
       "kind": "localization_draft",
       "key": "realm.crownlands.selection.line",
       "text": "Take the banner road, hold the oath in public, and let no border storm break Crownlands order."
     },
     {
-      "id": "realm.stonehold.selection.line",
+      "id": "realm_stonehold_selection_line",
       "kind": "localization_draft",
       "key": "realm.stonehold.selection.line",
       "text": "Keep forge and gate, remember the deep law, and make the mountain answer in iron."
     },
     {
-      "id": "realm.eldergrove.selection.line",
+      "id": "realm_eldergrove_selection_line",
       "kind": "localization_draft",
       "key": "realm.eldergrove.selection.line",
       "text": "Guard the living border, listen where roots remember, and choose mercy only when it can survive."
     },
     {
-      "id": "realm.umbral.selection.line",
+      "id": "realm_umbral_selection_line",
       "kind": "localization_draft",
       "key": "realm.umbral.selection.line",
       "text": "Claim the veil, keep power beneath ash, and let every oath cut before it is seen."
@@ -384,35 +384,35 @@
     },
     {
       "legacyId": "localization.realm.crownlands.selection.line",
-      "canonicalId": "realm.crownlands.selection.line",
+      "canonicalId": "realm_crownlands_selection_line",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "localization.realm.eldergrove.selection.line",
-      "canonicalId": "realm.eldergrove.selection.line",
+      "canonicalId": "realm_eldergrove_selection_line",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "localization.realm.lock.warning",
-      "canonicalId": "realm.lock.warning",
+      "canonicalId": "realm_lock_warning",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "localization.realm.stonehold.selection.line",
-      "canonicalId": "realm.stonehold.selection.line",
+      "canonicalId": "realm_stonehold_selection_line",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
     },
     {
       "legacyId": "localization.realm.umbral.selection.line",
-      "canonicalId": "realm.umbral.selection.line",
+      "canonicalId": "realm_umbral_selection_line",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
@@ -425,8 +425,29 @@
       "migrationIssue": "#183"
     },
     {
+      "legacyId": "realm.crownlands.selection.line",
+      "canonicalId": "realm_crownlands_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
       "legacyId": "realm.eldergrove",
       "canonicalId": "eldergrove",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.eldergrove.selection.line",
+      "canonicalId": "realm_eldergrove_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.lock.warning",
+      "canonicalId": "realm_lock_warning",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
@@ -439,8 +460,22 @@
       "migrationIssue": "#183"
     },
     {
+      "legacyId": "realm.stonehold.selection.line",
+      "canonicalId": "realm_stonehold_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
       "legacyId": "realm.umbral",
       "canonicalId": "umbral",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.umbral.selection.line",
+      "canonicalId": "realm_umbral_selection_line",
       "introducedVersion": 1,
       "retirementVersion": null,
       "migrationIssue": "#183"
