@@ -54,6 +54,7 @@ namespace AL.UI.Kingdom
         private Transform _nvs01ActionRoot;
         private readonly List<Button> _nvs01ActionButtons = new List<Button>();
         private bool _nvs01CatalogLoading;
+        private KingdomGreyboxDuelHost _greyboxDuelHost;
         private Color _messageAccentBaseColor = new Color(0.42f, 0.62f, 0.78f, 0.92f);
         private Color _messagePanelBaseColor = new Color(0.020f, 0.027f, 0.037f, 0.92f);
         private Color _messageWashBaseColor = new Color(0.28f, 0.56f, 0.78f, 0.05f);
@@ -1537,6 +1538,12 @@ namespace AL.UI.Kingdom
                 return;
             }
 
+            if (descriptor.Id == KingdomCommandPolicy.GreyboxDuel)
+            {
+                StartGreyboxDuel();
+                return;
+            }
+
             if (KingdomCommandPolicy.TryGetBuildingId(
                     descriptor.Id,
                     out string buildingId))
@@ -1561,6 +1568,22 @@ namespace AL.UI.Kingdom
             }
 
             SetMessage(CreateUnavailableCommandMessage(descriptor));
+        }
+
+        private void StartGreyboxDuel()
+        {
+            if (_greyboxDuelHost == null)
+            {
+                _greyboxDuelHost = gameObject.GetComponent<KingdomGreyboxDuelHost>();
+                if (_greyboxDuelHost == null)
+                {
+                    _greyboxDuelHost = gameObject.AddComponent<KingdomGreyboxDuelHost>();
+                }
+
+                _greyboxDuelHost.Bind(SetMessage);
+            }
+
+            _greyboxDuelHost.StartDuel();
         }
 
         private static string FormatConstructionResult(
@@ -1982,6 +2005,26 @@ namespace AL.UI.Kingdom
         private static CommandMessageProfile GetMessageProfile(string message)
         {
             string lower = message?.ToLowerInvariant() ?? string.Empty;
+            if (lower.Contains("champion duel"))
+            {
+                if (lower.Contains("victory"))
+                {
+                    return CreateMessageProfile("CHAMPION DUEL", "VICTORY", "RETURNED", new Color(0.72f, 0.88f, 0.42f, 0.95f), 0.78f);
+                }
+
+                if (lower.Contains("defeat"))
+                {
+                    return CreateMessageProfile("CHAMPION DUEL", "DEFEAT", "RETURNED", new Color(0.86f, 0.34f, 0.22f, 0.95f), 0.92f);
+                }
+
+                if (lower.Contains("concluded"))
+                {
+                    return CreateMessageProfile("CHAMPION DUEL", "RETURNED", "KINGDOM", new Color(0.66f, 0.92f, 1f, 0.95f), 0.78f);
+                }
+
+                return CreateMessageProfile("CHAMPION DUEL", "ENGAGED", "GREYBOX ARENA", new Color(0.92f, 0.66f, 0.30f, 0.95f), 0.78f);
+            }
+
             if (lower.Contains("war drill"))
             {
                 return lower.Contains("victory")
