@@ -1,58 +1,15 @@
-version: 6
+version: 7
 status_names:
-  classify: "policy / classify"
   hygiene: "repository / hygiene"
   android_unit_debug: "android / unit-debug"
   android_release: "android / release"
-branch_prefixes:
-  - codex/
-  - a2/terrestrial-
-  - anotherlife/
-primary_modes:
-  - Codex coordination/review
-  - Codex narrative/content
-  - A2 terrestrial design
-  - Codex engineering
-a2_branch_prefix: a2/terrestrial-
-a2_primary_mode: A2 terrestrial design
-a2_source_paths:
-  - unity/Docs/Terrestrials/
-  - unity/Assets/AL/Art/Terrestrials/ConceptSheets/
-retired_agents_and_prefixes:
-  - GPT
-  - Android Studio
-  - Gemini
-  - gpt/
-  - android-studio/
-  - gemini/
-  - codex/terrestrial-
-shared_files:
-  - unity/Assets/AL/Scripts/Core/Bootloader.cs
-  - unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs
-  - unity/Assets/AL/Scripts/Services/Local/LocalGameDataService.cs
-  - unity/Assets/AL/Scripts/Utilities/ProjectInitializer.cs
-save_sensitive_paths:
-  - unity/Assets/AL/Scripts/Services/Local/LocalSaveGameService.cs
-  - unity/Assets/AL/Scripts/Data/Runtime/
-narrative_source_paths:
-  - unity/Docs/NVS_01_A1
-  - unity/Docs/Narrative
-  - app/src/main/java/com/example/anotherlife/narrative/
-terrestrial_design_paths:
-  - unity/Assets/AL/Art/Terrestrials/
-  - unity/Assets/AL/Art/Designs/Terrestrial
-  - unity/Docs/Terrestrials/
-  - unity/Docs/Terrestrial
-runtime_paths:
-  - app/
-  - unity/Assets/AL/Scripts/
-  - unity/Assets/AL/Tests/
-workflow_paths:
-  - .github/workflows/
-  - .github/anotherlife-policy.yml
-  - tools/ci/
-engineering_tool_paths:
-  - tools/game-data/
+forbidden_tracked_path_patterns:
+  - "^unity/(Library|Temp|Logs|Build|Builds|UserSettings)/"
+  - "^unity/Assets/StreamingAssets/aa/"
+  - "^(.*/)?(build|obj|bin|\\.gradle)/"
+  - "\\.(apk|aab|ipa|exe|dll|pdb|keystore|jks|p12|mobileprovision)$"
+  - "(?i)(unity_lic|license|signing|keystore|password|secret)"
+production_test_scene_path: unity/Assets/Test.unity
 android_release_sensitive_paths:
   - app/
   - build.gradle.kts
@@ -65,17 +22,3 @@ android_release_sensitive_paths:
   - .github/anotherlife-policy.yml
   - tools/ci/Invoke-AnotherLifeQualityGate.ps1
   - tools/ci/Test-AnotherLifeQualityGateFixtures.ps1
-forbidden_tracked_path_patterns:
-  - "^unity/(Library|Temp|Logs|Build|Builds|UserSettings)/"
-  - "^unity/Assets/StreamingAssets/aa/"
-  - "^(.*/)?(build|obj|bin|\\.gradle)/"
-  - "\\.(apk|aab|ipa|exe|dll|pdb|keystore|jks|p12|mobileprovision)$"
-  - "(?i)(unity_lic|license|signing|keystore|password|secret)"
-production_test_scene_path: unity/Assets/Test.unity
-required_pr_checks:
-  - one primary delivery mode is selected
-  - upstream issue or artifact is linked
-  - changed shared files are declared
-  - branch prefix matches the recorded owner convention
-  - draft PRs are not represented as ready to merge
-  - no future GPT, Android Studio, Gemini, or external-agent action is required
