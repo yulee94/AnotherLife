@@ -149,3 +149,35 @@ The active roadmap gate remains blocked; this cross-lane retention evidence does
 ## Current authority after the cutoff
 
 Paid generation and uploads are on hold. No new exact source-admitted paid task is currently safe. The recorded current balance is 6,661 after the later 1,014-credit batch documented by merged PR #469; the 7,675 values in this ledger remain historical cutoff evidence only. When an A2-accepted candidate also has complete source/input hashes and rights evidence, the dedicated Meshy lane must submit the standing exact authorization packet before any GitHub or paid action. A1 must then reply with an exact scope and credit ceiling or `HOLD`; no automatic retry, campaign, recharge, purchase, renewal, billing change, asset promotion, or production approval follows from this ledger.
+
+## One-shot A1 authorizations — 2026-08-18 (two pilot subjects)
+
+This section records two later, individually-authorized one-shot Meshy operations that post-date this ledger's historical cutoff and the PR #469 spend policy. It changes none of the immutable cutoff evidence above; it opens exactly two specific pilot authorizations and nothing else.
+
+### Honest validation baseline (Meshy API check)
+
+- API status: `HTTP 200` from the balance endpoint `https://api.meshy.ai/openapi/v1/balance`.
+- Live balance: `6,481` credits, confirmed identically by the Meshy MCP `meshy_check_balance` and a direct REST GET using the repository `.env` key (`MESHY_API`, 40 chars, matches the MCP wiring).
+- `.env` not modified; no generation, POST, upload, or billing action was run.
+- This check consumed zero credits. The earlier PR #469 ledger recorded a `6,661` balance; the live check now reads `6,481`. The displayed balance is evidence only, not a spending target (spend-as-work-becomes-ready), and no broad campaign follows from it.
+
+### Authorized subjects (exactly two)
+
+| Authorization ID | Subject | Priority item / realm | Operation | Credit ceiling | State |
+| --- | --- | --- | --- | ---: | --- |
+| `a1_slagwhistle_slagfall_fauna_20260818_v001` | Slagfall Slagwhistle fauna (Stonehold) | `tdf_fauna_stonehold_slagwhistle_burrower` / `stonehold` | `image_to_3d` POST | 30 | `A1AuthorizedOneShot` |
+| `a1_champion_vanguard_crownlands_20260818_v001` | Champion Vanguard (Crownlands realm variant) | `champion_crownlands_vanguard` / `crownlands` | `image_to_3d` POST | 30 | `A1AuthorizedOneShot` |
+
+Both are single `image_to_3d` POSTs to `https://api.meshy.ai/openapi/v1/image-to-3d`, bound to the dedicated Meshy task `019fef94-af14-7671-a739-447391cfb7a5`, with `maximumAttempts=1`, `retryRequiresNewAuthorization=true`, `billingChangeAllowed=false`, and the full fail-closed stop rules (stop on success, any error, credit mismatch, source-hash mismatch, or rights uncertainty). Estimated, maximum, and authorized credits are each `30` per subject; `actualCredits` is null (no execution yet). Any retry or changed endpoint/input/payload requires a new A1 authorization (`CTMA-METHOD-001` / `CTMA-RETRY-001` / `CTMA-CREDIT-001`).
+
+The authoritative record is `unity/Docs/AI/Meshy/meshy_a1_authorization_2026-08-18_slagwhistle_vanguard_v001.json`, which binds the exact A2/owner-approved source packets and per-asset SHA-256 hashes for both subjects.
+
+### Hard boundaries (unchanged)
+
+Not authorized: bosses; elites (including all `tdf_elite_*` concept sheets); dragons (Wish Dragon and issue #456 realm guardians); any ecosystem/habitat beyond Slagfall Quarry; any other realm Vanguard sheet (stonehold / eldergrove / umbral); lava or glowing-crack transfer from `tdf-eco-slagfall-2026-07-30-v002`; reuse of the rejected Wish Dragon result; any Meshy operation other than the single `image_to_3d` per subject; and any billing change.
+
+### Scoping deviations flagged for user awareness
+
+- Neither pilot is bound to a CTMA cinematic shot/beat (`shotDependencyIds=[]`); both are gameplay/asset-lane candidate pilots, so the cinematic side of `reuseIntent=cinematic_and_named_gameplay_candidate` remains unbound.
+- `payloadSha256` is PENDING and must be bound by the executor before the single paid POST.
+- The 30-credit ceiling per subject is derived from the executed-batch evidence and must be re-verified against the actual cost at execution.
