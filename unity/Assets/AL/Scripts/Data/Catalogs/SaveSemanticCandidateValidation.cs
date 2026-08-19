@@ -759,6 +759,7 @@ namespace AL.Data.Catalogs
         public const int MaximumDomainRows = 4096;
         public const int MaximumResourceRows = 256;
         public const int MaximumStableIdCharacters = 256;
+        private const int IdentityAwareSaveSchemaVersion = 2;
 
         private static readonly HashSet<string> RecognizedTopLevelFields =
             new HashSet<string>(
@@ -1309,6 +1310,7 @@ namespace AL.Data.Catalogs
             ValidateTopLevelShape(
                 root,
                 isLegacySchema,
+                schemaVersion,
                 policy.Authority,
                 collector,
                 state);
@@ -1434,9 +1436,35 @@ namespace AL.Data.Catalogs
                    root.TryGet("LastSavedTimestamp", out ignored);
         }
 
+        private static bool IsCanonicalProfileIdValue(string value)
+        {
+            if (value == null ||
+                value.Length != 36 ||
+                !value.StartsWith("alp_", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            bool anyNonZero = false;
+            for (int index = 4; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!(character >= '0' && character <= '9' ||
+                      character >= 'a' && character <= 'f'))
+                {
+                    return false;
+                }
+
+                anyNonZero |= character != '0';
+            }
+
+            return anyNonZero;
+        }
+
         private static void ValidateTopLevelShape(
             StrictJsonObject root,
             bool isLegacySchema,
+            int schemaVersion,
             SaveSemanticValidationAuthority authority,
             DiagnosticCollector collector,
             ValidationState state)
@@ -1509,8 +1537,30 @@ namespace AL.Data.Catalogs
             RequireInt64(root, "LastSavedTimestamp", SaveSemanticDomain.Envelope, false, collector, state);
 
             StrictJsonValue profileIdValue;
-            if (root.TryGet("ProfileId", out profileIdValue))
+            bool hasProfileId = root.TryGet("ProfileId", out profileIdValue);
+            if (schemaVersion >= IdentityAwareSaveSchemaVersion)
             {
+                // Post-migration identity-aware schema: one canonical ProfileId
+                // is required. Absence, blank, or malformed identity is invalid
+                // and is never neutral-normalized into a writable profile.
+                var profileId = hasProfileId
+                    ? profileIdValue as StrictJsonString
+                    : null;
+                if (profileId == null ||
+                    !IsCanonicalProfileIdValue(profileId.Value))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_SCHEMA_V2_PROFILE_ID_INVALID",
+                        "$.ProfileId",
+                        SaveSemanticDomain.Metadata);
+                }
+            }
+            else if (hasProfileId)
+            {
+                // Schema-v1 and legacy profiles must serialize ProfileId as blank;
+                // a nonblank value is malformed and remains MigrationRequired.
                 var profileId = profileIdValue as StrictJsonString;
                 if (profileId == null || profileId.Value.Length != 0)
                 {
