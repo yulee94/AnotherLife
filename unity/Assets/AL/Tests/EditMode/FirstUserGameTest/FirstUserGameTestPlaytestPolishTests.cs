@@ -14,6 +14,7 @@ using AL.EditorTools;
 using AL.UI.FirstUserIdentity;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace AL.Tests.EditMode.FirstUserGameTest
@@ -222,6 +223,158 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             Assert.That(exit.navigation.selectOnDown, Is.EqualTo(choice));
         }
 
+        [Test]
+        public void CustomizationDraftRoundTripRetainsExactAppearanceAndNameForBackRetry()
+        {
+            GameObject exitRoot = Own(new GameObject("DraftRetentionExitRoot", typeof(RectTransform)));
+            Button exit = FirstUserGameTestRuntimeHost.CreateButton(
+                exitRoot.transform,
+                "Exit",
+                FirstUserGameTestPlaytestCopy.ExitAction,
+                FirstUserGameTestRuntimeHost.BuiltInFont(),
+                Vector2.zero,
+                new Vector2(214f, 52f),
+                Vector2.zero);
+            var identity = new FirstUserIdentityDraftSnapshot(
+                FirstUserIdentityDraftStep.CustomizationReady,
+                RealmId.Stonehold,
+                FirstUserRace.Dwarves,
+                ClassFamily.Warrior);
+            var presets = new[]
+            {
+                new BodyPresetData
+                {
+                    id = "preset_retained",
+                    displayName = "Retained Shape",
+                    scale = new[] { 1f, 1f, 1f }
+                }
+            };
+            FirstUserGameTestCustomizationPanel first =
+                FirstUserGameTestCustomizationPanel.Create(
+                    presets,
+                    identity,
+                    (_, __) => { },
+                    () => { },
+                    exit);
+            _ownedObjects.Add(first.gameObject);
+            first.SelectForTests("preset_retained");
+            first.HandleInput.text = "Stonehold Scout";
+
+            FirstUserGameTestCustomizationDraft retained = first.CaptureDraft();
+            UnityEngine.Object.DestroyImmediate(first.gameObject);
+
+            FirstUserGameTestCustomizationPanel restored =
+                FirstUserGameTestCustomizationPanel.Create(
+                    presets,
+                    identity,
+                    (_, __) => { },
+                    () => { },
+                    exit,
+                    retained);
+            _ownedObjects.Add(restored.gameObject);
+
+            Assert.That(restored.SelectedCustomizationId, Is.EqualTo("preset_retained"));
+            Assert.That(restored.HandleInput.text, Is.EqualTo("Stonehold Scout"));
+            Assert.That(restored.ConfirmButton.interactable, Is.True);
+            Assert.That(restored.CaptureDraft().CustomizationId, Is.EqualTo(
+                retained.CustomizationId));
+            Assert.That(restored.CaptureDraft().DevelopmentHandle, Is.EqualTo(
+                retained.DevelopmentHandle));
+        }
+
+        [Test]
+        public void RetainedCustomizationDraftRejectsCatalogDriftBeforePanelConstruction()
+        {
+            var retained = new FirstUserGameTestCustomizationDraft(
+                "preset_removed",
+                "Stonehold Scout");
+            var currentCatalog = new HashSet<string>(StringComparer.Ordinal)
+            {
+                "preset_current"
+            };
+
+            Assert.That(
+                FirstUserGameTestRuntimeHost.TryValidateRetainedCustomizationDraft(
+                    default,
+                    currentCatalog,
+                    out string emptyMessage),
+                Is.True);
+            Assert.That(emptyMessage, Is.Empty);
+
+            Assert.That(
+                FirstUserGameTestRuntimeHost.TryValidateRetainedCustomizationDraft(
+                    retained,
+                    currentCatalog,
+                    out string message),
+                Is.False);
+            Assert.That(message, Is.Not.Empty);
+            Assert.That(retained.CustomizationId, Is.EqualTo("preset_removed"));
+            Assert.That(retained.DevelopmentHandle, Is.EqualTo("Stonehold Scout"));
+        }
+
+        [Test]
+        public void EditorIdentityAdapterOwnsPreviewCopyWithoutChangingPlayerPresenter()
+        {
+            FirstUserIdentityDraftPresenter production =
+                FirstUserIdentityDraftPresenter.CreateStandalone();
+            _ownedObjects.Add(production.transform.root.gameObject);
+            Text productionAction = production.ConfirmRealmButton
+                .GetComponentInChildren<Text>(true);
+            Assert.That(
+                productionAction.text,
+                Is.EqualTo("Continue with this realm draft"));
+            Assert.That(
+                production.GetRealmChoiceButton(RealmId.Umbral)
+                    .GetComponent<EventTrigger>(),
+                Is.Null,
+                "Production AL.Runtime must retain its baseline click-only realm behavior.");
+
+            UnityEngine.Object.DestroyImmediate(production.transform.root.gameObject);
+            FirstUserIdentityDraftPresenter editor =
+                FirstUserGameTestIdentityAdapter.CreateStandalone();
+            _ownedObjects.Add(editor.transform.root.gameObject);
+            Text editorAction = editor.ConfirmRealmButton
+                .GetComponentInChildren<Text>(true);
+            Assert.That(editorAction.text, Is.EqualTo("Select Realm"));
+
+            Button previewButton = editor.GetRealmChoiceButton(RealmId.Umbral);
+            Assert.That(previewButton.GetComponent<EventTrigger>(), Is.Not.Null);
+            ExecuteEvents.Execute(
+                previewButton.gameObject,
+                new BaseEventData(EventSystem.current),
+                ExecuteEvents.selectHandler);
+            Assert.That(editor.CurrentDraft.HasRealm, Is.False,
+                "Editor hover/focus preview cannot select a production draft.");
+            previewButton.onClick.Invoke();
+            Assert.That(editor.CurrentDraft.Realm, Is.EqualTo(RealmId.Umbral));
+        }
+
+        [Test]
+        public void EditorIdentityAdapterRestoresExactClassDraftAfterCustomizationBack()
+        {
+            var retained = new FirstUserIdentityDraftSnapshot(
+                FirstUserIdentityDraftStep.CustomizationReady,
+                RealmId.Eldergrove,
+                FirstUserRace.Elves,
+                ClassFamily.Ranger);
+
+            Assert.That(
+                FirstUserGameTestIdentityAdapter.TryCreateRestoredClassDraft(
+                    retained,
+                    out FirstUserIdentityDraftPresenter presenter,
+                    out string message),
+                Is.True,
+                message);
+            _ownedObjects.Add(presenter.transform.root.gameObject);
+            Assert.That(presenter.CurrentDraft.Step, Is.EqualTo(
+                FirstUserIdentityDraftStep.ClassFamily));
+            Assert.That(presenter.CurrentDraft.Realm, Is.EqualTo(retained.Realm));
+            Assert.That(presenter.CurrentDraft.Race, Is.EqualTo(retained.Race));
+            Assert.That(
+                presenter.CurrentDraft.ClassFamily,
+                Is.EqualTo(retained.ClassFamily));
+        }
+
         [TestCase(false, false, false, false, true, "Ready to begin.",
             GameTestModeControlPanelPresentation.StartAction, true)]
         [TestCase(false, false, false, false, false, "Start is temporarily unavailable.",
@@ -292,6 +445,25 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             Assert.That(cleanupGate.TryCleanUp(() => cleanups++), Is.True);
             Assert.That(cleanupGate.TryCleanUp(() => cleanups++), Is.False);
             Assert.That(cleanups, Is.EqualTo(1));
+        }
+
+        [Test]
+        public void ControlPanelTruthfullyBlocksWhenRealAssetsAreNotAdmitted()
+        {
+            GameTestModeControlPanelView view = GameTestModeControlPanelPresentation.Build(
+                sessionActive: false,
+                recoveryPending: false,
+                invalidRecoveryRecord: false,
+                playModeActive: false,
+                canStart: false,
+                rawStatus: string.Empty,
+                rawBlocker:
+                    "The authored onboarding module and its admitted real assets are unavailable.");
+
+            Assert.That(view.CurrentState, Is.EqualTo("Start is temporarily unavailable."));
+            Assert.That(view.PrimaryActionEnabled, Is.False);
+            Assert.That(view.Blocker, Does.Contain("real champion"));
+            Assert.That(view.Blocker, Does.Contain("playtest remains locked"));
         }
 
         [Test]

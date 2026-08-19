@@ -22,6 +22,7 @@ namespace AL.UI.Kingdom
         public const string WarmasterPurchase = "warmaster.purchase_next";
         public const string BorderlandsCapture = "territory.borderlands.capture";
         public const string ChampionDeploy = "champion.deploy";
+        public const string GreyboxDuel = "champion.greybox_duel";
 
         // Blocking-issue diagnostics are re-derived from the spec section 15 reconnection matrix
         // and the LIVE GitHub issue state at implementation time (2026-07-21), not copied from the
@@ -57,6 +58,7 @@ namespace AL.UI.Kingdom
                 Mutating(SteelResearch, "Steel", KingdomCommandCategory.Progression, context.Capabilities.Research, "research-contract-missing", 137, 163, 165, 183),
                 Mutating(ArmorResearch, "Armor", KingdomCommandCategory.Progression, context.Capabilities.Research, "research-contract-missing", 137, 163, 165, 183),
                 Mutating(WarmasterPurchase, "Warmaster", KingdomCommandCategory.Progression, context.Capabilities.Warmaster, "warmaster-contract-missing", 137, 163, 171, 183),
+                Available(GreyboxDuel, "Duel", KingdomCommandCategory.RealmOps),
                 RealmDependent(BorderlandsCapture, "Capture", KingdomCommandCategory.RealmOps, context.Capabilities.TerritoryCapture, context.HasCommittedRealm, "territory-contract-missing", 137, 163, 166, 173),
                 RealmDependent(ChampionDeploy, "Champion", KingdomCommandCategory.RealmOps, context.Capabilities.ChampionDeployment, context.HasCommittedRealm, "champion-prerequisites-missing", 150, 173, 180)
             };

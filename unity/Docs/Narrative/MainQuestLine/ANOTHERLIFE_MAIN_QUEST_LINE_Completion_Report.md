@@ -6,7 +6,8 @@
 - Primary Codex mode: narrative/content
 - Packet version: `anotherlife-main-quest-line-2026-07-23-v001`
 - Canonical manifest: `unity/Docs/Narrative/MainQuestLine/ANOTHERLIFE_MAIN_QUEST_LINE.packet.json`
-- Starting `main`: `529312b82f1004e56ab16a97b04a3cde79e39dde`
+- v004/CH01 amendment base: `238c7e32d2f3d33e4da6e186ae34ed279b09f35e`
+- Accepted source dependency: draft PR #479 at `ac56c77f08a5fe46a76458f2b91b5240bc2ae382`
 
 ## Completion statement
 
@@ -14,7 +15,8 @@ The canonical narrative source is complete from the existing `OMEN_1` prologue t
 
 - 15 ordered chapters and 15 critical-path quests;
 - 30 optional supporting side quests, two per chapter;
-- 153 objectives and 410 localization-facing authorities;
+- 158 objectives and 415 localization-facing authorities, including five
+  explicitly `UNAPPROVED_COPY_BLOCKED` Chapter 1 objective keys;
 - seven four-realm variant quest families preserving 29 legacy chapter references;
 - eight named realm gems with temporary custody and mandatory return rules;
 - Edras Veyr, the Hollow Regent, as the central antagonist;
@@ -31,7 +33,7 @@ Edras Veyr, first commander of the Veil Watch, concluded that choice made peace 
 ## Campaign spine
 
 1. `CH00_FIRST_SIGNAL` / `OMEN_1` — The First Signal.
-2. `CH01_PROOF_OF_WORTH` / `MQ_C1_PROOF_OF_WORTH` — realm-specific proof and guardian covenant.
+2. `CH01_PROOF_OF_WORTH` / `MQ_C1_PROOF_OF_WORTH` — realm-specific proof and guardian covenant, followed by formal Lord appointment, one kingdom grant, a bounded Kingdom Management introduction, and a shared-menu round trip before Chapter 2.
 3. `CH02_BORDER_OATHS` / `MQ_C2_BORDER_OATHS` — ring conspiracy and manufactured border conflict.
 4. `CH03_FIRST_RESONANCE` / `MQ_C3_FIRST_RESONANCE` — first realm gem and eightfold foreshadowing.
 5. `CH04_KINGDOM_UNDER_OATH` / `MQ_C4_KINGDOM_UNDER_OATH` — 2.5D kingdom growth, research, troops, and economy.
@@ -45,6 +47,12 @@ Edras Veyr, first commander of the Veil Watch, concluded that choice made peace 
 13. `CH12_EIGHT_LIGHTS` / `MQ_C12_EIGHT_LIGHTS` — level 50, Warzone points, Warmaster gear, True Warmaster, and all eight gems.
 14. `CH13_ACCORDANT_ISLE` / `MQ_C13_ACCORDANT_ISLE` — neutral island, cross-realm trade, shared language, and Vaeloryn.
 15. `CH14_FINAL_WISH` / `MQ_C14_FINAL_WISH` — Hollow Regent defeat, voluntary wish, gem return, and postgame.
+
+The Chapter 1 extension does not replace or pre-complete
+`MQ_C4_KINGDOM_UNDER_OATH`. Chapter 4 remains the existing strategic kingdom
+chapter. The five new Chapter 1 objective IDs and machine handoffs establish
+only the quest-earned appointment, grant, unlock, introduction, and first
+3D-to-Kingdom-to-3D round trip. Their player-facing values remain copy-blocked.
 
 ## Side-quest contract
 
@@ -82,13 +90,23 @@ python tools/narrative/test_main_quest_line_packet.py
 Result:
 
 ```text
-Main quest packet accepted: components=15, chapters=15, mainQuests=15, sideQuests=30, objectives=153, realmGems=8, localizationAuthorities=410, negativeFixtures=13
+Main quest packet accepted: components=15, chapters=15, mainQuests=15, sideQuests=30, objectives=158, realmGems=8, localizationAuthorities=415, copyBlockedAuthorities=5, negativeFixtures=19
 ```
 
-The validator verifies component hashes, packet/index parity, contiguous order, the critical chain, unique IDs, localization authority, two optional side quests per chapter, non-gating feedback, all product milestones, two gems per realm, realm variants, `OMEN_1` authority, final-act identities, and ending invariants. Thirteen deliberately broken fixtures are rejected.
+The validator verifies line-ending-stable component hashes, packet/index parity,
+contiguous order, the critical chain, unique IDs, localization authority, the
+exact five copy-blocked C1 objectives and seven machine handoffs, two optional
+side quests per chapter, non-gating feedback, all product milestones, two gems
+per realm, realm variants, `OMEN_1` v004 authority, final-act identities, and
+ending invariants. Nineteen deliberately broken fixtures are rejected.
 
 ## Boundaries and handoff
 
-Changed files are limited to one manifest, 15 chapter components, one focused validator, and this report. No Unity or Android runtime code, scene, save schema, catalog, shared contract, asset, balance value, workflow, dependency, build setting, or designated shared file changed. Runtime performance, memory, package size, install size, and device compatibility are unchanged.
+The v004/CH01 amendment changes only the OMEN_1 packet and report, CH00 and
+CH01 components, the main manifest and report, and the two focused narrative
+validators. No Unity or Android runtime code, generated catalog, scene, save
+schema, shared contract, asset, balance value, workflow, dependency, build
+setting, or designated shared file changed. Runtime performance, memory,
+package size, install size, and device compatibility are unchanged.
 
 Codex coordination/review should next split implementation into dependency-ordered specifications. Engineering must consume this source rather than re-authoring story text in services. Every runtime slice still requires current catalog, save, progression, battle, scene, notification, packaging, fidelity-review, and user-playtest evidence.

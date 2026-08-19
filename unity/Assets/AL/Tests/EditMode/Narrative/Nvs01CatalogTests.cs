@@ -33,17 +33,21 @@ namespace AL.Tests.EditMode.Narrative
 
             Assert.NotNull(canonical, DiagnosticSummary(diagnostic));
             Assert.IsNull(diagnostic);
+            CollectionAssert.AreEqual(
+                source,
+                artifact,
+                "The tracked StreamingAssets artifact must remain byte-identical to the authoritative v004 source.");
             CollectionAssert.AreEqual(artifact, canonical, "The runtime artifact must be the normalized A1 source bytes, not a separately-authored copy.");
 
-            Assert.AreEqual(8317, ContractField<int>("CanonicalByteLength"));
+            Assert.AreEqual(8247, ContractField<int>("CanonicalByteLength"));
             Assert.AreEqual(ContractField<int>("CanonicalByteLength"), artifact.Length);
             Assert.AreEqual(
                 ContractField<string>("CanonicalSha256"),
                 ComputeSha256(artifact));
             Assert.AreEqual(
-                "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732",
+                "25a5170334fca571abe1035eacf448955e8eab1124ff08643f7d16be9a1b69dd",
                 ContractField<string>("CanonicalSha256"));
-            Assert.AreEqual("omen1-a1-2026-07-29-v003", ContractField<string>("PacketVersion"));
+            Assert.AreEqual("omen1-a1-2026-08-13-v004", ContractField<string>("PacketVersion"));
             Assert.AreEqual("AL/Narrative/OMEN_1.catalog.json", ContractField<string>("StreamingAssetsRelativePath"));
 
             object result = Validate(artifact, true);
@@ -165,14 +169,14 @@ namespace AL.Tests.EditMode.Narrative
 
             AssertRejected(
                 Mutate(
-                    "  \"packetVersion\": \"omen1-a1-2026-07-29-v003\",",
+                    "  \"packetVersion\": \"omen1-a1-2026-08-13-v004\",",
                     "  \"packetVersion\": \"omen1-a1-2026-07-22-v002\","),
                 false,
                 "VERSION-UNSUPPORTED");
 
             AssertRejected(
                 Mutate(
-                    "  \"packetVersion\": \"omen1-a1-2026-07-29-v003\",",
+                    "  \"packetVersion\": \"omen1-a1-2026-08-13-v004\",",
                     "  \"packetVersion\": \"omen1-a1-2026-07-22-v999\","),
                 false,
                 "VERSION-UNSUPPORTED");
@@ -364,7 +368,7 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual(3, Items(GetProperty(catalog, "Objectives")).Length);
             Assert.AreEqual(8, Items(GetProperty(catalog, "Dialogue")).Length);
             Assert.AreEqual(8, Items(GetProperty(catalog, "Transitions")).Length);
-            Assert.AreEqual(10, Items(GetProperty(catalog, "ExternalCapabilities")).Length);
+            Assert.AreEqual(9, Items(GetProperty(catalog, "ExternalCapabilities")).Length);
             Assert.AreEqual(5, Items(GetProperty(catalog, "Consequences")).Length);
             Assert.AreEqual(28, ((IDictionary)GetProperty(catalog, "Localization")).Count);
             CollectionAssert.AreEqual(
@@ -405,6 +409,15 @@ namespace AL.Tests.EditMode.Narrative
             Assert.AreEqual("objective.omen1.report", GetProperty(value, "TextKey"));
             Assert.True(TryQuery(catalog, "TryGetDialogue", out value, "DLG_OMEN_1_REPORT"));
             Assert.True(TryQuery(catalog, "TryGetExternalCapability", out value, "HOOK_SKY_CASTLE_ARENA"));
+            Assert.True(TryQuery(catalog, "TryGetExternalCapability", out value, "CH1_REALM_INTRO"));
+            Assert.False(TryQuery(catalog, "TryGetExternalCapability", out value, "KINGDOM_COMMAND_VIEW"));
+            Assert.IsNull(value);
+            Assert.AreEqual(
+                "CH1_REALM_INTRO",
+                GetProperty(GetProperty(catalog, "Placement"), "CompletionUnlockId"));
+            Assert.AreEqual(
+                "CH1_REALM_INTRO",
+                GetProperty(GetProperty(catalog, "Placement"), "CompletionDestination"));
             Assert.True(TryQuery(catalog, "TryGetConsequence", out value, "GRANT_GOLD_500"));
             Assert.AreEqual(500L, GetProperty(value, "Amount"));
             Assert.True(TryQuery(catalog, "TryGetTransition", out value, "OFFERED", "QUEST_ACCEPTED"));
