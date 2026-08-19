@@ -249,6 +249,91 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void UnmigratablePreSchemaPrimaryCreatesCurrentSchemaReplacement()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            string primaryPath = Path.Combine(root, "save.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            const string preSchemaJson =
+                "{" +
+                "\"SelectedRealm\":3," +
+                "\"Resources\":[{\"Type\":0,\"Amount\":77}]," +
+                "\"Buildings\":[],\"Troops\":[],\"Researches\":[]," +
+                "\"Quests\":[],\"Reputation\":[],\"FactionReputations\":[]," +
+                "\"LordPersona\":{\"Warlord\":0,\"Diplomat\":0,\"Sage\":0,\"Rogue\":0}," +
+                "\"Territories\":[],\"RealmGems\":[]," +
+                "\"Wishgate\":{\"IsEarned\":false,\"EarnReason\":\"\"," +
+                "\"LastRewardId\":\"\",\"LastRewardChosenTimestamp\":0}," +
+                "\"CurrentChapterId\":\"C1\"," +
+                "\"Warmaster\":{\"EquippedSetId\":\"\",\"UnlockedSetIds\":[]," +
+                "\"PurchasedPieceIds\":[],\"IsTrueWarmaster\":false," +
+                "\"Level\":0,\"Experience\":0}," +
+                "\"ChampionCustomization\":{}," +
+                "\"WarzoneCredits\":9,\"LastSavedTimestamp\":1784868853}";
+            fileSystem.Files[primaryPath] = preSchemaJson;
+            fileSystem.DurableWriteObserver = (path, _) =>
+            {
+                if (string.Equals(path, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    fileSystem.GetDurableWriteCount(path) == 1)
+                {
+                    fileSystem.WriteFailuresBeforeMutation.Add(path);
+                }
+                else
+                {
+                    fileSystem.WriteFailuresBeforeMutation.Remove(path);
+                }
+            };
+
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            InvokeAllowingFailureLogs(service, "Load");
+
+            string status = GetProperty(service, "LastLoadStatus").ToString();
+            Assert.That(
+                status,
+                Is.Not.StartsWith("LoadedPrimary"),
+                "An unmigratable pre-schema primary must never be reported as a loaded primary.");
+            Assert.AreEqual(
+                "CreatedNewAfterUnrecoverableCorruption",
+                status);
+            Assert.That(
+                (string)GetProperty(service, "LastLoadMessage"),
+                Does.Contain("AL-SAVE-CREATED-NEW-AFTER-UNRECOVERABLE"));
+
+            object currentSave = GetProperty(service, "CurrentSave");
+            Assert.NotNull(
+                currentSave,
+                "BootLoadReadinessProbe requires a published current-schema save.");
+            Assert.AreEqual(
+                CurrentSaveFormatId,
+                GetField(currentSave, "SaveFormatId"));
+            Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
+            Assert.AreEqual(
+                1,
+                GetField(currentSave, "ProfileInitializationVersion"));
+            Assert.AreEqual(
+                "None",
+                GetField(currentSave, "SelectedRealm").ToString(),
+                "Replacement profile must return the player to realm selection.");
+
+            Assert.False(fileSystem.Files.ContainsKey(primaryPath) &&
+                         fileSystem.Files[primaryPath] == preSchemaJson);
+            string[] quarantines = fileSystem.Files.Keys
+                .Where(path =>
+                    Path.GetFileName(path).StartsWith(
+                        "save.json.corrupt-",
+                        StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            Assert.AreEqual(1, quarantines.Length);
+            Assert.AreEqual(preSchemaJson, fileSystem.Files[quarantines[0]]);
+        }
+
+        [Test]
         public void EnsureSaveDefaultsInitializesNarrativeCompatibilityFields()
         {
             Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
