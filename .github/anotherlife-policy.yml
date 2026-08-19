@@ -7,6 +7,7 @@ status_names:
 branch_prefixes:
   - codex/
   - a2/terrestrial-
+  - anotherlife/
 primary_modes:
   - Codex coordination/review
   - Codex narrative/content
