@@ -1,0 +1,712 @@
+{
+  "gameId": "another-life",
+  "catalogId": "skill_weather_v1",
+  "family": "skill_weather",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_d4892ee5",
+  "records": [
+    {
+      "id": "realm_strike",
+      "kind": "skill_loadout",
+      "slot": 0,
+      "display_name": "Realm Strike",
+      "role": "melee_damage",
+      "vfx_key": "realm_slash",
+      "cooldown_seconds": 4.0,
+      "mana_cost": 20.0,
+      "cast_time_seconds": 0.05,
+      "range_meters": 2.6,
+      "power": 150.0,
+      "bot_damage_multiplier": 0.72
+    },
+    {
+      "id": "renewing_guard",
+      "kind": "skill_loadout",
+      "slot": 1,
+      "display_name": "Renewing Guard",
+      "role": "self_heal_guard",
+      "vfx_key": "renewing_guard",
+      "cooldown_seconds": 8.0,
+      "mana_cost": 30.0,
+      "cast_time_seconds": 0.35,
+      "range_meters": 0.0,
+      "power": 180.0,
+      "bot_damage_multiplier": 0.0
+    },
+    {
+      "id": "warzone_burst",
+      "kind": "skill_loadout",
+      "slot": 2,
+      "display_name": "Warzone Burst",
+      "role": "area_damage",
+      "vfx_key": "warzone_shockwave",
+      "cooldown_seconds": 10.0,
+      "mana_cost": 45.0,
+      "cast_time_seconds": 0.45,
+      "range_meters": 4.2,
+      "power": 115.0,
+      "bot_damage_multiplier": 0.72
+    },
+    {
+      "id": "warmaster_breaker",
+      "kind": "skill_loadout",
+      "slot": 3,
+      "display_name": "Warmaster Breaker",
+      "role": "elite_break_damage",
+      "vfx_key": "warmaster_breaker",
+      "cooldown_seconds": 14.0,
+      "mana_cost": 60.0,
+      "cast_time_seconds": 0.65,
+      "range_meters": 3.4,
+      "power": 260.0,
+      "bot_damage_multiplier": 0.72
+    },
+    {
+      "id": "stonehold_forge_burst",
+      "kind": "skill_effect",
+      "key": "stonehold_forge_burst",
+      "realm": "Stonehold",
+      "use": "melee impact and defensive Warmaster skills",
+      "colors": [
+        "slate",
+        "iron",
+        "copper",
+        "forge_orange"
+      ]
+    },
+    {
+      "id": "eldergrove_healing_bloom",
+      "kind": "skill_effect",
+      "key": "eldergrove_healing_bloom",
+      "realm": "Eldergrove",
+      "use": "healing, protection, ranger support",
+      "colors": [
+        "leaf_green",
+        "pale_gold",
+        "white",
+        "lake_blue"
+      ]
+    },
+    {
+      "id": "crownlands_royal_strike",
+      "kind": "skill_effect",
+      "key": "crownlands_royal_strike",
+      "realm": "Crownlands",
+      "use": "balanced attack, heroic buffs, banner effects",
+      "colors": [
+        "royal_blue",
+        "gold",
+        "white",
+        "red_accent"
+      ]
+    },
+    {
+      "id": "umbral_curse_mark",
+      "kind": "skill_effect",
+      "key": "umbral_curse_mark",
+      "realm": "Umbral",
+      "use": "curse, debuff, stealth, poison, anti-heal",
+      "colors": [
+        "black",
+        "violet",
+        "crimson",
+        "ember_red"
+      ]
+    },
+    {
+      "id": "stonehold_mountain_snow_wind",
+      "kind": "weather_profile",
+      "key": "stonehold_mountain_snow_wind",
+      "realm": "Stonehold",
+      "display_name": "Mountain Snow Wind",
+      "particles": [
+        "snow",
+        "wind_streak",
+        "cold_fog"
+      ],
+      "color": [
+        0.82,
+        0.92,
+        1.0,
+        0.58
+      ],
+      "particle_start_color": [
+        0.82,
+        0.92,
+        1.0,
+        0.58
+      ],
+      "particle_end_color": [
+        0.95,
+        0.98,
+        1.0,
+        0.2
+      ],
+      "max_particles": 260,
+      "radius": 30.0,
+      "fall_speed": 2.2,
+      "particle_size": 0.085,
+      "particle_lifetime": 7.5,
+      "emission_rate_multiplier": 0.16,
+      "horizontal_drift": 1.05,
+      "noise_strength": 0.34,
+      "noise_frequency": 0.11,
+      "wind": {
+        "yaw_degrees": 310.0,
+        "main": 0.62,
+        "turbulence": 0.42,
+        "pulse_amplitude": 0.18,
+        "pulse_frequency": 0.35
+      },
+      "lighting": {
+        "apply_fog": true,
+        "fog_color": [
+          0.58,
+          0.66,
+          0.72,
+          1.0
+        ],
+        "fog_density": 0.019,
+        "ambient_color": [
+          0.42,
+          0.47,
+          0.52,
+          1.0
+        ],
+        "directional_light_color": [
+          0.78,
+          0.86,
+          0.95,
+          1.0
+        ],
+        "directional_light_intensity": 0.92
+      },
+      "lightning": {
+        "enabled": false,
+        "color": [
+          0.82,
+          0.88,
+          1.0,
+          1.0
+        ],
+        "flash_intensity": 0.0,
+        "duration": 0.07,
+        "min_delay": 9.0,
+        "max_delay": 18.0
+      }
+    },
+    {
+      "id": "eldergrove_sunrain",
+      "kind": "weather_profile",
+      "key": "eldergrove_sunrain",
+      "realm": "Eldergrove",
+      "display_name": "Worldroot Sunrain",
+      "particles": [
+        "rain",
+        "glowing_pollen",
+        "soft_mist"
+      ],
+      "color": [
+        0.46,
+        0.98,
+        0.66,
+        0.44
+      ],
+      "particle_start_color": [
+        0.46,
+        0.98,
+        0.66,
+        0.44
+      ],
+      "particle_end_color": [
+        1.0,
+        0.9,
+        0.34,
+        0.2
+      ],
+      "max_particles": 190,
+      "radius": 27.0,
+      "fall_speed": 1.35,
+      "particle_size": 0.11,
+      "particle_lifetime": 6.8,
+      "emission_rate_multiplier": 0.13,
+      "horizontal_drift": 0.38,
+      "noise_strength": 0.22,
+      "noise_frequency": 0.06,
+      "wind": {
+        "yaw_degrees": 70.0,
+        "main": 0.18,
+        "turbulence": 0.26,
+        "pulse_amplitude": 0.05,
+        "pulse_frequency": 0.35
+      },
+      "lighting": {
+        "apply_fog": true,
+        "fog_color": [
+          0.24,
+          0.48,
+          0.34,
+          1.0
+        ],
+        "fog_density": 0.009,
+        "ambient_color": [
+          0.4,
+          0.5,
+          0.36,
+          1.0
+        ],
+        "directional_light_color": [
+          0.94,
+          0.92,
+          0.74,
+          1.0
+        ],
+        "directional_light_intensity": 1.08
+      },
+      "lightning": {
+        "enabled": false,
+        "color": [
+          0.82,
+          0.88,
+          1.0,
+          1.0
+        ],
+        "flash_intensity": 0.0,
+        "duration": 0.07,
+        "min_delay": 9.0,
+        "max_delay": 18.0
+      }
+    },
+    {
+      "id": "crownlands_clear_storm",
+      "kind": "weather_profile",
+      "key": "crownlands_clear_storm",
+      "realm": "Crownlands",
+      "display_name": "Royal Road Storm",
+      "particles": [
+        "light_rain",
+        "cloud_flash",
+        "banner_wind"
+      ],
+      "color": [
+        0.55,
+        0.62,
+        0.82,
+        0.4
+      ],
+      "particle_start_color": [
+        0.55,
+        0.62,
+        0.82,
+        0.4
+      ],
+      "particle_end_color": [
+        0.9,
+        0.78,
+        0.38,
+        0.14
+      ],
+      "max_particles": 150,
+      "radius": 28.0,
+      "fall_speed": 1.65,
+      "particle_size": 0.12,
+      "particle_lifetime": 5.6,
+      "emission_rate_multiplier": 0.11,
+      "horizontal_drift": 0.58,
+      "noise_strength": 0.28,
+      "noise_frequency": 0.1,
+      "wind": {
+        "yaw_degrees": 210.0,
+        "main": 0.34,
+        "turbulence": 0.34,
+        "pulse_amplitude": 0.12,
+        "pulse_frequency": 0.35
+      },
+      "lighting": {
+        "apply_fog": true,
+        "fog_color": [
+          0.3,
+          0.33,
+          0.44,
+          1.0
+        ],
+        "fog_density": 0.011,
+        "ambient_color": [
+          0.38,
+          0.4,
+          0.48,
+          1.0
+        ],
+        "directional_light_color": [
+          0.82,
+          0.86,
+          1.0,
+          1.0
+        ],
+        "directional_light_intensity": 1.0
+      },
+      "lightning": {
+        "enabled": true,
+        "color": [
+          0.82,
+          0.88,
+          1.0,
+          1.0
+        ],
+        "flash_intensity": 2.9,
+        "duration": 0.07,
+        "min_delay": 8.0,
+        "max_delay": 16.0
+      }
+    },
+    {
+      "id": "umbral_ashfall",
+      "kind": "weather_profile",
+      "key": "umbral_ashfall",
+      "realm": "Umbral",
+      "display_name": "Void Rift Ashfall",
+      "particles": [
+        "ash",
+        "ember",
+        "smoke_wisp"
+      ],
+      "color": [
+        0.25,
+        0.18,
+        0.18,
+        0.62
+      ],
+      "particle_start_color": [
+        0.25,
+        0.18,
+        0.18,
+        0.62
+      ],
+      "particle_end_color": [
+        0.95,
+        0.16,
+        0.08,
+        0.18
+      ],
+      "max_particles": 280,
+      "radius": 25.0,
+      "fall_speed": 0.92,
+      "particle_size": 0.13,
+      "particle_lifetime": 8.2,
+      "emission_rate_multiplier": 0.17,
+      "horizontal_drift": 0.72,
+      "noise_strength": 0.46,
+      "noise_frequency": 0.14,
+      "wind": {
+        "yaw_degrees": 135.0,
+        "main": 0.42,
+        "turbulence": 0.58,
+        "pulse_amplitude": 0.14,
+        "pulse_frequency": 0.35
+      },
+      "lighting": {
+        "apply_fog": true,
+        "fog_color": [
+          0.12,
+          0.08,
+          0.1,
+          1.0
+        ],
+        "fog_density": 0.032,
+        "ambient_color": [
+          0.22,
+          0.14,
+          0.16,
+          1.0
+        ],
+        "directional_light_color": [
+          0.84,
+          0.38,
+          0.28,
+          1.0
+        ],
+        "directional_light_intensity": 0.72
+      },
+      "lightning": {
+        "enabled": true,
+        "color": [
+          1.0,
+          0.2,
+          0.12,
+          1.0
+        ],
+        "flash_intensity": 1.8,
+        "duration": 0.07,
+        "min_delay": 13.0,
+        "max_delay": 24.0
+      }
+    },
+    {
+      "id": "neutral_battle_fog",
+      "kind": "weather_profile",
+      "key": "neutral_battle_fog",
+      "realm": "Shared",
+      "display_name": "Neutral Battle Fog",
+      "particles": [
+        "dust",
+        "smoke",
+        "distant_marker_haze"
+      ],
+      "color": [
+        0.45,
+        0.42,
+        0.38,
+        0.38
+      ],
+      "particle_start_color": [
+        0.45,
+        0.42,
+        0.38,
+        0.38
+      ],
+      "particle_end_color": [
+        0.72,
+        0.78,
+        0.82,
+        0.16
+      ],
+      "max_particles": 140,
+      "radius": 24.0,
+      "fall_speed": 1.1,
+      "particle_size": 0.15,
+      "particle_lifetime": 6.0,
+      "emission_rate_multiplier": 0.125,
+      "horizontal_drift": 0.35,
+      "noise_strength": 0.16,
+      "noise_frequency": 0.08,
+      "wind": {
+        "yaw_degrees": 25.0,
+        "main": 0.22,
+        "turbulence": 0.18,
+        "pulse_amplitude": 0.04,
+        "pulse_frequency": 0.35
+      },
+      "lighting": {
+        "apply_fog": true,
+        "fog_color": [
+          0.28,
+          0.3,
+          0.32,
+          1.0
+        ],
+        "fog_density": 0.012,
+        "ambient_color": [
+          0.36,
+          0.38,
+          0.4,
+          1.0
+        ],
+        "directional_light_color": [
+          0.86,
+          0.89,
+          0.92,
+          1.0
+        ],
+        "directional_light_intensity": 1.0
+      },
+      "lightning": {
+        "enabled": false,
+        "color": [
+          0.82,
+          0.88,
+          1.0,
+          1.0
+        ],
+        "flash_intensity": 0.0,
+        "duration": 0.07,
+        "min_delay": 9.0,
+        "max_delay": 18.0
+      }
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "0",
+      "canonicalId": "realm_strike",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "1",
+      "canonicalId": "renewing_guard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "2",
+      "canonicalId": "warzone_burst",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "3",
+      "canonicalId": "warmaster_breaker",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Mountain Snow Wind",
+      "canonicalId": "stonehold_mountain_snow_wind",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Neutral Battle Fog",
+      "canonicalId": "neutral_battle_fog",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Realm Strike",
+      "canonicalId": "realm_strike",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Renewing Guard",
+      "canonicalId": "renewing_guard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Royal Road Storm",
+      "canonicalId": "crownlands_clear_storm",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Void Rift Ashfall",
+      "canonicalId": "umbral_ashfall",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Warmaster Breaker",
+      "canonicalId": "warmaster_breaker",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Warzone Burst",
+      "canonicalId": "warzone_burst",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Worldroot Sunrain",
+      "canonicalId": "eldergrove_sunrain",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_effect.crownlands_royal_strike",
+      "canonicalId": "crownlands_royal_strike",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_effect.eldergrove_healing_bloom",
+      "canonicalId": "eldergrove_healing_bloom",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_effect.stonehold_forge_burst",
+      "canonicalId": "stonehold_forge_burst",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_effect.umbral_curse_mark",
+      "canonicalId": "umbral_curse_mark",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_loadout.realm_strike",
+      "canonicalId": "realm_strike",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_loadout.renewing_guard",
+      "canonicalId": "renewing_guard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_loadout.warmaster_breaker",
+      "canonicalId": "warmaster_breaker",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "skill_loadout.warzone_burst",
+      "canonicalId": "warzone_burst",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weather_profile.crownlands_clear_storm",
+      "canonicalId": "crownlands_clear_storm",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weather_profile.eldergrove_sunrain",
+      "canonicalId": "eldergrove_sunrain",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weather_profile.neutral_battle_fog",
+      "canonicalId": "neutral_battle_fog",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weather_profile.stonehold_mountain_snow_wind",
+      "canonicalId": "stonehold_mountain_snow_wind",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "weather_profile.umbral_ashfall",
+      "canonicalId": "umbral_ashfall",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

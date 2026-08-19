@@ -8,6 +8,7 @@ using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
 
 [assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
+[assembly: InternalsVisibleTo("AL.Development.FirstUserGameTest.Editor")]
 
 namespace AL.Narrative.Nvs01
 {
