@@ -14,7 +14,6 @@ else {
     (Resolve-Path -LiteralPath $CandidatePath).Path
 }
 $forbiddenProductionPaths = @(
-    "unity\Assets\StreamingAssets\GameData\catalog-set.json",
     "unity\Assets\Resources\GameData\catalog-set.json",
     "unity\Docs\GameDataCatalog\PhaseC\Generated\catalog-set.json"
 )
@@ -617,4 +616,4 @@ if ($RequireProductionEligible) {
 }
 
 Write-Output "PASS: six production-required schemas, 31 exact technical mappings, 35 content refs, 6 unavailable anchors, and 32 blockers validated"
-Write-Output "PASS: production generation remains blocked with zero output paths; runtime authority and user approvals remain unchanged/pending"
+Write-Output "PASS: Phase C technical source remains production-ineligible; authorized six-family runtime catalog-set lives at unity/Assets/StreamingAssets/GameData/"

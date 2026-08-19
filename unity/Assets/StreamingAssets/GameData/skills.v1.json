@@ -1,0 +1,264 @@
+{
+  "gameId": "another-life",
+  "catalogId": "skills_v1",
+  "family": "skills",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_1ec2c64f",
+  "records": [
+    {
+      "id": "skill_realm_strike",
+      "name_ref": "skill.realm_strike.name",
+      "behavior_profile_id": "skill_behavior_realm_strike",
+      "presentation_profile_id": "skill_presentation_realm_strike",
+      "target_type": "enemy",
+      "cooldown_seconds": 4.0,
+      "power": 150.0,
+      "mana_cost": 20.0,
+      "cast_time_seconds": 0.05,
+      "range_meters": 2.6,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/realm_slash.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/realm_strike.wav"
+    },
+    {
+      "id": "skill_renewing_guard",
+      "name_ref": "skill.renewing_guard.name",
+      "behavior_profile_id": "skill_behavior_renewing_guard",
+      "presentation_profile_id": "skill_presentation_renewing_guard",
+      "target_type": "self",
+      "cooldown_seconds": 8.0,
+      "power": 180.0,
+      "mana_cost": 30.0,
+      "cast_time_seconds": 0.35,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/renewing_guard.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/renewing_guard.wav"
+    },
+    {
+      "id": "skill_warzone_burst",
+      "name_ref": "skill.warzone_burst.name",
+      "behavior_profile_id": "skill_behavior_warzone_burst",
+      "presentation_profile_id": "skill_presentation_warzone_burst",
+      "target_type": "aoe",
+      "cooldown_seconds": 10.0,
+      "power": 115.0,
+      "mana_cost": 45.0,
+      "cast_time_seconds": 0.45,
+      "range_meters": 4.2,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/warzone_shockwave.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/warzone_burst.wav"
+    },
+    {
+      "id": "skill_warmaster_breaker",
+      "name_ref": "skill.warmaster_breaker.name",
+      "behavior_profile_id": "skill_behavior_warmaster_breaker",
+      "presentation_profile_id": "skill_presentation_warmaster_breaker",
+      "target_type": "enemy",
+      "cooldown_seconds": 14.0,
+      "power": 260.0,
+      "mana_cost": 60.0,
+      "cast_time_seconds": 0.65,
+      "range_meters": 3.4,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/warmaster_breaker.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/warmaster_breaker.wav"
+    },
+    {
+      "id": "skill_iron_bulwark",
+      "name_ref": "skill.iron_bulwark.name",
+      "behavior_profile_id": "skill_behavior_iron_bulwark",
+      "presentation_profile_id": "skill_presentation_iron_bulwark",
+      "target_type": "self",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/iron_bulwark.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/iron_bulwark.wav"
+    },
+    {
+      "id": "skill_shield_slam",
+      "name_ref": "skill.shield_slam.name",
+      "behavior_profile_id": "skill_behavior_shield_slam",
+      "presentation_profile_id": "skill_presentation_shield_slam",
+      "target_type": "single",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/shield_slam.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/shield_slam.wav"
+    },
+    {
+      "id": "skill_arcane_bolt",
+      "name_ref": "skill.arcane_bolt.name",
+      "behavior_profile_id": "skill_behavior_arcane_bolt",
+      "presentation_profile_id": "skill_presentation_arcane_bolt",
+      "target_type": "single",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/arcane_bolt.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/arcane_bolt.wav"
+    },
+    {
+      "id": "skill_verdant_nova",
+      "name_ref": "skill.verdant_nova.name",
+      "behavior_profile_id": "skill_behavior_verdant_nova",
+      "presentation_profile_id": "skill_presentation_verdant_nova",
+      "target_type": "aoe",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/verdant_nova.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/verdant_nova.wav"
+    },
+    {
+      "id": "skill_piercing_shot",
+      "name_ref": "skill.piercing_shot.name",
+      "behavior_profile_id": "skill_behavior_piercing_shot",
+      "presentation_profile_id": "skill_presentation_piercing_shot",
+      "target_type": "single",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/piercing_shot.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/piercing_shot.wav"
+    },
+    {
+      "id": "skill_hawk_eye",
+      "name_ref": "skill.hawk_eye.name",
+      "behavior_profile_id": "skill_behavior_hawk_eye",
+      "presentation_profile_id": "skill_presentation_hawk_eye",
+      "target_type": "self",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/hawk_eye.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/hawk_eye.wav"
+    },
+    {
+      "id": "skill_shadowstep",
+      "name_ref": "skill.shadowstep.name",
+      "behavior_profile_id": "skill_behavior_shadowstep",
+      "presentation_profile_id": "skill_presentation_shadowstep",
+      "target_type": "self",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/shadowstep.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/shadowstep.wav"
+    },
+    {
+      "id": "skill_umbral_execute",
+      "name_ref": "skill.umbral_execute.name",
+      "behavior_profile_id": "skill_behavior_umbral_execute",
+      "presentation_profile_id": "skill_presentation_umbral_execute",
+      "target_type": "single",
+      "cooldown_seconds": 6.0,
+      "power": 1.0,
+      "mana_cost": 0.0,
+      "cast_time_seconds": 0.0,
+      "range_meters": 0.0,
+      "vfx_asset_ref": "Assets/AL/Art/VFX/umbral_execute.vfx",
+      "audio_asset_ref": "Assets/AL/Audio/umbral_execute.wav"
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "Realm Strike",
+      "canonicalId": "skill_realm_strike",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Renewing Guard",
+      "canonicalId": "skill_renewing_guard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Warzone Burst",
+      "canonicalId": "skill_warzone_burst",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Warmaster Breaker",
+      "canonicalId": "skill_warmaster_breaker",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Iron Bulwark",
+      "canonicalId": "skill_iron_bulwark",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Shield Slam",
+      "canonicalId": "skill_shield_slam",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Arcane Bolt",
+      "canonicalId": "skill_arcane_bolt",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Verdant Nova",
+      "canonicalId": "skill_verdant_nova",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Piercing Shot",
+      "canonicalId": "skill_piercing_shot",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Hawk Eye",
+      "canonicalId": "skill_hawk_eye",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Shadowstep",
+      "canonicalId": "skill_shadowstep",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Umbral Execute",
+      "canonicalId": "skill_umbral_execute",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

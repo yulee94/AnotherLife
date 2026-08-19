@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "catalogId": "al_notification_production_catalog",
+  "authority": "production_notification_source_of_truth",
+  "source": {
+    "path": "unity/Assets/AL/StreamingAssets/GameData/al_notification_content_catalog.json",
+    "catalogId": "al_notification_content_catalog",
+    "version": "0.1.0",
+    "sourcePacketId": "al_narrative_notification_content_source_v001",
+    "byteLength": 11526,
+    "sha256": "3c32ba4faa8293897fa8c6ecf3518993aa17778c5848ea47bc48ce697ae1c1c3"
+  },
+  "requiredDefinitionIds": [
+    "al_notify_save_recovered_backup",
+    "al_notify_save_profile_degraded",
+    "al_notify_save_unrecoverable",
+    "al_notify_operation_unavailable",
+    "al_notify_reward_committed",
+    "al_notify_reward_failed",
+    "al_notify_world_event_started",
+    "al_notify_world_event_ended",
+    "al_notify_bridge_unavailable",
+    "al_notify_catalog_unavailable",
+    "al_notify_content_unavailable"
+  ],
+  "entries": [
+    {
+      "id": "al_notify_save_recovered_backup",
+      "sourceId": "al_source_save",
+      "consumers": ["#177", "#137", "#450"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_save_profile_degraded",
+      "sourceId": "al_source_save",
+      "consumers": ["#177", "#137", "#450"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_save_unrecoverable",
+      "sourceId": "al_source_save",
+      "consumers": ["#177", "#137", "#450"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_operation_unavailable",
+      "sourceId": "al_source_nvs",
+      "consumers": ["#177", "#176"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_reward_committed",
+      "sourceId": "al_source_boss_loot",
+      "consumers": ["#177", "#168", "#169"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_reward_failed",
+      "sourceId": "al_source_boss_loot",
+      "consumers": ["#177", "#168", "#169"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_world_event_started",
+      "sourceId": "al_source_world_state",
+      "consumers": ["#177", "#172"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_world_event_ended",
+      "sourceId": "al_source_world_state",
+      "consumers": ["#177", "#172"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_bridge_unavailable",
+      "sourceId": "al_source_bridge",
+      "consumers": ["#177", "#169", "#172", "#176"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_catalog_unavailable",
+      "sourceId": "al_source_catalog",
+      "consumers": ["#177", "#183"],
+      "availability": "available"
+    },
+    {
+      "id": "al_notify_content_unavailable",
+      "sourceId": "al_source_catalog",
+      "consumers": ["#177", "#168", "#169", "#172", "#176", "#183"],
+      "availability": "available"
+    }
+  ],
+  "blockedRequirements": [
+    {
+      "requirementId": "notification_requirement_production_packaging",
+      "consumers": ["#177", "#168", "#169", "#172", "#176"],
+      "dependencies": ["#183"],
+      "reason": "The common production envelope, provenance manifest, atomic publication, rollback, packaging, and notification-family consumer are not approved or available. The source bytes are authoritative, but production registration must remain fail-closed until this dependency is resolved.",
+      "requiredBeforeActivation": true
+    },
+    {
+      "requirementId": "notification_requirement_durable_outbox",
+      "consumers": ["#177", "#168", "#169", "#172", "#176"],
+      "dependencies": ["#137", "#450"],
+      "reason": "DurableUntilAcknowledged definitions cannot be accepted until profile-bound writable authority and crash-safe outbox persistence are implemented. Session fallback is prohibited.",
+      "requiredBeforeActivation": true
+    },
+    {
+      "requirementId": "notification_requirement_boss_reward_intents",
+      "consumers": ["#168"],
+      "dependencies": ["#183", "#137", "#450"],
+      "reason": "The boss reward planner currently requests boss_reward.credits_committed, item acquisition policy IDs, and boss_reward.explicit_no_reward. No approved al_notify definitions or authoritative reward source map those identities, so they must fail explicitly rather than resolve to generic reward copy.",
+      "requiredBeforeActivation": true
+    },
+    {
+      "requirementId": "notification_requirement_wishgate_outcomes",
+      "consumers": ["#169"],
+      "dependencies": ["#183", "#137", "#450"],
+      "reason": "Wishgate has no approved notification definition IDs or source-owned outcome copy. Generic reward notifications are not a semantic substitute, and committed delivery remains blocked on durable authority.",
+      "requiredBeforeActivation": true
+    },
+    {
+      "requirementId": "notification_requirement_world_event_cancelled",
+      "consumers": ["#172"],
+      "dependencies": ["#183"],
+      "reason": "The world-state planner emits al_notify_world_event_cancelled, but the approved notification source contains only started and ended definitions. Cancellation must fail as unavailable until authored and versioned source exists.",
+      "requiredBeforeActivation": true
+    },
+    {
+      "requirementId": "notification_requirement_relationship_commit",
+      "consumers": ["#176"],
+      "dependencies": ["#183", "#137", "#450"],
+      "reason": "No approved typed definition or source-owned copy exists for committed relationship consequences. al_notify_operation_unavailable may describe unavailable operations but must not replace a relationship success notification.",
+      "requiredBeforeActivation": true
+    }
+  ],
+  "resolutionPolicy": {
+    "unknownId": "explicit_failure",
+    "missingSource": "explicit_failure",
+    "sourceIdentityMismatch": "explicit_failure",
+    "blockedRequirement": "explicit_failure",
+    "fallbackContent": "prohibited"
+  }
+}

@@ -1,0 +1,92 @@
+{
+  "gameId": "another-life",
+  "catalogId": "champions_v1",
+  "family": "champions",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_1ec2c64f",
+  "records": [
+    {
+      "id": "champion_stonehold_vanguard",
+      "name_ref": "champion.stonehold_vanguard.name",
+      "realm_id": "stonehold",
+      "class_family_id": "warrior",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/stonehold_vanguard_portrait.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/stonehold_vanguard_model.png",
+      "base_skill_ids": [
+        "skill_iron_bulwark",
+        "skill_shield_slam"
+      ],
+      "stat_profile_id": "champion_stat_stonehold_vanguard"
+    },
+    {
+      "id": "champion_eldergrove_archmage",
+      "name_ref": "champion.eldergrove_archmage.name",
+      "realm_id": "eldergrove",
+      "class_family_id": "mage",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/eldergrove_archmage_portrait.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/eldergrove_archmage_model.png",
+      "base_skill_ids": [
+        "skill_arcane_bolt",
+        "skill_verdant_nova"
+      ],
+      "stat_profile_id": "champion_stat_eldergrove_archmage"
+    },
+    {
+      "id": "champion_crownlands_sharpshooter",
+      "name_ref": "champion.crownlands_sharpshooter.name",
+      "realm_id": "crownlands",
+      "class_family_id": "ranger",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/crownlands_sharpshooter_portrait.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/crownlands_sharpshooter_model.png",
+      "base_skill_ids": [
+        "skill_piercing_shot",
+        "skill_hawk_eye"
+      ],
+      "stat_profile_id": "champion_stat_crownlands_sharpshooter"
+    },
+    {
+      "id": "champion_umbral_shadowblade",
+      "name_ref": "champion.umbral_shadowblade.name",
+      "realm_id": "umbral",
+      "class_family_id": "assassin",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/umbral_shadowblade_portrait.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/umbral_shadowblade_model.png",
+      "base_skill_ids": [
+        "skill_shadowstep",
+        "skill_umbral_execute"
+      ],
+      "stat_profile_id": "champion_stat_umbral_shadowblade"
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "Bronn Ironhide",
+      "canonicalId": "champion_stonehold_vanguard",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Lyra Moonshadow",
+      "canonicalId": "champion_eldergrove_archmage",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Aurelia Dawnblade",
+      "canonicalId": "champion_crownlands_sharpshooter",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Vex Nocturne",
+      "canonicalId": "champion_umbral_shadowblade",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

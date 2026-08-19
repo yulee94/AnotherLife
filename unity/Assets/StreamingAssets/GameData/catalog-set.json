@@ -1,0 +1,82 @@
+{
+  "gameId": "another-life",
+  "catalogSetId": "six_family_catalog_set",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "minimumRuntimeCatalogVersion": 1,
+  "sourceRevision": "t_1ec2c64f",
+  "artifacts": [
+    {
+      "family": "realms",
+      "catalogId": "realms_v1",
+      "relativePath": "realms.v1.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "ed27c2516bf05e4707532792e9d95ea88af7a1f00e66ce3ad026918eaa3ad3d8",
+      "mediaType": "application/json",
+      "sourceMode": "generated",
+      "sourceRevision": "t_1ec2c64f"
+    },
+    {
+      "family": "buildings",
+      "catalogId": "buildings_v1",
+      "relativePath": "buildings.v1.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "7cb629ad98234e9adfb3b748513f4de0da484af8d5af61fba5dd0f4e395fea60",
+      "mediaType": "application/json",
+      "sourceMode": "generated",
+      "sourceRevision": "t_1ec2c64f"
+    },
+    {
+      "family": "research",
+      "catalogId": "research_v1",
+      "relativePath": "research.v1.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "0601ae0098b28f585941bcb6039da0e13c34cc59d1777ca381bc01fd3a3c50da",
+      "mediaType": "application/json",
+      "sourceMode": "generated",
+      "sourceRevision": "t_1ec2c64f"
+    },
+    {
+      "family": "troops",
+      "catalogId": "troops_v1",
+      "relativePath": "troops.v1.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "abc2e8a85da1efe9448b2786c83e95b2708127b2bfd85a1b39539ba0d543cb0c",
+      "mediaType": "application/json",
+      "sourceMode": "generated",
+      "sourceRevision": "t_1ec2c64f"
+    },
+    {
+      "family": "champions",
+      "catalogId": "champions_v1",
+      "relativePath": "champions.v1.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "5a70da3fa5d624db93d6b443f0df31ec02ac55da31c2ed097cbb7b77d953529e",
+      "mediaType": "application/json",
+      "sourceMode": "generated",
+      "sourceRevision": "t_1ec2c64f"
+    },
+    {
+      "family": "skills",
+      "catalogId": "skills_v1",
+      "relativePath": "skills.v1.json",
+      "schemaVersion": 1,
+      "contentVersion": "1.0.0",
+      "required": true,
+      "sha256": "7084cab9376cfad31252b357cd789ad83b4e4a1e73efaaf988fde0773a8db9f9",
+      "mediaType": "application/json",
+      "sourceMode": "generated",
+      "sourceRevision": "t_1ec2c64f"
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "gameId": "another-life",
+  "catalogId": "realms_v1",
+  "family": "realms",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_1ec2c64f",
+  "records": [
+    {
+      "id": "crownlands",
+      "legacy_realm_id": "Crownlands",
+      "legacy_realm_value": 3,
+      "name_ref": "realm.crownlands.name",
+      "description_ref": "realm.crownlands.description",
+      "inner_realm_id": "inner_crownlands",
+      "main_gate_id": "gate_crownlands_meridian",
+      "outer_warzone_id": "warzone_crownlands",
+      "rare_resource_id": "royal_sigil",
+      "capability_profile_ids": [
+        "battle_realm_crownlands"
+      ],
+      "asset_ref": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Crownlands_Flat_256_v001.png"
+    },
+    {
+      "id": "stonehold",
+      "legacy_realm_id": "Stonehold",
+      "legacy_realm_value": 1,
+      "name_ref": "realm.stonehold.name",
+      "description_ref": "realm.stonehold.description",
+      "inner_realm_id": "inner_stonehold",
+      "main_gate_id": "gate_stonehold_faultline",
+      "outer_warzone_id": "warzone_stonehold",
+      "rare_resource_id": "deep_ore",
+      "capability_profile_ids": [
+        "battle_realm_stonehold"
+      ],
+      "asset_ref": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Stonehold_Flat_256_v001.png"
+    },
+    {
+      "id": "eldergrove",
+      "legacy_realm_id": "Eldergrove",
+      "legacy_realm_value": 2,
+      "name_ref": "realm.eldergrove.name",
+      "description_ref": "realm.eldergrove.description",
+      "inner_realm_id": "inner_eldergrove",
+      "main_gate_id": "gate_eldergrove_greenveil",
+      "outer_warzone_id": "warzone_eldergrove",
+      "rare_resource_id": "world_sap",
+      "capability_profile_ids": [
+        "battle_realm_eldergrove"
+      ],
+      "asset_ref": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Eldergrove_Flat_256_v001.png"
+    },
+    {
+      "id": "umbral",
+      "legacy_realm_id": "Umbral",
+      "legacy_realm_value": 4,
+      "name_ref": "realm.umbral.name",
+      "description_ref": "realm.umbral.description",
+      "inner_realm_id": "inner_umbral",
+      "main_gate_id": "gate_umbral_ashvein",
+      "outer_warzone_id": "warzone_umbral",
+      "rare_resource_id": "dark_crystal",
+      "capability_profile_ids": [
+        "battle_realm_umbral"
+      ],
+      "asset_ref": "Assets/AL/Art/Heraldry/RuntimeExports/S_ArcaneAxis_Umbral_Flat_256_v001.png"
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "Crownlands",
+      "canonicalId": "crownlands",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Stonehold",
+      "canonicalId": "stonehold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Eldergrove",
+      "canonicalId": "eldergrove",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Umbral",
+      "canonicalId": "umbral",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

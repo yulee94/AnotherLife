@@ -70,11 +70,8 @@ cd unity/SharedContracts/Tests
 uv run --with jsonschema validate.py
 ```
 
-The real `al_world_event_content_catalog.json` currently fails validation on its
-four `notificationDefinitionId` values (`notification.world_event.*` dotted
-placeholders) because the schema enforces the canonical `al_notify_*` form — this
-is the known inventory conflict #5, to be corrected by the data-generation task,
-not the schema.
+The real `al_world_event_content_catalog.json` uses canonical
+`al_notify_world_event_started` IDs (inventory conflict #5 corrected).
 
 ## Runtime Snapshot Contracts
 

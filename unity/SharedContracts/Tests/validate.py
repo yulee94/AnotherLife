@@ -47,15 +47,9 @@ REAL_CATALOGS = {
     "al-world-event-content": "al_world_event_content_catalog.json",
 }
 
-# Known source-data defects that legitimately fail their schema today. These are
-# the canonical decisions being enforced; the downstream data-generation task
-# (t_46749a9c) corrects the data, not the schema.
-EXPECTED_DEFECTS = {
-    "al-world-event-content": [
-        "eventDefinitions[].notificationDefinitionId uses notification.world_event.* "
-        "dotted placeholders instead of canonical al_notify_* IDs (inventory conflict #5)."
-    ],
-}
+# Known source-data defects that legitimately fail their schema today.
+# Empty after t_1ec2c64f corrected inventory conflict #5 (world-event notification IDs).
+EXPECTED_DEFECTS = {}
 
 
 def load_json(path):
@@ -107,6 +101,10 @@ def main():
         ok = len(errors) == 0
         expected = key in EXPECTED_DEFECTS
         reports["real"].append((key, ok, expected, first_error_message(errors) if errors else ""))
+        if not ok and not expected:
+            failures.append(f"real catalog {key}: {first_error_message(errors)}")
+        if ok and expected:
+            failures.append(f"real catalog {key} was listed as EXPECTED_DEFECT but now passes")
 
     # 3. Fixtures.
     valid_dir = FIXTURES_DIR / "valid"

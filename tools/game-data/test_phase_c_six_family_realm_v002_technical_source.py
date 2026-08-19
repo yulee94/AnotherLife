@@ -581,7 +581,6 @@ def validate_no_production_outputs(repo_root: Path) -> None:
         "unity/Assets/Resources/GameData",
     ]
     forbidden = [
-        "unity/Assets/StreamingAssets/GameData/catalog-set.json",
         "unity/Assets/Resources/GameData/catalog-set.json",
         "unity/Docs/GameDataCatalog/PhaseC/Generated/catalog-set.json",
     ]

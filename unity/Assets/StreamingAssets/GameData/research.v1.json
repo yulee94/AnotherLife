@@ -1,0 +1,156 @@
+{
+  "gameId": "another-life",
+  "catalogId": "research_v1",
+  "family": "research",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_1ec2c64f",
+  "records": [
+    {
+      "id": "research_steel_forging",
+      "name_ref": "research.steel_forging.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_attack"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_plate_armor",
+      "name_ref": "research.plate_armor.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_defense"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_masonry",
+      "name_ref": "research.advanced_masonry.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_masonry"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_irrigation",
+      "name_ref": "research.irrigation.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_irrigation"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_ballistics",
+      "name_ref": "research.ballistics.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_ballistics"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_logistics",
+      "name_ref": "research.logistics.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_logistics"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_trade_routes",
+      "name_ref": "research.trade_routes.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_trade_routes"
+      ],
+      "prerequisite_research_ids": []
+    },
+    {
+      "id": "research_arcane_study",
+      "name_ref": "research.arcane_study.name",
+      "max_level": 5,
+      "cost_profile_id": "research_cost_common",
+      "duration_profile_id": "research_duration_common",
+      "effect_ids": [
+        "effect_arcane_study"
+      ],
+      "prerequisite_research_ids": []
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "Steel Forging",
+      "canonicalId": "research_steel_forging",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Plate Armor",
+      "canonicalId": "research_plate_armor",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Advanced Masonry",
+      "canonicalId": "research_masonry",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Irrigation",
+      "canonicalId": "research_irrigation",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Ballistics",
+      "canonicalId": "research_ballistics",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Logistics",
+      "canonicalId": "research_logistics",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Trade Routes",
+      "canonicalId": "research_trade_routes",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Arcane Study",
+      "canonicalId": "research_arcane_study",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

@@ -1,0 +1,342 @@
+{
+  "gameId": "another-life",
+  "catalogId": "buildings_v1",
+  "family": "buildings",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_1ec2c64f",
+  "records": [
+    {
+      "id": "town_hall",
+      "legacy_building_id": "TownHall",
+      "name_ref": "building.town_hall.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_town_hall"
+      ],
+      "cost_profile_id": "building_upgrade_cost_town_hall",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/town_hall.png"
+    },
+    {
+      "id": "farm",
+      "legacy_building_id": "Farm",
+      "name_ref": "building.farm.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_farm"
+      ],
+      "cost_profile_id": "building_upgrade_cost_farm",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/farm.png"
+    },
+    {
+      "id": "lumber_mill",
+      "legacy_building_id": "LumberMill",
+      "name_ref": "building.lumber_mill.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_lumber_mill"
+      ],
+      "cost_profile_id": "building_upgrade_cost_lumber_mill",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/lumber_mill.png"
+    },
+    {
+      "id": "quarry",
+      "legacy_building_id": "Quarry",
+      "name_ref": "building.quarry.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_quarry"
+      ],
+      "cost_profile_id": "building_upgrade_cost_quarry",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/quarry.png"
+    },
+    {
+      "id": "gold_mine",
+      "legacy_building_id": "GoldMine",
+      "name_ref": "building.gold_mine.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_gold_mine"
+      ],
+      "cost_profile_id": "building_upgrade_cost_gold_mine",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/gold_mine.png"
+    },
+    {
+      "id": "barracks",
+      "legacy_building_id": "Barracks",
+      "name_ref": "building.barracks.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_barracks"
+      ],
+      "cost_profile_id": "building_upgrade_cost_barracks",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/barracks.png"
+    },
+    {
+      "id": "academy",
+      "legacy_building_id": "Academy",
+      "name_ref": "building.academy.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_academy"
+      ],
+      "cost_profile_id": "building_upgrade_cost_academy",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/academy.png"
+    },
+    {
+      "id": "market",
+      "legacy_building_id": "Market",
+      "name_ref": "building.market.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_market"
+      ],
+      "cost_profile_id": "building_upgrade_cost_market",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/market.png"
+    },
+    {
+      "id": "storehouse",
+      "legacy_building_id": "Storehouse",
+      "name_ref": "building.storehouse.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_storehouse"
+      ],
+      "cost_profile_id": "building_upgrade_cost_storehouse",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/storehouse.png"
+    },
+    {
+      "id": "forge",
+      "legacy_building_id": "Forge",
+      "name_ref": "building.forge.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_forge"
+      ],
+      "cost_profile_id": "building_upgrade_cost_forge",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/forge.png"
+    },
+    {
+      "id": "stable",
+      "legacy_building_id": "Stable",
+      "name_ref": "building.stable.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_stable"
+      ],
+      "cost_profile_id": "building_upgrade_cost_stable",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/stable.png"
+    },
+    {
+      "id": "workshop",
+      "legacy_building_id": "Workshop",
+      "name_ref": "building.workshop.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_workshop"
+      ],
+      "cost_profile_id": "building_upgrade_cost_workshop",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/workshop.png"
+    },
+    {
+      "id": "embassy",
+      "legacy_building_id": "Embassy",
+      "name_ref": "building.embassy.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_embassy"
+      ],
+      "cost_profile_id": "building_upgrade_cost_embassy",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/embassy.png"
+    },
+    {
+      "id": "wall",
+      "legacy_building_id": "Wall",
+      "name_ref": "building.wall.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_wall"
+      ],
+      "cost_profile_id": "building_upgrade_cost_wall",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/wall.png"
+    },
+    {
+      "id": "watchtower",
+      "legacy_building_id": "Watchtower",
+      "name_ref": "building.watchtower.name",
+      "initial_level": 0,
+      "max_level": 10,
+      "production_profile_ids": [
+        "production_watchtower"
+      ],
+      "cost_profile_id": "building_upgrade_cost_watchtower",
+      "duration_profile_id": "building_upgrade_duration_common",
+      "prerequisite_profile_id": "building_prerequisite_none",
+      "realm_eligibility_profile_id": "building_realm_eligibility_all",
+      "asset_ref": "Assets/AL/Art/Buildings/watchtower.png"
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "TownHall",
+      "canonicalId": "town_hall",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Farm",
+      "canonicalId": "farm",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "LumberMill",
+      "canonicalId": "lumber_mill",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Quarry",
+      "canonicalId": "quarry",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "GoldMine",
+      "canonicalId": "gold_mine",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Barracks",
+      "canonicalId": "barracks",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Academy",
+      "canonicalId": "academy",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Market",
+      "canonicalId": "market",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Storehouse",
+      "canonicalId": "storehouse",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Forge",
+      "canonicalId": "forge",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Stable",
+      "canonicalId": "stable",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Workshop",
+      "canonicalId": "workshop",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Embassy",
+      "canonicalId": "embassy",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Wall",
+      "canonicalId": "wall",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Watchtower",
+      "canonicalId": "watchtower",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

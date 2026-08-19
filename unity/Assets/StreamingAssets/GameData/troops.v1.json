@@ -1,0 +1,80 @@
+{
+  "gameId": "another-life",
+  "catalogId": "troops_v1",
+  "family": "troops",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_1ec2c64f",
+  "records": [
+    {
+      "id": "troop_infantry",
+      "legacy_troop_type": "Infantry",
+      "legacy_troop_value": 0,
+      "name_ref": "troop.infantry.name",
+      "base_attack": 10,
+      "base_defense": 10,
+      "training_profile_id": "training_infantry",
+      "asset_ref": "Assets/AL/Art/Troops/infantry.png"
+    },
+    {
+      "id": "troop_cavalry",
+      "legacy_troop_type": "Cavalry",
+      "legacy_troop_value": 1,
+      "name_ref": "troop.cavalry.name",
+      "base_attack": 15,
+      "base_defense": 15,
+      "training_profile_id": "training_cavalry",
+      "asset_ref": "Assets/AL/Art/Troops/cavalry.png"
+    },
+    {
+      "id": "troop_ranged",
+      "legacy_troop_type": "Ranged",
+      "legacy_troop_value": 2,
+      "name_ref": "troop.ranged.name",
+      "base_attack": 12,
+      "base_defense": 12,
+      "training_profile_id": "training_ranged",
+      "asset_ref": "Assets/AL/Art/Troops/ranged.png"
+    },
+    {
+      "id": "troop_siege",
+      "legacy_troop_type": "Siege",
+      "legacy_troop_value": 3,
+      "name_ref": "troop.siege.name",
+      "base_attack": 20,
+      "base_defense": 20,
+      "training_profile_id": "training_siege",
+      "asset_ref": "Assets/AL/Art/Troops/siege.png"
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "Infantry",
+      "canonicalId": "troop_infantry",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Cavalry",
+      "canonicalId": "troop_cavalry",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Ranged",
+      "canonicalId": "troop_ranged",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Siege",
+      "canonicalId": "troop_siege",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

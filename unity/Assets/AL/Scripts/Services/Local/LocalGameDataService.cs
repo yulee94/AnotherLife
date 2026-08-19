@@ -1,427 +1,609 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Data.Catalogs;
 using AL.Data.Definitions;
-using AL.Data.Definitions.Narrative;
 using UnityEngine;
 
 namespace AL.Services.Local
 {
+    /// <summary>
+    /// Catalog-backed <see cref="IGameDataService"/>. Six-family records come from
+    /// StreamingAssets/GameData; construction levels are projected from the
+    /// catalog cost/duration profile IDs via <see cref="GameDataBuildingProgressionRegistry"/>.
+    /// </summary>
     public class LocalGameDataService : IGameDataService
     {
-        private Dictionary<RealmId, RealmDefinition> _realms = new Dictionary<RealmId, RealmDefinition>();
-        private Dictionary<string, BuildingDefinition> _buildings = new Dictionary<string, BuildingDefinition>();
-        private Dictionary<string, ResearchState> _researchDefaults = new Dictionary<string, ResearchState>();
-        private Dictionary<string, ChampionDefinition> _champions = new Dictionary<string, ChampionDefinition>();
+        internal const string CatalogSetFileName = SixFamilyCatalogLoader.ManifestFileName;
+
+        private static readonly object CacheGate = new object();
+        private static string CachedRoot;
+        private static GameDataCatalogSetSnapshot CachedSnapshot;
+
+        private readonly Dictionary<RealmId, RealmDefinition> _realms =
+            new Dictionary<RealmId, RealmDefinition>();
+        private readonly Dictionary<string, BuildingDefinition> _buildings =
+            new Dictionary<string, BuildingDefinition>(StringComparer.Ordinal);
+        private readonly Dictionary<string, TroopDefinition> _troops =
+            new Dictionary<string, TroopDefinition>(StringComparer.Ordinal);
+        private readonly Dictionary<string, ChampionDefinition> _champions =
+            new Dictionary<string, ChampionDefinition>(StringComparer.Ordinal);
+        private readonly Dictionary<string, SkillDefinition> _skills =
+            new Dictionary<string, SkillDefinition>(StringComparer.Ordinal);
+        private readonly List<string> _canonicalChampionIds = new List<string>();
+
+        /// <summary>
+        /// Test seam. When set, the parameterless constructor loads this directory
+        /// instead of StreamingAssets/GameData.
+        /// </summary>
+        internal static string CatalogRootOverride { get; set; }
 
         public LocalGameDataService()
+            : this(ResolveDefaultRoot())
         {
-            InitializeFallbackData();
-            InitializeAutomatedContent();
-            InitializeStoryData();
-            InitializeChampionArchetypes();
         }
 
-        private void InitializeFallbackData()
+        public LocalGameDataService(string catalogRootDirectory)
+            : this(LoadOrGetCachedSnapshot(catalogRootDirectory))
         {
-            // Factions
-            CreateFallbackRealm(RealmId.Stonehold, "Stonehold Dwarves", "Mountain kings and master smiths.\n\nPerks:\n+20% Stone\n+10% Def", "Perks: Resilience");
-            CreateFallbackRealm(RealmId.Eldergrove, "Eldergrove Elves", "Forest guardians and peerless mages.\n\nPerks:\n+20% Wood\n+15% Magic", "Perks: Harmony");
-            CreateFallbackRealm(RealmId.Crownlands, "Crownlands Humans", "Adaptive leaders of the central plains.\n\nPerks:\n+15% Gold\n+10% All Atk", "Perks: Ambition");
-            CreateFallbackRealm(RealmId.Umbral, "Umbral Dark Elves", "Masters of shadow and volcanic power.\n\nPerks:\n+20% Crit\n+15% Speed", "Perks: Cunning");
         }
 
-        private void InitializeAutomatedContent()
+        public LocalGameDataService(GameDataCatalogSetSnapshot snapshot)
         {
-            // 15 Core Buildings
-            string[] bIds = { "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks", "Academy", "Market", "Storehouse", "Forge", "Stable", "Workshop", "Embassy", "Wall", "Watchtower" };
-            foreach (var bId in bIds)
+            if (snapshot == null)
             {
-                var def = ScriptableObject.CreateInstance<BuildingDefinition>();
-                def.Id = bId;
-                def.DisplayName = bId.Replace("Mill", " Mill").Replace("Hall", " Hall").Replace("Mine", " Mine");
-                def.MaxLevel = 10;
-                def.ConstructionLevels = CreateConstructionLevels(bId);
-                _buildings[bId] = def;
+                throw new ArgumentNullException(nameof(snapshot));
             }
 
-            // Tech Tree
-            string[] techs = { "Steel Forging", "Plate Armor", "Advanced Masonry", "Irrigation", "Ballistics", "Logistics", "Trade Routes", "Arcane Study" };
-            foreach (var tech in techs)
+            ProjectSnapshot(snapshot);
+        }
+
+        internal static void ClearSnapshotCache()
+        {
+            lock (CacheGate)
             {
-                _researchDefaults[tech] = new ResearchState { ResearchId = tech, Level = 0 };
+                CachedRoot = null;
+                CachedSnapshot = null;
             }
         }
 
-        private void InitializeChampionArchetypes()
+        internal static string ResolveDefaultRoot()
         {
-            // Greybox champion archetypes (hardcoded, one per class family, realm-aligned).
-            // These are the "hardcoded LocalGameDataService archetypes" the character creation
-            // screen surfaces. IDs are lowercase snake_case per the data-ID convention.
-            AddChampion(
-                "champion_stonehold_vanguard",
-                "Bronn Ironhide",
-                RealmId.Stonehold,
-                ClassFamily.Warrior,
-                SubclassId.Vanguard,
-                new ChampionBaseStats { MaxHealth = 1250, MaxMana = 80, Attack = 55, Defense = 45, Speed = 8, CritRate = 5 },
-                "greataxe", "towershield",
-                new[] { ("skill_iron_bulwark", "Iron Bulwark", SkillTargetType.Self), ("skill_shield_slam", "Shield Slam", SkillTargetType.Single) });
-
-            AddChampion(
-                "champion_eldergrove_archmage",
-                "Lyra Moonshadow",
-                RealmId.Eldergrove,
-                ClassFamily.Mage,
-                SubclassId.Archmage,
-                new ChampionBaseStats { MaxHealth = 820, MaxMana = 150, Attack = 78, Defense = 18, Speed = 10, CritRate = 8 },
-                "staff", "tome",
-                new[] { ("skill_arcane_bolt", "Arcane Bolt", SkillTargetType.Single), ("skill_verdant_nova", "Verdant Nova", SkillTargetType.AoE) });
-
-            AddChampion(
-                "champion_crownlands_sharpshooter",
-                "Aurelia Dawnblade",
-                RealmId.Crownlands,
-                ClassFamily.Ranger,
-                SubclassId.Sharpshooter,
-                new ChampionBaseStats { MaxHealth = 900, MaxMana = 110, Attack = 62, Defense = 26, Speed = 15, CritRate = 20 },
-                "longbow", "quiver",
-                new[] { ("skill_piercing_shot", "Piercing Shot", SkillTargetType.Single), ("skill_hawk_eye", "Hawk Eye", SkillTargetType.Self) });
-
-            AddChampion(
-                "champion_umbral_shadowblade",
-                "Vex Nocturne",
-                RealmId.Umbral,
-                ClassFamily.Assassin,
-                SubclassId.Shadowblade,
-                new ChampionBaseStats { MaxHealth = 850, MaxMana = 100, Attack = 72, Defense = 16, Speed = 22, CritRate = 30 },
-                "twinblades", "shroud",
-                new[] { ("skill_shadowstep", "Shadowstep", SkillTargetType.Self), ("skill_umbral_execute", "Umbral Execute", SkillTargetType.Single) });
-        }
-
-        private void AddChampion(
-            string id,
-            string displayName,
-            RealmId realm,
-            ClassFamily family,
-            SubclassId subclass,
-            ChampionBaseStats baseStats,
-            string weaponStyleId,
-            string offhandStyleId,
-            (string Id, string DisplayName, SkillTargetType TargetType)[] skills)
-        {
-            var champion = ScriptableObject.CreateInstance<ChampionDefinition>();
-            champion.Id = id;
-            champion.DisplayName = displayName;
-            champion.Realm = realm;
-            champion.Family = family;
-            champion.Subclass = subclass;
-            champion.BaseStats = baseStats;
-            champion.WeaponStyleId = weaponStyleId;
-            champion.OffhandStyleId = offhandStyleId;
-
-            champion.BaseSkills = new SkillDefinition[skills.Length];
-            for (int i = 0; i < skills.Length; i++)
+            if (!string.IsNullOrWhiteSpace(CatalogRootOverride))
             {
-                var skill = ScriptableObject.CreateInstance<SkillDefinition>();
-                skill.Id = skills[i].Id;
-                skill.DisplayName = skills[i].DisplayName;
-                skill.TargetType = skills[i].TargetType;
-                skill.Cooldown = 6f;
-                skill.Power = 1f;
-                champion.BaseSkills[i] = skill;
+                return CatalogRootOverride;
             }
 
-            _champions[id] = champion;
-        }
-
-        private void InitializeStoryData()
-        {
-            // Chapter 1: The Proof of Worth
-            AddChapter(RealmId.Stonehold, "C1_SH", "The Echoes of Iron", "Re-opening the ancestral Deep Forge and defeating Ferrum the Iron Dragon to prove your worth.");
-            AddChapter(RealmId.Eldergrove, "C1_EG", "Whispers of the Sapling", "Investigating a blight on the World Tree and purging Virens the Blighted Dragon.");
-            AddChapter(RealmId.Crownlands, "C1_CL", "The King's Decree", "Rebuilding the capital and seeking the blessing of Aurelius the Gold Dragon.");
-            AddChapter(RealmId.Umbral, "C1_UM", "Shadows of the Void", "Rituals to stabilize the volcanic rifts and taming Nox the Void Dragon.");
-
-            // Chapter 2: The Treasure Hunt
-            AddChapter(RealmId.Stonehold, "C2_SH", "The Smuggler's Trail", "Discovering Elven scouting parties deep in the mountain passes searching for the Ring of the Mountain King.");
-            AddChapter(RealmId.Eldergrove, "C2_EG", "Shadows in the Mist", "Capturing a Human spy attempting to steal the Ring of Forest Harmony.");
-            AddChapter(RealmId.Crownlands, "C2_CL", "Border Skirmishes", "Countering Dwarven expansion and protecting the Ring of Royal Decree.");
-            AddChapter(RealmId.Umbral, "C2_UM", "Night's Whisper", "Sabotaging Human trade routes to retrieve the stolen Ring of Shadow Step.");
-
-            // Chapter 3
-            AddChapter(RealmId.Stonehold, "C3_SH", "Heart of the Mountain", "The discovery of the first Ancestral Gem within the core forge.");
-            AddChapter(RealmId.Eldergrove, "C3_EG", "The Forest's Tear", "A mystical gem is born from the tree's purest sap.");
-            AddChapter(RealmId.Crownlands, "C3_CL", "The Sovereign's Jewel", "The discovery of a divine gem buried beneath the royal cathedral.");
-            AddChapter(RealmId.Umbral, "C3_UM", "The Void Shard", "Retrieving a crystal from the heart of the volcanic rifts.");
-
-            // Chapters 7-9: Ancient Legacies
-            AddChapter(RealmId.Stonehold, "C7_SH", "The First King's Anvil", "Locating the legendary weapon of the founder.");
-            AddChapter(RealmId.Eldergrove, "C7_EG", "Whisper of the Glade", "Restoring the original bow of the Forest Sentinels.");
-            AddChapter(RealmId.Crownlands, "C7_CL", "The Golden Aegis", "Recovering the shield that stood during the First War.");
-            AddChapter(RealmId.Umbral, "C7_UM", "Void's Edge", "Forging the blade from the remains of the First Rift.");
-
-            // Chapters 10-12: The Heavens Ascended
-            AddChapter(RealmId.Stonehold, "C10_SH", "The Celestial Rift", "Ancient portals atop the mountain peaks begin to pulse with sky-light.");
-            AddChapter(RealmId.Eldergrove, "C10_EG", "Whispers of the Sky", "The highest leaves of the World Tree touch a new realm of magic.");
-            AddChapter(RealmId.Crownlands, "C10_CL", "The Sun-Gate Opens", "Portals appear in the clouds, revealing the path to the High Celestials.");
-            AddChapter(RealmId.Umbral, "C10_UM", "Void's Reach", "Shadow magic begins to pierce the heavens themselves.");
-
-            AddChapter(RealmId.Stonehold, "C11_SH", "Trial of the Granite King", "Confronting the guardians of the first floating fortress.");
-            AddChapter(RealmId.Eldergrove, "C11_EG", "Emerald Sky Trial", "Navigating the magical storms of the upper islands.");
-            AddChapter(RealmId.Crownlands, "C11_CL", "Radiant Vigil", "Proving your faith and strength to the Sky Wardens.");
-            AddChapter(RealmId.Umbral, "C11_UM", "Midnight Ascent", "Infiltrating the light-fortresses of the sky.");
-
-            AddChapter(RealmId.Stonehold, "C12_SH", "Throne of the Mountain Sky", "Reaching the ultimate seat of power and meeting the High Celestial.");
-            AddChapter(RealmId.Eldergrove, "C12_EG", "Glade of the Stars", "Securing the forest's place among the celestial powers.");
-            AddChapter(RealmId.Crownlands, "C12_CL", "Empire of Light", "Establishing a holy covenant between earth and sky.");
-            AddChapter(RealmId.Umbral, "C12_UM", "The Void Throne", "Claiming the sky for the shadows of the rift.");
-
-            // Otherworld Omen Foreshadowing
-            AddChapter(RealmId.None, "C_OMEN", "The Otherworld Omen", "Strange signals from beyond the celestial rift suggest we are not alone.");
-
-            InitializeSkillSoulQuests();
-        }
-
-        private void InitializeSkillSoulQuests()
-        {
-            // All 16 Subclass Soul Quests
-            AddSoulQuest(SubclassId.Vanguard, "Frontline Eternity", "Stand as the immovable object against the Celestial Tide.");
-            AddSoulQuest(SubclassId.Guardian, "The Unbreakable Vow", "Protect the Celestial Gate from an infinite onslaught.");
-            AddSoulQuest(SubclassId.Berserker, "Primal Rage", "Tame a legendary star-lion in a cosmic storm.");
-            AddSoulQuest(SubclassId.Pyromancer, "Sun-Fire Ascension", "Absorb the heat of the celestial sun into your core.");
-            AddSoulQuest(SubclassId.Cryomancer, "Absolute Zero", "Freeze the floating waterfalls of the Sky Castle.");
-            AddSoulQuest(SubclassId.Archmage, "Void Ascension", "Merge celestial light with shadow rift magic.");
-            AddSoulQuest(SubclassId.Sharpshooter, "Star-Piercer", "Strike a target on the furthest floating island.");
-            AddSoulQuest(SubclassId.Stalker, "The Celestial Hunt", "Track a creature made of pure starlight.");
-            AddSoulQuest(SubclassId.Beastmaster, "Sky-Bond", "Tame a High Celestial Gryphon.");
-            AddSoulQuest(SubclassId.Shadowblade, "Event Horizon", "Become one with the shadow cast by the Celestial Gate.");
-            AddSoulQuest(SubclassId.Infiltrator, "Heaven's Ghost", "Bypass the divine sentinels without being detected.");
-            AddSoulQuest(SubclassId.Nightstalker, "Void Reaper", "Execute the shadows lurking in the celestial gardens.");
-            AddSoulQuest(SubclassId.Paladin, "Divine Resonance", "Synchronize your armor with the High Celestial's song.");
-            AddSoulQuest(SubclassId.Necromancer, "Celestial Decay", "Study the life-cycles of the eternal sky-beings.");
-            AddSoulQuest(SubclassId.Slayer, "God-Killer", "Defeat the guardian of the Forbidden Island.");
-            AddSoulQuest(SubclassId.Druid, "World-Root Reach", "Connect the World Tree to the floating islands.");
-        }
-
-        private void AddSoulQuest(SubclassId subclass, string title, string description)
-        {
-            var quest = ScriptableObject.CreateInstance<SkillSoulQuestDefinition>();
-            quest.Id = $"SQ_{subclass}";
-            quest.AssociatedSubclass = subclass;
-            quest.Title = title;
-            quest.Description = description;
-            // Additional registration logic if needed
-        }
-
-        private void AddChapter(RealmId realmId, string id, string title, string summary)
-        {
-            var chapter = ScriptableObject.CreateInstance<ChapterDefinition>();
-            chapter.Id = id;
-            chapter.Title = title;
-            chapter.LoreSummary = summary;
-        }
-
-        private void CreateFallbackRealm(RealmId id, string name, string desc, string perks)
-        {
-            var realm = ScriptableObject.CreateInstance<RealmDefinition>();
-            realm.Id = id;
-            realm.RealmName = name;
-            realm.Description = $"{desc}\n\n{perks}";
-            _realms[id] = realm;
-        }
-
-        private static List<BuildingConstructionLevelDefinition> CreateConstructionLevels(
-            string buildingId)
-        {
-            int[] baseCosts =
+            try
             {
-                100, 175, 300, 475, 700, 1000, 1400, 1900, 2500, 3250
-            };
-            int[] durations =
-            {
-                10, 30, 120, 300, 900, 1800, 3600, 7200, 14400, 28800
-            };
+                if (!string.IsNullOrEmpty(Application.streamingAssetsPath))
+                {
+                    var packaged = Path.Combine(
+                        Application.streamingAssetsPath,
+                        SixFamilyCatalogLoader.PackagedRelativeRoot);
+                    if (File.Exists(Path.Combine(packaged, CatalogSetFileName)))
+                    {
+                        return packaged;
+                    }
+                }
 
-            int scalePercent = GetConstructionCostScalePercent(buildingId);
-            var levels = new List<BuildingConstructionLevelDefinition>(10);
-            for (int index = 0; index < baseCosts.Length; index++)
+                if (!string.IsNullOrEmpty(Application.dataPath))
+                {
+                    var editor = Path.Combine(
+                        Application.dataPath,
+                        "StreamingAssets",
+                        SixFamilyCatalogLoader.PackagedRelativeRoot);
+                    if (File.Exists(Path.Combine(editor, CatalogSetFileName)))
+                    {
+                        return editor;
+                    }
+                }
+            }
+            catch (Exception exception)
             {
-                long budget = checked((baseCosts[index] * (long)scalePercent + 99L) / 100L);
+                throw new InvalidOperationException(
+                    "Six-family catalog root could not be resolved from Unity StreamingAssets.",
+                    exception);
+            }
+
+            throw new InvalidOperationException(
+                "Six-family catalog-set.json was not found under StreamingAssets/GameData. " +
+                "Package the reviewed six-family catalog set before constructing IGameDataService.");
+        }
+
+        internal static GameDataCatalogSetSnapshot LoadOrGetCachedSnapshot(string catalogRootDirectory)
+        {
+            if (string.IsNullOrWhiteSpace(catalogRootDirectory))
+            {
+                throw new ArgumentException(
+                    "A catalog root directory is required.",
+                    nameof(catalogRootDirectory));
+            }
+
+            var root = Path.GetFullPath(catalogRootDirectory);
+            lock (CacheGate)
+            {
+                if (CachedSnapshot != null &&
+                    string.Equals(CachedRoot, root, StringComparison.OrdinalIgnoreCase))
+                {
+                    return CachedSnapshot;
+                }
+
+                var snapshot = SixFamilyCatalogLoader.LoadRequiredSnapshot(root);
+                CachedRoot = root;
+                CachedSnapshot = snapshot;
+                return snapshot;
+            }
+        }
+
+        public RealmDefinition GetRealm(RealmId id)
+        {
+            return _realms.TryGetValue(id, out var realm) ? realm : null;
+        }
+
+        public IEnumerable<RealmDefinition> GetAllRealms()
+        {
+            var ordered = new List<RealmDefinition>(_realms.Count);
+            if (_realms.TryGetValue(RealmId.Stonehold, out var stonehold)) ordered.Add(stonehold);
+            if (_realms.TryGetValue(RealmId.Eldergrove, out var eldergrove)) ordered.Add(eldergrove);
+            if (_realms.TryGetValue(RealmId.Crownlands, out var crownlands)) ordered.Add(crownlands);
+            if (_realms.TryGetValue(RealmId.Umbral, out var umbral)) ordered.Add(umbral);
+            return ordered;
+        }
+
+        public BuildingDefinition GetBuilding(string id)
+        {
+            return id != null && _buildings.TryGetValue(id, out var building) ? building : null;
+        }
+
+        public TroopDefinition GetTroop(string id)
+        {
+            return id != null && _troops.TryGetValue(id, out var troop) ? troop : null;
+        }
+
+        public ChampionDefinition GetChampion(string id)
+        {
+            return id != null && _champions.TryGetValue(id, out var champion) ? champion : null;
+        }
+
+        public IEnumerable<ChampionDefinition> GetAllChampions()
+        {
+            var ordered = new List<ChampionDefinition>(_canonicalChampionIds.Count);
+            for (var index = 0; index < _canonicalChampionIds.Count; index++)
+            {
+                ChampionDefinition champion;
+                if (_champions.TryGetValue(_canonicalChampionIds[index], out champion))
+                {
+                    ordered.Add(champion);
+                }
+            }
+
+            return ordered;
+        }
+
+        public SkillDefinition GetSkill(string id)
+        {
+            return id != null && _skills.TryGetValue(id, out var skill) ? skill : null;
+        }
+
+        private void ProjectSnapshot(GameDataCatalogSetSnapshot snapshot)
+        {
+            ProjectSkills(RequireFamily(snapshot, "skills"));
+            ProjectTroops(RequireFamily(snapshot, "troops"));
+            ProjectBuildings(RequireFamily(snapshot, "buildings"));
+            ProjectRealms(RequireFamily(snapshot, "realms"));
+            ProjectChampions(RequireFamily(snapshot, "champions"));
+        }
+
+        private static GameDataFamilyCatalogSnapshot RequireFamily(
+            GameDataCatalogSetSnapshot snapshot,
+            string family)
+        {
+            GameDataFamilyCatalogSnapshot catalog;
+            if (!snapshot.FamiliesById.TryGetValue(family, out catalog) ||
+                catalog.Records.Count == 0)
+            {
+                throw new InvalidOperationException(
+                    "Six-family catalog is missing required family '" + family + "'.");
+            }
+
+            return catalog;
+        }
+
+        private void ProjectRealms(GameDataFamilyCatalogSnapshot family)
+        {
+            foreach (var record in family.Records)
+            {
+                var legacyId = ReadString(record, "legacy_realm_id");
+                RealmId realmId;
+                if (!Enum.TryParse(legacyId, false, out realmId) || realmId == RealmId.None)
+                {
+                    throw new InvalidOperationException(
+                        "Realm record '" + record.Id + "' has an invalid legacy_realm_id.");
+                }
+
+                var definition = ScriptableObject.CreateInstance<RealmDefinition>();
+                definition.Id = realmId;
+                definition.RealmName = string.IsNullOrEmpty(legacyId) ? record.Id : legacyId;
+                definition.Description = ReadString(record, "description_ref");
+                _realms[realmId] = definition;
+            }
+        }
+
+        private void ProjectBuildings(GameDataFamilyCatalogSnapshot family)
+        {
+            foreach (var record in family.Records)
+            {
+                var canonical = ProjectBuilding(record, record.Id);
+                _buildings[record.Id] = canonical;
+                foreach (var alias in family.Aliases)
+                {
+                    if (!string.Equals(alias.CanonicalId, record.Id, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    _buildings[alias.LegacyId] = ProjectBuilding(record, alias.LegacyId);
+                }
+            }
+        }
+
+        private static BuildingDefinition ProjectBuilding(GameDataCatalogRecord record, string exposedId)
+        {
+            var definition = ScriptableObject.CreateInstance<BuildingDefinition>();
+            definition.Id = exposedId;
+            var legacyId = ReadString(record, "legacy_building_id");
+            definition.DisplayName = FormatBuildingDisplayName(legacyId ?? exposedId);
+            definition.MaxLevel = ReadInt32(record, "max_level");
+            definition.ConstructionLevels = ProjectConstructionLevels(
+                ReadString(record, "cost_profile_id"),
+                ReadString(record, "duration_profile_id"));
+            return definition;
+        }
+
+        private static List<BuildingConstructionLevelDefinition> ProjectConstructionLevels(
+            string costProfileId,
+            string durationProfileId)
+        {
+            GameDataBuildingCostProfile costProfile;
+            if (!GameDataBuildingProgressionRegistry.TryGetCostProfileByStableId(
+                    costProfileId,
+                    out costProfile))
+            {
+                throw new InvalidOperationException(
+                    "Building cost profile '" + costProfileId + "' is not in the progression registry.");
+            }
+
+            var durationProfile = GameDataBuildingProgressionRegistry.DurationProfile;
+            if (durationProfile == null ||
+                !string.Equals(durationProfile.StableId, durationProfileId, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException(
+                    "Building duration profile '" + durationProfileId + "' is not the reviewed common profile.");
+            }
+
+            var levels = new List<BuildingConstructionLevelDefinition>(costProfile.Levels.Count);
+            for (var index = 0; index < costProfile.Levels.Count; index++)
+            {
+                var costLevel = costProfile.Levels[index];
+                GameDataBuildingDurationLevel durationLevel;
+                if (!durationProfile.TryGetLevel(costLevel.TargetLevel, out durationLevel))
+                {
+                    throw new InvalidOperationException(
+                        "Duration profile is missing target level " + costLevel.TargetLevel + ".");
+                }
+
+                var costs = new List<BuildingConstructionCostDefinition>(costLevel.Costs.Count);
+                for (var costIndex = 0; costIndex < costLevel.Costs.Count; costIndex++)
+                {
+                    var cost = costLevel.Costs[costIndex];
+                    costs.Add(new BuildingConstructionCostDefinition
+                    {
+                        ResourceType = MapResource(cost.ResourceStableId),
+                        Amount = cost.Amount
+                    });
+                }
+
                 levels.Add(new BuildingConstructionLevelDefinition
                 {
-                    TargetLevel = index + 1,
-                    DurationSeconds = durations[index],
-                    Costs = CreateConstructionCosts(buildingId, budget)
+                    TargetLevel = costLevel.TargetLevel,
+                    DurationSeconds = durationLevel.DurationSeconds,
+                    Costs = costs
                 });
             }
 
             return levels;
         }
 
-        private static int GetConstructionCostScalePercent(string buildingId)
+        private void ProjectTroops(GameDataFamilyCatalogSnapshot family)
         {
-            switch (buildingId)
+            foreach (var record in family.Records)
             {
-                case "TownHall": return 140;
-                case "Farm":
-                case "LumberMill": return 80;
-                case "Quarry":
-                case "Market": return 90;
-                case "Storehouse": return 85;
-                case "GoldMine":
-                case "Stable":
-                case "Watchtower": return 100;
-                case "Barracks":
-                case "Workshop": return 110;
-                case "Forge": return 115;
-                case "Academy":
-                case "Embassy": return 120;
-                case "Wall": return 95;
-                default: return 100;
+                var definition = ProjectTroop(record, record.Id);
+                _troops[record.Id] = definition;
+                foreach (var alias in family.Aliases)
+                {
+                    if (string.Equals(alias.CanonicalId, record.Id, StringComparison.Ordinal))
+                    {
+                        _troops[alias.LegacyId] = ProjectTroop(record, alias.LegacyId);
+                    }
+                }
             }
         }
 
-        private static List<BuildingConstructionCostDefinition> CreateConstructionCosts(
-            string buildingId,
-            long budget)
+        private static TroopDefinition ProjectTroop(GameDataCatalogRecord record, string exposedId)
         {
-            switch (buildingId)
-            {
-                case "Farm":
-                case "LumberMill":
-                    return SplitCost(budget, ResourceType.Wood, 70, ResourceType.Stone, 30);
-                case "Quarry":
-                case "GoldMine":
-                    return SplitCost(budget, ResourceType.Wood, 40, ResourceType.Stone, 60);
-                case "Barracks":
-                case "Wall":
-                case "Watchtower":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        55,
-                        ResourceType.Wood,
-                        30,
-                        ResourceType.Gold,
-                        15);
-                case "Academy":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        40,
-                        ResourceType.Wood,
-                        25,
-                        ResourceType.ManaStone,
-                        35);
-                case "Forge":
-                case "Workshop":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        45,
-                        ResourceType.Wood,
-                        25,
-                        ResourceType.Ore,
-                        30);
-                case "Market":
-                case "Embassy":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Wood,
-                        45,
-                        ResourceType.Stone,
-                        25,
-                        ResourceType.Gold,
-                        30);
-                case "Stable":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Wood,
-                        55,
-                        ResourceType.Stone,
-                        25,
-                        ResourceType.Gold,
-                        20);
-                case "Storehouse":
-                    return SplitCost(budget, ResourceType.Wood, 60, ResourceType.Stone, 40);
-                case "TownHall":
-                default:
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        45,
-                        ResourceType.Wood,
-                        35,
-                        ResourceType.Gold,
-                        20);
-            }
-        }
-
-        private static List<BuildingConstructionCostDefinition> SplitCost(
-            long budget,
-            ResourceType firstType,
-            int firstPercent,
-            ResourceType secondType,
-            int secondPercent,
-            ResourceType? thirdType = null,
-            int thirdPercent = 0)
-        {
-            if (budget <= 0 ||
-                firstPercent <= 0 ||
-                secondPercent <= 0 ||
-                firstPercent + secondPercent + thirdPercent != 100 ||
-                (thirdPercent > 0 && !thirdType.HasValue))
+            var definition = ScriptableObject.CreateInstance<TroopDefinition>();
+            definition.Id = exposedId;
+            var legacyType = ReadString(record, "legacy_troop_type");
+            TroopType troopType;
+            if (!Enum.TryParse(legacyType, false, out troopType))
             {
                 throw new InvalidOperationException(
-                    "Building construction cost profile is invalid.");
+                    "Troop record '" + record.Id + "' has an invalid legacy_troop_type.");
             }
 
-            long firstAmount = Math.Max(1L, budget * firstPercent / 100L);
-            long secondAmount = Math.Max(1L, budget * secondPercent / 100L);
-            long thirdAmount = thirdPercent > 0
-                ? Math.Max(1L, budget - firstAmount - secondAmount)
-                : 0L;
-            if (thirdPercent == 0)
-            {
-                secondAmount = Math.Max(1L, budget - firstAmount);
-            }
-
-            var costs = new List<BuildingConstructionCostDefinition>
-            {
-                new BuildingConstructionCostDefinition
-                {
-                    ResourceType = firstType,
-                    Amount = firstAmount
-                },
-                new BuildingConstructionCostDefinition
-                {
-                    ResourceType = secondType,
-                    Amount = secondAmount
-                }
-            };
-
-            if (thirdType.HasValue)
-            {
-                costs.Add(new BuildingConstructionCostDefinition
-                {
-                    ResourceType = thirdType.Value,
-                    Amount = thirdAmount
-                });
-            }
-
-            return costs;
+            definition.Type = troopType;
+            definition.DisplayName = legacyType;
+            definition.BaseAttack = ReadInt32(record, "base_attack");
+            definition.BaseDefense = ReadInt32(record, "base_defense");
+            return definition;
         }
 
-        public RealmDefinition GetRealm(RealmId id) => _realms.TryGetValue(id, out var r) ? r : null;
-        public IEnumerable<RealmDefinition> GetAllRealms() => _realms.Values;
-        public BuildingDefinition GetBuilding(string id) => _buildings.TryGetValue(id, out var b) ? b : null;
-        public TroopDefinition GetTroop(string id) => null; // To be implemented
-        public ChampionDefinition GetChampion(string id) =>
-            string.IsNullOrEmpty(id) || !_champions.TryGetValue(id, out var c) ? null : c;
-        public IEnumerable<ChampionDefinition> GetAllChampions() => _champions.Values;
-        public SkillDefinition GetSkill(string id) => null; // To be implemented
+        private void ProjectSkills(GameDataFamilyCatalogSnapshot family)
+        {
+            foreach (var record in family.Records)
+            {
+                var definition = ProjectSkill(record, record.Id);
+                _skills[record.Id] = definition;
+                foreach (var alias in family.Aliases)
+                {
+                    if (string.Equals(alias.CanonicalId, record.Id, StringComparison.Ordinal))
+                    {
+                        _skills[alias.LegacyId] = ProjectSkill(record, alias.LegacyId);
+                    }
+                }
+            }
+        }
+
+        private static SkillDefinition ProjectSkill(GameDataCatalogRecord record, string exposedId)
+        {
+            var definition = ScriptableObject.CreateInstance<SkillDefinition>();
+            definition.Id = exposedId;
+            var nameRef = ReadString(record, "name_ref");
+            definition.DisplayName = string.IsNullOrEmpty(nameRef) ? exposedId : nameRef;
+            definition.TargetType = MapSkillTarget(ReadString(record, "target_type"));
+            definition.Cooldown = ReadSingle(record, "cooldown_seconds");
+            definition.Power = ReadSingle(record, "power");
+            return definition;
+        }
+
+        private void ProjectChampions(GameDataFamilyCatalogSnapshot family)
+        {
+            foreach (var record in family.Records)
+            {
+                var definition = ProjectChampion(record, record.Id);
+                _champions[record.Id] = definition;
+                _canonicalChampionIds.Add(record.Id);
+                foreach (var alias in family.Aliases)
+                {
+                    if (string.Equals(alias.CanonicalId, record.Id, StringComparison.Ordinal))
+                    {
+                        _champions[alias.LegacyId] = ProjectChampion(record, alias.LegacyId);
+                    }
+                }
+            }
+        }
+
+        private ChampionDefinition ProjectChampion(GameDataCatalogRecord record, string exposedId)
+        {
+            var definition = ScriptableObject.CreateInstance<ChampionDefinition>();
+            definition.Id = exposedId;
+            var nameRef = ReadString(record, "name_ref");
+            definition.DisplayName = string.IsNullOrEmpty(nameRef) ? exposedId : nameRef;
+
+            var realmStableId = ReadString(record, "realm_id");
+            RealmId realmId;
+            if (!TryMapRealmStableId(realmStableId, out realmId))
+            {
+                throw new InvalidOperationException(
+                    "Champion record '" + record.Id + "' has an invalid realm_id.");
+            }
+
+            definition.Realm = realmId;
+
+            ClassFamily family;
+            if (!Enum.TryParse(ReadString(record, "class_family_id"), true, out family))
+            {
+                throw new InvalidOperationException(
+                    "Champion record '" + record.Id + "' has an invalid class_family_id.");
+            }
+
+            definition.Family = family;
+            definition.BaseSkills = ResolveChampionSkills(record);
+
+            GameDataChampionSliceRegistry.Overlay overlay;
+            if (!GameDataChampionSliceRegistry.TryGet(record.Id, out overlay))
+            {
+                throw new InvalidOperationException(
+                    "Champion record '" + record.Id + "' has no reviewed slice overlay.");
+            }
+
+            SubclassId subclass;
+            if (!Enum.TryParse(overlay.SubclassId, false, out subclass) || subclass == SubclassId.None)
+            {
+                throw new InvalidOperationException(
+                    "Champion record '" + record.Id + "' has an invalid overlay subclass.");
+            }
+
+            if (!string.IsNullOrEmpty(overlay.DisplayName))
+            {
+                definition.DisplayName = overlay.DisplayName;
+            }
+
+            definition.Subclass = subclass;
+            definition.WeaponStyleId = overlay.WeaponStyleId;
+            definition.OffhandStyleId = overlay.OffhandStyleId;
+            definition.BaseStats = new ChampionBaseStats
+            {
+                MaxHealth = overlay.MaxHealth,
+                MaxMana = overlay.MaxMana,
+                Attack = overlay.Attack,
+                Defense = overlay.Defense,
+                Speed = overlay.Speed,
+                CritRate = overlay.CritRate
+            };
+            return definition;
+        }
+
+        private SkillDefinition[] ResolveChampionSkills(GameDataCatalogRecord record)
+        {
+            GameDataValue value;
+            if (!record.TryGetField("base_skill_ids", out value))
+            {
+                return Array.Empty<SkillDefinition>();
+            }
+
+            var array = value as GameDataArrayValue;
+            if (array == null)
+            {
+                return Array.Empty<SkillDefinition>();
+            }
+
+            var skills = new List<SkillDefinition>(array.Items.Count);
+            for (var index = 0; index < array.Items.Count; index++)
+            {
+                var item = array.Items[index] as GameDataStringValue;
+                if (item == null)
+                {
+                    continue;
+                }
+
+                SkillDefinition skill;
+                if (_skills.TryGetValue(item.Value, out skill))
+                {
+                    skills.Add(skill);
+                }
+            }
+
+            return skills.ToArray();
+        }
+
+        private static bool TryMapRealmStableId(string stableId, out RealmId realmId)
+        {
+            if (string.Equals(stableId, "stonehold", StringComparison.Ordinal))
+            {
+                realmId = RealmId.Stonehold;
+                return true;
+            }
+
+            if (string.Equals(stableId, "eldergrove", StringComparison.Ordinal))
+            {
+                realmId = RealmId.Eldergrove;
+                return true;
+            }
+
+            if (string.Equals(stableId, "crownlands", StringComparison.Ordinal))
+            {
+                realmId = RealmId.Crownlands;
+                return true;
+            }
+
+            if (string.Equals(stableId, "umbral", StringComparison.Ordinal))
+            {
+                realmId = RealmId.Umbral;
+                return true;
+            }
+
+            realmId = RealmId.None;
+            return false;
+        }
+
+        private static SkillTargetType MapSkillTarget(string targetType)
+        {
+            if (string.Equals(targetType, "enemy", StringComparison.Ordinal)) return SkillTargetType.Enemy;
+            if (string.Equals(targetType, "self", StringComparison.Ordinal)) return SkillTargetType.Self;
+            if (string.Equals(targetType, "aoe", StringComparison.Ordinal)) return SkillTargetType.AoE;
+            if (string.Equals(targetType, "ally", StringComparison.Ordinal)) return SkillTargetType.Ally;
+            if (string.Equals(targetType, "single", StringComparison.Ordinal)) return SkillTargetType.Single;
+            throw new InvalidOperationException("Unknown skill target_type '" + targetType + "'.");
+        }
+
+        private static ResourceType MapResource(string resourceStableId)
+        {
+            if (string.Equals(resourceStableId, "wood", StringComparison.Ordinal)) return ResourceType.Wood;
+            if (string.Equals(resourceStableId, "stone", StringComparison.Ordinal)) return ResourceType.Stone;
+            if (string.Equals(resourceStableId, "gold", StringComparison.Ordinal)) return ResourceType.Gold;
+            if (string.Equals(resourceStableId, "mana_stone", StringComparison.Ordinal)) return ResourceType.ManaStone;
+            if (string.Equals(resourceStableId, "ore", StringComparison.Ordinal)) return ResourceType.Ore;
+            if (string.Equals(resourceStableId, "food", StringComparison.Ordinal)) return ResourceType.Food;
+            throw new InvalidOperationException("Unknown resource stable id '" + resourceStableId + "'.");
+        }
+
+        private static string FormatBuildingDisplayName(string legacyOrCanonical)
+        {
+            if (string.IsNullOrEmpty(legacyOrCanonical))
+            {
+                return legacyOrCanonical;
+            }
+
+            return legacyOrCanonical
+                .Replace("Mill", " Mill")
+                .Replace("Hall", " Hall")
+                .Replace("Mine", " Mine");
+        }
+
+        private static string ReadString(GameDataCatalogRecord record, string fieldName)
+        {
+            GameDataValue value;
+            if (!record.TryGetField(fieldName, out value))
+            {
+                return null;
+            }
+
+            var typed = value as GameDataStringValue;
+            return typed != null ? typed.Value : null;
+        }
+
+        private static int ReadInt32(GameDataCatalogRecord record, string fieldName)
+        {
+            GameDataValue value;
+            if (!record.TryGetField(fieldName, out value))
+            {
+                throw new InvalidOperationException(
+                    "Record '" + record.Id + "' is missing integer field '" + fieldName + "'.");
+            }
+
+            var typed = value as GameDataNumberValue;
+            long parsed;
+            if (typed == null || !typed.TryGetInt64(out parsed) || parsed < int.MinValue || parsed > int.MaxValue)
+            {
+                throw new InvalidOperationException(
+                    "Record '" + record.Id + "' field '" + fieldName + "' is not an int32.");
+            }
+
+            return (int)parsed;
+        }
+
+        private static float ReadSingle(GameDataCatalogRecord record, string fieldName)
+        {
+            GameDataValue value;
+            if (!record.TryGetField(fieldName, out value))
+            {
+                throw new InvalidOperationException(
+                    "Record '" + record.Id + "' is missing number field '" + fieldName + "'.");
+            }
+
+            var typed = value as GameDataNumberValue;
+            if (typed == null)
+            {
+                throw new InvalidOperationException(
+                    "Record '" + record.Id + "' field '" + fieldName + "' is not a number.");
+            }
+
+            return (float)typed.Value;
+        }
     }
 }
