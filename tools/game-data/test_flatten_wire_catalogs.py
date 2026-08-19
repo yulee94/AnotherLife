@@ -19,8 +19,8 @@ def main() -> int:
     errors.extend(flatten.assert_protected_unchanged(before))
 
     expected_counts = {
-        "realm_specialized": (13, 13),
-        "character_customization": (114, 188),
+        "realm_specialized": (13, 18),
+        "character_customization": (114, 301),
         "skill_weather": (13, 26),
     }
     for family, (records, aliases) in expected_counts.items():

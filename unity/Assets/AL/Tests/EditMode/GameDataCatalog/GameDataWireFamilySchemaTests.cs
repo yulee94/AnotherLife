@@ -302,13 +302,19 @@ namespace AL.Tests.EditMode.GameDataCatalog
         [Test]
         public void PackagedSkillWeatherEnvelopeLoadsThroughWireRegistry()
         {
-            var artifact = PackagedArtifact("skill_weather");
-            var result = ValidatePackaged(artifact);
-            Assert.AreEqual(GameDataCatalogLoadStatus.LoadedPackaged, result.Status);
-            Assert.NotNull(result.Snapshot);
-            GameDataFamilyCatalogSnapshot family;
-            Assert.True(result.Snapshot.FamiliesById.TryGetValue("skill_weather", out family));
-            Assert.AreEqual(13, family.Records.Count);
+            AssertPackagedFamily("skill_weather", 13);
+        }
+
+        [Test]
+        public void PackagedRealmSpecializedEnvelopeLoadsThroughWireRegistry()
+        {
+            AssertPackagedFamily("realm_specialized", 13);
+        }
+
+        [Test]
+        public void PackagedCharacterCustomizationEnvelopeLoadsThroughWireRegistry()
+        {
+            AssertPackagedFamily("character_customization", 114);
         }
 
         [Test]
@@ -398,6 +404,17 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 "The bounded wire-family fixture should complete within five seconds.");
             Assert.AreEqual(GameDataCatalogLifecycleStatus.Ready, store.State.Status);
             return store;
+        }
+
+        private static void AssertPackagedFamily(string family, int expectedRecords)
+        {
+            var artifact = PackagedArtifact(family);
+            var result = ValidatePackaged(artifact);
+            Assert.AreEqual(GameDataCatalogLoadStatus.LoadedPackaged, result.Status, family);
+            Assert.NotNull(result.Snapshot, family);
+            GameDataFamilyCatalogSnapshot snapshot;
+            Assert.True(result.Snapshot.FamiliesById.TryGetValue(family, out snapshot), family);
+            Assert.AreEqual(expectedRecords, snapshot.Records.Count, family);
         }
 
         private static CatalogFixture.Artifact PackagedArtifact(string family)

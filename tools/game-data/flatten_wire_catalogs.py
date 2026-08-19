@@ -87,6 +87,28 @@ def camel_to_snake(name: str) -> str:
     return _CAMEL_2.sub(r"\1_\2", _CAMEL_1.sub(r"\1_\2", name)).lower()
 
 
+def rematerialize_id(value: str) -> str:
+    """Map a legacy / dotted / PascalCase token to AL-GDC-RECORD-ID snake_case."""
+    snake = camel_to_snake(str(value)).replace(".", "_")
+    return re.sub(r"_+", "_", snake).strip("_")
+
+
+def is_canonical_stable_id(value: str) -> bool:
+    if not value or len(value) > 128 or value[0] < "a" or value[0] > "z":
+        return False
+    previous_underscore = False
+    for index, character in enumerate(value[1:], start=1):
+        is_lower = "a" <= character <= "z"
+        is_digit = "0" <= character <= "9"
+        if is_lower or is_digit:
+            previous_underscore = False
+            continue
+        if character != "_" or previous_underscore or index == len(value) - 1:
+            return False
+        previous_underscore = True
+    return True
+
+
 def snake_keys(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {camel_to_snake(str(key)): snake_keys(value) for key, value in obj.items()}
@@ -191,15 +213,17 @@ def build_realm_specialized(src: dict[str, Any]) -> tuple[list[dict[str, Any]], 
 
     for draft in src.get("localizationDrafts") or []:
         key = draft["key"]
-        records.append(_record("localization_draft", key, draft))
-        aliases.add(f"localization.{key}", key)
+        canonical = rematerialize_id(key)
+        records.append(_record("localization_draft", canonical, draft))
+        aliases.add(key, canonical)
+        aliases.add(f"localization.{key}", canonical)
 
     records.append(_record("engineering_handoff", "engineering_handoff", src["engineeringHandoff"]))
     return records, aliases.rows()
 
 
 def _kind_id(kind: str, source_id: str) -> str:
-    return f"{kind}.{source_id}"
+    return f"{kind}_{rematerialize_id(source_id)}"
 
 
 def build_character_customization(src: dict[str, Any]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -312,6 +336,9 @@ def validate_envelope(family: str, envelope: dict[str, Any]) -> list[str]:
         errors.append(f"{family}: every record needs an id")
     if len(ids) != len(set(ids)):
         errors.append(f"{family}: record ids are not unique")
+    for record_id in ids:
+        if record_id and not is_canonical_stable_id(str(record_id)):
+            errors.append(f"{family}: record id {record_id!r} is not lower_snake_case")
     leftover_wrappers = {"realms", "skillLoadouts", "skillEffects", "weatherProfiles", "bodyPresets", "forgePresets"}
     if leftover_wrappers.intersection(envelope):
         errors.append(f"{family}: leftover nested catalog wrappers {sorted(leftover_wrappers.intersection(envelope))}")
@@ -330,6 +357,8 @@ def validate_envelope(family: str, envelope: dict[str, Any]) -> list[str]:
         seen_legacy.add(legacy)
         if canonical not in ids:
             errors.append(f"{family}: alias {legacy!r} points at missing id {canonical!r}")
+        elif not is_canonical_stable_id(str(canonical)):
+            errors.append(f"{family}: alias {legacy!r} target {canonical!r} is not lower_snake_case")
     return errors
 
 
@@ -369,17 +398,17 @@ def validate_identity(family: str, envelope: dict[str, Any], source: dict[str, A
 
     if family == "character_customization":
         for item in source["bodyPresets"]:
-            canonical = f"body_preset.{item['id']}"
+            canonical = f"body_preset_{rematerialize_id(item['id'])}"
             if canonical not in by_id:
                 errors.append(f"body preset {item['id']!r} missing")
             elif by_id[canonical].get("legacy_id") != item["id"]:
                 errors.append(f"body preset legacy_id drifted for {item['id']!r}")
         for item in source["forgePresets"]:
-            canonical = f"forge_preset.{item['id']}"
+            canonical = f"forge_preset_{rematerialize_id(item['id'])}"
             if canonical not in by_id:
                 errors.append(f"forge preset {item['id']!r} missing")
         for slot in source["characterSlots"]:
-            if f"character_slot.{slot}" not in by_id:
+            if f"character_slot_{rematerialize_id(slot)}" not in by_id:
                 errors.append(f"character slot {slot!r} missing")
         if "quality_targets" not in by_id:
             errors.append("quality_targets record missing")

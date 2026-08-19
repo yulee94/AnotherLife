@@ -143,14 +143,14 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal const string KingdomPath = "Assets/AL/Scenes/Kingdom.unity";
 
         private const int MaximumBodyPresetChoices = 16;
-        private const int MaximumCustomizationCatalogBytes = 64 * 1024;
+        private const int MaximumCustomizationCatalogBytes = 256 * 1024;
         private const int MaximumEnvironmentFactoryComponents = 16384;
         private const int MaximumEnvironmentFactoryServices = 256;
         private const int MaximumEnvironmentFactorySerializedStateCodeUnits =
             8 * 1024 * 1024;
         private const float DestinationLoadTimeoutSeconds = 30f;
         private const string CustomizationCatalogFileName =
-            "al_character_customization_catalog.json";
+            "character_customization.v1.json";
 
         private static readonly UTF8Encoding StrictUtf8 = new UTF8Encoding(false, true);
         private static readonly FieldInfo ServiceLocatorServicesField =
@@ -4160,13 +4160,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 }
 
                 string json = StrictUtf8.GetString(bytes);
-                catalog = JsonUtility.FromJson<CharacterCustomizationCatalogData>(json);
-                return catalog?.bodyPresets != null &&
-                       catalog.bodyPresets.Length > 0 &&
-                       catalog.hairStyles != null &&
-                       catalog.hairStyles.Length > 0 &&
-                       catalog.armorStyles != null &&
-                       catalog.armorStyles.Length > 0;
+                return CharacterCustomizationCatalog.TryParse(json, out catalog);
             }
             catch (Exception exception) when (
                 exception is IOException ||

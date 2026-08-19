@@ -28,7 +28,8 @@ python tools/game-data/flatten_wire_catalogs.py --check
 - Every record has `id` + `kind`. No leftover top-level wrappers (`realms`, `skillLoadouts`, `bodyPresets`, …).
 - realm_specialized: realm ids stay `crownlands` / `stonehold` / `eldergrove` / `umbral`. Catalog-level objects become records (`selection_policy`, `narrative_continuity`, `realm_order`, localization keys, `engineering_handoff`). Aliases: `Crownlands` → `crownlands`.
 - skill_weather: loadout ids stay `realm_strike` etc. Effect/weather `key` is promoted to `id` and kept as `key`. Aliases: `Realm Strike` → `realm_strike`.
-- character_customization: colliding short ids (`duelist`, `grove_green`, `none`, `royal_gold`) are namespaced as `{kind}.{legacy_id}`. Original id is `legacy_id`. Ambiguous bare aliases are omitted.
+- character_customization: colliding short ids (`duelist`, `grove_green`, `none`, `royal_gold`) are namespaced as `{kind}_{legacy_id}` (lower_snake_case so AL-GDC-RECORD-ID accepts them). Original id is `legacy_id`. Dotted `{kind}.{legacy_id}` is kept as an alias. Ambiguous bare aliases are omitted.
+- realm_specialized localization keys (`realm.lock.warning`) are rematerialized to snake_case record ids (`realm_lock_warning`); the original key stays as an alias. The realm schema has no `legacy_id` field.
 
 Do **not** merge into `realms.v1.json` or `skills.v1.json`.
 
