@@ -2073,10 +2073,15 @@ namespace AL.Services.Local
                 return;
             }
 
+            bool isPreSchemaMigration =
+                selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
+                IsPreSchemaMetadata(selectedSave) &&
+                HasRecoverableKingdomState(selectedSave);
+
             bool runtimeUsable =
                 selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
-                selected.IsWritable &&
-                IsRuntimeRoundTrippable(selected);
+                ((selected.IsWritable && IsRuntimeRoundTrippable(selected)) ||
+                 isPreSchemaMigration);
             bool writable = runtimeUsable &&
                 (!HasUnresolvedAuxiliaryEvidence(inventory) ||
                  hasCommittedBackupRecoveryWitness);
@@ -2084,6 +2089,83 @@ namespace AL.Services.Local
 
             if (runtimeUsable)
             {
+                if (isPreSchemaMigration)
+                {
+                    if (TryMigratePreSchemaPrimary(
+                            selected,
+                            selectedSave,
+                            out SaveGameData migratedSave,
+                            out string migrateMessage))
+                    {
+                        _currentSave = migratedSave;
+                        _readOnlyCandidate = null;
+                        _profileWritable = true;
+                        _committedRecoveryWitnessBytes = null;
+                        _committedInvalidPrimaryWitnessBytes = null;
+                        _committedInvalidPrimaryQuarantinePath = null;
+                        _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                        _committedInvalidPrimaryRecoveryMarkerPath = null;
+                        PublishDisposition(
+                            inventory,
+                            selected,
+                            selection.ReasonCode,
+                            true,
+                            true,
+                            true);
+                        ObservePrimaryAuthority(migratedSave);
+                        SetLoadStatus(
+                            SaveLoadStatus.LoadedPrimary,
+                            migrateMessage,
+                            false);
+                        return;
+                    }
+
+                    if (TryCreateReplacementAfterUnmigratablePrimary(
+                            out SaveGameData replacementSave,
+                            out string replacementMessage))
+                    {
+                        _currentSave = replacementSave;
+                        _readOnlyCandidate = null;
+                        _profileWritable = true;
+                        _committedRecoveryWitnessBytes = null;
+                        _committedInvalidPrimaryWitnessBytes = null;
+                        _committedInvalidPrimaryQuarantinePath = null;
+                        _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                        _committedInvalidPrimaryRecoveryMarkerPath = null;
+                        PublishDisposition(
+                            inventory,
+                            null,
+                            "SAVE_SELECT_UNMIGRATABLE_PRIMARY_CREATE_NEW",
+                            true,
+                            true,
+                            true,
+                            SaveCandidateSourceGeneration.Primary);
+                        SetLoadStatus(
+                            SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption,
+                            replacementMessage,
+                            false);
+                        return;
+                    }
+
+                    _currentSave = null;
+                    _readOnlyCandidate = selectedSave;
+                    _profileWritable = false;
+                    PublishDisposition(
+                        inventory,
+                        selected,
+                        selection.ReasonCode,
+                        false,
+                        false,
+                        false);
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryFailed,
+                        string.IsNullOrWhiteSpace(replacementMessage)
+                            ? migrateMessage
+                            : replacementMessage,
+                        true);
+                    return;
+                }
+
                 _currentSave = selectedSave;
                 _readOnlyCandidate = null;
                 _committedRecoveryWitnessBytes =
@@ -2433,6 +2515,109 @@ namespace AL.Services.Local
             public string MigrationBackupArchivePath { get; }
             public bool RollbackAttempted { get; set; }
             public bool RollbackBytesVerified { get; set; }
+        }
+
+        private bool TryMigratePreSchemaPrimary(
+            SaveSemanticCandidate selected,
+            SaveGameData selectedSave,
+            out SaveGameData migratedSave,
+            out string message)
+        {
+            migratedSave = null;
+            message = string.Empty;
+
+            SaveGameData candidate = CloneSave(selectedSave);
+            candidate.SaveFormatId = SaveGameData.CurrentSaveFormatId;
+            candidate.SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion;
+            candidate.ProfileInitializationVersion =
+                SaveGameData.CurrentProfileInitializationVersion;
+            ApplyApprovedNeutralNormalization(candidate, selected);
+
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                null,
+                null,
+                out SaveGameData persistedSave,
+                out SaveOperationDisposition disposition,
+                out string persistMessage);
+            LastSaveDisposition = disposition;
+
+            if (status != SaveOperationStatus.SavedPrimary ||
+                persistedSave == null)
+            {
+                message = persistMessage ??
+                    "AL-SAVE-PRESCHEMA-MIGRATION-FAILED: A pre-schema primary could not be stamped and durably persisted; original evidence was preserved read-only.";
+                return false;
+            }
+
+            migratedSave = persistedSave;
+            message =
+                "AL-SAVE-PRESCHEMA-MIGRATED: A legacy pre-schema primary was stamped with current save metadata and durably persisted; original evidence was preserved.";
+            return true;
+        }
+
+        private bool TryCreateReplacementAfterUnmigratablePrimary(
+            out SaveGameData createdSave,
+            out string message)
+        {
+            createdSave = null;
+            message = string.Empty;
+
+            if (HasSaveEvidence(BackupPath) ||
+                HasSaveEvidence(PreviousPath) ||
+                HasSaveEvidence(LegacyPreviousPath))
+            {
+                message =
+                    "AL-SAVE-PRESCHEMA-MIGRATION-FAILED: A pre-schema primary could not be stamped; remaining generations were preserved for explicit recovery.";
+                return false;
+            }
+
+            string quarantineError;
+            string tempQuarantineError = string.Empty;
+            if (!TryQuarantineInvalidFile(SavePath, out quarantineError) ||
+                !TryQuarantineInvalidFile(TempPath, out tempQuarantineError))
+            {
+                message =
+                    "AL-SAVE-PRESCHEMA-QUARANTINE-FAILED: Unmigratable primary could not be quarantined before replacement. " +
+                    quarantineError +
+                    " " +
+                    tempQuarantineError;
+                return false;
+            }
+
+            if (!AllCanonicalPathsMissing(includeTemp: true))
+            {
+                message =
+                    "AL-SAVE-PRESCHEMA-MIGRATION-FAILED: Unmigratable primary was preserved because replacement would not be exclusive.";
+                return false;
+            }
+
+            SaveGameData newSave = CreateDefaultSave(RealmId.None);
+            SaveGameData firstGenerationCandidate = CloneSave(newSave);
+            bool coreSucceeded = TryCreateFirstGenerationCandidate(
+                firstGenerationCandidate,
+                out SaveGameData persistedNewSave,
+                out string createMessage,
+                out bool diskChanged);
+            SaveOperationStatus reconciledStatus =
+                ReconcileFirstGenerationAttempt(
+                    firstGenerationCandidate,
+                    coreSucceeded,
+                    diskChanged,
+                    ref persistedNewSave,
+                    out _,
+                    ref createMessage);
+            if (reconciledStatus != SaveOperationStatus.SavedPrimary ||
+                persistedNewSave == null)
+            {
+                message = createMessage;
+                return false;
+            }
+
+            createdSave = persistedNewSave;
+            message =
+                "AL-SAVE-CREATED-NEW-AFTER-UNRECOVERABLE: A pre-schema primary could not be stamped and persisted, so the original bytes were quarantined and a current-schema profile was created.";
+            return true;
         }
 
         private SaveOperationStatus PersistCandidate(
@@ -6449,6 +6634,15 @@ namespace AL.Services.Local
 
             return JsonUtility.FromJson<SaveGameData>(JsonUtility.ToJson(save));
         }
+
+        private static bool IsPreSchemaMetadata(SaveGameData save) =>
+            save != null &&
+            (string.IsNullOrEmpty(save.SaveFormatId) ||
+             save.SaveSchemaVersion <= 0 ||
+             save.ProfileInitializationVersion <= 0);
+
+        private static bool HasRecoverableKingdomState(SaveGameData save) =>
+            save != null && save.SelectedRealm != RealmId.None;
 
         private static bool HasCurrentSaveMetadata(SaveGameData save) =>
             save != null &&
