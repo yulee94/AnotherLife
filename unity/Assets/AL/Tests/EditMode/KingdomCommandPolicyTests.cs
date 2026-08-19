@@ -55,11 +55,14 @@ namespace AL.Tests.EditMode
         public void DefaultDeckLeavesEveryMutationUnavailable()
         {
             object[] deck = CreateDeckDescriptors(DefaultContext());
+            string duelId = CommandId("GreyboxDuel");
+            object duel = deck.Single(command => Id(command) == duelId);
 
             Assert.That(deck, Is.Not.Empty);
-            Assert.That(deck.All(command => Category(command) != "Presentation"), Is.True);
-            Assert.That(deck.All(command => !IsInteractable(command)), Is.True);
-            Assert.That(deck.All(command => Availability(command) != "Available"), Is.True);
+            Assert.That(IsInteractable(duel), Is.True, "The greybox duel is the one unlocked Kingdom control.");
+            Assert.That(deck.Where(command => Id(command) != duelId).All(command => Category(command) != "Presentation"), Is.True);
+            Assert.That(deck.Where(command => Id(command) != duelId).All(command => !IsInteractable(command)), Is.True);
+            Assert.That(deck.Where(command => Id(command) != duelId).All(command => Availability(command) != "Available"), Is.True);
         }
 
         [Test]

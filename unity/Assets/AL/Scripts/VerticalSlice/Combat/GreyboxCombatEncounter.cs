@@ -219,7 +219,15 @@ namespace AL.VerticalSlice.Combat
         {
             if (_canvasObject != null)
             {
-                Destroy(_canvasObject);
+                if (Application.isPlaying)
+                {
+                    Destroy(_canvasObject);
+                }
+                else
+                {
+                    DestroyImmediate(_canvasObject);
+                }
+
                 _canvasObject = null;
             }
 
@@ -233,6 +241,11 @@ namespace AL.VerticalSlice.Combat
             _resultPanel = null;
             _resultTitle = null;
             _resultSummary = null;
+        }
+
+        private void OnDestroy()
+        {
+            TearDownUI();
         }
 
         // ----------------------------------------------------------------- UI helpers (mirrors DemoInitializer style)
