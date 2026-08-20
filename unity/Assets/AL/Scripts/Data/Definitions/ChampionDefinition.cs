@@ -20,7 +20,7 @@ namespace AL.Data.Definitions
     }
 
     /// <summary>
-    /// Greybox champion base stats carried by a hardcoded LocalGameDataService archetype.
+    /// Greybox champion base stats projected from packaged six-family catalogs.
     /// Plain serializable values (not authority micros) so the character creation and legacy
     /// combat surfaces can share one source without catalog/save authority.
     /// </summary>
