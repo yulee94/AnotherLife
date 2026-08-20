@@ -52,17 +52,29 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void DefaultDeckLeavesEveryMutationUnavailable()
+        public void DefaultDeckLeavesDeferredMutationsUnavailable()
         {
             object[] deck = CreateDeckDescriptors(DefaultContext());
             string duelId = CommandId("GreyboxDuel");
+            string townHallId = CommandId("TownHallUpgrade");
             object duel = deck.Single(command => Id(command) == duelId);
+            object townHall = deck.Single(command => Id(command) == townHallId);
 
             Assert.That(deck, Is.Not.Empty);
-            Assert.That(IsInteractable(duel), Is.True, "The greybox duel is the one unlocked Kingdom control.");
-            Assert.That(deck.Where(command => Id(command) != duelId).All(command => Category(command) != "Presentation"), Is.True);
-            Assert.That(deck.Where(command => Id(command) != duelId).All(command => !IsInteractable(command)), Is.True);
-            Assert.That(deck.Where(command => Id(command) != duelId).All(command => Availability(command) != "Available"), Is.True);
+            Assert.That(IsInteractable(duel), Is.True, "The greybox duel stays the unlocked Realm Ops control.");
+            Assert.That(IsInteractable(townHall), Is.True, "Town Hall is the one unlocked Kingdom build.");
+            Assert.That(
+                deck.Where(command => Id(command) != duelId && Id(command) != townHallId)
+                    .All(command => Category(command) != "Presentation"),
+                Is.True);
+            Assert.That(
+                deck.Where(command => Id(command) != duelId && Id(command) != townHallId)
+                    .All(command => !IsInteractable(command)),
+                Is.True);
+            Assert.That(
+                deck.Where(command => Id(command) != duelId && Id(command) != townHallId)
+                    .All(command => Availability(command) != "Available"),
+                Is.True);
         }
 
         [Test]
@@ -101,7 +113,6 @@ namespace AL.Tests.EditMode
 
             Assert.That(changedIds, Is.EquivalentTo(new[]
             {
-                CommandId("TownHallUpgrade"),
                 CommandId("FarmUpgrade"),
                 CommandId("LumberMillUpgrade"),
                 CommandId("QuarryUpgrade"),
