@@ -15,6 +15,8 @@ namespace AL.ChampionMode.Customization
         private Renderer[] _renderers;
         private CharacterCustomizationCatalogData _catalog;
         private bool _catalogLoadStarted;
+        private bool _useExternalPresentation;
+        private ChampionCustomizationState _externalPresentation;
 
         private static readonly string[] BodyPresets =
         {
@@ -100,7 +102,15 @@ namespace AL.ChampionMode.Customization
 
         private void Start()
         {
-            ApplySavedCustomization();
+            if (_useExternalPresentation)
+            {
+                ApplyState(_externalPresentation);
+            }
+            else
+            {
+                ApplySavedCustomization();
+            }
+
             if (_catalog == null && !_catalogLoadStarted)
             {
                 StartCoroutine(ApplySharedCatalogAsync());
@@ -109,7 +119,29 @@ namespace AL.ChampionMode.Customization
 
         public void ApplySavedCustomization()
         {
-            var state = GetPresentationSnapshot();
+            if (_useExternalPresentation)
+            {
+                ApplyState(_externalPresentation);
+                return;
+            }
+
+            ApplyState(GetPresentationSnapshot());
+        }
+
+        public void ApplyPresentation(ChampionCustomizationState state)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            _useExternalPresentation = true;
+            _externalPresentation = state;
+            ApplyState(state);
+        }
+
+        private void ApplyState(ChampionCustomizationState state)
+        {
             if (state == null)
             {
                 return;

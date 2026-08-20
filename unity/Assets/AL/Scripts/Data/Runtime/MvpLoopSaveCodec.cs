@@ -1,5 +1,6 @@
 using System;
 using AL.Core;
+using AL.UI.CharacterCreation;
 using AL.UI.FirstUserIdentity;
 
 namespace AL.Data.Runtime
@@ -55,6 +56,27 @@ namespace AL.Data.Runtime
             string lastResultId,
             string buildingId,
             int buildingLevel)
+            : this(
+                transactionId,
+                expectedRealm,
+                classFamily,
+                confirmIdentity,
+                lastResultId,
+                buildingId,
+                buildingLevel,
+                null)
+        {
+        }
+
+        public MvpLoopCommitRequest(
+            string transactionId,
+            RealmId expectedRealm,
+            ClassFamily classFamily,
+            bool confirmIdentity,
+            string lastResultId,
+            string buildingId,
+            int buildingLevel,
+            ChampionCustomizationState appearance)
         {
             TransactionId = transactionId ?? string.Empty;
             ExpectedRealm = expectedRealm;
@@ -63,6 +85,7 @@ namespace AL.Data.Runtime
             LastResultId = lastResultId ?? string.Empty;
             BuildingId = buildingId ?? string.Empty;
             BuildingLevel = buildingLevel;
+            Appearance = appearance;
         }
 
         public string TransactionId { get; }
@@ -72,6 +95,7 @@ namespace AL.Data.Runtime
         public string LastResultId { get; }
         public string BuildingId { get; }
         public int BuildingLevel { get; }
+        public ChampionCustomizationState Appearance { get; }
     }
 
     /// <summary>
@@ -305,9 +329,16 @@ namespace AL.Data.Runtime
                 StringComparison.Ordinal);
             bool sameBuild = string.IsNullOrEmpty(request.BuildingId) ||
                              HasBuilding(candidate, request.BuildingId, request.BuildingLevel);
-            if (sameClass && sameConfirm && sameResult && sameBuild)
+            bool sameLook = request.Appearance == null ||
+                            CharacterCreationLook.Matches(customization, request.Appearance);
+            if (sameClass && sameConfirm && sameResult && sameBuild && sameLook)
             {
                 return MvpLoopPrepareDisposition.Duplicate;
+            }
+
+            if (request.Appearance != null)
+            {
+                CharacterCreationLook.CopyInto(customization, request.Appearance);
             }
 
             customization.ClassFamilyId = classFamilyId;
