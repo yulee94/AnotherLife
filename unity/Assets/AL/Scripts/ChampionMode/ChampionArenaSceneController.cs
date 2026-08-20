@@ -13,6 +13,7 @@ using AL.Data.Catalogs.WorldAtlas;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
 using AL.UI;
+using AL.UI.Presentation;
 using AL.World;
 using System.Collections;
 using System.Collections.Generic;
@@ -156,6 +157,7 @@ namespace AL.ChampionMode
         private RealmId _realmId = RealmId.None;
         private bool _guardianTrialStarted;
         private FirstSessionInnerRealmSpawn _innerSpawn;
+        private ChampionHudSession _hudSession;
 
         private void Start()
         {
@@ -287,6 +289,7 @@ namespace AL.ChampionMode
             if (!_guardianTrialStarted)
             {
                 _guardianTrialStarted = true;
+                _hudSession?.RevealCombatChrome();
                 StartCoroutine(EncounterIntroRoutine());
             }
 
@@ -1075,13 +1078,11 @@ namespace AL.ChampionMode
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             _hudCanvasRect = canvasObject.GetComponent<RectTransform>();
             var scaler = canvasObject.AddComponent<CanvasScaler>();
-            scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            scaler.referenceResolution = new Vector2(1920f, 1080f);
-            scaler.matchWidthOrHeight = 0.5f;
+            PresentationChrome.ApplyCanvasScaler(scaler);
             canvasObject.AddComponent<GraphicRaycaster>();
             EnsureEventSystem();
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
+            var font = PresentationChrome.ResolveFont() ??
                        Resources.GetBuiltinResource<Font>("Arial.ttf");
 
             CreateDamageFeedbackLayer(canvasObject.transform);
@@ -1230,6 +1231,10 @@ namespace AL.ChampionMode
             RefreshBossText();
             RefreshAppearanceText();
             RefreshEncounterText();
+            _hudSession = ChampionHudSession.Attach(
+                canvasObject.transform,
+                () => _guardianTrialStarted || FirstSessionChampionStart.IsEncounterHarness,
+                () => _encounterFailed);
         }
 
         private void OnDestroy()
@@ -1474,7 +1479,7 @@ namespace AL.ChampionMode
                 SetFillAmount(_bossBreakFill, 1f);
                 if (_combatFeedText != null)
                 {
-                    _combatFeedText.text = "Boss defeated. Loot roll complete. Return to Kingdom or keep testing your build.";
+                    _combatFeedText.text = ChampionHudCopy.BossClearFeed;
                 }
                 return;
             }
@@ -1807,6 +1812,7 @@ namespace AL.ChampionMode
             {
                 _clearPanelObject.SetActive(true);
                 _clearPanelObject.transform.localScale = Vector3.one * 0.96f;
+                _hudSession?.NotifyRecap(true);
             }
 
             if (_clearBackdropImage != null)
@@ -1849,7 +1855,7 @@ namespace AL.ChampionMode
 
             if (_combatFeedText != null)
             {
-                _combatFeedText.text = "Encounter cleared. Review the result, inspect your build, retry, or return to Kingdom.";
+                _combatFeedText.text = ChampionHudCopy.ClearFeed;
             }
 
             RefreshClearRewardText();
@@ -2062,11 +2068,12 @@ namespace AL.ChampionMode
             if (_defeatPanelObject != null)
             {
                 _defeatPanelObject.SetActive(true);
+                _hudSession?.NotifyRecap(true);
             }
 
             if (_combatFeedText != null)
             {
-                _combatFeedText.text = "Champion down. Retry the encounter, refine your build, or return to Kingdom.";
+                _combatFeedText.text = ChampionHudCopy.DefeatFeed;
             }
 
             if (_playerController != null)
@@ -2096,7 +2103,7 @@ namespace AL.ChampionMode
 
             if (_defeatActionText != null)
             {
-                _defeatActionText.text = "Next: retry for execution, inspect your champion, or return to Kingdom upgrades.";
+                _defeatActionText.text = ChampionHudCopy.RecapNext;
             }
         }
 
@@ -2919,14 +2926,14 @@ namespace AL.ChampionMode
             CreateText(_defeatPanelObject.transform, font, "CHAMPION FALLEN", 30, new Vector2(0f, -42f), new Vector2(660f, 42f), TextAnchor.MiddleCenter, new Color(1f, 0.42f, 0.28f));
             _defeatSummaryText = CreateText(_defeatPanelObject.transform, font, "Time 00:00   Boss 100%   Guard held   Enrage avoided", 15, new Vector2(50f, -94f), new Vector2(560f, 28f), TextAnchor.MiddleCenter, new Color(0.95f, 0.92f, 0.88f));
             _defeatDetailText = CreateText(_defeatPanelObject.transform, font, "Review the battle report, adjust timing, then choose the next attempt.", 15, new Vector2(70f, -134f), new Vector2(520f, 58f), TextAnchor.MiddleCenter, new Color(0.88f, 0.90f, 0.94f));
-            _defeatActionText = CreateText(_defeatPanelObject.transform, font, "Next: retry for execution, inspect your champion, or return to Kingdom upgrades.", 13, new Vector2(84f, -184f), new Vector2(492f, 30f), TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.84f));
+            _defeatActionText = CreateText(_defeatPanelObject.transform, font, ChampionHudCopy.RecapNext, 13, new Vector2(84f, -184f), new Vector2(492f, 30f), TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.84f));
             CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(70f, -232f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
             CreateHudButton(_defeatPanelObject.transform, font, "Inspect", new Vector2(260f, -232f), new Vector2(140f, 42f), () =>
             {
                 _defeatPanelObject.SetActive(false);
+                _hudSession?.NotifyRecap(false);
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            TryCreateDebugKingdomButton(_defeatPanelObject.transform, font, new Vector2(450f, -232f), new Vector2(140f, 42f), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
             _defeatPanelObject.SetActive(false);
         }
 
@@ -2971,9 +2978,9 @@ namespace AL.ChampionMode
                     _clearBackdropImage.gameObject.SetActive(false);
                 }
 
+                _hudSession?.NotifyRecap(false);
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            TryCreateDebugKingdomButton(_clearPanelObject.transform, font, new Vector2(466f, -330f), new Vector2(140f, 42f), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
             _clearPanelObject.SetActive(false);
         }
 

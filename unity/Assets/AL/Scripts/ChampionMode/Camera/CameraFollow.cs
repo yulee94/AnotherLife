@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
+using AL.ChampionMode.UI;
 using AL.Input;
 using AL.Core;
 using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch.Touch;
@@ -139,13 +140,6 @@ namespace AL.ChampionMode.Camera
             HandleTouchInput();
             _pitch = Mathf.Clamp(_pitch, _minPitch, _maxPitch);
             _distance = Mathf.Clamp(_distance, _minDistance, _maxDistance);
-
-            // Escape key release
-            if (GameInput.CancelPressed())
-            {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
-            }
         }
 
         private void HandleMouseInput()
@@ -156,11 +150,16 @@ namespace AL.ChampionMode.Camera
             }
 
             bool canOrbit = !_inspectionMode || (Mouse.current != null && Mouse.current.rightButton.isPressed);
-            if (canOrbit)
+            if (canOrbit && !ChampionHudCameraGate.ShouldIgnoreLook())
             {
                 Vector2 look = GameInput.ReadLook();
                 _yaw += look.x * _mouseSensitivity;
                 _pitch -= look.y * _mouseSensitivity;
+            }
+
+            if (ChampionHudCameraGate.ShouldIgnoreLook())
+            {
+                return;
             }
 
             float wheel = GameInput.ReadScroll();
