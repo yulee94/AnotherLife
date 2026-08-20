@@ -1,0 +1,10 @@
+meshes=1
+verts=251163
+tris=471338
+mesh_names=['Mesh_0:251163v/471338t']
+other_objects=[]
+bounds=(1.119,1.899,0.590)
+center=(-0.001,0.001,-0.002)
+mins=(-0.560,-0.949,-0.297)
+maxs=(0.559,0.951,0.293)
+files=['C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1e666a71\\unity\\Docs\\AI\\Meshy\\slagwhistle_crop_2026-08-20\\mesh_front.png', 'C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1e666a71\\unity\\Docs\\AI\\Meshy\\slagwhistle_crop_2026-08-20\\mesh_threequarter.png', 'C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1e666a71\\unity\\Docs\\AI\\Meshy\\slagwhistle_crop_2026-08-20\\mesh_side.png', 'C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1e666a71\\unity\\Docs\\AI\\Meshy\\slagwhistle_crop_2026-08-20\\mesh_top.png']
