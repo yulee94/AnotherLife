@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-champion.schema.json",
+  "title": "Another Life Champion Art Binding Catalog",
+  "type": "object",
+  "required": ["version", "catalogId", "game", "idFormat", "champions"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "catalogId": {
+      "const": "al_champion_catalog"
+    },
+    "game": {
+      "const": "Another Life"
+    },
+    "idFormat": {
+      "const": "lowercase_snake_case"
+    },
+    "champions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/champion"
+      }
+    }
+  },
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*$",
+      "description": "Matches GameDataCatalogIdentifiers.IsCanonicalStableId."
+    },
+    "contentRef": {
+      "type": "string",
+      "maxLength": 256,
+      "pattern": "^[a-z][a-z0-9]*(_[a-z0-9]+)*(\\.[a-z][a-z0-9]*(_[a-z0-9]+)*)+$",
+      "description": "Dot-separated stable IDs. Matches IsCanonicalContentReference."
+    },
+    "assetReference": {
+      "type": "object",
+      "required": ["path", "guid", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "maxLength": 256,
+          "pattern": "^Assets/(?:[A-Za-z0-9_-]+/)+[A-Za-z0-9_.-]+$",
+          "description": "Project-relative asset path. Forward slashes, starts with Assets/, no '..', no backslash. .png portraits or .prefab models."
+        },
+        "guid": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "champion": {
+      "type": "object",
+      "required": ["id", "name_ref", "realm_id"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "maxLength": 128,
+          "pattern": "^champion_[a-z][a-z0-9]*(_[a-z0-9]+)*$"
+        },
+        "name_ref": {
+          "$ref": "#/$defs/contentRef"
+        },
+        "realm_id": {
+          "enum": ["crownlands", "stonehold", "eldergrove", "umbral"]
+        },
+        "portrait_asset_ref": {
+          "$ref": "#/$defs/assetReference"
+        },
+        "model_asset_ref": {
+          "$ref": "#/$defs/assetReference"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

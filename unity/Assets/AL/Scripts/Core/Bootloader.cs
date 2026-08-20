@@ -916,7 +916,7 @@ namespace AL.Core
             var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
             var trainingService = new LocalTrainingService(saveGame, resourceService);
 
-            var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
+            var battleSim = new AL.Battle.Simulator.FixedPointBattleSimulator();
             var warzoneCredits = new LocalWarzoneCreditService(saveGame);
             var warmaster = new LocalWarmasterService(saveGame, warzoneCredits);
             var territoryService = new AL.RealmWar.Warzone.WarzoneService(saveGame);

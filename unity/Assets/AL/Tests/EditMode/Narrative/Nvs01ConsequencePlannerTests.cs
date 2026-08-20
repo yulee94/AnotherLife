@@ -42,15 +42,15 @@ namespace AL.Tests.EditMode.Narrative
             Nvs01ConsequencePlanner = new ConsequencePlannerHarness();
 
         [Test]
-        public void ContractPinsCanonicalV003ConsequenceOrderAndRealmMapping()
+        public void ContractPinsCanonicalV004ConsequenceOrderAndRealmMapping()
         {
             Assert.AreEqual(
-                "omen1-a1-2026-07-29-v003",
+                "omen1-a1-2026-08-13-v004",
                 Nvs01ConsequenceContract.PacketVersion);
             Assert.AreEqual(
-                "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732",
+                "25a5170334fca571abe1035eacf448955e8eab1124ff08643f7d16be9a1b69dd",
                 Nvs01ConsequenceContract.PacketSha256);
-            Assert.AreEqual(8317, Nvs01ConsequenceContract.PacketByteLength);
+            Assert.AreEqual(8247, Nvs01ConsequenceContract.PacketByteLength);
             CollectionAssert.AreEqual(
                 new[]
                 {

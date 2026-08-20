@@ -1,0 +1,577 @@
+{
+  "task": "t_b8b483e2",
+  "blender": "5.2.0 LTS",
+  "sources": {
+    "blend": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_b8b483e2\\unity\\ArtSource\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend",
+    "fbx": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_b8b483e2\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Meshes\\tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.fbx",
+    "glb": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_b8b483e2\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Meshes\\tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.glb"
+  },
+  "blend": {
+    "label": "blend",
+    "objects": [
+      {
+        "name": "FORWARD_Unity+Z",
+        "type": "EMPTY"
+      },
+      {
+        "name": "preview_cam",
+        "type": "CAMERA"
+      },
+      {
+        "name": "root",
+        "type": "EMPTY"
+      },
+      {
+        "name": "Slagwhistle_Rig",
+        "type": "ARMATURE"
+      },
+      {
+        "name": "SM_Slagwhistle_LOD0",
+        "type": "MESH"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "SM_Slagwhistle_LOD0",
+        "verts": 8691,
+        "polygons": 9200,
+        "loop_triangles": 9200,
+        "fan_triangles": 9200,
+        "ngons": 0,
+        "materials": [
+          "M_Slagwhistle_LOD0"
+        ],
+        "vertex_groups": 38,
+        "max_influences": 4,
+        "verts_over_4_influences": 0,
+        "parent": "Slagwhistle_Rig",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "aabb_world": {
+          "xmin": -0.5610542893409729,
+          "xmax": 0.5597803592681885,
+          "ymin": -0.9498084187507629,
+          "ymax": 0.9517719745635986,
+          "zmin": -0.00108361488673836,
+          "zmax": 0.5903412699699402,
+          "size": [
+            1.1208346486091614,
+            1.9015803933143616,
+            0.5914248848566785
+          ]
+        }
+      }
+    ],
+    "armatures": [
+      {
+        "name": "Slagwhistle_Rig",
+        "bone_count": 38,
+        "deform_count": 38,
+        "deform_names": [
+          "Root",
+          "Pelvis",
+          "Spine1",
+          "Spine2",
+          "Spine3",
+          "Chest",
+          "UpperChest",
+          "Neck",
+          "Head",
+          "Jaw",
+          "Yoke_L",
+          "Yoke_R",
+          "Shoulder_L",
+          "UpperArm_L",
+          "LowerArm_L",
+          "Palm_L",
+          "Stab1_L",
+          "Stab2_L",
+          "Shoulder_R",
+          "UpperArm_R",
+          "LowerArm_R",
+          "Palm_R",
+          "Stab1_R",
+          "Stab2_R",
+          "UpperLeg_L",
+          "LowerLeg_L",
+          "Foot_L",
+          "Toe_L",
+          "UpperLeg_R",
+          "LowerLeg_R",
+          "Foot_R",
+          "Toe_R",
+          "Tail1",
+          "Tail2",
+          "Tail3",
+          "Tail4",
+          "Tail5",
+          "Tail6"
+        ],
+        "non_deform_names": [],
+        "root_bones": [
+          "Root"
+        ],
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    ],
+    "materials": [
+      "M_Slagwhistle_LOD0"
+    ],
+    "images": [
+      {
+        "name": "T_Slagwhistle_Color_1K",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "T_Slagwhistle_Normal_1K",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "T_Slagwhistle_Packed_1K",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "actions": [],
+    "unit_system": "METRIC",
+    "unit_scale": 1.0,
+    "lights": [],
+    "particles": [],
+    "lod_named_objects": [],
+    "totals": {
+      "loop_triangles": 9200,
+      "fan_triangles": 9200,
+      "deform_bones": 38,
+      "all_bones": 38,
+      "materials": 1,
+      "actions": 0
+    },
+    "facing": {
+      "armature": "Slagwhistle_Rig",
+      "head_world": [
+        0.0,
+        -0.8166977763175964,
+        0.2836233973503113
+      ],
+      "head_more_negative_y": true,
+      "interpretation": "Blender -Y / Unity +Z"
+    },
+    "root_empty": {
+      "name": "root",
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "type": "EMPTY"
+    },
+    "filepath": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_b8b483e2\\unity\\ArtSource\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend"
+  },
+  "fbx": {
+    "label": "fbx",
+    "objects": [
+      {
+        "name": "FORWARD_Unity+Z",
+        "type": "EMPTY"
+      },
+      {
+        "name": "root",
+        "type": "EMPTY"
+      },
+      {
+        "name": "Slagwhistle_Rig",
+        "type": "ARMATURE"
+      },
+      {
+        "name": "SM_Slagwhistle_LOD0",
+        "type": "MESH"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "SM_Slagwhistle_LOD0",
+        "verts": 8691,
+        "polygons": 9200,
+        "loop_triangles": 9200,
+        "fan_triangles": 9200,
+        "ngons": 0,
+        "materials": [
+          "M_Slagwhistle_LOD0"
+        ],
+        "vertex_groups": 38,
+        "max_influences": 4,
+        "verts_over_4_influences": 0,
+        "parent": "Slagwhistle_Rig",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "aabb_world": {
+          "xmin": -0.5610542893409729,
+          "xmax": 0.5597803592681885,
+          "ymin": -0.9498084187507629,
+          "ymax": 0.9517719745635986,
+          "zmin": -0.0010835356079041958,
+          "zmax": 0.5903412699699402,
+          "size": [
+            1.1208346486091614,
+            1.9015803933143616,
+            0.5914248055778444
+          ]
+        }
+      }
+    ],
+    "armatures": [
+      {
+        "name": "Slagwhistle_Rig",
+        "bone_count": 38,
+        "deform_count": 38,
+        "deform_names": [
+          "Root",
+          "Pelvis",
+          "Spine1",
+          "Spine2",
+          "Spine3",
+          "Chest",
+          "UpperChest",
+          "Neck",
+          "Head",
+          "Jaw",
+          "Yoke_L",
+          "Yoke_R",
+          "Shoulder_L",
+          "UpperArm_L",
+          "LowerArm_L",
+          "Palm_L",
+          "Stab1_L",
+          "Stab2_L",
+          "Shoulder_R",
+          "UpperArm_R",
+          "LowerArm_R",
+          "Palm_R",
+          "Stab1_R",
+          "Stab2_R",
+          "UpperLeg_L",
+          "LowerLeg_L",
+          "Foot_L",
+          "Toe_L",
+          "UpperLeg_R",
+          "LowerLeg_R",
+          "Foot_R",
+          "Toe_R",
+          "Tail1",
+          "Tail2",
+          "Tail3",
+          "Tail4",
+          "Tail5",
+          "Tail6"
+        ],
+        "non_deform_names": [],
+        "root_bones": [
+          "Root"
+        ],
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    ],
+    "materials": [
+      "M_Slagwhistle_LOD0"
+    ],
+    "images": [],
+    "actions": [],
+    "unit_system": "METRIC",
+    "unit_scale": 1.0,
+    "lights": [],
+    "particles": [],
+    "lod_named_objects": [],
+    "totals": {
+      "loop_triangles": 9200,
+      "fan_triangles": 9200,
+      "deform_bones": 38,
+      "all_bones": 38,
+      "materials": 1,
+      "actions": 0
+    },
+    "facing": {
+      "armature": "Slagwhistle_Rig",
+      "head_world": [
+        0.0,
+        -0.8166977167129517,
+        0.28362345695495605
+      ],
+      "head_more_negative_y": true,
+      "interpretation": "Blender -Y / Unity +Z"
+    },
+    "root_empty": {
+      "name": "root",
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "type": "EMPTY"
+    },
+    "filepath": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_b8b483e2\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Meshes\\tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.fbx"
+  },
+  "glb": {
+    "label": "glb",
+    "objects": [
+      {
+        "name": "FORWARD_Unity+Z",
+        "type": "EMPTY"
+      },
+      {
+        "name": "Icosphere",
+        "type": "MESH"
+      },
+      {
+        "name": "root",
+        "type": "EMPTY"
+      },
+      {
+        "name": "Slagwhistle_Rig",
+        "type": "ARMATURE"
+      },
+      {
+        "name": "SM_Slagwhistle_LOD0",
+        "type": "MESH"
+      }
+    ],
+    "meshes": [
+      {
+        "name": "Icosphere",
+        "verts": 42,
+        "polygons": 80,
+        "loop_triangles": 80,
+        "fan_triangles": 80,
+        "ngons": 0,
+        "materials": [],
+        "vertex_groups": 0,
+        "max_influences": 0,
+        "verts_over_4_influences": 0,
+        "parent": null,
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "aabb_world": {
+          "xmin": -0.9510578513145447,
+          "xmax": 0.9510578513145447,
+          "ymin": -0.9999999403953552,
+          "ymax": 0.9999999403953552,
+          "zmin": -1.0,
+          "zmax": 1.0,
+          "size": [
+            1.9021157026290894,
+            1.9999998807907104,
+            2.0
+          ]
+        }
+      },
+      {
+        "name": "SM_Slagwhistle_LOD0",
+        "verts": 8523,
+        "polygons": 9200,
+        "loop_triangles": 9200,
+        "fan_triangles": 9200,
+        "ngons": 0,
+        "materials": [
+          "M_Slagwhistle_LOD0"
+        ],
+        "vertex_groups": 38,
+        "max_influences": 4,
+        "verts_over_4_influences": 0,
+        "parent": "Slagwhistle_Rig",
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ],
+        "aabb_world": {
+          "xmin": -0.5610543489456177,
+          "xmax": 0.5597804188728333,
+          "ymin": -0.9498084187507629,
+          "ymax": 0.9517720937728882,
+          "zmin": -0.001083569717593491,
+          "zmax": 0.5903412699699402,
+          "size": [
+            1.120834767818451,
+            1.9015805125236511,
+            0.5914248396875337
+          ]
+        }
+      }
+    ],
+    "armatures": [
+      {
+        "name": "Slagwhistle_Rig",
+        "bone_count": 38,
+        "deform_count": 38,
+        "deform_names": [
+          "Root",
+          "Pelvis",
+          "Spine1",
+          "Spine2",
+          "Spine3",
+          "Chest",
+          "Shoulder_L",
+          "UpperArm_L",
+          "LowerArm_L",
+          "Palm_L",
+          "Stab1_L",
+          "Stab2_L",
+          "Shoulder_R",
+          "UpperArm_R",
+          "LowerArm_R",
+          "Palm_R",
+          "Stab1_R",
+          "Stab2_R",
+          "UpperChest",
+          "Neck",
+          "Head",
+          "Jaw",
+          "Yoke_L",
+          "Yoke_R",
+          "Tail1",
+          "Tail2",
+          "Tail3",
+          "Tail4",
+          "Tail5",
+          "Tail6",
+          "UpperLeg_L",
+          "LowerLeg_L",
+          "Foot_L",
+          "Toe_L",
+          "UpperLeg_R",
+          "LowerLeg_R",
+          "Foot_R",
+          "Toe_R"
+        ],
+        "non_deform_names": [],
+        "root_bones": [
+          "Root"
+        ],
+        "location": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      }
+    ],
+    "materials": [
+      "M_Slagwhistle_LOD0"
+    ],
+    "images": [
+      {
+        "name": "tdf_fauna_stonehold_slagwhistle_burrower_color_1k_v001",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "tdf_fauna_stonehold_slagwhistle_burrower_normal_1k_v001",
+        "size": [
+          1024,
+          1024
+        ]
+      },
+      {
+        "name": "tdf_fauna_stonehold_slagwhistle_burrower_packed_1k_v001",
+        "size": [
+          1024,
+          1024
+        ]
+      }
+    ],
+    "actions": [],
+    "unit_system": "METRIC",
+    "unit_scale": 1.0,
+    "lights": [],
+    "particles": [],
+    "lod_named_objects": [],
+    "totals": {
+      "loop_triangles": 9280,
+      "fan_triangles": 9280,
+      "deform_bones": 38,
+      "all_bones": 38,
+      "materials": 1,
+      "actions": 0
+    },
+    "facing": {
+      "armature": "Slagwhistle_Rig",
+      "head_world": [
+        0.0,
+        -0.8166975975036621,
+        0.2836235761642456
+      ],
+      "head_more_negative_y": true,
+      "interpretation": "Blender -Y / Unity +Z"
+    },
+    "root_empty": {
+      "name": "root",
+      "location": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "type": "EMPTY"
+    },
+    "filepath": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_b8b483e2\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Meshes\\tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.glb"
+  }
+}

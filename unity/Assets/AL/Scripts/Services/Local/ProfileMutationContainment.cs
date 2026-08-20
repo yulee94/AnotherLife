@@ -105,7 +105,7 @@ namespace AL.Services.Local
             Boot(ProfileMutationSurfaceIds.Research, typeof(IResearchService), typeof(LocalResearchService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Building, typeof(IBuildingService), typeof(LocalBuildingService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Training, typeof(ITrainingService), typeof(LocalTrainingService), ProfileMutationSurfaceDisposition.ContainedWriter),
-            Boot("boot.battle-simulator", typeof(IBattleSimulator), typeof(AL.Battle.Simulator.DeterministicBattleSimulator), ProfileMutationSurfaceDisposition.ReadOnly),
+            Boot("boot.battle-simulator", typeof(IBattleSimulator), typeof(AL.Battle.Simulator.FixedPointBattleSimulator), ProfileMutationSurfaceDisposition.ReadOnly),
             Boot(ProfileMutationSurfaceIds.WarzoneCredit, typeof(IWarzoneCreditService), typeof(LocalWarzoneCreditService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Warmaster, typeof(IWarmasterService), typeof(LocalWarmasterService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Territory, typeof(ITerritoryService), typeof(AL.RealmWar.Warzone.WarzoneService), ProfileMutationSurfaceDisposition.ContainedWriter),

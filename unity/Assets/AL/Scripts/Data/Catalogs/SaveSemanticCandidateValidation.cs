@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("AL.Runtime")]
 
 namespace AL.Data.Catalogs
 {
@@ -347,6 +350,23 @@ namespace AL.Data.Catalogs
             string packetVersion,
             string packetSha256,
             string questId)
+            : this(
+                currentVersion,
+                packetVersion,
+                packetSha256,
+                questId,
+                string.Empty,
+                string.Empty)
+        {
+        }
+
+        public SaveSemanticNvs01Rule(
+            int currentVersion,
+            string packetVersion,
+            string packetSha256,
+            string questId,
+            string migratablePacketVersion,
+            string migratablePacketSha256)
         {
             if (currentVersion <= 0)
                 throw new ArgumentOutOfRangeException(nameof(currentVersion));
@@ -358,17 +378,45 @@ namespace AL.Data.Catalogs
                 throw new ArgumentException("Packet hash is invalid.", nameof(packetSha256));
             if (string.IsNullOrWhiteSpace(questId) || questId.Length > 256)
                 throw new ArgumentException("Quest ID is invalid.", nameof(questId));
+            bool hasMigratableVersion =
+                !string.IsNullOrWhiteSpace(migratablePacketVersion);
+            bool hasMigratableHash =
+                !string.IsNullOrWhiteSpace(migratablePacketSha256);
+            if (hasMigratableVersion != hasMigratableHash ||
+                hasMigratableVersion &&
+                (migratablePacketVersion.Length > 256 ||
+                 migratablePacketSha256.Length > 256 ||
+                 string.Equals(
+                     packetVersion,
+                     migratablePacketVersion,
+                     StringComparison.Ordinal) ||
+                 string.Equals(
+                     packetSha256,
+                     migratablePacketSha256,
+                     StringComparison.Ordinal)))
+            {
+                throw new ArgumentException(
+                    "Migratable packet identity is invalid.",
+                    nameof(migratablePacketVersion));
+            }
 
             CurrentVersion = currentVersion;
             PacketVersion = packetVersion;
             PacketSha256 = packetSha256;
             QuestId = questId;
+            MigratablePacketVersion = migratablePacketVersion ?? string.Empty;
+            MigratablePacketSha256 = migratablePacketSha256 ?? string.Empty;
         }
 
         public int CurrentVersion { get; }
         public string PacketVersion { get; }
         public string PacketSha256 { get; }
         public string QuestId { get; }
+        internal string MigratablePacketVersion { get; }
+        internal string MigratablePacketSha256 { get; }
+        internal bool HasMigratablePacketIdentity =>
+            MigratablePacketVersion.Length > 0 &&
+            MigratablePacketSha256.Length > 0;
     }
 
     public sealed class SaveSemanticValidationPolicy
@@ -598,6 +646,32 @@ namespace AL.Data.Catalogs
                     "SAVE_SELECT_OVERSIZE_PRIMARY_RECOVERY_REQUIRED");
             }
 
+            // A bounded, exact migration candidate is the newest retained authority.
+            // It must reach the reviewed atomic migration boundary instead of losing
+            // to an older backup solely because that backup is already on the current
+            // packet identity.
+            if (primary != null &&
+                primary.Outcome ==
+                    SaveSemanticCandidateOutcome.RepairableWithDataChange &&
+                primary.HasRetainedRawBytes &&
+                primary.DisabledDomains == SaveSemanticDomain.None &&
+                primary.NormalizedDomains == SaveSemanticDomain.None &&
+                primary.PreservedUnknownDomains == SaveSemanticDomain.None &&
+                primary.Diagnostics.Count == 1 &&
+                primary.Diagnostics[0] != null &&
+                primary.Diagnostics[0].Code ==
+                    "SAVE_NVS01_PACKET_IDENTITY_MIGRATION_REQUIRED" &&
+                primary.Diagnostics[0].Path == "$.Nvs01Progress" &&
+                primary.Diagnostics[0].Domain ==
+                    SaveSemanticDomain.Narrative &&
+                primary.Diagnostics[0].Severity ==
+                    SaveSemanticDiagnosticSeverity.Information)
+            {
+                return new SaveSemanticCandidateSelection(
+                    primary,
+                    "SAVE_SELECT_REPAIRABLE_PRIMARY");
+            }
+
             // A supported primary is authoritative even when a backup has a nominally
             // cleaner rank. Preserved unknown records may be legitimate newer content.
             if (SaveSemanticCandidate.IsCleanSupported(primary))
@@ -685,6 +759,7 @@ namespace AL.Data.Catalogs
         public const int MaximumDomainRows = 4096;
         public const int MaximumResourceRows = 256;
         public const int MaximumStableIdCharacters = 256;
+        private const int IdentityAwareSaveSchemaVersion = 2;
 
         private static readonly HashSet<string> RecognizedTopLevelFields =
             new HashSet<string>(
@@ -716,6 +791,44 @@ namespace AL.Data.Catalogs
                     "LastSavedTimestamp"
                 },
                 StringComparer.Ordinal);
+
+        internal static SaveSemanticCandidate RejectNvs01MigrationTopology(
+            SaveSemanticCandidate candidate)
+        {
+            if (candidate == null)
+                throw new ArgumentNullException(nameof(candidate));
+            if (candidate.Outcome !=
+                    SaveSemanticCandidateOutcome.RepairableWithDataChange ||
+                !candidate.HasRetainedRawBytes)
+            {
+                throw new ArgumentException(
+                    "Only a retained repairable candidate can be topology-rejected.",
+                    nameof(candidate));
+            }
+
+            return new SaveSemanticCandidate(
+                candidate.SourceGeneration,
+                SaveSemanticCandidateOutcome.Invalid,
+                SaveSemanticDomain.All,
+                candidate.NormalizedDomains,
+                candidate.PreservedUnknownDomains,
+                candidate.SaveSchemaVersion,
+                candidate.ProfileInitializationVersion,
+                candidate.HasExplicitSaveSchemaVersion,
+                candidate.HasExplicitProfileInitializationVersion,
+                false,
+                candidate.CopyRawBytes(),
+                candidate.OriginalRawByteCount,
+                Array.AsReadOnly(
+                    new[]
+                    {
+                        new SaveSemanticDiagnostic(
+                            "SAVE_NVS01_PACKET_TOPOLOGY_UNSUPPORTED",
+                            "$.Nvs01Progress",
+                            SaveSemanticDomain.Narrative,
+                            SaveSemanticDiagnosticSeverity.Error)
+                    }));
+        }
 
         private static readonly HashSet<string> ResourceRowFields =
             new HashSet<string>(new[] { "Type", "Amount" }, StringComparer.Ordinal);
@@ -1197,6 +1310,7 @@ namespace AL.Data.Catalogs
             ValidateTopLevelShape(
                 root,
                 isLegacySchema,
+                schemaVersion,
                 policy.Authority,
                 collector,
                 state);
@@ -1231,6 +1345,11 @@ namespace AL.Data.Catalogs
             {
                 outcome = SaveSemanticCandidateOutcome.CompatiblePreservedUnknown;
                 writable = !state.HasRawOnlyUnknown;
+            }
+            else if (state.NeedsDataChange)
+            {
+                outcome = SaveSemanticCandidateOutcome.RepairableWithDataChange;
+                writable = false;
             }
             else if (state.NeedsNormalization)
             {
@@ -1317,9 +1436,35 @@ namespace AL.Data.Catalogs
                    root.TryGet("LastSavedTimestamp", out ignored);
         }
 
+        private static bool IsCanonicalProfileIdValue(string value)
+        {
+            if (value == null ||
+                value.Length != 36 ||
+                !value.StartsWith("alp_", StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            bool anyNonZero = false;
+            for (int index = 4; index < value.Length; index++)
+            {
+                char character = value[index];
+                if (!(character >= '0' && character <= '9' ||
+                      character >= 'a' && character <= 'f'))
+                {
+                    return false;
+                }
+
+                anyNonZero |= character != '0';
+            }
+
+            return anyNonZero;
+        }
+
         private static void ValidateTopLevelShape(
             StrictJsonObject root,
             bool isLegacySchema,
+            int schemaVersion,
             SaveSemanticValidationAuthority authority,
             DiagnosticCollector collector,
             ValidationState state)
@@ -1392,8 +1537,30 @@ namespace AL.Data.Catalogs
             RequireInt64(root, "LastSavedTimestamp", SaveSemanticDomain.Envelope, false, collector, state);
 
             StrictJsonValue profileIdValue;
-            if (root.TryGet("ProfileId", out profileIdValue))
+            bool hasProfileId = root.TryGet("ProfileId", out profileIdValue);
+            if (schemaVersion >= IdentityAwareSaveSchemaVersion)
             {
+                // Post-migration identity-aware schema: one canonical ProfileId
+                // is required. Absence, blank, or malformed identity is invalid
+                // and is never neutral-normalized into a writable profile.
+                var profileId = hasProfileId
+                    ? profileIdValue as StrictJsonString
+                    : null;
+                if (profileId == null ||
+                    !IsCanonicalProfileIdValue(profileId.Value))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_SCHEMA_V2_PROFILE_ID_INVALID",
+                        "$.ProfileId",
+                        SaveSemanticDomain.Metadata);
+                }
+            }
+            else if (hasProfileId)
+            {
+                // Schema-v1 and legacy profiles must serialize ProfileId as blank;
+                // a nonblank value is malformed and remains MigrationRequired.
                 var profileId = profileIdValue as StrictJsonString;
                 if (profileId == null || profileId.Value.Length != 0)
                 {
@@ -3438,21 +3605,50 @@ namespace AL.Data.Catalogs
                 var questId = progress.TryGet("QuestId", out questValue)
                     ? questValue as StrictJsonString
                     : null;
-                if (packetVersion == null ||
-                    packetSha == null ||
-                    questId == null ||
-                    !string.Equals(
+                bool currentIdentity =
+                    packetVersion != null &&
+                    packetSha != null &&
+                    questId != null &&
+                    string.Equals(
                         packetVersion.Value,
                         rule.PacketVersion,
-                        StringComparison.Ordinal) ||
-                    !string.Equals(
+                        StringComparison.Ordinal) &&
+                    string.Equals(
                         packetSha.Value,
                         rule.PacketSha256,
-                        StringComparison.Ordinal) ||
-                    !string.Equals(
+                        StringComparison.Ordinal) &&
+                    string.Equals(
                         questId.Value,
                         rule.QuestId,
-                        StringComparison.Ordinal))
+                        StringComparison.Ordinal);
+                bool migratableIdentity =
+                    !currentIdentity &&
+                    rule.HasMigratablePacketIdentity &&
+                    packetVersion != null &&
+                    packetSha != null &&
+                    questId != null &&
+                    string.Equals(
+                        packetVersion.Value,
+                        rule.MigratablePacketVersion,
+                        StringComparison.Ordinal) &&
+                    string.Equals(
+                        packetSha.Value,
+                        rule.MigratablePacketSha256,
+                        StringComparison.Ordinal) &&
+                    string.Equals(
+                        questId.Value,
+                        rule.QuestId,
+                        StringComparison.Ordinal);
+                if (migratableIdentity)
+                {
+                    MarkDataChange(
+                        state,
+                        collector,
+                        "SAVE_NVS01_PACKET_IDENTITY_MIGRATION_REQUIRED",
+                        path,
+                        SaveSemanticDomain.Narrative);
+                }
+                else if (!currentIdentity)
                 {
                     MarkPreservedUnknown(
                         state,
@@ -4879,6 +5075,21 @@ namespace AL.Data.Catalogs
             collector.Add(code, path, domain, SaveSemanticDiagnosticSeverity.Information);
         }
 
+        private static void MarkDataChange(
+            ValidationState state,
+            DiagnosticCollector collector,
+            string code,
+            string path,
+            SaveSemanticDomain domain)
+        {
+            state.NeedsDataChange = true;
+            collector.Add(
+                code,
+                path,
+                domain,
+                SaveSemanticDiagnosticSeverity.Information);
+        }
+
         private static void MarkPreservedUnknown(
             ValidationState state,
             DiagnosticCollector collector,
@@ -5041,6 +5252,7 @@ namespace AL.Data.Catalogs
         {
             internal bool HasMalformedData;
             internal bool NeedsNormalization;
+            internal bool NeedsDataChange;
             internal bool HasPreservedUnknown;
             internal bool HasRawOnlyUnknown;
             internal SaveSemanticDomain DisabledDomains;

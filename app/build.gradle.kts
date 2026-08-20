@@ -4,6 +4,38 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.plugin.serialization)
 }
 
+val withUnity = providers.gradleProperty("withUnity")
+    .map { it.toBooleanStrict() }
+    .orElse(false)
+val unityArtifactsRoot = rootProject.layout.projectDirectory.dir("unity/Builds/AndroidArtifacts")
+val unityDebugAar = unityArtifactsRoot.file("debug/unityLibrary-debug.aar").asFile
+val unityReleaseAar = unityArtifactsRoot.file("release/unityLibrary-release.aar").asFile
+val packageVerifierPath = rootProject.layout.projectDirectory
+    .file("tools/android_unity_package.py").asFile.absolutePath
+val unityArtifactsPath = unityArtifactsRoot.asFile.absolutePath
+val pythonCommand = providers.environmentVariable("PYTHON").getOrElse("python3")
+
+val verifyUnityDebugPackageInput by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Verifies the opted-in Unity debug AAR and inventory."
+    enabled = withUnity.get()
+    commandLine(
+        pythonCommand, packageVerifierPath, "--variant", "debug", "--verify-only",
+        "--artifacts-dir", unityArtifactsPath,
+    )
+}
+
+val verifyUnityReleasePackageInput by tasks.registering(Exec::class) {
+    group = "verification"
+    description = "Verifies the opted-in Unity release AAR and inventory."
+    enabled = withUnity.get()
+    commandLine(
+        pythonCommand, packageVerifierPath, "--variant", "release", "--verify-only",
+        "--artifacts-dir", unityArtifactsPath,
+    )
+}
+
+
 android {
     namespace = "com.example.anotherlife"
     compileSdk {
@@ -20,6 +52,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        if (withUnity.get()) {
+            ndk {
+                abiFilters += "arm64-v8a"
+            }
+        }
     }
 
     buildTypes {
@@ -51,6 +88,10 @@ android {
 }
 
 dependencies {
+    if (withUnity.get()) {
+        debugImplementation(files(unityDebugAar))
+        releaseImplementation(files(unityReleaseAar))
+    }
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material.icons.core)
@@ -69,4 +110,12 @@ dependencies {
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+tasks.matching { it.name == "preDebugBuild" }.configureEach {
+    dependsOn(verifyUnityDebugPackageInput)
+}
+
+tasks.matching { it.name == "preReleaseBuild" }.configureEach {
+    dependsOn(verifyUnityReleasePackageInput)
 }
