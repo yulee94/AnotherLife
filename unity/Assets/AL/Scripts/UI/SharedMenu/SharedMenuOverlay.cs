@@ -61,5 +61,19 @@ namespace AL.UI.SharedMenu
             DetailLabel.fontSize = 14;
             DetailLabel.alignment = TextAnchor.UpperLeft;
         }
+
+        public void BindInvoke(UnityEngine.Events.UnityAction action)
+        {
+            if (KingdomButton == null)
+            {
+                return;
+            }
+
+            KingdomButton.onClick.RemoveAllListeners();
+            if (action != null && State.CanInvoke)
+            {
+                KingdomButton.onClick.AddListener(action);
+            }
+        }
     }
 }

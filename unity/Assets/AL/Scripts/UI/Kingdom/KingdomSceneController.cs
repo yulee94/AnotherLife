@@ -1438,9 +1438,9 @@ namespace AL.UI.Kingdom
             try
             {
                 hasCommittedRealm = ServiceLocator.Get<IRealmService>().CurrentRealmId != RealmId.None;
-                buildingConstructionAvailable =
-                    _profileReady &&
-                    ServiceLocator.TryGet<IBuildingService>(out _);
+                // Full castle-grid upgrades stay capability-gated. The one Town Hall
+                // construct is unlocked by KingdomCommandPolicy itself.
+                buildingConstructionAvailable = false;
             }
             catch (Exception)
             {
@@ -1486,7 +1486,8 @@ namespace AL.UI.Kingdom
                 descriptor.IsInteractable &&
                 KingdomCommandPolicy.TryGetBuildingId(
                     descriptor.Id,
-                    out _) &&
+                    out string buildingId) &&
+                !KingdomOneBuildCommand.IsOneBuild(buildingId) &&
                 !_profileMutationPresentation
                     .OrdinaryMutationCommandsEnabled;
             bool isInteractable =
@@ -1541,6 +1542,21 @@ namespace AL.UI.Kingdom
             if (descriptor.Id == KingdomCommandPolicy.GreyboxDuel)
             {
                 StartGreyboxDuel();
+                return;
+            }
+
+            if (KingdomOneBuildCommand.IsOneBuildCommand(descriptor.Id))
+            {
+                ServiceLocator.TryGet<ISaveGameService>(out ISaveGameService save);
+                ServiceLocator.TryGet<IGameDataService>(out IGameDataService gameData);
+                KingdomOneBuildResult oneBuild = KingdomOneBuildCommand.TryExecute(
+                    save,
+                    gameData);
+                SetMessage(oneBuild.Message);
+                if (_runtimeInitialized)
+                {
+                    Refresh();
+                }
                 return;
             }
 

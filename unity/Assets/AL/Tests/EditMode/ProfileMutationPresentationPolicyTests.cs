@@ -134,7 +134,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void KingdomPresentationCapturesOnceDisablesSixOrdersAndPreservesOtherActions()
+        public void KingdomPresentationCapturesOnceKeepsTownHallAndDisablesOtherOrders()
         {
             var save = new AuthoritySaveService(
                 CreateAuthority(ProfileWriteAuthorityStatus.MigrationRequired));
@@ -154,7 +154,6 @@ namespace AL.Tests.EditMode
 
             string[] ordinaryBuildingCommands =
             {
-                KingdomCommandPolicy.TownHallUpgrade,
                 KingdomCommandPolicy.FarmUpgrade,
                 KingdomCommandPolicy.LumberMillUpgrade,
                 KingdomCommandPolicy.QuarryUpgrade,
@@ -169,7 +168,7 @@ namespace AL.Tests.EditMode
                 Text[] buttonTexts = button.GetComponentsInChildren<Text>(true);
                 Text status = buttonTexts.Single(
                     text => text.name == "UnavailableStatusText");
-                Assert.AreEqual("READ-ONLY", status.text, commandId);
+                Assert.AreEqual("LOCKED", status.text, commandId);
 
                 Text commandLabel = buttonTexts.Single(
                     text => text.name != "UnavailableStatusText");
@@ -191,6 +190,10 @@ namespace AL.Tests.EditMode
 
                 button.onClick.Invoke();
             }
+
+            Button townHall = FindButton(canvas, KingdomCommandPolicy.TownHallUpgrade);
+            Assert.True(townHall.interactable, KingdomCommandPolicy.TownHallUpgrade);
+            townHall.onClick.Invoke();
 
             Text authorityText = canvas.GetComponentsInChildren<Text>(true)
                 .Single(text => text.name == "CommandDeckAuthorityStatus");
