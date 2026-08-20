@@ -44,7 +44,9 @@ namespace AL.Tests.EditMode.ChampionMode
         public void EnvironmentRootAndPlaqueAreLabelledTemporary()
         {
             Assert.That(FirstSessionChampionStart.EnvironmentRootName, Does.Contain("TEMPORARY"));
+            Assert.That(FirstSessionChampionStart.EnvironmentRootName, Is.EqualTo("InnerRealmWorld_TEMPORARY"));
             Assert.That(FirstSessionChampionStart.TemporaryPlaqueCopy, Does.Contain("TEMPORARY"));
+            Assert.That(FirstSessionChampionStart.TemporaryPlaqueCopy, Does.Contain("Capital"));
             Assert.That(FirstSessionChampionStart.AtmosphereName, Does.Contain("TEMPORARY"));
             Assert.AreEqual("Arena_TEMPORARY", FirstSessionChampionStart.LabelTemporary("Arena"));
             Assert.AreEqual("Wall_TEMPORARY", FirstSessionChampionStart.LabelTemporary("Wall_TEMPORARY"));

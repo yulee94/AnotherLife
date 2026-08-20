@@ -10,7 +10,7 @@ namespace AL.ChampionMode.Death
     public enum InnerRealmSafeSiteKind
     {
         Capital = 0,
-        Outpost = 1,
+        Area = 1,
         WarzonePillar = 2
     }
 

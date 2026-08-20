@@ -4,7 +4,7 @@ namespace AL.ChampionMode.Death
 {
     /// <summary>
     /// Pure inner-realm death stand-up. Prefers the unnamed capital, else the
-    /// nearest inner 거점 / outpost. Never binds a warzone pillar, never reloads
+    /// nearest inner Area. Never binds a warzone pillar, never reloads
     /// a scene, and never mutates a save.
     /// </summary>
     public static class InnerRealmDeathRespawnPlanner
@@ -17,7 +17,7 @@ namespace AL.ChampionMode.Death
 
         public const string FallenTitle = "FALLEN";
         public const string CapitalStandUpDetail = "Returning to the Capital.";
-        public const string OutpostStandUpDetail = "Returning to the nearest inner outpost.";
+        public const string AreaStandUpDetail = "Returning to the nearest inner Area.";
         public const float DefeatHoldSeconds = 1.6f;
 
         public static bool TryInnerZoneId(RealmId realmId, out string zoneId)
@@ -86,7 +86,7 @@ namespace AL.ChampionMode.Death
                     break;
                 }
 
-                if (site.Kind != InnerRealmSafeSiteKind.Outpost)
+                if (site.Kind != InnerRealmSafeSiteKind.Area)
                 {
                     continue;
                 }
@@ -112,7 +112,7 @@ namespace AL.ChampionMode.Death
                 FallenTitle,
                 chosen.Kind == InnerRealmSafeSiteKind.Capital
                     ? CapitalStandUpDetail
-                    : OutpostStandUpDetail,
+                    : AreaStandUpDetail,
                 DefeatHoldSeconds);
 
             return new InnerRealmDeathRespawnPlan(

@@ -21,7 +21,7 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
-        public void PrefersUnnamedCapitalOverNearerOutpost()
+        public void PrefersUnnamedCapitalOverNearerArea()
         {
             var death = new InnerRealmVec3(40f, 1.1f, 40f);
             InnerRealmDeathRespawnPlan plan = InnerRealmDeathRespawnPlanner.Plan(
@@ -31,7 +31,7 @@ namespace AL.Tests.EditMode.ChampionMode
                     InnerRealmDeathZoneKind.Inner,
                     new[]
                     {
-                        Outpost(RealmId.Crownlands, "inner_outpost_a", new InnerRealmVec3(41f, 1.1f, 41f)),
+                        Area(RealmId.Crownlands, "inner_area_a", new InnerRealmVec3(41f, 1.1f, 41f)),
                         InnerRealmSafeSite.UnnamedCapital(
                             RealmId.Crownlands,
                             new InnerRealmVec3(0f, 1.1f, -7.4f))
@@ -47,7 +47,7 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
-        public void FallsBackToNearestInnerOutpostWhenCapitalMissing()
+        public void FallsBackToNearestInnerAreaWhenCapitalMissing()
         {
             var death = new InnerRealmVec3(10f, 1.1f, 0f);
             InnerRealmDeathRespawnPlan plan = InnerRealmDeathRespawnPlanner.Plan(
@@ -57,16 +57,16 @@ namespace AL.Tests.EditMode.ChampionMode
                     InnerRealmDeathZoneKind.Inner,
                     new[]
                     {
-                        Outpost(RealmId.Stonehold, "inner_outpost_far", new InnerRealmVec3(80f, 1.1f, 0f)),
-                        Outpost(RealmId.Stonehold, "inner_outpost_near", new InnerRealmVec3(12f, 1.1f, 0f)),
-                        Outpost(RealmId.Umbral, "inner_outpost_other", new InnerRealmVec3(10.5f, 1.1f, 0f))
+                        Area(RealmId.Stonehold, "inner_area_far", new InnerRealmVec3(80f, 1.1f, 0f)),
+                        Area(RealmId.Stonehold, "inner_area_near", new InnerRealmVec3(12f, 1.1f, 0f)),
+                        Area(RealmId.Umbral, "inner_area_other", new InnerRealmVec3(10.5f, 1.1f, 0f))
                     }));
 
             Assert.That(plan.IsApplied, Is.True);
-            Assert.That(plan.Site.SiteId, Is.EqualTo("inner_outpost_near"));
-            Assert.That(plan.Site.Kind, Is.EqualTo(InnerRealmSafeSiteKind.Outpost));
+            Assert.That(plan.Site.SiteId, Is.EqualTo("inner_area_near"));
+            Assert.That(plan.Site.Kind, Is.EqualTo(InnerRealmSafeSiteKind.Area));
             Assert.That(plan.Site.ZoneId, Is.EqualTo("zone_inner_stonehold"));
-            AssertPresentationIsStandUp(plan, InnerRealmDeathRespawnPlanner.OutpostStandUpDetail);
+            AssertPresentationIsStandUp(plan, InnerRealmDeathRespawnPlanner.AreaStandUpDetail);
         }
 
         [Test]
@@ -222,14 +222,14 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.That(plan.Presentation.PersistsSave, Is.False);
         }
 
-        private static InnerRealmSafeSite Outpost(RealmId realmId, string siteId, InnerRealmVec3 position)
+        private static InnerRealmSafeSite Area(RealmId realmId, string siteId, InnerRealmVec3 position)
         {
             string zoneId;
             InnerRealmDeathRespawnPlanner.TryInnerZoneId(realmId, out zoneId);
             return new InnerRealmSafeSite(
                 siteId,
                 realmId,
-                InnerRealmSafeSiteKind.Outpost,
+                InnerRealmSafeSiteKind.Area,
                 zoneId,
                 position,
                 isWarzone: false);
