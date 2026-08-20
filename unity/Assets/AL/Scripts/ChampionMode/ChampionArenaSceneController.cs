@@ -170,7 +170,20 @@ namespace AL.ChampionMode
             ApplyFirstSessionPresentationBudgets();
             BuildArena();
             BuildHud();
-            if (FirstSessionChampionStart.AutoStartEncounterIntro)
+            if (FirstSessionChampionStart.AutoStartFirstFight)
+            {
+                if (!TryBindFirstFightCatalog())
+                {
+                    Debug.LogError(
+                        "AL-FIRST-FIGHT-CATALOG-MISSING: first-session direct-control fight " +
+                        "cannot start without catalog player, opponent, and special stats.");
+                    enabled = false;
+                    return;
+                }
+
+                StartCoroutine(EncounterIntroRoutine());
+            }
+            else if (FirstSessionChampionStart.AutoStartEncounterIntro)
             {
                 StartCoroutine(EncounterIntroRoutine());
             }
@@ -184,6 +197,52 @@ namespace AL.ChampionMode
         {
             _dummyCount = FirstSessionChampionStart.ResolveDummyBudget(_dummyCount);
             _botChampionCount = FirstSessionChampionStart.ResolveBotBudget(_botChampionCount);
+        }
+
+        private bool TryBindFirstFightCatalog()
+        {
+            FirstFightLoadout loadout;
+            string diagnostic;
+            if (!FirstFightCatalog.TryResolveFromRegistered(_realmId, out loadout, out diagnostic) ||
+                loadout == null)
+            {
+                Debug.LogError(diagnostic + ": catalog first-fight bind failed closed.");
+                return false;
+            }
+
+            if (_playerCombat == null ||
+                !_playerCombat.ApplyCatalogStats(
+                    loadout.PlayerMaxHealth,
+                    loadout.PlayerMaxMana,
+                    loadout.PlayerAttack))
+            {
+                Debug.LogError(FirstFightCatalog.PlayerMissingCode + ": player combat stats rejected.");
+                return false;
+            }
+
+            if (_boss == null ||
+                !_boss.ApplyCatalogStats(
+                    loadout.OpponentId,
+                    loadout.OpponentDisplayName,
+                    loadout.OpponentMaxHealth,
+                    loadout.OpponentAttack))
+            {
+                Debug.LogError(FirstFightCatalog.OpponentMissingCode + ": opponent combat stats rejected.");
+                return false;
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text =
+                    FirstSessionChampionStart.LandingFeedCopy +
+                    " Face " +
+                    loadout.OpponentDisplayName +
+                    ". Special: " +
+                    loadout.SpecialSkillName +
+                    ".";
+            }
+
+            return true;
         }
 
         private void Update()

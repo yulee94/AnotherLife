@@ -26,6 +26,7 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.IsFalse(FirstSessionChampionStart.AllowDebugKingdomLoad);
             Assert.IsFalse(FirstSessionChampionStart.ShowAppearanceRack);
             Assert.IsFalse(FirstSessionChampionStart.AutoStartEncounterIntro);
+            Assert.IsTrue(FirstSessionChampionStart.AutoStartFirstFight);
         }
 
         [Test]
@@ -58,6 +59,7 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.AreEqual(40, FirstSessionChampionStart.ResolveBotBudget(40));
             Assert.IsTrue(FirstSessionChampionStart.ShowAppearanceRack);
             Assert.IsTrue(FirstSessionChampionStart.AutoStartEncounterIntro);
+            Assert.IsFalse(FirstSessionChampionStart.AutoStartFirstFight);
         }
 
         [Test]
