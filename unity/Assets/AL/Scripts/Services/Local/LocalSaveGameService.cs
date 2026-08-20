@@ -736,6 +736,16 @@ namespace AL.Services.Local
 
         public void Save()
         {
+            PersistCurrentSave(requireManualActivation: true);
+        }
+
+        internal void PersistLifecycleCheckpoint()
+        {
+            PersistCurrentSave(requireManualActivation: false);
+        }
+
+        private void PersistCurrentSave(bool requireManualActivation)
+        {
             if (!_profileWritable &&
                 LastSaveStatus == SaveOperationStatus.CommitUncertain)
             {
@@ -744,7 +754,8 @@ namespace AL.Services.Local
                 return;
             }
 
-            if (!ProfileMutationContainment.CanInvokeManualSave(this))
+            if (requireManualActivation &&
+                !ProfileMutationContainment.CanInvokeManualSave(this))
             {
                 const string containedMessage =
                     "AL-SAVE-MANUAL-WRITE-CONTAINED: Arbitrary profile persistence is disabled until the profile-bound migration train is explicitly approved and activated.";
