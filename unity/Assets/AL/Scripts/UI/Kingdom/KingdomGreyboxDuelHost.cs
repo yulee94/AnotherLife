@@ -128,7 +128,11 @@ namespace AL.UI.Kingdom
                 ? "NONE"
                 : result.Outcome.ToString().ToUpperInvariant();
             _setMessage?.Invoke(
-                "CHAMPION DUEL CONCLUDED — returned to Kingdom. Last result: " + outcome + ".");
+                "CHAMPION DUEL CONCLUDED — Town Hall construct is available (catalog " +
+                KingdomOneBuildCommand.CatalogBuildingId +
+                "). Last result: " +
+                outcome +
+                ".");
         }
 
         private void OnDestroy()
