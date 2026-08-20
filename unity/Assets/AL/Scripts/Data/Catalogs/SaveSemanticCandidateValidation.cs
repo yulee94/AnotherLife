@@ -794,7 +794,10 @@ namespace AL.Data.Catalogs
                 "AccentG",
                 "AccentB",
                 "CapeEnabled",
-                "HelmetEnabled");
+                "HelmetEnabled",
+                "ClassFamilyId",
+                "IdentityConfirmed",
+                "LastResultId");
 
         private static readonly HashSet<string> EquipmentRowFields =
             Fields(
@@ -3059,6 +3062,105 @@ namespace AL.Data.Catalogs
                 collector,
                 state,
                 out ignoredBoolean);
+            ValidateOptionalMvpLoopFields(customization, collector, state);
+        }
+
+        private static void ValidateOptionalMvpLoopFields(
+            StrictJsonObject customization,
+            DiagnosticCollector collector,
+            ValidationState state)
+        {
+            const string path = "$.ChampionCustomization";
+            StrictJsonValue value;
+            if (customization.TryGet("ClassFamilyId", out value) && !(value is StrictJsonNull))
+            {
+                string classFamilyId;
+                if (TryReadRequiredString(
+                        customization,
+                        "ClassFamilyId",
+                        path,
+                        SaveSemanticDomain.Customization,
+                        allowBlank: true,
+                        collector,
+                        state,
+                        out classFamilyId) &&
+                    !string.IsNullOrEmpty(classFamilyId) &&
+                    classFamilyId != "warrior" &&
+                    classFamilyId != "mage" &&
+                    classFamilyId != "ranger" &&
+                    classFamilyId != "assassin")
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_MVP_CLASS_FAMILY_INVALID",
+                        path + ".ClassFamilyId",
+                        SaveSemanticDomain.Customization);
+                }
+            }
+
+            if (customization.TryGet("IdentityConfirmed", out value) && !(value is StrictJsonNull))
+            {
+                bool ignoredConfirm;
+                TryReadRequiredBoolean(
+                    customization,
+                    "IdentityConfirmed",
+                    path,
+                    SaveSemanticDomain.Customization,
+                    collector,
+                    state,
+                    out ignoredConfirm);
+            }
+
+            if (customization.TryGet("LastResultId", out value) && !(value is StrictJsonNull))
+            {
+                string lastResultId;
+                if (TryReadRequiredString(
+                        customization,
+                        "LastResultId",
+                        path,
+                        SaveSemanticDomain.Customization,
+                        allowBlank: true,
+                        collector,
+                        state,
+                        out lastResultId) &&
+                    !IsAllowedMvpLastResultId(lastResultId))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_MVP_LAST_RESULT_INVALID",
+                        path + ".LastResultId",
+                        SaveSemanticDomain.Customization);
+                }
+            }
+        }
+
+        private static bool IsAllowedMvpLastResultId(string lastResultId)
+        {
+            if (string.IsNullOrEmpty(lastResultId))
+            {
+                return true;
+            }
+
+            if (lastResultId.Length > 64)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < lastResultId.Length; index++)
+            {
+                char c = lastResultId[index];
+                if ((c < 'a' || c > 'z') &&
+                    (c < '0' || c > '9') &&
+                    c != '_' &&
+                    c != ':')
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static void ValidateEquipmentRows(

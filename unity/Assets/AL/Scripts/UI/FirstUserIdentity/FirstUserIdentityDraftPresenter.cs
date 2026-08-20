@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using AL.Core;
+using AL.Core.Interfaces;
+using AL.Data.Runtime;
+using AL.Services.Local;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -348,8 +351,31 @@ namespace AL.UI.FirstUserIdentity
                 return;
             }
 
+            PersistDraftIdentity(result.Snapshot);
             ClearOwnedFocus();
             CustomizationReady?.Invoke(result.Snapshot);
+        }
+
+        private static void PersistDraftIdentity(FirstUserIdentityDraftSnapshot snapshot)
+        {
+            if (snapshot == null ||
+                !snapshot.HasRealm ||
+                !snapshot.HasClassFamily ||
+                !ServiceLocator.TryGet(out ISaveGameService saveGameService))
+            {
+                return;
+            }
+
+            MvpLoopSaveAuthority.TryCommit(
+                saveGameService,
+                new MvpLoopCommitRequest(
+                    Guid.NewGuid().ToString("N"),
+                    snapshot.Realm,
+                    snapshot.ClassFamily.Value,
+                    false,
+                    string.Empty,
+                    string.Empty,
+                    0));
         }
 
         private void Apply(FirstUserIdentityDraftTransitionResult result)
