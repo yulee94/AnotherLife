@@ -14,6 +14,11 @@ namespace AL.ChampionMode
         public const string EnvironmentRootName = "ChampionArena_ObsidianCitadel_TEMPORARY";
         public const string TemporaryPlaqueName = "TEMPORARY_GreyboxPlaque";
         public const string TemporaryPlaqueCopy = "TEMPORARY — inner-realm greybox";
+        public const string PresentationPlaqueName = "TEMPORARY_ChampionPresentationPlaque";
+        public const string PresentationPlaqueCopy =
+            "TEMPORARY — procedural adult binding sample. Vanguard mesh not promoted.";
+        public const string ClassFamilyTokenPrefix = "ClassFamily_";
+        public const string PeopleTokenPrefix = "People_";
         public const string PlayerObjectName = "Player_Champion";
         public const string HudCanvasName = "ChampionMode_HUD";
         public const string PlayerFrameName = "PlayerFrame";

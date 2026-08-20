@@ -2,6 +2,7 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Presentation;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
@@ -296,17 +297,24 @@ namespace AL.ChampionMode
             BuildArenaEnvironment();
             Color realmAccent = GetRealmAccentColor(_realmId);
 
-            var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            player.name = "Player_Champion";
-            player.tag = "Player";
-            player.transform.position = new Vector3(0f, 1.1f, -7.4f);
+            var player = ChampionPresentationBinder.CreateAndBind(
+                new Vector3(0f, 1.1f, -7.4f),
+                _realmId,
+                out _);
+            if (player == null)
+            {
+                Debug.LogError(
+                    "AL-CHAMPION-PRESENTATION-BIND: first-session body could not resolve a champion.");
+                enabled = false;
+                return;
+            }
+
             ApplyMaterial(player, new Color(0.16f, 0.34f, 0.78f), 0.15f, 0.55f);
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
             _playerController = player.AddComponent<ChampionController>();
             _playerController.ConfigureRealmContext(_realmId);
-            ProceduralChampionModelBuilder.EnsureModel(player);
-            _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _playerCustomization = player.GetComponent<ChampionCustomizationController>();
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
