@@ -30,6 +30,10 @@ loads the ScriptableObject. Runtime loader migration is a later task. These cata
 are **not** registered in `GameDataCatalogManifest` (string `version` vs integer
 manifest version).
 
+`al-six-family.schema.json` (landed on main via the option-C work) remains the
+gameplay-family shape and still types `asset_ref` as a required string. This art
+surface is a sibling, not a replacement.
+
 ## 1. Settled decisions
 
 Settled here from existing repo patterns. Not re-opened.

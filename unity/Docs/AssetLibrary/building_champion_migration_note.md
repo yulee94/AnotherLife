@@ -23,10 +23,20 @@ Actually ran:
 
 - `uv run --with jsonschema python tools/game-data/validate_building_champion_art_catalogs.py`
   → `RESULT: all checks passed`
+- `uv run --with jsonschema python unity/SharedContracts/Tests/validate.py`
+  → `ALL CHECKS PASSED` (16 schemas compile; `al-building` and `al-champion`
+  real catalogs OK). Pre-existing `al-world-event-content` KNOWN-DEFECT is
+  unchanged.
 - `python tools/game-data/migrate_byte_stable_sources.py` (default check, no `--write`)
-  → `PASS: all byte-stable sources match their exact reviewed SHA-256 identities`
+  → **FAIL on main already**: `LocalGameDataService.cs` SHA-256
+  `1c81cc398f7554afd809d7622c01707bf0a7f67118b4ee51cac5cfc9fa04c34d` is not
+  the reviewed identity. This file is **not** in this delta (option-C WIRE
+  consumer wiring on main, #560). The four sampled pinned sources this delta
+  actually cares about (`al_realm_catalog.json`, `GameDataRealmReferences.cs`,
+  `GameDataBuildingProgressionRegistry.cs`, `GameDataSixFamilySchemas.cs`)
+  still match their reviewed hashes.
 - `%LOCALAPPDATA%\Microsoft\dotnet\dotnet.exe build unity/SharedContracts/Fable/AnotherLife.Contracts.fsproj`
-  → 0 warnings, 0 errors
+  → 0 warnings, 0 errors (verified before rebase onto main)
 - `sha256sum` of the 8 production prefabs (via Python hashlib of file bytes)
 
 Did **not** run: Unity EditMode/PlayMode, `CityLayoutEngine` playtest, or the
@@ -61,7 +71,7 @@ GameData JSON; the full Asset Production Manifest; champion `.blend` internals.
 | Every sample ID / `name_ref` / `model_id` vs `IsCanonicalStableId` / `IsCanonicalContentReference` | PASS |
 | 8 prefab `path` exist, `guid` = `.meta`, `sha256` = file bytes | PASS |
 | Champion art refs absent (no fake portraits/models) | PASS |
-| `migrate_byte_stable_sources.py` 18-file pinned manifest | PASS, unchanged |
+| `migrate_byte_stable_sources.py` 18-file pinned manifest | **Pre-existing FAIL** on main: `LocalGameDataService.cs` drift from #560. This delta does not touch that file. The 4 sampled sources we pin against still match. |
 | `KingdomBuildingModelCatalog.asset` still contains Crownlands TownHall guid `40d5f768…` | PASS, unmodified |
 | Fable `AnotherLife.Contracts.fsproj` | PASS, 0/0 |
 
