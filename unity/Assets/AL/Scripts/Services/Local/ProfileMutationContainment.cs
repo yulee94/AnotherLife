@@ -80,6 +80,7 @@ namespace AL.Services.Local
         public const string BossLoot = "profile.boss-loot";
         public const string SideQuest = "profile.side-quest.dormant";
         public const string ChampionCustomization = "profile.champion-customization";
+        public const string MvpLoop = "profile.mvp-loop.schema1";
         public const string ChampionArena = "profile.champion-arena.indirect";
         public const string DemoInitializer = "profile.demo-initializer.indirect";
         public const string KingdomNvs01 = "profile.kingdom-nvs01.indirect";
@@ -123,6 +124,7 @@ namespace AL.Services.Local
             Extra(ProfileMutationSurfaceIds.LifecycleSave, typeof(ISaveGameService), typeof(AL.Core.Bootloader), ProfileMutationSurfaceDisposition.IndirectCaller),
             Extra(ProfileMutationSurfaceIds.DeleteSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Extra(ProfileMutationSurfaceIds.MvpLoop, typeof(ILegacyMvpLoopCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.SideQuest, typeof(ISideQuestService), typeof(SideQuestService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.ChampionCustomization, null, typeof(AL.ChampionMode.Customization.ChampionCustomizationController), ProfileMutationSurfaceDisposition.ContainedWriter),
             Extra(ProfileMutationSurfaceIds.ChampionArena, null, typeof(AL.ChampionMode.ChampionArenaSceneController), ProfileMutationSurfaceDisposition.IndirectCaller),

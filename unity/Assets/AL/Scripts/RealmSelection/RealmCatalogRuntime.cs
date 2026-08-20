@@ -13,15 +13,30 @@ namespace AL.RealmSelection
 
     public sealed class RealmCatalogEntry
     {
-        internal RealmCatalogEntry(string id, RealmId runtimeId, string displayName)
+        internal RealmCatalogEntry(
+            string id,
+            RealmId runtimeId,
+            string displayName,
+            string peopleName,
+            string markName,
+            string silhouetteLanguage,
+            string materialLanguage)
         {
             Id = id;
             RuntimeId = runtimeId;
             DisplayName = displayName;
+            PeopleName = peopleName ?? string.Empty;
+            MarkName = markName ?? string.Empty;
+            SilhouetteLanguage = silhouetteLanguage ?? string.Empty;
+            MaterialLanguage = materialLanguage ?? string.Empty;
         }
         public string Id { get; }
         public RealmId RuntimeId { get; }
         public string DisplayName { get; }
+        public string PeopleName { get; }
+        public string MarkName { get; }
+        public string SilhouetteLanguage { get; }
+        public string MaterialLanguage { get; }
     }
 
     public sealed class RealmCatalogSnapshot
@@ -189,7 +204,24 @@ namespace AL.RealmSelection
                     return Reject("AL-REALM-CATALOG-INVALID-REALM");
                 }
 
-                entries.Add(new RealmCatalogEntry(realm.Id, runtimeId, displayName));
+                string peopleName;
+                if (!WireFamilyCatalogLoader.TryGetString(realm, "people_name", out peopleName))
+                {
+                    peopleName = string.Empty;
+                }
+
+                string markName;
+                string silhouetteLanguage;
+                string materialLanguage;
+                TryReadVisualIdentity(realm, out markName, out silhouetteLanguage, out materialLanguage);
+                entries.Add(new RealmCatalogEntry(
+                    realm.Id,
+                    runtimeId,
+                    displayName,
+                    peopleName,
+                    markName,
+                    silhouetteLanguage,
+                    materialLanguage));
             }
 
             for (int i = 0; i < realmOrder.Length; i++)
@@ -271,6 +303,43 @@ namespace AL.RealmSelection
 
         private static RealmCatalogLoadResult Reject(string code) => new RealmCatalogLoadResult(null, code);
 
+        private static void TryReadVisualIdentity(
+            GameDataCatalogRecord realm,
+            out string markName,
+            out string silhouetteLanguage,
+            out string materialLanguage)
+        {
+            markName = string.Empty;
+            silhouetteLanguage = string.Empty;
+            materialLanguage = string.Empty;
+            GameDataValue raw;
+            if (realm == null || !realm.TryGetField("visual_identity", out raw))
+            {
+                return;
+            }
+
+            var visual = raw as GameDataObjectValue;
+            if (visual == null)
+            {
+                return;
+            }
+
+            markName = NestedString(visual, "mark_name");
+            silhouetteLanguage = NestedString(visual, "silhouette_language");
+            materialLanguage = NestedString(visual, "material_language");
+        }
+
+        private static string NestedString(GameDataObjectValue obj, string name)
+        {
+            GameDataValue raw;
+            if (obj == null || !obj.TryGetValue(name, out raw))
+            {
+                return string.Empty;
+            }
+
+            var text = raw as GameDataStringValue;
+            return text == null || string.IsNullOrEmpty(text.Value) ? string.Empty : text.Value;
+        }
     }
 
     public sealed class RealmCatalogRuntimeHost : MonoBehaviour

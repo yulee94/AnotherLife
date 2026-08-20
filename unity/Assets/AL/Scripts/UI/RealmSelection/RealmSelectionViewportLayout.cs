@@ -20,12 +20,12 @@ namespace AL.UI.RealmSelection
     public static class RealmSelectionViewportLayout
     {
         private const float PortraitMaximumCardWidth = 900f;
-        private const float PortraitCardHeight = 220f;
-        private const float PortraitRowSpacing = 24f;
+        private const float PortraitCardHeight = 300f;
+        private const float PortraitRowSpacing = 20f;
         private const float LandscapeMaximumCardWidth = 790f;
-        private const float LandscapeCardHeight = 148f;
+        private const float LandscapeCardHeight = 280f;
         private const float LandscapeColumnSpacing = 28f;
-        private const float LandscapeRowSpacing = 36f;
+        private const float LandscapeRowSpacing = 24f;
 
         public static void NormalizeSafeArea(
             Rect safeArea,

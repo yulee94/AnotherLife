@@ -2,14 +2,18 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Presentation;
+using AL.ChampionMode.Quests;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
+using AL.Data.Catalogs.WorldAtlas;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
 using AL.UI;
+using AL.World;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -150,6 +154,8 @@ namespace AL.ChampionMode
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private RealmId _realmId = RealmId.None;
+        private bool _guardianTrialStarted;
+        private FirstSessionInnerRealmSpawn _innerSpawn;
 
         private void Start()
         {
@@ -166,9 +172,125 @@ namespace AL.ChampionMode
 
             _realmId = realmContext.RealmId;
             ApplyRuntimeQuality();
+            ApplyFirstSessionPresentationBudgets();
             BuildArena();
             BuildHud();
-            StartCoroutine(EncounterIntroRoutine());
+            if (FirstSessionChampionStart.ShouldRunProofOfWorth)
+            {
+                if (_bossTransform != null)
+                {
+                    _bossTransform.gameObject.SetActive(false);
+                }
+
+                ProofOfWorthDirector.AttachIfNeeded(
+                    transform,
+                    this,
+                    _playerController != null ? _playerController.transform : null,
+                    _realmId);
+            }
+
+            if (FirstSessionChampionStart.AutoStartFirstFight)
+            {
+                if (!TryBindFirstFightCatalog())
+                {
+                    Debug.LogError(
+                        "AL-FIRST-FIGHT-CATALOG-MISSING: first-session direct-control fight " +
+                        "cannot start without catalog player, opponent, and special stats.");
+                    enabled = false;
+                    return;
+                }
+
+                StartCoroutine(EncounterIntroRoutine());
+            }
+            else if (FirstSessionChampionStart.AutoStartEncounterIntro)
+            {
+                StartCoroutine(EncounterIntroRoutine());
+            }
+            else if (_combatFeedText != null)
+            {
+                _combatFeedText.text = FirstSessionChampionStart.LandingFeedCopy;
+            }
+        }
+
+        private void ApplyFirstSessionPresentationBudgets()
+        {
+            _dummyCount = FirstSessionChampionStart.ResolveDummyBudget(_dummyCount);
+            _botChampionCount = FirstSessionChampionStart.ResolveBotBudget(_botChampionCount);
+        }
+
+        private bool TryBindFirstFightCatalog()
+        {
+            FirstFightLoadout loadout;
+            string diagnostic;
+            if (!FirstFightCatalog.TryResolveFromRegistered(_realmId, out loadout, out diagnostic) ||
+                loadout == null)
+            {
+                Debug.LogError(diagnostic + ": catalog first-fight bind failed closed.");
+                return false;
+            }
+
+            if (_playerCombat == null ||
+                !_playerCombat.ApplyCatalogStats(
+                    loadout.PlayerMaxHealth,
+                    loadout.PlayerMaxMana,
+                    loadout.PlayerAttack))
+            {
+                Debug.LogError(FirstFightCatalog.PlayerMissingCode + ": player combat stats rejected.");
+                return false;
+            }
+
+            if (_boss == null ||
+                !_boss.ApplyCatalogStats(
+                    loadout.OpponentId,
+                    loadout.OpponentDisplayName,
+                    loadout.OpponentMaxHealth,
+                    loadout.OpponentAttack))
+            {
+                Debug.LogError(FirstFightCatalog.OpponentMissingCode + ": opponent combat stats rejected.");
+                return false;
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text =
+                    FirstSessionChampionStart.LandingFeedCopy +
+                    " Face " +
+                    loadout.OpponentDisplayName +
+                    ". Special: " +
+                    loadout.SpecialSkillName +
+                    ".";
+            }
+
+            return true;
+        }
+
+        public bool GuardianTrialCleared =>
+            _guardianTrialStarted && _boss != null && _boss.IsDead;
+
+        public bool TryStartGuardianTrial()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                return false;
+            }
+
+            if (_bossTransform != null && !_bossTransform.gameObject.activeSelf)
+            {
+                _bossTransform.gameObject.SetActive(true);
+            }
+
+            if (!TryBindFirstFightCatalog())
+            {
+                return false;
+            }
+
+            if (!_guardianTrialStarted)
+            {
+                _guardianTrialStarted = true;
+                StartCoroutine(EncounterIntroRoutine());
+            }
+
+            return true;
         }
 
         private void Update()
@@ -219,21 +341,37 @@ namespace AL.ChampionMode
 
         private void BuildArena()
         {
+            if (FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                _innerSpawn = FirstSessionInnerRealmSpawn.Resolve(_realmId);
+                Debug.Log(_innerSpawn.ReportLine);
+            }
+
             ConfigureArenaLighting();
             BuildArenaEnvironment();
             Color realmAccent = GetRealmAccentColor(_realmId);
 
-            var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            player.name = "Player_Champion";
-            player.tag = "Player";
-            player.transform.position = new Vector3(0f, 1.1f, -7.4f);
+            Vector3 playerPosition = _innerSpawn != null
+                ? _innerSpawn.Position
+                : new Vector3(0f, 1.1f, -7.4f);
+            var player = ChampionPresentationBinder.CreateAndBind(
+                playerPosition,
+                _realmId,
+                out _);
+            if (player == null)
+            {
+                Debug.LogError(
+                    "AL-CHAMPION-PRESENTATION-BIND: first-session body could not resolve a champion.");
+                enabled = false;
+                return;
+            }
+
             ApplyMaterial(player, new Color(0.16f, 0.34f, 0.78f), 0.15f, 0.55f);
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
             _playerController = player.AddComponent<ChampionController>();
             _playerController.ConfigureRealmContext(_realmId);
-            ProceduralChampionModelBuilder.EnsureModel(player);
-            _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _playerCustomization = player.GetComponent<ChampionCustomizationController>();
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
@@ -241,7 +379,9 @@ namespace AL.ChampionMode
             cameraObject.tag = "MainCamera";
             var camera = cameraObject.AddComponent<UnityEngine.Camera>();
             _arenaCamera = camera;
-            camera.transform.position = new Vector3(0f, 7.2f, -13.4f);
+            camera.transform.position = _innerSpawn != null
+                ? _innerSpawn.CameraPosition
+                : new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
             camera.fieldOfView = 42f;
             camera.clearFlags = CameraClearFlags.SolidColor;
@@ -252,7 +392,9 @@ namespace AL.ChampionMode
 
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";
-            boss.transform.position = new Vector3(0f, 1.8f, 8.6f);
+            boss.transform.position = _innerSpawn != null
+                ? _innerSpawn.OpponentPosition
+                : new Vector3(0f, 1.8f, 8.6f);
             boss.transform.localScale = new Vector3(1.55f, 1.8f, 1.55f);
             ApplyMaterial(boss, new Color(0.20f, 0.03f, 0.05f), 0.2f, 0.42f);
             DressBossVisual(boss);
@@ -285,32 +427,82 @@ namespace AL.ChampionMode
 
             CreateWeather();
             CreateWorldObjectiveMarkers();
+            CreateTemporaryGreyboxPlaque();
         }
 
         private void ConfigureArenaLighting()
         {
-            RenderSettings.ambientLight = new Color(0.16f, 0.18f, 0.22f);
-            RenderSettings.fog = true;
-            RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(0.035f, 0.04f, 0.055f);
-            RenderSettings.fogDensity = 0.018f;
+            if (FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                RenderSettings.ambientLight = new Color(0.28f, 0.30f, 0.32f);
+                RenderSettings.fog = true;
+                RenderSettings.fogMode = FogMode.ExponentialSquared;
+                RenderSettings.fogColor = new Color(0.36f, 0.40f, 0.42f);
+                RenderSettings.fogDensity = 0.0045f;
+            }
+            else
+            {
+                RenderSettings.ambientLight = new Color(0.16f, 0.18f, 0.22f);
+                RenderSettings.fog = true;
+                RenderSettings.fogMode = FogMode.ExponentialSquared;
+                RenderSettings.fogColor = new Color(0.035f, 0.04f, 0.055f);
+                RenderSettings.fogDensity = 0.018f;
+            }
 
-            var lightObject = FindObjectOfType<Light>()?.gameObject ?? new GameObject("Key Light - Moonforge");
-            var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
-            light.name = "Key Light - Moonforge";
+            Light light = ResolveKeyLight();
             light.type = LightType.Directional;
             light.intensity = 1.35f;
             light.color = new Color(0.74f, 0.82f, 1f);
-            lightObject.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
+            light.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
 
-            CreatePointLight("Boss Rift Light", new Vector3(0f, 3.2f, 8.4f), new Color(1f, 0.18f, 0.08f), 4.2f, 12f);
-            CreatePointLight("Player Rim Light", new Vector3(0f, 3.4f, -6.8f), new Color(0.34f, 0.65f, 1f), 2.3f, 8f);
-            CreatePointLight("Arena Cold Fill", new Vector3(0f, 5f, 0f), new Color(0.24f, 0.36f, 0.58f), 1.6f, 18f);
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                CreatePointLight("Boss Rift Light", new Vector3(0f, 3.2f, 8.4f), new Color(1f, 0.18f, 0.08f), 4.2f, 12f);
+                CreatePointLight("Player Rim Light", new Vector3(0f, 3.4f, -6.8f), new Color(0.34f, 0.65f, 1f), 2.3f, 8f);
+                CreatePointLight("Arena Cold Fill", new Vector3(0f, 5f, 0f), new Color(0.24f, 0.36f, 0.58f), 1.6f, 18f);
+            }
+            else if (_innerSpawn != null)
+            {
+                CreatePointLight("Capital Rim Light", _innerSpawn.Position + Vector3.up * 2.4f, new Color(1f, 0.94f, 0.86f), 2.1f, 10f);
+                CreatePointLight("Inner Fill Light", _innerSpawn.OpponentPosition + Vector3.up * 3.2f, new Color(0.74f, 0.82f, 1f), 1.6f, 14f);
+            }
+        }
+
+        private static Light ResolveKeyLight()
+        {
+            const string keyLightName = "Key Light - Moonforge";
+
+            // Unity overloaded == treats destroyed/"fake-null" objects as null.
+            // C# ?. / ?? do not, and SetName on a missing Light throws MissingComponentException.
+            GameObject lightObject = GameObject.Find(keyLightName);
+            if (lightObject == null)
+            {
+                lightObject = new GameObject(keyLightName);
+            }
+
+            Light light = lightObject.GetComponent<Light>();
+            if (light == null)
+            {
+                light = lightObject.AddComponent<Light>();
+            }
+
+            if (light == null)
+            {
+                lightObject = new GameObject(keyLightName);
+                light = lightObject.AddComponent<Light>();
+            }
+
+            return light;
         }
 
         private void BuildArenaEnvironment()
         {
-            var environment = new GameObject("ChampionArena_ObsidianCitadel").transform;
+            if (TryBuildFirstSessionInnerRealm())
+            {
+                return;
+            }
+
+            var environment = new GameObject("ChampionArena_ObsidianCitadel_TEMPORARY").transform;
             var atmospherePulse = environment.gameObject.AddComponent<ArenaAtmospherePulse>();
             Color realmAccent = GetRealmAccentColor(_realmId);
             Color riftRed = new Color(1f, 0.18f, 0.08f);
@@ -624,7 +816,10 @@ namespace AL.ChampionMode
 
         private void CreateWeather()
         {
-            var weatherObject = new GameObject("Warzone_BattleFog_Weather");
+            var weatherObject = new GameObject(
+                FirstSessionChampionStart.IsFirstSessionLanding
+                    ? FirstSessionChampionStart.AtmosphereName
+                    : "Warzone_BattleFog_Weather");
             weatherObject.transform.position = new Vector3(0f, 6f, 0f);
             var weather = weatherObject.AddComponent<RuntimeWeatherController>();
             weather.ConfigureForRealm(_realmId);
@@ -632,6 +827,49 @@ namespace AL.ChampionMode
             {
                 weather.ApplyParticleBudgetMultiplier(_qualityController.GetWeatherParticleMultiplier());
             }
+        }
+
+        private bool TryBuildFirstSessionInnerRealm()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding || _innerSpawn == null)
+            {
+                return false;
+            }
+
+            WorldAtlasSnapshot snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
+            InnerRealmWorldLayout layout = InnerRealmWorldLayout.FromSnapshot(snapshot);
+            InnerRealmWorldBuildResult built = InnerRealmWorldGreyboxBuilder.Build(layout, _innerSpawn.RealmId);
+            built.Root.name = FirstSessionChampionStart.EnvironmentRootName;
+            return true;
+        }
+
+        private void CreateTemporaryGreyboxPlaque()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                return;
+            }
+
+            Vector3 plaquePosition = _innerSpawn != null
+                ? _innerSpawn.Position + new Vector3(-2.4f, 0.75f, -2.8f)
+                : new Vector3(-7.6f, 1.85f, -9.4f);
+            string plaqueCopy = _innerSpawn != null
+                ? _innerSpawn.TemporaryLabel +
+                    " — unnamed " + _innerSpawn.DisplayCapital +
+                    "\n" + _innerSpawn.InnerAtlasZoneId +
+                    " / " + _innerSpawn.CapitalPoiId
+                : FirstSessionChampionStart.TemporaryPlaqueCopy;
+
+            var plaque = new GameObject(FirstSessionChampionStart.TemporaryPlaqueName);
+            plaque.transform.position = plaquePosition;
+            plaque.transform.rotation = Quaternion.Euler(8f, 28f, 0f);
+            var text = plaque.AddComponent<TextMesh>();
+            text.text = plaqueCopy;
+            text.anchor = TextAnchor.MiddleCenter;
+            text.alignment = TextAlignment.Center;
+            text.characterSize = 0.085f;
+            text.fontSize = 28;
+            text.color = new Color(0.78f, 0.70f, 0.52f, 0.78f);
         }
 
         private GameObject CreateInspectionShowcase(Transform player, Color realmAccent)
@@ -918,7 +1156,11 @@ namespace AL.ChampionMode
             CreateControlModeButton(actionPanel.transform, font, "Assist", AutoMode.SemiAuto, 1, new Vector2(18f, -250f));
             CreateControlModeButton(actionPanel.transform, font, "Auto", AutoMode.FullAuto, 2, new Vector2(18f, -290f));
 
-            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
+            var appearancePanel = FirstSessionChampionStart.ShowAppearanceRack
+                ? CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f))
+                : null;
+            if (appearancePanel != null)
+            {
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
             CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 486f), new Color(0.24f, 0.56f, 1f, 0.48f));
             CreateText(appearancePanel.transform, font, "CHAMPION FORGE", 16, new Vector2(18f, -14f), new Vector2(178f, 22f), TextAnchor.UpperLeft, new Color(1f, 0.80f, 0.48f));
@@ -986,6 +1228,7 @@ namespace AL.ChampionMode
             _appearanceInspectButtonImage = inspectButton.GetComponent<Image>();
             _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
             _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(28f, -426f), new Vector2(218f, 58f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            }
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -995,8 +1238,8 @@ namespace AL.ChampionMode
             CreateMoveButton(navPanel.transform, font, "v", new Vector2(90f, -142f), new Vector2(0, -1));
 
             var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -296f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
-            _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
-            CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            _combatFeedText = CreateText(combatFeedPanel.transform, font, FirstSessionChampionStart.IsFirstSessionLanding ? FirstSessionChampionStart.LandingFeedCopy : "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            TryCreateDebugKingdomButton(canvasObject.transform, font, new Vector2(-28f, -268f), new Vector2(132f, 40f), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             CreateTargetLockIndicator(canvasObject.transform, font);
             CreateDefeatPanel(canvasObject.transform, font);
             CreateClearPanel(canvasObject.transform, font);
@@ -2708,7 +2951,7 @@ namespace AL.ChampionMode
                 _defeatPanelObject.SetActive(false);
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(450f, -232f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
+            TryCreateDebugKingdomButton(_defeatPanelObject.transform, font, new Vector2(450f, -232f), new Vector2(140f, 42f), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
             _defeatPanelObject.SetActive(false);
         }
 
@@ -2755,7 +2998,7 @@ namespace AL.ChampionMode
 
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            CreateHudButton(_clearPanelObject.transform, font, "Kingdom", new Vector2(466f, -330f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
+            TryCreateDebugKingdomButton(_clearPanelObject.transform, font, new Vector2(466f, -330f), new Vector2(140f, 42f), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
             _clearPanelObject.SetActive(false);
         }
 
@@ -2947,6 +3190,34 @@ namespace AL.ChampionMode
                 outline.effectColor =
                     new Color(0.24f, 0.28f, 0.34f, 0.20f);
             }
+        }
+
+        private void TryCreateDebugKingdomButton(
+            Transform parent,
+            Font font,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta,
+            int fontSize,
+            Color color,
+            Vector2? anchor = null,
+            Vector2? pivot = null)
+        {
+            if (!FirstSessionChampionStart.AllowDebugKingdomLoad)
+            {
+                return;
+            }
+
+            CreateHudButton(
+                parent,
+                font,
+                FirstSessionChampionStart.DebugKingdomButtonName,
+                anchoredPosition,
+                sizeDelta,
+                () => SceneManager.LoadScene(_kingdomSceneName),
+                fontSize,
+                color,
+                anchor,
+                pivot);
         }
 
         private static Button CreateHudButton(

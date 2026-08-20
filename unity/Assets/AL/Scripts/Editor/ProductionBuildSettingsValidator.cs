@@ -274,7 +274,7 @@ namespace AL.EditorTools
                     Add(diagnostics, ProductionBuildSettingsValidationStatus.TestSceneEnabled, index, entry.Path,
                         "The representative Test scene is prohibited even as a disabled entry.");
                 }
-                else if (isChampion && entry.Enabled)
+                else if (isChampion && entry.Enabled && champion != null && !champion.IsInShellFoundation)
                 {
                     Add(diagnostics, ProductionBuildSettingsValidationStatus.DeferredSceneEnabled, index, entry.Path,
                         "ChampionArena is deferred and cannot be enabled in ShellFoundation.");
@@ -444,19 +444,36 @@ namespace AL.EditorTools
 
             try
             {
+                ProductionSceneRecord championRecord = RecordById(ProductionSceneDescriptor.ChampionArenaSceneId);
+                bool championIsDeferred = championRecord != null && !championRecord.IsInShellFoundation;
                 foreach (ProductionSceneRecord record in ProductionSceneDescriptor.ShellFoundationOrdered)
                 {
                     Type controllerType = AppDomain.CurrentDomain.GetAssemblies()
                         .Select(assembly => assembly.GetType(record.RequiredControllerType, throwOnError: false))
                         .FirstOrDefault(type => type != null);
                     string controllerAssetPath = FindMonoScriptAssetPath(controllerType);
+                    if (string.IsNullOrWhiteSpace(controllerAssetPath) && controllerType != null)
+                    {
+                        controllerAssetPath = FindControllerScriptByFileName(projectRoot, controllerType.Name);
+                    }
                     string controllerPhysicalPath = AssetPathToPhysicalPath(projectRoot, controllerAssetPath);
                     if (controllerType == null ||
                         string.IsNullOrWhiteSpace(controllerAssetPath) ||
                         string.IsNullOrWhiteSpace(controllerPhysicalPath) ||
                         !File.Exists(controllerPhysicalPath))
                     {
-                        return CurrentTransitionReachability.Invalid();
+                        // Fail closed only for the first-session path owners. ChampionArena / Kingdom
+                        // script lookup must not poison Boot→Realm→Create validation.
+                        bool isRequiredPathOwner =
+                            string.Equals(record.SceneId, ProductionSceneDescriptor.BootSceneId, StringComparison.Ordinal) ||
+                            string.Equals(record.SceneId, ProductionSceneDescriptor.RealmSelectionSceneId, StringComparison.Ordinal) ||
+                            string.Equals(record.SceneId, ProductionSceneDescriptor.CharacterCreationSceneId, StringComparison.Ordinal);
+                        if (isRequiredPathOwner)
+                        {
+                            return CurrentTransitionReachability.Invalid();
+                        }
+
+                        continue;
                     }
 
                     string source = StripComments(File.ReadAllText(controllerPhysicalPath));
@@ -466,7 +483,7 @@ namespace AL.EditorTools
                         StringComparison.Ordinal);
                     deferredChampionHandlerReachable |=
                         (isKingdomController && ContainsSceneLoadCall(source)) ||
-                        ContainsSceneLoadTarget(source, "ChampionArena");
+                        (championIsDeferred && ContainsSceneLoadTarget(source, "ChampionArena"));
                     resetToBootReachable |= ContainsSceneLoadTarget(source, "Boot");
                 }
 
@@ -503,6 +520,51 @@ namespace AL.EditorTools
             }
 
             return string.Empty;
+        }
+
+        private static string FindControllerScriptByFileName(string projectRoot, string typeName)
+        {
+            if (string.IsNullOrWhiteSpace(projectRoot) || string.IsNullOrWhiteSpace(typeName))
+            {
+                return string.Empty;
+            }
+
+            string scriptsRoot = Path.Combine(projectRoot, "Assets", "AL", "Scripts");
+            if (!Directory.Exists(scriptsRoot))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                string match = Directory
+                    .EnumerateFiles(scriptsRoot, typeName + ".cs", SearchOption.AllDirectories)
+                    .OrderBy(path => path, StringComparer.OrdinalIgnoreCase)
+                    .FirstOrDefault();
+                if (string.IsNullOrWhiteSpace(match))
+                {
+                    return string.Empty;
+                }
+
+                string fullRoot = Path.GetFullPath(projectRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+                string fullMatch = Path.GetFullPath(match);
+                if (!fullMatch.StartsWith(fullRoot, StringComparison.OrdinalIgnoreCase))
+                {
+                    return string.Empty;
+                }
+
+                return fullMatch
+                    .Substring(fullRoot.Length)
+                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                    .Replace(Path.DirectorySeparatorChar, '/');
+            }
+            catch (Exception exception) when (
+                exception is IOException ||
+                exception is UnauthorizedAccessException ||
+                exception is ArgumentException)
+            {
+                return string.Empty;
+            }
         }
 
         private static bool ContainsSceneLoadCall(string source)
@@ -705,12 +767,15 @@ namespace AL.EditorTools
             {
                 ProductionSceneDescriptor.BootSceneId,
                 ProductionSceneDescriptor.RealmSelectionSceneId,
+                ProductionSceneDescriptor.CharacterCreationSceneId,
+                ProductionSceneDescriptor.ChampionArenaSceneId,
                 ProductionSceneDescriptor.KingdomSceneId
             };
             string[] requiredInventory =
             {
                 ProductionSceneDescriptor.BootSceneId,
                 ProductionSceneDescriptor.RealmSelectionSceneId,
+                ProductionSceneDescriptor.CharacterCreationSceneId,
                 ProductionSceneDescriptor.KingdomSceneId,
                 ProductionSceneDescriptor.ChampionArenaSceneId,
                 ProductionSceneDescriptor.TestSceneId
@@ -744,10 +809,14 @@ namespace AL.EditorTools
 
             ProductionSceneRecord champion = RecordById(ProductionSceneDescriptor.ChampionArenaSceneId);
             ProductionSceneRecord representativeTest = RecordById(ProductionSceneDescriptor.TestSceneId);
+            ProductionSceneRecord characterCreation = RecordById(ProductionSceneDescriptor.CharacterCreationSceneId);
             if (champion == null ||
                 !champion.IsProductionScene ||
-                champion.IsInShellFoundation ||
-                !string.Equals(champion.Status, ProductionSceneDescriptor.StatusCommittedDeferred, StringComparison.Ordinal) ||
+                !champion.IsInShellFoundation ||
+                !string.Equals(champion.Status, ProductionSceneDescriptor.StatusCommittedActive, StringComparison.Ordinal) ||
+                characterCreation == null ||
+                !characterCreation.IsProductionScene ||
+                !characterCreation.IsInShellFoundation ||
                 representativeTest == null ||
                 representativeTest.IsProductionScene ||
                 representativeTest.IsInShellFoundation ||
@@ -765,7 +834,6 @@ namespace AL.EditorTools
                    all.Select(record => record.SceneName).Distinct(StringComparer.OrdinalIgnoreCase).Count() == all.Count &&
                    all.Select(record => record.AssetGuid).Distinct(StringComparer.Ordinal).Count() == all.Count &&
                    !shell.Any(record =>
-                       string.Equals(record.SceneId, ProductionSceneDescriptor.ChampionArenaSceneId, StringComparison.Ordinal) ||
                        string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal));
         }
 

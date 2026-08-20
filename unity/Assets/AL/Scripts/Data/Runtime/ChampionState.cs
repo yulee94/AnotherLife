@@ -18,7 +18,8 @@ namespace AL.Data.Runtime
     {
         // Stable identity.
         public string Id = string.Empty;                 // archetype id (lowercase snake_case)
-        public string DisplayName = string.Empty;        // champion name
+        public string DisplayName = string.Empty;        // champion catalog name (not the player username)
+        public string Username = string.Empty;           // local player username; authoritative copy lives on ChampionCustomization.Username
 
         // Class / realm identity.
         public ClassFamily Family = ClassFamily.Warrior;

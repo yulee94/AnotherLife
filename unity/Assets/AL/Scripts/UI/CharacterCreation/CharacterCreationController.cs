@@ -4,6 +4,8 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
 using AL.Data.Runtime;
+using AL.Services.Local;
+using AL.UI.FirstUserIdentity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -37,6 +39,7 @@ namespace AL.UI.CharacterCreation
         private Text _statusText;
         private Text _nvs01Text;
         private Text _detailText;
+        private InputField _usernameField;
         private Button _confirmButton;
         private Text _confirmLabel;
         private bool _committing;
@@ -57,6 +60,11 @@ namespace AL.UI.CharacterCreation
             if (save != null && save.CurrentSave == null)
             {
                 save.Load();
+            }
+
+            if (save?.CurrentSave != null)
+            {
+                MvpLoopSaveCodec.RestoreSessionIdentity(save.CurrentSave);
             }
         }
 
@@ -149,7 +157,13 @@ namespace AL.UI.CharacterCreation
             _detailText.color = _textDim;
             _detailText.alignment = TextAnchor.UpperLeft;
 
-            // Confirm action.
+            // Confirm action + local username (uniqueness is in-process only).
+            _usernameField = CreateUsernameField(canvasObject.transform, font, new Vector2(64f, -780f), new Vector2(360f, 48f));
+            if (_alreadyConfirmed && !string.IsNullOrWhiteSpace(SliceRunState.Champion.Username))
+            {
+                _usernameField.text = SliceRunState.Champion.Username;
+            }
+
             _confirmButton = CreateButton(canvasObject.transform, "ConfirmChampion", "CONFIRM CHAMPION", font,
                 new Vector2(64f, -852f), new Vector2(360f, 54f), ConfirmChampion);
             _confirmLabel = _confirmButton.GetComponentInChildren<Text>();
@@ -236,7 +250,7 @@ namespace AL.UI.CharacterCreation
 
             if (_confirmLabel != null)
             {
-                _confirmLabel.text = _alreadyConfirmed ? "CONTINUE TO COMBAT" : "CONFIRM CHAMPION";
+                _confirmLabel.text = _alreadyConfirmed ? "CONTINUE TO ARENA" : "CONFIRM CHAMPION";
             }
         }
 
@@ -277,15 +291,77 @@ namespace AL.UI.CharacterCreation
 
             _committing = true;
 
+            string alreadyOwned = _alreadyConfirmed ? SliceRunState.Champion.Username : string.Empty;
+            if (!CharacterCreationIdentity.TryClaim(
+                    _usernameField != null ? _usernameField.text : string.Empty,
+                    alreadyOwned,
+                    out string username,
+                    out string usernameError))
+            {
+                _committing = false;
+                SetStatus(usernameError);
+                return;
+            }
+
             ChampionState state = BuildChampionState(_selected);
+            state.Username = username;
+            if (!TryPersistIdentity(state, username, out string persistError))
+            {
+                _committing = false;
+                SetStatus(persistError);
+                return;
+            }
+
             SliceRunState.ConfirmChampion(state);
 
             Debug.Log(
                 $"[AL-CHARACTER-CREATION] Champion confirmed: id={state.Id} name={state.DisplayName} " +
-                $"family={state.Family} subclass={state.Subclass} realm={state.Realm} " +
+                $"username={state.Username} family={state.Family} subclass={state.Subclass} realm={state.Realm} " +
                 $"hp={state.MaxHealth} atk={state.Attack} def={state.Defense} skills={state.SkillIds.Count}");
-            SetStatus($"Champion confirmed — {state.DisplayName} of {state.Realm}. Advancing to combat...");
+            SetStatus($"Champion confirmed — {state.DisplayName} as {state.Username}. Advancing to the inner realm...");
             AdvanceToCombat();
+        }
+
+        private static bool TryPersistIdentity(ChampionState state, string username, out string error)
+        {
+            error = string.Empty;
+            ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
+            if (save == null)
+            {
+                error = "Could not persist identity. Stay on create.";
+                return false;
+            }
+
+            if (save.CurrentSave == null)
+            {
+                save.Load();
+            }
+
+            if (save.CurrentSave == null ||
+                !FirstUserIdentityDerivation.IsSupportedRealm(save.CurrentSave.SelectedRealm))
+            {
+                error = "Could not persist identity. Stay on create.";
+                return false;
+            }
+
+            MvpLoopCommitResult commit = MvpLoopSaveAuthority.TryCommit(
+                save,
+                new MvpLoopCommitRequest(
+                    Guid.NewGuid().ToString("N"),
+                    save.CurrentSave.SelectedRealm,
+                    state.Family,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    0,
+                    username));
+            if (!commit.Accepted)
+            {
+                error = "Could not persist identity. Stay on create.";
+                return false;
+            }
+
+            return true;
         }
 
         private void AdvanceToCombat()
@@ -434,6 +510,50 @@ namespace AL.UI.CharacterCreation
             labelRect.offsetMax = Vector2.zero;
 
             return button;
+        }
+
+        private static InputField CreateUsernameField(Transform parent, Font font, Vector2 anchoredPosition, Vector2 sizeDelta)
+        {
+            var fieldObject = new GameObject("Username");
+            fieldObject.transform.SetParent(parent, false);
+
+            var image = fieldObject.AddComponent<Image>();
+            image.color = new Color(0.08f, 0.10f, 0.14f, 0.96f);
+
+            var rect = fieldObject.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0f, 1f);
+            rect.anchorMax = new Vector2(0f, 1f);
+            rect.pivot = new Vector2(0f, 1f);
+            rect.anchoredPosition = anchoredPosition;
+            rect.sizeDelta = sizeDelta;
+
+            var text = CreateText(fieldObject.transform, "Text", font, string.Empty, 18, Vector2.zero, sizeDelta);
+            text.alignment = TextAnchor.MiddleLeft;
+            text.color = Color.white;
+            text.supportRichText = false;
+            var textRect = text.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = Vector2.one;
+            textRect.offsetMin = new Vector2(12f, 4f);
+            textRect.offsetMax = new Vector2(-12f, -4f);
+
+            var placeholder = CreateText(fieldObject.transform, "Placeholder", font, "USERNAME", 16, Vector2.zero, sizeDelta);
+            placeholder.alignment = TextAnchor.MiddleLeft;
+            placeholder.color = new Color(0.62f, 0.70f, 0.78f, 0.7f);
+            placeholder.fontStyle = FontStyle.Italic;
+            var placeholderRect = placeholder.GetComponent<RectTransform>();
+            placeholderRect.anchorMin = Vector2.zero;
+            placeholderRect.anchorMax = Vector2.one;
+            placeholderRect.offsetMin = new Vector2(12f, 4f);
+            placeholderRect.offsetMax = new Vector2(-12f, -4f);
+
+            var field = fieldObject.AddComponent<InputField>();
+            field.textComponent = text;
+            field.placeholder = placeholder;
+            field.characterLimit = CharacterCreationIdentity.MaxLength;
+            field.contentType = InputField.ContentType.Standard;
+            field.lineType = InputField.LineType.SingleLine;
+            return field;
         }
     }
 }
