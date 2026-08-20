@@ -16,6 +16,11 @@ namespace AL.ChampionMode
         public const string EnvironmentRootName = "InnerRealmWorld_TEMPORARY";
         public const string TemporaryPlaqueName = "TEMPORARY_GreyboxPlaque";
         public const string TemporaryPlaqueCopy = "TEMPORARY — unnamed Capital greybox";
+        public const string PresentationPlaqueName = "TEMPORARY_ChampionPresentationPlaque";
+        public const string PresentationPlaqueCopy =
+            "TEMPORARY — procedural adult binding sample. Vanguard mesh not promoted.";
+        public const string ClassFamilyTokenPrefix = "ClassFamily_";
+        public const string PeopleTokenPrefix = "People_";
         public const string PlayerObjectName = "Player_Champion";
         public const string HudCanvasName = "ChampionMode_HUD";
         public const string PlayerFrameName = "PlayerFrame";
@@ -44,7 +49,10 @@ namespace AL.ChampionMode
 
         public static bool AutoStartEncounterIntro => _encounterHarness;
 
-        public static bool AutoStartFirstFight => !_encounterHarness;
+        // First-session fight is the C1 guardian trial (OBJ_C1_FACE_GUARDIAN), not landing.
+        public static bool AutoStartFirstFight => false;
+
+        public static bool ShouldRunProofOfWorth => !_encounterHarness;
 
         public static void EnableEncounterHarness()
         {
