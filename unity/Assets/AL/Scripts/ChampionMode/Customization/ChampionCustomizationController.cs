@@ -18,6 +18,8 @@ namespace AL.ChampionMode.Customization
         private bool _catalogLoadStarted;
         private ChampionPresentationSpec _boundPresentation;
         private bool _hasBoundPresentation;
+        private bool _useExternalPresentation;
+        private ChampionCustomizationState _externalPresentation;
 
         private static readonly string[] BodyPresets =
         {
@@ -103,7 +105,11 @@ namespace AL.ChampionMode.Customization
 
         private void Start()
         {
-            if (_hasBoundPresentation)
+            if (_useExternalPresentation)
+            {
+                ApplyState(_externalPresentation);
+            }
+            else if (_hasBoundPresentation)
             {
                 ApplyBoundPresentation(_boundPresentation);
             }
@@ -132,7 +138,29 @@ namespace AL.ChampionMode.Customization
 
         public void ApplySavedCustomization()
         {
-            var state = GetPresentationSnapshot();
+            if (_useExternalPresentation)
+            {
+                ApplyState(_externalPresentation);
+                return;
+            }
+
+            ApplyState(GetPresentationSnapshot());
+        }
+
+        public void ApplyPresentation(ChampionCustomizationState state)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            _useExternalPresentation = true;
+            _externalPresentation = state;
+            ApplyState(state);
+        }
+
+        private void ApplyState(ChampionCustomizationState state)
+        {
             if (state == null)
             {
                 return;

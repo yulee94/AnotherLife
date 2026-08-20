@@ -73,7 +73,8 @@ namespace AL.Data.Runtime
                 lastResultId,
                 buildingId,
                 buildingLevel,
-                string.Empty)
+                string.Empty,
+                null)
         {
         }
 
@@ -86,6 +87,51 @@ namespace AL.Data.Runtime
             string buildingId,
             int buildingLevel,
             string username)
+            : this(
+                transactionId,
+                expectedRealm,
+                classFamily,
+                confirmIdentity,
+                lastResultId,
+                buildingId,
+                buildingLevel,
+                username,
+                null)
+        {
+        }
+
+        public MvpLoopCommitRequest(
+            string transactionId,
+            RealmId expectedRealm,
+            ClassFamily classFamily,
+            bool confirmIdentity,
+            string lastResultId,
+            string buildingId,
+            int buildingLevel,
+            ChampionCustomizationState appearance)
+            : this(
+                transactionId,
+                expectedRealm,
+                classFamily,
+                confirmIdentity,
+                lastResultId,
+                buildingId,
+                buildingLevel,
+                string.Empty,
+                appearance)
+        {
+        }
+
+        public MvpLoopCommitRequest(
+            string transactionId,
+            RealmId expectedRealm,
+            ClassFamily classFamily,
+            bool confirmIdentity,
+            string lastResultId,
+            string buildingId,
+            int buildingLevel,
+            string username,
+            ChampionCustomizationState appearance)
         {
             TransactionId = transactionId ?? string.Empty;
             ExpectedRealm = expectedRealm;
@@ -95,6 +141,7 @@ namespace AL.Data.Runtime
             BuildingId = buildingId ?? string.Empty;
             BuildingLevel = buildingLevel;
             Username = username ?? string.Empty;
+            Appearance = appearance;
         }
 
         public string TransactionId { get; }
@@ -105,6 +152,7 @@ namespace AL.Data.Runtime
         public string BuildingId { get; }
         public int BuildingLevel { get; }
         public string Username { get; }
+        public ChampionCustomizationState Appearance { get; }
     }
 
     /// <summary>
@@ -390,9 +438,16 @@ namespace AL.Data.Runtime
                                     StringComparison.Ordinal);
             bool sameBuild = string.IsNullOrEmpty(request.BuildingId) ||
                              HasBuilding(candidate, request.BuildingId, request.BuildingLevel);
-            if (sameClass && sameConfirm && sameResult && sameUsername && sameBuild)
+            bool sameLook = request.Appearance == null ||
+                            AL.UI.CharacterCreation.CharacterCreationLook.Matches(customization, request.Appearance);
+            if (sameClass && sameConfirm && sameResult && sameUsername && sameBuild && sameLook)
             {
                 return MvpLoopPrepareDisposition.Duplicate;
+            }
+
+            if (request.Appearance != null)
+            {
+                AL.UI.CharacterCreation.CharacterCreationLook.CopyInto(customization, request.Appearance);
             }
 
             customization.ClassFamilyId = classFamilyId;
