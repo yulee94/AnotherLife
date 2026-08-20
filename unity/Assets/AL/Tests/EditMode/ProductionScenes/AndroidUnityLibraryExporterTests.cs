@@ -51,8 +51,35 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, options.scenes);
+        }
+
+        [Test]
+        public void PlanPinsDistinctNonDevelopmentReleaseProfile()
+        {
+            FieldInfo profile = ExporterType.GetField(
+                "developmentExport",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(profile);
+            object original = profile.GetValue(null);
+            try
+            {
+                profile.SetValue(null, false);
+                string root = ProjectRoot();
+                object plan = CreatePlan(root, ExpectedOutput(root), ExpectedSummary(root));
+                var options = (BuildPlayerOptions)Invoke(plan, "CreateBuildPlayerOptions");
+
+                Assert.AreEqual(
+                    BuildOptions.AcceptExternalModificationsToPlayer,
+                    options.options);
+            }
+            finally
+            {
+                profile.SetValue(null, original);
+            }
         }
 
         [Test]
@@ -536,6 +563,8 @@ namespace AL.Tests.EditMode.ProductionScenes
         [TestCase("minimum-api")]
         [TestCase("export-project")]
         [TestCase("app-bundle")]
+        [TestCase("il2cpp-compiler-configuration")]
+        [TestCase("managed-stripping-level")]
         public void RestoreMustRecaptureAndMatchEveryOriginalSetting(string drift)
         {
             EnvironmentState state = ValidEnvironment();
@@ -544,7 +573,9 @@ namespace AL.Tests.EditMode.ProductionScenes
                 drift == "architectures" ? "ARM64" : "ARMv7",
                 drift == "minimum-api" ? 24 : 22,
                 drift == "export-project" || false,
-                drift != "app-bundle");
+                drift != "app-bundle",
+                drift == "il2cpp-compiler-configuration" ? "Release" : "Master",
+                drift == "managed-stripping-level" ? "Medium" : "Minimal");
 
             object summary = Execute(state);
 
@@ -1063,13 +1094,31 @@ namespace AL.Tests.EditMode.ProductionScenes
             string architectures,
             int minimumApi,
             bool exportProject,
-            bool buildAppBundle) => Create(
+            bool buildAppBundle) => NewSettings(
+                backend,
+                architectures,
+                minimumApi,
+                exportProject,
+                buildAppBundle,
+                "Master",
+                "Minimal");
+
+        private static object NewSettings(
+            string backend,
+            string architectures,
+            int minimumApi,
+            bool exportProject,
+            bool buildAppBundle,
+            string il2CppCompilerConfiguration,
+            string managedStrippingLevel) => Create(
                 SettingsType,
                 backend,
                 architectures,
                 minimumApi,
                 exportProject,
-                buildAppBundle);
+                buildAppBundle,
+                il2CppCompilerConfiguration,
+                managedStrippingLevel);
 
         private static object NewReport(string result, string target, string output, int errors) => Create(
             ReportType,

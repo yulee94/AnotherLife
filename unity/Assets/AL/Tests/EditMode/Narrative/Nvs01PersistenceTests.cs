@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -21,8 +23,24 @@ namespace AL.Tests.EditMode.Narrative
     {
         private const string ProfileId =
             "alp_11111111111111111111111111111111";
+        private const int ErrorInvalidParameter = 87;
+        private const int SymbolicLinkFlagAllowUnprivilegedCreate = 2;
         private string _saveRoot;
+        private string _externalSentinelRoot;
+        private string _ownedSymbolicLinkPath;
         private Nvs01VerifiedCatalog _catalog;
+
+        [DllImport(
+            "kernel32.dll",
+            EntryPoint = "CreateSymbolicLinkW",
+            CharSet = CharSet.Unicode,
+            ExactSpelling = true,
+            SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.U1)]
+        private static extern bool CreateSymbolicLinkW(
+            string symbolicLinkPath,
+            string targetPath,
+            int flags);
 
         [SetUp]
         public void SetUp()
@@ -38,10 +56,21 @@ namespace AL.Tests.EditMode.Narrative
         [TearDown]
         public void TearDown()
         {
+            if (!string.IsNullOrEmpty(_ownedSymbolicLinkPath))
+            {
+                File.Delete(_ownedSymbolicLinkPath);
+            }
+
             if (!string.IsNullOrEmpty(_saveRoot) &&
                 Directory.Exists(_saveRoot))
             {
                 Directory.Delete(_saveRoot, true);
+            }
+
+            if (!string.IsNullOrEmpty(_externalSentinelRoot) &&
+                Directory.Exists(_externalSentinelRoot))
+            {
+                Directory.Delete(_externalSentinelRoot, true);
             }
         }
 
@@ -131,6 +160,550 @@ namespace AL.Tests.EditMode.Narrative
                 expectedPendingAction,
                 expectedEncounterStatus,
                 expectedIntentCount);
+        }
+
+        [TestCase("offer-pending")]
+        [TestCase("offer-deferred")]
+        [TestCase("accepted")]
+        [TestCase("lore")]
+        [TestCase("before-request")]
+        [TestCase("request-saved")]
+        [TestCase("failure")]
+        [TestCase("retry-ready")]
+        [TestCase("retry-requested")]
+        [TestCase("cancelled")]
+        [TestCase("unavailable")]
+        [TestCase("success-before-report")]
+        [TestCase("during-report")]
+        [TestCase("abandon-reaccept")]
+        public void ExactRetainedV003D16StateMigratesOnlyPacketIdentityAndIsIdempotent(
+            string stage)
+        {
+            Assert.AreEqual(
+                "omen1-a1-2026-07-29-v003",
+                Nvs01ProgressCodec.MigratablePacketVersion);
+            Assert.AreEqual(
+                "8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732",
+                Nvs01ProgressCodec.MigratablePacketSha256);
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, stage);
+
+            Nvs01ProgressData legacy = service.CurrentSave.Nvs01Progress;
+            legacy.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
+            legacy.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
+            Assert.AreEqual(
+                string.Empty,
+                legacy.LastOperation.ExpectedGenerationFingerprint);
+            string exactLegacyProgress = JsonUtility.ToJson(legacy);
+            long exactTimestamp = service.CurrentSave.LastSavedTimestamp;
+            byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
+                JsonUtility.ToJson(service.CurrentSave, true));
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+            string backupPath = Path.Combine(_saveRoot, "save.backup.json");
+            File.WriteAllBytes(primaryPath, exactLegacyPrimary);
+
+            byte[] olderCurrentBackup = File.ReadAllBytes(backupPath);
+            SaveGameData backupSave = JsonUtility.FromJson<SaveGameData>(
+                new UTF8Encoding(false, true).GetString(olderCurrentBackup));
+            Assert.Less(
+                backupSave.Nvs01Progress.Revision,
+                legacy.Revision,
+                "The fixture must prove the exact migratable primary outranks an older clean backup.");
+            Assert.AreEqual(
+                Nvs01RuntimeContract.PacketVersion,
+                backupSave.Nvs01Progress.PacketVersion);
+
+            LocalSaveGameService migrated = CreateSaveService(_saveRoot);
+            migrated.Load();
+
+            Assert.NotNull(migrated.CurrentSave, migrated.LastLoadMessage);
+            Assert.AreEqual(SaveLoadStatus.LoadedPrimary, migrated.LastLoadStatus);
+            Assert.AreEqual(
+                Nvs01RuntimeContract.PacketVersion,
+                migrated.CurrentSave.Nvs01Progress.PacketVersion);
+            Assert.AreEqual(
+                Nvs01RuntimeContract.PacketSha256,
+                migrated.CurrentSave.Nvs01Progress.PacketSha256);
+            Assert.AreEqual(exactTimestamp, migrated.CurrentSave.LastSavedTimestamp);
+            Assert.AreEqual(
+                string.Empty,
+                migrated.CurrentSave.Nvs01Progress.LastOperation
+                    .ExpectedGenerationFingerprint);
+            Nvs01QuestSnapshot migratedSnapshot = Decode(
+                migrated.CurrentSave.Nvs01Progress,
+                _catalog);
+            Assert.True(
+                Nvs01QuestRuntime.TryValidateSnapshot(
+                    migratedSnapshot,
+                    out string sharedValidationError),
+                sharedValidationError);
+            Assert.AreEqual(
+                legacy.Revision,
+                migratedSnapshot.Revision,
+                "The migrated clone must validate through the current v004 codec and catalog topology.");
+
+            Nvs01ProgressData identityNeutralized =
+                JsonUtility.FromJson<Nvs01ProgressData>(
+                    JsonUtility.ToJson(migrated.CurrentSave.Nvs01Progress));
+            identityNeutralized.PacketVersion =
+                Nvs01ProgressCodec.MigratablePacketVersion;
+            identityNeutralized.PacketSha256 =
+                Nvs01ProgressCodec.MigratablePacketSha256;
+            Assert.AreEqual(
+                exactLegacyProgress,
+                JsonUtility.ToJson(identityNeutralized),
+                "Migration may change only packet version/hash; every D16 field and receipt must remain exact.");
+            CollectionAssert.AreEqual(
+                exactLegacyPrimary,
+                File.ReadAllBytes(backupPath),
+                "The existing atomic rotation must preserve the exact retained v003 primary as backup.");
+            string[] migrationArchives = Directory.GetFiles(
+                _saveRoot,
+                "save.previous.json.migration-archive-*");
+            Assert.AreEqual(1, migrationArchives.Length);
+            CollectionAssert.AreEqual(
+                olderCurrentBackup,
+                File.ReadAllBytes(migrationArchives[0]),
+                "Migration must retain the displaced pinned backup in its unique archive.");
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.tmp.json")));
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.previous.json")));
+
+            byte[] exactMigratedPrimary = File.ReadAllBytes(primaryPath);
+            byte[] exactMigratedBackup = File.ReadAllBytes(backupPath);
+            string exactMigratedProgress =
+                JsonUtility.ToJson(migrated.CurrentSave.Nvs01Progress);
+            LocalSaveGameService repeated = CreateSaveService(_saveRoot);
+            repeated.Load();
+
+            Assert.NotNull(repeated.CurrentSave, repeated.LastLoadMessage);
+            CollectionAssert.AreEqual(
+                exactMigratedPrimary,
+                File.ReadAllBytes(primaryPath),
+                "A repeated load must be a migration no-op.");
+            CollectionAssert.AreEqual(
+                exactMigratedBackup,
+                File.ReadAllBytes(backupPath));
+            CollectionAssert.AreEqual(
+                olderCurrentBackup,
+                File.ReadAllBytes(migrationArchives[0]));
+            Assert.AreEqual(
+                exactMigratedProgress,
+                JsonUtility.ToJson(repeated.CurrentSave.Nvs01Progress));
+        }
+
+        [TestCase("wrong-hash")]
+        [TestCase("wrong-version")]
+        [TestCase("wrong-quest")]
+        [TestCase("future-packet")]
+        [TestCase("malformed-state")]
+        [TestCase("nonblank-generation")]
+        public void NonExactV003EvidenceFailsClosedWithoutChangingBytes(
+            string scenario)
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, "offer-pending");
+            Nvs01ProgressData progress = service.CurrentSave.Nvs01Progress;
+            progress.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
+            progress.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
+
+            switch (scenario)
+            {
+                case "wrong-hash":
+                    progress.PacketSha256 =
+                        Nvs01ProgressCodec.MigratablePacketSha256
+                            .Substring(0, 63) + "0";
+                    break;
+                case "wrong-version":
+                    progress.PacketVersion = "omen1-a1-2026-07-29-v003-unknown";
+                    break;
+                case "wrong-quest":
+                    progress.QuestId = "OMEN_UNKNOWN";
+                    break;
+                case "future-packet":
+                    progress.PacketVersion = "omen1-a1-2099-01-01-v999";
+                    break;
+                case "malformed-state":
+                    progress.StateId = string.Empty;
+                    break;
+                case "nonblank-generation":
+                    progress.LastOperation.ExpectedGenerationFingerprint =
+                        new string('a', 64);
+                    break;
+                default:
+                    Assert.Fail("Unknown migration rejection fixture.");
+                    break;
+            }
+
+            byte[] exactBytes = WriteCanonicalGenerations(service.CurrentSave);
+            LocalSaveGameService reloaded = CreateSaveService(_saveRoot);
+            reloaded.Load();
+
+            Assert.IsNull(reloaded.CurrentSave);
+            Assert.NotNull(reloaded.LastLoadDisposition);
+            Assert.False(reloaded.LastLoadDisposition.IsWritable);
+            CollectionAssert.AreEqual(
+                exactBytes,
+                File.ReadAllBytes(Path.Combine(_saveRoot, "save.json")));
+            CollectionAssert.AreEqual(
+                exactBytes,
+                File.ReadAllBytes(Path.Combine(_saveRoot, "save.backup.json")));
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.tmp.json")));
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.previous.json")));
+        }
+
+        [TestCase("unknown-state")]
+        [TestCase("unknown-dialogue")]
+        [TestCase("unknown-objective")]
+        public void StructurallyValidButNonV004TopologyPrimaryLosesToCleanBackup(
+            string scenario)
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, "offer-pending");
+            Nvs01ProgressData progress = service.CurrentSave.Nvs01Progress;
+            progress.PacketVersion = Nvs01ProgressCodec.MigratablePacketVersion;
+            progress.PacketSha256 = Nvs01ProgressCodec.MigratablePacketSha256;
+
+            switch (scenario)
+            {
+                case "unknown-state":
+                    progress.StateId = "UNKNOWN_STRUCTURAL_STATE";
+                    break;
+                case "unknown-dialogue":
+                    progress.CurrentDialogueNodeId = "DLG_UNKNOWN_STRUCTURAL";
+                    break;
+                case "unknown-objective":
+                    progress.Objectives[0].ObjectiveId = "OBJ_UNKNOWN_STRUCTURAL";
+                    break;
+                default:
+                    Assert.Fail("Unknown topology fixture.");
+                    break;
+            }
+
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+            string backupPath = Path.Combine(_saveRoot, "save.backup.json");
+            byte[] invalidPrimary = new UTF8Encoding(false, true).GetBytes(
+                JsonUtility.ToJson(service.CurrentSave, true));
+            byte[] cleanBackup = File.ReadAllBytes(backupPath);
+            File.WriteAllBytes(primaryPath, invalidPrimary);
+
+            LocalSaveGameService reloaded = CreateSaveService(_saveRoot);
+            reloaded.Load();
+
+            Assert.NotNull(reloaded.CurrentSave, reloaded.LastLoadMessage);
+            Assert.AreEqual(
+                SaveLoadStatus.RecoveredFromBackup,
+                reloaded.LastLoadStatus);
+            CollectionAssert.AreEqual(cleanBackup, File.ReadAllBytes(primaryPath));
+            Assert.AreEqual(
+                Nvs01RuntimeContract.PacketVersion,
+                reloaded.CurrentSave.Nvs01Progress.PacketVersion);
+            Assert.That(
+                Directory.GetFiles(_saveRoot, "save.json.corrupt-*")
+                    .Any(path => File.ReadAllBytes(path).SequenceEqual(invalidPrimary)),
+                Is.True,
+                "The topology-invalid v003 primary must survive as read-only quarantine evidence.");
+        }
+
+        [Test]
+        public void MigrationWriteFailurePreservesExactOldAndRecoveryGenerations()
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, "during-report");
+            service.CurrentSave.Nvs01Progress.PacketVersion =
+                Nvs01ProgressCodec.MigratablePacketVersion;
+            service.CurrentSave.Nvs01Progress.PacketSha256 =
+                Nvs01ProgressCodec.MigratablePacketSha256;
+
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+            string backupPath = Path.Combine(_saveRoot, "save.backup.json");
+            byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
+                JsonUtility.ToJson(service.CurrentSave, true));
+            File.WriteAllBytes(primaryPath, exactLegacyPrimary);
+            byte[] exactRecoveryBackup = File.ReadAllBytes(backupPath);
+
+            var failing = new LocalSaveGameService(
+                _saveRoot,
+                new FailingMigrationWriteFileOperations());
+            failing.Load();
+
+            Assert.IsNull(failing.CurrentSave);
+            Assert.NotNull(failing.ReadOnlyCandidateSnapshot);
+            Assert.AreEqual(SaveLoadStatus.RecoveryFailed, failing.LastLoadStatus);
+            Assert.NotNull(failing.LastSaveDisposition);
+            Assert.False(failing.LastSaveDisposition.MayHaveMutated);
+            CollectionAssert.AreEqual(
+                exactLegacyPrimary,
+                File.ReadAllBytes(primaryPath));
+            CollectionAssert.AreEqual(
+                exactRecoveryBackup,
+                File.ReadAllBytes(backupPath));
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.tmp.json")));
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.previous.json")));
+        }
+
+        [TestCase("save.tmp.json")]
+        [TestCase("save.previous.json")]
+        public void MigrationPreservesAuxiliaryGenerationAppearingAfterInventory(
+            string auxiliaryFileName)
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, "during-report");
+            service.CurrentSave.Nvs01Progress.PacketVersion =
+                Nvs01ProgressCodec.MigratablePacketVersion;
+            service.CurrentSave.Nvs01Progress.PacketSha256 =
+                Nvs01ProgressCodec.MigratablePacketSha256;
+
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+            string backupPath = Path.Combine(_saveRoot, "save.backup.json");
+            string auxiliaryPath = Path.Combine(_saveRoot, auxiliaryFileName);
+            byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
+                JsonUtility.ToJson(service.CurrentSave, true));
+            byte[] exactBackup = File.ReadAllBytes(backupPath);
+            byte[] concurrentEvidence = new UTF8Encoding(false, true).GetBytes(
+                "{ concurrent auxiliary evidence");
+            File.WriteAllBytes(primaryPath, exactLegacyPrimary);
+
+            var raced = new LocalSaveGameService(
+                _saveRoot,
+                new AppearingMigrationAuxiliaryFileOperations(
+                    auxiliaryPath,
+                    concurrentEvidence));
+            raced.Load();
+
+            Assert.IsNull(raced.CurrentSave);
+            Assert.NotNull(raced.ReadOnlyCandidateSnapshot);
+            Assert.AreEqual(SaveLoadStatus.RecoveryFailed, raced.LastLoadStatus);
+            CollectionAssert.AreEqual(
+                exactLegacyPrimary,
+                File.ReadAllBytes(primaryPath));
+            CollectionAssert.AreEqual(exactBackup, File.ReadAllBytes(backupPath));
+            CollectionAssert.AreEqual(
+                concurrentEvidence,
+                File.ReadAllBytes(auxiliaryPath));
+        }
+
+        [Test]
+        public void MigrationArchivesForeignPreviousRaceAndWithholdsSuccess()
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, "during-report");
+            service.CurrentSave.Nvs01Progress.PacketVersion =
+                Nvs01ProgressCodec.MigratablePacketVersion;
+            service.CurrentSave.Nvs01Progress.PacketSha256 =
+                Nvs01ProgressCodec.MigratablePacketSha256;
+
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+            string backupPath = Path.Combine(_saveRoot, "save.backup.json");
+            string previousPath = Path.Combine(
+                _saveRoot,
+                "save.previous.json");
+            byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
+                JsonUtility.ToJson(service.CurrentSave, true));
+            byte[] foreignPrevious = new UTF8Encoding(false, true).GetBytes(
+                "{ foreign previous race evidence");
+            File.WriteAllBytes(primaryPath, exactLegacyPrimary);
+
+            var operations =
+                new ReplacingMigrationPreviousFileOperations(
+                    previousPath,
+                    foreignPrevious);
+            var raced = new LocalSaveGameService(_saveRoot, operations);
+            raced.Load();
+
+            Assert.True(operations.Injected);
+            Assert.IsNull(raced.CurrentSave);
+            Assert.NotNull(raced.ReadOnlyCandidateSnapshot);
+            Assert.AreEqual(SaveLoadStatus.RecoveryFailed, raced.LastLoadStatus);
+            Assert.NotNull(raced.LastSaveDisposition);
+            Assert.AreEqual(
+                SaveOperationStatus.CommitUncertain,
+                raced.LastSaveDisposition.Status);
+            Assert.True(raced.LastSaveDisposition.CandidatePrimaryVerified);
+            Assert.True(raced.LastSaveDisposition.RequiredBackupVerified);
+            Assert.False(raced.LastSaveDisposition.CleanupVerified);
+            CollectionAssert.AreEqual(
+                exactLegacyPrimary,
+                File.ReadAllBytes(backupPath));
+            Assert.False(File.Exists(previousPath));
+            Assert.False(File.Exists(Path.Combine(_saveRoot, "save.tmp.json")));
+            string[] migrationArchives = Directory.GetFiles(
+                _saveRoot,
+                "save.previous.json.migration-archive-*");
+            Assert.AreEqual(1, migrationArchives.Length);
+            CollectionAssert.AreEqual(
+                foreignPrevious,
+                File.ReadAllBytes(migrationArchives[0]),
+                "A foreign generation that wins immediately before cleanup must survive in the non-overwriting archive.");
+
+            LocalSaveGameService fresh = CreateSaveService(_saveRoot);
+            fresh.Load();
+
+            Assert.IsNull(fresh.CurrentSave);
+            Assert.IsNull(fresh.ReadOnlyCandidateSnapshot);
+            Assert.AreEqual(
+                SaveLoadStatus.RecoveryRequired,
+                fresh.LastLoadStatus);
+            Assert.NotNull(fresh.LastLoadDisposition);
+            Assert.False(fresh.LastLoadDisposition.IsWritable);
+            Assert.AreEqual(
+                ProfileWriteAuthorityStatus.RecoveryRequired,
+                ((IProfileWriteAuthorityProvider)fresh)
+                    .GetCurrentAuthority().Status);
+            CollectionAssert.AreEqual(
+                foreignPrevious,
+                File.ReadAllBytes(migrationArchives[0]));
+            CollectionAssert.AreEqual(
+                exactLegacyPrimary,
+                File.ReadAllBytes(backupPath));
+        }
+
+        [Test]
+        [Platform("Win")]
+        public void MigrationArchiveFileSymbolicLinkFailsClosedWithoutTouchingTarget()
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            byte[] exactPrimary = File.ReadAllBytes(
+                Path.Combine(_saveRoot, "save.json"));
+            byte[] exactBackup = File.ReadAllBytes(
+                Path.Combine(_saveRoot, "save.backup.json"));
+
+            _externalSentinelRoot = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-Nvs01PersistenceSentinelTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(_externalSentinelRoot);
+            string sentinelPath = Path.Combine(
+                _externalSentinelRoot,
+                "migration-archive-sentinel.bin");
+            byte[] sentinelBytes = new UTF8Encoding(false, true).GetBytes(
+                "NVS01 external symbolic-link sentinel");
+            File.WriteAllBytes(sentinelPath, sentinelBytes);
+
+            _ownedSymbolicLinkPath = Path.Combine(
+                _saveRoot,
+                "save.previous.json.migration-archive-" +
+                Sha256Base64Url(sentinelBytes));
+            bool created = CreateSymbolicLinkW(
+                _ownedSymbolicLinkPath,
+                sentinelPath,
+                SymbolicLinkFlagAllowUnprivilegedCreate);
+            int firstError = Marshal.GetLastWin32Error();
+            int fallbackError = 0;
+            if (!created && firstError == ErrorInvalidParameter)
+            {
+                created = CreateSymbolicLinkW(
+                    _ownedSymbolicLinkPath,
+                    sentinelPath,
+                    0);
+                fallbackError = Marshal.GetLastWin32Error();
+            }
+
+            Assert.True(
+                created,
+                "Windows file symbolic-link creation is required evidence; " +
+                $"CreateSymbolicLinkW failed with {firstError}/{fallbackError}.");
+            Assert.That(
+                File.GetAttributes(_ownedSymbolicLinkPath) &
+                FileAttributes.ReparsePoint,
+                Is.EqualTo(FileAttributes.ReparsePoint));
+            CollectionAssert.AreEqual(
+                sentinelBytes,
+                File.ReadAllBytes(_ownedSymbolicLinkPath));
+
+            LocalSaveGameService fresh = CreateSaveService(_saveRoot);
+            fresh.Load();
+
+            Assert.IsNull(fresh.CurrentSave);
+            Assert.AreEqual(
+                SaveLoadStatus.RecoveryRequired,
+                fresh.LastLoadStatus);
+            Assert.NotNull(fresh.LastLoadDisposition);
+            Assert.AreEqual(
+                "SAVE_NVS01_MIGRATION_ARCHIVE_UNSAFE",
+                fresh.LastLoadDisposition.SelectorReason);
+            Assert.False(fresh.LastLoadDisposition.IsWritable);
+            Assert.False(fresh.LastLoadDisposition.IsRuntimeUsable);
+            Assert.AreEqual(
+                ProfileWriteAuthorityStatus.RecoveryRequired,
+                ((IProfileWriteAuthorityProvider)fresh)
+                    .GetCurrentAuthority().Status);
+            Assert.True(File.Exists(sentinelPath));
+            Assert.True(File.Exists(_ownedSymbolicLinkPath));
+            Assert.That(
+                File.GetAttributes(_ownedSymbolicLinkPath) &
+                FileAttributes.ReparsePoint,
+                Is.EqualTo(FileAttributes.ReparsePoint));
+            CollectionAssert.AreEqual(
+                sentinelBytes,
+                File.ReadAllBytes(sentinelPath));
+            CollectionAssert.AreEqual(
+                sentinelBytes,
+                File.ReadAllBytes(_ownedSymbolicLinkPath));
+            CollectionAssert.AreEqual(
+                exactPrimary,
+                File.ReadAllBytes(Path.Combine(_saveRoot, "save.json")));
+            CollectionAssert.AreEqual(
+                exactBackup,
+                File.ReadAllBytes(Path.Combine(
+                    _saveRoot,
+                    "save.backup.json")));
+        }
+
+        [TestCase("save.tmp.json")]
+        [TestCase("save.previous.json")]
+        public void MigrationDoesNotConsumeUnresolvedRecoveryGeneration(
+            string recoveryFileName)
+        {
+            LocalSaveGameService service = CreateSaveService(_saveRoot);
+            service.CreateNewSave(RealmId.Crownlands);
+            var session = new RuntimeSession(service, _catalog, null);
+            AdvanceTo(session, "offer-pending");
+            service.CurrentSave.Nvs01Progress.PacketVersion =
+                Nvs01ProgressCodec.MigratablePacketVersion;
+            service.CurrentSave.Nvs01Progress.PacketSha256 =
+                Nvs01ProgressCodec.MigratablePacketSha256;
+
+            string primaryPath = Path.Combine(_saveRoot, "save.json");
+            string backupPath = Path.Combine(_saveRoot, "save.backup.json");
+            string recoveryPath = Path.Combine(_saveRoot, recoveryFileName);
+            byte[] exactLegacyPrimary = new UTF8Encoding(false, true).GetBytes(
+                JsonUtility.ToJson(service.CurrentSave, true));
+            byte[] exactBackup = File.ReadAllBytes(backupPath);
+            byte[] exactRecovery = new UTF8Encoding(false, true).GetBytes(
+                "{ retained recovery evidence");
+            File.WriteAllBytes(primaryPath, exactLegacyPrimary);
+            File.WriteAllBytes(recoveryPath, exactRecovery);
+
+            LocalSaveGameService reloaded = CreateSaveService(_saveRoot);
+            reloaded.Load();
+
+            Assert.IsNull(reloaded.CurrentSave);
+            Assert.NotNull(reloaded.ReadOnlyCandidateSnapshot);
+            Assert.AreEqual(
+                SaveLoadStatus.LoadedPrimaryDegraded,
+                reloaded.LastLoadStatus);
+            CollectionAssert.AreEqual(
+                exactLegacyPrimary,
+                File.ReadAllBytes(primaryPath));
+            CollectionAssert.AreEqual(
+                exactBackup,
+                File.ReadAllBytes(backupPath));
+            CollectionAssert.AreEqual(
+                exactRecovery,
+                File.ReadAllBytes(recoveryPath));
         }
 
         [TestCase("artifact")]
@@ -690,6 +1263,16 @@ namespace AL.Tests.EditMode.Narrative
                 new object[] { root });
         }
 
+        private static string Sha256Base64Url(byte[] bytes)
+        {
+            using SHA256 sha256 = SHA256.Create();
+            return Convert.ToBase64String(
+                    sha256.ComputeHash(bytes ?? Array.Empty<byte>()))
+                .TrimEnd('=')
+                .Replace('+', '-')
+                .Replace('/', '_');
+        }
+
         private byte[] WriteCanonicalGenerations(SaveGameData save)
         {
             byte[] bytes = new UTF8Encoding(false, true).GetBytes(
@@ -718,6 +1301,167 @@ namespace AL.Tests.EditMode.Narrative
                     Environment.NewLine,
                     validation.Diagnostics.Select(item => item.Code)));
             return validation.VerifiedCatalog;
+        }
+
+        private sealed class FailingMigrationWriteFileOperations :
+            ISaveFileOperations
+        {
+            private readonly ISaveFileOperations _inner =
+                new SystemSaveFileOperations();
+
+            public bool FileExists(string path) => _inner.FileExists(path);
+            public void CreateDirectory(string path) =>
+                _inner.CreateDirectory(path);
+            public SaveFileReadResult ReadAllBytesBounded(
+                string path,
+                int maximumBytes) =>
+                _inner.ReadAllBytesBounded(path, maximumBytes);
+            public SaveFileWriteResult WriteAllTextDurable(
+                string path,
+                string contents) =>
+                new SaveFileWriteResult(
+                    false,
+                    false,
+                    "TEST_MIGRATION_WRITE_FAILED");
+            public void Copy(
+                string sourcePath,
+                string destinationPath,
+                bool overwrite) =>
+                _inner.Copy(sourcePath, destinationPath, overwrite);
+            public void Move(string sourcePath, string destinationPath) =>
+                _inner.Move(sourcePath, destinationPath);
+            public void Replace(
+                string sourcePath,
+                string destinationPath,
+                string backupPath) =>
+                _inner.Replace(sourcePath, destinationPath, backupPath);
+            public void Delete(string path) => _inner.Delete(path);
+            public IEnumerable<string> EnumerateFiles(
+                string directoryPath,
+                string searchPattern) =>
+                _inner.EnumerateFiles(directoryPath, searchPattern);
+            public bool IsReparsePoint(string path) =>
+                _inner.IsReparsePoint(path);
+        }
+
+        private sealed class AppearingMigrationAuxiliaryFileOperations :
+            ISaveFileOperations
+        {
+            private readonly ISaveFileOperations _inner =
+                new SystemSaveFileOperations();
+            private readonly string _path;
+            private readonly byte[] _bytes;
+            private bool _appeared;
+
+            internal AppearingMigrationAuxiliaryFileOperations(
+                string path,
+                byte[] bytes)
+            {
+                _path = path;
+                _bytes = bytes;
+            }
+
+            public bool FileExists(string path) => _inner.FileExists(path);
+            public void CreateDirectory(string path)
+            {
+                _inner.CreateDirectory(path);
+                if (_appeared) return;
+                File.WriteAllBytes(_path, _bytes);
+                _appeared = true;
+            }
+            public SaveFileReadResult ReadAllBytesBounded(
+                string path,
+                int maximumBytes) =>
+                _inner.ReadAllBytesBounded(path, maximumBytes);
+            public SaveFileWriteResult WriteAllTextDurable(
+                string path,
+                string contents) =>
+                _inner.WriteAllTextDurable(path, contents);
+            public void Copy(
+                string sourcePath,
+                string destinationPath,
+                bool overwrite) =>
+                _inner.Copy(sourcePath, destinationPath, overwrite);
+            public void Move(string sourcePath, string destinationPath) =>
+                _inner.Move(sourcePath, destinationPath);
+            public void Replace(
+                string sourcePath,
+                string destinationPath,
+                string backupPath) =>
+                _inner.Replace(sourcePath, destinationPath, backupPath);
+            public void Delete(string path) => _inner.Delete(path);
+            public IEnumerable<string> EnumerateFiles(
+                string directoryPath,
+                string searchPattern) =>
+                _inner.EnumerateFiles(directoryPath, searchPattern);
+            public bool IsReparsePoint(string path) =>
+                _inner.IsReparsePoint(path);
+        }
+
+        private sealed class ReplacingMigrationPreviousFileOperations :
+            ISaveFileOperations
+        {
+            private readonly ISaveFileOperations _inner =
+                new SystemSaveFileOperations();
+            private readonly string _previousPath;
+            private readonly byte[] _foreignBytes;
+
+            internal ReplacingMigrationPreviousFileOperations(
+                string previousPath,
+                byte[] foreignBytes)
+            {
+                _previousPath = previousPath;
+                _foreignBytes = foreignBytes;
+            }
+
+            internal bool Injected { get; private set; }
+
+            public bool FileExists(string path) => _inner.FileExists(path);
+            public void CreateDirectory(string path) =>
+                _inner.CreateDirectory(path);
+            public SaveFileReadResult ReadAllBytesBounded(
+                string path,
+                int maximumBytes) =>
+                _inner.ReadAllBytesBounded(path, maximumBytes);
+            public SaveFileWriteResult WriteAllTextDurable(
+                string path,
+                string contents) =>
+                _inner.WriteAllTextDurable(path, contents);
+            public void Copy(
+                string sourcePath,
+                string destinationPath,
+                bool overwrite) =>
+                _inner.Copy(sourcePath, destinationPath, overwrite);
+            public void Move(string sourcePath, string destinationPath)
+            {
+                if (!Injected &&
+                    string.Equals(
+                        sourcePath,
+                        _previousPath,
+                        StringComparison.OrdinalIgnoreCase) &&
+                    Path.GetFileName(destinationPath).StartsWith(
+                        "save.previous.json.migration-archive-",
+                        StringComparison.Ordinal))
+                {
+                    File.Delete(sourcePath);
+                    File.WriteAllBytes(sourcePath, _foreignBytes);
+                    Injected = true;
+                }
+
+                _inner.Move(sourcePath, destinationPath);
+            }
+            public void Replace(
+                string sourcePath,
+                string destinationPath,
+                string backupPath) =>
+                _inner.Replace(sourcePath, destinationPath, backupPath);
+            public void Delete(string path) => _inner.Delete(path);
+            public IEnumerable<string> EnumerateFiles(
+                string directoryPath,
+                string searchPattern) =>
+                _inner.EnumerateFiles(directoryPath, searchPattern);
+            public bool IsReparsePoint(string path) =>
+                _inner.IsReparsePoint(path);
         }
 
         private sealed class RuntimeSession

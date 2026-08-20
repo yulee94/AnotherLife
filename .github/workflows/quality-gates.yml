@@ -21,23 +21,6 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  classify:
-    name: policy / classify
-    runs-on: windows-latest
-    timeout-minutes: 15
-    steps:
-      - name: Checkout exact event head
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
-        timeout-minutes: 5
-        with:
-          fetch-depth: 0
-          persist-credentials: false
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-      - name: Classify PR scope
-        shell: pwsh
-        timeout-minutes: 5
-        run: ./tools/ci/Invoke-AnotherLifeQualityGate.ps1 -Mode Classify
-
   hygiene:
     name: repository / hygiene
     runs-on: windows-latest

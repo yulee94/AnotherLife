@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-realm-gem-wishgate-content.schema.json",
+  "title": "Another Life Realm Gem And Wishgate Content Catalog",
+  "description": "Schema for al_realm_gem_wishgate_content_catalog.json. Enforces Decision 4 (exactly eight gems, two per realm, lowercase canonical IDs) and Decision 5 (lowercase realm IDs). Each realmGem's id must match its declared realmId.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "sourceAuthorities", "contentPolicy", "realmGems", "custodyStates",
+    "wishgate", "statusCopy", "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_realm_gem_wishgate_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "sourceAuthorities": { "type": "object" },
+    "contentPolicy": { "type": "object" },
+    "realmGems": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/realmGemRecord" }
+    },
+    "custodyStates": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/custodyStateRecord" }
+    },
+    "wishgate": { "$ref": "#/$defs/wishgateRecord" },
+    "statusCopy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/statusCopyRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "realmId": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral"]
+    },
+    "gemId": {
+      "type": "string",
+      "enum": [
+        "gem_crownlands_sun", "gem_crownlands_oath",
+        "gem_stonehold_forge", "gem_stonehold_depth",
+        "gem_eldergrove_root", "gem_eldergrove_moon",
+        "gem_umbral_veil", "gem_umbral_ember"
+      ]
+    },
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "realmGemRecord": {
+      "type": "object",
+      "required": [
+        "id", "realmId", "displayNameKey", "summaryKey",
+        "custodyMeaningKey", "signatureKey", "status"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/gemId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "custodyMeaningKey": { "type": "string" },
+        "signatureKey": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": { "properties": { "realmId": { "const": "crownlands" } }, "required": ["realmId"] },
+          "then": { "properties": { "id": { "pattern": "^gem_crownlands_" } } }
+        },
+        {
+          "if": { "properties": { "realmId": { "const": "stonehold" } }, "required": ["realmId"] },
+          "then": { "properties": { "id": { "pattern": "^gem_stonehold_" } } }
+        },
+        {
+          "if": { "properties": { "realmId": { "const": "eldergrove" } }, "required": ["realmId"] },
+          "then": { "properties": { "id": { "pattern": "^gem_eldergrove_" } } }
+        },
+        {
+          "if": { "properties": { "realmId": { "const": "umbral" } }, "required": ["realmId"] },
+          "then": { "properties": { "id": { "pattern": "^gem_umbral_" } } }
+        }
+      ]
+    },
+    "custodyStateRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey", "runtimeMeaning"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "runtimeMeaning": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "statusCopyRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "bodyKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "bodyKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "wishgateRecord": {
+      "type": "object",
+      "required": [
+        "id", "displayNameKey", "summaryKey", "entryZoneId",
+        "guardianDragonNameKey", "eligibilitySource", "defaultStatus",
+        "rewardPolicy", "approvedWishEmphases", "blockedRuntimeClaims"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "entryZoneId": { "type": "string" },
+        "guardianDragonNameKey": { "type": "string" },
+        "eligibilitySource": { "type": "string" },
+        "defaultStatus": { "type": "string" },
+        "rewardPolicy": { "type": "string" },
+        "approvedWishEmphases": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/wishEmphasisRecord" }
+        },
+        "blockedRuntimeClaims": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "wishEmphasisRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey", "effectBoundary"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "effectBoundary": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

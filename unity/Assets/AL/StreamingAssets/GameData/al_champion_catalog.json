@@ -1,0 +1,28 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_champion_catalog",
+  "game": "Another Life",
+  "idFormat": "lowercase_snake_case",
+  "champions": [
+    {
+      "id": "champion_crownlands_vanguard",
+      "name_ref": "champion.crownlands.vanguard.name",
+      "realm_id": "crownlands"
+    },
+    {
+      "id": "champion_stonehold_vanguard",
+      "name_ref": "champion.stonehold.vanguard.name",
+      "realm_id": "stonehold"
+    },
+    {
+      "id": "champion_eldergrove_vanguard",
+      "name_ref": "champion.eldergrove.vanguard.name",
+      "realm_id": "eldergrove"
+    },
+    {
+      "id": "champion_umbral_vanguard",
+      "name_ref": "champion.umbral.vanguard.name",
+      "realm_id": "umbral"
+    }
+  ]
+}

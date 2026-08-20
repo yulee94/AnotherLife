@@ -282,8 +282,8 @@ namespace AL.EditorTools
         // -----------------------------------------------------------------
 
         /// <summary>
-        /// Applies the ShellFoundation Build Settings list (Boot(0)/RealmSelection(1)/Kingdom(2), enabled;
-        /// Test and ChampionArena absent) from the descriptor. This is the ONLY method that writes
+        /// Applies the ShellFoundation Build Settings list (Boot/RealmSelection/CharacterCreation/
+        /// ChampionArena/Kingdom, enabled; Test absent) from the descriptor. This is the ONLY method that writes
         /// EditorBuildSettings and it is invoked exclusively by the later #150 build entry. It has no menu
         /// item and no batch entry and is never called by inspection/generation/validation.
         /// </summary>

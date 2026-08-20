@@ -16,8 +16,10 @@ only — they are not operating constraints.
 1. **One checkout.** Never work from duplicate worktrees, timestamped copies, or
    backup folders. Superseded / scratch material lives in `archive/` (out of the
    read path, gitignored).
-2. **Trunk-based.** Commit small and often straight to `main` with clear messages.
-   Git history is the paper trail. Branch only if a second concurrent contributor joins.
+2. **PR, then auto-merge when green.** Do not push or merge straight to `main`.
+   Open a PR and arm squash auto-merge. Required checks are
+   `repository / hygiene`, `android / unit-debug`, and `android / release`.
+   Never merge red CI. Never force-push `main`. Load `anotherlife-auto-pr`.
 3. **Never break saves.** Any change to save data requires a backward-compatible
    migration and a test that loads an old save.
 4. **Data lives in catalogs, not code.** Single catalog-driven authority:

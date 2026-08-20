@@ -150,10 +150,12 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, options.scenes);
             Assert.That(options.scenes, Has.None.EqualTo("Assets/Test.unity"));
-            Assert.That(options.scenes, Has.None.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
+            Assert.That(options.scenes, Has.Some.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
             Assert.AreEqual("StandaloneWindows64", Prop(plan, "Target").ToString());
             Assert.AreEqual(BuildOptions.Development, (BuildOptions)Prop(plan, "Options"));
         }
@@ -317,6 +319,8 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, AsStrings(Prop(summary, "ScenePaths")));
         }
@@ -408,7 +412,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.That(first, Does.Contain("\"totalSize\": 987654"));
             Assert.That(first, Does.Contain("2026-07-22T01:02:03.0000000Z"));
             Assert.That(first, Does.Not.Contain("Assets/Test.unity"));
-            Assert.That(first, Does.Not.Contain("ChampionArena.unity"));
+            Assert.That(first, Does.Contain("ChampionArena.unity"));
         }
 
         [Test]

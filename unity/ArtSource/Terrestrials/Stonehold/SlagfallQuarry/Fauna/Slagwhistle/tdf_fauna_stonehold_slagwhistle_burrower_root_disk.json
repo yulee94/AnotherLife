@@ -1,0 +1,176 @@
+{
+  "task": "t_b8b483e2",
+  "files": {
+    "blend": {
+      "rel": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend",
+      "exists": true,
+      "bytes": 5546399,
+      "sha256": "493e44350356d9d10d72cde21aa8b2df0298d096dfbc61c4827efd40b7e987d1"
+    },
+    "fbx": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Meshes/tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.fbx",
+      "exists": true,
+      "bytes": 777580,
+      "sha256": "e7c69c4fd9ab0b1c1a3a7f267e9716a3958199bdbaa03c5c0e305eb1c5664afa"
+    },
+    "glb": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Meshes/tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.glb",
+      "exists": true,
+      "bytes": 5240600,
+      "sha256": "21f2b27c158497559849f6aa81537a9c33954a4ae575235426025157d0d3c3d4"
+    },
+    "color": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Textures/tdf_fauna_stonehold_slagwhistle_burrower_color_1k_v001.png",
+      "exists": true,
+      "bytes": 1918696,
+      "sha256": "a283174db502b3802ff912904cd2de5169bf78c9e99ccbd6bdaf35282258e038",
+      "png": {
+        "width": 1024,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 2
+      }
+    },
+    "normal": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Textures/tdf_fauna_stonehold_slagwhistle_burrower_normal_1k_v001.png",
+      "exists": true,
+      "bytes": 1687190,
+      "sha256": "064132958d08745f2c3647a773f98724a18ca5b63be0ca3bbfc2152aba0a5097",
+      "png": {
+        "width": 1024,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 2
+      }
+    },
+    "packed": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Textures/tdf_fauna_stonehold_slagwhistle_burrower_packed_1k_v001.png",
+      "exists": true,
+      "bytes": 1155911,
+      "sha256": "502822d32b6db89c10a3518bfb25fd1dfc586a0cf14fb75330ce63031a93bac1",
+      "png": {
+        "width": 1024,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 6
+      }
+    },
+    "metallic_derived": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Materials/tdf_fauna_stonehold_slagwhistle_burrower_metallicgloss_derived_1k_v001.png",
+      "exists": true,
+      "bytes": 1284179,
+      "sha256": "006ed412f76ab6374334cde28700ea92f6881d4208e8bae0947df5232524ba5a",
+      "png": {
+        "width": 1024,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 6
+      }
+    },
+    "material": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Materials/M_Slagwhistle_LOD0.mat",
+      "exists": true,
+      "bytes": 2446,
+      "sha256": "1b27f6e7b4e94630f90e5b244750f18aceae704287f8a17436d261b266fb94b7"
+    },
+    "prefab": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Prefabs/tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.prefab",
+      "exists": true,
+      "bytes": 2735,
+      "sha256": "c104200a97b59e860f61c1e6c385e077fd572e0984c00c49ac56a67ea35cafea"
+    },
+    "scene": {
+      "rel": "unity/Assets/AL/Scenes/Prototype/Terrestrials/SlagfallQuarryRepresentativeSlice.unity",
+      "exists": true,
+      "bytes": 12623,
+      "sha256": "14bf40f36330aa798e0d3c7557a1ec1de4f1621be548e5a9f82a81b6dea97877"
+    },
+    "prefab_meta": {
+      "rel": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Prefabs/tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.prefab.meta",
+      "exists": true,
+      "bytes": 154,
+      "sha256": "8d1f9a3d9745f84f5cf0647a094189ee5e18c3c5d17d6e252e36345d3ef51e09"
+    },
+    "identity": {
+      "rel": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v002.png",
+      "exists": true,
+      "bytes": 2521039,
+      "sha256": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+      "png": {
+        "width": 1536,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 2
+      }
+    },
+    "motion": {
+      "rel": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_motion_contact_v002.png",
+      "exists": true,
+      "bytes": 2617228,
+      "sha256": "1099937075dba7012545afb7636e100c592c561c30c2fe68ce7a434ca4ff2d92",
+      "png": {
+        "width": 1536,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 2
+      }
+    },
+    "habitat": {
+      "rel": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_habitat_stonehold_slagfall_quarry_master_v002.png",
+      "exists": true,
+      "bytes": 3133264,
+      "sha256": "600a76d983f0cb63abf1169b7a9cdf34477b60ebf2e10ca9f74883efd899d195",
+      "png": {
+        "width": 1536,
+        "height": 1024,
+        "bit_depth": 8,
+        "color_type": 2
+      }
+    },
+    "build_settings": {
+      "rel": "unity/ProjectSettings/EditorBuildSettings.asset",
+      "exists": true,
+      "bytes": 458,
+      "sha256": "dd3d6950ee09defd7a150bc97053e921d72d6a359dd820dce57a1819387d661e"
+    }
+  },
+  "prefab_guid": "10414d1e3afe5ec43be0ad68ec4336ce",
+  "scene_has_prefab_guid": true,
+  "scene_prefab_guid_count": 12,
+  "scene_instance_name": true,
+  "catalog_hits": {
+    "slagwhistle": [],
+    "tdf_fauna_stonehold_slagwhistle": []
+  },
+  "tests": {
+    "editmode_terrestrials_dir": false,
+    "playmode_terrestrials_dir": false
+  },
+  "animation_folder": [
+    ".gitkeep"
+  ],
+  "lod_named_files": [],
+  "source_pins": {
+    "identity": {
+      "pinned": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+      "match": true,
+      "bytes_match": true
+    },
+    "motion": {
+      "pinned": "1099937075dba7012545afb7636e100c592c561c30c2fe68ce7a434ca4ff2d92",
+      "match": true,
+      "bytes_match": true
+    },
+    "habitat": {
+      "pinned": "600a76d983f0cb63abf1169b7a9cdf34477b60ebf2e10ca9f74883efd899d195",
+      "match": true,
+      "bytes_match": true
+    }
+  },
+  "unique_compressed": {
+    "authored_runtime_bytes": 5539377,
+    "authored_runtime_mib": 5.2828,
+    "plus_derived_bytes": 6823556,
+    "plus_derived_mib": 6.5075
+  }
+}

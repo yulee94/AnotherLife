@@ -1,0 +1,2033 @@
+{
+  "contractId": "al_champion_customization_production_contract_v001",
+  "status": "approved_contract_production_activation_blocked",
+  "decisionDate": "2026-08-17",
+  "issue": 184,
+  "authority": {
+    "technicalIdentity": "Codex coordination/engineering",
+    "presentationCopy": "Codex narrative/content source packet al_narrative_character_customization_labels_v001",
+    "finalVisualProductBalancePlaytest": "user"
+  },
+  "sourcePins": {
+    "technicalCatalog": {
+      "path": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json",
+      "legacyVersion": "0.5.0",
+      "sha256": "3c0e265d947fa0e62c3042a4614a2dd50cdb36ee8e0272071ca2d241fdc8ab24",
+      "disposition": "approved_as_compatibility_and_migration_input_not_as_production_runtime_artifact"
+    },
+    "contentCatalog": {
+      "path": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json",
+      "version": "0.1.0",
+      "sha256": "ced64c0d9cba02d4e24d73984fbb814f928e476bf2c01a0c3bef54f11b78c844",
+      "sourcePacketId": "al_narrative_character_customization_labels_v001",
+      "disposition": "approved_presentation_reference_draft_copy_user_gate_remains"
+    },
+    "integritySpec": {
+      "path": "unity/Docs/Champion_Customization_Integrity_Spec.md",
+      "disposition": "binding"
+    },
+    "plannerImplementation": {
+      "mergeCommit": "e0cbf6c1845489be6bf1032bb8c4d3a8e6dc7103",
+      "disposition": "binding_technical_contracts_only"
+    },
+    "blenderHandoff": {
+      "mergeCommit": "2383b61a57f999e59ba4298a7378ea27163e5027",
+      "disposition": "source_navigation_only_not_production_asset_or_runtime_authority"
+    }
+  },
+  "stableIdPolicy": {
+    "caseSensitive": true,
+    "normalization": "none",
+    "aliases": [],
+    "removals": [],
+    "renames": [],
+    "unknownFutureIds": "preserve exact raw value; render typed unavailable/placeholder only; never persist placeholder as selection"
+  },
+  "defaults": {
+    "bodyPresetId": "average",
+    "hairStyleId": "short",
+    "armorStyleId": "realm_basic",
+    "faceMarkId": "none",
+    "weaponStyleId": "sword",
+    "offhandStyleId": "shield",
+    "primaryRgb": [
+      0.2,
+      0.4,
+      1.0
+    ],
+    "hairRgb": [
+      0.08,
+      0.06,
+      0.04
+    ],
+    "skinRgb": [
+      0.72,
+      0.56,
+      0.42
+    ],
+    "eyeRgb": [
+      0.25,
+      0.58,
+      0.92
+    ],
+    "accentRgb": [
+      0.85,
+      0.62,
+      0.18
+    ],
+    "capeEnabled": true,
+    "helmetEnabled": false
+  },
+  "compatibility": {
+    "legacyWithoutMetadata": "ValidLegacyNoMetadata only after exact semantic validation",
+    "futureSchema": "FutureSchemaUnsupported and preserve bytes/state",
+    "catalogUnavailable": "no normalization, no hard-coded fallback, no save mutation",
+    "explicitEdit": "replace only fields in exact edit mask",
+    "aliasMigration": "none in v001; future aliases must be explicit/versioned/confirmed as contract requires",
+    "colors": "saved exact finite RGB remains authority; palette IDs are selection/provenance only; no nearest-color inference"
+  },
+  "productionEligibility": {
+    "eligible": false,
+    "runtimeSelectableEntryCount": 0,
+    "totalEntryCount": 91,
+    "requiredBeforeActivation": [
+      "Approve a final production Champion model/prefab identity and immutable source hash; PR #504 is not that approval.",
+      "Approve model capability revision mapping every option/flag/color channel to concrete model parts, renderers, material slots, anchors, and body-scale behavior.",
+      "Approve production asset references and budgets for all runtime-selectable options; generated prefab/materials and procedural object names are prototype evidence only.",
+      "Resolve and approve body-scale bounds/compatibility for all nine existing body preset vectors.",
+      "Publish the versioned #183 catalog-set envelope with stable game/catalog/family IDs, schema/content/source revisions, packaged path, requiredness, and raw hash.",
+      "Complete #137 profile/write authority and backward-compatible customization metadata/migration before durable commit.",
+      "Obtain user visual/product approval after rendered Player/device evidence."
+    ]
+  },
+  "entries": [
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "average",
+      "order": 0,
+      "saveField": "bodyPresetId",
+      "default": true,
+      "displayNameKey": "customization.body.average.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=average]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=average]",
+      "requiredCapabilityId": "model.body_scale.average",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        1.0,
+        1.0,
+        1.0
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "slim",
+      "order": 1,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.slim.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=slim]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=slim]",
+      "requiredCapabilityId": "model.body_scale.slim",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        0.86,
+        1.06,
+        0.86
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "broad",
+      "order": 2,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.broad.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=broad]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=broad]",
+      "requiredCapabilityId": "model.body_scale.broad",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        1.16,
+        1.0,
+        1.06
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "tall",
+      "order": 3,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.tall.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=tall]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=tall]",
+      "requiredCapabilityId": "model.body_scale.tall",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        0.96,
+        1.18,
+        0.96
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "stout",
+      "order": 4,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.stout.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=stout]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=stout]",
+      "requiredCapabilityId": "model.body_scale.stout",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        1.08,
+        0.92,
+        1.08
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "duelist",
+      "order": 5,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.duelist.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=duelist]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=duelist]",
+      "requiredCapabilityId": "model.body_scale.duelist",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        0.94,
+        1.08,
+        0.92
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "statuesque",
+      "order": 6,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.statuesque.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=statuesque]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=statuesque]",
+      "requiredCapabilityId": "model.body_scale.statuesque",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        1.02,
+        1.24,
+        0.98
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "massive",
+      "order": 7,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.massive.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=massive]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=massive]",
+      "requiredCapabilityId": "model.body_scale.massive",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        1.24,
+        1.04,
+        1.14
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "body_presets",
+      "id": "compact",
+      "order": 8,
+      "saveField": "bodyPresetId",
+      "default": false,
+      "displayNameKey": "customization.body.compact.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#bodyPresets[id=compact]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=body_presets].optionKeys[id=compact]",
+      "requiredCapabilityId": "model.body_scale.compact",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists.",
+      "scale": [
+        1.02,
+        0.86,
+        1.02
+      ]
+    },
+    {
+      "kind": "option",
+      "familyId": "hair_styles",
+      "id": "short",
+      "order": 0,
+      "saveField": "hairStyleId",
+      "default": true,
+      "displayNameKey": "customization.hair.short.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairStyles[id=short]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=hair_styles].optionKeys[id=short]",
+      "requiredCapabilityId": "model.hair_style.short",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "hair_styles",
+      "id": "long",
+      "order": 1,
+      "saveField": "hairStyleId",
+      "default": false,
+      "displayNameKey": "customization.hair.long.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairStyles[id=long]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=hair_styles].optionKeys[id=long]",
+      "requiredCapabilityId": "model.hair_style.long",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "hair_styles",
+      "id": "braid",
+      "order": 2,
+      "saveField": "hairStyleId",
+      "default": false,
+      "displayNameKey": "customization.hair.braid.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairStyles[id=braid]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=hair_styles].optionKeys[id=braid]",
+      "requiredCapabilityId": "model.hair_style.braid",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "hair_styles",
+      "id": "mohawk",
+      "order": 3,
+      "saveField": "hairStyleId",
+      "default": false,
+      "displayNameKey": "customization.hair.mohawk.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairStyles[id=mohawk]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=hair_styles].optionKeys[id=mohawk]",
+      "requiredCapabilityId": "model.hair_style.mohawk",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "hair_styles",
+      "id": "topknot",
+      "order": 4,
+      "saveField": "hairStyleId",
+      "default": false,
+      "displayNameKey": "customization.hair.topknot.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairStyles[id=topknot]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=hair_styles].optionKeys[id=topknot]",
+      "requiredCapabilityId": "model.hair_style.topknot",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "armor_styles",
+      "id": "realm_basic",
+      "order": 0,
+      "saveField": "armorStyleId",
+      "default": true,
+      "displayNameKey": "customization.armor.realm_basic.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#armorStyles[id=realm_basic]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=armor_styles].optionKeys[id=realm_basic]",
+      "requiredCapabilityId": "model.armor_style.realm_basic",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "armor_styles",
+      "id": "light_scout",
+      "order": 1,
+      "saveField": "armorStyleId",
+      "default": false,
+      "displayNameKey": "customization.armor.light_scout.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#armorStyles[id=light_scout]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=armor_styles].optionKeys[id=light_scout]",
+      "requiredCapabilityId": "model.armor_style.light_scout",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "armor_styles",
+      "id": "heavy_plate",
+      "order": 2,
+      "saveField": "armorStyleId",
+      "default": false,
+      "displayNameKey": "customization.armor.heavy_plate.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#armorStyles[id=heavy_plate]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=armor_styles].optionKeys[id=heavy_plate]",
+      "requiredCapabilityId": "model.armor_style.heavy_plate",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "armor_styles",
+      "id": "warmaster_plate",
+      "order": 3,
+      "saveField": "armorStyleId",
+      "default": false,
+      "displayNameKey": "customization.armor.warmaster_plate.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#armorStyles[id=warmaster_plate]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=armor_styles].optionKeys[id=warmaster_plate]",
+      "requiredCapabilityId": "model.armor_style.warmaster_plate",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "armor_styles",
+      "id": "arcane_robes",
+      "order": 4,
+      "saveField": "armorStyleId",
+      "default": false,
+      "displayNameKey": "customization.armor.arcane_robes.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#armorStyles[id=arcane_robes]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=armor_styles].optionKeys[id=arcane_robes]",
+      "requiredCapabilityId": "model.armor_style.arcane_robes",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "armor_styles",
+      "id": "assassin_leathers",
+      "order": 5,
+      "saveField": "armorStyleId",
+      "default": false,
+      "displayNameKey": "customization.armor.assassin_leathers.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#armorStyles[id=assassin_leathers]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=armor_styles].optionKeys[id=assassin_leathers]",
+      "requiredCapabilityId": "model.armor_style.assassin_leathers",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "none",
+      "order": 0,
+      "saveField": "faceMarkId",
+      "default": true,
+      "displayNameKey": "customization.face.none.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=none]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=none]",
+      "requiredCapabilityId": "model.face_mark.none",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "scar",
+      "order": 1,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.scar.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=scar]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=scar]",
+      "requiredCapabilityId": "model.face_mark.scar",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "warpaint",
+      "order": 2,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.warpaint.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=warpaint]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=warpaint]",
+      "requiredCapabilityId": "model.face_mark.warpaint",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "realm_mark",
+      "order": 3,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.realm_mark.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=realm_mark]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=realm_mark]",
+      "requiredCapabilityId": "model.face_mark.realm_mark",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "rune",
+      "order": 4,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.rune.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=rune]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=rune]",
+      "requiredCapabilityId": "model.face_mark.rune",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "tattoo",
+      "order": 5,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.tattoo.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=tattoo]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=tattoo]",
+      "requiredCapabilityId": "model.face_mark.tattoo",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "beard",
+      "order": 6,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.beard.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=beard]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=beard]",
+      "requiredCapabilityId": "model.face_mark.beard",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "duelist_scar",
+      "order": 7,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.duelist_scar.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=duelist_scar]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=duelist_scar]",
+      "requiredCapabilityId": "model.face_mark.duelist_scar",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "face_marks",
+      "id": "ash_mask",
+      "order": 8,
+      "saveField": "faceMarkId",
+      "default": false,
+      "displayNameKey": "customization.face.ash_mask.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#faceMarks[id=ash_mask]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=face_marks].optionKeys[id=ash_mask]",
+      "requiredCapabilityId": "model.face_mark.ash_mask",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "weapon_styles",
+      "id": "sword",
+      "order": 0,
+      "saveField": "weaponStyleId",
+      "default": true,
+      "displayNameKey": "customization.weapon.sword.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#weaponStyles[id=sword]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=weapon_styles].optionKeys[id=sword]",
+      "requiredCapabilityId": "model.weapon_main.sword",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "weapon_styles",
+      "id": "axe",
+      "order": 1,
+      "saveField": "weaponStyleId",
+      "default": false,
+      "displayNameKey": "customization.weapon.axe.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#weaponStyles[id=axe]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=weapon_styles].optionKeys[id=axe]",
+      "requiredCapabilityId": "model.weapon_main.axe",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "weapon_styles",
+      "id": "staff",
+      "order": 2,
+      "saveField": "weaponStyleId",
+      "default": false,
+      "displayNameKey": "customization.weapon.staff.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#weaponStyles[id=staff]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=weapon_styles].optionKeys[id=staff]",
+      "requiredCapabilityId": "model.weapon_main.staff",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "weapon_styles",
+      "id": "bow",
+      "order": 3,
+      "saveField": "weaponStyleId",
+      "default": false,
+      "displayNameKey": "customization.weapon.bow.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#weaponStyles[id=bow]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=weapon_styles].optionKeys[id=bow]",
+      "requiredCapabilityId": "model.weapon_main.bow",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "weapon_styles",
+      "id": "hammer",
+      "order": 4,
+      "saveField": "weaponStyleId",
+      "default": false,
+      "displayNameKey": "customization.weapon.hammer.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#weaponStyles[id=hammer]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=weapon_styles].optionKeys[id=hammer]",
+      "requiredCapabilityId": "model.weapon_main.hammer",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "offhand_styles",
+      "id": "shield",
+      "order": 0,
+      "saveField": "offhandStyleId",
+      "default": true,
+      "displayNameKey": "customization.offhand.shield.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#offhandStyles[id=shield]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=offhand_styles].optionKeys[id=shield]",
+      "requiredCapabilityId": "model.weapon_off.shield",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "offhand_styles",
+      "id": "orb",
+      "order": 1,
+      "saveField": "offhandStyleId",
+      "default": false,
+      "displayNameKey": "customization.offhand.orb.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#offhandStyles[id=orb]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=offhand_styles].optionKeys[id=orb]",
+      "requiredCapabilityId": "model.weapon_off.orb",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "offhand_styles",
+      "id": "dagger",
+      "order": 2,
+      "saveField": "offhandStyleId",
+      "default": false,
+      "displayNameKey": "customization.offhand.dagger.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#offhandStyles[id=dagger]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=offhand_styles].optionKeys[id=dagger]",
+      "requiredCapabilityId": "model.weapon_off.dagger",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "offhand_styles",
+      "id": "tome",
+      "order": 3,
+      "saveField": "offhandStyleId",
+      "default": false,
+      "displayNameKey": "customization.offhand.tome.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#offhandStyles[id=tome]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=offhand_styles].optionKeys[id=tome]",
+      "requiredCapabilityId": "model.weapon_off.tome",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "option",
+      "familyId": "offhand_styles",
+      "id": "none",
+      "order": 4,
+      "saveField": "offhandStyleId",
+      "default": false,
+      "displayNameKey": "customization.offhand.none.name",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#offhandStyles[id=none]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#families[id=offhand_styles].optionKeys[id=none]",
+      "requiredCapabilityId": "model.weapon_off.none",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/part asset and immutable capability mapping exists."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "crown_blue",
+      "order": 0,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.2,
+        0.4,
+        1.0
+      ],
+      "default": true,
+      "displayNameMigrationEvidence": "Crown Blue",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=crown_blue]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "stone_bronze",
+      "order": 1,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.45,
+        0.38,
+        0.3
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Stone Bronze",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=stone_bronze]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "grove_green",
+      "order": 2,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.18,
+        0.58,
+        0.32
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Grove Green",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=grove_green]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "royal_gold",
+      "order": 3,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.85,
+        0.62,
+        0.18
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Royal Gold",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=royal_gold]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "umbral_violet",
+      "order": 4,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.22,
+        0.08,
+        0.28
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Umbral Violet",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=umbral_violet]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "obsidian_steel",
+      "order": 5,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.055,
+        0.06,
+        0.07
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Obsidian Steel",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=obsidian_steel]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "blood_wine",
+      "order": 6,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.28,
+        0.035,
+        0.045
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Blood Wine",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=blood_wine]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "ivory_battlecloth",
+      "order": 7,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.82,
+        0.78,
+        0.66
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Ivory Battlecloth",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=ivory_battlecloth]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "primary_colors",
+      "id": "duelist_steel",
+      "order": 8,
+      "saveField": "PrimaryRGB",
+      "rgb": [
+        0.18,
+        0.21,
+        0.24
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Duelist Steel",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#primaryColors[id=duelist_steel]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.primary_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "raven",
+      "order": 0,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.08,
+        0.06,
+        0.04
+      ],
+      "default": true,
+      "displayNameMigrationEvidence": "Raven",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=raven]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "chestnut",
+      "order": 1,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.55,
+        0.36,
+        0.16
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Chestnut",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=chestnut]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "sun_blonde",
+      "order": 2,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.85,
+        0.78,
+        0.55
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Sun Blonde",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=sun_blonde]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "silver",
+      "order": 3,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.8,
+        0.82,
+        0.9
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Silver",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=silver]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "ember_black",
+      "order": 4,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.25,
+        0.05,
+        0.08
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Ember Black",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=ember_black]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "ivory",
+      "order": 5,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.88,
+        0.84,
+        0.72
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Ivory",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=ivory]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "ash_black",
+      "order": 6,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.16,
+        0.16,
+        0.18
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Ash Black",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=ash_black]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "hair_colors",
+      "id": "copper",
+      "order": 7,
+      "saveField": "HairRGB",
+      "rgb": [
+        0.42,
+        0.24,
+        0.11
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Copper",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#hairColors[id=copper]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.hair_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "sunlit",
+      "order": 0,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.72,
+        0.56,
+        0.42
+      ],
+      "default": true,
+      "displayNameMigrationEvidence": "Sunlit",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=sunlit]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "deep_earth",
+      "order": 1,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.55,
+        0.38,
+        0.26
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Deep Earth",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=deep_earth]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "fair",
+      "order": 2,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.86,
+        0.7,
+        0.54
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Fair",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=fair]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "rose_ash",
+      "order": 3,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.64,
+        0.5,
+        0.46
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Rose Ash",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=rose_ash]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "umbral",
+      "order": 4,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.42,
+        0.34,
+        0.4
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Umbral",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=umbral]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "warm_umber",
+      "order": 5,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.66,
+        0.48,
+        0.36
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Warm Umber",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=warm_umber]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "porcelain_rose",
+      "order": 6,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.78,
+        0.62,
+        0.52
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Porcelain Rose",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=porcelain_rose]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "skin_colors",
+      "id": "storm_ash",
+      "order": 7,
+      "saveField": "SkinRGB",
+      "rgb": [
+        0.46,
+        0.34,
+        0.32
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Storm Ash",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#skinColors[id=storm_ash]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.skin_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "storm_blue",
+      "order": 0,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.25,
+        0.58,
+        0.92
+      ],
+      "default": true,
+      "displayNameMigrationEvidence": "Storm Blue",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=storm_blue]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "grove_green",
+      "order": 1,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.28,
+        0.72,
+        0.42
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Grove Green",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=grove_green]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "amber",
+      "order": 2,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.7,
+        0.42,
+        0.18
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Amber",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=amber]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "moonlit",
+      "order": 3,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.78,
+        0.72,
+        0.88
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Moonlit",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=moonlit]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "curse_red",
+      "order": 4,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.9,
+        0.18,
+        0.12
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Curse Red",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=curse_red]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "pale_gold",
+      "order": 5,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.95,
+        0.64,
+        0.2
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Pale Gold",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=pale_gold]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "jade_fire",
+      "order": 6,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.58,
+        1.0,
+        0.82
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Jade Fire",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=jade_fire]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "eye_colors",
+      "id": "void_red",
+      "order": 7,
+      "saveField": "EyeRGB",
+      "rgb": [
+        0.95,
+        0.18,
+        0.08
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Void Red",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#eyeColors[id=void_red]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.eye_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "royal_gold",
+      "order": 0,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.85,
+        0.62,
+        0.18
+      ],
+      "default": true,
+      "displayNameMigrationEvidence": "Royal Gold",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=royal_gold]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "arcane_blue",
+      "order": 1,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.3,
+        0.75,
+        1.0
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Arcane Blue",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=arcane_blue]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "worldsap",
+      "order": 2,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.42,
+        1.0,
+        0.48
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Worldsap",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=worldsap]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "ember",
+      "order": 3,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.9,
+        0.12,
+        0.16
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Ember",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=ember]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "shadow_violet",
+      "order": 4,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.68,
+        0.28,
+        0.96
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Shadow Violet",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=shadow_violet]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "blood_ember",
+      "order": 5,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.94,
+        0.12,
+        0.08
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Blood Ember",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=blood_ember]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "oracle_green",
+      "order": 6,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.38,
+        1.0,
+        0.74
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Oracle Green",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=oracle_green]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "palette",
+      "familyId": "accent_colors",
+      "id": "burnished_gold",
+      "order": 7,
+      "saveField": "AccentRGB",
+      "rgb": [
+        0.92,
+        0.54,
+        0.16
+      ],
+      "default": false,
+      "displayNameMigrationEvidence": "Burnished Gold",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#accentColors[id=burnished_gold]",
+      "contentSource": null,
+      "requiredCapabilityId": "material.accent_color",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model/material channel mapping or presentation localization key exists; current generated materials and raw English labels are prototype/migration evidence only."
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "vanguard",
+      "order": 0,
+      "default": false,
+      "displayNameKey": "customization.preset.vanguard.name",
+      "summaryKey": "customization.preset.vanguard.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=vanguard]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=vanguard]",
+      "requiredCapabilityId": "preset.vanguard",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "broad",
+        "hairStyleId": "short",
+        "armorStyleId": "warmaster_plate",
+        "faceMarkId": "scar",
+        "weaponStyleId": "sword",
+        "offhandStyleId": "shield",
+        "primaryRgb": [
+          0.22,
+          0.27,
+          0.34
+        ],
+        "hairRgb": [
+          0.07,
+          0.055,
+          0.045
+        ],
+        "skinRgb": [
+          0.64,
+          0.48,
+          0.36
+        ],
+        "eyeRgb": [
+          0.86,
+          0.62,
+          0.24
+        ],
+        "accentRgb": [
+          0.92,
+          0.64,
+          0.2
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": true
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "arcanist",
+      "order": 1,
+      "default": false,
+      "displayNameKey": "customization.preset.arcanist.name",
+      "summaryKey": "customization.preset.arcanist.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=arcanist]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=arcanist]",
+      "requiredCapabilityId": "preset.arcanist",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "tall",
+        "hairStyleId": "long",
+        "armorStyleId": "arcane_robes",
+        "faceMarkId": "rune",
+        "weaponStyleId": "staff",
+        "offhandStyleId": "tome",
+        "primaryRgb": [
+          0.08,
+          0.14,
+          0.32
+        ],
+        "hairRgb": [
+          0.72,
+          0.74,
+          0.82
+        ],
+        "skinRgb": [
+          0.68,
+          0.52,
+          0.44
+        ],
+        "eyeRgb": [
+          0.4,
+          0.82,
+          1.0
+        ],
+        "accentRgb": [
+          0.26,
+          0.78,
+          1.0
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": false
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "nightblade",
+      "order": 2,
+      "default": false,
+      "displayNameKey": "customization.preset.nightblade.name",
+      "summaryKey": "customization.preset.nightblade.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=nightblade]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=nightblade]",
+      "requiredCapabilityId": "preset.nightblade",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "slim",
+        "hairStyleId": "topknot",
+        "armorStyleId": "assassin_leathers",
+        "faceMarkId": "tattoo",
+        "weaponStyleId": "bow",
+        "offhandStyleId": "dagger",
+        "primaryRgb": [
+          0.1,
+          0.095,
+          0.12
+        ],
+        "hairRgb": [
+          0.18,
+          0.035,
+          0.055
+        ],
+        "skinRgb": [
+          0.5,
+          0.38,
+          0.34
+        ],
+        "eyeRgb": [
+          0.84,
+          0.18,
+          0.14
+        ],
+        "accentRgb": [
+          0.78,
+          0.12,
+          0.18
+        ],
+        "capeEnabled": false,
+        "helmetEnabled": false
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "dreadknight",
+      "order": 3,
+      "default": false,
+      "displayNameKey": "customization.preset.dreadknight.name",
+      "summaryKey": "customization.preset.dreadknight.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=dreadknight]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=dreadknight]",
+      "requiredCapabilityId": "preset.dreadknight",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "massive",
+        "hairStyleId": "mohawk",
+        "armorStyleId": "warmaster_plate",
+        "faceMarkId": "ash_mask",
+        "weaponStyleId": "hammer",
+        "offhandStyleId": "shield",
+        "primaryRgb": [
+          0.055,
+          0.06,
+          0.07
+        ],
+        "hairRgb": [
+          0.16,
+          0.16,
+          0.18
+        ],
+        "skinRgb": [
+          0.46,
+          0.34,
+          0.32
+        ],
+        "eyeRgb": [
+          0.95,
+          0.18,
+          0.08
+        ],
+        "accentRgb": [
+          0.94,
+          0.12,
+          0.08
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": true
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "oracle",
+      "order": 4,
+      "default": false,
+      "displayNameKey": "customization.preset.oracle.name",
+      "summaryKey": "customization.preset.oracle.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=oracle]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=oracle]",
+      "requiredCapabilityId": "preset.oracle",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "statuesque",
+        "hairStyleId": "braid",
+        "armorStyleId": "arcane_robes",
+        "faceMarkId": "realm_mark",
+        "weaponStyleId": "staff",
+        "offhandStyleId": "orb",
+        "primaryRgb": [
+          0.82,
+          0.78,
+          0.66
+        ],
+        "hairRgb": [
+          0.88,
+          0.84,
+          0.72
+        ],
+        "skinRgb": [
+          0.78,
+          0.62,
+          0.52
+        ],
+        "eyeRgb": [
+          0.58,
+          1.0,
+          0.82
+        ],
+        "accentRgb": [
+          0.38,
+          1.0,
+          0.74
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": false
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "duelist",
+      "order": 5,
+      "default": false,
+      "displayNameKey": "customization.preset.duelist.name",
+      "summaryKey": "customization.preset.duelist.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=duelist]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=duelist]",
+      "requiredCapabilityId": "preset.duelist",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "duelist",
+        "hairStyleId": "short",
+        "armorStyleId": "light_scout",
+        "faceMarkId": "duelist_scar",
+        "weaponStyleId": "sword",
+        "offhandStyleId": "dagger",
+        "primaryRgb": [
+          0.18,
+          0.21,
+          0.24
+        ],
+        "hairRgb": [
+          0.42,
+          0.24,
+          0.11
+        ],
+        "skinRgb": [
+          0.66,
+          0.48,
+          0.36
+        ],
+        "eyeRgb": [
+          0.95,
+          0.64,
+          0.2
+        ],
+        "accentRgb": [
+          0.92,
+          0.54,
+          0.16
+        ],
+        "capeEnabled": false,
+        "helmetEnabled": false
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "inquisitor",
+      "order": 6,
+      "default": false,
+      "displayNameKey": "customization.preset.inquisitor.name",
+      "summaryKey": "customization.preset.inquisitor.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=inquisitor]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=inquisitor]",
+      "requiredCapabilityId": "preset.inquisitor",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "tall",
+        "hairStyleId": "short",
+        "armorStyleId": "heavy_plate",
+        "faceMarkId": "realm_mark",
+        "weaponStyleId": "sword",
+        "offhandStyleId": "tome",
+        "primaryRgb": [
+          0.12,
+          0.13,
+          0.14
+        ],
+        "hairRgb": [
+          0.08,
+          0.06,
+          0.04
+        ],
+        "skinRgb": [
+          0.72,
+          0.56,
+          0.42
+        ],
+        "eyeRgb": [
+          0.95,
+          0.64,
+          0.2
+        ],
+        "accentRgb": [
+          0.92,
+          0.54,
+          0.16
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": true
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "warden",
+      "order": 7,
+      "default": false,
+      "displayNameKey": "customization.preset.warden.name",
+      "summaryKey": "customization.preset.warden.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=warden]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=warden]",
+      "requiredCapabilityId": "preset.warden",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "broad",
+        "hairStyleId": "braid",
+        "armorStyleId": "heavy_plate",
+        "faceMarkId": "warpaint",
+        "weaponStyleId": "axe",
+        "offhandStyleId": "shield",
+        "primaryRgb": [
+          0.12,
+          0.26,
+          0.18
+        ],
+        "hairRgb": [
+          0.55,
+          0.36,
+          0.16
+        ],
+        "skinRgb": [
+          0.55,
+          0.38,
+          0.26
+        ],
+        "eyeRgb": [
+          0.58,
+          1.0,
+          0.82
+        ],
+        "accentRgb": [
+          0.38,
+          1.0,
+          0.74
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": false
+      }
+    },
+    {
+      "kind": "preset",
+      "familyId": "forge_presets",
+      "id": "spellblade",
+      "order": 8,
+      "default": false,
+      "displayNameKey": "customization.preset.spellblade.name",
+      "summaryKey": "customization.preset.spellblade.summary",
+      "technicalSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json#forgePresets[id=spellblade]",
+      "contentSource": "unity/Assets/AL/StreamingAssets/GameData/al_character_customization_content_catalog.json#forgePresets[id=spellblade]",
+      "requiredCapabilityId": "preset.spellblade",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "Preset transitively requires every referenced option, flag, scale, and material channel; those production mappings are unresolved.",
+      "composition": {
+        "bodyPresetId": "duelist",
+        "hairStyleId": "long",
+        "armorStyleId": "arcane_robes",
+        "faceMarkId": "rune",
+        "weaponStyleId": "sword",
+        "offhandStyleId": "orb",
+        "primaryRgb": [
+          0.08,
+          0.12,
+          0.22
+        ],
+        "hairRgb": [
+          0.8,
+          0.82,
+          0.9
+        ],
+        "skinRgb": [
+          0.64,
+          0.5,
+          0.46
+        ],
+        "eyeRgb": [
+          0.4,
+          0.82,
+          1.0
+        ],
+        "accentRgb": [
+          0.68,
+          0.28,
+          0.96
+        ],
+        "capeEnabled": true,
+        "helmetEnabled": false
+      }
+    },
+    {
+      "kind": "flag",
+      "familyId": "flags",
+      "id": "cape_enabled",
+      "order": 0,
+      "saveField": "CapeEnabled",
+      "default": true,
+      "technicalSource": "unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs#ChampionCustomizationState",
+      "contentSource": null,
+      "requiredCapabilityId": "model.flag.cape",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model part/capability mapping exists."
+    },
+    {
+      "kind": "flag",
+      "familyId": "flags",
+      "id": "helmet_enabled",
+      "order": 1,
+      "saveField": "HelmetEnabled",
+      "default": false,
+      "technicalSource": "unity/Assets/AL/Scripts/Data/Runtime/SaveGameData.cs#ChampionCustomizationState",
+      "contentSource": null,
+      "requiredCapabilityId": "model.flag.helmet",
+      "productionAssetRef": null,
+      "runtimeSelectable": false,
+      "blocker": "No approved production model part/capability mapping exists."
+    }
+  ]
+}

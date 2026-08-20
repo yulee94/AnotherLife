@@ -1,0 +1,34 @@
+{
+  "operation": "image_to_3d",
+  "httpMethod": "POST",
+  "endpoint": "https://api.meshy.ai/openapi/v1/image-to-3d",
+  "provider": "Meshy",
+  "ai_model": "meshy-6",
+  "orderedInputCount": 1,
+  "input": {
+    "file": "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/tdf_fauna_stonehold_slagwhistle_burrower_identity_side_crop_v001.png",
+    "sha256": "efc77b574a757266dd8e19ce7284b6ed2edff27b998d1a59051c2cd01f4a8698",
+    "byteLength": 366052,
+    "width": 704,
+    "height": 336,
+    "derivedFrom": {
+      "file": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v002.png",
+      "sha256": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+      "bbox": [16, 24, 720, 360],
+      "cropSize": [704, 336],
+      "sourceUnmodified": true
+    }
+  },
+  "params": {
+    "enable_pbr": true,
+    "should_texture": true,
+    "target_formats": ["glb", "fbx"]
+  },
+  "retryOf": {
+    "priorAuthorizationId": "a1_slagwhistle_slagfall_fauna_20260819_retry_v001",
+    "priorProviderTaskId": "01a0190e-d06a-7189-bd11-5395b9de97a9",
+    "priorFinalStatus": "SUCCEEDED_REJECTED",
+    "priorRejection": "full identity board sculpted as one 714k-tri sheet-diorama; worktree GLB truncated (declared 29350616, on disk 16834897)",
+    "userDecision": "2026-08-20 t_1e666a71 crop-retry with fresh A1 on existing single-pose crop; do not recrop; do not send full board"
+  }
+}

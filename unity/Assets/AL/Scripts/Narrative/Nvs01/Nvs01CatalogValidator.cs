@@ -16,6 +16,26 @@ namespace AL.Narrative.Nvs01
     {
         private static readonly UTF8Encoding StrictUtf8 = new UTF8Encoding(false, true);
 
+        internal static bool IsExactCurrentStateId(string value) =>
+            CatalogSemantics.IsExpectedStateId(value);
+
+        internal static bool IsExactCurrentDialogueId(string value) =>
+            CatalogSemantics.IsExpectedDialogueId(value);
+
+        internal static bool IsExactCurrentObjectiveId(
+            int index,
+            string value) =>
+            CatalogSemantics.IsExpectedObjectiveId(index, value);
+
+        internal static int ExactCurrentObjectiveCount =>
+            CatalogSemantics.ExpectedObjectiveCount;
+
+        internal static bool IsExactCurrentConsequenceId(string value) =>
+            CatalogSemantics.IsExpectedConsequenceId(value);
+
+        internal static bool IsExactCurrentEligibleRealmId(string value) =>
+            CatalogSemantics.IsExpectedRealmId(value);
+
         public static Nvs01CatalogValidationResult ValidateCanonicalArtifact(byte[] bytes)
         {
             string json;
@@ -1174,6 +1194,11 @@ namespace AL.Narrative.Nvs01
 
         private static class CatalogSemantics
         {
+            private static readonly string[] ExpectedRealmIds =
+            {
+                "crownlands", "stonehold", "eldergrove", "umbral"
+            };
+
             private static readonly string[] ExpectedStateIds =
             {
                 "OFFERED", "TALK_TO_VALERIUS", "INVESTIGATE_SKY_CASTLE", "FAILED", "REPORT_TO_VALERIUS", "COMPLETED"
@@ -1195,7 +1220,7 @@ namespace AL.Narrative.Nvs01
                 "LOCATION_SKY_CASTLE_MARKER", "ACTION_DEPLOY_CHAMPION", "HOOK_SKY_CASTLE_ARENA",
                 "EVENT_SKY_CASTLE_ARENA_SUCCESS", "EVENT_SKY_CASTLE_ARENA_FAILURE",
                 "EVENT_SKY_CASTLE_ARENA_CANCELLED", "EVENT_SKY_CASTLE_ARENA_UNAVAILABLE",
-                "ARTIFACT_CELESTIAL_TEAR", "CH1_REALM_INTRO", "KINGDOM_COMMAND_VIEW"
+                "ARTIFACT_CELESTIAL_TEAR", "CH1_REALM_INTRO"
             };
 
             private static readonly string[] ExpectedConsequenceIds =
@@ -1215,6 +1240,40 @@ namespace AL.Narrative.Nvs01
                 "artifact.celestial_tear.name", "artifact.celestial_tear.lore", "reward.omen1.gold",
                 "reward.omen1.valerius_affinity"
             };
+
+            internal static int ExpectedObjectiveCount =>
+                ExpectedObjectiveIds.Length;
+
+            internal static bool IsExpectedStateId(string value) =>
+                Contains(ExpectedStateIds, value);
+
+            internal static bool IsExpectedDialogueId(string value) =>
+                Contains(ExpectedDialogueIds, value);
+
+            internal static bool IsExpectedObjectiveId(
+                int index,
+                string value) =>
+                index >= 0 &&
+                index < ExpectedObjectiveIds.Length &&
+                Equal(ExpectedObjectiveIds[index], value);
+
+            internal static bool IsExpectedConsequenceId(string value) =>
+                Contains(ExpectedConsequenceIds, value);
+
+            internal static bool IsExpectedRealmId(string value) =>
+                Contains(ExpectedRealmIds, value);
+
+            private static bool Contains(
+                IEnumerable<string> expected,
+                string value)
+            {
+                foreach (string item in expected)
+                {
+                    if (Equal(item, value)) return true;
+                }
+
+                return false;
+            }
 
             public static void Validate(Nvs01Catalog catalog)
             {
@@ -1258,7 +1317,7 @@ namespace AL.Narrative.Nvs01
                 Count(catalog.Objectives.Count, 3, "$.objectives");
                 Count(catalog.Dialogue.Count, 8, "$.dialogue");
                 Count(catalog.Transitions.Count, 8, "$.transitions");
-                Count(catalog.ExternalCapabilities.Count, 10, "$.externalCapabilities");
+                Count(catalog.ExternalCapabilities.Count, 9, "$.externalCapabilities");
                 Count(catalog.Consequences.Count, 5, "$.consequences");
                 Count(catalog.Localization.Count, 28, "$.localization");
             }
@@ -1546,7 +1605,7 @@ namespace AL.Narrative.Nvs01
                 Exact(catalog.Placement.OfferAction, "SELECT_VALERIUS", "$.placement.offerAction");
                 Exact(catalog.Placement.AutoAccept, false, "$.placement.autoAccept");
                 Exact(catalog.Placement.CompletionUnlockId, "CH1_REALM_INTRO", "$.placement.completionUnlockId");
-                Exact(catalog.Placement.CompletionDestination, "KINGDOM_COMMAND_VIEW", "$.placement.completionDestination");
+                Exact(catalog.Placement.CompletionDestination, "CH1_REALM_INTRO", "$.placement.completionDestination");
 
                 Exact(catalog.Speaker.Id, "NPC_VALERIUS", "$.speaker.id");
                 Exact(catalog.Speaker.NameKey, "npc.valerius.name", "$.speaker.nameKey");

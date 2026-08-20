@@ -1,0 +1,124 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-notification-content.schema.json",
+  "title": "Another Life Notification Content Catalog",
+  "description": "Schema for al_notification_content_catalog.json. Notification definition IDs are canonical al_notify_* lowercase snake_case (idFormat: al_notify_lowercase_snake_case); source IDs resolve to the six approved sources.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "sourceAuthorities", "contentPolicy", "sources", "actions",
+    "definitions", "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_notification_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "al_notify_lowercase_snake_case" },
+    "sourceAuthorities": { "type": "object" },
+    "contentPolicy": { "type": "object" },
+    "sources": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sourceRecord" }
+    },
+    "actions": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/actionRecord" }
+    },
+    "definitions": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/definitionRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "notificationId": {
+      "type": "string",
+      "pattern": "^al_notify_[a-z][a-z0-9_]*$",
+      "description": "Canonical notification definition ID: lowercase snake_case with the al_notify_ prefix."
+    },
+    "sourceId": {
+      "type": "string",
+      "enum": [
+        "al_source_save", "al_source_boss_loot", "al_source_world_state",
+        "al_source_nvs", "al_source_bridge", "al_source_catalog"
+      ]
+    },
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "sourceRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey"],
+      "properties": {
+        "id": { "$ref": "#/$defs/sourceId" },
+        "displayNameKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "actionRecord": {
+      "type": "object",
+      "required": ["id", "labelKey", "kind"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^al_notify_action_[a-z][a-z0-9_]*$" },
+        "labelKey": { "type": "string" },
+        "kind": {
+          "type": "string",
+          "enum": ["acknowledge", "retry_operation", "open_recovery_details"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "definitionRecord": {
+      "type": "object",
+      "required": [
+        "id", "sourceId", "severity", "category", "channel", "titleKey",
+        "bodyKey", "parameterNames", "requiresCorrelation",
+        "requiresAcknowledgement", "durability"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/notificationId" },
+        "sourceId": { "$ref": "#/$defs/sourceId" },
+        "severity": {
+          "type": "string",
+          "enum": ["warning", "recoverable_error", "blocking_error", "success", "info"]
+        },
+        "category": { "type": "string" },
+        "channel": { "type": "string", "enum": ["acknowledgement", "toast"] },
+        "titleKey": { "type": "string" },
+        "bodyKey": { "type": "string" },
+        "parameterNames": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "requiresCorrelation": { "type": "boolean" },
+        "requiresAcknowledgement": { "type": "boolean" },
+        "durability": {
+          "type": "string",
+          "enum": ["session_only", "future_durable_outbox"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

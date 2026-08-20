@@ -1,0 +1,182 @@
+{
+  "schemaVersion": 1,
+  "sliceId": "crownlands-content-authoring-2026-08-18-v001",
+  "realmId": "crownlands",
+  "scope": "Crownlands slice content records for troops, champions, research, and skills. Authored strictly from verbatim-preserved source; no invented names, stats, costs, requirements, or lore.",
+  "authority": {
+    "primaryMode": "codex_narrative_content",
+    "userFinalCreativeAcceptance": "pending",
+    "userBalanceAcceptance": "pending",
+    "runtimeAuthority": "unchanged",
+    "productionEligible": false
+  },
+  "sources": {
+    "contentMap": {
+      "path": "unity/Docs/Narrative/GameData/phase-c-six-family-content-map.json",
+      "sourceCommit": "963c4bc6e6db8ae2b87d363ceb229519e97f13b0",
+      "gitBlobSha256": "8377a47d659a2e7dd238e35f373dbefa711e4ca16bf95e280e2dc36029327353"
+    },
+    "technicalHandoff": "unity/Docs/GameDataCatalog/PhaseC/Phase_C_Six_Family_Technical_Handoff.md",
+    "skillConvergence": "unity/Docs/GameDataCatalog/PhaseC/Phase_C8A_Skill_Authority_Convergence.md",
+    "championConvergence": "unity/Docs/GameDataCatalog/PhaseC/Phase_C7A_Champion_Authority_Convergence.md",
+    "audit": "unity/Docs/Stonehold_Content_Authoring_Audit.md"
+  },
+  "provenance": {
+    "generatedArtifactsMustRecordSourceCommit": true,
+    "generatedArtifactsMustRecordSourceBlobSha256": true
+  },
+  "nonFabricationRule": "Every authored record traces to a canonical source. Names are copied verbatim from verbatim_preserved content references only. Numeric stats, costs, durations, effects, prerequisites, behavior/presentation profiles, target types, and asset references are authorable only from an approved value or a separate approved balance decision; absence is an explicit blocked_required or not_authored_unavailable placeholder, never a fabricated value.",
+  "loaderWiring": {
+    "status": "blocked",
+    "reason": "There is no wired production loader for research, troops, champions, or skills. The six-family registry (GameDataSixFamilySchemas.CreateRegistry) has no caller, the strict schema requires full concrete records that this slice cannot yet satisfy, and Phase C7A/C8A explicitly forbid editing LocalGameDataService, SkillCaster, and SkillLoadoutCatalog. Runtime wiring and production-catalog emission remain blocked by the generation gate."
+  },
+  "families": [
+    {
+      "family": "research",
+      "authoringDisposition": "name_only_records_mechanics_blocked",
+      "records": [
+        {
+          "id": "steel_forging",
+          "nameRef": "research.steel_forging.name",
+          "displayName": "Steel Forging",
+          "sourceAnchor": "Steel Forging"
+        },
+        {
+          "id": "plate_armor",
+          "nameRef": "research.plate_armor.name",
+          "displayName": "Plate Armor",
+          "sourceAnchor": "Plate Armor"
+        },
+        {
+          "id": "masonry",
+          "nameRef": "research.advanced_masonry.name",
+          "displayName": "Advanced Masonry",
+          "sourceAnchor": "Advanced Masonry"
+        },
+        {
+          "id": "irrigation",
+          "nameRef": "research.irrigation.name",
+          "displayName": "Irrigation",
+          "sourceAnchor": "Irrigation"
+        },
+        {
+          "id": "ballistics",
+          "nameRef": "research.ballistics.name",
+          "displayName": "Ballistics",
+          "sourceAnchor": "Ballistics"
+        },
+        {
+          "id": "logistics",
+          "nameRef": "research.logistics.name",
+          "displayName": "Logistics",
+          "sourceAnchor": "Logistics"
+        },
+        {
+          "id": "trade_routes",
+          "nameRef": "research.trade_routes.name",
+          "displayName": "Trade Routes",
+          "sourceAnchor": "Trade Routes"
+        },
+        {
+          "id": "arcane_study",
+          "nameRef": "research.arcane_study.name",
+          "displayName": "Arcane Study",
+          "sourceAnchor": "Arcane Study"
+        }
+      ],
+      "blockedFields": [
+        "max_level",
+        "cost_profile_id",
+        "duration_profile_id",
+        "effect_ids",
+        "prerequisite_research_ids"
+      ],
+      "absence": null
+    },
+    {
+      "family": "skills",
+      "authoringDisposition": "name_only_records_mechanics_blocked",
+      "records": [
+        {
+          "id": "realm_strike",
+          "nameRef": "skill.realm_strike.name",
+          "displayName": "Realm Strike",
+          "sourceAnchor": "realm_strike"
+        },
+        {
+          "id": "renewing_guard",
+          "nameRef": "skill.renewing_guard.name",
+          "displayName": "Renewing Guard",
+          "sourceAnchor": "renewing_guard"
+        },
+        {
+          "id": "warzone_burst",
+          "nameRef": "skill.warzone_burst.name",
+          "displayName": "Warzone Burst",
+          "sourceAnchor": "warzone_burst"
+        },
+        {
+          "id": "warmaster_breaker",
+          "nameRef": "skill.warmaster_breaker.name",
+          "displayName": "Warmaster Breaker",
+          "sourceAnchor": "warmaster_breaker"
+        }
+      ],
+      "blockedFields": [
+        "behavior_profile_id",
+        "presentation_profile_id",
+        "target_type",
+        "cooldown_seconds",
+        "power",
+        "mana_cost",
+        "cast_time_seconds",
+        "range_meters",
+        "vfx_asset_ref",
+        "audio_asset_ref"
+      ],
+      "absence": null
+    },
+    {
+      "family": "troops",
+      "authoringDisposition": "not_authored_unavailable",
+      "records": [],
+      "blockedFields": [
+        "records",
+        "localization",
+        "base_stats",
+        "training_profiles",
+        "asset_refs"
+      ],
+      "absence": {
+        "disposition": "not_authored_unavailable",
+        "reason": "No Crownlands troop name, stat, training profile, or asset exists in any canonical source. Troops are missing required source, not optional content; authoring requires a separate creative and balance decision first.",
+        "anchors": [
+          "TroopType.Infantry",
+          "TroopType.Cavalry",
+          "TroopType.Ranged",
+          "TroopType.Siege"
+        ],
+        "visualPrecursor": null
+      }
+    },
+    {
+      "family": "champions",
+      "authoringDisposition": "not_authored_unavailable",
+      "records": [],
+      "blockedFields": [
+        "records",
+        "localization",
+        "realm_class_assignments",
+        "asset_refs",
+        "base_skill_refs",
+        "stat_profiles"
+      ],
+      "absence": {
+        "disposition": "not_authored_unavailable",
+        "reason": "No Crownlands champion identity (name, realm/class assignment, portrait/model reference, base-skill list, stat profile) is defensible from current source. The only material is an owner-approved visual precursor, which is not a gameplay record.",
+        "anchors": [],
+        "visualPrecursor": "Crownlands Vanguard turnaround sheet (FourRealmChampionAnchor.md; champion-character-sheets-blender-handoff.v1.json, runtimeAuthority:false)"
+      }
+    }
+  ]
+}

@@ -76,12 +76,14 @@ namespace AL.Tests.EditMode
         public void DeferredMutationFamiliesDeclareSaveHardeningDependency()
         {
             string championId = CommandId("ChampionDeploy");
+            string duelId = CommandId("GreyboxDuel");
 
             foreach (object descriptor in CreateDescriptors(CommittedRealmContext()))
             {
                 if (Category(descriptor) == "Presentation" ||
                     Category(descriptor) == "Build" ||
-                    Id(descriptor) == championId)
+                    Id(descriptor) == championId ||
+                    Id(descriptor) == duelId)
                 {
                     continue;
                 }
