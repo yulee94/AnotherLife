@@ -1,5 +1,6 @@
 using System;
 using AL.Core;
+using AL.UI.CharacterCreation;
 using AL.UI.FirstUserIdentity;
 
 namespace AL.Data.Runtime
@@ -12,7 +13,8 @@ namespace AL.Data.Runtime
             bool identityConfirmed,
             string lastResultId,
             string lastBuildId,
-            int lastBuildLevel)
+            int lastBuildLevel,
+            string username = "")
         {
             Realm = realm;
             ClassFamily = classFamily;
@@ -20,6 +22,7 @@ namespace AL.Data.Runtime
             LastResultId = lastResultId ?? string.Empty;
             LastBuildId = lastBuildId ?? string.Empty;
             LastBuildLevel = lastBuildLevel;
+            Username = username ?? string.Empty;
         }
 
         public RealmId Realm { get; }
@@ -28,12 +31,19 @@ namespace AL.Data.Runtime
         public string LastResultId { get; }
         public string LastBuildId { get; }
         public int LastBuildLevel { get; }
+        public string Username { get; }
+
+        public FirstUserRace People =>
+            FirstUserIdentityDerivation.TryDeriveRace(Realm, out FirstUserRace race)
+                ? race
+                : FirstUserRace.Unknown;
 
         public bool HasConfirmedChampion =>
             IdentityConfirmed &&
             FirstUserIdentityDerivation.IsSupportedRealm(Realm) &&
             ClassFamily.HasValue &&
-            FirstUserIdentityDerivation.IsSupportedClassFamily(ClassFamily.Value);
+            FirstUserIdentityDerivation.IsSupportedClassFamily(ClassFamily.Value) &&
+            CharacterCreationIdentity.TryNormalize(Username, out _, out _);
 
         public bool ShouldSkipCreate => HasConfirmedChampion;
     }
@@ -55,6 +65,27 @@ namespace AL.Data.Runtime
             string lastResultId,
             string buildingId,
             int buildingLevel)
+            : this(
+                transactionId,
+                expectedRealm,
+                classFamily,
+                confirmIdentity,
+                lastResultId,
+                buildingId,
+                buildingLevel,
+                string.Empty)
+        {
+        }
+
+        public MvpLoopCommitRequest(
+            string transactionId,
+            RealmId expectedRealm,
+            ClassFamily classFamily,
+            bool confirmIdentity,
+            string lastResultId,
+            string buildingId,
+            int buildingLevel,
+            string username)
         {
             TransactionId = transactionId ?? string.Empty;
             ExpectedRealm = expectedRealm;
@@ -63,6 +94,7 @@ namespace AL.Data.Runtime
             LastResultId = lastResultId ?? string.Empty;
             BuildingId = buildingId ?? string.Empty;
             BuildingLevel = buildingLevel;
+            Username = username ?? string.Empty;
         }
 
         public string TransactionId { get; }
@@ -72,6 +104,7 @@ namespace AL.Data.Runtime
         public string LastResultId { get; }
         public string BuildingId { get; }
         public int BuildingLevel { get; }
+        public string Username { get; }
     }
 
     /// <summary>
@@ -132,7 +165,42 @@ namespace AL.Data.Runtime
                 customization != null && customization.IdentityConfirmed,
                 customization == null ? string.Empty : customization.LastResultId ?? string.Empty,
                 lastBuildId,
-                lastBuildLevel);
+                lastBuildLevel,
+                customization == null ? string.Empty : customization.Username ?? string.Empty);
+        }
+
+        public static void RestoreSessionIdentity(SaveGameData save)
+        {
+            MvpLoopSnapshot snapshot = Read(save);
+            if (!string.IsNullOrEmpty(snapshot.Username))
+            {
+                CharacterCreationIdentity.RememberPersisted(snapshot.Username);
+            }
+
+            if (!snapshot.HasConfirmedChampion)
+            {
+                return;
+            }
+
+            if (SliceRunState.HasConfirmedChampion)
+            {
+                if (SliceRunState.Champion != null &&
+                    string.IsNullOrWhiteSpace(SliceRunState.Champion.Username))
+                {
+                    SliceRunState.Champion.Username = snapshot.Username;
+                    SliceRunState.Champion.Family = snapshot.ClassFamily.Value;
+                    SliceRunState.Champion.Realm = snapshot.Realm;
+                }
+
+                return;
+            }
+
+            SliceRunState.ConfirmChampion(new ChampionState
+            {
+                Username = snapshot.Username,
+                Family = snapshot.ClassFamily.Value,
+                Realm = snapshot.Realm
+            });
         }
 
         public static FirstUserRouteSnapshot ToRouteSnapshot(
@@ -252,6 +320,17 @@ namespace AL.Data.Runtime
             return true;
         }
 
+        public static bool TryNormalizeUsername(string raw, out string normalized)
+        {
+            if (string.IsNullOrEmpty(raw))
+            {
+                normalized = string.Empty;
+                return true;
+            }
+
+            return CharacterCreationIdentity.TryNormalize(raw, out normalized, out _);
+        }
+
         public static MvpLoopPrepareDisposition PrepareCandidate(
             SaveGameData candidate,
             MvpLoopCommitRequest request,
@@ -273,7 +352,8 @@ namespace AL.Data.Runtime
             if (candidate.SelectedRealm != request.ExpectedRealm ||
                 !FirstUserIdentityDerivation.IsSupportedRealm(request.ExpectedRealm) ||
                 !TryEncodeClassFamily(request.ClassFamily, out string classFamilyId) ||
-                !IsAllowedLastResultId(request.LastResultId))
+                !IsAllowedLastResultId(request.LastResultId) ||
+                !TryNormalizeUsername(request.Username, out string incomingUsername))
             {
                 message = "AL-MVP-LOOP-REQUEST-INVALID";
                 return MvpLoopPrepareDisposition.Rejected;
@@ -303,9 +383,14 @@ namespace AL.Data.Runtime
                 customization.LastResultId ?? string.Empty,
                 request.LastResultId ?? string.Empty,
                 StringComparison.Ordinal);
+            bool sameUsername = string.IsNullOrEmpty(incomingUsername) ||
+                                string.Equals(
+                                    customization.Username ?? string.Empty,
+                                    incomingUsername,
+                                    StringComparison.Ordinal);
             bool sameBuild = string.IsNullOrEmpty(request.BuildingId) ||
                              HasBuilding(candidate, request.BuildingId, request.BuildingLevel);
-            if (sameClass && sameConfirm && sameResult && sameBuild)
+            if (sameClass && sameConfirm && sameResult && sameUsername && sameBuild)
             {
                 return MvpLoopPrepareDisposition.Duplicate;
             }
@@ -319,6 +404,11 @@ namespace AL.Data.Runtime
             if (!string.IsNullOrEmpty(request.LastResultId))
             {
                 customization.LastResultId = request.LastResultId;
+            }
+
+            if (!string.IsNullOrEmpty(incomingUsername))
+            {
+                customization.Username = incomingUsername;
             }
 
             if (!string.IsNullOrEmpty(request.BuildingId))
