@@ -188,6 +188,9 @@ namespace AL.Data.Runtime
         public string ClassFamilyId = string.Empty;
         public bool IdentityConfirmed;
         public string LastResultId = string.Empty;
+        // Additive schema-v1 nested slot. Omitted on pre-change saves.
+        // People stay derived from SelectedRealm and are never stored here.
+        public string Username = string.Empty;
     }
 
     [Serializable]
