@@ -247,9 +247,11 @@ namespace AL.Services.Local
     /// <summary>
     /// Hard dormant activation boundary for ordinary profile mutation. This
     /// train deliberately has no setter, configuration key, environment flag,
-    /// or authority-provider path capable of enabling production writes.
+    /// or authority-provider path capable of enabling ordinary writes.
     /// Schema-v1 realm bootstrap and NVS-01 use separate typed adapters and do
-    /// not pass through this latch.
+    /// not pass through this latch. Owner lifecycle persist (pause/quit) is the
+    /// exception: it flushes the already-loaded profile without opening
+    /// mutation, manual save, or delete.
     /// </summary>
     public static class ProfileMutationContainment
     {
@@ -277,7 +279,23 @@ namespace AL.Services.Local
             saveGameService != null && ProductionWriteActivationEnabled;
 
         internal static bool CanInvokeLifecycleSave(ISaveGameService saveGameService) =>
-            saveGameService != null && ProductionWriteActivationEnabled;
+            saveGameService != null;
+
+        internal static void InvokeLifecycleSave(ISaveGameService saveGameService)
+        {
+            if (!CanInvokeLifecycleSave(saveGameService))
+            {
+                return;
+            }
+
+            if (saveGameService is LocalSaveGameService local)
+            {
+                local.PersistLifecycleCheckpoint();
+                return;
+            }
+
+            saveGameService.Save();
+        }
 
         internal static bool CanInvokeDeleteSave(ISaveGameService saveGameService) =>
             saveGameService != null && ProductionWriteActivationEnabled;
