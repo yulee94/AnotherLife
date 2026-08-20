@@ -39,6 +39,8 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.AreEqual("PlayerFrame", FirstSessionChampionStart.PlayerFrameName);
             Assert.AreEqual("CombatHotbar", FirstSessionChampionStart.HotbarName);
             Assert.AreEqual("BossTargetLock", FirstSessionChampionStart.TargetLockName);
+            Assert.AreEqual("SharedMenuButton", FirstSessionChampionStart.SharedMenuButtonName);
+            Assert.AreEqual("QuestHudSlot", FirstSessionChampionStart.QuestHudSlotName);
         }
 
         [Test]
