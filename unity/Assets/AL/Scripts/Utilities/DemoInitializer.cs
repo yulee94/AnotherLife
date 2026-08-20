@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.Scenes;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
@@ -68,7 +70,19 @@ namespace AL.Utilities
 
         private void Start()
         {
-            // 0. Ensure Services are initialized (Plug-and-Play) so the arena debug UI below keeps working.
+#if !UNITY_EDITOR
+            Destroy(this);
+            return;
+#else
+            if (!ProductionDebugChrome.AllowsDemoInitializer(SceneManager.GetActiveScene().name))
+            {
+                enabled = false;
+                Destroy(this);
+                return;
+            }
+
+            // Editor/dev harness only. Production Boot / RealmSelection / CharacterCreation /
+            // ChampionArena / Kingdom never reach this greybox slice.
             Bootloader.InitializeIfMissing();
             EnsureSaveLoaded();
 
@@ -76,6 +90,7 @@ namespace AL.Utilities
             // Realm selection and character-creation-entry use hardcoded LocalGameDataService data and
             // the process-local GreyboxRunState only; they do not touch catalog/save/determinism authority.
             BeginGreyboxSliceFlow();
+#endif
         }
 
         private void BeginGreyboxSliceFlow()
