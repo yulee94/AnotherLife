@@ -1,0 +1,146 @@
+{
+  "task": "t_1690c393",
+  "source_glb": "C:\\Users\\MY\\AppData\\Local\\Temp\\slagwhistle_cleanup\\tdf_fauna_stonehold_slagwhistle_burrower_meshy6_crop_raw_v001.glb",
+  "source_sha256": "03d4958f6a889d315c8da28d7c0b9d492622b74c9461d3243fcd28c3c20c2a1e",
+  "outputs": {
+    "blend": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1690c393\\unity\\ArtSource\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend",
+    "fbx": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1690c393\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Meshes\\tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.fbx",
+    "glb": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1690c393\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Meshes\\tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.glb",
+    "color": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1690c393\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Textures\\tdf_fauna_stonehold_slagwhistle_burrower_color_1k_v001.png",
+    "normal": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1690c393\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Textures\\tdf_fauna_stonehold_slagwhistle_burrower_normal_1k_v001.png",
+    "packed": "C:\\Users\\MY\\Documents\\AnotherLife\\.worktrees\\t_1690c393\\unity\\Assets\\AL\\Art\\Terrestrials\\Stonehold\\SlagfallQuarry\\Fauna\\Slagwhistle\\Textures\\tdf_fauna_stonehold_slagwhistle_burrower_packed_1k_v001.png"
+  },
+  "lod0_tris": 9200,
+  "lod0_verts": 8691,
+  "lod0_tris_contract": {
+    "min": 8000,
+    "max": 10000,
+    "hard_max": 10000
+  },
+  "deform_bones": 38,
+  "deform_bone_names": [
+    "Root",
+    "Pelvis",
+    "Spine1",
+    "Spine2",
+    "Spine3",
+    "Chest",
+    "UpperChest",
+    "Neck",
+    "Head",
+    "Jaw",
+    "Yoke_L",
+    "Yoke_R",
+    "Shoulder_L",
+    "UpperArm_L",
+    "LowerArm_L",
+    "Palm_L",
+    "Stab1_L",
+    "Stab2_L",
+    "Shoulder_R",
+    "UpperArm_R",
+    "LowerArm_R",
+    "Palm_R",
+    "Stab1_R",
+    "Stab2_R",
+    "UpperLeg_L",
+    "LowerLeg_L",
+    "Foot_L",
+    "Toe_L",
+    "UpperLeg_R",
+    "LowerLeg_R",
+    "Foot_R",
+    "Toe_R",
+    "Tail1",
+    "Tail2",
+    "Tail3",
+    "Tail4",
+    "Tail5",
+    "Tail6"
+  ],
+  "deform_bones_contract": {
+    "min": 34,
+    "max": 42,
+    "hard_max": 42
+  },
+  "materials": 1,
+  "material_names": [
+    "M_Slagwhistle_LOD0"
+  ],
+  "materials_contract": {
+    "preferred": 1,
+    "hard_max": 2
+  },
+  "texture_set": {
+    "count": 3,
+    "size": [
+      1024,
+      1024
+    ],
+    "maps": [
+      "color",
+      "normal",
+      "packed"
+    ],
+    "packed_channels": {
+      "R": "metallic (from glTF metallicRoughness B)",
+      "G": "occlusion (Meshy extra map R, or 1.0)",
+      "B": "roughness (from glTF metallicRoughness G)"
+    }
+  },
+  "animation_clips": 0,
+  "animation_clip_names": [],
+  "animation_clips_contract": {
+    "hard_max": 6
+  },
+  "orientation": {
+    "blender_up": "+Z",
+    "blender_forward": "-Y",
+    "unity_import_forward": "+Z",
+    "unity_import_scale": "1 unit = 1 meter",
+    "fbx_axis_forward": "-Z",
+    "fbx_axis_up": "Y",
+    "pivot": "ground-center",
+    "root": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "zmin": -0.0011,
+    "zmax": 0.5903,
+    "length_y": 1.9016,
+    "width_x": 1.1208,
+    "height_z": 0.5914
+  },
+  "bind_pose": "recumbent (Meshy crop pose kept as bind; not unposed to a stand)",
+  "lod1_lod2": "not authored in this task (LOD0 candidate only)",
+  "checks": {
+    "tris": "PASS",
+    "bones": "PASS",
+    "materials": "PASS",
+    "textures": "PASS",
+    "clips": "PASS",
+    "pivot": "PASS",
+    "facing": "PASS",
+    "scale": "PASS"
+  },
+  "file_bytes": {
+    "blend": 5546399,
+    "fbx": 777580,
+    "glb": 5240600,
+    "color": 1918696,
+    "normal": 1687190,
+    "packed": 1155911
+  },
+  "unique_compressed_runtime_bytes": 5539377,
+  "unique_compressed_runtime_mib": 5.28,
+  "unique_compressed_contract": {"target_mib": [3, 4], "hard_max_mib": 7},
+  "independent_verify": {
+    "blend_reopen_tris": 9200,
+    "blend_reopen_deform_bones": 38,
+    "blend_reopen_materials": 1,
+    "blend_reopen_actions": 0,
+    "on_disk_texture_px": [1024, 1024],
+    "blend_packed_texture_px": [1024, 1024]
+  }
+}

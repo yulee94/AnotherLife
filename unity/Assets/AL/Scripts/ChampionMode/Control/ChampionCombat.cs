@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using AL.Core;
 
 namespace AL.ChampionMode.Control
 {
@@ -106,7 +107,7 @@ namespace AL.ChampionMode.Control
             }
 
             _isDead = true;
-            Debug.Log("Champion has fallen!");
+            GameDebug.Log("Champion has fallen!");
             OnDeath?.Invoke();
         }
 

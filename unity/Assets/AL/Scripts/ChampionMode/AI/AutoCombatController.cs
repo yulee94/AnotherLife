@@ -60,7 +60,7 @@ namespace AL.ChampionMode.AI
                 _controller?.SetExternalMoveInput(Vector2.zero);
             }
 
-            Debug.Log($"Auto mode set to {_mode}");
+            GameDebug.Log($"Auto mode set to {_mode}");
         }
 
         private void TickAssistOrAuto()

@@ -171,7 +171,7 @@ namespace AL.ChampionMode.AI
         private IEnumerator PerformTelegraphedAttack()
         {
             _isAttacking = true;
-            Debug.Log("BOSS: Telegraphing Slam Attack...");
+            GameDebug.Log("BOSS: Telegraphing Slam Attack...");
             Vector3 impactCenter = _player != null ? Grounded(_player.position) : Grounded(transform.position + transform.forward * 2.5f);
             float impactRadius = _enraged ? _attackRange * 1.12f : _attackRange;
             SkillEffectFactory.SpawnBossSlamTelegraph(impactCenter, transform.position, impactRadius, _telegraphDuration, _enraged);
@@ -201,7 +201,7 @@ namespace AL.ChampionMode.AI
             }
 
             ClearTelegraphReadout();
-            Debug.Log("BOSS: SLAM!");
+            GameDebug.Log("BOSS: SLAM!");
             SkillEffectFactory.SpawnBossSlamImpact(impactCenter, impactRadius, _realmId);
             RuntimeCombatAudio.PlayHeavySkill();
 
@@ -228,21 +228,21 @@ namespace AL.ChampionMode.AI
             if (!_phase70 && _healthPercent <= 0.70f)
             {
                 _phase70 = true;
-                Debug.Log("BOSS: Phase 2. Wider telegraphs.");
+                GameDebug.Log("BOSS: Phase 2. Wider telegraphs.");
                 _attackRange += 1f;
             }
 
             if (!_phase40 && _healthPercent <= 0.40f)
             {
                 _phase40 = true;
-                Debug.Log("BOSS: Phase 3. Faster attacks.");
+                GameDebug.Log("BOSS: Phase 3. Faster attacks.");
                 _attackCooldown *= 0.75f;
             }
 
             if (!_phase15 && _healthPercent <= 0.15f)
             {
                 _phase15 = true;
-                Debug.Log("BOSS: Final phase.");
+                GameDebug.Log("BOSS: Final phase.");
                 SkillEffectFactory.SpawnCurseMark(transform.position + Vector3.up);
             }
 
@@ -270,7 +270,7 @@ namespace AL.ChampionMode.AI
             PlayHitReaction(_isBroken ? 1.08f : 1.04f);
             _visualFeedback?.PulseHit(_isBroken ? 1f : 0.72f);
             RuntimeCombatAudio.PlayImpact();
-            Debug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
+            GameDebug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
 
             if (_currentHealth <= 0f)
             {
@@ -321,7 +321,7 @@ namespace AL.ChampionMode.AI
             _isAttacking = false;
             ClearTelegraphReadout();
             _visualFeedback?.SetBroken(true);
-            Debug.Log("BOSS: BREAK! Damage window opened.");
+            GameDebug.Log("BOSS: BREAK! Damage window opened.");
             SkillEffectFactory.SpawnBossTelegraph(transform.position, 2.25f, _brokenDuration);
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "BREAK", new Color(0.40f, 1f, 0.95f), 0.38f, 1.1f);
             SkillEffectFactory.ShakeCamera(0.28f, 0.20f);
@@ -338,7 +338,7 @@ namespace AL.ChampionMode.AI
             _currentBreak = _breakBarMax;
             _isBroken = false;
             _visualFeedback?.SetBroken(false);
-            Debug.Log("BOSS: Break recovered.");
+            GameDebug.Log("BOSS: Break recovered.");
         }
 
         private void TickTimedEnrage()
@@ -359,7 +359,7 @@ namespace AL.ChampionMode.AI
             }
 
             _enraged = true;
-            Debug.Log($"BOSS: ENRAGED by {reason}!");
+            GameDebug.Log($"BOSS: ENRAGED by {reason}!");
             _attackCooldown *= 0.5f;
             _attackRange += 0.5f;
             _visualFeedback?.SetEnraged(true);
@@ -373,7 +373,7 @@ namespace AL.ChampionMode.AI
         {
             _isDead = true;
             ClearTelegraphReadout();
-            Debug.Log("BOSS: Defeated.");
+            GameDebug.Log("BOSS: Defeated.");
             _visualFeedback?.PulseDefeated();
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "DEFEATED", new Color(0.85f, 1f, 0.62f), 0.38f, 1.25f);
             SkillEffectFactory.ShakeCamera(0.26f, 0.22f);
