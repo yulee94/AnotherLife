@@ -166,9 +166,23 @@ namespace AL.ChampionMode
 
             _realmId = realmContext.RealmId;
             ApplyRuntimeQuality();
+            ApplyFirstSessionPresentationBudgets();
             BuildArena();
             BuildHud();
-            StartCoroutine(EncounterIntroRoutine());
+            if (FirstSessionChampionStart.AutoStartEncounterIntro)
+            {
+                StartCoroutine(EncounterIntroRoutine());
+            }
+            else if (_combatFeedText != null)
+            {
+                _combatFeedText.text = FirstSessionChampionStart.LandingFeedCopy;
+            }
+        }
+
+        private void ApplyFirstSessionPresentationBudgets()
+        {
+            _dummyCount = FirstSessionChampionStart.ResolveDummyBudget(_dummyCount);
+            _botChampionCount = FirstSessionChampionStart.ResolveBotBudget(_botChampionCount);
         }
 
         private void Update()
@@ -285,6 +299,7 @@ namespace AL.ChampionMode
 
             CreateWeather();
             CreateWorldObjectiveMarkers();
+            CreateTemporaryGreyboxPlaque();
         }
 
         private void ConfigureArenaLighting()
@@ -310,7 +325,7 @@ namespace AL.ChampionMode
 
         private void BuildArenaEnvironment()
         {
-            var environment = new GameObject("ChampionArena_ObsidianCitadel").transform;
+            var environment = new GameObject(FirstSessionChampionStart.EnvironmentRootName).transform;
             var atmospherePulse = environment.gameObject.AddComponent<ArenaAtmospherePulse>();
             Color realmAccent = GetRealmAccentColor(_realmId);
             Color riftRed = new Color(1f, 0.18f, 0.08f);
@@ -624,7 +639,10 @@ namespace AL.ChampionMode
 
         private void CreateWeather()
         {
-            var weatherObject = new GameObject("Warzone_BattleFog_Weather");
+            var weatherObject = new GameObject(
+                FirstSessionChampionStart.IsFirstSessionLanding
+                    ? FirstSessionChampionStart.AtmosphereName
+                    : "Warzone_BattleFog_Weather");
             weatherObject.transform.position = new Vector3(0f, 6f, 0f);
             var weather = weatherObject.AddComponent<RuntimeWeatherController>();
             weather.ConfigureForRealm(_realmId);
@@ -632,6 +650,25 @@ namespace AL.ChampionMode
             {
                 weather.ApplyParticleBudgetMultiplier(_qualityController.GetWeatherParticleMultiplier());
             }
+        }
+
+        private static void CreateTemporaryGreyboxPlaque()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                return;
+            }
+
+            var plaque = new GameObject(FirstSessionChampionStart.TemporaryPlaqueName);
+            plaque.transform.position = new Vector3(-7.6f, 1.85f, -9.4f);
+            plaque.transform.rotation = Quaternion.Euler(8f, 28f, 0f);
+            var text = plaque.AddComponent<TextMesh>();
+            text.text = FirstSessionChampionStart.TemporaryPlaqueCopy;
+            text.anchor = TextAnchor.MiddleCenter;
+            text.alignment = TextAlignment.Center;
+            text.characterSize = 0.085f;
+            text.fontSize = 28;
+            text.color = new Color(0.78f, 0.70f, 0.52f, 0.78f);
         }
 
         private GameObject CreateInspectionShowcase(Transform player, Color realmAccent)
@@ -918,7 +955,11 @@ namespace AL.ChampionMode
             CreateControlModeButton(actionPanel.transform, font, "Assist", AutoMode.SemiAuto, 1, new Vector2(18f, -250f));
             CreateControlModeButton(actionPanel.transform, font, "Auto", AutoMode.FullAuto, 2, new Vector2(18f, -290f));
 
-            var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
+            var appearancePanel = FirstSessionChampionStart.ShowAppearanceRack
+                ? CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f))
+                : null;
+            if (appearancePanel != null)
+            {
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
             CreateUiImage(appearancePanel.transform, "ForgeSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -8f), new Vector2(5f, 486f), new Color(0.24f, 0.56f, 1f, 0.48f));
             CreateText(appearancePanel.transform, font, "CHAMPION FORGE", 16, new Vector2(18f, -14f), new Vector2(178f, 22f), TextAnchor.UpperLeft, new Color(1f, 0.80f, 0.48f));
@@ -986,6 +1027,7 @@ namespace AL.ChampionMode
             _appearanceInspectButtonImage = inspectButton.GetComponent<Image>();
             _appearanceInspectButtonText = inspectButton.GetComponentInChildren<Text>();
             _appearanceSummaryText = CreateText(appearancePanel.transform, font, "Loading appearance", 12, new Vector2(28f, -426f), new Vector2(218f, 58f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            }
 
             var navPanel = CreateHudPanel(canvasObject.transform, "NavigationPad", new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(28f, 28f), new Vector2(236f, 188f), new Color(0.035f, 0.042f, 0.052f, 0.80f));
             CreateText(navPanel.transform, font, "MOVE", 15, new Vector2(18f, -14f), new Vector2(88f, 20f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
@@ -995,8 +1037,8 @@ namespace AL.ChampionMode
             CreateMoveButton(navPanel.transform, font, "v", new Vector2(90f, -142f), new Vector2(0, -1));
 
             var combatFeedPanel = CreateHudPanel(canvasObject.transform, "CombatFeed", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(28f, -296f), new Vector2(560f, 62f), new Color(0.020f, 0.026f, 0.034f, 0.76f));
-            _combatFeedText = CreateText(combatFeedPanel.transform, font, "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
-            CreateHudButton(canvasObject.transform, font, "Kingdom", new Vector2(-28f, -268f), new Vector2(132f, 40f), () => SceneManager.LoadScene(_kingdomSceneName), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
+            _combatFeedText = CreateText(combatFeedPanel.transform, font, FirstSessionChampionStart.IsFirstSessionLanding ? FirstSessionChampionStart.LandingFeedCopy : "Enter the arena. Break the boss guard before the enrage window.", 16, new Vector2(16f, -10f), new Vector2(526f, 44f), TextAnchor.UpperLeft, new Color(0.84f, 0.88f, 0.92f));
+            TryCreateDebugKingdomButton(canvasObject.transform, font, new Vector2(-28f, -268f), new Vector2(132f, 40f), 14, new Color(0.12f, 0.11f, 0.08f, 0.92f), new Vector2(1f, 1f), new Vector2(1f, 1f));
             CreateTargetLockIndicator(canvasObject.transform, font);
             CreateDefeatPanel(canvasObject.transform, font);
             CreateClearPanel(canvasObject.transform, font);
@@ -2708,7 +2750,7 @@ namespace AL.ChampionMode
                 _defeatPanelObject.SetActive(false);
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            CreateHudButton(_defeatPanelObject.transform, font, "Kingdom", new Vector2(450f, -232f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
+            TryCreateDebugKingdomButton(_defeatPanelObject.transform, font, new Vector2(450f, -232f), new Vector2(140f, 42f), 16, new Color(0.11f, 0.12f, 0.14f, 0.96f));
             _defeatPanelObject.SetActive(false);
         }
 
@@ -2755,7 +2797,7 @@ namespace AL.ChampionMode
 
                 SetAppearanceInspection(true);
             }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
-            CreateHudButton(_clearPanelObject.transform, font, "Kingdom", new Vector2(466f, -330f), new Vector2(140f, 42f), () => SceneManager.LoadScene(_kingdomSceneName), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
+            TryCreateDebugKingdomButton(_clearPanelObject.transform, font, new Vector2(466f, -330f), new Vector2(140f, 42f), 16, new Color(0.13f, 0.12f, 0.08f, 0.96f));
             _clearPanelObject.SetActive(false);
         }
 
@@ -2947,6 +2989,34 @@ namespace AL.ChampionMode
                 outline.effectColor =
                     new Color(0.24f, 0.28f, 0.34f, 0.20f);
             }
+        }
+
+        private void TryCreateDebugKingdomButton(
+            Transform parent,
+            Font font,
+            Vector2 anchoredPosition,
+            Vector2 sizeDelta,
+            int fontSize,
+            Color color,
+            Vector2? anchor = null,
+            Vector2? pivot = null)
+        {
+            if (!FirstSessionChampionStart.AllowDebugKingdomLoad)
+            {
+                return;
+            }
+
+            CreateHudButton(
+                parent,
+                font,
+                FirstSessionChampionStart.DebugKingdomButtonName,
+                anchoredPosition,
+                sizeDelta,
+                () => SceneManager.LoadScene(_kingdomSceneName),
+                fontSize,
+                color,
+                anchor,
+                pivot);
         }
 
         private static Button CreateHudButton(
