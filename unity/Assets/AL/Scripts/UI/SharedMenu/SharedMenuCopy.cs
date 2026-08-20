@@ -24,5 +24,11 @@ namespace AL.UI.SharedMenu
             "You cannot enter the private kingdom while in combat.";
         public const string UnavailableUnsafe =
             "You cannot enter the private kingdom until you are safe.";
+
+        public const string MenuHeader = "Shared Menu";
+        public const string MenuCaption =
+            "The inner realm stays live. Kingdom Management is the only 2.5D gate.";
+        public const string Resume = "Resume";
+        public const string ResumeButtonName = "SharedMenuResume";
     }
 }
