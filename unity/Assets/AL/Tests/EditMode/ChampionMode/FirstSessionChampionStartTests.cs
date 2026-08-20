@@ -26,7 +26,8 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.IsFalse(FirstSessionChampionStart.AllowDebugKingdomLoad);
             Assert.IsFalse(FirstSessionChampionStart.ShowAppearanceRack);
             Assert.IsFalse(FirstSessionChampionStart.AutoStartEncounterIntro);
-            Assert.IsTrue(FirstSessionChampionStart.AutoStartFirstFight);
+            Assert.IsFalse(FirstSessionChampionStart.AutoStartFirstFight);
+            Assert.IsTrue(FirstSessionChampionStart.ShouldRunProofOfWorth);
         }
 
         [Test]
@@ -60,6 +61,7 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.IsTrue(FirstSessionChampionStart.ShowAppearanceRack);
             Assert.IsTrue(FirstSessionChampionStart.AutoStartEncounterIntro);
             Assert.IsFalse(FirstSessionChampionStart.AutoStartFirstFight);
+            Assert.IsFalse(FirstSessionChampionStart.ShouldRunProofOfWorth);
         }
 
         [Test]

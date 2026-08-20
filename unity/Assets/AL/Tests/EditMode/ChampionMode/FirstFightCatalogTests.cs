@@ -127,9 +127,10 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
-        public void FirstSessionStartsOneDirectControlFightNotGreyboxSim()
+        public void FirstSessionDoesNotAutoStartFightBeforeC1Guardian()
         {
-            Assert.IsTrue(FirstSessionChampionStart.AutoStartFirstFight);
+            Assert.IsFalse(FirstSessionChampionStart.AutoStartFirstFight);
+            Assert.IsTrue(FirstSessionChampionStart.ShouldRunProofOfWorth);
             Assert.IsFalse(FirstSessionChampionStart.AutoStartEncounterIntro);
             Assert.AreEqual(0, FirstSessionChampionStart.ResolveDummyBudget(16));
             Assert.AreEqual(0, FirstSessionChampionStart.ResolveBotBudget(40));
