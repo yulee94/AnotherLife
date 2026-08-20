@@ -5,8 +5,10 @@ using System.Text.RegularExpressions;
 namespace AL.UI.CharacterCreation
 {
     /// <summary>
-    /// Local username rules for character creation. Production uniqueness is simulated in-process
-    /// only — SaveGameData stays schema-v1 locked, so this never writes a new top-level save field.
+    /// Local username rules for character creation. Format is 3–16 [A-Za-z0-9_].
+    /// Uniqueness is local only (in-process claims plus persisted names on this device).
+    /// Do not invent a server. The authoritative copy lives on
+    /// <c>SaveGameData.ChampionCustomization.Username</c>, not a new top-level field.
     /// </summary>
     public static class CharacterCreationIdentity
     {
@@ -79,6 +81,14 @@ namespace AL.UI.CharacterCreation
             ClaimedNames.Add(normalized);
             error = string.Empty;
             return true;
+        }
+
+        public static void RememberPersisted(string raw)
+        {
+            if (TryNormalize(raw, out string normalized, out _))
+            {
+                ClaimedNames.Add(normalized);
+            }
         }
 
         public static void ResetClaims()
