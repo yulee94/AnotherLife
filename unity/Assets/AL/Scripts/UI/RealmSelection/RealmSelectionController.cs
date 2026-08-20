@@ -38,6 +38,24 @@ namespace AL.UI.RealmSelection
         {
             EnsurePresentationCamera();
             Bootloader.InitializeIfMissing();
+            if (RealmCatalogRuntime.Status == RealmCatalogRuntimeStatus.Loading)
+            {
+                StartCoroutine(PopulateWhenCatalogReady());
+                return;
+            }
+
+            PopulateRealms();
+        }
+
+        private IEnumerator PopulateWhenCatalogReady()
+        {
+            float catalogWait = 0f;
+            while (RealmCatalogRuntime.Status == RealmCatalogRuntimeStatus.Loading && catalogWait < 10f)
+            {
+                catalogWait += Time.unscaledDeltaTime;
+                yield return null;
+            }
+
             PopulateRealms();
         }
 
@@ -84,7 +102,7 @@ namespace AL.UI.RealmSelection
         private void PopulateRealms()
         {
             var dataService = ServiceLocator.Get<IGameDataService>();
-            var realms = dataService.GetAllRealms();
+            var realms = OrderRealms(dataService.GetAllRealms());
 
             if (_cardPrefab == null || _container == null)
             {
@@ -95,8 +113,43 @@ namespace AL.UI.RealmSelection
             foreach (var realm in realms)
             {
                 var card = Instantiate(_cardPrefab, _container);
-                card.Setup(realm, OnRealmSelected);
+                card.Setup(realm, OnRealmSelected, RealmCatalogRuntime.Current);
             }
+        }
+
+        private static IEnumerable<RealmDefinition> OrderRealms(IEnumerable<RealmDefinition> realms)
+        {
+            RealmCatalogSnapshot catalog = RealmCatalogRuntime.Current;
+            if (catalog == null || catalog.Realms == null || catalog.Realms.Count == 0)
+            {
+                return realms;
+            }
+
+            var byId = new Dictionary<RealmId, RealmDefinition>();
+            foreach (RealmDefinition realm in realms)
+            {
+                if (realm != null && !byId.ContainsKey(realm.Id))
+                {
+                    byId.Add(realm.Id, realm);
+                }
+            }
+
+            var ordered = new List<RealmDefinition>(catalog.Realms.Count);
+            for (int i = 0; i < catalog.Realms.Count; i++)
+            {
+                if (byId.TryGetValue(catalog.Realms[i].RuntimeId, out RealmDefinition realm))
+                {
+                    ordered.Add(realm);
+                    byId.Remove(catalog.Realms[i].RuntimeId);
+                }
+            }
+
+            foreach (RealmDefinition leftover in byId.Values)
+            {
+                ordered.Add(leftover);
+            }
+
+            return ordered;
         }
 
         private void OnRealmSelected(RealmId id)
@@ -177,20 +230,19 @@ namespace AL.UI.RealmSelection
             safeAreaRect.offsetMin = Vector2.zero;
             safeAreaRect.offsetMax = Vector2.zero;
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
-                       Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var font = RealmSelectionIdentity.ResolvePresentationFont();
 
             var topRule = CreatePanel(safeAreaObject.transform, "TopRule", new Color(0.88f, 0.62f, 0.24f, 0.72f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -118f), new Vector2(-96f, 4f));
             var bottomRule = CreatePanel(safeAreaObject.transform, "BottomRule", new Color(0.22f, 0.45f, 0.72f, 0.42f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 58f), new Vector2(-160f, 3f));
             atmosphere.AddPulseTarget(topRule, 0.72f, 0.96f, 0.52f);
             atmosphere.AddPulseTarget(bottomRule, 0.36f, 0.62f, 0.33f);
 
-            var title = CreateText(safeAreaObject.transform, "Title", font, "ANOTHER LIFE", 42, new Vector2(0f, -18f), new Vector2(-48f, 52f));
+            var title = CreateText(safeAreaObject.transform, "Title", font, "SWEAR YOUR REALM", 40, new Vector2(0f, -18f), new Vector2(-48f, 52f));
             StretchAcrossTop(title);
-            title.color = new Color(1f, 0.88f, 0.62f);
-            var subtitle = CreateText(safeAreaObject.transform, "Subtitle", font, "Choose the realm that will define your command style.", 21, new Vector2(0f, -70f), new Vector2(-48f, 34f));
+            title.color = new Color(0.92f, 0.88f, 0.78f);
+            var subtitle = CreateText(safeAreaObject.transform, "Subtitle", font, RealmSelectionIdentity.LockWarningFallback, 18, new Vector2(0f, -70f), new Vector2(-48f, 34f));
             StretchAcrossTop(subtitle);
-            subtitle.color = new Color(0.78f, 0.86f, 0.94f);
+            subtitle.color = new Color(0.72f, 0.74f, 0.76f);
 
             var cardsObject = new GameObject("RealmCards", typeof(RectTransform));
             cardsObject.transform.SetParent(safeAreaObject.transform, false);
@@ -215,21 +267,17 @@ namespace AL.UI.RealmSelection
 
         private void CreateRealmButton(Transform parent, Font font, RealmDefinition realm)
         {
-            var buttonObject = new GameObject(realm.RealmName);
+            RealmIdentityPresentation identity = RealmSelectionIdentity.Resolve(realm, RealmCatalogRuntime.Current);
+            var buttonObject = new GameObject(identity.RealmName);
             buttonObject.transform.SetParent(parent, false);
 
             var image = buttonObject.AddComponent<Image>();
-            Color realmColor = GetRealmColor(realm.Id);
-            image.color = new Color(0.030f, 0.039f, 0.052f, 0.92f);
-            var outline = buttonObject.AddComponent<Outline>();
-            outline.effectColor = Color.Lerp(realmColor, Color.white, 0.18f);
-            outline.effectDistance = new Vector2(1.2f, -1.2f);
-
+            image.color = new Color(0.030f, 0.032f, 0.034f, 0.96f);
             var button = buttonObject.AddComponent<Button>();
             button.onClick.AddListener(() => OnRealmSelected(realm.Id));
             var colors = button.colors;
-            colors.highlightedColor = Color.Lerp(image.color, realmColor, 0.22f);
-            colors.pressedColor = Color.Lerp(image.color, Color.black, 0.28f);
+            colors.highlightedColor = new Color(0.10f, 0.10f, 0.11f, 1f);
+            colors.pressedColor = new Color(0.06f, 0.06f, 0.07f, 1f);
             colors.selectedColor = colors.highlightedColor;
             button.colors = colors;
 
@@ -238,31 +286,47 @@ namespace AL.UI.RealmSelection
             rect.anchorMax = new Vector2(0.5f, 1f);
             rect.pivot = new Vector2(0.5f, 1f);
 
-            CreateGradientPanel(buttonObject.transform, "CardDepth", new Color(0.055f, 0.067f, 0.086f, 0.88f), new Color(0.014f, 0.018f, 0.026f, 0.62f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
-            CreatePanel(buttonObject.transform, "CardTopTrace", new Color(1f, 0.90f, 0.66f, 0.18f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-34f, 1.8f));
-            CreatePanel(buttonObject.transform, "CardBottomTrace", new Color(realmColor.r, realmColor.g, realmColor.b, 0.20f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 1f), new Vector2(-34f, 1.5f));
-            CreatePanel(buttonObject.transform, "RealmAccent", realmColor, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), Vector2.zero, new Vector2(8f, 0f));
-            CreateRealmEmblem(buttonObject.transform, realm.Id, realmColor);
+            RealmSelectionIdentity.BuildStructuralFrame(buttonObject.transform, identity.FrameKind);
+            CreateRealmEmblem(buttonObject.transform, realm.Id);
 
-            var profile = CreateText(buttonObject.transform, realm.RealmName + "_Profile", font, GetRealmCommandProfile(realm.Id), 13, new Vector2(30f, -16f), new Vector2(260f, 18f));
-            AnchorTopLeft(profile, new Vector2(30f, -16f), new Vector2(260f, 18f));
-            profile.alignment = TextAnchor.UpperLeft;
-            profile.color = new Color(1f, 0.84f, 0.52f);
+            var people = CreateText(buttonObject.transform, identity.RealmName + "_People", font, identity.PeopleName, 16, new Vector2(0f, -18f), new Vector2(-36f, 22f));
+            StretchAcrossTop(people);
+            people.alignment = TextAnchor.UpperCenter;
+            people.color = new Color(0.78f, 0.76f, 0.70f);
 
-            var realmName = CreateText(buttonObject.transform, realm.RealmName + "_Name", font, realm.RealmName.ToUpperInvariant(), 25, new Vector2(30f, -38f), new Vector2(500f, 32f));
-            AnchorTopStretch(realmName, new Vector2(30f, -38f), 210f, 32f);
-            realmName.alignment = TextAnchor.UpperLeft;
-            realmName.color = Color.Lerp(realmColor, Color.white, 0.46f);
+            var realmName = CreateText(buttonObject.transform, identity.RealmName + "_Name", font, identity.RealmName.ToUpperInvariant(), 26, new Vector2(0f, -42f), new Vector2(-36f, 32f));
+            StretchAcrossTop(realmName);
+            realmName.alignment = TextAnchor.UpperCenter;
+            realmName.color = new Color(0.94f, 0.92f, 0.86f);
 
-            var selectText = CreateText(buttonObject.transform, realm.RealmName + "_Select", font, "SELECT", 14, new Vector2(-30f, 16f), new Vector2(126f, 24f));
-            AnchorBottomRight(selectText, new Vector2(-30f, 16f), new Vector2(126f, 24f));
-            selectText.alignment = TextAnchor.UpperRight;
-            selectText.color = new Color(1f, 0.84f, 0.52f);
+            var structure = CreateText(
+                buttonObject.transform,
+                identity.RealmName + "_Structure",
+                font,
+                identity.MarkName + "  ·  " + identity.SilhouetteLanguage,
+                14,
+                new Vector2(0f, -168f),
+                new Vector2(-40f, 36f));
+            StretchAcrossTop(structure);
+            structure.alignment = TextAnchor.UpperCenter;
+            structure.color = new Color(0.70f, 0.70f, 0.68f);
 
-            var text = CreateText(buttonObject.transform, realm.RealmName + "_Text", font, realm.Description, 17, new Vector2(30f, -76f), new Vector2(585f, 70f));
-            AnchorTopStretch(text, new Vector2(30f, -76f), 175f, 70f);
-            text.alignment = TextAnchor.UpperLeft;
-            text.color = new Color(0.84f, 0.88f, 0.92f);
+            var material = CreateText(
+                buttonObject.transform,
+                identity.RealmName + "_Material",
+                font,
+                identity.MaterialLanguage,
+                13,
+                new Vector2(0f, -200f),
+                new Vector2(-40f, 22f));
+            StretchAcrossTop(material);
+            material.alignment = TextAnchor.UpperCenter;
+            material.color = new Color(0.62f, 0.62f, 0.60f);
+
+            var selectText = CreateText(buttonObject.transform, identity.RealmName + "_Select", font, "SWEAR", 14, new Vector2(0f, 14f), new Vector2(126f, 24f));
+            AnchorBottomCenter(selectText, new Vector2(0f, 16f), new Vector2(160f, 24f));
+            selectText.alignment = TextAnchor.LowerCenter;
+            selectText.color = new Color(0.88f, 0.84f, 0.72f);
         }
 
         private void ShowCommitOverlay(RealmId id)
@@ -291,8 +355,7 @@ namespace AL.UI.RealmSelection
             scaler.matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf") ??
-                       Resources.GetBuiltinResource<Font>("Arial.ttf");
+            var font = RealmSelectionIdentity.ResolvePresentationFont();
 
             _commitBackdrop = CreatePanel(canvasObject.transform, "CommitBackdrop", new Color(0f, 0f, 0f, 0f), Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
             _commitBackdrop.raycastTarget = true;
@@ -313,8 +376,8 @@ namespace AL.UI.RealmSelection
             _commitEmblem = CreatePanel(panel.transform, "CommitEmblem", Color.white, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(82f, -84f), new Vector2(72f, 72f));
             _commitEmblem.preserveAspect = true;
 
-            _commitTitleText = CreateText(panel.transform, "CommitTitle", font, "COMMAND ACCEPTED", 15, new Vector2(0f, -30f), new Vector2(640f, 24f));
-            _commitTitleText.color = new Color(1f, 0.84f, 0.52f);
+            _commitTitleText = CreateText(panel.transform, "CommitTitle", font, "REALM LOCKED", 15, new Vector2(0f, -30f), new Vector2(640f, 24f));
+            _commitTitleText.color = new Color(0.88f, 0.84f, 0.72f);
             _commitRealmText = CreateText(panel.transform, "CommitRealm", font, string.Empty, 34, new Vector2(0f, -66f), new Vector2(640f, 44f));
             _commitMetaText = CreateText(panel.transform, "CommitMeta", font, string.Empty, 16, new Vector2(0f, -116f), new Vector2(640f, 30f));
             _commitMetaText.color = new Color(0.80f, 0.88f, 0.94f);
@@ -327,7 +390,7 @@ namespace AL.UI.RealmSelection
 
         private void UpdateCommitOverlay(RealmId id, float progress)
         {
-            Color realmColor = GetRealmColor(id);
+            RealmIdentityPresentation identity = ResolveIdentity(id);
             float eased = Mathf.SmoothStep(0f, 1f, progress);
             float pulse = 0.5f + Mathf.Sin(Time.unscaledTime * 7.0f) * 0.5f;
 
@@ -338,37 +401,38 @@ namespace AL.UI.RealmSelection
 
             if (_commitAccentLine != null)
             {
-                _commitAccentLine.color = new Color(realmColor.r, realmColor.g, realmColor.b, Mathf.Lerp(0.68f, 1f, pulse));
+                _commitAccentLine.color = new Color(0.86f, 0.82f, 0.70f, Mathf.Lerp(0.68f, 1f, pulse));
             }
 
             Sprite emblem = GetRealmEmblem(id);
             if (_commitEmblemGlow != null)
             {
                 _commitEmblemGlow.sprite = emblem;
-                _commitEmblemGlow.color = new Color(realmColor.r, realmColor.g, realmColor.b, Mathf.Lerp(0.12f, 0.22f, pulse));
+                _commitEmblemGlow.color = new Color(0.86f, 0.84f, 0.76f, Mathf.Lerp(0.10f, 0.20f, pulse));
             }
 
             if (_commitEmblem != null)
             {
                 _commitEmblem.sprite = emblem;
-                _commitEmblem.color = Color.Lerp(realmColor, Color.white, 0.52f);
+                _commitEmblem.color = Color.white;
             }
 
             if (_commitProgressFill != null)
             {
-                _commitProgressFill.color = Color.Lerp(realmColor, new Color(1f, 0.84f, 0.52f), 0.25f);
+                _commitProgressFill.color = new Color(0.86f, 0.80f, 0.62f, 0.94f);
                 _commitProgressFill.rectTransform.sizeDelta = new Vector2(Mathf.Lerp(0f, 620f, eased), 6f);
             }
 
             if (_commitRealmText != null)
             {
-                _commitRealmText.text = GetRealmDisplayName(id).ToUpperInvariant();
-                _commitRealmText.color = Color.Lerp(realmColor, Color.white, 0.34f);
+                _commitRealmText.text = identity.RealmName.ToUpperInvariant();
+                _commitRealmText.color = new Color(0.94f, 0.92f, 0.86f);
             }
 
             if (_commitMetaText != null)
             {
-                _commitMetaText.text = GetRealmCommandProfile(id) + " // KINGDOM LINK ESTABLISHING";
+                _commitMetaText.text = identity.PeopleName + "  ·  " + identity.MarkName + "\n" +
+                                       RealmSelectionIdentity.LockWarningFallback;
             }
         }
 
@@ -400,7 +464,7 @@ namespace AL.UI.RealmSelection
             return animated;
         }
 
-        private void CreateRealmEmblem(Transform parent, RealmId id, Color realmColor)
+        private void CreateRealmEmblem(Transform parent, RealmId id)
         {
             Sprite emblem = GetRealmEmblem(id);
             if (emblem == null)
@@ -409,11 +473,11 @@ namespace AL.UI.RealmSelection
                 return;
             }
 
-            var glow = CreatePanel(parent, "RealmEmblemGlow", new Color(realmColor.r, realmColor.g, realmColor.b, 0.18f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -50f), new Vector2(98f, 98f));
+            var glow = CreatePanel(parent, "RealmEmblemGlow", new Color(0.86f, 0.84f, 0.76f, 0.16f), new Vector2(0.5f, 0.62f), new Vector2(0.5f, 0.62f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(148f, 148f));
             glow.sprite = emblem;
             glow.preserveAspect = true;
 
-            var image = CreatePanel(parent, "RealmEmblem", Color.Lerp(realmColor, Color.white, 0.52f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-74f, -50f), new Vector2(78f, 78f));
+            var image = CreatePanel(parent, "RealmEmblem", Color.white, new Vector2(0.5f, 0.62f), new Vector2(0.5f, 0.62f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(120f, 120f));
             image.sprite = emblem;
             image.preserveAspect = true;
         }
@@ -460,7 +524,7 @@ namespace AL.UI.RealmSelection
             rect.sizeDelta = new Vector2(-anchoredPosition.x - rightInset, height);
         }
 
-        private static void AnchorBottomRight(Text text, Vector2 anchoredPosition, Vector2 sizeDelta)
+        private static void AnchorBottomCenter(Text text, Vector2 anchoredPosition, Vector2 sizeDelta)
         {
             if (text == null)
             {
@@ -468,11 +532,38 @@ namespace AL.UI.RealmSelection
             }
 
             var rect = text.GetComponent<RectTransform>();
-            rect.anchorMin = new Vector2(1f, 0f);
-            rect.anchorMax = new Vector2(1f, 0f);
-            rect.pivot = new Vector2(1f, 0f);
+            rect.anchorMin = new Vector2(0.5f, 0f);
+            rect.anchorMax = new Vector2(0.5f, 0f);
+            rect.pivot = new Vector2(0.5f, 0f);
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta;
+        }
+
+        private static RealmIdentityPresentation ResolveIdentity(RealmId id)
+        {
+            RealmCatalogSnapshot catalog = RealmCatalogRuntime.Current;
+            if (catalog != null && catalog.TryGet(id, out RealmCatalogEntry entry))
+            {
+                return new RealmIdentityPresentation(
+                    id,
+                    entry.Id,
+                    entry.DisplayName,
+                    entry.PeopleName,
+                    entry.MarkName,
+                    entry.SilhouetteLanguage,
+                    entry.MaterialLanguage,
+                    RealmSelectionIdentity.FrameKindFor(id));
+            }
+
+            return new RealmIdentityPresentation(
+                id,
+                string.Empty,
+                id == RealmId.None ? "Unclaimed Realm" : id.ToString(),
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                string.Empty,
+                RealmSelectionIdentity.FrameKindFor(id));
         }
 
         private static void StretchAcrossTop(Text text)
@@ -557,35 +648,6 @@ namespace AL.UI.RealmSelection
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = sizeDelta;
             return text;
-        }
-
-        private static Color GetRealmColor(RealmId id)
-        {
-            return id switch
-            {
-                RealmId.Stonehold => new Color(0.38f, 0.34f, 0.30f, 1f),
-                RealmId.Eldergrove => new Color(0.18f, 0.44f, 0.28f, 1f),
-                RealmId.Crownlands => new Color(0.18f, 0.28f, 0.58f, 1f),
-                RealmId.Umbral => new Color(0.18f, 0.08f, 0.20f, 1f),
-                _ => new Color(0.20f, 0.20f, 0.22f, 1f)
-            };
-        }
-
-        private static string GetRealmCommandProfile(RealmId id)
-        {
-            return id switch
-            {
-                RealmId.Stonehold => "FORTRESS ECONOMY",
-                RealmId.Eldergrove => "GROWTH ENGINE",
-                RealmId.Crownlands => "ROYAL COMMAND",
-                RealmId.Umbral => "SHADOW WARFARE",
-                _ => "COMMAND PROFILE"
-            };
-        }
-
-        private static string GetRealmDisplayName(RealmId id)
-        {
-            return id == RealmId.None ? "Unclaimed Realm" : id.ToString();
         }
 
         private sealed class RealmSelectionFallbackAtmosphere : MonoBehaviour
