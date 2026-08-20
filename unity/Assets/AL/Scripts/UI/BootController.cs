@@ -401,6 +401,10 @@ namespace AL.UI
         {
             ISaveGameService saveGameService = null;
             ServiceLocator.TryGet(out saveGameService);
+            if (saveGameService?.CurrentSave != null)
+            {
+                AL.Data.Runtime.MvpLoopSaveCodec.RestoreSessionIdentity(saveGameService.CurrentSave);
+            }
             bool gameplayLoadable =
                 Application.CanStreamedLevelBeLoaded(
                     FirstUserBootDestinationResolver.GameplaySceneName);

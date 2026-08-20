@@ -910,7 +910,8 @@ namespace AL.Data.Catalogs
                 "HelmetEnabled",
                 "ClassFamilyId",
                 "IdentityConfirmed",
-                "LastResultId");
+                "LastResultId",
+                "Username");
 
         private static readonly HashSet<string> EquipmentRowFields =
             Fields(
@@ -3301,6 +3302,29 @@ namespace AL.Data.Catalogs
                         SaveSemanticDomain.Customization);
                 }
             }
+
+            if (customization.TryGet("Username", out value) && !(value is StrictJsonNull))
+            {
+                string username;
+                if (TryReadRequiredString(
+                        customization,
+                        "Username",
+                        path,
+                        SaveSemanticDomain.Customization,
+                        allowBlank: true,
+                        collector,
+                        state,
+                        out username) &&
+                    !IsAllowedMvpUsername(username))
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_MVP_USERNAME_INVALID",
+                        path + ".Username",
+                        SaveSemanticDomain.Customization);
+                }
+            }
         }
 
         private static bool IsAllowedMvpLastResultId(string lastResultId)
@@ -3322,6 +3346,33 @@ namespace AL.Data.Catalogs
                     (c < '0' || c > '9') &&
                     c != '_' &&
                     c != ':')
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private static bool IsAllowedMvpUsername(string username)
+        {
+            if (string.IsNullOrEmpty(username))
+            {
+                return true;
+            }
+
+            if (username.Length < 3 || username.Length > 16)
+            {
+                return false;
+            }
+
+            for (var index = 0; index < username.Length; index++)
+            {
+                char c = username[index];
+                if ((c < 'A' || c > 'Z') &&
+                    (c < 'a' || c > 'z') &&
+                    (c < '0' || c > '9') &&
+                    c != '_')
                 {
                     return false;
                 }
