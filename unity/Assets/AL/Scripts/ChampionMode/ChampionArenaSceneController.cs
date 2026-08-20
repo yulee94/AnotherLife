@@ -2,12 +2,14 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Death;
 using AL.ChampionMode.Interaction;
 using AL.ChampionMode.Presentation;
 using AL.ChampionMode.Quests;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Input;
 using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
 using AL.Data.Catalogs.WorldAtlas;
@@ -146,6 +148,9 @@ namespace AL.ChampionMode
         private bool _enrageObserved;
         private bool _encounterClearShown;
         private bool _encounterFailed;
+        private bool _innerDeathSequenceActive;
+        private Vector3 _innerCapitalSpawnPosition;
+        private Coroutine _innerDeathRoutine;
         private bool _encounterIntroRunning;
         private bool _appearanceInspectionMode;
         private bool _forgePresentationCaptured;
@@ -373,6 +378,7 @@ namespace AL.ChampionMode
                 return;
             }
 
+            _innerCapitalSpawnPosition = player.transform.position;
             ApplyMaterial(player, new Color(0.16f, 0.34f, 0.78f), 0.15f, 0.55f);
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
@@ -415,6 +421,7 @@ namespace AL.ChampionMode
             _enrageObserved = false;
             _encounterClearShown = false;
             _encounterFailed = false;
+            _innerDeathSequenceActive = false;
             _encounterIntroRunning = false;
             _appearanceInspectionMode = false;
 
@@ -2088,34 +2095,37 @@ namespace AL.ChampionMode
 
         private void HandlePlayerDeath()
         {
-            if (_encounterFailed)
+            if (_innerDeathSequenceActive)
             {
                 return;
             }
 
-            _encounterFailed = true;
             SetAppearanceInspection(false);
             _playerController?.SetControlLocked(true);
             _autoCombatController?.SetMode(AutoMode.Manual);
-            if (_boss != null)
-            {
-                _guardBreakObserved |= _boss.IsBroken;
-                _enrageObserved |= _boss.IsEnraged;
-            }
 
-            float elapsed = Mathf.Max(0f, Time.time - _encounterStartTime);
-            UpdateDefeatPanel(elapsed);
-
-            if (_defeatPanelObject != null)
+            Vector3 deathPosition = _playerController != null
+                ? _playerController.transform.position
+                : _innerCapitalSpawnPosition;
+            var sites = new[]
             {
-                _defeatPanelObject.SetActive(true);
-                _hudSession?.NotifyRecap(true);
-            }
+                InnerRealmSafeSite.UnnamedCapital(
+                    _realmId,
+                    new InnerRealmVec3(
+                        _innerCapitalSpawnPosition.x,
+                        _innerCapitalSpawnPosition.y,
+                        _innerCapitalSpawnPosition.z))
+            };
+            InnerRealmDeathRespawnPlan plan = InnerRealmDeathRespawnPlanner.Plan(
+                new InnerRealmDeathRespawnRequest(
+                    _realmId,
+                    new InnerRealmVec3(deathPosition.x, deathPosition.y, deathPosition.z),
+                    InnerRealmDeathZoneKind.Inner,
+                    sites));
 
-            if (_combatFeedText != null)
-            {
-                _combatFeedText.text = ChampionHudCopy.DefeatFeed;
-            }
+            _innerDeathSequenceActive = true;
+            ShowInnerDeathPresentation(plan);
+            _hudSession?.NotifyRecap(true);
 
             if (_playerController != null)
             {
@@ -2124,6 +2134,96 @@ namespace AL.ChampionMode
             }
 
             RuntimeCombatAudio.PlayWarning();
+            RefreshBossText();
+            RefreshEncounterText();
+
+            if (_innerDeathRoutine != null)
+            {
+                StopCoroutine(_innerDeathRoutine);
+            }
+
+            _innerDeathRoutine = StartCoroutine(InnerDeathStandUpRoutine(plan));
+        }
+
+        private void ShowInnerDeathPresentation(InnerRealmDeathRespawnPlan plan)
+        {
+            string title = plan != null && plan.Presentation != null
+                ? plan.Presentation.Title
+                : InnerRealmDeathRespawnPlanner.FallenTitle;
+            string detail = plan != null && plan.Presentation != null
+                ? plan.Presentation.Detail
+                : InnerRealmDeathRespawnPlanner.CapitalStandUpDetail;
+
+            if (_defeatSummaryText != null)
+            {
+                _defeatSummaryText.text = title;
+            }
+
+            if (_defeatDetailText != null)
+            {
+                _defeatDetailText.text = detail;
+            }
+
+            if (_defeatActionText != null)
+            {
+                _defeatActionText.text = "Stand up at the Capital. No reload.";
+            }
+
+            if (_defeatPanelObject != null)
+            {
+                _defeatPanelObject.SetActive(true);
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = detail;
+            }
+        }
+
+        private IEnumerator InnerDeathStandUpRoutine(InnerRealmDeathRespawnPlan plan)
+        {
+            float holdSeconds = plan != null && plan.Presentation != null
+                ? Mathf.Max(0.2f, plan.Presentation.HoldSeconds)
+                : InnerRealmDeathRespawnPlanner.DefeatHoldSeconds;
+            float until = Time.unscaledTime + holdSeconds;
+            while (Time.unscaledTime < until)
+            {
+                if (GameInput.SubmitPressed())
+                {
+                    break;
+                }
+
+                yield return null;
+            }
+
+            bool stoodUp = InnerRealmDeathRespawnApplier.TryApply(
+                plan,
+                _playerCombat,
+                _playerController);
+            if (_defeatPanelObject != null)
+            {
+                _defeatPanelObject.SetActive(false);
+            }
+            _hudSession?.NotifyRecap(false);
+
+            _innerDeathSequenceActive = false;
+            _innerDeathRoutine = null;
+            if (stoodUp &&
+                !_appearanceInspectionMode &&
+                !_encounterIntroRunning &&
+                _playerCombat != null &&
+                !_playerCombat.IsDead)
+            {
+                _playerController?.SetControlLocked(false);
+            }
+
+            if (_combatFeedText != null)
+            {
+                _combatFeedText.text = stoodUp
+                    ? "You stand again at the Capital."
+                    : "Fallen. Capital stand-up was unavailable.";
+            }
+
             RefreshBossText();
             RefreshEncounterText();
         }
@@ -2963,18 +3063,11 @@ namespace AL.ChampionMode
 
             CreateHudPanel(_defeatPanelObject.transform, "DefeatTopAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(660f, 6f), new Color(1f, 0.22f, 0.10f, 0.90f));
             CreateHudPanel(_defeatPanelObject.transform, "DefeatSideAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -6f), new Vector2(6f, 286f), new Color(0.86f, 0.08f, 0.06f, 0.72f));
-            CreateText(_defeatPanelObject.transform, font, "BATTLE REPORT", 13, new Vector2(36f, -22f), new Vector2(150f, 22f), TextAnchor.UpperLeft, new Color(0.74f, 0.62f, 0.58f));
-            CreateText(_defeatPanelObject.transform, font, "CHAMPION FALLEN", 30, new Vector2(0f, -42f), new Vector2(660f, 42f), TextAnchor.MiddleCenter, new Color(1f, 0.42f, 0.28f));
-            _defeatSummaryText = CreateText(_defeatPanelObject.transform, font, "Time 00:00   Boss 100%   Guard held   Enrage avoided", 15, new Vector2(50f, -94f), new Vector2(560f, 28f), TextAnchor.MiddleCenter, new Color(0.95f, 0.92f, 0.88f));
-            _defeatDetailText = CreateText(_defeatPanelObject.transform, font, "Review the battle report, adjust timing, then choose the next attempt.", 15, new Vector2(70f, -134f), new Vector2(520f, 58f), TextAnchor.MiddleCenter, new Color(0.88f, 0.90f, 0.94f));
-            _defeatActionText = CreateText(_defeatPanelObject.transform, font, ChampionHudCopy.RecapNext, 13, new Vector2(84f, -184f), new Vector2(492f, 30f), TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.84f));
-            CreateHudButton(_defeatPanelObject.transform, font, "Retry", new Vector2(70f, -232f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.34f, 0.08f, 0.05f, 0.96f));
-            CreateHudButton(_defeatPanelObject.transform, font, "Inspect", new Vector2(260f, -232f), new Vector2(140f, 42f), () =>
-            {
-                _defeatPanelObject.SetActive(false);
-                _hudSession?.NotifyRecap(false);
-                SetAppearanceInspection(true);
-            }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            CreateText(_defeatPanelObject.transform, font, "DEFEAT", 13, new Vector2(36f, -22f), new Vector2(150f, 22f), TextAnchor.UpperLeft, new Color(0.74f, 0.62f, 0.58f));
+            CreateText(_defeatPanelObject.transform, font, "FALLEN", 30, new Vector2(0f, -42f), new Vector2(660f, 42f), TextAnchor.MiddleCenter, new Color(1f, 0.42f, 0.28f));
+            _defeatSummaryText = CreateText(_defeatPanelObject.transform, font, "FALLEN", 15, new Vector2(50f, -94f), new Vector2(560f, 28f), TextAnchor.MiddleCenter, new Color(0.95f, 0.92f, 0.88f));
+            _defeatDetailText = CreateText(_defeatPanelObject.transform, font, "Returning to the Capital.", 15, new Vector2(70f, -134f), new Vector2(520f, 58f), TextAnchor.MiddleCenter, new Color(0.88f, 0.90f, 0.94f));
+            _defeatActionText = CreateText(_defeatPanelObject.transform, font, "Stand up at the Capital. No reload.", 13, new Vector2(84f, -196f), new Vector2(492f, 30f), TextAnchor.MiddleCenter, new Color(0.72f, 0.78f, 0.84f));
             _defeatPanelObject.SetActive(false);
         }
 
