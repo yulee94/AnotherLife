@@ -124,6 +124,37 @@ namespace AL.Tests.EditMode.CharacterCreation
         }
 
         [Test]
+        public void PrepareCandidatePersistsUsernameAndLookAtomically()
+        {
+            var candidate = new SaveGameData
+            {
+                SelectedRealm = RealmId.Crownlands,
+                ChampionCustomization = new ChampionCustomizationState()
+            };
+            Assert.IsTrue(CharacterCreationDraft.TryCreate(RealmId.Crownlands, out CharacterCreationDraft draft, out _));
+            Assert.IsTrue(draft.TrySelectClassFamily(ClassFamily.Warrior, out _));
+            draft.CycleBodyPreset();
+
+            MvpLoopPrepareDisposition disposition = MvpLoopSaveCodec.PrepareCandidate(
+                candidate,
+                new MvpLoopCommitRequest(
+                    "tx_creator_identity_and_look",
+                    RealmId.Crownlands,
+                    ClassFamily.Warrior,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    0,
+                    "CrownGuard",
+                    draft.Customization),
+                out string message);
+
+            Assert.AreEqual(MvpLoopPrepareDisposition.Prepared, disposition, message);
+            Assert.AreEqual("CrownGuard", candidate.ChampionCustomization.Username);
+            Assert.IsTrue(CharacterCreationLook.Matches(candidate.ChampionCustomization, draft.Customization));
+        }
+
+        [Test]
         public void TwoLooksOfSameClassAreNotDuplicates()
         {
             var candidate = new SaveGameData

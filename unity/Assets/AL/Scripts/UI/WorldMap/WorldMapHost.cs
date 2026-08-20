@@ -1,3 +1,4 @@
+using AL.ChampionMode.UI;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.Input;
 using System.IO;
@@ -69,32 +70,13 @@ namespace AL.UI.WorldMap
 
             if (GameInput.WorldMapPressed())
             {
+                ChampionHudSession hudSession = FindObjectOfType<ChampionHudSession>();
+                if (!WorldMapSession.IsMapOpen && hudSession != null && hudSession.IsOpen)
+                {
+                    hudSession.CloseMenu();
+                }
+
                 WorldMapSession.ToggleMap();
-                return;
-            }
-
-            if (GameInput.SharedMenuPressed())
-            {
-                WorldMapSession.ToggleSharedMenu();
-                return;
-            }
-
-            if (!GameInput.CancelPressed())
-            {
-                return;
-            }
-
-            if (WorldMapSession.IsMapOpen)
-            {
-                WorldMapSession.CloseMap();
-            }
-            else if (WorldMapSession.IsMenuOpen)
-            {
-                WorldMapSession.CloseSharedMenu();
-            }
-            else
-            {
-                WorldMapSession.OpenSharedMenu();
             }
         }
 

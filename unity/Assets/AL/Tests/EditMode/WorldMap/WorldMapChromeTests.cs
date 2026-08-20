@@ -82,30 +82,20 @@ namespace AL.Tests.EditMode.WorldMap
         }
 
         [Test]
-        public void OverlayOpensAndClosesFromSessionAndSharedMenuEntry()
+        public void OverlayOpensAndClosesFromSession()
         {
             WorldAtlasSnapshot snapshot = LoadSnapshot();
             WorldMapOverlay overlay = WorldMapOverlay.Ensure(snapshot);
             _spawned.Add(overlay.gameObject);
 
             GameObject mapVeil = FindDeep(overlay.transform, "WorldMap_Veil");
-            GameObject menuVeil = FindDeep(overlay.transform, "SharedMenu_Veil");
             Assert.That(mapVeil, Is.Not.Null);
-            Assert.That(menuVeil, Is.Not.Null);
             Assert.That(WorldMapSession.IsMapOpen, Is.False);
             Assert.That(mapVeil.activeSelf, Is.False);
-            Assert.That(menuVeil.activeSelf, Is.False);
 
-            WorldMapSession.OpenSharedMenu();
-            Assert.That(WorldMapSession.IsMenuOpen, Is.True);
-            Assert.That(menuVeil.activeSelf, Is.True);
-            Assert.That(FindDeep(overlay.transform, WorldMapIds.MenuModuleWorldMap), Is.Not.Null);
-            Assert.That(FindDeep(overlay.transform, WorldMapIds.MenuModuleKingdom).GetComponent<Button>().interactable, Is.False);
-
-            WorldMapSession.OpenMapFromSharedMenu();
+            WorldMapSession.OpenMap();
             Assert.That(WorldMapSession.IsMapOpen, Is.True);
             Assert.That(mapVeil.activeSelf, Is.True);
-            Assert.That(menuVeil.activeSelf, Is.False);
             Assert.That(AL.Input.GameInput.GameplaySuppressed, Is.True);
 
             Assert.That(FindDeep(overlay.transform, "zone_inner_stonehold"), Is.Not.Null);

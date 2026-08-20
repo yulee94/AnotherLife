@@ -1,4 +1,5 @@
 using AL.UI.Presentation;
+using AL.UI.WorldMap;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,7 @@ namespace AL.UI.SharedMenu
     public sealed class SharedMenuOverlay : MonoBehaviour
     {
         public SharedMenuModuleState State { get; private set; }
+        public Button WorldMapButton { get; private set; }
         public Button KingdomButton { get; private set; }
         public Button ResumeButton { get; private set; }
         public Text HeaderLabel { get; private set; }
@@ -59,8 +61,8 @@ namespace AL.UI.SharedMenu
                 new Vector2(0.5f, 0.5f),
                 new Vector2(0.5f, 0.5f),
                 Vector2.zero,
-                new Vector2(720f, 420f));
-            AddMetalEdge(plate.transform, new Vector2(720f, 420f));
+                new Vector2(720f, 500f));
+            AddMetalEdge(plate.transform, new Vector2(720f, 500f));
 
             HeaderLabel = PresentationChrome.CreateLabel(
                 plate.transform,
@@ -90,6 +92,30 @@ namespace AL.UI.SharedMenu
                 new Vector2(PresentationChrome.SpaceMd, -64f),
                 new Vector2(672f, 28f));
 
+            WorldMapButton = PresentationChrome.CreateHit(
+                plate.transform,
+                WorldMapIds.MenuModuleWorldMap,
+                PresentationChrome.StoneInset,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(PresentationChrome.SpaceMd, -108f),
+                new Vector2(672f, 72f));
+            AddMetalEdge(WorldMapButton.transform, new Vector2(672f, 72f));
+            PresentationChrome.CreateLabel(
+                WorldMapButton.transform,
+                "WorldMapLabel",
+                font,
+                WorldMapIds.SharedMenuWorldMapLabel,
+                PresentationChrome.ActionSize,
+                PresentationChrome.Ink,
+                TextAnchor.MiddleLeft,
+                Vector2.zero,
+                Vector2.one,
+                new Vector2(0.5f, 0.5f),
+                new Vector2(PresentationChrome.SpaceSm, 0f),
+                new Vector2(-PresentationChrome.SpaceSm * 2f, 0f));
+
             Button kingdom = PresentationChrome.CreateHit(
                 plate.transform,
                 SharedMenuIds.KingdomButtonName,
@@ -97,11 +123,11 @@ namespace AL.UI.SharedMenu
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
-                new Vector2(PresentationChrome.SpaceMd, -108f),
-                new Vector2(672f, 148f));
+                new Vector2(PresentationChrome.SpaceMd, -196f),
+                new Vector2(672f, 132f));
             KingdomButton = kingdom;
             KingdomButton.interactable = state.CanInvoke && state.Visible;
-            AddMetalEdge(kingdom.transform, new Vector2(672f, 148f));
+            AddMetalEdge(kingdom.transform, new Vector2(672f, 132f));
 
             TitleLabel = PresentationChrome.CreateLabel(
                 kingdom.transform,
@@ -222,6 +248,20 @@ namespace AL.UI.SharedMenu
             if (action != null && State.CanInvoke)
             {
                 KingdomButton.onClick.AddListener(action);
+            }
+        }
+
+        public void BindWorldMap(UnityEngine.Events.UnityAction action)
+        {
+            if (WorldMapButton == null)
+            {
+                return;
+            }
+
+            WorldMapButton.onClick.RemoveAllListeners();
+            if (action != null)
+            {
+                WorldMapButton.onClick.AddListener(action);
             }
         }
     }

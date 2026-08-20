@@ -3,6 +3,7 @@ using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.Input;
 using AL.UI.SharedMenu;
+using AL.UI.WorldMap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -58,11 +59,13 @@ namespace AL.ChampionMode.UI
 
         public void OpenMenu()
         {
+            WorldMapSession.CloseMap();
             SharedMenuModuleState state = KingdomManagementUnlock.EvaluateKingdomManagement(
                 ResolveSave(),
                 inCombat: _inCombat != null && _inCombat(),
                 unsafeContext: _unsafeContext != null && _unsafeContext());
             _overlay = SharedMenuOverlay.Ensure(state);
+            _overlay.BindWorldMap(OpenWorldMap);
             _overlay.ResumeButton.onClick.RemoveAllListeners();
             _overlay.ResumeButton.onClick.AddListener(CloseMenu);
             _overlay.KingdomButton.onClick.RemoveAllListeners();
@@ -99,6 +102,12 @@ namespace AL.ChampionMode.UI
             }
         }
 
+        public void OpenWorldMap()
+        {
+            CloseMenu();
+            WorldMapSession.OpenMap();
+        }
+
         public void NotifyRecap(bool open)
         {
             ChampionHudCameraGate.RecapOpen = open;
@@ -116,7 +125,14 @@ namespace AL.ChampionMode.UI
 
         private void Update()
         {
-            if (!GameInput.CancelPressed())
+            bool cancelPressed = GameInput.CancelPressed();
+            if (cancelPressed && WorldMapSession.IsMapOpen)
+            {
+                WorldMapSession.CloseMap();
+                return;
+            }
+
+            if (!cancelPressed && !GameInput.SharedMenuPressed())
             {
                 return;
             }

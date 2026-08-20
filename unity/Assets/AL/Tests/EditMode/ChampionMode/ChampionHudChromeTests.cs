@@ -3,6 +3,7 @@ using AL.ChampionMode.UI;
 using AL.Data.Runtime;
 using AL.UI.Presentation;
 using AL.UI.SharedMenu;
+using AL.UI.WorldMap;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
@@ -18,6 +19,7 @@ namespace AL.Tests.EditMode.ChampionMode
         {
             FirstSessionChampionStart.ResetToFirstSessionLanding();
             ChampionHudCameraGate.Reset();
+            WorldMapSession.ResetStatics();
             Time.timeScale = 1f;
             _root = new GameObject("ChampionMode_HUD", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
         }
@@ -27,6 +29,7 @@ namespace AL.Tests.EditMode.ChampionMode
         {
             FirstSessionChampionStart.ResetToFirstSessionLanding();
             ChampionHudCameraGate.Reset();
+            WorldMapSession.ResetStatics();
             Time.timeScale = 1f;
             SharedMenuOverlay[] leftovers = Object.FindObjectsOfType<SharedMenuOverlay>();
             for (int i = 0; i < leftovers.Length; i++)
@@ -79,10 +82,24 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.That(session.Overlay.DetailLabel.text, Does.Contain("Proof of Worth"));
             Assert.That(session.Overlay.HeaderLabel.text, Is.EqualTo(SharedMenuCopy.MenuHeader));
             Assert.That(session.Overlay.KingdomButton.name, Is.EqualTo(SharedMenuIds.KingdomButtonName));
+            Assert.That(session.Overlay.WorldMapButton.name, Is.EqualTo(WorldMapIds.MenuModuleWorldMap));
             Assert.That(ChampionHudChrome.UsesPresentationFont(session.Overlay.transform), Is.True);
 
             session.CloseMenu();
             Assert.IsFalse(session.IsOpen);
+            Assert.AreEqual(1f, Time.timeScale);
+        }
+
+        [Test]
+        public void SharedMenuWorldMapEntryClosesMenuAndOpensMap()
+        {
+            ChampionHudSession session = ChampionHudSession.Attach(_root.transform);
+            session.OpenMenu();
+
+            session.Overlay.WorldMapButton.onClick.Invoke();
+
+            Assert.IsFalse(session.IsOpen);
+            Assert.IsTrue(WorldMapSession.IsMapOpen);
             Assert.AreEqual(1f, Time.timeScale);
         }
 

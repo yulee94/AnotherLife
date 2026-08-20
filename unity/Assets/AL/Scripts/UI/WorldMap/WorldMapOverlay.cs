@@ -1,3 +1,4 @@
+using AL.ChampionMode.UI;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.UI.RealmSelection;
 using UnityEngine;
@@ -13,7 +14,6 @@ namespace AL.UI.WorldMap
     {
         private WorldMapPresentation _presentation;
         private GameObject _mapRoot;
-        private GameObject _menuRoot;
 
         public WorldMapPresentation Presentation => _presentation;
 
@@ -55,12 +55,18 @@ namespace AL.UI.WorldMap
                 _mapRoot.SetActive(WorldMapSession.IsMapOpen);
             }
 
-            if (_menuRoot != null)
+            bool mapOpen = WorldMapSession.IsMapOpen;
+            GameInputBridge.ApplySuppression(mapOpen);
+            if (mapOpen)
             {
-                _menuRoot.SetActive(WorldMapSession.IsMenuOpen);
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
             }
-
-            GameInputBridge.ApplySuppression(WorldMapSession.IsBlockingGameplay);
+            else if (!ChampionHudCameraGate.BlocksLook)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
 
         private void OnEnable()
@@ -84,7 +90,6 @@ namespace AL.UI.WorldMap
             Canvas canvas = CreateCanvas(transform);
             Font font = RealmSelectionIdentity.ResolvePresentationFont(22);
             _mapRoot = BuildMap(canvas.transform, font);
-            _menuRoot = BuildSharedMenu(canvas.transform, font);
         }
 
         private GameObject BuildMap(Transform parent, Font font)
@@ -126,43 +131,6 @@ namespace AL.UI.WorldMap
             return veil.gameObject;
         }
 
-        private GameObject BuildSharedMenu(Transform parent, Font font)
-        {
-            Image veil = CreatePanel(parent, "SharedMenu_Veil", new Color(0.015f, 0.018f, 0.025f, 0.82f), Vector2.zero, Vector2.one);
-            veil.raycastTarget = true;
-
-            Image plate = CreatePanel(
-                veil.transform,
-                "SharedMenu_Plate",
-                new Color(0.05f, 0.055f, 0.065f, 0.98f),
-                new Vector2(0.32f, 0.22f),
-                new Vector2(0.68f, 0.78f));
-            CreateText(plate.transform, "SharedMenu_Title", font, WorldMapIds.SharedMenuTitle, 26, new Vector2(0.08f, 0.82f), new Vector2(0.92f, 0.96f), TextAnchor.MiddleLeft, new Color(0.93f, 0.86f, 0.62f));
-
-            Button worldMap = CreateButton(
-                plate.transform,
-                WorldMapIds.MenuModuleWorldMap,
-                font,
-                WorldMapIds.SharedMenuWorldMapLabel,
-                new Vector2(0.08f, 0.52f),
-                new Vector2(0.92f, 0.74f),
-                WorldMapSession.OpenMapFromSharedMenu);
-            worldMap.GetComponent<Image>().color = new Color(0.16f, 0.15f, 0.12f, 0.96f);
-
-            Button kingdom = CreateButton(
-                plate.transform,
-                WorldMapIds.MenuModuleKingdom,
-                font,
-                WorldMapIds.SharedMenuKingdomLabel + "\n" + WorldMapIds.SharedMenuKingdomLock,
-                new Vector2(0.08f, 0.22f),
-                new Vector2(0.92f, 0.46f),
-                null);
-            kingdom.interactable = false;
-            kingdom.GetComponent<Image>().color = new Color(0.08f, 0.08f, 0.09f, 0.92f);
-
-            CreateButton(plate.transform, "SharedMenu_Close", font, "Close", new Vector2(0.08f, 0.05f), new Vector2(0.92f, 0.16f), WorldMapSession.CloseSharedMenu);
-            return veil.gameObject;
-        }
 
         private static void DrawInner(Transform viewport, Font font, WorldMapInnerRealm inner)
         {

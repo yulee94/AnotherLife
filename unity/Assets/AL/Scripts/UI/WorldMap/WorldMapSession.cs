@@ -5,8 +5,7 @@ namespace AL.UI.WorldMap
     public enum WorldMapSurface
     {
         Closed = 0,
-        Map = 1,
-        SharedMenu = 2
+        Map = 1
     }
 
     /// <summary>
@@ -19,8 +18,6 @@ namespace AL.UI.WorldMap
         public static WorldMapSurface Surface { get; private set; }
 
         public static bool IsMapOpen => Surface == WorldMapSurface.Map;
-
-        public static bool IsMenuOpen => Surface == WorldMapSurface.SharedMenu;
 
         public static bool IsBlockingGameplay => Surface != WorldMapSurface.Closed;
 
@@ -42,33 +39,12 @@ namespace AL.UI.WorldMap
             Set(IsMapOpen ? WorldMapSurface.Closed : WorldMapSurface.Map);
         }
 
-        public static void OpenSharedMenu()
-        {
-            Set(WorldMapSurface.SharedMenu);
-        }
-
-        public static void CloseSharedMenu()
-        {
-            if (IsMenuOpen)
-            {
-                Set(WorldMapSurface.Closed);
-            }
-        }
-
-        public static void ToggleSharedMenu()
-        {
-            Set(IsMenuOpen ? WorldMapSurface.Closed : WorldMapSurface.SharedMenu);
-        }
 
         public static void CloseAll()
         {
             Set(WorldMapSurface.Closed);
         }
 
-        public static void OpenMapFromSharedMenu()
-        {
-            Set(WorldMapSurface.Map);
-        }
 
         public static void ResetStatics()
         {
