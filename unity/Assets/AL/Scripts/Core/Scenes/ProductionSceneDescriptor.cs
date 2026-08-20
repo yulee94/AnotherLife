@@ -19,7 +19,7 @@ namespace AL.Core.Scenes
         /// Descriptor source version stamped into every production scene startup marker and asserted
         /// by the marker and validator. Bumped only by a descriptor-changing PR (#223 seam, decision D4).
         /// </summary>
-        public const string SourceVersion = "223.1";
+        public const string SourceVersion = "223.2";
 
         public const string SceneFolder = "Assets/AL/Scenes";
 
@@ -28,6 +28,7 @@ namespace AL.Core.Scenes
         // Scene identifiers (spec section 5 "Recommended IDs").
         public const string BootSceneId = "al_scene_boot";
         public const string RealmSelectionSceneId = "al_scene_realm_selection";
+        public const string CharacterCreationSceneId = "al_scene_character_creation";
         public const string KingdomSceneId = "al_scene_kingdom";
         public const string ChampionArenaSceneId = "al_scene_champion_arena";
         public const string TestSceneId = "al_scene_test_representative";
@@ -35,7 +36,9 @@ namespace AL.Core.Scenes
         // Role tokens emitted verbatim in the [AL-SCENE-ACTIVE] marker log (spec section 6).
         public const string RoleProductionEntry = "production_entry";
         public const string RoleOnboardingSelection = "onboarding_selection";
+        public const string RoleOnboardingCreation = "onboarding_creation";
         public const string RoleProductionHub = "production_hub";
+        public const string RoleFirstSessionGameplay = "first_session_gameplay";
         public const string RoleDeferredGameplay = "deferred_gameplay";
         public const string RoleRepresentativeTestOnly = "representative_test_only";
 
@@ -78,7 +81,24 @@ namespace AL.Core.Scenes
             startupMarkerId: RealmSelectionSceneId,
             transitionTargets: new[]
             {
-                new SceneTransition(KingdomSceneId, "_nextScene", "Kingdom", TransitionStatus.Active)
+                new SceneTransition(CharacterCreationSceneId, "_nextScene", "CharacterCreation", TransitionStatus.Active)
+            },
+            buildProfiles: new[] { ShellFoundationProfile },
+            requiredUpstreamIssues: Array.Empty<int>(),
+            status: StatusCommittedActive,
+            isProductionScene: true);
+
+        private static readonly ProductionSceneRecord CharacterCreationRecord = new ProductionSceneRecord(
+            sceneId: CharacterCreationSceneId,
+            assetPath: SceneFolder + "/CharacterCreation.unity",
+            sceneName: "CharacterCreation",
+            role: RoleOnboardingCreation,
+            assetGuid: "c3d4e5f60718293a4b5c6d7e8f901234",
+            requiredControllerType: "AL.UI.CharacterCreation.CharacterCreationController",
+            startupMarkerId: CharacterCreationSceneId,
+            transitionTargets: new[]
+            {
+                new SceneTransition(ChampionArenaSceneId, "_combatSceneName", "ChampionArena", TransitionStatus.Active)
             },
             buildProfiles: new[] { ShellFoundationProfile },
             requiredUpstreamIssues: Array.Empty<int>(),
@@ -93,13 +113,12 @@ namespace AL.Core.Scenes
             assetGuid: "dea6fe75315c3402fbfa8de764bd9873",
             requiredControllerType: "AL.UI.Kingdom.KingdomSceneController",
             startupMarkerId: KingdomSceneId,
-            // Kingdom -> ChampionArena is a descriptor-only deferred record (decision D3a). Current
-            // KingdomSceneController on main carries no arena scene field and no SceneManager.LoadScene,
-            // so this transition intentionally has no serialized source field. The unsafe reset-to-Boot
-            // route (stale spec section 4.3) is NOT an accepted production transition and is absent here.
+            // Kingdom -> ChampionArena is a descriptor-only active record so the first-session 3D
+            // scene stays loadable. Current KingdomSceneController still has no arena scene field.
+            // The unsafe reset-to-Boot route is NOT an accepted production transition.
             transitionTargets: new[]
             {
-                new SceneTransition(ChampionArenaSceneId, null, "ChampionArena", TransitionStatus.Deferred)
+                new SceneTransition(ChampionArenaSceneId, null, "ChampionArena", TransitionStatus.Active)
             },
             buildProfiles: new[] { ShellFoundationProfile },
             requiredUpstreamIssues: Array.Empty<int>(),
@@ -110,7 +129,7 @@ namespace AL.Core.Scenes
             sceneId: ChampionArenaSceneId,
             assetPath: SceneFolder + "/ChampionArena.unity",
             sceneName: "ChampionArena",
-            role: RoleDeferredGameplay,
+            role: RoleFirstSessionGameplay,
             assetGuid: "9c8e973279bb149b49b9938b1781c775",
             requiredControllerType: "AL.ChampionMode.ChampionArenaSceneController",
             startupMarkerId: ChampionArenaSceneId,
@@ -118,11 +137,11 @@ namespace AL.Core.Scenes
             {
                 new SceneTransition(KingdomSceneId, "_kingdomSceneName", "Kingdom", TransitionStatus.Active)
             },
-            // Committed as scene authority but excluded from every build profile until #178 (release
-            // reachability) and #180 (encounter/combat lifecycle) pass (spec decision 5, section 6.4).
-            buildProfiles: Array.Empty<string>(),
-            requiredUpstreamIssues: new[] { 178, 180 },
-            status: StatusCommittedDeferred,
+            // First-session 3D destination after CharacterCreation. Shared Menu / 2.5D kingdom stay
+            // locked until lordship; this only makes the scene loadable.
+            buildProfiles: new[] { ShellFoundationProfile },
+            requiredUpstreamIssues: Array.Empty<int>(),
+            status: StatusCommittedActive,
             isProductionScene: true);
 
         private static readonly ProductionSceneRecord TestRecord = new ProductionSceneRecord(
@@ -146,6 +165,7 @@ namespace AL.Core.Scenes
             {
                 BootRecord,
                 RealmSelectionRecord,
+                CharacterCreationRecord,
                 KingdomRecord,
                 ChampionArenaRecord,
                 TestRecord
@@ -155,23 +175,26 @@ namespace AL.Core.Scenes
             new ReadOnlyCollection<ProductionSceneRecord>(
                 AllRecords.Where(record => record.IsProductionScene).ToArray());
 
-        // Boot(0), RealmSelection(1), Kingdom(2) in exact order. Consumed by the later #150
-        // ApplyProductionBuildSettings/validator; kept here so the ordering has one owner (spec section 7).
+        // Boot(0), RealmSelection(1), CharacterCreation(2), ChampionArena(3), Kingdom(4).
+        // First-session spine is Boot → Realm → Create → ChampionArena. Kingdom stays loadable
+        // for Boot/ChampionArena return routes and post-lordship hub work.
         private static readonly ReadOnlyCollection<ProductionSceneRecord> ShellFoundationRecords =
             new ReadOnlyCollection<ProductionSceneRecord>(new[]
             {
                 BootRecord,
                 RealmSelectionRecord,
+                CharacterCreationRecord,
+                ChampionArenaRecord,
                 KingdomRecord
             });
 
-        /// <summary>All five descriptor records (four production scenes plus the representative test scene).</summary>
+        /// <summary>All six descriptor records (five production scenes plus the representative test scene).</summary>
         public static IReadOnlyList<ProductionSceneRecord> All => AllRecords;
 
-        /// <summary>The four committed production scenes (excludes the representative Test scene).</summary>
+        /// <summary>The five committed production scenes (excludes the representative Test scene).</summary>
         public static IReadOnlyList<ProductionSceneRecord> ProductionScenes => ProductionRecords;
 
-        /// <summary>Boot, RealmSelection, Kingdom in the exact ShellFoundation build order (spec section 7).</summary>
+        /// <summary>Boot, RealmSelection, CharacterCreation, ChampionArena, Kingdom in ShellFoundation order.</summary>
         public static IReadOnlyList<ProductionSceneRecord> ShellFoundationOrdered => ShellFoundationRecords;
 
         /// <summary>

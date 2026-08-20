@@ -183,6 +183,11 @@ namespace AL.Data.Runtime
         public float AccentB = 0.18f;
         public bool CapeEnabled = true;
         public bool HelmetEnabled;
+        // Additive schema-v1 nested slot for the 3D-first MVP loop.
+        // Omitted on pre-change saves; default empty/false and stay loadable.
+        public string ClassFamilyId = string.Empty;
+        public bool IdentityConfirmed;
+        public string LastResultId = string.Empty;
     }
 
     [Serializable]

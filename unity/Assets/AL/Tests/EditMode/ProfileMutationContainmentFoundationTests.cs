@@ -71,6 +71,7 @@ namespace AL.Tests.EditMode
                     ProfileMutationSurfaceIds.KingdomNvs01,
                     ProfileMutationSurfaceIds.RealmSelection,
                     ProfileMutationSurfaceIds.Nvs01Progress,
+                    ProfileMutationSurfaceIds.MvpLoop,
                     ProfileMutationSurfaceIds.DeleteSave
                 },
                 descriptors.Select(item => item.StableId).ToArray());
@@ -258,7 +259,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void SchemaOneAuthorityUsesOnlyNarrowRealmAndNvsAdapters()
+        public void SchemaOneAuthorityUsesNarrowRealmNvsAndMvpLoopAdapters()
         {
             Assembly runtime = typeof(LocalSaveGameService).Assembly;
             Assert.NotNull(runtime.GetType(
@@ -267,6 +268,9 @@ namespace AL.Tests.EditMode
             Assert.NotNull(runtime.GetType(
                 "AL.Services.Local.INvs01LegacyCandidateStore",
                 throwOnError: false));
+            Assert.NotNull(runtime.GetType(
+                "AL.Services.Local.ILegacyMvpLoopCandidateStore",
+                throwOnError: false));
 
             string source = ReadScript(
                 "Services/Local/ISaveGameCandidateStore.cs");
@@ -274,6 +278,7 @@ namespace AL.Tests.EditMode
                 "ILegacyRealmSelectionCandidateStore",
                 source);
             StringAssert.Contains("INvs01LegacyCandidateStore", source);
+            StringAssert.Contains("ILegacyMvpLoopCandidateStore", source);
         }
 
         [Test]

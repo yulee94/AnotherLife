@@ -1856,13 +1856,13 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private static bool AreGameplayInputsNeutral()
         {
-            return !Input.anyKey &&
-                   Input.touchCount == 0 &&
-                   !Input.GetMouseButton(0) &&
-                   !Input.GetMouseButton(1) &&
-                   !Input.GetMouseButton(2) &&
-                   Mathf.Abs(Input.GetAxisRaw("Horizontal")) < 0.001f &&
-                   Mathf.Abs(Input.GetAxisRaw("Vertical")) < 0.001f;
+            return !UnityEngine.Input.anyKey &&
+                   UnityEngine.Input.touchCount == 0 &&
+                   !UnityEngine.Input.GetMouseButton(0) &&
+                   !UnityEngine.Input.GetMouseButton(1) &&
+                   !UnityEngine.Input.GetMouseButton(2) &&
+                   Mathf.Abs(UnityEngine.Input.GetAxisRaw("Horizontal")) < 0.001f &&
+                   Mathf.Abs(UnityEngine.Input.GetAxisRaw("Vertical")) < 0.001f;
         }
 
         private void HandleSceneLoaded(Scene scene, LoadSceneMode mode)

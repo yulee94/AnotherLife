@@ -170,7 +170,8 @@ namespace AL.Tests.EditMode.GameDataCatalog
                 "sub_character_policy",
                 "text",
                 "uncommitted_meaning",
-                "uncommitted_profile_state");
+                "uncommitted_profile_state",
+                "visual_identity");
             AssertExactFields(
                 Family(registry, "character_customization"),
                 "accent_color",
