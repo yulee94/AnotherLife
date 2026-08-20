@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "realmIds": [
+    "crownlands",
+    "stonehold",
+    "eldergrove",
+    "umbral"
+  ],
+  "legacyRealmNames": [
+    "Crownlands",
+    "Stonehold",
+    "Eldergrove",
+    "Umbral"
+  ],
+  "gemIds": [
+    "gem_crownlands_sun",
+    "gem_crownlands_oath",
+    "gem_stonehold_forge",
+    "gem_stonehold_depth",
+    "gem_eldergrove_root",
+    "gem_eldergrove_moon",
+    "gem_umbral_veil",
+    "gem_umbral_ember"
+  ],
+  "buildingIds": [
+    "town_hall",
+    "farm",
+    "lumber_mill",
+    "quarry",
+    "gold_mine",
+    "barracks",
+    "academy",
+    "market",
+    "storehouse",
+    "forge",
+    "stable",
+    "workshop",
+    "embassy",
+    "wall",
+    "watchtower",
+    "mana_shrine"
+  ],
+  "legacyBuildingIds": [
+    "TownHall",
+    "Farm",
+    "LumberMill",
+    "Quarry",
+    "GoldMine",
+    "Barracks",
+    "Academy",
+    "Market",
+    "Storehouse",
+    "Forge",
+    "Stable",
+    "Workshop",
+    "Embassy",
+    "Wall",
+    "Watchtower"
+  ],
+  "warzoneCredits": 123456,
+  "territoryIncomePerMinute": 50,
+  "chapter1Ids": [
+    "ch01_proof_of_worth",
+    "ch01_stonehold",
+    "ch01_eldergrove",
+    "ch01_crownlands",
+    "ch01_umbral"
+  ],
+  "legacyChapterReferences": [
+    "C1",
+    "C1_SH",
+    "C1_EG",
+    "C1_CL",
+    "C1_UM",
+    "CH01_PROOF_OF_WORTH"
+  ]
+}

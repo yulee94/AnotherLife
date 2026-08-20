@@ -22,27 +22,30 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
-        public void RealmSelectionTransitionResolvesToKingdom()
+        public void RealmSelectionTransitionResolvesToCharacterCreation()
         {
-            AssertActiveTransitionResolves("al_scene_realm_selection", "al_scene_kingdom", "_nextScene", "Kingdom");
+            AssertActiveTransitionResolves("al_scene_realm_selection", "al_scene_character_creation", "_nextScene", "CharacterCreation");
         }
 
         [Test]
-        public void KingdomChampionArenaTransitionIsDeferredDescriptorRecord()
+        public void CharacterCreationTransitionResolvesToChampionArena()
+        {
+            AssertActiveTransitionResolves("al_scene_character_creation", "al_scene_champion_arena", "_combatSceneName", "ChampionArena");
+        }
+
+        [Test]
+        public void KingdomChampionArenaTransitionIsActiveDescriptorRecord()
         {
             object kingdom = R.RecordById("al_scene_kingdom");
             var transitions = R.Transitions(kingdom);
             object arena = transitions.FirstOrDefault(t => R.PropString(t, "TargetSceneId") == "al_scene_champion_arena");
             Assert.NotNull(arena, "Kingdom must carry a descriptor transition to ChampionArena.");
-            Assert.AreEqual("Deferred", R.Prop(arena, "Status").ToString());
+            Assert.AreEqual("Active", R.Prop(arena, "Status").ToString());
+            Assert.IsFalse(R.PropBool(arena, "HasSerializedField"), "Kingdom->ChampionArena remains descriptor-only (no serialized field).");
 
-            // Descriptor-only: no serialized controller field on main (KingdomSceneController has no arena field).
-            Assert.IsFalse(R.PropBool(arena, "HasSerializedField"), "Kingdom->ChampionArena must be descriptor-only (no serialized field).");
-
-            // Deferred target still resolves as scene authority even though it is excluded from ShellFoundation.
             object arenaRecord = R.RecordById("al_scene_champion_arena");
             Assert.AreEqual("ChampionArena", R.PropString(arenaRecord, "SceneName"));
-            Assert.IsEmpty(R.AsStrings(R.Prop(arenaRecord, "BuildProfiles")));
+            Assert.That(R.AsStrings(R.Prop(arenaRecord, "BuildProfiles")), Does.Contain("ShellFoundation"));
         }
 
         [Test]

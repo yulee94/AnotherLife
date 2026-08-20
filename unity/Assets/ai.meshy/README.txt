@@ -6,7 +6,7 @@ License: GPL-3.0
 
 DESCRIPTION
 -----------
-A streamlined Unity plugin that enables direct 3D model import from Meshy.ai 
+A streamlined Unity plugin that enables direct 3D model import from Meshy.ai
 web interface to Unity Editor through a local bridge server.
 
 FEATURES

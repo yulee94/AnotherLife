@@ -1,0 +1,30 @@
+{
+  "task": "t_bb2a487f",
+  "prefab": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Prefabs/tdf_fauna_stonehold_slagwhistle_burrower_lod0_v001.prefab",
+  "scene": "Assets/AL/Scenes/Prototype/Terrestrials/SlagfallQuarryRepresentativeSlice.unity",
+  "hasPrefab": true,
+  "hasScene": true,
+  "skinnedTriangles": 9200,
+  "staticTriangles": 0,
+  "bones": 38,
+  "rendererMaterials": 1,
+  "lossyScale": "(1.0000, 1.0000, 1.0000)",
+  "forward": "(0.0000, 0.0000, 1.0000)",
+  "bounds": "center=(-0.0001,0.3052,-0.0082) size=(1.5421,1.0960,2.0309) minY=-0.2428",
+  "material": {
+    "path": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Materials/M_Slagwhistle_LOD0.mat",
+    "albedo": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Textures/tdf_fauna_stonehold_slagwhistle_burrower_color_1k_v001.png",
+    "normal": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Textures/tdf_fauna_stonehold_slagwhistle_burrower_normal_1k_v001.png",
+    "occlusionPacked": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Textures/tdf_fauna_stonehold_slagwhistle_burrower_packed_1k_v001.png",
+    "metallicGlossDerived": "Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Materials/tdf_fauna_stonehold_slagwhistle_burrower_metallicgloss_derived_1k_v001.png"
+  },
+  "import": {
+    "unityForward": "+Z",
+    "scale": "1 unit/m",
+    "pivot": "ground-center (authored in FBX)",
+    "bakeAxisConversion": true,
+    "animationClips": 0,
+    "runtimeCatalogRecord": false,
+    "playerBuildSettings": false
+  }
+}

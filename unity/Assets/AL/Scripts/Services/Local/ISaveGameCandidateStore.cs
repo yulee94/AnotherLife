@@ -107,6 +107,15 @@ namespace AL.Services.Local
     }
 
     /// <summary>
+    /// Schema-v1 3D-first MVP loop mutation entry point. It carries no
+    /// caller-provided mutation callback.
+    /// </summary>
+    internal interface ILegacyMvpLoopCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitLegacyMvpLoop(MvpLoopCommitRequest request);
+    }
+
+    /// <summary>
     /// The only schema-v1 narrative mutation entry point. The complete typed
     /// NVS-01 plan and verified catalog are interpreted inside the save root;
     /// callers cannot supply an arbitrary save mutation callback.

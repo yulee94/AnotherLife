@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-quest-preview-content.schema.json",
+  "title": "Another Life Quest Preview Content Catalog",
+  "description": "Schema for al_quest_preview_content_catalog.json. Catalog-owned IDs (actions, location markers, quest previews) are lowercase snake_case. questId/speakerId/sourceSemanticAction are external NVS source references (OMEN_1 packet) and are not canonicalized here.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "sourceAuthorities", "previewPolicy", "actions", "prohibitedReleaseActions",
+    "locationMarkers", "questPreviews", "statusCopy", "draftLocalization",
+    "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_quest_preview_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case_for_catalog_ids" },
+    "sourceAuthorities": { "type": "object" },
+    "previewPolicy": { "type": "object" },
+    "actions": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/actionRecord" }
+    },
+    "prohibitedReleaseActions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/prohibitedActionRecord" }
+    },
+    "locationMarkers": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/locationMarkerRecord" }
+    },
+    "questPreviews": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/questPreviewRecord" }
+    },
+    "statusCopy": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/statusCopyRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "actionRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "status", "mutatesAuthoritativeState"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^action_[a-z][a-z0-9_]*$" },
+        "displayNameKey": { "type": "string" },
+        "sourceSemanticAction": { "type": "string" },
+        "requiredCapability": { "type": "string" },
+        "requiredState": { "type": "string" },
+        "status": { "type": "string" },
+        "mutatesAuthoritativeState": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "prohibitedActionRecord": {
+      "type": "object",
+      "required": ["id", "reason"],
+      "properties": {
+        "id": { "type": "string" },
+        "reason": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "locationMarkerRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacyMarkerId", "displayNameKey", "summaryKey",
+        "worldAtlasZoneId", "status"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^location_[a-z][a-z0-9_]*$" },
+        "legacyMarkerId": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "worldAtlasZoneId": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "statusCopyRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "questPreviewRecord": {
+      "type": "object",
+      "required": ["id", "questId", "previewRole", "releaseAvailability"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^quest_preview_[a-z][a-z0-9_]*$" },
+        "questId": { "type": "string" },
+        "sourceVersion": { "type": "string" },
+        "previewRole": { "type": "string" },
+        "releaseAvailability": { "type": "string" },
+        "status": { "type": "string" },
+        "reason": { "type": "string" },
+        "titleKey": { "type": "string" },
+        "descriptionKey": { "type": "string" },
+        "speakerId": { "type": "string" },
+        "locationMarkerId": { "type": "string" },
+        "progressModel": { "$ref": "#/$defs/progressModel" },
+        "displayObjectives": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/displayObjectiveRecord" }
+        },
+        "rewardSummaryKeys": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "rewardTiming": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/rewardTimingRecord" }
+        },
+        "availableActions": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "progressModel": {
+      "type": "object",
+      "required": ["kind", "validStates", "rawIntegerProgressAllowed", "androidProgressBarAuthority"],
+      "properties": {
+        "kind": { "type": "string" },
+        "validStates": { "type": "array", "items": { "type": "string" } },
+        "rawIntegerProgressAllowed": { "type": "boolean" },
+        "androidProgressBarAuthority": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "displayObjectiveRecord": {
+      "type": "object",
+      "required": ["objectiveId", "textKey"],
+      "properties": {
+        "objectiveId": { "type": "string" },
+        "textKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "rewardTimingRecord": {
+      "type": "object",
+      "required": ["rewardId", "trigger", "manualClaimAllowed"],
+      "properties": {
+        "rewardId": { "type": "string" },
+        "trigger": { "type": "string" },
+        "manualClaimAllowed": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    }
+  }
+}
