@@ -48,6 +48,7 @@ namespace AL.Input
         public static InputAction Skill4 => Map["Skill4"];
         public static InputAction Submit => Map["Submit"];
         public static InputAction Cancel => Map["Cancel"];
+        public static InputAction Interact => Map["Interact"];
 
         // ---- Lifecycle ----
 
@@ -126,6 +127,8 @@ namespace AL.Input
 
         public static bool CancelPressed() => Cancel.WasPressedThisFrame();
 
+        public static bool InteractPressed() => Interact.WasPressedThisFrame();
+
         // ---- Touch ----
 
         public static int TouchCount
@@ -202,6 +205,9 @@ namespace AL.Input
 
             var cancel = map.AddAction("Cancel", InputActionType.Button, "<Keyboard>/escape");
             cancel.AddBinding("<Gamepad>/buttonEast");
+
+            var interact = map.AddAction("Interact", InputActionType.Button, "<Keyboard>/f");
+            interact.AddBinding("<Gamepad>/buttonNorth");
 
             return map;
         }
