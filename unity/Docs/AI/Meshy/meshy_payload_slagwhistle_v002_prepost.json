@@ -1,0 +1,24 @@
+{
+  "operation": "image_to_3d",
+  "httpMethod": "POST",
+  "endpoint": "https://api.meshy.ai/openapi/v1/image-to-3d",
+  "provider": "Meshy",
+  "ai_model": "meshy-6",
+  "orderedInputCount": 1,
+  "input": {
+    "file": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v002.png",
+    "sha256": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+    "byteLength": 2521039
+  },
+  "params": {
+    "enable_pbr": true,
+    "should_texture": true,
+    "target_formats": ["glb", "fbx"]
+  },
+  "retryOf": {
+    "priorAuthorizationId": "a1_slagwhistle_slagfall_fauna_20260818_v001",
+    "priorProviderTaskId": "01a013e9-8545-7a68-a055-206ea84d3cad",
+    "priorFinalStatus": "FAILED",
+    "userDecision": "2026-08-19 t_1e666a71 retry with fresh A1"
+  }
+}
