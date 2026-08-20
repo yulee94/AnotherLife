@@ -219,6 +219,7 @@ namespace AL.Services.Local
         ISaveOperationDispositionProvider,
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
+        ILegacyMvpLoopCandidateStore,
         INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
     {
@@ -252,6 +253,8 @@ namespace AL.Services.Local
             "al.save.schema1.realm-selection.v1";
         private const string LegacyNvs01OperationId =
             "al.save.schema1.nvs01.v1";
+        private const string LegacyMvpLoopOperationId =
+            "al.save.schema1.mvp-loop.v1";
 
         private static readonly ProfileWriteAuthoritySnapshot
             MigrationRequiredPrimary =
@@ -986,6 +989,73 @@ namespace AL.Services.Local
         }
 
         SaveCandidateCommitResult
+            ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
+                MvpLoopCommitRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyCandidateRejected("AL-MVP-LOOP-TRANSACTION-INVALID");
+            }
+
+            if (!TryEnterLegacyCandidateCoordinator(LegacyMvpLoopOperationId))
+            {
+                return LegacyCandidateRejected("AL-MVP-LOOP-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyPrimaryProfile(out SaveGameData published))
+                {
+                    return LegacyCandidateRejected("AL-MVP-LOOP-PROFILE-READ-ONLY");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits.LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-MVP-LOOP-AUTHORITY-CONFLICT");
+                    }
+
+                    MvpLoopPrepareDisposition disposition =
+                        MvpLoopSaveCodec.PrepareCandidate(
+                            candidate,
+                            request,
+                            out string prepareMessage);
+                    if (candidate.SelectedRealm != expectedRealm)
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-MVP-LOOP-AUTHORITY-CONFLICT");
+                    }
+
+                    switch (disposition)
+                    {
+                        case MvpLoopPrepareDisposition.Duplicate:
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        case MvpLoopPrepareDisposition.Prepared:
+                            return SaveCandidateMutationPreparation.Prepared();
+                        default:
+                            return SaveCandidateMutationPreparation.Rejected(
+                                string.IsNullOrWhiteSpace(prepareMessage)
+                                    ? "AL-MVP-LOOP-REQUEST-INVALID"
+                                    : prepareMessage);
+                    }
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
+        SaveCandidateCommitResult
             INvs01LegacyCandidateStore.TryCommitNvs01LegacyCandidate(
                 Nvs01MutationPlan plan,
                 Nvs01VerifiedCatalog verifiedCatalog)
@@ -1082,7 +1152,7 @@ namespace AL.Services.Local
             return new SaveCandidateCommitResult(
                 SaveCandidateCommitOutcome.ReadOnly,
                 _currentSave,
-                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only the typed realm-selection and NVS-01 adapters.");
+                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only the typed realm-selection, NVS-01, and MVP-loop adapters.");
         }
 
         private SaveCandidateCommitResult TryCommitLegacyCandidateCore(
@@ -1404,6 +1474,10 @@ namespace AL.Services.Local
                 !string.Equals(
                     operationId,
                     LegacyNvs01OperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyMvpLoopOperationId,
                     StringComparison.Ordinal))
             {
                 return false;
@@ -6570,7 +6644,10 @@ namespace AL.Services.Local
                         "sword"),
                     new SaveSemanticStableIdRule(
                         SaveSemanticStableIdKind.OffhandStyle,
-                        "shield")
+                        "shield"),
+                    new SaveSemanticStableIdRule(
+                        SaveSemanticStableIdKind.Building,
+                        MvpLoopSaveCodec.DefaultOneBuildId)
                 });
             return new SaveSemanticValidationPolicy(
                 SaveGameData.CurrentSaveFormatId,

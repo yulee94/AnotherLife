@@ -437,14 +437,13 @@ namespace AL.EditorTools
             }
 
             ProductionSceneRecord[] records = ProductionSceneDescriptor.ShellFoundationOrdered.ToArray();
-            if (records.Length != 3 ||
+            if (records.Length != 5 ||
                 records.Any(record => record == null || !record.IsProductionScene || !record.IsInShellFoundation) ||
                 records.Any(record =>
-                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal) ||
-                    string.Equals(record.SceneId, ProductionSceneDescriptor.ChampionArenaSceneId, StringComparison.Ordinal)) ||
+                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal)) ||
                 records.Select(record => record.AssetPath).Distinct(StringComparer.Ordinal).Count() != records.Length)
             {
-                failures.Add("ShellFoundation descriptor is not three unique production scenes with Test/Champion excluded.");
+                failures.Add("ShellFoundation descriptor is not five unique production scenes with Test excluded.");
             }
 
             string[] scenes = records

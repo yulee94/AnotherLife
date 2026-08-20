@@ -65,6 +65,8 @@ namespace AL.Tests.EditMode.ProductionScenes
                 {
                     "Assets/AL/Scenes/Boot.unity",
                     "Assets/AL/Scenes/RealmSelection.unity",
+                    "Assets/AL/Scenes/CharacterCreation.unity",
+                    "Assets/AL/Scenes/ChampionArena.unity",
                     "Assets/AL/Scenes/Kingdom.unity"
                 },
                 EditorBuildSettings.scenes.Select(scene => scene.path).ToArray(),
@@ -74,7 +76,8 @@ namespace AL.Tests.EditMode.ProductionScenes
 
             string text = System.Text.Encoding.UTF8.GetString(after);
             Assert.That(text, Does.Not.Contain("Assets/Test.unity"));
-            Assert.That(text, Does.Not.Contain("Assets/AL/Scenes/ChampionArena.unity"));
+            Assert.That(text, Does.Contain("Assets/AL/Scenes/ChampionArena.unity"));
+            Assert.That(text, Does.Contain("Assets/AL/Scenes/CharacterCreation.unity"));
         }
 
         [Test]
