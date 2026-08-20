@@ -2,6 +2,8 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Presentation;
+using AL.ChampionMode.Quests;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
@@ -152,6 +154,7 @@ namespace AL.ChampionMode
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private RealmId _realmId = RealmId.None;
+        private bool _guardianTrialStarted;
         private FirstSessionInnerRealmSpawn _innerSpawn;
 
         private void Start()
@@ -172,6 +175,20 @@ namespace AL.ChampionMode
             ApplyFirstSessionPresentationBudgets();
             BuildArena();
             BuildHud();
+            if (FirstSessionChampionStart.ShouldRunProofOfWorth)
+            {
+                if (_bossTransform != null)
+                {
+                    _bossTransform.gameObject.SetActive(false);
+                }
+
+                ProofOfWorthDirector.AttachIfNeeded(
+                    transform,
+                    this,
+                    _playerController != null ? _playerController.transform : null,
+                    _realmId);
+            }
+
             if (FirstSessionChampionStart.AutoStartFirstFight)
             {
                 if (!TryBindFirstFightCatalog())
@@ -247,6 +264,35 @@ namespace AL.ChampionMode
             return true;
         }
 
+        public bool GuardianTrialCleared =>
+            _guardianTrialStarted && _boss != null && _boss.IsDead;
+
+        public bool TryStartGuardianTrial()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                return false;
+            }
+
+            if (_bossTransform != null && !_bossTransform.gameObject.activeSelf)
+            {
+                _bossTransform.gameObject.SetActive(true);
+            }
+
+            if (!TryBindFirstFightCatalog())
+            {
+                return false;
+            }
+
+            if (!_guardianTrialStarted)
+            {
+                _guardianTrialStarted = true;
+                StartCoroutine(EncounterIntroRoutine());
+            }
+
+            return true;
+        }
+
         private void Update()
         {
             if (_playerController == null)
@@ -305,19 +351,27 @@ namespace AL.ChampionMode
             BuildArenaEnvironment();
             Color realmAccent = GetRealmAccentColor(_realmId);
 
-            var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            player.name = "Player_Champion";
-            player.tag = "Player";
-            player.transform.position = _innerSpawn != null
+            Vector3 playerPosition = _innerSpawn != null
                 ? _innerSpawn.Position
                 : new Vector3(0f, 1.1f, -7.4f);
+            var player = ChampionPresentationBinder.CreateAndBind(
+                playerPosition,
+                _realmId,
+                out _);
+            if (player == null)
+            {
+                Debug.LogError(
+                    "AL-CHAMPION-PRESENTATION-BIND: first-session body could not resolve a champion.");
+                enabled = false;
+                return;
+            }
+
             ApplyMaterial(player, new Color(0.16f, 0.34f, 0.78f), 0.15f, 0.55f);
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
             _playerController = player.AddComponent<ChampionController>();
             _playerController.ConfigureRealmContext(_realmId);
-            ProceduralChampionModelBuilder.EnsureModel(player);
-            _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _playerCustomization = player.GetComponent<ChampionCustomizationController>();
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
