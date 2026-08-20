@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
@@ -11,130 +10,18 @@ namespace AL.Services.Local
 {
     public class LocalGameDataService : IGameDataService
     {
-        private Dictionary<RealmId, RealmDefinition> _realms = new Dictionary<RealmId, RealmDefinition>();
-        private Dictionary<string, BuildingDefinition> _buildings = new Dictionary<string, BuildingDefinition>();
-        private Dictionary<string, ResearchState> _researchDefaults = new Dictionary<string, ResearchState>();
-        private Dictionary<string, ChampionDefinition> _champions = new Dictionary<string, ChampionDefinition>();
+        private readonly SixFamilyRuntimeSnapshot _catalog;
 
         public LocalGameDataService()
+            : this(SixFamilyRuntimeCatalog.LoadOrThrow())
         {
-            InitializeFallbackData();
-            InitializeAutomatedContent();
+        }
+
+        internal LocalGameDataService(SixFamilyRuntimeSnapshot catalog)
+        {
+            _catalog = catalog ?? throw new InvalidOperationException(
+                "AL-GDC-SIX-FAMILY-MISSING: catalog snapshot is required.");
             InitializeStoryData();
-            InitializeChampionArchetypes();
-        }
-
-        private void InitializeFallbackData()
-        {
-            // Factions
-            CreateFallbackRealm(RealmId.Stonehold, "Stonehold Dwarves", "Mountain kings and master smiths.\n\nPerks:\n+20% Stone\n+10% Def", "Perks: Resilience");
-            CreateFallbackRealm(RealmId.Eldergrove, "Eldergrove Elves", "Forest guardians and peerless mages.\n\nPerks:\n+20% Wood\n+15% Magic", "Perks: Harmony");
-            CreateFallbackRealm(RealmId.Crownlands, "Crownlands Humans", "Adaptive leaders of the central plains.\n\nPerks:\n+15% Gold\n+10% All Atk", "Perks: Ambition");
-            CreateFallbackRealm(RealmId.Umbral, "Umbral Dark Elves", "Masters of shadow and volcanic power.\n\nPerks:\n+20% Crit\n+15% Speed", "Perks: Cunning");
-        }
-
-        private void InitializeAutomatedContent()
-        {
-            // 15 Core Buildings
-            string[] bIds = { "TownHall", "Farm", "LumberMill", "Quarry", "GoldMine", "Barracks", "Academy", "Market", "Storehouse", "Forge", "Stable", "Workshop", "Embassy", "Wall", "Watchtower" };
-            foreach (var bId in bIds)
-            {
-                var def = ScriptableObject.CreateInstance<BuildingDefinition>();
-                def.Id = bId;
-                def.DisplayName = bId.Replace("Mill", " Mill").Replace("Hall", " Hall").Replace("Mine", " Mine");
-                def.MaxLevel = 10;
-                def.ConstructionLevels = CreateConstructionLevels(bId);
-                _buildings[bId] = def;
-            }
-
-            // Tech Tree
-            string[] techs = { "Steel Forging", "Plate Armor", "Advanced Masonry", "Irrigation", "Ballistics", "Logistics", "Trade Routes", "Arcane Study" };
-            foreach (var tech in techs)
-            {
-                _researchDefaults[tech] = new ResearchState { ResearchId = tech, Level = 0 };
-            }
-        }
-
-        private void InitializeChampionArchetypes()
-        {
-            // Greybox champion archetypes (hardcoded, one per class family, realm-aligned).
-            // These are the "hardcoded LocalGameDataService archetypes" the character creation
-            // screen surfaces. IDs are lowercase snake_case per the data-ID convention.
-            AddChampion(
-                "champion_stonehold_vanguard",
-                "Bronn Ironhide",
-                RealmId.Stonehold,
-                ClassFamily.Warrior,
-                SubclassId.Vanguard,
-                new ChampionBaseStats { MaxHealth = 1250, MaxMana = 80, Attack = 55, Defense = 45, Speed = 8, CritRate = 5 },
-                "greataxe", "towershield",
-                new[] { ("skill_iron_bulwark", "Iron Bulwark", SkillTargetType.Self), ("skill_shield_slam", "Shield Slam", SkillTargetType.Single) });
-
-            AddChampion(
-                "champion_eldergrove_archmage",
-                "Lyra Moonshadow",
-                RealmId.Eldergrove,
-                ClassFamily.Mage,
-                SubclassId.Archmage,
-                new ChampionBaseStats { MaxHealth = 820, MaxMana = 150, Attack = 78, Defense = 18, Speed = 10, CritRate = 8 },
-                "staff", "tome",
-                new[] { ("skill_arcane_bolt", "Arcane Bolt", SkillTargetType.Single), ("skill_verdant_nova", "Verdant Nova", SkillTargetType.AoE) });
-
-            AddChampion(
-                "champion_crownlands_sharpshooter",
-                "Aurelia Dawnblade",
-                RealmId.Crownlands,
-                ClassFamily.Ranger,
-                SubclassId.Sharpshooter,
-                new ChampionBaseStats { MaxHealth = 900, MaxMana = 110, Attack = 62, Defense = 26, Speed = 15, CritRate = 20 },
-                "longbow", "quiver",
-                new[] { ("skill_piercing_shot", "Piercing Shot", SkillTargetType.Single), ("skill_hawk_eye", "Hawk Eye", SkillTargetType.Self) });
-
-            AddChampion(
-                "champion_umbral_shadowblade",
-                "Vex Nocturne",
-                RealmId.Umbral,
-                ClassFamily.Assassin,
-                SubclassId.Shadowblade,
-                new ChampionBaseStats { MaxHealth = 850, MaxMana = 100, Attack = 72, Defense = 16, Speed = 22, CritRate = 30 },
-                "twinblades", "shroud",
-                new[] { ("skill_shadowstep", "Shadowstep", SkillTargetType.Self), ("skill_umbral_execute", "Umbral Execute", SkillTargetType.Single) });
-        }
-
-        private void AddChampion(
-            string id,
-            string displayName,
-            RealmId realm,
-            ClassFamily family,
-            SubclassId subclass,
-            ChampionBaseStats baseStats,
-            string weaponStyleId,
-            string offhandStyleId,
-            (string Id, string DisplayName, SkillTargetType TargetType)[] skills)
-        {
-            var champion = ScriptableObject.CreateInstance<ChampionDefinition>();
-            champion.Id = id;
-            champion.DisplayName = displayName;
-            champion.Realm = realm;
-            champion.Family = family;
-            champion.Subclass = subclass;
-            champion.BaseStats = baseStats;
-            champion.WeaponStyleId = weaponStyleId;
-            champion.OffhandStyleId = offhandStyleId;
-
-            champion.BaseSkills = new SkillDefinition[skills.Length];
-            for (int i = 0; i < skills.Length; i++)
-            {
-                var skill = ScriptableObject.CreateInstance<SkillDefinition>();
-                skill.Id = skills[i].Id;
-                skill.DisplayName = skills[i].DisplayName;
-                skill.TargetType = skills[i].TargetType;
-                skill.Cooldown = 6f;
-                skill.Power = 1f;
-                champion.BaseSkills[i] = skill;
-            }
-
-            _champions[id] = champion;
         }
 
         private void InitializeStoryData()
@@ -187,7 +74,6 @@ namespace AL.Services.Local
 
         private void InitializeSkillSoulQuests()
         {
-            // All 16 Subclass Soul Quests
             AddSoulQuest(SubclassId.Vanguard, "Frontline Eternity", "Stand as the immovable object against the Celestial Tide.");
             AddSoulQuest(SubclassId.Guardian, "The Unbreakable Vow", "Protect the Celestial Gate from an infinite onslaught.");
             AddSoulQuest(SubclassId.Berserker, "Primal Rage", "Tame a legendary star-lion in a cosmic storm.");
@@ -213,7 +99,6 @@ namespace AL.Services.Local
             quest.AssociatedSubclass = subclass;
             quest.Title = title;
             quest.Description = description;
-            // Additional registration logic if needed
         }
 
         private void AddChapter(RealmId realmId, string id, string title, string summary)
@@ -224,204 +109,12 @@ namespace AL.Services.Local
             chapter.LoreSummary = summary;
         }
 
-        private void CreateFallbackRealm(RealmId id, string name, string desc, string perks)
-        {
-            var realm = ScriptableObject.CreateInstance<RealmDefinition>();
-            realm.Id = id;
-            realm.RealmName = name;
-            realm.Description = $"{desc}\n\n{perks}";
-            _realms[id] = realm;
-        }
-
-        private static List<BuildingConstructionLevelDefinition> CreateConstructionLevels(
-            string buildingId)
-        {
-            int[] baseCosts =
-            {
-                100, 175, 300, 475, 700, 1000, 1400, 1900, 2500, 3250
-            };
-            int[] durations =
-            {
-                10, 30, 120, 300, 900, 1800, 3600, 7200, 14400, 28800
-            };
-
-            int scalePercent = GetConstructionCostScalePercent(buildingId);
-            var levels = new List<BuildingConstructionLevelDefinition>(10);
-            for (int index = 0; index < baseCosts.Length; index++)
-            {
-                long budget = checked((baseCosts[index] * (long)scalePercent + 99L) / 100L);
-                levels.Add(new BuildingConstructionLevelDefinition
-                {
-                    TargetLevel = index + 1,
-                    DurationSeconds = durations[index],
-                    Costs = CreateConstructionCosts(buildingId, budget)
-                });
-            }
-
-            return levels;
-        }
-
-        private static int GetConstructionCostScalePercent(string buildingId)
-        {
-            switch (buildingId)
-            {
-                case "TownHall": return 140;
-                case "Farm":
-                case "LumberMill": return 80;
-                case "Quarry":
-                case "Market": return 90;
-                case "Storehouse": return 85;
-                case "GoldMine":
-                case "Stable":
-                case "Watchtower": return 100;
-                case "Barracks":
-                case "Workshop": return 110;
-                case "Forge": return 115;
-                case "Academy":
-                case "Embassy": return 120;
-                case "Wall": return 95;
-                default: return 100;
-            }
-        }
-
-        private static List<BuildingConstructionCostDefinition> CreateConstructionCosts(
-            string buildingId,
-            long budget)
-        {
-            switch (buildingId)
-            {
-                case "Farm":
-                case "LumberMill":
-                    return SplitCost(budget, ResourceType.Wood, 70, ResourceType.Stone, 30);
-                case "Quarry":
-                case "GoldMine":
-                    return SplitCost(budget, ResourceType.Wood, 40, ResourceType.Stone, 60);
-                case "Barracks":
-                case "Wall":
-                case "Watchtower":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        55,
-                        ResourceType.Wood,
-                        30,
-                        ResourceType.Gold,
-                        15);
-                case "Academy":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        40,
-                        ResourceType.Wood,
-                        25,
-                        ResourceType.ManaStone,
-                        35);
-                case "Forge":
-                case "Workshop":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        45,
-                        ResourceType.Wood,
-                        25,
-                        ResourceType.Ore,
-                        30);
-                case "Market":
-                case "Embassy":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Wood,
-                        45,
-                        ResourceType.Stone,
-                        25,
-                        ResourceType.Gold,
-                        30);
-                case "Stable":
-                    return SplitCost(
-                        budget,
-                        ResourceType.Wood,
-                        55,
-                        ResourceType.Stone,
-                        25,
-                        ResourceType.Gold,
-                        20);
-                case "Storehouse":
-                    return SplitCost(budget, ResourceType.Wood, 60, ResourceType.Stone, 40);
-                case "TownHall":
-                default:
-                    return SplitCost(
-                        budget,
-                        ResourceType.Stone,
-                        45,
-                        ResourceType.Wood,
-                        35,
-                        ResourceType.Gold,
-                        20);
-            }
-        }
-
-        private static List<BuildingConstructionCostDefinition> SplitCost(
-            long budget,
-            ResourceType firstType,
-            int firstPercent,
-            ResourceType secondType,
-            int secondPercent,
-            ResourceType? thirdType = null,
-            int thirdPercent = 0)
-        {
-            if (budget <= 0 ||
-                firstPercent <= 0 ||
-                secondPercent <= 0 ||
-                firstPercent + secondPercent + thirdPercent != 100 ||
-                (thirdPercent > 0 && !thirdType.HasValue))
-            {
-                throw new InvalidOperationException(
-                    "Building construction cost profile is invalid.");
-            }
-
-            long firstAmount = Math.Max(1L, budget * firstPercent / 100L);
-            long secondAmount = Math.Max(1L, budget * secondPercent / 100L);
-            long thirdAmount = thirdPercent > 0
-                ? Math.Max(1L, budget - firstAmount - secondAmount)
-                : 0L;
-            if (thirdPercent == 0)
-            {
-                secondAmount = Math.Max(1L, budget - firstAmount);
-            }
-
-            var costs = new List<BuildingConstructionCostDefinition>
-            {
-                new BuildingConstructionCostDefinition
-                {
-                    ResourceType = firstType,
-                    Amount = firstAmount
-                },
-                new BuildingConstructionCostDefinition
-                {
-                    ResourceType = secondType,
-                    Amount = secondAmount
-                }
-            };
-
-            if (thirdType.HasValue)
-            {
-                costs.Add(new BuildingConstructionCostDefinition
-                {
-                    ResourceType = thirdType.Value,
-                    Amount = thirdAmount
-                });
-            }
-
-            return costs;
-        }
-
-        public RealmDefinition GetRealm(RealmId id) => _realms.TryGetValue(id, out var r) ? r : null;
-        public IEnumerable<RealmDefinition> GetAllRealms() => _realms.Values;
-        public BuildingDefinition GetBuilding(string id) => _buildings.TryGetValue(id, out var b) ? b : null;
-        public TroopDefinition GetTroop(string id) => null; // To be implemented
-        public ChampionDefinition GetChampion(string id) =>
-            string.IsNullOrEmpty(id) || !_champions.TryGetValue(id, out var c) ? null : c;
-        public IEnumerable<ChampionDefinition> GetAllChampions() => _champions.Values;
-        public SkillDefinition GetSkill(string id) => null; // To be implemented
+        public RealmDefinition GetRealm(RealmId id) => _catalog.GetRealm(id);
+        public IEnumerable<RealmDefinition> GetAllRealms() => _catalog.GetAllRealms();
+        public BuildingDefinition GetBuilding(string id) => _catalog.GetBuilding(id);
+        public TroopDefinition GetTroop(string id) => null; // Troops remain not_authored_unavailable.
+        public ChampionDefinition GetChampion(string id) => _catalog.GetChampion(id);
+        public IEnumerable<ChampionDefinition> GetAllChampions() => _catalog.GetAllChampions();
+        public SkillDefinition GetSkill(string id) => null; // Skills family is name-only in content maps.
     }
 }
