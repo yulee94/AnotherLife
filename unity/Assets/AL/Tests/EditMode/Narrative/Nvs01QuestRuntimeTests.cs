@@ -922,7 +922,7 @@ namespace AL.Tests.EditMode.Narrative
             }
             Assert.NotNull(diagnostic);
             Assert.AreEqual(diagnosticCode, Property(diagnostic, "Code"));
-            Assert.AreEqual("omen1-a1-2026-07-29-v003", Property(diagnostic, "PacketVersion"));
+            Assert.AreEqual("omen1-a1-2026-08-13-v004", Property(diagnostic, "PacketVersion"));
             Assert.AreEqual(QuestId, Property(diagnostic, "QuestId"));
             Assert.False(string.IsNullOrWhiteSpace((string)Property(diagnostic, "StateId")));
         }

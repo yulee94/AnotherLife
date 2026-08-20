@@ -3,11 +3,12 @@
 ## Control
 
 - Milestone: NVS-01, A1
-- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-07-29-v003`
+- Packet: `OMEN_1_A1.packet.json`, version `omen1-a1-2026-08-13-v004`
 - Primary mode: Codex narrative/content
 - Upstream decision: issue #138, comment `4966062298`
 - Tracked task: issue #128
-- Starting main: `1cfceef816f27616e1fb9c1d8d90fa79ccce11e8`
+- v004 amendment base: `238c7e32d2f3d33e4da6e186ae34ed279b09f35e`
+- Accepted dependency: draft PR #479 at `ac56c77f08a5fe46a76458f2b91b5240bc2ae382`
 
 ## Scope and fidelity
 
@@ -37,17 +38,30 @@ localization meaning remain unchanged. G1, generated runtime data, validation,
 adapters, and production integration require separate downstream
 synchronization under issue #365.
 
+Version `v004` removes direct `KINGDOM_COMMAND_VIEW` completion authority and
+hands completion to `CH1_REALM_INTRO`. It also deletes only the premature
+"My lord, " address from `dialogue.omen1.offer`; the key and the remainder of
+the approved source sentence are unchanged. The offer remains `OFFERED`,
+requires `SELECT_VALERIUS`, and cannot auto-accept. The final localized value
+remains a separate copy-approval surface. Lord appointment, kingdom grant, and
+Kingdom Management access are earned later through the appended Chapter 1
+objectives accepted through PR #479.
+
+The v004 source packet is 8,247 bytes, Git blob
+`93f4eab24aac17fed83179bae19c2c4c8c71f16e`, and SHA-256
+`25a5170334fca571abe1035eacf448955e8eab1124ff08643f7d16be9a1b69dd`.
+
 ## Boundaries
 
 No Android runtime model, navigation, UI, Gradle, Unity runtime service, scene, save file, shared integration file, complete Chapter 1 content, or Android↔Unity bridge is changed. The existing Kotlin archive remains historical/runtime preview material and is not made authoritative by this packet.
 
-The focused PowerShell validator is included only to satisfy #128's packet acceptance matrix. It validates IDs, internal references, state/objective/dialogue targets, D1–D16 presence, localization coverage, requested external classification, reachability, and consequence-trigger conflicts, and exercises eleven negative fixtures. It is not a general authoring framework.
+The focused PowerShell validator is included only to satisfy #128's packet acceptance matrix. It validates IDs, internal references, state/objective/dialogue targets, D1–D16 presence, localization coverage, exact v004 placement and capability inventory, requested external classification, reachability, consequence-trigger conflicts, and the pre-appointment title boundary. It exercises seventeen negative fixtures and is not a general authoring framework.
 
 ## External dependencies and limitations
 
-The Sky Castle marker, Deploy Champion action, arena request/results, artifact persistence, realm Chapter 1 unlock, command-view return, localization runtime, and save/resume mechanics remain requested engineering capabilities. A1 defines their narrative meaning only. G1 must specify technical contracts, persistence, atomicity, correlation, validation, and idempotency before implementation.
+The Sky Castle marker, Deploy Champion action, arena request/results, artifact persistence, realm Chapter 1 handoff, localization runtime, and save/resume mechanics remain requested engineering capabilities. `KINGDOM_COMMAND_VIEW` is no longer an OMEN_1 completion capability. G1 must specify technical contracts, persistence, atomicity, correlation, validation, and idempotency before implementation.
 
-No unresolved creative decision remains within the approved A1 scope.
+Final localized copy remains unapproved. The unchanged legacy `500 Gold` reward wording and effect remain a separate #477 reconciliation dependency; v004 does not reinterpret or migrate them.
 
 ## Validation and handoff
 
@@ -55,9 +69,8 @@ Run:
 
 ```powershell
 pwsh -NoProfile -File tools/narrative/Test-Omen1A1Packet.ps1
-./gradlew.bat :app:testDebugUnitTest :app:assembleDebug --no-daemon
 ```
 
 Exact results are recorded in the PR description after execution.
 
-Codex coordination/review: review this clean A1 packet against issue #138 D1–D16, issue #128, AGENTS.md, the Phase 1 risk register, and ownership boundaries. Do not implement or rewrite narrative in this review. If complete and user-approved, activate #133 and produce G1 from `NVS_01_G1_Specification_Template.md`.
+Codex coordination/review: review this clean A1 packet against issue #138 D1–D16, issue #128, PR #479, AGENTS.md, the Phase 1 risk register, and ownership boundaries. Engineering must synchronize the generated runtime catalog and contracts in a separate downstream change; this source report does not claim runtime integration, user approval, or release readiness.

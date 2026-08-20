@@ -1,10 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Runtime.CompilerServices;
 using AL.Core;
 using AL.Core.SaveAuthority;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+
+[assembly: InternalsVisibleTo("AL.Nvs01.Persistence.Tests")]
+[assembly: InternalsVisibleTo("AL.Development.FirstUserGameTest.Editor")]
 
 namespace AL.Narrative.Nvs01
 {
@@ -144,7 +148,7 @@ namespace AL.Narrative.Nvs01
     {
         private readonly IReadOnlyDictionary<string, bool> _availability;
 
-        public Nvs01CapabilitySnapshot(IDictionary<string, bool> availability)
+        internal Nvs01CapabilitySnapshot(IDictionary<string, bool> availability)
         {
             if (availability == null) throw new ArgumentNullException(nameof(availability));
             if (availability.Count > Nvs01RuntimeContract.MaximumCapabilityCount)
@@ -165,6 +169,164 @@ namespace AL.Narrative.Nvs01
             if (string.IsNullOrEmpty(capabilityId)) return false;
             bool available;
             return _availability.TryGetValue(capabilityId, out available) && available;
+        }
+    }
+
+    internal sealed class Nvs01MountedConsumerRegistration
+    {
+        internal Nvs01MountedConsumerRegistration(
+            string consumerId,
+            string capabilityId,
+            string questId,
+            string packetVersion,
+            string packetSha256,
+            Func<bool> mountedProbe)
+        {
+            ConsumerId = Nvs01ContractGuard.RequireIdentifier(
+                consumerId,
+                nameof(consumerId));
+            CapabilityId = Nvs01ContractGuard.RequireIdentifier(
+                capabilityId,
+                nameof(capabilityId));
+            QuestId = Nvs01ContractGuard.RequireIdentifier(
+                questId,
+                nameof(questId));
+            PacketVersion = Nvs01ContractGuard.RequireIdentifier(
+                packetVersion,
+                nameof(packetVersion));
+            PacketSha256 = Nvs01ContractGuard.RequireIdentifier(
+                packetSha256,
+                nameof(packetSha256));
+            MountedProbe = mountedProbe ??
+                           throw new ArgumentNullException(
+                               nameof(mountedProbe));
+        }
+
+        internal string ConsumerId { get; }
+        internal string CapabilityId { get; }
+        internal string QuestId { get; }
+        internal string PacketVersion { get; }
+        internal string PacketSha256 { get; }
+        internal Func<bool> MountedProbe { get; }
+    }
+
+    internal sealed class Nvs01MountedConsumerRegistry
+    {
+        private static readonly Nvs01MountedConsumerRegistry EmptyRegistry =
+            new Nvs01MountedConsumerRegistry(
+                Array.Empty<Nvs01MountedConsumerRegistration>());
+
+        private readonly IReadOnlyList<Nvs01MountedConsumerRegistration>
+            _registrations;
+
+        internal Nvs01MountedConsumerRegistry(
+            IList<Nvs01MountedConsumerRegistration> registrations)
+        {
+            if (registrations == null)
+                throw new ArgumentNullException(nameof(registrations));
+            if (registrations.Count >
+                Nvs01RuntimeContract.MaximumCapabilityCount)
+            {
+                throw new ArgumentException(
+                    "Mounted consumer count exceeds the NVS-01 bound.",
+                    nameof(registrations));
+            }
+
+            var copy = new Nvs01MountedConsumerRegistration[
+                registrations.Count];
+            registrations.CopyTo(copy, 0);
+            _registrations = Array.AsReadOnly(copy);
+        }
+
+        internal static Nvs01MountedConsumerRegistry Empty => EmptyRegistry;
+
+        internal Nvs01CapabilitySnapshot Capture(
+            Nvs01VerifiedCatalog verifiedCatalog)
+        {
+            var availability = new Dictionary<string, bool>(
+                StringComparer.Ordinal);
+            if (verifiedCatalog == null)
+            {
+                return new Nvs01CapabilitySnapshot(availability);
+            }
+
+            Nvs01Catalog catalog = verifiedCatalog.Catalog;
+            foreach (Nvs01ExternalCapability capability in
+                     catalog.ExternalCapabilities)
+            {
+                availability.Add(capability.Id, false);
+            }
+
+            if (!string.Equals(
+                    verifiedCatalog.CatalogId,
+                    Nvs01CatalogContract.CatalogId,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    catalog.PacketVersion,
+                    Nvs01RuntimeContract.PacketVersion,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    verifiedCatalog.CanonicalSha256,
+                    Nvs01RuntimeContract.PacketSha256,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    catalog.QuestId,
+                    Nvs01RuntimeContract.QuestId,
+                    StringComparison.Ordinal))
+            {
+                return new Nvs01CapabilitySnapshot(availability);
+            }
+
+            foreach (Nvs01ExternalCapability capability in
+                     catalog.ExternalCapabilities)
+            {
+                Nvs01MountedConsumerRegistration match = null;
+                int matchCount = 0;
+                for (int index = 0; index < _registrations.Count; index++)
+                {
+                    Nvs01MountedConsumerRegistration registration =
+                        _registrations[index];
+                    if (registration == null ||
+                        !string.Equals(
+                            registration.CapabilityId,
+                            capability.Id,
+                            StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    match = registration;
+                    matchCount++;
+                }
+
+                if (matchCount != 1 || match == null ||
+                    !string.Equals(
+                        match.QuestId,
+                        catalog.QuestId,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
+                        match.PacketVersion,
+                        catalog.PacketVersion,
+                        StringComparison.Ordinal) ||
+                    !string.Equals(
+                        match.PacketSha256,
+                        verifiedCatalog.CanonicalSha256,
+                        StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    availability[capability.Id] = match.MountedProbe();
+                }
+                catch (Exception)
+                {
+                    availability[capability.Id] = false;
+                }
+            }
+
+            return new Nvs01CapabilitySnapshot(availability);
         }
     }
 

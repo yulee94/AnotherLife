@@ -2,12 +2,71 @@ using UnityEngine;
 using UnityEngine.UI;
 using AL.Core;
 using AL.ChampionMode.Skills;
-using AL.Input;
 using System.Collections;
 using System.Linq;
 
 namespace AL.ChampionMode.Control
 {
+#if UNITY_EDITOR
+    public enum ChampionBasicAttackResolutionKind
+    {
+        Invalid = 0,
+        Miss = 1,
+        Hit = 2,
+        Defeated = 3
+    }
+
+    public readonly struct ChampionBasicAttackContext
+    {
+        public ChampionBasicAttackContext(
+            ChampionController attacker,
+            int attackSequence,
+            Vector3 hitCenter,
+            float hitRadius,
+            Collider[] hitColliders,
+            RealmId realmId)
+        {
+            Attacker = attacker;
+            AttackSequence = attackSequence;
+            HitCenter = hitCenter;
+            HitRadius = hitRadius;
+            HitColliders = hitColliders ?? System.Array.Empty<Collider>();
+            RealmId = realmId;
+        }
+
+        public ChampionController Attacker { get; }
+        public int AttackSequence { get; }
+        public Vector3 HitCenter { get; }
+        public float HitRadius { get; }
+        public Collider[] HitColliders { get; }
+        public RealmId RealmId { get; }
+    }
+
+    public readonly struct ChampionBasicAttackResolution
+    {
+        public ChampionBasicAttackResolution(
+            ChampionBasicAttackResolutionKind kind,
+            Vector3 impactPosition,
+            string combatText)
+        {
+            Kind = kind;
+            ImpactPosition = impactPosition;
+            CombatText = combatText ?? string.Empty;
+        }
+
+        public ChampionBasicAttackResolutionKind Kind { get; }
+        public Vector3 ImpactPosition { get; }
+        public string CombatText { get; }
+    }
+
+    public interface IChampionBasicAttackResolver
+    {
+        bool TryResolve(
+            ChampionBasicAttackContext context,
+            out ChampionBasicAttackResolution resolution);
+    }
+#endif
+
     [RequireComponent(typeof(CharacterController))]
     public class ChampionController : MonoBehaviour
     {
@@ -31,11 +90,41 @@ namespace AL.ChampionMode.Control
         private bool _isDodging;
         private bool _isAttacking;
         private bool _controlsLocked;
-        private bool _touchBlockHeld;
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
         private RealmId _realmId = RealmId.None;
+#if UNITY_EDITOR
+        private IChampionBasicAttackResolver _editorBasicAttackResolver;
+        private int _editorBasicAttackSequence;
+
+        public int EditorBasicAttackSequence => _editorBasicAttackSequence;
+
+        public bool TryBindEditorBasicAttackResolver(
+            IChampionBasicAttackResolver resolver)
+        {
+            if (resolver == null || _editorBasicAttackResolver != null)
+            {
+                return false;
+            }
+
+            _editorBasicAttackResolver = resolver;
+            return true;
+        }
+
+        public bool TryUnbindEditorBasicAttackResolver(
+            IChampionBasicAttackResolver resolver)
+        {
+            if (resolver == null ||
+                !ReferenceEquals(_editorBasicAttackResolver, resolver))
+            {
+                return false;
+            }
+
+            _editorBasicAttackResolver = null;
+            return true;
+        }
+#endif
 
         private void Awake()
         {
@@ -85,9 +174,8 @@ namespace AL.ChampionMode.Control
             if (_isAttacking) return;
             RefreshCameraTransform();
 
-            Vector2 move = GameInput.ReadMove();
-            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : move.x;
-            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : move.y;
+            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : Input.GetAxis("Horizontal");
+            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : Input.GetAxis("Vertical");
 
             Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
@@ -127,18 +215,18 @@ namespace AL.ChampionMode.Control
                 return;
             }
 
-            if (GameInput.DodgePressed()) StartCoroutine(Dodge());
-            _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
+            if (Input.GetKeyDown(KeyCode.Space)) StartCoroutine(Dodge());
+            _isBlocking = Input.GetKey(KeyCode.LeftShift);
 
-            if (GameInput.AttackPressed() && !_isAttacking)
+            if (Input.GetMouseButtonDown(0) && !_isAttacking)
             {
                 StartCoroutine(PerformAttack());
             }
 
-            if (GameInput.SkillPressed(0)) RequestSkill(0);
-            if (GameInput.SkillPressed(1)) RequestSkill(1);
-            if (GameInput.SkillPressed(2)) RequestSkill(2);
-            if (GameInput.SkillPressed(3)) RequestSkill(3);
+            if (Input.GetKeyDown(KeyCode.Alpha1)) RequestSkill(0);
+            if (Input.GetKeyDown(KeyCode.Alpha2)) RequestSkill(1);
+            if (Input.GetKeyDown(KeyCode.Alpha3)) RequestSkill(2);
+            if (Input.GetKeyDown(KeyCode.Alpha4)) RequestSkill(3);
         }
 
         private IEnumerator PerformAttack()
@@ -149,7 +237,11 @@ namespace AL.ChampionMode.Control
             }
 
             _isAttacking = true;
-            GameDebug.Log("<color=orange>[Combat] Attacking!</color>");
+#if UNITY_EDITOR
+            _editorBasicAttackSequence++;
+            int editorAttackSequence = _editorBasicAttackSequence;
+#endif
+            Debug.Log("<color=orange>[Combat] Attacking!</color>");
             RuntimeCombatAudio.PlayBasicAttack();
 
             // 1. Lunge Forward
@@ -175,12 +267,74 @@ namespace AL.ChampionMode.Control
 
             bool hitAnything = false;
             bool hitBoss = false;
+#if UNITY_EDITOR
+            bool editorResolverBound = _editorBasicAttackResolver != null;
+            bool editorResolverAllowsMissFeedback = false;
+            if (editorResolverBound)
+            {
+                bool resolved = false;
+                ChampionBasicAttackResolution resolution = default;
+                try
+                {
+                    resolved = _editorBasicAttackResolver.TryResolve(
+                        new ChampionBasicAttackContext(
+                            this,
+                            editorAttackSequence,
+                            hitCenter,
+                            _attackRange,
+                            hitColliders,
+                            realmId),
+                        out resolution);
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogError(
+                        "[AL-FIRST-USER-ATTACK-RESOLVER-FAILED] " +
+                        exception.GetType().Name);
+                }
+
+                if (!resolved || resolution.Kind == ChampionBasicAttackResolutionKind.Invalid)
+                {
+                    Debug.LogError(
+                        "[AL-FIRST-USER-ATTACK-RESOLVER-FAILED] " +
+                        "The isolated resolver did not return an exact result.");
+                }
+                else if (resolution.Kind == ChampionBasicAttackResolutionKind.Miss)
+                {
+                    editorResolverAllowsMissFeedback = true;
+                }
+                else
+                {
+                    hitAnything = true;
+                    bool defeated =
+                        resolution.Kind == ChampionBasicAttackResolutionKind.Defeated;
+                    Debug.Log(defeated
+                        ? "<color=red>[Combat] Enemy Defeated!</color>"
+                        : "<color=red>[Combat] Enemy Hit!</color>");
+                    CreateHitVFX(resolution.ImpactPosition);
+                    SkillEffectFactory.SpawnFloatingCombatText(
+                        resolution.ImpactPosition + Vector3.up * 1.45f,
+                        string.IsNullOrEmpty(resolution.CombatText)
+                            ? defeated ? "KO" : "HIT"
+                            : resolution.CombatText,
+                        new Color(1f, 0.78f, 0.22f),
+                        0.26f,
+                        0.8f);
+                    SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
+                    SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
+                    RuntimeCombatAudio.PlayImpact();
+                }
+            }
+
+            if (!editorResolverBound)
+            {
+#endif
             foreach (var hitCollider in hitColliders)
             {
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
                 {
                     hitAnything = true;
-                    GameDebug.Log("<color=red>[Combat] Enemy Defeated!</color>");
+                    Debug.Log("<color=red>[Combat] Enemy Defeated!</color>");
 
                     // Visual Feedback
                     CreateHitVFX(hitCollider.transform.position);
@@ -204,10 +358,17 @@ namespace AL.ChampionMode.Control
                     }
                 }
             }
+#if UNITY_EDITOR
+            }
+#endif
 
-            if (!hitAnything)
+            if (!hitAnything
+#if UNITY_EDITOR
+                && (!editorResolverBound || editorResolverAllowsMissFeedback)
+#endif
+                )
             {
-                GameDebug.Log("[Combat] Attack Missed.");
+                Debug.Log("[Combat] Attack Missed.");
                 Vector3 whiffCenter = transform.position + transform.forward * 1.35f;
                 SkillEffectFactory.SpawnBasicAttackWhiff(whiffCenter, transform.forward, realmId);
                 SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.55f + transform.forward * 0.65f, "MISS", new Color(0.68f, 0.76f, 0.86f), 0.20f, 0.55f);
@@ -230,7 +391,7 @@ namespace AL.ChampionMode.Control
 
             if (remaining <= 0)
             {
-                GameDebug.Log("<color=gold>[Victory] REALM SECURED!</color>");
+                Debug.Log("<color=gold>[Victory] REALM SECURED!</color>");
                 ShowVictoryUI();
             }
         }
@@ -260,7 +421,7 @@ namespace AL.ChampionMode.Control
 
         private void UseSkill(int index)
         {
-            GameDebug.Log($"[Champion] Using Skill {index + 1}");
+            Debug.Log($"[Champion] Using Skill {index + 1}");
             _skillCaster?.TryCastSkill(index);
         }
 
@@ -350,20 +511,17 @@ namespace AL.ChampionMode.Control
         {
             if (_controlsLocked || _realmId == RealmId.None)
             {
-                _touchBlockHeld = false;
                 _isBlocking = false;
                 return;
             }
 
-            _touchBlockHeld = isBlocking;
-            _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
+            _isBlocking = isBlocking;
         }
 
         public void SetControlLocked(bool isLocked)
         {
             _controlsLocked = isLocked;
             _externalMoveInput = Vector2.zero;
-            _touchBlockHeld = false;
             _isBlocking = false;
             _velocity = Vector3.zero;
 

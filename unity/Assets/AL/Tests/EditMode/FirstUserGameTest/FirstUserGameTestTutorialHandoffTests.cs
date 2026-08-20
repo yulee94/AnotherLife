@@ -61,6 +61,41 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                 Is.EqualTo("ACTION_FOLLOW_ACTIVE_OBJECTIVE"));
         }
 
+        [Test]
+        public void FocusResumeReadDoesNotCreateMissingTutorialState()
+        {
+            var store = new FirstUserGameTestTutorialSessionStore(
+                SessionA,
+                GenerationA);
+
+            Assert.That(
+                store.TryLoadExisting(
+                    out FirstUserGameTestTutorialState missing,
+                    out string missingMessage),
+                Is.False);
+            Assert.That(missing, Is.Null);
+            Assert.That(missingMessage, Is.Not.Empty);
+            Assert.That(
+                store.TryLoadExisting(out missing, out _),
+                Is.False,
+                "A resume-time read must never recreate an erased tutorial record.");
+
+            Assert.That(
+                store.TryLoadOrCreate(
+                    out FirstUserGameTestTutorialState created,
+                    out string createMessage),
+                Is.True,
+                createMessage);
+            Assert.That(created, Is.Not.Null);
+            Assert.That(
+                store.TryLoadExisting(
+                    out FirstUserGameTestTutorialState retained,
+                    out string retainedMessage),
+                Is.True,
+                retainedMessage);
+            Assert.That(retained.ValueEquals(created), Is.True);
+        }
+
         [TestCase(null, GenerationA, TestName = "Initial_NullSession_Rejects")]
         [TestCase("", GenerationA, TestName = "Initial_EmptySession_Rejects")]
         [TestCase("0123456789ABCDEF0123456789ABCDEF", GenerationA,

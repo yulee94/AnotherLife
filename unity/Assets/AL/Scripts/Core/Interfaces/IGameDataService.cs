@@ -11,6 +11,7 @@ namespace AL.Core.Interfaces
         BuildingDefinition GetBuilding(string id);
         TroopDefinition GetTroop(string id);
         ChampionDefinition GetChampion(string id);
+        IEnumerable<ChampionDefinition> GetAllChampions();
         SkillDefinition GetSkill(string id);
     }
 }

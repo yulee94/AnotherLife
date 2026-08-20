@@ -68,7 +68,7 @@ namespace AL.Tests.EditMode.Customization
                 "0.5.0-test",
                 "fixture_v1",
                 hash ?? new string('0', 64),
-                "GameData/al_character_customization_catalog.json");
+                "GameData/character_customization.v1.json");
         }
 
         internal static CustomizationCatalogCandidate Candidate(

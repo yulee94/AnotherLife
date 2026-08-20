@@ -13,25 +13,21 @@ namespace AL.Tests.EditMode
     public class RealmSelectionIntegrityTests
     {
         private const string ValidCatalogJson = @"{
-  ""version"": ""0.1.0"",
-  ""catalogId"": ""al_realm_catalog"",
-  ""selectionPolicy"": {
-    ""selectionMode"": ""one_realm_per_account"",
-    ""realmLockScope"": ""account"",
-    ""subCharacterPolicy"": ""same_realm_only"",
-    ""sharedStoragePolicy"": ""same_realm_account_storage"",
-    ""crossRealmCreationPolicy"": ""reject"",
-    ""realmChangePolicy"": ""not_supported_after_commit"",
-    ""uncommittedProfileState"": ""realm_unselected"",
-    ""committedProfileState"": ""realm_locked""
-  },
-  ""realmOrder"": [""crownlands"", ""stonehold"", ""eldergrove"", ""umbral""],
-  ""realms"": [
-    { ""id"": ""crownlands"", ""legacyRuntimeId"": ""Crownlands"", ""displayName"": ""Crownlands"", ""realmGemIds"": [""gem_crownlands_sun"", ""gem_crownlands_oath""] },
-    { ""id"": ""stonehold"", ""legacyRuntimeId"": ""Stonehold"", ""displayName"": ""Stonehold"", ""realmGemIds"": [""gem_stonehold_forge"", ""gem_stonehold_depth""] },
-    { ""id"": ""eldergrove"", ""legacyRuntimeId"": ""Eldergrove"", ""displayName"": ""Eldergrove"", ""realmGemIds"": [""gem_eldergrove_root"", ""gem_eldergrove_moon""] },
-    { ""id"": ""umbral"", ""legacyRuntimeId"": ""Umbral"", ""displayName"": ""Umbral"", ""realmGemIds"": [""gem_umbral_veil"", ""gem_umbral_ember""] }
-  ]
+  ""gameId"": ""another-life"",
+  ""catalogId"": ""realm_specialized_v1"",
+  ""family"": ""realm_specialized"",
+  ""schemaVersion"": 1,
+  ""contentVersion"": ""1.0.0"",
+  ""sourceRevision"": ""t_d4892ee5"",
+  ""records"": [
+    { ""id"": ""selection_policy"", ""kind"": ""selection_policy"", ""selection_mode"": ""one_realm_per_account"", ""realm_lock_scope"": ""account"", ""sub_character_policy"": ""same_realm_only"", ""shared_storage_policy"": ""same_realm_account_storage"", ""cross_realm_creation_policy"": ""reject"", ""realm_change_policy"": ""not_supported_after_commit"", ""uncommitted_profile_state"": ""realm_unselected"", ""committed_profile_state"": ""realm_locked"" },
+    { ""id"": ""realm_order"", ""kind"": ""realm_order"", ""realm_ids"": [""crownlands"", ""stonehold"", ""eldergrove"", ""umbral""] },
+    { ""id"": ""crownlands"", ""kind"": ""realm"", ""legacy_runtime_id"": ""Crownlands"", ""display_name"": ""Crownlands"", ""realm_gem_ids"": [""gem_crownlands_sun"", ""gem_crownlands_oath""] },
+    { ""id"": ""stonehold"", ""kind"": ""realm"", ""legacy_runtime_id"": ""Stonehold"", ""display_name"": ""Stonehold"", ""realm_gem_ids"": [""gem_stonehold_forge"", ""gem_stonehold_depth""] },
+    { ""id"": ""eldergrove"", ""kind"": ""realm"", ""legacy_runtime_id"": ""Eldergrove"", ""display_name"": ""Eldergrove"", ""realm_gem_ids"": [""gem_eldergrove_root"", ""gem_eldergrove_moon""] },
+    { ""id"": ""umbral"", ""kind"": ""realm"", ""legacy_runtime_id"": ""Umbral"", ""display_name"": ""Umbral"", ""realm_gem_ids"": [""gem_umbral_veil"", ""gem_umbral_ember""] }
+  ],
+  ""aliases"": []
 }";
 
         private readonly List<RealmDefinition> _createdRealms = new List<RealmDefinition>();
@@ -228,6 +224,8 @@ namespace AL.Tests.EditMode
             public BuildingDefinition GetBuilding(string id) => null;
             public TroopDefinition GetTroop(string id) => null;
             public ChampionDefinition GetChampion(string id) => null;
+            public IEnumerable<ChampionDefinition> GetAllChampions() =>
+                System.Linq.Enumerable.Empty<ChampionDefinition>();
             public SkillDefinition GetSkill(string id) => null;
         }
 
