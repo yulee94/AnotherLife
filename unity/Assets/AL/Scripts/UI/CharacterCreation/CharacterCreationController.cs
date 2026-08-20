@@ -4,6 +4,8 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
 using AL.Data.Runtime;
+using AL.RealmSelection;
+using AL.UI.RealmSelection;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -12,27 +14,20 @@ using UnityEngine.UI;
 namespace AL.UI.CharacterCreation
 {
     /// <summary>
-    /// Greybox character creation screen for the legacy runtime vertical slice.
-    ///
-    /// Surfaces the hardcoded LocalGameDataService champion archetypes, lets the player select and
-    /// confirm exactly one champion, writes the resulting <see cref="ChampionState"/> into the local
-    /// slice run state (<see cref="SliceRunState"/>), then advances to the combat encounter.
-    ///
-    /// Deliberately does NOT depend on catalog/save/determinism authority: SaveGameData is
-    /// schema-v1 authority-locked (any new top-level field fails semantic validation), so the
-    /// slice keeps its cross-scene run state in <see cref="SliceRunState"/>. Persistence of that
-    /// state is owned by the save/reload slice task; this screen only mutates the in-memory state.
+    /// First-session create after realm commit. People stay locked to the sworn realm.
+    /// Visible loadouts are that realm only. Heraldry is structural, not a hue swatch.
+    /// Remaining champion cards are labelled TEMPORARY.
     /// </summary>
     public class CharacterCreationController : MonoBehaviour
     {
         [Header("Flow")]
         [SerializeField] private string _combatSceneName = "ChampionArena";
 
-        private readonly Color _accent = new Color(0.92f, 0.66f, 0.30f, 1f);
-        private readonly Color _panel = new Color(0.030f, 0.039f, 0.052f, 0.92f);
-        private readonly Color _textDim = new Color(0.84f, 0.88f, 0.92f, 1f);
+        private readonly Color _panel = new Color(0.030f, 0.032f, 0.034f, 0.96f);
+        private readonly Color _textDim = new Color(0.78f, 0.76f, 0.70f, 1f);
 
         private readonly List<ChampionDefinition> _champions = new List<ChampionDefinition>();
+        private CharacterCreationPresentationPlan _plan;
         private ChampionDefinition _selected;
         private Text _statusText;
         private Text _nvs01Text;
@@ -77,6 +72,11 @@ namespace AL.UI.CharacterCreation
         {
             _champions.Clear();
 
+            ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
+            SaveGameData current = save?.CurrentSave;
+            RealmId committedRealm = current != null ? current.SelectedRealm : RealmId.None;
+
+            var catalog = new List<ChampionDefinition>();
             IGameDataService data = ServiceLocator.Get<IGameDataService>();
             if (data != null)
             {
@@ -84,25 +84,35 @@ namespace AL.UI.CharacterCreation
                 {
                     if (champion != null)
                     {
-                        _champions.Add(champion);
+                        catalog.Add(champion);
                     }
                 }
             }
 
-            ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
-            SaveGameData current = save?.CurrentSave;
+            _plan = CharacterCreationPresentation.Build(
+                committedRealm,
+                catalog,
+                RealmCatalogRuntime.Current);
+
+            var allowed = new HashSet<string>(_plan.VisibleChampionIds, StringComparer.Ordinal);
+            foreach (ChampionDefinition champion in catalog)
+            {
+                if (champion != null && allowed.Contains(champion.Id))
+                {
+                    _champions.Add(champion);
+                }
+            }
+
             if (SliceRunState.HasConfirmedChampion)
             {
-                // Exactly one champion already exists: pre-select it and present a re-confirm path.
                 _alreadyConfirmed = true;
-                _selected = _champions.Find(champion => champion.Id == SliceRunState.Champion.Id);
+                _selected = _champions.Find(champion => champion.Id == SliceRunState.Champion.Id)
+                    ?? (_champions.Count > 0 ? _champions[0] : null);
             }
             else
             {
                 _alreadyConfirmed = false;
-                RealmId realm = current != null ? current.SelectedRealm : RealmId.None;
-                _selected = _champions.Find(champion => champion.Realm == realm)
-                    ?? (_champions.Count > 0 ? _champions[0] : null);
+                _selected = _champions.Count > 0 ? _champions[0] : null;
             }
         }
 
@@ -118,26 +128,60 @@ namespace AL.UI.CharacterCreation
             scaler.matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
 
-            var background = CreatePanel(canvasObject.transform, "Background", new Color(0.012f, 0.016f, 0.024f, 1f),
+            CreatePanel(canvasObject.transform, "Background", new Color(0.014f, 0.018f, 0.025f, 1f),
                 Vector2.zero, Vector2.one, new Vector2(0.5f, 0.5f), Vector2.zero, Vector2.zero);
 
-            Font font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf")
-                ?? Resources.GetBuiltinResource<Font>("Arial.ttf");
+            Font font = RealmSelectionIdentity.ResolvePresentationFont();
 
-            var topRule = CreatePanel(canvasObject.transform, "TopRule", new Color(0.88f, 0.62f, 0.24f, 0.55f),
+            CreatePanel(canvasObject.transform, "TopRule", new Color(0.78f, 0.76f, 0.70f, 0.72f),
                 new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -8f), new Vector2(-96f, 3f));
 
-            var title = CreateText(canvasObject.transform, "Title", font, "CHOOSE YOUR CHAMPION", 34,
-                new Vector2(64f, -26f), new Vector2(720f, 44f));
-            title.color = new Color(1f, 0.88f, 0.62f);
+            var title = CreateText(canvasObject.transform, "Title", font, _plan.Title, 34,
+                new Vector2(64f, -26f), new Vector2(980f, 44f));
+            title.color = new Color(0.94f, 0.92f, 0.86f);
 
-            _nvs01Text = CreateText(canvasObject.transform, "Nvs01Bark", font, string.Empty, 17,
-                new Vector2(64f, -78f), new Vector2(1100f, 26f));
-            _nvs01Text.color = new Color(0.52f, 0.78f, 0.92f);
-            _nvs01Text.text = "NVS-01 // Awaiting champion confirmation. Select one vanguard; exactly one will be committed to the run.";
+            var markHost = new GameObject("CommittedRealmMark");
+            markHost.transform.SetParent(canvasObject.transform, false);
+            var markRect = markHost.AddComponent<RectTransform>();
+            markRect.anchorMin = new Vector2(1f, 1f);
+            markRect.anchorMax = new Vector2(1f, 1f);
+            markRect.pivot = new Vector2(1f, 1f);
+            markRect.anchoredPosition = new Vector2(-72f, -28f);
+            markRect.sizeDelta = new Vector2(168f, 168f);
+            if (_plan.HasStructuralIdentity)
+            {
+                RealmSelectionIdentity.BuildStructuralFrame(markHost.transform, _plan.Identity.FrameKind);
+                Sprite emblem = CharacterCreationPresentation.TryLoadEmblem(_plan.Realm);
+                if (emblem != null)
+                {
+                    var emblemImage = CreatePanel(
+                        markHost.transform,
+                        "RealmEmblem",
+                        Color.white,
+                        new Vector2(0.5f, 0.5f),
+                        new Vector2(0.5f, 0.5f),
+                        new Vector2(0.5f, 0.5f),
+                        Vector2.zero,
+                        new Vector2(96f, 96f));
+                    emblemImage.sprite = emblem;
+                    emblemImage.preserveAspect = true;
+                }
+            }
 
-            // Champion cards (placeholder art = realm-accent swatch + name/class/stats).
-            var cardY = -128f;
+            _nvs01Text = CreateText(canvasObject.transform, "RealmIdentity", font,
+                string.IsNullOrEmpty(_plan.PeopleCopy) ? _plan.BindRealmError : _plan.PeopleCopy,
+                17, new Vector2(64f, -78f), new Vector2(1200f, 26f));
+            _nvs01Text.color = new Color(0.78f, 0.76f, 0.70f);
+
+            var heraldry = CreateText(canvasObject.transform, "Heraldry", font, _plan.HeraldryCopy, 15,
+                new Vector2(64f, -106f), new Vector2(1200f, 22f));
+            heraldry.color = new Color(0.70f, 0.70f, 0.68f);
+
+            var temporary = CreateText(canvasObject.transform, "TemporaryBadge", font, _plan.TemporaryBadge, 14,
+                new Vector2(64f, -132f), new Vector2(1200f, 20f));
+            temporary.color = new Color(0.86f, 0.80f, 0.62f);
+
+            var cardY = -168f;
             foreach (ChampionDefinition champion in _champions)
             {
                 BuildChampionCard(canvasObject.transform, font, champion, cardY);
@@ -157,11 +201,14 @@ namespace AL.UI.CharacterCreation
                 _usernameField.text = SliceRunState.Champion.Username;
             }
 
-            _confirmButton = CreateButton(canvasObject.transform, "ConfirmChampion", "CONFIRM CHAMPION", font,
+            _confirmButton = CreateButton(canvasObject.transform, "ConfirmChampion", "SWEAR THIS NAME", font,
                 new Vector2(64f, -852f), new Vector2(360f, 54f), ConfirmChampion);
             _confirmLabel = _confirmButton.GetComponentInChildren<Text>();
 
-            _statusText = CreateText(canvasObject.transform, "Status", font, "Select a champion to begin.",
+            _statusText = CreateText(canvasObject.transform, "Status", font,
+                string.IsNullOrEmpty(_plan.BindRealmError)
+                    ? "Name this champion, then enter the inner realm."
+                    : _plan.BindRealmError,
                 16, new Vector2(64f, -920f), new Vector2(1200f, 28f));
             _statusText.color = _textDim;
 
@@ -183,36 +230,53 @@ namespace AL.UI.CharacterCreation
             rect.anchoredPosition = new Vector2(64f, y);
             rect.sizeDelta = new Vector2(820f, 112f);
 
-            // Placeholder portrait art: a realm-accent swatch on the left.
-            Color realmColor = RealmAccent(champion.Realm);
-            var swatch = CreatePanel(cardObject.transform, "Art", realmColor,
-                new Vector2(0f, 0.5f), new Vector2(0f, 0.5f), new Vector2(0f, 0.5f),
-                new Vector2(0f, 0f), new Vector2(112f, 112f));
-            swatch.raycastTarget = false;
+            var mark = new GameObject("StructuralMark");
+            mark.transform.SetParent(cardObject.transform, false);
+            var markRect = mark.AddComponent<RectTransform>();
+            markRect.anchorMin = new Vector2(0f, 0.5f);
+            markRect.anchorMax = new Vector2(0f, 0.5f);
+            markRect.pivot = new Vector2(0f, 0.5f);
+            markRect.anchoredPosition = Vector2.zero;
+            markRect.sizeDelta = new Vector2(112f, 112f);
+            RealmSelectionIdentity.BuildStructuralFrame(mark.transform, _plan.Identity.FrameKind);
+            Sprite emblem = CharacterCreationPresentation.TryLoadEmblem(champion.Realm);
+            if (emblem != null)
+            {
+                var emblemImage = CreatePanel(
+                    mark.transform,
+                    "RealmEmblem",
+                    Color.white,
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    new Vector2(0.5f, 0.5f),
+                    Vector2.zero,
+                    new Vector2(72f, 72f));
+                emblemImage.sprite = emblem;
+                emblemImage.preserveAspect = true;
+            }
 
             var nameText = CreateText(cardObject.transform, "Name", font, champion.DisplayName, 22,
                 new Vector2(136f, -16f), new Vector2(620f, 28f));
             nameText.alignment = TextAnchor.UpperLeft;
-            nameText.color = Color.Lerp(realmColor, Color.white, 0.5f);
+            nameText.color = new Color(0.94f, 0.92f, 0.86f);
 
             var classText = CreateText(cardObject.transform, "Class", font,
-                $"{champion.Family} // {champion.Subclass}  —  {champion.Realm}", 15,
+                champion.Family + "  ·  " + _plan.Identity.PeopleName + "  ·  " + _plan.Identity.MarkName, 15,
                 new Vector2(136f, -48f), new Vector2(620f, 22f));
             classText.alignment = TextAnchor.UpperLeft;
             classText.color = _textDim;
 
-            var statsText = CreateText(cardObject.transform, "Stats", font,
-                $"HP {champion.BaseStats.MaxHealth}   ATK {champion.BaseStats.Attack}   DEF {champion.BaseStats.Defense}   SPD {champion.BaseStats.Speed}   CRIT {champion.BaseStats.CritRate}%",
+            var statsText = CreateText(cardObject.transform, "Stats", font, _plan.TemporaryBadge,
                 14, new Vector2(136f, -74f), new Vector2(660f, 20f));
             statsText.alignment = TextAnchor.UpperLeft;
-            statsText.color = new Color(0.62f, 0.70f, 0.78f);
+            statsText.color = new Color(0.70f, 0.70f, 0.68f);
 
             var button = cardObject.AddComponent<Button>();
             var captured = champion;
             button.onClick.AddListener(() => SelectChampion(captured));
             var colors = button.colors;
-            colors.highlightedColor = Color.Lerp(_panel, realmColor, 0.18f);
-            colors.pressedColor = Color.Lerp(_panel, Color.black, 0.25f);
+            colors.highlightedColor = new Color(0.10f, 0.10f, 0.11f, 1f);
+            colors.pressedColor = new Color(0.06f, 0.06f, 0.07f, 1f);
             button.colors = colors;
         }
 
@@ -243,7 +307,7 @@ namespace AL.UI.CharacterCreation
 
             if (_confirmLabel != null)
             {
-                _confirmLabel.text = _alreadyConfirmed ? "CONTINUE TO ARENA" : "CONFIRM CHAMPION";
+                _confirmLabel.text = _alreadyConfirmed ? "ENTER THE INNER REALM" : "SWEAR THIS NAME";
             }
         }
 
@@ -370,20 +434,6 @@ namespace AL.UI.CharacterCreation
             if (_statusText != null)
             {
                 _statusText.text = message;
-            }
-
-            Debug.Log("[AL-CHARACTER-CREATION] " + message);
-        }
-
-        private static Color RealmAccent(RealmId realm)
-        {
-            switch (realm)
-            {
-                case RealmId.Stonehold: return new Color(0.80f, 0.52f, 0.24f, 1f);
-                case RealmId.Eldergrove: return new Color(0.30f, 0.70f, 0.42f, 1f);
-                case RealmId.Crownlands: return new Color(0.92f, 0.66f, 0.30f, 1f);
-                case RealmId.Umbral: return new Color(0.52f, 0.34f, 0.78f, 1f);
-                default: return new Color(0.52f, 0.58f, 0.64f, 1f);
             }
         }
 

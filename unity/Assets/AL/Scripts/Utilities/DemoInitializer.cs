@@ -1,7 +1,9 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.Scenes;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
@@ -68,6 +70,13 @@ namespace AL.Utilities
 
         private void Start()
         {
+            if (!ProductionDebugChrome.AllowsDemoInitializer(SceneManager.GetActiveScene().name))
+            {
+                enabled = false;
+                Destroy(this);
+                return;
+            }
+
             // 0. Ensure Services are initialized (Plug-and-Play) so the arena debug UI below keeps working.
             Bootloader.InitializeIfMissing();
             EnsureSaveLoaded();

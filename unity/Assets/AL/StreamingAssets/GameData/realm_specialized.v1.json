@@ -103,6 +103,11 @@
           "inquisitor"
         ]
       },
+      "visual_identity": {
+        "mark_name": "Celestial Meridian",
+        "silhouette_language": "four-point meridian",
+        "material_language": "aged silver, pale stone"
+      },
       "sort_order": 0
     },
     {
@@ -167,6 +172,11 @@
           "warden",
           "dreadknight"
         ]
+      },
+      "visual_identity": {
+        "mark_name": "Tectonic Axis",
+        "silhouette_language": "squared orthogonal mass",
+        "material_language": "basalt, dark iron, aged steel"
       },
       "sort_order": 1
     },
@@ -233,6 +243,11 @@
           "spellblade"
         ]
       },
+      "visual_identity": {
+        "mark_name": "Living Orbit",
+        "silhouette_language": "three-arc seed void",
+        "material_language": "bark, lichen, weathered bronze"
+      },
       "sort_order": 2
     },
     {
@@ -297,6 +312,11 @@
           "dreadknight",
           "spellblade"
         ]
+      },
+      "visual_identity": {
+        "mark_name": "Severed Eclipse",
+        "silhouette_language": "offset eclipse and diagonal void",
+        "material_language": "obsidian, smoked metal"
       },
       "sort_order": 3
     },

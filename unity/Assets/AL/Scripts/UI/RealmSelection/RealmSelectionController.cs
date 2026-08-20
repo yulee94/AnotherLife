@@ -243,6 +243,16 @@ namespace AL.UI.RealmSelection
             var subtitle = CreateText(safeAreaObject.transform, "Subtitle", font, RealmSelectionIdentity.LockWarningFallback, 18, new Vector2(0f, -70f), new Vector2(-48f, 34f));
             StretchAcrossTop(subtitle);
             subtitle.color = new Color(0.72f, 0.74f, 0.76f);
+            var temporary = CreateText(
+                safeAreaObject.transform,
+                "TemporaryBadge",
+                font,
+                "TEMPORARY — runtime realm layout until authored ceremonial chrome lands.",
+                14,
+                new Vector2(0f, -102f),
+                new Vector2(-48f, 22f));
+            StretchAcrossTop(temporary);
+            temporary.color = new Color(0.86f, 0.80f, 0.62f);
 
             var cardsObject = new GameObject("RealmCards", typeof(RectTransform));
             cardsObject.transform.SetParent(safeAreaObject.transform, false);
