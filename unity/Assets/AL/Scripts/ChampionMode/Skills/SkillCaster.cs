@@ -112,7 +112,7 @@ namespace AL.ChampionMode.Skills
 
             if (_combat != null && !_combat.TrySpendMana(_manaCosts[slotIndex]))
             {
-                Debug.Log($"Not enough mana for {_skillNames[slotIndex]}.");
+                GameDebug.Log($"Not enough mana for {_skillNames[slotIndex]}.");
                 ShowDeniedFeedback("NO MANA", new Color(0.42f, 0.72f, 1f));
                 return false;
             }
@@ -143,7 +143,7 @@ namespace AL.ChampionMode.Skills
             StopCoroutine(_castRoutine);
             _castRoutine = null;
             ClearActiveCast();
-            Debug.Log("Skill cast cancelled.");
+            GameDebug.Log("Skill cast cancelled.");
         }
 
         public float GetCooldownRemaining(int slotIndex)
@@ -183,7 +183,7 @@ namespace AL.ChampionMode.Skills
 
         private IEnumerator CastRoutine(int slotIndex, RealmId realmId)
         {
-            Debug.Log($"Casting {_skillNames[slotIndex]}.");
+            GameDebug.Log($"Casting {_skillNames[slotIndex]}.");
             _activeCastStartTime = Time.time;
             _activeCastDuration = Mathf.Max(0f, _castTimes[slotIndex]);
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
@@ -352,7 +352,7 @@ namespace AL.ChampionMode.Skills
 
             if (applied)
             {
-                Debug.Log("[SkillCaster] Applied shared skill loadouts from StreamingAssets.");
+                GameDebug.Log("[SkillCaster] Applied shared skill loadouts from StreamingAssets.");
             }
         }
 
