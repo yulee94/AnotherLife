@@ -32,6 +32,8 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_warmaster_content_catalog.json` | `al-warmaster-content.schema.json` | — |
 | `al_world_atlas_narrative_catalog.json` | `al-world-atlas-narrative.schema.json` | — |
 | `al_world_event_content_catalog.json` | `al-world-event-content.schema.json` | — |
+| `al_building_catalog.json` | `al-building.schema.json` | `BuildingArtCatalog` |
+| `al_champion_catalog.json` | `al-champion.schema.json` | `ChampionArtCatalog` |
 
 The character customization catalog includes body presets, hair styles, armor styles, primary/hair/skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
@@ -52,6 +54,10 @@ families (realms, buildings, research, troops, champions, skills):
 - `al-six-family.schema.json` — the JSON shape for the six technical families,
   mirroring `GameDataSixFamilySchemas.cs`. The downstream data-generation task
   uses this as the target shape when converting the legacy hardcoded data.
+  Building/champion **art** bindings are a separate surface
+  (`al-building.schema.json` / `al-champion.schema.json`) with hash-pinned
+  `{path,guid,sha256}` tuples and realm-scoped `models[]`. Those catalogs do
+  not replace the six-family gameplay `asset_ref` string field.
 
 ## Validation
 
