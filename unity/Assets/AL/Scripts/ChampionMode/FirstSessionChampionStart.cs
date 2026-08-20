@@ -3,17 +3,19 @@ using System;
 namespace AL.ChampionMode
 {
     /// <summary>
-    /// First-session 3D landing contract. Production Boot → Realm → Create lands in
-    /// ChampionArena as an inner-realm champion start, not Kingdom and not a debug
-    /// floor. Encounter-crowd / debug Kingdom HUD remain an explicit harness.
+    /// First-session 3D landing contract. Production Boot → Realm → Create still
+    /// loads ChampionArena (HUD / first fight stay on this scene) but the floor is
+    /// the TEMPORARY InnerRealmWorld greybox: chosen realm, unnamed Capital, World
+    /// Atlas IDs. Not Kingdom, not a generic citadel courtyard. Encounter-crowd /
+    /// debug Kingdom HUD remain an explicit harness.
     /// </summary>
     public static class FirstSessionChampionStart
     {
         public const string DestinationSceneName = "ChampionArena";
         public const string TemporaryToken = "TEMPORARY";
-        public const string EnvironmentRootName = "ChampionArena_ObsidianCitadel_TEMPORARY";
+        public const string EnvironmentRootName = "InnerRealmWorld_TEMPORARY";
         public const string TemporaryPlaqueName = "TEMPORARY_GreyboxPlaque";
-        public const string TemporaryPlaqueCopy = "TEMPORARY — inner-realm greybox";
+        public const string TemporaryPlaqueCopy = "TEMPORARY — unnamed Capital greybox";
         public const string PlayerObjectName = "Player_Champion";
         public const string HudCanvasName = "ChampionMode_HUD";
         public const string PlayerFrameName = "PlayerFrame";
@@ -21,9 +23,14 @@ namespace AL.ChampionMode
         public const string TargetLockName = "BossTargetLock";
         public const string DebugKingdomButtonName = "Kingdom";
         public const string AtmosphereName = "InnerRealm_Atmosphere_TEMPORARY";
+        public const string OpponentObjectName = "BossDummy";
+        public const string WinPanelName = "EncounterClearPanel";
+        public const string LosePanelName = "DefeatRetryPanel";
+        public const string SpecialSkillId = "realm_strike";
+        public const int SpecialSkillSlot = 0;
 
         public const string LandingFeedCopy =
-            "Inner realm. Direct control is live. TEMPORARY citadel greybox — walk, look, hold the line.";
+            "Inner realm. TEMPORARY greybox at the unnamed Capital. Direct control is live — move, basic attack, and cast Realm Strike.";
 
         private static bool _encounterHarness;
 
@@ -36,6 +43,8 @@ namespace AL.ChampionMode
         public static bool ShowAppearanceRack => _encounterHarness;
 
         public static bool AutoStartEncounterIntro => _encounterHarness;
+
+        public static bool AutoStartFirstFight => !_encounterHarness;
 
         public static void EnableEncounterHarness()
         {
