@@ -15,7 +15,7 @@ namespace AL.UI.RealmSelection
         [Header("Config")]
         [SerializeField] private RealmSelectionCard _cardPrefab;
         [SerializeField] private Transform _container;
-        [SerializeField] private string _nextScene = "Kingdom";
+        [SerializeField] private string _nextScene = "CharacterCreation";
 
         [Header("Realm Heraldry")]
         [SerializeField] private Sprite _stoneholdEmblem;
@@ -432,7 +432,7 @@ namespace AL.UI.RealmSelection
             if (_commitMetaText != null)
             {
                 _commitMetaText.text = identity.PeopleName + "  ·  " + identity.MarkName + "\n" +
-                                       RealmSelectionIdentity.LockWarningFallback;
+                                       "CREATION GATE OPENING  ·  " + RealmSelectionIdentity.LockWarningFallback;
             }
         }
 
