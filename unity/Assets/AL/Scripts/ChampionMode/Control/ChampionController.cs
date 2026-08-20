@@ -95,6 +95,7 @@ namespace AL.ChampionMode.Control
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
+        private ChampionCombat _combat;
         private RealmId _realmId = RealmId.None;
 #if UNITY_EDITOR
         private IChampionBasicAttackResolver _editorBasicAttackResolver;
@@ -145,6 +146,7 @@ namespace AL.ChampionMode.Control
                 _cameraTransform = UnityEngine.Camera.main.transform;
 
             _skillCaster = GetComponent<SkillCaster>() ?? gameObject.AddComponent<SkillCaster>();
+            _combat = GetComponent<ChampionCombat>();
         }
 
         private void Start()
@@ -356,7 +358,13 @@ namespace AL.ChampionMode.Control
                     {
                         hitBoss = true;
                         hitAnything = true;
-                        boss.TakeDamage(125f);
+                        // hotspot: ChampionController.cs — basic-attack damage must stay catalog-backed.
+                        float catalogDamage = ResolveCatalogAttackDamage();
+                        if (catalogDamage > 0f)
+                        {
+                            boss.TakeDamage(catalogDamage);
+                        }
+
                         RuntimeCombatAudio.PlayImpact();
                     }
                 }
@@ -538,6 +546,12 @@ namespace AL.ChampionMode.Control
                 _isDodging = false;
                 _skillCaster?.CancelCurrentSkill();
             }
+        }
+
+        private float ResolveCatalogAttackDamage()
+        {
+            _combat ??= GetComponent<ChampionCombat>();
+            return _combat != null ? _combat.GetAttackDamage() : 0f;
         }
 
     }
