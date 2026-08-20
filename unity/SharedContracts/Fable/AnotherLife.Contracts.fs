@@ -248,9 +248,70 @@ module DesignContracts =
             championCustomization: ChampionCustomizationState
         }
 
+    [<CLIMutable>]
+    type AssetReference =
+        {
+            path: string
+            guid: string
+            sha256: string
+        }
+
+    [<CLIMutable>]
+    type BuildingModelRef =
+        {
+            realm_id: string
+            model_id: string
+            asset_ref: AssetReference
+        }
+
+    [<CLIMutable>]
+    type BuildingArtBinding =
+        {
+            id: string
+            legacy_building_id: string
+            name_ref: string
+            models: BuildingModelRef array
+        }
+
+    [<CLIMutable>]
+    type BuildingArtCatalog =
+        {
+            version: string
+            catalogId: string
+            game: string
+            idFormat: string
+            buildings: BuildingArtBinding array
+        }
+
+    [<CLIMutable>]
+    type ChampionArtBinding =
+        {
+            id: string
+            name_ref: string
+            realm_id: string
+            portrait_asset_ref: AssetReference option
+            model_asset_ref: AssetReference option
+        }
+
+    [<CLIMutable>]
+    type ChampionArtCatalog =
+        {
+            version: string
+            catalogId: string
+            game: string
+            idFormat: string
+            champions: ChampionArtBinding array
+        }
+
     module CatalogPaths =
         [<Literal>]
         let CharacterCustomization = "Assets/AL/StreamingAssets/GameData/al_character_customization_catalog.json"
 
         [<Literal>]
         let SkillWeather = "Assets/AL/StreamingAssets/GameData/al_skill_weather_catalog.json"
+
+        [<Literal>]
+        let BuildingArt = "Assets/AL/StreamingAssets/GameData/al_building_catalog.json"
+
+        [<Literal>]
+        let ChampionArt = "Assets/AL/StreamingAssets/GameData/al_champion_catalog.json"

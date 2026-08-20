@@ -15,6 +15,7 @@ namespace AL.RealmWar.World
 
         private readonly List<GameObject> _spawnedMarkers = new List<GameObject>();
         private readonly List<Transform> _labels = new List<Transform>();
+        private UnityEngine.Camera _camera;
 
         public void Configure(RealmId viewerRealm, int maxMarkers = 8)
         {
@@ -46,7 +47,17 @@ namespace AL.RealmWar.World
 
         private void LateUpdate()
         {
-            if (!_faceMainCamera || Camera.main == null)
+            if (!_faceMainCamera)
+            {
+                return;
+            }
+
+            if (_camera == null)
+            {
+                _camera = Camera.main;
+            }
+
+            if (_camera == null)
             {
                 return;
             }
@@ -55,7 +66,7 @@ namespace AL.RealmWar.World
             {
                 if (label != null)
                 {
-                    label.rotation = Quaternion.LookRotation(label.position - Camera.main.transform.position);
+                    label.rotation = Quaternion.LookRotation(label.position - _camera.transform.position);
                 }
             }
         }
