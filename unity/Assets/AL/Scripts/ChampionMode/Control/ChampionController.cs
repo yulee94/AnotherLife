@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using AL.Core;
 using AL.ChampionMode.Skills;
+using AL.Input;
 using System.Collections;
 using System.Linq;
 
@@ -90,6 +91,7 @@ namespace AL.ChampionMode.Control
         private bool _isDodging;
         private bool _isAttacking;
         private bool _controlsLocked;
+        private bool _touchBlockHeld;
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
@@ -174,8 +176,9 @@ namespace AL.ChampionMode.Control
             if (_isAttacking) return;
             RefreshCameraTransform();
 
-            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : Input.GetAxis("Horizontal");
-            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : Input.GetAxis("Vertical");
+            Vector2 move = GameInput.ReadMove();
+            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : move.x;
+            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : move.y;
 
             Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
 
@@ -215,18 +218,18 @@ namespace AL.ChampionMode.Control
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Space)) StartCoroutine(Dodge());
-            _isBlocking = Input.GetKey(KeyCode.LeftShift);
+            if (GameInput.DodgePressed()) StartCoroutine(Dodge());
+            _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
 
-            if (Input.GetMouseButtonDown(0) && !_isAttacking)
+            if (GameInput.AttackPressed() && !_isAttacking)
             {
                 StartCoroutine(PerformAttack());
             }
 
-            if (Input.GetKeyDown(KeyCode.Alpha1)) RequestSkill(0);
-            if (Input.GetKeyDown(KeyCode.Alpha2)) RequestSkill(1);
-            if (Input.GetKeyDown(KeyCode.Alpha3)) RequestSkill(2);
-            if (Input.GetKeyDown(KeyCode.Alpha4)) RequestSkill(3);
+            if (GameInput.SkillPressed(0)) RequestSkill(0);
+            if (GameInput.SkillPressed(1)) RequestSkill(1);
+            if (GameInput.SkillPressed(2)) RequestSkill(2);
+            if (GameInput.SkillPressed(3)) RequestSkill(3);
         }
 
         private IEnumerator PerformAttack()
@@ -241,7 +244,7 @@ namespace AL.ChampionMode.Control
             _editorBasicAttackSequence++;
             int editorAttackSequence = _editorBasicAttackSequence;
 #endif
-            Debug.Log("<color=orange>[Combat] Attacking!</color>");
+            GameDebug.Log("<color=orange>[Combat] Attacking!</color>");
             RuntimeCombatAudio.PlayBasicAttack();
 
             // 1. Lunge Forward
@@ -308,7 +311,7 @@ namespace AL.ChampionMode.Control
                     hitAnything = true;
                     bool defeated =
                         resolution.Kind == ChampionBasicAttackResolutionKind.Defeated;
-                    Debug.Log(defeated
+                    GameDebug.Log(defeated
                         ? "<color=red>[Combat] Enemy Defeated!</color>"
                         : "<color=red>[Combat] Enemy Hit!</color>");
                     CreateHitVFX(resolution.ImpactPosition);
@@ -334,7 +337,7 @@ namespace AL.ChampionMode.Control
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
                 {
                     hitAnything = true;
-                    Debug.Log("<color=red>[Combat] Enemy Defeated!</color>");
+                    GameDebug.Log("<color=red>[Combat] Enemy Defeated!</color>");
 
                     // Visual Feedback
                     CreateHitVFX(hitCollider.transform.position);
@@ -368,7 +371,7 @@ namespace AL.ChampionMode.Control
 #endif
                 )
             {
-                Debug.Log("[Combat] Attack Missed.");
+                GameDebug.Log("[Combat] Attack Missed.");
                 Vector3 whiffCenter = transform.position + transform.forward * 1.35f;
                 SkillEffectFactory.SpawnBasicAttackWhiff(whiffCenter, transform.forward, realmId);
                 SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.55f + transform.forward * 0.65f, "MISS", new Color(0.68f, 0.76f, 0.86f), 0.20f, 0.55f);
@@ -391,7 +394,7 @@ namespace AL.ChampionMode.Control
 
             if (remaining <= 0)
             {
-                Debug.Log("<color=gold>[Victory] REALM SECURED!</color>");
+                GameDebug.Log("<color=gold>[Victory] REALM SECURED!</color>");
                 ShowVictoryUI();
             }
         }
@@ -421,7 +424,7 @@ namespace AL.ChampionMode.Control
 
         private void UseSkill(int index)
         {
-            Debug.Log($"[Champion] Using Skill {index + 1}");
+            GameDebug.Log($"[Champion] Using Skill {index + 1}");
             _skillCaster?.TryCastSkill(index);
         }
 
@@ -511,17 +514,20 @@ namespace AL.ChampionMode.Control
         {
             if (_controlsLocked || _realmId == RealmId.None)
             {
+                _touchBlockHeld = false;
                 _isBlocking = false;
                 return;
             }
 
-            _isBlocking = isBlocking;
+            _touchBlockHeld = isBlocking;
+            _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
         }
 
         public void SetControlLocked(bool isLocked)
         {
             _controlsLocked = isLocked;
             _externalMoveInput = Vector2.zero;
+            _touchBlockHeld = false;
             _isBlocking = false;
             _velocity = Vector3.zero;
 
