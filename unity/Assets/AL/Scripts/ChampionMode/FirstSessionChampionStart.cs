@@ -21,9 +21,14 @@ namespace AL.ChampionMode
         public const string TargetLockName = "BossTargetLock";
         public const string DebugKingdomButtonName = "Kingdom";
         public const string AtmosphereName = "InnerRealm_Atmosphere_TEMPORARY";
+        public const string OpponentObjectName = "BossDummy";
+        public const string WinPanelName = "EncounterClearPanel";
+        public const string LosePanelName = "DefeatRetryPanel";
+        public const string SpecialSkillId = "realm_strike";
+        public const int SpecialSkillSlot = 0;
 
         public const string LandingFeedCopy =
-            "Inner realm. Direct control is live. TEMPORARY citadel greybox — walk, look, hold the line.";
+            "Inner realm. Direct control is live — move, basic attack, and cast Realm Strike. TEMPORARY citadel greybox.";
 
         private static bool _encounterHarness;
 
@@ -36,6 +41,8 @@ namespace AL.ChampionMode
         public static bool ShowAppearanceRack => _encounterHarness;
 
         public static bool AutoStartEncounterIntro => _encounterHarness;
+
+        public static bool AutoStartFirstFight => !_encounterHarness;
 
         public static void EnableEncounterHarness()
         {
