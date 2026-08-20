@@ -37,6 +37,8 @@ namespace AL.ChampionMode
 
         public static bool AutoStartEncounterIntro => _encounterHarness;
 
+        public static bool ShouldRunFirstWorldEntryTutorial => IsFirstSessionLanding;
+
         public static void EnableEncounterHarness()
         {
             _encounterHarness = true;

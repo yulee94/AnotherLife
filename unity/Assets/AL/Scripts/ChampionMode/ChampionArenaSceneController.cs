@@ -177,6 +177,9 @@ namespace AL.ChampionMode
             {
                 _combatFeedText.text = FirstSessionChampionStart.LandingFeedCopy;
             }
+
+            // hotspot: ChampionArenaSceneController.cs — tutorial attach only; no HUD/combat rewrite.
+            FirstWorldEntryTutorialDirector.AttachIfNeeded(transform);
         }
 
         private void ApplyFirstSessionPresentationBudgets()

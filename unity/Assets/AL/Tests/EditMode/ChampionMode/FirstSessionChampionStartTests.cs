@@ -26,6 +26,7 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.IsFalse(FirstSessionChampionStart.AllowDebugKingdomLoad);
             Assert.IsFalse(FirstSessionChampionStart.ShowAppearanceRack);
             Assert.IsFalse(FirstSessionChampionStart.AutoStartEncounterIntro);
+            Assert.IsTrue(FirstSessionChampionStart.ShouldRunFirstWorldEntryTutorial);
         }
 
         [Test]
