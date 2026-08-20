@@ -6,14 +6,31 @@ using AL.Core.Interfaces;
 using AL.Data.Catalogs;
 using AL.Data.Runtime;
 using AL.Services.Local;
+using AL.UI.CharacterCreation;
+using AL.UI.FirstUserIdentity;
 using NUnit.Framework;
 
 namespace AL.Tests.EditMode
 {
     public sealed class MvpLoopSavePersistenceTests
     {
+        [SetUp]
+        public void SetUp()
+        {
+            SliceRunState.Reset();
+            CharacterCreationIdentity.ResetClaims();
+        }
+
+        [TearDown]
+        public void TearDown()
+        {
+            SliceRunState.Reset();
+            CharacterCreationIdentity.ResetClaims();
+        }
+
         private const string CurrentSaveFormatId = "anotherlife.local-save";
         private const string LastResultId = "ch01_proof_of_worth:victory";
+        private const string Username = "Banner_01";
         private const string PreChangeCustomizationJson =
             "{\"BodyPresetId\":\"average\",\"HairStyleId\":\"short\"," +
             "\"ArmorStyleId\":\"realm_basic\",\"FaceMarkId\":\"none\"," +
@@ -39,9 +56,13 @@ namespace AL.Tests.EditMode
                 MvpLoopSaveCodec.RealmSlot);
             Assert.IsNull(typeof(SaveGameData).GetField("MvpLoop"));
             Assert.IsNull(typeof(SaveGameData).GetField("FirstUserIdentity"));
+            Assert.IsNull(typeof(SaveGameData).GetField("Username"));
+            Assert.IsNull(typeof(ChampionCustomizationState).GetField("People"));
+            Assert.IsNull(typeof(ChampionCustomizationState).GetField("Race"));
             Assert.NotNull(typeof(ChampionCustomizationState).GetField("ClassFamilyId"));
             Assert.NotNull(typeof(ChampionCustomizationState).GetField("IdentityConfirmed"));
             Assert.NotNull(typeof(ChampionCustomizationState).GetField("LastResultId"));
+            Assert.NotNull(typeof(ChampionCustomizationState).GetField("Username"));
         }
 
         [Test]
@@ -91,7 +112,8 @@ namespace AL.Tests.EditMode
                         true,
                         LastResultId,
                         MvpLoopSaveCodec.DefaultOneBuildId,
-                        1));
+                        1,
+                        Username));
                 Assert.IsTrue(commit.Accepted, commit.Message);
                 Assert.IsTrue(commit.Persisted, commit.Message);
 
@@ -100,6 +122,8 @@ namespace AL.Tests.EditMode
                 MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(reader.CurrentSave);
                 Assert.AreEqual(RealmId.Eldergrove, snapshot.Realm);
                 Assert.AreEqual(ClassFamily.Ranger, snapshot.ClassFamily);
+                Assert.AreEqual(FirstUserRace.Elves, snapshot.People);
+                Assert.AreEqual(Username, snapshot.Username);
                 Assert.IsTrue(snapshot.IdentityConfirmed);
                 Assert.IsTrue(snapshot.ShouldSkipCreate);
                 Assert.AreEqual(LastResultId, snapshot.LastResultId);
@@ -139,7 +163,8 @@ namespace AL.Tests.EditMode
                     true,
                     LastResultId,
                     MvpLoopSaveCodec.DefaultOneBuildId,
-                    1);
+                    1,
+                    Username);
                 Assert.IsTrue(MvpLoopSaveAuthority.TryCommit(service, request).Persisted);
                 MvpLoopCommitResult replay = MvpLoopSaveAuthority.TryCommit(service, request);
                 Assert.IsTrue(replay.Accepted, replay.Message);
@@ -170,7 +195,8 @@ namespace AL.Tests.EditMode
                 {
                     ClassFamilyId = "assassin",
                     IdentityConfirmed = true,
-                    LastResultId = LastResultId
+                    LastResultId = LastResultId,
+                    Username = Username
                 }
             };
             Assert.AreNotEqual(
@@ -220,6 +246,104 @@ namespace AL.Tests.EditMode
             }
 
             Assert.IsTrue(sawInvalidClass);
+        }
+
+        [Test]
+        public void ConfirmedIdentityWithoutUsernameStaysOnCreate()
+        {
+            var nameless = new SaveGameData
+            {
+                SelectedRealm = RealmId.Stonehold,
+                ChampionCustomization = new ChampionCustomizationState
+                {
+                    ClassFamilyId = "warrior",
+                    IdentityConfirmed = true,
+                    LastResultId = LastResultId
+                }
+            };
+
+            MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(nameless);
+            Assert.IsTrue(snapshot.IdentityConfirmed);
+            Assert.IsFalse(snapshot.ShouldSkipCreate);
+            Assert.AreEqual(FirstUserRace.Dwarves, snapshot.People);
+            Assert.AreEqual(
+                "RealmSelection",
+                FirstUserBootDestinationResolver.ResolveSceneName(
+                    nameless,
+                    "RealmSelection",
+                    gameplaySceneLoadable: true));
+        }
+
+        [Test]
+        public void CreateThenReloadKeepsRealmClassUsername()
+        {
+            string root = NewRoot();
+            try
+            {
+                ISaveGameService writer = CreateSaveService(root);
+                writer.CreateNewSave(RealmId.Umbral);
+                MvpLoopCommitResult commit = MvpLoopSaveAuthority.TryCommit(
+                    writer,
+                    new MvpLoopCommitRequest(
+                        Guid.NewGuid().ToString("N"),
+                        RealmId.Umbral,
+                        ClassFamily.Assassin,
+                        true,
+                        string.Empty,
+                        string.Empty,
+                        0,
+                        Username));
+                Assert.IsTrue(commit.Accepted, commit.Message);
+                Assert.IsTrue(commit.Persisted, commit.Message);
+
+                SliceRunState.Reset();
+                CharacterCreationIdentity.ResetClaims();
+
+                ISaveGameService reader = CreateSaveService(root);
+                reader.Load();
+                MvpLoopSaveCodec.RestoreSessionIdentity(reader.CurrentSave);
+                MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(reader.CurrentSave);
+                Assert.AreEqual(RealmId.Umbral, snapshot.Realm);
+                Assert.AreEqual(ClassFamily.Assassin, snapshot.ClassFamily);
+                Assert.AreEqual(FirstUserRace.DarkElves, snapshot.People);
+                Assert.AreEqual(Username, snapshot.Username);
+                Assert.IsTrue(snapshot.ShouldSkipCreate);
+                Assert.IsTrue(SliceRunState.HasConfirmedChampion);
+                Assert.AreEqual(Username, SliceRunState.Champion.Username);
+                Assert.AreEqual(ClassFamily.Assassin, SliceRunState.Champion.Family);
+                Assert.AreEqual(RealmId.Umbral, SliceRunState.Champion.Realm);
+                Assert.IsFalse(
+                    CharacterCreationIdentity.TryClaim("banner_01", string.Empty, out _, out string error));
+                Assert.That(error, Does.Contain("already taken"));
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
+        public void InvalidUsernameIsRejectedBySemanticValidation()
+        {
+            string json = PreChangeSchemaV1Json().Replace(
+                "\"HelmetEnabled\":false}",
+                "\"HelmetEnabled\":false,\"Username\":\"bad name\"}");
+            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                System.Text.Encoding.UTF8.GetBytes(json),
+                SaveCandidateSourceGeneration.Primary,
+                CreateSemanticPolicy());
+            Assert.AreNotEqual(SaveSemanticCandidateOutcome.Valid, candidate.Outcome);
+            bool sawInvalidUsername = false;
+            for (int i = 0; i < candidate.Diagnostics.Count; i++)
+            {
+                if (candidate.Diagnostics[i].Code == "SAVE_MVP_USERNAME_INVALID")
+                {
+                    sawInvalidUsername = true;
+                    break;
+                }
+            }
+
+            Assert.IsTrue(sawInvalidUsername);
         }
 
         private static string PreChangeSchemaV1Json()

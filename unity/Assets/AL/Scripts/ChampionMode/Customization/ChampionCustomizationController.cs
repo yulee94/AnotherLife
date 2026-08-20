@@ -919,7 +919,8 @@ namespace AL.ChampionMode.Customization
                 HelmetEnabled = source.HelmetEnabled,
                 ClassFamilyId = source.ClassFamilyId,
                 IdentityConfirmed = source.IdentityConfirmed,
-                LastResultId = source.LastResultId
+                LastResultId = source.LastResultId,
+                Username = source.Username
             };
         }
 
