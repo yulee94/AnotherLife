@@ -554,5 +554,22 @@ namespace AL.ChampionMode.Control
             return _combat != null ? _combat.GetAttackDamage() : 0f;
         }
 
+        public void TeleportTo(Vector3 position)
+        {
+            bool wasEnabled = _controller != null && _controller.enabled;
+            if (_controller != null)
+            {
+                _controller.enabled = false;
+            }
+
+            transform.position = position;
+            _velocity = Vector3.zero;
+
+            if (_controller != null)
+            {
+                _controller.enabled = wasEnabled;
+            }
+        }
+
     }
 }
