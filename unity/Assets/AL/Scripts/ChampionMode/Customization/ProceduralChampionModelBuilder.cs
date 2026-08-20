@@ -4,7 +4,7 @@ namespace AL.ChampionMode.Customization
 {
     public static class ProceduralChampionModelBuilder
     {
-        public static void EnsureModel(GameObject champion)
+        public static void EnsureModel(GameObject champion, bool fullDetail = true)
         {
             if (champion == null)
             {
@@ -19,8 +19,16 @@ namespace AL.ChampionMode.Customization
             EnsureHair(root);
             EnsureArmor(root);
             EnsureWeapons(root);
-            EnsureHeroDetailLayer(root);
-            EnsurePrestigeSilhouetteLayer(root);
+            if (fullDetail)
+            {
+                // Hero/prestige layers are cosmetic micro-detail (~80 extra primitive
+                // parts each with their own material) that only the player champion and
+                // hero showcase need. Crowd bots pass fullDetail:false to keep their
+                // primitive/material count down without losing the base body, armor,
+                // weapon, or realm identity that bot behavior and LOD rely on.
+                EnsureHeroDetailLayer(root);
+                EnsurePrestigeSilhouetteLayer(root);
+            }
             EnsureAnchors(root);
             var motion = champion.GetComponent<ProceduralChampionMotion>() ?? champion.AddComponent<ProceduralChampionMotion>();
             motion.Rebind();

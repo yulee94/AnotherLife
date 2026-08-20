@@ -1,12 +1,34 @@
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Skills;
 using AL.Core;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace AL.ChampionMode.AI
 {
     public class BotChampionAI : MonoBehaviour
     {
+        // Static registry of active realm-contextualized bots. Replaces per-refresh
+        // FindObjectsOfType<BotChampionAI>() (an O(scene) allocation every ~1s per bot)
+        // with an O(1)-amortized registry populated on enable and drained on disable/destroy.
+        private static readonly List<BotChampionAI> ActiveBots = new List<BotChampionAI>(128);
+
+        // Cached "Player" transform so target selection does not pay a tag lookup per refresh.
+        private static Transform _cachedPlayer;
+
+        private void OnEnable()
+        {
+            if (!ActiveBots.Contains(this))
+            {
+                ActiveBots.Add(this);
+            }
+        }
+
+        private void OnDisable()
+        {
+            ActiveBots.Remove(this);
+        }
+
         [Header("Realm")]
         [SerializeField] private RealmId _realmId = RealmId.None;
         [SerializeField] private RealmId _playerRealm = RealmId.None;
@@ -53,11 +75,7 @@ namespace AL.ChampionMode.AI
 
             if (_fallbackObjective == null)
             {
-                var player = GameObject.FindGameObjectWithTag("Player");
-                if (player != null)
-                {
-                    _fallbackObjective = player.transform;
-                }
+                _fallbackObjective = FindPlayer();
             }
 
             ChooseTarget(true);
@@ -159,8 +177,7 @@ namespace AL.ChampionMode.AI
             _nextTargetRefreshTime = Time.time + _targetRefreshSeconds;
 
             float bestScore = float.MaxValue;
-            var bots = FindObjectsOfType<BotChampionAI>();
-            foreach (var bot in bots)
+            foreach (var bot in ActiveBots)
             {
                 if (bot == null || bot == this || !bot.IsAlive || bot.RealmId == _realmId)
                 {
@@ -188,20 +205,31 @@ namespace AL.ChampionMode.AI
                 return;
             }
 
-            var player = GameObject.FindGameObjectWithTag("Player");
+            Transform player = FindPlayer();
             if (player == null)
             {
                 return;
             }
 
-            float playerDistance = Vector3.Distance(transform.position, player.transform.position);
+            float playerDistance = Vector3.Distance(transform.position, player.position);
             float playerScore = playerDistance + Random.Range(3f, 9f);
             if (playerDistance <= _aggroRange && playerScore < bestScore)
             {
-                _target = player.transform;
+                _target = player;
                 _targetBot = null;
                 _targetPlayerCombat = player.GetComponent<ChampionCombat>();
             }
+        }
+
+        private static Transform FindPlayer()
+        {
+            if (_cachedPlayer == null)
+            {
+                var player = GameObject.FindGameObjectWithTag("Player");
+                _cachedPlayer = player != null ? player.transform : null;
+            }
+
+            return _cachedPlayer;
         }
 
         private bool IsTargetAlive()

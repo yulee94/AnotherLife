@@ -907,15 +907,16 @@ namespace AL.ChampionMode
                 CreateSkillButton(skillPanel.transform, font, i, new Vector2(24f + i * 176f, -42f));
             }
 
-            var actionPanel = CreateHudPanel(canvasObject.transform, "CombatActions", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, 28f), new Vector2(168f, 310f), new Color(0.035f, 0.042f, 0.052f, 0.82f));
+            var actionPanel = CreateHudPanel(canvasObject.transform, "CombatActions", new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), new Vector2(-28f, 28f), new Vector2(168f, 358f), new Color(0.035f, 0.042f, 0.052f, 0.82f));
             CreateText(actionPanel.transform, font, "ACTIONS", 15, new Vector2(16f, -16f), new Vector2(136f, 20f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
             _attackActionFeedback = CreateChampionActionButton(actionPanel.transform, font, "Attack", new Vector2(18f, -48f), () => _playerController.RequestBasicAttack(), new Color(0.24f, 0.08f, 0.08f, 0.95f), new Color(1f, 0.42f, 0.20f, 0.96f));
             _dodgeActionFeedback = CreateChampionActionButton(actionPanel.transform, font, "Dodge", new Vector2(18f, -96f), () => _playerController.RequestDodge(), new Color(0.09f, 0.16f, 0.24f, 0.95f), new Color(0.42f, 0.76f, 1f, 0.96f));
-            _controlModeStrip = CreateUiImage(actionPanel.transform, "ControlModeStrip", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -145f), new Vector2(132f, 4f), new Color(0.45f, 0.70f, 1f, 0.74f));
-            _controlModeText = CreateText(actionPanel.transform, font, "CONTROL MANUAL", 10, new Vector2(18f, -130f), new Vector2(132f, 18f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
-            CreateControlModeButton(actionPanel.transform, font, "Manual", AutoMode.Manual, 0, new Vector2(18f, -162f));
-            CreateControlModeButton(actionPanel.transform, font, "Assist", AutoMode.SemiAuto, 1, new Vector2(18f, -202f));
-            CreateControlModeButton(actionPanel.transform, font, "Auto", AutoMode.FullAuto, 2, new Vector2(18f, -242f));
+            CreateBlockButton(actionPanel.transform, font, "Block", new Vector2(18f, -144f));
+            _controlModeStrip = CreateUiImage(actionPanel.transform, "ControlModeStrip", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(18f, -193f), new Vector2(132f, 4f), new Color(0.45f, 0.70f, 1f, 0.74f));
+            _controlModeText = CreateText(actionPanel.transform, font, "CONTROL MANUAL", 10, new Vector2(18f, -178f), new Vector2(132f, 18f), TextAnchor.MiddleCenter, new Color(0.78f, 0.86f, 1f));
+            CreateControlModeButton(actionPanel.transform, font, "Manual", AutoMode.Manual, 0, new Vector2(18f, -210f));
+            CreateControlModeButton(actionPanel.transform, font, "Assist", AutoMode.SemiAuto, 1, new Vector2(18f, -250f));
+            CreateControlModeButton(actionPanel.transform, font, "Auto", AutoMode.FullAuto, 2, new Vector2(18f, -290f));
 
             var appearancePanel = CreateHudPanel(canvasObject.transform, "AppearanceRack", new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-28f, -28f), new Vector2(402f, 506f), new Color(0.026f, 0.033f, 0.044f, 0.88f));
             CreateUiImage(appearancePanel.transform, "ForgeTopAccent", new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-24f, 4f), new Color(1f, 0.68f, 0.28f, 0.76f));
@@ -2439,6 +2440,12 @@ namespace AL.ChampionMode
         {
             var button = CreateHudButton(parent, font, label, anchoredPosition, new Vector2(56f, 42f), null, 13);
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(_playerController, moveInput);
+        }
+
+        private void CreateBlockButton(Transform parent, Font font, string label, Vector2 anchoredPosition)
+        {
+            var button = CreateHudButton(parent, font, label, anchoredPosition, new Vector2(132f, 42f), null, 16, new Color(0.09f, 0.14f, 0.11f, 0.95f));
+            button.gameObject.AddComponent<ChampionBlockButton>().Setup(_playerController);
         }
 
         private void CreateCombatPressureIndicator(Transform parent, Font font)
