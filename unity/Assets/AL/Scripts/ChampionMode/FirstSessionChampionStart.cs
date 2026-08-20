@@ -1,4 +1,5 @@
 using System;
+using AL.ChampionMode.UI;
 
 namespace AL.ChampionMode
 {
@@ -27,6 +28,8 @@ namespace AL.ChampionMode
         public const string HotbarName = "CombatHotbar";
         public const string TargetLockName = "BossTargetLock";
         public const string DebugKingdomButtonName = "Kingdom";
+        public const string SharedMenuButtonName = ChampionHudCopy.SharedMenuButtonName;
+        public const string QuestHudSlotName = ChampionHudCopy.QuestSlotName;
         public const string AtmosphereName = "InnerRealm_Atmosphere_TEMPORARY";
         public const string OpponentObjectName = "BossDummy";
         public const string WinPanelName = "EncounterClearPanel";
