@@ -468,7 +468,7 @@ namespace AL.Core
 
             try
             {
-                saveGameService.Save();
+                ProfileMutationContainment.InvokeLifecycleSave(saveGameService);
                 if (saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
                 {
                     Debug.LogError($"[BOOT_STACK_SAVE_FAILED] Bootloader save did not complete successfully: {saveGameService.LastSaveStatus} {saveGameService.LastSaveMessage}");
