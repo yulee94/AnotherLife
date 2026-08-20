@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "packetVersion": "omen1-a1-2026-07-29-v003",
+  "packetVersion": "omen1-a1-2026-08-13-v004",
   "milestoneId": "NVS-01",
   "questId": "OMEN_1",
   "titleKey": "quest.omen1.title",
@@ -17,7 +17,7 @@
     "offerAction": "SELECT_VALERIUS",
     "autoAccept": false,
     "completionUnlockId": "CH1_REALM_INTRO",
-    "completionDestination": "KINGDOM_COMMAND_VIEW"
+    "completionDestination": "CH1_REALM_INTRO"
   },
   "speaker": {
     "id": "NPC_VALERIUS",
@@ -66,8 +66,7 @@
     {"id":"EVENT_SKY_CASTLE_ARENA_CANCELLED","status":"requested"},
     {"id":"EVENT_SKY_CASTLE_ARENA_UNAVAILABLE","status":"requested"},
     {"id":"ARTIFACT_CELESTIAL_TEAR","status":"requested"},
-    {"id":"CH1_REALM_INTRO","status":"requested"},
-    {"id":"KINGDOM_COMMAND_VIEW","status":"requested"}
+    {"id":"CH1_REALM_INTRO","status":"requested"}
   ],
   "consequences": [
     {"id":"ACQUIRE_CELESTIAL_TEAR","target":"ARTIFACT_CELESTIAL_TEAR","trigger":"EVENT_SKY_CASTLE_ARENA_SUCCESS","repeatability":"once","retained":true},
@@ -85,7 +84,7 @@
     "objective.omen1.talk":"Speak with Captain Valerius.",
     "objective.omen1.arena":"Deploy your Champion and investigate the Sky Castle anomaly.",
     "objective.omen1.report":"Present the Celestial Tear to Valerius.",
-    "dialogue.omen1.offer":"My lord, the Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?",
+    "dialogue.omen1.offer":"The Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?",
     "dialogue.omen1.start":"The air itself is trembling. Whatever waits there may threaten every realm, but we still have time to understand it.",
     "dialogue.omen1.lore":"Our oldest records call it an opening of the Veil—not an ending, but a warning that the world is changing.",
     "dialogue.omen1.go":"The Sky Castle marker is ready. When you are prepared, deploy your Champion and investigate.",

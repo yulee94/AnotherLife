@@ -74,9 +74,12 @@ namespace AL.Tests.EditMode
             {
                 string primaryPath = Path.Combine(root, "save.json");
                 long futureTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 60;
+                // SelectedRealm is None so this unmigrated fixture stays on the
+                // write-containment path instead of the recoverable pre-schema
+                // migration that stamps current schema metadata on load.
                 string historicalJson =
                     "{" +
-                    "\"SelectedRealm\":1," +
+                    "\"SelectedRealm\":0," +
                     "\"Resources\":[{\"Type\":0,\"Amount\":1000}]," +
                     "\"Buildings\":[],\"Troops\":[],\"Researches\":[]," +
                     "\"Quests\":[],\"Territories\":[],\"RealmGems\":[]," +
@@ -118,6 +121,216 @@ namespace AL.Tests.EditMode
                     Directory.Delete(root, true);
                 }
             }
+        }
+
+        [Test]
+        public void PreSchemaPrimaryWithKingdomStateMigratesOnCompatibilityLoad()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+
+            try
+            {
+                string primaryPath = Path.Combine(root, "save.json");
+                // A pre-schema primary (no SaveFormatId/SaveSchemaVersion/
+                // ProfileInitializationVersion) carrying recoverable kingdom state
+                // plus an unknown quest id, mirroring the shipped legacy format.
+                const string preSchemaJson =
+                    "{" +
+                    "\"SelectedRealm\":3," +
+                    "\"Resources\":[{\"Type\":0,\"Amount\":1033546}," +
+                    "{\"Type\":1,\"Amount\":517898}," +
+                    "{\"Type\":2,\"Amount\":259349}," +
+                    "{\"Type\":3,\"Amount\":130473}]," +
+                    "\"Buildings\":[],\"Troops\":[],\"Researches\":[]," +
+                    "\"Quests\":[{\"QuestId\":\"Q1\",\"CurrentValue\":0," +
+                    "\"IsCompleted\":false,\"IsClaimed\":false}]," +
+                    "\"Reputation\":[],\"FactionReputations\":[]," +
+                    "\"LordPersona\":{\"Warlord\":0,\"Diplomat\":0,\"Sage\":0,\"Rogue\":0}," +
+                    "\"Territories\":[],\"RealmGems\":[]," +
+                    "\"Wishgate\":{\"IsEarned\":false,\"EarnReason\":\"\"," +
+                    "\"LastRewardId\":\"\",\"LastRewardChosenTimestamp\":0}," +
+                    "\"CurrentChapterId\":\"C1\"," +
+                    "\"Warmaster\":{\"EquippedSetId\":\"\",\"UnlockedSetIds\":[]," +
+                    "\"PurchasedPieceIds\":[],\"IsTrueWarmaster\":false," +
+                    "\"Level\":0,\"Experience\":0}," +
+                    "\"ChampionCustomization\":{\"BodyPresetId\":\"average\"," +
+                    "\"HairStyleId\":\"short\",\"ArmorStyleId\":\"realm_basic\"," +
+                    "\"FaceMarkId\":\"none\",\"WeaponStyleId\":\"sword\"," +
+                    "\"OffhandStyleId\":\"shield\",\"PrimaryR\":0.2,\"PrimaryG\":0.4," +
+                    "\"PrimaryB\":1.0,\"HairR\":0.08,\"HairG\":0.06,\"HairB\":0.04," +
+                    "\"CapeEnabled\":true,\"HelmetEnabled\":false}," +
+                    "\"WarzoneCredits\":4300,\"LastSavedTimestamp\":1784868853}";
+                File.WriteAllText(primaryPath, preSchemaJson);
+                byte[] originalBytes = File.ReadAllBytes(primaryPath);
+
+                object service = CreateSaveService(root);
+                Invoke(service, "Load");
+
+                Assert.AreEqual(
+                    "LoadedPrimary",
+                    GetProperty(service, "LastLoadStatus").ToString());
+                Assert.That(
+                    (string)GetProperty(service, "LastLoadMessage"),
+                    Does.Contain("AL-SAVE-PRESCHEMA-MIGRATED"));
+                object currentSave = GetProperty(service, "CurrentSave");
+                Assert.NotNull(currentSave);
+                Assert.Null(GetProperty(service, "ReadOnlyCandidateSnapshot"));
+                Assert.AreEqual(
+                    CurrentSaveFormatId,
+                    GetField(currentSave, "SaveFormatId"));
+                Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
+                Assert.AreEqual(
+                    1,
+                    GetField(currentSave, "ProfileInitializationVersion"));
+                Assert.AreEqual(
+                    "Crownlands",
+                    GetField(currentSave, "SelectedRealm").ToString());
+                Assert.AreEqual(4300, GetField(currentSave, "WarzoneCredits"));
+
+                IList resources = (IList)GetField(currentSave, "Resources");
+                object food = resources.Cast<object>().Single(row =>
+                    GetField(row, "Type").ToString() == "Food");
+                Assert.AreEqual(
+                    1033546L,
+                    GetField(food, "Amount"),
+                    "Existing kingdom resources must survive migration.");
+
+                // The schema fields must be durably written to the primary.
+                string persistedPrimary = File.ReadAllText(primaryPath);
+                Type saveType = GetRuntimeType("AL.Data.Runtime.SaveGameData");
+                object persistedSave = JsonUtility.FromJson(
+                    persistedPrimary,
+                    saveType);
+                Assert.NotNull(persistedSave);
+                Assert.AreEqual(
+                    CurrentSaveFormatId,
+                    GetField(persistedSave, "SaveFormatId"));
+                Assert.AreEqual(
+                    1,
+                    GetField(persistedSave, "SaveSchemaVersion"));
+                Assert.AreEqual(
+                    1,
+                    GetField(persistedSave, "ProfileInitializationVersion"));
+                Assert.AreEqual(
+                    "Crownlands",
+                    GetField(persistedSave, "SelectedRealm").ToString());
+                Assert.AreEqual(4300, GetField(persistedSave, "WarzoneCredits"));
+
+                // Pre-schema primaries are not current-schema-valid, so persist
+                // quarantines the original bytes and writes a current-schema
+                // backup of the migrated candidate.
+                string backupPath = Path.Combine(root, "save.backup.json");
+                string[] quarantines = Directory.GetFiles(root, "save.json.corrupt-*");
+                Assert.True(File.Exists(backupPath));
+                Assert.AreEqual(1, quarantines.Length);
+                CollectionAssert.AreEqual(originalBytes, File.ReadAllBytes(quarantines[0]));
+                object persistedBackup = JsonUtility.FromJson(
+                    File.ReadAllText(backupPath),
+                    saveType);
+                Assert.AreEqual(
+                    CurrentSaveFormatId,
+                    GetField(persistedBackup, "SaveFormatId"));
+                Assert.AreNotEqual(
+                    originalBytes,
+                    File.ReadAllBytes(primaryPath),
+                    "The primary must be rewritten with the migrated schema metadata.");
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void UnmigratablePreSchemaPrimaryCreatesCurrentSchemaReplacement()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-SaveTests",
+                Guid.NewGuid().ToString("N"));
+            var fileSystem = new ScriptedSaveFileOperations();
+            string primaryPath = Path.Combine(root, "save.json");
+            string tempPath = Path.Combine(root, "save.tmp.json");
+            const string preSchemaJson =
+                "{" +
+                "\"SelectedRealm\":3," +
+                "\"Resources\":[{\"Type\":0,\"Amount\":77}]," +
+                "\"Buildings\":[],\"Troops\":[],\"Researches\":[]," +
+                "\"Quests\":[],\"Reputation\":[],\"FactionReputations\":[]," +
+                "\"LordPersona\":{\"Warlord\":0,\"Diplomat\":0,\"Sage\":0,\"Rogue\":0}," +
+                "\"Territories\":[],\"RealmGems\":[]," +
+                "\"Wishgate\":{\"IsEarned\":false,\"EarnReason\":\"\"," +
+                "\"LastRewardId\":\"\",\"LastRewardChosenTimestamp\":0}," +
+                "\"CurrentChapterId\":\"C1\"," +
+                "\"Warmaster\":{\"EquippedSetId\":\"\",\"UnlockedSetIds\":[]," +
+                "\"PurchasedPieceIds\":[],\"IsTrueWarmaster\":false," +
+                "\"Level\":0,\"Experience\":0}," +
+                "\"ChampionCustomization\":{}," +
+                "\"WarzoneCredits\":9,\"LastSavedTimestamp\":1784868853}";
+            fileSystem.Files[primaryPath] = preSchemaJson;
+            fileSystem.DurableWriteObserver = (path, _) =>
+            {
+                if (string.Equals(path, tempPath, StringComparison.OrdinalIgnoreCase) &&
+                    fileSystem.GetDurableWriteCount(path) == 1)
+                {
+                    fileSystem.WriteFailuresBeforeMutation.Add(path);
+                }
+                else
+                {
+                    fileSystem.WriteFailuresBeforeMutation.Remove(path);
+                }
+            };
+
+            object service = CreateSaveService(
+                root,
+                CreateFileOperationsProxy(fileSystem));
+            InvokeAllowingFailureLogs(service, "Load");
+
+            string status = GetProperty(service, "LastLoadStatus").ToString();
+            Assert.That(
+                status,
+                Is.Not.StartsWith("LoadedPrimary"),
+                "An unmigratable pre-schema primary must never be reported as a loaded primary.");
+            Assert.AreEqual(
+                "CreatedNewAfterUnrecoverableCorruption",
+                status);
+            Assert.That(
+                (string)GetProperty(service, "LastLoadMessage"),
+                Does.Contain("AL-SAVE-CREATED-NEW-AFTER-UNRECOVERABLE"));
+
+            object currentSave = GetProperty(service, "CurrentSave");
+            Assert.NotNull(
+                currentSave,
+                "BootLoadReadinessProbe requires a published current-schema save.");
+            Assert.AreEqual(
+                CurrentSaveFormatId,
+                GetField(currentSave, "SaveFormatId"));
+            Assert.AreEqual(1, GetField(currentSave, "SaveSchemaVersion"));
+            Assert.AreEqual(
+                1,
+                GetField(currentSave, "ProfileInitializationVersion"));
+            Assert.AreEqual(
+                "None",
+                GetField(currentSave, "SelectedRealm").ToString(),
+                "Replacement profile must return the player to realm selection.");
+
+            Assert.False(fileSystem.Files.ContainsKey(primaryPath) &&
+                         fileSystem.Files[primaryPath] == preSchemaJson);
+            string[] quarantines = fileSystem.Files.Keys
+                .Where(path =>
+                    Path.GetFileName(path).StartsWith(
+                        "save.json.corrupt-",
+                        StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+            Assert.AreEqual(1, quarantines.Length);
+            Assert.AreEqual(preSchemaJson, fileSystem.Files[quarantines[0]]);
         }
 
         [Test]

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.Services.Local;
+using AL.UI.FirstUserIdentity;
 using UnityEngine;
 
 namespace AL.ChampionMode.Customization
@@ -770,7 +772,35 @@ namespace AL.ChampionMode.Customization
         private void SaveAndApply()
         {
             ServiceLocator.Get<ISaveGameService>().Save();
+            PersistConfirmedIdentity();
             ApplySavedCustomization();
+        }
+
+        private static void PersistConfirmedIdentity()
+        {
+            if (!ServiceLocator.TryGet(out ISaveGameService saveGameService) ||
+                saveGameService.CurrentSave == null)
+            {
+                return;
+            }
+
+            MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(saveGameService.CurrentSave);
+            if (!snapshot.ClassFamily.HasValue ||
+                !FirstUserIdentityDerivation.IsSupportedRealm(snapshot.Realm))
+            {
+                return;
+            }
+
+            MvpLoopSaveAuthority.TryCommit(
+                saveGameService,
+                new MvpLoopCommitRequest(
+                    Guid.NewGuid().ToString("N"),
+                    snapshot.Realm,
+                    snapshot.ClassFamily.Value,
+                    true,
+                    snapshot.LastResultId,
+                    snapshot.LastBuildId,
+                    snapshot.LastBuildLevel));
         }
 
         private void TryApplySharedCatalog()
@@ -886,7 +916,10 @@ namespace AL.ChampionMode.Customization
                 AccentG = source.AccentG,
                 AccentB = source.AccentB,
                 CapeEnabled = source.CapeEnabled,
-                HelmetEnabled = source.HelmetEnabled
+                HelmetEnabled = source.HelmetEnabled,
+                ClassFamilyId = source.ClassFamilyId,
+                IdentityConfirmed = source.IdentityConfirmed,
+                LastResultId = source.LastResultId
             };
         }
 

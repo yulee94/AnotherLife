@@ -8,6 +8,66 @@ using System.Linq;
 
 namespace AL.ChampionMode.Control
 {
+#if UNITY_EDITOR
+    public enum ChampionBasicAttackResolutionKind
+    {
+        Invalid = 0,
+        Miss = 1,
+        Hit = 2,
+        Defeated = 3
+    }
+
+    public readonly struct ChampionBasicAttackContext
+    {
+        public ChampionBasicAttackContext(
+            ChampionController attacker,
+            int attackSequence,
+            Vector3 hitCenter,
+            float hitRadius,
+            Collider[] hitColliders,
+            RealmId realmId)
+        {
+            Attacker = attacker;
+            AttackSequence = attackSequence;
+            HitCenter = hitCenter;
+            HitRadius = hitRadius;
+            HitColliders = hitColliders ?? System.Array.Empty<Collider>();
+            RealmId = realmId;
+        }
+
+        public ChampionController Attacker { get; }
+        public int AttackSequence { get; }
+        public Vector3 HitCenter { get; }
+        public float HitRadius { get; }
+        public Collider[] HitColliders { get; }
+        public RealmId RealmId { get; }
+    }
+
+    public readonly struct ChampionBasicAttackResolution
+    {
+        public ChampionBasicAttackResolution(
+            ChampionBasicAttackResolutionKind kind,
+            Vector3 impactPosition,
+            string combatText)
+        {
+            Kind = kind;
+            ImpactPosition = impactPosition;
+            CombatText = combatText ?? string.Empty;
+        }
+
+        public ChampionBasicAttackResolutionKind Kind { get; }
+        public Vector3 ImpactPosition { get; }
+        public string CombatText { get; }
+    }
+
+    public interface IChampionBasicAttackResolver
+    {
+        bool TryResolve(
+            ChampionBasicAttackContext context,
+            out ChampionBasicAttackResolution resolution);
+    }
+#endif
+
     [RequireComponent(typeof(CharacterController))]
     public class ChampionController : MonoBehaviour
     {
@@ -35,7 +95,39 @@ namespace AL.ChampionMode.Control
         private int _initialEnemyCount;
         private Vector2 _externalMoveInput;
         private SkillCaster _skillCaster;
+        private ChampionCombat _combat;
         private RealmId _realmId = RealmId.None;
+#if UNITY_EDITOR
+        private IChampionBasicAttackResolver _editorBasicAttackResolver;
+        private int _editorBasicAttackSequence;
+
+        public int EditorBasicAttackSequence => _editorBasicAttackSequence;
+
+        public bool TryBindEditorBasicAttackResolver(
+            IChampionBasicAttackResolver resolver)
+        {
+            if (resolver == null || _editorBasicAttackResolver != null)
+            {
+                return false;
+            }
+
+            _editorBasicAttackResolver = resolver;
+            return true;
+        }
+
+        public bool TryUnbindEditorBasicAttackResolver(
+            IChampionBasicAttackResolver resolver)
+        {
+            if (resolver == null ||
+                !ReferenceEquals(_editorBasicAttackResolver, resolver))
+            {
+                return false;
+            }
+
+            _editorBasicAttackResolver = null;
+            return true;
+        }
+#endif
 
         private void Awake()
         {
@@ -54,6 +146,7 @@ namespace AL.ChampionMode.Control
                 _cameraTransform = UnityEngine.Camera.main.transform;
 
             _skillCaster = GetComponent<SkillCaster>() ?? gameObject.AddComponent<SkillCaster>();
+            _combat = GetComponent<ChampionCombat>();
         }
 
         private void Start()
@@ -149,6 +242,10 @@ namespace AL.ChampionMode.Control
             }
 
             _isAttacking = true;
+#if UNITY_EDITOR
+            _editorBasicAttackSequence++;
+            int editorAttackSequence = _editorBasicAttackSequence;
+#endif
             GameDebug.Log("<color=orange>[Combat] Attacking!</color>");
             RuntimeCombatAudio.PlayBasicAttack();
 
@@ -175,6 +272,68 @@ namespace AL.ChampionMode.Control
 
             bool hitAnything = false;
             bool hitBoss = false;
+#if UNITY_EDITOR
+            bool editorResolverBound = _editorBasicAttackResolver != null;
+            bool editorResolverAllowsMissFeedback = false;
+            if (editorResolverBound)
+            {
+                bool resolved = false;
+                ChampionBasicAttackResolution resolution = default;
+                try
+                {
+                    resolved = _editorBasicAttackResolver.TryResolve(
+                        new ChampionBasicAttackContext(
+                            this,
+                            editorAttackSequence,
+                            hitCenter,
+                            _attackRange,
+                            hitColliders,
+                            realmId),
+                        out resolution);
+                }
+                catch (System.Exception exception)
+                {
+                    Debug.LogError(
+                        "[AL-FIRST-USER-ATTACK-RESOLVER-FAILED] " +
+                        exception.GetType().Name);
+                }
+
+                if (!resolved || resolution.Kind == ChampionBasicAttackResolutionKind.Invalid)
+                {
+                    Debug.LogError(
+                        "[AL-FIRST-USER-ATTACK-RESOLVER-FAILED] " +
+                        "The isolated resolver did not return an exact result.");
+                }
+                else if (resolution.Kind == ChampionBasicAttackResolutionKind.Miss)
+                {
+                    editorResolverAllowsMissFeedback = true;
+                }
+                else
+                {
+                    hitAnything = true;
+                    bool defeated =
+                        resolution.Kind == ChampionBasicAttackResolutionKind.Defeated;
+                    GameDebug.Log(defeated
+                        ? "<color=red>[Combat] Enemy Defeated!</color>"
+                        : "<color=red>[Combat] Enemy Hit!</color>");
+                    CreateHitVFX(resolution.ImpactPosition);
+                    SkillEffectFactory.SpawnFloatingCombatText(
+                        resolution.ImpactPosition + Vector3.up * 1.45f,
+                        string.IsNullOrEmpty(resolution.CombatText)
+                            ? defeated ? "KO" : "HIT"
+                            : resolution.CombatText,
+                        new Color(1f, 0.78f, 0.22f),
+                        0.26f,
+                        0.8f);
+                    SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
+                    SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
+                    RuntimeCombatAudio.PlayImpact();
+                }
+            }
+
+            if (!editorResolverBound)
+            {
+#endif
             foreach (var hitCollider in hitColliders)
             {
                 if (hitCollider.gameObject.name.StartsWith("Dummy_"))
@@ -199,13 +358,26 @@ namespace AL.ChampionMode.Control
                     {
                         hitBoss = true;
                         hitAnything = true;
-                        boss.TakeDamage(125f);
+                        // hotspot: ChampionController.cs — basic-attack damage must stay catalog-backed.
+                        float catalogDamage = ResolveCatalogAttackDamage();
+                        if (catalogDamage > 0f)
+                        {
+                            boss.TakeDamage(catalogDamage);
+                        }
+
                         RuntimeCombatAudio.PlayImpact();
                     }
                 }
             }
+#if UNITY_EDITOR
+            }
+#endif
 
-            if (!hitAnything)
+            if (!hitAnything
+#if UNITY_EDITOR
+                && (!editorResolverBound || editorResolverAllowsMissFeedback)
+#endif
+                )
             {
                 GameDebug.Log("[Combat] Attack Missed.");
                 Vector3 whiffCenter = transform.position + transform.forward * 1.35f;
@@ -391,6 +563,12 @@ namespace AL.ChampionMode.Control
             {
                 _controller.enabled = wasEnabled;
             }
+        }
+
+        private float ResolveCatalogAttackDamage()
+        {
+            _combat ??= GetComponent<ChampionCombat>();
+            return _combat != null ? _combat.GetAttackDamage() : 0f;
         }
 
     }

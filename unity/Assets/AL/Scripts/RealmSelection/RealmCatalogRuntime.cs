@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using AL.Core;
+using AL.Data.Catalogs;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -12,15 +13,30 @@ namespace AL.RealmSelection
 
     public sealed class RealmCatalogEntry
     {
-        internal RealmCatalogEntry(string id, RealmId runtimeId, string displayName)
+        internal RealmCatalogEntry(
+            string id,
+            RealmId runtimeId,
+            string displayName,
+            string peopleName,
+            string markName,
+            string silhouetteLanguage,
+            string materialLanguage)
         {
             Id = id;
             RuntimeId = runtimeId;
             DisplayName = displayName;
+            PeopleName = peopleName ?? string.Empty;
+            MarkName = markName ?? string.Empty;
+            SilhouetteLanguage = silhouetteLanguage ?? string.Empty;
+            MaterialLanguage = materialLanguage ?? string.Empty;
         }
         public string Id { get; }
         public RealmId RuntimeId { get; }
         public string DisplayName { get; }
+        public string PeopleName { get; }
+        public string MarkName { get; }
+        public string SilhouetteLanguage { get; }
+        public string MaterialLanguage { get; }
     }
 
     public sealed class RealmCatalogSnapshot
@@ -54,7 +70,7 @@ namespace AL.RealmSelection
 
     public static class RealmCatalogRuntime
     {
-        public const string RelativePath = "GameData/al_realm_catalog.json";
+        public const string RelativePath = "GameData/realm_specialized.v1.json";
         public const string SupportedVersion = "0.1.0";
         public const int MaximumByteLength = 32768;
 
@@ -118,45 +134,109 @@ namespace AL.RealmSelection
         {
             if (string.IsNullOrEmpty(json)) return Reject("AL-REALM-CATALOG-MISSING");
             if (Encoding.UTF8.GetByteCount(json) > MaximumByteLength) return Reject("AL-REALM-CATALOG-OVERSIZE");
-            RealmCatalogDocument document;
-            try { document = JsonUtility.FromJson<RealmCatalogDocument>(json); }
-            catch (Exception) { return Reject("AL-REALM-CATALOG-MALFORMED"); }
-            if (document == null || document.catalogId != "al_realm_catalog" || document.version != SupportedVersion)
-                return Reject("AL-REALM-CATALOG-UNSUPPORTED");
-            if (document.selectionPolicy == null || document.selectionPolicy.selectionMode != "one_realm_per_account" ||
-                document.selectionPolicy.realmLockScope != "account" || document.selectionPolicy.subCharacterPolicy != "same_realm_only" ||
-                document.selectionPolicy.sharedStoragePolicy != "same_realm_account_storage" ||
-                document.selectionPolicy.crossRealmCreationPolicy != "reject" ||
-                document.selectionPolicy.realmChangePolicy != "not_supported_after_commit" ||
-                document.selectionPolicy.uncommittedProfileState != "realm_unselected" ||
-                document.selectionPolicy.committedProfileState != "realm_locked")
+            GameDataFamilyCatalogSnapshot family;
+            string diagnosticCode;
+            if (!WireFamilyCatalogLoader.TryLoad("realm_specialized", json, out family, out diagnosticCode))
+                return Reject("AL-REALM-CATALOG-MALFORMED");
+            return Project(family);
+        }
+
+        private static RealmCatalogLoadResult Project(GameDataFamilyCatalogSnapshot family)
+        {
+            GameDataCatalogRecord policy;
+            if (!WireFamilyCatalogLoader.TryGetRecord(family, "selection_policy", out policy) ||
+                !HasExact(policy, "selection_mode", "one_realm_per_account") ||
+                !HasExact(policy, "realm_lock_scope", "account") ||
+                !HasExact(policy, "sub_character_policy", "same_realm_only") ||
+                !HasExact(policy, "shared_storage_policy", "same_realm_account_storage") ||
+                !HasExact(policy, "cross_realm_creation_policy", "reject") ||
+                !HasExact(policy, "realm_change_policy", "not_supported_after_commit") ||
+                !HasExact(policy, "uncommitted_profile_state", "realm_unselected") ||
+                !HasExact(policy, "committed_profile_state", "realm_locked"))
+            {
                 return Reject("AL-REALM-CATALOG-POLICY-MISMATCH");
-            if (document.realms == null || document.realms.Length != 4 || document.realmOrder == null || document.realmOrder.Length != 4)
+            }
+
+            GameDataCatalogRecord orderRecord;
+            string[] realmOrder;
+            if (!WireFamilyCatalogLoader.TryGetRecord(family, "realm_order", out orderRecord) ||
+                !WireFamilyCatalogLoader.TryGetStringArray(orderRecord, "realm_ids", out realmOrder) ||
+                realmOrder == null ||
+                realmOrder.Length != 4)
+            {
                 return Reject("AL-REALM-CATALOG-REALM-COUNT");
+            }
+
+            var realmRecords = WireFamilyCatalogLoader.RecordsOfKind(family, "realm");
+            if (realmRecords.Count != 4)
+            {
+                return Reject("AL-REALM-CATALOG-REALM-COUNT");
+            }
 
             var seenIds = new HashSet<string>(StringComparer.Ordinal);
             var seenRuntime = new HashSet<RealmId>();
             var seenGemIds = new HashSet<string>(StringComparer.Ordinal);
             var entries = new List<RealmCatalogEntry>(4);
-            for (int i = 0; i < document.realms.Length; i++)
+            for (int i = 0; i < realmRecords.Count; i++)
             {
-                RealmCatalogRealm realm = document.realms[i];
+                GameDataCatalogRecord realm = realmRecords[i];
+                string displayName;
+                string legacyRuntimeId;
+                string[] realmGemIds;
                 RealmId expectedRuntimeId;
                 RealmId runtimeId;
-                if (realm == null || !TryStableRuntimeId(realm.id, out expectedRuntimeId) || !seenIds.Add(realm.id) || string.IsNullOrWhiteSpace(realm.displayName) ||
-                    !TryRuntimeId(realm.legacyRuntimeId, out runtimeId) || runtimeId != expectedRuntimeId || !seenRuntime.Add(runtimeId) ||
-                    realm.realmGemIds == null || realm.realmGemIds.Length != 2 ||
-                    !IsStableId(realm.realmGemIds[0]) || !IsStableId(realm.realmGemIds[1]) ||
-                    !seenGemIds.Add(realm.realmGemIds[0]) || !seenGemIds.Add(realm.realmGemIds[1]))
+                if (realm == null ||
+                    !TryStableRuntimeId(realm.Id, out expectedRuntimeId) ||
+                    !seenIds.Add(realm.Id) ||
+                    !WireFamilyCatalogLoader.TryGetString(realm, "display_name", out displayName) ||
+                    !WireFamilyCatalogLoader.TryGetString(realm, "legacy_runtime_id", out legacyRuntimeId) ||
+                    !TryRuntimeId(legacyRuntimeId, out runtimeId) ||
+                    runtimeId != expectedRuntimeId ||
+                    !seenRuntime.Add(runtimeId) ||
+                    !WireFamilyCatalogLoader.TryGetStringArray(realm, "realm_gem_ids", out realmGemIds) ||
+                    realmGemIds == null ||
+                    realmGemIds.Length != 2 ||
+                    !IsStableId(realmGemIds[0]) ||
+                    !IsStableId(realmGemIds[1]) ||
+                    !seenGemIds.Add(realmGemIds[0]) ||
+                    !seenGemIds.Add(realmGemIds[1]))
+                {
                     return Reject("AL-REALM-CATALOG-INVALID-REALM");
-                entries.Add(new RealmCatalogEntry(realm.id, runtimeId, realm.displayName));
+                }
+
+                string peopleName;
+                if (!WireFamilyCatalogLoader.TryGetString(realm, "people_name", out peopleName))
+                {
+                    peopleName = string.Empty;
+                }
+
+                string markName;
+                string silhouetteLanguage;
+                string materialLanguage;
+                TryReadVisualIdentity(realm, out markName, out silhouetteLanguage, out materialLanguage);
+                entries.Add(new RealmCatalogEntry(
+                    realm.Id,
+                    runtimeId,
+                    displayName,
+                    peopleName,
+                    markName,
+                    silhouetteLanguage,
+                    materialLanguage));
             }
-            for (int i = 0; i < document.realmOrder.Length; i++)
-                if (!seenIds.Contains(document.realmOrder[i])) return Reject("AL-REALM-CATALOG-ORDER-MISMATCH");
-            if (new HashSet<string>(document.realmOrder, StringComparer.Ordinal).Count != 4)
+
+            for (int i = 0; i < realmOrder.Length; i++)
+                if (!seenIds.Contains(realmOrder[i])) return Reject("AL-REALM-CATALOG-ORDER-MISMATCH");
+            if (new HashSet<string>(realmOrder, StringComparer.Ordinal).Count != 4)
                 return Reject("AL-REALM-CATALOG-ORDER-MISMATCH");
-            entries.Sort((left, right) => Array.IndexOf(document.realmOrder, left.Id).CompareTo(Array.IndexOf(document.realmOrder, right.Id)));
-            return new RealmCatalogLoadResult(new RealmCatalogSnapshot(document.version, entries), "AL-REALM-CATALOG-READY");
+            entries.Sort((left, right) => Array.IndexOf(realmOrder, left.Id).CompareTo(Array.IndexOf(realmOrder, right.Id)));
+            return new RealmCatalogLoadResult(new RealmCatalogSnapshot(SupportedVersion, entries), "AL-REALM-CATALOG-READY");
+        }
+
+        private static bool HasExact(GameDataCatalogRecord record, string field, string expected)
+        {
+            string value;
+            return WireFamilyCatalogLoader.TryGetString(record, field, out value) &&
+                   string.Equals(value, expected, StringComparison.Ordinal);
         }
 
         internal static void MarkLoading()
@@ -223,20 +303,43 @@ namespace AL.RealmSelection
 
         private static RealmCatalogLoadResult Reject(string code) => new RealmCatalogLoadResult(null, code);
 
-        [Serializable] private sealed class RealmCatalogDocument { public string version; public string catalogId; public RealmCatalogSelectionPolicy selectionPolicy; public string[] realmOrder; public RealmCatalogRealm[] realms; }
-        [Serializable] private sealed class RealmCatalogSelectionPolicy
+        private static void TryReadVisualIdentity(
+            GameDataCatalogRecord realm,
+            out string markName,
+            out string silhouetteLanguage,
+            out string materialLanguage)
         {
-            public string selectionMode;
-            public string realmLockScope;
-            public string subCharacterPolicy;
-            public string sharedStoragePolicy;
-            public string crossRealmCreationPolicy;
-            public string realmChangePolicy;
-            public string uncommittedProfileState;
-            public string committedProfileState;
-        }
-        [Serializable] private sealed class RealmCatalogRealm { public string id; public string legacyRuntimeId; public string displayName; public string[] realmGemIds; }
+            markName = string.Empty;
+            silhouetteLanguage = string.Empty;
+            materialLanguage = string.Empty;
+            GameDataValue raw;
+            if (realm == null || !realm.TryGetField("visual_identity", out raw))
+            {
+                return;
+            }
 
+            var visual = raw as GameDataObjectValue;
+            if (visual == null)
+            {
+                return;
+            }
+
+            markName = NestedString(visual, "mark_name");
+            silhouetteLanguage = NestedString(visual, "silhouette_language");
+            materialLanguage = NestedString(visual, "material_language");
+        }
+
+        private static string NestedString(GameDataObjectValue obj, string name)
+        {
+            GameDataValue raw;
+            if (obj == null || !obj.TryGetValue(name, out raw))
+            {
+                return string.Empty;
+            }
+
+            var text = raw as GameDataStringValue;
+            return text == null || string.IsNullOrEmpty(text.Value) ? string.Empty : text.Value;
+        }
     }
 
     public sealed class RealmCatalogRuntimeHost : MonoBehaviour

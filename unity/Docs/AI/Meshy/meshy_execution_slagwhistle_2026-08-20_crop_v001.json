@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "MeshyExecutionEvidence",
+  "recordId": "meshy_execution_slagwhistle_2026-08-20_crop_v001",
+  "recordedBy": "default",
+  "recordedAtUtc": "2026-08-19T23:44:54Z",
+  "state": "SUCCEEDED_ACCEPTED_SINGLE_BURROWER",
+  "referencesA1Authorization": {
+    "recordId": "meshy_a1_authorization_2026-08-20_slagwhistle_crop_v001",
+    "authorizationId": "a1_slagwhistle_slagfall_fauna_20260820_crop_v001",
+    "subject": "Slagfall Slagwhistle fauna (Stonehold)",
+    "priorityItemId": "tdf_fauna_stonehold_slagwhistle_burrower"
+  },
+  "executionTask": "t_1e666a71",
+  "operation": "image_to_3d",
+  "httpMethod": "POST",
+  "endpoint": "https://api.meshy.ai/openapi/v1/image-to-3d",
+  "provider": "Meshy",
+  "ai_model": "meshy-6",
+  "payloadBinding": {
+    "payloadSha256": "e0a779877e0dd0fec0d3f61d2f44fa93b6cb2a679ebdd303c47047b0cbcf1ffc",
+    "payloadSha256State": "BOUND_PRE_POST",
+    "bindingArtifact": "unity/Docs/AI/Meshy/meshy_payload_slagwhistle_v003_crop_prepost.json",
+    "note": "Canonical request-contract hash (input file identity + parameters). The exact multipart wire bytes are produced by the Meshy MCP server; the deterministic request contract is hash-bound here."
+  },
+  "sourceVerification": {
+    "inputFile": "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/tdf_fauna_stonehold_slagwhistle_burrower_identity_side_crop_v001.png",
+    "inputSha256": "efc77b574a757266dd8e19ce7284b6ed2edff27b998d1a59051c2cd01f4a8698",
+    "inputByteLength": 366052,
+    "inputWidth": 704,
+    "inputHeight": 336,
+    "cropBbox": [16, 24, 720, 360],
+    "identityFile": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v002.png",
+    "identityPinSha256": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+    "identityUnmodified": true,
+    "cropHashMatch": true,
+    "cropRecroppedThisRun": false,
+    "fullBoardSentToMeshy": false
+  },
+  "execution": {
+    "providerTaskId": "01a01c64-08f4-7626-9d9b-718d5f3688ce",
+    "submitStatus": "PENDING",
+    "submitMessage": "3D generation task created successfully",
+    "finalStatus": "SUCCEEDED",
+    "finalError": null,
+    "waitTimeSeconds": 100,
+    "pollCount": 8,
+    "createdAtMs": 1787182713527,
+    "finishedAtMs": 1787182829374
+  },
+  "credits": {
+    "balanceBefore": 6451,
+    "balanceAfter": 6421,
+    "actualCredits": 30,
+    "authorizedCeiling": 30,
+    "withinCeiling": true,
+    "creditMismatch": false
+  },
+  "stopRulesApplied": {
+    "stopOnSuccess": true,
+    "stopOnAnyError": false,
+    "stopOnCreditMismatch": false,
+    "stopOnSourceHashMismatch": false,
+    "stopOnRightsUncertainty": false,
+    "stopOnNonSingleBurrower": false,
+    "retryPolicy": "ForbiddenWithoutNewA1Authorization",
+    "retried": false,
+    "remeshRigRetextureConvertCalled": false
+  },
+  "authorizationStateAfterRun": "ExecutedAccepted",
+  "acceptanceGate": {
+    "singleCreature": true,
+    "recumbentBurrower": true,
+    "sheetDiorama": false,
+    "multipleAnimals": false,
+    "scaleHuman": false,
+    "glbHeaderMatchesByteLength": true,
+    "fbxComplete": true
+  },
+  "outputFiles": [
+    {
+      "format": "glb",
+      "locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Meshes/tdf_fauna_stonehold_slagwhistle_burrower_meshy6_crop_raw_v001.glb",
+      "byteLength": 22815020,
+      "sha256": "03d4958f6a889d315c8da28d7c0b9d492622b74c9461d3243fcd28c3c20c2a1e",
+      "glbHeaderDeclared": 22815020,
+      "headerMatch": true
+    },
+    {
+      "format": "fbx",
+      "locator": "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Meshes/tdf_fauna_stonehold_slagwhistle_burrower_meshy6_crop_raw_v001.fbx",
+      "byteLength": 33738844,
+      "sha256": "3a72d17627cedddbbb6b924d46fe4240be9336ca636a1aa2e2fdeaa09b21170b"
+    }
+  ],
+  "meshInspection": {
+    "blender": "5.2.0 LTS",
+    "meshes": 1,
+    "meshName": "Mesh_0",
+    "verts": 251163,
+    "tris": 471338,
+    "otherObjects": [],
+    "boundsXyz": [1.119, 1.899, 0.590],
+    "centerXyz": [-0.001, 0.001, -0.002],
+    "minsXyz": [-0.560, -0.949, -0.297],
+    "maxsXyz": [0.559, 0.951, 0.293],
+    "preview": "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/preview_01a01c64.png",
+    "renders": [
+      "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/mesh_front.png",
+      "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/mesh_threequarter.png",
+      "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/mesh_side.png",
+      "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/mesh_top.png"
+    ],
+    "notesFile": "unity/Docs/AI/Meshy/slagwhistle_crop_2026-08-20/inspection_notes.md"
+  },
+  "rejectedPriorOutput": {
+    "providerTaskId": "01a0190e-d06a-7189-bd11-5395b9de97a9",
+    "reason": "full identity board sculpted as 714458-tri sheet-diorama; not forwarded",
+    "notCommitted": [
+      "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Meshes/tdf_fauna_stonehold_slagwhistle_burrower_meshy6_raw_v001.glb",
+      "unity/Assets/AL/Art/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/Meshes/tdf_fauna_stonehold_slagwhistle_burrower_meshy6_raw_v001.fbx"
+    ]
+  },
+  "conclusion": "Single authorized crop image_to_3d succeeded. Result is one recumbent Slagwhistle burrower (not a sheet-diorama). Complete GLB (header match) and FBX are on disk and hash-bound to crop efc77b57 and identity pin 1a08581e. 30 credits consumed, within the 30-credit ceiling. Raw 471338 tris exceeds the 10k LOD0 cap; that is for t_1690c393 cleanup, not a Meshy rerun. No remesh/rig/retexture/convert. No retry. Acceptance met.",
+  "scopingNotes": [
+    "Approved source PNGs were not modified. Full identity board was not sent to Meshy.",
+    "No catalog or save data was modified.",
+    "Champion Vanguard was not authorized and was not generated.",
+    "Signed Meshy CDN URLs expire and are not stored in-repo; retrieve via provider task 01a01c64-08f4-7626-9d9b-718d5f3688ce."
+  ]
+}

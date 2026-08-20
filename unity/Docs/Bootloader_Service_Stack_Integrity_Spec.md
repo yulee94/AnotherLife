@@ -85,7 +85,7 @@ The current offline stack contains these required registrations in this dependen
 
 | Registration | Implementation | Direct dependencies |
 | --- | --- | --- |
-| `IBattleSimulator` | `DeterministicBattleSimulator` | none |
+| `IBattleSimulator` | `FixedPointBattleSimulator` | none |
 | `IWarzoneCreditService` | `LocalWarzoneCreditService` | save |
 | `IWarmasterService` | `LocalWarmasterService` | save, Warzone Credits |
 | `ITerritoryService` | `WarzoneService` | save |

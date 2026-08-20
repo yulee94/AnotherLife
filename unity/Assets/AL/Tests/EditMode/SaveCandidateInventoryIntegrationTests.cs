@@ -908,8 +908,11 @@ namespace AL.Tests.EditMode
 
         private static string LegacyCompatibleJson()
         {
+            // SelectedRealm is intentionally None so this pre-schema fixture is not
+            // auto-migrated on load; it exercises the read-only neutral-snapshot path
+            // for legacy saves that carry no recoverable kingdom state.
             return "{" +
-                   "\"SelectedRealm\":1," +
+                   "\"SelectedRealm\":0," +
                    "\"Resources\":[{\"Type\":0,\"Amount\":1000}," +
                    "{\"Type\":1,\"Amount\":1000}," +
                    "{\"Type\":2,\"Amount\":500}," +

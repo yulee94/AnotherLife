@@ -1,0 +1,172 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_building_catalog",
+  "game": "Another Life",
+  "idFormat": "lowercase_snake_case",
+  "buildings": [
+    {
+      "id": "town_hall",
+      "legacy_building_id": "TownHall",
+      "name_ref": "building.town_hall.name",
+      "models": [
+        {
+          "realm_id": "crownlands",
+          "model_id": "building_crownlands_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Runtime/Crownlands_TownHall_Production.prefab",
+            "guid": "40d5f7687fed640fd8c0d4b1868ff0ef",
+            "sha256": "71ea52234ec8aea93b91bf39ae41d111fa1a7d54cf181f54894e895d23463b46"
+          }
+        },
+        {
+          "realm_id": "stonehold",
+          "model_id": "building_stonehold_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/TownHall/Runtime/Stonehold_TownHall_Production.prefab",
+            "guid": "8efaf25037c3b444f86bfe62ea193ed7",
+            "sha256": "6dfcab4c4f36fceae06bb83b56a2a7034c74a53f6d027370f5eca830f96341b2"
+          }
+        },
+        {
+          "realm_id": "eldergrove",
+          "model_id": "building_eldergrove_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/TownHall/Runtime/Eldergrove_TownHall_Production.prefab",
+            "guid": "64552283a5bd040f08d3f41d6a94ca5a",
+            "sha256": "2d91fc0a7cf825facabe995ef9d04204b0cc1471ad19fded3093f9602699b16e"
+          }
+        },
+        {
+          "realm_id": "umbral",
+          "model_id": "building_umbral_town_hall_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Umbral/Production/TownHall/Runtime/Umbral_TownHall_Production.prefab",
+            "guid": "1a01ccaafe3d44864b31d30ef7091279",
+            "sha256": "252665d5d111fdafdf95f11996a28f49ab5381e836802e8e0aa1fba3aa3a953e"
+          }
+        }
+      ]
+    },
+    {
+      "id": "farm",
+      "legacy_building_id": "Farm",
+      "name_ref": "building.farm.name",
+      "models": []
+    },
+    {
+      "id": "lumber_mill",
+      "legacy_building_id": "LumberMill",
+      "name_ref": "building.lumber_mill.name",
+      "models": []
+    },
+    {
+      "id": "quarry",
+      "legacy_building_id": "Quarry",
+      "name_ref": "building.quarry.name",
+      "models": []
+    },
+    {
+      "id": "gold_mine",
+      "legacy_building_id": "GoldMine",
+      "name_ref": "building.gold_mine.name",
+      "models": []
+    },
+    {
+      "id": "barracks",
+      "legacy_building_id": "Barracks",
+      "name_ref": "building.barracks.name",
+      "models": []
+    },
+    {
+      "id": "academy",
+      "legacy_building_id": "Academy",
+      "name_ref": "building.academy.name",
+      "models": []
+    },
+    {
+      "id": "market",
+      "legacy_building_id": "Market",
+      "name_ref": "building.market.name",
+      "models": []
+    },
+    {
+      "id": "storehouse",
+      "legacy_building_id": "Storehouse",
+      "name_ref": "building.storehouse.name",
+      "models": []
+    },
+    {
+      "id": "forge",
+      "legacy_building_id": "Forge",
+      "name_ref": "building.forge.name",
+      "models": []
+    },
+    {
+      "id": "stable",
+      "legacy_building_id": "Stable",
+      "name_ref": "building.stable.name",
+      "models": []
+    },
+    {
+      "id": "workshop",
+      "legacy_building_id": "Workshop",
+      "name_ref": "building.workshop.name",
+      "models": [
+        {
+          "realm_id": "crownlands",
+          "model_id": "building_crownlands_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/Runtime/Crownlands_Stormwright_Production.prefab",
+            "guid": "af08230ec23a84ed59fe22cb35dc22df",
+            "sha256": "e6af605f86ae0f3ad2986d70070a6dbe72b5f9560d2ef92c104af812d55c7cb5"
+          }
+        },
+        {
+          "realm_id": "stonehold",
+          "model_id": "building_stonehold_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Stonehold/Production/Runtime/Stonehold_Workshop_Production.prefab",
+            "guid": "fa8beffdd2c1045579a3fbd5c25ef181",
+            "sha256": "388b56eeb5cfb1cefd19bcdc188fe4beeff5fa817860e37a876b7315ac002106"
+          }
+        },
+        {
+          "realm_id": "eldergrove",
+          "model_id": "building_eldergrove_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Eldergrove/Production/Runtime/Eldergrove_Workshop_Production.prefab",
+            "guid": "856e9f0cea18f4647812c4467a05d991",
+            "sha256": "d6756aa97c2e92b0d2b59806ce67de03d6500e25e2e3a44a463cdcb28a92daf1"
+          }
+        },
+        {
+          "realm_id": "umbral",
+          "model_id": "building_umbral_workshop_production_v1",
+          "asset_ref": {
+            "path": "Assets/AL/Art/Generated/Architecture/Umbral/Production/Runtime/Umbral_Veilwright_Production.prefab",
+            "guid": "197149fd997cd4a59b110b4722bc7e68",
+            "sha256": "c4f559a4c572f63b5a4136ca74d1d2fb9b77c4f042cb9a2166d2e1d931e1a691"
+          }
+        }
+      ]
+    },
+    {
+      "id": "embassy",
+      "legacy_building_id": "Embassy",
+      "name_ref": "building.embassy.name",
+      "models": []
+    },
+    {
+      "id": "wall",
+      "legacy_building_id": "Wall",
+      "name_ref": "building.wall.name",
+      "models": []
+    },
+    {
+      "id": "watchtower",
+      "legacy_building_id": "Watchtower",
+      "name_ref": "building.watchtower.name",
+      "models": []
+    }
+  ]
+}

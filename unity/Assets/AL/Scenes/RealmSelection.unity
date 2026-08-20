@@ -153,7 +153,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _cardPrefab: {fileID: 0}
   _container: {fileID: 0}
-  _nextScene: Kingdom
+  _nextScene: CharacterCreation
   _stoneholdEmblem: {fileID: 21300000, guid: 94d8d9e2cf04a4b769c213a13c164b8e, type: 3}
   _eldergroveEmblem: {fileID: 21300000, guid: 53001b27fd9d14914984211765be4391, type: 3}
   _crownlandsEmblem: {fileID: 21300000, guid: ba4dfcc7b514049f79f6ec3424193b46, type: 3}
@@ -318,7 +318,7 @@ MonoBehaviour:
   _sceneId: al_scene_realm_selection
   _expectedAssetPath: Assets/AL/Scenes/RealmSelection.unity
   _role: onboarding_selection
-  _sourceVersion: 223.1
+  _sourceVersion: 223.2
 --- !u!4 &1679056345
 Transform:
   m_ObjectHideFlags: 0

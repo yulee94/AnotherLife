@@ -58,12 +58,33 @@ namespace AL.EditorTools
         private const string WindowsIl2CppToolPath = Il2CppToolDirectory + "il2cpp.exe";
         private const string UnixIl2CppToolPath = Il2CppToolDirectory + "il2cpp";
         private const int ArtifactReadBufferBytes = 64 * 1024;
+        internal static bool developmentExport = true;
 
         /// <summary>Unity -executeMethod entry. A rejected export intentionally exits non-zero.</summary>
         public static void ExportDevelopmentArm64Il2Cpp()
         {
-            AndroidUnityLibraryExportSummary summary = Execute(
-                new UnityAndroidUnityLibraryExportEnvironment());
+            RunExport(development: true);
+        }
+
+        /// <summary>Unity -executeMethod entry for the non-development release export.</summary>
+        public static void ExportReleaseArm64Il2Cpp()
+        {
+            RunExport(development: false);
+        }
+
+        private static void RunExport(bool development)
+        {
+            bool original = developmentExport;
+            developmentExport = development;
+            AndroidUnityLibraryExportSummary summary;
+            try
+            {
+                summary = Execute(new UnityAndroidUnityLibraryExportEnvironment());
+            }
+            finally
+            {
+                developmentExport = original;
+            }
             Debug.Log("[AL-ANDROID-UNITY-EXPORT-SUMMARY] " + summary.Summarize());
             if (!summary.Succeeded)
             {
@@ -416,14 +437,13 @@ namespace AL.EditorTools
             }
 
             ProductionSceneRecord[] records = ProductionSceneDescriptor.ShellFoundationOrdered.ToArray();
-            if (records.Length != 3 ||
+            if (records.Length != 5 ||
                 records.Any(record => record == null || !record.IsProductionScene || !record.IsInShellFoundation) ||
                 records.Any(record =>
-                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal) ||
-                    string.Equals(record.SceneId, ProductionSceneDescriptor.ChampionArenaSceneId, StringComparison.Ordinal)) ||
+                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal)) ||
                 records.Select(record => record.AssetPath).Distinct(StringComparer.Ordinal).Count() != records.Length)
             {
-                failures.Add("ShellFoundation descriptor is not three unique production scenes with Test/Champion excluded.");
+                failures.Add("ShellFoundation descriptor is not five unique production scenes with Test excluded.");
             }
 
             string[] scenes = records
@@ -1793,6 +1813,20 @@ namespace AL.EditorTools
             {
                 mismatches.Add("app-bundle");
             }
+            if (!string.Equals(
+                    expected.Il2CppCompilerConfiguration,
+                    actual.Il2CppCompilerConfiguration,
+                    StringComparison.Ordinal))
+            {
+                mismatches.Add("il2cpp-compiler-configuration");
+            }
+            if (!string.Equals(
+                    expected.ManagedStrippingLevel,
+                    actual.ManagedStrippingLevel,
+                    StringComparison.Ordinal))
+            {
+                mismatches.Add("managed-stripping-level");
+            }
             return mismatches.Count == 0
                 ? string.Empty
                 : "Post-restore build settings mismatch: " + string.Join(", ", mismatches) + ".";
@@ -2034,7 +2068,8 @@ namespace AL.EditorTools
             scenes = ScenePaths.ToArray(),
             locationPathName = OutputDirectory,
             target = BuildTarget.Android,
-            options = BuildOptions.Development | BuildOptions.AcceptExternalModificationsToPlayer
+            options = BuildOptions.AcceptExternalModificationsToPlayer |
+                (AndroidUnityLibraryExporter.developmentExport ? BuildOptions.Development : BuildOptions.None)
         };
 
         public string SummarizeFailures() => Failures.Count == 0
@@ -2049,6 +2084,8 @@ namespace AL.EditorTools
         public int MinimumApiLevel { get; }
         public bool ExportAsGoogleAndroidProject { get; }
         public bool BuildAppBundle { get; }
+        public string Il2CppCompilerConfiguration { get; }
+        public string ManagedStrippingLevel { get; }
 
         internal AndroidUnityLibraryBuildSettingsSnapshot(
             string scriptingBackend,
@@ -2056,12 +2093,33 @@ namespace AL.EditorTools
             int minimumApiLevel,
             bool exportAsGoogleAndroidProject,
             bool buildAppBundle)
+            : this(
+                scriptingBackend,
+                targetArchitectures,
+                minimumApiLevel,
+                exportAsGoogleAndroidProject,
+                buildAppBundle,
+                UnityEditor.Il2CppCompilerConfiguration.Master.ToString(),
+                UnityEditor.ManagedStrippingLevel.Minimal.ToString())
+        {
+        }
+
+        internal AndroidUnityLibraryBuildSettingsSnapshot(
+            string scriptingBackend,
+            string targetArchitectures,
+            int minimumApiLevel,
+            bool exportAsGoogleAndroidProject,
+            bool buildAppBundle,
+            string il2CppCompilerConfiguration,
+            string managedStrippingLevel)
         {
             ScriptingBackend = scriptingBackend ?? string.Empty;
             TargetArchitectures = targetArchitectures ?? string.Empty;
             MinimumApiLevel = minimumApiLevel;
             ExportAsGoogleAndroidProject = exportAsGoogleAndroidProject;
             BuildAppBundle = buildAppBundle;
+            Il2CppCompilerConfiguration = il2CppCompilerConfiguration ?? string.Empty;
+            ManagedStrippingLevel = managedStrippingLevel ?? string.Empty;
         }
     }
 
@@ -2526,7 +2584,9 @@ namespace AL.EditorTools
                 PlayerSettings.Android.targetArchitectures.ToString(),
                 (int)PlayerSettings.Android.minSdkVersion,
                 EditorUserBuildSettings.exportAsGoogleAndroidProject,
-                EditorUserBuildSettings.buildAppBundle);
+                EditorUserBuildSettings.buildAppBundle,
+                PlayerSettings.GetIl2CppCompilerConfiguration(NamedBuildTarget.Android).ToString(),
+                PlayerSettings.GetManagedStrippingLevel(NamedBuildTarget.Android).ToString());
 
         public void ApplyRequiredBuildSettings()
         {
@@ -2535,6 +2595,16 @@ namespace AL.EditorTools
                 ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+            PlayerSettings.SetIl2CppCompilerConfiguration(
+                NamedBuildTarget.Android,
+                AndroidUnityLibraryExporter.developmentExport
+                    ? Il2CppCompilerConfiguration.Debug
+                    : Il2CppCompilerConfiguration.Release);
+            PlayerSettings.SetManagedStrippingLevel(
+                NamedBuildTarget.Android,
+                AndroidUnityLibraryExporter.developmentExport
+                    ? ManagedStrippingLevel.Minimal
+                    : ManagedStrippingLevel.Medium);
             EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
             EditorUserBuildSettings.buildAppBundle = false;
         }
@@ -2544,7 +2614,11 @@ namespace AL.EditorTools
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             if (!Enum.TryParse(snapshot.ScriptingBackend, out ScriptingImplementation backend) ||
                 !Enum.TryParse(snapshot.TargetArchitectures, out AndroidArchitecture architectures) ||
-                !Enum.IsDefined(typeof(AndroidSdkVersions), snapshot.MinimumApiLevel))
+                !Enum.IsDefined(typeof(AndroidSdkVersions), snapshot.MinimumApiLevel) ||
+                !Enum.TryParse(
+                    snapshot.Il2CppCompilerConfiguration,
+                    out Il2CppCompilerConfiguration compilerConfiguration) ||
+                !Enum.TryParse(snapshot.ManagedStrippingLevel, out ManagedStrippingLevel strippingLevel))
             {
                 throw new InvalidOperationException("Captured Android build settings cannot be restored exactly.");
             }
@@ -2560,6 +2634,12 @@ namespace AL.EditorTools
             TryRestore("minimumApiLevel", () =>
                 PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)snapshot.MinimumApiLevel,
                 failures);
+            TryRestore("il2CppCompilerConfiguration", () =>
+                PlayerSettings.SetIl2CppCompilerConfiguration(
+                    NamedBuildTarget.Android,
+                    compilerConfiguration), failures);
+            TryRestore("managedStrippingLevel", () =>
+                PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Android, strippingLevel), failures);
             TryRestore("exportAsGoogleAndroidProject", () =>
                 EditorUserBuildSettings.exportAsGoogleAndroidProject =
                     snapshot.ExportAsGoogleAndroidProject, failures);

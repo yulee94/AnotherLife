@@ -39,8 +39,12 @@
 /Docs/GameDataCatalog/PhaseC/Shadow/*.json                                unity-json
 /Docs/GameDataCatalog/PhaseC/Phase_C4A_Building_Authority_Convergence.md  text eol=lf
 /Docs/Narrative/GameData/phase-c-six-family-content-map.json              unity-json
+# Realm content-authoring slices (byte-stable; wildcard covers Stonehold and future realms)
+/Docs/Narrative/GameData/*-content-authoring-map.json                     unity-json
 /Assets/AL/StreamingAssets/GameData/al_realm_catalog.json                 unity-json
 /Assets/AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json unity-json
+/Assets/AL/StreamingAssets/GameData/al_building_catalog.json              unity-json
+/Assets/AL/StreamingAssets/GameData/al_champion_catalog.json              unity-json
 /Assets/AL/Scripts/Services/Local/LocalGameDataService.cs                  text eol=lf
 /Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataWalletResourceReferences.cs text eol=lf
 /Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmReferences.cs      text eol=lf

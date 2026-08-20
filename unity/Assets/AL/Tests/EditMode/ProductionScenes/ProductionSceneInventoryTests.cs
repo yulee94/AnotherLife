@@ -7,7 +7,7 @@ namespace AL.Tests.EditMode.ProductionScenes
 {
     /// <summary>
     /// Inventory contract for the production scene descriptor (#223 "Required tests" inventory family):
-    /// exactly four production scenes plus the representative Test scene, exact path/name/id/role/GUID,
+    /// five production scenes plus the representative Test scene, exact path/name/id/role/GUID,
     /// duplicate detection, and Test excluded from production build applicability.
     /// </summary>
     public sealed class ProductionSceneInventoryTests
@@ -16,18 +16,19 @@ namespace AL.Tests.EditMode.ProductionScenes
         {
             "al_scene_boot",
             "al_scene_realm_selection",
+            "al_scene_character_creation",
             "al_scene_kingdom",
             "al_scene_champion_arena"
         };
 
         [Test]
-        public void DescriptorContainsFourProductionScenesPlusTest()
+        public void DescriptorContainsFiveProductionScenesPlusTest()
         {
             IReadOnlyList<object> all = R.DescriptorAll();
             IReadOnlyList<object> production = R.DescriptorProduction();
 
-            Assert.AreEqual(5, all.Count, "Descriptor must contain four production scenes plus the representative Test scene.");
-            Assert.AreEqual(4, production.Count, "Descriptor must expose exactly four production scenes.");
+            Assert.AreEqual(6, all.Count, "Descriptor must contain five production scenes plus the representative Test scene.");
+            Assert.AreEqual(5, production.Count, "Descriptor must expose exactly five production scenes.");
 
             var productionIds = production.Select(r => R.PropString(r, "SceneId")).ToArray();
             Assert.That(productionIds, Is.EquivalentTo(ExpectedProductionIds));
@@ -38,8 +39,9 @@ namespace AL.Tests.EditMode.ProductionScenes
         {
             AssertRecord("al_scene_boot", "Assets/AL/Scenes/Boot.unity", "Boot", "production_entry", "AL.UI.BootController");
             AssertRecord("al_scene_realm_selection", "Assets/AL/Scenes/RealmSelection.unity", "RealmSelection", "onboarding_selection", "AL.UI.RealmSelection.RealmSelectionController");
+            AssertRecord("al_scene_character_creation", "Assets/AL/Scenes/CharacterCreation.unity", "CharacterCreation", "onboarding_creation", "AL.UI.CharacterCreation.CharacterCreationController");
             AssertRecord("al_scene_kingdom", "Assets/AL/Scenes/Kingdom.unity", "Kingdom", "production_hub", "AL.UI.Kingdom.KingdomSceneController");
-            AssertRecord("al_scene_champion_arena", "Assets/AL/Scenes/ChampionArena.unity", "ChampionArena", "deferred_gameplay", "AL.ChampionMode.ChampionArenaSceneController");
+            AssertRecord("al_scene_champion_arena", "Assets/AL/Scenes/ChampionArena.unity", "ChampionArena", "first_session_gameplay", "AL.ChampionMode.ChampionArenaSceneController");
         }
 
         [Test]
@@ -92,16 +94,24 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
-        public void ShellFoundationIsBootRealmKingdomInOrderAndChampionArenaDeferred()
+        public void ShellFoundationIsBootRealmCreateArenaKingdomInOrder()
         {
             var shell = R.DescriptorShellFoundation().Select(r => R.PropString(r, "SceneId")).ToArray();
-            Assert.AreEqual(new[] { "al_scene_boot", "al_scene_realm_selection", "al_scene_kingdom" }, shell);
+            Assert.AreEqual(new[]
+            {
+                "al_scene_boot",
+                "al_scene_realm_selection",
+                "al_scene_character_creation",
+                "al_scene_champion_arena",
+                "al_scene_kingdom"
+            }, shell);
 
             object champion = R.RecordById("al_scene_champion_arena");
-            Assert.IsEmpty(R.AsStrings(R.Prop(champion, "BuildProfiles")), "ChampionArena must be excluded from every build profile until #178/#180.");
-            var upstream = R.AsObjects(R.Prop(champion, "RequiredUpstreamIssues")).Select(o => (int)o).ToArray();
-            Assert.That(upstream, Is.EquivalentTo(new[] { 178, 180 }));
-            Assert.AreEqual("committed_deferred", R.PropString(champion, "Status"));
+            Assert.That(R.AsStrings(R.Prop(champion, "BuildProfiles")), Does.Contain("ShellFoundation"));
+            Assert.AreEqual("committed_active", R.PropString(champion, "Status"));
+            object create = R.RecordById("al_scene_character_creation");
+            Assert.That(R.AsStrings(R.Prop(create, "BuildProfiles")), Does.Contain("ShellFoundation"));
+            Assert.AreEqual("committed_active", R.PropString(create, "Status"));
         }
 
         [Test]
