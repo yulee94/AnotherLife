@@ -51,6 +51,8 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, options.scenes);
         }

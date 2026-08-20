@@ -313,8 +313,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _sceneId: al_scene_champion_arena
   _expectedAssetPath: Assets/AL/Scenes/ChampionArena.unity
-  _role: deferred_gameplay
-  _sourceVersion: 223.1
+  _role: first_session_gameplay
+  _sourceVersion: 223.2
 --- !u!4 &1679056345
 Transform:
   m_ObjectHideFlags: 0

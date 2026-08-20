@@ -311,7 +311,7 @@ MonoBehaviour:
   _sceneId: al_scene_kingdom
   _expectedAssetPath: Assets/AL/Scenes/Kingdom.unity
   _role: production_hub
-  _sourceVersion: 223.1
+  _sourceVersion: 223.2
 --- !u!4 &1679056345
 Transform:
   m_ObjectHideFlags: 0
