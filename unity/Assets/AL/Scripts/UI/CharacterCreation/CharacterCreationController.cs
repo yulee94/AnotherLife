@@ -4,6 +4,8 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
 using AL.Data.Runtime;
+using AL.Services.Local;
+using AL.UI.FirstUserIdentity;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -58,6 +60,11 @@ namespace AL.UI.CharacterCreation
             if (save != null && save.CurrentSave == null)
             {
                 save.Load();
+            }
+
+            if (save?.CurrentSave != null)
+            {
+                MvpLoopSaveCodec.RestoreSessionIdentity(save.CurrentSave);
             }
         }
 
@@ -298,6 +305,13 @@ namespace AL.UI.CharacterCreation
 
             ChampionState state = BuildChampionState(_selected);
             state.Username = username;
+            if (!TryPersistIdentity(state, username, out string persistError))
+            {
+                _committing = false;
+                SetStatus(persistError);
+                return;
+            }
+
             SliceRunState.ConfirmChampion(state);
 
             Debug.Log(
@@ -306,6 +320,48 @@ namespace AL.UI.CharacterCreation
                 $"hp={state.MaxHealth} atk={state.Attack} def={state.Defense} skills={state.SkillIds.Count}");
             SetStatus($"Champion confirmed — {state.DisplayName} as {state.Username}. Advancing to the inner realm...");
             AdvanceToCombat();
+        }
+
+        private static bool TryPersistIdentity(ChampionState state, string username, out string error)
+        {
+            error = string.Empty;
+            ISaveGameService save = ServiceLocator.Get<ISaveGameService>();
+            if (save == null)
+            {
+                error = "Could not persist identity. Stay on create.";
+                return false;
+            }
+
+            if (save.CurrentSave == null)
+            {
+                save.Load();
+            }
+
+            if (save.CurrentSave == null ||
+                !FirstUserIdentityDerivation.IsSupportedRealm(save.CurrentSave.SelectedRealm))
+            {
+                error = "Could not persist identity. Stay on create.";
+                return false;
+            }
+
+            MvpLoopCommitResult commit = MvpLoopSaveAuthority.TryCommit(
+                save,
+                new MvpLoopCommitRequest(
+                    Guid.NewGuid().ToString("N"),
+                    save.CurrentSave.SelectedRealm,
+                    state.Family,
+                    true,
+                    string.Empty,
+                    string.Empty,
+                    0,
+                    username));
+            if (!commit.Accepted)
+            {
+                error = "Could not persist identity. Stay on create.";
+                return false;
+            }
+
+            return true;
         }
 
         private void AdvanceToCombat()
