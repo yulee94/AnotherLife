@@ -44,7 +44,7 @@ namespace AL.UI.Kingdom
             var descriptors = new List<KingdomCommandDescriptor>
             {
                 Available(BoardView, "Board View", KingdomCommandCategory.Presentation),
-                BuildingCommand(TownHallUpgrade, "Town Hall", context.Capabilities.BuildingUpgrade),
+                BuildingCommand(TownHallUpgrade, "Town Hall", true),
                 BuildingCommand(FarmUpgrade, "Farm", context.Capabilities.BuildingUpgrade),
                 BuildingCommand(LumberMillUpgrade, "Lumber", context.Capabilities.BuildingUpgrade),
                 BuildingCommand(QuarryUpgrade, "Quarry", context.Capabilities.BuildingUpgrade),

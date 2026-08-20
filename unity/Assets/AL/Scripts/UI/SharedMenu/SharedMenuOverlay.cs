@@ -210,5 +210,19 @@ namespace AL.UI.SharedMenu
                 Vector2.zero,
                 new Vector2(2f, 0f));
         }
+
+        public void BindInvoke(UnityEngine.Events.UnityAction action)
+        {
+            if (KingdomButton == null)
+            {
+                return;
+            }
+
+            KingdomButton.onClick.RemoveAllListeners();
+            if (action != null && State.CanInvoke)
+            {
+                KingdomButton.onClick.AddListener(action);
+            }
+        }
     }
 }
