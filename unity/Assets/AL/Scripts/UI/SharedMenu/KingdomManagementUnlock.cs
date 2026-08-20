@@ -105,7 +105,8 @@ namespace AL.UI.SharedMenu
             bool inCombat = false,
             bool unsafeContext = false)
         {
-            if (!ProofOfWorthLordship.IsGranted(save))
+            if (!MvpLoopSaveCodec.Read(save).IdentityConfirmed ||
+                !ProofOfWorthLordship.IsGranted(save))
             {
                 return new SharedMenuModuleState(
                     SharedMenuIds.KingdomManagementModule,
@@ -177,7 +178,9 @@ namespace AL.UI.SharedMenu
                 return Reject(SharedMenuIds.SwitchRejectedDependency, request.CurrentMode);
             }
 
-            if (TargetsKingdom(request.TargetMode) && !ProofOfWorthLordship.IsGranted(request.Save))
+            if (TargetsKingdom(request.TargetMode) &&
+                (!MvpLoopSaveCodec.Read(request.Save).IdentityConfirmed ||
+                 !ProofOfWorthLordship.IsGranted(request.Save)))
             {
                 return Reject(SharedMenuIds.SwitchRejectedDependency, request.CurrentMode);
             }
