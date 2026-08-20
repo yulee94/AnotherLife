@@ -2,6 +2,7 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Interaction;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
@@ -300,6 +301,7 @@ namespace AL.ChampionMode
             CreateWeather();
             CreateWorldObjectiveMarkers();
             CreateTemporaryGreyboxPlaque();
+            InstallFirstSessionInteractables();
         }
 
         private void ConfigureArenaLighting()
@@ -669,6 +671,17 @@ namespace AL.ChampionMode
             text.characterSize = 0.085f;
             text.fontSize = 28;
             text.color = new Color(0.78f, 0.70f, 0.52f, 0.78f);
+        }
+
+        private void InstallFirstSessionInteractables()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding ||
+                _playerController == null)
+            {
+                return;
+            }
+
+            FirstSessionWorldInteractables.Install(_playerController.transform, _arenaCamera);
         }
 
         private GameObject CreateInspectionShowcase(Transform player, Color realmAccent)
