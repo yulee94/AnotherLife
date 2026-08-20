@@ -108,13 +108,15 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
-        public void MissingRequiredRealmAndKingdomAreReportedDeterministically()
+        public void MissingRequiredScenesAfterBootAreReportedDeterministically()
         {
             object report = Validate(true, true,
                 SnapshotArray(ValidEntry(R.DescriptorShellFoundation()[0])));
 
             AssertInvalid(report, "MissingRequiredScene");
-            Assert.AreEqual(2, Statuses(report).Count(status => status == "MissingRequiredScene"));
+            Assert.AreEqual(
+                R.DescriptorShellFoundation().Count - 1,
+                Statuses(report).Count(status => status == "MissingRequiredScene"));
             AssertStatus(report, "TransitionUnavailable");
         }
 
@@ -122,8 +124,12 @@ namespace AL.Tests.EditMode.ProductionScenes
         public void WrongOrderAfterBootReturnsDescriptorDrift()
         {
             IReadOnlyList<object> records = R.DescriptorShellFoundation();
-            object report = Validate(true, true,
-                SnapshotArray(ValidEntry(records[0]), ValidEntry(records[2]), ValidEntry(records[1])));
+            var entries = ValidEntries();
+            object tmp = entries[1];
+            entries[1] = entries[2];
+            entries[2] = tmp;
+
+            object report = Validate(true, true, SnapshotArray(entries));
 
             AssertInvalid(report, "DescriptorDrift");
         }
@@ -181,26 +187,38 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
-        public void EnabledChampionIsDeferredAndMakesTransitionReachable()
+        public void ChampionArenaIsRequiredInShellFoundation()
         {
-            var entries = ValidEntries();
-            entries.Add(Entry(R.RecordById("al_scene_champion_arena"), true, true));
-
-            object report = Validate(true, true, SnapshotArray(entries));
-            AssertInvalid(report, "DeferredSceneEnabled");
-            AssertStatus(report, "DeferredSceneEnabled");
-            AssertStatus(report, "DeferredTransitionReachable");
+            object report = Validate(true, true, ValidSnapshot());
+            Assert.IsTrue(R.PropBool(report, "IsValid"), R.Invoke(report, "Summarize").ToString());
+            Assert.That(
+                R.AsStrings(R.Prop(report, "ScenePaths")),
+                Does.Contain("Assets/AL/Scenes/ChampionArena.unity"));
+            Assert.That(
+                R.AsStrings(R.Prop(report, "ScenePaths")),
+                Does.Contain("Assets/AL/Scenes/CharacterCreation.unity"));
         }
 
         [Test]
-        public void DisabledChampionIsStillRejectedAsUnexpectedStaleEntry()
+        public void DisabledChampionArenaReturnsDisabledStaleScene()
         {
-            var entries = ValidEntries();
-            entries.Add(Entry(R.RecordById("al_scene_champion_arena"), false, true));
+            Array snapshot = ValidSnapshot();
+            IReadOnlyList<object> records = R.DescriptorShellFoundation();
+            int championIndex = -1;
+            for (int i = 0; i < records.Count; i++)
+            {
+                if (R.PropString(records[i], "SceneId") == "al_scene_champion_arena")
+                {
+                    championIndex = i;
+                    break;
+                }
+            }
 
-            object report = Validate(true, true, SnapshotArray(entries));
-            AssertStatus(report, "UnexpectedScene");
-            AssertStatus(report, "DisabledStaleScene");
+            Assert.GreaterOrEqual(championIndex, 0);
+            snapshot.SetValue(Entry(records[championIndex], false, true), championIndex);
+
+            object report = Validate(true, true, snapshot);
+            AssertInvalid(report, "DisabledStaleScene");
         }
 
         [Test]

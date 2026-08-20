@@ -18,8 +18,8 @@ namespace AL.VerticalSlice
     [Serializable]
     public sealed class SliceChampionProfile
     {
-        public string Id = string.Empty;          // e.g. "champion_greybox_vanguard"
-        public string DisplayName = string.Empty; // e.g. "Greybox Vanguard"
+        public string Id = string.Empty;          // e.g. "champion_stonehold_vanguard"
+        public string DisplayName = string.Empty; // catalog display name
         public string ClassName = string.Empty;   // e.g. "Vanguard"
 
         public int MaxHealth = 300;
@@ -54,18 +54,25 @@ namespace AL.VerticalSlice
             DefendMitigation = defendMitigation;
         }
 
-        /// <summary>Greybox fallback used when no champion has been selected in the run state yet.</summary>
+        /// <summary>
+        /// Resolves the packaged catalog default champion. Missing or invalid
+        /// catalogs fail closed — there is no silent greybox stat block.
+        /// </summary>
         public static SliceChampionProfile CreateDefault()
         {
-            return new SliceChampionProfile(
-                "champion_greybox_vanguard",
-                "Greybox Vanguard",
-                "Vanguard",
-                300,
-                100,
-                40,
-                90,
-                0.5f);
+            SliceChampionProfile profile;
+            string diagnosticCode;
+            if (!AL.Services.Local.SixFamilyRuntimeCatalog.TryGetDefaultChampion(
+                    out profile,
+                    out diagnosticCode))
+            {
+                throw new InvalidOperationException(
+                    "AL-GDC-CHAMPION-MISSING: CreateDefault requires a catalog record (" +
+                    diagnosticCode +
+                    ").");
+            }
+
+            return profile;
         }
     }
 }

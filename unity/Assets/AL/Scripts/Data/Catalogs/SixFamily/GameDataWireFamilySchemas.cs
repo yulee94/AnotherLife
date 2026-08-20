@@ -138,6 +138,11 @@ namespace AL.Data.Catalogs
                         OptionalText("realm_selection_line_key"),
                         OptionalText("first_quest_arc_id"),
                         OptionalStringArray("starter_class_bias")),
+                    OptionalObject(
+                        "visual_identity",
+                        OptionalText("mark_name"),
+                        OptionalText("silhouette_language"),
+                        OptionalText("material_language")),
                     OptionalInteger("sort_order", 0, MaximumCatalogInteger),
                     OptionalText("key"),
                     OptionalText("text"),
