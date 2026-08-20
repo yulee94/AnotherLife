@@ -290,6 +290,33 @@ namespace AL.ChampionMode.AI
             enabled = normalized != RealmId.None;
         }
 
+        public bool ApplyCatalogStats(string id, string displayName, float maxHealth, float slamDamage)
+        {
+            if (maxHealth <= 0f || slamDamage <= 0f)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                _bossId = id;
+            }
+
+            if (!string.IsNullOrWhiteSpace(displayName))
+            {
+                _bossName = displayName;
+            }
+
+            _maxHealth = maxHealth;
+            _slamDamage = slamDamage;
+            if (!_isDead)
+            {
+                _currentHealth = _maxHealth;
+            }
+
+            return true;
+        }
+
         private void ApplyBreakDamage(float sourceDamage)
         {
             if (_isBroken || sourceDamage <= 0f)
