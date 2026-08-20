@@ -29,6 +29,19 @@ namespace AL.ChampionMode.Quests
             return IsGranted(MvpLoopSaveCodec.Read(save));
         }
 
+        public const string SharedMenuKingdomModuleId = "MENU_MODULE_KINGDOM_MANAGEMENT";
+        public const string SharedMenuLockedNarrative = "LockedNarrative";
+        public const string SharedMenuAvailable = "Available";
+
+        /// <summary>
+        /// Shared Menu MENU_MODULE_KINGDOM_MANAGEMENT stays LockedNarrative until
+        /// a ch01_&lt;realm&gt; mark. Overlay chrome is t_c8823dae.
+        /// </summary>
+        public static string ResolveSharedMenuKingdomAvailability(SaveGameData save)
+        {
+            return IsGranted(save) ? SharedMenuAvailable : SharedMenuLockedNarrative;
+        }
+
         public static string ResolveMarkId(RealmId realm)
         {
             return ProofOfWorthIds.ResolveRealmVariantId(realm);
