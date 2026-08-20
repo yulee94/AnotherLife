@@ -3,6 +3,8 @@ using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Interaction;
+using AL.ChampionMode.Presentation;
+using AL.ChampionMode.Quests;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
@@ -153,6 +155,7 @@ namespace AL.ChampionMode
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private RealmId _realmId = RealmId.None;
+        private bool _guardianTrialStarted;
         private FirstSessionInnerRealmSpawn _innerSpawn;
 
         private void Start()
@@ -173,6 +176,20 @@ namespace AL.ChampionMode
             ApplyFirstSessionPresentationBudgets();
             BuildArena();
             BuildHud();
+            if (FirstSessionChampionStart.ShouldRunProofOfWorth)
+            {
+                if (_bossTransform != null)
+                {
+                    _bossTransform.gameObject.SetActive(false);
+                }
+
+                ProofOfWorthDirector.AttachIfNeeded(
+                    transform,
+                    this,
+                    _playerController != null ? _playerController.transform : null,
+                    _realmId);
+            }
+
             if (FirstSessionChampionStart.AutoStartFirstFight)
             {
                 if (!TryBindFirstFightCatalog())
@@ -248,6 +265,35 @@ namespace AL.ChampionMode
             return true;
         }
 
+        public bool GuardianTrialCleared =>
+            _guardianTrialStarted && _boss != null && _boss.IsDead;
+
+        public bool TryStartGuardianTrial()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                return false;
+            }
+
+            if (_bossTransform != null && !_bossTransform.gameObject.activeSelf)
+            {
+                _bossTransform.gameObject.SetActive(true);
+            }
+
+            if (!TryBindFirstFightCatalog())
+            {
+                return false;
+            }
+
+            if (!_guardianTrialStarted)
+            {
+                _guardianTrialStarted = true;
+                StartCoroutine(EncounterIntroRoutine());
+            }
+
+            return true;
+        }
+
         private void Update()
         {
             if (_playerController == null)
@@ -306,19 +352,27 @@ namespace AL.ChampionMode
             BuildArenaEnvironment();
             Color realmAccent = GetRealmAccentColor(_realmId);
 
-            var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-            player.name = "Player_Champion";
-            player.tag = "Player";
-            player.transform.position = _innerSpawn != null
+            Vector3 playerPosition = _innerSpawn != null
                 ? _innerSpawn.Position
                 : new Vector3(0f, 1.1f, -7.4f);
+            var player = ChampionPresentationBinder.CreateAndBind(
+                playerPosition,
+                _realmId,
+                out _);
+            if (player == null)
+            {
+                Debug.LogError(
+                    "AL-CHAMPION-PRESENTATION-BIND: first-session body could not resolve a champion.");
+                enabled = false;
+                return;
+            }
+
             ApplyMaterial(player, new Color(0.16f, 0.34f, 0.78f), 0.15f, 0.55f);
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
             _playerController = player.AddComponent<ChampionController>();
             _playerController.ConfigureRealmContext(_realmId);
-            ProceduralChampionModelBuilder.EnsureModel(player);
-            _playerCustomization = player.AddComponent<ChampionCustomizationController>();
+            _playerCustomization = player.GetComponent<ChampionCustomizationController>();
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
@@ -397,13 +451,11 @@ namespace AL.ChampionMode
                 RenderSettings.fogDensity = 0.018f;
             }
 
-            var lightObject = FindObjectOfType<Light>()?.gameObject ?? new GameObject("Key Light - Moonforge");
-            var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
-            light.name = "Key Light - Moonforge";
+            Light light = ResolveKeyLight();
             light.type = LightType.Directional;
             light.intensity = 1.35f;
             light.color = new Color(0.74f, 0.82f, 1f);
-            lightObject.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
+            light.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
 
             if (!FirstSessionChampionStart.IsFirstSessionLanding)
             {
@@ -416,6 +468,33 @@ namespace AL.ChampionMode
                 CreatePointLight("Capital Rim Light", _innerSpawn.Position + Vector3.up * 2.4f, new Color(1f, 0.94f, 0.86f), 2.1f, 10f);
                 CreatePointLight("Inner Fill Light", _innerSpawn.OpponentPosition + Vector3.up * 3.2f, new Color(0.74f, 0.82f, 1f), 1.6f, 14f);
             }
+        }
+
+        private static Light ResolveKeyLight()
+        {
+            const string keyLightName = "Key Light - Moonforge";
+
+            // Unity overloaded == treats destroyed/"fake-null" objects as null.
+            // C# ?. / ?? do not, and SetName on a missing Light throws MissingComponentException.
+            GameObject lightObject = GameObject.Find(keyLightName);
+            if (lightObject == null)
+            {
+                lightObject = new GameObject(keyLightName);
+            }
+
+            Light light = lightObject.GetComponent<Light>();
+            if (light == null)
+            {
+                light = lightObject.AddComponent<Light>();
+            }
+
+            if (light == null)
+            {
+                lightObject = new GameObject(keyLightName);
+                light = lightObject.AddComponent<Light>();
+            }
+
+            return light;
         }
 
         private void BuildArenaEnvironment()

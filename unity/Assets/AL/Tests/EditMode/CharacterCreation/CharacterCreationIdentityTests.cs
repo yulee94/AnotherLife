@@ -65,5 +65,14 @@ namespace AL.Tests.EditMode.CharacterCreation
             Assert.AreEqual(first, second);
             Assert.IsEmpty(error);
         }
+
+        [Test]
+        public void PersistedUsernameBlocksLocalDuplicate()
+        {
+            CharacterCreationIdentity.RememberPersisted("Banner_01");
+            Assert.IsFalse(
+                CharacterCreationIdentity.TryClaim("banner_01", string.Empty, out _, out string error));
+            Assert.That(error, Does.Contain("already taken"));
+        }
     }
 }
