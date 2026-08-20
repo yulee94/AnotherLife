@@ -449,13 +449,11 @@ namespace AL.ChampionMode
                 RenderSettings.fogDensity = 0.018f;
             }
 
-            var lightObject = FindObjectOfType<Light>()?.gameObject ?? new GameObject("Key Light - Moonforge");
-            var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
-            light.name = "Key Light - Moonforge";
+            Light light = ResolveKeyLight();
             light.type = LightType.Directional;
             light.intensity = 1.35f;
             light.color = new Color(0.74f, 0.82f, 1f);
-            lightObject.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
+            light.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
 
             if (!FirstSessionChampionStart.IsFirstSessionLanding)
             {
@@ -468,6 +466,33 @@ namespace AL.ChampionMode
                 CreatePointLight("Capital Rim Light", _innerSpawn.Position + Vector3.up * 2.4f, new Color(1f, 0.94f, 0.86f), 2.1f, 10f);
                 CreatePointLight("Inner Fill Light", _innerSpawn.OpponentPosition + Vector3.up * 3.2f, new Color(0.74f, 0.82f, 1f), 1.6f, 14f);
             }
+        }
+
+        private static Light ResolveKeyLight()
+        {
+            const string keyLightName = "Key Light - Moonforge";
+
+            // Unity overloaded == treats destroyed/"fake-null" objects as null.
+            // C# ?. / ?? do not, and SetName on a missing Light throws MissingComponentException.
+            GameObject lightObject = GameObject.Find(keyLightName);
+            if (lightObject == null)
+            {
+                lightObject = new GameObject(keyLightName);
+            }
+
+            Light light = lightObject.GetComponent<Light>();
+            if (light == null)
+            {
+                light = lightObject.AddComponent<Light>();
+            }
+
+            if (light == null)
+            {
+                lightObject = new GameObject(keyLightName);
+                light = lightObject.AddComponent<Light>();
+            }
+
+            return light;
         }
 
         private void BuildArenaEnvironment()
