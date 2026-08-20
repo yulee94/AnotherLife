@@ -44,7 +44,10 @@ namespace AL.ChampionMode
 
         public static bool AutoStartEncounterIntro => _encounterHarness;
 
-        public static bool AutoStartFirstFight => !_encounterHarness;
+        // First-session fight is the C1 guardian trial (OBJ_C1_FACE_GUARDIAN), not landing.
+        public static bool AutoStartFirstFight => false;
+
+        public static bool ShouldRunProofOfWorth => !_encounterHarness;
 
         public static void EnableEncounterHarness()
         {

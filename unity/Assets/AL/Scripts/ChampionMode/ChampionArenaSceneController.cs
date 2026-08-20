@@ -2,6 +2,7 @@ using AL.ChampionMode.AI;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Quests;
 using AL.ChampionMode.Skills;
 using AL.ChampionMode.UI;
 using AL.Core;
@@ -152,6 +153,7 @@ namespace AL.ChampionMode
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private RealmId _realmId = RealmId.None;
+        private bool _guardianTrialStarted;
         private FirstSessionInnerRealmSpawn _innerSpawn;
 
         private void Start()
@@ -172,6 +174,20 @@ namespace AL.ChampionMode
             ApplyFirstSessionPresentationBudgets();
             BuildArena();
             BuildHud();
+            if (FirstSessionChampionStart.ShouldRunProofOfWorth)
+            {
+                if (_bossTransform != null)
+                {
+                    _bossTransform.gameObject.SetActive(false);
+                }
+
+                ProofOfWorthDirector.AttachIfNeeded(
+                    transform,
+                    this,
+                    _playerController != null ? _playerController.transform : null,
+                    _realmId);
+            }
+
             if (FirstSessionChampionStart.AutoStartFirstFight)
             {
                 if (!TryBindFirstFightCatalog())
@@ -242,6 +258,35 @@ namespace AL.ChampionMode
                     ". Special: " +
                     loadout.SpecialSkillName +
                     ".";
+            }
+
+            return true;
+        }
+
+        public bool GuardianTrialCleared =>
+            _guardianTrialStarted && _boss != null && _boss.IsDead;
+
+        public bool TryStartGuardianTrial()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                return false;
+            }
+
+            if (_bossTransform != null && !_bossTransform.gameObject.activeSelf)
+            {
+                _bossTransform.gameObject.SetActive(true);
+            }
+
+            if (!TryBindFirstFightCatalog())
+            {
+                return false;
+            }
+
+            if (!_guardianTrialStarted)
+            {
+                _guardianTrialStarted = true;
+                StartCoroutine(EncounterIntroRoutine());
             }
 
             return true;
