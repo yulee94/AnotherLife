@@ -112,5 +112,23 @@ namespace AL.ChampionMode.Control
         }
 
         public float GetAttackDamage() => _attackPower;
+
+        public bool ApplyCatalogStats(float maxHealth, float maxMana, float attackPower)
+        {
+            if (maxHealth <= 0f || maxMana < 0f || attackPower <= 0f)
+            {
+                return false;
+            }
+
+            _maxHealth = maxHealth;
+            _maxMana = maxMana;
+            _attackPower = attackPower;
+            _isDead = false;
+            _currentHealth = _maxHealth;
+            _currentMana = _maxMana;
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+            OnManaChanged?.Invoke(_currentMana, _maxMana);
+            return true;
+        }
     }
 }

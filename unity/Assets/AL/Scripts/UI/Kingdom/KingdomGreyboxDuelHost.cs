@@ -66,21 +66,41 @@ namespace AL.UI.Kingdom
 
         internal static SliceChampionProfile FromConfirmedChampion(ChampionState state)
         {
-            SliceChampionProfile fallback = SliceChampionProfile.CreateDefault();
             if (state == null || !state.HasIdentity)
             {
-                return fallback;
+                return SliceChampionProfile.CreateDefault();
+            }
+
+            SliceChampionProfile catalogProfile;
+            string diagnosticCode;
+            if (AL.Services.Local.SixFamilyRuntimeCatalog.TryGetDefaultChampion(
+                    out catalogProfile,
+                    out diagnosticCode))
+            {
+                SliceChampionProfile named;
+                if (AL.Services.Local.SixFamilyRuntimeCatalog.TryLoad(out var snapshot, out _) &&
+                    snapshot.TryCreateSliceProfile(state.Id, out named, out _))
+                {
+                    catalogProfile = named;
+                }
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    "AL-GDC-CHAMPION-MISSING: confirmed champion cannot resolve catalog stats (" +
+                    diagnosticCode +
+                    ").");
             }
 
             return new SliceChampionProfile(
                 state.Id,
                 state.DisplayName,
                 state.Family.ToString(),
-                state.MaxHealth > 0 ? state.MaxHealth : fallback.MaxHealth,
-                state.MaxMana > 0 ? state.MaxMana : fallback.MaxMana,
-                state.Attack > 0 ? state.Attack : fallback.AttackPower,
-                fallback.SpecialPower,
-                fallback.DefendMitigation);
+                state.MaxHealth > 0 ? state.MaxHealth : catalogProfile.MaxHealth,
+                state.MaxMana > 0 ? state.MaxMana : catalogProfile.MaxMana,
+                state.Attack > 0 ? state.Attack : catalogProfile.AttackPower,
+                catalogProfile.SpecialPower,
+                catalogProfile.DefendMitigation);
         }
 
         private void OnChampionDuelCompleted(SliceCombatResult result)
@@ -108,7 +128,11 @@ namespace AL.UI.Kingdom
                 ? "NONE"
                 : result.Outcome.ToString().ToUpperInvariant();
             _setMessage?.Invoke(
-                "CHAMPION DUEL CONCLUDED — returned to Kingdom. Last result: " + outcome + ".");
+                "CHAMPION DUEL CONCLUDED — Town Hall construct is available (catalog " +
+                KingdomOneBuildCommand.CatalogBuildingId +
+                "). Last result: " +
+                outcome +
+                ".");
         }
 
         private void OnDestroy()
