@@ -111,6 +111,25 @@ namespace AL.ChampionMode.Control
             OnDeath?.Invoke();
         }
 
+        public bool TryRevive(float healthFraction)
+        {
+            if (!_isDead)
+            {
+                return false;
+            }
+
+            _isDead = false;
+            float fraction = Mathf.Clamp01(healthFraction);
+            _currentHealth = Mathf.Max(1f, _maxHealth * fraction);
+            if (_currentHealth > _maxHealth)
+            {
+                _currentHealth = _maxHealth;
+            }
+
+            OnHealthChanged?.Invoke(_currentHealth, _maxHealth);
+            return true;
+        }
+
         public float GetAttackDamage() => _attackPower;
     }
 }
