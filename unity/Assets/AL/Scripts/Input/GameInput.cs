@@ -48,6 +48,10 @@ namespace AL.Input
         public static InputAction Skill4 => Map["Skill4"];
         public static InputAction Submit => Map["Submit"];
         public static InputAction Cancel => Map["Cancel"];
+        public static InputAction WorldMap => Map["WorldMap"];
+        public static InputAction SharedMenu => Map["SharedMenu"];
+
+        private static bool _gameplaySuppressed;
 
         // ---- Lifecycle ----
 
@@ -57,7 +61,15 @@ namespace AL.Input
             // Guards against stale state when domain reload is disabled in play mode.
             _map = null;
             _enabled = false;
+            _gameplaySuppressed = false;
         }
+
+        public static void SetGameplaySuppressed(bool suppressed)
+        {
+            _gameplaySuppressed = suppressed;
+        }
+
+        public static bool GameplaySuppressed => _gameplaySuppressed;
 
         public static void EnsureEnabled()
         {
@@ -89,22 +101,27 @@ namespace AL.Input
 
         // ---- Typed reads ----
 
-        public static Vector2 ReadMove() => Move.ReadValue<Vector2>();
+        public static Vector2 ReadMove() => _gameplaySuppressed ? Vector2.zero : Move.ReadValue<Vector2>();
 
-        public static Vector2 ReadLook() => Look.ReadValue<Vector2>();
+        public static Vector2 ReadLook() => _gameplaySuppressed ? Vector2.zero : Look.ReadValue<Vector2>();
 
-        public static float ReadScroll() => Scroll.ReadValue<float>();
+        public static float ReadScroll() => _gameplaySuppressed ? 0f : Scroll.ReadValue<float>();
 
-        public static bool AttackPressed() => Attack.WasPressedThisFrame();
+        public static bool AttackPressed() => !_gameplaySuppressed && Attack.WasPressedThisFrame();
 
-        public static bool DodgePressed() => Dodge.WasPressedThisFrame();
+        public static bool DodgePressed() => !_gameplaySuppressed && Dodge.WasPressedThisFrame();
 
-        public static bool BlockHeld() => Block.IsPressed();
+        public static bool BlockHeld() => !_gameplaySuppressed && Block.IsPressed();
 
-        public static bool BlockPressed() => Block.WasPressedThisFrame();
+        public static bool BlockPressed() => !_gameplaySuppressed && Block.WasPressedThisFrame();
 
         public static bool SkillPressed(int index)
         {
+            if (_gameplaySuppressed)
+            {
+                return false;
+            }
+
             switch (index)
             {
                 case 0:
@@ -120,11 +137,15 @@ namespace AL.Input
             }
         }
 
-        public static bool SubmitPressed() => Submit.WasPressedThisFrame();
+        public static bool SubmitPressed() => !_gameplaySuppressed && Submit.WasPressedThisFrame();
 
-        public static bool SubmitHeld() => Submit.IsPressed();
+        public static bool SubmitHeld() => !_gameplaySuppressed && Submit.IsPressed();
 
         public static bool CancelPressed() => Cancel.WasPressedThisFrame();
+
+        public static bool WorldMapPressed() => WorldMap.WasPressedThisFrame();
+
+        public static bool SharedMenuPressed() => SharedMenu.WasPressedThisFrame();
 
         // ---- Touch ----
 
@@ -202,6 +223,11 @@ namespace AL.Input
 
             var cancel = map.AddAction("Cancel", InputActionType.Button, "<Keyboard>/escape");
             cancel.AddBinding("<Gamepad>/buttonEast");
+
+            var worldMap = map.AddAction("WorldMap", InputActionType.Button, "<Keyboard>/m");
+            worldMap.AddBinding("<Gamepad>/select");
+
+            map.AddAction("SharedMenu", InputActionType.Button, "<Keyboard>/tab");
 
             return map;
         }
