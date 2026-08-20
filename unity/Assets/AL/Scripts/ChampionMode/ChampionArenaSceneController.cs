@@ -8,9 +8,11 @@ using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
+using AL.Data.Catalogs.WorldAtlas;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
 using AL.UI;
+using AL.World;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -151,6 +153,7 @@ namespace AL.ChampionMode
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
         private RealmId _realmId = RealmId.None;
+        private FirstSessionInnerRealmSpawn _innerSpawn;
 
         private void Start()
         {
@@ -293,6 +296,12 @@ namespace AL.ChampionMode
 
         private void BuildArena()
         {
+            if (FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                _innerSpawn = FirstSessionInnerRealmSpawn.Resolve(_realmId);
+                Debug.Log(_innerSpawn.ReportLine);
+            }
+
             ConfigureArenaLighting();
             BuildArenaEnvironment();
             Color realmAccent = GetRealmAccentColor(_realmId);
@@ -300,7 +309,9 @@ namespace AL.ChampionMode
             var player = GameObject.CreatePrimitive(PrimitiveType.Capsule);
             player.name = "Player_Champion";
             player.tag = "Player";
-            player.transform.position = new Vector3(0f, 1.1f, -7.4f);
+            player.transform.position = _innerSpawn != null
+                ? _innerSpawn.Position
+                : new Vector3(0f, 1.1f, -7.4f);
             ApplyMaterial(player, new Color(0.16f, 0.34f, 0.78f), 0.15f, 0.55f);
             _playerCombat = player.AddComponent<ChampionCombat>();
             _playerSkillCaster = player.AddComponent<SkillCaster>();
@@ -315,7 +326,9 @@ namespace AL.ChampionMode
             cameraObject.tag = "MainCamera";
             var camera = cameraObject.AddComponent<UnityEngine.Camera>();
             _arenaCamera = camera;
-            camera.transform.position = new Vector3(0f, 7.2f, -13.4f);
+            camera.transform.position = _innerSpawn != null
+                ? _innerSpawn.CameraPosition
+                : new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
             camera.fieldOfView = 42f;
             camera.clearFlags = CameraClearFlags.SolidColor;
@@ -326,7 +339,9 @@ namespace AL.ChampionMode
 
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";
-            boss.transform.position = new Vector3(0f, 1.8f, 8.6f);
+            boss.transform.position = _innerSpawn != null
+                ? _innerSpawn.OpponentPosition
+                : new Vector3(0f, 1.8f, 8.6f);
             boss.transform.localScale = new Vector3(1.55f, 1.8f, 1.55f);
             ApplyMaterial(boss, new Color(0.20f, 0.03f, 0.05f), 0.2f, 0.42f);
             DressBossVisual(boss);
@@ -365,11 +380,22 @@ namespace AL.ChampionMode
 
         private void ConfigureArenaLighting()
         {
-            RenderSettings.ambientLight = new Color(0.16f, 0.18f, 0.22f);
-            RenderSettings.fog = true;
-            RenderSettings.fogMode = FogMode.ExponentialSquared;
-            RenderSettings.fogColor = new Color(0.035f, 0.04f, 0.055f);
-            RenderSettings.fogDensity = 0.018f;
+            if (FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                RenderSettings.ambientLight = new Color(0.28f, 0.30f, 0.32f);
+                RenderSettings.fog = true;
+                RenderSettings.fogMode = FogMode.ExponentialSquared;
+                RenderSettings.fogColor = new Color(0.36f, 0.40f, 0.42f);
+                RenderSettings.fogDensity = 0.0045f;
+            }
+            else
+            {
+                RenderSettings.ambientLight = new Color(0.16f, 0.18f, 0.22f);
+                RenderSettings.fog = true;
+                RenderSettings.fogMode = FogMode.ExponentialSquared;
+                RenderSettings.fogColor = new Color(0.035f, 0.04f, 0.055f);
+                RenderSettings.fogDensity = 0.018f;
+            }
 
             var lightObject = FindObjectOfType<Light>()?.gameObject ?? new GameObject("Key Light - Moonforge");
             var light = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
@@ -379,14 +405,27 @@ namespace AL.ChampionMode
             light.color = new Color(0.74f, 0.82f, 1f);
             lightObject.transform.rotation = Quaternion.Euler(48f, -32f, 0f);
 
-            CreatePointLight("Boss Rift Light", new Vector3(0f, 3.2f, 8.4f), new Color(1f, 0.18f, 0.08f), 4.2f, 12f);
-            CreatePointLight("Player Rim Light", new Vector3(0f, 3.4f, -6.8f), new Color(0.34f, 0.65f, 1f), 2.3f, 8f);
-            CreatePointLight("Arena Cold Fill", new Vector3(0f, 5f, 0f), new Color(0.24f, 0.36f, 0.58f), 1.6f, 18f);
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                CreatePointLight("Boss Rift Light", new Vector3(0f, 3.2f, 8.4f), new Color(1f, 0.18f, 0.08f), 4.2f, 12f);
+                CreatePointLight("Player Rim Light", new Vector3(0f, 3.4f, -6.8f), new Color(0.34f, 0.65f, 1f), 2.3f, 8f);
+                CreatePointLight("Arena Cold Fill", new Vector3(0f, 5f, 0f), new Color(0.24f, 0.36f, 0.58f), 1.6f, 18f);
+            }
+            else if (_innerSpawn != null)
+            {
+                CreatePointLight("Capital Rim Light", _innerSpawn.Position + Vector3.up * 2.4f, new Color(1f, 0.94f, 0.86f), 2.1f, 10f);
+                CreatePointLight("Inner Fill Light", _innerSpawn.OpponentPosition + Vector3.up * 3.2f, new Color(0.74f, 0.82f, 1f), 1.6f, 14f);
+            }
         }
 
         private void BuildArenaEnvironment()
         {
-            var environment = new GameObject(FirstSessionChampionStart.EnvironmentRootName).transform;
+            if (TryBuildFirstSessionInnerRealm())
+            {
+                return;
+            }
+
+            var environment = new GameObject("ChampionArena_ObsidianCitadel_TEMPORARY").transform;
             var atmospherePulse = environment.gameObject.AddComponent<ArenaAtmospherePulse>();
             Color realmAccent = GetRealmAccentColor(_realmId);
             Color riftRed = new Color(1f, 0.18f, 0.08f);
@@ -713,18 +752,42 @@ namespace AL.ChampionMode
             }
         }
 
-        private static void CreateTemporaryGreyboxPlaque()
+        private bool TryBuildFirstSessionInnerRealm()
+        {
+            if (!FirstSessionChampionStart.IsFirstSessionLanding || _innerSpawn == null)
+            {
+                return false;
+            }
+
+            WorldAtlasSnapshot snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
+            InnerRealmWorldLayout layout = InnerRealmWorldLayout.FromSnapshot(snapshot);
+            InnerRealmWorldBuildResult built = InnerRealmWorldGreyboxBuilder.Build(layout, _innerSpawn.RealmId);
+            built.Root.name = FirstSessionChampionStart.EnvironmentRootName;
+            return true;
+        }
+
+        private void CreateTemporaryGreyboxPlaque()
         {
             if (!FirstSessionChampionStart.IsFirstSessionLanding)
             {
                 return;
             }
 
+            Vector3 plaquePosition = _innerSpawn != null
+                ? _innerSpawn.Position + new Vector3(-2.4f, 0.75f, -2.8f)
+                : new Vector3(-7.6f, 1.85f, -9.4f);
+            string plaqueCopy = _innerSpawn != null
+                ? _innerSpawn.TemporaryLabel +
+                    " — unnamed " + _innerSpawn.DisplayCapital +
+                    "\n" + _innerSpawn.InnerAtlasZoneId +
+                    " / " + _innerSpawn.CapitalPoiId
+                : FirstSessionChampionStart.TemporaryPlaqueCopy;
+
             var plaque = new GameObject(FirstSessionChampionStart.TemporaryPlaqueName);
-            plaque.transform.position = new Vector3(-7.6f, 1.85f, -9.4f);
+            plaque.transform.position = plaquePosition;
             plaque.transform.rotation = Quaternion.Euler(8f, 28f, 0f);
             var text = plaque.AddComponent<TextMesh>();
-            text.text = FirstSessionChampionStart.TemporaryPlaqueCopy;
+            text.text = plaqueCopy;
             text.anchor = TextAnchor.MiddleCenter;
             text.alignment = TextAlignment.Center;
             text.characterSize = 0.085f;
