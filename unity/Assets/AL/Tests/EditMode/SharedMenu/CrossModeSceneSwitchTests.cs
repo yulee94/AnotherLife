@@ -1,15 +1,19 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using AL.ChampionMode;
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.Core.Scenes;
 using AL.Data.Runtime;
+using AL.Input;
 using AL.UI.SharedMenu;
 using AL.World;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Object = UnityEngine.Object;
 
 namespace AL.Tests.EditMode.SharedMenu
 {
@@ -65,6 +69,37 @@ namespace AL.Tests.EditMode.SharedMenu
                 CrossModeSceneSwitch.ReusedKingdomController);
             Assert.IsFalse(CrossModeSceneSwitch.IsShellLoadable(SharedMenuIds.WarzoneScene));
             Assert.IsFalse(CrossModeSceneSwitch.IsShellLoadable(SharedMenuIds.InnerRealmWorldScene));
+        }
+
+        [Test]
+        public void SharedMenuOwnsKingdomManagementAndBHasNoModeSwitchBinding()
+        {
+            SaveGameData save = LordshipSave(RealmId.Stonehold);
+            SharedMenuModuleState module = KingdomManagementUnlock.EvaluateKingdomManagement(save);
+
+            Assert.AreEqual("MENU_MODULE_KINGDOM_MANAGEMENT", module.ModuleId);
+            Assert.AreEqual(SharedMenuIds.KingdomManagementModule, module.ModuleId);
+            Assert.IsTrue(module.Visible);
+            Assert.IsTrue(module.CanInvoke);
+
+            Assert.AreEqual("SharedMenu", GameInput.SharedMenu.name);
+            CollectionAssert.AreEqual(
+                new[] { "<Keyboard>/tab" },
+                GameInput.SharedMenu.bindings.Select(binding => binding.path).ToArray());
+            Assert.IsFalse(GameInput.SharedMenu.actionMap.actions.Any(action =>
+                string.Equals(action.name, "ModeSwitch", StringComparison.OrdinalIgnoreCase)));
+            Assert.IsFalse(GameInput.SharedMenu.bindings.Any(binding =>
+                string.Equals(binding.path, "<Keyboard>/b", StringComparison.OrdinalIgnoreCase)));
+
+            CrossModeSwitchPlan bAttempt = CrossModeSceneSwitch.Plan(
+                SharedMenuIds.AdventureScene,
+                SharedMenuIds.Kingdom2_5D,
+                save,
+                inCombat: false,
+                unsafeContext: false,
+                inputSource: "B");
+            Assert.IsFalse(bAttempt.ShouldLoad);
+            Assert.AreEqual(SharedMenuIds.SwitchRejectedDependency, bAttempt.Failure);
         }
 
         [Test]
