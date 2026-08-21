@@ -2225,11 +2225,14 @@ namespace AL.Editor.Development.FirstUserGameTest
                 yield break;
             }
 
-            if (EditorBuildSettings.scenes.Any(scene =>
-                    scene.enabled &&
-                    string.Equals(scene.path, ChampionArenaPath, StringComparison.Ordinal)))
+            int enabledDestinationCount = EditorBuildSettings.scenes.Count(scene =>
+                scene.enabled &&
+                string.Equals(scene.path, ChampionArenaPath, StringComparison.Ordinal));
+            if (enabledDestinationCount != 1)
             {
-                FailClosed("ChampionArena must remain excluded from production Build Settings.");
+                FailClosed(
+                    "The production first-session ChampionArena destination must be enabled " +
+                    "exactly once in Build Settings.");
                 yield break;
             }
 
@@ -2467,9 +2470,21 @@ namespace AL.Editor.Development.FirstUserGameTest
 
                 if (!validation.IsValid)
                 {
+                    string providerDiagnostic = string.Empty;
+                    if (validation.Failure ==
+                            FirstUserOnboardingEnvironmentFailure.ForbiddenAuthorityPresent)
+                    {
+                        _environmentInventoryVerifier.TryVerifyRuntimeComponentInventory(
+                            _environmentLease,
+                            out providerDiagnostic);
+                    }
+
                     message =
                         "The authored onboarding environment changed: " +
-                        validation.Failure + ".";
+                        validation.Failure +
+                        (string.IsNullOrEmpty(providerDiagnostic)
+                            ? "."
+                            : " (" + providerDiagnostic + ").");
                     return false;
                 }
 

@@ -439,10 +439,9 @@ namespace AL.Editor.Development.FirstUserGameTest
     }
 
     /// <summary>
-    /// Registry-owned trust boundary for the separately admitted asset packet. The current source
-    /// tree has no approved champion/gear/enemy/neutral-kit manifest, so real registration remains
-    /// unavailable. A later A5 binding change must replace this closed gate with a sealed,
-    /// AssetDatabase-backed verifier containing only A1-dispositioned canonical paths and GUIDs.
+    /// Registry-owned trust boundary for the admitted MVP asset packet. Only the sealed authored
+    /// provider may register, and every canonical path, GUID, file SHA, and admitted dependency is
+    /// reverified through AssetDatabase before the registry exposes the provider.
     /// </summary>
     internal static class FirstUserOnboardingFixedAssetManifestGate
     {
@@ -452,7 +451,20 @@ namespace AL.Editor.Development.FirstUserGameTest
             out IFirstUserOnboardingAssetInventoryVerifier inventoryVerifier)
         {
             inventoryVerifier = null;
-            return false;
+            if (!FirstUserOnboardingAuthoredEnvironmentProvider.Owns(owner, factory))
+            {
+                return false;
+            }
+
+            FirstUserOnboardingFixedAssetInventoryVerifier verifier =
+                FirstUserOnboardingFixedAssetInventoryVerifier.Instance;
+            if (!verifier.TryVerifyManifest(out _))
+            {
+                return false;
+            }
+
+            inventoryVerifier = verifier;
+            return true;
         }
     }
 
@@ -707,8 +719,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             if (player == null || !IsOwnedTransform(root, player.transform) ||
                 !player.enabled || player.radius <= 0f || player.height <= 0f ||
                 !IsFinite(player.transform.position) ||
-                Vector3.Distance(player.transform.position, lease.SpawnAnchor.position) >
-                    BoundsTolerance)
+                !walkable.Contains(player.transform.position))
             {
                 return Invalid(FirstUserOnboardingEnvironmentFailure.PlayerControllerInvalid);
             }
