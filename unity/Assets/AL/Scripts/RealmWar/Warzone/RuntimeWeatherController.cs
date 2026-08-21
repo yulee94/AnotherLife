@@ -131,7 +131,12 @@ namespace AL.RealmWar.Warzone
 
         private ParticleSystem GetOrCreateParticleSystem()
         {
-            _particles = GetComponent<ParticleSystem>() ?? gameObject.AddComponent<ParticleSystem>();
+            _particles = GetComponent<ParticleSystem>();
+            if (_particles == null)
+            {
+                _particles = gameObject.AddComponent<ParticleSystem>();
+            }
+
             return _particles;
         }
 
@@ -145,7 +150,12 @@ namespace AL.RealmWar.Warzone
             var existing = transform.Find(name);
             var particleObject = existing != null ? existing.gameObject : new GameObject(name);
             particleObject.transform.SetParent(transform, false);
-            cachedParticles = particleObject.GetComponent<ParticleSystem>() ?? particleObject.AddComponent<ParticleSystem>();
+            cachedParticles = particleObject.GetComponent<ParticleSystem>();
+            if (cachedParticles == null)
+            {
+                cachedParticles = particleObject.AddComponent<ParticleSystem>();
+            }
+
             return cachedParticles;
         }
 
@@ -676,7 +686,12 @@ namespace AL.RealmWar.Warzone
             lightObject.transform.SetParent(transform, false);
             lightObject.transform.localRotation = Quaternion.Euler(62f, -18f, 0f);
 
-            _lightningLight = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
+            _lightningLight = lightObject.GetComponent<Light>();
+            if (_lightningLight == null)
+            {
+                _lightningLight = lightObject.AddComponent<Light>();
+            }
+
             _lightningLight.type = LightType.Directional;
             _lightningLight.enabled = false;
             return _lightningLight;
@@ -694,7 +709,12 @@ namespace AL.RealmWar.Warzone
             lightObject.transform.SetParent(transform, false);
             lightObject.transform.localPosition = new Vector3(0f, -1.35f, 3.8f);
 
-            _atmosphereLight = lightObject.GetComponent<Light>() ?? lightObject.AddComponent<Light>();
+            _atmosphereLight = lightObject.GetComponent<Light>();
+            if (_atmosphereLight == null)
+            {
+                _atmosphereLight = lightObject.AddComponent<Light>();
+            }
+
             _atmosphereLight.type = LightType.Point;
             _atmosphereLight.shadows = LightShadows.None;
             return _atmosphereLight;

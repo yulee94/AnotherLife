@@ -3,9 +3,15 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using AL.ChampionMode;
+using AL.ChampionMode.Control;
+using AL.ChampionMode.Quests;
+using AL.Core;
+using AL.Data.Runtime;
 using AL.RealmSelection;
 using AL.UI.Kingdom;
 using AL.UI.RealmSelection;
+using AL.UI.SharedMenu;
 using NUnit.Framework;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -190,6 +196,83 @@ namespace AL.Tests.PlayMode
 
             // No marker mismatch anywhere, and the only tolerated error is the reverse-ordering handoff.
             Assert.IsFalse(_logs.Logs.Any(l => l.Contains("[AL-SCENE-ACTIVE-MISMATCH]")), "A startup marker reported a mismatch.");
+            var unexpected = _logs.Errors
+                .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
+                .ToList();
+            Assert.IsEmpty(unexpected, "Unexpected severe logs:\n" + string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator SharedMenuDrivesChampionToPrivateKingdomAndBackWithOwnerAndWriteAuthority()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Private kingdom round-trip drives editor PlayMode scene loads.");
+            yield break;
+#else
+            SaveGameData save = SeedLordshipSave(RealmId.Stonehold);
+            _quiesceSceneControllers = false;
+            var ownerIds = new List<string>();
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            AssertSingleOwner(
+                "al_scene_champion_arena",
+                SharedMenuIds.AdventureScene,
+                ChampionArenaPath,
+                ownerIds);
+            AssertInnerRealmControlIsLive();
+
+            SharedMenuModeSwitchHost adventureHost =
+                SharedMenuModeSwitchHost.EnsureForSceneName(SharedMenuIds.AdventureScene);
+            Assert.That(adventureHost, Is.Not.Null);
+            adventureHost.Open();
+            Assert.That(adventureHost.Overlay.KingdomButton.name, Is.EqualTo(SharedMenuIds.KingdomManagementModule));
+            Assert.That(adventureHost.Overlay.KingdomButton.interactable, Is.True);
+            Assert.That(adventureHost.CommitFromMenu(), Is.True);
+
+            yield return WaitForActiveScene(KingdomPath);
+            AssertExclusiveScene(KingdomPath, ChampionArenaPath);
+            AssertSingleOwner(
+                "al_scene_kingdom",
+                SharedMenuIds.KingdomScene,
+                KingdomPath,
+                ownerIds);
+            Assert.That(Object.FindObjectOfType<ChampionController>(), Is.Null);
+            Assert.That(CrossModeSession.HasActiveRoundTrip, Is.True);
+            Assert.That(CrossModeSession.AdventureScene, Is.EqualTo(SharedMenuIds.AdventureScene));
+
+            SharedMenuModeSwitchHost kingdomHost =
+                SharedMenuModeSwitchHost.EnsureForSceneName(SharedMenuIds.KingdomScene);
+            Assert.That(kingdomHost, Is.Not.Null);
+            kingdomHost.Open();
+            Assert.That(kingdomHost.Overlay.KingdomButton.interactable, Is.True);
+            Assert.That(kingdomHost.CommitFromMenu(), Is.True);
+
+            yield return WaitForActiveScene(ChampionArenaPath);
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            AssertSingleOwner(
+                "al_scene_champion_arena",
+                SharedMenuIds.AdventureScene,
+                ChampionArenaPath,
+                ownerIds);
+            AssertInnerRealmControlIsLive();
+
+            SaveGameData roundTripped = (SaveGameData)InstanceField(_controllableSave, "_currentSave");
+            Assert.That(roundTripped, Is.SameAs(save), "The same inner-realm save session must survive both loads.");
+            Assert.That(roundTripped.SelectedRealm, Is.EqualTo(RealmId.Stonehold));
+            Assert.That(roundTripped.ChampionCustomization.LastResultId, Is.EqualTo(ProofOfWorthIds.StoneholdVariantId));
+            Assert.That(LoadCount(), Is.EqualTo(1), "The round-trip must not reload offline progress.");
+
+            int savesBeforePause = SaveCount();
+            InvokeOnCurrentOwner("OnApplicationPause", true);
+            Assert.That(
+                SaveCount(),
+                Is.GreaterThan(savesBeforePause),
+                "The returned ChampionArena Bootloader must retain lifecycle write authority.");
+            Assert.That(ownerIds.Distinct().Count(), Is.EqualTo(ownerIds.Count));
+
+            Assert.That(_logs.Logs.Any(line => line.Contains("[AL-SCENE-ACTIVE-MISMATCH]")), Is.False);
             var unexpected = _logs.Errors
                 .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
                 .ToList();
@@ -486,7 +569,46 @@ namespace AL.Tests.PlayMode
             yield return null;
             yield return null;
         }
+
+        private IEnumerator WaitForActiveScene(string path)
+        {
+            float started = Time.realtimeSinceStartup;
+            while (!string.Equals(SceneManager.GetActiveScene().path, path, StringComparison.Ordinal))
+            {
+                if (Time.realtimeSinceStartup - started > LoadTimeoutSeconds)
+                {
+                    Assert.Fail($"Timed out waiting for active scene {path}.");
+                }
+
+                yield return null;
+            }
+
+            yield return null;
+            yield return null;
+            yield return null;
+        }
 #endif
+
+        private static void AssertExclusiveScene(string expectedPath, string excludedPath)
+        {
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(expectedPath));
+            Assert.That(SceneManager.sceneCount, Is.EqualTo(1), "LoadSceneMode.Single must leave one world loaded.");
+            Assert.That(
+                SceneManager.GetSceneByPath(excludedPath).isLoaded,
+                Is.False,
+                excludedPath + " must be mutually exclusive with " + expectedPath);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.BootScene).isLoaded, Is.False);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+        }
+
+        private static void AssertInnerRealmControlIsLive()
+        {
+            ChampionController controller = Object.FindObjectOfType<ChampionController>();
+            Assert.That(controller, Is.Not.Null, "ChampionArena must restore direct 3D champion control.");
+            Assert.That(controller.isActiveAndEnabled, Is.True);
+            Assert.That(controller.gameObject.name, Is.EqualTo(FirstSessionChampionStart.PlayerObjectName));
+            Assert.That(Object.FindObjectOfType<KingdomSceneController>(), Is.Null);
+        }
 
         private void AssertSingleOwner(string sceneId, string sceneName, string path, List<string> ownerIds)
         {
@@ -570,6 +692,23 @@ namespace AL.Tests.PlayMode
                 .SetValue(save, 1);
             saveType.GetField("ProfileInitializationVersion", BindingFlags.Instance | BindingFlags.Public)
                 .SetValue(save, 1);
+        }
+
+        private SaveGameData SeedLordshipSave(RealmId realm)
+        {
+            SeedCurrentSave();
+            SaveGameData save = (SaveGameData)InstanceField(_controllableSave, "_currentSave");
+            save.SelectedRealm = realm;
+            save.ChampionCustomization = new ChampionCustomizationState
+            {
+                ClassFamilyId = "warrior",
+                IdentityConfirmed = true,
+                Username = "RoundTripTester"
+            };
+            Assert.That(
+                ProofOfWorthLordship.TryWriteMark(save, ProofOfWorthLordship.ResolveMarkId(realm)),
+                Is.True);
+            return save;
         }
 
         private static object GetMarker()

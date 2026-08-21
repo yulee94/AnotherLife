@@ -5,7 +5,8 @@
         "AL.Runtime",
         "AL.SaveAuthority",
         "AL.GameDataCatalog",
-        "AL.NotificationCatalogAdapter"
+        "AL.NotificationCatalogAdapter",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [
         "Editor"

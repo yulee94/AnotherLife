@@ -164,7 +164,12 @@ namespace AL.ChampionMode.Presentation
                 : new GameObject(FirstSessionChampionStart.PresentationPlaqueName);
             plaque.transform.SetParent(player.transform, false);
             plaque.transform.localPosition = new Vector3(0f, 1.55f, 0.2f);
-            var text = plaque.GetComponent<TextMesh>() ?? plaque.AddComponent<TextMesh>();
+            var text = plaque.GetComponent<TextMesh>();
+            if (text == null)
+            {
+                text = plaque.AddComponent<TextMesh>();
+            }
+
             text.text = FirstSessionChampionStart.PresentationPlaqueCopy +
                         "\n" + spec.PeopleName + " · " + spec.ClassFamily;
             text.anchor = TextAnchor.MiddleCenter;
