@@ -1338,7 +1338,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
         }
 
         [Test]
-        public void RealRegistrationRemainsClosedUntilRegistryOwnedManifestExists()
+        public void ArbitraryProviderCannotCrossRegistryOwnedManifestBoundary()
         {
             object owner = new object();
             var factory = new RejectingEnvironmentFactory();
@@ -1350,6 +1350,149 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             Assert.That(FirstUserOnboardingEnvironmentRegistry.TryRegister(
                 owner,
                 factory), Is.False);
+        }
+
+        [Test]
+        public void ExactAdmittedProviderAndManifestAreReadyForUserPlaytest()
+        {
+            Assert.That(
+                FirstUserOnboardingFixedAssetInventoryVerifier.Instance.TryVerifyManifest(
+                    out string diagnostic),
+                Is.True,
+                diagnostic);
+            Assert.That(
+                FirstUserOnboardingEnvironmentRegistry.TryResolve(
+                    out IFirstUserOnboardingEnvironmentFactory factory,
+                    out IFirstUserOnboardingAssetInventoryVerifier verifier),
+                Is.True);
+            Assert.That(factory, Is.TypeOf<FirstUserOnboardingAuthoredEnvironmentFactory>());
+            Assert.That(
+                verifier,
+                Is.SameAs(FirstUserOnboardingFixedAssetInventoryVerifier.Instance));
+            Assert.That(verifier.InventoryFingerprint, Has.Length.EqualTo(64));
+        }
+
+        [Test]
+        public void AdmittedFactoryBuildsACompleteValidatedAuthoredLease()
+        {
+            _previewScene = EditorSceneManager.NewPreviewScene();
+            Assert.That(
+                FirstUserOnboardingEnvironmentRegistry.TryResolve(
+                    out IFirstUserOnboardingEnvironmentFactory factory,
+                    out IFirstUserOnboardingAssetInventoryVerifier verifier),
+                Is.True);
+            var request = new FirstUserOnboardingEnvironmentRequest(
+                SessionId,
+                generation: 3,
+                _previewScene,
+                allowUnitTestDouble: false,
+                assetInventoryVerifier: verifier);
+            Assert.That(
+                factory.TryCreate(request, out IFirstUserOnboardingEnvironmentLease lease,
+                    out string factoryDiagnostic),
+                Is.True,
+                factoryDiagnostic);
+
+            try
+            {
+                Assert.That(lease, Is.Not.Null);
+                AssertExactAsset(
+                    verifier,
+                    FirstUserOnboardingAssetRole.EnvironmentModule,
+                    lease.EnvironmentModuleAssetId,
+                    lease.EnvironmentModuleSourceAsset,
+                    lease.NeutralEnvironmentRoot);
+                AssertExactAsset(
+                    verifier,
+                    FirstUserOnboardingAssetRole.ModularChampion,
+                    lease.ChampionAssetId,
+                    lease.ChampionSourceAsset,
+                    lease.ModularChampionRoot);
+                AssertExactAsset(
+                    verifier,
+                    FirstUserOnboardingAssetRole.SelectedBasicArmor,
+                    lease.ArmorAssetId,
+                    lease.ArmorSourceAsset,
+                    lease.SelectedArmorRoot);
+                AssertExactAsset(
+                    verifier,
+                    FirstUserOnboardingAssetRole.SelectedBasicWeapon,
+                    lease.WeaponAssetId,
+                    lease.WeaponSourceAsset,
+                    lease.SelectedWeaponRoot);
+                AssertExactAsset(
+                    verifier,
+                    FirstUserOnboardingAssetRole.CommonEnemy,
+                    lease.EnemyAssetId,
+                    lease.EnemySourceAsset,
+                    lease.EnemyRoot);
+                AssertExactAsset(
+                    verifier,
+                    FirstUserOnboardingAssetRole.KingdomBaseStructure,
+                    lease.KingdomStructureAssetId,
+                    lease.KingdomStructureSourceAsset,
+                    lease.KingdomStructureRoot);
+                Assert.That(
+                    verifier.TryVerifyChampionRigAndLoadout(lease, out string rigDiagnostic),
+                    Is.True,
+                    rigDiagnostic);
+                Assert.That(
+                    verifier.TryVerifyRuntimeComponentInventory(
+                        lease,
+                        out string componentDiagnostic),
+                    Is.True,
+                    componentDiagnostic);
+                Assert.That(
+                    verifier.TryVerifyCharacterControllerSafeTraversal(
+                        lease,
+                        out string traversalDiagnostic),
+                    Is.True,
+                    traversalDiagnostic);
+                Assert.That(
+                    verifier.TryVerifyMechanicsEncounterSlot(
+                        lease,
+                        out string encounterDiagnostic),
+                    Is.True,
+                    encounterDiagnostic);
+                Collider[] enemyColliders = lease.EnemyRoot
+                    .GetComponentsInChildren<Collider>(true);
+                Assert.That(enemyColliders, Has.Length.EqualTo(1));
+                Assert.That(
+                    lease.AttackSafeBounds.Contains(enemyColliders[0].bounds.min),
+                    Is.True,
+                    "Enemy min " + enemyColliders[0].bounds.min +
+                    " must remain inside " + lease.AttackSafeBounds);
+                Assert.That(
+                    lease.AttackSafeBounds.Contains(enemyColliders[0].bounds.max),
+                    Is.True,
+                    "Enemy max " + enemyColliders[0].bounds.max +
+                    " must remain inside " + lease.AttackSafeBounds);
+                FirstUserOnboardingEnvironmentValidation validation =
+                    FirstUserOnboardingEnvironmentValidator.Validate(request, lease);
+                Assert.That(validation.IsValid, Is.True, validation.Failure.ToString());
+            }
+            finally
+            {
+                lease?.Dispose();
+            }
+        }
+
+        private static void AssertExactAsset(
+            IFirstUserOnboardingAssetInventoryVerifier verifier,
+            FirstUserOnboardingAssetRole role,
+            string assetId,
+            UnityEngine.Object source,
+            UnityEngine.Object instance)
+        {
+            Assert.That(
+                verifier.TryVerifyExactAsset(
+                    role,
+                    assetId,
+                    source,
+                    instance,
+                    out string diagnostic),
+                Is.True,
+                diagnostic);
         }
 
         [Test]
@@ -1601,6 +1744,15 @@ namespace AL.Tests.EditMode.FirstUserGameTest
 
             Assert.That(Validate(_lease).Failure, Is.EqualTo(
                 FirstUserOnboardingEnvironmentFailure.PlayerControllerInvalid));
+        }
+
+        [Test]
+        public void RevalidationAllowsPlayerMovementInsideTheAuthoredWalkableBounds()
+        {
+            _lease = TestEnvironmentLease.Create();
+            _lease.PlayerControllerValue.transform.position = Vector3.forward * 2f;
+
+            Assert.That(Validate(_lease).IsValid, Is.True);
         }
 
         [Test]
