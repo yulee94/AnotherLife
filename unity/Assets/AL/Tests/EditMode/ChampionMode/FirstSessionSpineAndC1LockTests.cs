@@ -146,7 +146,8 @@ namespace AL.Tests.EditMode.ChampionMode
                 ChampionCustomization = new ChampionCustomizationState
                 {
                     ClassFamilyId = "warrior",
-                    IdentityConfirmed = true
+                    IdentityConfirmed = true,
+                    Username = username
                 }
             };
             Assert.AreEqual(

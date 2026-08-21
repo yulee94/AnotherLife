@@ -7,13 +7,13 @@ namespace AL.EditorTools
 {
     /// <summary>
     /// Fails fast when this project is opened with any Unity Editor version other than the
-    /// project-pinned 2022.3.62f3.
+    /// project-pinned 6000.3.22f1 LTS.
     ///
     /// Background: opening the project with Unity 6000.5.3f1 (installed side-by-side) corrupted
     /// Library/ShaderCache and left every UI element unrendered — the realm-select and kingdom
     /// screens looked empty and the console spammed "Couldn't open include file HLSLSupport.cginc".
     /// Application.unityVersion is the authoritative running version, so we block on any mismatch
-    /// before the wrong editor can do further damage.
+    /// before the wrong editor can do further damage. 6000.5.x remains blocked.
     ///
     /// Honest limit: no editor-script hook runs before the very first asset import (scripts must
     /// compile before they can execute), so this fires at the earliest point Unity exposes — during
@@ -25,7 +25,7 @@ namespace AL.EditorTools
     public static class UnityVersionGuard
     {
         /// <summary>The only Unity Editor version this project may be opened with.</summary>
-        public const string RequiredUnityVersion = "2022.3.62f3";
+        public const string RequiredUnityVersion = "6000.3.22f1";
 
         /// <summary>
         /// Environment variable that deliberately bypasses the guard. Set it to any non-empty value

@@ -131,12 +131,7 @@ namespace AL.RealmWar.Warzone
 
         private ParticleSystem GetOrCreateParticleSystem()
         {
-            _particles = GetComponent<ParticleSystem>();
-            if (_particles == null)
-            {
-                _particles = gameObject.AddComponent<ParticleSystem>();
-            }
-
+            _particles = GetOrAddComponent<ParticleSystem>(gameObject);
             return _particles;
         }
 
@@ -150,13 +145,27 @@ namespace AL.RealmWar.Warzone
             var existing = transform.Find(name);
             var particleObject = existing != null ? existing.gameObject : new GameObject(name);
             particleObject.transform.SetParent(transform, false);
-            cachedParticles = particleObject.GetComponent<ParticleSystem>();
-            if (cachedParticles == null)
+            cachedParticles = GetOrAddComponent<ParticleSystem>(particleObject);
+            return cachedParticles;
+        }
+
+        // Unity overloaded == treats destroyed/"fake-null" objects as null.
+        // C# ?. / ?? do not, and ParticleSystem.main / Light.type on a missing
+        // component throws MissingComponentException.
+        private static T GetOrAddComponent<T>(GameObject host) where T : Component
+        {
+            if (host == null)
             {
-                cachedParticles = particleObject.AddComponent<ParticleSystem>();
+                return null;
             }
 
-            return cachedParticles;
+            T component = host.GetComponent<T>();
+            if (component == null)
+            {
+                component = host.AddComponent<T>();
+            }
+
+            return component;
         }
 
         private WindZone GetOrCreateWindZone()
@@ -180,6 +189,11 @@ namespace AL.RealmWar.Warzone
 
         private void ConfigureParticleSystem(ParticleSystem particles)
         {
+            if (particles == null)
+            {
+                return;
+            }
+
             var main = particles.main;
             main.loop = true;
             main.startLifetime = Mathf.Max(0.5f, _profile.ParticleLifetime);
@@ -216,6 +230,11 @@ namespace AL.RealmWar.Warzone
 
         private void ConfigureGroundMist(ParticleSystem particles)
         {
+            if (particles == null)
+            {
+                return;
+            }
+
             particles.transform.localPosition = new Vector3(0f, -5.15f, 0f);
 
             Color mistStart = Color.Lerp(_profile.FogColor, _profile.ParticleStartColor, 0.35f);
@@ -261,6 +280,11 @@ namespace AL.RealmWar.Warzone
 
         private void ConfigureHorizonHaze(ParticleSystem particles)
         {
+            if (particles == null)
+            {
+                return;
+            }
+
             particles.transform.localPosition = new Vector3(0f, -1.8f, 0f);
 
             Color hazeStart = Color.Lerp(_profile.FogColor, _profile.ParticleEndColor, 0.55f);
@@ -306,6 +330,11 @@ namespace AL.RealmWar.Warzone
 
         private void ConfigureWindStreaks(ParticleSystem particles)
         {
+            if (particles == null)
+            {
+                return;
+            }
+
             particles.transform.localPosition = new Vector3(0f, -1.15f, -2.4f);
 
             Color streakStart = Color.Lerp(_profile.ParticleStartColor, _profile.DirectionalLightColor, 0.28f);
@@ -686,12 +715,7 @@ namespace AL.RealmWar.Warzone
             lightObject.transform.SetParent(transform, false);
             lightObject.transform.localRotation = Quaternion.Euler(62f, -18f, 0f);
 
-            _lightningLight = lightObject.GetComponent<Light>();
-            if (_lightningLight == null)
-            {
-                _lightningLight = lightObject.AddComponent<Light>();
-            }
-
+            _lightningLight = GetOrAddComponent<Light>(lightObject);
             _lightningLight.type = LightType.Directional;
             _lightningLight.enabled = false;
             return _lightningLight;
@@ -709,12 +733,7 @@ namespace AL.RealmWar.Warzone
             lightObject.transform.SetParent(transform, false);
             lightObject.transform.localPosition = new Vector3(0f, -1.35f, 3.8f);
 
-            _atmosphereLight = lightObject.GetComponent<Light>();
-            if (_atmosphereLight == null)
-            {
-                _atmosphereLight = lightObject.AddComponent<Light>();
-            }
-
+            _atmosphereLight = GetOrAddComponent<Light>(lightObject);
             _atmosphereLight.type = LightType.Point;
             _atmosphereLight.shadows = LightShadows.None;
             return _atmosphereLight;
@@ -734,7 +753,14 @@ namespace AL.RealmWar.Warzone
             var collider = quadObject.GetComponent<Collider>();
             if (collider != null)
             {
-                Destroy(collider);
+                if (Application.isPlaying)
+                {
+                    Destroy(collider);
+                }
+                else
+                {
+                    DestroyImmediate(collider);
+                }
             }
 
             var renderer = quadObject.GetComponent<Renderer>();
@@ -906,7 +932,14 @@ namespace AL.RealmWar.Warzone
                     continue;
                 }
 
-                UnityEngine.Object.Destroy(materials[i]);
+                if (Application.isPlaying)
+                {
+                    UnityEngine.Object.Destroy(materials[i]);
+                }
+                else
+                {
+                    UnityEngine.Object.DestroyImmediate(materials[i]);
+                }
                 materials[i] = null;
             }
         }
