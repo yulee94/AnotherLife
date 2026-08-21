@@ -230,7 +230,8 @@ namespace AL.Tests.EditMode.SharedMenu
                 {
                     ClassFamilyId = "warrior",
                     IdentityConfirmed = true,
-                    LastResultId = string.Empty
+                    LastResultId = string.Empty,
+                    Username = "SharedMenuTester"
                 }
             };
         }
