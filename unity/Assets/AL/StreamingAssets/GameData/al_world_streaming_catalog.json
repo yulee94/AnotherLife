@@ -1,0 +1,1318 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_world_streaming_catalog",
+  "idFormat": "lowercase_snake_case",
+  "layoutAuthority": "topology_only_provisional_coordinates",
+  "dimensions": [
+    {
+      "id": "dimension_adventure_3d",
+      "mode": "adventure_3d",
+      "exclusive": true,
+      "worlds": [
+        {
+          "id": "world_adventure_ring_slot_01_inner",
+          "usage": "inner_realm",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "unresolved",
+          "topologyNodeId": "ring_slot_01",
+          "seedChunkId": "chunk_ring_slot_01_capital_core",
+          "chunks": [
+            {
+              "id": "chunk_ring_slot_01_capital_core",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_01_inner/chunk_ring_slot_01_capital_core.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_01_area_01",
+                "chunk_ring_slot_01_area_02",
+                "chunk_ring_slot_01_area_03",
+                "chunk_ring_slot_01_area_04"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_capital",
+                "socket_ring_slot_01_dragon_entrance"
+              ],
+              "blockoutArchetype": "realm_capital"
+            },
+            {
+              "id": "chunk_ring_slot_01_area_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_01_inner/chunk_ring_slot_01_area_01.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_ring_slot_01_capital_core",
+                "chunk_ring_slot_01_main_gate"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_area_01"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_01_area_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_01_inner/chunk_ring_slot_01_area_02.unity",
+              "gridX": 1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_01_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_area_02"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_01_area_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_01_inner/chunk_ring_slot_01_area_03.unity",
+              "gridX": 0,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_ring_slot_01_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_area_03"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_01_area_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_01_inner/chunk_ring_slot_01_area_04.unity",
+              "gridX": -1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_01_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_area_04"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_01_main_gate",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_01_inner/chunk_ring_slot_01_main_gate.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_ring_slot_01_area_01"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_inner_wall",
+                "socket_ring_slot_01_main_gate"
+              ],
+              "blockoutArchetype": "realm_gate"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_ring_slot_02_inner",
+          "usage": "inner_realm",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "unresolved",
+          "topologyNodeId": "ring_slot_02",
+          "seedChunkId": "chunk_ring_slot_02_capital_core",
+          "chunks": [
+            {
+              "id": "chunk_ring_slot_02_capital_core",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_02_inner/chunk_ring_slot_02_capital_core.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_02_area_01",
+                "chunk_ring_slot_02_area_02",
+                "chunk_ring_slot_02_area_03",
+                "chunk_ring_slot_02_area_04"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_capital",
+                "socket_ring_slot_02_dragon_entrance"
+              ],
+              "blockoutArchetype": "realm_capital"
+            },
+            {
+              "id": "chunk_ring_slot_02_area_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_02_inner/chunk_ring_slot_02_area_01.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_ring_slot_02_capital_core",
+                "chunk_ring_slot_02_main_gate"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_area_01"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_02_area_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_02_inner/chunk_ring_slot_02_area_02.unity",
+              "gridX": 1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_02_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_area_02"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_02_area_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_02_inner/chunk_ring_slot_02_area_03.unity",
+              "gridX": 0,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_ring_slot_02_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_area_03"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_02_area_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_02_inner/chunk_ring_slot_02_area_04.unity",
+              "gridX": -1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_02_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_area_04"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_02_main_gate",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_02_inner/chunk_ring_slot_02_main_gate.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_ring_slot_02_area_01"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_inner_wall",
+                "socket_ring_slot_02_main_gate"
+              ],
+              "blockoutArchetype": "realm_gate"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_ring_slot_03_inner",
+          "usage": "inner_realm",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "unresolved",
+          "topologyNodeId": "ring_slot_03",
+          "seedChunkId": "chunk_ring_slot_03_capital_core",
+          "chunks": [
+            {
+              "id": "chunk_ring_slot_03_capital_core",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_03_inner/chunk_ring_slot_03_capital_core.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_03_area_01",
+                "chunk_ring_slot_03_area_02",
+                "chunk_ring_slot_03_area_03",
+                "chunk_ring_slot_03_area_04"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_capital",
+                "socket_ring_slot_03_dragon_entrance"
+              ],
+              "blockoutArchetype": "realm_capital"
+            },
+            {
+              "id": "chunk_ring_slot_03_area_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_03_inner/chunk_ring_slot_03_area_01.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_ring_slot_03_capital_core",
+                "chunk_ring_slot_03_main_gate"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_area_01"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_03_area_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_03_inner/chunk_ring_slot_03_area_02.unity",
+              "gridX": 1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_03_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_area_02"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_03_area_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_03_inner/chunk_ring_slot_03_area_03.unity",
+              "gridX": 0,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_ring_slot_03_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_area_03"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_03_area_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_03_inner/chunk_ring_slot_03_area_04.unity",
+              "gridX": -1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_03_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_area_04"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_03_main_gate",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_03_inner/chunk_ring_slot_03_main_gate.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_ring_slot_03_area_01"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_inner_wall",
+                "socket_ring_slot_03_main_gate"
+              ],
+              "blockoutArchetype": "realm_gate"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_ring_slot_04_inner",
+          "usage": "inner_realm",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "unresolved",
+          "topologyNodeId": "ring_slot_04",
+          "seedChunkId": "chunk_ring_slot_04_capital_core",
+          "chunks": [
+            {
+              "id": "chunk_ring_slot_04_capital_core",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_04_inner/chunk_ring_slot_04_capital_core.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_04_area_01",
+                "chunk_ring_slot_04_area_02",
+                "chunk_ring_slot_04_area_03",
+                "chunk_ring_slot_04_area_04"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_capital",
+                "socket_ring_slot_04_dragon_entrance"
+              ],
+              "blockoutArchetype": "realm_capital"
+            },
+            {
+              "id": "chunk_ring_slot_04_area_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_04_inner/chunk_ring_slot_04_area_01.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_ring_slot_04_capital_core",
+                "chunk_ring_slot_04_main_gate"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_area_01"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_04_area_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_04_inner/chunk_ring_slot_04_area_02.unity",
+              "gridX": 1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_04_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_area_02"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_04_area_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_04_inner/chunk_ring_slot_04_area_03.unity",
+              "gridX": 0,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_ring_slot_04_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_area_03"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_04_area_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_04_inner/chunk_ring_slot_04_area_04.unity",
+              "gridX": -1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_ring_slot_04_capital_core"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_area_04"
+              ],
+              "blockoutArchetype": "realm_area"
+            },
+            {
+              "id": "chunk_ring_slot_04_main_gate",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_ring_slot_04_inner/chunk_ring_slot_04_main_gate.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_ring_slot_04_area_01"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_inner_wall",
+                "socket_ring_slot_04_main_gate"
+              ],
+              "blockoutArchetype": "realm_gate"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_outer_warzone",
+          "usage": "shared_warzone",
+          "accessPolicy": "warzone_gate",
+          "variantBindingStatus": "shared",
+          "topologyNodeId": "outer_warzone_ring",
+          "seedChunkId": "chunk_warzone_crossroads",
+          "chunks": [
+            {
+              "id": "chunk_warzone_sector_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_sector_01.unity",
+              "gridX": -2,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_warzone_crossroads",
+                "chunk_warzone_gate_approach_01",
+                "chunk_warzone_bridge_01_02_a",
+                "chunk_warzone_bridge_01_02_b",
+                "chunk_warzone_bridge_04_01_a",
+                "chunk_warzone_bridge_04_01_b"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_sector_01_fort",
+                "socket_warzone_sector_01_terrain"
+              ],
+              "blockoutArchetype": "warzone_sector"
+            },
+            {
+              "id": "chunk_warzone_sector_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_sector_02.unity",
+              "gridX": 2,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_warzone_crossroads",
+                "chunk_warzone_gate_approach_02",
+                "chunk_warzone_bridge_01_02_a",
+                "chunk_warzone_bridge_01_02_b",
+                "chunk_warzone_bridge_02_03_a",
+                "chunk_warzone_bridge_02_03_b"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_sector_02_fort",
+                "socket_warzone_sector_02_terrain"
+              ],
+              "blockoutArchetype": "warzone_sector"
+            },
+            {
+              "id": "chunk_warzone_sector_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_sector_03.unity",
+              "gridX": 2,
+              "gridZ": -2,
+              "neighbors": [
+                "chunk_warzone_crossroads",
+                "chunk_warzone_gate_approach_03",
+                "chunk_warzone_bridge_02_03_a",
+                "chunk_warzone_bridge_02_03_b",
+                "chunk_warzone_bridge_03_04_a",
+                "chunk_warzone_bridge_03_04_b"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_sector_03_fort",
+                "socket_warzone_sector_03_terrain"
+              ],
+              "blockoutArchetype": "warzone_sector"
+            },
+            {
+              "id": "chunk_warzone_sector_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_sector_04.unity",
+              "gridX": -2,
+              "gridZ": -2,
+              "neighbors": [
+                "chunk_warzone_crossroads",
+                "chunk_warzone_gate_approach_04",
+                "chunk_warzone_bridge_03_04_a",
+                "chunk_warzone_bridge_03_04_b",
+                "chunk_warzone_bridge_04_01_a",
+                "chunk_warzone_bridge_04_01_b"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_sector_04_fort",
+                "socket_warzone_sector_04_terrain"
+              ],
+              "blockoutArchetype": "warzone_sector"
+            },
+            {
+              "id": "chunk_warzone_crossroads",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_crossroads.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_warzone_sector_01",
+                "chunk_warzone_sector_02",
+                "chunk_warzone_sector_03",
+                "chunk_warzone_sector_04"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_crossroads_landmark"
+              ],
+              "blockoutArchetype": "warzone_crossroads"
+            },
+            {
+              "id": "chunk_warzone_gate_approach_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_gate_approach_01.unity",
+              "gridX": -2,
+              "gridZ": 5,
+              "neighbors": [
+                "chunk_warzone_sector_01"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_01_controlled_transition",
+                "socket_ring_slot_01_outer_wall",
+                "socket_ring_slot_01_warzone_entry"
+              ],
+              "blockoutArchetype": "warzone_gate_approach"
+            },
+            {
+              "id": "chunk_warzone_gate_approach_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_gate_approach_02.unity",
+              "gridX": 2,
+              "gridZ": 5,
+              "neighbors": [
+                "chunk_warzone_sector_02"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_02_controlled_transition",
+                "socket_ring_slot_02_outer_wall",
+                "socket_ring_slot_02_warzone_entry"
+              ],
+              "blockoutArchetype": "warzone_gate_approach"
+            },
+            {
+              "id": "chunk_warzone_gate_approach_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_gate_approach_03.unity",
+              "gridX": 2,
+              "gridZ": -5,
+              "neighbors": [
+                "chunk_warzone_sector_03"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_03_controlled_transition",
+                "socket_ring_slot_03_outer_wall",
+                "socket_ring_slot_03_warzone_entry"
+              ],
+              "blockoutArchetype": "warzone_gate_approach"
+            },
+            {
+              "id": "chunk_warzone_gate_approach_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_gate_approach_04.unity",
+              "gridX": -2,
+              "gridZ": -5,
+              "neighbors": [
+                "chunk_warzone_sector_04"
+              ],
+              "replacementSocketIds": [
+                "socket_ring_slot_04_controlled_transition",
+                "socket_ring_slot_04_outer_wall",
+                "socket_ring_slot_04_warzone_entry"
+              ],
+              "blockoutArchetype": "warzone_gate_approach"
+            },
+            {
+              "id": "chunk_warzone_bridge_01_02_a",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_01_02_a.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_warzone_sector_01",
+                "chunk_warzone_sector_02"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_01_02_a"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_01_02_b",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_01_02_b.unity",
+              "gridX": 0,
+              "gridZ": 3,
+              "neighbors": [
+                "chunk_warzone_sector_01",
+                "chunk_warzone_sector_02"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_01_02_b"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_02_03_a",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_02_03_a.unity",
+              "gridX": 1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_warzone_sector_02",
+                "chunk_warzone_sector_03"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_02_03_a"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_02_03_b",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_02_03_b.unity",
+              "gridX": 3,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_warzone_sector_02",
+                "chunk_warzone_sector_03"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_02_03_b"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_03_04_a",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_03_04_a.unity",
+              "gridX": 0,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_warzone_sector_03",
+                "chunk_warzone_sector_04"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_03_04_a"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_03_04_b",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_03_04_b.unity",
+              "gridX": 0,
+              "gridZ": -3,
+              "neighbors": [
+                "chunk_warzone_sector_03",
+                "chunk_warzone_sector_04"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_03_04_b"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_04_01_a",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_04_01_a.unity",
+              "gridX": -1,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_warzone_sector_04",
+                "chunk_warzone_sector_01"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_04_01_a"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            },
+            {
+              "id": "chunk_warzone_bridge_04_01_b",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_outer_warzone/chunk_warzone_bridge_04_01_b.unity",
+              "gridX": -3,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_warzone_sector_04",
+                "chunk_warzone_sector_01"
+              ],
+              "replacementSocketIds": [
+                "socket_warzone_bridge_04_01_b"
+              ],
+              "blockoutArchetype": "warzone_bridge"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_stonehold_dragon_cave",
+          "usage": "realm_dragon_cave",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "stonehold",
+          "topologyNodeId": "under_realm_capital",
+          "seedChunkId": "chunk_stonehold_dragon_cave_entrance",
+          "chunks": [
+            {
+              "id": "chunk_stonehold_dragon_cave_entrance",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_stonehold_dragon_cave/chunk_stonehold_dragon_cave_entrance.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_stonehold_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_stonehold_cave_portal"
+              ],
+              "blockoutArchetype": "dragon_cave_entrance"
+            },
+            {
+              "id": "chunk_stonehold_dragon_cave_descent",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_stonehold_dragon_cave/chunk_stonehold_dragon_cave_descent.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_stonehold_dragon_cave_entrance",
+                "chunk_stonehold_dragon_cave_lair"
+              ],
+              "replacementSocketIds": [
+                "socket_stonehold_cave_descent"
+              ],
+              "blockoutArchetype": "dragon_cave_descent"
+            },
+            {
+              "id": "chunk_stonehold_dragon_cave_lair",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_stonehold_dragon_cave/chunk_stonehold_dragon_cave_lair.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_stonehold_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_stonehold_dragon_lair"
+              ],
+              "blockoutArchetype": "dragon_cave_lair"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_eldergrove_dragon_cave",
+          "usage": "realm_dragon_cave",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "eldergrove",
+          "topologyNodeId": "under_realm_capital",
+          "seedChunkId": "chunk_eldergrove_dragon_cave_entrance",
+          "chunks": [
+            {
+              "id": "chunk_eldergrove_dragon_cave_entrance",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_eldergrove_dragon_cave/chunk_eldergrove_dragon_cave_entrance.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_eldergrove_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_eldergrove_cave_portal"
+              ],
+              "blockoutArchetype": "dragon_cave_entrance"
+            },
+            {
+              "id": "chunk_eldergrove_dragon_cave_descent",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_eldergrove_dragon_cave/chunk_eldergrove_dragon_cave_descent.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_eldergrove_dragon_cave_entrance",
+                "chunk_eldergrove_dragon_cave_lair"
+              ],
+              "replacementSocketIds": [
+                "socket_eldergrove_cave_descent"
+              ],
+              "blockoutArchetype": "dragon_cave_descent"
+            },
+            {
+              "id": "chunk_eldergrove_dragon_cave_lair",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_eldergrove_dragon_cave/chunk_eldergrove_dragon_cave_lair.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_eldergrove_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_eldergrove_dragon_lair"
+              ],
+              "blockoutArchetype": "dragon_cave_lair"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_crownlands_dragon_cave",
+          "usage": "realm_dragon_cave",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "crownlands",
+          "topologyNodeId": "under_realm_capital",
+          "seedChunkId": "chunk_crownlands_dragon_cave_entrance",
+          "chunks": [
+            {
+              "id": "chunk_crownlands_dragon_cave_entrance",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_crownlands_dragon_cave/chunk_crownlands_dragon_cave_entrance.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_crownlands_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_crownlands_cave_portal"
+              ],
+              "blockoutArchetype": "dragon_cave_entrance"
+            },
+            {
+              "id": "chunk_crownlands_dragon_cave_descent",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_crownlands_dragon_cave/chunk_crownlands_dragon_cave_descent.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_crownlands_dragon_cave_entrance",
+                "chunk_crownlands_dragon_cave_lair"
+              ],
+              "replacementSocketIds": [
+                "socket_crownlands_cave_descent"
+              ],
+              "blockoutArchetype": "dragon_cave_descent"
+            },
+            {
+              "id": "chunk_crownlands_dragon_cave_lair",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_crownlands_dragon_cave/chunk_crownlands_dragon_cave_lair.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_crownlands_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_crownlands_dragon_lair"
+              ],
+              "blockoutArchetype": "dragon_cave_lair"
+            }
+          ]
+        },
+        {
+          "id": "world_adventure_umbral_dragon_cave",
+          "usage": "realm_dragon_cave",
+          "accessPolicy": "realm_members",
+          "variantBindingStatus": "umbral",
+          "topologyNodeId": "under_realm_capital",
+          "seedChunkId": "chunk_umbral_dragon_cave_entrance",
+          "chunks": [
+            {
+              "id": "chunk_umbral_dragon_cave_entrance",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_umbral_dragon_cave/chunk_umbral_dragon_cave_entrance.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_umbral_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_umbral_cave_portal"
+              ],
+              "blockoutArchetype": "dragon_cave_entrance"
+            },
+            {
+              "id": "chunk_umbral_dragon_cave_descent",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_umbral_dragon_cave/chunk_umbral_dragon_cave_descent.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_umbral_dragon_cave_entrance",
+                "chunk_umbral_dragon_cave_lair"
+              ],
+              "replacementSocketIds": [
+                "socket_umbral_cave_descent"
+              ],
+              "blockoutArchetype": "dragon_cave_descent"
+            },
+            {
+              "id": "chunk_umbral_dragon_cave_lair",
+              "scenePath": "Assets/AL/Worlds/Generated/Adventure3D/world_adventure_umbral_dragon_cave/chunk_umbral_dragon_cave_lair.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_umbral_dragon_cave_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_umbral_dragon_lair"
+              ],
+              "blockoutArchetype": "dragon_cave_lair"
+            }
+          ]
+        }
+      ],
+      "chunkSpanMeters": 1200
+    },
+    {
+      "id": "dimension_kingdom_25d",
+      "mode": "kingdom_25d",
+      "exclusive": true,
+      "worlds": [
+        {
+          "id": "world_kingdom_private",
+          "usage": "private_kingdom",
+          "accessPolicy": "owner_only",
+          "variantBindingStatus": "selected_realm",
+          "topologyNodeId": "inner_realm_only",
+          "seedChunkId": "chunk_kingdom_castle_core",
+          "chunks": [
+            {
+              "id": "chunk_kingdom_castle_core",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_castle_core.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_kingdom_area_01",
+                "chunk_kingdom_area_02",
+                "chunk_kingdom_area_03",
+                "chunk_kingdom_area_04",
+                "chunk_kingdom_area_05",
+                "chunk_kingdom_area_06",
+                "chunk_kingdom_area_07",
+                "chunk_kingdom_area_08",
+                "chunk_kingdom_area_09",
+                "chunk_kingdom_area_10",
+                "chunk_kingdom_area_11",
+                "chunk_kingdom_area_12"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_castle",
+                "socket_kingdom_command_court"
+              ],
+              "blockoutArchetype": "kingdom_castle"
+            },
+            {
+              "id": "chunk_kingdom_area_01",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_01.unity",
+              "gridX": -1,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_02"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_01_district",
+                "socket_kingdom_area_01_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_02",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_02.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_01",
+                "chunk_kingdom_area_03"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_02_district",
+                "socket_kingdom_area_02_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_03",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_03.unity",
+              "gridX": 1,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_02",
+                "chunk_kingdom_area_04"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_03_district",
+                "socket_kingdom_area_03_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_04",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_04.unity",
+              "gridX": -2,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_03",
+                "chunk_kingdom_area_05"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_04_district",
+                "socket_kingdom_area_04_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_05",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_05.unity",
+              "gridX": 2,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_04",
+                "chunk_kingdom_area_06"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_05_district",
+                "socket_kingdom_area_05_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_06",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_06.unity",
+              "gridX": -2,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_05",
+                "chunk_kingdom_area_07"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_06_district",
+                "socket_kingdom_area_06_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_07",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_07.unity",
+              "gridX": 2,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_06",
+                "chunk_kingdom_area_08"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_07_district",
+                "socket_kingdom_area_07_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_08",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_08.unity",
+              "gridX": -2,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_07",
+                "chunk_kingdom_area_09"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_08_district",
+                "socket_kingdom_area_08_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_09",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_09.unity",
+              "gridX": 2,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_08",
+                "chunk_kingdom_area_10"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_09_district",
+                "socket_kingdom_area_09_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_10",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_10.unity",
+              "gridX": -1,
+              "gridZ": -2,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_09",
+                "chunk_kingdom_area_11"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_10_district",
+                "socket_kingdom_area_10_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_11",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_11.unity",
+              "gridX": 0,
+              "gridZ": -2,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_10",
+                "chunk_kingdom_area_12"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_11_district",
+                "socket_kingdom_area_11_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            },
+            {
+              "id": "chunk_kingdom_area_12",
+              "scenePath": "Assets/AL/Worlds/Generated/Kingdom25D/world_kingdom_private/chunk_kingdom_area_12.unity",
+              "gridX": 1,
+              "gridZ": -2,
+              "neighbors": [
+                "chunk_kingdom_castle_core",
+                "chunk_kingdom_area_11"
+              ],
+              "replacementSocketIds": [
+                "socket_kingdom_area_12_district",
+                "socket_kingdom_area_12_landmark"
+              ],
+              "blockoutArchetype": "kingdom_area"
+            }
+          ]
+        }
+      ],
+      "chunkSpanMeters": 128
+    },
+    {
+      "id": "dimension_special_event_3d",
+      "mode": "special_event_3d",
+      "exclusive": true,
+      "worlds": [
+        {
+          "id": "world_event_accordant_isle",
+          "usage": "accordant_isle_event",
+          "accessPolicy": "event_only",
+          "variantBindingStatus": "shared",
+          "topologyNodeId": "center_slot",
+          "seedChunkId": "chunk_accordant_surface",
+          "chunks": [
+            {
+              "id": "chunk_accordant_surface",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_surface.unity",
+              "gridX": 0,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_accordant_castle",
+                "chunk_accordant_cavern_descent",
+                "chunk_accordant_center_bridge_ring_slot_01",
+                "chunk_accordant_center_bridge_ring_slot_02",
+                "chunk_accordant_center_bridge_ring_slot_03",
+                "chunk_accordant_center_bridge_ring_slot_04"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_island_terrain"
+              ],
+              "blockoutArchetype": "accordant_surface"
+            },
+            {
+              "id": "chunk_accordant_castle",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_castle.unity",
+              "gridX": 0,
+              "gridZ": 1,
+              "neighbors": [
+                "chunk_accordant_surface",
+                "chunk_accordant_entrance_01",
+                "chunk_accordant_entrance_02",
+                "chunk_accordant_entrance_03",
+                "chunk_accordant_entrance_04"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_huge_castle"
+              ],
+              "blockoutArchetype": "accordant_castle"
+            },
+            {
+              "id": "chunk_accordant_entrance_01",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_entrance_01.unity",
+              "gridX": -1,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_accordant_castle",
+                "chunk_accordant_cavern_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_castle_entrance_01"
+              ],
+              "blockoutArchetype": "accordant_entrance"
+            },
+            {
+              "id": "chunk_accordant_entrance_02",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_entrance_02.unity",
+              "gridX": 0,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_accordant_castle",
+                "chunk_accordant_cavern_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_castle_entrance_02"
+              ],
+              "blockoutArchetype": "accordant_entrance"
+            },
+            {
+              "id": "chunk_accordant_entrance_03",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_entrance_03.unity",
+              "gridX": 1,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_accordant_castle",
+                "chunk_accordant_cavern_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_castle_entrance_03"
+              ],
+              "blockoutArchetype": "accordant_entrance"
+            },
+            {
+              "id": "chunk_accordant_entrance_04",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_entrance_04.unity",
+              "gridX": 2,
+              "gridZ": 2,
+              "neighbors": [
+                "chunk_accordant_castle",
+                "chunk_accordant_cavern_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_castle_entrance_04"
+              ],
+              "blockoutArchetype": "accordant_entrance"
+            },
+            {
+              "id": "chunk_accordant_cavern_descent",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_cavern_descent.unity",
+              "gridX": 0,
+              "gridZ": -1,
+              "neighbors": [
+                "chunk_accordant_surface",
+                "chunk_accordant_wish_dragon_cavern",
+                "chunk_accordant_entrance_01",
+                "chunk_accordant_entrance_02",
+                "chunk_accordant_entrance_03",
+                "chunk_accordant_entrance_04"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_crystal_descent"
+              ],
+              "blockoutArchetype": "accordant_descent"
+            },
+            {
+              "id": "chunk_accordant_wish_dragon_cavern",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_wish_dragon_cavern.unity",
+              "gridX": 0,
+              "gridZ": -2,
+              "neighbors": [
+                "chunk_accordant_cavern_descent"
+              ],
+              "replacementSocketIds": [
+                "socket_accordant_wish_dragon_lair",
+                "socket_accordant_crystal_cavern"
+              ],
+              "blockoutArchetype": "accordant_wish_dragon_cavern"
+            },
+            {
+              "id": "chunk_accordant_center_bridge_ring_slot_01",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_center_bridge_ring_slot_01.unity",
+              "blockoutArchetype": "accordant_sealed_bridge",
+              "gridX": 0,
+              "gridZ": 4,
+              "neighbors": [
+                "chunk_accordant_surface"
+              ],
+              "replacementSocketIds": [
+                "socket_center_bridge_ring_slot_01"
+              ]
+            },
+            {
+              "id": "chunk_accordant_center_bridge_ring_slot_02",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_center_bridge_ring_slot_02.unity",
+              "blockoutArchetype": "accordant_sealed_bridge",
+              "gridX": 4,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_accordant_surface"
+              ],
+              "replacementSocketIds": [
+                "socket_center_bridge_ring_slot_02"
+              ]
+            },
+            {
+              "id": "chunk_accordant_center_bridge_ring_slot_03",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_center_bridge_ring_slot_03.unity",
+              "blockoutArchetype": "accordant_sealed_bridge",
+              "gridX": 0,
+              "gridZ": -4,
+              "neighbors": [
+                "chunk_accordant_surface"
+              ],
+              "replacementSocketIds": [
+                "socket_center_bridge_ring_slot_03"
+              ]
+            },
+            {
+              "id": "chunk_accordant_center_bridge_ring_slot_04",
+              "scenePath": "Assets/AL/Worlds/Generated/SpecialEvent3D/world_event_accordant_isle/chunk_accordant_center_bridge_ring_slot_04.unity",
+              "blockoutArchetype": "accordant_sealed_bridge",
+              "gridX": -4,
+              "gridZ": 0,
+              "neighbors": [
+                "chunk_accordant_surface"
+              ],
+              "replacementSocketIds": [
+                "socket_center_bridge_ring_slot_04"
+              ]
+            }
+          ]
+        }
+      ],
+      "chunkSpanMeters": 800
+    }
+  ],
+  "traversalProfiles": [
+    {
+      "id": "traversal_gate_to_nearest_warzone_fortress",
+      "dimensionId": "dimension_adventure_3d",
+      "routeType": "main_gate_to_nearest_warzone_fortress",
+      "referenceSpeedMetersPerSecond": 6,
+      "minimumSeconds": 600,
+      "maximumSeconds": 600
+    },
+    {
+      "id": "traversal_gate_to_nearest_adjacent_bridge_crossing",
+      "dimensionId": "dimension_adventure_3d",
+      "routeType": "main_gate_to_nearest_adjacent_bridge_crossing",
+      "referenceSpeedMetersPerSecond": 6,
+      "minimumSeconds": 900,
+      "maximumSeconds": 900
+    },
+    {
+      "id": "traversal_gate_to_nearest_opposing_warzone_fortress",
+      "dimensionId": "dimension_adventure_3d",
+      "routeType": "main_gate_to_nearest_opposing_warzone_fortress",
+      "referenceSpeedMetersPerSecond": 6,
+      "minimumSeconds": 1200,
+      "maximumSeconds": 1500
+    }
+  ]
+}
