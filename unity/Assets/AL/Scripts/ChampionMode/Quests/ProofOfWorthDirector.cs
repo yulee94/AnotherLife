@@ -33,6 +33,8 @@ namespace AL.ChampionMode.Quests
         private bool _persistAttempted;
         private string _lastPersistMessage = string.Empty;
 
+        public static event Action LordshipGrantedObserved;
+
         public ProofOfWorthState State => _state;
         public QuestHudOverlay Hud { get; private set; }
         public string LastPersistMessage => _lastPersistMessage;
@@ -81,6 +83,7 @@ namespace AL.ChampionMode.Quests
         public static void ResetForTests()
         {
             _instance = null;
+            LordshipGrantedObserved = null;
             QuestHudAutoQuest.ResetForTests();
         }
 
@@ -303,12 +306,17 @@ namespace AL.ChampionMode.Quests
             if (transition.Changed)
             {
                 _state = transition.State;
-                if (_state.LordshipGranted)
+                bool grantedLordship = _state.LordshipGranted;
+                if (grantedLordship)
                 {
                     PersistLordship();
                 }
 
                 RefreshPresentation();
+                if (grantedLordship)
+                {
+                    LordshipGrantedObserved?.Invoke();
+                }
             }
 
             return transition;
@@ -342,7 +350,7 @@ namespace AL.ChampionMode.Quests
         {
             if (_player == null || !TryGetActiveMarker(out Transform marker))
             {
-                return true;
+                return false;
             }
 
             Vector3 delta = marker.position - _player.position;

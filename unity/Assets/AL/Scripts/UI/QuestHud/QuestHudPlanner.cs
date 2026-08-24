@@ -114,6 +114,26 @@ namespace AL.UI.QuestHud
                 autoQuestOn);
         }
 
+        public static QuestHudModel FromKingdomTeachingEntry(
+            KingdomTeachingEntry entry,
+            bool autoQuestOn)
+        {
+            if (entry == null)
+            {
+                return Empty(autoQuestOn);
+            }
+
+            return new QuestHudModel(
+                entry.Title,
+                entry.WhatToDo,
+                SanitizeLocation(entry.Location),
+                entry.Id,
+                entry.Id,
+                QuestHudAction.Continue,
+                QuestHudSurface.InnerRealm3D,
+                autoQuestOn);
+        }
+
         public static QuestHudModel FromKingdomTeaching(
             KingdomTeachingStep step,
             bool autoQuestOn)

@@ -10,6 +10,26 @@ using UnityEngine;
 
 namespace AL.UI.Kingdom
 {
+    public sealed class KingdomTeachingEntry
+    {
+        internal KingdomTeachingEntry(
+            string id,
+            string title,
+            string whatToDo,
+            string location)
+        {
+            Id = id ?? string.Empty;
+            Title = title ?? string.Empty;
+            WhatToDo = whatToDo ?? string.Empty;
+            Location = location ?? string.Empty;
+        }
+
+        public string Id { get; }
+        public string Title { get; }
+        public string WhatToDo { get; }
+        public string Location { get; }
+    }
+
     public sealed class KingdomTeachingStep
     {
         internal KingdomTeachingStep(
@@ -43,16 +63,22 @@ namespace AL.UI.Kingdom
     {
         public const string FileName = "al_kingdom_teaching_catalog.json";
         public const string CatalogId = "al_kingdom_teaching_v1";
+        public const string EntryId = "teach_enter_private_kingdom";
 
         private readonly IReadOnlyList<KingdomTeachingStep> _steps;
 
-        private KingdomTeachingCatalog(string questId, IReadOnlyList<KingdomTeachingStep> steps)
+        private KingdomTeachingCatalog(
+            string questId,
+            KingdomTeachingEntry entry,
+            IReadOnlyList<KingdomTeachingStep> steps)
         {
             QuestId = questId;
+            Entry = entry;
             _steps = steps;
         }
 
         public string QuestId { get; }
+        public KingdomTeachingEntry Entry { get; }
         public IReadOnlyList<KingdomTeachingStep> Steps => _steps;
 
         public static KingdomTeachingCatalog LoadCanonical()
@@ -81,6 +107,7 @@ namespace AL.UI.Kingdom
             if (file == null ||
                 !string.Equals(file.catalog_id, CatalogId, StringComparison.Ordinal) ||
                 string.IsNullOrWhiteSpace(file.quest_id) ||
+                !IsValidEntry(file.entry) ||
                 file.steps == null ||
                 file.steps.Length == 0)
             {
@@ -123,7 +150,27 @@ namespace AL.UI.Kingdom
 
             return new KingdomTeachingCatalog(
                 file.quest_id,
+                new KingdomTeachingEntry(
+                    file.entry.id,
+                    file.entry.title,
+                    file.entry.what_to_do,
+                    file.entry.location),
                 new ReadOnlyCollection<KingdomTeachingStep>(steps));
+        }
+
+        private static bool IsValidEntry(KingdomTeachingEntryFile entry)
+        {
+            return entry != null &&
+                   string.Equals(
+                       entry.id,
+                       EntryId,
+                       StringComparison.Ordinal) &&
+                   !string.IsNullOrWhiteSpace(entry.title) &&
+                   !string.IsNullOrWhiteSpace(entry.what_to_do) &&
+                   !string.IsNullOrWhiteSpace(entry.location) &&
+                   !ContainsForbiddenDestination(entry.title) &&
+                   !ContainsForbiddenDestination(entry.what_to_do) &&
+                   !ContainsForbiddenDestination(entry.location);
         }
 
         private static bool ContainsForbiddenDestination(string value)
@@ -141,7 +188,17 @@ namespace AL.UI.Kingdom
         {
             public string catalog_id;
             public string quest_id;
+            public KingdomTeachingEntryFile entry;
             public KingdomTeachingStepFile[] steps;
+        }
+
+        [Serializable]
+        private sealed class KingdomTeachingEntryFile
+        {
+            public string id;
+            public string title;
+            public string what_to_do;
+            public string location;
         }
 
         [Serializable]

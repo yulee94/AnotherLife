@@ -591,6 +591,7 @@ namespace AL.Tests.EditMode.KingdomTeaching
             string schema = File.ReadAllText(schemaPath);
             Assert.That(schema, Does.Contain("\"catalog_id\""));
             Assert.That(schema, Does.Contain("\"quest_id\""));
+            Assert.That(schema, Does.Contain("\"entry\""));
             Assert.That(schema, Does.Contain("\"steps\""));
             Assert.That(schema, Does.Contain("\"completion_event\""));
             Assert.That(schema, Does.Contain("\"additionalProperties\": false"));

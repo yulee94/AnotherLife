@@ -7,6 +7,7 @@
   "required": [
     "catalog_id",
     "quest_id",
+    "entry",
     "steps"
   ],
   "properties": {
@@ -17,6 +18,33 @@
       "type": "string",
       "pattern": "^quest_[a-z0-9_]+$",
       "minLength": 1
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "what_to_do",
+        "location"
+      ],
+      "properties": {
+        "id": {
+          "const": "teach_enter_private_kingdom"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "what_to_do": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
     },
     "steps": {
       "type": "array",
