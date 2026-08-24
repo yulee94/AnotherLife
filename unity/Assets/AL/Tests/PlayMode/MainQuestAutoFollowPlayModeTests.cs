@@ -1,25 +1,39 @@
+using System;
 using System.Collections;
+using System.IO;
+using System.Reflection;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Quests;
 using AL.Core;
+using AL.Core.Interfaces;
+using AL.Data.Runtime;
+using AL.Services.Local;
+using AL.UI.Kingdom;
 using AL.UI.QuestHud;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using Object = UnityEngine.Object;
 
 namespace AL.Tests.PlayMode
 {
     public sealed class MainQuestAutoFollowPlayModeTests
     {
         private GameObject _root;
+        private string _saveRoot;
 
         [SetUp]
         public void SetUp()
         {
             ProofOfWorthDirector.ResetForTests();
             QuestHudAutoQuest.ResetForTests();
+            KingdomTeachingInteraction.ResetForTests();
             _root = new GameObject("MainQuestAutoFollowPlayModeRoot");
+            _saveRoot = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-MainQuestTeachingPlayModeTests",
+                Guid.NewGuid().ToString("N"));
         }
 
         [UnityTearDown]
@@ -27,6 +41,7 @@ namespace AL.Tests.PlayMode
         {
             QuestHudAutoQuest.ResetForTests();
             ProofOfWorthDirector.ResetForTests();
+            KingdomTeachingInteraction.ResetForTests();
             if (_root != null)
             {
                 Object.Destroy(_root);
@@ -45,6 +60,11 @@ namespace AL.Tests.PlayMode
             }
 
             yield return null;
+
+            if (!string.IsNullOrEmpty(_saveRoot) && Directory.Exists(_saveRoot))
+            {
+                Directory.Delete(_saveRoot, true);
+            }
         }
 
         [UnityTest]
@@ -118,11 +138,66 @@ namespace AL.Tests.PlayMode
             Assert.Greater(HorizontalDistance(afterFirstFrame, champion.transform.position), 0.1f);
         }
 
+        [UnityTest]
+        public IEnumerator AutoQuestOnAdvancesOnePostLordshipTwoPointFiveDTeachingStep()
+        {
+            Directory.CreateDirectory(_saveRoot);
+            ISaveGameService save = CreateSaveService(_saveRoot);
+            save.CreateNewSave(RealmId.Crownlands);
+            Assert.That(
+                MvpLoopSaveAuthority.TryCommit(
+                    save,
+                    new MvpLoopCommitRequest(
+                        Guid.NewGuid().ToString("N"),
+                        RealmId.Crownlands,
+                        ClassFamily.Mage,
+                        true,
+                        ProofOfWorthIds.CrownlandsVariantId,
+                        string.Empty,
+                        0)).Persisted,
+                Is.True);
+
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            QuestHudOverlay hud = QuestHudOverlay.Mount(_root.transform);
+            KingdomTeachingDirector director =
+                _root.AddComponent<KingdomTeachingDirector>();
+            string requestedInteraction = string.Empty;
+            KingdomTeachingInteraction.InteractionRequested +=
+                interaction => requestedInteraction = interaction;
+            QuestHudAutoQuest.SetEnabled(false);
+            director.EnsureReady(save, hud, catalog);
+            Assert.That(director.State.IsAvailable, Is.True);
+            Assert.That(director.State.ProgressValue, Is.Zero);
+            Assert.That(director.State.CurrentStep, Is.SameAs(catalog.Steps[0]));
+            Assert.That(requestedInteraction, Is.Empty);
+
+            QuestHudAutoQuest.SetEnabled(true);
+            director.Refresh();
+            yield return null;
+
+            Assert.That(director.State.ProgressValue, Is.EqualTo(1));
+            Assert.That(director.State.CurrentStep, Is.SameAs(catalog.Steps[1]));
+            Assert.That(director.Hud.Model.Surface, Is.EqualTo(QuestHudSurface.Kingdom25D));
+            Assert.That(director.Hud.Model.StepId, Is.EqualTo(catalog.Steps[1].Id));
+            Assert.That(requestedInteraction, Is.EqualTo(catalog.Steps[1].Interaction));
+        }
+
         private static float HorizontalDistance(Vector3 a, Vector3 b)
         {
             a.y = 0f;
             b.y = 0f;
             return Vector3.Distance(a, b);
+        }
+
+        private static ISaveGameService CreateSaveService(string root)
+        {
+            ConstructorInfo constructor = typeof(LocalSaveGameService).GetConstructor(
+                BindingFlags.Instance | BindingFlags.NonPublic,
+                null,
+                new[] { typeof(string) },
+                null);
+            Assert.That(constructor, Is.Not.Null);
+            return (ISaveGameService)constructor.Invoke(new object[] { root });
         }
     }
 }
