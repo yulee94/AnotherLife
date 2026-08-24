@@ -1,8 +1,11 @@
+using System;
 using AL.ChampionMode.Control;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Data.Runtime;
 using AL.Input;
 using AL.UI.QuestHud;
+using AL.UI.SharedMenu;
 using AL.UI.WorldMap;
 using UnityEngine;
 
@@ -41,7 +44,8 @@ namespace AL.ChampionMode.Quests
             Transform player,
             RealmId realm)
         {
-            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            SaveGameData save = SharedMenuModeSwitchHost.ReadSave();
+            if (!ShouldAttachForSave(save))
             {
                 return null;
             }
@@ -61,6 +65,17 @@ namespace AL.ChampionMode.Quests
             ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
             director.EnsureReady(arena, player, realm);
             return director;
+        }
+
+        public static bool ShouldAttachForSave(SaveGameData save)
+        {
+            MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(save);
+            return FirstSessionChampionStart.IsFirstSessionLanding &&
+                   (!snapshot.IdentityConfirmed ||
+                    !string.Equals(
+                        snapshot.LastResultId,
+                        ProofOfWorthLordship.ResolveMarkId(snapshot.Realm),
+                        StringComparison.Ordinal));
         }
 
         public static void ResetForTests()

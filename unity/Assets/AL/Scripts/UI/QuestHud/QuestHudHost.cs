@@ -80,8 +80,31 @@ namespace AL.UI.QuestHud
                 return;
             }
 
+            if (!TryGetSave(out ISaveGameService save))
+            {
+                return;
+            }
+
+            if (CrossModeSceneSwitch.IsAdventureScene(SceneName()))
+            {
+                KingdomTeachingReturnDirector returnDirector =
+                    GetComponent<KingdomTeachingReturnDirector>();
+                if (returnDirector == null)
+                {
+                    returnDirector = gameObject.AddComponent<KingdomTeachingReturnDirector>();
+                }
+
+                if (returnDirector.EnsureReady(save.CurrentSave, Overlay))
+                {
+                    Overlay.Bind(
+                        QuestHudPlanner.WarzoneGate(QuestHudAutoQuest.Enabled),
+                        null,
+                        Refresh);
+                    return;
+                }
+            }
+
             if (CrossModeSceneSwitch.IsKingdomScene(SceneName()) &&
-                TryGetSave(out ISaveGameService save) &&
                 ProofOfWorthLordship.IsGranted(save.CurrentSave))
             {
                 KingdomTeachingDirector teaching =
