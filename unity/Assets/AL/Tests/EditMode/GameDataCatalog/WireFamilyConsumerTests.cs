@@ -80,6 +80,35 @@ namespace AL.Tests.EditMode.GameDataCatalog
         }
 
         [Test]
+        public void SkillLoadoutTryLoadResolvesCanonicalEditorPackage()
+        {
+            SkillLoadoutData[] loadouts;
+            Assert.True(SkillLoadoutCatalog.TryLoad(out loadouts));
+            Assert.AreEqual(4, loadouts.Length);
+            Assert.AreEqual(0, loadouts[0].slot);
+            Assert.AreEqual("realm_strike", loadouts[0].id);
+            Assert.AreEqual("Realm Strike", loadouts[0].displayName);
+            Assert.AreEqual(150f, loadouts[0].power);
+            Assert.AreEqual("warmaster_breaker", loadouts[3].id);
+        }
+
+        [Test]
+        public void CharacterCustomizationTryLoadResolvesCanonicalEditorPackage()
+        {
+            CharacterCustomizationCatalogData catalog;
+            Assert.True(CharacterCustomizationCatalog.TryLoad(out catalog));
+            Assert.AreEqual("1.0.0", catalog.version);
+
+            BodyPresetData average = catalog.bodyPresets.Single(preset => preset.id == "average");
+            Assert.AreEqual("Average", average.displayName);
+            CollectionAssert.AreEqual(new[] { 1f, 1f, 1f }, average.scale);
+            Assert.True(catalog.hairStyles.Any(style =>
+                style.id == "braid" && style.displayName == "Braid"));
+            Assert.True(catalog.armorStyles.Any(style =>
+                style.id == "light_scout" && style.displayName == "Light Scout"));
+        }
+
+        [Test]
         public void NestedLegacyShapesAndSkipFamiliesStayUnwired()
         {
             CharacterCustomizationCatalogData customization;

@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.IO;
 using AL.Data.Catalogs;
+using AL.Services.Local;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -152,6 +153,11 @@ namespace AL.ChampionMode.Skills
 
         private static string BuildCatalogPath()
         {
+            if (SixFamilyRuntimeCatalog.TryResolveGameDataDirectory(out string gameDataDirectory))
+            {
+                return Path.Combine(gameDataDirectory, Path.GetFileName(CatalogRelativePath));
+            }
+
             return Application.streamingAssetsPath.TrimEnd('/', '\\') + "/" + CatalogRelativePath;
         }
     }
