@@ -1,3 +1,4 @@
+using AL.ChampionMode.Control;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Input;
@@ -9,7 +10,8 @@ namespace AL.ChampionMode.Quests
 {
     /// <summary>
     /// First-session 3D driver for OMEN_1 then MQ_C1_PROOF_OF_WORTH.
-    /// Offer is never auto-accepted. Guardian trial uses the catalog first fight.
+    /// The offer is manual by default and follows the Auto Quest preference.
+    /// Guardian trial uses the catalog first fight.
     /// </summary>
     public sealed class ProofOfWorthDirector : MonoBehaviour
     {
@@ -20,8 +22,10 @@ namespace AL.ChampionMode.Quests
         private ProofOfWorthState _state;
         private ChampionArenaSceneController _arena;
         private Transform _player;
+        private ChampionController _playerController;
         private GameObject _markerRoot;
         private bool _ready;
+        private bool _autoFollowInputApplied;
         private bool _guardianStarted;
         private bool _persistAttempted;
         private string _lastPersistMessage = string.Empty;
@@ -70,6 +74,9 @@ namespace AL.ChampionMode.Quests
             _instance = this;
             _arena = arena;
             _player = player;
+            _playerController = player != null
+                ? player.GetComponent<ChampionController>()
+                : null;
             if (_ready)
             {
                 return;
@@ -88,6 +95,7 @@ namespace AL.ChampionMode.Quests
 
         private void OnDestroy()
         {
+            ReleaseAutoQuestFollow();
             if (_instance == this)
             {
                 _instance = null;
@@ -106,6 +114,19 @@ namespace AL.ChampionMode.Quests
             if (_state.Phase == ProofOfWorthPhase.C1FaceGuardian)
             {
                 ConsiderGuardian();
+            }
+
+            bool canAutoDrive = QuestHudAutoQuest.Enabled &&
+                                QuestHudAutoQuest.CanDriveInCurrentContext();
+            if (canAutoDrive)
+            {
+                Hud?.ConsiderAutoQuest();
+            }
+
+            DriveAutoQuestFollow(canAutoDrive);
+            if (canAutoDrive && IsNearActiveMarker())
+            {
+                ConsiderSubmit();
             }
 
             if (!GameInput.SubmitPressed())
@@ -304,13 +325,7 @@ namespace AL.ChampionMode.Quests
 
         private bool IsNearActiveMarker()
         {
-            if (_player == null || _markerRoot == null)
-            {
-                return true;
-            }
-
-            Transform marker = _markerRoot.transform.Find(ActiveMarkerName());
-            if (marker == null)
+            if (_player == null || !TryGetActiveMarker(out Transform marker))
             {
                 return true;
             }
@@ -318,6 +333,77 @@ namespace AL.ChampionMode.Quests
             Vector3 delta = marker.position - _player.position;
             delta.y = 0f;
             return delta.sqrMagnitude <= 9f;
+        }
+
+        private void DriveAutoQuestFollow(bool canAutoDrive)
+        {
+            if (_playerController == null)
+            {
+                return;
+            }
+
+            if (!canAutoDrive || !TryGetActiveMarker(out Transform marker))
+            {
+                ReleaseAutoQuestFollow();
+                return;
+            }
+
+            Vector3 delta = marker.position - _player.position;
+            delta.y = 0f;
+            if (delta.sqrMagnitude <= 9f)
+            {
+                ReleaseAutoQuestFollow();
+                return;
+            }
+
+            Vector3 forward = Vector3.forward;
+            Vector3 right = Vector3.right;
+            UnityEngine.Camera camera = UnityEngine.Camera.main;
+            if (camera != null)
+            {
+                forward = camera.transform.forward;
+                forward.y = 0f;
+                if (forward.sqrMagnitude > 0.01f)
+                {
+                    forward.Normalize();
+                    right = new Vector3(forward.z, 0f, -forward.x);
+                }
+            }
+
+            Vector3 direction = delta.normalized;
+            _playerController.SetExternalMoveInput(new Vector2(
+                Vector3.Dot(direction, right),
+                Vector3.Dot(direction, forward)));
+            _autoFollowInputApplied = true;
+        }
+
+        private void ReleaseAutoQuestFollow()
+        {
+            if (!_autoFollowInputApplied || _playerController == null)
+            {
+                return;
+            }
+
+            _playerController.SetExternalMoveInput(Vector2.zero);
+            _autoFollowInputApplied = false;
+        }
+
+        private bool TryGetActiveMarker(out Transform marker)
+        {
+            marker = null;
+            if (_markerRoot == null)
+            {
+                return false;
+            }
+
+            string markerName = ActiveMarkerName();
+            if (string.IsNullOrEmpty(markerName))
+            {
+                return false;
+            }
+
+            marker = _markerRoot.transform.Find(markerName);
+            return marker != null;
         }
 
         private string ActiveMarkerName()

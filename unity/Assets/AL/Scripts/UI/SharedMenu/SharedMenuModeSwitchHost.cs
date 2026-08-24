@@ -1,4 +1,5 @@
 using AL.ChampionMode;
+using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -184,6 +185,15 @@ namespace AL.UI.SharedMenu
 
         internal static bool DetectCombat()
         {
+            BossDummyAI[] bosses = Object.FindObjectsOfType<BossDummyAI>();
+            for (int i = 0; i < bosses.Length; i++)
+            {
+                if (bosses[i] != null && !bosses[i].IsDead)
+                {
+                    return true;
+                }
+            }
+
             ChampionCombat[] combats = Object.FindObjectsOfType<ChampionCombat>();
             for (int i = 0; i < combats.Length; i++)
             {
