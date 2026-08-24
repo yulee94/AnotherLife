@@ -156,7 +156,7 @@ MonoBehaviour:
   _realmSelectionScene: RealmSelection
   _kingdomScene: Kingdom
   _buildRuntimeSplash: 1
-  _buildLabel: PRE-ALPHA RUNTIME
+  _buildLabel: TEMPORARY — launch splash
 --- !u!114 &1147275458
 MonoBehaviour:
   m_ObjectHideFlags: 0
