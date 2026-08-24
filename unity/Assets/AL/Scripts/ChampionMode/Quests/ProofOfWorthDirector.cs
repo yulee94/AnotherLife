@@ -2,6 +2,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Input;
 using AL.UI.QuestHud;
+using AL.UI.WorldMap;
 using UnityEngine;
 
 namespace AL.ChampionMode.Quests
@@ -91,6 +92,8 @@ namespace AL.ChampionMode.Quests
             {
                 _instance = null;
             }
+
+            MainQuestMapSession.Clear();
         }
 
         private void Update()
@@ -347,8 +350,14 @@ namespace AL.ChampionMode.Quests
                 return;
             }
 
+            QuestHudModel model =
+                QuestHudPlanner.FromProofOfWorth(_state, QuestHudAutoQuest.Enabled);
+            MainQuestMapSession.Publish(
+                _state.ObjectiveId,
+                _state.Realm,
+                model.WhatToDo);
             Hud.Bind(
-                QuestHudPlanner.FromProofOfWorth(_state, QuestHudAutoQuest.Enabled),
+                model,
                 ChoosePrimary,
                 BindQuestHud);
         }

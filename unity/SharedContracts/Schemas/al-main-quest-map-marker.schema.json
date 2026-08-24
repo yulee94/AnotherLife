@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-main-quest-map-marker.schema.json",
+  "title": "Another Life Main Quest Map Marker Catalog",
+  "type": "object",
+  "required": ["version", "catalogId", "sourceAuthorities", "markers"],
+  "properties": {
+    "version": { "const": "1.0.0" },
+    "catalogId": { "const": "al_main_quest_map_marker_catalog" },
+    "sourceAuthorities": {
+      "type": "object",
+      "required": ["worldAtlasCatalog", "questPreviewCatalog", "mainQuestRuntime"],
+      "properties": {
+        "worldAtlasCatalog": { "const": "al_world_atlas_narrative_catalog" },
+        "questPreviewCatalog": { "const": "al_quest_preview_content_catalog" },
+        "mainQuestRuntime": { "const": "OMEN_1_then_MQ_C1_PROOF_OF_WORTH" }
+      },
+      "additionalProperties": false
+    },
+    "markers": {
+      "type": "array",
+      "minItems": 7,
+      "maxItems": 7,
+      "uniqueItems": true,
+      "allOf": [
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_OMEN_1_TALK" } }, "required": ["objectiveId"] } },
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_OMEN_1_ARENA" } }, "required": ["objectiveId"] } },
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_OMEN_1_REPORT" } }, "required": ["objectiveId"] } },
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_C1_MEET_REALM_GUIDE" } }, "required": ["objectiveId"] } },
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_C1_RESTORE_COVENANT" } }, "required": ["objectiveId"] } },
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_C1_FACE_GUARDIAN" } }, "required": ["objectiveId"] } },
+        { "contains": { "properties": { "objectiveId": { "const": "OBJ_C1_ACCEPT_MARK" } }, "required": ["objectiveId"] } }
+      ],
+      "items": {
+        "type": "object",
+        "required": ["objectiveId", "atlasPoiRole"],
+        "properties": {
+          "objectiveId": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "atlasPoiRole": { "enum": ["capital", "area_a", "area_b"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}
