@@ -8,6 +8,7 @@ using System.Reflection;
 using AL.ChampionMode;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.Presentation;
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -18,6 +19,7 @@ using AL.Services.Local;
 using AL.UI.CharacterCreation;
 using AL.UI.FirstUserIdentity;
 using AL.UI.RealmSelection;
+using AL.World;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -194,6 +196,22 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(SceneManager.GetSceneByPath(KingdomPath).isLoaded, Is.False);
             Assert.That(GameObject.Find(FirstSessionChampionStart.EnvironmentRootName), Is.Not.Null,
                 "The first user must land in the 3D inner-realm capital, never Kingdom.");
+            GameObject authoredEnvironment =
+                GameObject.Find(FirstSessionChampionStart.EnvironmentRootName);
+            FirstSessionAuthoredWorldMarker authoredMarker =
+                authoredEnvironment.GetComponent<FirstSessionAuthoredWorldMarker>();
+            Assert.That(authoredMarker, Is.Not.Null);
+            Assert.That(authoredMarker.Realm, Is.EqualTo(RealmId.Eldergrove));
+            Assert.That(authoredEnvironment.transform.Find(
+                    FirstSessionAuthoredWorldBuilder.HallName),
+                Is.Not.Null);
+            Assert.That(authoredEnvironment.transform.Find(
+                    FirstSessionAuthoredWorldBuilder.StructuralIdentityPrefix +
+                    RealmId.Eldergrove),
+                Is.Not.Null);
+            Assert.That(GameObject.Find(FirstSessionChampionStart.TemporaryPlaqueName),
+                Is.Null,
+                "The authored launch may not render a greybox plaque.");
 
             MvpLoopSnapshot identity = MvpLoopSaveCodec.Read(isolatedSave.CurrentSave);
             Assert.That(identity.Realm, Is.EqualTo(RealmId.Eldergrove));
@@ -210,6 +228,17 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(player, Is.Not.Null);
             Assert.That(player.isActiveAndEnabled, Is.True,
                 "Direct 3D champion control must be live in the inner realm.");
+            Transform authoredChampion = player.transform.Find(
+                FirstSessionAuthoredVisualBinder.ChampionVisualName);
+            Assert.That(authoredChampion, Is.Not.Null);
+            Assert.That(authoredChampion.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length,
+                Is.GreaterThan(0));
+            Assert.That(player.GetComponentsInChildren<Renderer>(true)
+                    .Where(renderer => !renderer.transform.IsChildOf(authoredChampion))
+                    .All(renderer =>
+                        !renderer.enabled || !renderer.gameObject.activeInHierarchy),
+                Is.True,
+                "Procedural mannequin renderers must be hidden on the authored launch.");
             Assert.That(proof, Is.Not.Null);
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenOffered));
             Assert.That(proof.State.QuestId, Is.EqualTo(ProofOfWorthIds.OmenQuestId));
@@ -263,6 +292,24 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             BossDummyAI guardian = Object.FindObjectOfType<BossDummyAI>();
             Assert.That(guardian, Is.Not.Null);
             Assert.That(guardian.gameObject.activeInHierarchy, Is.True);
+            Transform authoredGuardian = guardian.transform.Find(
+                FirstSessionAuthoredVisualBinder.GuardianVisualName);
+            Assert.That(authoredGuardian, Is.Not.Null);
+            Assert.That(authoredGuardian.GetComponentInChildren<SkinnedMeshRenderer>(true),
+                Is.Not.Null);
+            Assert.That(authoredGuardian.GetComponentInChildren<Animator>(true),
+                Is.Not.Null);
+            AuthoredGuardianMotion guardianMotion =
+                authoredGuardian.GetComponent<AuthoredGuardianMotion>();
+            Assert.That(guardianMotion, Is.Not.Null);
+            Assert.That(guardianMotion.Clip, Is.Not.Null);
+            Assert.That(guardianMotion.IsPlaying, Is.True);
+            Assert.That(authoredGuardian.GetComponentsInChildren<Renderer>(true)
+                    .All(renderer =>
+                        renderer.sharedMaterial != null &&
+                        renderer.sharedMaterial.GetTexture("_MainTex") != null),
+                Is.True,
+                "The live guardian must use the admitted textured PBR sentinel.");
             yield return new WaitForSecondsRealtime(2.8f);
 
             MovePlayerToPosition(
@@ -280,6 +327,13 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             {
                 Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline),
                     "The direct-control guardian fight did not resolve within the bounded trial.");
+                MovePlayerToPosition(
+                    player,
+                    guardian.transform.position - guardian.transform.forward * 1.25f);
+                player.transform.rotation = Quaternion.LookRotation(
+                    guardian.transform.position - player.transform.position,
+                    Vector3.up);
+                Physics.SyncTransforms();
                 int beforeAttack = player.EditorBasicAttackSequence;
                 float healthBeforeAttack = guardian.CurrentHealth;
                 player.RequestBasicAttack();

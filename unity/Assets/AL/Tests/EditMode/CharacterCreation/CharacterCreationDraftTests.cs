@@ -73,6 +73,44 @@ namespace AL.Tests.EditMode.CharacterCreation
         }
 
         [Test]
+        public void CyclesBetweenMaleAndFemaleBodyBasesAndPersistsDifference()
+        {
+            Assert.IsTrue(CharacterCreationDraft.TryCreate(
+                RealmId.Crownlands,
+                out CharacterCreationDraft male,
+                out _));
+            Assert.IsTrue(CharacterCreationDraft.TryCreate(
+                RealmId.Crownlands,
+                out CharacterCreationDraft female,
+                out _));
+
+            Assert.AreEqual("male", male.Customization.BodyBaseId);
+            female.CycleBodyBase();
+
+            Assert.AreEqual("female", female.Customization.BodyBaseId);
+            Assert.IsTrue(CharacterCreationLook.LooksDifferent(
+                male.Customization,
+                female.Customization));
+        }
+
+        [Test]
+        public void PreBodyBaseSaveJsonLoadsWithMaleCompatibilityDefault()
+        {
+            const string legacyJson =
+                "{\"ChampionCustomization\":{\"ClassFamilyId\":\"warrior\"," +
+                "\"BodyPresetId\":\"body_average\"}}";
+
+            SaveGameData loaded = JsonUtility.FromJson<SaveGameData>(legacyJson);
+
+            Assert.That(loaded, Is.Not.Null);
+            Assert.That(loaded.ChampionCustomization, Is.Not.Null);
+            Assert.That(
+                CharacterCreationLook.NormalizeBodyBaseId(
+                    loaded.ChampionCustomization.BodyBaseId),
+                Is.EqualTo("male"));
+        }
+
+        [Test]
         public void BindChampionPrefersRealmAndClassThenRealm()
         {
             var warriors = CreateChampion("champion_stonehold_vanguard", RealmId.Stonehold, ClassFamily.Warrior);
@@ -133,6 +171,7 @@ namespace AL.Tests.EditMode.CharacterCreation
             };
             Assert.IsTrue(CharacterCreationDraft.TryCreate(RealmId.Crownlands, out CharacterCreationDraft draft, out _));
             Assert.IsTrue(draft.TrySelectClassFamily(ClassFamily.Warrior, out _));
+            draft.CycleBodyBase();
             draft.CycleBodyPreset();
 
             MvpLoopPrepareDisposition disposition = MvpLoopSaveCodec.PrepareCandidate(
@@ -151,6 +190,7 @@ namespace AL.Tests.EditMode.CharacterCreation
 
             Assert.AreEqual(MvpLoopPrepareDisposition.Prepared, disposition, message);
             Assert.AreEqual("CrownGuard", candidate.ChampionCustomization.Username);
+            Assert.AreEqual("female", candidate.ChampionCustomization.BodyBaseId);
             Assert.IsTrue(CharacterCreationLook.Matches(candidate.ChampionCustomization, draft.Customization));
         }
 
@@ -208,6 +248,7 @@ namespace AL.Tests.EditMode.CharacterCreation
                     "AL/Scripts/UI/CharacterCreation/CharacterCreationController.cs"));
             Assert.That(controller, Does.Contain("ChampionCustomizationController"));
             Assert.That(controller, Does.Contain("ApplyPresentation"));
+            Assert.That(controller, Does.Contain("FirstSessionAuthoredVisualBinder.TryBindChampion"));
             Assert.That(controller, Does.Contain("CreatorPreview"));
             Assert.That(controller, Does.Not.Contain("PrimitiveType.Capsule"));
             Assert.That(controller, Does.Not.Contain("CreatePrimitive"));

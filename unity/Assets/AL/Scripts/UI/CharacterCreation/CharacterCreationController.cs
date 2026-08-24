@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AL.ChampionMode.Customization;
+using AL.ChampionMode.Presentation;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Definitions;
@@ -156,6 +157,7 @@ namespace AL.UI.CharacterCreation
                 _draft,
                 font,
                 SelectClass,
+                () => MutateLook(_draft.CycleBodyBase),
                 () => MutateLook(_draft.CycleArmorTint),
                 () => MutateLook(_draft.CycleBodyTint),
                 () => MutateLook(_draft.CycleHairStyle),
@@ -209,6 +211,15 @@ namespace AL.UI.CharacterCreation
         private void RefreshPreview()
         {
             _preview?.ApplyPresentation(_draft.Customization);
+            if (_preview != null &&
+                !FirstSessionAuthoredVisualBinder.TryBindChampion(
+                    _preview.gameObject,
+                    _draft.Realm,
+                    _draft.Customization,
+                    out _))
+            {
+                PresentValidation("Champion preview unavailable. Your choices are preserved.");
+            }
         }
 
         private void RefreshSelection()

@@ -69,6 +69,15 @@ namespace AL.UI.CharacterCreation
             CharacterCreationLook.CopyRgb(next, out Customization.PrimaryR, out Customization.PrimaryG, out Customization.PrimaryB);
         }
 
+        public void CycleBodyBase()
+        {
+            int index = CharacterCreationLook.IndexOfId(
+                CharacterCreationLook.NormalizeBodyBaseId(Customization.BodyBaseId),
+                CharacterCreationLook.BodyBases);
+            Customization.BodyBaseId = CharacterCreationLook.BodyBases[
+                (index + 1) % CharacterCreationLook.BodyBases.Length];
+        }
+
         public void CycleBodyTint()
         {
             int index = CharacterCreationLook.IndexOfRgb(

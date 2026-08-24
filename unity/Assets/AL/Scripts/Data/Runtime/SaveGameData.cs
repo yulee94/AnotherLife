@@ -160,6 +160,8 @@ namespace AL.Data.Runtime
     [Serializable]
     public class ChampionCustomizationState
     {
+        // Additive nested slot. Omitted legacy saves resolve to the male base.
+        public string BodyBaseId = "male";
         public string BodyPresetId = "average";
         public string HairStyleId = "short";
         public string ArmorStyleId = "realm_basic";
