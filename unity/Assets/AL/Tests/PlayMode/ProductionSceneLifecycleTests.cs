@@ -466,7 +466,7 @@ namespace AL.Tests.PlayMode
                 yield return null;
             }
 
-            // Let RealmSelectionController.Start build the fallback UI and presentation camera.
+            // Let RealmSelectionController.Start build the production UI and presentation camera.
             yield return null;
             yield return null;
 
@@ -482,18 +482,26 @@ namespace AL.Tests.PlayMode
             Assert.That(controller, Is.Not.Null);
             Assert.That(controller.isActiveAndEnabled, Is.True);
 
-            GameObject fallbackCanvas = GameObject.Find("RealmSelectionCanvas");
-            Assert.That(fallbackCanvas, Is.Not.Null, "The production fallback realm UI must be active.");
-            Button[] realmButtons = fallbackCanvas.GetComponentsInChildren<Button>(true);
+            GameObject realmCanvas = GameObject.Find("RealmSelectionCanvas");
+            Assert.That(realmCanvas, Is.Not.Null, "The authored production realm UI must be active.");
+            string[] realmNames = { "Crownlands", "Stonehold", "Eldergrove", "Umbral" };
+            Button[] realmButtons = realmCanvas.GetComponentsInChildren<Button>(true)
+                .Where(button => realmNames.Contains(button.name, StringComparer.Ordinal))
+                .ToArray();
             Assert.That(realmButtons, Has.Length.EqualTo(4));
             Assert.That(
                 realmButtons.Select(button => button.name).Distinct(StringComparer.Ordinal).Count(),
                 Is.EqualTo(4),
-                "Each catalog realm must produce one distinct fallback control.");
+                "Each catalog realm must produce one distinct authored control.");
             Assert.That(
                 realmButtons.All(button => button.interactable),
                 Is.True,
                 "All four realm choices must be interactable before a selection is committed.");
+            Assert.That(
+                realmCanvas.GetComponentsInChildren<Button>(true)
+                    .Any(button => button.name == RealmSelectionCommitOverlay.ConfirmButtonName),
+                Is.True,
+                "The production realm UI must carry an explicit binding action.");
 
             Camera[] presentationCameras = Camera.allCameras
                 .Where(camera =>
@@ -604,7 +612,7 @@ namespace AL.Tests.PlayMode
             _quiesceSceneControllers = false;
             yield return LoadAndSettle(RealmSelectionPath);
 
-            // Let RealmSelectionController.Start build the fallback presentation camera.
+            // Let RealmSelectionController.Start build the production presentation camera.
             yield return null;
             yield return null;
 

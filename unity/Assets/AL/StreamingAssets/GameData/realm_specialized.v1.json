@@ -46,6 +46,11 @@
       "legacy_runtime_id": "Crownlands",
       "display_name": "Crownlands",
       "people_name": "Crownlands Humans",
+      "visual_identity": {
+        "mark_name": "Celestial Meridian",
+        "silhouette_language": "four-point meridian",
+        "material_language": "aged silver, pale stone"
+      },
       "adjective": "Crownland",
       "language_id": "lang_crown_speech",
       "capital_id": "capital_crownspire",
@@ -111,6 +116,11 @@
       "legacy_runtime_id": "Stonehold",
       "display_name": "Stonehold",
       "people_name": "Stonehold Dwarves",
+      "visual_identity": {
+        "mark_name": "Tectonic Axis",
+        "silhouette_language": "squared orthogonal mass",
+        "material_language": "basalt, dark iron, aged steel"
+      },
       "adjective": "Stonehold",
       "language_id": "lang_deep_rune",
       "capital_id": "capital_anvildeep",
@@ -176,6 +186,11 @@
       "legacy_runtime_id": "Eldergrove",
       "display_name": "Eldergrove",
       "people_name": "Eldergrove Elves",
+      "visual_identity": {
+        "mark_name": "Living Orbit",
+        "silhouette_language": "three-arc seed void",
+        "material_language": "bark, lichen, weathered bronze"
+      },
       "adjective": "Eldergrove",
       "language_id": "lang_leafsong",
       "capital_id": "capital_worldroot",
@@ -241,6 +256,11 @@
       "legacy_runtime_id": "Umbral",
       "display_name": "Umbral",
       "people_name": "Umbral Dark Elves",
+      "visual_identity": {
+        "mark_name": "Severed Eclipse",
+        "silhouette_language": "offset eclipse and diagonal void",
+        "material_language": "obsidian, smoked metal"
+      },
       "adjective": "Umbral",
       "language_id": "lang_ash_cant",
       "capital_id": "capital_veilspire",
