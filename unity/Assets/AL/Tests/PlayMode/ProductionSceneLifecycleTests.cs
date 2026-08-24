@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using AL.ChampionMode;
@@ -63,6 +64,34 @@ namespace AL.Tests.PlayMode
         private object _countingResource;
         private bool _quiesceSceneControllers;
         private readonly Dictionary<string, int> _expectedActivations = new Dictionary<string, int>();
+
+        private static void CapturePresentationCamera(string outputPath)
+        {
+            Camera camera = Camera.main;
+            Assert.That(camera, Is.Not.Null, "The kingdom presentation camera must exist.");
+            const int width = 1600;
+            const int height = 900;
+            var target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+            var pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture previousTarget = camera.targetTexture;
+            try
+            {
+                camera.targetTexture = target;
+                RenderTexture.active = target;
+                camera.Render();
+                pixels.ReadPixels(new Rect(0f, 0f, width, height), 0, 0);
+                pixels.Apply();
+                File.WriteAllBytes(outputPath, pixels.EncodeToPNG());
+            }
+            finally
+            {
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previous;
+                Object.DestroyImmediate(pixels);
+                Object.DestroyImmediate(target);
+            }
+        }
 
         [SetUp]
         public void SetUp()
@@ -238,6 +267,22 @@ namespace AL.Tests.PlayMode
                 SharedMenuIds.KingdomScene,
                 KingdomPath,
                 ownerIds);
+            string privateKingdomCapture =
+                Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_CAPTURE");
+            if (!string.IsNullOrWhiteSpace(privateKingdomCapture))
+            {
+                yield return null;
+                string captureDirectory = Path.GetDirectoryName(privateKingdomCapture);
+                if (!string.IsNullOrWhiteSpace(captureDirectory))
+                {
+                    Directory.CreateDirectory(captureDirectory);
+                }
+                CapturePresentationCamera(privateKingdomCapture);
+                Assert.That(
+                    File.Exists(privateKingdomCapture),
+                    Is.True,
+                    "The requested private-kingdom evidence capture must be written.");
+            }
             Assert.That(Object.FindObjectOfType<ChampionController>(), Is.Null);
             Assert.That(CrossModeSession.HasActiveRoundTrip, Is.True);
             Assert.That(CrossModeSession.AdventureScene, Is.EqualTo(SharedMenuIds.AdventureScene));
