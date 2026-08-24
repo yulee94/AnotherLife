@@ -1,7 +1,7 @@
 # First-user onboarding MVP asset packet
 
-Status: `MVP_PRODUCTION_CANDIDATE` for the Editor-only isolated first-user trial. This packet is
-not a visual-quality sign-off for a shipping Player.
+Status: `MVP_RUNTIME_CANDIDATE` for the production first-session route and the isolated admission
+trial. This is an authored MVP promotion, not a final BDO-quality visual sign-off.
 
 ## Sources and provenance
 
@@ -25,6 +25,11 @@ not a visual-quality sign-off for a shipping Player.
 - Requested budget: triangle topology, 12,000 target polygons, PBR textures, A-pose, FBX.
 - Received production candidate: 12,441 triangles; staging camera/light/cube removed; five PBR
   maps capped at 1024 px by the reproducible Blender cleanup step.
+- Rigged with Meshy task `01a03125-7885-70bd-9af0-0dec1e975963`, 5 credits. The retained runtime
+  file is the skin-bound `Covenant_Sentinel_Meshy6_Walking_v002.fbx`, which supplies both the
+  guardian mesh/rig and walking clip without shipping a duplicate skinned FBX. The production binder plays it through an
+  `AnimationPlayable` while existing gameplay telegraphs, colliders, health, and attack authority
+  remain unchanged.
 - Concept source is retained at
   `unity/ArtSource/Enemies/CovenantSentinel/covenant_sentinel_concept_meshy_v001.png`.
 - This is an original neutral humanoid fantasy foe. No Slagwhistle or other realm fauna was used.
@@ -52,21 +57,24 @@ not a visual-quality sign-off for a shipping Player.
 
 ## Admission boundary
 
-`FirstUserOnboardingFixedAssetManifestGate` accepts only the sealed authored provider. The
-AssetDatabase-backed inventory verifier rechecks every role's exact canonical path, GUID, and file
-SHA-256, plus all five sentinel PBR dependency maps. Arbitrary factories, caller-selected IDs,
-asset drift, added runtime authority, and primitive fallback remain fail-closed.
+`FirstUserOnboardingFixedAssetManifestGate` continues to accept only the sealed isolated provider.
+The production route uses the generated typed
+`Resources/FirstSessionAuthoredAssetCatalog.asset`; its builder binds only the admitted hall,
+champion kit, rigged sentinel, five sentinel PBR maps, walking clip, and catalogued four-realm
+production architecture. Missing roles fail closed before the first-session scene is built.
 
 ## Honest BDO-quality gaps
 
 - The retained champion reads as a modular MVP mannequin at close range and has no valid Humanoid
   Avatar or authored locomotion/combat animations.
 - Champion body/armor materials are flat retained-source materials, not final authored texture sets.
-- The neutral hall is a beveled modular candidate with PBR parameters but no authored texture atlas,
-  decals, set dressing pass, or atmospheric VFX.
-- The Meshy sentinel is a textured static combat candidate; it is not rigged and has no authored hit,
-  defeat, or locomotion animation. Trial reactions are bounded state evidence only.
-- The fixed Eldergrove Town Hall satisfies the deterministic test's locked preview slot; dynamic
-  realm-matched structure selection is still future production integration.
-- The evidence capture is the isolated Editor asset scene, not a claim that the shipping Player has
-  reached Black Desert Online presentation quality.
+- The neutral hall is a beveled modular candidate with PBR parameters but no authored texture atlas
+  or decal pass; production architecture and existing bounded atmosphere provide the first runtime
+  dressing layer.
+- The Meshy sentinel is rigged and has skin-bound locomotion. Dedicated authored attack, hit, and
+  defeat clips remain a post-MVP quality gap; existing reviewed combat telegraphs remain authoritative.
+- Realm-matched Town Hall and specialist structures are now selected for Stonehold, Eldergrove,
+  Crownlands, and Umbral. These are production-runtime LOD assets, but the surrounding city breadth
+  remains outside this bounded first-session room.
+- Runtime and isolated captures are acceptance evidence, not a claim that the full game has reached
+  Black Desert Online presentation quality.

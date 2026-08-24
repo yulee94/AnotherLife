@@ -385,6 +385,17 @@ namespace AL.ChampionMode
             _playerController = player.AddComponent<ChampionController>();
             _playerController.ConfigureRealmContext(_realmId);
             _playerCustomization = player.GetComponent<ChampionCustomizationController>();
+            if (FirstSessionChampionStart.IsFirstSessionLanding &&
+                !FirstSessionAuthoredVisualBinder.TryBindChampion(
+                    player,
+                    _realmId,
+                    out string championDiagnostic))
+            {
+                Debug.LogError(championDiagnostic);
+                enabled = false;
+                return;
+            }
+
             _inspectionShowcaseRoot = CreateInspectionShowcase(player.transform, realmAccent);
             _autoCombatController = player.AddComponent<AutoCombatController>();
 
@@ -397,8 +408,10 @@ namespace AL.ChampionMode
                 : new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
             camera.fieldOfView = 42f;
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = new Color(0.025f, 0.03f, 0.04f);
+            camera.clearFlags = FirstSessionChampionStart.IsFirstSessionLanding
+                ? CameraClearFlags.Skybox
+                : CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.08f, 0.11f, 0.16f);
             cameraObject.AddComponent<AudioListener>();
             _cameraFollow = cameraObject.AddComponent<CameraFollow>();
             _cameraFollow.Configure(player.transform, 8.6f, 2.65f, 25f, 0f);
@@ -410,7 +423,22 @@ namespace AL.ChampionMode
                 : new Vector3(0f, 1.8f, 8.6f);
             boss.transform.localScale = new Vector3(1.55f, 1.8f, 1.55f);
             ApplyMaterial(boss, new Color(0.20f, 0.03f, 0.05f), 0.2f, 0.42f);
-            DressBossVisual(boss);
+            if (FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                if (!FirstSessionAuthoredVisualBinder.TryBindGuardian(
+                        boss,
+                        out string guardianDiagnostic))
+                {
+                    Debug.LogError(guardianDiagnostic);
+                    enabled = false;
+                    return;
+                }
+            }
+            else
+            {
+                DressBossVisual(boss);
+            }
+
             _boss = boss.AddComponent<BossDummyAI>();
             _boss.ConfigureRealmContext(_realmId);
             _boss.LootRolled += HandleBossLootRolled;
@@ -441,7 +469,6 @@ namespace AL.ChampionMode
 
             CreateWeather();
             CreateWorldObjectiveMarkers();
-            CreateTemporaryGreyboxPlaque();
             InstallFirstSessionInteractables();
         }
 
@@ -853,7 +880,9 @@ namespace AL.ChampionMode
 
             WorldAtlasSnapshot snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
             InnerRealmWorldLayout layout = InnerRealmWorldLayout.FromSnapshot(snapshot);
-            InnerRealmWorldBuildResult built = InnerRealmWorldGreyboxBuilder.Build(layout, _innerSpawn.RealmId);
+            InnerRealmWorldBuildResult built = FirstSessionAuthoredWorldBuilder.Build(
+                layout,
+                _innerSpawn.RealmId);
             built.Root.name = FirstSessionChampionStart.EnvironmentRootName;
             return true;
         }
@@ -984,10 +1013,10 @@ namespace AL.ChampionMode
             shape.scale = new Vector3(2.6f, 1.7f, 2.2f);
 
             var velocity = particles.velocityOverLifetime;
+            velocity.x = new ParticleSystem.MinMaxCurve(0f);
+            velocity.y = new ParticleSystem.MinMaxCurve(0.10f);
+            velocity.z = new ParticleSystem.MinMaxCurve(0f);
             velocity.enabled = true;
-            velocity.x = new ParticleSystem.MinMaxCurve(-0.08f, 0.08f);
-            velocity.y = new ParticleSystem.MinMaxCurve(0.02f, 0.18f);
-            velocity.z = new ParticleSystem.MinMaxCurve(-0.08f, 0.08f);
 
             var noise = particles.noise;
             noise.enabled = true;

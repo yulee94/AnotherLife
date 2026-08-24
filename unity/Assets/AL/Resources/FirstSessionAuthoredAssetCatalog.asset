@@ -1,0 +1,86 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4d7d9b224a336247884bf720d0ccf78, type: 3}
+  m_Name: FirstSessionAuthoredAssetCatalog
+  m_EditorClassIdentifier: AL.Runtime::AL.World.FirstSessionAuthoredAssetCatalog
+  covenantHallPrefab: {fileID: 919132149155446097, guid: d5dfc319681fd774395f5a14c330583e, type: 3}
+  floorMaterial: {fileID: -5176461839922979079, guid: d5dfc319681fd774395f5a14c330583e, type: 3}
+  wallMaterial: {fileID: -5415481506180404798, guid: d5dfc319681fd774395f5a14c330583e, type: 3}
+  trimMaterial: {fileID: 3797131288936854351, guid: d5dfc319681fd774395f5a14c330583e, type: 3}
+  premiumFloorBaseColor: {fileID: 2800000, guid: 96efadedeec07be47a27e5bb181a06ef, type: 3}
+  premiumFloorNormal: {fileID: 2800000, guid: 17b0a5d7ee61af74c995446e92c4c87a, type: 3}
+  premiumFloorMetallic: {fileID: 2800000, guid: fad2502d3e160d142b06d04cdc30c3ea, type: 3}
+  premiumFloorRoughness: {fileID: 2800000, guid: b477a753d6737e846bbc496decb4141a, type: 3}
+  championBases:
+  - bodyBaseId: male
+    prefab: {fileID: 919132149155446097, guid: 4898fd234dc9f1248876f397226aba2b, type: 3}
+    baseColor: {fileID: 2800000, guid: c2109a1ca1aace545acae03222df63c9, type: 3}
+    normal: {fileID: 2800000, guid: 85d41338e2f6c7047822a285bb588898, type: 3}
+    metallic: {fileID: 2800000, guid: c9aae3d0cda8d02458d82946169c7d0b, type: 3}
+    roughness: {fileID: 2800000, guid: 69de3d1345442894caadde173b93a86f, type: 3}
+    emission: {fileID: 2800000, guid: f5d7c7243f5366a4dabc371ee5b5648b, type: 3}
+    locomotionClip: {fileID: -623603649343465320, guid: 4898fd234dc9f1248876f397226aba2b, type: 3}
+  - bodyBaseId: female
+    prefab: {fileID: 919132149155446097, guid: 2e8670d366f26e6439942ec9f0c80b84, type: 3}
+    baseColor: {fileID: 2800000, guid: c94378e058c5af349873707f7a11762d, type: 3}
+    normal: {fileID: 2800000, guid: ca0146e60345c754aa09a140e65b565e, type: 3}
+    metallic: {fileID: 2800000, guid: 97a07159a3253f54b99ab82772827ae2, type: 3}
+    roughness: {fileID: 2800000, guid: 8d5357cac66b8e94aa4c0c9bd3665902, type: 3}
+    emission: {fileID: 2800000, guid: 5e6f8857362409245ba767378699c2aa, type: 3}
+    locomotionClip: {fileID: -623603649343465320, guid: 2e8670d366f26e6439942ec9f0c80b84, type: 3}
+  championBodyPrefab: {fileID: 919132149155446097, guid: 893b944277f8e6944af50e351c18d6bb, type: 3}
+  championArmorPrefab: {fileID: 919132149155446097, guid: e203a6ad644712f44842f58c848034bb, type: 3}
+  championWeaponPrefab: {fileID: 919132149155446097, guid: ab7419a768b5d304f9d053c6d733b028, type: 3}
+  guardianPrefab: {fileID: 919132149155446097, guid: d0febd6da62b5724a99111a64b13e4e4, type: 3}
+  guardianBaseColor: {fileID: 2800000, guid: 56a36ff708765c24abb40dbb2f4ce759, type: 3}
+  guardianNormal: {fileID: 2800000, guid: 2f562600cf131a44b8d8a0a870b61b73, type: 3}
+  guardianMetallic: {fileID: 2800000, guid: 0ead688b25f3e7845b315464072d4095, type: 3}
+  guardianRoughness: {fileID: 2800000, guid: d633ef1a94d15f544b7a9e3f96b6c75c, type: 3}
+  guardianEmission: {fileID: 2800000, guid: 95482f2597decd44fb4917e59465ff2c, type: 3}
+  guardianLocomotionClip: {fileID: -2901233246522174405, guid: d0febd6da62b5724a99111a64b13e4e4, type: 3}
+  realmVisuals:
+  - realm: 1
+    landmarkPrefab: {fileID: 6390210644148224361, guid: 8efaf25037c3b444f86bfe62ea193ed7, type: 3}
+    premiumLandmarkPrefab: {fileID: 919132149155446097, guid: 77ad9d28f5b91f54f86e4f6506d3e3fe, type: 3}
+    premiumBaseColor: {fileID: 2800000, guid: 57515c4052fb4de47bc418c2ebbfff4c, type: 3}
+    premiumNormal: {fileID: 2800000, guid: 5eb7b46772ca4cb41837ed928b66cae1, type: 3}
+    premiumMetallic: {fileID: 2800000, guid: 6c480a257d8e7d7408eca104761f097d, type: 3}
+    premiumRoughness: {fileID: 2800000, guid: 94fdb2bc144579a4a8db7ac0847455c0, type: 3}
+    premiumEmission: {fileID: 2800000, guid: 02e3b29ab8953214bafdb3238a69533f, type: 3}
+    panoramicSky: {fileID: 2800000, guid: 097bb803bf8c4ee4d96e48305eb603c8, type: 3}
+  - realm: 2
+    landmarkPrefab: {fileID: 6718489068813069786, guid: 64552283a5bd040f08d3f41d6a94ca5a, type: 3}
+    premiumLandmarkPrefab: {fileID: 919132149155446097, guid: 58a17da981c76e54fb36b8897219defb, type: 3}
+    premiumBaseColor: {fileID: 2800000, guid: 6182c635912eceb40b4ca05486ea4a6d, type: 3}
+    premiumNormal: {fileID: 2800000, guid: 8660e8c95267b2842940397753fc80b0, type: 3}
+    premiumMetallic: {fileID: 2800000, guid: 09c5aa3d486d42240b0d07d1bc8529bf, type: 3}
+    premiumRoughness: {fileID: 2800000, guid: a31b26b49a36b0342b86e483ea7bcdfa, type: 3}
+    premiumEmission: {fileID: 2800000, guid: ad78b20610c5b324494ac6f4d3ac6765, type: 3}
+    panoramicSky: {fileID: 2800000, guid: 3ded8e3b463804d448f52fb21fe2bbb4, type: 3}
+  - realm: 3
+    landmarkPrefab: {fileID: 133079770350490369, guid: 40d5f7687fed640fd8c0d4b1868ff0ef, type: 3}
+    premiumLandmarkPrefab: {fileID: 919132149155446097, guid: 27cd9206ac7de7740a359cd9cdb08fd9, type: 3}
+    premiumBaseColor: {fileID: 2800000, guid: 2c290e5540871ba4fa4a7c21e6aa37b5, type: 3}
+    premiumNormal: {fileID: 2800000, guid: 48589c25980118e4f88c1b1e55791757, type: 3}
+    premiumMetallic: {fileID: 2800000, guid: 43c9262793de6404cad241c6a30ddd39, type: 3}
+    premiumRoughness: {fileID: 2800000, guid: 27c2af5b139a0b245abd49ff4bdd7e4b, type: 3}
+    premiumEmission: {fileID: 2800000, guid: 703242ab21c85164eb45fdf3c6d4712d, type: 3}
+    panoramicSky: {fileID: 2800000, guid: e5a0b1204d5c2bc44a4e7dabb7dd488e, type: 3}
+  - realm: 4
+    landmarkPrefab: {fileID: 1554135779196789712, guid: 1a01ccaafe3d44864b31d30ef7091279, type: 3}
+    premiumLandmarkPrefab: {fileID: 919132149155446097, guid: ec88ad8f29ed12b449ba3f5709cddd19, type: 3}
+    premiumBaseColor: {fileID: 2800000, guid: a2ba70cbe371a5f41934e9ac28931513, type: 3}
+    premiumNormal: {fileID: 2800000, guid: cd55f27295221cd4ba67f9cf6d7c69cd, type: 3}
+    premiumMetallic: {fileID: 2800000, guid: bafc3be8e907b784aba05e6baf332e69, type: 3}
+    premiumRoughness: {fileID: 2800000, guid: b2f0453f164de564184710f46916968b, type: 3}
+    premiumEmission: {fileID: 2800000, guid: 2af057a5498e83c40a0e12ce27b33509, type: 3}
+    panoramicSky: {fileID: 2800000, guid: cd79e09283fa7594bb89cca2eea7c79f, type: 3}

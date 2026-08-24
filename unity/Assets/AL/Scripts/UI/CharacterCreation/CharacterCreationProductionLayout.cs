@@ -55,6 +55,7 @@ namespace AL.UI.CharacterCreation
             CharacterCreationDraft draft,
             Font font,
             Action<ClassFamily> onClass,
+            Action onBodyBase,
             Action onArmorTint,
             Action onBodyTint,
             Action onHairStyle,
@@ -121,20 +122,22 @@ namespace AL.UI.CharacterCreation
                 new Vector2(48f, -268f),
                 new Vector2(400f, 20f));
 
+            CreateAction(screen.CanvasObject.transform, font, "BodyBase", "BODY BASE",
+                new Vector2(48f, -296f), new Vector2(176f, PresentationChrome.MinHit), onBodyBase);
             CreateAction(screen.CanvasObject.transform, font, "ArmorTint", "ARMOR TINT",
-                new Vector2(48f, -296f), new Vector2(176f, PresentationChrome.MinHit), onArmorTint);
-            CreateAction(screen.CanvasObject.transform, font, "BodyTint", "BODY TINT",
-                new Vector2(236f, -296f), new Vector2(176f, PresentationChrome.MinHit), onBodyTint);
+                new Vector2(236f, -296f), new Vector2(176f, PresentationChrome.MinHit), onArmorTint);
+            CreateAction(screen.CanvasObject.transform, font, "BodyTint", "SKIN TONE",
+                new Vector2(424f, -296f), new Vector2(176f, PresentationChrome.MinHit), onBodyTint);
             CreateAction(screen.CanvasObject.transform, font, "HairStyle", "HAIR",
-                new Vector2(424f, -296f), new Vector2(176f, PresentationChrome.MinHit), onHairStyle);
+                new Vector2(48f, -364f), new Vector2(176f, PresentationChrome.MinHit), onHairStyle);
             CreateAction(screen.CanvasObject.transform, font, "HairColor", "HAIR COLOR",
-                new Vector2(48f, -364f), new Vector2(176f, PresentationChrome.MinHit), onHairColor);
-            CreateAction(screen.CanvasObject.transform, font, "BodyPreset", "BODY",
-                new Vector2(236f, -364f), new Vector2(176f, PresentationChrome.MinHit), onBodyPreset);
+                new Vector2(236f, -364f), new Vector2(176f, PresentationChrome.MinHit), onHairColor);
+            CreateAction(screen.CanvasObject.transform, font, "BodyPreset", "BUILD",
+                new Vector2(424f, -364f), new Vector2(176f, PresentationChrome.MinHit), onBodyPreset);
             CreateAction(screen.CanvasObject.transform, font, "Helmet", "HELMET",
-                new Vector2(424f, -364f), new Vector2(176f, PresentationChrome.MinHit), onHelmet);
+                new Vector2(48f, -432f), new Vector2(176f, PresentationChrome.MinHit), onHelmet);
             CreateAction(screen.CanvasObject.transform, font, "Cape", "CAPE",
-                new Vector2(48f, -432f), new Vector2(176f, PresentationChrome.MinHit), onCape);
+                new Vector2(236f, -432f), new Vector2(176f, PresentationChrome.MinHit), onCape);
 
             screen.Look = PresentationChrome.CreateLabel(
                 screen.CanvasObject.transform,
@@ -236,7 +239,8 @@ namespace AL.UI.CharacterCreation
                 return string.Empty;
             }
 
-            return "Hair " + look.HairStyleId +
+            return "base " + CharacterCreationLook.NormalizeBodyBaseId(look.BodyBaseId) +
+                   "  ·  hair " + look.HairStyleId +
                    "  ·  body " + look.BodyPresetId +
                    "  ·  armor " + look.ArmorStyleId +
                    "  ·  helm " + (look.HelmetEnabled ? "on" : "off") +
