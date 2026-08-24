@@ -1,9 +1,11 @@
+using AL.UI.SharedMenu;
+
 namespace AL.UI.QuestHud
 {
     /// <summary>
     /// Player preference for auto-accept / auto-continue / auto-complete.
     /// Default OFF matches OMEN_1 autoAccept:false. Never auto-fires the
-    /// Warzone-gate prompt — that stop is owned by t_117c1dca.
+    /// Warzone-gate prompt, which remains a mandatory hard stop.
     /// </summary>
     public static class QuestHudAutoQuest
     {
@@ -23,7 +25,15 @@ namespace AL.UI.QuestHud
 
         public static bool ShouldFire(QuestHudModel model)
         {
-            return model != null && model.CanAutoFire;
+            return model != null &&
+                   model.CanAutoFire &&
+                   CanDriveInCurrentContext();
+        }
+
+        public static bool CanDriveInCurrentContext()
+        {
+            return !SharedMenuModeSwitchHost.DetectCombat() &&
+                   !SharedMenuModeSwitchHost.DetectUnsafe();
         }
     }
 }

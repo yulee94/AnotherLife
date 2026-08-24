@@ -1,4 +1,6 @@
 using AL.ChampionMode;
+using AL.ChampionMode.AI;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.UI.QuestHud;
@@ -161,6 +163,70 @@ namespace AL.Tests.EditMode.QuestHud
         }
 
         [Test]
+        public void AutoQuestDoesNotAcceptOfferWhileCombatIsActive()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            var enemy = new GameObject("AutoQuestEnemy");
+            enemy.transform.SetParent(_root.transform, false);
+            enemy.AddComponent<ChampionCombat>();
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+
+            director.EnsureReady(null, _root.transform, RealmId.Umbral);
+
+            Assert.IsTrue(director.State.IsOmenOffered);
+        }
+
+        [Test]
+        public void AutoQuestDoesNotAcceptOfferWhileGuardianCombatIsActive()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            var guardian = new GameObject("AutoQuestGuardian");
+            guardian.transform.SetParent(_root.transform, false);
+            guardian.AddComponent<BossDummyAI>();
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+
+            director.EnsureReady(null, _root.transform, RealmId.Crownlands);
+
+            Assert.IsTrue(director.State.IsOmenOffered);
+        }
+
+        [Test]
+        public void AutoQuestDoesNotAcceptOfferWhileChampionIsUnsafe()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            var champion = new GameObject("UnsafeAutoQuestChampion");
+            champion.transform.SetParent(_root.transform, false);
+            ChampionCombat combat = champion.AddComponent<ChampionCombat>();
+            champion.AddComponent<ChampionController>();
+            combat.TakeDamage(1f);
+            Assert.IsTrue(combat.IsDead);
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+
+            director.EnsureReady(null, champion.transform, RealmId.Stonehold);
+
+            Assert.IsTrue(director.State.IsOmenOffered);
+        }
+
+        [Test]
+        public void AutoQuestResumesOfferAfterCombatClears()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            var enemy = new GameObject("AutoQuestEnemy");
+            enemy.transform.SetParent(_root.transform, false);
+            enemy.AddComponent<ChampionCombat>();
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+            director.EnsureReady(null, _root.transform, RealmId.Umbral);
+            Assert.IsTrue(director.State.IsOmenOffered);
+
+            Object.DestroyImmediate(enemy);
+            typeof(ProofOfWorthDirector)
+                .GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(director, null);
+
+            Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
+        }
+
+        [Test]
         public void AutoQuestOnAcceptsOfferFromHud()
         {
             QuestHudAutoQuest.SetEnabled(true);
@@ -170,6 +236,52 @@ namespace AL.Tests.EditMode.QuestHud
             Assert.IsFalse(director.State.IsOmenOffered);
             Assert.IsTrue(director.State.OmenAccepted);
             Assert.Greater((int)director.State.Phase, (int)ProofOfWorthPhase.OmenOffered);
+        }
+
+        [Test]
+        public void AutoQuestOnCompletesArrivalWithoutWorldInputWhenConditionIsMet()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            var champion = new GameObject("AutoQuestChampion");
+            champion.transform.SetParent(_root.transform, false);
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+            director.EnsureReady(null, champion.transform, RealmId.Stonehold);
+            Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
+
+            GameObject markerRoot = GameObject.Find(ProofOfWorthDirector.MarkerRootName);
+            Assert.IsNotNull(markerRoot);
+            Assert.AreEqual(1, markerRoot.transform.childCount);
+            champion.transform.position = markerRoot.transform.GetChild(0).position;
+
+            typeof(ProofOfWorthDirector)
+                .GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(director, null);
+
+            Assert.AreEqual(ProofOfWorthPhase.C1MeetGuide, director.State.Phase);
+        }
+
+        [Test]
+        public void AutoQuestPausesArrivalCompletionWhileCombatIsActive()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            var champion = new GameObject("AutoQuestChampion");
+            champion.transform.SetParent(_root.transform, false);
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+            director.EnsureReady(null, champion.transform, RealmId.Eldergrove);
+            Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
+
+            var enemy = new GameObject("AutoQuestEnemy");
+            enemy.transform.SetParent(_root.transform, false);
+            enemy.AddComponent<ChampionCombat>();
+
+            GameObject markerRoot = GameObject.Find(ProofOfWorthDirector.MarkerRootName);
+            champion.transform.position = markerRoot.transform.GetChild(0).position;
+
+            typeof(ProofOfWorthDirector)
+                .GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
+                .Invoke(director, null);
+
+            Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
         }
 
         [Test]
