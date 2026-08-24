@@ -17,7 +17,7 @@ namespace AL.Tests.EditMode.RealmSelection
         [SetUp]
         public void SetUp()
         {
-            string path = Path.Combine(Application.dataPath, "AL", "StreamingAssets", "GameData", "al_realm_catalog.json");
+            string path = Path.Combine(Application.dataPath, "AL", "StreamingAssets", "GameData", "realm_specialized.v1.json");
             RealmCatalogLoadResult result = RealmCatalogRuntime.Parse(File.ReadAllText(path));
             Assert.That(result.IsSuccess, Is.True, result.TechnicalCode);
             _catalog = result.Snapshot;

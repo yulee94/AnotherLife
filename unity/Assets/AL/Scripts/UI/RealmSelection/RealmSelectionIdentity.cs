@@ -110,21 +110,13 @@ namespace AL.UI.RealmSelection
 
         public static Font ResolvePresentationFont(int size = 22)
         {
-            Font font = Font.CreateDynamicFontFromOSFont(
-                new[] { "Segoe UI", "Noto Sans", "Noto Sans CJK KR", "Malgun Gothic", "Arial" },
-                size);
-            if (font != null)
-            {
-                return font;
-            }
-
-            return Resources.GetBuiltinResource<Font>("Arial.ttf");
+            return AL.UI.Presentation.PresentationChrome.ResolveFont(size);
         }
 
         public static void BuildStructuralFrame(Transform parent, RealmStructuralFrameKind kind)
         {
             Color plate = new Color(0.10f, 0.11f, 0.12f, 0.96f);
-            Color edge = new Color(0.78f, 0.76f, 0.70f, 0.92f);
+            Color edge = new Color(0.78f, 0.76f, 0.70f, 0.42f);
             Color voidColor = new Color(0.04f, 0.04f, 0.045f, 0.94f);
 
             switch (kind)

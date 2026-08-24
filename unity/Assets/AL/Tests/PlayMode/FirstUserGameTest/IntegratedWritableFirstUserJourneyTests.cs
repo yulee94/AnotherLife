@@ -17,6 +17,7 @@ using AL.Editor.Development.FirstUserGameTest;
 using AL.Services.Local;
 using AL.UI.CharacterCreation;
 using AL.UI.FirstUserIdentity;
+using AL.UI.RealmSelection;
 using NUnit.Framework;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -127,9 +128,12 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             yield return WaitForActiveScene(RealmSelectionPath);
             GameObject realmCanvas = GameObject.Find("RealmSelectionCanvas");
             Assert.That(realmCanvas, Is.Not.Null);
-            Button[] realmButtons = realmCanvas.GetComponentsInChildren<Button>(true);
+            string[] realmNames = { "Crownlands", "Stonehold", "Eldergrove", "Umbral" };
+            Button[] realmButtons = realmCanvas.GetComponentsInChildren<Button>(true)
+                .Where(button => realmNames.Contains(button.name, StringComparer.Ordinal))
+                .ToArray();
             Assert.That(realmButtons.Select(button => button.name),
-                Is.EquivalentTo(new[] { "Crownlands", "Stonehold", "Eldergrove", "Umbral" }));
+                Is.EquivalentTo(realmNames));
             Button eldergrove = realmButtons.Single(button => button.name == "Eldergrove");
             Assert.That(
                 eldergrove.GetComponentsInChildren<Text>(true)
@@ -137,6 +141,14 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.True,
                 "The selected realm must visibly lock its people before commitment.");
             eldergrove.onClick.Invoke();
+            RealmSelectionController realmController = Object.FindObjectOfType<RealmSelectionController>();
+            Assert.That(realmController, Is.Not.Null);
+            Assert.That(realmController.PendingRealmId, Is.EqualTo(RealmId.Eldergrove));
+            Assert.That(realmController.IsCommitOverlayVisible, Is.True,
+                "Considering a realm must open the binding ritual without persisting it.");
+            Button bindRealm = realmCanvas.GetComponentsInChildren<Button>(true)
+                .Single(button => button.name == RealmSelectionCommitOverlay.ConfirmButtonName);
+            bindRealm.onClick.Invoke();
 
             yield return WaitForActiveScene(CharacterCreationPath);
             Assert.That(isolatedSave.CurrentSave, Is.Not.Null);
