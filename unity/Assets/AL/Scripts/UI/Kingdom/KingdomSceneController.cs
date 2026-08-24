@@ -49,6 +49,7 @@ namespace AL.UI.Kingdom
         private Text _dashboardToggleText;
         private Text _commandDeckAuthorityStatus;
         private Text _privateKingdomStatusText;
+        private Text _privateKingdomTimerText;
         private Text _privateKingdomMapText;
         private GameObject _constructionDockRoot;
         private GameObject _privateMapRoot;
@@ -402,10 +403,10 @@ namespace AL.UI.Kingdom
                 top.transform,
                 "RealmText",
                 font,
-                26,
+                20,
                 TextAnchor.UpperLeft,
-                new Vector2(22f, -14f),
-                new Vector2(440f, 58f));
+                new Vector2(22f, -10f),
+                new Vector2(500f, 30f));
             _realmText.color = ink;
             _resourceText = CreateText(
                 top.transform,
@@ -413,10 +414,41 @@ namespace AL.UI.Kingdom
                 font,
                 11,
                 TextAnchor.UpperLeft,
-                new Vector2(22f, -66f),
+                new Vector2(22f, -38f),
                 new Vector2(420f, 18f));
             _resourceText.color = muted;
             CreateResourceTicker(top.transform, font);
+
+            GameObject timerStrip = CreatePanel(
+                top.transform,
+                "PrivateKingdomTimerStrip",
+                new Vector2(692f, -18f),
+                new Vector2(168f, 54f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Color(0.014f, 0.020f, 0.030f, 0.92f));
+            CreatePanel(
+                timerStrip.transform,
+                "TimerRail",
+                Vector2.zero,
+                new Vector2(4f, 0f),
+                Vector2.zero,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 0.5f),
+                accent);
+            _privateKingdomTimerText = CreateText(
+                timerStrip.transform,
+                "PrivateKingdomTimerText",
+                font,
+                12,
+                TextAnchor.MiddleLeft,
+                new Vector2(12f, 0f),
+                new Vector2(146f, 50f));
+            _privateKingdomTimerText.color = ink;
+            _privateKingdomTimerText.text = PrivateKingdomHudTimer.Format(
+                Array.Empty<BuildingState>(),
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds());
 
             _privateKingdomStatusText = CreateText(
                 top.transform,
@@ -603,7 +635,7 @@ namespace AL.UI.Kingdom
             _privateMapRoot = CreatePanel(
                 parent,
                 "PrivateKingdomMapPreview",
-                new Vector2(-28f, -136f),
+                new Vector2(-28f, -276f),
                 new Vector2(410f, 260f),
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
@@ -684,6 +716,9 @@ namespace AL.UI.Kingdom
             {
                 RenderProfileUnavailable();
                 SetPanelText(
+                    _privateKingdomTimerText,
+                    "BUILD TIMER\nUNAVAILABLE");
+                SetPanelText(
                     _privateKingdomStatusText,
                     "PRIVATE CASTLE\nPROFILE UNAVAILABLE");
                 return;
@@ -692,8 +727,7 @@ namespace AL.UI.Kingdom
             RealmId realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
             var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
             string realmName = realm == null ? realmId.ToString() : realm.RealmName;
-            _realmText.text = realmName.ToUpperInvariant() + " PRIVATE KINGDOM\n" +
-                              "OWNER-ONLY CASTLE DOMAIN";
+            _realmText.text = realmName.ToUpperInvariant() + " PRIVATE KINGDOM";
             _resourceText.text = "TREASURY / LIVE PROFILE";
 
             IResourceService resources = ServiceLocator.Get<IResourceService>();
@@ -706,10 +740,14 @@ namespace AL.UI.Kingdom
             SetResourceChip(5, "ORE", resources.GetResourceCount(ResourceType.Ore), new Color(0.52f, 0.60f, 0.70f, 1f), 0.34f);
             SetResourceChip(6, FormatResourceLabel(rare), resources.GetResourceCount(rare), GetCurrentRealmAccent(), 0.60f);
 
+            BuildingState[] buildingStates = ServiceLocator.Get<IBuildingService>()
+                .GetAllBuildingStates()
+                .Where(state => state != null)
+                .ToArray();
             KingdomBuildingPresentation townHall =
                 KingdomBuildingPresentationResolver.Resolve(
                         realmId,
-                        ServiceLocator.Get<IBuildingService>().GetAllBuildingStates())
+                        buildingStates)
                     .FirstOrDefault(item => item != null && item.BuildingId == "TownHall");
             bool constructed = townHall != null &&
                                townHall.Status == KingdomBuildingPresentationStatus.Built &&
@@ -720,6 +758,11 @@ namespace AL.UI.Kingdom
                 constructed ? townHall.ConfirmedLevel : 0,
                 constructed ? GetCurrentRealmAccent() : new Color(0.56f, 0.58f, 0.60f, 1f),
                 constructed ? 0.72f : 0.30f);
+            SetPanelText(
+                _privateKingdomTimerText,
+                PrivateKingdomHudTimer.Format(
+                    buildingStates,
+                    DateTimeOffset.UtcNow.ToUnixTimeSeconds()));
 
             _buildingText.text =
                 "CASTLE DOMAIN\n\n" +
@@ -814,11 +857,19 @@ namespace AL.UI.Kingdom
                 return;
             }
 
+            string realmName = realm == RealmId.None ? "Inner Realm" : realm.ToString();
+            if (ServiceLocator.TryGet<IRealmService>(out IRealmService realmService) &&
+                realmService.CurrentRealm != null &&
+                realmService.CurrentRealmId == realm)
+            {
+                realmName = realmService.CurrentRealm.RealmName;
+            }
+
             _privateKingdomMapText.text =
                 "PRIVATE KINGDOM MAP\n\n" +
-                "CASTLE  /  " + destinations[0] + "\n" +
-                "AREA I  /  " + destinations[1] + "\n" +
-                "AREA II /  " + destinations[2] + "\n\n" +
+                "CASTLE  /  " + realmName + " Castle\n" +
+                "AREA I  /  " + realmName + " Area I\n" +
+                "AREA II /  " + realmName + " Area II\n\n" +
                 "Inner-realm destinations only.";
         }
 

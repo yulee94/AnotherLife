@@ -127,6 +127,28 @@ namespace AL.Tests.EditMode.QuestHud
         }
 
         [Test]
+        public void FallbackOverlayStaysBoundedAndCannotCoverTheKingdomHud()
+        {
+            QuestHudOverlay overlay = QuestHudOverlay.Mount();
+            overlay.Bind(
+                QuestHudPlanner.TeachingStores(autoQuestOn: false),
+                () => { });
+
+            RectTransform plate = overlay.transform
+                .Find(QuestHudCopy.RootName)
+                .GetComponent<RectTransform>();
+            Assert.That(plate.anchorMin, Is.EqualTo(Vector2.one));
+            Assert.That(plate.anchorMax, Is.EqualTo(Vector2.one));
+            Assert.That(
+                plate.sizeDelta,
+                Is.EqualTo(new Vector2(
+                    QuestHudChrome.PlateWidth,
+                    QuestHudChrome.PlateHeight)));
+            Assert.That(plate.offsetMin, Is.Not.EqualTo(Vector2.zero));
+            Assert.That(plate.offsetMax, Is.Not.EqualTo(Vector2.zero));
+        }
+
+        [Test]
         public void AutoQuestOffDoesNotAcceptOffer()
         {
             ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();

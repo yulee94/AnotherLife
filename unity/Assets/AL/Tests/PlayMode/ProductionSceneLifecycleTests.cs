@@ -93,6 +93,58 @@ namespace AL.Tests.PlayMode
             }
         }
 
+        private static void CapturePresentationCameraWithHud(string outputPath)
+        {
+            Camera camera = Camera.main;
+            Assert.That(camera, Is.Not.Null, "The kingdom presentation camera must exist.");
+            Canvas[] overlays = Object.FindObjectsOfType<Canvas>()
+                .Where(canvas =>
+                    canvas != null &&
+                    canvas.isActiveAndEnabled &&
+                    canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                .ToArray();
+            Camera[] originalCameras = overlays.Select(canvas => canvas.worldCamera).ToArray();
+            float[] originalPlaneDistances = overlays.Select(canvas => canvas.planeDistance).ToArray();
+            try
+            {
+                foreach (Canvas overlay in overlays)
+                {
+                    overlay.renderMode = RenderMode.ScreenSpaceCamera;
+                    overlay.worldCamera = camera;
+                    overlay.planeDistance = 1f;
+                }
+
+                Canvas.ForceUpdateCanvases();
+                CapturePresentationCamera(outputPath);
+            }
+            finally
+            {
+                for (int index = 0; index < overlays.Length; index++)
+                {
+                    overlays[index].renderMode = RenderMode.ScreenSpaceOverlay;
+                    overlays[index].worldCamera = originalCameras[index];
+                    overlays[index].planeDistance = originalPlaneDistances[index];
+                }
+
+                Canvas.ForceUpdateCanvases();
+            }
+        }
+
+        private static void CaptureHudEvidence(string outputPath)
+        {
+            string captureDirectory = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(captureDirectory))
+            {
+                Directory.CreateDirectory(captureDirectory);
+            }
+
+            CapturePresentationCameraWithHud(outputPath);
+            Assert.That(
+                File.Exists(outputPath),
+                Is.True,
+                "The requested private-kingdom HUD capture must be written.");
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -282,6 +334,25 @@ namespace AL.Tests.PlayMode
                     File.Exists(privateKingdomCapture),
                     Is.True,
                     "The requested private-kingdom evidence capture must be written.");
+            }
+            string privateKingdomHudCapture =
+                Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_HUD_CAPTURE");
+            if (!string.IsNullOrWhiteSpace(privateKingdomHudCapture))
+            {
+                CaptureHudEvidence(privateKingdomHudCapture);
+            }
+            string privateKingdomMapCapture =
+                Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_MAP_CAPTURE");
+            if (!string.IsNullOrWhiteSpace(privateKingdomMapCapture))
+            {
+                GameObject mapButtonObject = GameObject.Find("MAP");
+                Assert.That(mapButtonObject, Is.Not.Null, "The private-kingdom map button must exist.");
+                Button mapButton = mapButtonObject.GetComponent<Button>();
+                Assert.That(mapButton, Is.Not.Null);
+                Assert.That(mapButton.interactable, Is.True);
+                mapButton.onClick.Invoke();
+                yield return null;
+                CaptureHudEvidence(privateKingdomMapCapture);
             }
             Assert.That(Object.FindObjectOfType<ChampionController>(), Is.Null);
             Assert.That(CrossModeSession.HasActiveRoundTrip, Is.True);
