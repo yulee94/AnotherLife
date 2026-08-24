@@ -152,56 +152,37 @@ namespace AL.Tests.EditMode
             GameObject canvas = GameObject.Find("KingdomCanvas");
             Assert.NotNull(canvas);
 
-            string[] ordinaryBuildingCommands =
+            string[] lockedDockButtons =
             {
-                KingdomCommandPolicy.FarmUpgrade,
-                KingdomCommandPolicy.LumberMillUpgrade,
-                KingdomCommandPolicy.QuarryUpgrade,
-                KingdomCommandPolicy.GoldMineUpgrade,
-                KingdomCommandPolicy.BarracksUpgrade
+                "RESEARCH",
+                "TROOPS",
+                "ADVISORS"
             };
 
-            foreach (string commandId in ordinaryBuildingCommands)
+            foreach (string buttonName in lockedDockButtons)
             {
-                Button button = FindButton(canvas, commandId);
-                Assert.False(button.interactable, commandId);
-                Text[] buttonTexts = button.GetComponentsInChildren<Text>(true);
-                Text status = buttonTexts.Single(
-                    text => text.name == "UnavailableStatusText");
-                Assert.AreEqual("LOCKED", status.text, commandId);
-
-                Text commandLabel = buttonTexts.Single(
-                    text => text.name != "UnavailableStatusText");
-                Color mutedLabelColor = commandLabel.color;
-                var feedback =
-                    button.GetComponent<KingdomCommandButtonFeedback>();
-                Assert.NotNull(feedback, commandId);
-                var pointer = new PointerEventData(null);
-                feedback.OnPointerEnter(pointer);
-                feedback.OnPointerDown(pointer);
-                feedback.OnPointerUp(pointer);
-                Invoke(feedback, "Update");
-
-                Assert.False((bool)GetField(feedback, "_hovered"), commandId);
-                Assert.False((bool)GetField(feedback, "_pressed"), commandId);
-                Assert.AreEqual(0f, (float)GetField(feedback, "_impactAmount"), commandId);
-                Assert.AreEqual(Vector3.one, button.transform.localScale, commandId);
-                AssertColor(mutedLabelColor, commandLabel.color, commandId);
-
-                button.onClick.Invoke();
+                Button button = FindButton(canvas, buttonName);
+                Assert.False(button.interactable, buttonName);
+                Assert.That(
+                    button.GetComponentInChildren<Text>(true).text,
+                    Does.Contain("LOCKED"),
+                    buttonName);
             }
 
-            Button townHall = FindButton(canvas, KingdomCommandPolicy.TownHallUpgrade);
-            Assert.True(townHall.interactable, KingdomCommandPolicy.TownHallUpgrade);
-            townHall.onClick.Invoke();
+            Button townHall = FindButton(canvas, "ConstructTownHall");
+            Assert.True(townHall.interactable, "The one approved build remains visible.");
+            Assert.True(FindButton(canvas, "MAP").interactable);
+            Assert.True(FindButton(canvas, "SHAREDMENU").interactable);
 
             Text authorityText = canvas.GetComponentsInChildren<Text>(true)
-                .Single(text => text.name == "CommandDeckAuthorityStatus");
-            Assert.That(authorityText.text, Does.Contain("COMMAND DECK READ-ONLY"));
+                .Single(text => text.name == "PrivateKingdomStatus");
+            Assert.That(authorityText.text, Does.Contain("CASTLE READ-ONLY"));
             Assert.That(authorityText.text, Does.Contain("PROFILE MIGRATION REQUIRED"));
-
-            Button boardView = FindButton(canvas, "Board View");
-            Assert.True(boardView.interactable);
+            Assert.That(
+                (string)Invoke(controller, "ResolvePrivateKingdomStatus", true),
+                Does.Contain("CASTLE READ-ONLY"),
+                "A production refresh must not overwrite captured read-only authority.");
+            Assert.That(GameObject.Find("CommandDeck"), Is.Null);
 
             int nvsCallbacks = 0;
             Invoke(

@@ -48,6 +48,10 @@ namespace AL.UI.Kingdom
         private GameObject _dashboardRoot;
         private Text _dashboardToggleText;
         private Text _commandDeckAuthorityStatus;
+        private Text _privateKingdomStatusText;
+        private Text _privateKingdomMapText;
+        private GameObject _constructionDockRoot;
+        private GameObject _privateMapRoot;
         private KingdomVisualizer _kingdomVisualizer;
         private Nvs01KingdomPresenter _nvs01Presenter;
         private Nvs01KingdomView _nvs01View;
@@ -147,6 +151,14 @@ namespace AL.UI.Kingdom
             UpdateStrategicReadinessPulse();
             UpdateResourceTickerPulse();
 
+            Keyboard keyboard = Keyboard.current;
+            if (keyboard != null &&
+                keyboard.bKey.wasPressedThisFrame &&
+                string.Equals(gameObject.scene.name, "Kingdom", StringComparison.Ordinal))
+            {
+                ToggleConstructionDock();
+            }
+
             long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             if (_profileReady && now > _lastLiveRefreshTimestamp)
             {
@@ -194,8 +206,8 @@ namespace AL.UI.Kingdom
             }
 
             camera.orthographic = true;
-            camera.orthographicSize = 8.6f;
-            camera.transform.position = new Vector3(0f, 10.4f, -10.8f);
+            camera.orthographicSize = 7.5f;
+            camera.transform.position = new Vector3(0f, 10.4f, -7.3f);
             camera.transform.rotation = Quaternion.Euler(55f, 0f, 0f);
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.020f, 0.026f, 0.034f);
@@ -253,6 +265,10 @@ namespace AL.UI.Kingdom
 
         private void BuildRuntimeUi()
         {
+            BuildPrivateKingdomRuntimeUi();
+            return;
+
+#pragma warning disable CS0162
             CaptureProfileMutationPresentationOnce();
 
             var canvas = CreateCanvas("KingdomCanvas");
@@ -347,6 +363,271 @@ namespace AL.UI.Kingdom
             _boardHintText = CreateBoardHintText(canvas.transform, font);
             SetMessage("Command board online. Select a district or border outpost to inspect yield, readiness, and next order.");
             RefreshBoardHintVisibility();
+#pragma warning restore CS0162
+        }
+
+        private void BuildPrivateKingdomRuntimeUi()
+        {
+            CaptureProfileMutationPresentationOnce();
+            Canvas canvas = CreateCanvas("KingdomCanvas");
+            Font font = AL.UI.Presentation.PresentationChrome.ResolveFont(18);
+            Color ink = AL.UI.Presentation.PresentationChrome.Ink;
+            Color muted = AL.UI.Presentation.PresentationChrome.InkMuted;
+            Color plate = new Color(0.025f, 0.030f, 0.038f, 0.86f);
+            Color accent = GetCurrentRealmAccent();
+
+            _dashboardRoot = new GameObject("PrivateKingdomHud");
+            _dashboardRoot.transform.SetParent(canvas.transform, false);
+            Stretch(_dashboardRoot.AddComponent<RectTransform>());
+
+            GameObject top = CreatePanel(
+                _dashboardRoot.transform,
+                "PrivateKingdomTopBar",
+                new Vector2(28f, -24f),
+                new Vector2(1220f, 96f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                plate);
+            CreatePanel(
+                top.transform,
+                "RealmHeraldryRail",
+                Vector2.zero,
+                new Vector2(7f, 0f),
+                Vector2.zero,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 0.5f),
+                accent);
+            _realmText = CreateText(
+                top.transform,
+                "RealmText",
+                font,
+                26,
+                TextAnchor.UpperLeft,
+                new Vector2(22f, -14f),
+                new Vector2(440f, 58f));
+            _realmText.color = ink;
+            _resourceText = CreateText(
+                top.transform,
+                "ResourceText",
+                font,
+                11,
+                TextAnchor.UpperLeft,
+                new Vector2(22f, -66f),
+                new Vector2(420f, 18f));
+            _resourceText.color = muted;
+            CreateResourceTicker(top.transform, font);
+
+            _privateKingdomStatusText = CreateText(
+                top.transform,
+                "PrivateKingdomStatus",
+                font,
+                15,
+                TextAnchor.MiddleRight,
+                new Vector2(878f, -18f),
+                new Vector2(316f, 54f));
+            _privateKingdomStatusText.color = Color.Lerp(accent, Color.white, 0.38f);
+            _privateKingdomStatusText.text = ResolvePrivateKingdomStatus(false);
+
+            _buildingText = CreatePanelText(
+                _dashboardRoot.transform,
+                "CastleSummary",
+                "BuildingText",
+                font,
+                17,
+                TextAnchor.UpperLeft,
+                new Vector2(28f, -140f),
+                new Vector2(350f, 238f));
+            _questText = CreatePanelText(
+                _dashboardRoot.transform,
+                "QuestPanel",
+                "QuestText",
+                font,
+                16,
+                TextAnchor.UpperLeft,
+                new Vector2(28f, -396f),
+                new Vector2(350f, 226f));
+            ConfigureNvs01QuestPanel();
+
+            _messageText = CreatePanelText(
+                _dashboardRoot.transform,
+                "KingdomNotice",
+                "MessageText",
+                font,
+                16,
+                TextAnchor.UpperLeft,
+                new Vector2(28f, 92f),
+                new Vector2(820f, 82f));
+            RectTransform noticeRect = _messageText.transform.parent.GetComponent<RectTransform>();
+            noticeRect.anchorMin = Vector2.zero;
+            noticeRect.anchorMax = Vector2.zero;
+            noticeRect.pivot = Vector2.zero;
+            noticeRect.anchoredPosition = new Vector2(28f, 92f);
+            _messageText.color = ink;
+
+            CreatePrivateKingdomDock(_dashboardRoot.transform, font, accent);
+            CreateConstructionDock(canvas.transform, font, accent);
+            CreatePrivateMapPreview(canvas.transform, font, accent);
+            SetMessage("Your private castle is ready. Press B to inspect the construction dock.");
+        }
+
+        private void CreatePrivateKingdomDock(Transform parent, Font font, Color accent)
+        {
+            GameObject dock = CreatePanel(
+                parent,
+                "PrivateKingdomDock",
+                new Vector2(-28f, 34f),
+                new Vector2(720f, 68f),
+                new Vector2(1f, 0f),
+                new Vector2(1f, 0f),
+                new Vector2(1f, 0f),
+                new Color(0.025f, 0.030f, 0.038f, 0.92f));
+            CreateDockButton(dock.transform, font, "CITY", 0, () => SetMessage("Private castle view centered on your Town Hall."), accent, true);
+            CreateDockButton(dock.transform, font, "CONSTRUCT  [B]", 1, ToggleConstructionDock, accent, true);
+            CreateDockButton(dock.transform, font, "RESEARCH", 2, () => SetMessage("Research is locked until the kingdom research contract is approved."), accent, false);
+            CreateDockButton(dock.transform, font, "TROOPS", 3, () => SetMessage("Troop management is locked until the force roster is approved."), accent, false);
+            CreateDockButton(dock.transform, font, "ADVISORS", 4, () => SetMessage("Advisors are locked until the court roster is approved."), accent, false);
+            CreateDockButton(dock.transform, font, "MAP", 5, TogglePrivateMap, accent, true);
+            CreateDockButton(dock.transform, font, "SHARED MENU", 6, OpenSharedMenu, accent, true);
+        }
+
+        private static void CreateDockButton(
+            Transform parent,
+            Font font,
+            string label,
+            int index,
+            UnityEngine.Events.UnityAction action,
+            Color accent,
+            bool interactable)
+        {
+            Button button = AL.UI.Presentation.PresentationChrome.CreateHit(
+                parent,
+                label.Replace(" ", string.Empty),
+                interactable
+                    ? Color.Lerp(new Color(0.055f, 0.065f, 0.078f, 0.98f), accent, 0.14f)
+                    : new Color(0.040f, 0.044f, 0.050f, 0.82f),
+                new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f),
+                new Vector2(10f + index * 101f, 0f),
+                new Vector2(94f, 48f));
+            button.interactable = interactable;
+            button.onClick.AddListener(action);
+            Text text = AL.UI.Presentation.PresentationChrome.CreateLabel(
+                button.transform,
+                "Label",
+                font,
+                interactable ? label : label + "\nLOCKED",
+                interactable ? 12 : 10,
+                interactable
+                    ? AL.UI.Presentation.PresentationChrome.Ink
+                    : AL.UI.Presentation.PresentationChrome.InkFaint,
+                TextAnchor.MiddleCenter,
+                Vector2.zero,
+                Vector2.one,
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                Vector2.zero);
+            text.resizeTextForBestFit = true;
+            text.resizeTextMinSize = 8;
+        }
+
+        private void CreateConstructionDock(Transform parent, Font font, Color accent)
+        {
+            _constructionDockRoot = CreatePanel(
+                parent,
+                "ConstructionDock",
+                new Vector2(0f, 116f),
+                new Vector2(560f, 210f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Vector2(0.5f, 0f),
+                new Color(0.025f, 0.030f, 0.038f, 0.97f));
+            CreatePanel(
+                _constructionDockRoot.transform,
+                "ConstructionRail",
+                Vector2.zero,
+                new Vector2(7f, 0f),
+                Vector2.zero,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 0.5f),
+                accent);
+            Text heading = CreateText(
+                _constructionDockRoot.transform,
+                "ConstructionHeading",
+                font,
+                22,
+                TextAnchor.UpperLeft,
+                new Vector2(24f, -18f),
+                new Vector2(500f, 34f));
+            heading.text = "TOWN HALL CONSTRUCTION";
+            heading.color = AL.UI.Presentation.PresentationChrome.Ink;
+            Text body = CreateText(
+                _constructionDockRoot.transform,
+                "ConstructionBody",
+                font,
+                15,
+                TextAnchor.UpperLeft,
+                new Vector2(24f, -58f),
+                new Vector2(508f, 72f));
+            body.text = "One approved build is available. The order writes through the save authority and changes the central castle model.";
+            body.color = AL.UI.Presentation.PresentationChrome.InkMuted;
+            Button build = AL.UI.Presentation.PresentationChrome.CreateHit(
+                _constructionDockRoot.transform,
+                "ConstructTownHall",
+                Color.Lerp(new Color(0.09f, 0.10f, 0.12f, 1f), accent, 0.28f),
+                new Vector2(0f, 0f),
+                new Vector2(0f, 0f),
+                new Vector2(0f, 0f),
+                new Vector2(24f, 20f),
+                new Vector2(236f, 52f));
+            build.onClick.AddListener(ConstructTownHall);
+            AL.UI.Presentation.PresentationChrome.CreateLabel(
+                build.transform,
+                "Label",
+                font,
+                "CONSTRUCT TOWN HALL",
+                16,
+                AL.UI.Presentation.PresentationChrome.Ink,
+                TextAnchor.MiddleCenter,
+                Vector2.zero,
+                Vector2.one,
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                Vector2.zero);
+            _constructionDockRoot.SetActive(false);
+        }
+
+        private void CreatePrivateMapPreview(Transform parent, Font font, Color accent)
+        {
+            _privateMapRoot = CreatePanel(
+                parent,
+                "PrivateKingdomMapPreview",
+                new Vector2(-28f, -136f),
+                new Vector2(410f, 260f),
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                new Vector2(1f, 1f),
+                new Color(0.025f, 0.030f, 0.038f, 0.96f));
+            CreatePanel(
+                _privateMapRoot.transform,
+                "MapRail",
+                Vector2.zero,
+                new Vector2(7f, 0f),
+                Vector2.zero,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 0.5f),
+                accent);
+            _privateKingdomMapText = CreateText(
+                _privateMapRoot.transform,
+                "PrivateMapText",
+                font,
+                16,
+                TextAnchor.UpperLeft,
+                new Vector2(24f, -20f),
+                new Vector2(356f, 216f));
+            _privateKingdomMapText.color = AL.UI.Presentation.PresentationChrome.Ink;
+            _privateMapRoot.SetActive(false);
         }
 
         // Read-only refresh. The controller's own direct panel reads here are non-seeding: they never
@@ -360,6 +641,10 @@ namespace AL.UI.Kingdom
         // district panel both consume immutable building snapshots and seed no domain entities.
         private void Refresh()
         {
+            RefreshPrivateKingdomHud();
+            return;
+
+#pragma warning disable CS0162
             _kingdomVisualizer?.RefreshVisuals();
 
             if (!_profileReady)
@@ -389,6 +674,165 @@ namespace AL.UI.Kingdom
             _troopText.text = BuildUnavailablePanel("FORCES");
             RefreshNvs01QuestPanel();
             _territoryText.text = BuildUnavailablePanel("WAR ZONE");
+#pragma warning restore CS0162
+        }
+
+        private void RefreshPrivateKingdomHud()
+        {
+            _kingdomVisualizer?.RefreshVisuals();
+            if (!_profileReady)
+            {
+                RenderProfileUnavailable();
+                SetPanelText(
+                    _privateKingdomStatusText,
+                    "PRIVATE CASTLE\nPROFILE UNAVAILABLE");
+                return;
+            }
+
+            RealmId realmId = ServiceLocator.Get<IRealmService>().CurrentRealmId;
+            var realm = ServiceLocator.Get<IRealmService>().CurrentRealm;
+            string realmName = realm == null ? realmId.ToString() : realm.RealmName;
+            _realmText.text = realmName.ToUpperInvariant() + " PRIVATE KINGDOM\n" +
+                              "OWNER-ONLY CASTLE DOMAIN";
+            _resourceText.text = "TREASURY / LIVE PROFILE";
+
+            IResourceService resources = ServiceLocator.Get<IResourceService>();
+            ResourceType rare = ResourceRules.GetRareResourceForRealm(realmId);
+            SetResourceChip(0, "FOOD", resources.GetResourceCount(ResourceType.Food), new Color(0.56f, 0.86f, 0.48f, 1f), 0.36f);
+            SetResourceChip(1, "WOOD", resources.GetResourceCount(ResourceType.Wood), new Color(0.74f, 0.58f, 0.36f, 1f), 0.34f);
+            SetResourceChip(2, "STONE", resources.GetResourceCount(ResourceType.Stone), new Color(0.62f, 0.72f, 0.80f, 1f), 0.32f);
+            SetResourceChip(3, "GOLD", resources.GetResourceCount(ResourceType.Gold), new Color(0.96f, 0.76f, 0.34f, 1f), 0.42f);
+            SetResourceChip(4, "MANA", resources.GetResourceCount(ResourceType.ManaStone), new Color(0.48f, 0.78f, 1f, 1f), 0.48f);
+            SetResourceChip(5, "ORE", resources.GetResourceCount(ResourceType.Ore), new Color(0.52f, 0.60f, 0.70f, 1f), 0.34f);
+            SetResourceChip(6, FormatResourceLabel(rare), resources.GetResourceCount(rare), GetCurrentRealmAccent(), 0.60f);
+
+            KingdomBuildingPresentation townHall =
+                KingdomBuildingPresentationResolver.Resolve(
+                        realmId,
+                        ServiceLocator.Get<IBuildingService>().GetAllBuildingStates())
+                    .FirstOrDefault(item => item != null && item.BuildingId == "TownHall");
+            bool constructed = townHall != null &&
+                               townHall.Status == KingdomBuildingPresentationStatus.Built &&
+                               townHall.ConfirmedLevel > 0;
+            SetResourceChip(
+                7,
+                "HALL",
+                constructed ? townHall.ConfirmedLevel : 0,
+                constructed ? GetCurrentRealmAccent() : new Color(0.56f, 0.58f, 0.60f, 1f),
+                constructed ? 0.72f : 0.30f);
+
+            _buildingText.text =
+                "CASTLE DOMAIN\n\n" +
+                (constructed
+                    ? $"Town Hall  Lv {townHall.ConfirmedLevel}  /  BUILT\n"
+                    : "Town Hall  /  CONSTRUCTION READY\n") +
+                "Architecture  /  REALM-SPECIALIZED\n" +
+                "Districts  /  POPULATED SILHOUETTES\n\n" +
+                "Press B to open construction.";
+            SetPanelText(
+                _privateKingdomStatusText,
+                ResolvePrivateKingdomStatus(constructed));
+            RefreshNvs01QuestPanel();
+
+            if (_privateMapRoot != null && _privateMapRoot.activeSelf)
+            {
+                RefreshPrivateMapText(realmId);
+            }
+        }
+
+        private void ToggleConstructionDock()
+        {
+            if (_constructionDockRoot == null)
+            {
+                return;
+            }
+
+            bool open = !_constructionDockRoot.activeSelf;
+            _constructionDockRoot.SetActive(open);
+            if (open && _privateMapRoot != null)
+            {
+                _privateMapRoot.SetActive(false);
+            }
+        }
+
+        private string ResolvePrivateKingdomStatus(bool constructed)
+        {
+            if (_profileMutationPresentation.IsReadOnly)
+            {
+                return "CASTLE READ-ONLY\n" +
+                       (_profileMutationPresentation.DisplayText ?? string.Empty)
+                           .Replace("COMMAND DECK", "CASTLE");
+            }
+
+            return constructed
+                ? "CASTLE ESTABLISHED\nSAVE VERIFIED"
+                : "CASTLE CLAIMED\nONE BUILD AVAILABLE";
+        }
+
+        private void ConstructTownHall()
+        {
+            ServiceLocator.TryGet<ISaveGameService>(out ISaveGameService save);
+            ServiceLocator.TryGet<IGameDataService>(out IGameDataService gameData);
+            KingdomOneBuildResult result = KingdomOneBuildCommand.TryExecute(save, gameData);
+            SetMessage(result.Message);
+            _constructionDockRoot?.SetActive(false);
+            RefreshPrivateKingdomHud();
+        }
+
+        private void TogglePrivateMap()
+        {
+            if (_privateMapRoot == null)
+            {
+                return;
+            }
+
+            bool open = !_privateMapRoot.activeSelf;
+            _privateMapRoot.SetActive(open);
+            if (!open)
+            {
+                return;
+            }
+
+            _constructionDockRoot?.SetActive(false);
+            RealmId realm = RealmId.None;
+            if (ServiceLocator.TryGet<IRealmService>(out IRealmService realmService))
+            {
+                realm = realmService.CurrentRealmId;
+            }
+            RefreshPrivateMapText(realm);
+        }
+
+        private void RefreshPrivateMapText(RealmId realm)
+        {
+            IReadOnlyList<string> destinations =
+                AL.UI.SharedMenu.PrivateKingdomInnerDestinations
+                    .EnumerateCastleAndAreas(realm);
+            if (AL.UI.SharedMenu.PrivateKingdomInnerDestinations.ContainsForbidden(destinations))
+            {
+                _privateKingdomMapText.text =
+                    "PRIVATE KINGDOM MAP\n\nDESTINATIONS UNAVAILABLE\nFail-closed destination policy.";
+                return;
+            }
+
+            _privateKingdomMapText.text =
+                "PRIVATE KINGDOM MAP\n\n" +
+                "CASTLE  /  " + destinations[0] + "\n" +
+                "AREA I  /  " + destinations[1] + "\n" +
+                "AREA II /  " + destinations[2] + "\n\n" +
+                "Inner-realm destinations only.";
+        }
+
+        private void OpenSharedMenu()
+        {
+            AL.UI.SharedMenu.SharedMenuModeSwitchHost host =
+                AL.UI.SharedMenu.SharedMenuModeSwitchHost.EnsureForScene(gameObject.scene);
+            if (host == null)
+            {
+                SetMessage("Shared Menu is unavailable in this scene.");
+                return;
+            }
+
+            host.Open();
         }
 
         private void RefreshDistrictsPanel()
