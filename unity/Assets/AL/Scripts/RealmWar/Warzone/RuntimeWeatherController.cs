@@ -211,9 +211,10 @@ namespace AL.RealmWar.Warzone
             shape.scale = new Vector3(Mathf.Max(1f, _profile.Radius), 4f, Mathf.Max(1f, _profile.Radius));
 
             var velocity = particles.velocityOverLifetime;
+            velocity.x = new ParticleSystem.MinMaxCurve(0f);
+            velocity.y = new ParticleSystem.MinMaxCurve(-Mathf.Abs(_profile.FallSpeed));
+            velocity.z = new ParticleSystem.MinMaxCurve(0f);
             velocity.enabled = true;
-            velocity.x = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift, _profile.HorizontalDrift);
-            velocity.y = -Mathf.Abs(_profile.FallSpeed);
 
             var noise = particles.noise;
             noise.enabled = _profile.NoiseStrength > 0f;
@@ -260,10 +261,10 @@ namespace AL.RealmWar.Warzone
             shape.scale = new Vector3(Mathf.Max(8f, _profile.Radius * 0.95f), 1.1f, Mathf.Max(8f, _profile.Radius * 0.95f));
 
             var velocity = particles.velocityOverLifetime;
+            velocity.x = new ParticleSystem.MinMaxCurve(0f);
+            velocity.y = new ParticleSystem.MinMaxCurve(0.025f);
+            velocity.z = new ParticleSystem.MinMaxCurve(0f);
             velocity.enabled = true;
-            velocity.x = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.35f, _profile.HorizontalDrift * 0.35f);
-            velocity.y = new ParticleSystem.MinMaxCurve(-0.03f, 0.08f);
-            velocity.z = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.35f, _profile.HorizontalDrift * 0.35f);
 
             var noise = particles.noise;
             noise.enabled = true;
@@ -310,10 +311,10 @@ namespace AL.RealmWar.Warzone
             shape.scale = new Vector3(Mathf.Max(10f, _profile.Radius * 1.15f), 3.2f, Mathf.Max(10f, _profile.Radius * 1.15f));
 
             var velocity = particles.velocityOverLifetime;
+            velocity.x = new ParticleSystem.MinMaxCurve(0f);
+            velocity.y = new ParticleSystem.MinMaxCurve(0.015f);
+            velocity.z = new ParticleSystem.MinMaxCurve(0f);
             velocity.enabled = true;
-            velocity.x = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.18f, _profile.HorizontalDrift * 0.18f);
-            velocity.y = new ParticleSystem.MinMaxCurve(-0.02f, 0.05f);
-            velocity.z = new ParticleSystem.MinMaxCurve(-_profile.HorizontalDrift * 0.18f, _profile.HorizontalDrift * 0.18f);
 
             var noise = particles.noise;
             noise.enabled = true;
@@ -360,11 +361,14 @@ namespace AL.RealmWar.Warzone
             shape.scale = new Vector3(Mathf.Max(9f, _profile.Radius * 0.72f), 5.2f, Mathf.Max(7f, _profile.Radius * 0.46f));
 
             var velocity = particles.velocityOverLifetime;
-            velocity.enabled = true;
             float windDirection = _profile.WindYawDegrees * Mathf.Deg2Rad;
-            velocity.x = new ParticleSystem.MinMaxCurve(Mathf.Sin(windDirection) * _profile.WindMain * 1.4f - _profile.HorizontalDrift, Mathf.Sin(windDirection) * _profile.WindMain * 1.4f + _profile.HorizontalDrift);
-            velocity.y = new ParticleSystem.MinMaxCurve(-Mathf.Max(0.45f, _profile.FallSpeed * 0.62f), -Mathf.Max(1.2f, _profile.FallSpeed * 1.18f));
-            velocity.z = new ParticleSystem.MinMaxCurve(Mathf.Cos(windDirection) * _profile.WindMain * 1.4f - _profile.HorizontalDrift, Mathf.Cos(windDirection) * _profile.WindMain * 1.4f + _profile.HorizontalDrift);
+            velocity.x = new ParticleSystem.MinMaxCurve(
+                Mathf.Sin(windDirection) * _profile.WindMain * 1.4f);
+            velocity.y = new ParticleSystem.MinMaxCurve(
+                -Mathf.Max(0.82f, _profile.FallSpeed * 0.9f));
+            velocity.z = new ParticleSystem.MinMaxCurve(
+                Mathf.Cos(windDirection) * _profile.WindMain * 1.4f);
+            velocity.enabled = true;
 
             var noise = particles.noise;
             noise.enabled = true;

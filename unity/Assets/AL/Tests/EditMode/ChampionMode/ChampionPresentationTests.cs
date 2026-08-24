@@ -135,10 +135,13 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
-        public void PresentationPlaqueCopyIsLabelledTemporary()
+        public void FirstSessionAuthoredPresentationHasNoTemporaryPlaqueContract()
         {
-            Assert.That(FirstSessionChampionStart.PresentationPlaqueName, Does.Contain("TEMPORARY"));
-            Assert.That(FirstSessionChampionStart.PresentationPlaqueCopy, Does.Contain("TEMPORARY"));
+            FirstSessionChampionStart.ResetToFirstSessionLanding();
+            Assert.That(FirstSessionChampionStart.EnvironmentRootName,
+                Does.Not.Contain("TEMPORARY"));
+            Assert.That(FirstSessionChampionStart.LandingFeedCopy,
+                Does.Not.Contain("TEMPORARY"));
         }
 
         private static void AssertLoadout(

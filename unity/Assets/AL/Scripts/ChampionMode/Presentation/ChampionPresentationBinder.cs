@@ -85,7 +85,11 @@ namespace AL.ChampionMode.Presentation
                                 player.AddComponent<ChampionCustomizationController>();
             customization.BindPresentation(spec);
             AttachIdentityTokens(player, spec);
-            AttachTemporaryPlaque(player, spec);
+            if (!FirstSessionChampionStart.IsFirstSessionLanding)
+            {
+                AttachTemporaryPlaque(player, spec);
+            }
+
             return player;
         }
 

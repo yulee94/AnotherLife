@@ -24,6 +24,11 @@ namespace AL.UI.CharacterCreation
             "short", "long", "braid", "mohawk", "topknot"
         };
 
+        public static readonly string[] BodyBases =
+        {
+            "male", "female"
+        };
+
         public static readonly float[][] ArmorTints =
         {
             new[] { 0.20f, 0.40f, 1.00f },
@@ -142,6 +147,7 @@ namespace AL.UI.CharacterCreation
                 return;
             }
 
+            state.BodyBaseId = BodyBases[0];
             switch (realm)
             {
                 case RealmId.Stonehold:
@@ -219,6 +225,7 @@ namespace AL.UI.CharacterCreation
                 return;
             }
 
+            target.BodyBaseId = NormalizeBodyBaseId(source.BodyBaseId);
             target.BodyPresetId = source.BodyPresetId;
             target.HairStyleId = source.HairStyleId;
             target.ArmorStyleId = source.ArmorStyleId;
@@ -244,7 +251,11 @@ namespace AL.UI.CharacterCreation
                 return left == right;
             }
 
-            return string.Equals(left.BodyPresetId, right.BodyPresetId, StringComparison.Ordinal) &&
+            return string.Equals(
+                       NormalizeBodyBaseId(left.BodyBaseId),
+                       NormalizeBodyBaseId(right.BodyBaseId),
+                       StringComparison.Ordinal) &&
+                   string.Equals(left.BodyPresetId, right.BodyPresetId, StringComparison.Ordinal) &&
                    string.Equals(left.HairStyleId, right.HairStyleId, StringComparison.Ordinal) &&
                    string.Equals(left.ArmorStyleId, right.ArmorStyleId, StringComparison.Ordinal) &&
                    string.Equals(left.WeaponStyleId, right.WeaponStyleId, StringComparison.Ordinal) &&
@@ -293,6 +304,13 @@ namespace AL.UI.CharacterCreation
             }
 
             return 0;
+        }
+
+        public static string NormalizeBodyBaseId(string id)
+        {
+            return string.Equals(id, BodyBases[1], StringComparison.Ordinal)
+                ? BodyBases[1]
+                : BodyBases[0];
         }
 
         public static void CopyRgb(float[] rgb, out float r, out float g, out float b)

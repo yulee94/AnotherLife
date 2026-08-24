@@ -885,6 +885,7 @@ namespace AL.Data.Catalogs
 
         private static readonly HashSet<string> CurrentCustomizationFields =
             Fields(
+                "BodyBaseId",
                 "BodyPresetId",
                 "HairStyleId",
                 "ArmorStyleId",
@@ -3143,6 +3144,31 @@ namespace AL.Data.Catalogs
                 SaveSemanticDomain.Customization,
                 collector,
                 state);
+
+            StrictJsonValue bodyBaseValue;
+            if (customization.TryGet("BodyBaseId", out bodyBaseValue) &&
+                !(bodyBaseValue is StrictJsonNull))
+            {
+                string bodyBaseId;
+                if (TryReadRequiredString(
+                        customization,
+                        "BodyBaseId",
+                        path,
+                        SaveSemanticDomain.Customization,
+                        allowBlank: false,
+                        collector,
+                        state,
+                        out bodyBaseId) &&
+                    bodyBaseId != "male" && bodyBaseId != "female")
+                {
+                    MarkMalformed(
+                        state,
+                        collector,
+                        "SAVE_CUSTOMIZATION_BODY_BASE_INVALID",
+                        path + ".BodyBaseId",
+                        SaveSemanticDomain.Customization);
+                }
+            }
 
             var originalStringFields = new[] { "BodyPresetId", "HairStyleId", "ArmorStyleId" };
             for (var index = 0; index < originalStringFields.Length; index++)

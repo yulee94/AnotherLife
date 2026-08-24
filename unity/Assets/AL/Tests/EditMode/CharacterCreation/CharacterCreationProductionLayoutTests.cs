@@ -96,6 +96,40 @@ namespace AL.Tests.EditMode.CharacterCreation
         }
 
         [Test]
+        public void ProductionCreatorExposesAndSummarizesBodyBaseSelection()
+        {
+            Assert.IsTrue(CharacterCreationDraft.TryCreate(
+                RealmId.Crownlands,
+                out CharacterCreationDraft draft,
+                out _));
+            Font font = PresentationChrome.ResolveFont();
+            CharacterCreationProductionScreen screen = CharacterCreationProductionLayout.Build(
+                draft,
+                font,
+                _ => { },
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                () => { },
+                () => { });
+
+            Assert.IsNotNull(screen.CanvasObject.transform.Find("BodyBase"));
+            Assert.That(
+                CharacterCreationProductionLayout.FormatLookSummary(draft.Customization),
+                Does.Contain("base male"));
+            draft.CycleBodyBase();
+            Assert.That(
+                CharacterCreationProductionLayout.FormatLookSummary(draft.Customization),
+                Does.Contain("base female"));
+
+            Object.DestroyImmediate(screen.CanvasObject);
+        }
+
+        [Test]
         public void BuildPresentsClassLookUsernameAndValidationBanner()
         {
             Assert.IsTrue(CharacterCreationDraft.TryCreate(RealmId.Stonehold, out CharacterCreationDraft draft, out _));
@@ -104,6 +138,7 @@ namespace AL.Tests.EditMode.CharacterCreation
                 draft,
                 font,
                 _ => { },
+                () => { },
                 () => { },
                 () => { },
                 () => { },

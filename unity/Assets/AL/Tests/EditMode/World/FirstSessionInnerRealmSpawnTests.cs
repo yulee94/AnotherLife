@@ -107,14 +107,18 @@ namespace AL.Tests.EditMode.World
         }
 
         [Test]
-        public void FirstSessionStaysOffKingdomAndNamesTheGreybox()
+        public void FirstSessionStaysOffKingdomAndNamesTheAuthoredLanding()
         {
             Assert.AreEqual("ChampionArena", FirstSessionChampionStart.DestinationSceneName);
             Assert.AreNotEqual(FirstSessionInnerRealmSpawn.KingdomSceneName, FirstSessionChampionStart.DestinationSceneName);
-            Assert.That(FirstSessionChampionStart.EnvironmentRootName, Is.EqualTo("InnerRealmWorld_TEMPORARY"));
-            Assert.That(FirstSessionChampionStart.TemporaryPlaqueCopy, Does.Contain("TEMPORARY"));
-            Assert.That(FirstSessionChampionStart.TemporaryPlaqueCopy, Does.Contain("Capital"));
-            Assert.That(FirstSessionChampionStart.LandingFeedCopy, Does.Contain("TEMPORARY"));
+            Assert.That(FirstSessionChampionStart.EnvironmentRootName,
+                Is.EqualTo("FirstSessionAuthoredInnerRealm"));
+            Assert.That(FirstSessionChampionStart.EnvironmentRootName,
+                Does.Not.Contain("TEMPORARY"));
+            Assert.That(FirstSessionChampionStart.LandingFeedCopy,
+                Does.Not.Contain("TEMPORARY"));
+            Assert.That(FirstSessionChampionStart.LandingFeedCopy,
+                Does.Contain("covenant hall"));
             Assert.That(FirstSessionChampionStart.LandingFeedCopy, Does.Not.Contain("citadel"));
 
             Assert.IsTrue(
