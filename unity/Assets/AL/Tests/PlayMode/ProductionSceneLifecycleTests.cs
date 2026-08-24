@@ -15,6 +15,7 @@ using AL.UI.Kingdom;
 using AL.UI.QuestHud;
 using AL.UI.RealmSelection;
 using AL.UI.SharedMenu;
+using AL.UI.WorldMap;
 using NUnit.Framework;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -152,6 +153,8 @@ namespace AL.Tests.PlayMode
         {
             _expectedActivations.Clear();
             _quiesceSceneControllers = true;
+            CrossModeSession.Reset();
+            QuestHudAutoQuest.ResetForTests();
             _originalIgnoreFailingMessages = LogAssert.ignoreFailingMessages;
             // Expected reverse-ordering handoff logs one [BOOT_STACK_RUNTIME_OWNER_REJECTED] error per
             // transition; classify logs ourselves rather than letting the runner auto-fail on them.
@@ -184,6 +187,8 @@ namespace AL.Tests.PlayMode
             _logs = null;
 
             yield return UnloadIntoEmptyScene();
+            CrossModeSession.Reset();
+            QuestHudAutoQuest.ResetForTests();
             ResetStackOverrides();
             ClearServiceLocator();
             LogAssert.ignoreFailingMessages = _originalIgnoreFailingMessages;
@@ -408,6 +413,119 @@ namespace AL.Tests.PlayMode
                 .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
                 .ToList();
             Assert.IsEmpty(unexpected, "Unexpected severe logs:\n" + string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator LordshipQuestHudStaysManualWhenOffThenAutoQuestEntersKingdomTeaching()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Quest HUD kingdom handoff drives an editor PlayMode scene load.");
+            yield break;
+#else
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            SeedLordshipSave(RealmId.Crownlands);
+            _quiesceSceneControllers = false;
+            QuestHudAutoQuest.SetEnabled(false);
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            Assert.That(Object.FindObjectOfType<ProofOfWorthDirector>(), Is.Null);
+
+            QuestHudHost questHost = Object.FindObjectOfType<QuestHudHost>();
+            Assert.That(questHost, Is.Not.Null);
+            Assert.That(questHost.Overlay.Model, Is.Not.Null);
+            Assert.That(questHost.Overlay.Model.Surface, Is.EqualTo(QuestHudSurface.InnerRealm3D));
+            Assert.That(questHost.Overlay.Model.Action, Is.EqualTo(QuestHudAction.Continue));
+            Assert.That(questHost.Overlay.Model.CanAutoFire, Is.False);
+            Assert.That(questHost.Overlay.Model.StepId, Is.EqualTo(KingdomTeachingCatalog.EntryId));
+            Assert.That(questHost.Overlay.Model.Title, Is.EqualTo(catalog.Entry.Title));
+            Assert.That(questHost.Overlay.Model.WhatToDo, Is.EqualTo(catalog.Entry.WhatToDo));
+            Assert.That(QuestHudPlanner.CopyLooksLikeId(questHost.Overlay.Model.WhatToDo), Is.False);
+
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(ChampionArenaPath));
+
+            questHost.Overlay.ToggleAutoQuest();
+            yield return WaitForActiveScene(KingdomPath);
+            AssertExclusiveScene(KingdomPath, ChampionArenaPath);
+
+            KingdomTeachingDirector teaching =
+                Object.FindObjectOfType<KingdomTeachingDirector>();
+            Assert.That(teaching, Is.Not.Null);
+            Assert.That(teaching.State.IsAvailable, Is.True);
+            Assert.That(teaching.State.IsComplete, Is.False);
+            Assert.That(teaching.State.ProgressValue, Is.Zero);
+            Assert.That(teaching.Hud.Model, Is.Not.Null);
+            Assert.That(teaching.Hud.Model.StepId, Is.EqualTo(catalog.Steps[0].Id));
+            Assert.That(teaching.Hud.Model.CanAutoFire, Is.True);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator LiveLordshipWithAutoQuestEntersKingdomOnceAndClearsTheCompletedMarker()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Live lordship handoff drives an editor PlayMode scene load.");
+            yield break;
+#else
+            SeedCurrentSave();
+            SaveGameData save = (SaveGameData)InstanceField(_controllableSave, "_currentSave");
+            save.SelectedRealm = RealmId.Stonehold;
+            save.ChampionCustomization = new ChampionCustomizationState
+            {
+                ClassFamilyId = "warrior",
+                IdentityConfirmed = true,
+                Username = "LiveLordshipTester"
+            };
+            FirstSessionChampionStart.ResetToFirstSessionLanding();
+            QuestHudAutoQuest.SetEnabled(false);
+            _quiesceSceneControllers = false;
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            ProofOfWorthDirector proof = Object.FindObjectOfType<ProofOfWorthDirector>();
+            Assert.That(proof, Is.Not.Null);
+
+            foreach (ProofOfWorthCommand command in new[]
+            {
+                ProofOfWorthCommand.AcceptOffer,
+                ProofOfWorthCommand.Investigate,
+                ProofOfWorthCommand.DeployChampion,
+                ProofOfWorthCommand.ArenaSuccess,
+                ProofOfWorthCommand.SelectValerius,
+                ProofOfWorthCommand.PresentTear,
+                ProofOfWorthCommand.ConcludeReport,
+                ProofOfWorthCommand.MeetRealmGuide,
+                ProofOfWorthCommand.RestoreCovenant,
+                ProofOfWorthCommand.GuardianDefeated
+            })
+            {
+                Assert.That(proof.ApplyForTests(command).Changed, Is.True, command.ToString());
+            }
+
+            Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.C1AcceptMark));
+            Assert.That(MainQuestMapSession.Current, Is.Not.Null);
+            Assert.That(
+                MainQuestMapSession.Current.ObjectiveId,
+                Is.EqualTo(ProofOfWorthIds.AcceptMarkObjectiveId));
+
+            QuestHudAutoQuest.SetEnabled(true);
+            Assert.That(
+                proof.ApplyForTests(ProofOfWorthCommand.AcceptMark).Changed,
+                Is.True);
+
+            yield return WaitForActiveScene(KingdomPath);
+            AssertExclusiveScene(KingdomPath, ChampionArenaPath);
+            Assert.That(MainQuestMapSession.Current, Is.Null);
+            Assert.That(
+                _logs.Logs.Count(line =>
+                    line.StartsWith(
+                        "[AL-SCENE-ACTIVE] id=al_scene_kingdom",
+                        StringComparison.Ordinal)),
+                Is.EqualTo(1));
+            Assert.That(Object.FindObjectOfType<KingdomTeachingDirector>(), Is.Not.Null);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
 #endif
         }
 

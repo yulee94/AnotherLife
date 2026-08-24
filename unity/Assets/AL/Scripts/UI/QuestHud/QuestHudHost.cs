@@ -3,6 +3,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.UI.Kingdom;
 using AL.UI.SharedMenu;
+using AL.UI.WorldMap;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +16,8 @@ namespace AL.UI.QuestHud
     [DefaultExecutionOrder(220)]
     public sealed class QuestHudHost : MonoBehaviour
     {
+        private bool _awaitingSave = true;
+
         public QuestHudOverlay Overlay { get; private set; }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -64,6 +67,26 @@ namespace AL.UI.QuestHud
             Refresh();
         }
 
+        private void OnEnable()
+        {
+            ProofOfWorthDirector.LordshipGrantedObserved += HandleLordshipGranted;
+        }
+
+        private void OnDisable()
+        {
+            ProofOfWorthDirector.LordshipGrantedObserved -= HandleLordshipGranted;
+        }
+
+        private void Update()
+        {
+            if (_awaitingSave)
+            {
+                Refresh();
+            }
+
+            Overlay?.ConsiderAutoQuest();
+        }
+
         public void Refresh()
         {
             if (Overlay == null)
@@ -74,6 +97,7 @@ namespace AL.UI.QuestHud
             ProofOfWorthDirector director = Object.FindObjectOfType<ProofOfWorthDirector>();
             if (director != null && director.State != null && !director.State.LordshipGranted)
             {
+                _awaitingSave = false;
                 Overlay.Bind(
                     QuestHudPlanner.FromProofOfWorth(director.State, QuestHudAutoQuest.Enabled),
                     director.ChoosePrimary);
@@ -82,8 +106,11 @@ namespace AL.UI.QuestHud
 
             if (!TryGetSave(out ISaveGameService save))
             {
+                _awaitingSave = true;
                 return;
             }
+
+            _awaitingSave = false;
 
             if (CrossModeSceneSwitch.IsAdventureScene(SceneName()))
             {
@@ -102,6 +129,21 @@ namespace AL.UI.QuestHud
                         Refresh);
                     return;
                 }
+
+                KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+                KingdomTeachingState teaching =
+                    KingdomTeachingQuestline.Evaluate(save.CurrentSave, catalog);
+                if (teaching.IsAvailable && !teaching.IsComplete)
+                {
+                    MainQuestMapSession.Clear();
+                    Overlay.Bind(
+                        QuestHudPlanner.FromKingdomTeachingEntry(
+                            catalog.Entry,
+                            QuestHudAutoQuest.Enabled),
+                        EnterKingdomTeaching,
+                        Refresh);
+                    return;
+                }
             }
 
             if (CrossModeSceneSwitch.IsKingdomScene(SceneName()) &&
@@ -116,6 +158,24 @@ namespace AL.UI.QuestHud
 
                 teaching.EnsureReady(save, Overlay);
             }
+        }
+
+        private void EnterKingdomTeaching()
+        {
+            string currentScene = SceneName();
+            if (!CrossModeSceneSwitch.IsAdventureScene(currentScene))
+            {
+                return;
+            }
+
+            SharedMenuModeSwitchHost host =
+                SharedMenuModeSwitchHost.EnsureForSceneName(currentScene);
+            host?.Commit(currentScene, SharedMenuIds.Kingdom2_5D);
+        }
+
+        private void HandleLordshipGranted()
+        {
+            Refresh();
         }
 
         private static string SceneName()

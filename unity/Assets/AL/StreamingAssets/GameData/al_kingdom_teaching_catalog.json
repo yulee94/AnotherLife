@@ -1,6 +1,12 @@
 {
   "catalog_id": "al_kingdom_teaching_v1",
   "quest_id": "quest_private_kingdom_teaching",
+  "entry": {
+    "id": "teach_enter_private_kingdom",
+    "title": "Private Kingdom Stewardship",
+    "what_to_do": "Enter your private kingdom and review its resource stores and live build timer.",
+    "location": "Private Kingdom"
+  },
   "steps": [
     {
       "id": "teach_resources_timers",

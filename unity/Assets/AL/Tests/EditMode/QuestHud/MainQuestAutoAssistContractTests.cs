@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using AL.ChampionMode;
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -27,6 +28,7 @@ namespace AL.Tests.EditMode.QuestHud
             ProofOfWorthDirector.ResetForTests();
             QuestHudAutoQuest.ResetForTests();
             MainQuestMapSession.ResetForTests();
+            FirstSessionChampionStart.ResetToFirstSessionLanding();
             _root = new GameObject("MainQuestAutoAssistContractTests.Root");
         }
 
@@ -37,6 +39,7 @@ namespace AL.Tests.EditMode.QuestHud
             QuestHudAutoQuest.ResetForTests();
             ProofOfWorthDirector.ResetForTests();
             MainQuestMapSession.ResetForTests();
+            FirstSessionChampionStart.ResetToFirstSessionLanding();
 
             foreach (QuestHudOverlay overlay in Object.FindObjectsOfType<QuestHudOverlay>())
             {
@@ -114,6 +117,34 @@ namespace AL.Tests.EditMode.QuestHud
             Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenOffered));
             Assert.That(director.State.IsOmenOffered, Is.True);
             Assert.That(director.State.OmenAccepted, Is.False);
+        }
+
+        [Test]
+        public void AutoQuestCannotCompleteAnArrivalWithoutAPlayer()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+
+            director.EnsureReady(null, null, RealmId.Stonehold);
+            Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenArena));
+
+            InvokeUpdate(director);
+
+            Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenArena));
+        }
+
+        [Test]
+        public void AutoQuestCannotCompleteAnArrivalWithoutItsMarker()
+        {
+            QuestHudAutoQuest.SetEnabled(true);
+            ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
+            director.EnsureReady(null, _root.transform, RealmId.Eldergrove);
+            Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenArena));
+            Object.DestroyImmediate(GameObject.Find(ProofOfWorthDirector.MarkerRootName));
+
+            InvokeUpdate(director);
+
+            Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenArena));
         }
 
         [Test]
