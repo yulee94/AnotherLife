@@ -198,7 +198,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             EnvironmentState state = ValidEnvironment();
             switch (failedGate)
             {
-                case "version": state.UnityVersion = "2022.3.61f1"; break;
+                case "version": state.UnityVersion = "6000.3.21f1"; break;
                 case "compiling": state.IsCompiling = true; break;
                 case "compile-errors": state.HasCompilationErrors = true; break;
                 case "settings": state.Validation = NewValidation(false, "settings drift"); break;
@@ -449,7 +449,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             var state = new EnvironmentState
             {
                 ProjectRoot = root,
-                UnityVersion = "2022.3.62f3",
+                UnityVersion = "6000.3.22f1",
                 Validation = NewValidation(true, "valid"),
                 OutputIgnored = true,
                 SummaryIgnored = true,
@@ -482,7 +482,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                 "CreatePlan",
                 root,
                 outputDirectory,
-                "2022.3.62f3",
+                "6000.3.22f1",
                 false,
                 false,
                 NewValidation(true, "valid"),
