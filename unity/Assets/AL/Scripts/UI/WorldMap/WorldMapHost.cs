@@ -15,6 +15,7 @@ namespace AL.UI.WorldMap
     public sealed class WorldMapHost : MonoBehaviour
     {
         private WorldMapOverlay _overlay;
+        private InnerRealmMinimapOverlay _minimap;
         private bool _bound;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
@@ -95,7 +96,8 @@ namespace AL.UI.WorldMap
             }
 
             _overlay = WorldMapOverlay.Ensure(snapshot);
-            _bound = _overlay != null;
+            _minimap = InnerRealmMinimapOverlay.Ensure(snapshot);
+            _bound = _overlay != null && _minimap != null;
         }
 
         internal static WorldAtlasSnapshot LoadCanonicalSnapshot()

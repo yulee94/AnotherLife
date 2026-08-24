@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using AL.ChampionMode.UI;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.UI.RealmSelection;
@@ -13,7 +15,10 @@ namespace AL.UI.WorldMap
     public sealed class WorldMapOverlay : MonoBehaviour
     {
         private WorldMapPresentation _presentation;
+        private WorldAtlasSnapshot _snapshot;
+        private MainQuestMapMarkerCatalog _markerCatalog;
         private GameObject _mapRoot;
+        private Transform _questMarkerRoot;
 
         public WorldMapPresentation Presentation => _presentation;
 
@@ -39,13 +44,25 @@ namespace AL.UI.WorldMap
 
         public void Bind(WorldAtlasSnapshot snapshot)
         {
+            _snapshot = snapshot;
             _presentation = WorldMapPresentation.FromSnapshot(snapshot);
+            try
+            {
+                _markerCatalog = MainQuestMapMarkerCatalog.LoadCanonical();
+            }
+            catch (Exception exception)
+            {
+                _markerCatalog = null;
+                Debug.LogWarning("Main-quest world-map marker unavailable: " + exception.Message);
+            }
         }
 
         public void HookSession()
         {
             WorldMapSession.Changed -= Refresh;
             WorldMapSession.Changed += Refresh;
+            MainQuestMapSession.Changed -= Refresh;
+            MainQuestMapSession.Changed += Refresh;
         }
 
         public void Refresh()
@@ -54,6 +71,8 @@ namespace AL.UI.WorldMap
             {
                 _mapRoot.SetActive(WorldMapSession.IsMapOpen);
             }
+
+            RefreshQuestMarker();
 
             bool mapOpen = WorldMapSession.IsMapOpen;
             GameInputBridge.ApplySuppression(mapOpen);
@@ -72,11 +91,13 @@ namespace AL.UI.WorldMap
         private void OnEnable()
         {
             WorldMapSession.Changed += Refresh;
+            MainQuestMapSession.Changed += Refresh;
         }
 
         private void OnDisable()
         {
             WorldMapSession.Changed -= Refresh;
+            MainQuestMapSession.Changed -= Refresh;
         }
 
         private void OnDestroy()
@@ -127,8 +148,93 @@ namespace AL.UI.WorldMap
                 DrawInner(viewport.transform, font, _presentation.Inners[i]);
             }
 
+            var questRoot = new GameObject("WorldMapQuestMarkers", typeof(RectTransform));
+            questRoot.transform.SetParent(viewport.transform, false);
+            RectTransform questRect = questRoot.GetComponent<RectTransform>();
+            questRect.anchorMin = Vector2.zero;
+            questRect.anchorMax = Vector2.one;
+            questRect.offsetMin = Vector2.zero;
+            questRect.offsetMax = Vector2.zero;
+            _questMarkerRoot = questRoot.transform;
+            RefreshQuestMarker();
+
             close.transform.SetAsLastSibling();
             return veil.gameObject;
+        }
+
+        private void RefreshQuestMarker()
+        {
+            if (_questMarkerRoot == null)
+            {
+                return;
+            }
+
+            ClearChildren(_questMarkerRoot);
+            MainQuestMapState state = MainQuestMapSession.Current;
+            if (state == null || _snapshot == null || _markerCatalog == null)
+            {
+                return;
+            }
+
+            IReadOnlyList<MainQuestMapMarker> markers =
+                MainQuestMapMarkerResolver.ResolveCurrent(
+                    _snapshot,
+                    _markerCatalog,
+                    state.ObjectiveId,
+                    state.Realm,
+                    state.WhatToDo);
+            if (markers.Count != 1)
+            {
+                return;
+            }
+
+            MainQuestMapMarker marker = markers[0];
+            Font font = RealmSelectionIdentity.ResolvePresentationFont(18);
+            Image icon = CreateAnchored(
+                _questMarkerRoot,
+                "WorldMapQuestMarker_" + marker.MarkerId,
+                new Color(1f, 0.68f, 0.14f, 1f),
+                marker.FullMapUv.AsVector,
+                new Vector2(25f, 25f));
+            icon.transform.SetAsLastSibling();
+            Image objectiveCard = CreatePanel(
+                _questMarkerRoot,
+                "WorldMapQuestObjectiveCard",
+                new Color(0.055f, 0.06f, 0.07f, 0.96f),
+                new Vector2(0.34f, 0.76f),
+                new Vector2(0.66f, 0.9f));
+            CreatePanel(
+                objectiveCard.transform,
+                "WorldMapQuestObjectiveAccent",
+                new Color(1f, 0.68f, 0.14f, 1f),
+                new Vector2(0f, 0f),
+                new Vector2(0.018f, 1f));
+            CreateText(
+                objectiveCard.transform,
+                "WorldMapQuestWhatToDo",
+                font,
+                "MAIN QUEST\n" + marker.WhatToDo,
+                15,
+                new Vector2(0.05f, 0.08f),
+                new Vector2(0.96f, 0.92f),
+                TextAnchor.MiddleLeft,
+                new Color(1f, 0.88f, 0.55f, 1f));
+        }
+
+        private static void ClearChildren(Transform parent)
+        {
+            for (int i = parent.childCount - 1; i >= 0; i--)
+            {
+                GameObject child = parent.GetChild(i).gameObject;
+                if (Application.isPlaying)
+                {
+                    Destroy(child);
+                }
+                else
+                {
+                    DestroyImmediate(child);
+                }
+            }
         }
 
 
