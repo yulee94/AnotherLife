@@ -22,7 +22,7 @@ namespace AL.UI
 
         [Header("Presentation")]
         [SerializeField] private bool _buildRuntimeSplash = true;
-        [SerializeField] private string _buildLabel = "PRE-ALPHA RUNTIME";
+        [SerializeField] private string _buildLabel = "TEMPORARY — launch splash";
 
         private LaunchReadinessCoordinator _readiness;
         private LaunchCinematicLifecycle _launchLifecycle;
