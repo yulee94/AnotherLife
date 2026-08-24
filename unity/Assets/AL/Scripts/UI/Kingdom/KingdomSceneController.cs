@@ -94,12 +94,14 @@ namespace AL.UI.Kingdom
         {
             CityLayoutEngine.OnBuildingSelected += HandleBuildingSelected;
             KingdomVisualizer.OnTerritorySelected += HandleTerritorySelected;
+            KingdomTeachingInteraction.InteractionRequested += HandleKingdomTeachingInteraction;
         }
 
         private void OnDisable()
         {
             CityLayoutEngine.OnBuildingSelected -= HandleBuildingSelected;
             KingdomVisualizer.OnTerritorySelected -= HandleTerritorySelected;
+            KingdomTeachingInteraction.InteractionRequested -= HandleKingdomTeachingInteraction;
         }
 
         private void Start()
@@ -796,6 +798,86 @@ namespace AL.UI.Kingdom
             {
                 _privateMapRoot.SetActive(false);
             }
+
+            if (open)
+            {
+                KingdomTeachingInteraction.Observe("open_construction_dock");
+            }
+        }
+
+        private void HandleKingdomTeachingInteraction(string interaction)
+        {
+            if (string.Equals(
+                    interaction,
+                    "construct_town_hall",
+                    StringComparison.Ordinal))
+            {
+                ShowConstructionDock();
+                return;
+            }
+
+            if (string.Equals(
+                    interaction,
+                    "open_construction_dock",
+                    StringComparison.Ordinal))
+            {
+                if (ShowConstructionDock())
+                {
+                    KingdomTeachingInteraction.Observe(interaction);
+                }
+                return;
+            }
+
+            if (string.Equals(
+                    interaction,
+                    "open_inner_map",
+                    StringComparison.Ordinal))
+            {
+                if (ShowPrivateMap())
+                {
+                    KingdomTeachingInteraction.Observe(interaction);
+                }
+                return;
+            }
+
+            if (string.Equals(
+                    interaction,
+                    "return_shared_menu",
+                    StringComparison.Ordinal))
+            {
+                OpenSharedMenu();
+            }
+        }
+
+        private bool ShowConstructionDock()
+        {
+            if (_constructionDockRoot == null)
+            {
+                return false;
+            }
+
+            _constructionDockRoot.SetActive(true);
+            _privateMapRoot?.SetActive(false);
+            return true;
+        }
+
+        private bool ShowPrivateMap()
+        {
+            if (_privateMapRoot == null || _privateKingdomMapText == null)
+            {
+                return false;
+            }
+
+            _privateMapRoot.SetActive(true);
+            _constructionDockRoot?.SetActive(false);
+            RealmId realm = RealmId.None;
+            if (ServiceLocator.TryGet<IRealmService>(out IRealmService realmService))
+            {
+                realm = realmService.CurrentRealmId;
+            }
+
+            RefreshPrivateMapText(realm);
+            return true;
         }
 
         private string ResolvePrivateKingdomStatus(bool constructed)
@@ -820,6 +902,10 @@ namespace AL.UI.Kingdom
             SetMessage(result.Message);
             _constructionDockRoot?.SetActive(false);
             RefreshPrivateKingdomHud();
+            if (result.Accepted)
+            {
+                KingdomTeachingInteraction.Observe("construct_town_hall");
+            }
         }
 
         private void TogglePrivateMap()
@@ -843,6 +929,7 @@ namespace AL.UI.Kingdom
                 realm = realmService.CurrentRealmId;
             }
             RefreshPrivateMapText(realm);
+            KingdomTeachingInteraction.Observe("open_inner_map");
         }
 
         private void RefreshPrivateMapText(RealmId realm)

@@ -319,6 +319,19 @@ namespace AL.Tests.PlayMode
                 SharedMenuIds.KingdomScene,
                 KingdomPath,
                 ownerIds);
+            yield return null;
+            KingdomTeachingDirector teaching =
+                Object.FindObjectOfType<KingdomTeachingDirector>();
+            Assert.That(
+                teaching,
+                Is.Not.Null,
+                "The lordship-gated private kingdom must mount its teaching quest director.");
+            Assert.That(teaching.State, Is.Not.Null);
+            Assert.That(teaching.State.IsAvailable, Is.True);
+            Assert.That(teaching.State.IsComplete, Is.False);
+            Assert.That(teaching.State.ProgressValue, Is.Zero);
+            Assert.That(teaching.Hud, Is.Not.Null);
+            Assert.That(teaching.Hud.gameObject.activeInHierarchy, Is.True);
             string privateKingdomCapture =
                 Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_CAPTURE");
             if (!string.IsNullOrWhiteSpace(privateKingdomCapture))

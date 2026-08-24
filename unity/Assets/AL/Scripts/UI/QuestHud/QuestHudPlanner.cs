@@ -1,4 +1,5 @@
 using AL.ChampionMode.Quests;
+using AL.UI.Kingdom;
 using AL.UI.SharedMenu;
 using AL.World;
 
@@ -109,6 +110,32 @@ namespace AL.UI.QuestHud
                 QuestHudCopy.TeachStoresId,
                 QuestHudCopy.TeachStoresId,
                 QuestHudAction.Continue,
+                QuestHudSurface.Kingdom25D,
+                autoQuestOn);
+        }
+
+        public static QuestHudModel FromKingdomTeaching(
+            KingdomTeachingStep step,
+            bool autoQuestOn)
+        {
+            if (step == null)
+            {
+                return Empty(autoQuestOn);
+            }
+
+            QuestHudAction action = string.Equals(
+                step.Action,
+                "complete",
+                System.StringComparison.Ordinal)
+                ? QuestHudAction.Complete
+                : QuestHudAction.Continue;
+            return new QuestHudModel(
+                step.Title,
+                step.WhatToDo,
+                step.Location,
+                step.Id,
+                step.Id,
+                action,
                 QuestHudSurface.Kingdom25D,
                 autoQuestOn);
         }
