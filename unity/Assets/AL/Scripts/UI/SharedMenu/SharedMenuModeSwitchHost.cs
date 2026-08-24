@@ -5,6 +5,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.Input;
+using AL.UI.Kingdom;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -157,7 +158,23 @@ namespace AL.UI.SharedMenu
                 DetectCombat(),
                 DetectUnsafe(),
                 SharedMenuIds.InputSharedMenu);
-            return CrossModeSceneSwitch.TryCommit(plan, LoadExclusive);
+            bool returningFromKingdom =
+                CrossModeSceneSwitch.IsKingdomScene(currentScene) &&
+                string.Equals(
+                    targetMode,
+                    SharedMenuIds.Adventure3D,
+                    System.StringComparison.Ordinal);
+            return CrossModeSceneSwitch.TryCommit(
+                plan,
+                (sceneName, mode) =>
+                {
+                    if (returningFromKingdom)
+                    {
+                        KingdomTeachingInteraction.Observe("return_shared_menu");
+                    }
+
+                    LoadExclusive(sceneName, mode);
+                });
         }
 
         internal static void LoadExclusive(string sceneName, LoadSceneMode mode)

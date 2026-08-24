@@ -1,6 +1,7 @@
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.UI.Kingdom;
 using AL.UI.SharedMenu;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -79,11 +80,18 @@ namespace AL.UI.QuestHud
                 return;
             }
 
-            if (CrossModeSceneSwitch.IsKingdomScene(SceneName()) && HasLordship())
+            if (CrossModeSceneSwitch.IsKingdomScene(SceneName()) &&
+                TryGetSave(out ISaveGameService save) &&
+                ProofOfWorthLordship.IsGranted(save.CurrentSave))
             {
-                Overlay.Bind(
-                    QuestHudPlanner.TeachingStores(QuestHudAutoQuest.Enabled),
-                    () => { });
+                KingdomTeachingDirector teaching =
+                    GetComponent<KingdomTeachingDirector>();
+                if (teaching == null)
+                {
+                    teaching = gameObject.AddComponent<KingdomTeachingDirector>();
+                }
+
+                teaching.EnsureReady(save, Overlay);
             }
         }
 
@@ -92,15 +100,16 @@ namespace AL.UI.QuestHud
             return Application.isPlaying ? SceneManager.GetActiveScene().name : SharedMenuIds.KingdomScene;
         }
 
-        private static bool HasLordship()
+        private static bool TryGetSave(out ISaveGameService save)
         {
             if (ServiceLocator.TryGet<IOfflineServiceStackMarker>(out var marker) &&
-                marker.TryGetExpected<ISaveGameService>(out var save) &&
+                marker.TryGetExpected(out save) &&
                 save != null)
             {
-                return ProofOfWorthLordship.IsGranted(save.CurrentSave);
+                return true;
             }
 
+            save = null;
             return false;
         }
     }

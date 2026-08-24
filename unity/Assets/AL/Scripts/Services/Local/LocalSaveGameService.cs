@@ -15,6 +15,8 @@ using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+using AL.ChampionMode.Quests;
+using AL.UI.Kingdom;
 
 namespace AL.Services.Local
 {
@@ -220,6 +222,7 @@ namespace AL.Services.Local
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
         ILegacyMvpLoopCandidateStore,
+        ILegacyKingdomTeachingCandidateStore,
         INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
     {
@@ -255,6 +258,8 @@ namespace AL.Services.Local
             "al.save.schema1.nvs01.v1";
         private const string LegacyMvpLoopOperationId =
             "al.save.schema1.mvp-loop.v1";
+        private const string LegacyKingdomTeachingOperationId =
+            "al.save.schema1.kingdom-teaching.v1";
 
         private static readonly ProfileWriteAuthoritySnapshot
             MigrationRequiredPrimary =
@@ -1157,13 +1162,127 @@ namespace AL.Services.Local
             }
         }
 
+        SaveCandidateCommitResult
+            ILegacyKingdomTeachingCandidateStore
+                .TryCommitLegacyKingdomTeaching(
+                    KingdomTeachingCommitRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-TRANSACTION-INVALID");
+            }
+
+            KingdomTeachingCatalog teachingCatalog;
+            try
+            {
+                teachingCatalog = KingdomTeachingCatalog.LoadCanonical();
+            }
+            catch (Exception)
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-INVALID");
+            }
+
+            if (request.ExpectedProgress < 0 ||
+                request.ExpectedProgress >= teachingCatalog.Steps.Count ||
+                request.StepCount != teachingCatalog.Steps.Count ||
+                !string.Equals(
+                    request.QuestId,
+                    teachingCatalog.QuestId,
+                    StringComparison.Ordinal))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
+            }
+
+            KingdomTeachingStep expectedStep =
+                teachingCatalog.Steps[request.ExpectedProgress];
+            if (!string.Equals(
+                    request.StepId,
+                    expectedStep.Id,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    request.CompletionEvent,
+                    expectedStep.CompletionEvent,
+                    StringComparison.Ordinal))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
+            }
+
+            bool requiresTownHall = string.Equals(
+                expectedStep.Interaction,
+                "construct_town_hall",
+                StringComparison.Ordinal);
+
+            if (!TryEnterLegacyCandidateCoordinator(
+                    LegacyKingdomTeachingOperationId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyPrimaryProfile(out SaveGameData published) ||
+                    published.SelectedRealm != request.ExpectedRealm ||
+                    !ProofOfWorthLordship.IsGranted(published))
+                {
+                    return LegacyCandidateRejected(
+                        "AL-KINGDOM-TEACHING-PROFILE-READ-ONLY");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits
+                                .LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId) ||
+                        !ProofOfWorthLordship.IsGranted(candidate))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-KINGDOM-TEACHING-AUTHORITY-CONFLICT");
+                    }
+
+                    KingdomTeachingPrepareDisposition disposition =
+                        KingdomTeachingSaveCodec.PrepareCandidate(
+                            candidate,
+                            request,
+                            requiresTownHall,
+                            out string prepareMessage);
+                    switch (disposition)
+                    {
+                        case KingdomTeachingPrepareDisposition.Duplicate:
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        case KingdomTeachingPrepareDisposition.Prepared:
+                            return SaveCandidateMutationPreparation.Prepared();
+                        default:
+                            return SaveCandidateMutationPreparation.Rejected(
+                                string.IsNullOrWhiteSpace(prepareMessage)
+                                    ? "AL-KINGDOM-TEACHING-REQUEST-INVALID"
+                                    : prepareMessage);
+                    }
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
         SaveCandidateCommitResult ISaveGameCandidateStore.TryCommitCandidate(
             Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate)
         {
             return new SaveCandidateCommitResult(
                 SaveCandidateCommitOutcome.ReadOnly,
                 _currentSave,
-                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only the typed realm-selection, NVS-01, and MVP-loop adapters.");
+                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only approved typed adapters.");
         }
 
         private SaveCandidateCommitResult TryCommitLegacyCandidateCore(
@@ -1489,6 +1608,10 @@ namespace AL.Services.Local
                 !string.Equals(
                     operationId,
                     LegacyMvpLoopOperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyKingdomTeachingOperationId,
                     StringComparison.Ordinal))
             {
                 return false;
