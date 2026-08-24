@@ -143,8 +143,7 @@ namespace AL.UI.QuestHud
                 : null;
             if (plate == null)
             {
-                bool selfNamed = gameObject.name == QuestHudCopy.SlotName ||
-                                 gameObject.name == QuestHudCopy.RootName;
+                bool selfNamed = gameObject.name == QuestHudCopy.SlotName;
                 Transform plateParent = selfNamed ? transform : transform;
                 plate = QuestHudChrome.CreatePlate(
                     plateParent,

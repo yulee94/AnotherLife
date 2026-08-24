@@ -7,6 +7,7 @@ using AL.Data.Runtime;
 using AL.Kingdom;
 using AL.Kingdom.Visuals;
 using AL.Kingdom.Visuals.Architecture;
+using AL.UI.Kingdom;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
@@ -184,7 +185,7 @@ namespace AL.Tests.EditMode
                 "KingdomSceneController.cs");
             string source = File.ReadAllText(path);
             string startToken = "private void BuildPrivateKingdomRuntimeUi()";
-            string endToken = "private void CreatePrivateKingdomDock";
+            string endToken = "private void RefreshDistrictsPanel";
             int start = source.IndexOf(startToken, StringComparison.Ordinal);
             int end = source.IndexOf(endToken, start, StringComparison.Ordinal);
             Assert.That(start, Is.GreaterThanOrEqualTo(0));
@@ -192,12 +193,55 @@ namespace AL.Tests.EditMode
             string productHud = source.Substring(start, end - start);
 
             Assert.That(productHud, Does.Contain("ConstructionDock"));
+            Assert.That(productHud, Does.Contain("PrivateKingdomTimerStrip"));
+            Assert.That(productHud, Does.Contain("PrivateKingdomTimerText"));
+            Assert.That(productHud, Does.Not.Contain("OWNER-ONLY CASTLE DOMAIN"));
             Assert.That(source, Does.Contain("PrivateKingdomMapPreview"));
             Assert.That(source, Does.Contain("PrivateKingdomDock"));
             Assert.That(productHud, Does.Not.Contain("CommandDeck"));
+            Assert.That(productHud, Does.Not.Contain("Duel"));
+            Assert.That(productHud, Does.Not.Contain("DemoInitializer"));
             Assert.That(source, Does.Contain("keyboard.bKey.wasPressedThisFrame"));
             Assert.That(source, Does.Contain("PrivateKingdomInnerDestinations"));
             Assert.That(source, Does.Contain("SharedMenuModeSwitchHost.EnsureForScene"));
+            Assert.That(productHud, Does.Not.Contain("+ destinations[0]"));
+            Assert.That(productHud, Does.Not.Contain("+ destinations[1]"));
+            Assert.That(productHud, Does.Not.Contain("+ destinations[2]"));
+            Assert.That(productHud, Does.Contain("realmName + \" Castle\\n\""));
+        }
+
+        [Test]
+        public void TimerStripAlwaysShowsReadyActiveOrCompleteState()
+        {
+            Assert.That(
+                PrivateKingdomHudTimer.Format(Array.Empty<BuildingState>(), 1000),
+                Is.EqualTo("BUILD TIMER\nREADY"));
+            Assert.That(
+                PrivateKingdomHudTimer.Format(
+                    new[]
+                    {
+                        new BuildingState
+                        {
+                            BuildingId = "TownHall",
+                            IsUpgrading = true,
+                            UpgradeCompleteTimestamp = 1125
+                        }
+                    },
+                    1000),
+                Is.EqualTo("TOWN HALL TIMER\n02:05"));
+            Assert.That(
+                PrivateKingdomHudTimer.Format(
+                    new[]
+                    {
+                        new BuildingState
+                        {
+                            BuildingId = "TownHall",
+                            IsUpgrading = true,
+                            UpgradeCompleteTimestamp = 999
+                        }
+                    },
+                    1000),
+                Is.EqualTo("BUILD TIMER\nCOMPLETE"));
         }
 
         private static KingdomBuildingModelCatalog LoadCatalog()
