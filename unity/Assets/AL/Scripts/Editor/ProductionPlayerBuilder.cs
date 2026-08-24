@@ -21,7 +21,7 @@ namespace AL.EditorTools
     /// </summary>
     public static class ProductionPlayerBuilder
     {
-        public const string RequiredUnityVersion = "2022.3.62f3";
+        public const string RequiredUnityVersion = "6000.3.22f1";
         public const string OutputRelativeDirectory = "Builds/Validation/Windows64";
         public const string ExecutableFileName = "AnotherLifeUnity.exe";
         public const string DataDirectoryName = "AnotherLifeUnity_Data";

@@ -189,6 +189,8 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             ranger.onClick.Invoke();
             username.text = "EldergroveScout";
             Assert.That(confirm.interactable, Is.True);
+            yield return null;
+            CaptureReviewFrame("02-realm-locked-character-creator.png");
             confirm.onClick.Invoke();
 
             yield return WaitForActiveScene(ChampionArenaPath);
@@ -244,6 +246,8 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(proof.State.QuestId, Is.EqualTo(ProofOfWorthIds.OmenQuestId));
             Assert.That(proof.State.OmenAccepted, Is.False,
                 "OMEN_1 must be offered and require an explicit player choice.");
+            yield return null;
+            CaptureReviewFrame("03-inner-realm-capital-and-omen.png");
 
             Vector3 movementStart = player.transform.position;
             player.SetExternalMoveInput(Vector2.up);
@@ -286,6 +290,8 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 proof.ApplyForTests(ProofOfWorthCommand.RestoreCovenant).Changed,
                 Is.True);
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.C1FaceGuardian));
+            yield return null;
+            CaptureReviewFrame("04-proof-of-worth.png");
 
             yield return null;
             Assert.That(arena.TryStartGuardianTrial(), Is.True);
@@ -311,6 +317,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.True,
                 "The live guardian must use the admitted textured PBR sentinel.");
             yield return new WaitForSecondsRealtime(2.8f);
+            CaptureReviewFrame("05-direct-control-guardian-trial.png");
 
             MovePlayerToPosition(
                 player,
@@ -446,6 +453,78 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             player.SetExternalMoveInput(Vector2.zero);
             player.TeleportTo(position);
             Physics.SyncTransforms();
+        }
+
+        private static void CaptureReviewFrame(string fileName)
+        {
+            string outputRoot = Environment.GetEnvironmentVariable("AL_MVP_VISUAL_REVIEW_CAPTURE_ROOT");
+            if (string.IsNullOrWhiteSpace(outputRoot))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(outputRoot);
+            string outputPath = Path.Combine(outputRoot, fileName);
+            Camera camera = Camera.main;
+            GameObject temporaryCamera = null;
+            if (camera == null)
+            {
+                temporaryCamera = new GameObject("MvpVisualReviewCaptureCamera");
+                camera = temporaryCamera.AddComponent<Camera>();
+                camera.clearFlags = CameraClearFlags.SolidColor;
+                camera.backgroundColor = new Color(0.025f, 0.035f, 0.055f, 1f);
+            }
+
+            const int width = 1600;
+            const int height = 900;
+            var target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+            var pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
+            Canvas[] canvases = Object.FindObjectsOfType<Canvas>()
+                .Where(canvas => canvas != null && canvas.isActiveAndEnabled)
+                .ToArray();
+            RenderMode[] originalRenderModes = canvases.Select(canvas => canvas.renderMode).ToArray();
+            Camera[] originalCameras = canvases.Select(canvas => canvas.worldCamera).ToArray();
+            float[] originalPlaneDistances = canvases.Select(canvas => canvas.planeDistance).ToArray();
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture previousTarget = camera.targetTexture;
+            try
+            {
+                foreach (Canvas canvas in canvases)
+                {
+                    canvas.renderMode = RenderMode.ScreenSpaceCamera;
+                    canvas.worldCamera = camera;
+                    canvas.planeDistance = 1f;
+                }
+
+                Canvas.ForceUpdateCanvases();
+                camera.targetTexture = target;
+                RenderTexture.active = target;
+                camera.Render();
+                pixels.ReadPixels(new Rect(0f, 0f, width, height), 0, 0);
+                pixels.Apply();
+                File.WriteAllBytes(outputPath, pixels.EncodeToPNG());
+                Assert.That(File.Exists(outputPath), Is.True, "Review frame was not written: " + outputPath);
+            }
+            finally
+            {
+                for (int index = 0; index < canvases.Length; index++)
+                {
+                    canvases[index].renderMode = originalRenderModes[index];
+                    canvases[index].worldCamera = originalCameras[index];
+                    canvases[index].planeDistance = originalPlaneDistances[index];
+                }
+
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previous;
+                Object.DestroyImmediate(pixels);
+                Object.DestroyImmediate(target);
+                if (temporaryCamera != null)
+                {
+                    Object.DestroyImmediate(temporaryCamera);
+                }
+
+                Canvas.ForceUpdateCanvases();
+            }
         }
 
         private static ISaveGameService CreateIsolatedLocalSaveService(string root)
