@@ -171,6 +171,14 @@ namespace AL.UI.SharedMenu
                     if (returningFromKingdom)
                     {
                         KingdomTeachingInteraction.Observe("return_shared_menu");
+                        KingdomTeachingState teaching =
+                            KingdomTeachingQuestline.Evaluate(
+                                ReadSave(),
+                                KingdomTeachingCatalog.LoadCanonical());
+                        if (teaching != null && teaching.IsComplete)
+                        {
+                            CrossModeSession.ArmTeachingReturn();
+                        }
                     }
 
                     LoadExclusive(sceneName, mode);

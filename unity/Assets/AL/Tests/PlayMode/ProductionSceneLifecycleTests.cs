@@ -8,9 +8,11 @@ using AL.ChampionMode;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Quests;
 using AL.Core;
+using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.RealmSelection;
 using AL.UI.Kingdom;
+using AL.UI.QuestHud;
 using AL.UI.RealmSelection;
 using AL.UI.SharedMenu;
 using NUnit.Framework;
@@ -402,6 +404,62 @@ namespace AL.Tests.PlayMode
             Assert.That(ownerIds.Distinct().Count(), Is.EqualTo(ownerIds.Count));
 
             Assert.That(_logs.Logs.Any(line => line.Contains("[AL-SCENE-ACTIVE-MISMATCH]")), Is.False);
+            var unexpected = _logs.Errors
+                .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
+                .ToList();
+            Assert.IsEmpty(unexpected, "Unexpected severe logs:\n" + string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator CompletedKingdomTeachingReturnsToTheInnerGateAndNeverLoadsWarzone()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Post-teaching return drives an editor PlayMode scene load.");
+            yield break;
+#else
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            SaveGameData save = SeedLordshipSave(RealmId.Eldergrove);
+            CompleteKingdomTeaching(save, catalog);
+            CrossModeSession.ArmTeachingReturn();
+            _quiesceSceneControllers = false;
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            float started = Time.realtimeSinceStartup;
+            KingdomTeachingReturnDirector returnDirector = null;
+            while (returnDirector == null || !returnDirector.IsApplied)
+            {
+                if (Time.realtimeSinceStartup - started > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("The post-teaching inner-gate landing was not applied.");
+                }
+
+                returnDirector = Object.FindObjectOfType<KingdomTeachingReturnDirector>();
+                yield return null;
+            }
+
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            AssertInnerRealmControlIsLive();
+            ChampionController champion = Object.FindObjectOfType<ChampionController>();
+            Vector3 landingDelta =
+                champion.transform.position - returnDirector.Plan.Position;
+            landingDelta.y = 0f;
+            Assert.That(
+                landingDelta.magnitude,
+                Is.LessThan(0.01f));
+            Assert.That(
+                Vector3.Dot(champion.transform.forward, returnDirector.Plan.Forward),
+                Is.GreaterThan(0.999f));
+            Assert.That(returnDirector.Plan.MainGateId, Is.Not.Empty);
+            Assert.That(returnDirector.Plan.ShouldEnterWarzone, Is.False);
+            Assert.That(Object.FindObjectOfType<ProofOfWorthDirector>(), Is.Null);
+
+            QuestHudHost questHost = Object.FindObjectOfType<QuestHudHost>();
+            Assert.That(questHost, Is.Not.Null);
+            Assert.That(questHost.Overlay.Model.Surface, Is.EqualTo(QuestHudSurface.WarzoneGate));
+            Assert.That(questHost.Overlay.Model.CanAutoFire, Is.False);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+
             var unexpected = _logs.Errors
                 .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
                 .ToList();
@@ -846,6 +904,22 @@ namespace AL.Tests.PlayMode
                 ProofOfWorthLordship.TryWriteMark(save, ProofOfWorthLordship.ResolveMarkId(realm)),
                 Is.True);
             return save;
+        }
+
+        private static void CompleteKingdomTeaching(
+            SaveGameData save,
+            KingdomTeachingCatalog catalog)
+        {
+            save.Quests = new List<QuestState>
+            {
+                new QuestState
+                {
+                    QuestId = catalog.QuestId,
+                    CurrentValue = catalog.Steps.Count,
+                    IsCompleted = true,
+                    IsClaimed = false
+                }
+            };
         }
 
         private static object GetMarker()

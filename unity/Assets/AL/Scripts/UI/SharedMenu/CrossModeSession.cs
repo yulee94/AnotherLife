@@ -10,6 +10,8 @@ namespace AL.UI.SharedMenu
 
         public static bool HasActiveRoundTrip { get; private set; }
 
+        public static bool HasPendingTeachingReturn { get; private set; }
+
         public static void RememberAdventure(string sceneName)
         {
             if (!CrossModeSceneSwitch.IsAdventureScene(sceneName))
@@ -26,10 +28,27 @@ namespace AL.UI.SharedMenu
             HasActiveRoundTrip = true;
         }
 
+        public static void ArmTeachingReturn()
+        {
+            HasPendingTeachingReturn = true;
+        }
+
+        public static bool TryConsumeTeachingReturn()
+        {
+            if (!HasPendingTeachingReturn)
+            {
+                return false;
+            }
+
+            HasPendingTeachingReturn = false;
+            return true;
+        }
+
         public static void Reset()
         {
             AdventureScene = SharedMenuIds.AdventureScene;
             HasActiveRoundTrip = false;
+            HasPendingTeachingReturn = false;
         }
     }
 }

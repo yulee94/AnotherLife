@@ -1,15 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using AL.ChampionMode;
 using AL.ChampionMode.Quests;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Data.Catalogs.WorldAtlas;
 using AL.Data.Runtime;
 using AL.Services.Local;
 using AL.UI.Kingdom;
 using AL.UI.QuestHud;
 using AL.UI.SharedMenu;
+using AL.World;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -22,8 +26,15 @@ namespace AL.Tests.EditMode.KingdomTeaching
         {
             QuestHudAutoQuest.ResetForTests();
             KingdomTeachingInteraction.ResetForTests();
+            CrossModeSession.Reset();
             foreach (KingdomTeachingDirector director in
                      UnityEngine.Object.FindObjectsOfType<KingdomTeachingDirector>())
+            {
+                UnityEngine.Object.DestroyImmediate(director.gameObject);
+            }
+
+            foreach (KingdomTeachingReturnDirector director in
+                     UnityEngine.Object.FindObjectsOfType<KingdomTeachingReturnDirector>())
             {
                 UnityEngine.Object.DestroyImmediate(director.gameObject);
             }
@@ -204,6 +215,224 @@ namespace AL.Tests.EditMode.KingdomTeaching
                     Directory.Delete(root, true);
                 }
             }
+        }
+
+        [Test]
+        public void CompletedTeachingReturnsEveryRealmToTheInnerSideOfItsMainGate()
+        {
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            WorldAtlasSnapshot snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
+            InnerRealmWorldLayout layout = InnerRealmWorldLayout.FromSnapshot(snapshot);
+
+            foreach (RealmId realm in new[]
+                     {
+                         RealmId.Stonehold,
+                         RealmId.Eldergrove,
+                         RealmId.Crownlands,
+                         RealmId.Umbral
+                     })
+            {
+                SaveGameData save = CompletedTeachingSave(realm, catalog);
+
+                Assert.That(
+                    KingdomTeachingReturnPlanner.TryPlan(
+                        save,
+                        catalog,
+                        snapshot,
+                        out KingdomTeachingReturnPlan plan),
+                    Is.True,
+                    realm.ToString());
+                Assert.That(plan.DestinationScene, Is.EqualTo(SharedMenuIds.AdventureScene));
+                Assert.That(plan.ShouldEnterWarzone, Is.False);
+                Assert.That(plan.InnerAtlasZoneId, Does.StartWith("zone_inner_"));
+                Assert.That(
+                    layout.TryGetInner(
+                        InnerRealmWorldLayout.RealmCatalogId(realm),
+                        out InnerRealmSlotLayout inner),
+                    Is.True);
+                Assert.That(plan.MainGateId, Is.EqualTo(inner.MainGateId));
+                Assert.That(plan.TransitionZoneId, Is.EqualTo(inner.TransitionZoneId));
+                Assert.That(inner.InnerSafe.Contains(plan.Position), Is.True);
+                Assert.That(
+                    Vector3.Dot(
+                        plan.Position - inner.GatePosition,
+                        inner.InnerSafe.Center - inner.GatePosition),
+                    Is.GreaterThan(0f),
+                    "The landing must remain on the protected inner side of the gate.");
+                Assert.That(
+                    (plan.Position - inner.GatePosition).sqrMagnitude,
+                    Is.LessThan((inner.CapitalPosition - inner.GatePosition).sqrMagnitude));
+            }
+
+            SaveGameData incomplete = CompletedTeachingSave(RealmId.Stonehold, catalog);
+            incomplete.Quests[0].CurrentValue--;
+            incomplete.Quests[0].IsCompleted = false;
+            Assert.That(
+                KingdomTeachingReturnPlanner.TryPlan(
+                    incomplete,
+                    catalog,
+                    snapshot,
+                    out _),
+                Is.False);
+
+            SaveGameData staleIdentity =
+                CompletedTeachingSave(RealmId.Stonehold, catalog);
+            staleIdentity.ChampionCustomization.IdentityConfirmed = false;
+            Assert.That(
+                KingdomTeachingReturnPlanner.TryPlan(
+                    staleIdentity,
+                    catalog,
+                    snapshot,
+                    out _),
+                Is.False,
+                "A stale lordship mark cannot bypass the committed identity gate.");
+
+            SaveGameData mismatchedLordship =
+                CompletedTeachingSave(RealmId.Stonehold, catalog);
+            mismatchedLordship.ChampionCustomization.LastResultId =
+                ProofOfWorthIds.EldergroveVariantId;
+            Assert.That(
+                KingdomTeachingReturnPlanner.TryPlan(
+                    mismatchedLordship,
+                    catalog,
+                    snapshot,
+                    out _),
+                Is.False,
+                "A lordship mark from another realm cannot authorize this realm's return.");
+        }
+
+        [Test]
+        public void CompletedTeachingReturnPlacesChampionAndBindsTheNonAutoGatePrompt()
+        {
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            WorldAtlasSnapshot snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
+            SaveGameData save = CompletedTeachingSave(RealmId.Eldergrove, catalog);
+            var host = new GameObject("KingdomTeachingReturnTests.Host");
+            var player = new GameObject(FirstSessionChampionStart.PlayerObjectName);
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                QuestHudOverlay hud = QuestHudOverlay.Mount(host.transform);
+                KingdomTeachingReturnDirector director =
+                    host.AddComponent<KingdomTeachingReturnDirector>();
+                CrossModeSession.ArmTeachingReturn();
+
+                Assert.That(
+                    director.EnsureReady(save, hud, catalog, snapshot),
+                    Is.True);
+                Assert.That(
+                    director.IsApplied,
+                    Is.True,
+                    "EnsureReady applies immediately when the champion already exists.");
+                Assert.That(CrossModeSession.HasPendingTeachingReturn, Is.False);
+                Assert.That(player.transform.position, Is.EqualTo(director.Plan.Position));
+                Assert.That(
+                    Vector3.Dot(player.transform.forward, director.Plan.Forward),
+                    Is.GreaterThan(0.999f));
+                Assert.That(hud.Model.Surface, Is.EqualTo(QuestHudSurface.WarzoneGate));
+                Assert.That(hud.Model.Action, Is.EqualTo(QuestHudAction.None));
+                Assert.That(hud.Model.CanAutoFire, Is.False);
+                Assert.That(director.Plan.ShouldEnterWarzone, Is.False);
+
+                player.transform.position = Vector3.zero;
+                Assert.That(director.TryApply(player.transform), Is.False);
+                Assert.That(player.transform.position, Is.EqualTo(Vector3.zero));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(player);
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void CompletedTeachingWithoutPendingReturnCannotRepositionFutureChampionLoads()
+        {
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            WorldAtlasSnapshot snapshot = FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
+            SaveGameData save = CompletedTeachingSave(RealmId.Eldergrove, catalog);
+            var host = new GameObject("KingdomTeachingReturnTests.FutureLoad");
+            try
+            {
+                QuestHudOverlay hud = QuestHudOverlay.Mount(host.transform);
+                KingdomTeachingReturnDirector director =
+                    host.AddComponent<KingdomTeachingReturnDirector>();
+
+                Assert.That(CrossModeSession.HasPendingTeachingReturn, Is.False);
+                Assert.That(
+                    director.EnsureReady(save, hud, catalog, snapshot),
+                    Is.False,
+                    "Persisted teaching completion is not itself a one-shot return intent.");
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void PersistedLordshipCannotRestartProofOfWorthAfterKingdomReturn()
+        {
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            SaveGameData completed = CompletedTeachingSave(RealmId.Umbral, catalog);
+            var fresh = new SaveGameData
+            {
+                SelectedRealm = RealmId.Umbral,
+                ChampionCustomization = new ChampionCustomizationState
+                {
+                    ClassFamilyId = "ranger",
+                    IdentityConfirmed = true
+                }
+            };
+
+            Assert.That(ProofOfWorthDirector.ShouldAttachForSave(fresh), Is.True);
+            Assert.That(ProofOfWorthDirector.ShouldAttachForSave(completed), Is.False);
+            completed.ChampionCustomization.IdentityConfirmed = false;
+            Assert.That(
+                ProofOfWorthDirector.ShouldAttachForSave(completed),
+                Is.True,
+                "A stale lordship mark without committed identity cannot suppress the quest owner.");
+            completed.ChampionCustomization.IdentityConfirmed = true;
+            completed.ChampionCustomization.LastResultId =
+                ProofOfWorthIds.EldergroveVariantId;
+            Assert.That(
+                ProofOfWorthDirector.ShouldAttachForSave(completed),
+                Is.True,
+                "A lordship mark from another realm cannot suppress this realm's quest owner.");
+
+            string questHost = File.ReadAllText(
+                Path.Combine(
+                    UnityEngine.Application.dataPath,
+                    "AL",
+                    "Scripts",
+                    "UI",
+                    "QuestHud",
+                    "QuestHudHost.cs"));
+            Assert.That(questHost, Does.Contain("KingdomTeachingReturnDirector"));
+            Assert.That(questHost, Does.Contain("QuestHudPlanner.WarzoneGate"));
+
+            string proofDirector = File.ReadAllText(
+                Path.Combine(
+                    UnityEngine.Application.dataPath,
+                    "AL",
+                    "Scripts",
+                    "ChampionMode",
+                    "Quests",
+                    "ProofOfWorthDirector.cs"));
+            Assert.That(proofDirector, Does.Contain("SharedMenuModeSwitchHost.ReadSave()"));
+            Assert.That(
+                proofDirector,
+                Does.Not.Contain("ServiceLocator.TryGet<ISaveGameService>"));
+
+            string modeSwitchHost = File.ReadAllText(
+                Path.Combine(
+                    UnityEngine.Application.dataPath,
+                    "AL",
+                    "Scripts",
+                    "UI",
+                    "SharedMenu",
+                    "SharedMenuModeSwitchHost.cs"));
+            Assert.That(modeSwitchHost, Does.Contain("CrossModeSession.ArmTeachingReturn()"));
         }
 
         [Test]
@@ -552,6 +781,37 @@ namespace AL.Tests.EditMode.KingdomTeaching
             {
                 UnityEngine.Object.DestroyImmediate(host);
             }
+        }
+
+        private static SaveGameData CompletedTeachingSave(
+            RealmId realm,
+            KingdomTeachingCatalog catalog)
+        {
+            var save = new SaveGameData
+            {
+                SelectedRealm = realm,
+                ChampionCustomization = new ChampionCustomizationState
+                {
+                    ClassFamilyId = "warrior",
+                    IdentityConfirmed = true
+                },
+                Quests = new List<QuestState>
+                {
+                    new QuestState
+                    {
+                        QuestId = catalog.QuestId,
+                        CurrentValue = catalog.Steps.Count,
+                        IsCompleted = true,
+                        IsClaimed = false
+                    }
+                }
+            };
+            Assert.That(
+                ProofOfWorthLordship.TryWriteMark(
+                    save,
+                    ProofOfWorthLordship.ResolveMarkId(realm)),
+                Is.True);
+            return save;
         }
 
         private static ISaveGameService CreateSaveService(string root)
