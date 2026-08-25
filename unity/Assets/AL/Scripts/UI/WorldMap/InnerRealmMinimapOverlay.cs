@@ -25,6 +25,7 @@ namespace AL.UI.WorldMap
         private RectTransform _content;
         private RectTransform _playerMarker;
         private RectTransform _playerLabel;
+        private RectTransform _questMarker;
         private InnerRealmSlotLayout _inner;
         private readonly List<string> _visibleMarkerIds = new List<string>();
         private IReadOnlyList<MainQuestMapMarker> _currentQuestMarkers =
@@ -94,6 +95,7 @@ namespace AL.UI.WorldMap
             }
 
             UpdatePlayerMarker();
+            UpdateQuestPulse();
         }
 
         private void Build()
@@ -135,6 +137,16 @@ namespace AL.UI.WorldMap
             mapRect.anchoredPosition = new Vector2(0f, 16f);
             mapRect.sizeDelta = new Vector2(318f, 274f);
 
+            Color compassColor = new Color(0.84f, 0.78f, 0.60f, 0.92f);
+            CreateText(map.transform, "CompassNorth", font, "N", 12,
+                new Vector2(151f, -4f), new Vector2(16f, 18f), TextAnchor.MiddleCenter, compassColor);
+            CreateText(map.transform, "CompassEast", font, "E", 12,
+                new Vector2(298f, -128f), new Vector2(16f, 18f), TextAnchor.MiddleCenter, compassColor);
+            CreateText(map.transform, "CompassSouth", font, "S", 12,
+                new Vector2(151f, -252f), new Vector2(16f, 18f), TextAnchor.MiddleCenter, compassColor);
+            CreateText(map.transform, "CompassWest", font, "W", 12,
+                new Vector2(4f, -128f), new Vector2(16f, 18f), TextAnchor.MiddleCenter, compassColor);
+
             var content = new GameObject("MinimapContent", typeof(RectTransform));
             content.transform.SetParent(map.transform, false);
             _content = content.GetComponent<RectTransform>();
@@ -156,6 +168,7 @@ namespace AL.UI.WorldMap
             _currentQuestMarkers = Array.Empty<MainQuestMapMarker>();
             _playerMarker = null;
             _playerLabel = null;
+            _questMarker = null;
             _inner = null;
 
             MainQuestMapState state = MainQuestMapSession.Current;
@@ -209,12 +222,13 @@ namespace AL.UI.WorldMap
             if (_currentQuestMarkers.Count == 1)
             {
                 MainQuestMapMarker marker = _currentQuestMarkers[0];
-                CreateMarker(
+                Image questMarker = CreateMarker(
                     _content,
                     "MinimapQuestMarker_" + marker.MarkerId,
                     marker.MinimapUv,
                     22f,
                     new Color(1f, 0.72f, 0.18f, 0.96f));
+                _questMarker = questMarker.rectTransform;
                 CreateMarkerLabel(
                     _content,
                     "MinimapQuestMarkerLabel",
@@ -279,10 +293,29 @@ namespace AL.UI.WorldMap
             Vector2 anchor = uv.AsVector;
             _playerMarker.anchorMin = anchor;
             _playerMarker.anchorMax = anchor;
+            _playerMarker.localRotation = Quaternion.Euler(0f, 0f, -_player.eulerAngles.y + 45f);
             if (_playerLabel != null)
             {
                 _playerLabel.anchorMin = anchor;
                 _playerLabel.anchorMax = anchor;
+            }
+        }
+
+        private void UpdateQuestPulse()
+        {
+            if (_questMarker == null)
+            {
+                return;
+            }
+
+            float pulse = (Mathf.Sin(Time.unscaledTime * 3.6f) + 1f) * 0.5f;
+            _questMarker.localScale = Vector3.one * Mathf.Lerp(0.92f, 1.24f, pulse);
+            Image image = _questMarker.GetComponent<Image>();
+            if (image != null)
+            {
+                Color color = image.color;
+                color.a = Mathf.Lerp(0.68f, 1f, pulse);
+                image.color = color;
             }
         }
 
