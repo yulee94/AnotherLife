@@ -109,9 +109,10 @@ namespace AL.Tests.EditMode.CharacterCreation
                 _ => { },
                 () => { },
                 () => { },
+                _ => { },
                 () => { },
-                () => { },
-                () => { },
+                _ => { },
+                _ => { },
                 () => { },
                 () => { },
                 () => { },
@@ -140,9 +141,10 @@ namespace AL.Tests.EditMode.CharacterCreation
                 _ => { },
                 () => { },
                 () => { },
+                _ => { },
                 () => { },
-                () => { },
-                () => { },
+                _ => { },
+                _ => { },
                 () => { },
                 () => { },
                 () => { },
@@ -152,6 +154,12 @@ namespace AL.Tests.EditMode.CharacterCreation
             Assert.AreEqual(4, screen.ClassCards.Count);
             Assert.IsNotNull(screen.Username);
             Assert.IsNotNull(screen.Confirm);
+            Assert.IsNotNull(screen.SkinTone);
+            Assert.IsNotNull(screen.HairColor);
+            Assert.IsNotNull(screen.EyeColor);
+            Assert.IsNotNull(screen.SkinSwatch);
+            Assert.IsNotNull(screen.HairSwatch);
+            Assert.IsNotNull(screen.EyeSwatch);
             Assert.IsNotNull(screen.StatusPlate);
             Assert.AreEqual(CharacterCreationProductionLayout.ValidationBannerName, screen.StatusPlate.gameObject.name);
             Assert.IsFalse(screen.StatusPlate.gameObject.activeSelf);

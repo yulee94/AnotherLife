@@ -118,6 +118,23 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
+        public void ExplorationChromeReservesTheMinimapCornerWithoutOverlap()
+        {
+            Button menu = ChampionHudChrome.MountSharedMenuButton(_root.transform, null);
+            RectTransform quest = ChampionHudChrome.MountQuestSlot(_root.transform);
+
+            Assert.AreEqual(
+                ChampionHudChrome.MinimapSafeMenuPosition,
+                menu.GetComponent<RectTransform>().anchoredPosition);
+            Assert.AreEqual(
+                ChampionHudChrome.MinimapSafeQuestPosition,
+                quest.anchoredPosition);
+            Assert.AreEqual(ChampionHudChrome.MinimapSafeQuestSize, quest.sizeDelta);
+            Assert.That(quest.anchoredPosition.y, Is.LessThan(-354f));
+            Assert.That(menu.GetComponent<RectTransform>().anchoredPosition.x, Is.LessThan(-360f));
+        }
+
+        [Test]
         public void RecapCopyNeverSendsThePlayerToADebugKingdomButton()
         {
             Assert.That(ChampionHudCopy.RecapNext, Does.Contain("Shared Menu"));

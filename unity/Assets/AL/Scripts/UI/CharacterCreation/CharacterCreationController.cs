@@ -29,6 +29,7 @@ namespace AL.UI.CharacterCreation
         private CharacterCreationDraft _draft;
         private CharacterCreationProductionScreen _screen;
         private ChampionCustomizationController _preview;
+        private CharacterCreationPreviewMotion _previewMotion;
         private bool _committing;
         private bool _alreadyConfirmed;
 
@@ -121,13 +122,14 @@ namespace AL.UI.CharacterCreation
 
         private void BuildPreview()
         {
-            if (FindObjectOfType<Light>() == null)
+            Light keyLight = FindObjectOfType<Light>();
+            if (keyLight == null)
             {
                 var lightObject = new GameObject("CreatorKeyLight");
-                var light = lightObject.AddComponent<Light>();
-                light.type = LightType.Directional;
-                light.intensity = 1.15f;
-                light.color = new Color(1f, 0.96f, 0.90f);
+                keyLight = lightObject.AddComponent<Light>();
+                keyLight.type = LightType.Directional;
+                keyLight.intensity = 1.15f;
+                keyLight.color = new Color(1f, 0.96f, 0.90f);
                 lightObject.transform.rotation = Quaternion.Euler(28f, 140f, 0f);
             }
 
@@ -148,6 +150,8 @@ namespace AL.UI.CharacterCreation
             camera.rect = new Rect(0.46f, 0.04f, 0.52f, 0.92f);
             cameraObject.transform.position = new Vector3(0.85f, 1.05f, 1.05f);
             cameraObject.transform.LookAt(new Vector3(0.85f, 0.72f, 3.4f));
+            _previewMotion = cameraObject.AddComponent<CharacterCreationPreviewMotion>();
+            _previewMotion.Configure(previewObject.transform, keyLight, camera);
         }
 
         private void BuildUi()
@@ -159,9 +163,10 @@ namespace AL.UI.CharacterCreation
                 SelectClass,
                 () => MutateLook(_draft.CycleBodyBase),
                 () => MutateLook(_draft.CycleArmorTint),
-                () => MutateLook(_draft.CycleBodyTint),
+                value => MutateLook(() => _draft.SetSkinToneIndex(value)),
                 () => MutateLook(_draft.CycleHairStyle),
-                () => MutateLook(_draft.CycleHairColor),
+                value => MutateLook(() => _draft.SetHairColorIndex(value)),
+                value => MutateLook(() => _draft.SetEyeColorIndex(value)),
                 () => MutateLook(_draft.CycleBodyPreset),
                 () => MutateLook(_draft.ToggleHelmet),
                 () => MutateLook(_draft.ToggleCape),
@@ -229,6 +234,8 @@ namespace AL.UI.CharacterCreation
             {
                 _screen.Look.text = CharacterCreationProductionLayout.FormatLookSummary(_draft.Customization);
             }
+
+            CharacterCreationProductionLayout.PaintColorControls(_screen, _draft.Customization);
 
             if (_screen?.Confirm != null)
             {
