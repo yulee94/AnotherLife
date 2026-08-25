@@ -1,0 +1,210 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-relationship-authority-content.schema.json",
+  "title": "Another Life Relationship Authority Content Catalog",
+  "description": "Schema for al_relationship_authority_content_catalog.json. NPC and faction IDs are lowercase snake_case (legacy aliases are UPPERCASE and retained only as exact aliases). parentRealmId is a lowercase realm ID or 'shared'. Affinity/reputation/delta values are integers (sparse default 0), not floats.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "sourceAuthorities", "contentPolicy", "npcRecords", "factionRecords",
+    "affinityClassificationProfiles", "factionClassificationProfiles",
+    "personaPolicy", "approvedConsequences", "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_relationship_authority_content_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "sourceAuthorities": { "type": "object" },
+    "contentPolicy": { "type": "object" },
+    "npcRecords": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/npcRecord" }
+    },
+    "factionRecords": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/factionRecord" }
+    },
+    "affinityClassificationProfiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/classificationProfile" }
+    },
+    "factionClassificationProfiles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/classificationProfile" }
+    },
+    "personaPolicy": { "$ref": "#/$defs/personaPolicy" },
+    "approvedConsequences": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/approvedConsequenceRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "realmIdOrShared": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral", "shared"]
+    },
+    "int32": {
+      "type": "integer",
+      "minimum": -2147483648,
+      "maximum": 2147483647
+    },
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "npcRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacyAliases", "relationshipEnabled", "initialAffinity",
+        "classificationProfileId", "displayNameKey", "roleKey", "relationshipContextKey"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^npc_[a-z][a-z0-9_]*$" },
+        "legacyAliases": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "relationshipEnabled": { "type": "boolean" },
+        "initialAffinity": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "legacyPreviewAffinity": { "type": "integer", "minimum": -100, "maximum": 100 },
+        "classificationProfileId": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "roleKey": { "type": "string" },
+        "relationshipContextKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "factionRecord": {
+      "type": "object",
+      "required": [
+        "id", "legacyAliases", "relationshipEnabled", "initialReputation",
+        "classificationProfileId", "parentRealmId", "displayNameKey", "summaryKey"
+      ],
+      "properties": {
+        "id": { "type": "string", "pattern": "^faction_[a-z][a-z0-9_]*$" },
+        "legacyAliases": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "relationshipEnabled": { "type": "boolean" },
+        "initialReputation": { "$ref": "#/$defs/int32" },
+        "legacyPreviewReputation": { "$ref": "#/$defs/int32" },
+        "classificationProfileId": { "type": "string" },
+        "parentRealmId": { "$ref": "#/$defs/realmIdOrShared" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "classificationProfile": {
+      "type": "object",
+      "required": ["id", "bands"],
+      "properties": {
+        "id": { "type": "string" },
+        "minimum": { "type": "integer" },
+        "maximum": { "type": "integer" },
+        "bands": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/classificationBand" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "classificationBand": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "minimumInclusive": { "type": "integer" },
+        "maximumInclusive": { "type": "integer" },
+        "minimumExclusive": { "type": "integer" },
+        "maximumExclusive": { "type": "integer" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "personaPolicy": {
+      "type": "object",
+      "required": [
+        "id", "supportedTraits", "classificationStates",
+        "allZeroPolicy", "tiePolicy", "missingPolicy"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "supportedTraits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/personaTraitRecord" }
+        },
+        "classificationStates": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/personaStateRecord" }
+        },
+        "allZeroPolicy": { "type": "string" },
+        "tiePolicy": { "type": "string" },
+        "missingPolicy": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "personaTraitRecord": {
+      "type": "object",
+      "required": ["id", "legacyEnum", "displayNameKey", "summaryKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "legacyEnum": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "personaStateRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey"],
+      "properties": {
+        "id": { "type": "string" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "approvedConsequenceRecord": {
+      "type": "object",
+      "required": [
+        "id", "sourceQuestId", "sourceConsequenceId", "targetNpcId",
+        "delta", "repeatability", "status"
+      ],
+      "properties": {
+        "id": { "type": "string" },
+        "sourceQuestId": { "type": "string" },
+        "sourceConsequenceId": { "type": "string" },
+        "targetNpcId": { "type": "string", "pattern": "^npc_[a-z][a-z0-9_]*$" },
+        "delta": { "type": "integer" },
+        "repeatability": { "type": "string" },
+        "status": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

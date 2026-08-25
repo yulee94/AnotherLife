@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.game/schemas/al-kingdom-teaching.schema.json",
+  "title": "AnotherLife Private Kingdom Teaching Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "catalog_id",
+    "quest_id",
+    "entry",
+    "steps"
+  ],
+  "properties": {
+    "catalog_id": {
+      "const": "al_kingdom_teaching_v1"
+    },
+    "quest_id": {
+      "type": "string",
+      "pattern": "^quest_[a-z0-9_]+$",
+      "minLength": 1
+    },
+    "entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "what_to_do",
+        "location"
+      ],
+      "properties": {
+        "id": {
+          "const": "teach_enter_private_kingdom"
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1
+        },
+        "what_to_do": {
+          "type": "string",
+          "minLength": 1
+        },
+        "location": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "title",
+          "what_to_do",
+          "location",
+          "interaction",
+          "completion_event",
+          "action"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^teach_[a-z0-9_]+$",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "what_to_do": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interaction": {
+            "enum": [
+              "acknowledge",
+              "construct_town_hall",
+              "inspect_research_troops",
+              "open_construction_dock",
+              "open_inner_map",
+              "return_shared_menu"
+            ]
+          },
+          "completion_event": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]+$",
+            "minLength": 1
+          },
+          "action": {
+            "enum": [
+              "continue",
+              "complete"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

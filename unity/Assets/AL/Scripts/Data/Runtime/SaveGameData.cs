@@ -160,6 +160,8 @@ namespace AL.Data.Runtime
     [Serializable]
     public class ChampionCustomizationState
     {
+        // Additive nested slot. Omitted legacy saves resolve to the male base.
+        public string BodyBaseId = "male";
         public string BodyPresetId = "average";
         public string HairStyleId = "short";
         public string ArmorStyleId = "realm_basic";
@@ -183,6 +185,14 @@ namespace AL.Data.Runtime
         public float AccentB = 0.18f;
         public bool CapeEnabled = true;
         public bool HelmetEnabled;
+        // Additive schema-v1 nested slot for the 3D-first MVP loop.
+        // Omitted on pre-change saves; default empty/false and stay loadable.
+        public string ClassFamilyId = string.Empty;
+        public bool IdentityConfirmed;
+        public string LastResultId = string.Empty;
+        // Additive schema-v1 nested slot. Omitted on pre-change saves.
+        // People stay derived from SelectedRealm and are never stored here.
+        public string Username = string.Empty;
     }
 
     [Serializable]

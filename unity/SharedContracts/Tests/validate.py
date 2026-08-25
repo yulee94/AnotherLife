@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+"""Validate Another Life SharedContracts JSON Schemas and fixtures.
+
+Usage:
+  uv run --with jsonschema validate.py
+  (or) python validate.py   # if `jsonschema` is already importable
+
+Behavior:
+  1. Loads every *.schema.json under ../Schemas and asserts each is a valid
+     draft 2020-12 schema (compiles without error).
+  2. Validates each real StreamingAssets/GameData catalog against its schema
+     and reports PASS/FAIL (honest report; see EXPECTED_DEFECTS).
+  3. Validates Tests/fixtures/valid/*.json (must PASS) and
+     Tests/fixtures/invalid/*.json (must FAIL) against the schema named by the
+     fixture filename prefix.
+
+Exit code is 0 only when every schema compiles, every valid fixture passes,
+and every invalid fixture fails. Real-catalog failures listed in
+EXPECTED_DEFECTS do not fail the run (they are the known data defects the
+downstream data-generation task must correct).
+"""
+
+import json
+import pathlib
+import sys
+
+from jsonschema import Draft202012Validator, SchemaError, ValidationError
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent  # unity/SharedContracts
+SCHEMAS_DIR = ROOT / "Schemas"
+FIXTURES_DIR = pathlib.Path(__file__).resolve().parent / "fixtures"
+GAMEDATA_DIR = (
+    ROOT.parent / "Assets" / "AL" / "StreamingAssets" / "GameData"
+)
+
+# schema-name -> real catalog file (for the ten content catalogs)
+REAL_CATALOGS = {
+    "al-realm": "al_realm_catalog.json",
+    "al-realm-gem-wishgate-content": "al_realm_gem_wishgate_content_catalog.json",
+    "al-notification-content": "al_notification_content_catalog.json",
+    "al-notification-production": "al_notification_production_catalog.json",
+    "al-character-customization-content": "al_character_customization_content_catalog.json",
+    "al-warmaster-content": "al_warmaster_content_catalog.json",
+    "al-quest-preview-content": "al_quest_preview_content_catalog.json",
+    "al-relationship-authority-content": "al_relationship_authority_content_catalog.json",
+    "al-world-atlas-narrative": "al_world_atlas_narrative_catalog.json",
+    "al-world-event-content": "al_world_event_content_catalog.json",
+    "al-building": "al_building_catalog.json",
+    "al-champion": "al_champion_catalog.json",
+}
+
+# Known source-data defects that legitimately fail their schema today. These are
+# the canonical decisions being enforced; the downstream data-generation task
+# (t_46749a9c) corrects the data, not the schema.
+EXPECTED_DEFECTS = {
+    "al-world-event-content": [
+        "eventDefinitions[].notificationDefinitionId uses notification.world_event.* "
+        "dotted placeholders instead of canonical al_notify_* IDs (inventory conflict #5)."
+    ],
+}
+
+
+def load_json(path):
+    with open(path, "r", encoding="utf-8") as fh:
+        return json.load(fh)
+
+
+def first_error_message(errors):
+    err = errors[0]
+    path = ".".join(str(p) for p in err.absolute_path)
+    return f"{path or '<root>'}: {err.message}"
+
+
+def main():
+    schemas = {}
+    for schema_path in sorted(SCHEMAS_DIR.glob("*.schema.json")):
+        schema = load_json(schema_path)
+        name = schema_path.stem  # e.g. "al-realm.schema" -> we strip later
+        # Use the $id leaf as the canonical name key.
+        sid = schema.get("$id", "")
+        key = schema_path.name[: -len(".schema.json")]
+        schemas[key] = (schema_path, schema)
+
+    print(f"Loaded {len(schemas)} schemas from {SCHEMAS_DIR}")
+    print()
+
+    failures = []
+    reports = {"schemas": [], "valid": [], "invalid": [], "real": []}
+
+    # 1. Compile every schema (validity of the schema itself).
+    compiled = {}
+    for key, (path, schema) in sorted(schemas.items()):
+        try:
+            compiled[key] = Draft202012Validator(schema)
+            reports["schemas"].append((key, True, ""))
+        except SchemaError as exc:
+            compiled[key] = None
+            reports["schemas"].append((key, False, str(exc)))
+            failures.append(f"schema[{key}] does not compile: {exc}")
+
+    # 2. Real catalogs.
+    for key, filename in sorted(REAL_CATALOGS.items()):
+        validator = compiled.get(key)
+        real_path = GAMEDATA_DIR / filename
+        if validator is None or not real_path.exists():
+            continue
+        instance = load_json(real_path)
+        errors = list(validator.iter_errors(instance))
+        ok = len(errors) == 0
+        expected = key in EXPECTED_DEFECTS
+        reports["real"].append((key, ok, expected, first_error_message(errors) if errors else ""))
+
+    # 3. Fixtures.
+    valid_dir = FIXTURES_DIR / "valid"
+    invalid_dir = FIXTURES_DIR / "invalid"
+
+    for fixture_path in sorted(valid_dir.glob("*.json")):
+        key = fixture_path.stem.split(".valid")[0]
+        validator = compiled.get(key)
+        if validator is None:
+            failures.append(f"valid fixture {fixture_path.name}: no schema '{key}'")
+            continue
+        instance = load_json(fixture_path)
+        errors = list(validator.iter_errors(instance))
+        ok = len(errors) == 0
+        reports["valid"].append((fixture_path.name, ok, first_error_message(errors) if errors else ""))
+        if not ok:
+            failures.append(f"VALID fixture {fixture_path.name} unexpectedly failed: {first_error_message(errors)}")
+
+    for fixture_path in sorted(invalid_dir.glob("*.json")):
+        # name pattern: <schema>.invalid.<reason>.json
+        key = fixture_path.stem.split(".invalid")[0]
+        validator = compiled.get(key)
+        if validator is None:
+            failures.append(f"invalid fixture {fixture_path.name}: no schema '{key}'")
+            continue
+        instance = load_json(fixture_path)
+        errors = list(validator.iter_errors(instance))
+        ok = len(errors) > 0
+        reports["invalid"].append((fixture_path.name, ok, first_error_message(errors) if errors else ""))
+        if not ok:
+            failures.append(f"INVALID fixture {fixture_path.name} unexpectedly PASSED (should be rejected)")
+
+    # ---- Report ----
+    print("== Schema compilation ==")
+    for key, ok, msg in reports["schemas"]:
+        print(f"  [{'OK' if ok else 'FAIL'}] {key}" + (f"  -> {msg}" if msg else ""))
+
+    print("\n== Real catalog validation ==")
+    for key, ok, expected_defect, msg in reports["real"]:
+        tag = "OK" if ok else ("KNOWN-DEFECT" if expected_defect else "FAIL")
+        line = f"  [{tag}] {key}"
+        if msg:
+            line += f"  -> {msg}"
+        print(line)
+        if expected_defect:
+            for note in EXPECTED_DEFECTS[key]:
+                print(f"       note: {note}")
+
+    print("\n== Valid fixtures (must PASS) ==")
+    for name, ok, msg in reports["valid"]:
+        print(f"  [{'OK' if ok else 'FAIL'}] {name}" + (f"  -> {msg}" if msg else ""))
+
+    print("\n== Invalid fixtures (must FAIL) ==")
+    for name, ok, msg in reports["invalid"]:
+        print(f"  [{'OK' if ok else 'FAIL'}] {name}" + (f"  -> {msg}" if msg else ""))
+
+    print()
+    if failures:
+        print(f"FAILED: {len(failures)} problem(s)")
+        for f in failures:
+            print(f"  - {f}")
+        return 1
+
+    print("ALL CHECKS PASSED")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

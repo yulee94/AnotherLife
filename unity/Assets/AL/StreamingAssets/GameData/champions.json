@@ -1,0 +1,63 @@
+{
+  "gameId": "another-life",
+  "catalogId": "champions_v1",
+  "family": "champions",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_5e063078",
+  "records": [
+    {
+      "id": "champion_stonehold_vanguard",
+      "name_ref": "champion.stonehold.vanguard.name",
+      "realm_id": "stonehold",
+      "class_family_id": "warrior",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_stonehold_vanguard_turnaround_v001.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_stonehold_vanguard_turnaround_v001.png",
+      "base_skill_ids": [
+        "skill_iron_bulwark",
+        "skill_shield_slam"
+      ],
+      "stat_profile_id": "champion_stat_stonehold_vanguard"
+    },
+    {
+      "id": "champion_eldergrove_archmage",
+      "name_ref": "champion.eldergrove.archmage.name",
+      "realm_id": "eldergrove",
+      "class_family_id": "mage",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_eldergrove_vanguard_turnaround_v001.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_eldergrove_vanguard_turnaround_v001.png",
+      "base_skill_ids": [
+        "skill_arcane_bolt",
+        "skill_verdant_nova"
+      ],
+      "stat_profile_id": "champion_stat_eldergrove_archmage"
+    },
+    {
+      "id": "champion_crownlands_sharpshooter",
+      "name_ref": "champion.crownlands.sharpshooter.name",
+      "realm_id": "crownlands",
+      "class_family_id": "ranger",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_crownlands_vanguard_turnaround_v001.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_crownlands_vanguard_turnaround_v001.png",
+      "base_skill_ids": [
+        "skill_piercing_shot",
+        "skill_hawk_eye"
+      ],
+      "stat_profile_id": "champion_stat_crownlands_sharpshooter"
+    },
+    {
+      "id": "champion_umbral_shadowblade",
+      "name_ref": "champion.umbral.shadowblade.name",
+      "realm_id": "umbral",
+      "class_family_id": "assassin",
+      "portrait_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_umbral_vanguard_turnaround_v001.png",
+      "model_asset_ref": "Assets/AL/Art/Champions/ConceptSheets/champion_umbral_vanguard_turnaround_v001.png",
+      "base_skill_ids": [
+        "skill_shadowstep",
+        "skill_umbral_execute"
+      ],
+      "stat_profile_id": "champion_stat_umbral_shadowblade"
+    }
+  ],
+  "aliases": []
+}

@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "catalogId": "al_main_quest_map_marker_catalog",
+  "sourceAuthorities": {
+    "worldAtlasCatalog": "al_world_atlas_narrative_catalog",
+    "questPreviewCatalog": "al_quest_preview_content_catalog",
+    "mainQuestRuntime": "OMEN_1_then_MQ_C1_PROOF_OF_WORTH"
+  },
+  "markers": [
+    { "objectiveId": "OBJ_OMEN_1_TALK", "atlasPoiRole": "capital" },
+    { "objectiveId": "OBJ_OMEN_1_ARENA", "atlasPoiRole": "area_a" },
+    { "objectiveId": "OBJ_OMEN_1_REPORT", "atlasPoiRole": "capital" },
+    { "objectiveId": "OBJ_C1_MEET_REALM_GUIDE", "atlasPoiRole": "area_a" },
+    { "objectiveId": "OBJ_C1_RESTORE_COVENANT", "atlasPoiRole": "area_b" },
+    { "objectiveId": "OBJ_C1_FACE_GUARDIAN", "atlasPoiRole": "area_b" },
+    { "objectiveId": "OBJ_C1_ACCEPT_MARK", "atlasPoiRole": "capital" }
+  ]
+}

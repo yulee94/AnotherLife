@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0.0",
+  "recordType": "MeshyExecutionEvidence",
+  "recordId": "meshy_execution_slagwhistle_2026-08-18_v001",
+  "recordedBy": "default",
+  "recordedAtUtc": "2026-08-18T08:20:00Z",
+  "referencesA1Authorization": {
+    "recordId": "meshy_a1_authorization_2026-08-18_slagwhistle_vanguard_v001",
+    "authorizationId": "a1_slagwhistle_slagfall_fauna_20260818_v001",
+    "subject": "Slagfall Slagwhistle fauna (Stonehold)",
+    "priorityItemId": "tdf_fauna_stonehold_slagwhistle_burrower"
+  },
+  "executionTask": "t_1e666a71",
+  "operation": "image_to_3d",
+  "httpMethod": "POST",
+  "endpoint": "https://api.meshy.ai/openapi/v1/image-to-3d",
+  "provider": "Meshy",
+  "ai_model": "meshy-6",
+  "payloadBinding": {
+    "payloadSha256": "278336236206a62556ca7003dad03f6974c29f86ea9b6e595084bd9dba3e8aa1",
+    "payloadSha256State": "BOUND_PRE_POST",
+    "bindingArtifact": "unity/Docs/AI/Meshy/meshy_payload_slagwhistle_v001_prepost.json",
+    "note": "Canonical request-contract hash (input file identity + parameters). The exact multipart wire bytes are produced by the Meshy MCP server; the deterministic request contract is hash-bound here. Input image bytes are separately hash-pinned (see sourceVerification)."
+  },
+  "sourceVerification": {
+    "inputFile": "unity/Docs/Terrestrials/Ecosystems/SlagfallQuarryV002/ConceptSheets/tdf_fauna_stonehold_slagwhistle_burrower_identity_v002.png",
+    "inputSha256": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+    "inputByteLength": 2521039,
+    "pinnedSha256": "1a08581ef2a49d56f3e3b5a9925a88ee7eebcb6df2895de61691f74b820eaa05",
+    "hashMatch": true,
+    "sourceUnmodified": true
+  },
+  "execution": {
+    "providerTaskId": "01a013e9-8545-7a68-a055-206ea84d3cad",
+    "submitStatus": "PENDING",
+    "submitMessage": "3D generation task created successfully",
+    "finalStatus": "FAILED",
+    "finalError": "The generated model could not be finalized. Please retry.",
+    "providerSuggestion": "retry with different parameters",
+    "progressAtFailure": "99% IN_PROGRESS"
+  },
+  "credits": {
+    "balanceBefore": 6481,
+    "balanceAfter": 6481,
+    "actualCredits": 0,
+    "authorizedCeiling": 30,
+    "withinCeiling": true,
+    "creditMismatch": false
+  },
+  "stopRulesApplied": {
+    "stopOnSuccess": false,
+    "stopOnAnyError": true,
+    "stopOnCreditMismatch": false,
+    "stopOnSourceHashMismatch": false,
+    "stopOnRightsUncertainty": false,
+    "retryPolicy": "ForbiddenWithoutNewA1Authorization",
+    "retried": false
+  },
+  "authorizationStateAfterRun": "ExecutedStopped",
+  "outputFiles": [],
+  "conclusion": "The single authorized image_to_3d attempt reached a terminal provider error (model could not be finalized). 0 credits consumed. maximumAttempts=1 and retryRequiresNewAuthorization=true prohibit a retry without a fresh A1 authorization record. No base mesh was produced; acceptance criterion (base mesh file available) is NOT met. Task blocked pending a new A1 authorization decision.",
+  "scopingNotes": [
+    "Payload hash bound at request-contract level because the MCP server controls multipart wire encoding; input bytes are independently hash-pinned and re-verified on disk.",
+    "No source, catalog, or save data was modified.",
+    "Balance observed before and after the attempt (6481 -> 6481) confirms zero credit consumption for the failed generation."
+  ]
+}

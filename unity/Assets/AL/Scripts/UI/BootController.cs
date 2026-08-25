@@ -1,5 +1,7 @@
 using System;
 using System.Collections;
+using AL.Core;
+using AL.Core.Interfaces;
 using AL.Input;
 using AL.RealmSelection;
 using UnityEngine;
@@ -20,7 +22,7 @@ namespace AL.UI
 
         [Header("Presentation")]
         [SerializeField] private bool _buildRuntimeSplash = true;
-        [SerializeField] private string _buildLabel = "PRE-ALPHA RUNTIME";
+        [SerializeField] private string _buildLabel = "TEMPORARY — launch splash";
 
         private LaunchReadinessCoordinator _readiness;
         private LaunchCinematicLifecycle _launchLifecycle;
@@ -189,17 +191,21 @@ namespace AL.UI
                     LaunchReadinessFailure.DestinationUnavailable,
                     retryAllowed: false);
             }
-            else if (Application.CanStreamedLevelBeLoaded(_realmSelectionScene))
+            else
             {
-                _readiness.TryPublishDestination(
-                    new LaunchDestinationEvidence(generation, _realmSelectionScene));
-            }
-            else if (_catalogReceipt != null)
-            {
-                _readiness.TryFail(
-                    generation,
-                    LaunchReadinessFailure.DestinationUnavailable,
-                    retryAllowed: true);
+                string destination = ResolveFirstUserDestination();
+                if (Application.CanStreamedLevelBeLoaded(destination))
+                {
+                    _readiness.TryPublishDestination(
+                        new LaunchDestinationEvidence(generation, destination));
+                }
+                else if (_catalogReceipt != null)
+                {
+                    _readiness.TryFail(
+                        generation,
+                        LaunchReadinessFailure.DestinationUnavailable,
+                        retryAllowed: true);
+                }
             }
         }
 
@@ -367,7 +373,8 @@ namespace AL.UI
             AsyncOperation operation = null;
             try
             {
-                operation = SceneManager.LoadSceneAsync(_realmSelectionScene, LoadSceneMode.Single);
+                string destination = ResolveFirstUserDestination();
+                operation = SceneManager.LoadSceneAsync(destination, LoadSceneMode.Single);
             }
             catch (Exception exception)
             {
@@ -388,6 +395,23 @@ namespace AL.UI
             {
                 yield return null;
             }
+        }
+
+        private string ResolveFirstUserDestination()
+        {
+            ISaveGameService saveGameService = null;
+            ServiceLocator.TryGet(out saveGameService);
+            if (saveGameService?.CurrentSave != null)
+            {
+                AL.Data.Runtime.MvpLoopSaveCodec.RestoreSessionIdentity(saveGameService.CurrentSave);
+            }
+            bool gameplayLoadable =
+                Application.CanStreamedLevelBeLoaded(
+                    FirstUserBootDestinationResolver.GameplaySceneName);
+            return FirstUserBootDestinationResolver.ResolveSceneName(
+                saveGameService,
+                _realmSelectionScene,
+                gameplayLoadable);
         }
 
         private void OnRetryRequested()

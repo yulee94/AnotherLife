@@ -576,6 +576,27 @@ namespace AL.Tests.EditMode
                 SaveSemanticDomain.Customization);
         }
 
+        [Test]
+        public void UnsupportedBodyBaseIdIsMalformedInsteadOfPreservedUnknown()
+        {
+            string customization = CurrentChampionCustomizationJson.Insert(
+                1,
+                "\"BodyBaseId\":\"other\",");
+
+            SaveSemanticCandidate candidate = Validate(
+                CurrentJson(championCustomization: customization),
+                SaveCandidateSourceGeneration.Primary);
+
+            Assert.AreEqual(SaveSemanticCandidateOutcome.DegradedMalformed, candidate.Outcome);
+            Assert.False(candidate.IsWritable);
+            AssertFlag(candidate.DisabledDomains, SaveSemanticDomain.Customization);
+            Assert.That(
+                candidate.Diagnostics.Any(diagnostic =>
+                    diagnostic.Code == "SAVE_CUSTOMIZATION_BODY_BASE_INVALID" &&
+                    diagnostic.Path == "$.ChampionCustomization.BodyBaseId"),
+                Is.True);
+        }
+
         [TestCase("0")]
         [TestCase("-0")]
         [TestCase("0.0")]

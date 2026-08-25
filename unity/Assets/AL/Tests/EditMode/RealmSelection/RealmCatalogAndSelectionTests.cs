@@ -24,7 +24,7 @@ namespace AL.Tests.EditMode.RealmSelection
         [SetUp]
         public void SetUp()
         {
-            string path = Path.Combine(Application.dataPath, "AL", "StreamingAssets", "GameData", "al_realm_catalog.json");
+            string path = Path.Combine(Application.dataPath, "AL", "StreamingAssets", "GameData", "realm_specialized.v1.json");
             _json = File.ReadAllText(path);
             RealmCatalogLoadResult result = RealmCatalogRuntime.Parse(_json);
             Assert.That(result.IsSuccess, Is.True, result.TechnicalCode);
@@ -74,10 +74,10 @@ namespace AL.Tests.EditMode.RealmSelection
         {
             Assert.That(
                 RealmCatalogRuntimeHost.BuildRequestUri("jar:file:///game.apk!/assets"),
-                Is.EqualTo("jar:file:///game.apk!/assets/GameData/al_realm_catalog.json"));
+                Is.EqualTo("jar:file:///game.apk!/assets/GameData/realm_specialized.v1.json"));
             Assert.That(
                 RealmCatalogRuntimeHost.BuildRequestUri("https://content.example.test/assets"),
-                Is.EqualTo("https://content.example.test/assets/GameData/al_realm_catalog.json"));
+                Is.EqualTo("https://content.example.test/assets/GameData/realm_specialized.v1.json"));
         }
 
         [Test]
@@ -330,14 +330,14 @@ namespace AL.Tests.EditMode.RealmSelection
         [Test]
         public void ParserRejectsUnsupportedVersionPolicyAndDuplicateRealm()
         {
-            Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"0.1.0\"", "\"9.0.0\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-UNSUPPORTED"));
+            Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"1.0.0\"", "\"9.0.0\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-MALFORMED"));
             Assert.That(RealmCatalogRuntime.Parse(_json.Replace("same_realm_only", "cross_realm")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-POLICY-MISMATCH"));
-            Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"id\": \"stonehold\"", "\"id\": \"crownlands\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-INVALID-REALM"));
+            Assert.That(RealmCatalogRuntime.Parse(_json.Replace("\"id\": \"stonehold\"", "\"id\": \"crownlands\"")).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-MALFORMED"));
 
             string swappedRuntimeIds = _json
-                .Replace("\"legacyRuntimeId\": \"Crownlands\"", "\"legacyRuntimeId\": \"SwapTemporary\"")
-                .Replace("\"legacyRuntimeId\": \"Umbral\"", "\"legacyRuntimeId\": \"Crownlands\"")
-                .Replace("\"legacyRuntimeId\": \"SwapTemporary\"", "\"legacyRuntimeId\": \"Umbral\"");
+                .Replace("\"legacy_runtime_id\": \"Crownlands\"", "\"legacy_runtime_id\": \"SwapTemporary\"")
+                .Replace("\"legacy_runtime_id\": \"Umbral\"", "\"legacy_runtime_id\": \"Crownlands\"")
+                .Replace("\"legacy_runtime_id\": \"SwapTemporary\"", "\"legacy_runtime_id\": \"Umbral\"");
             Assert.That(RealmCatalogRuntime.Parse(swappedRuntimeIds).TechnicalCode, Is.EqualTo("AL-REALM-CATALOG-INVALID-REALM"));
         }
 
@@ -524,6 +524,8 @@ namespace AL.Tests.EditMode.RealmSelection
             public BuildingDefinition GetBuilding(string id) => null;
             public TroopDefinition GetTroop(string id) => null;
             public ChampionDefinition GetChampion(string id) => null;
+            public IEnumerable<ChampionDefinition> GetAllChampions() =>
+                System.Linq.Enumerable.Empty<ChampionDefinition>();
             public SkillDefinition GetSkill(string id) => null;
         }
 

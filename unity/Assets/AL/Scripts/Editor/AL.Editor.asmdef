@@ -3,7 +3,8 @@
     "rootNamespace": "AL.Editor",
     "references": [
         "AL.Runtime",
-        "AL.GameDataCatalog"
+        "AL.GameDataCatalog",
+        "AL.Development.FirstUserGameTest.Editor"
     ],
     "includePlatforms": [
         "Editor"

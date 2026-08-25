@@ -1,11 +1,17 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using AL.Core;
 using AL.Core.Interfaces;
+using AL.Core.Scenes;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Customization;
 using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
+using AL.VerticalSlice;
+using AL.VerticalSlice.Combat;
+using AL.Kingdom.Greybox;
+using AL.Slice;
 using System;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
@@ -16,6 +22,7 @@ namespace AL.Utilities
     {
         private Text _statusText;
         private Text _modeText;
+        private GreyboxCombatEncounter _championDuel;
         private readonly Dictionary<MaterialStyle, Material> _materials = new Dictionary<MaterialStyle, Material>();
         private readonly Color _gold = new Color(0.92f, 0.66f, 0.30f, 1f);
         private readonly Color _blue = new Color(0.36f, 0.58f, 0.82f, 1f);
@@ -63,10 +70,49 @@ namespace AL.Utilities
 
         private void Start()
         {
-            // 0. Ensure Services are initialized (Plug-and-Play)
+#if !UNITY_EDITOR
+            Destroy(this);
+            return;
+#else
+            if (!ProductionDebugChrome.AllowsDemoInitializer(SceneManager.GetActiveScene().name))
+            {
+                enabled = false;
+                Destroy(this);
+                return;
+            }
+
+            // Editor/dev harness only. Production Boot / RealmSelection / CharacterCreation /
+            // ChampionArena / Kingdom never reach this greybox slice.
             Bootloader.InitializeIfMissing();
             EnsureSaveLoaded();
 
+            // Greybox vertical-slice opening: realm selection -> character creation -> arena.
+            // Realm selection and character-creation-entry use hardcoded LocalGameDataService data and
+            // the process-local GreyboxRunState only; they do not touch catalog/save/determinism authority.
+            BeginGreyboxSliceFlow();
+#endif
+        }
+
+        private void BeginGreyboxSliceFlow()
+        {
+            GreyboxRunState.Reset();
+
+            var realmSelection = gameObject.AddComponent<GreyboxRealmSelectionController>();
+            realmSelection.OnRealmCommitted += OnRealmCommitted;
+            realmSelection.Present();
+        }
+
+        private void OnRealmCommitted(RealmId realmId)
+        {
+            Debug.Log($"[GREYBOX-SLICE] Advancing from realm selection to character creation for realm {realmId}.");
+
+            var characterCreation = gameObject.AddComponent<GreyboxCharacterCreationEntryController>();
+            characterCreation.OnCharacterConfirmed += OnCharacterConfirmed;
+            characterCreation.Present();
+        }
+
+        private void OnCharacterConfirmed()
+        {
             SetupDemoScene();
             Debug.Log("<color=green><b>Welcome to Another Life!</b></color>");
             Debug.Log("Press <b>Play</b> in the Unity Editor to start your journey as a Realm Lord.");
@@ -285,8 +331,40 @@ namespace AL.Utilities
 
             CreateButton(canvasObj.transform, "BATTLE SIM", new Vector2(252, -716), RunTestBattle);
             CreateButton(canvasObj.transform, "RESET TARGETS", new Vector2(460, -716), SpawnArenaTargets);
+            CreateButton(canvasObj.transform, "CHAMPION DUEL", new Vector2(44, -770), StartChampionDuel);
+
+            // Post-combat kingdom build scene (greybox vertical slice). The build action
+            // spends combat loot (a fixed slice budget) and writes to the local run state.
+            CreateButton(canvasObj.transform, "KINGDOM BUILD", new Vector2(252, -770), () =>
+            {
+                GreyboxKingdomBuildController.Toggle();
+                SetStatus("Kingdom build scene toggled. Construct or upgrade a structure with your combat loot.");
+            });
 
             StartCoroutine(UpdateResourceText(text));
+        }
+
+        private void StartChampionDuel()
+        {
+            if (_championDuel == null)
+            {
+                var encounterObject = new GameObject("GreyboxCombatEncounter");
+                _championDuel = encounterObject.AddComponent<GreyboxCombatEncounter>();
+                _championDuel.Completed += OnChampionDuelCompleted;
+                _championDuel.ReturnRequested += OnChampionDuelReturn;
+            }
+
+            _championDuel.BeginEncounter();
+        }
+
+        private void OnChampionDuelCompleted(SliceCombatResult result)
+        {
+            SetStatus($"Champion duel {result.Outcome.ToString().ToUpperInvariant()} — {result.ChampionDisplayName} vs {result.OpponentDisplayName} in {result.TurnsTaken} turn(s).");
+        }
+
+        private void OnChampionDuelReturn()
+        {
+            SetStatus("Champion duel concluded. Command board restored.");
         }
 
         private void EnsureSaveLoaded()

@@ -156,7 +156,7 @@ MonoBehaviour:
   _realmSelectionScene: RealmSelection
   _kingdomScene: Kingdom
   _buildRuntimeSplash: 1
-  _buildLabel: PRE-ALPHA RUNTIME
+  _buildLabel: TEMPORARY — launch splash
 --- !u!114 &1147275458
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -285,7 +285,7 @@ MonoBehaviour:
   _sceneId: al_scene_boot
   _expectedAssetPath: Assets/AL/Scenes/Boot.unity
   _role: production_entry
-  _sourceVersion: 223.1
+  _sourceVersion: 223.2
 --- !u!4 &1679056345
 Transform:
   m_ObjectHideFlags: 0

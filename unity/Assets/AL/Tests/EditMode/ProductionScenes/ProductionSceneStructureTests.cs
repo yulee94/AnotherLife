@@ -83,7 +83,8 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void ActiveTransitionStringsMatchDescriptorExactly()
         {
-            AssertTransition("al_scene_realm_selection", "_nextScene", "Kingdom");
+            AssertTransition("al_scene_realm_selection", "_nextScene", "CharacterCreation");
+            AssertTransition("al_scene_character_creation", "_combatSceneName", "ChampionArena");
             AssertTransition("al_scene_boot", "_realmSelectionScene", "RealmSelection");
             AssertTransition("al_scene_boot", "_kingdomScene", "Kingdom");
             AssertTransition("al_scene_champion_arena", "_kingdomSceneName", "Kingdom");

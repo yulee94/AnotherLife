@@ -137,29 +137,188 @@ namespace AL.Tests.EditMode.Narrative
         }
 
         [Test]
-        public void ProductionCapabilitiesDeclareOnlyTheMountedKingdomView()
+        public void ProductionCapabilitiesRegisterNoUnapprovedConsumer()
         {
-            Nvs01Catalog catalog = VerifiedCatalog().Catalog;
+            Nvs01VerifiedCatalog verified = VerifiedCatalog();
             var snapshot = (Nvs01CapabilitySnapshot)typeof(KingdomSceneController)
                 .GetMethod(
                     "BuildNvs01CapabilitySnapshot",
                     BindingFlags.NonPublic | BindingFlags.Static)
-                .Invoke(null, new object[] { catalog });
+                .Invoke(null, new object[] { verified });
 
-            Assert.True(snapshot.IsAvailable(catalog.Placement.CompletionDestination));
-            foreach (string capability in new[]
-                     {
-                         "LOCATION_SKY_CASTLE_MARKER",
-                         "ACTION_DEPLOY_CHAMPION",
-                         "HOOK_SKY_CASTLE_ARENA",
-                         "EVENT_SKY_CASTLE_ARENA_SUCCESS",
-                         "EVENT_SKY_CASTLE_ARENA_FAILURE",
-                         "EVENT_SKY_CASTLE_ARENA_CANCELLED",
-                         "EVENT_SKY_CASTLE_ARENA_UNAVAILABLE"
-                     })
+            foreach (Nvs01ExternalCapability capability in
+                     verified.Catalog.ExternalCapabilities)
             {
-                Assert.False(snapshot.IsAvailable(capability), capability);
+                Assert.False(
+                    snapshot.IsAvailable(capability.Id),
+                    capability.Id);
             }
+        }
+
+        [Test]
+        public void CapabilitySnapshotHasNoPublicForgeableConstructor()
+        {
+            Assert.IsEmpty(
+                typeof(Nvs01CapabilitySnapshot).GetConstructors(
+                    BindingFlags.Public | BindingFlags.Instance));
+            Assert.IsEmpty(
+                Nvs01MountedConsumerRegistry.Empty
+                    .Capture(VerifiedCatalog())
+                    .Availability
+                    .Where(entry => entry.Value));
+        }
+
+        [TestCase("missing")]
+        [TestCase("wrong-id")]
+        [TestCase("wrong-quest")]
+        [TestCase("stale-version")]
+        [TestCase("stale-hash")]
+        [TestCase("unmounted")]
+        [TestCase("ambiguous")]
+        [TestCase("throwing")]
+        public void Ch1ConsumerRegistryFailsClosedForEveryInvalidMount(
+            string scenario)
+        {
+            Nvs01VerifiedCatalog verified = VerifiedCatalog();
+            const string capabilityId = "CH1_REALM_INTRO";
+            var registrations =
+                new List<Nvs01MountedConsumerRegistration>();
+            Func<bool> mounted = () => true;
+            string registeredCapability = capabilityId;
+            string questId = Nvs01RuntimeContract.QuestId;
+            string packetVersion = Nvs01RuntimeContract.PacketVersion;
+            string packetSha = Nvs01RuntimeContract.PacketSha256;
+
+            switch (scenario)
+            {
+                case "missing":
+                    break;
+                case "wrong-id":
+                    registeredCapability = "KINGDOM_COMMAND_VIEW";
+                    goto default;
+                case "wrong-quest":
+                    questId = "OMEN_UNKNOWN";
+                    goto default;
+                case "stale-version":
+                    packetVersion = Nvs01ProgressCodec.MigratablePacketVersion;
+                    goto default;
+                case "stale-hash":
+                    packetSha = Nvs01ProgressCodec.MigratablePacketSha256;
+                    goto default;
+                case "unmounted":
+                    mounted = () => false;
+                    goto default;
+                case "throwing":
+                    mounted = () => throw new InvalidOperationException(
+                        "test mount probe failure");
+                    goto default;
+                case "ambiguous":
+                    registrations.Add(Registration(capabilityId, () => true));
+                    registrations.Add(Registration(capabilityId, () => true));
+                    break;
+                default:
+                    registrations.Add(
+                        new Nvs01MountedConsumerRegistration(
+                            "AL.TEST.CH1.CONSUMER",
+                            registeredCapability,
+                            questId,
+                            packetVersion,
+                            packetSha,
+                            mounted));
+                    break;
+            }
+
+            Nvs01CapabilitySnapshot snapshot =
+                new Nvs01MountedConsumerRegistry(registrations)
+                    .Capture(verified);
+
+            Assert.False(snapshot.IsAvailable(capabilityId), scenario);
+        }
+
+        [Test]
+        public void Ch1ConsumerRegistryRequiresOneExactMountedCurrentConsumer()
+        {
+            Nvs01CapabilitySnapshot snapshot =
+                new Nvs01MountedConsumerRegistry(
+                        new[]
+                        {
+                            Registration("CH1_REALM_INTRO", () => true)
+                        })
+                    .Capture(VerifiedCatalog());
+
+            Assert.True(snapshot.IsAvailable("CH1_REALM_INTRO"));
+        }
+
+        [Test]
+        public void BlockedChapterOneCopyHasNoProductionRenderOrSaveRoute()
+        {
+            string[] blockedObjectiveIds =
+            {
+                "OBJ_C1_RECEIVE_LORD_APPOINTMENT",
+                "OBJ_C1_RECEIVE_KINGDOM_GRANT",
+                "OBJ_C1_REVIEW_KINGDOM_MANAGEMENT",
+                "OBJ_C1_ENTER_KINGDOM_MANAGEMENT",
+                "OBJ_C1_RETURN_TO_CHARACTER_MODE"
+            };
+            string[] blockedLocalizationKeys =
+            {
+                "objective.obj_c1_receive_lord_appointment",
+                "objective.obj_c1_receive_kingdom_grant",
+                "objective.obj_c1_review_kingdom_management",
+                "objective.obj_c1_enter_kingdom_management",
+                "objective.obj_c1_return_to_character_mode"
+            };
+            KingdomSceneController controller =
+                CreateController(profileReady: true);
+            string rendered = string.Join(
+                "\n",
+                new[]
+                {
+                    QuestText(controller),
+                    MessageText(controller)
+                }.Concat(
+                    ActionButtons(controller).Select(ButtonLabel)));
+            string persisted = JsonUtility.ToJson(
+                ServiceLocator.Get<ISaveGameService>().CurrentSave);
+            string controllerSource = File.ReadAllText(
+                Path.Combine(
+                    Application.dataPath,
+                    "AL",
+                    "Scripts",
+                    "UI",
+                    "Kingdom",
+                    "KingdomSceneController.cs"));
+
+            Assert.That(rendered, Does.Not.Contain("UNAPPROVED_COPY_BLOCKED"));
+            Assert.That(persisted, Does.Not.Contain("UNAPPROVED_COPY_BLOCKED"));
+            Assert.That(controllerSource, Does.Not.Contain("UNAPPROVED_COPY_BLOCKED"));
+            foreach (string blocked in blockedObjectiveIds.Concat(
+                         blockedLocalizationKeys))
+            {
+                Assert.That(rendered, Does.Not.Contain(blocked), blocked);
+                Assert.That(persisted, Does.Not.Contain(blocked), blocked);
+                Assert.That(controllerSource, Does.Not.Contain(blocked), blocked);
+            }
+
+            Nvs01VerifiedCatalog verified = VerifiedCatalog();
+            var capabilities = (Nvs01CapabilitySnapshot)typeof(
+                    KingdomSceneController)
+                .GetMethod(
+                    "BuildNvs01CapabilitySnapshot",
+                    BindingFlags.NonPublic | BindingFlags.Static)
+                .Invoke(null, new object[] { verified });
+            Assert.False(capabilities.IsAvailable("CH1_REALM_INTRO"));
+            Assert.AreEqual("OFFERED", CurrentView(controller).StateId);
+            CollectionAssert.IsEmpty(
+                ServiceLocator.Get<ISaveGameService>()
+                    .CurrentSave.Nvs01Progress.ConsequenceIntentIds);
+            CollectionAssert.IsEmpty(
+                ServiceLocator.Get<ISaveGameService>()
+                    .CurrentSave.Nvs01Progress.AcquiredArtifactIds);
+            Assert.AreEqual(
+                string.Empty,
+                ServiceLocator.Get<ISaveGameService>()
+                    .CurrentSave.Nvs01Progress.UnlockedChapterId);
         }
 
         [Test]
@@ -388,6 +547,17 @@ namespace AL.Tests.EditMode.Narrative
                     validation.Diagnostics.Select(item => item.Code + " " + item.Path)));
             return validation.VerifiedCatalog;
         }
+
+        private static Nvs01MountedConsumerRegistration Registration(
+            string capabilityId,
+            Func<bool> mounted) =>
+            new Nvs01MountedConsumerRegistration(
+                "AL.TEST.CH1.CONSUMER",
+                capabilityId,
+                Nvs01RuntimeContract.QuestId,
+                Nvs01RuntimeContract.PacketVersion,
+                Nvs01RuntimeContract.PacketSha256,
+                mounted);
 
         private static string Localize(string key)
         {

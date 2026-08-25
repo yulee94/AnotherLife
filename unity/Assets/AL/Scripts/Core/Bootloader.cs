@@ -468,7 +468,7 @@ namespace AL.Core
 
             try
             {
-                saveGameService.Save();
+                ProfileMutationContainment.InvokeLifecycleSave(saveGameService);
                 if (saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
                 {
                     Debug.LogError($"[BOOT_STACK_SAVE_FAILED] Bootloader save did not complete successfully: {saveGameService.LastSaveStatus} {saveGameService.LastSaveMessage}");
@@ -916,7 +916,7 @@ namespace AL.Core
             var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
             var trainingService = new LocalTrainingService(saveGame, resourceService);
 
-            var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
+            var battleSim = new AL.Battle.Simulator.FixedPointBattleSimulator();
             var warzoneCredits = new LocalWarzoneCreditService(saveGame);
             var warmaster = new LocalWarmasterService(saveGame, warzoneCredits);
             var territoryService = new AL.RealmWar.Warzone.WarzoneService(saveGame);

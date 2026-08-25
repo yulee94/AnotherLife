@@ -71,6 +71,7 @@ namespace AL.Tests.EditMode
                     ProfileMutationSurfaceIds.KingdomNvs01,
                     ProfileMutationSurfaceIds.RealmSelection,
                     ProfileMutationSurfaceIds.Nvs01Progress,
+                    ProfileMutationSurfaceIds.MvpLoop,
                     ProfileMutationSurfaceIds.DeleteSave
                 },
                 descriptors.Select(item => item.StableId).ToArray());
@@ -134,7 +135,7 @@ namespace AL.Tests.EditMode
             Assert.False(ProfileMutationContainment.ProductionWriteActivationEnabled);
             Assert.False((bool)mutable.Invoke(null, arguments));
             Assert.IsNull(arguments[2]);
-            Assert.False((bool)lifecycle.Invoke(null, new object[] { forged }));
+            Assert.True((bool)lifecycle.Invoke(null, new object[] { forged }));
             Assert.False((bool)delete.Invoke(null, new object[] { forged }));
             Assert.That(forged.CurrentSaveReadCount, Is.Zero);
             Assert.That(forged.AuthorityReadCount, Is.Zero);
@@ -258,7 +259,60 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void SchemaOneAuthorityUsesOnlyNarrowRealmAndNvsAdapters()
+        public void LifecyclePersistWritesWhileManualSaveStaysContained()
+        {
+            string root = Path.Combine(
+                Path.GetTempPath(),
+                "AnotherLife-ContainmentTests",
+                Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(root);
+            try
+            {
+                ConstructorInfo constructor = typeof(LocalSaveGameService)
+                    .GetConstructor(
+                        BindingFlags.Instance | BindingFlags.NonPublic,
+                        binder: null,
+                        types: new[] { typeof(string) },
+                        modifiers: null);
+                Assert.NotNull(constructor);
+                var service = (LocalSaveGameService)constructor.Invoke(
+                    new object[] { root });
+                service.CreateNewSave(RealmId.Crownlands);
+                Assert.NotNull(service.CurrentSave);
+                string primary = Path.Combine(root, "save.json");
+                Assert.True(File.Exists(primary));
+
+                MethodInfo invokeLifecycle = typeof(ProfileMutationContainment).GetMethod(
+                    "InvokeLifecycleSave",
+                    BindingFlags.Static | BindingFlags.NonPublic);
+                Assert.NotNull(invokeLifecycle);
+                invokeLifecycle.Invoke(null, new object[] { service });
+
+                Assert.AreEqual(
+                    SaveOperationStatus.SavedPrimary,
+                    service.LastSaveStatus,
+                    service.LastSaveMessage);
+                Assert.False(ProfileMutationContainment.ProductionWriteActivationEnabled);
+
+                service.Save();
+                Assert.AreEqual(
+                    SaveOperationStatus.SaveFailedPreviousPreserved,
+                    service.LastSaveStatus);
+                StringAssert.StartsWith(
+                    "AL-SAVE-MANUAL-WRITE-CONTAINED:",
+                    service.LastSaveMessage);
+            }
+            finally
+            {
+                if (Directory.Exists(root))
+                {
+                    Directory.Delete(root, true);
+                }
+            }
+        }
+
+        [Test]
+        public void SchemaOneAuthorityUsesNarrowRealmNvsAndMvpLoopAdapters()
         {
             Assembly runtime = typeof(LocalSaveGameService).Assembly;
             Assert.NotNull(runtime.GetType(
@@ -267,6 +321,9 @@ namespace AL.Tests.EditMode
             Assert.NotNull(runtime.GetType(
                 "AL.Services.Local.INvs01LegacyCandidateStore",
                 throwOnError: false));
+            Assert.NotNull(runtime.GetType(
+                "AL.Services.Local.ILegacyMvpLoopCandidateStore",
+                throwOnError: false));
 
             string source = ReadScript(
                 "Services/Local/ISaveGameCandidateStore.cs");
@@ -274,6 +331,7 @@ namespace AL.Tests.EditMode
                 "ILegacyRealmSelectionCandidateStore",
                 source);
             StringAssert.Contains("INvs01LegacyCandidateStore", source);
+            StringAssert.Contains("ILegacyMvpLoopCandidateStore", source);
         }
 
         [Test]
