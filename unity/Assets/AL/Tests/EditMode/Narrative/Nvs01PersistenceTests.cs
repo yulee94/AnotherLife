@@ -211,9 +211,13 @@ namespace AL.Tests.EditMode.Narrative
                 backupSave.Nvs01Progress.Revision,
                 legacy.Revision,
                 "The fixture must prove the exact migratable primary outranks an older clean backup.");
+            Nvs01QuestSnapshot backupSnapshot = Decode(
+                backupSave.Nvs01Progress,
+                _catalog);
             Assert.AreEqual(
                 Nvs01RuntimeContract.PacketVersion,
-                backupSave.Nvs01Progress.PacketVersion);
+                backupSnapshot.PacketVersion,
+                "The older neutral generation must decode through the current packet without rewriting its retained v0 bytes.");
 
             LocalSaveGameService migrated = CreateSaveService(_saveRoot);
             migrated.Load();
@@ -401,8 +405,25 @@ namespace AL.Tests.EditMode.Narrative
                 reloaded.LastLoadStatus);
             CollectionAssert.AreEqual(cleanBackup, File.ReadAllBytes(primaryPath));
             Assert.AreEqual(
+                0,
+                reloaded.CurrentSave.Nvs01Progress.Version,
+                "Exact recovery must retain the older neutral v0 generation instead of silently rewriting it.");
+            Nvs01QuestSnapshot recoveredSnapshot = Decode(
+                reloaded.CurrentSave.Nvs01Progress,
+                _catalog);
+            Assert.AreEqual(
                 Nvs01RuntimeContract.PacketVersion,
-                reloaded.CurrentSave.Nvs01Progress.PacketVersion);
+                recoveredSnapshot.PacketVersion,
+                "The retained neutral v0 generation must decode through the current runtime packet contract.");
+            AssertSnapshot(
+                recoveredSnapshot,
+                0,
+                "OFFERED",
+                string.Empty,
+                false,
+                string.Empty,
+                "None",
+                0);
             Assert.That(
                 Directory.GetFiles(_saveRoot, "save.json.corrupt-*")
                     .Any(path => File.ReadAllBytes(path).SequenceEqual(invalidPrimary)),
@@ -520,6 +541,9 @@ namespace AL.Tests.EditMode.Narrative
                     previousPath,
                     foreignPrevious);
             var raced = new LocalSaveGameService(_saveRoot, operations);
+            LogAssert.Expect(
+                LogType.Error,
+                "AL-SAVE-NVS01-MIGRATION-FAILED: The atomic v003-to-v004 rebind did not reach a twice-verified commit target; old generation and recovery evidence were preserved. AL-SAVE-BACKUP-CLEANUP-FAILED: Candidate and backup validated, but canonical residue or the preserved Stage 5 transaction marker did not reach its exact cleanup target.");
             raced.Load();
 
             Assert.True(operations.Injected);
@@ -691,10 +715,21 @@ namespace AL.Tests.EditMode.Narrative
             reloaded.Load();
 
             Assert.IsNull(reloaded.CurrentSave);
-            Assert.NotNull(reloaded.ReadOnlyCandidateSnapshot);
+            SaveGameData readOnlyCandidate =
+                reloaded.ReadOnlyCandidateSnapshot;
+            Assert.NotNull(readOnlyCandidate);
+            Assert.AreEqual(
+                Nvs01ProgressCodec.MigratablePacketVersion,
+                readOnlyCandidate.Nvs01Progress.PacketVersion);
+            Assert.AreEqual(
+                Nvs01ProgressCodec.MigratablePacketSha256,
+                readOnlyCandidate.Nvs01Progress.PacketSha256);
             Assert.AreEqual(
                 SaveLoadStatus.LoadedPrimaryDegraded,
                 reloaded.LastLoadStatus);
+            Assert.NotNull(reloaded.LastLoadDisposition);
+            Assert.False(reloaded.LastLoadDisposition.IsWritable);
+            Assert.False(reloaded.LastLoadDisposition.IsRuntimeUsable);
             CollectionAssert.AreEqual(
                 exactLegacyPrimary,
                 File.ReadAllBytes(primaryPath));

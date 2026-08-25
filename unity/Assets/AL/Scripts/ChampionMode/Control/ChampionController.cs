@@ -1,13 +1,59 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using AL.Core;
 using AL.ChampionMode.Skills;
+using AL.ChampionMode.UI;
 using AL.Input;
+using AL.Services.Local;
+using System;
 using System.Collections;
 using System.Linq;
 
 namespace AL.ChampionMode.Control
 {
+    public readonly struct ChampionMovementReceipt
+    {
+        public ChampionMovementReceipt(
+            uint sequence,
+            Vector2 requestedInput,
+            Vector3 displacement,
+            bool wasGrounded,
+            bool isGrounded,
+            CollisionFlags collisionFlags)
+        {
+            Sequence = sequence;
+            RequestedInput = requestedInput;
+            Displacement = displacement;
+            WasGrounded = wasGrounded;
+            IsGrounded = isGrounded;
+            CollisionFlags = collisionFlags;
+        }
+
+        public uint Sequence { get; }
+        public Vector2 RequestedInput { get; }
+        public Vector3 Displacement { get; }
+        public bool WasGrounded { get; }
+        public bool IsGrounded { get; }
+        public CollisionFlags CollisionFlags { get; }
+        public float HorizontalDisplacement =>
+            new Vector2(Displacement.x, Displacement.z).magnitude;
+    }
+
+    /// <summary>
+    /// Monotonic evidence that the authoritative local champion motor accepted
+    /// a basic-attack command. This is intentionally not a hit/damage receipt.
+    /// </summary>
+    public readonly struct ChampionBasicAttackReceipt
+    {
+        public ChampionBasicAttackReceipt(uint sequence)
+        {
+            Sequence = sequence;
+        }
+
+        public uint Sequence { get; }
+    }
+
 #if UNITY_EDITOR
     public enum ChampionBasicAttackResolutionKind
     {
@@ -68,6 +114,16 @@ namespace AL.ChampionMode.Control
     }
 #endif
 
+    public static class ChampionCombatInputPolicy
+    {
+        public static bool ShouldSuppressBasicAttack(
+            bool pointerOverUi,
+            bool attackOriginatesFromMouse)
+        {
+            return pointerOverUi && attackOriginatesFromMouse;
+        }
+    }
+
     [RequireComponent(typeof(CharacterController))]
     public class ChampionController : MonoBehaviour
     {
@@ -97,6 +153,28 @@ namespace AL.ChampionMode.Control
         private SkillCaster _skillCaster;
         private ChampionCombat _combat;
         private RealmId _realmId = RealmId.None;
+        private float _rotationVelocity;
+        private uint _movementSequence;
+        private uint _basicAttackRequestSequence;
+        private TerrainCollider _requiredTerrainSupport;
+        private Vector3 _terrainSafetySpawn;
+        private float _terrainSafetyRecoveryY;
+        private bool _terrainSafetyConfigured;
+        private bool _terrainSafetySupportBlocked;
+        private int _terrainSafetyRecoveryCount;
+
+        public ChampionMovementReceipt LastMovementReceipt { get; private set; }
+        public ChampionBasicAttackReceipt LastBasicAttackReceipt { get; private set; }
+        public bool IsBlocking => _isBlocking;
+        public bool TerrainSafetyConfigured => _terrainSafetyConfigured;
+        public bool TerrainSafetySupportReady =>
+            _terrainSafetyConfigured && HasRequiredTerrainSupport();
+        public TerrainCollider TerrainSafetySupport => _requiredTerrainSupport;
+        public Vector3 TerrainSafetySpawn => _terrainSafetySpawn;
+        public float TerrainSafetyRecoveryY => _terrainSafetyRecoveryY;
+        public int TerrainSafetyRecoveryCount => _terrainSafetyRecoveryCount;
+        public event Action<ChampionMovementReceipt> MovementApplied;
+        public event Action<ChampionBasicAttackReceipt> BasicAttackAccepted;
 #if UNITY_EDITOR
         private IChampionBasicAttackResolver _editorBasicAttackResolver;
         private int _editorBasicAttackSequence;
@@ -137,16 +215,17 @@ namespace AL.ChampionMode.Control
                 _controller = gameObject.AddComponent<CharacterController>();
             }
 
-            _controller.center = new Vector3(0, 1f, 0);
-            _controller.height = 2f;
-            _controller.radius = 0.5f;
-            _controller.stepOffset = 0.3f;
+            // Presentation/spawn authority owns the capsule pivot and dimensions.
+            // Production uses a body-center root while the isolated onboarding
+            // harness uses a foot root; the motor must preserve either explicit
+            // contract instead of silently rewriting serialized collision geometry.
+            _controller.minMoveDistance = 0f;
 
             if (_cameraTransform == null && UnityEngine.Camera.main != null)
                 _cameraTransform = UnityEngine.Camera.main.transform;
 
+            _combat = GetComponent<ChampionCombat>() ?? gameObject.AddComponent<ChampionCombat>();
             _skillCaster = GetComponent<SkillCaster>() ?? gameObject.AddComponent<SkillCaster>();
-            _combat = GetComponent<ChampionCombat>();
         }
 
         private void Start()
@@ -162,30 +241,88 @@ namespace AL.ChampionMode.Control
         {
             if (_controller == null || _isDodging) return;
 
-            if (_controlsLocked)
+            Vector3 frameStart = transform.position;
+            bool wasGrounded = _controller.isGrounded;
+            Vector2 requestedInput = Vector2.zero;
+            CollisionFlags collisionFlags = CollisionFlags.None;
+
+            if (_terrainSafetyConfigured && !HasRequiredTerrainSupport())
             {
-                HandleGravity();
+                if (!_terrainSafetySupportBlocked)
+                {
+                    RecoverToTerrainSafetySpawn();
+                }
+                _terrainSafetySupportBlocked = true;
+                _velocity = Vector3.zero;
+                PublishMovementReceipt(
+                    requestedInput,
+                    frameStart,
+                    wasGrounded,
+                    collisionFlags);
                 return;
             }
 
-            HandleMovement();
-            HandleGravity();
+            _terrainSafetySupportBlocked = false;
+            if (TryRecoverTerrainSafety())
+            {
+                PublishMovementReceipt(
+                    requestedInput,
+                    frameStart,
+                    wasGrounded,
+                    CollisionFlags.Below);
+                return;
+            }
+
+            if (_controlsLocked)
+            {
+                collisionFlags = ApplyMovement(Vector2.zero);
+                PublishMovementReceipt(
+                    requestedInput,
+                    frameStart,
+                    wasGrounded,
+                    collisionFlags);
+                return;
+            }
+
+            requestedInput = ReadMoveInput();
+            collisionFlags = ApplyMovement(requestedInput);
+            if (TryRecoverTerrainSafety())
+            {
+                collisionFlags |= CollisionFlags.Below;
+            }
+            PublishMovementReceipt(
+                requestedInput,
+                frameStart,
+                wasGrounded,
+                collisionFlags);
             HandleActions();
         }
 
-        private void HandleMovement()
+        private Vector2 ReadMoveInput()
         {
-            if (_isAttacking) return;
-            RefreshCameraTransform();
-
             Vector2 move = GameInput.ReadMove();
-            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f ? _externalMoveInput.x : move.x;
-            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f ? _externalMoveInput.y : move.y;
+            float horizontal = Mathf.Abs(_externalMoveInput.x) > 0.01f
+                ? _externalMoveInput.x
+                : move.x;
+            float vertical = Mathf.Abs(_externalMoveInput.y) > 0.01f
+                ? _externalMoveInput.y
+                : move.y;
+            return Vector2.ClampMagnitude(new Vector2(horizontal, vertical), 1f);
+        }
 
-            Vector3 direction = new Vector3(horizontal, 0, vertical).normalized;
-
-            if (direction.magnitude >= 0.1f)
+        private CollisionFlags ApplyMovement(Vector2 requestedInput)
+        {
+            Vector3 planarVelocity = Vector3.zero;
+            if (!_isAttacking && requestedInput.magnitude >= 0.1f)
             {
+                RefreshCameraTransform();
+                Vector3 direction = new Vector3(
+                    requestedInput.x,
+                    0f,
+                    requestedInput.y);
+                float inputMagnitude = Mathf.Clamp01(direction.magnitude);
+                direction.Normalize();
+
                 float targetAngle = 0;
                 if (_cameraTransform != null)
                 {
@@ -196,21 +333,102 @@ namespace AL.ChampionMode.Control
                     targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
                 }
 
-                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref _rotationSpeed, 0.1f);
+                float angle = Mathf.SmoothDampAngle(
+                    transform.eulerAngles.y,
+                    targetAngle,
+                    ref _rotationVelocity,
+                    1f / Mathf.Max(0.01f, _rotationSpeed));
                 transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
                 Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
-                _controller.Move(moveDir.normalized * _moveSpeed * Time.deltaTime);
+                planarVelocity = moveDir.normalized * (_moveSpeed * inputMagnitude);
             }
-        }
 
-        private void HandleGravity()
-        {
             if (_controller.isGrounded && _velocity.y < 0)
+            {
                 _velocity.y = -2f;
+            }
 
             _velocity.y += _gravity * Time.deltaTime;
-            _controller.Move(_velocity * Time.deltaTime);
+            Vector3 frameVelocity = planarVelocity + Vector3.up * _velocity.y;
+            return MoveWithinTerrainSupport(frameVelocity * Time.deltaTime);
+        }
+
+        private CollisionFlags MoveWithinTerrainSupport(Vector3 displacement)
+        {
+            if (_controller == null || !_controller.enabled)
+            {
+                return CollisionFlags.None;
+            }
+
+            if (!_terrainSafetyConfigured)
+            {
+                return _controller.Move(displacement);
+            }
+
+            // Action coroutines run outside Update, so they must share the same
+            // TerrainCollider authority as ordinary movement. Failing closed here
+            // prevents a lunge or dodge from moving while support is unavailable.
+            if (!HasRequiredTerrainSupport())
+            {
+                return CollisionFlags.None;
+            }
+
+            Vector3 center = transform.TransformPoint(_controller.center);
+            Bounds supportBounds = _requiredTerrainSupport.bounds;
+            float horizontalScale = Mathf.Max(
+                Mathf.Abs(transform.lossyScale.x),
+                Mathf.Abs(transform.lossyScale.z));
+            float supportInset =
+                (_controller.radius + _controller.skinWidth) * horizontalScale;
+            float minimumX = supportBounds.min.x + supportInset;
+            float maximumX = supportBounds.max.x - supportInset;
+            float minimumZ = supportBounds.min.z + supportInset;
+            float maximumZ = supportBounds.max.z - supportInset;
+
+            Vector3 candidateCenter = center + displacement;
+            if (minimumX <= maximumX)
+            {
+                displacement.x +=
+                    Mathf.Clamp(candidateCenter.x, minimumX, maximumX) -
+                    candidateCenter.x;
+            }
+            else
+            {
+                displacement.x = 0f;
+            }
+
+            if (minimumZ <= maximumZ)
+            {
+                displacement.z +=
+                    Mathf.Clamp(candidateCenter.z, minimumZ, maximumZ) -
+                    candidateCenter.z;
+            }
+            else
+            {
+                displacement.z = 0f;
+            }
+
+            return _controller.Move(displacement);
+        }
+
+        private void PublishMovementReceipt(
+            Vector2 requestedInput,
+            Vector3 frameStart,
+            bool wasGrounded,
+            CollisionFlags collisionFlags)
+        {
+            _movementSequence++;
+            bool isGrounded = _controller.isGrounded ||
+                              (collisionFlags & CollisionFlags.Below) != 0;
+            LastMovementReceipt = new ChampionMovementReceipt(
+                _movementSequence,
+                requestedInput,
+                transform.position - frameStart,
+                wasGrounded,
+                isGrounded,
+                collisionFlags);
+            MovementApplied?.Invoke(LastMovementReceipt);
         }
 
         private void HandleActions()
@@ -223,9 +441,12 @@ namespace AL.ChampionMode.Control
             if (GameInput.DodgePressed()) StartCoroutine(Dodge());
             _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
 
-            if (GameInput.AttackPressed() && !_isAttacking)
+            if (GameInput.AttackPressed() &&
+                !ChampionCombatInputPolicy.ShouldSuppressBasicAttack(
+                    ChampionHudCameraGate.IsPointerOverUi(),
+                    GameInput.Attack.activeControl?.device is Mouse))
             {
-                StartCoroutine(PerformAttack());
+                RequestBasicAttack();
             }
 
             if (GameInput.SkillPressed(0)) RequestSkill(0);
@@ -254,7 +475,8 @@ namespace AL.ChampionMode.Control
             float lungeTimer = 0f;
             while (lungeTimer < 0.1f && !_controlsLocked)
             {
-                _controller.Move(lungeDir * _attackLungeForce * Time.deltaTime * 10f);
+                MoveWithinTerrainSupport(
+                    lungeDir * _attackLungeForce * Time.deltaTime * 10f);
                 lungeTimer += Time.deltaTime;
                 yield return null;
             }
@@ -461,7 +683,8 @@ namespace AL.ChampionMode.Control
 
             while (timer < duration && !_controlsLocked)
             {
-                _controller.Move(dodgeDir * (_dodgeDistance / duration) * Time.deltaTime);
+                MoveWithinTerrainSupport(
+                    dodgeDir * (_dodgeDistance / duration) * Time.deltaTime);
                 timer += Time.deltaTime;
                 yield return null;
             }
@@ -480,12 +703,27 @@ namespace AL.ChampionMode.Control
             _externalMoveInput = Vector2.ClampMagnitude(input, 1f);
         }
 
-        public void RequestBasicAttack()
+        public bool RequestBasicAttack()
         {
-            if (!_controlsLocked && !_isAttacking && _realmId != RealmId.None)
+            if (_controlsLocked ||
+                _isAttacking ||
+                _realmId == RealmId.None ||
+                !isActiveAndEnabled)
             {
-                StartCoroutine(PerformAttack());
+                return false;
             }
+
+            StartCoroutine(PerformAttack());
+            _basicAttackRequestSequence++;
+            if (_basicAttackRequestSequence == 0)
+            {
+                _basicAttackRequestSequence = 1;
+            }
+
+            LastBasicAttackReceipt =
+                new ChampionBasicAttackReceipt(_basicAttackRequestSequence);
+            BasicAttackAccepted?.Invoke(LastBasicAttackReceipt);
+            return true;
         }
 
         public void RequestDodge()
@@ -514,8 +752,166 @@ namespace AL.ChampionMode.Control
                 return;
             }
 
+            if (normalized == RealmId.None)
+            {
+                _realmId = RealmId.None;
+                _skillCaster?.ConfigureRealmContext(RealmId.None);
+                return;
+            }
+
+            float defendMitigation;
+            string diagnosticCode;
+            if (!SixFamilyRuntimeCatalog.TryResolveDefendMitigation(
+                    normalized,
+                    out defendMitigation,
+                    out diagnosticCode))
+            {
+                Debug.LogError(
+                    diagnosticCode +
+                    ": champion defend authority could not resolve realm " +
+                    normalized + ".");
+                _realmId = RealmId.None;
+                _skillCaster?.ConfigureRealmContext(RealmId.None);
+                return;
+            }
+
+            _combat ??= GetComponent<ChampionCombat>();
+            if (_combat == null ||
+                !_combat.TryConfigureDefendMitigation(defendMitigation))
+            {
+                Debug.LogError(
+                    SixFamilyRuntimeCatalog.DefendMitigationInvalidCode +
+                    ": champion combat rejected realm " +
+                    normalized +
+                    " defend authority.");
+                _realmId = RealmId.None;
+                _skillCaster?.ConfigureRealmContext(RealmId.None);
+                return;
+            }
+
             _realmId = normalized;
             _skillCaster?.ConfigureRealmContext(normalized);
+        }
+
+        /// <summary>
+        /// Binds the first-session motor to an actual Unity TerrainCollider. The
+        /// renderer is never accepted as physical authority: if the collider is
+        /// unloaded or disabled, movement fails closed; if the champion escapes
+        /// its horizontal bounds or drops below it, the motor restores a verified
+        /// grounded spawn on the next update.
+        /// </summary>
+        public bool TryConfigureTerrainSafety(
+            TerrainCollider terrainSupport,
+            Vector3 requestedSpawn)
+        {
+            if (_controller == null ||
+                terrainSupport == null ||
+                !terrainSupport.enabled ||
+                !terrainSupport.gameObject.activeInHierarchy ||
+                terrainSupport.isTrigger ||
+                terrainSupport.terrainData == null ||
+                !IsFinite(requestedSpawn))
+            {
+                return false;
+            }
+
+            // The runtime terrain and champion are created in the same startup
+            // frame. Synchronize once before proving the spawn against physics;
+            // this is not a per-frame movement cost.
+            Physics.SyncTransforms();
+            Bounds supportBounds = terrainSupport.bounds;
+            if (requestedSpawn.x < supportBounds.min.x ||
+                requestedSpawn.x > supportBounds.max.x ||
+                requestedSpawn.z < supportBounds.min.z ||
+                requestedSpawn.z > supportBounds.max.z)
+            {
+                return false;
+            }
+
+            float verticalScale = Mathf.Abs(transform.lossyScale.y);
+            float horizontalScale = Mathf.Max(
+                Mathf.Abs(transform.lossyScale.x),
+                Mathf.Abs(transform.lossyScale.z));
+            if (verticalScale <= Mathf.Epsilon || horizontalScale <= Mathf.Epsilon)
+            {
+                return false;
+            }
+
+            float worldHeight = _controller.height * verticalScale;
+            float rayOriginY = supportBounds.max.y + worldHeight + 1f;
+            float rayDistance = supportBounds.size.y + worldHeight * 4f + 2f;
+            var ray = new Ray(
+                new Vector3(requestedSpawn.x, rayOriginY, requestedSpawn.z),
+                Vector3.down);
+            if (!terrainSupport.Raycast(ray, out RaycastHit hit, rayDistance))
+            {
+                return false;
+            }
+
+            float centerOffsetY = _controller.center.y *
+                                  transform.lossyScale.y;
+            float footClearance = Mathf.Max(_controller.skinWidth, 0.05f);
+            _requiredTerrainSupport = terrainSupport;
+            _terrainSafetySpawn = new Vector3(
+                requestedSpawn.x,
+                hit.point.y - centerOffsetY + worldHeight * 0.5f + footClearance,
+                requestedSpawn.z);
+            _terrainSafetyRecoveryY = supportBounds.min.y -
+                                      Mathf.Max(worldHeight * 2f, 1f);
+            _terrainSafetyConfigured = true;
+            _terrainSafetySupportBlocked = false;
+            return true;
+        }
+
+        private bool HasRequiredTerrainSupport()
+        {
+            return _requiredTerrainSupport != null &&
+                   _requiredTerrainSupport.enabled &&
+                   _requiredTerrainSupport.gameObject.activeInHierarchy &&
+                   !_requiredTerrainSupport.isTrigger &&
+                   _requiredTerrainSupport.terrainData != null;
+        }
+
+        private bool TryRecoverTerrainSafety()
+        {
+            if (!_terrainSafetyConfigured || _terrainSafetySupportBlocked)
+            {
+                return false;
+            }
+
+            Vector3 position = transform.position;
+            Bounds bounds = _requiredTerrainSupport.bounds;
+            float radius = _controller.radius *
+                           Mathf.Max(
+                               Mathf.Abs(transform.lossyScale.x),
+                               Mathf.Abs(transform.lossyScale.z));
+            bool outsideHorizontalSupport =
+                position.x + radius < bounds.min.x ||
+                position.x - radius > bounds.max.x ||
+                position.z + radius < bounds.min.z ||
+                position.z - radius > bounds.max.z;
+            if (IsFinite(position) &&
+                position.y >= _terrainSafetyRecoveryY &&
+                !outsideHorizontalSupport)
+            {
+                return false;
+            }
+
+            RecoverToTerrainSafetySpawn();
+            return true;
+        }
+
+        private void RecoverToTerrainSafetySpawn()
+        {
+            TeleportTo(_terrainSafetySpawn);
+            _terrainSafetyRecoveryCount++;
+        }
+
+        private static bool IsFinite(Vector3 value)
+        {
+            return !float.IsNaN(value.x) && !float.IsInfinity(value.x) &&
+                   !float.IsNaN(value.y) && !float.IsInfinity(value.y) &&
+                   !float.IsNaN(value.z) && !float.IsInfinity(value.z);
         }
 
         public void SetBlocking(bool isBlocking)
@@ -538,6 +934,7 @@ namespace AL.ChampionMode.Control
             _touchBlockHeld = false;
             _isBlocking = false;
             _velocity = Vector3.zero;
+            _rotationVelocity = 0f;
 
             if (isLocked)
             {
@@ -564,6 +961,7 @@ namespace AL.ChampionMode.Control
 
             transform.position = position;
             _velocity = Vector3.zero;
+            _rotationVelocity = 0f;
 
             if (_controller != null)
             {

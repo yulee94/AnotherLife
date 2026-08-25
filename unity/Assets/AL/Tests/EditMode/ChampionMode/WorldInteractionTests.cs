@@ -153,6 +153,37 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
+        public void PromptPresentsAuthoredConfirmationWithoutStaleInteractGlyph()
+        {
+            WorldInteractionPromptView view =
+                WorldInteractionPromptView.Create(null, null);
+            try
+            {
+                view.Show(WorldInteractionPromptCopy.Compose(
+                    WorldInteractionPromptCopy.InteractGlyph,
+                    WorldInteractionKind.Talk,
+                    FirstSessionWorldInteractables.GuideCatalogId));
+                Transform glyph = view.transform.Find(
+                    WorldInteractionPromptView.PlateName + "/" +
+                    WorldInteractionPromptView.GlyphName);
+                Assert.NotNull(glyph);
+                Assert.IsTrue(glyph.gameObject.activeSelf);
+
+                view.ShowFeedback(WorldInteractionPromptCopy.GuideObjectiveText);
+                Assert.IsTrue(view.IsVisible);
+                Assert.AreEqual(
+                    WorldInteractionPromptCopy.GuideObjectiveText,
+                    view.CurrentCopy);
+                Assert.IsFalse(glyph.gameObject.activeSelf,
+                    "Accepted feedback must not retain an actionable F glyph.");
+            }
+            finally
+            {
+                Object.DestroyImmediate(view.gameObject);
+            }
+        }
+
+        [Test]
         public void InstallPlacesGuideAndCovenantSiteOnFirstSessionPath()
         {
             FirstSessionChampionStart.ResetToFirstSessionLanding();

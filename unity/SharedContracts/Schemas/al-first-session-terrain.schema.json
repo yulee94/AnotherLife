@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-first-session-terrain.schema.json",
+  "title": "Another Life First-Session Terrain Catalog",
+  "description": "Replaceable MVP physical-terrain profile. It defines deterministic runtime terrain, low-cost debug presentation, collision proxies, and engine-neutral navigation seams without approving final biome or terrain art.",
+  "type": "object",
+  "required": ["version", "catalogId", "authorityStatus", "profile"],
+  "properties": {
+    "version": { "const": "0.1.0" },
+    "catalogId": { "const": "al_first_session_terrain_catalog" },
+    "authorityStatus": { "const": "mvp_procedural_replaceable" },
+    "profile": { "$ref": "#/$defs/profile" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "positiveNumber": {
+      "type": "number",
+      "exclusiveMinimum": 0
+    },
+    "color": {
+      "type": "string",
+      "pattern": "^#[0-9A-F]{6}$"
+    },
+    "profile": {
+      "type": "object",
+      "required": [
+        "id", "sourceMode", "replacementSocketId", "futureBakeContract",
+        "placement", "dimensions", "generation", "surface", "collision",
+        "navigation"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "sourceMode": { "const": "runtime_procedural_mvp" },
+        "replacementSocketId": { "$ref": "#/$defs/stableId" },
+        "futureBakeContract": { "const": "terrain_data_height_slope_biome_splat_v1" },
+        "placement": { "$ref": "#/$defs/placement" },
+        "dimensions": { "$ref": "#/$defs/dimensions" },
+        "generation": { "$ref": "#/$defs/generation" },
+        "surface": { "$ref": "#/$defs/surface" },
+        "collision": { "$ref": "#/$defs/collision" },
+        "navigation": { "$ref": "#/$defs/navigation" }
+      },
+      "additionalProperties": false
+    },
+    "placement": {
+      "type": "object",
+      "required": ["anchor", "verticalDatum", "landmarkFrontOffsetMeters"],
+      "properties": {
+        "anchor": { "const": "capital_position_centered" },
+        "verticalDatum": { "const": "capital_ground_plane" },
+        "landmarkFrontOffsetMeters": { "type": "number", "minimum": 8, "maximum": 32 }
+      },
+      "additionalProperties": false
+    },
+    "dimensions": {
+      "type": "object",
+      "required": [
+        "sizeXMeters", "heightMeters", "sizeZMeters", "heightmapResolution",
+        "alphamapResolution", "baseMapResolution"
+      ],
+      "properties": {
+        "sizeXMeters": { "type": "number", "minimum": 64, "maximum": 512 },
+        "heightMeters": { "type": "number", "minimum": 4, "maximum": 128 },
+        "sizeZMeters": { "type": "number", "minimum": 64, "maximum": 512 },
+        "heightmapResolution": { "type": "integer", "enum": [33, 65, 129, 257, 513] },
+        "alphamapResolution": { "type": "integer", "enum": [16, 32, 64, 128] },
+        "baseMapResolution": { "type": "integer", "enum": [16, 32, 64, 128, 256] }
+      },
+      "additionalProperties": false
+    },
+    "generation": {
+      "type": "object",
+      "required": [
+        "algorithm", "seed", "baseHeightMeters", "safeCourtyardRadiusMeters",
+        "rimRiseMeters", "noiseAmplitudeMeters", "noiseCycles"
+      ],
+      "properties": {
+        "algorithm": { "const": "safe_courtyard_rim_v1" },
+        "seed": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        "baseHeightMeters": { "type": "number", "minimum": 0.25, "maximum": 32 },
+        "safeCourtyardRadiusMeters": { "type": "number", "minimum": 16, "maximum": 96 },
+        "rimRiseMeters": { "type": "number", "minimum": 0, "maximum": 16 },
+        "noiseAmplitudeMeters": { "type": "number", "minimum": 0, "maximum": 4 },
+        "noiseCycles": { "type": "number", "minimum": 0, "maximum": 12 }
+      },
+      "additionalProperties": false
+    },
+    "surface": {
+      "type": "object",
+      "required": [
+        "materialRole", "textureResolution", "checkerCellsPerTile",
+        "gridLinePixels", "tileSizeMeters", "baseColor", "alternateColor",
+        "gridColor", "normalScale", "metallic", "smoothness",
+        "heightmapPixelError", "baseMapDistanceMeters"
+      ],
+      "properties": {
+        "materialRole": { "const": "procedural_debug_grid" },
+        "textureResolution": { "type": "integer", "enum": [8, 16, 32, 64, 128] },
+        "checkerCellsPerTile": { "type": "integer", "minimum": 2, "maximum": 16 },
+        "gridLinePixels": { "type": "integer", "minimum": 1, "maximum": 4 },
+        "tileSizeMeters": { "type": "number", "minimum": 1, "maximum": 32 },
+        "baseColor": { "$ref": "#/$defs/color" },
+        "alternateColor": { "$ref": "#/$defs/color" },
+        "gridColor": { "$ref": "#/$defs/color" },
+        "normalScale": { "type": "number", "minimum": 0, "maximum": 2 },
+        "metallic": { "type": "number", "minimum": 0, "maximum": 1 },
+        "smoothness": { "type": "number", "minimum": 0, "maximum": 1 },
+        "heightmapPixelError": { "type": "number", "minimum": 1, "maximum": 64 },
+        "baseMapDistanceMeters": { "type": "number", "minimum": 16, "maximum": 2048 }
+      },
+      "additionalProperties": false
+    },
+    "collision": {
+      "type": "object",
+      "required": [
+        "boundaryInsetMeters", "boundaryThicknessMeters", "boundaryHeightMeters",
+        "landmarkProxyThicknessMeters", "landmarkEntranceWidthMeters",
+        "landmarkHeightFraction", "landmarkMinimumHeightMeters",
+        "landmarkMaximumHeightMeters"
+      ],
+      "properties": {
+        "boundaryInsetMeters": { "type": "number", "minimum": 0, "maximum": 8 },
+        "boundaryThicknessMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 8 },
+        "boundaryHeightMeters": { "type": "number", "minimum": 2, "maximum": 24 },
+        "landmarkProxyThicknessMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 4 },
+        "landmarkEntranceWidthMeters": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 16,
+          "description": "Clear width through the landmark front proxy. Zero explicitly seals a visually closed landmark."
+        },
+        "landmarkHeightFraction": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+        "landmarkMinimumHeightMeters": { "type": "number", "minimum": 1, "maximum": 12 },
+        "landmarkMaximumHeightMeters": { "type": "number", "minimum": 2, "maximum": 24 }
+      },
+      "additionalProperties": false
+    },
+    "navigation": {
+      "type": "object",
+      "required": [
+        "walkableSurfaceName", "collisionCollectionName", "exclusionPrefix",
+        "linkSocketPrefix", "traversalProbeRadiusMeters"
+      ],
+      "properties": {
+        "walkableSurfaceName": { "const": "NAV_FirstSessionCapitalTerrain" },
+        "collisionCollectionName": { "const": "AL_COLLISION" },
+        "exclusionPrefix": { "const": "NAVEX_" },
+        "linkSocketPrefix": { "const": "SOCKET_NAVLINK_" },
+        "traversalProbeRadiusMeters": { "type": "number", "minimum": 8, "maximum": 64 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

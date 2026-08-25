@@ -1,7 +1,7 @@
 using AL.ChampionMode.UI;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.Input;
-using System.IO;
+using AL.World;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -102,16 +102,10 @@ namespace AL.UI.WorldMap
 
         internal static WorldAtlasSnapshot LoadCanonicalSnapshot()
         {
-            string path = Path.Combine(
-                Application.dataPath,
-                "AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json");
-            if (!File.Exists(path))
-            {
-                return null;
-            }
-
-            WorldAtlasLoadResult result = WorldAtlasTopologyLoader.Validate(File.ReadAllBytes(path));
-            return result.IsAccepted ? result.Snapshot : null;
+            return FirstSessionInnerRealmSpawn.TryLoadCanonicalSnapshot(
+                out WorldAtlasSnapshot snapshot)
+                ? snapshot
+                : null;
         }
     }
 }

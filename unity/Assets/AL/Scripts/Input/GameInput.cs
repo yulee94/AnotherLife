@@ -39,6 +39,7 @@ namespace AL.Input
         public static InputAction Move => Map["Move"];
         public static InputAction Look => Map["Look"];
         public static InputAction Scroll => Map["Scroll"];
+        public static InputAction CameraRecenter => Map["CameraRecenter"];
         public static InputAction Attack => Map["Attack"];
         public static InputAction Dodge => Map["Dodge"];
         public static InputAction Block => Map["Block"];
@@ -104,9 +105,24 @@ namespace AL.Input
 
         public static Vector2 ReadMove() => _gameplaySuppressed ? Vector2.zero : Move.ReadValue<Vector2>();
 
-        public static Vector2 ReadLook() => _gameplaySuppressed ? Vector2.zero : Look.ReadValue<Vector2>();
+        public static Vector2 ReadLook()
+        {
+            if (_gameplaySuppressed)
+            {
+                return Vector2.zero;
+            }
+
+            Vector2 look = Look.ReadValue<Vector2>();
+            Mouse activeMouse = Look.activeControl?.device as Mouse;
+            return activeMouse != null && !activeMouse.rightButton.isPressed
+                ? Vector2.zero
+                : look;
+        }
 
         public static float ReadScroll() => _gameplaySuppressed ? 0f : Scroll.ReadValue<float>();
+
+        public static bool CameraRecenterPressed() =>
+            !_gameplaySuppressed && CameraRecenter.WasPressedThisFrame();
 
         public static bool AttackPressed() => !_gameplaySuppressed && Attack.WasPressedThisFrame();
 
@@ -144,7 +160,8 @@ namespace AL.Input
 
         public static bool CancelPressed() => Cancel.WasPressedThisFrame();
 
-        public static bool InteractPressed() => Interact.WasPressedThisFrame();
+        public static bool InteractPressed() =>
+            !_gameplaySuppressed && Interact.WasPressedThisFrame();
 
         public static bool WorldMapPressed() => WorldMap.WasPressedThisFrame();
 
@@ -203,6 +220,10 @@ namespace AL.Input
 
             var scroll = map.AddAction("Scroll", InputActionType.Value);
             scroll.AddBinding("<Mouse>/scroll/y");
+
+            var cameraRecenter = map.AddAction("CameraRecenter", InputActionType.Button);
+            cameraRecenter.AddBinding("<Mouse>/middleButton");
+            cameraRecenter.AddBinding("<Gamepad>/rightStickPress");
 
             var attack = map.AddAction("Attack", InputActionType.Button, "<Mouse>/leftButton");
             attack.AddBinding("<Gamepad>/buttonWest");

@@ -1297,7 +1297,14 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                     controller.TryBindEditorBasicAttackResolver(resolver),
                     Is.True);
 
-                controller.RequestBasicAttack();
+                Assert.That(
+                    controller.RequestBasicAttack(),
+                    Is.True,
+                    "An idle configured champion must accept its basic-attack request.");
+                Assert.That(
+                    controller.RequestBasicAttack(),
+                    Is.False,
+                    "A champion must reject an overlapping basic-attack request while the accepted attack is active.");
                 float started = Time.realtimeSinceStartup;
                 while (controller.EditorBasicAttackSequence < 1)
                 {

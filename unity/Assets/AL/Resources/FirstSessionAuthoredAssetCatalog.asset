@@ -20,6 +20,7 @@ MonoBehaviour:
   premiumFloorNormal: {fileID: 2800000, guid: 17b0a5d7ee61af74c995446e92c4c87a, type: 3}
   premiumFloorMetallic: {fileID: 2800000, guid: fad2502d3e160d142b06d04cdc30c3ea, type: 3}
   premiumFloorRoughness: {fileID: 2800000, guid: b477a753d6737e846bbc496decb4141a, type: 3}
+  firstSessionTerrainCatalog: {fileID: 4900000, guid: c2ea1f0bade44d56a3da074e1d1a6ee1, type: 3}
   championBases:
   - bodyBaseId: male
     prefab: {fileID: 919132149155446097, guid: 4898fd234dc9f1248876f397226aba2b, type: 3}

@@ -15,7 +15,10 @@ namespace AL.ChampionMode.Interaction
         public const string LabelName = "PromptLabel";
 
         private GameObject _root;
+        private GameObject _glyph;
         private Text _label;
+        private RectTransform _labelRect;
+        private RectTransform _plateRect;
         private Button _button;
         private UnityAction _onConfirm;
 
@@ -39,17 +42,12 @@ namespace AL.ChampionMode.Interaction
 
         public void Show(string copy)
         {
-            if (_root == null)
-            {
-                return;
-            }
+            SetCopy(copy, showInteractGlyph: true);
+        }
 
-            if (_label != null)
-            {
-                _label.text = copy ?? string.Empty;
-            }
-
-            _root.SetActive(!string.IsNullOrEmpty(copy));
+        public void ShowFeedback(string copy)
+        {
+            SetCopy(copy, showInteractGlyph: false);
         }
 
         public void Hide()
@@ -63,6 +61,49 @@ namespace AL.ChampionMode.Interaction
             {
                 _label.text = string.Empty;
             }
+        }
+
+        private void SetCopy(string copy, bool showInteractGlyph)
+        {
+            if (_root == null)
+            {
+                return;
+            }
+
+            string safeCopy = copy ?? string.Empty;
+            bool hasCopy = !string.IsNullOrEmpty(safeCopy);
+            if (_glyph != null)
+            {
+                _glyph.SetActive(hasCopy && showInteractGlyph);
+            }
+
+            if (_label != null)
+            {
+                _label.text = safeCopy;
+                _label.fontSize = showInteractGlyph ? 28 : 22;
+                _label.alignment = showInteractGlyph
+                    ? TextAnchor.MiddleLeft
+                    : TextAnchor.MiddleCenter;
+            }
+
+            if (_plateRect != null)
+            {
+                _plateRect.sizeDelta = showInteractGlyph
+                    ? new Vector2(640f, 64f)
+                    : new Vector2(720f, 88f);
+            }
+
+            if (_labelRect != null)
+            {
+                _labelRect.offsetMin = showInteractGlyph
+                    ? new Vector2(70f, 6f)
+                    : new Vector2(18f, 8f);
+                _labelRect.offsetMax = showInteractGlyph
+                    ? new Vector2(-16f, -6f)
+                    : new Vector2(-18f, -8f);
+            }
+
+            _root.SetActive(hasCopy);
         }
 
         private void Build()
@@ -86,15 +127,16 @@ namespace AL.ChampionMode.Interaction
             var outline = _root.AddComponent<Outline>();
             outline.effectColor = new Color(0.82f, 0.70f, 0.38f, 0.72f);
             outline.effectDistance = new Vector2(1.6f, -1.6f);
-            var plateRect = _root.GetComponent<RectTransform>();
-            plateRect.anchorMin = new Vector2(0.5f, 0f);
-            plateRect.anchorMax = new Vector2(0.5f, 0f);
-            plateRect.pivot = new Vector2(0.5f, 0f);
-            plateRect.anchoredPosition = new Vector2(0f, 168f);
-            plateRect.sizeDelta = new Vector2(640f, 64f);
+            _plateRect = _root.GetComponent<RectTransform>();
+            _plateRect.anchorMin = new Vector2(0.5f, 0f);
+            _plateRect.anchorMax = new Vector2(0.5f, 0f);
+            _plateRect.pivot = new Vector2(0.5f, 0f);
+            _plateRect.anchoredPosition = new Vector2(0f, 168f);
+            _plateRect.sizeDelta = new Vector2(640f, 64f);
 
             var glyph = new GameObject(GlyphName);
             glyph.transform.SetParent(_root.transform, false);
+            _glyph = glyph;
             var glyphImage = glyph.AddComponent<Image>();
             glyphImage.color = new Color(0.78f, 0.64f, 0.30f, 0.96f);
             var glyphRect = glyph.GetComponent<RectTransform>();
@@ -127,14 +169,14 @@ namespace AL.ChampionMode.Interaction
             _label.fontStyle = FontStyle.Bold;
             _label.alignment = TextAnchor.MiddleLeft;
             _label.color = new Color(0.93f, 0.88f, 0.74f, 1f);
-            _label.horizontalOverflow = HorizontalWrapMode.Overflow;
+            _label.horizontalOverflow = HorizontalWrapMode.Wrap;
             _label.verticalOverflow = VerticalWrapMode.Overflow;
             _label.raycastTarget = false;
-            var labelRect = labelObject.GetComponent<RectTransform>();
-            labelRect.anchorMin = new Vector2(0f, 0f);
-            labelRect.anchorMax = new Vector2(1f, 1f);
-            labelRect.offsetMin = new Vector2(70f, 6f);
-            labelRect.offsetMax = new Vector2(-16f, -6f);
+            _labelRect = labelObject.GetComponent<RectTransform>();
+            _labelRect.anchorMin = new Vector2(0f, 0f);
+            _labelRect.anchorMax = new Vector2(1f, 1f);
+            _labelRect.offsetMin = new Vector2(70f, 6f);
+            _labelRect.offsetMax = new Vector2(-16f, -6f);
 
             _button = _root.AddComponent<Button>();
             _button.targetGraphic = plate;

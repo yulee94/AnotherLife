@@ -1,8 +1,11 @@
 using AL.ChampionMode;
+using AL.ChampionMode.Control;
+using AL.ChampionMode.Interaction;
 using AL.ChampionMode.Tutorial;
 using AL.Narrative.Nvs01.Contracts;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace AL.Tests.EditMode.ChampionMode
 {
@@ -64,7 +67,7 @@ namespace AL.Tests.EditMode.ChampionMode
             FirstWorldEntryTutorialState afterLook = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
                 initial,
                 FirstWorldEntryTeachingBeat.Move,
-                sprintTaught: false);
+                blockTaught: false);
             Assert.AreEqual(FirstWorldEntryTutorialStep.Move, afterLook.Step);
             Assert.AreEqual(FirstWorldEntryTutorialIds.MoveObjectiveId, afterLook.ActiveTutorialObjectiveId);
         }
@@ -76,7 +79,7 @@ namespace AL.Tests.EditMode.ChampionMode
             FirstWorldEntryTutorialState readyToMove = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
                 initial,
                 FirstWorldEntryTeachingBeat.Move,
-                sprintTaught: false);
+                blockTaught: false);
             FirstWorldEntryTutorialTransition attack = FirstWorldEntryTutorialPlanner.Apply(
                 readyToMove,
                 FirstWorldEntryEvidenceKind.BasicAttackConfirmed);
@@ -89,7 +92,7 @@ namespace AL.Tests.EditMode.ChampionMode
         [Test]
         public void OrderedMoveThenAttackOffersOmenOnceAndDoesNotAccept()
         {
-            FirstWorldEntryTutorialState state = DriveToComplete(sprint: true);
+            FirstWorldEntryTutorialState state = DriveToComplete(block: true);
             Assert.AreEqual(FirstWorldEntryTutorialStep.Complete, state.Step);
             Assert.AreEqual(FirstWorldEntryTeachingBeat.OmenOffered, state.TeachingBeat);
             Assert.AreEqual(1, state.CompletionEventCount);
@@ -99,7 +102,7 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.AreEqual("OMEN_1", state.ForegroundQuestId);
             Assert.AreEqual("OFFERED", state.ForegroundQuestState);
             Assert.AreEqual("OBJ_OMEN_1_TALK", state.ForegroundObjectiveId);
-            Assert.IsTrue(state.SprintTaught);
+            Assert.IsTrue(state.BlockTaught);
         }
 
         [Test]
@@ -108,7 +111,7 @@ namespace AL.Tests.EditMode.ChampionMode
             FirstWorldEntryTutorialState moveReady = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
                 FirstWorldEntryTutorialPlanner.CreateInitial(),
                 FirstWorldEntryTeachingBeat.Move,
-                sprintTaught: false);
+                blockTaught: false);
             FirstWorldEntryTutorialTransition first = FirstWorldEntryTutorialPlanner.Apply(
                 moveReady,
                 FirstWorldEntryEvidenceKind.MovementConfirmed);
@@ -122,7 +125,7 @@ namespace AL.Tests.EditMode.ChampionMode
         [Test]
         public void FollowDoesNotAcceptOmenAndHasNoTargetYet()
         {
-            FirstWorldEntryTutorialState complete = DriveToComplete(sprint: false);
+            FirstWorldEntryTutorialState complete = DriveToComplete(block: false);
             Assert.AreEqual(
                 FirstWorldEntryTutorialIds.FollowNoTargetResultId,
                 FirstWorldEntryTutorialPlanner.Follow(complete, targetAvailable: false));
@@ -136,8 +139,17 @@ namespace AL.Tests.EditMode.ChampionMode
         {
             Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.Title));
             Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.CameraPrompt));
+            Assert.That(
+                FirstWorldEntryTutorialCopy.CameraPrompt,
+                Does.Contain("Hold the right mouse button and drag"));
+            Assert.That(FirstWorldEntryTutorialCopy.CameraPrompt, Does.Contain("right stick"));
+            Assert.That(FirstWorldEntryTutorialCopy.CameraPrompt, Does.Not.Contain("Move the mouse"));
             Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.MovePrompt));
+            Assert.That(FirstWorldEntryTutorialCopy.MovePrompt, Does.Contain("Shift to block"));
+            Assert.That(FirstWorldEntryTutorialCopy.MovePrompt, Does.Not.Contain("sprint"));
             Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.InteractPrompt));
+            Assert.That(FirstWorldEntryTutorialCopy.InteractPrompt, Does.Contain("press F"));
+            Assert.That(FirstWorldEntryTutorialCopy.InteractPrompt, Does.Not.Contain("Enter"));
             Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.AttackPrompt));
             Assert.AreEqual("The First Signal", FirstWorldEntryTutorialCopy.OmenOfferTitle);
             Assert.AreEqual("Speak with Captain Valerius.", FirstWorldEntryTutorialCopy.OmenTalk);
@@ -166,6 +178,35 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
+        public void TutorialPromptClearsCombatHotbarEnvelope()
+        {
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+            Transform promptTransform = director.transform.Find(
+                "TutorialCanvas_TEMPORARY/" + FirstWorldEntryTutorialDirector.PromptName);
+            Assert.NotNull(promptTransform);
+
+            RectTransform prompt = promptTransform.GetComponent<RectTransform>();
+            Assert.NotNull(prompt);
+            CanvasScaler tutorialScaler = promptTransform.GetComponentInParent<CanvasScaler>();
+            Assert.NotNull(tutorialScaler);
+            Assert.That(
+                tutorialScaler.matchWidthOrHeight,
+                Is.EqualTo(0.5f),
+                "Tutorial and combat HUD must share one scaling contract at non-16:9 resolutions.");
+            float promptBottom = prompt.anchoredPosition.y -
+                                 prompt.sizeDelta.y * prompt.pivot.y;
+            float hotbarTop = ChampionArenaSceneController.CombatHotbarBottomOffset +
+                              ChampionArenaSceneController.CombatHotbarHeight;
+
+            Assert.That(
+                promptBottom - hotbarTop,
+                Is.GreaterThanOrEqualTo(
+                    FirstWorldEntryTutorialDirector.PromptHotbarClearance),
+                "First-session guidance must remain readable above the combat hotbar.");
+        }
+
+        [Test]
         public void DirectorTeachesLookMoveInteractAttackThenOffersOmen()
         {
             FirstWorldEntryTutorialDirector director =
@@ -176,7 +217,7 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.AreEqual(FirstWorldEntryTeachingBeat.Move, director.State.TeachingBeat);
             Assert.AreEqual(FirstWorldEntryTutorialStep.Move, director.State.Step);
 
-            director.ApplyMoveForTests(FirstWorldEntryTutorialEvidence.MoveThreshold, sprintHeld: true);
+            director.ApplyMoveForTests(FirstWorldEntryTutorialEvidence.MoveThreshold, blockHeld: true);
             Assert.AreEqual(FirstWorldEntryTeachingBeat.Interact, director.State.TeachingBeat);
             Assert.AreEqual(FirstWorldEntryTutorialStep.BasicAttack, director.State.Step);
             Assert.AreEqual(
@@ -203,27 +244,108 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.IsFalse(director.State.OmenAccepted);
             Assert.IsTrue(director.State.IsOmenOffered);
             Assert.IsFalse(director.OpenedKingdom);
-            Assert.IsTrue(director.State.SprintTaught);
+            Assert.IsTrue(director.State.BlockTaught);
 
             Assert.NotNull(director.transform.Find("TutorialCanvas_TEMPORARY/" + FirstWorldEntryTutorialDirector.OfferPlateName));
+        }
+
+        [Test]
+        public void OnlyAcceptedRealmGuideInteractionAdvancesInteractBeat()
+        {
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+            director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
+            director.ApplyMoveForTests(
+                FirstWorldEntryTutorialEvidence.MoveThreshold,
+                blockHeld: false);
+            Assert.AreEqual(
+                FirstWorldEntryTeachingBeat.Interact,
+                director.State.TeachingBeat);
+
+            director.ApplyWorldInteractionForTests(new WorldInteractionResult(
+                true,
+                FirstSessionWorldInteractables.CovenantSiteCatalogId,
+                WorldInteractionKind.Use,
+                WorldInteractionPromptCopy.CovenantObjectiveText));
+            Assert.AreEqual(
+                FirstWorldEntryTeachingBeat.Interact,
+                director.State.TeachingBeat);
+
+            director.ApplyWorldInteractionForTests(new WorldInteractionResult(
+                false,
+                FirstSessionWorldInteractables.GuideCatalogId,
+                WorldInteractionKind.Talk,
+                string.Empty));
+            Assert.AreEqual(
+                FirstWorldEntryTeachingBeat.Interact,
+                director.State.TeachingBeat);
+
+            director.ApplyWorldInteractionForTests(new WorldInteractionResult(
+                true,
+                FirstSessionWorldInteractables.GuideCatalogId,
+                WorldInteractionKind.Talk,
+                WorldInteractionPromptCopy.GuideObjectiveText));
+            Assert.AreEqual(
+                FirstWorldEntryTeachingBeat.BasicAttack,
+                director.State.TeachingBeat);
         }
 
         [Test]
         public void EvidenceThresholdsRejectNoise()
         {
             Assert.IsFalse(FirstWorldEntryTutorialEvidence.IsLookAccepted(0.5f));
-            Assert.IsFalse(FirstWorldEntryTutorialEvidence.IsMoveAccepted(0.05f));
             Assert.IsTrue(FirstWorldEntryTutorialEvidence.IsLookAccepted(12f));
-            Assert.IsTrue(FirstWorldEntryTutorialEvidence.IsMoveAccepted(0.35f));
+
+            ChampionMovementReceipt accepted = MovementReceipt(
+                FirstWorldEntryTutorialEvidence.MoveThreshold,
+                FirstWorldEntryTutorialEvidence.HorizontalDisplacementThreshold,
+                grounded: true);
+            Assert.IsTrue(FirstWorldEntryTutorialEvidence.IsMoveAccepted(accepted));
+            Assert.IsFalse(FirstWorldEntryTutorialEvidence.IsMoveAccepted(
+                MovementReceipt(0.05f, 0.2f, grounded: true)));
+            Assert.IsFalse(FirstWorldEntryTutorialEvidence.IsMoveAccepted(
+                MovementReceipt(1f, 0f, grounded: true)));
+            Assert.IsFalse(FirstWorldEntryTutorialEvidence.IsMoveAccepted(
+                MovementReceipt(1f, 0.2f, grounded: false)));
         }
 
-        private static FirstWorldEntryTutorialState DriveToComplete(bool sprint)
+        [Test]
+        public void DirectorRejectsMoveIntentWithoutGroundedDisplacement()
+        {
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+            director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
+
+            director.ApplyRejectedMoveForTests(1f, 0f, grounded: true);
+            Assert.AreEqual(FirstWorldEntryTeachingBeat.Move, director.State.TeachingBeat);
+            Assert.AreEqual(0, director.State.MovementConfirmationCount);
+
+            director.ApplyRejectedMoveForTests(1f, 0.2f, grounded: false);
+            Assert.AreEqual(FirstWorldEntryTeachingBeat.Move, director.State.TeachingBeat);
+            Assert.AreEqual(0, director.State.MovementConfirmationCount);
+        }
+
+        private static ChampionMovementReceipt MovementReceipt(
+            float inputMagnitude,
+            float horizontalDisplacement,
+            bool grounded)
+        {
+            return new ChampionMovementReceipt(
+                1,
+                Vector2.up * inputMagnitude,
+                Vector3.forward * horizontalDisplacement,
+                grounded,
+                grounded,
+                grounded ? CollisionFlags.Below : CollisionFlags.None);
+        }
+
+        private static FirstWorldEntryTutorialState DriveToComplete(bool block)
         {
             FirstWorldEntryTutorialState state = FirstWorldEntryTutorialPlanner.CreateInitial();
             state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
                 state,
                 FirstWorldEntryTeachingBeat.Move,
-                sprintTaught: false);
+                blockTaught: false);
             FirstWorldEntryTutorialTransition moved = FirstWorldEntryTutorialPlanner.Apply(
                 state,
                 FirstWorldEntryEvidenceKind.MovementConfirmed);
@@ -232,7 +354,7 @@ namespace AL.Tests.EditMode.ChampionMode
             state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
                 moved.State,
                 FirstWorldEntryTeachingBeat.BasicAttack,
-                sprintTaught: sprint);
+                blockTaught: block);
             FirstWorldEntryTutorialTransition attack = FirstWorldEntryTutorialPlanner.Apply(
                 state,
                 FirstWorldEntryEvidenceKind.BasicAttackConfirmed);

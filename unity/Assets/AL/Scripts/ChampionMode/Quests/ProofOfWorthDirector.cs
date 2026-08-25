@@ -1,9 +1,11 @@
 using System;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.Interaction;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.Input;
+using AL.Services.Local;
 using AL.UI.QuestHud;
 using AL.UI.SharedMenu;
 using AL.UI.WorldMap;
@@ -26,12 +28,17 @@ namespace AL.ChampionMode.Quests
         private ChampionArenaSceneController _arena;
         private Transform _player;
         private ChampionController _playerController;
+        private WorldInteractionDirector _worldInteractionDirector;
         private GameObject _markerRoot;
         private bool _ready;
         private bool _autoFollowInputApplied;
         private bool _guardianStarted;
         private bool _persistAttempted;
         private string _lastPersistMessage = string.Empty;
+        private ISaveGameService _saveGameService;
+        private FirstWorldProgressSnapshot _progressSnapshot;
+        private bool _durable;
+        private bool _failedClosed;
 
         public static event Action LordshipGrantedObserved;
 
@@ -52,9 +59,35 @@ namespace AL.ChampionMode.Quests
                 return null;
             }
 
+            string message = string.Empty;
+            FirstWorldProgressSnapshot progress = null;
+            if (!ServiceLocator.TryGet(
+                    out ISaveGameService saveGameService) ||
+                !FirstWorldProgressSaveAuthority.CanCommit(saveGameService) ||
+                !FirstWorldProgressSaveAuthority.TryRead(
+                    saveGameService,
+                    out progress,
+                    out message) ||
+                !progress.CanRunProof ||
+                progress.Realm != realm ||
+                progress.Proof.LordshipGranted)
+            {
+                Debug.LogError(
+                    "[AL-PROOF-PROGRESS-FAILED-CLOSED] " +
+                    (string.IsNullOrWhiteSpace(message)
+                        ? "Durable tutorial handoff or Proof authority is unavailable."
+                        : message));
+                return null;
+            }
+
             if (_instance != null)
             {
-                _instance.EnsureReady(arena, player, realm);
+                _instance.EnsureReadyDurable(
+                    arena,
+                    player,
+                    realm,
+                    saveGameService,
+                    progress);
                 return _instance;
             }
 
@@ -65,7 +98,12 @@ namespace AL.ChampionMode.Quests
             }
 
             ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
-            director.EnsureReady(arena, player, realm);
+            director.EnsureReadyDurable(
+                arena,
+                player,
+                realm,
+                saveGameService,
+                progress);
             return director;
         }
 
@@ -82,6 +120,11 @@ namespace AL.ChampionMode.Quests
 
         public static void ResetForTests()
         {
+            if (_instance != null)
+            {
+                _instance.BindWorldInteractionDirector(null);
+            }
+
             _instance = null;
             LordshipGrantedObserved = null;
             QuestHudAutoQuest.ResetForTests();
@@ -106,13 +149,110 @@ namespace AL.ChampionMode.Quests
             _ready = true;
         }
 
+        private void EnsureReadyDurable(
+            ChampionArenaSceneController arena,
+            Transform player,
+            RealmId realm,
+            ISaveGameService saveGameService,
+            FirstWorldProgressSnapshot progress)
+        {
+            _instance = this;
+            _arena = arena;
+            _player = player;
+            _playerController = player != null
+                ? player.GetComponent<ChampionController>()
+                : null;
+            if (_ready)
+            {
+                if (!_durable ||
+                    _progressSnapshot == null ||
+                    _progressSnapshot.Realm != realm)
+                {
+                    FailClosed("AL-PROOF-INSTANCE-AUTHORITY-CONFLICT");
+                }
+
+                return;
+            }
+
+            if (!FirstWorldProgressSaveAuthority.CanCommit(saveGameService) ||
+                progress == null ||
+                !progress.CanRunProof ||
+                progress.Realm != realm ||
+                progress.Proof.LordshipGranted)
+            {
+                FailClosed("AL-PROOF-PROGRESS-UNAVAILABLE");
+                return;
+            }
+
+            _saveGameService = saveGameService;
+            _progressSnapshot = progress;
+            _state = progress.Proof;
+            _durable = true;
+            BuildOverlay();
+            RefreshPresentation();
+            _ready = true;
+        }
+
         public ProofOfWorthTransition ApplyForTests(ProofOfWorthCommand command)
         {
             return Apply(command);
         }
 
+        public void BindWorldInteractionDirector(WorldInteractionDirector director)
+        {
+            if (_worldInteractionDirector == director)
+            {
+                return;
+            }
+
+            if (_worldInteractionDirector != null)
+            {
+                _worldInteractionDirector.Confirmed -=
+                    HandleWorldInteractionConfirmed;
+            }
+
+            _worldInteractionDirector = director;
+            if (_worldInteractionDirector != null)
+            {
+                _worldInteractionDirector.Confirmed +=
+                    HandleWorldInteractionConfirmed;
+            }
+        }
+
+        public bool TryApplyWorldInteraction(WorldInteractionResult result)
+        {
+            if (_failedClosed ||
+                !result.Accepted ||
+                _state == null ||
+                !string.Equals(
+                    result.CatalogId,
+                    _state.ObjectiveId,
+                    StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            ProofOfWorthCommand command;
+            switch (_state.Phase)
+            {
+                case ProofOfWorthPhase.C1MeetGuide
+                    when result.Kind == WorldInteractionKind.Talk:
+                    command = ProofOfWorthCommand.MeetRealmGuide;
+                    break;
+                case ProofOfWorthPhase.C1RestoreCovenant
+                    when result.Kind == WorldInteractionKind.Use:
+                    command = ProofOfWorthCommand.RestoreCovenant;
+                    break;
+                default:
+                    return false;
+            }
+
+            return Apply(command).Changed;
+        }
+
         private void OnDestroy()
         {
+            BindWorldInteractionDirector(null);
             ReleaseAutoQuestFollow();
             if (_instance == this)
             {
@@ -122,9 +262,15 @@ namespace AL.ChampionMode.Quests
             MainQuestMapSession.Clear();
         }
 
+        private void HandleWorldInteractionConfirmed(
+            WorldInteractionResult result)
+        {
+            TryApplyWorldInteraction(result);
+        }
+
         private void Update()
         {
-            if (_state == null || _state.LordshipGranted)
+            if (_failedClosed || _state == null || _state.LordshipGranted)
             {
                 return;
             }
@@ -302,48 +448,128 @@ namespace AL.ChampionMode.Quests
 
         private ProofOfWorthTransition Apply(ProofOfWorthCommand command)
         {
-            ProofOfWorthTransition transition = ProofOfWorthPlanner.Apply(_state, command);
-            if (transition.Changed)
+            ProofOfWorthTransition transition =
+                ProofOfWorthPlanner.Apply(_state, command);
+            if (!transition.Changed)
+            {
+                return transition;
+            }
+
+            bool grantedLordship = transition.State.LordshipGranted;
+            if (_durable)
+            {
+                if (_failedClosed ||
+                    _saveGameService == null ||
+                    _progressSnapshot == null)
+                {
+                    FailClosed("AL-PROOF-PROGRESS-UNAVAILABLE");
+                    return RejectedCurrent();
+                }
+
+                if (grantedLordship && !TryPersistLordship())
+                {
+                    FailClosed(_lastPersistMessage);
+                    return RejectedCurrent();
+                }
+
+                FirstWorldProgressCommitResult commit =
+                    FirstWorldProgressSaveAuthority.TryAdvanceProof(
+                        _saveGameService,
+                        _progressSnapshot,
+                        command);
+                if (commit == null ||
+                    !commit.Accepted ||
+                    commit.Snapshot?.Proof == null)
+                {
+                    // A crash-safe lordship write is authoritative even if the
+                    // extension write becomes uncertain. Its codec reconciles
+                    // that older slot forward instead of replaying the quest.
+                    if (grantedLordship &&
+                        FirstWorldProgressSaveAuthority.TryRead(
+                            _saveGameService,
+                            out FirstWorldProgressSnapshot reconciled,
+                            out _) &&
+                        reconciled.CanRunProof &&
+                        reconciled.Proof.LordshipGranted)
+                    {
+                        _progressSnapshot = reconciled;
+                        _state = reconciled.Proof;
+                        RefreshPresentation();
+                        LordshipGrantedObserved?.Invoke();
+                        return new ProofOfWorthTransition(
+                            ProofOfWorthStatus.Applied,
+                            _state);
+                    }
+
+                    FailClosed(
+                        commit?.Message ??
+                        "AL-PROOF-PROGRESS-COMMIT-FAILED");
+                    return RejectedCurrent();
+                }
+
+                _progressSnapshot = commit.Snapshot;
+                _state = commit.Snapshot.Proof;
+            }
+            else
             {
                 _state = transition.State;
-                bool grantedLordship = _state.LordshipGranted;
                 if (grantedLordship)
                 {
-                    PersistLordship();
-                }
-
-                RefreshPresentation();
-                if (grantedLordship)
-                {
-                    LordshipGrantedObserved?.Invoke();
+                    TryPersistLordship();
                 }
             }
 
-            return transition;
+            RefreshPresentation();
+            if (grantedLordship)
+            {
+                LordshipGrantedObserved?.Invoke();
+            }
+
+            return new ProofOfWorthTransition(
+                ProofOfWorthStatus.Applied,
+                _state);
         }
 
-        private void PersistLordship()
+        private bool TryPersistLordship()
         {
             _persistAttempted = true;
-            if (ServiceLocator.TryGet(out ISaveGameService save) && save != null)
+            ISaveGameService save = _saveGameService;
+            if (save == null)
             {
-                AL.Services.Local.MvpLoopCommitResult result =
-                    ProofOfWorthLordship.TryPersist(save, _state.Realm);
-                _lastPersistMessage = result.Message;
-                if (result.Accepted)
-                {
-                    return;
-                }
+                ServiceLocator.TryGet(out save);
             }
 
-            if (ServiceLocator.TryGet(out ISaveGameService fallback) &&
-                fallback != null &&
-                fallback.CurrentSave != null)
+            if (save == null)
             {
-                ProofOfWorthLordship.TryWriteMark(
-                    fallback.CurrentSave,
-                    _state.ChapterVariantId);
+                _lastPersistMessage = "AL-C1-LORDSHIP-PROFILE-READ-ONLY";
+                return false;
             }
+
+            MvpLoopCommitResult result =
+                ProofOfWorthLordship.TryPersist(save, _state.Realm);
+            _lastPersistMessage = result?.Message ??
+                                  "AL-C1-LORDSHIP-PERSIST-FAILED";
+            return result != null && result.Accepted;
+        }
+
+        private ProofOfWorthTransition RejectedCurrent()
+        {
+            return new ProofOfWorthTransition(
+                ProofOfWorthStatus.Rejected,
+                _state);
+        }
+
+        private void FailClosed(string message)
+        {
+            _failedClosed = true;
+            enabled = false;
+            BindWorldInteractionDirector(null);
+            ReleaseAutoQuestFollow();
+            Debug.LogError(
+                "[AL-PROOF-PROGRESS-FAILED-CLOSED] " +
+                (string.IsNullOrWhiteSpace(message)
+                    ? "Durable Proof authority is unavailable."
+                    : message));
         }
 
         private bool IsNearActiveMarker()

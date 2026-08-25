@@ -223,6 +223,7 @@ namespace AL.Services.Local
         ILegacyRealmSelectionCandidateStore,
         ILegacyMvpLoopCandidateStore,
         ILegacyKingdomTeachingCandidateStore,
+        ILegacyFirstWorldProgressCandidateStore,
         INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
     {
@@ -260,6 +261,8 @@ namespace AL.Services.Local
             "al.save.schema1.mvp-loop.v1";
         private const string LegacyKingdomTeachingOperationId =
             "al.save.schema1.kingdom-teaching.v1";
+        private const string LegacyFirstWorldProgressOperationId =
+            "al.save.schema1.first-world-progress.v1";
 
         private static readonly ProfileWriteAuthoritySnapshot
             MigrationRequiredPrimary =
@@ -1276,6 +1279,84 @@ namespace AL.Services.Local
             }
         }
 
+        SaveCandidateCommitResult
+            ILegacyFirstWorldProgressCandidateStore
+                .TryCommitLegacyFirstWorldProgress(
+                    FirstWorldProgressCommitRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-FIRST-WORLD-TRANSACTION-INVALID");
+            }
+
+            if (!TryEnterLegacyCandidateCoordinator(
+                    LegacyFirstWorldProgressOperationId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-FIRST-WORLD-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyPrimaryProfile(
+                        out SaveGameData published) ||
+                    published.SelectedRealm == RealmId.None ||
+                    request.Expected == null ||
+                    published.SelectedRealm != request.Expected.Realm)
+                {
+                    return LegacyCandidateRejected(
+                        "AL-FIRST-WORLD-PROFILE-READ-ONLY");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits
+                                .LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-FIRST-WORLD-AUTHORITY-CONFLICT");
+                    }
+
+                    FirstWorldProgressPrepareDisposition disposition =
+                        FirstWorldProgressSaveCodec.PrepareCandidate(
+                            candidate,
+                            request,
+                            out _,
+                            out string prepareMessage);
+                    if (candidate.SelectedRealm != expectedRealm)
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-FIRST-WORLD-AUTHORITY-CONFLICT");
+                    }
+
+                    switch (disposition)
+                    {
+                        case FirstWorldProgressPrepareDisposition.Duplicate:
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        case FirstWorldProgressPrepareDisposition.Prepared:
+                            return SaveCandidateMutationPreparation.Prepared();
+                        default:
+                            return SaveCandidateMutationPreparation.Rejected(
+                                string.IsNullOrWhiteSpace(prepareMessage)
+                                    ? "AL-FIRST-WORLD-REQUEST-INVALID"
+                                    : prepareMessage);
+                    }
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
         SaveCandidateCommitResult ISaveGameCandidateStore.TryCommitCandidate(
             Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate)
         {
@@ -1612,6 +1693,10 @@ namespace AL.Services.Local
                 !string.Equals(
                     operationId,
                     LegacyKingdomTeachingOperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyFirstWorldProgressOperationId,
                     StringComparison.Ordinal))
             {
                 return false;
@@ -2453,11 +2538,14 @@ namespace AL.Services.Local
             Nvs01ProgressData migratedProgress = null;
             Nvs01RuntimeDiagnostic migrationDiagnostic = null;
             SaveCanonicalLedger migrationBaseline = null;
-            if (HasUnresolvedAuxiliaryEvidence(inventory) ||
-                selected?.SourceGeneration !=
+            // Materialize the exact retained generation before rejecting
+            // unresolved auxiliary evidence so diagnostics can expose the
+            // same read-only bytes without granting runtime/write authority.
+            if (selected?.SourceGeneration !=
                     SaveCandidateSourceGeneration.Primary ||
                 !IsExactNvs01V003MigrationCandidate(selected) ||
                 !TryDeserializeSelectedCandidate(selected, out retained) ||
+                HasUnresolvedAuxiliaryEvidence(inventory) ||
                 !Nvs01ProgressCodec.TryMigrateExactV003(
                     retained.Nvs01Progress,
                     out migratedProgress,
@@ -4411,10 +4499,9 @@ namespace AL.Services.Local
                 return false;
             }
 
-            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+            SaveSemanticCandidate candidate = ValidateSemanticCandidate(
                 actual.Bytes,
-                source,
-                _semanticPolicy);
+                source);
             return candidate.Outcome == SaveSemanticCandidateOutcome.Invalid &&
                    candidate.HasRetainedRawBytes &&
                    candidate.OriginalRawByteCount == actual.Bytes.Length;
@@ -4434,10 +4521,9 @@ namespace AL.Services.Local
                 return false;
             }
 
-            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+            SaveSemanticCandidate candidate = ValidateSemanticCandidate(
                 actual.Bytes,
-                source,
-                _semanticPolicy);
+                source);
             return IsExplicitCurrentWritableCandidate(candidate) &&
                    TryDeserializeSelectedCandidate(candidate, out save);
         }
@@ -5592,10 +5678,7 @@ namespace AL.Services.Local
             try
             {
                 SaveSemanticCandidate semanticCandidate =
-                    SaveSemanticCandidateValidator.Validate(
-                        bytes,
-                        source,
-                        _semanticPolicy);
+                    ValidateSemanticCandidate(bytes, source);
                 if (!semanticCandidate.IsWritable ||
                     (semanticCandidate.Outcome != SaveSemanticCandidateOutcome.Valid &&
                      semanticCandidate.Outcome !=
@@ -5669,6 +5752,13 @@ namespace AL.Services.Local
 
             if (!Nvs01ProgressCodec.TryValidateStoredData(
                     save.Nvs01Progress,
+                    out error))
+            {
+                return false;
+            }
+
+            if (!FirstWorldProgressSaveCodec.TryValidateStoredData(
+                    save,
                     out error))
             {
                 return false;
@@ -5855,16 +5945,16 @@ namespace AL.Services.Local
             };
         }
 
-        private SaveCandidateInventoryEntry InspectCandidate(
-            SaveCandidateSourceGeneration source,
-            string path)
+        private SaveSemanticCandidate ValidateSemanticCandidate(
+            byte[] bytes,
+            SaveCandidateSourceGeneration source)
         {
-            SaveFileReadResult readResult = _fileOperations.ReadAllBytesBounded(
-                path,
-                _semanticPolicy.MaximumInputBytes);
-            SaveSemanticCandidate candidate = readResult.Disposition == SaveFileReadDisposition.Read
-                ? SaveSemanticCandidateValidator.Validate(readResult.Bytes, source, _semanticPolicy)
-                : null;
+            // Selection and every later ledger/recovery verification must use
+            // one topology-aware classification for the same retained bytes.
+            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                bytes,
+                source,
+                _semanticPolicy);
             if (IsExactNvs01V003MigrationCandidate(candidate) &&
                 (!TryDeserializeSelectedCandidate(
                      candidate,
@@ -5874,10 +5964,23 @@ namespace AL.Services.Local
                      out _,
                      out _)))
             {
-                candidate =
-                    SaveSemanticCandidateValidator
-                        .RejectNvs01MigrationTopology(candidate);
+                return SaveSemanticCandidateValidator
+                    .RejectNvs01MigrationTopology(candidate);
             }
+
+            return candidate;
+        }
+
+        private SaveCandidateInventoryEntry InspectCandidate(
+            SaveCandidateSourceGeneration source,
+            string path)
+        {
+            SaveFileReadResult readResult = _fileOperations.ReadAllBytesBounded(
+                path,
+                _semanticPolicy.MaximumInputBytes);
+            SaveSemanticCandidate candidate = readResult.Disposition == SaveFileReadDisposition.Read
+                ? ValidateSemanticCandidate(readResult.Bytes, source)
+                : null;
             var summaryReadResult = new SaveFileReadResult(
                 readResult.Disposition,
                 null,
