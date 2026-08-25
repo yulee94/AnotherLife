@@ -13,6 +13,9 @@ engineering hypotheses until measured and accepted
 
 **Scorecard template:** [`Templates/PostMVP_Golden_Scene_Scorecard.md`](Templates/PostMVP_Golden_Scene_Scorecard.md)
 
+**Sustained physical Android procedure:**
+[`PostMVP_Sustained_Physical_Android_Benchmark_Procedure.md`](PostMVP_Sustained_Physical_Android_Benchmark_Procedure.md)
+
 ## 1. Purpose
 
 This specification turns the owner-approved post-MVP visual direction into repeatable,
