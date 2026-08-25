@@ -619,6 +619,11 @@ namespace AL.Kingdom.Visuals
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.sortMode = ParticleSystemSortMode.Distance;
                 renderer.sortingOrder = groundLayer ? -2 : 1;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    groundLayer
+                        ? "MAT_RuntimeKingdomGroundAtmosphere"
+                        : "MAT_RuntimeKingdomAtmosphere");
             }
 
             particles.Play();

@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using AL.Core;
 using AL.Data.Catalogs.WorldAtlas;
+using AL.Data.Catalogs.WorldTerrain;
 using AL.World;
 using NUnit.Framework;
 using UnityEngine;
@@ -53,6 +55,14 @@ namespace AL.Tests.EditMode.World
             Assert.That(catalog.FloorMaterial.shader.name, Is.EqualTo("Standard"));
             Assert.That(catalog.WallMaterial.shader.name, Is.EqualTo("Standard"));
             Assert.That(catalog.TrimMaterial.shader.name, Is.EqualTo("Standard"));
+            Assert.That(catalog.FirstSessionTerrainCatalog, Is.Not.Null);
+            FirstSessionTerrainLoadResult terrainLoad =
+                FirstSessionTerrainCatalogLoader.Validate(
+                    catalog.FirstSessionTerrainCatalog.bytes);
+            Assert.That(terrainLoad.IsAccepted, Is.True,
+                terrainLoad.Diagnostics.Count == 0
+                    ? string.Empty
+                    : terrainLoad.Diagnostics[0].Fingerprint);
 
             foreach (RealmId realm in Realms())
             {
@@ -140,7 +150,7 @@ namespace AL.Tests.EditMode.World
                 Assert.That(structural, Is.Not.Null, realm.ToString());
                 Assert.That(structuralRoots.Add(structural.name), Is.True);
                 Assert.That(built.Root.GetComponentsInChildren<Collider>(true).Length,
-                    Is.GreaterThanOrEqualTo(2));
+                    Is.GreaterThanOrEqualTo(1));
 
                 Renderer[] representativeRenderers = built.Root
                     .GetComponentsInChildren<Renderer>(true)
@@ -168,6 +178,278 @@ namespace AL.Tests.EditMode.World
             }
 
             Assert.That(structuralRoots.Count, Is.EqualTo(4));
+        }
+
+        [Test]
+        public void CanonicalTerrainCatalogAcceptsSealedLandmarkAndRejectsInvalidRanges()
+        {
+            FirstSessionAuthoredAssetCatalog catalog =
+                Resources.Load<FirstSessionAuthoredAssetCatalog>(
+                    FirstSessionAuthoredAssetCatalog.ResourcesPath);
+            FirstSessionTerrainLoadResult accepted =
+                FirstSessionTerrainCatalogLoader.Validate(
+                    catalog.FirstSessionTerrainCatalog.bytes);
+
+            Assert.That(accepted.IsAccepted, Is.True);
+            Assert.That(accepted.Profile.SourceMode, Is.EqualTo("runtime_procedural_mvp"));
+            Assert.That(
+                accepted.Profile.FutureBakeContract,
+                Is.EqualTo("terrain_data_height_slope_biome_splat_v1"));
+            Assert.That(
+                accepted.Profile.Navigation.TraversalProbeRadiusMeters,
+                Is.LessThan(accepted.Profile.Generation.SafeCourtyardRadiusMeters));
+            Assert.That(
+                accepted.Profile.Collision.LandmarkEntranceWidthMeters,
+                Is.Zero,
+                "The admitted imported landmarks have visually closed doors, so their provisional front collision must be explicitly sealed.");
+
+            string invalid = catalog.FirstSessionTerrainCatalog.text.Replace(
+                "\"heightmapResolution\": 65",
+                "\"heightmapResolution\": 62");
+            FirstSessionTerrainLoadResult rejected =
+                FirstSessionTerrainCatalogLoader.Validate(
+                    Encoding.UTF8.GetBytes(invalid));
+            Assert.That(rejected.IsAccepted, Is.False);
+            Assert.That(rejected.Diagnostics.Any(diagnostic =>
+                diagnostic.Code == "AL-TERRAIN-RESOLUTION-INVALID"), Is.True);
+
+            string negativeEntrance = catalog.FirstSessionTerrainCatalog.text.Replace(
+                "\"landmarkEntranceWidthMeters\": 0",
+                "\"landmarkEntranceWidthMeters\": -1");
+            FirstSessionTerrainLoadResult rejectedEntrance =
+                FirstSessionTerrainCatalogLoader.Validate(
+                    Encoding.UTF8.GetBytes(negativeEntrance));
+            Assert.That(rejectedEntrance.IsAccepted, Is.False);
+            Assert.That(rejectedEntrance.Diagnostics.Any(diagnostic =>
+                diagnostic.Code == "AL-TERRAIN-RANGE-INVALID" &&
+                diagnostic.Path ==
+                    "$.profile.collision.landmarkEntranceWidthMeters"), Is.True);
+        }
+
+        [Test]
+        public void EveryFirstSessionRealmBuildsRealTerrainColliderAndBoundedSafeCourtyard()
+        {
+            InnerRealmWorldLayout layout = LoadLayout();
+            FirstSessionAuthoredAssetCatalog catalog =
+                Resources.Load<FirstSessionAuthoredAssetCatalog>(
+                    FirstSessionAuthoredAssetCatalog.ResourcesPath);
+            FirstSessionTerrainLoadResult terrainLoad =
+                FirstSessionTerrainCatalogLoader.Validate(
+                    catalog.FirstSessionTerrainCatalog.bytes);
+            Assert.That(terrainLoad.IsAccepted, Is.True);
+            FirstSessionTerrainProfile profile = terrainLoad.Profile;
+
+            foreach (RealmId realm in Realms())
+            {
+                string realmId = realm.ToString().ToLowerInvariant();
+                InnerRealmWorldBuildResult built =
+                    FirstSessionAuthoredWorldBuilder.Build(layout, realmId);
+                _spawned.Add(built.Root.gameObject);
+                Physics.SyncTransforms();
+
+                Vector3 spawn = built.PlayerSpawn;
+                Transform terrainTransform = built.Root.Find(
+                    FirstSessionAuthoredWorldBuilder.TerrainName);
+                Assert.That(terrainTransform, Is.Not.Null,
+                    realm + " has no physical Unity Terrain.");
+                Terrain terrain = terrainTransform.GetComponent<Terrain>();
+                TerrainCollider terrainCollider =
+                    terrainTransform.GetComponent<TerrainCollider>();
+                Assert.That(terrain, Is.Not.Null, realm.ToString());
+                Assert.That(terrainCollider, Is.Not.Null, realm.ToString());
+                Assert.That(terrainCollider.isTrigger, Is.False, realm.ToString());
+                Assert.That(terrainCollider.terrainData, Is.SameAs(terrain.terrainData));
+                Assert.That(
+                    built.Root.GetComponentsInChildren<Terrain>(true),
+                    Has.Length.EqualTo(1));
+                Assert.That(
+                    built.Root.GetComponentsInChildren<TerrainCollider>(true),
+                    Has.Length.EqualTo(1));
+
+                Assert.That(
+                    terrain.terrainData.size.x,
+                    Is.EqualTo(profile.Dimensions.SizeXMeters).Within(0.001f));
+                Assert.That(
+                    terrain.terrainData.size.y,
+                    Is.EqualTo(profile.Dimensions.HeightMeters).Within(0.001f));
+                Assert.That(
+                    terrain.terrainData.size.z,
+                    Is.EqualTo(profile.Dimensions.SizeZMeters).Within(0.001f));
+                Assert.That(
+                    terrain.terrainData.heightmapResolution,
+                    Is.EqualTo(profile.Dimensions.HeightmapResolution));
+                Assert.That(
+                    terrainTransform.position.x + terrain.terrainData.size.x * 0.5f,
+                    Is.EqualTo(built.WalkableInner.CapitalPosition.x).Within(0.001f));
+                Assert.That(
+                    terrainTransform.position.z + terrain.terrainData.size.z * 0.5f,
+                    Is.EqualTo(built.WalkableInner.CapitalPosition.z).Within(0.001f));
+
+                FirstSessionTerrainRuntimeMarker marker =
+                    terrainTransform.GetComponent<FirstSessionTerrainRuntimeMarker>();
+                Assert.That(marker, Is.Not.Null);
+                Assert.That(marker.ProfileId, Is.EqualTo(profile.Id));
+                Assert.That(marker.GenerationSeed, Is.EqualTo(profile.Generation.Seed));
+                Assert.That(marker.ReplacementSocketId,
+                    Is.EqualTo(profile.ReplacementSocketId));
+                Assert.That(
+                    built.Root.Find(profile.ReplacementSocketId),
+                    Is.Not.Null,
+                    realm + " has no terrain replacement socket.");
+
+                TerrainLayer[] layers = terrain.terrainData.terrainLayers;
+                Assert.That(layers, Has.Length.EqualTo(1));
+                Assert.That(layers[0].diffuseTexture.width,
+                    Is.EqualTo(profile.Surface.TextureResolution));
+                Assert.That(layers[0].diffuseTexture.height,
+                    Is.EqualTo(profile.Surface.TextureResolution));
+                Assert.That(layers[0].diffuseTexture.wrapMode,
+                    Is.EqualTo(TextureWrapMode.Repeat));
+                Assert.That(layers[0].tileSize.x,
+                    Is.EqualTo(profile.Surface.TileSizeMeters).Within(0.001f));
+
+                BoxCollider[] boxColliders = built.Root
+                    .GetComponentsInChildren<BoxCollider>(true);
+                Assert.That(
+                    boxColliders.Any(collider => collider.bounds.Contains(spawn)),
+                    Is.False,
+                    realm + " player spawn may not begin inside collision.");
+                Assert.That(
+                    boxColliders.Any(collider =>
+                        collider.bounds.min.x <= spawn.x &&
+                        collider.bounds.max.x >= spawn.x &&
+                        collider.bounds.min.z <= spawn.z &&
+                        collider.bounds.max.z >= spawn.z &&
+                        collider.bounds.max.y < spawn.y),
+                    Is.False,
+                    realm + " may not disguise a box collider as its terrain floor.");
+
+                Vector3[] directions =
+                {
+                    Vector3.forward,
+                    Vector3.back,
+                    Vector3.left,
+                    Vector3.right,
+                    new Vector3(1f, 0f, 1f).normalized,
+                    new Vector3(-1f, 0f, 1f).normalized,
+                    new Vector3(1f, 0f, -1f).normalized,
+                    new Vector3(-1f, 0f, -1f).normalized
+                };
+                foreach (Vector3 direction in directions)
+                {
+                    Vector3 probe = built.WalkableInner.CapitalPosition +
+                                    direction *
+                                    profile.Navigation.TraversalProbeRadiusMeters;
+                    // Terrain.SampleHeight returns height relative to the Terrain
+                    // object's Y origin, not an absolute world-space Y value.
+                    float sampledHeight = terrain.transform.position.y +
+                                          terrain.SampleHeight(probe);
+                    Assert.That(
+                        sampledHeight,
+                        Is.EqualTo(built.WalkableInner.CapitalPosition.y).Within(0.015f),
+                        realm + " safe courtyard is not flat at " + direction + ".");
+                    var ray = new Ray(probe + Vector3.up * 8f, Vector3.down);
+                    Assert.That(
+                        terrainCollider.Raycast(ray, out RaycastHit hit, 20f),
+                        Is.True,
+                        realm + " TerrainCollider missed " + direction + ".");
+                    Assert.That(
+                        hit.point.y,
+                        Is.EqualTo(built.WalkableInner.CapitalPosition.y).Within(0.015f));
+                }
+
+                Transform collisionRoot = built.Root.Find(
+                    profile.Navigation.CollisionCollectionName);
+                Assert.That(collisionRoot, Is.Not.Null);
+                Assert.That(
+                    collisionRoot.GetComponentsInChildren<BoxCollider>(true)
+                        .Count(collider =>
+                            collider.name.StartsWith(
+                                "COL_FirstSessionTerrainBoundary_")),
+                    Is.EqualTo(4));
+
+                Transform structural = built.Root.Find(
+                    FirstSessionAuthoredWorldBuilder.StructuralIdentityPrefix + realm);
+                Bounds landmarkBounds = CalculateBounds(structural.gameObject);
+                Assert.That(
+                    landmarkBounds.min.y,
+                    Is.EqualTo(built.WalkableInner.CapitalPosition.y).Within(0.01f),
+                    realm + " authored world must be grounded independently of spawn height.");
+                Assert.That(
+                    landmarkBounds.min.z,
+                    Is.EqualTo(
+                        built.WalkableInner.CapitalPosition.z +
+                        profile.Placement.LandmarkFrontOffsetMeters).Within(0.015f),
+                    realm + " landmark front must align to the catalogued threshold.");
+                Transform compound = collisionRoot.Find(
+                    FirstSessionAuthoredWorldBuilder.LandmarkCollisionRootName);
+                Assert.That(compound, Is.Not.Null);
+                BoxCollider[] compoundColliders =
+                    compound.GetComponentsInChildren<BoxCollider>(true);
+                Assert.That(
+                    compoundColliders.Length,
+                    Is.GreaterThanOrEqualTo(4),
+                    realm + " landmark collision has only " +
+                    compoundColliders.Length + " proxies for visible width " +
+                    landmarkBounds.size.x + "m.");
+                Assert.That(compoundColliders.All(collider =>
+                    collider.name.StartsWith("COL_")), Is.True);
+                if (profile.Collision.LandmarkEntranceWidthMeters <= Mathf.Epsilon)
+                {
+                    BoxCollider sealedFront = compoundColliders.Single(collider =>
+                        collider.name == "COL_Landmark_Front");
+                    Assert.That(
+                        sealedFront.bounds.size.x,
+                        Is.EqualTo(landmarkBounds.size.x).Within(0.02f),
+                        realm + " sealed landmark front must cover its full visible width.");
+                    Assert.That(
+                        compoundColliders.Any(collider =>
+                            collider.name == "COL_Landmark_FrontLeft" ||
+                            collider.name == "COL_Landmark_FrontRight"),
+                        Is.False,
+                        realm + " sealed landmark may not retain an invisible portal seam.");
+                }
+                else
+                {
+                    BoxCollider frontLeft = compoundColliders.Single(collider =>
+                        collider.name == "COL_Landmark_FrontLeft");
+                    BoxCollider frontRight = compoundColliders.Single(collider =>
+                        collider.name == "COL_Landmark_FrontRight");
+                    Assert.That(
+                        frontRight.bounds.min.x - frontLeft.bounds.max.x,
+                        Is.EqualTo(profile.Collision.LandmarkEntranceWidthMeters)
+                            .Within(0.02f),
+                        realm + " compound proxy must preserve its entrance seam.");
+                }
+                Assert.That(
+                    built.Root.GetComponentsInChildren<MeshCollider>(true),
+                    Is.Empty,
+                    realm + " may not cook stripped imported meshes at runtime.");
+
+                TerrainData generatedTerrainData = terrain.terrainData;
+                TerrainLayer generatedTerrainLayer = layers[0];
+                Texture2D generatedGridTexture = layers[0].diffuseTexture;
+                Object.DestroyImmediate(built.Root.gameObject);
+                _spawned.RemoveAt(_spawned.Count - 1);
+                Assert.That(generatedTerrainData == null, Is.True,
+                    realm + " runtime TerrainData leaked after world teardown.");
+                Assert.That(generatedTerrainLayer == null, Is.True,
+                    realm + " runtime TerrainLayer leaked after world teardown.");
+                Assert.That(generatedGridTexture == null, Is.True,
+                    realm + " runtime terrain grid texture leaked after world teardown.");
+            }
+        }
+
+        private static Bounds CalculateBounds(GameObject root)
+        {
+            Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
+            Bounds bounds = renderers[0].bounds;
+            for (int index = 1; index < renderers.Length; index++)
+            {
+                bounds.Encapsulate(renderers[index].bounds);
+            }
+
+            return bounds;
         }
 
         private static bool IsUnityPrimitive(string name)

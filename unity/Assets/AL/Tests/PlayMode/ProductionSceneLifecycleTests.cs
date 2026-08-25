@@ -11,6 +11,7 @@ using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.RealmSelection;
+using AL.Services.Local;
 using AL.UI.Kingdom;
 using AL.UI.QuestHud;
 using AL.UI.RealmSelection;
@@ -479,6 +480,8 @@ namespace AL.Tests.PlayMode
                 IdentityConfirmed = true,
                 Username = "LiveLordshipTester"
             };
+            CompleteFirstWorldTutorial(
+                (ISaveGameService)_controllableSave);
             FirstSessionChampionStart.ResetToFirstSessionLanding();
             QuestHudAutoQuest.SetEnabled(false);
             _quiesceSceneControllers = false;
@@ -1022,6 +1025,40 @@ namespace AL.Tests.PlayMode
                 ProofOfWorthLordship.TryWriteMark(save, ProofOfWorthLordship.ResolveMarkId(realm)),
                 Is.True);
             return save;
+        }
+
+        private static void CompleteFirstWorldTutorial(
+            ISaveGameService saveGameService)
+        {
+            Assert.That(
+                FirstWorldProgressSaveAuthority.TryRead(
+                    saveGameService,
+                    out FirstWorldProgressSnapshot snapshot,
+                    out string message),
+                Is.True,
+                message);
+
+            foreach (FirstWorldTutorialProgressCommand command in new[]
+                     {
+                         FirstWorldTutorialProgressCommand.CameraLookAccepted,
+                         FirstWorldTutorialProgressCommand.MovementAccepted,
+                         FirstWorldTutorialProgressCommand.GuideInteractionAccepted,
+                         FirstWorldTutorialProgressCommand.BasicAttackAccepted
+                     })
+            {
+                FirstWorldProgressCommitResult result =
+                    FirstWorldProgressSaveAuthority.TryAdvanceTutorial(
+                        saveGameService,
+                        snapshot,
+                        command);
+                Assert.That(result, Is.Not.Null, command.ToString());
+                Assert.That(result.Accepted, Is.True,
+                    command + ": " + result.Message);
+                Assert.That(result.Snapshot, Is.Not.Null, command.ToString());
+                snapshot = result.Snapshot;
+            }
+
+            Assert.That(snapshot.CanRunProof, Is.True);
         }
 
         private static void CompleteKingdomTeaching(

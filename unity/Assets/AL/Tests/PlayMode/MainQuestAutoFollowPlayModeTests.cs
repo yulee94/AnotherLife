@@ -99,20 +99,52 @@ namespace AL.Tests.PlayMode
             var champion = new GameObject("AutoQuestChampion");
             champion.transform.SetParent(_root.transform, false);
             champion.AddComponent<CharacterController>();
-            champion.AddComponent<ChampionController>();
+            ChampionController controller = champion.AddComponent<ChampionController>();
             ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
             director.EnsureReady(null, champion.transform, RealmId.Eldergrove);
             Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
 
             var guardian = new GameObject("AutoQuestGuardian");
             guardian.transform.SetParent(_root.transform, false);
-            guardian.AddComponent<BossDummyAI>().ConfigureRealmContext(RealmId.Eldergrove);
+            BossDummyAI guardianCombat = guardian.AddComponent<BossDummyAI>();
+            guardianCombat.ConfigureRealmContext(RealmId.Eldergrove);
+            Assert.That(guardianCombat.isActiveAndEnabled, Is.True,
+                "The combat-pause fixture requires an enabled guardian.");
+            Assert.That(QuestHudAutoQuest.CanDriveInCurrentContext(), Is.False,
+                "A configured guardian must synchronously pause auto-quest movement.");
+            Assert.That(Object.FindObjectsOfType<ChampionController>().Length, Is.EqualTo(1),
+                "The combat-pause fixture must not inherit a champion from another scene test.");
+            float maximumRequestedInput = 0f;
+            controller.MovementApplied += receipt =>
+            {
+                maximumRequestedInput = Mathf.Max(
+                    maximumRequestedInput,
+                    receipt.RequestedInput.magnitude);
+            };
+
+            // Unity's native CharacterController can perform a one-time
+            // depenetration on its first Move in the inherited runner scene.
+            // Settle that motor initialization before measuring position. The
+            // requested-input assertion includes this frame and therefore still
+            // detects an auto-follow race from the guardian's first frame.
+            yield return null;
+            Assert.That(maximumRequestedInput, Is.LessThan(0.01f),
+                "Combat must suppress auto-follow from the guardian's first frame.");
             Vector3 pausedAt = champion.transform.position;
 
             yield return new WaitForSeconds(0.25f);
 
             Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
-            Assert.Less(HorizontalDistance(pausedAt, champion.transform.position), 0.01f);
+            Assert.That(maximumRequestedInput, Is.LessThan(0.01f),
+                "Combat must never feed auto-follow input into the champion motor.");
+            Assert.Less(
+                HorizontalDistance(pausedAt, champion.transform.position),
+                0.01f,
+                "Combat pause lost authority. guardianActive=" +
+                guardianCombat.isActiveAndEnabled +
+                ", autoDrive=" + QuestHudAutoQuest.CanDriveInCurrentContext() +
+                ", requestedInput=" + controller.LastMovementReceipt.RequestedInput +
+                ", activeScene=" + UnityEngine.SceneManagement.SceneManager.GetActiveScene().name + ".");
         }
 
         [UnityTest]

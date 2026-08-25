@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Reflection;
 using AL.ChampionMode;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Presentation;
 using AL.Core;
 using NUnit.Framework;
@@ -131,7 +133,37 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.IsFalse(ChampionPresentationBinder.RootLooksLikeCapsule(_root));
             Assert.IsNull(_root.GetComponent<MeshRenderer>());
             Assert.IsNull(_root.GetComponent<MeshFilter>());
-            Assert.NotNull(_root.GetComponent<CapsuleCollider>());
+            CharacterController controller = _root.GetComponent<CharacterController>();
+            Assert.NotNull(controller);
+            Assert.IsNull(_root.GetComponent<CapsuleCollider>());
+            Assert.That(controller.center, Is.EqualTo(Vector3.zero));
+            Assert.That(controller.height, Is.EqualTo(2f));
+            Assert.That(controller.radius, Is.EqualTo(0.45f));
+            Assert.That(controller.minMoveDistance, Is.Zero);
+        }
+
+        [Test]
+        public void ChampionMotorPreservesThePresentationOwnedPivotContract()
+        {
+            _root = new GameObject("FootPivotChampionContract");
+            CharacterController controller = _root.AddComponent<CharacterController>();
+            controller.center = Vector3.up;
+            controller.height = 2f;
+            controller.radius = 0.34f;
+            controller.stepOffset = 0.3f;
+
+            ChampionController motor = _root.AddComponent<ChampionController>();
+            MethodInfo awake = typeof(ChampionController).GetMethod(
+                "Awake",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(awake, Is.Not.Null);
+            awake.Invoke(motor, null);
+
+            Assert.That(controller.center, Is.EqualTo(Vector3.up));
+            Assert.That(controller.height, Is.EqualTo(2f));
+            Assert.That(controller.radius, Is.EqualTo(0.34f));
+            Assert.That(controller.stepOffset, Is.EqualTo(0.3f));
+            Assert.That(controller.minMoveDistance, Is.Zero);
         }
 
         [Test]

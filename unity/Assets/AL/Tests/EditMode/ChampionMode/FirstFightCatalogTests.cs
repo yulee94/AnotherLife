@@ -30,14 +30,18 @@ namespace AL.Tests.EditMode.ChampionMode
         public void ResolvesCatalogPlayerOpponentAndSpecialWithoutFabricating()
         {
             var data = new LocalGameDataService();
-            SkillLoadoutData[] skills = CreateCatalogSpecial();
+            SkillLoadoutData[] skills = CreateCompleteCatalogLoadout();
+            Assert.IsTrue(
+                SkillLoadoutCatalog.TryCreateSnapshot(
+                    skills,
+                    out SkillLoadoutSnapshot snapshot));
 
             Assert.IsTrue(
-                FirstFightCatalog.TryResolve(
+                FirstFightCatalog.TryResolveSnapshot(
                     data,
                     null,
                     RealmId.Stonehold,
-                    skills,
+                    snapshot,
                     out FirstFightLoadout loadout,
                     out string diagnostic));
 
@@ -46,12 +50,15 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.AreEqual(1250, loadout.PlayerMaxHealth);
             Assert.AreEqual(80, loadout.PlayerMaxMana);
             Assert.AreEqual(55, loadout.PlayerAttack);
-            Assert.AreEqual("champion_eldergrove_archmage", loadout.OpponentId);
-            Assert.AreEqual(820, loadout.OpponentMaxHealth);
-            Assert.AreEqual(78, loadout.OpponentAttack);
+            Assert.AreEqual("champion_crownlands_sharpshooter", loadout.OpponentId);
+            Assert.AreEqual(900, loadout.OpponentMaxHealth);
+            Assert.AreEqual(62, loadout.OpponentAttack);
             Assert.AreEqual(FirstSessionChampionStart.SpecialSkillId, loadout.SpecialSkillId);
             Assert.AreEqual(150f, loadout.SpecialPower);
-            Assert.AreNotEqual(AL.VerticalSlice.SliceChampionProfile.CreateDefault().MaxHealth, loadout.PlayerMaxHealth);
+            AL.VerticalSlice.SliceChampionProfile catalogDefault =
+                AL.VerticalSlice.SliceChampionProfile.CreateDefault();
+            Assert.AreEqual(catalogDefault.Id, loadout.PlayerId);
+            Assert.AreEqual(catalogDefault.MaxHealth, loadout.PlayerMaxHealth);
             Assert.AreNotEqual(AL.VerticalSlice.SliceOpponentProfile.CreateDefault().MaxHealth, loadout.OpponentMaxHealth);
         }
 
@@ -73,7 +80,7 @@ namespace AL.Tests.EditMode.ChampionMode
                     data,
                     SliceRunState.Champion,
                     RealmId.Stonehold,
-                    CreateCatalogSpecial(),
+                    CreateCompleteCatalogLoadout(),
                     out _,
                     out string diagnostic));
             Assert.That(diagnostic, Does.StartWith(FirstFightCatalog.PlayerMissingCode));
@@ -83,12 +90,14 @@ namespace AL.Tests.EditMode.ChampionMode
         public void MissingSpecialFailsClosed()
         {
             var data = new LocalGameDataService();
+            SkillLoadoutData[] skills = CreateCompleteCatalogLoadout();
+            skills[0].id = "missing_realm_strike";
             Assert.IsFalse(
                 FirstFightCatalog.TryResolve(
                     data,
                     null,
                     RealmId.Stonehold,
-                    new SkillLoadoutData[0],
+                    skills,
                     out _,
                     out string diagnostic));
             Assert.AreEqual(FirstFightCatalog.SpecialMissingCode, diagnostic);
@@ -102,7 +111,7 @@ namespace AL.Tests.EditMode.ChampionMode
                     null,
                     null,
                     RealmId.Stonehold,
-                    CreateCatalogSpecial(),
+                    CreateCompleteCatalogLoadout(),
                     out _,
                     out string diagnostic));
             Assert.AreEqual(FirstFightCatalog.MissingCode, diagnostic);
@@ -205,20 +214,43 @@ namespace AL.Tests.EditMode.ChampionMode
             Assert.AreEqual("ChampionArena", arena.SerializedValue);
         }
 
-        private static SkillLoadoutData[] CreateCatalogSpecial()
+        private static SkillLoadoutData[] CreateCompleteCatalogLoadout()
         {
             return new[]
             {
-                new SkillLoadoutData
-                {
-                    slot = FirstSessionChampionStart.SpecialSkillSlot,
-                    id = FirstSessionChampionStart.SpecialSkillId,
-                    displayName = "Realm Strike",
-                    power = 150f,
-                    manaCost = 20f,
-                    cooldownSeconds = 4f,
-                    rangeMeters = 2.6f
-                }
+                CreateSkill(0, "realm_strike", "Realm Strike", "melee_damage", "realm_slash", 4f, 20f, 0.05f, 2.6f, 150f, 0.72f),
+                CreateSkill(1, "renewing_guard", "Renewing Guard", "self_heal_guard", "renewing_guard", 8f, 30f, 0.35f, 0f, 180f, 0f),
+                CreateSkill(2, "warzone_burst", "Warzone Burst", "area_damage", "warzone_shockwave", 10f, 45f, 0.45f, 4.2f, 115f, 0.72f),
+                CreateSkill(3, "warmaster_breaker", "Warmaster Breaker", "elite_break_damage", "warmaster_breaker", 14f, 60f, 0.65f, 3.4f, 260f, 0.72f)
+            };
+        }
+
+        private static SkillLoadoutData CreateSkill(
+            int slot,
+            string id,
+            string displayName,
+            string role,
+            string vfxKey,
+            float cooldown,
+            float mana,
+            float castTime,
+            float range,
+            float power,
+            float botMultiplier)
+        {
+            return new SkillLoadoutData
+            {
+                slot = slot,
+                id = id,
+                displayName = displayName,
+                role = role,
+                vfxKey = vfxKey,
+                cooldownSeconds = cooldown,
+                manaCost = mana,
+                castTimeSeconds = castTime,
+                rangeMeters = range,
+                power = power,
+                botDamageMultiplier = botMultiplier
             };
         }
     }

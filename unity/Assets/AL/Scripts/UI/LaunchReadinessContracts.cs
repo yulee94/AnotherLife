@@ -354,18 +354,57 @@ namespace AL.UI
             LaunchBootLoadEvidence evidence,
             IOfflineServiceStackMarker marker,
             ISaveGameService saveService,
-            SaveGameData save)
+            SaveGameData save,
+            SaveOperationDisposition saveDisposition)
         {
             Evidence = evidence;
             Marker = marker;
             SaveService = saveService;
             Save = save;
+            SaveDisposition = saveDisposition;
         }
 
         internal LaunchBootLoadEvidence Evidence { get; }
         internal IOfflineServiceStackMarker Marker { get; }
         internal ISaveGameService SaveService { get; }
-        internal SaveGameData Save { get; }
+        internal SaveGameData Save { get; private set; }
+        internal SaveOperationDisposition SaveDisposition { get; private set; }
+
+        internal bool TryAcceptCurrentSave(
+            ISaveGameService saveService,
+            SaveGameData currentSave)
+        {
+            if (ReferenceEquals(currentSave, Save))
+            {
+                return true;
+            }
+
+            if (!(saveService is ISaveOperationDispositionProvider dispositionProvider))
+            {
+                return false;
+            }
+
+            SaveOperationDisposition disposition =
+                dispositionProvider.LastSaveDisposition;
+            if (disposition == null ||
+                ReferenceEquals(disposition, SaveDisposition) ||
+                saveService.LastSaveStatus != SaveOperationStatus.SavedPrimary ||
+                disposition.Status != SaveOperationStatus.SavedPrimary ||
+                !disposition.CandidatePrimaryVerified ||
+                !disposition.RequiredBackupVerified ||
+                !disposition.CleanupVerified)
+            {
+                return false;
+            }
+
+            // LocalSaveGameService intentionally publishes the twice-read persisted
+            // generation as a new object after a successful lifecycle checkpoint.
+            // Advance only across a new, fully verified save disposition; an arbitrary
+            // same-schema replacement still has no fresh disposition and fails closed.
+            Save = currentSave;
+            SaveDisposition = disposition;
+            return true;
+        }
     }
 
     internal static class BootLoadReadinessProbe
@@ -414,7 +453,9 @@ namespace AL.UI
                 evidence,
                 marker,
                 saveService,
-                saveService.CurrentSave);
+                saveService.CurrentSave,
+                (saveService as ISaveOperationDispositionProvider)
+                    ?.LastSaveDisposition);
             return BootLoadReadinessProbeStatus.Ready;
         }
 
@@ -427,9 +468,10 @@ namespace AL.UI
                 return false;
             }
 
-            return ReferenceEquals(marker, receipt.Marker) &&
+            SaveGameData currentSave = saveService.CurrentSave;
+            bool stableAuthority =
+                ReferenceEquals(marker, receipt.Marker) &&
                 ReferenceEquals(saveService, receipt.SaveService) &&
-                ReferenceEquals(saveService.CurrentSave, receipt.Save) &&
                 ReferenceEquals(marker.SaveRoot, saveService) &&
                 marker.LoadState == OfflineStackLoadState.Succeeded &&
                 string.Equals(
@@ -438,7 +480,9 @@ namespace AL.UI
                     StringComparison.Ordinal) &&
                 marker.StackVersion == receipt.Evidence.StackVersion &&
                 saveService.LastLoadStatus == receipt.Evidence.LoadStatus &&
-                IsCurrentSaveSchema(saveService.CurrentSave);
+                IsCurrentSaveSchema(currentSave);
+            return stableAuthority &&
+                receipt.TryAcceptCurrentSave(saveService, currentSave);
         }
 
         private static bool IsCurrentSaveSchema(SaveGameData save)

@@ -78,6 +78,7 @@ namespace AL.World
         [SerializeField] private Texture2D premiumFloorNormal;
         [SerializeField] private Texture2D premiumFloorMetallic;
         [SerializeField] private Texture2D premiumFloorRoughness;
+        [SerializeField] private TextAsset firstSessionTerrainCatalog;
 
         [Header("Champion")]
         [SerializeField] private FirstSessionChampionBaseVisualAsset[] championBases =
@@ -107,6 +108,7 @@ namespace AL.World
         public Texture2D PremiumFloorNormal => premiumFloorNormal;
         public Texture2D PremiumFloorMetallic => premiumFloorMetallic;
         public Texture2D PremiumFloorRoughness => premiumFloorRoughness;
+        public TextAsset FirstSessionTerrainCatalog => firstSessionTerrainCatalog;
         public GameObject ChampionBodyPrefab => championBodyPrefab;
         public GameObject ChampionArmorPrefab => championArmorPrefab;
         public GameObject ChampionWeaponPrefab => championWeaponPrefab;
@@ -191,7 +193,9 @@ namespace AL.World
             if (covenantHallPrefab == null || floorMaterial == null || wallMaterial == null ||
                 trimMaterial == null || premiumFloorBaseColor == null ||
                 premiumFloorNormal == null || premiumFloorMetallic == null ||
-                premiumFloorRoughness == null ||
+                premiumFloorRoughness == null || firstSessionTerrainCatalog == null ||
+                firstSessionTerrainCatalog.bytes == null ||
+                firstSessionTerrainCatalog.bytes.Length == 0 ||
                 championBodyPrefab == null || championArmorPrefab == null ||
                 championWeaponPrefab == null || guardianPrefab == null ||
                 guardianBaseColor == null || guardianNormal == null ||

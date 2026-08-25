@@ -2,7 +2,9 @@
     "name": "AL.PlayMode.Tests",
     "rootNamespace": "AL.Tests.PlayMode",
     "references": [
-        "AL.Runtime"
+        "AL.Runtime",
+        "AL.GameDataCatalog",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -1,0 +1,364 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://anotherlife.invalid/schemas/al-blender-source-validation.schema.json",
+  "title": "AnotherLife Blender source validation manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "contractId",
+    "minimumBlenderVersion",
+    "defaultSourceUpAxis",
+    "unityImport",
+    "sources"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": 1
+    },
+    "contractId": {
+      "$ref": "#/$defs/id"
+    },
+    "minimumBlenderVersion": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "integer", "minimum": 1 },
+        { "type": "integer", "minimum": 0 },
+        { "type": "integer", "minimum": 0 }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3
+    },
+    "defaultSourceUpAxis": {
+      "$ref": "#/$defs/axis"
+    },
+    "unityImport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "unitsPerMeter",
+        "upAxis",
+        "forwardAxis",
+        "blenderFbxAxisForward",
+        "blenderFbxAxisUp"
+      ],
+      "properties": {
+        "unitsPerMeter": { "type": "number", "exclusiveMinimum": 0 },
+        "upAxis": { "type": "string", "enum": ["+Y"] },
+        "forwardAxis": { "type": "string", "enum": ["+Z"] },
+        "blenderFbxAxisForward": { "type": "string", "enum": ["-Z"] },
+        "blenderFbxAxisUp": { "type": "string", "enum": ["Y"] }
+      }
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/source"
+      }
+    }
+  },
+  "$defs": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:[-_][a-z0-9+]+)*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 160
+    },
+    "axis": {
+      "type": "string",
+      "enum": ["X", "Y", "Z"]
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/name" },
+      "uniqueItems": true
+    },
+    "objectReference": {
+      "type": "object",
+      "oneOf": [
+        { "required": ["objects"] },
+        { "required": ["objectsFromLod"] }
+      ],
+      "properties": {
+        "objects": { "$ref": "#/$defs/stringArray" },
+        "objectsFromLod": { "$ref": "#/$defs/name" }
+      }
+    },
+    "lod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "minimumTriangles", "maximumTriangles"],
+      "oneOf": [
+        {
+          "required": ["objects"],
+          "not": { "required": ["objectsFromLod"] }
+        },
+        {
+          "required": ["objectsFromLod", "suffix"],
+          "not": { "required": ["objects"] }
+        }
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/name" },
+        "family": { "$ref": "#/$defs/id" },
+        "objects": { "$ref": "#/$defs/stringArray" },
+        "objectsFromLod": { "$ref": "#/$defs/name" },
+        "suffix": { "type": "string", "minLength": 1 },
+        "minimumTriangles": { "type": "integer", "minimum": 0 },
+        "maximumTriangles": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "exportSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "format",
+        "objectsFromLods",
+        "includeObjects",
+        "includeAnimations"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "format": { "type": "string", "enum": ["GLB"] },
+        "objectsFromLods": { "$ref": "#/$defs/stringArray" },
+        "includeObjects": { "$ref": "#/$defs/stringArray" },
+        "includeAnimations": { "type": "boolean" }
+      }
+    },
+    "root": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object", "expectedLocation", "tolerance"],
+      "properties": {
+        "object": { "$ref": "#/$defs/name" },
+        "expectedLocation": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "number" },
+            { "type": "number" },
+            { "type": "number" }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "tolerance": { "type": "number", "minimum": 0 }
+      }
+    },
+    "pivots": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["objects", "expectedLocation", "tolerance"],
+      "properties": {
+        "objects": { "$ref": "#/$defs/stringArray" },
+        "expectedLocation": {
+          "type": "array",
+          "prefixItems": [
+            { "type": "number" },
+            { "type": "number" },
+            { "type": "number" }
+          ],
+          "items": false,
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "tolerance": { "type": "number", "minimum": 0 }
+      }
+    },
+    "ground": {
+      "allOf": [
+        { "$ref": "#/$defs/objectReference" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["axis", "edge", "expected", "tolerance"],
+          "properties": {
+            "objects": { "$ref": "#/$defs/stringArray" },
+            "objectsFromLod": { "$ref": "#/$defs/name" },
+            "axis": { "$ref": "#/$defs/axis" },
+            "edge": { "type": "string", "enum": ["minimum", "maximum"] },
+            "expected": { "type": "number" },
+            "tolerance": { "type": "number", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "height": {
+      "allOf": [
+        { "$ref": "#/$defs/objectReference" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["axis", "minimum", "maximum"],
+          "properties": {
+            "objects": { "$ref": "#/$defs/stringArray" },
+            "objectsFromLod": { "$ref": "#/$defs/name" },
+            "axis": { "$ref": "#/$defs/axis" },
+            "minimum": { "type": "number", "minimum": 0 },
+            "maximum": { "type": "number", "exclusiveMinimum": 0 }
+          }
+        }
+      ]
+    },
+    "dimensions": {
+      "allOf": [
+        { "$ref": "#/$defs/objectReference" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["expected", "tolerance"],
+          "properties": {
+            "objects": { "$ref": "#/$defs/stringArray" },
+            "objectsFromLod": { "$ref": "#/$defs/name" },
+            "expected": {
+              "type": "object",
+              "additionalProperties": false,
+              "minProperties": 1,
+              "properties": {
+                "X": { "type": "number", "exclusiveMinimum": 0 },
+                "Y": { "type": "number", "exclusiveMinimum": 0 },
+                "Z": { "type": "number", "exclusiveMinimum": 0 }
+              }
+            },
+            "tolerance": { "type": "number", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "orientation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "headObject",
+        "forwardObject",
+        "axis",
+        "direction",
+        "minimumSeparation"
+      ],
+      "properties": {
+        "headObject": { "$ref": "#/$defs/name" },
+        "forwardObject": { "$ref": "#/$defs/name" },
+        "axis": { "$ref": "#/$defs/axis" },
+        "direction": { "type": "string", "enum": ["negative", "positive"] },
+        "minimumSeparation": { "type": "number", "minimum": 0 }
+      }
+    },
+    "boneOrientation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "armatureObject",
+        "originBone",
+        "forwardBone",
+        "axis",
+        "direction",
+        "minimumSeparation"
+      ],
+      "properties": {
+        "armatureObject": { "$ref": "#/$defs/name" },
+        "originBone": { "$ref": "#/$defs/name" },
+        "forwardBone": { "$ref": "#/$defs/name" },
+        "axis": { "$ref": "#/$defs/axis" },
+        "direction": { "type": "string", "enum": ["negative", "positive"] },
+        "minimumSeparation": { "type": "number", "minimum": 0 }
+      }
+    },
+    "armature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "object",
+        "minimumBones",
+        "maximumBones",
+        "maximumInfluencesPerVertex",
+        "skinnedObjectsFromLods",
+        "requiredBones"
+      ],
+      "properties": {
+        "object": { "$ref": "#/$defs/name" },
+        "minimumBones": { "type": "integer", "minimum": 1 },
+        "maximumBones": { "type": "integer", "minimum": 1 },
+        "maximumInfluencesPerVertex": { "type": "integer", "minimum": 1, "maximum": 8 },
+        "skinnedObjectsFromLods": { "$ref": "#/$defs/stringArray" },
+        "requiredBones": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "minimumActions": { "type": "integer", "minimum": 0 },
+        "requiredMeshNameTokens": { "$ref": "#/$defs/stringArray" },
+        "requiredObjectNames": { "$ref": "#/$defs/stringArray" },
+        "requiredCollectionNames": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "approvalState",
+        "path",
+        "sha256",
+        "sourceUpAxis",
+        "unitSystem",
+        "unitScale",
+        "requiredObjects",
+        "identityScaleObjects",
+        "lods",
+        "exportSets",
+        "ground",
+        "openReview"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/id" },
+        "category": { "$ref": "#/$defs/id" },
+        "approvalState": { "$ref": "#/$defs/id" },
+        "path": { "type": "string", "pattern": "^unity/ArtSource/.+\\.blend$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "sourceUpAxis": { "$ref": "#/$defs/axis" },
+        "axisException": { "type": "string", "minLength": 1 },
+        "unitSystem": { "type": "string", "enum": ["METRIC"] },
+        "unitScale": { "type": "number", "exclusiveMinimum": 0 },
+        "requiredObjects": { "$ref": "#/$defs/stringArray" },
+        "requiredCollections": { "$ref": "#/$defs/stringArray" },
+        "identityScaleObjects": { "type": "string", "enum": ["all-exportable"] },
+        "identityRotationObjects": { "$ref": "#/$defs/stringArray" },
+        "lods": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/lod" }
+        },
+        "exportSets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/exportSet" }
+        },
+        "maximumMeshObjects": { "type": "integer", "minimum": 1 },
+        "maximumMaterialNames": { "type": "integer", "minimum": 1 },
+        "maximumMaterialSlotsPerMesh": { "type": "integer", "minimum": 1 },
+        "root": { "$ref": "#/$defs/root" },
+        "pivots": { "$ref": "#/$defs/pivots" },
+        "ground": { "$ref": "#/$defs/ground" },
+        "dimensions": { "$ref": "#/$defs/dimensions" },
+        "height": { "$ref": "#/$defs/height" },
+        "orientation": { "$ref": "#/$defs/orientation" },
+        "boneOrientation": { "$ref": "#/$defs/boneOrientation" },
+        "armature": { "$ref": "#/$defs/armature" },
+        "promotion": { "$ref": "#/$defs/promotion" },
+        "openReview": { "$ref": "#/$defs/stringArray" }
+      }
+    }
+  }
+}
