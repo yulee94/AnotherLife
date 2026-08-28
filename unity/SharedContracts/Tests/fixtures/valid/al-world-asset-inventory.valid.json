@@ -124,6 +124,57 @@
       }
     ]
   },
+  "familyRecords": [
+    {
+      "familyId": "waf_architecture_building_town_hall",
+      "displayLabel": "Architecture Building Town Hall",
+      "assetClass": "architecture",
+      "purpose": "Gameplay Town Hall/civic anchor",
+      "requiredVariants": "levels 0–10, LOD0–3, settled/construction/unavailable; existing eight aliases preserved",
+      "ownerAuthority": {
+        "finalCreativeOwner": "project_owner",
+        "accountableOwners": ["architecture"],
+        "ownerDecisionRef": "unity/Docs/AssetLibrary/PostMVP_World_Asset_Taxonomy_v1.md#waf_architecture_building_town_hall"
+      },
+      "realmApplicability": [
+        {"realmId": "crownlands", "mode": "realm_variant", "reason": null},
+        {"realmId": "stonehold", "mode": "realm_variant", "reason": null},
+        {"realmId": "eldergrove", "mode": "realm_variant", "reason": null},
+        {"realmId": "umbral", "mode": "realm_variant", "reason": null}
+      ],
+      "taxonomyStatus": "current_bound_partial",
+      "dependencies": ["bld", "mvp", "src", "bud", "acc", "tech", "device", "gate"],
+      "schedule": "launch",
+      "biomeIds": [],
+      "budgetClassId": "wbud_architecture_hero",
+      "standards": {
+        "coordinateProfileId": "coord_unity_meter_y_up_z_forward_v001",
+        "pivotProfileId": "pivot_base_center_finished_ground_v001",
+        "snapGridProfileId": "snap_world_modular_default_v001",
+        "materialShaderProfileId": "material_builtin_pbr_opaque_shared_v001",
+        "texelDensityProfileId": "texel_shared_trim_measured_v001",
+        "lodProfileId": "lod_static_world_standard_v001",
+        "colliderProfileId": "collider_static_simple_v001",
+        "navigationProfileId": "nav_static_structure_v001",
+        "occlusionProfileId": "occlusion_structure_groups_v001",
+        "streamingProfileId": "stream_chunk_owned_packaged_v001",
+        "exceptionRefs": []
+      },
+      "provenance": {
+        "state": "logical_authority_only",
+        "sourceReferences": [
+          "unity/Docs/AssetLibrary/PostMVP_World_Asset_Taxonomy_v1.md",
+          "unity/Docs/AssetLibrary/PostMVP_World_Asset_Budgets_And_Readability_v1.md",
+          "unity/Docs/AssetLibrary/PostMVP_World_Asset_Catalog_Binding_And_Production_Standard_v1.md"
+        ],
+        "humanDecisionRef": "fixture-only-held-authority",
+        "openIssues": ["Production source and evidence remain incomplete."]
+      },
+      "approvalState": "preparation_held",
+      "generationState": "held",
+      "activationState": "held"
+    }
+  ],
   "records": [
     {
       "assetId": "wa_crownlands_architecture_building_town_hall_base_v001",
@@ -264,7 +315,31 @@
       "anchors": [],
       "vfxAnchor": null,
       "derivative25d": null,
-      "budgetClassId": "budget_unassigned_pending_t_e00af422",
+      "budgetClassId": "wbud_architecture_hero",
+      "budgetMeasurements": {
+        "measurementState": "not_measured",
+        "baseVariants": null,
+        "stateDerivatives": null,
+        "lod0Triangles": null,
+        "mobileNormalTriangles": null,
+        "lod0MaterialSlots": null,
+        "mobileDraws": null,
+        "textureLongEdgePixels": null,
+        "textureFormat": null,
+        "colliderPrimitives": null,
+        "colliderProxyTriangles": null,
+        "navSourceTriangles": null,
+        "navLinkPairs": null,
+        "navDataBytes": null,
+        "activeVfxSources": null,
+        "liveParticles": null,
+        "transparentDraws": null,
+        "dynamicLights": null,
+        "activationP95Ms": null,
+        "loadReadyP95Ms": null,
+        "artifacts": [],
+        "placements": []
+      },
       "approvals": {
         "technical": {"state": "not_tested", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},
         "creative": {"state": "not_reviewed", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},

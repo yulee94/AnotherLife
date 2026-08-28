@@ -26,6 +26,8 @@ import sys
 
 from jsonschema import Draft202012Validator, SchemaError, ValidationError
 
+import world_asset_inventory
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # unity/SharedContracts
 SCHEMAS_DIR = ROOT / "Schemas"
 FIXTURES_DIR = pathlib.Path(__file__).resolve().parent / "fixtures"
@@ -48,6 +50,7 @@ REAL_CATALOGS = {
     "al-building": "al_building_catalog.json",
     "al-champion": "al_champion_catalog.json",
     "al-first-session-terrain": "al_first_session_terrain_catalog.json",
+    "al-world-asset-inventory": "al_world_asset_inventory.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
@@ -86,7 +89,13 @@ def main():
     print()
 
     failures = []
-    reports = {"schemas": [], "valid": [], "invalid": [], "real": []}
+    reports = {
+        "schemas": [],
+        "valid": [],
+        "invalid": [],
+        "real": [],
+        "inventory": [],
+    }
 
     # 1. Compile every schema (validity of the schema itself).
     compiled = {}
@@ -143,6 +152,24 @@ def main():
         if not ok:
             failures.append(f"INVALID fixture {fixture_path.name} unexpectedly PASSED (should be rejected)")
 
+    # 4. Cross-record inventory semantics and canonical byte stability.
+    repo_root = ROOT.parents[1]
+    try:
+        _, evidence = world_asset_inventory.validate_committed_outputs(repo_root)
+        reports["inventory"].append(
+            (
+                True,
+                (
+                    f"{evidence['familyCoverage']['covered']} families, "
+                    f"{evidence['bindingCoverage']['verifiedPrefabTuples']} prefab tuples, "
+                    f"{evidence['budgetRollup']['classCount']} budget classes"
+                ),
+            )
+        )
+    except world_asset_inventory.InventoryValidationError as exc:
+        reports["inventory"].append((False, str(exc)))
+        failures.append(f"world asset inventory cross-validation failed: {exc}")
+
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:
@@ -166,6 +193,10 @@ def main():
     print("\n== Invalid fixtures (must FAIL) ==")
     for name, ok, msg in reports["invalid"]:
         print(f"  [{'OK' if ok else 'FAIL'}] {name}" + (f"  -> {msg}" if msg else ""))
+
+    print("\n== World-asset inventory cross-validation ==")
+    for ok, msg in reports["inventory"]:
+        print(f"  [{'OK' if ok else 'FAIL'}] al-world-asset-inventory  -> {msg}")
 
     print()
     if failures:

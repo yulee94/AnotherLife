@@ -58,6 +58,7 @@ idFormat             lowercase_ascii_snake_case
 authority             mandatory catalog and final-owner authority
 gatePolicy            mandatory generation/activation hold and required gates
 profiles              mandatory named production-rule profiles
+familyRecords         complete logical-family taxonomy, authority, standards, and budget assignment
 records               canonical asset records
 aliases               exact legacy-to-canonical mappings
 ```
@@ -89,6 +90,20 @@ array. Omitting it is invalid.
 | Budget | `budgetClassId` | no unbudgeted production record; temporary assembly placeholders block release |
 | Approval | six independent gate objects | reviewer/date/evidence may be null/empty only before a positive decision |
 | Lifecycle | state, MVP preservation, replacement/deprecation links | replacement links and reason may be null/empty while not replacing/deprecating |
+
+Every `familyRecords[]` entry preserves one taxonomy row, all four explicit realm
+applicability decisions, accountable owner authority, the ten production-standard
+profile references, provenance references, its closed budget-class assignment, and
+catalog-wide held generation/activation state. It is demand and preparation authority,
+not a fabricated runtime asset identity. `records[]` therefore contains only real
+canonical asset identities; the initial assembly preserves the eight existing Town
+Hall/Workshop bindings and does not create placeholder assets for unproduced families.
+
+Every `records[]` entry also carries `budgetMeasurements`. `not_measured` requires
+null scalar measurements and empty artifact/placement arrays; `measured` requires the
+distinct compressed-delivery, installed, resident, and load-I/O artifact metrics plus
+scene/cell/ring placements needed for deterministic aggregate rollups. Missing values
+remain blocked and are never interpreted as zero.
 
 Schema validation proves shape and local conditions. Cross-record uniqueness,
 filesystem/Addressables resolution, hashes, profile references, ordering, aggregate
