@@ -20,6 +20,7 @@ MonoBehaviour:
   premiumFloorNormal: {fileID: 2800000, guid: 17b0a5d7ee61af74c995446e92c4c87a, type: 3}
   premiumFloorMetallic: {fileID: 2800000, guid: fad2502d3e160d142b06d04cdc30c3ea, type: 3}
   premiumFloorRoughness: {fileID: 2800000, guid: b477a753d6737e846bbc496decb4141a, type: 3}
+  firstSessionTerrainCatalog: {fileID: 4900000, guid: c2ea1f0bade44d56a3da074e1d1a6ee1, type: 3}
   championBases:
   - bodyBaseId: male
     prefab: {fileID: 919132149155446097, guid: 4898fd234dc9f1248876f397226aba2b, type: 3}
@@ -57,6 +58,7 @@ MonoBehaviour:
     premiumRoughness: {fileID: 2800000, guid: 94fdb2bc144579a4a8db7ac0847455c0, type: 3}
     premiumEmission: {fileID: 2800000, guid: 02e3b29ab8953214bafdb3238a69533f, type: 3}
     panoramicSky: {fileID: 2800000, guid: 097bb803bf8c4ee4d96e48305eb603c8, type: 3}
+    firstSessionRealmPrefab: {fileID: 6896297249399563325, guid: b4b42cbf6a1c7a34ea4ceede1820f828, type: 3}
   - realm: 2
     landmarkPrefab: {fileID: 6718489068813069786, guid: 64552283a5bd040f08d3f41d6a94ca5a, type: 3}
     premiumLandmarkPrefab: {fileID: 919132149155446097, guid: 58a17da981c76e54fb36b8897219defb, type: 3}
@@ -66,6 +68,7 @@ MonoBehaviour:
     premiumRoughness: {fileID: 2800000, guid: a31b26b49a36b0342b86e483ea7bcdfa, type: 3}
     premiumEmission: {fileID: 2800000, guid: ad78b20610c5b324494ac6f4d3ac6765, type: 3}
     panoramicSky: {fileID: 2800000, guid: 3ded8e3b463804d448f52fb21fe2bbb4, type: 3}
+    firstSessionRealmPrefab: {fileID: 799100831331667138, guid: c37dc5ec687f0ab458840d025ba59d50, type: 3}
   - realm: 3
     landmarkPrefab: {fileID: 133079770350490369, guid: 40d5f7687fed640fd8c0d4b1868ff0ef, type: 3}
     premiumLandmarkPrefab: {fileID: 919132149155446097, guid: 27cd9206ac7de7740a359cd9cdb08fd9, type: 3}
@@ -75,6 +78,7 @@ MonoBehaviour:
     premiumRoughness: {fileID: 2800000, guid: 27c2af5b139a0b245abd49ff4bdd7e4b, type: 3}
     premiumEmission: {fileID: 2800000, guid: 703242ab21c85164eb45fdf3c6d4712d, type: 3}
     panoramicSky: {fileID: 2800000, guid: e5a0b1204d5c2bc44a4e7dabb7dd488e, type: 3}
+    firstSessionRealmPrefab: {fileID: 9148744425129553701, guid: 678830e64b5b5ed45b0039cda7ab26e9, type: 3}
   - realm: 4
     landmarkPrefab: {fileID: 1554135779196789712, guid: 1a01ccaafe3d44864b31d30ef7091279, type: 3}
     premiumLandmarkPrefab: {fileID: 919132149155446097, guid: ec88ad8f29ed12b449ba3f5709cddd19, type: 3}
@@ -84,3 +88,4 @@ MonoBehaviour:
     premiumRoughness: {fileID: 2800000, guid: b2f0453f164de564184710f46916968b, type: 3}
     premiumEmission: {fileID: 2800000, guid: 2af057a5498e83c40a0e12ce27b33509, type: 3}
     panoramicSky: {fileID: 2800000, guid: cd79e09283fa7594bb89cca2eea7c79f, type: 3}
+    firstSessionRealmPrefab: {fileID: 4217963812231582610, guid: 45bc70d9e5dfd234b833f00413746f62, type: 3}

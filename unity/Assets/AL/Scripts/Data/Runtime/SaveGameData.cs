@@ -35,8 +35,40 @@ namespace AL.Data.Runtime
         public List<OwnedEquipmentState> OwnedEquipment = new List<OwnedEquipmentState>();
         public List<AppliedBossLootRewardState> AppliedBossLootRewards = new List<AppliedBossLootRewardState>();
         public Nvs01ProgressData Nvs01Progress = new Nvs01ProgressData();
+        // Optional schema-v1 extension. A missing value is an admitted legacy
+        // save and resolves to the first tutorial step (or reconciles from an
+        // already committed lordship result). Once present, Version and the
+        // complete topology are validated fail-closed.
+        public FirstWorldProgressData FirstWorldProgress;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
+    }
+
+    [Serializable]
+    public sealed class FirstWorldProgressData
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public long Revision;
+        public int TutorialStep;
+        public int TeachingBeat;
+        public int MovementConfirmationCount;
+        public int BasicAttackConfirmationCount;
+        public int CompletionEventCount;
+        public int OmenOfferCount;
+        public bool BlockTaught;
+        public bool HandoffCommitted;
+        public int ProofPhase;
+        public string ProofQuestId = string.Empty;
+        public string ProofQuestStateId = string.Empty;
+        public string ProofObjectiveId = string.Empty;
+        public string ProofDialogueId = string.Empty;
+        public string ProofLastEventId = string.Empty;
+        public string ProofChapterVariantId = string.Empty;
+        public bool ProofOmenAccepted;
+        public bool ProofAutoAccept;
+        public string LastOperationId = string.Empty;
     }
 
     [Serializable]

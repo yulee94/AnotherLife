@@ -12,6 +12,10 @@ namespace AL.ChampionMode.UI
     /// </summary>
     public static class ChampionHudChrome
     {
+        public static readonly Vector2 MinimapSafeMenuPosition = new Vector2(-400f, -24f);
+        public static readonly Vector2 MinimapSafeQuestPosition = new Vector2(-24f, -370f);
+        public static readonly Vector2 MinimapSafeQuestSize = new Vector2(360f, 168f);
+
         public static readonly string[] CombatOnlyRoots =
         {
             "CombatGoals",
@@ -81,7 +85,7 @@ namespace AL.ChampionMode.UI
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-PresentationChrome.SpaceMd, -PresentationChrome.SpaceMd),
+                MinimapSafeMenuPosition,
                 new Vector2(148f, PresentationChrome.MinHit));
             if (onOpen != null)
             {
@@ -124,8 +128,8 @@ namespace AL.ChampionMode.UI
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-PresentationChrome.SpaceMd, -92f),
-                new Vector2(360f, 120f));
+                MinimapSafeQuestPosition,
+                MinimapSafeQuestSize);
             slot.raycastTarget = false;
             return slot.rectTransform;
         }

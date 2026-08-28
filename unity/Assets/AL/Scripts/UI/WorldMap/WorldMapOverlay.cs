@@ -5,6 +5,7 @@ using AL.Data.Catalogs.WorldAtlas;
 using AL.UI.RealmSelection;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AL.UI.WorldMap
@@ -19,27 +20,51 @@ namespace AL.UI.WorldMap
         private MainQuestMapMarkerCatalog _markerCatalog;
         private GameObject _mapRoot;
         private Transform _questMarkerRoot;
+        private IDisposable _cursorOwnership;
+        private IDisposable _gameplaySuppressionOwnership;
+        private bool _presentationAuthority;
+        private bool _sessionHooked;
 
         public WorldMapPresentation Presentation => _presentation;
 
         public static WorldMapOverlay Ensure(WorldAtlasSnapshot snapshot)
         {
-            WorldMapOverlay existing = FindObjectOfType<WorldMapOverlay>();
+            return Ensure(snapshot, SceneManager.GetActiveScene());
+        }
+
+        internal static WorldMapOverlay Ensure(WorldAtlasSnapshot snapshot, Scene scene)
+        {
+            WorldMapOverlay existing = FindInScene(scene);
             if (existing != null)
             {
-                existing.Bind(snapshot);
-                existing.HookSession();
-                existing.Refresh();
+                existing.EnsureSurfaceHealthy(snapshot);
                 return existing;
             }
 
             var host = new GameObject(WorldMapIds.OverlayRootName);
+            if (scene.IsValid() && scene.isLoaded)
+            {
+                SceneManager.MoveGameObjectToScene(host, scene);
+            }
+
             WorldMapOverlay overlay = host.AddComponent<WorldMapOverlay>();
-            overlay.Bind(snapshot);
-            overlay.Build();
-            overlay.HookSession();
-            overlay.Refresh();
+            overlay.EnsureSurfaceHealthy(snapshot);
             return overlay;
+        }
+
+        private static WorldMapOverlay FindInScene(Scene scene)
+        {
+            WorldMapOverlay[] overlays = Resources.FindObjectsOfTypeAll<WorldMapOverlay>();
+            for (int i = 0; i < overlays.Length; i++)
+            {
+                WorldMapOverlay candidate = overlays[i];
+                if (candidate != null && candidate.gameObject.scene == scene)
+                {
+                    return candidate;
+                }
+            }
+
+            return null;
         }
 
         public void Bind(WorldAtlasSnapshot snapshot)
@@ -57,60 +82,215 @@ namespace AL.UI.WorldMap
             }
         }
 
+        internal bool IsSurfaceHealthy()
+        {
+            if (!gameObject.activeSelf || !enabled)
+            {
+                return false;
+            }
+
+            Transform canvasRoot = transform.Find("WorldMap_Canvas");
+            if (canvasRoot == null || !canvasRoot.gameObject.activeSelf)
+            {
+                return false;
+            }
+
+            Canvas canvas = canvasRoot.GetComponent<Canvas>();
+            CanvasScaler scaler = canvasRoot.GetComponent<CanvasScaler>();
+            GraphicRaycaster raycaster = canvasRoot.GetComponent<GraphicRaycaster>();
+            Transform veil = canvasRoot.Find("WorldMap_Veil");
+            Transform plate = veil != null ? veil.Find("WorldMap_Plate") : null;
+            Transform viewport = plate != null ? plate.Find("WorldMap_Viewport") : null;
+            Transform questMarkers =
+                viewport != null ? viewport.Find("WorldMapQuestMarkers") : null;
+            Transform close = plate != null ? plate.Find("WorldMap_Close") : null;
+            Image veilImage = veil != null ? veil.GetComponent<Image>() : null;
+            bool shouldBeVisible = _presentationAuthority && WorldMapSession.IsMapOpen;
+
+            return canvas != null && canvas.enabled &&
+                   scaler != null && scaler.enabled &&
+                   raycaster != null && raycaster.enabled &&
+                   veilImage != null && veilImage.raycastTarget &&
+                   plate != null && plate.gameObject.activeSelf &&
+                   viewport != null && viewport.gameObject.activeSelf &&
+                   questMarkers != null && questMarkers.gameObject.activeSelf &&
+                   close != null && close.GetComponent<Button>() != null &&
+                   (!shouldBeVisible ||
+                    (veil.gameObject.activeSelf && veil.gameObject.activeInHierarchy)) &&
+                   _mapRoot == veil.gameObject &&
+                   _questMarkerRoot == questMarkers;
+        }
+
+        internal void EnsureSurfaceHealthy(WorldAtlasSnapshot snapshot)
+        {
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+            }
+
+            if (!enabled)
+            {
+                enabled = true;
+            }
+
+            Bind(snapshot);
+            if (!IsSurfaceHealthy())
+            {
+                Build();
+            }
+        }
+
+        internal void SetPresentationAuthority(bool ownsPresentation)
+        {
+            if (!ownsPresentation)
+            {
+                _presentationAuthority = false;
+                UnhookSession();
+                HideAndRelease();
+                return;
+            }
+
+            if (!IsSurfaceHealthy())
+            {
+                _presentationAuthority = false;
+                UnhookSession();
+                HideAndRelease();
+                return;
+            }
+
+            _presentationAuthority = true;
+            _mapRoot.SetActive(WorldMapSession.IsMapOpen);
+            HookSession();
+            Refresh();
+        }
+
         public void HookSession()
         {
-            WorldMapSession.Changed -= Refresh;
+            if (!_presentationAuthority || _sessionHooked)
+            {
+                return;
+            }
+
             WorldMapSession.Changed += Refresh;
-            MainQuestMapSession.Changed -= Refresh;
             MainQuestMapSession.Changed += Refresh;
+            _sessionHooked = true;
+        }
+
+        private void UnhookSession()
+        {
+            if (!_sessionHooked)
+            {
+                return;
+            }
+
+            WorldMapSession.Changed -= Refresh;
+            MainQuestMapSession.Changed -= Refresh;
+            _sessionHooked = false;
         }
 
         public void Refresh()
         {
+            if (!_presentationAuthority)
+            {
+                HideAndRelease();
+                return;
+            }
+
+            bool mapOpen = WorldMapSession.IsMapOpen;
             if (_mapRoot != null)
             {
-                _mapRoot.SetActive(WorldMapSession.IsMapOpen);
+                _mapRoot.SetActive(mapOpen);
+            }
+
+            if (!IsSurfaceHealthy())
+            {
+                HideAndRelease();
+                return;
             }
 
             RefreshQuestMarker();
 
-            bool mapOpen = WorldMapSession.IsMapOpen;
-            GameInputBridge.ApplySuppression(mapOpen);
-            if (mapOpen)
+            if (mapOpen && _mapRoot.activeInHierarchy)
             {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                _cursorOwnership ??=
+                    ChampionHudCameraGate.AcquireCursorOwnership("world-map");
+                _gameplaySuppressionOwnership ??=
+                    GameInputBridge.AcquireSuppression("world-map");
             }
-            else if (!ChampionHudCameraGate.BlocksLook)
+            else
             {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
+                ReleaseViewOwnership();
             }
         }
 
         private void OnEnable()
         {
-            WorldMapSession.Changed += Refresh;
-            MainQuestMapSession.Changed += Refresh;
+            if (_presentationAuthority)
+            {
+                HookSession();
+                Refresh();
+            }
         }
 
         private void OnDisable()
         {
-            WorldMapSession.Changed -= Refresh;
-            MainQuestMapSession.Changed -= Refresh;
+            _presentationAuthority = false;
+            UnhookSession();
+            HideAndRelease();
         }
 
         private void OnDestroy()
         {
-            GameInputBridge.ApplySuppression(false);
+            _presentationAuthority = false;
+            UnhookSession();
+            HideAndRelease();
+        }
+
+        private void HideAndRelease()
+        {
+            if (_mapRoot != null)
+            {
+                _mapRoot.SetActive(false);
+            }
+
+            ReleaseViewOwnership();
+        }
+
+        private void ReleaseViewOwnership()
+        {
+            _cursorOwnership?.Dispose();
+            _cursorOwnership = null;
+            _gameplaySuppressionOwnership?.Dispose();
+            _gameplaySuppressionOwnership = null;
         }
 
         private void Build()
         {
+            ClearVisualTree();
+            _mapRoot = null;
+            _questMarkerRoot = null;
             EnsureEventSystem();
             Canvas canvas = CreateCanvas(transform);
             Font font = RealmSelectionIdentity.ResolvePresentationFont(22);
             _mapRoot = BuildMap(canvas.transform, font);
+            _mapRoot.SetActive(_presentationAuthority && WorldMapSession.IsMapOpen);
+        }
+
+        private void ClearVisualTree()
+        {
+            while (transform.childCount > 0)
+            {
+                Transform child = transform.GetChild(transform.childCount - 1);
+                child.SetParent(null, false);
+                if (Application.isPlaying)
+                {
+                    Destroy(child.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+            }
         }
 
         private GameObject BuildMap(Transform parent, Font font)
@@ -463,9 +643,9 @@ namespace AL.UI.WorldMap
 
     internal static class GameInputBridge
     {
-        public static void ApplySuppression(bool suppressed)
+        public static IDisposable AcquireSuppression(string owner)
         {
-            AL.Input.GameInput.SetGameplaySuppressed(suppressed);
+            return AL.Input.GameInput.AcquireGameplaySuppression(owner);
         }
     }
 }
