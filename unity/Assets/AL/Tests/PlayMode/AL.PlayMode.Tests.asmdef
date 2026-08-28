@@ -3,6 +3,7 @@
     "rootNamespace": "AL.Tests.PlayMode",
     "references": [
         "AL.Runtime",
+        "AL.SaveAuthority",
         "AL.GameDataCatalog",
         "Unity.InputSystem"
     ],

@@ -41,14 +41,13 @@ namespace AL.UI.WorldMap
             InnerRealmMinimapOverlay existing = FindObjectOfType<InnerRealmMinimapOverlay>();
             if (existing != null)
             {
-                existing.Bind(snapshot, player);
+                existing.EnsureSurfaceHealthy(snapshot, player);
                 return existing;
             }
 
             var root = new GameObject(RootName);
             InnerRealmMinimapOverlay overlay = root.AddComponent<InnerRealmMinimapOverlay>();
-            overlay.Build();
-            overlay.Bind(snapshot, player);
+            overlay.EnsureSurfaceHealthy(snapshot, player);
             return overlay;
         }
 
@@ -71,6 +70,55 @@ namespace AL.UI.WorldMap
             }
 
             Refresh();
+        }
+
+        internal bool IsSurfaceHealthy()
+        {
+            if (!gameObject.activeSelf || !enabled)
+            {
+                return false;
+            }
+
+            Transform canvasRoot = transform.Find("InnerRealmMinimapCanvas");
+            Transform plate = canvasRoot != null ? canvasRoot.Find("MinimapPlate") : null;
+            Transform viewport = plate != null ? plate.Find("MinimapViewport") : null;
+            Transform content = viewport != null ? viewport.Find("MinimapContent") : null;
+            Canvas canvas = canvasRoot != null ? canvasRoot.GetComponent<Canvas>() : null;
+            CanvasScaler scaler =
+                canvasRoot != null ? canvasRoot.GetComponent<CanvasScaler>() : null;
+            GraphicRaycaster raycaster =
+                canvasRoot != null ? canvasRoot.GetComponent<GraphicRaycaster>() : null;
+
+            return canvasRoot != null && canvasRoot.gameObject.activeSelf &&
+                   canvas != null && canvas.enabled &&
+                   scaler != null && scaler.enabled &&
+                   raycaster != null && raycaster.enabled &&
+                   plate != null && plate.gameObject.activeSelf &&
+                   viewport != null && viewport.gameObject.activeSelf &&
+                   content != null && content.gameObject.activeSelf &&
+                   _content == content;
+        }
+
+        internal void EnsureSurfaceHealthy(
+            WorldAtlasSnapshot snapshot,
+            Transform player = null)
+        {
+            if (!gameObject.activeSelf)
+            {
+                gameObject.SetActive(true);
+            }
+
+            if (!enabled)
+            {
+                enabled = true;
+            }
+
+            if (!IsSurfaceHealthy())
+            {
+                Build();
+            }
+
+            Bind(snapshot, player);
         }
 
         private void OnEnable()
@@ -100,6 +148,10 @@ namespace AL.UI.WorldMap
 
         private void Build()
         {
+            ClearVisualTree();
+            _content = null;
+            _playerMarker = null;
+            _playerLabel = null;
             var canvasObject = new GameObject("InnerRealmMinimapCanvas");
             canvasObject.transform.SetParent(transform, false);
             var canvas = canvasObject.AddComponent<Canvas>();
@@ -154,6 +206,23 @@ namespace AL.UI.WorldMap
             _content.anchorMax = Vector2.one;
             _content.offsetMin = new Vector2(12f, 12f);
             _content.offsetMax = new Vector2(-12f, -12f);
+        }
+
+        private void ClearVisualTree()
+        {
+            while (transform.childCount > 0)
+            {
+                Transform child = transform.GetChild(transform.childCount - 1);
+                child.SetParent(null, false);
+                if (Application.isPlaying)
+                {
+                    Destroy(child.gameObject);
+                }
+                else
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+            }
         }
 
         private void Refresh()

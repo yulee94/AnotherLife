@@ -1,4 +1,5 @@
 using AL.Core;
+using AL.ChampionMode.UI;
 using AL.RealmWar.Warzone;
 using AL.World.Streaming;
 using System.Collections;
@@ -491,6 +492,7 @@ namespace AL.ChampionMode.Skills
             }
 
             var textObject = new GameObject("VFX_Runtime_FloatingCombatText");
+            CombatEffectOwnership.Track(textObject, false);
             textObject.transform.position = position;
             var mesh = textObject.AddComponent<TextMesh>();
             mesh.text = text;
@@ -1331,8 +1333,8 @@ namespace AL.ChampionMode.Skills
     {
         private static RuntimeFeedbackHost _host;
         private static Coroutine _hitPauseRoutine;
-        private static float _restoreTimeScale = 1f;
-        private static float _restoreFixedDeltaTime = 0.02f;
+        private static System.IDisposable _hitPauseOwnership;
+        private static int _hitPauseGeneration;
 
         public static void RequestHitPause(float duration, float timeScale)
         {
@@ -1347,30 +1349,40 @@ namespace AL.ChampionMode.Skills
                 return;
             }
 
-            if (_hitPauseRoutine == null)
-            {
-                _restoreTimeScale = Time.timeScale;
-                _restoreFixedDeltaTime = Time.fixedDeltaTime;
-            }
-            else
+            if (_hitPauseRoutine != null)
             {
                 host.StopCoroutine(_hitPauseRoutine);
             }
 
-            _hitPauseRoutine = host.StartCoroutine(HitPauseRoutine(duration, timeScale));
+            _hitPauseOwnership?.Dispose();
+            _hitPauseOwnership = null;
+
+            int generation = unchecked(++_hitPauseGeneration);
+            _hitPauseRoutine = host.StartCoroutine(
+                HitPauseRoutine(host, generation, duration, timeScale));
         }
 
-        private static IEnumerator HitPauseRoutine(float duration, float timeScale)
+        private static IEnumerator HitPauseRoutine(
+            RuntimeFeedbackHost owner,
+            int generation,
+            float duration,
+            float timeScale)
         {
             float safeDuration = Mathf.Clamp(duration, 0.015f, 0.12f);
             float safeTimeScale = Mathf.Clamp(timeScale, 0.04f, 1f);
-            Time.timeScale = safeTimeScale;
-            Time.fixedDeltaTime = Mathf.Max(0.001f, _restoreFixedDeltaTime * safeTimeScale);
+            _hitPauseOwnership = ChampionTimeScaleGate.Acquire(
+                "combat-hit-pause",
+                safeTimeScale);
 
             yield return new WaitForSecondsRealtime(safeDuration);
 
-            Time.timeScale = _restoreTimeScale;
-            Time.fixedDeltaTime = _restoreFixedDeltaTime;
+            if (_host != owner || _hitPauseGeneration != generation)
+            {
+                yield break;
+            }
+
+            _hitPauseOwnership?.Dispose();
+            _hitPauseOwnership = null;
             _hitPauseRoutine = null;
         }
 
@@ -1389,6 +1401,41 @@ namespace AL.ChampionMode.Skills
 
         private sealed class RuntimeFeedbackHost : MonoBehaviour
         {
+            private void OnEnable()
+            {
+                if (_host == null)
+                {
+                    _host = this;
+                }
+            }
+
+            private void OnDisable()
+            {
+                ReleaseOwnedHitPause();
+            }
+
+            private void OnDestroy()
+            {
+                ReleaseOwnedHitPause();
+            }
+
+            private void ReleaseOwnedHitPause()
+            {
+                if (_host != this)
+                {
+                    return;
+                }
+
+                _hitPauseGeneration = unchecked(_hitPauseGeneration + 1);
+                if (_hitPauseRoutine != null)
+                {
+                    StopCoroutine(_hitPauseRoutine);
+                }
+                _hitPauseOwnership?.Dispose();
+                _hitPauseOwnership = null;
+                _hitPauseRoutine = null;
+                _host = null;
+            }
         }
     }
 
@@ -1443,6 +1490,17 @@ namespace AL.ChampionMode.Skills
             PlayTone("clear", 660f, 0.42f, 0.28f, 0.30f);
         }
 
+        public static void StopOwned(GameObject owner)
+        {
+            if (owner == null)
+            {
+                return;
+            }
+
+            Transform channel = owner.transform.Find("OwnedRuntimeCombatAudio");
+            channel?.GetComponent<AudioSource>()?.Stop();
+        }
+
         private static void PlayTone(string key, float frequency, float duration, float volume, float brightness)
         {
             var source = GetOrCreateSource();
@@ -1463,6 +1521,40 @@ namespace AL.ChampionMode.Skills
 
         private static AudioSource GetOrCreateSource()
         {
+            GameObject owner = CombatEffectOwnership.CurrentOwner;
+            if (owner != null)
+            {
+                return GetOrCreateOwnedSource(owner);
+            }
+
+            return GetOrCreateSharedSource();
+        }
+
+        private static AudioSource GetOrCreateOwnedSource(GameObject owner)
+        {
+            GetOrCreateSharedSource();
+            const string ownedChannelName = "OwnedRuntimeCombatAudio";
+            Transform existing = owner.transform.Find(ownedChannelName);
+            GameObject channel = existing != null
+                ? existing.gameObject
+                : new GameObject(ownedChannelName);
+            if (existing == null)
+            {
+                channel.transform.SetParent(owner.transform, false);
+            }
+
+            AudioSource source = channel.GetComponent<AudioSource>();
+            if (source == null)
+            {
+                source = channel.AddComponent<AudioSource>();
+                ConfigureSource(source);
+            }
+
+            return source;
+        }
+
+        private static AudioSource GetOrCreateSharedSource()
+        {
             if (_source != null)
             {
                 return _source;
@@ -1471,10 +1563,15 @@ namespace AL.ChampionMode.Skills
             var host = new GameObject("ChampionRuntimeCombatAudio");
             Object.DontDestroyOnLoad(host);
             _source = host.AddComponent<AudioSource>();
-            _source.playOnAwake = false;
-            _source.spatialBlend = 0f;
-            _source.priority = 80;
+            ConfigureSource(_source);
             return _source;
+        }
+
+        private static void ConfigureSource(AudioSource source)
+        {
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.priority = 80;
         }
 
         private static AudioClip CreateToneClip(string key, float frequency, float duration, float brightness)

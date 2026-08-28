@@ -8,6 +8,7 @@ using AL.Data.Runtime;
 using AL.Input;
 using AL.Services.Local;
 using AL.UI.Presentation;
+using AL.UI.QuestHud;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -44,6 +45,9 @@ namespace AL.ChampionMode
         private FirstWorldProgressSnapshot _progressSnapshot;
         private bool _durable;
         private bool _failedClosed;
+        private bool _ownsAutoQuestMovement;
+        private float _nextAutoQuestAdvanceAt;
+        private float _autoQuestResumeAt;
 
         public FirstWorldEntryTutorialState State => _state;
         public FirstWorldProgressSnapshot ProgressSnapshot => _progressSnapshot;
@@ -56,12 +60,27 @@ namespace AL.ChampionMode
         {
             ServiceLocator.TryGet(
                 out ISaveGameService saveGameService);
-            return AttachIfNeeded(parent, saveGameService);
+            return AttachIfNeeded(parent, saveGameService, null);
         }
 
         public static FirstWorldEntryTutorialDirector AttachIfNeeded(
             Transform parent,
             ISaveGameService saveGameService)
+        {
+            return AttachIfNeeded(parent, saveGameService, null);
+        }
+
+        public static FirstWorldEntryTutorialDirector AttachIfNeeded(
+            Transform parent,
+            ChampionController playerController)
+        {
+            return AttachIfNeeded(parent, null, playerController);
+        }
+
+        public static FirstWorldEntryTutorialDirector AttachIfNeeded(
+            Transform parent,
+            ISaveGameService saveGameService,
+            ChampionController playerController)
         {
             if (!FirstSessionChampionStart.ShouldRunFirstWorldEntryTutorial)
             {
@@ -105,6 +124,7 @@ namespace AL.ChampionMode
             if (_instance != null)
             {
                 _instance._saveGameService ??= saveGameService;
+                _instance.BindPlayerController(playerController);
                 _instance.EnsureReady();
                 return _instance;
             }
@@ -119,18 +139,30 @@ namespace AL.ChampionMode
             FirstWorldEntryTutorialDirector director =
                 host.AddComponent<FirstWorldEntryTutorialDirector>();
             director._saveGameService = saveGameService;
+            director.BindPlayerController(playerController);
             director.EnsureReady();
             host.SetActive(true);
             return director;
         }
 
+#if UNITY_EDITOR
         public void ApplyLookForTests(float magnitude)
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             ConsiderLook(magnitude);
         }
 
         public void ApplyMoveForTests(float magnitude, bool blockHeld)
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             _testMovementSequence++;
             ConsiderMove(
                 new ChampionMovementReceipt(
@@ -148,6 +180,11 @@ namespace AL.ChampionMode
             float horizontalDisplacement,
             bool grounded)
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             _testMovementSequence++;
             ConsiderMove(
                 new ChampionMovementReceipt(
@@ -162,6 +199,11 @@ namespace AL.ChampionMode
 
         public void ApplyInteractForTests()
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             ConsiderInteract();
         }
 
@@ -169,6 +211,7 @@ namespace AL.ChampionMode
         {
             HandleWorldInteractionConfirmed(result);
         }
+#endif
 
         public void BindWorldInteractionDirector(WorldInteractionDirector director)
         {
@@ -191,10 +234,22 @@ namespace AL.ChampionMode
             }
         }
 
+#if UNITY_EDITOR
         public void ApplyAttackForTests()
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             ConsiderAttack();
         }
+
+        public void AdvanceAutoQuestForTests()
+        {
+            AdvanceAutoQuest();
+        }
+#endif
 
         public string FollowActiveObjective(bool targetAvailable)
         {
@@ -214,6 +269,11 @@ namespace AL.ChampionMode
             EnsureReady();
         }
 
+        private void OnDisable()
+        {
+            ReleaseAutoQuestMovement();
+        }
+
         private void OnDestroy()
         {
             BindWorldInteractionDirector(null);
@@ -224,10 +284,12 @@ namespace AL.ChampionMode
             }
         }
 
+#if UNITY_EDITOR
         public static void ResetForTests()
         {
             _instance = null;
         }
+#endif
 
         public void EnsureReady()
         {
@@ -276,7 +338,6 @@ namespace AL.ChampionMode
                 return;
             }
 
-            BindPlayerControllerIfNeeded();
             BuildOverlay();
             RefreshPresentation();
             _ready = true;
@@ -286,12 +347,18 @@ namespace AL.ChampionMode
         {
             if (_failedClosed || _state == null || _state.IsComplete)
             {
+                ReleaseAutoQuestMovement();
+                return;
+            }
+
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                ReleaseAutoQuestMovement();
                 return;
             }
 
             Vector2 look = GameInput.ReadLook();
             ConsiderLook(look.magnitude);
-            BindPlayerControllerIfNeeded();
 
             if (_playerController != null)
             {
@@ -312,6 +379,59 @@ namespace AL.ChampionMode
                     _lastBasicAttackSequence = attackReceipt.Sequence;
                     ConsiderAttack();
                 }
+            }
+
+            bool manualInput =
+                look.sqrMagnitude > 0.0001f ||
+                (_playerController != null &&
+                 _playerController.LastMovementReceipt.RequestedInput.sqrMagnitude > 0.0001f);
+            if (manualInput)
+            {
+                _autoQuestResumeAt = Time.unscaledTime + 1.25f;
+            }
+
+            bool autoQuestAvailable =
+                QuestHudAutoQuest.Enabled &&
+                QuestHudAutoQuest.CanDriveInCurrentContext();
+            if (manualInput ||
+                !autoQuestAvailable ||
+                Time.unscaledTime < _autoQuestResumeAt)
+            {
+                ReleaseAutoQuestMovement();
+                return;
+            }
+
+            if (Time.unscaledTime >= _nextAutoQuestAdvanceAt)
+            {
+                AdvanceAutoQuest();
+                _nextAutoQuestAdvanceAt = Time.unscaledTime + 1.25f;
+            }
+        }
+
+        private void AdvanceAutoQuest()
+        {
+            if (_state == null || _state.IsComplete ||
+                !QuestHudAutoQuest.Enabled ||
+                !QuestHudAutoQuest.CanDriveInCurrentContext() ||
+                !OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
+            switch (_state.TeachingBeat)
+            {
+                case FirstWorldEntryTeachingBeat.CameraLook:
+                    break;
+                case FirstWorldEntryTeachingBeat.Move:
+                    _playerController.SetExternalMoveInput(Vector2.up);
+                    _ownsAutoQuestMovement = true;
+                    break;
+                case FirstWorldEntryTeachingBeat.Interact:
+                    _worldInteractionDirector?.TryConfirmFocused();
+                    break;
+                case FirstWorldEntryTeachingBeat.BasicAttack:
+                    _playerController.RequestBasicAttack();
+                    break;
             }
         }
 
@@ -357,6 +477,8 @@ namespace AL.ChampionMode
             {
                 return;
             }
+
+            ReleaseAutoQuestMovement();
 
             if (_durable)
             {
@@ -410,8 +532,13 @@ namespace AL.ChampionMode
         private void HandleWorldInteractionConfirmed(
             WorldInteractionResult result)
         {
-            if (!result.Accepted ||
-                result.CatalogId != FirstSessionWorldInteractables.GuideCatalogId)
+            if (!OwnerAllowsTutorialEvidence ||
+                _worldInteractionDirector == null ||
+                _playerController == null ||
+                _worldInteractionDirector.Actor != _playerController.transform ||
+                !result.Accepted ||
+                result.CatalogId != FirstSessionWorldInteractables.GuideCatalogId ||
+                result.Kind != WorldInteractionKind.Talk)
             {
                 return;
             }
@@ -488,24 +615,36 @@ namespace AL.ChampionMode
             gameObject.SetActive(false);
         }
 
-        private void BindPlayerControllerIfNeeded()
+        private void BindPlayerController(ChampionController playerController)
         {
-            if (_playerController != null)
+            if (playerController == null || _playerController == playerController)
             {
                 return;
             }
 
-            _playerController = FindFirstObjectByType<ChampionController>();
-            if (_playerController == null)
-            {
-                return;
-            }
-
+            _playerController = playerController;
             _lastMovementSequence =
                 _playerController.LastMovementReceipt.Sequence;
             _lastBasicAttackSequence =
                 _playerController.LastBasicAttackReceipt.Sequence;
         }
+
+        private void ReleaseAutoQuestMovement()
+        {
+            if (!_ownsAutoQuestMovement)
+            {
+                return;
+            }
+
+            _playerController?.SetExternalMoveInput(Vector2.zero);
+            _ownsAutoQuestMovement = false;
+        }
+
+        private bool OwnerAllowsTutorialEvidence =>
+            isActiveAndEnabled &&
+            _playerController != null &&
+            _playerController.isActiveAndEnabled &&
+            !_playerController.BlocksGameplayEntry;
 
         private void FailClosed(string message)
         {

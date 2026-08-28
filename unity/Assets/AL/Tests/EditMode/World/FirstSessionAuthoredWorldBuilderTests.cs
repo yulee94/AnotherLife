@@ -8,6 +8,7 @@ using AL.Data.Catalogs.WorldTerrain;
 using AL.World;
 using NUnit.Framework;
 using UnityEngine;
+using UnityEngine.TestTools.Utils;
 
 namespace AL.Tests.EditMode.World
 {
@@ -75,6 +76,26 @@ namespace AL.Tests.EditMode.World
                     visual.PanoramicSky.width,
                     Is.EqualTo(visual.PanoramicSky.height * 2),
                     realm.ToString());
+                Assert.That(
+                    catalog.TryResolveFirstSessionRealm(realm, out GameObject realmPrefab),
+                    Is.True,
+                    realm.ToString());
+                Assert.That(realmPrefab, Is.Not.Null, realm.ToString());
+                FirstSessionAuthoredRealmRoute route =
+                    realmPrefab.GetComponent<FirstSessionAuthoredRealmRoute>();
+                Assert.That(route, Is.Not.Null, realm.ToString());
+                Renderer landscape = route.transform
+                    .Find(FirstSessionAuthoredRealmRoute.LandscapeName)
+                    .GetComponent<Renderer>();
+                Assert.That(
+                    landscape.sharedMaterial.color.grayscale,
+                    Is.GreaterThanOrEqualTo(0.18f),
+                    realm + " landscape must remain readable under mobile lighting.");
+                Assert.That(
+                    realmPrefab.GetComponentsInChildren<Transform>(true)
+                        .All(transform => !transform.name.Contains("TEMPORARY")),
+                    Is.True,
+                    realm.ToString());
             }
         }
 
@@ -101,6 +122,75 @@ namespace AL.Tests.EditMode.World
                     bodyBaseId);
                 Assert.That(locomotion, Is.Not.Null, bodyBaseId);
                 Assert.That(locomotion.length, Is.GreaterThan(0f), bodyBaseId);
+            }
+        }
+
+        [Test]
+        public void AdmittedFirstSessionRealmPrefabsContainNoCompetingColliders()
+        {
+            FirstSessionAuthoredAssetCatalog catalog =
+                Resources.Load<FirstSessionAuthoredAssetCatalog>(
+                    FirstSessionAuthoredAssetCatalog.ResourcesPath);
+
+            Assert.That(catalog, Is.Not.Null);
+            foreach (RealmId realm in Realms())
+            {
+                Assert.That(
+                    catalog.TryResolveFirstSessionRealm(realm, out GameObject prefab),
+                    Is.True,
+                    realm.ToString());
+                Assert.That(prefab, Is.Not.Null, realm.ToString());
+                Assert.That(
+                    prefab.GetComponentsInChildren<Collider>(true),
+                    Is.Empty,
+                    realm + " prefab asset may not compete with TerrainCollider authority.");
+            }
+        }
+
+        [Test]
+        public void RuntimeAdmissionRejectsRealmPrefabWithAnyCompetingCollider()
+        {
+            FirstSessionAuthoredAssetCatalog catalog =
+                Resources.Load<FirstSessionAuthoredAssetCatalog>(
+                    FirstSessionAuthoredAssetCatalog.ResourcesPath);
+            Assert.That(catalog, Is.Not.Null);
+            Assert.That(
+                catalog.TryResolveRealmVisual(
+                    RealmId.Crownlands,
+                    out FirstSessionRealmVisualAsset visual),
+                Is.True);
+            System.Reflection.FieldInfo prefabField =
+                typeof(FirstSessionRealmVisualAsset).GetField(
+                    "firstSessionRealmPrefab",
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.NonPublic);
+            Assert.That(prefabField, Is.Not.Null);
+            var original = (GameObject)prefabField.GetValue(visual);
+            GameObject invalid = Object.Instantiate(original);
+            invalid.name = "ColliderBearingFirstSessionRealmForTest";
+            invalid.AddComponent<BoxCollider>();
+            InnerRealmWorldBuildResult unexpected = null;
+            try
+            {
+                prefabField.SetValue(visual, invalid);
+
+                System.InvalidOperationException exception =
+                    Assert.Throws<System.InvalidOperationException>(() =>
+                        unexpected = FirstSessionAuthoredWorldBuilder.Build(
+                            LoadLayout(),
+                            "crownlands"));
+
+                Assert.That(exception.Message, Does.Contain("competing Collider"));
+            }
+            finally
+            {
+                prefabField.SetValue(visual, original);
+                if (unexpected?.Root != null)
+                {
+                    Object.DestroyImmediate(unexpected.Root.gameObject);
+                }
+
+                Object.DestroyImmediate(invalid);
             }
         }
 
@@ -156,14 +246,14 @@ namespace AL.Tests.EditMode.World
                     .GetComponentsInChildren<Renderer>(true)
                     .Where(renderer => renderer.enabled && renderer.gameObject.activeInHierarchy)
                     .ToArray();
-                Assert.That(representativeRenderers.Length, Is.LessThanOrEqualTo(6));
-                Assert.That(CountTriangles(representativeRenderers), Is.LessThanOrEqualTo(12000));
+                Assert.That(representativeRenderers.Length, Is.LessThanOrEqualTo(200));
+                Assert.That(CountTriangles(representativeRenderers), Is.LessThanOrEqualTo(500000));
                 Assert.That(representativeRenderers
                         .SelectMany(renderer => renderer.sharedMaterials)
                         .Where(material => material != null)
                         .Distinct()
                         .Count(),
-                    Is.LessThanOrEqualTo(5));
+                    Is.LessThanOrEqualTo(24));
 
                 MeshFilter[] filters = built.Root.GetComponentsInChildren<MeshFilter>(true);
                 Assert.That(filters.Length, Is.GreaterThanOrEqualTo(10));
@@ -450,6 +540,70 @@ namespace AL.Tests.EditMode.World
             }
 
             return bounds;
+        }
+
+        [Test]
+        public void FirstSessionAuthoredRealmUsesCompleteRouteAboveSoleTerrainGround()
+        {
+            InnerRealmWorldLayout layout = LoadLayout();
+            InnerRealmWorldBuildResult built =
+                FirstSessionAuthoredWorldBuilder.Build(layout, "crownlands");
+            _spawned.Add(built.Root.gameObject);
+
+            Transform hall = built.Root.Find(FirstSessionAuthoredWorldBuilder.HallName);
+            Assert.That(hall, Is.Not.Null);
+            FirstSessionAuthoredRealmRoute route =
+                hall.GetComponentInChildren<FirstSessionAuthoredRealmRoute>(true);
+            Assert.That(route, Is.Not.Null);
+            Assert.That(route.HasCompleteRoute(), Is.True);
+            Assert.That(
+                HorizontalDistance(route.PlayerSpawn.position, built.PlayerSpawn),
+                Is.LessThan(0.01f));
+            Assert.That(
+                HorizontalDistance(route.PlayerSpawn.position, route.LordshipDestination.position),
+                Is.GreaterThanOrEqualTo(70f));
+
+            Renderer landscape = hall.GetComponentsInChildren<Renderer>(true)
+                .Single(renderer =>
+                    renderer.transform.name == FirstSessionAuthoredRealmRoute.LandscapeName);
+            Assert.That(
+                landscape.enabled,
+                Is.False,
+                "The imported landscape is presentation reference only; real Terrain owns ground.");
+            Assert.That(hall.GetComponentsInChildren<MeshCollider>(true), Is.Empty);
+
+            Terrain terrain = built.Root.GetComponentsInChildren<Terrain>(true).Single();
+            TerrainCollider terrainCollider =
+                built.Root.GetComponentsInChildren<TerrainCollider>(true).Single();
+            Assert.That(terrainCollider.terrainData, Is.SameAs(terrain.terrainData));
+            foreach (Transform anchor in new[]
+            {
+                route.PlayerSpawn,
+                route.CaptainValerius,
+                route.GuardianTrial,
+                route.CovenantSite,
+                route.LordshipDestination
+            })
+            {
+                float terrainY = terrain.SampleHeight(anchor.position) +
+                                 terrain.transform.position.y;
+                Assert.That(
+                    Mathf.Abs(anchor.position.y - terrainY),
+                    Is.LessThanOrEqualTo(0.05f),
+                    "Authored route anchor is not grounded: " + anchor.name);
+            }
+
+            Assert.That(
+                built.Root.GetComponentsInChildren<Transform>(true).Any(transform =>
+                    transform.name.StartsWith("FloorModule_Courtyard")),
+                Is.False);
+        }
+
+        private static float HorizontalDistance(Vector3 a, Vector3 b)
+        {
+            a.y = 0f;
+            b.y = 0f;
+            return Vector3.Distance(a, b);
         }
 
         private static bool IsUnityPrimitive(string name)

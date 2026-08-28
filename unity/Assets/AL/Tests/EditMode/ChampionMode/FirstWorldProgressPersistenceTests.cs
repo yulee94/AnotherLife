@@ -1,7 +1,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Quests;
+using AL.ChampionMode.Skills;
 using AL.ChampionMode.Tutorial;
 using AL.Core;
 using AL.Data.Runtime;
@@ -217,6 +219,11 @@ namespace AL.Tests.EditMode.ChampionMode
             var host = new GameObject("DurableProofResumeHost");
             try
             {
+                host.AddComponent<CharacterController>();
+                host.AddComponent<ChampionCombat>();
+                host.AddComponent<SkillCaster>();
+                ChampionController controller = host.AddComponent<ChampionController>();
+                controller.ConfigureRealmContext(RealmId.Crownlands);
                 ProofOfWorthDirector director =
                     host.AddComponent<ProofOfWorthDirector>();
                 MethodInfo initialize = typeof(ProofOfWorthDirector).GetMethod(
@@ -240,6 +247,11 @@ namespace AL.Tests.EditMode.ChampionMode
                 Assert.That(
                     director.State.DialogueId,
                     Is.EqualTo(ProofOfWorthIds.StartDialogueId));
+
+                NpcConversationView conversation =
+                    Object.FindObjectOfType<NpcConversationView>();
+                Assert.That(conversation, Is.Not.Null);
+                conversation.Collapse();
 
                 ProofOfWorthTransition investigate =
                     director.ApplyForTests(ProofOfWorthCommand.Investigate);

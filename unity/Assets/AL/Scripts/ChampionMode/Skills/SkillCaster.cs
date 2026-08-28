@@ -2,7 +2,9 @@ using System.Collections;
 using System.Collections.Generic;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Input;
 using UnityEngine;
 
 namespace AL.ChampionMode.Skills
@@ -82,6 +84,8 @@ namespace AL.ChampionMode.Skills
         {
             StopLoadoutRoutine();
             StopCastRoutine(false);
+            CombatEffectOwnership.Retire(gameObject);
+            RuntimeCombatAudio.StopOwned(gameObject);
             if (!IsLoadoutReady && !_isDestroyed)
             {
                 _loadoutState = SkillLoadoutState.Loading;
@@ -115,6 +119,11 @@ namespace AL.ChampionMode.Skills
 
         public bool TryCastSkill(int slotIndex)
         {
+            if (GameplaySuppressed)
+            {
+                return false;
+            }
+
             if (!TryGetSkill(slotIndex, out var skill))
             {
                 return false;
@@ -163,12 +172,13 @@ namespace AL.ChampionMode.Skills
 
         public void CancelCurrentSkill()
         {
-            if (_castRoutine == null)
+            if (_castRoutine != null)
             {
-                return;
+                StopCastRoutine(true);
             }
 
-            StopCastRoutine(true);
+            CombatEffectOwnership.Retire(gameObject);
+            RuntimeCombatAudio.StopOwned(gameObject);
         }
 
         public float GetCooldownRemaining(int slotIndex)
@@ -225,28 +235,68 @@ namespace AL.ChampionMode.Skills
             _activeCastDuration = skill.CastTimeSeconds;
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
             Vector3 previewCenter = GetSkillGroundCenter(skill, forward);
-            SkillEffectFactory.SpawnSkillCastRing(
-                transform.position,
-                realmId,
-                GetSkillPreviewRadius(skill),
-                skill.CastTimeSeconds + 0.15f);
-            if (skill.Identity != MvpSkillIdentity.RenewingGuard)
+            using (CombatEffectOwnership.Begin(gameObject))
             {
-                SkillEffectFactory.SpawnSkillTargetPreview(
+                SkillEffectFactory.SpawnSkillCastRing(
                     transform.position,
-                    previewCenter,
-                    forward,
                     realmId,
-                    skill.RangeMeters,
-                    skill.CastTimeSeconds + 0.18f);
+                    GetSkillPreviewRadius(skill),
+                    skill.CastTimeSeconds + 0.15f);
+                if (skill.Identity != MvpSkillIdentity.RenewingGuard)
+                {
+                    SkillEffectFactory.SpawnSkillTargetPreview(
+                        transform.position,
+                        previewCenter,
+                        forward,
+                        realmId,
+                        skill.RangeMeters,
+                        skill.CastTimeSeconds + 0.18f);
+                }
             }
 
-            yield return new WaitForSeconds(skill.CastTimeSeconds);
+            float remainingCastTime = Mathf.Max(0f, skill.CastTimeSeconds);
+            while (remainingCastTime > 0f)
+            {
+                if (GameplaySuppressed)
+                {
+                    _castRoutine = null;
+                    ClearActiveCast();
+                    yield break;
+                }
 
-            ResolveSkill(skill, realmId);
+                remainingCastTime -= Time.deltaTime;
+                yield return null;
+            }
+
+            if (GameplaySuppressed)
+            {
+                _castRoutine = null;
+                ClearActiveCast();
+                yield break;
+            }
+
+            using (CombatEffectOwnership.Begin(gameObject))
+            {
+                ResolveSkill(skill, realmId);
+            }
             _nextReadyTimes[skill.Slot] = Time.time + skill.CooldownSeconds;
             _castRoutine = null;
             ClearActiveCast();
+        }
+
+        private bool GameplaySuppressed
+        {
+            get
+            {
+                if (_controller == null)
+                {
+                    _controller = GetComponent<ChampionController>();
+                }
+
+                return GameInput.GameplaySuppressed ||
+                       ChampionHudCameraGate.BlocksGameplay ||
+                       (_controller != null && _controller.BlocksGameplayEntry);
+            }
         }
 
         private void ClearActiveCast()

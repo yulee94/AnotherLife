@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Input;
 using AL.Services.Local;
 using NUnit.Framework;
 using UnityEngine;
@@ -14,10 +16,21 @@ namespace AL.Tests.EditMode.ChampionMode
     {
         private GameObject _root;
         private string _catalogRoot;
+        private bool _previousGameplaySuppressed;
+
+        [SetUp]
+        public void SetUp()
+        {
+            _previousGameplaySuppressed = GameInput.GameplaySuppressed;
+            GameInput.SetGameplaySuppressed(false);
+            ChampionHudCameraGate.Reset();
+        }
 
         [TearDown]
         public void TearDown()
         {
+            ChampionHudCameraGate.Reset();
+            GameInput.SetGameplaySuppressed(_previousGameplaySuppressed);
             if (_root != null)
             {
                 UnityEngine.Object.DestroyImmediate(_root);

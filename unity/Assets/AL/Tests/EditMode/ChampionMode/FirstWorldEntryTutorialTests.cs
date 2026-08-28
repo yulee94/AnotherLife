@@ -1,8 +1,13 @@
+using System.IO;
 using AL.ChampionMode;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Interaction;
+using AL.ChampionMode.Skills;
 using AL.ChampionMode.Tutorial;
+using AL.ChampionMode.UI;
+using AL.Core;
 using AL.Narrative.Nvs01.Contracts;
+using AL.UI.QuestHud;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,24 +16,561 @@ namespace AL.Tests.EditMode.ChampionMode
 {
     public sealed class FirstWorldEntryTutorialTests
     {
+        private GameObject _fixtureRoot;
+
         [SetUp]
         public void SetUp()
         {
+            ChampionHudCameraGate.Reset();
             FirstSessionChampionStart.ResetToFirstSessionLanding();
+            _fixtureRoot = new GameObject("FirstWorldEntryTutorialTests.Root");
         }
 
         [TearDown]
         public void TearDown()
         {
             FirstSessionChampionStart.ResetToFirstSessionLanding();
-            FirstWorldEntryTutorialDirector[] leftovers =
-                Object.FindObjectsOfType<FirstWorldEntryTutorialDirector>();
-            for (int i = 0; i < leftovers.Length; i++)
+            if (_fixtureRoot != null)
             {
-                Object.DestroyImmediate(leftovers[i].gameObject);
+                Object.DestroyImmediate(_fixtureRoot);
+                _fixtureRoot = null;
             }
 
             FirstWorldEntryTutorialDirector.ResetForTests();
+            ChampionHudCameraGate.Reset();
+        }
+
+        [Test]
+        public void TearDownPreservesUnregisteredForeignController()
+        {
+            var foreign = new GameObject("ForeignPreExistingTutorialController");
+            foreign.AddComponent<CharacterController>();
+            foreign.AddComponent<ChampionController>();
+            try
+            {
+                TearDown();
+
+                Assert.That(foreign != null, Is.True);
+            }
+            finally
+            {
+                if (foreign != null)
+                {
+                    Object.DestroyImmediate(foreign);
+                }
+            }
+        }
+
+        [Test]
+        public void MissingOwnerRejectsSyntheticTutorialEvidence()
+        {
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(_fixtureRoot.transform);
+            FirstWorldEntryTutorialState before = director.State;
+
+            director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
+            director.ApplyMoveForTests(
+                FirstWorldEntryTutorialEvidence.MoveThreshold,
+                blockHeld: false);
+            director.ApplyInteractForTests();
+            director.ApplyAttackForTests();
+
+            Assert.That(director.State, Is.SameAs(before));
+        }
+
+        [Test]
+        public void ControllerLockBlocksAutoTutorialEvidenceIncludingBasicAttack()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            QuestHudAutoQuest.SetEnabled(true);
+            ChampionController decoyController = CreateTutorialController(
+                "UnlockedAdditiveTutorialDecoy");
+            ChampionController controller = CreateTutorialController(
+                "LockedTutorialEvidenceChampion");
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
+
+            controller.SetControlLocked(true);
+            FirstWorldEntryTutorialState initial = director.State;
+            director.AdvanceAutoQuestForTests();
+            Assert.That(director.State, Is.SameAs(initial));
+            Assert.That(decoyController.EditorBasicAttackSequence, Is.Zero);
+
+            controller.SetControlLocked(false);
+            director.ApplyLookForTests(
+                FirstWorldEntryTutorialEvidence.LookThreshold);
+            director.ApplyMoveForTests(
+                FirstWorldEntryTutorialEvidence.MoveThreshold,
+                blockHeld: false);
+            director.ApplyInteractForTests();
+            Assert.That(director.State.TeachingBeat,
+                Is.EqualTo(FirstWorldEntryTeachingBeat.BasicAttack));
+
+            controller.SetControlLocked(true);
+            int attackSequence = controller.EditorBasicAttackSequence;
+            FirstWorldEntryTutorialState attackBeat = director.State;
+            director.AdvanceAutoQuestForTests();
+            Assert.That(director.State, Is.SameAs(attackBeat));
+            Assert.That(controller.EditorBasicAttackSequence, Is.EqualTo(attackSequence));
+
+            Assert.That(director.State.IsComplete, Is.False);
+            Object.DestroyImmediate(decoyController.gameObject);
+            Object.DestroyImmediate(controller.gameObject);
+        }
+
+        [Test]
+        public void AutoQuestOffPreservesEveryTutorialBeat()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            ChampionController controller = CreateTutorialController(
+                "AutoQuestOffTutorialOwner");
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
+            FirstWorldEntryTeachingBeat[] beats =
+            {
+                FirstWorldEntryTeachingBeat.CameraLook,
+                FirstWorldEntryTeachingBeat.Move,
+                FirstWorldEntryTeachingBeat.Interact,
+                FirstWorldEntryTeachingBeat.BasicAttack
+            };
+
+            for (int i = 0; i < beats.Length; i++)
+            {
+                Assert.That(director.State.TeachingBeat, Is.EqualTo(beats[i]));
+                FirstWorldEntryTutorialState before = director.State;
+                director.AdvanceAutoQuestForTests();
+                Assert.That(director.State, Is.SameAs(before));
+
+                switch (beats[i])
+                {
+                    case FirstWorldEntryTeachingBeat.CameraLook:
+                        director.ApplyLookForTests(
+                            FirstWorldEntryTutorialEvidence.LookThreshold);
+                        break;
+                    case FirstWorldEntryTeachingBeat.Move:
+                        director.ApplyMoveForTests(
+                            FirstWorldEntryTutorialEvidence.MoveThreshold,
+                            blockHeld: false);
+                        break;
+                    case FirstWorldEntryTeachingBeat.Interact:
+                        director.ApplyInteractForTests();
+                        break;
+                }
+            }
+
+            Assert.That(director.State.TeachingBeat,
+                Is.EqualTo(FirstWorldEntryTeachingBeat.BasicAttack));
+            Assert.That(director.State.IsComplete, Is.False);
+            director.ApplyAttackForTests();
+            Assert.That(director.State.IsComplete, Is.True);
+        }
+
+        [Test]
+        public void ModalSuppressionPreservesEveryAutoQuestTutorialBeat()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                ChampionController controller = CreateTutorialController(
+                    "ModalTutorialOwner");
+                FirstWorldEntryTutorialDirector director =
+                    FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                        _fixtureRoot.transform,
+                        controller);
+                FirstWorldEntryTeachingBeat[] beats =
+                {
+                    FirstWorldEntryTeachingBeat.CameraLook,
+                    FirstWorldEntryTeachingBeat.Move,
+                    FirstWorldEntryTeachingBeat.Interact,
+                    FirstWorldEntryTeachingBeat.BasicAttack
+                };
+
+                for (int i = 0; i < beats.Length; i++)
+                {
+                    Assert.That(director.State.TeachingBeat, Is.EqualTo(beats[i]));
+                    FirstWorldEntryTutorialState before = director.State;
+                    using (ChampionHudCameraGate.AcquireCursorOwnership(
+                               "tutorial-auto-quest-modal-test"))
+                    {
+                        director.AdvanceAutoQuestForTests();
+                    }
+
+                    Assert.That(director.State, Is.SameAs(before),
+                        "Modal suppression must not synthesize tutorial evidence.");
+                    switch (beats[i])
+                    {
+                        case FirstWorldEntryTeachingBeat.CameraLook:
+                            director.ApplyLookForTests(
+                                FirstWorldEntryTutorialEvidence.LookThreshold);
+                            break;
+                        case FirstWorldEntryTeachingBeat.Move:
+                            director.ApplyMoveForTests(
+                                FirstWorldEntryTutorialEvidence.MoveThreshold,
+                                blockHeld: false);
+                            break;
+                        case FirstWorldEntryTeachingBeat.Interact:
+                            director.ApplyInteractForTests();
+                            break;
+                        case FirstWorldEntryTeachingBeat.BasicAttack:
+                            director.ApplyAttackForTests();
+                            break;
+                    }
+                }
+
+                Assert.That(director.State.IsComplete, Is.True);
+            }
+            finally
+            {
+                QuestHudAutoQuest.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void AutoQuestCameraTeachingWaitsForObservedLookEvidence()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                ChampionController controller = CreateTutorialController(
+                    "AutoQuestTutorialOwner");
+                FirstWorldEntryTutorialDirector director =
+                    FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                        _fixtureRoot.transform,
+                        controller);
+
+                FirstWorldEntryTutorialState before = director.State;
+                director.AdvanceAutoQuestForTests();
+
+                Assert.That(director.State, Is.SameAs(before));
+                Assert.That(
+                    director.State.TeachingBeat,
+                    Is.EqualTo(FirstWorldEntryTeachingBeat.CameraLook));
+                Assert.That(director.State.IsComplete, Is.False);
+                Assert.That(QuestHudAutoQuest.Enabled, Is.True);
+            }
+            finally
+            {
+                QuestHudAutoQuest.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void AutoQuestMoveTeachingWaitsForControllerMovementReceipt()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                ChampionController controller = CreateTutorialController(
+                    "AutoQuestMoveReceiptOwner");
+                FirstWorldEntryTutorialDirector director =
+                    FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                        _fixtureRoot.transform,
+                        controller);
+                director.ApplyLookForTests(
+                    FirstWorldEntryTutorialEvidence.LookThreshold);
+                Assert.That(
+                    director.State.TeachingBeat,
+                    Is.EqualTo(FirstWorldEntryTeachingBeat.Move));
+
+                FirstWorldEntryTutorialState before = director.State;
+                uint receiptSequence = controller.LastMovementReceipt.Sequence;
+                director.AdvanceAutoQuestForTests();
+
+                Assert.That(director.State, Is.SameAs(before));
+                Assert.That(director.State.MovementConfirmationCount, Is.Zero);
+                Assert.That(
+                    controller.LastMovementReceipt.Sequence,
+                    Is.EqualTo(receiptSequence));
+                System.Reflection.FieldInfo externalMoveInput =
+                    typeof(ChampionController).GetField(
+                        "_externalMoveInput",
+                        System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic);
+                Assert.That(externalMoveInput, Is.Not.Null);
+                Assert.That(
+                    ((Vector2)externalMoveInput.GetValue(controller)).sqrMagnitude,
+                    Is.GreaterThan(0.9f));
+
+                director.ApplyMoveForTests(
+                    FirstWorldEntryTutorialEvidence.MoveThreshold,
+                    blockHeld: false);
+
+                Assert.That(
+                    director.State.TeachingBeat,
+                    Is.EqualTo(FirstWorldEntryTeachingBeat.Interact));
+                Assert.That(
+                    ((Vector2)externalMoveInput.GetValue(controller)).sqrMagnitude,
+                    Is.LessThan(0.0001f),
+                    "An accepted owner movement receipt must retire the Auto Quest request.");
+            }
+            finally
+            {
+                QuestHudAutoQuest.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void DisablingTutorialDirectorReleasesOwnedAutoQuestMovement()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                ChampionController controller = CreateTutorialController(
+                    "DisabledAutoQuestMoveOwner");
+                FirstWorldEntryTutorialDirector director =
+                    FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                        _fixtureRoot.transform,
+                        controller);
+                director.ApplyLookForTests(
+                    FirstWorldEntryTutorialEvidence.LookThreshold);
+                director.AdvanceAutoQuestForTests();
+                System.Reflection.FieldInfo externalMoveInput =
+                    typeof(ChampionController).GetField(
+                        "_externalMoveInput",
+                        System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic);
+                Assert.That(externalMoveInput, Is.Not.Null);
+                Assert.That(
+                    ((Vector2)externalMoveInput.GetValue(controller)).sqrMagnitude,
+                    Is.GreaterThan(0.9f));
+
+                director.enabled = false;
+                System.Reflection.MethodInfo onDisable =
+                    typeof(FirstWorldEntryTutorialDirector).GetMethod(
+                        "OnDisable",
+                        System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic);
+                Assert.That(onDisable, Is.Not.Null);
+                onDisable.Invoke(director, null);
+
+                Assert.That(
+                    ((Vector2)externalMoveInput.GetValue(controller)).sqrMagnitude,
+                    Is.LessThan(0.0001f));
+            }
+            finally
+            {
+                QuestHudAutoQuest.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void TurningAutoQuestOffReleasesOwnedTutorialMovementOnUpdate()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                ChampionController controller = CreateTutorialController(
+                    "DisabledAutoQuestToggleMoveOwner");
+                FirstWorldEntryTutorialDirector director =
+                    FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                        _fixtureRoot.transform,
+                        controller);
+                director.ApplyLookForTests(
+                    FirstWorldEntryTutorialEvidence.LookThreshold);
+                director.AdvanceAutoQuestForTests();
+                System.Reflection.FieldInfo externalMoveInput =
+                    typeof(ChampionController).GetField(
+                        "_externalMoveInput",
+                        System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic);
+                Assert.That(externalMoveInput, Is.Not.Null);
+                Assert.That(
+                    ((Vector2)externalMoveInput.GetValue(controller)).sqrMagnitude,
+                    Is.GreaterThan(0.9f));
+
+                QuestHudAutoQuest.SetEnabled(false);
+                System.Reflection.MethodInfo update =
+                    typeof(FirstWorldEntryTutorialDirector).GetMethod(
+                        "Update",
+                        System.Reflection.BindingFlags.Instance |
+                        System.Reflection.BindingFlags.NonPublic);
+                Assert.That(update, Is.Not.Null);
+                update.Invoke(director, null);
+
+                Assert.That(
+                    ((Vector2)externalMoveInput.GetValue(controller)).sqrMagnitude,
+                    Is.LessThan(0.0001f));
+            }
+            finally
+            {
+                QuestHudAutoQuest.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void AutoQuestInteractTeachingWaitsForAcceptedWorldInteraction()
+        {
+            QuestHudAutoQuest.ResetForTests();
+            try
+            {
+                QuestHudAutoQuest.SetEnabled(true);
+                ChampionController controller = CreateTutorialController(
+                    "AutoQuestInteractionReceiptOwner");
+                FirstWorldEntryTutorialDirector director =
+                    FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                        _fixtureRoot.transform,
+                        controller);
+                director.ApplyLookForTests(
+                    FirstWorldEntryTutorialEvidence.LookThreshold);
+                director.ApplyMoveForTests(
+                    FirstWorldEntryTutorialEvidence.MoveThreshold,
+                    blockHeld: false);
+                Assert.That(
+                    director.State.TeachingBeat,
+                    Is.EqualTo(FirstWorldEntryTeachingBeat.Interact));
+
+                FirstWorldEntryTutorialState before = director.State;
+                director.AdvanceAutoQuestForTests();
+
+                Assert.That(director.State, Is.SameAs(before));
+                Assert.That(
+                    director.State.TeachingBeat,
+                    Is.EqualTo(FirstWorldEntryTeachingBeat.Interact));
+            }
+            finally
+            {
+                QuestHudAutoQuest.ResetForTests();
+            }
+        }
+
+        [Test]
+        public void NonDurableCompletionDoesNotPublishDurableHandoff()
+        {
+            ChampionController controller = CreateTutorialController(
+                "CompletionHandoffTutorialOwner");
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
+            int completions = 0;
+            director.Completed += _ => completions++;
+
+            director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
+            director.ApplyMoveForTests(FirstWorldEntryTutorialEvidence.MoveThreshold, false);
+            director.ApplyInteractForTests();
+            director.ApplyAttackForTests();
+            director.ApplyAttackForTests();
+
+            Assert.That(director.State.IsComplete, Is.True);
+            Assert.That(completions, Is.Zero);
+        }
+
+        [Test]
+        public void InteractTeachingRejectsForeignOwnerAndWrongInteractionKind()
+        {
+            ChampionController controller = CreateTutorialController(
+                "OwnerBoundInteractionReceiptOwner");
+            FirstWorldEntryTutorialDirector director =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
+            director.ApplyLookForTests(
+                FirstWorldEntryTutorialEvidence.LookThreshold);
+            director.ApplyMoveForTests(
+                FirstWorldEntryTutorialEvidence.MoveThreshold,
+                blockHeld: false);
+            Assert.That(
+                director.State.TeachingBeat,
+                Is.EqualTo(FirstWorldEntryTeachingBeat.Interact));
+
+            var sourceObject = new GameObject("OwnerBoundInteractionSource");
+            sourceObject.transform.SetParent(_fixtureRoot.transform, false);
+            WorldInteractionDirector source =
+                sourceObject.AddComponent<WorldInteractionDirector>();
+            director.BindWorldInteractionDirector(source);
+
+            var foreignActor = new GameObject("ForeignInteractionActor");
+            foreignActor.transform.SetParent(_fixtureRoot.transform, false);
+            source.Configure(foreignActor.transform, null, null);
+            director.ApplyWorldInteractionForTests(new WorldInteractionResult(
+                true,
+                FirstSessionWorldInteractables.GuideCatalogId,
+                WorldInteractionKind.Talk,
+                WorldInteractionPromptCopy.GuideObjectiveText));
+            Assert.That(
+                director.State.TeachingBeat,
+                Is.EqualTo(FirstWorldEntryTeachingBeat.Interact));
+
+            source.Configure(controller.transform, null, null);
+            director.ApplyWorldInteractionForTests(new WorldInteractionResult(
+                true,
+                FirstSessionWorldInteractables.GuideCatalogId,
+                WorldInteractionKind.Use,
+                WorldInteractionPromptCopy.GuideObjectiveText));
+            Assert.That(
+                director.State.TeachingBeat,
+                Is.EqualTo(FirstWorldEntryTeachingBeat.Interact));
+
+            director.ApplyWorldInteractionForTests(new WorldInteractionResult(
+                true,
+                FirstSessionWorldInteractables.GuideCatalogId,
+                WorldInteractionKind.Talk,
+                WorldInteractionPromptCopy.GuideObjectiveText));
+            Assert.That(
+                director.State.TeachingBeat,
+                Is.EqualTo(FirstWorldEntryTeachingBeat.BasicAttack));
+        }
+
+        [Test]
+        public void SyntheticProgressionIngressIsEditorOnly()
+        {
+            string tutorialSource = File.ReadAllText(Path.Combine(
+                Application.dataPath,
+                "AL/Scripts/ChampionMode/Tutorial/FirstWorldEntryTutorialDirector.cs"))
+                .Replace(System.Environment.NewLine, "\n");
+            string proofSource = File.ReadAllText(Path.Combine(
+                Application.dataPath,
+                "AL/Scripts/ChampionMode/Quests/ProofOfWorthDirector.cs"))
+                .Replace(System.Environment.NewLine, "\n");
+
+            Assert.That(
+                tutorialSource,
+                Does.Contain("#if UNITY_EDITOR\n        public void ApplyLookForTests"));
+            Assert.That(
+                tutorialSource,
+                Does.Contain("public void AdvanceAutoQuestForTests()\n" +
+                             "        {\n" +
+                             "            AdvanceAutoQuest();\n" +
+                             "        }\n#endif"));
+            Assert.That(
+                proofSource,
+                Does.Contain("#if UNITY_EDITOR\n        public ProofOfWorthTransition ApplyForTests"));
+        }
+
+        [Test]
+        public void LiveInteractTeachingUsesTheWorldInteractionBinding()
+        {
+            string source = File.ReadAllText(Path.Combine(
+                Application.dataPath,
+                "AL/Scripts/ChampionMode/Tutorial/FirstWorldEntryTutorialDirector.cs"));
+
+            Assert.That(
+                source,
+                Does.Contain("_worldInteractionDirector.Confirmed +="));
+            Assert.That(source, Does.Contain("HandleWorldInteractionConfirmed"));
+            Assert.That(source, Does.Not.Contain("GameInput.InteractPressed()"));
+            Assert.That(source, Does.Not.Contain("GameInput.SubmitPressed()"));
+        }
+
+        [Test]
+        public void LiveMoveTeachingDoesNotPresentBlockAsSprint()
+        {
+            string source = File.ReadAllText(Path.Combine(
+                Application.dataPath,
+                "AL/Scripts/ChampionMode/Tutorial/FirstWorldEntryTutorialDirector.cs"));
+
+            Assert.That(source, Does.Not.Contain("ConsiderMove(move.magnitude, GameInput.BlockHeld())"));
+            Assert.That(FirstWorldEntryTutorialCopy.MovePrompt, Does.Not.Contain("Shift"));
+            Assert.That(FirstWorldEntryTutorialCopy.MovePrompt.ToLowerInvariant(), Does.Not.Contain("sprint"));
         }
 
         [Test]
@@ -135,22 +677,20 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
-        public void TutorialCopyIsTemporaryAndOmenCopyMatchesCatalog()
+        public void TutorialCopyIsProductionReadyAndOmenCopyMatchesCatalog()
         {
-            Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.Title));
-            Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.CameraPrompt));
-            Assert.That(
-                FirstWorldEntryTutorialCopy.CameraPrompt,
-                Does.Contain("Hold the right mouse button and drag"));
+            Assert.IsFalse(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.Title));
+            Assert.IsFalse(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.CameraPrompt));
             Assert.That(FirstWorldEntryTutorialCopy.CameraPrompt, Does.Contain("right stick"));
-            Assert.That(FirstWorldEntryTutorialCopy.CameraPrompt, Does.Not.Contain("Move the mouse"));
-            Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.MovePrompt));
-            Assert.That(FirstWorldEntryTutorialCopy.MovePrompt, Does.Contain("Shift to block"));
-            Assert.That(FirstWorldEntryTutorialCopy.MovePrompt, Does.Not.Contain("sprint"));
-            Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.InteractPrompt));
-            Assert.That(FirstWorldEntryTutorialCopy.InteractPrompt, Does.Contain("press F"));
+            Assert.IsFalse(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.MovePrompt));
+            Assert.IsFalse(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.InteractPrompt));
+            Assert.IsFalse(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.AttackPrompt));
+            Assert.AreEqual("Champion's First Steps", FirstWorldEntryTutorialCopy.Title);
+            Assert.That(FirstWorldEntryTutorialCopy.InteractPrompt, Does.Contain("[F]"));
+            Assert.That(FirstWorldEntryTutorialCopy.InteractPrompt, Does.Contain("Captain Valerius"));
             Assert.That(FirstWorldEntryTutorialCopy.InteractPrompt, Does.Not.Contain("Enter"));
-            Assert.IsTrue(FirstWorldEntryTutorialCopy.IsTemporary(FirstWorldEntryTutorialCopy.AttackPrompt));
+            Assert.That(FirstWorldEntryTutorialCopy.OmenOfferedHint, Does.Not.Contain("SELECT_"));
+            Assert.That(FirstWorldEntryTutorialCopy.OmenOfferedHint, Does.Contain("Captain Valerius"));
             Assert.AreEqual("The First Signal", FirstWorldEntryTutorialCopy.OmenOfferTitle);
             Assert.AreEqual("Speak with Captain Valerius.", FirstWorldEntryTutorialCopy.OmenTalk);
             Assert.That(
@@ -163,7 +703,7 @@ namespace AL.Tests.EditMode.ChampionMode
         {
             Assert.IsTrue(FirstSessionChampionStart.ShouldRunFirstWorldEntryTutorial);
             FirstWorldEntryTutorialDirector attached =
-                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(_fixtureRoot.transform);
             Assert.NotNull(attached);
             Assert.AreEqual(
                 FirstWorldEntryTutorialDirector.OverlayRootName,
@@ -209,8 +749,12 @@ namespace AL.Tests.EditMode.ChampionMode
         [Test]
         public void DirectorTeachesLookMoveInteractAttackThenOffersOmen()
         {
+            ChampionController controller = CreateTutorialController(
+                "OrderedTutorialOwner");
             FirstWorldEntryTutorialDirector director =
-                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
             Assert.AreEqual(FirstWorldEntryTeachingBeat.CameraLook, director.State.TeachingBeat);
 
             director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
@@ -252,8 +796,18 @@ namespace AL.Tests.EditMode.ChampionMode
         [Test]
         public void OnlyAcceptedRealmGuideInteractionAdvancesInteractBeat()
         {
+            ChampionController controller = CreateTutorialController(
+                "GuideInteractionTutorialOwner");
             FirstWorldEntryTutorialDirector director =
-                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
+            var sourceObject = new GameObject("GuideInteractionTutorialSource");
+            sourceObject.transform.SetParent(_fixtureRoot.transform, false);
+            WorldInteractionDirector source =
+                sourceObject.AddComponent<WorldInteractionDirector>();
+            source.Configure(controller.transform, null, null);
+            director.BindWorldInteractionDirector(source);
             director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
             director.ApplyMoveForTests(
                 FirstWorldEntryTutorialEvidence.MoveThreshold,
@@ -312,8 +866,12 @@ namespace AL.Tests.EditMode.ChampionMode
         [Test]
         public void DirectorRejectsMoveIntentWithoutGroundedDisplacement()
         {
+            ChampionController controller = CreateTutorialController(
+                "RejectedMoveTutorialOwner");
             FirstWorldEntryTutorialDirector director =
-                FirstWorldEntryTutorialDirector.AttachIfNeeded(null);
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    _fixtureRoot.transform,
+                    controller);
             director.ApplyLookForTests(FirstWorldEntryTutorialEvidence.LookThreshold);
 
             director.ApplyRejectedMoveForTests(1f, 0f, grounded: true);
@@ -323,6 +881,18 @@ namespace AL.Tests.EditMode.ChampionMode
             director.ApplyRejectedMoveForTests(1f, 0.2f, grounded: false);
             Assert.AreEqual(FirstWorldEntryTeachingBeat.Move, director.State.TeachingBeat);
             Assert.AreEqual(0, director.State.MovementConfirmationCount);
+        }
+
+        private ChampionController CreateTutorialController(string name)
+        {
+            var champion = new GameObject(name);
+            champion.transform.SetParent(_fixtureRoot.transform, false);
+            champion.AddComponent<CharacterController>();
+            champion.AddComponent<ChampionCombat>();
+            champion.AddComponent<SkillCaster>();
+            ChampionController controller = champion.AddComponent<ChampionController>();
+            controller.ConfigureRealmContext(RealmId.Crownlands);
+            return controller;
         }
 
         private static ChampionMovementReceipt MovementReceipt(

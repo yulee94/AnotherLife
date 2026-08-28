@@ -357,19 +357,19 @@ namespace AL.ChampionMode.Tutorial
     {
         public const string TemporaryBadge = "TEMPORARY";
 
-        public const string Title = "TEMPORARY — first steps";
-        public const string CameraPrompt = "TEMPORARY — look around. Hold the right mouse button and drag, or use the right stick.";
-        public const string MovePrompt = "TEMPORARY — walk with WASD. Hold Shift to block.";
+        public const string Title = "Champion's First Steps";
+        public const string CameraPrompt = "Look around with the mouse or right stick.";
+        public const string MovePrompt = "Walk with WASD.";
         public const string InteractPrompt =
-            "TEMPORARY — approach the Realm Guide and press F to talk.";
-        public const string AttackPrompt = "TEMPORARY — strike once. Left mouse.";
+            "Approach Captain Valerius and press [F] to speak.";
+        public const string AttackPrompt = "Strike once with Left Mouse.";
         public const string OmenOfferTitle = "The First Signal";
         public const string OmenTalk = "Speak with Captain Valerius.";
         public const string OmenOffer =
             "The Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?";
         public const string OmenSpeaker = "Captain Valerius";
         public const string OmenOfferedHint =
-            "Offered — not accepted. SELECT_VALERIUS waits on the C1 card.";
+            "Speak with Captain Valerius at the gold beacon when you are ready.";
         public const string FollowLabel = "Mark the signal";
         public const string DeferLabel = "Not yet.";
 

@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
@@ -24,6 +25,7 @@ namespace AL.Tests.EditMode.Narrative
         private const string ProfileId =
             "alp_11111111111111111111111111111111";
         private const int ErrorInvalidParameter = 87;
+        private const int ErrorPrivilegeNotHeld = 1314;
         private const int SymbolicLinkFlagAllowUnprivilegedCreate = 2;
         private string _saveRoot;
         private string _externalSentinelRoot;
@@ -56,7 +58,8 @@ namespace AL.Tests.EditMode.Narrative
         [TearDown]
         public void TearDown()
         {
-            if (!string.IsNullOrEmpty(_ownedSymbolicLinkPath))
+            if (!string.IsNullOrEmpty(_ownedSymbolicLinkPath) &&
+                File.Exists(_ownedSymbolicLinkPath))
             {
                 File.Delete(_ownedSymbolicLinkPath);
             }
@@ -633,6 +636,15 @@ namespace AL.Tests.EditMode.Narrative
                     sentinelPath,
                     0);
                 fallbackError = Marshal.GetLastWin32Error();
+            }
+
+            if (!created &&
+                (firstError == ErrorPrivilegeNotHeld ||
+                 fallbackError == ErrorPrivilegeNotHeld))
+            {
+                Assert.Ignore(
+                    "Windows file symbolic-link evidence requires Developer Mode or " +
+                    "SeCreateSymbolicLinkPrivilege on this host.");
             }
 
             Assert.True(
@@ -1375,6 +1387,8 @@ namespace AL.Tests.EditMode.Narrative
                 string directoryPath,
                 string searchPattern) =>
                 _inner.EnumerateFiles(directoryPath, searchPattern);
+            public DateTime GetCreationTimeUtc(string path) =>
+                _inner.GetCreationTimeUtc(path);
             public bool IsReparsePoint(string path) =>
                 _inner.IsReparsePoint(path);
         }
@@ -1429,6 +1443,8 @@ namespace AL.Tests.EditMode.Narrative
                 string directoryPath,
                 string searchPattern) =>
                 _inner.EnumerateFiles(directoryPath, searchPattern);
+            public DateTime GetCreationTimeUtc(string path) =>
+                _inner.GetCreationTimeUtc(path);
             public bool IsReparsePoint(string path) =>
                 _inner.IsReparsePoint(path);
         }
@@ -1495,6 +1511,8 @@ namespace AL.Tests.EditMode.Narrative
                 string directoryPath,
                 string searchPattern) =>
                 _inner.EnumerateFiles(directoryPath, searchPattern);
+            public DateTime GetCreationTimeUtc(string path) =>
+                _inner.GetCreationTimeUtc(path);
             public bool IsReparsePoint(string path) =>
                 _inner.IsReparsePoint(path);
         }

@@ -175,6 +175,7 @@ namespace AL.ChampionMode
         private bool _guardianCatalogFailureReported;
         private RealmId _realmId = RealmId.None;
         private bool _guardianTrialStarted;
+        private bool _guardianTrialCleared;
         private FirstSessionInnerRealmSpawn _innerSpawn;
         private ChampionHudSession _hudSession;
 
@@ -285,7 +286,8 @@ namespace AL.ChampionMode
             _firstWorldTutorialDirector =
                 FirstWorldEntryTutorialDirector.AttachIfNeeded(
                     transform,
-                    saveGameService);
+                    saveGameService,
+                    _playerController);
             if (_firstWorldTutorialDirector == null)
             {
                 Debug.LogError(
@@ -408,8 +410,9 @@ namespace AL.ChampionMode
             return true;
         }
 
-        public bool GuardianTrialCleared =>
-            _guardianTrialStarted && _boss != null && _boss.IsDead;
+        public bool GuardianTrialCleared => _guardianTrialCleared;
+
+        public Transform GuardianTrialTarget => _bossTransform;
 
         public bool TryStartGuardianTrial()
         {
@@ -450,6 +453,7 @@ namespace AL.ChampionMode
 
             if (!_guardianTrialStarted)
             {
+                _guardianTrialCleared = false;
                 _guardianTrialStarted = true;
                 _hudSession?.RevealCombatChrome();
                 StartCoroutine(EncounterIntroRoutine());
@@ -493,6 +497,10 @@ namespace AL.ChampionMode
         private void HandleBossLootRolled(BossLootResult result)
         {
             _lastBossLootResult = result;
+            if (_guardianTrialStarted && _boss != null && _boss.IsDead)
+            {
+                _guardianTrialCleared = true;
+            }
         }
 
         private void ApplyRuntimeQuality()
@@ -578,7 +586,7 @@ namespace AL.ChampionMode
                 ? _innerSpawn.CameraPosition
                 : new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
-            camera.fieldOfView = 42f;
+            camera.fieldOfView = 38f;
             camera.clearFlags = FirstSessionChampionStart.IsFirstSessionLanding
                 ? CameraClearFlags.Skybox
                 : CameraClearFlags.SolidColor;
@@ -586,6 +594,7 @@ namespace AL.ChampionMode
             cameraObject.AddComponent<AudioListener>();
             _cameraFollow = cameraObject.AddComponent<CameraFollow>();
             _cameraFollow.ConfigureChampion(player.transform);
+            _cameraFollow.SnapToTarget();
 
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";
@@ -639,8 +648,18 @@ namespace AL.ChampionMode
             }
 
             CreateWeather();
-            CreateWorldObjectiveMarkers();
+            if (ShouldCreateWorldObjectiveMarkers(
+                    FirstSessionChampionStart.IsFirstSessionLanding))
+            {
+                CreateWorldObjectiveMarkers();
+            }
+
             InstallFirstSessionInteractables();
+        }
+
+        public static bool ShouldCreateWorldObjectiveMarkers(bool firstSessionLanding)
+        {
+            return !firstSessionLanding;
         }
 
         private void ConfigureArenaLighting()
@@ -1098,7 +1117,8 @@ namespace AL.ChampionMode
 
             _worldInteractionDirector = FirstSessionWorldInteractables.Install(
                 _playerController.transform,
-                _arenaCamera);
+                _arenaCamera,
+                _realmId);
         }
 
         private GameObject CreateInspectionShowcase(Transform player, Color realmAccent)
@@ -2689,6 +2709,25 @@ namespace AL.ChampionMode
             }
         }
 
+        private void ContinueFromFirstSessionResult()
+        {
+            if (_clearPanelObject != null)
+            {
+                _clearPanelObject.SetActive(false);
+            }
+
+            if (_clearBackdropImage != null)
+            {
+                _clearBackdropImage.gameObject.SetActive(false);
+            }
+
+            _hudSession?.NotifyRecap(false);
+            if (!_encounterFailed && _playerCombat != null && !_playerCombat.IsDead)
+            {
+                _playerController?.SetControlLocked(false);
+            }
+        }
+
         private void RefreshAppearanceInspectionChrome()
         {
             Color active = new Color(0.34f, 0.64f, 1f, 0.96f);
@@ -3414,17 +3453,32 @@ namespace AL.ChampionMode
             _clearProgressFill = CreateUiImage(_clearPanelObject.transform, "ClearProgressFill", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(0f, 7f), new Color(0.62f, 1f, 0.40f, 0.94f));
 
             CreateHudButton(_clearPanelObject.transform, font, "Retry", new Vector2(154f, -330f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.12f, 0.20f, 0.13f, 0.96f));
-            CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(310f, -330f), new Vector2(140f, 42f), () =>
+            if (FirstSessionChampionStart.ShouldRunProofOfWorth)
             {
-                _clearPanelObject.SetActive(false);
-                if (_clearBackdropImage != null)
+                CreateHudButton(
+                    _clearPanelObject.transform,
+                    font,
+                    "Continue",
+                    new Vector2(310f, -330f),
+                    new Vector2(140f, 42f),
+                    ContinueFromFirstSessionResult,
+                    16,
+                    new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            }
+            else
+            {
+                CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(310f, -330f), new Vector2(140f, 42f), () =>
                 {
-                    _clearBackdropImage.gameObject.SetActive(false);
-                }
+                    _clearPanelObject.SetActive(false);
+                    if (_clearBackdropImage != null)
+                    {
+                        _clearBackdropImage.gameObject.SetActive(false);
+                    }
 
-                _hudSession?.NotifyRecap(false);
-                SetAppearanceInspection(true);
-            }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+                    _hudSession?.NotifyRecap(false);
+                    SetAppearanceInspection(true);
+                }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            }
             _clearPanelObject.SetActive(false);
         }
 

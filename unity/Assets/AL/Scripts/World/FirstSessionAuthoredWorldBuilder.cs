@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using AL.Core;
 using AL.Data.Catalogs.WorldTerrain;
 using UnityEngine;
@@ -83,7 +84,7 @@ namespace AL.World
                     catalog,
                     terrainLoad.Profile,
                     groundCenter);
-            BuildHall(root, catalog, realmVisual, groundCenter, walkable.Realm);
+            BuildFirstSessionRealm(root, catalog, walkable, terrain);
             BuildRealmIdentity(
                 root,
                 walkable.Realm,
@@ -96,6 +97,98 @@ namespace AL.World
             var marker = root.gameObject.AddComponent<FirstSessionAuthoredWorldMarker>();
             marker.Bind(walkable.Realm, renderers.Length);
             return new InnerRealmWorldBuildResult(root, layout, walkable);
+        }
+
+        private static void BuildFirstSessionRealm(
+            Transform root,
+            FirstSessionAuthoredAssetCatalog catalog,
+            InnerRealmSlotLayout walkable,
+            FirstSessionPlayableTerrainBuildResult terrain)
+        {
+            if (!catalog.TryResolveFirstSessionRealm(
+                    walkable.Realm,
+                    out GameObject realmPrefab))
+            {
+                throw new InvalidOperationException(
+                    "No complete first-session realm prefab is admitted for " +
+                    walkable.Realm + ".");
+            }
+
+            if (realmPrefab.GetComponentsInChildren<Collider>(true).Length != 0)
+            {
+                throw new InvalidOperationException(
+                    "The admitted first-session realm prefab contains a competing Collider for " +
+                    walkable.Realm + ".");
+            }
+
+            GameObject authoredRealm = UnityEngine.Object.Instantiate(realmPrefab, root);
+            authoredRealm.name = HallName;
+            FirstSessionAuthoredRealmRoute route =
+                authoredRealm.GetComponentInChildren<FirstSessionAuthoredRealmRoute>(true);
+            if (route == null || !route.HasCompleteRoute())
+            {
+                UnityEngine.Object.DestroyImmediate(authoredRealm);
+                throw new InvalidOperationException(
+                    "The admitted first-session realm prefab has no complete route for " +
+                    walkable.Realm + ".");
+            }
+
+            Vector3 groundedSpawn = walkable.WalkableSpawn;
+            groundedSpawn.y = SampleTerrainHeight(terrain.Terrain, groundedSpawn);
+            authoredRealm.transform.position += groundedSpawn - route.PlayerSpawn.position;
+
+            Renderer landscape = null;
+            Renderer[] renderers = authoredRealm.GetComponentsInChildren<Renderer>(true);
+            for (int index = 0; index < renderers.Length; index++)
+            {
+                if (renderers[index].transform.name ==
+                    FirstSessionAuthoredRealmRoute.LandscapeName)
+                {
+                    landscape = renderers[index];
+                    break;
+                }
+            }
+
+            if (landscape == null)
+            {
+                UnityEngine.Object.DestroyImmediate(authoredRealm);
+                throw new InvalidOperationException(
+                    "The admitted first-session realm prefab has no landscape reference for " +
+                    walkable.Realm + ".");
+            }
+
+            // The imported landscape establishes authored placement, but the generated
+            // Terrain/TerrainCollider pair remains the sole visible and physical ground.
+            landscape.enabled = false;
+            GroundRoute(route, terrain.Terrain);
+        }
+
+        private static void GroundRoute(
+            FirstSessionAuthoredRealmRoute route,
+            Terrain terrain)
+        {
+            GroundRouteAnchor(route.PlayerSpawn, terrain);
+            GroundRouteAnchor(route.CaptainValerius, terrain);
+            GroundRouteAnchor(route.GuardianTrial, terrain);
+            GroundRouteAnchor(route.CovenantSite, terrain);
+            GroundRouteAnchor(route.LordshipDestination, terrain);
+            Transform[] waypoints = route.Waypoints;
+            for (int index = 0; index < waypoints.Length; index++)
+            {
+                GroundRouteAnchor(waypoints[index], terrain);
+            }
+        }
+
+        private static void GroundRouteAnchor(Transform anchor, Terrain terrain)
+        {
+            Vector3 position = anchor.position;
+            position.y = SampleTerrainHeight(terrain, position);
+            anchor.position = position;
+        }
+
+        private static float SampleTerrainHeight(Terrain terrain, Vector3 position)
+        {
+            return terrain.SampleHeight(position) + terrain.transform.position.y;
         }
 
         private static void BuildHall(
@@ -139,8 +232,7 @@ namespace AL.World
             Transform brazier = FindRequired(hall.transform, "BrazierProp");
             Transform banner = FindRequired(hall.transform, "BannerStandProp");
             Transform clutter = FindRequired(hall.transform, "CrateBarrelProp");
-            Transform floorCenter = Clone(floor, hall.transform, "FloorModule_Center");
-            Transform floorDais = Clone(floor, hall.transform, "FloorModule_Dais");
+            var courtyardFloors = new List<Transform>(15);
 
             // The premium realm landmark now carries the bounded architectural mass.
             // Keep only a compact authored covenant threshold/dressing kit in front of it.
@@ -152,12 +244,26 @@ namespace AL.World
             trim.gameObject.SetActive(false);
             clutter.gameObject.SetActive(false);
 
-            Place(floor, center + new Vector3(0f, 0f, -4.8f), 0f, true);
-            Place(floorCenter, center + new Vector3(0f, 0f, 2f), 0f, true);
-            Place(floorDais, center + new Vector3(0f, 0f, 8.8f), 0f, true);
-            WidenThreshold(floor);
-            WidenThreshold(floorCenter);
-            WidenThreshold(floorDais);
+            for (int row = -1; row <= 1; row++)
+            {
+                for (int column = -2; column <= 2; column++)
+                {
+                    Transform tile = row == -1 && column == -2
+                        ? floor
+                        : Clone(
+                            floor,
+                            hall.transform,
+                            $"FloorModule_Courtyard_{column + 2}_{row + 1}");
+                    tile.name = $"FloorModule_Courtyard_{column + 2}_{row + 1}";
+                    Place(
+                        tile,
+                        center + new Vector3(column * 8f, 0f, row * 12f),
+                        0f,
+                        true);
+                    courtyardFloors.Add(tile);
+                }
+            }
+
             Place(brazier, center + new Vector3(-3.8f, 0f, 2.4f), 0f, true);
             Place(Clone(brazier, hall.transform, "BrazierProp_Right"), center + new Vector3(3.8f, 0f, 2.4f), 0f, true);
             Place(banner, center + new Vector3(-4.5f, 0f, 4.1f), 0f, true);
@@ -174,18 +280,20 @@ namespace AL.World
             AssignMaterial(clutter, wallMaterial);
             AssignMaterialsByName(hall.transform, floorMaterial, wallMaterial, trimMaterial);
             Material premiumFloorMaterial = CreatePremiumFloorMaterial(catalog, realm);
-            AssignMaterial(floor, premiumFloorMaterial);
-            AssignMaterial(floorCenter, premiumFloorMaterial);
-            AssignMaterial(floorDais, premiumFloorMaterial);
+            for (int index = 0; index < courtyardFloors.Count; index++)
+            {
+                AssignMaterial(courtyardFloors[index], premiumFloorMaterial);
+            }
 
             Renderer[] thresholdRenderers = hall.GetComponentsInChildren<Renderer>(true);
             for (int index = 0; index < thresholdRenderers.Length; index++)
             {
                 thresholdRenderers[index].enabled = false;
             }
-            SetRenderersEnabled(floor, true);
-            SetRenderersEnabled(floorCenter, true);
-            SetRenderersEnabled(floorDais, true);
+            for (int index = 0; index < courtyardFloors.Count; index++)
+            {
+                SetRenderersEnabled(courtyardFloors[index], true);
+            }
         }
 
         private static void SetRenderersEnabled(Transform target, bool enabled)
