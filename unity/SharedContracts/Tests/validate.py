@@ -92,6 +92,7 @@ def main():
     compiled = {}
     for key, (path, schema) in sorted(schemas.items()):
         try:
+            Draft202012Validator.check_schema(schema)
             compiled[key] = Draft202012Validator(schema)
             reports["schemas"].append((key, True, ""))
         except SchemaError as exc:
