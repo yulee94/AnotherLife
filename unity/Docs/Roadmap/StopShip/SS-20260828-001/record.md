@@ -86,3 +86,24 @@ The corrected technical audit is
 `unity/Docs/Roadmap/Gate0_Traceability_And_Authority_Audit_v2.md`. This incident
 remains open pending the game owner's explicit decision on exact candidate
 `RC-20260828-001` and the resulting approval/baseline/gate/closure records.
+
+## Append-only candidate-revision event — 2026-08-28T09:53:23Z
+
+After the RC-001 technical PASS, the candidate owner found that raw working-tree
+hashes were not portable across Git line-ending conversion. RC-001 was withdrawn
+before owner review and is preserved at commit
+`ae7deb96027be93a6bb2a823dc8d01cace299165` with a canonical supersession record.
+It cannot be approved, promoted, or reused.
+
+`RC-20260828-002` preserves identical roadmap meaning and uses canonical UTF-8/LF
+SHA-256 values matching Git text content. Delegated read-only reviewer
+`deleg_a8aba4b2` task `0` / `sa-0-f632fede` independently ran both validator modes;
+both exited `0`, with 44 matching authority rows, 12 fail-closed unresolved rows,
+and 8/8 canonical hashes verified. Targeted order, visual-separation,
+numerical-reference, prohibited-invention, rollback, reopen, historical-isolation,
+and approval-boundary checks passed.
+
+The controlling technical audit is
+`unity/Docs/Roadmap/Gate0_Traceability_And_Authority_Audit_v3.md`. This incident
+remains open pending an explicit game-owner decision naming exact RC-002 and the
+resulting approval, promoted-baseline, Gate 0, and closure records.
