@@ -26,7 +26,13 @@ namespace AL.ChampionMode.Interaction
                 return false;
             }
 
-            Vector3 look = forward.normalized;
+            Vector3 look = Vector3.ProjectOnPlane(forward, Vector3.up);
+            if (look.sqrMagnitude <= 0.0001f)
+            {
+                return false;
+            }
+
+            look.Normalize();
             float bestScore = float.MaxValue;
             for (int i = 0; i < candidates.Count; i++)
             {
@@ -45,7 +51,13 @@ namespace AL.ChampionMode.Interaction
                     continue;
                 }
 
-                float angle = Vector3.Angle(look, toTarget);
+                Vector3 horizontalToTarget = Vector3.ProjectOnPlane(toTarget, Vector3.up);
+                if (horizontalToTarget.sqrMagnitude <= 0.0001f)
+                {
+                    continue;
+                }
+
+                float angle = Vector3.Angle(look, horizontalToTarget);
                 if (angle > candidate.MaxAngleDegrees)
                 {
                     continue;

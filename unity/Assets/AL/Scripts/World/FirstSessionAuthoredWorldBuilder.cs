@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using AL.Core;
+using AL.Data.Catalogs.WorldTerrain;
 using UnityEngine;
 
 namespace AL.World
@@ -23,14 +25,17 @@ namespace AL.World
     }
 
     /// <summary>
-    /// Builds the first-session player-facing room entirely from admitted imported
-    /// meshes. The old atlas-scale primitive builder remains available to isolated
-    /// topology tests, but is no longer on the production first-session route.
+    /// Builds the first-session player-facing capital from a real Unity Terrain,
+    /// admitted imported presentation meshes, and explicit primitive collision
+    /// proxies. The old atlas-scale primitive builder remains isolated to topology
+    /// tests and is not on the production first-session route.
     /// </summary>
     public static class FirstSessionAuthoredWorldBuilder
     {
         public const string RootName = "FirstSessionAuthoredInnerRealm";
         public const string HallName = "AuthoredCovenantHall";
+        public const string TerrainName = "NAV_FirstSessionCapitalTerrain";
+        public const string LandmarkCollisionRootName = "COL_FirstSessionLandmarkCompound";
         public const string StructuralIdentityPrefix = "RealmStructuralIdentity_";
 
         public static InnerRealmWorldBuildResult Build(
@@ -58,16 +63,132 @@ namespace AL.World
                     "No authored structural identity is admitted for " + walkable.Realm + ".");
             }
 
+            FirstSessionTerrainLoadResult terrainLoad =
+                FirstSessionTerrainCatalogLoader.Validate(
+                    catalog.FirstSessionTerrainCatalog.bytes);
+            if (!terrainLoad.IsAccepted)
+            {
+                string diagnostic = terrainLoad.Diagnostics.Count == 0
+                    ? "unknown"
+                    : terrainLoad.Diagnostics[0].Fingerprint;
+                throw new InvalidOperationException(
+                    "First-session terrain catalog is rejected: " + diagnostic);
+            }
+
             var root = new GameObject(RootName).transform;
-            Vector3 center = walkable.WalkableSpawn;
+            Vector3 groundCenter = walkable.CapitalPosition;
             ConfigureAtmosphere(walkable.Realm, realmVisual.PanoramicSky);
-            BuildHall(root, catalog, realmVisual, center, walkable.Realm);
-            BuildRealmIdentity(root, walkable.Realm, realmVisual, center);
+            FirstSessionPlayableTerrainBuildResult terrain =
+                FirstSessionPlayableTerrainBuilder.Build(
+                    root,
+                    catalog,
+                    terrainLoad.Profile,
+                    groundCenter);
+            BuildFirstSessionRealm(root, catalog, walkable, terrain);
+            BuildRealmIdentity(
+                root,
+                walkable.Realm,
+                realmVisual,
+                terrainLoad.Profile,
+                terrain.CollisionRoot,
+                groundCenter);
 
             Renderer[] renderers = root.GetComponentsInChildren<Renderer>(true);
             var marker = root.gameObject.AddComponent<FirstSessionAuthoredWorldMarker>();
             marker.Bind(walkable.Realm, renderers.Length);
             return new InnerRealmWorldBuildResult(root, layout, walkable);
+        }
+
+        private static void BuildFirstSessionRealm(
+            Transform root,
+            FirstSessionAuthoredAssetCatalog catalog,
+            InnerRealmSlotLayout walkable,
+            FirstSessionPlayableTerrainBuildResult terrain)
+        {
+            if (!catalog.TryResolveFirstSessionRealm(
+                    walkable.Realm,
+                    out GameObject realmPrefab))
+            {
+                throw new InvalidOperationException(
+                    "No complete first-session realm prefab is admitted for " +
+                    walkable.Realm + ".");
+            }
+
+            if (realmPrefab.GetComponentsInChildren<Collider>(true).Length != 0)
+            {
+                throw new InvalidOperationException(
+                    "The admitted first-session realm prefab contains a competing Collider for " +
+                    walkable.Realm + ".");
+            }
+
+            GameObject authoredRealm = UnityEngine.Object.Instantiate(realmPrefab, root);
+            authoredRealm.name = HallName;
+            FirstSessionAuthoredRealmRoute route =
+                authoredRealm.GetComponentInChildren<FirstSessionAuthoredRealmRoute>(true);
+            if (route == null || !route.HasCompleteRoute())
+            {
+                UnityEngine.Object.DestroyImmediate(authoredRealm);
+                throw new InvalidOperationException(
+                    "The admitted first-session realm prefab has no complete route for " +
+                    walkable.Realm + ".");
+            }
+
+            Vector3 groundedSpawn = walkable.WalkableSpawn;
+            groundedSpawn.y = SampleTerrainHeight(terrain.Terrain, groundedSpawn);
+            authoredRealm.transform.position += groundedSpawn - route.PlayerSpawn.position;
+
+            Renderer landscape = null;
+            Renderer[] renderers = authoredRealm.GetComponentsInChildren<Renderer>(true);
+            for (int index = 0; index < renderers.Length; index++)
+            {
+                if (renderers[index].transform.name ==
+                    FirstSessionAuthoredRealmRoute.LandscapeName)
+                {
+                    landscape = renderers[index];
+                    break;
+                }
+            }
+
+            if (landscape == null)
+            {
+                UnityEngine.Object.DestroyImmediate(authoredRealm);
+                throw new InvalidOperationException(
+                    "The admitted first-session realm prefab has no landscape reference for " +
+                    walkable.Realm + ".");
+            }
+
+            // The imported landscape establishes authored placement, but the generated
+            // Terrain/TerrainCollider pair remains the sole visible and physical ground.
+            landscape.enabled = false;
+            GroundRoute(route, terrain.Terrain);
+        }
+
+        private static void GroundRoute(
+            FirstSessionAuthoredRealmRoute route,
+            Terrain terrain)
+        {
+            GroundRouteAnchor(route.PlayerSpawn, terrain);
+            GroundRouteAnchor(route.CaptainValerius, terrain);
+            GroundRouteAnchor(route.GuardianTrial, terrain);
+            GroundRouteAnchor(route.CovenantSite, terrain);
+            GroundRouteAnchor(route.LordshipDestination, terrain);
+            Transform[] waypoints = route.Waypoints;
+            for (int index = 0; index < waypoints.Length; index++)
+            {
+                GroundRouteAnchor(waypoints[index], terrain);
+            }
+        }
+
+        private static void GroundRouteAnchor(Transform anchor, Terrain terrain)
+        {
+            Vector3 position = anchor.position;
+            position.y = SampleTerrainHeight(terrain, position);
+            anchor.position = position;
+        }
+
+        private static float SampleTerrainHeight(Terrain terrain, Vector3 position)
+        {
+            return terrain.SampleHeight(position) + terrain.transform.position.y;
         }
 
         private static void BuildHall(
@@ -111,8 +232,7 @@ namespace AL.World
             Transform brazier = FindRequired(hall.transform, "BrazierProp");
             Transform banner = FindRequired(hall.transform, "BannerStandProp");
             Transform clutter = FindRequired(hall.transform, "CrateBarrelProp");
-            Transform floorCenter = Clone(floor, hall.transform, "FloorModule_Center");
-            Transform floorDais = Clone(floor, hall.transform, "FloorModule_Dais");
+            var courtyardFloors = new List<Transform>(15);
 
             // The premium realm landmark now carries the bounded architectural mass.
             // Keep only a compact authored covenant threshold/dressing kit in front of it.
@@ -124,12 +244,26 @@ namespace AL.World
             trim.gameObject.SetActive(false);
             clutter.gameObject.SetActive(false);
 
-            Place(floor, center + new Vector3(0f, 0f, -4.8f), 0f, true);
-            Place(floorCenter, center + new Vector3(0f, 0f, 2f), 0f, true);
-            Place(floorDais, center + new Vector3(0f, 0f, 8.8f), 0f, true);
-            WidenThreshold(floor);
-            WidenThreshold(floorCenter);
-            WidenThreshold(floorDais);
+            for (int row = -1; row <= 1; row++)
+            {
+                for (int column = -2; column <= 2; column++)
+                {
+                    Transform tile = row == -1 && column == -2
+                        ? floor
+                        : Clone(
+                            floor,
+                            hall.transform,
+                            $"FloorModule_Courtyard_{column + 2}_{row + 1}");
+                    tile.name = $"FloorModule_Courtyard_{column + 2}_{row + 1}";
+                    Place(
+                        tile,
+                        center + new Vector3(column * 8f, 0f, row * 12f),
+                        0f,
+                        true);
+                    courtyardFloors.Add(tile);
+                }
+            }
+
             Place(brazier, center + new Vector3(-3.8f, 0f, 2.4f), 0f, true);
             Place(Clone(brazier, hall.transform, "BrazierProp_Right"), center + new Vector3(3.8f, 0f, 2.4f), 0f, true);
             Place(banner, center + new Vector3(-4.5f, 0f, 4.1f), 0f, true);
@@ -146,21 +280,20 @@ namespace AL.World
             AssignMaterial(clutter, wallMaterial);
             AssignMaterialsByName(hall.transform, floorMaterial, wallMaterial, trimMaterial);
             Material premiumFloorMaterial = CreatePremiumFloorMaterial(catalog, realm);
-            AssignMaterial(floor, premiumFloorMaterial);
-            AssignMaterial(floorCenter, premiumFloorMaterial);
-            AssignMaterial(floorDais, premiumFloorMaterial);
+            for (int index = 0; index < courtyardFloors.Count; index++)
+            {
+                AssignMaterial(courtyardFloors[index], premiumFloorMaterial);
+            }
 
-            AddBoundsCollider(floor);
-            AddBoundsCollider(floorCenter);
-            AddBoundsCollider(floorDais);
             Renderer[] thresholdRenderers = hall.GetComponentsInChildren<Renderer>(true);
             for (int index = 0; index < thresholdRenderers.Length; index++)
             {
                 thresholdRenderers[index].enabled = false;
             }
-            SetRenderersEnabled(floor, true);
-            SetRenderersEnabled(floorCenter, true);
-            SetRenderersEnabled(floorDais, true);
+            for (int index = 0; index < courtyardFloors.Count; index++)
+            {
+                SetRenderersEnabled(courtyardFloors[index], true);
+            }
         }
 
         private static void SetRenderersEnabled(Transform target, bool enabled)
@@ -196,6 +329,8 @@ namespace AL.World
             Transform root,
             RealmId realm,
             FirstSessionRealmVisualAsset realmVisual,
+            FirstSessionTerrainProfile terrainProfile,
+            Transform collisionRoot,
             Vector3 center)
         {
             var identity = new GameObject(StructuralIdentityPrefix + realm).transform;
@@ -205,12 +340,16 @@ namespace AL.World
                 realmVisual.PremiumLandmarkPrefab,
                 identity);
             landmark.name = realm + "_PremiumCapitalHall";
-            landmark.transform.position = center + new Vector3(0f, 0f, 5.8f);
+            landmark.transform.position = center;
             landmark.transform.rotation = Quaternion.Euler(0f, 180f, 0f);
             landmark.transform.localScale = Vector3.one;
             ScaleAndGround(landmark, center.y, LandmarkExtent(realm));
+            FirstSessionPlayableTerrainBuilder.AlignLandmarkAndBuildCollision(
+                landmark,
+                collisionRoot,
+                terrainProfile,
+                center);
             ApplyPremiumRealmMaterial(landmark, realmVisual, realm);
-            AddStaticMeshCollider(landmark);
         }
 
         private static float LandmarkExtent(RealmId realm)
@@ -271,20 +410,6 @@ namespace AL.World
                 target.localScale.x * 1.75f,
                 target.localScale.y,
                 target.localScale.z);
-        }
-
-        private static void AddStaticMeshCollider(GameObject landmark)
-        {
-            MeshFilter meshFilter = landmark.GetComponentInChildren<MeshFilter>(true);
-            if (meshFilter == null || meshFilter.sharedMesh == null)
-            {
-                throw new InvalidOperationException(
-                    "Premium realm landmark has no collision mesh: " + landmark.name);
-            }
-
-            var collider = meshFilter.gameObject.AddComponent<MeshCollider>();
-            collider.sharedMesh = meshFilter.sharedMesh;
-            collider.convex = false;
         }
 
         private static void ApplyPremiumRealmMaterial(
@@ -506,35 +631,6 @@ namespace AL.World
                     UnityEngine.Rendering.ShadowCastingMode.On;
                 renderers[rendererIndex].receiveShadows = true;
             }
-        }
-
-        private static void AddBoundsCollider(Transform target)
-        {
-            if (target.GetComponentInChildren<Collider>(true) != null)
-            {
-                return;
-            }
-
-            Renderer[] renderers = target.GetComponentsInChildren<Renderer>(true);
-            if (renderers.Length == 0)
-            {
-                throw new InvalidOperationException(
-                    "Authored hall collider target has no renderer: " + target.name);
-            }
-
-            Bounds bounds = renderers[0].bounds;
-            for (int index = 1; index < renderers.Length; index++)
-            {
-                bounds.Encapsulate(renderers[index].bounds);
-            }
-
-            BoxCollider collider = target.gameObject.AddComponent<BoxCollider>();
-            collider.center = target.InverseTransformPoint(bounds.center);
-            Vector3 localSize = target.InverseTransformVector(bounds.size);
-            collider.size = new Vector3(
-                Mathf.Abs(localSize.x),
-                Mathf.Abs(localSize.y),
-                Mathf.Abs(localSize.z));
         }
     }
 }

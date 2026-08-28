@@ -1,4 +1,5 @@
 using System;
+using AL.ChampionMode.Control;
 using AL.Narrative.Nvs01.Contracts;
 
 namespace AL.ChampionMode.Tutorial
@@ -76,7 +77,7 @@ namespace AL.ChampionMode.Tutorial
             int completionEventCount,
             int omenOfferCount,
             bool omenAccepted,
-            bool sprintTaught)
+            bool blockTaught)
         {
             Step = step;
             TeachingBeat = teachingBeat;
@@ -85,7 +86,7 @@ namespace AL.ChampionMode.Tutorial
             CompletionEventCount = completionEventCount;
             OmenOfferCount = omenOfferCount;
             OmenAccepted = omenAccepted;
-            SprintTaught = sprintTaught;
+            BlockTaught = blockTaught;
         }
 
         public FirstWorldEntryTutorialStep Step { get; }
@@ -95,7 +96,7 @@ namespace AL.ChampionMode.Tutorial
         public int CompletionEventCount { get; }
         public int OmenOfferCount { get; }
         public bool OmenAccepted { get; }
-        public bool SprintTaught { get; }
+        public bool BlockTaught { get; }
         public bool IsComplete => Step == FirstWorldEntryTutorialStep.Complete;
         public bool IsOmenOffered => IsComplete && OmenOfferCount == 1 && !OmenAccepted;
 
@@ -160,7 +161,7 @@ namespace AL.ChampionMode.Tutorial
                 completionEventCount: 0,
                 omenOfferCount: 0,
                 omenAccepted: false,
-                sprintTaught: false);
+                blockTaught: false);
         }
 
         public static bool IsValid(FirstWorldEntryTutorialState state)
@@ -219,7 +220,7 @@ namespace AL.ChampionMode.Tutorial
                         completionEventCount: 0,
                         omenOfferCount: 0,
                         omenAccepted: false,
-                        sprintTaught: current.SprintTaught);
+                        blockTaught: current.BlockTaught);
                     return new FirstWorldEntryTutorialTransition(
                         FirstWorldEntryTransitionStatus.Applied,
                         next,
@@ -248,7 +249,7 @@ namespace AL.ChampionMode.Tutorial
                         completionEventCount: 1,
                         omenOfferCount: 1,
                         omenAccepted: false,
-                        sprintTaught: current.SprintTaught);
+                        blockTaught: current.BlockTaught);
                     return new FirstWorldEntryTutorialTransition(
                         FirstWorldEntryTransitionStatus.Applied,
                         next,
@@ -265,7 +266,7 @@ namespace AL.ChampionMode.Tutorial
         public static FirstWorldEntryTutorialState AdvanceTeaching(
             FirstWorldEntryTutorialState current,
             FirstWorldEntryTeachingBeat nextBeat,
-            bool sprintTaught)
+            bool blockTaught)
         {
             if (!IsValid(current))
             {
@@ -280,7 +281,7 @@ namespace AL.ChampionMode.Tutorial
                 current.CompletionEventCount,
                 current.OmenOfferCount,
                 omenAccepted: false,
-                sprintTaught: current.SprintTaught || sprintTaught);
+                blockTaught: current.BlockTaught || blockTaught);
         }
 
         public static string Follow(FirstWorldEntryTutorialState state, bool targetAvailable)
@@ -310,7 +311,7 @@ namespace AL.ChampionMode.Tutorial
                 current.CompletionEventCount,
                 current.OmenOfferCount,
                 omenAccepted: false,
-                sprintTaught: current.SprintTaught);
+                blockTaught: current.BlockTaught);
         }
 
         private static FirstWorldEntryTutorialTransition Duplicate(FirstWorldEntryTutorialState state)
@@ -336,15 +337,19 @@ namespace AL.ChampionMode.Tutorial
     {
         public const float LookThreshold = 12f;
         public const float MoveThreshold = 0.35f;
+        public const float HorizontalDisplacementThreshold = 0.01f;
 
         public static bool IsLookAccepted(float lookMagnitude)
         {
             return lookMagnitude >= LookThreshold;
         }
 
-        public static bool IsMoveAccepted(float moveMagnitude)
+        public static bool IsMoveAccepted(ChampionMovementReceipt receipt)
         {
-            return moveMagnitude >= MoveThreshold;
+            return receipt.RequestedInput.magnitude >= MoveThreshold &&
+                   receipt.WasGrounded &&
+                   receipt.IsGrounded &&
+                   receipt.HorizontalDisplacement >= HorizontalDisplacementThreshold;
         }
     }
 
@@ -352,19 +357,19 @@ namespace AL.ChampionMode.Tutorial
     {
         public const string TemporaryBadge = "TEMPORARY";
 
-        public const string Title = "TEMPORARY — first steps";
-        public const string CameraPrompt = "TEMPORARY — look around. Move the mouse or right stick.";
-        public const string MovePrompt = "TEMPORARY — walk with WASD. Hold Shift to sprint.";
+        public const string Title = "Champion's First Steps";
+        public const string CameraPrompt = "Look around with the mouse or right stick.";
+        public const string MovePrompt = "Walk with WASD.";
         public const string InteractPrompt =
-            "TEMPORARY — confirm once (Enter) to address the realm guide.";
-        public const string AttackPrompt = "TEMPORARY — strike once. Left mouse.";
+            "Approach Captain Valerius and press [F] to speak.";
+        public const string AttackPrompt = "Strike once with Left Mouse.";
         public const string OmenOfferTitle = "The First Signal";
         public const string OmenTalk = "Speak with Captain Valerius.";
         public const string OmenOffer =
             "The Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?";
         public const string OmenSpeaker = "Captain Valerius";
         public const string OmenOfferedHint =
-            "Offered — not accepted. SELECT_VALERIUS waits on the C1 card.";
+            "Speak with Captain Valerius at the gold beacon when you are ready.";
         public const string FollowLabel = "Mark the signal";
         public const string DeferLabel = "Not yet.";
 

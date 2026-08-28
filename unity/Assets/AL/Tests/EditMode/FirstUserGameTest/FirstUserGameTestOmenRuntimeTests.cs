@@ -44,7 +44,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
         }
 
         [Test]
-        public void CanonicalLoaderPinsExactCurrentV003Artifact()
+        public void CanonicalLoaderPinsExactCurrentV004Artifact()
         {
             Assert.That(
                 FirstUserGameTestOmenCatalogLoader.TryLoad(
@@ -55,11 +55,11 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             Assert.That(catalog, Is.Not.Null);
             Assert.That(catalog.CatalogId, Is.EqualTo(Nvs01CatalogContract.CatalogId));
             Assert.That(catalog.Catalog.PacketVersion,
-                Is.EqualTo("omen1-a1-2026-07-29-v003"));
+                Is.EqualTo("omen1-a1-2026-08-13-v004"));
             Assert.That(catalog.Catalog.QuestId, Is.EqualTo("OMEN_1"));
-            Assert.That(catalog.CanonicalByteLength, Is.EqualTo(8317));
+            Assert.That(catalog.CanonicalByteLength, Is.EqualTo(8247));
             Assert.That(catalog.CanonicalSha256,
-                Is.EqualTo("8bec0bee9e591d0b19d16760f597f7c8e6c34f128ea7f98edd18c5a934dc4732"));
+                Is.EqualTo("25a5170334fca571abe1035eacf448955e8eab1124ff08643f7d16be9a1b69dd"));
             Assert.That(catalog.Catalog.Placement.AutoAccept, Is.False);
             Assert.That(catalog.Catalog.Placement.OfferAction, Is.EqualTo("SELECT_VALERIUS"));
             Assert.That(
