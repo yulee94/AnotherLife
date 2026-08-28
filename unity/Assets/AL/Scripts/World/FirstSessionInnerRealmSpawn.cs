@@ -79,16 +79,68 @@ namespace AL.World
 
         public static WorldAtlasSnapshot LoadCanonicalSnapshot()
         {
-            byte[] bytes = File.ReadAllBytes(Path.Combine(
+            if (!TryLoadCanonicalSnapshot(out WorldAtlasSnapshot snapshot))
+            {
+                throw new InvalidOperationException(
+                    "World atlas is missing or rejected: " +
+                    WorldAtlasContract.FileName);
+            }
+
+            return snapshot;
+        }
+
+        internal static bool TryLoadCanonicalSnapshot(
+            out WorldAtlasSnapshot snapshot)
+        {
+            snapshot = null;
+            string path = ResolveCatalogPath(
                 Application.dataPath,
-                "AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json"));
+                Application.streamingAssetsPath,
+                Application.isEditor);
+            if (!File.Exists(path))
+            {
+                return false;
+            }
+
+            byte[] bytes;
+            try
+            {
+                bytes = File.ReadAllBytes(path);
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+
             WorldAtlasLoadResult result = WorldAtlasTopologyLoader.Validate(bytes);
             if (!result.IsAccepted)
             {
-                throw new InvalidOperationException("World atlas rejected: " + result.Status);
+                return false;
             }
 
-            return result.Snapshot;
+            snapshot = result.Snapshot;
+            return true;
+        }
+
+        internal static string ResolveCatalogPath(
+            string dataPath,
+            string streamingAssetsPath,
+            bool isEditor)
+        {
+            string gameDataDirectory = isEditor
+                ? Path.Combine(
+                    dataPath ?? string.Empty,
+                    "AL",
+                    "StreamingAssets",
+                    "GameData")
+                : Path.Combine(
+                    (streamingAssetsPath ?? string.Empty).TrimEnd('/', '\\'),
+                    "GameData");
+            return Path.Combine(gameDataDirectory, WorldAtlasContract.FileName);
         }
 
         public static FirstSessionInnerRealmSpawn Resolve(RealmId realm)

@@ -1,6 +1,8 @@
+using System;
 using AL.UI.Presentation;
 using AL.UI.WorldMap;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace AL.UI.SharedMenu
@@ -18,21 +20,81 @@ namespace AL.UI.SharedMenu
         public Text HeaderLabel { get; private set; }
         public Text TitleLabel { get; private set; }
         public Text DetailLabel { get; private set; }
+        private object _owner;
+        private Action _onDisplaced;
 
-        public static SharedMenuOverlay Ensure(SharedMenuModuleState state)
+        public static SharedMenuOverlay Ensure(SharedMenuModuleState state) =>
+            Ensure(SceneManager.GetActiveScene(), state, null, null);
+
+        public static SharedMenuOverlay Ensure(
+            Scene ownerScene,
+            SharedMenuModuleState state,
+            object owner,
+            Action onDisplaced)
         {
-            SharedMenuOverlay existing = FindObjectOfType<SharedMenuOverlay>();
+            if (!ownerScene.IsValid() || !ownerScene.isLoaded)
+            {
+                throw new InvalidOperationException(
+                    "Shared Menu requires an exact loaded owner scene.");
+            }
+
+            SharedMenuOverlay existing = null;
+            SharedMenuOverlay[] overlays =
+                Resources.FindObjectsOfTypeAll<SharedMenuOverlay>();
+            for (int i = 0; i < overlays.Length; i++)
+            {
+                SharedMenuOverlay candidate = overlays[i];
+                if (candidate != null && candidate.gameObject.scene == ownerScene)
+                {
+                    if (existing == null || Prefer(candidate, existing))
+                    {
+                        existing = candidate;
+                    }
+                }
+            }
+
+            for (int i = 0; i < overlays.Length; i++)
+            {
+                SharedMenuOverlay duplicate = overlays[i];
+                if (duplicate != null && duplicate != existing &&
+                    duplicate.gameObject.scene == ownerScene)
+                {
+                    duplicate.RetireDuplicate();
+                }
+            }
+
             if (existing != null)
             {
+                existing.Claim(owner, onDisplaced);
                 existing.Build(state);
                 existing.gameObject.SetActive(true);
                 return existing;
             }
 
             var root = new GameObject(SharedMenuIds.OverlayRootName);
+            SceneManager.MoveGameObjectToScene(root, ownerScene);
             SharedMenuOverlay overlay = root.AddComponent<SharedMenuOverlay>();
+            overlay.Claim(owner, onDisplaced);
             overlay.Build(state);
             return overlay;
+        }
+
+        public bool IsOwnedBy(object owner) =>
+            owner != null && ReferenceEquals(_owner, owner);
+
+        public void Release(object owner, bool hide)
+        {
+            if (!IsOwnedBy(owner))
+            {
+                return;
+            }
+
+            _owner = null;
+            _onDisplaced = null;
+            if (hide)
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         public void Build(SharedMenuModuleState state)
@@ -186,7 +248,79 @@ namespace AL.UI.SharedMenu
 
         public void Close()
         {
+            _owner = null;
+            _onDisplaced = null;
             gameObject.SetActive(false);
+        }
+
+        private void Claim(object owner, Action onDisplaced)
+        {
+            if (owner == null)
+            {
+                return;
+            }
+            if (ReferenceEquals(_owner, owner))
+            {
+                _onDisplaced = onDisplaced;
+                return;
+            }
+
+            Action displaced = _onDisplaced;
+            _owner = null;
+            _onDisplaced = null;
+            displaced?.Invoke();
+            _owner = owner;
+            _onDisplaced = onDisplaced;
+        }
+
+        private static bool Prefer(
+            SharedMenuOverlay candidate,
+            SharedMenuOverlay current)
+        {
+            bool candidateOwned = candidate._owner != null;
+            bool currentOwned = current._owner != null;
+            if (candidateOwned != currentOwned)
+            {
+                return candidateOwned;
+            }
+
+            bool candidateActive = candidate.gameObject.activeSelf;
+            bool currentActive = current.gameObject.activeSelf;
+            return candidateActive != currentActive
+                ? candidateActive
+                : candidate.GetInstanceID() < current.GetInstanceID();
+        }
+
+        private void RetireDuplicate()
+        {
+            NotifyUnexpectedSurfaceLoss();
+            gameObject.SetActive(false);
+            if (Application.isPlaying)
+            {
+                Destroy(gameObject);
+            }
+            else
+            {
+                DestroyImmediate(gameObject);
+            }
+        }
+
+        private void OnDisable()
+        {
+            NotifyUnexpectedSurfaceLoss();
+        }
+
+        private void OnDestroy()
+        {
+            NotifyUnexpectedSurfaceLoss();
+        }
+
+        private void NotifyUnexpectedSurfaceLoss()
+        {
+            Action displaced = _onDisplaced;
+            _owner = null;
+            _onDisplaced = null;
+            displaced?.Invoke();
         }
 
         private void EnsureCanvas()

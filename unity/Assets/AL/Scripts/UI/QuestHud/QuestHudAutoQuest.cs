@@ -1,4 +1,7 @@
+using AL.ChampionMode.UI;
+using AL.Input;
 using AL.UI.SharedMenu;
+using UnityEngine;
 
 namespace AL.UI.QuestHud
 {
@@ -9,31 +12,67 @@ namespace AL.UI.QuestHud
     /// </summary>
     public static class QuestHudAutoQuest
     {
-        private static bool _enabled;
+        public const string PreferenceKey = "al.mvp.auto-quest.enabled";
 
-        public static bool Enabled => _enabled;
+        private static bool _enabled;
+        private static bool _loaded;
+
+        public static bool Enabled
+        {
+            get
+            {
+                EnsureLoaded();
+                return _enabled;
+            }
+        }
 
         public static void SetEnabled(bool enabled)
         {
             _enabled = enabled;
+            _loaded = true;
+            PlayerPrefs.SetInt(PreferenceKey, enabled ? 1 : 0);
+            PlayerPrefs.Save();
         }
 
         public static void ResetForTests()
         {
+            PlayerPrefs.DeleteKey(PreferenceKey);
+            PlayerPrefs.Save();
             _enabled = false;
+            _loaded = true;
+        }
+
+        public static void ResetRuntimeCacheForTests()
+        {
+            _enabled = false;
+            _loaded = false;
         }
 
         public static bool ShouldFire(QuestHudModel model)
         {
             return model != null &&
                    model.CanAutoFire &&
+                   Enabled &&
                    CanDriveInCurrentContext();
         }
 
         public static bool CanDriveInCurrentContext()
         {
-            return !SharedMenuModeSwitchHost.DetectCombat() &&
+            return !GameInput.GameplaySuppressed &&
+                   !ChampionHudCameraGate.BlocksGameplay &&
+                   !SharedMenuModeSwitchHost.DetectCombat() &&
                    !SharedMenuModeSwitchHost.DetectUnsafe();
+        }
+
+        private static void EnsureLoaded()
+        {
+            if (_loaded)
+            {
+                return;
+            }
+
+            _enabled = PlayerPrefs.GetInt(PreferenceKey, 0) == 1;
+            _loaded = true;
         }
     }
 }
