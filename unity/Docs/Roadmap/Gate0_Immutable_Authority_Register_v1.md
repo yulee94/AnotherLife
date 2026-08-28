@@ -1,9 +1,13 @@
 # Gate 0 Immutable Authority Register
 
-**Register version:** `1.0.0`  
-**Baseline date:** 2026-08-28  
-**Status:** immutable, owner-approved planning baseline  
-**Owning gate:** `t_1ad7a8d5`  
+**Register version:** `1.0.0`
+
+**Baseline date:** 2026-08-28
+
+**Status:** immutable, owner-approved planning baseline
+
+**Owning gate:** `t_1ad7a8d5`
+
 **Register task:** `t_180378d0`
 
 ## Authority and use
