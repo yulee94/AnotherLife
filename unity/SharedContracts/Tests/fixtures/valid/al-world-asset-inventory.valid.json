@@ -1,0 +1,301 @@
+{
+  "gameId": "another-life",
+  "catalogId": "al_world_asset_inventory",
+  "family": "world_assets",
+  "schemaVersion": 1,
+  "contentVersion": "0.1.0",
+  "sourceRevision": "fixture-only-not-runtime-content",
+  "idFormat": "lowercase_ascii_snake_case",
+  "authority": {
+    "catalogOwner": "world_asset_inventory",
+    "finalCreativeOwner": "project_owner",
+    "ownerDecisionRef": "kanban:t_394f4111",
+    "status": "preparation_held"
+  },
+  "gatePolicy": {
+    "generationState": "held",
+    "activationState": "held",
+    "requiredGateIds": [
+      "owner_creative",
+      "technical",
+      "provenance",
+      "performance_mobile_floor",
+      "accessibility",
+      "release"
+    ]
+  },
+  "profiles": {
+    "coordinateProfiles": [
+      {
+        "id": "coord_unity_meter_y_up_z_forward_v001",
+        "distanceUnit": "meter",
+        "unityUnitsPerMeter": 1,
+        "sourceUpAxis": "positive_z",
+        "sourceForwardAxis": "negative_y",
+        "runtimeUpAxis": "positive_y",
+        "runtimeForwardAxis": "positive_z",
+        "chunkLocalCoordinatesRequired": true
+      }
+    ],
+    "pivotProfiles": [
+      {
+        "id": "pivot_base_center_finished_ground_v001",
+        "origin": "base_center",
+        "verticalDatum": "finished_ground",
+        "forwardRule": "semantic_forward",
+        "exceptionRequiresApproval": true
+      }
+    ],
+    "snapGridProfiles": [
+      {
+        "id": "snap_world_modular_default_v001",
+        "authoringSubgridMeters": 0.5,
+        "placementCellMeters": 2,
+        "structuralBayMeters": 4,
+        "verticalTierMeters": 1,
+        "rotationIncrementDegrees": 90
+      }
+    ],
+    "materialShaderProfiles": [
+      {
+        "id": "material_builtin_pbr_opaque_shared_v001",
+        "renderPipeline": "builtin",
+        "allowedSurfaceTypes": ["opaque", "alpha_clip"],
+        "blendedTransparency": "exception_only",
+        "sharedMaterialsRequired": true,
+        "runtimeReadWriteDefault": false,
+        "requiredMapRoles": ["base_color", "normal", "packed_mask"],
+        "forbiddenShaderTraits": ["unbounded_screen_space_sampling", "always_on_edge_emission"]
+      }
+    ],
+    "texelDensityProfiles": [
+      {
+        "id": "texel_shared_trim_measured_v001",
+        "targetPixelsPerMeter": 256,
+        "tolerancePercent": 20,
+        "sourceResolutionMax": 4096,
+        "runtimeResolutionMax": 2048,
+        "mipmapsRequired": true,
+        "platformCompressionRequired": true
+      }
+    ],
+    "lodProfiles": [
+      {
+        "id": "lod_static_world_standard_v001",
+        "minimumLevels": 3,
+        "normalPlayUsesReducedLod": true,
+        "initialTriangleRatioCeilings": [1, 0.6, 0.3, 0.1],
+        "crossFadeMustBeProfiled": true,
+        "protectedCuePolicy": "silhouette_gameplay_and_realm_cues_survive"
+      }
+    ],
+    "colliderProfiles": [
+      {
+        "id": "collider_static_simple_v001",
+        "allowedModes": ["primitive", "compound_primitive", "low_complexity_static_mesh"],
+        "renderMeshColliderForbidden": true,
+        "lodIndependent": true
+      }
+    ],
+    "navigationProfiles": [
+      {
+        "id": "nav_static_structure_v001",
+        "participation": "source_and_exclusions",
+        "renderGeometryIsAuthority": false,
+        "authoredLinksRequireSockets": true,
+        "gameplayTraversalRequiresSeparateAuthority": true
+      }
+    ],
+    "occlusionProfiles": [
+      {
+        "id": "occlusion_structure_groups_v001",
+        "mode": "separate_groups",
+        "requiredGroups": ["roof", "upper_wall"],
+        "cameraReachableBackingRequired": true
+      }
+    ],
+    "streamingProfiles": [
+      {
+        "id": "stream_chunk_owned_packaged_v001",
+        "residency": "chunk_owned",
+        "addressablesPolicy": "optional_when_measured",
+        "sourceAndPreviewExcludedFromPlayer": true,
+        "prefetchMetadataRequired": true
+      }
+    ]
+  },
+  "records": [
+    {
+      "assetId": "wa_crownlands_architecture_building_town_hall_base_v001",
+      "familyId": "waf_architecture_building_town_hall",
+      "kitId": null,
+      "assetClass": "architecture",
+      "displayLabel": "Crownlands Town Hall existing binding",
+      "ownerAuthority": {
+        "finalCreativeOwner": "project_owner",
+        "accountableOwners": ["architecture", "technical_art"],
+        "ownerDecisionRef": "unity/Docs/Architecture/Crownlands_TownHall_Final_Model_And_Runtime_Binding.md"
+      },
+      "placementScope": {
+        "scope": "realm",
+        "realmIds": ["crownlands"],
+        "taxonomyStatus": "unresolved",
+        "biomeIds": [],
+        "dimensionIds": [],
+        "worldIds": [],
+        "chunkIds": [],
+        "replacementSocketIds": []
+      },
+      "source": {
+        "status": "legacy_runtime_only",
+        "sourcePacketId": "crownlands_town_hall_final_runtime_binding",
+        "sourceVersion": "1",
+        "artifacts": [
+          {
+            "kind": "handoff",
+            "path": "unity/Docs/Architecture/Crownlands_TownHall_Final_Model_And_Runtime_Binding.md",
+            "sha256": null
+          }
+        ],
+        "derivationRevision": "existing-binding-preserved"
+      },
+      "provenance": {
+        "state": "incomplete",
+        "creatorIdentities": [],
+        "authoringTools": [],
+        "sourceReferences": ["al_building_catalog:model:building_crownlands_town_hall_production_v1"],
+        "rights": {
+          "state": "unknown",
+          "declaration": "Retained existing runtime binding; rights record must be completed before post-MVP promotion."
+        },
+        "aiUse": "unknown",
+        "cleanupStatus": "not_recorded",
+        "similarityReview": "not_reviewed",
+        "humanDecisionRef": "unity/Docs/Architecture/Crownlands_TownHall_Final_Model_And_Runtime_Binding.md",
+        "openIssues": ["Complete source chain of custody and rights evidence before promotion."]
+      },
+      "binding": {
+        "bindingState": "candidate",
+        "prefab": {
+          "path": "Assets/AL/Art/Generated/Architecture/Crownlands/Production/TownHall/Runtime/Crownlands_TownHall_Production.prefab",
+          "guid": "40d5f7687fed640fd8c0d4b1868ff0ef",
+          "sha256": "71ea52234ec8aea93b91bf39ae41d111fa1a7d54cf181f54894e895d23463b46"
+        },
+        "addressable": null,
+        "runtimeDependencies": [],
+        "bindingEvidenceRefs": ["al_building_catalog:model:building_crownlands_town_hall_production_v1"],
+        "unboundReason": null
+      },
+      "standards": {
+        "coordinateProfileId": "coord_unity_meter_y_up_z_forward_v001",
+        "pivotProfileId": "pivot_base_center_finished_ground_v001",
+        "snapGridProfileId": "snap_world_modular_default_v001",
+        "materialShaderProfileId": "material_builtin_pbr_opaque_shared_v001",
+        "texelDensityProfileId": "texel_shared_trim_measured_v001",
+        "lodProfileId": "lod_static_world_standard_v001",
+        "colliderProfileId": "collider_static_simple_v001",
+        "navigationProfileId": "nav_static_structure_v001",
+        "occlusionProfileId": "occlusion_structure_groups_v001",
+        "streamingProfileId": "stream_chunk_owned_packaged_v001",
+        "exceptionRefs": []
+      },
+      "geometry": {
+        "representation": "spatial_3d",
+        "dimensionsMeters": null,
+        "measuredScale": null,
+        "pivotVerified": false
+      },
+      "materials": {
+        "materialSlotCount": null,
+        "materialFamilyIds": [],
+        "shaderIds": [],
+        "surfaceTypes": [],
+        "sharedOrInstanced": "unverified"
+      },
+      "texelDensity": {
+        "status": "not_measured",
+        "measuredPixelsPerMeter": null,
+        "evidenceRefs": []
+      },
+      "lod": {
+        "status": "not_verified",
+        "levels": [],
+        "protectedCues": ["footprint", "entrance", "roofline", "realm_construction"],
+        "notApplicableReason": null
+      },
+      "impostor": {
+        "mode": "unresolved",
+        "reason": "Long-range representation requires measured camera and mobile-floor evidence.",
+        "sourceAssetId": null
+      },
+      "collider": {
+        "participation": "unverified",
+        "sourceObjectIds": [],
+        "lodIndependent": true,
+        "reason": "Existing binding must be inspected before promotion."
+      },
+      "navigation": {
+        "participation": "unverified",
+        "sourceObjectIds": [],
+        "linkSocketIds": [],
+        "navmeshAreaProfileId": null,
+        "reason": "Traversal authority remains outside render geometry."
+      },
+      "occlusion": {
+        "participation": "unverified",
+        "groupIds": [],
+        "portalIds": [],
+        "reason": "Occlusion grouping requires inspection."
+      },
+      "streaming": {
+        "residency": "packaged_current",
+        "chunkIds": [],
+        "bundleId": null,
+        "prefetchRing": "not_assigned",
+        "estimatedResidentBytes": null,
+        "measuredResidentBytes": null,
+        "measuredBuildSizeBytes": null
+      },
+      "modularity": {
+        "isModular": true,
+        "socketIds": [],
+        "gridExceptionRef": null
+      },
+      "anchors": [],
+      "vfxAnchor": null,
+      "derivative25d": null,
+      "budgetClassId": "budget_unassigned_pending_t_e00af422",
+      "approvals": {
+        "technical": {"state": "not_tested", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},
+        "creative": {"state": "not_reviewed", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},
+        "provenance": {"state": "incomplete", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},
+        "performance": {"state": "not_measured", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},
+        "accessibility": {"state": "not_tested", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": []},
+        "releaseGate": {"state": "held", "reviewer": null, "decisionAtUtc": null, "evidenceRefs": [], "openIssues": ["Gate 0 stop-ship remains separate and unresolved."]}
+      },
+      "lifecycle": {
+        "inventoryState": "current_bound_partial",
+        "preserveMvpBinding": true,
+        "replacesAssetIds": [],
+        "replacedByAssetId": null,
+        "deprecationReason": null
+      }
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "building.crownlands.townhall.production.v1",
+      "canonicalAssetId": "wa_crownlands_architecture_building_town_hall_base_v001",
+      "introducedContentVersion": "0.1.0",
+      "retirementContentVersion": null,
+      "migrationRef": "unity/Docs/AssetLibrary/PostMVP_World_Asset_Taxonomy_v1.md"
+    },
+    {
+      "legacyId": "building_crownlands_town_hall_production_v1",
+      "canonicalAssetId": "wa_crownlands_architecture_building_town_hall_base_v001",
+      "introducedContentVersion": "0.1.0",
+      "retirementContentVersion": null,
+      "migrationRef": "unity/Docs/AssetLibrary/PostMVP_World_Asset_Taxonomy_v1.md"
+    }
+  ]
+}

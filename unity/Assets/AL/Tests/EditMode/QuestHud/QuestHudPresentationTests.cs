@@ -2,6 +2,8 @@ using AL.ChampionMode;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
 using AL.ChampionMode.Quests;
+using AL.ChampionMode.Skills;
+using AL.ChampionMode.UI;
 using AL.Core;
 using AL.UI.QuestHud;
 using AL.World;
@@ -18,15 +20,22 @@ namespace AL.Tests.EditMode.QuestHud
         [SetUp]
         public void SetUp()
         {
+            ChampionHudCameraGate.Reset();
             FirstSessionChampionStart.ResetToFirstSessionLanding();
             ProofOfWorthDirector.ResetForTests();
             QuestHudAutoQuest.ResetForTests();
             _root = new GameObject("QuestHudTestRoot");
+            _root.AddComponent<CharacterController>();
+            _root.AddComponent<ChampionCombat>();
+            _root.AddComponent<SkillCaster>();
+            ChampionController controller = _root.AddComponent<ChampionController>();
+            controller.ConfigureRealmContext(RealmId.Crownlands);
         }
 
         [TearDown]
         public void TearDown()
         {
+            ChampionHudCameraGate.Reset();
             QuestHudAutoQuest.ResetForTests();
             ProofOfWorthDirector.ResetForTests();
             FirstSessionChampionStart.ResetToFirstSessionLanding();
@@ -197,7 +206,8 @@ namespace AL.Tests.EditMode.QuestHud
             var champion = new GameObject("UnsafeAutoQuestChampion");
             champion.transform.SetParent(_root.transform, false);
             ChampionCombat combat = champion.AddComponent<ChampionCombat>();
-            champion.AddComponent<ChampionController>();
+            ChampionController controller = champion.AddComponent<ChampionController>();
+            controller.ConfigureRealmContext(RealmId.Stonehold);
             combat.TakeDamage(1f);
             Assert.IsTrue(combat.IsDead);
             ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
@@ -223,17 +233,22 @@ namespace AL.Tests.EditMode.QuestHud
                 .GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 .Invoke(director, null);
 
+            AdvanceOpeningConversationToArena();
             Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
         }
 
         [Test]
-        public void AutoQuestOnAcceptsOfferFromHud()
+        public void AutoQuestOnShowsReadableOfferBeforeAcceptance()
         {
             QuestHudAutoQuest.SetEnabled(true);
             ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
             director.EnsureReady(null, _root.transform, RealmId.Stonehold);
 
-            Assert.IsFalse(director.State.IsOmenOffered);
+            Assert.IsTrue(director.State.IsOmenOffered);
+            NpcConversationView view = Object.FindObjectOfType<NpcConversationView>();
+            Assert.IsNotNull(view);
+            Assert.IsTrue(view.IsVisible);
+            Assert.IsTrue(view.SkipCurrentLine());
             Assert.IsTrue(director.State.OmenAccepted);
             Assert.Greater((int)director.State.Phase, (int)ProofOfWorthPhase.OmenOffered);
         }
@@ -244,9 +259,16 @@ namespace AL.Tests.EditMode.QuestHud
             QuestHudAutoQuest.SetEnabled(true);
             var champion = new GameObject("AutoQuestChampion");
             champion.transform.SetParent(_root.transform, false);
+            champion.AddComponent<CharacterController>();
+            champion.AddComponent<ChampionCombat>();
+            champion.AddComponent<SkillCaster>();
+            ChampionController controller = champion.AddComponent<ChampionController>();
+            controller.ConfigureRealmContext(RealmId.Stonehold);
             ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
             director.EnsureReady(null, champion.transform, RealmId.Stonehold);
+            AdvanceOpeningConversationToArena();
             Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
+            Assert.IsTrue(Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
 
             GameObject markerRoot = GameObject.Find(ProofOfWorthDirector.MarkerRootName);
             Assert.IsNotNull(markerRoot);
@@ -257,6 +279,8 @@ namespace AL.Tests.EditMode.QuestHud
                 .GetMethod("Update", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)
                 .Invoke(director, null);
 
+            Assert.IsTrue(Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
+            Assert.IsTrue(Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
             Assert.AreEqual(ProofOfWorthPhase.C1MeetGuide, director.State.Phase);
         }
 
@@ -266,9 +290,16 @@ namespace AL.Tests.EditMode.QuestHud
             QuestHudAutoQuest.SetEnabled(true);
             var champion = new GameObject("AutoQuestChampion");
             champion.transform.SetParent(_root.transform, false);
+            champion.AddComponent<CharacterController>();
+            champion.AddComponent<ChampionCombat>();
+            champion.AddComponent<SkillCaster>();
+            ChampionController controller = champion.AddComponent<ChampionController>();
+            controller.ConfigureRealmContext(RealmId.Eldergrove);
             ProofOfWorthDirector director = _root.AddComponent<ProofOfWorthDirector>();
             director.EnsureReady(null, champion.transform, RealmId.Eldergrove);
+            AdvanceOpeningConversationToArena();
             Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
+            Assert.IsTrue(Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
 
             var enemy = new GameObject("AutoQuestEnemy");
             enemy.transform.SetParent(_root.transform, false);
@@ -284,6 +315,15 @@ namespace AL.Tests.EditMode.QuestHud
             Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
         }
 
+        private static void AdvanceOpeningConversationToArena()
+        {
+            NpcConversationView view = Object.FindObjectOfType<NpcConversationView>();
+            Assert.IsNotNull(view);
+            Assert.IsTrue(view.SkipCurrentLine());
+            Assert.IsTrue(view.SkipCurrentLine());
+            Assert.IsTrue(view.SkipCurrentLine());
+        }
+
         [Test]
         public void ManualTapAdvancesWhenAutoQuestOff()
         {
@@ -291,7 +331,12 @@ namespace AL.Tests.EditMode.QuestHud
             director.EnsureReady(null, _root.transform, RealmId.Crownlands);
             Assert.IsTrue(director.State.IsOmenOffered);
 
+            NpcConversationView view = Object.FindObjectOfType<NpcConversationView>();
+            view.Collapse();
             director.Hud.FirePrimary();
+            Assert.That(view.IsVisible, Is.True);
+            Assert.That(director.State.IsOmenOffered, Is.True);
+            Assert.That(view.SkipCurrentLine(), Is.True);
             Assert.IsTrue(director.State.OmenAccepted);
             Assert.AreEqual(QuestHudAction.Continue, director.Hud.Model.Action);
             Assert.IsTrue(director.Hud.ContinueButton.gameObject.activeSelf);

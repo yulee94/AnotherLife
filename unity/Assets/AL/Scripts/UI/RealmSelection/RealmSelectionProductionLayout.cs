@@ -172,9 +172,10 @@ namespace AL.UI.RealmSelection
             button.onClick.AddListener(() => onConsider?.Invoke(captured));
 
             RealmSelectionIdentity.BuildStructuralFrame(buttonObject.transform, identity.FrameKind);
+            Image mark = null;
             if (emblem != null)
             {
-                Image mark = PresentationChrome.CreatePlate(
+                mark = PresentationChrome.CreatePlate(
                     buttonObject.transform,
                     "RealmEmblem",
                     Color.white,
@@ -186,6 +187,10 @@ namespace AL.UI.RealmSelection
                 mark.sprite = emblem;
                 mark.preserveAspect = true;
             }
+
+            RealmSelectionFormationEffect formation =
+                buttonObject.AddComponent<RealmSelectionFormationEffect>();
+            formation.Configure(realm.Id, mark != null ? mark.sprite : emblem);
 
             PresentationChrome.CreateLabel(
                 buttonObject.transform,

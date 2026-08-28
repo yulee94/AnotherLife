@@ -1,0 +1,902 @@
+{
+  "$schema": "./al_blender_source_validation.schema.json",
+  "schemaVersion": 1,
+  "contractId": "al-blender-source-validation-v001",
+  "minimumBlenderVersion": [
+    5,
+    2,
+    0
+  ],
+  "defaultSourceUpAxis": "Z",
+  "unityImport": {
+    "unitsPerMeter": 1.0,
+    "upAxis": "+Y",
+    "forwardAxis": "+Z",
+    "blenderFbxAxisForward": "-Z",
+    "blenderFbxAxisUp": "Y"
+  },
+  "sources": [
+    {
+      "id": "neutral-covenant-hall-working-v001",
+      "category": "modular-environment-kit",
+      "approvalState": "mvp-runtime-candidate",
+      "path": "unity/ArtSource/FirstUserOnboarding/neutral_covenant_hall_working_v001.blend",
+      "sha256": "b807a8ec7d5332a70774405ccf240a16e8555787c9de0778303d0ebe54d85a5c",
+      "sourceUpAxis": "Y",
+      "axisException": "Legacy onboarding generator authored mesh coordinates in Unity Y-up space inside Blender. Preserve the reviewed render geometry; author new Blender sources Z-up.",
+      "unitSystem": "METRIC",
+      "unitScale": 1.0,
+      "requiredObjects": [
+        "FloorModule",
+        "WallModule",
+        "InnerCornerModule",
+        "OuterCornerModule",
+        "DoorwayModule",
+        "CeilingBeamModule",
+        "TrimModule",
+        "BrazierProp",
+        "BannerStandProp",
+        "CrateBarrelProp"
+      ],
+      "identityScaleObjects": "all-exportable",
+      "lods": [
+        {
+          "id": "runtime-candidate",
+          "objects": [
+            "FloorModule",
+            "WallModule",
+            "InnerCornerModule",
+            "OuterCornerModule",
+            "DoorwayModule",
+            "CeilingBeamModule",
+            "TrimModule",
+            "BrazierProp",
+            "BannerStandProp",
+            "CrateBarrelProp"
+          ],
+          "minimumTriangles": 1,
+          "maximumTriangles": 12000
+        }
+      ],
+      "maximumMeshObjects": 35,
+      "maximumMaterialNames": 3,
+      "exportSets": [
+        {
+          "id": "mvp-render",
+          "format": "GLB",
+          "objectsFromLods": [
+            "runtime-candidate"
+          ],
+          "includeObjects": [],
+          "includeAnimations": false
+        }
+      ],
+      "ground": {
+        "objects": [
+          "FloorModule"
+        ],
+        "axis": "Y",
+        "edge": "maximum",
+        "expected": 0.0,
+        "tolerance": 0.002
+      },
+      "dimensions": {
+        "objects": [
+          "FloorModule"
+        ],
+        "expected": {
+          "X": 8.0,
+          "Z": 12.0
+        },
+        "tolerance": 0.01
+      },
+      "promotion": {
+        "requiredCollectionNames": [
+          "AL_COLLISION",
+          "AL_NAVIGATION",
+          "AL_SOCKETS"
+        ],
+        "requiredObjectNames": [
+          "COL_NeutralCovenantHall_Walkable_00",
+          "NAV_NeutralCovenantHall_Walkable_00",
+          "SOCKET_Entrance_00"
+        ]
+      },
+      "openReview": [
+        "Final texture atlas and decal pass",
+        "Final capital-district breadth and dressing",
+        "Runtime import/binding review for the derived collision, walkable navigation source, and entrance socket outputs",
+        "Replacement with a conventionally Z-up source on a new version"
+      ]
+    },
+    {
+      "id": "champion-vanguard-working-v001",
+      "category": "champion-modular-character",
+      "approvalState": "production-candidate",
+      "path": "unity/ArtSource/Champions/champion_vanguard_working_v001.blend",
+      "sha256": "10c07b25d4e7316ac664621adaf11156066b57ab9a35471df9d76ab3900bc4cb",
+      "sourceUpAxis": "Z",
+      "unitSystem": "METRIC",
+      "unitScale": 1.0,
+      "requiredObjects": [
+        "root",
+        "Champion_Vanguard_Rig",
+        "SM_Head",
+        "SM_Hair",
+        "SM_Face",
+        "SM_Eye_L",
+        "SM_Eye_R",
+        "SM_Torso",
+        "SM_Arm_L",
+        "SM_Arm_R",
+        "SM_Leg_L",
+        "SM_Leg_R",
+        "Shoulder_L",
+        "Shoulder_R",
+        "Cape",
+        "Weapon_Main",
+        "Shield_Off",
+        "Realm_Ornament"
+      ],
+      "requiredCollections": [
+        "head",
+        "hair",
+        "face",
+        "torso",
+        "shoulders",
+        "arms",
+        "legs",
+        "cape",
+        "main-hand",
+        "off-hand",
+        "realm-ornament",
+        "anchors",
+        "rig",
+        "LOD_Medium",
+        "LOD_Low"
+      ],
+      "identityScaleObjects": "all-exportable",
+      "root": {
+        "object": "root",
+        "expectedLocation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerance": 0.0001
+      },
+      "lods": [
+        {
+          "id": "LOD0",
+          "objects": [
+            "SM_Head",
+            "SM_Hair",
+            "SM_Face",
+            "SM_Eye_L",
+            "SM_Eye_R",
+            "SM_Torso",
+            "SM_Arm_L",
+            "SM_Arm_R",
+            "SM_Leg_L",
+            "SM_Leg_R",
+            "Shoulder_L",
+            "Shoulder_R",
+            "Cape",
+            "Weapon_Main",
+            "Shield_Off",
+            "Realm_Ornament"
+          ],
+          "minimumTriangles": 8000,
+          "maximumTriangles": 18000
+        },
+        {
+          "id": "LOD1",
+          "objectsFromLod": "LOD0",
+          "suffix": "_LOD1",
+          "minimumTriangles": 3000,
+          "maximumTriangles": 6000
+        },
+        {
+          "id": "LOD2",
+          "objectsFromLod": "LOD0",
+          "suffix": "_LOD2",
+          "minimumTriangles": 800,
+          "maximumTriangles": 1500
+        }
+      ],
+      "maximumMaterialSlotsPerMesh": 3,
+      "exportSets": [
+        {
+          "id": "review-render-rig",
+          "format": "GLB",
+          "objectsFromLods": [
+            "LOD0",
+            "LOD1",
+            "LOD2"
+          ],
+          "includeObjects": [
+            "root",
+            "Champion_Vanguard_Rig"
+          ],
+          "includeAnimations": false
+        }
+      ],
+      "ground": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "edge": "minimum",
+        "expected": 0.0,
+        "tolerance": 0.02
+      },
+      "height": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "minimum": 1.7,
+        "maximum": 1.95
+      },
+      "orientation": {
+        "headObject": "SM_Head",
+        "forwardObject": "SM_Face",
+        "axis": "Y",
+        "direction": "negative",
+        "minimumSeparation": 0.01
+      },
+      "armature": {
+        "object": "Champion_Vanguard_Rig",
+        "minimumBones": 20,
+        "maximumBones": 89,
+        "maximumInfluencesPerVertex": 4,
+        "skinnedObjectsFromLods": [
+          "LOD0",
+          "LOD1",
+          "LOD2"
+        ],
+        "requiredBones": [
+          "Hips",
+          "Spine",
+          "Chest",
+          "UpperChest",
+          "Neck",
+          "Head",
+          "LeftUpperArm",
+          "LeftLowerArm",
+          "LeftHand",
+          "RightUpperArm",
+          "RightLowerArm",
+          "RightHand",
+          "LeftUpperLeg",
+          "LeftLowerLeg",
+          "LeftFoot",
+          "LeftToes",
+          "RightUpperLeg",
+          "RightLowerLeg",
+          "RightFoot",
+          "RightToes"
+        ]
+      },
+      "openReview": [
+        "Final face identity and anatomical proportion review",
+        "Eight equipment n-gons at LOD0 and LOD1 plus one at LOD2",
+        "Artist-corrected deformation weights and Unity Humanoid Avatar validation",
+        "Production UVs, textures, animations, and measured device performance"
+      ]
+    },
+    {
+      "id": "crownlands-champion-male-base-working-v001",
+      "category": "first-session-champion-base",
+      "approvalState": "mvp-runtime-candidate",
+      "path": "unity/ArtSource/Champions/crownlands_champion_male_base_working_v001.blend",
+      "sha256": "8d27f6390967809a0fa1a394978bcee65045e874cfce9e7c7d0ab0efd5327e24",
+      "sourceUpAxis": "Z",
+      "unitSystem": "METRIC",
+      "unitScale": 1.0,
+      "requiredObjects": [
+        "Armature",
+        "ChampionBase",
+        "Socket_WeaponMain",
+        "Socket_Offhand",
+        "Socket_Head",
+        "Socket_Back"
+      ],
+      "identityScaleObjects": "all-exportable",
+      "identityRotationObjects": [
+        "Armature",
+        "ChampionBase"
+      ],
+      "root": {
+        "object": "Armature",
+        "expectedLocation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerance": 0.0001
+      },
+      "lods": [
+        {
+          "id": "LOD0",
+          "objects": [
+            "ChampionBase"
+          ],
+          "minimumTriangles": 8000,
+          "maximumTriangles": 60000
+        }
+      ],
+      "maximumMaterialSlotsPerMesh": 4,
+      "exportSets": [
+        {
+          "id": "review-lod0-rig",
+          "format": "GLB",
+          "objectsFromLods": [
+            "LOD0"
+          ],
+          "includeObjects": [
+            "Armature",
+            "Socket_WeaponMain",
+            "Socket_Offhand",
+            "Socket_Head",
+            "Socket_Back"
+          ],
+          "includeAnimations": true
+        }
+      ],
+      "ground": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "edge": "minimum",
+        "expected": 0.0,
+        "tolerance": 0.02
+      },
+      "height": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "minimum": 1.65,
+        "maximum": 1.95
+      },
+      "boneOrientation": {
+        "armatureObject": "Armature",
+        "originBone": "Head",
+        "forwardBone": "headfront",
+        "axis": "Y",
+        "direction": "negative",
+        "minimumSeparation": 0.01
+      },
+      "armature": {
+        "object": "Armature",
+        "minimumBones": 20,
+        "maximumBones": 89,
+        "maximumInfluencesPerVertex": 4,
+        "skinnedObjectsFromLods": [
+          "LOD0"
+        ],
+        "requiredBones": [
+          "Hips",
+          "Spine",
+          "Spine01",
+          "Spine02",
+          "neck",
+          "Head",
+          "LeftArm",
+          "LeftForeArm",
+          "LeftHand",
+          "RightArm",
+          "RightForeArm",
+          "RightHand",
+          "LeftUpLeg",
+          "LeftLeg",
+          "LeftFoot",
+          "RightUpLeg",
+          "RightLeg",
+          "RightFoot"
+        ]
+      },
+      "promotion": {
+        "minimumActions": 1,
+        "requiredMeshNameTokens": [
+          "lod1",
+          "lod2",
+          "crowd"
+        ]
+      },
+      "openReview": [
+        "Source weight cleanup; Unity import currently prunes to four influences",
+        "Applied armature/mesh transforms in a new version",
+        "Shared Humanoid retarget validation and artist-corrected deformation",
+        "LOD1, LOD2, and crowd/far representation",
+        "Final face, anatomy, armor, hair, cloth, and realm-identity approval"
+      ]
+    },
+    {
+      "id": "crownlands-champion-female-base-working-v001",
+      "category": "first-session-champion-base",
+      "approvalState": "mvp-runtime-candidate",
+      "path": "unity/ArtSource/Champions/crownlands_champion_female_base_working_v001.blend",
+      "sha256": "464f0f296869b8637ecd744ac8b1abbf06be6bb210bda3f7c3cca24587258729",
+      "sourceUpAxis": "Z",
+      "unitSystem": "METRIC",
+      "unitScale": 1.0,
+      "requiredObjects": [
+        "Armature",
+        "ChampionBase",
+        "Socket_WeaponMain",
+        "Socket_Offhand",
+        "Socket_Head",
+        "Socket_Back"
+      ],
+      "identityScaleObjects": "all-exportable",
+      "identityRotationObjects": [
+        "Armature",
+        "ChampionBase"
+      ],
+      "root": {
+        "object": "Armature",
+        "expectedLocation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerance": 0.0001
+      },
+      "lods": [
+        {
+          "id": "LOD0",
+          "objects": [
+            "ChampionBase"
+          ],
+          "minimumTriangles": 8000,
+          "maximumTriangles": 60000
+        }
+      ],
+      "maximumMaterialSlotsPerMesh": 4,
+      "exportSets": [
+        {
+          "id": "review-lod0-rig",
+          "format": "GLB",
+          "objectsFromLods": [
+            "LOD0"
+          ],
+          "includeObjects": [
+            "Armature",
+            "Socket_WeaponMain",
+            "Socket_Offhand",
+            "Socket_Head",
+            "Socket_Back"
+          ],
+          "includeAnimations": true
+        }
+      ],
+      "ground": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "edge": "minimum",
+        "expected": 0.0,
+        "tolerance": 0.02
+      },
+      "height": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "minimum": 1.65,
+        "maximum": 1.95
+      },
+      "boneOrientation": {
+        "armatureObject": "Armature",
+        "originBone": "Head",
+        "forwardBone": "headfront",
+        "axis": "Y",
+        "direction": "negative",
+        "minimumSeparation": 0.01
+      },
+      "armature": {
+        "object": "Armature",
+        "minimumBones": 20,
+        "maximumBones": 89,
+        "maximumInfluencesPerVertex": 4,
+        "skinnedObjectsFromLods": [
+          "LOD0"
+        ],
+        "requiredBones": [
+          "Hips",
+          "Spine",
+          "Spine01",
+          "Spine02",
+          "neck",
+          "Head",
+          "LeftArm",
+          "LeftForeArm",
+          "LeftHand",
+          "RightArm",
+          "RightForeArm",
+          "RightHand",
+          "LeftUpLeg",
+          "LeftLeg",
+          "LeftFoot",
+          "RightUpLeg",
+          "RightLeg",
+          "RightFoot"
+        ]
+      },
+      "promotion": {
+        "minimumActions": 1,
+        "requiredMeshNameTokens": [
+          "lod1",
+          "lod2",
+          "crowd"
+        ]
+      },
+      "openReview": [
+        "Source weight cleanup; Unity import currently prunes to four influences",
+        "Applied armature/mesh transforms in a new version",
+        "Shared Humanoid retarget validation and artist-corrected deformation",
+        "LOD1, LOD2, and crowd/far representation",
+        "Final face, anatomy, armor, hair, cloth, and realm-identity approval"
+      ]
+    },
+    {
+      "id": "slagwhistle-burrower-working-v001",
+      "category": "ambient-terrestrial-creature",
+      "approvalState": "lod0-production-pilot",
+      "path": "unity/ArtSource/Terrestrials/Stonehold/SlagfallQuarry/Fauna/Slagwhistle/tdf_fauna_stonehold_slagwhistle_burrower_working_v001.blend",
+      "sha256": "493e44350356d9d10d72cde21aa8b2df0298d096dfbc61c4827efd40b7e987d1",
+      "sourceUpAxis": "Z",
+      "unitSystem": "METRIC",
+      "unitScale": 1.0,
+      "requiredObjects": [
+        "root",
+        "Slagwhistle_Rig",
+        "SM_Slagwhistle_LOD0",
+        "FORWARD_Unity+Z"
+      ],
+      "identityScaleObjects": "all-exportable",
+      "root": {
+        "object": "root",
+        "expectedLocation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerance": 0.0001
+      },
+      "lods": [
+        {
+          "id": "LOD0",
+          "objects": [
+            "SM_Slagwhistle_LOD0"
+          ],
+          "minimumTriangles": 8000,
+          "maximumTriangles": 10000
+        }
+      ],
+      "maximumMaterialNames": 2,
+      "exportSets": [
+        {
+          "id": "review-lod0-rig",
+          "format": "GLB",
+          "objectsFromLods": [
+            "LOD0"
+          ],
+          "includeObjects": [
+            "root",
+            "Slagwhistle_Rig",
+            "FORWARD_Unity+Z"
+          ],
+          "includeAnimations": false
+        }
+      ],
+      "ground": {
+        "objectsFromLod": "LOD0",
+        "axis": "Z",
+        "edge": "minimum",
+        "expected": 0.0,
+        "tolerance": 0.01
+      },
+      "armature": {
+        "object": "Slagwhistle_Rig",
+        "minimumBones": 34,
+        "maximumBones": 42,
+        "maximumInfluencesPerVertex": 4,
+        "skinnedObjectsFromLods": [
+          "LOD0"
+        ],
+        "requiredBones": [
+          "Root",
+          "Pelvis",
+          "Spine1",
+          "Spine2",
+          "Spine3",
+          "Chest",
+          "UpperChest",
+          "Neck",
+          "Head"
+        ]
+      },
+      "promotion": {
+        "minimumActions": 6,
+        "requiredMeshNameTokens": [
+          "lod1",
+          "lod2",
+          "impostor"
+        ]
+      },
+      "openReview": [
+        "Owner decision on recumbent bind pose and mole/armadillo silhouette read",
+        "LOD1, LOD2, and opaque distant representation",
+        "Six contact-verified presentation clips",
+        "Compressed-size reduction and measured device performance"
+      ]
+    },
+    {
+      "id": "neutral-covenant-terrain-landmark-kit-working-v001",
+      "category": "terrain-adjacent-environment-kit",
+      "approvalState": "review-candidate",
+      "path": "unity/ArtSource/FirstUserOnboarding/neutral_covenant_terrain_landmark_kit_working_v001.blend",
+      "sha256": "382765b66936cf744d423a37fe171b4c7c90886f73090e3a968373f9085f089c",
+      "sourceUpAxis": "Z",
+      "unitSystem": "METRIC",
+      "unitScale": 1.0,
+      "requiredObjects": [
+        "M_Neutral_CovenantPathBeacon_LOD0",
+        "M_Neutral_CovenantPathBeacon_LOD1",
+        "M_Neutral_CovenantPathBeacon_LOD2",
+        "M_Neutral_CovenantTrailPost_LOD0",
+        "M_Neutral_CovenantTrailPost_LOD1",
+        "M_Neutral_CovenantTrailPost_LOD2",
+        "M_Neutral_CovenantBoundaryWall_LOD0",
+        "M_Neutral_CovenantBoundaryWall_LOD1",
+        "M_Neutral_CovenantBoundaryWall_LOD2",
+        "COL_NeutralCovenantPathBeacon_Body_00",
+        "COL_NeutralCovenantTrailPost_Body_00",
+        "COL_NeutralCovenantBoundaryWall_Body_00",
+        "NAVEX_NeutralCovenantPathBeacon_Footprint_00",
+        "NAVEX_NeutralCovenantTrailPost_Footprint_00",
+        "NAVEX_NeutralCovenantBoundaryWall_Footprint_00",
+        "SOCKET_PathBeacon_Interaction_00",
+        "SOCKET_TrailPost_Interaction_00",
+        "SOCKET_BoundaryWall_End_A",
+        "SOCKET_BoundaryWall_End_B"
+      ],
+      "requiredCollections": [
+        "AL_RENDER",
+        "AL_COLLISION",
+        "AL_NAVIGATION",
+        "AL_SOCKETS"
+      ],
+      "identityScaleObjects": "all-exportable",
+      "identityRotationObjects": [
+        "M_Neutral_CovenantPathBeacon_LOD0",
+        "M_Neutral_CovenantPathBeacon_LOD1",
+        "M_Neutral_CovenantPathBeacon_LOD2",
+        "M_Neutral_CovenantTrailPost_LOD0",
+        "M_Neutral_CovenantTrailPost_LOD1",
+        "M_Neutral_CovenantTrailPost_LOD2",
+        "M_Neutral_CovenantBoundaryWall_LOD0",
+        "M_Neutral_CovenantBoundaryWall_LOD1",
+        "M_Neutral_CovenantBoundaryWall_LOD2",
+        "COL_NeutralCovenantPathBeacon_Body_00",
+        "COL_NeutralCovenantTrailPost_Body_00",
+        "COL_NeutralCovenantBoundaryWall_Body_00",
+        "NAVEX_NeutralCovenantPathBeacon_Footprint_00",
+        "NAVEX_NeutralCovenantTrailPost_Footprint_00",
+        "NAVEX_NeutralCovenantBoundaryWall_Footprint_00"
+      ],
+      "lods": [
+        {
+          "id": "path-beacon-lod0",
+          "family": "path-beacon",
+          "objects": [
+            "M_Neutral_CovenantPathBeacon_LOD0"
+          ],
+          "minimumTriangles": 600,
+          "maximumTriangles": 900
+        },
+        {
+          "id": "path-beacon-lod1",
+          "family": "path-beacon",
+          "objects": [
+            "M_Neutral_CovenantPathBeacon_LOD1"
+          ],
+          "minimumTriangles": 150,
+          "maximumTriangles": 300
+        },
+        {
+          "id": "path-beacon-lod2",
+          "family": "path-beacon",
+          "objects": [
+            "M_Neutral_CovenantPathBeacon_LOD2"
+          ],
+          "minimumTriangles": 24,
+          "maximumTriangles": 80
+        },
+        {
+          "id": "trail-post-lod0",
+          "family": "trail-post",
+          "objects": [
+            "M_Neutral_CovenantTrailPost_LOD0"
+          ],
+          "minimumTriangles": 300,
+          "maximumTriangles": 500
+        },
+        {
+          "id": "trail-post-lod1",
+          "family": "trail-post",
+          "objects": [
+            "M_Neutral_CovenantTrailPost_LOD1"
+          ],
+          "minimumTriangles": 80,
+          "maximumTriangles": 200
+        },
+        {
+          "id": "trail-post-lod2",
+          "family": "trail-post",
+          "objects": [
+            "M_Neutral_CovenantTrailPost_LOD2"
+          ],
+          "minimumTriangles": 12,
+          "maximumTriangles": 60
+        },
+        {
+          "id": "boundary-wall-lod0",
+          "family": "boundary-wall",
+          "objects": [
+            "M_Neutral_CovenantBoundaryWall_LOD0"
+          ],
+          "minimumTriangles": 500,
+          "maximumTriangles": 900
+        },
+        {
+          "id": "boundary-wall-lod1",
+          "family": "boundary-wall",
+          "objects": [
+            "M_Neutral_CovenantBoundaryWall_LOD1"
+          ],
+          "minimumTriangles": 100,
+          "maximumTriangles": 300
+        },
+        {
+          "id": "boundary-wall-lod2",
+          "family": "boundary-wall",
+          "objects": [
+            "M_Neutral_CovenantBoundaryWall_LOD2"
+          ],
+          "minimumTriangles": 8,
+          "maximumTriangles": 40
+        }
+      ],
+      "maximumMeshObjects": 15,
+      "maximumMaterialNames": 3,
+      "maximumMaterialSlotsPerMesh": 3,
+      "exportSets": [
+        {
+          "id": "path-beacon-review",
+          "format": "GLB",
+          "objectsFromLods": [
+            "path-beacon-lod0",
+            "path-beacon-lod1",
+            "path-beacon-lod2"
+          ],
+          "includeObjects": [
+            "COL_NeutralCovenantPathBeacon_Body_00",
+            "NAVEX_NeutralCovenantPathBeacon_Footprint_00",
+            "SOCKET_PathBeacon_Interaction_00"
+          ],
+          "includeAnimations": false
+        },
+        {
+          "id": "trail-post-review",
+          "format": "GLB",
+          "objectsFromLods": [
+            "trail-post-lod0",
+            "trail-post-lod1",
+            "trail-post-lod2"
+          ],
+          "includeObjects": [
+            "COL_NeutralCovenantTrailPost_Body_00",
+            "NAVEX_NeutralCovenantTrailPost_Footprint_00",
+            "SOCKET_TrailPost_Interaction_00"
+          ],
+          "includeAnimations": false
+        },
+        {
+          "id": "boundary-wall-review",
+          "format": "GLB",
+          "objectsFromLods": [
+            "boundary-wall-lod0",
+            "boundary-wall-lod1",
+            "boundary-wall-lod2"
+          ],
+          "includeObjects": [
+            "COL_NeutralCovenantBoundaryWall_Body_00",
+            "NAVEX_NeutralCovenantBoundaryWall_Footprint_00",
+            "SOCKET_BoundaryWall_End_A",
+            "SOCKET_BoundaryWall_End_B"
+          ],
+          "includeAnimations": false
+        }
+      ],
+      "pivots": {
+        "objects": [
+          "M_Neutral_CovenantPathBeacon_LOD0",
+          "M_Neutral_CovenantPathBeacon_LOD1",
+          "M_Neutral_CovenantPathBeacon_LOD2",
+          "M_Neutral_CovenantTrailPost_LOD0",
+          "M_Neutral_CovenantTrailPost_LOD1",
+          "M_Neutral_CovenantTrailPost_LOD2",
+          "M_Neutral_CovenantBoundaryWall_LOD0",
+          "M_Neutral_CovenantBoundaryWall_LOD1",
+          "M_Neutral_CovenantBoundaryWall_LOD2",
+          "COL_NeutralCovenantPathBeacon_Body_00",
+          "COL_NeutralCovenantTrailPost_Body_00",
+          "COL_NeutralCovenantBoundaryWall_Body_00",
+          "NAVEX_NeutralCovenantPathBeacon_Footprint_00",
+          "NAVEX_NeutralCovenantTrailPost_Footprint_00",
+          "NAVEX_NeutralCovenantBoundaryWall_Footprint_00"
+        ],
+        "expectedLocation": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "tolerance": 0.000001
+      },
+      "ground": {
+        "objects": [
+          "M_Neutral_CovenantPathBeacon_LOD0",
+          "M_Neutral_CovenantTrailPost_LOD0",
+          "M_Neutral_CovenantBoundaryWall_LOD0"
+        ],
+        "axis": "Z",
+        "edge": "minimum",
+        "expected": 0.0,
+        "tolerance": 0.000001
+      },
+      "dimensions": {
+        "objects": [
+          "M_Neutral_CovenantPathBeacon_LOD0",
+          "M_Neutral_CovenantTrailPost_LOD0",
+          "M_Neutral_CovenantBoundaryWall_LOD0"
+        ],
+        "expected": {
+          "X": 4.32,
+          "Y": 0.9,
+          "Z": 3.39
+        },
+        "tolerance": 0.01
+      },
+      "height": {
+        "objects": [
+          "M_Neutral_CovenantPathBeacon_LOD0",
+          "M_Neutral_CovenantTrailPost_LOD0",
+          "M_Neutral_CovenantBoundaryWall_LOD0"
+        ],
+        "axis": "Z",
+        "minimum": 3.3,
+        "maximum": 3.5
+      },
+      "promotion": {
+        "requiredCollectionNames": [
+          "AL_RENDER",
+          "AL_COLLISION",
+          "AL_NAVIGATION",
+          "AL_SOCKETS"
+        ],
+        "requiredObjectNames": [
+          "COL_NeutralCovenantPathBeacon_Body_00",
+          "COL_NeutralCovenantTrailPost_Body_00",
+          "COL_NeutralCovenantBoundaryWall_Body_00",
+          "NAVEX_NeutralCovenantPathBeacon_Footprint_00",
+          "NAVEX_NeutralCovenantTrailPost_Footprint_00",
+          "NAVEX_NeutralCovenantBoundaryWall_Footprint_00",
+          "SOCKET_PathBeacon_Interaction_00",
+          "SOCKET_TrailPost_Interaction_00",
+          "SOCKET_BoundaryWall_End_A",
+          "SOCKET_BoundaryWall_End_B"
+        ]
+      },
+      "openReview": [
+        "Owner approval of the forked path-beacon silhouette and neutral Covenant role",
+        "Owner approval before the trail-post or boundary-wall kit enters first-session terrain placement",
+        "Final texture atlas, wear, decals, palette, vegetation adjacency, and lighting",
+        "Runtime collider/nav/socket import binding and representative traversal profiling"
+      ]
+    }
+  ]
+}

@@ -56,6 +56,7 @@ namespace AL.Tests.EditMode.RealmSelection
             Assert.That(screen.Commit.IsVisible, Is.False);
 
             var frames = new HashSet<string>();
+            var materialNouns = new HashSet<string>();
             foreach (Button button in screen.RealmButtons)
             {
                 Assert.That(button.GetComponent<RectTransform>().rect.height, Is.GreaterThanOrEqualTo(0f));
@@ -63,9 +64,20 @@ namespace AL.Tests.EditMode.RealmSelection
                 Transform frame = button.transform.Find("Frame_Outer");
                 Assert.That(frame, Is.Not.Null, button.name);
                 frames.Add(CollectFrameSignature(button.transform));
+                RealmSelectionFormationEffect formation =
+                    button.GetComponent<RealmSelectionFormationEffect>();
+                Assert.That(formation, Is.Not.Null, button.name);
+                Assert.That(button.transform.Find(RealmSelectionFormationEffect.RootName), Is.Not.Null);
+                Assert.That(
+                    button.transform.Find(
+                        RealmSelectionFormationEffect.RootName + "/" +
+                        RealmSelectionFormationEffect.FlowRootName).childCount,
+                    Is.EqualTo(RealmSelectionFormationEffect.ParticleCount));
+                materialNouns.Add(formation.MaterialNoun);
             }
 
             Assert.That(frames, Has.Count.EqualTo(4));
+            Assert.That(materialNouns, Has.Count.EqualTo(4));
             Assert.That(screen.Grid, Is.Not.Null);
         }
 

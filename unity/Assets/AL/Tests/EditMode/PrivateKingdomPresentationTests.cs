@@ -57,7 +57,7 @@ namespace AL.Tests.EditMode
         [TestCase(RealmId.Eldergrove)]
         [TestCase(RealmId.Crownlands)]
         [TestCase(RealmId.Umbral)]
-        public void PrivateCityBuildsDenseRealmArchitectureWithoutStrategicBoardObjects(
+        public void PrivateCityBuildsOrganizedUpgradeDistrictsWithoutStrategicBoardObjects(
             RealmId realm)
         {
             var host = new GameObject("PrivateKingdomPresentationTests.Host");
@@ -70,7 +70,12 @@ namespace AL.Tests.EditMode
             Assert.That(city, Is.Not.Null);
             Assert.That(
                 presenter.ArchitectureInstanceCount,
-                Is.EqualTo(PrivateKingdomCityPresenter.SetDressingBuildingCount + 1));
+                Is.EqualTo(
+                    PrivateKingdomCityPresenter.EligibleDistrictCount *
+                    PrivateKingdomCityPresenter.MinimumDuplicatesPerEligibleBuilding + 1));
+            Assert.That(
+                presenter.DuplicateCountPerEligibleBuilding,
+                Is.EqualTo(PrivateKingdomCityPresenter.MinimumDuplicatesPerEligibleBuilding));
             Assert.That(
                 city.Find(PrivateKingdomCityPresenter.GroundRootName)
                     .GetComponentsInChildren<MeshRenderer>(true),
@@ -78,7 +83,9 @@ namespace AL.Tests.EditMode
             Assert.That(
                 city.Find(PrivateKingdomCityPresenter.ArchitectureRootName)
                     .GetComponentsInChildren<KingdomBuildingLevelModel>(true),
-                Has.Length.EqualTo(PrivateKingdomCityPresenter.SetDressingBuildingCount + 1));
+                Has.Length.EqualTo(
+                    PrivateKingdomCityPresenter.EligibleDistrictCount *
+                    PrivateKingdomCityPresenter.MinimumDuplicatesPerEligibleBuilding + 1));
 
             string[] names = city.GetComponentsInChildren<Transform>(true)
                 .Select(item => item.name.ToLowerInvariant())
@@ -96,6 +103,11 @@ namespace AL.Tests.EditMode
             Assert.That(
                 names.Any(name => name.Contains("townhall_constructionpreview")),
                 Is.True);
+            foreach (string eligible in new[] { "farm", "lumbermill", "quarry", "goldmine" })
+            {
+                Assert.That(names.Count(name => name.StartsWith("privatekingdom_" + eligible + "_")),
+                    Is.EqualTo(PrivateKingdomCityPresenter.MinimumDuplicatesPerEligibleBuilding));
+            }
         }
 
         [TestCase(RealmId.Stonehold)]
@@ -135,6 +147,42 @@ namespace AL.Tests.EditMode
             Assert.That(
                 hall.GetComponent<KingdomBuildingLevelModel>().AppliedLevel,
                 Is.EqualTo(1));
+        }
+
+        [Test]
+        public void TownHallLevelFiveExpandsEligibleDistrictsToThreeDuplicates()
+        {
+            var host = new GameObject("PrivateKingdomPresentationTests.Host");
+            var presenter = host.AddComponent<PrivateKingdomCityPresenter>();
+            SetField(presenter, "_modelCatalog", LoadCatalog());
+            KingdomBuildingPresentation townHall =
+                KingdomBuildingPresentationResolver.Resolve(
+                        RealmId.Crownlands,
+                        new[]
+                        {
+                            new BuildingState
+                            {
+                                BuildingId = "TownHall",
+                                Level = 5,
+                                IsUpgrading = false,
+                                UpgradeCompleteTimestamp = 0
+                            }
+                        })
+                    .Single(item => item.BuildingId == "TownHall");
+
+            InvokeRebuild(presenter, RealmId.Crownlands, townHall);
+
+            Assert.That(
+                presenter.DuplicateCountPerEligibleBuilding,
+                Is.EqualTo(PrivateKingdomCityPresenter.MaximumDuplicatesPerEligibleBuilding));
+            Assert.That(
+                presenter.ArchitectureInstanceCount,
+                Is.EqualTo(PrivateKingdomCityPresenter.SetDressingBuildingCount + 1));
+            Transform architecture = host.transform
+                .Find(PrivateKingdomCityPresenter.RootName)
+                .Find(PrivateKingdomCityPresenter.ArchitectureRootName);
+            Assert.That(architecture.Find("PrivateKingdom_Farm_03"), Is.Not.Null);
+            Assert.That(architecture.Find("PrivateKingdom_GoldMine_03"), Is.Not.Null);
         }
 
         [Test]

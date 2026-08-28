@@ -47,6 +47,7 @@ REAL_CATALOGS = {
     "al-world-event-content": "al_world_event_content_catalog.json",
     "al-building": "al_building_catalog.json",
     "al-champion": "al_champion_catalog.json",
+    "al-first-session-terrain": "al_first_session_terrain_catalog.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
@@ -91,6 +92,7 @@ def main():
     compiled = {}
     for key, (path, schema) in sorted(schemas.items()):
         try:
+            Draft202012Validator.check_schema(schema)
             compiled[key] = Draft202012Validator(schema)
             reports["schemas"].append((key, True, ""))
         except SchemaError as exc:

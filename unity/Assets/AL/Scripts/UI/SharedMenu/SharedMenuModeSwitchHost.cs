@@ -1,11 +1,13 @@
 using AL.ChampionMode;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
 using AL.Input;
 using AL.UI.Kingdom;
+using AL.UI.WorldMap;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -19,6 +21,8 @@ namespace AL.UI.SharedMenu
     [DefaultExecutionOrder(210)]
     public sealed class SharedMenuModeSwitchHost : MonoBehaviour
     {
+        private System.IDisposable _gameplaySuppression;
+
         public SharedMenuOverlay Overlay { get; private set; }
 
         public bool IsOpen { get; private set; }
@@ -43,7 +47,28 @@ namespace AL.UI.SharedMenu
 
         public static SharedMenuModeSwitchHost EnsureForScene(Scene scene)
         {
-            return EnsureForSceneName(scene.name);
+            if (!scene.IsValid() || !scene.isLoaded ||
+                !CrossModeSceneSwitch.IsSupportedHostScene(scene.name))
+            {
+                return null;
+            }
+
+            SharedMenuModeSwitchHost candidate = ElectSceneHost(scene, activeOnly: true) ??
+                                                   ElectSceneHost(scene, activeOnly: false);
+            if (candidate != null)
+            {
+                if (!candidate.gameObject.activeSelf)
+                {
+                    candidate.gameObject.SetActive(true);
+                }
+
+                candidate.enabled = true;
+                return candidate;
+            }
+
+            var go = new GameObject(SharedMenuIds.HostName);
+            SceneManager.MoveGameObjectToScene(go, scene);
+            return go.AddComponent<SharedMenuModeSwitchHost>();
         }
 
         public static SharedMenuModeSwitchHost EnsureForSceneName(string sceneName)
@@ -53,10 +78,19 @@ namespace AL.UI.SharedMenu
                 return null;
             }
 
-            SharedMenuModeSwitchHost existing = Object.FindObjectOfType<SharedMenuModeSwitchHost>();
-            if (existing != null)
+            for (int i = 0; i < SceneManager.sceneCount; i++)
             {
-                return existing;
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (scene.IsValid() && scene.isLoaded &&
+                    string.Equals(scene.name, sceneName, System.StringComparison.Ordinal))
+                {
+                    return EnsureForScene(scene);
+                }
+            }
+
+            if (Application.isPlaying)
+            {
+                return null;
             }
 
             var go = new GameObject(SharedMenuIds.HostName);
@@ -65,10 +99,56 @@ namespace AL.UI.SharedMenu
 
         private void Update()
         {
-            if (SharedMenuTogglePressed())
+            if (!OwnsAutomaticInput())
+            {
+                return;
+            }
+
+            if (SharedMenuTogglePressed() &&
+                SharedMenuInputCoordinator.TryConsume(this, Time.frameCount))
             {
                 Toggle();
             }
+        }
+
+        private bool OwnsAutomaticInput()
+        {
+            Scene ownerScene = gameObject.scene;
+            return ownerScene.IsValid() && ownerScene.isLoaded &&
+                   ownerScene == SceneManager.GetActiveScene() &&
+                   OwnsAutomaticInputForSceneName(ownerScene.name) &&
+                   ElectSceneHost(ownerScene, activeOnly: true) == this;
+        }
+
+        private static SharedMenuModeSwitchHost ElectSceneHost(
+            Scene scene,
+            bool activeOnly)
+        {
+            SharedMenuModeSwitchHost winner = null;
+            SharedMenuModeSwitchHost[] hosts =
+                Resources.FindObjectsOfTypeAll<SharedMenuModeSwitchHost>();
+            for (int i = 0; i < hosts.Length; i++)
+            {
+                SharedMenuModeSwitchHost candidate = hosts[i];
+                if (candidate == null || candidate.gameObject.scene != scene ||
+                    (activeOnly && !candidate.isActiveAndEnabled))
+                {
+                    continue;
+                }
+
+                if (winner == null || candidate.GetInstanceID() < winner.GetInstanceID())
+                {
+                    winner = candidate;
+                }
+            }
+
+            return winner;
+        }
+
+        internal static bool OwnsAutomaticInputForSceneName(string sceneName)
+        {
+            return CrossModeSceneSwitch.IsSupportedHostScene(sceneName) &&
+                   !CrossModeSceneSwitch.IsAdventureScene(sceneName);
         }
 
         public void Toggle()
@@ -85,39 +165,80 @@ namespace AL.UI.SharedMenu
 
         public void Open()
         {
+            if (IsOpen)
+            {
+                return;
+            }
+
+            CloseOtherOpenHosts(this);
+            ChampionHudSession.CloseActiveMenu();
+            WorldMapSession.CloseMap();
             SaveGameData save = ReadSave();
             SharedMenuModuleState state = KingdomManagementUnlock.EvaluateKingdomManagement(
                 save,
                 DetectCombat(),
                 DetectUnsafe());
-            if (Overlay == null)
-            {
-                Overlay = SharedMenuOverlay.Ensure(state);
-            }
-            else
-            {
-                Overlay.Build(state);
-            }
+            Overlay = SharedMenuOverlay.Ensure(
+                gameObject.scene,
+                state,
+                this,
+                OnOverlayDisplaced);
 
             Overlay.BindInvoke(() => CommitFromMenu());
+            Overlay.ResumeButton.onClick.RemoveAllListeners();
+            Overlay.ResumeButton.onClick.AddListener(Close);
+            _gameplaySuppression =
+                GameInput.AcquireGameplaySuppression("shared-menu-mode-switch");
             IsOpen = true;
+        }
+
+        private static void CloseOtherOpenHosts(SharedMenuModeSwitchHost owner)
+        {
+            SharedMenuModeSwitchHost[] hosts =
+                Resources.FindObjectsOfTypeAll<SharedMenuModeSwitchHost>();
+            for (int i = 0; i < hosts.Length; i++)
+            {
+                SharedMenuModeSwitchHost candidate = hosts[i];
+                if (candidate != null && candidate != owner && candidate.IsOpen)
+                {
+                    candidate.Close();
+                }
+            }
+        }
+
+        internal static void CloseActiveMenus()
+        {
+            CloseOtherOpenHosts(null);
+        }
+
+        internal static bool HasOpenMenu
+        {
+            get
+            {
+                SharedMenuModeSwitchHost[] hosts =
+                    Resources.FindObjectsOfTypeAll<SharedMenuModeSwitchHost>();
+                for (int i = 0; i < hosts.Length; i++)
+                {
+                    if (hosts[i] != null && hosts[i].IsOpen)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
         }
 
         public void Close()
         {
             if (Overlay != null)
             {
-                if (Application.isPlaying)
-                {
-                    Object.Destroy(Overlay.gameObject);
-                }
-                else
-                {
-                    Object.DestroyImmediate(Overlay.gameObject);
-                }
-
+                Overlay.Release(this, hide: true);
                 Overlay = null;
             }
+
+            _gameplaySuppression?.Dispose();
+            _gameplaySuppression = null;
 
             IsOpen = false;
         }
@@ -125,7 +246,7 @@ namespace AL.UI.SharedMenu
         public CrossModeSwitchPlan Preview(string targetMode)
         {
             return CrossModeSceneSwitch.Plan(
-                SceneManager.GetActiveScene().name,
+                OwnerSceneName(),
                 targetMode,
                 ReadSave(),
                 DetectCombat(),
@@ -135,9 +256,7 @@ namespace AL.UI.SharedMenu
 
         public bool CommitFromMenu()
         {
-            string current = Application.isPlaying
-                ? SceneManager.GetActiveScene().name
-                : SharedMenuIds.AdventureScene;
+            string current = OwnerSceneName();
             if (string.IsNullOrEmpty(current))
             {
                 current = SharedMenuIds.AdventureScene;
@@ -264,6 +383,60 @@ namespace AL.UI.SharedMenu
         private void OnDestroy()
         {
             Close();
+        }
+
+        private void OnDisable()
+        {
+            Close();
+        }
+
+        private void OnOverlayDisplaced()
+        {
+            Overlay = null;
+            _gameplaySuppression?.Dispose();
+            _gameplaySuppression = null;
+            IsOpen = false;
+        }
+
+        private string OwnerSceneName()
+        {
+            Scene ownerScene = gameObject.scene;
+            if (ownerScene.IsValid() && !string.IsNullOrEmpty(ownerScene.name))
+            {
+                return ownerScene.name;
+            }
+
+            return SharedMenuIds.AdventureScene;
+        }
+    }
+
+    internal static class SharedMenuInputCoordinator
+    {
+        private static int _frame = -1;
+        private static object _owner;
+
+        internal static bool TryConsume(object owner, int frame)
+        {
+            if (_frame != frame)
+            {
+                _frame = frame;
+                _owner = null;
+            }
+
+            if (_owner != null && !ReferenceEquals(_owner, owner))
+            {
+                return false;
+            }
+
+            _owner = owner;
+            return true;
+        }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void Reset()
+        {
+            _frame = -1;
+            _owner = null;
         }
     }
 }
