@@ -21,6 +21,14 @@ namespace AL.Services.Local
         public const string ChampionsFileName = "champions.json";
         public const string SkillsFileName = "skills.json";
         public const string ChampionRuntimeFileName = "champion_runtime.json";
+        public const string DefendMitigationReadyCode =
+            "AL-GDC-DEFEND-MITIGATION-READY";
+        public const string DefendMitigationMissingCode =
+            "AL-GDC-DEFEND-MITIGATION-MISSING";
+        public const string DefendMitigationAmbiguousCode =
+            "AL-GDC-DEFEND-MITIGATION-AMBIGUOUS";
+        public const string DefendMitigationInvalidCode =
+            "AL-GDC-DEFEND-MITIGATION-INVALID";
 
         public static bool TryResolveGameDataDirectory(out string directory)
         {
@@ -134,6 +142,30 @@ namespace AL.Services.Local
             }
 
             return snapshot.TryCreateSliceProfile(snapshot.DefaultChampionId, out profile, out diagnosticCode);
+        }
+
+        /// <summary>
+        /// Resolves the one catalog champion that owns a realm's defend tuning.
+        /// Runtime combat never substitutes a code default when this authority is
+        /// missing, ambiguous, or invalid.
+        /// </summary>
+        public static bool TryResolveDefendMitigation(
+            RealmId realmId,
+            out float mitigation,
+            out string diagnosticCode)
+        {
+            mitigation = 0f;
+            SixFamilyRuntimeSnapshot snapshot;
+            if (!TryLoad(out snapshot, out diagnosticCode))
+            {
+                diagnosticCode = DefendMitigationMissingCode + ":" + diagnosticCode;
+                return false;
+            }
+
+            return snapshot.TryResolveDefendMitigation(
+                realmId,
+                out mitigation,
+                out diagnosticCode);
         }
 
         private static bool TryLoadFamilySet(
@@ -613,6 +645,69 @@ namespace AL.Services.Local
         public IEnumerable<ChampionDefinition> GetAllChampions()
         {
             return champions;
+        }
+
+        public bool TryResolveDefendMitigation(
+            RealmId realmId,
+            out float mitigation,
+            out string diagnosticCode)
+        {
+            mitigation = 0f;
+            diagnosticCode = SixFamilyRuntimeCatalog.DefendMitigationInvalidCode;
+            if (realmId == RealmId.None ||
+                !Enum.IsDefined(typeof(RealmId), realmId))
+            {
+                return false;
+            }
+
+            ChampionDefinition realmChampion = null;
+            var matchCount = 0;
+            for (var index = 0; index < champions.Count; index++)
+            {
+                var candidate = champions[index];
+                if (candidate == null || candidate.Realm != realmId)
+                {
+                    continue;
+                }
+
+                matchCount++;
+                realmChampion = candidate;
+            }
+
+            if (matchCount == 0 || realmChampion == null)
+            {
+                diagnosticCode = SixFamilyRuntimeCatalog.DefendMitigationMissingCode;
+                return false;
+            }
+
+            if (matchCount != 1)
+            {
+                diagnosticCode = SixFamilyRuntimeCatalog.DefendMitigationAmbiguousCode;
+                return false;
+            }
+
+            SixFamilyRuntimeCatalog.ChampionRuntimeRecord runtime;
+            if (string.IsNullOrEmpty(realmChampion.Id) ||
+                !runtimeById.TryGetValue(realmChampion.Id, out runtime) ||
+                runtime == null)
+            {
+                diagnosticCode = SixFamilyRuntimeCatalog.DefendMitigationMissingCode;
+                return false;
+            }
+
+            var candidateMitigation = runtime.defend_mitigation;
+            if (float.IsNaN(candidateMitigation) ||
+                float.IsInfinity(candidateMitigation) ||
+                candidateMitigation < 0f ||
+                candidateMitigation > 1f)
+            {
+                diagnosticCode = SixFamilyRuntimeCatalog.DefendMitigationInvalidCode;
+                return false;
+            }
+
+            mitigation = candidateMitigation;
+            diagnosticCode = SixFamilyRuntimeCatalog.DefendMitigationReadyCode;
+            return true;
         }
 
         public bool TryCreateSliceProfile(

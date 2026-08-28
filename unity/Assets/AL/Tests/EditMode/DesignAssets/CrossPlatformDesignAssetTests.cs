@@ -23,6 +23,12 @@ namespace AL.Tests.EditMode.DesignAssets
         private const string IosIconQueryUnavailableDiagnostic =
             "IOS_ICON_QUERY_UNAVAILABLE";
 
+        private const string AndroidBuildSupportUnavailableDiagnostic =
+            "ANDROID_BUILD_SUPPORT_UNAVAILABLE";
+
+        private const string AndroidIconQueryUnavailableDiagnostic =
+            "ANDROID_ICON_QUERY_UNAVAILABLE";
+
         private const string AndroidAdaptiveForegroundPath =
             "Assets/AL/Art/Branding/AndroidAdaptive/" +
             "App_Icon_Android_Adaptive_Foreground_AL_432_v001.png";
@@ -34,6 +40,12 @@ namespace AL.Tests.EditMode.DesignAssets
         private const string AndroidMonochromePath =
             "Assets/AL/Art/Branding/AndroidAdaptive/" +
             "App_Icon_Android_Monochrome_AL_432_v001.png";
+
+        private const string AndroidAdaptiveBackgroundGuid =
+            "d654e8a9f2350472ba2f44c8fb921832";
+
+        private const string AndroidAdaptiveForegroundGuid =
+            "d3f27616c9f9a4d3f8d592866626c689";
 
         private const int AdaptiveCanvasSize = 432;
         private const int AdaptiveSafeZoneStart = 84;
@@ -65,6 +77,28 @@ namespace AL.Tests.EditMode.DesignAssets
             "4:App Store:1024x1024"
         };
 
+        private static readonly string[] SerializedAndroidIconMatrix =
+        {
+            "2:432x432:" + AndroidAdaptiveBackgroundGuid + "," + AndroidAdaptiveForegroundGuid,
+            "2:324x324:" + AndroidAdaptiveBackgroundGuid + "," + AndroidAdaptiveForegroundGuid,
+            "2:216x216:" + AndroidAdaptiveBackgroundGuid + "," + AndroidAdaptiveForegroundGuid,
+            "2:162x162:" + AndroidAdaptiveBackgroundGuid + "," + AndroidAdaptiveForegroundGuid,
+            "2:108x108:" + AndroidAdaptiveBackgroundGuid + "," + AndroidAdaptiveForegroundGuid,
+            "2:81x81:" + AndroidAdaptiveBackgroundGuid + "," + AndroidAdaptiveForegroundGuid,
+            "1:192x192:" + ApprovedBrandIconGuid,
+            "1:144x144:" + ApprovedBrandIconGuid,
+            "1:96x96:" + ApprovedBrandIconGuid,
+            "1:72x72:" + ApprovedBrandIconGuid,
+            "1:48x48:" + ApprovedBrandIconGuid,
+            "1:36x36:" + ApprovedBrandIconGuid,
+            "0:192x192:" + ApprovedBrandIconGuid,
+            "0:144x144:" + ApprovedBrandIconGuid,
+            "0:96x96:" + ApprovedBrandIconGuid,
+            "0:72x72:" + ApprovedBrandIconGuid,
+            "0:48x48:" + ApprovedBrandIconGuid,
+            "0:36x36:" + ApprovedBrandIconGuid
+        };
+
         private static readonly Regex SerializedIosIconPattern = new Regex(
             @"    - m_Textures:\r?\n" +
             @"      - \{fileID: 2800000, guid: (?<guid>[a-f0-9]{32}), type: 3\}\r?\n" +
@@ -72,6 +106,19 @@ namespace AL.Tests.EditMode.DesignAssets
             @"      m_Height: (?<height>\d+)\r?\n" +
             @"      m_Kind: (?<kind>\d+)\r?\n" +
             @"      m_SubKind: (?<subkind>[^\r\n]+)",
+            RegexOptions.CultureInvariant);
+
+        private static readonly Regex SerializedAndroidIconPattern = new Regex(
+            @"    - m_Textures:\r?\n" +
+            @"(?<textures>(?:      - \{fileID: 2800000, guid: [a-f0-9]{32}, type: 3\}\r?\n)+)" +
+            @"      m_Width: (?<width>\d+)\r?\n" +
+            @"      m_Height: (?<height>\d+)\r?\n" +
+            @"      m_Kind: (?<kind>\d+)\r?\n" +
+            @"      m_SubKind: [^\r\n]*",
+            RegexOptions.CultureInvariant);
+
+        private static readonly Regex SerializedTextureGuidPattern = new Regex(
+            @"guid: (?<guid>[a-f0-9]{32}), type: 3",
             RegexOptions.CultureInvariant);
 
         private static readonly string[] Realms =
@@ -105,21 +152,65 @@ namespace AL.Tests.EditMode.DesignAssets
         public void ApprovedBrandIconFillsEverySingleLayerAndroidSlot()
         {
             Texture2D icon = AssetDatabase.LoadAssetAtPath<Texture2D>(BrandIconPath);
-            var verifiedKinds = new List<string>();
+            Assert.That(icon, Is.Not.Null);
 
-            foreach (PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            AndroidIconQueryResult query = QueryLiveAndroidIconSlots();
+            if (query.Status != AndroidIconQueryStatus.Available)
             {
-                PlatformIcon[] slots = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind);
-                if (slots.Length == 0 || slots.Any(slot => slot.maxLayerCount != 1))
-                {
-                    continue;
-                }
-
-                verifiedKinds.Add(kind.ToString());
-                Assert.That(slots.Select(slot => slot.GetTexture(0)), Has.All.SameAs(icon));
+                Assert.That(
+                    query.DiagnosticCode,
+                    Is.EqualTo(query.Status == AndroidIconQueryStatus.BuildSupportUnavailable
+                        ? AndroidBuildSupportUnavailableDiagnostic
+                        : AndroidIconQueryUnavailableDiagnostic));
+                Assert.That(query.Slots, Is.Empty);
+                return;
             }
 
-            Assert.That(verifiedKinds, Is.Not.Empty);
+            AndroidLiveIconSlot[] singleLayerSlots = query.Slots
+                .Where(slot => slot.Icon.maxLayerCount == 1)
+                .ToArray();
+            Assert.That(singleLayerSlots, Is.Not.Empty);
+            foreach (AndroidLiveIconSlot slot in singleLayerSlots)
+            {
+                Assert.That(slot.Icon.GetTexture(0), Is.SameAs(icon), slot.Label);
+            }
+        }
+
+        [Test]
+        public void SerializedProjectSettingsPinsEveryAndroidIconLayerAndSlot()
+        {
+            Assert.That(
+                AssetDatabase.AssetPathToGUID(BrandIconPath),
+                Is.EqualTo(ApprovedBrandIconGuid));
+            Assert.That(
+                AssetDatabase.AssetPathToGUID(AndroidAdaptiveBackgroundPath),
+                Is.EqualTo(AndroidAdaptiveBackgroundGuid));
+            Assert.That(
+                AssetDatabase.AssetPathToGUID(AndroidAdaptiveForegroundPath),
+                Is.EqualTo(AndroidAdaptiveForegroundGuid));
+
+            string androidIconBlock = ReadSerializedIconBlock(
+                "  - m_BuildTarget: Android",
+                "\n  - m_BuildTarget: iPhone",
+                "Android");
+            MatchCollection matches = SerializedAndroidIconPattern.Matches(androidIconBlock);
+            Assert.That(matches.Count, Is.GreaterThan(0), "Serialized Android icon matrix is empty.");
+
+            var actualMatrix = new List<string>(matches.Count);
+            foreach (Match match in matches)
+            {
+                string[] textureGuids = SerializedTextureGuidPattern
+                    .Matches(match.Groups["textures"].Value)
+                    .Cast<Match>()
+                    .Select(texture => texture.Groups["guid"].Value)
+                    .ToArray();
+                actualMatrix.Add(
+                    $"{match.Groups["kind"].Value}:" +
+                    $"{match.Groups["width"].Value}x{match.Groups["height"].Value}:" +
+                    string.Join(",", textureGuids));
+            }
+
+            CollectionAssert.AreEqual(SerializedAndroidIconMatrix, actualMatrix);
         }
 
         [Test]
@@ -193,21 +284,28 @@ namespace AL.Tests.EditMode.DesignAssets
             AssertAndroidIconImporter(AndroidAdaptiveForegroundPath, true);
             AssertAndroidIconImporter(AndroidAdaptiveBackgroundPath, false);
 
-            var verifiedSlots = new List<string>();
-
-            foreach (PlatformIconKind kind in PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+            AndroidIconQueryResult query = QueryLiveAndroidIconSlots();
+            if (query.Status != AndroidIconQueryStatus.Available)
             {
-                PlatformIcon[] slots = PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind);
-
-                foreach (PlatformIcon slot in slots.Where(slot => slot.maxLayerCount == 2))
+                Assert.That(
+                    query.DiagnosticCode,
+                    Is.EqualTo(query.Status == AndroidIconQueryStatus.BuildSupportUnavailable
+                        ? AndroidBuildSupportUnavailableDiagnostic
+                        : AndroidIconQueryUnavailableDiagnostic));
+                Assert.That(query.Slots, Is.Empty);
+            }
+            else
+            {
+                AndroidLiveIconSlot[] adaptiveSlots = query.Slots
+                    .Where(slot => slot.Icon.maxLayerCount == 2)
+                    .ToArray();
+                Assert.That(adaptiveSlots, Is.Not.Empty);
+                foreach (AndroidLiveIconSlot slot in adaptiveSlots)
                 {
-                    verifiedSlots.Add($"{kind}:{slot.width}x{slot.height}");
-                    Assert.That(slot.GetTexture(0), Is.SameAs(background));
-                    Assert.That(slot.GetTexture(1), Is.SameAs(foreground));
+                    Assert.That(slot.Icon.GetTexture(0), Is.SameAs(background), slot.Label);
+                    Assert.That(slot.Icon.GetTexture(1), Is.SameAs(foreground), slot.Label);
                 }
             }
-
-            Assert.That(verifiedSlots, Is.Not.Empty);
 
             Color32[] foregroundPixels = LoadSourcePixels(
                 AndroidAdaptiveForegroundPath,
@@ -295,6 +393,55 @@ namespace AL.Tests.EditMode.DesignAssets
             }
         }
 
+        private static AndroidIconQueryResult QueryLiveAndroidIconSlots()
+        {
+            if (!BuildPipeline.IsBuildTargetSupported(
+                    BuildTargetGroup.Android,
+                    BuildTarget.Android))
+            {
+                return new AndroidIconQueryResult(
+                    AndroidIconQueryStatus.BuildSupportUnavailable,
+                    AndroidBuildSupportUnavailableDiagnostic,
+                    new List<AndroidLiveIconSlot>());
+            }
+
+            var slots = new List<AndroidLiveIconSlot>();
+            try
+            {
+                foreach (PlatformIconKind kind in
+                         PlayerSettings.GetSupportedIconKinds(NamedBuildTarget.Android))
+                {
+                    foreach (PlatformIcon icon in
+                             PlayerSettings.GetPlatformIcons(NamedBuildTarget.Android, kind))
+                    {
+                        slots.Add(new AndroidLiveIconSlot(
+                            $"{kind}:{icon.width}x{icon.height}",
+                            icon));
+                    }
+                }
+            }
+            catch (System.Exception)
+            {
+                return new AndroidIconQueryResult(
+                    AndroidIconQueryStatus.IconQueryUnavailable,
+                    AndroidIconQueryUnavailableDiagnostic,
+                    new List<AndroidLiveIconSlot>());
+            }
+
+            if (slots.Count == 0)
+            {
+                return new AndroidIconQueryResult(
+                    AndroidIconQueryStatus.IconQueryUnavailable,
+                    AndroidIconQueryUnavailableDiagnostic,
+                    slots);
+            }
+
+            return new AndroidIconQueryResult(
+                AndroidIconQueryStatus.Available,
+                string.Empty,
+                slots);
+        }
+
         private static IosIconQueryResult QueryLiveIosIconSlots()
         {
             if (!BuildPipeline.IsBuildTargetSupported(
@@ -336,6 +483,17 @@ namespace AL.Tests.EditMode.DesignAssets
 
         private static string ReadSerializedIosIconBlock()
         {
+            return ReadSerializedIconBlock(
+                "  - m_BuildTarget: iPhone",
+                "\n  m_BuildTargetBatching:",
+                "iOS");
+        }
+
+        private static string ReadSerializedIconBlock(
+            string targetMarker,
+            string endMarker,
+            string platformLabel)
+        {
             DirectoryInfo projectRoot = Directory.GetParent(Application.dataPath);
             Assert.That(projectRoot, Is.Not.Null, "Unity project root is unavailable.");
 
@@ -346,17 +504,19 @@ namespace AL.Tests.EditMode.DesignAssets
             Assert.That(File.Exists(settingsPath), Is.True, settingsPath);
 
             string settings = File.ReadAllText(settingsPath);
-            const string iosTargetMarker = "  - m_BuildTarget: iPhone";
             int start = settings.IndexOf(
-                iosTargetMarker,
+                targetMarker,
                 System.StringComparison.Ordinal);
-            Assert.That(start, Is.GreaterThanOrEqualTo(0), iosTargetMarker);
+            Assert.That(start, Is.GreaterThanOrEqualTo(0), targetMarker);
 
             int end = settings.IndexOf(
-                "\n  m_BuildTargetBatching:",
+                endMarker,
                 start,
                 System.StringComparison.Ordinal);
-            Assert.That(end, Is.GreaterThan(start), "Serialized iOS icon block is incomplete.");
+            Assert.That(
+                end,
+                Is.GreaterThan(start),
+                $"Serialized {platformLabel} icon block is incomplete.");
             return settings.Substring(start, end - start);
         }
 
@@ -477,6 +637,45 @@ namespace AL.Tests.EditMode.DesignAssets
             Available,
             BuildSupportUnavailable,
             IconQueryUnavailable
+        }
+
+        private enum AndroidIconQueryStatus
+        {
+            Available,
+            BuildSupportUnavailable,
+            IconQueryUnavailable
+        }
+
+        private sealed class AndroidIconQueryResult
+        {
+            public AndroidIconQueryResult(
+                AndroidIconQueryStatus status,
+                string diagnosticCode,
+                List<AndroidLiveIconSlot> slots)
+            {
+                Status = status;
+                DiagnosticCode = diagnosticCode;
+                Slots = slots;
+            }
+
+            public AndroidIconQueryStatus Status { get; }
+
+            public string DiagnosticCode { get; }
+
+            public List<AndroidLiveIconSlot> Slots { get; }
+        }
+
+        private sealed class AndroidLiveIconSlot
+        {
+            public AndroidLiveIconSlot(string label, PlatformIcon icon)
+            {
+                Label = label;
+                Icon = icon;
+            }
+
+            public string Label { get; }
+
+            public PlatformIcon Icon { get; }
         }
 
         private sealed class IosIconQueryResult

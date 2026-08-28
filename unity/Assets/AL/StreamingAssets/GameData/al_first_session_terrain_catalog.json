@@ -1,0 +1,65 @@
+{
+  "version": "0.1.0",
+  "catalogId": "al_first_session_terrain_catalog",
+  "authorityStatus": "mvp_procedural_replaceable",
+  "profile": {
+    "id": "first_session_capital_courtyard_mvp",
+    "sourceMode": "runtime_procedural_mvp",
+    "replacementSocketId": "socket_first_session_capital_terrain",
+    "futureBakeContract": "terrain_data_height_slope_biome_splat_v1",
+    "placement": {
+      "anchor": "capital_position_centered",
+      "verticalDatum": "capital_ground_plane",
+      "landmarkFrontOffsetMeters": 12
+    },
+    "dimensions": {
+      "sizeXMeters": 128,
+      "heightMeters": 12,
+      "sizeZMeters": 128,
+      "heightmapResolution": 65,
+      "alphamapResolution": 16,
+      "baseMapResolution": 32
+    },
+    "generation": {
+      "algorithm": "safe_courtyard_rim_v1",
+      "seed": 4135921,
+      "baseHeightMeters": 2,
+      "safeCourtyardRadiusMeters": 44,
+      "rimRiseMeters": 3,
+      "noiseAmplitudeMeters": 0.6,
+      "noiseCycles": 3
+    },
+    "surface": {
+      "materialRole": "procedural_debug_grid",
+      "textureResolution": 32,
+      "checkerCellsPerTile": 8,
+      "gridLinePixels": 1,
+      "tileSizeMeters": 8,
+      "baseColor": "#374047",
+      "alternateColor": "#48545D",
+      "gridColor": "#91A0AA",
+      "normalScale": 0.2,
+      "metallic": 0.05,
+      "smoothness": 0.22,
+      "heightmapPixelError": 8,
+      "baseMapDistanceMeters": 160
+    },
+    "collision": {
+      "boundaryInsetMeters": 1,
+      "boundaryThicknessMeters": 1.5,
+      "boundaryHeightMeters": 6,
+      "landmarkProxyThicknessMeters": 0.8,
+      "landmarkEntranceWidthMeters": 0,
+      "landmarkHeightFraction": 0.6,
+      "landmarkMinimumHeightMeters": 3,
+      "landmarkMaximumHeightMeters": 8
+    },
+    "navigation": {
+      "walkableSurfaceName": "NAV_FirstSessionCapitalTerrain",
+      "collisionCollectionName": "AL_COLLISION",
+      "exclusionPrefix": "NAVEX_",
+      "linkSocketPrefix": "SOCKET_NAVLINK_",
+      "traversalProbeRadiusMeters": 28
+    }
+  }
+}

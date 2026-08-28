@@ -2,61 +2,50 @@ using System.Collections;
 using System.Collections.Generic;
 using AL.ChampionMode.AI;
 using AL.ChampionMode.Control;
+using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Input;
 using UnityEngine;
 
 namespace AL.ChampionMode.Skills
 {
+    public enum SkillLoadoutState
+    {
+        Loading,
+        Ready,
+        Unavailable
+    }
+
     [RequireComponent(typeof(ChampionCombat))]
     public class SkillCaster : MonoBehaviour
     {
-        private const int SlotCount = 4;
+        private const int SlotCount = SkillLoadoutCatalog.RequiredSlotCount;
         private const float DeniedFeedbackCooldown = 0.55f;
 
-        private readonly string[] _skillNames =
-        {
-            "Realm Strike",
-            "Renewing Guard",
-            "Warzone Burst",
-            "Warmaster Breaker"
-        };
-
-        private readonly string[] _skillIds =
-        {
-            "realm_strike",
-            "renewing_guard",
-            "warzone_burst",
-            "warmaster_breaker"
-        };
-
-        private readonly string[] _vfxKeys =
-        {
-            "realm_slash",
-            "renewing_guard",
-            "warzone_shockwave",
-            "warmaster_breaker"
-        };
-
-        private readonly float[] _cooldowns = { 4f, 8f, 10f, 14f };
-        private readonly float[] _manaCosts = { 20f, 30f, 45f, 60f };
-        private readonly float[] _castTimes = { 0.05f, 0.35f, 0.45f, 0.65f };
-        private readonly float[] _ranges = { 2.6f, 0f, 4.2f, 3.4f };
-        private readonly float[] _powers = { 150f, 180f, 115f, 260f };
-        private readonly float[] _botDamageMultipliers = { 0.72f, 0f, 0.72f, 0.72f };
         private readonly float[] _nextReadyTimes = new float[SlotCount];
 
+        private SkillLoadoutSnapshot _loadout;
         private ChampionCombat _combat;
         private ChampionController _controller;
+        private Coroutine _loadRoutine;
         private Coroutine _castRoutine;
         private int _activeSlot = -1;
         private float _activeCastStartTime;
         private float _activeCastDuration;
         private float _lastDeniedFeedbackTime = -999f;
         private RealmId _realmId = RealmId.None;
+        private SkillLoadoutState _loadoutState = SkillLoadoutState.Loading;
+        private bool _hasAwakened;
+        private bool _isDestroyed;
 
+        public SkillLoadoutState LoadoutState => _loadoutState;
+        public bool IsLoadoutReady =>
+            _loadoutState == SkillLoadoutState.Ready && _loadout != null;
+        public SkillLoadoutSnapshot LoadoutSnapshot => IsLoadoutReady ? _loadout : null;
         public bool IsCasting => _castRoutine != null;
         public int ActiveSlot => _activeSlot;
-        public string ActiveSkillName => IsValidSlot(_activeSlot) ? _skillNames[_activeSlot] : string.Empty;
+        public string ActiveSkillName =>
+            TryGetSkill(_activeSlot, out var skill) ? skill.DisplayName : string.Empty;
         public float ActiveCastProgress
         {
             get
@@ -77,17 +66,65 @@ namespace AL.ChampionMode.Skills
 
         private void Awake()
         {
+            _hasAwakened = true;
             _combat = GetComponent<ChampionCombat>();
             _controller = GetComponent<ChampionController>();
-            if (!TryApplySharedSkillLoadouts())
+            BeginLoadoutLoad();
+        }
+
+        private void OnEnable()
+        {
+            if (_hasAwakened && !IsLoadoutReady && _loadRoutine == null)
             {
-                StartCoroutine(ApplySharedSkillLoadoutsAsync());
+                BeginLoadoutLoad();
             }
+        }
+
+        private void OnDisable()
+        {
+            StopLoadoutRoutine();
+            StopCastRoutine(false);
+            CombatEffectOwnership.Retire(gameObject);
+            RuntimeCombatAudio.StopOwned(gameObject);
+            if (!IsLoadoutReady && !_isDestroyed)
+            {
+                _loadoutState = SkillLoadoutState.Loading;
+            }
+        }
+
+        private void OnDestroy()
+        {
+            _isDestroyed = true;
+            _loadRoutine = null;
+            _castRoutine = null;
+            ClearActiveCast();
+        }
+
+        public bool TryGetLoadoutSnapshot(out SkillLoadoutSnapshot snapshot)
+        {
+            snapshot = LoadoutSnapshot;
+            return snapshot != null;
+        }
+
+        public bool RetryLoadoutLoad()
+        {
+            if (_isDestroyed || !isActiveAndEnabled || IsLoadoutReady || _loadRoutine != null)
+            {
+                return false;
+            }
+
+            BeginLoadoutLoad();
+            return IsLoadoutReady || _loadRoutine != null;
         }
 
         public bool TryCastSkill(int slotIndex)
         {
-            if (!IsValidSlot(slotIndex))
+            if (GameplaySuppressed)
+            {
+                return false;
+            }
+
+            if (!TryGetSkill(slotIndex, out var skill))
             {
                 return false;
             }
@@ -110,15 +147,15 @@ namespace AL.ChampionMode.Skills
                 return false;
             }
 
-            if (_combat != null && !_combat.TrySpendMana(_manaCosts[slotIndex]))
+            if (_combat != null && !_combat.TrySpendMana(skill.ManaCost))
             {
-                GameDebug.Log($"Not enough mana for {_skillNames[slotIndex]}.");
+                GameDebug.Log($"Not enough mana for {skill.DisplayName}.");
                 ShowDeniedFeedback("NO MANA", new Color(0.42f, 0.72f, 1f));
                 return false;
             }
 
-            _activeSlot = slotIndex;
-            _castRoutine = StartCoroutine(CastRoutine(slotIndex, _realmId));
+            _activeSlot = skill.Slot;
+            _castRoutine = StartCoroutine(CastRoutine(skill, _realmId));
             return true;
         }
 
@@ -135,20 +172,18 @@ namespace AL.ChampionMode.Skills
 
         public void CancelCurrentSkill()
         {
-            if (_castRoutine == null)
+            if (_castRoutine != null)
             {
-                return;
+                StopCastRoutine(true);
             }
 
-            StopCoroutine(_castRoutine);
-            _castRoutine = null;
-            ClearActiveCast();
-            GameDebug.Log("Skill cast cancelled.");
+            CombatEffectOwnership.Retire(gameObject);
+            RuntimeCombatAudio.StopOwned(gameObject);
         }
 
         public float GetCooldownRemaining(int slotIndex)
         {
-            if (!IsValidSlot(slotIndex))
+            if (!TryGetSkill(slotIndex, out _))
             {
                 return 0f;
             }
@@ -158,48 +193,110 @@ namespace AL.ChampionMode.Skills
 
         public float GetCooldownDuration(int slotIndex)
         {
-            return IsValidSlot(slotIndex) ? _cooldowns[slotIndex] : 0f;
+            return TryGetSkill(slotIndex, out var skill) ? skill.CooldownSeconds : 0f;
         }
 
         public float GetManaCost(int slotIndex)
         {
-            return IsValidSlot(slotIndex) ? _manaCosts[slotIndex] : 0f;
+            return TryGetSkill(slotIndex, out var skill) ? skill.ManaCost : 0f;
         }
 
         public string GetSkillName(int slotIndex)
         {
-            return IsValidSlot(slotIndex) ? _skillNames[slotIndex] : "Unknown";
+            if (!IsValidSlot(slotIndex))
+            {
+                return "Unknown";
+            }
+
+            if (TryGetSkill(slotIndex, out var skill))
+            {
+                return skill.DisplayName;
+            }
+
+            return _loadoutState == SkillLoadoutState.Loading
+                ? "Loading"
+                : "Unavailable";
         }
 
         public string GetSkillId(int slotIndex)
         {
-            return IsValidSlot(slotIndex) ? _skillIds[slotIndex] : string.Empty;
+            return TryGetSkill(slotIndex, out var skill) ? skill.Id : string.Empty;
         }
 
         public string GetSkillVfxKey(int slotIndex)
         {
-            return IsValidSlot(slotIndex) ? _vfxKeys[slotIndex] : string.Empty;
+            return TryGetSkill(slotIndex, out var skill) ? skill.VfxKey : string.Empty;
         }
 
-        private IEnumerator CastRoutine(int slotIndex, RealmId realmId)
+        private IEnumerator CastRoutine(SkillLoadoutSlot skill, RealmId realmId)
         {
-            GameDebug.Log($"Casting {_skillNames[slotIndex]}.");
+            GameDebug.Log($"Casting {skill.DisplayName}.");
             _activeCastStartTime = Time.time;
-            _activeCastDuration = Mathf.Max(0f, _castTimes[slotIndex]);
+            _activeCastDuration = skill.CastTimeSeconds;
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
-            Vector3 previewCenter = GetSkillGroundCenter(slotIndex, forward);
-            SkillEffectFactory.SpawnSkillCastRing(transform.position, realmId, GetSkillPreviewRadius(slotIndex), _castTimes[slotIndex] + 0.15f);
-            if (slotIndex != 1)
+            Vector3 previewCenter = GetSkillGroundCenter(skill, forward);
+            using (CombatEffectOwnership.Begin(gameObject))
             {
-                SkillEffectFactory.SpawnSkillTargetPreview(transform.position, previewCenter, forward, realmId, _ranges[slotIndex], _castTimes[slotIndex] + 0.18f);
+                SkillEffectFactory.SpawnSkillCastRing(
+                    transform.position,
+                    realmId,
+                    GetSkillPreviewRadius(skill),
+                    skill.CastTimeSeconds + 0.15f);
+                if (skill.Identity != MvpSkillIdentity.RenewingGuard)
+                {
+                    SkillEffectFactory.SpawnSkillTargetPreview(
+                        transform.position,
+                        previewCenter,
+                        forward,
+                        realmId,
+                        skill.RangeMeters,
+                        skill.CastTimeSeconds + 0.18f);
+                }
             }
 
-            yield return new WaitForSeconds(_castTimes[slotIndex]);
+            float remainingCastTime = Mathf.Max(0f, skill.CastTimeSeconds);
+            while (remainingCastTime > 0f)
+            {
+                if (GameplaySuppressed)
+                {
+                    _castRoutine = null;
+                    ClearActiveCast();
+                    yield break;
+                }
 
-            ResolveSkill(slotIndex, realmId);
-            _nextReadyTimes[slotIndex] = Time.time + _cooldowns[slotIndex];
+                remainingCastTime -= Time.deltaTime;
+                yield return null;
+            }
+
+            if (GameplaySuppressed)
+            {
+                _castRoutine = null;
+                ClearActiveCast();
+                yield break;
+            }
+
+            using (CombatEffectOwnership.Begin(gameObject))
+            {
+                ResolveSkill(skill, realmId);
+            }
+            _nextReadyTimes[skill.Slot] = Time.time + skill.CooldownSeconds;
             _castRoutine = null;
             ClearActiveCast();
+        }
+
+        private bool GameplaySuppressed
+        {
+            get
+            {
+                if (_controller == null)
+                {
+                    _controller = GetComponent<ChampionController>();
+                }
+
+                return GameInput.GameplaySuppressed ||
+                       ChampionHudCameraGate.BlocksGameplay ||
+                       (_controller != null && _controller.BlocksGameplayEntry);
+            }
         }
 
         private void ClearActiveCast()
@@ -209,51 +306,76 @@ namespace AL.ChampionMode.Skills
             _activeCastDuration = 0f;
         }
 
-        private void ResolveSkill(int slotIndex, RealmId realmId)
+        private void ResolveSkill(SkillLoadoutSlot skill, RealmId realmId)
         {
             Vector3 forward = transform.forward.sqrMagnitude > 0.01f ? transform.forward.normalized : Vector3.forward;
-            Vector3 groundCenter = GetSkillGroundCenter(slotIndex, forward);
+            Vector3 groundCenter = GetSkillGroundCenter(skill, forward);
             Vector3 hitCenter = groundCenter + Vector3.up;
 
-            switch (slotIndex)
+            switch (skill.Identity)
             {
-                case 1:
-                    _combat?.Heal(_powers[slotIndex]);
-                    SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
-                    SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.85f, "+" + Mathf.CeilToInt(_powers[slotIndex]), new Color(0.48f, 1f, 0.62f), 0.28f, 0.95f);
-                    SkillEffectFactory.ShakeCamera(0.06f, 0.08f);
-                    RuntimeCombatAudio.PlayHeal();
-                    break;
-                case 2:
-                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
-                    SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, _ranges[slotIndex]);
-                    SkillEffectFactory.ShakeCamera(0.18f, 0.14f);
-                    RuntimeCombatAudio.PlaySkillCast();
-                    break;
-                case 3:
-                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
-                    SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, _ranges[slotIndex]);
-                    SkillEffectFactory.ShakeCamera(0.24f, 0.18f);
-                    RuntimeCombatAudio.PlayHeavySkill();
-                    break;
-                default:
-                    DamageTargets(hitCenter, _ranges[slotIndex], _powers[slotIndex], realmId, _botDamageMultipliers[slotIndex]);
+                case MvpSkillIdentity.RealmStrike:
+                    DamageTargets(
+                        hitCenter,
+                        skill.RangeMeters,
+                        skill.Power,
+                        realmId,
+                        skill.BotDamageMultiplier);
                     SkillEffectFactory.SpawnRealmSlash(groundCenter, forward, realmId);
                     SkillEffectFactory.ShakeCamera(0.12f, 0.10f);
                     RuntimeCombatAudio.PlaySkillCast();
                     break;
+                case MvpSkillIdentity.RenewingGuard:
+                    _combat?.Heal(skill.Power);
+                    SkillEffectFactory.SpawnRenewingGuard(transform.position, realmId);
+                    SkillEffectFactory.SpawnFloatingCombatText(
+                        transform.position + Vector3.up * 1.85f,
+                        "+" + Mathf.CeilToInt(skill.Power),
+                        new Color(0.48f, 1f, 0.62f),
+                        0.28f,
+                        0.95f);
+                    SkillEffectFactory.ShakeCamera(0.06f, 0.08f);
+                    RuntimeCombatAudio.PlayHeal();
+                    break;
+                case MvpSkillIdentity.WarzoneBurst:
+                    DamageTargets(
+                        hitCenter,
+                        skill.RangeMeters,
+                        skill.Power,
+                        realmId,
+                        skill.BotDamageMultiplier);
+                    SkillEffectFactory.SpawnWarzoneShockwave(groundCenter, realmId, skill.RangeMeters);
+                    SkillEffectFactory.ShakeCamera(0.18f, 0.14f);
+                    RuntimeCombatAudio.PlaySkillCast();
+                    break;
+                case MvpSkillIdentity.WarmasterBreaker:
+                    DamageTargets(
+                        hitCenter,
+                        skill.RangeMeters,
+                        skill.Power,
+                        realmId,
+                        skill.BotDamageMultiplier);
+                    SkillEffectFactory.SpawnWarmasterBreaker(groundCenter, realmId, skill.RangeMeters);
+                    SkillEffectFactory.ShakeCamera(0.24f, 0.18f);
+                    RuntimeCombatAudio.PlayHeavySkill();
+                    break;
+                default:
+                    GameDebug.Log($"[SkillCaster] Rejected unresolved skill identity '{skill.Id}'.");
+                    return;
             }
         }
 
-        private float GetSkillPreviewRadius(int slotIndex)
+        private static float GetSkillPreviewRadius(SkillLoadoutSlot skill)
         {
-            return slotIndex == 1 ? 1.35f : Mathf.Clamp(_ranges[slotIndex], 1.15f, 4.5f);
+            return skill.Identity == MvpSkillIdentity.RenewingGuard
+                ? 1.35f
+                : Mathf.Clamp(skill.RangeMeters, 1.15f, 4.5f);
         }
 
-        private Vector3 GetSkillGroundCenter(int slotIndex, Vector3 forward)
+        private Vector3 GetSkillGroundCenter(SkillLoadoutSlot skill, Vector3 forward)
         {
             Vector3 safeForward = forward.sqrMagnitude > 0.01f ? forward.normalized : Vector3.forward;
-            return transform.position + safeForward * Mathf.Max(1.5f, _ranges[slotIndex]);
+            return transform.position + safeForward * Mathf.Max(1.5f, skill.RangeMeters);
         }
 
         private void ShowDeniedFeedback(string message, Color color)
@@ -327,82 +449,108 @@ namespace AL.ChampionMode.Skills
 
         private bool TryApplySharedSkillLoadouts()
         {
-            if (!SkillLoadoutCatalog.TryLoad(out var loadouts))
+            if (!SkillLoadoutCatalog.TryLoadSnapshot(out var snapshot))
             {
                 return false;
             }
 
-            ApplySkillLoadouts(loadouts);
+            PublishLoadout(snapshot);
             return true;
         }
 
         private IEnumerator ApplySharedSkillLoadoutsAsync()
         {
-            bool applied = false;
-            yield return SkillLoadoutCatalog.LoadAsync(loadouts =>
+            SkillLoadoutSnapshot loadedSnapshot = null;
+            yield return SkillLoadoutCatalog.LoadSnapshotAsync(snapshot =>
             {
-                if (loadouts == null || loadouts.Length == 0)
-                {
-                    return;
-                }
-
-                ApplySkillLoadouts(loadouts);
-                applied = true;
+                loadedSnapshot = snapshot;
             });
 
-            if (applied)
+            _loadRoutine = null;
+            if (_isDestroyed || !isActiveAndEnabled)
             {
-                GameDebug.Log("[SkillCaster] Applied shared skill loadouts from StreamingAssets.");
+                yield break;
+            }
+
+            if (loadedSnapshot != null)
+            {
+                PublishLoadout(loadedSnapshot);
+                GameDebug.Log("[SkillCaster] Published the validated skill loadout snapshot from StreamingAssets.");
+            }
+            else
+            {
+                _loadoutState = SkillLoadoutState.Unavailable;
+                Debug.LogWarning("[SkillCaster] Playable skill loadout is unavailable. Skill casting remains disabled.");
             }
         }
 
-        private void ApplySkillLoadouts(SkillLoadoutData[] loadouts)
+        private void BeginLoadoutLoad()
         {
-            if (loadouts == null)
+            if (_isDestroyed || IsLoadoutReady || _loadRoutine != null)
             {
                 return;
             }
 
-            foreach (var loadout in loadouts)
+            _loadoutState = SkillLoadoutState.Loading;
+            if (TryApplySharedSkillLoadouts())
             {
-                if (loadout == null || !IsValidSlot(loadout.slot))
-                {
-                    continue;
-                }
+                return;
+            }
 
-                int slot = loadout.slot;
-                if (!string.IsNullOrWhiteSpace(loadout.id))
-                {
-                    _skillIds[slot] = loadout.id;
-                }
-
-                if (!string.IsNullOrWhiteSpace(loadout.displayName))
-                {
-                    _skillNames[slot] = loadout.displayName;
-                }
-
-                if (!string.IsNullOrWhiteSpace(loadout.vfxKey))
-                {
-                    _vfxKeys[slot] = loadout.vfxKey;
-                }
-
-                _cooldowns[slot] = UseCatalogValue(loadout.cooldownSeconds, _cooldowns[slot], 0f);
-                _manaCosts[slot] = UseCatalogValue(loadout.manaCost, _manaCosts[slot], 0f);
-                _castTimes[slot] = UseCatalogValue(loadout.castTimeSeconds, _castTimes[slot], 0f);
-                _ranges[slot] = UseCatalogValue(loadout.rangeMeters, _ranges[slot], 0f);
-                _powers[slot] = UseCatalogValue(loadout.power, _powers[slot], 0f);
-                _botDamageMultipliers[slot] = UseCatalogValue(loadout.botDamageMultiplier, _botDamageMultipliers[slot], 0f);
+            if (isActiveAndEnabled)
+            {
+                _loadRoutine = StartCoroutine(ApplySharedSkillLoadoutsAsync());
             }
         }
 
-        private static float UseCatalogValue(float value, float fallback, float minimum)
+        private void PublishLoadout(SkillLoadoutSnapshot snapshot)
         {
-            if (float.IsNaN(value) || float.IsInfinity(value))
+            if (_isDestroyed || snapshot == null ||
+                snapshot.Count != SkillLoadoutCatalog.RequiredSlotCount)
             {
-                return fallback;
+                return;
             }
 
-            return Mathf.Max(minimum, value);
+            _loadout = snapshot;
+            _loadoutState = SkillLoadoutState.Ready;
+        }
+
+        private void StopLoadoutRoutine()
+        {
+            if (_loadRoutine == null)
+            {
+                return;
+            }
+
+            StopCoroutine(_loadRoutine);
+            _loadRoutine = null;
+        }
+
+        private void StopCastRoutine(bool reportCancellation)
+        {
+            if (_castRoutine == null)
+            {
+                return;
+            }
+
+            StopCoroutine(_castRoutine);
+            _castRoutine = null;
+            ClearActiveCast();
+            if (reportCancellation)
+            {
+                GameDebug.Log("Skill cast cancelled.");
+            }
+        }
+
+        private bool TryGetSkill(int slotIndex, out SkillLoadoutSlot skill)
+        {
+            if (_loadout == null || !IsValidSlot(slotIndex))
+            {
+                skill = null;
+                return false;
+            }
+
+            return _loadout.TryGetSlot(slotIndex, out skill);
         }
 
         private static bool IsValidSlot(int slotIndex)

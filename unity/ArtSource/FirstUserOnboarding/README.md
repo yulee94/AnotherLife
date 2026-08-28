@@ -38,14 +38,43 @@ trial. This is an authored MVP promotion, not a final BDO-quality visual sign-of
 
 - Authored with Blender 5.2.0 LTS by `build_onboarding_asset_packet.py` and retained as
   `neutral_covenant_hall_working_v001.blend`.
+- Pinned source SHA-256 after the objective technical-helper remediation:
+  `b807a8ec7d5332a70774405ccf240a16e8555787c9de0778303d0ebe54d85a5c`.
 - Ten distinct required modules: floor, wall, inner corner, outer corner, doorway, ceiling beam,
   trim, brazier, banner stand, and crate/barrel prop.
 - Exact traversal footprint: 8 m x 12 m. Authoring grid/cell/bay conventions follow the sealed
   runtime budget contract (0.5 m / 2 m / 4 m).
+- Separate render-hidden `AL_COLLISION`, `AL_NAVIGATION`, and `AL_SOCKETS` collections retain an
+  exact floor-bounds box proxy, a four-vertex upward walkable source, and an entrance socket at
+  `(-4, 0, 0)` facing inward. They are bake/import inputs, not a replacement for Unity Terrain or
+  runtime navigation authority.
 - Uses three distinct built-in Standard PBR materials and one soft-shadow directional light.
 - The admission verifier enforces no more than 12,000 visible environment triangles, 35 renderers,
   three shared materials, one shadowed directional light, two unshadowed local lights, and 48
   ambient particles.
+
+### Neutral terrain-landmark kit review candidate
+
+- Retained review source:
+  `neutral_covenant_terrain_landmark_kit_working_v001.blend`, SHA-256
+  `382765b66936cf744d423a37fe171b4c7c90886f73090e3a968373f9085f089c`.
+- This source is deliberately `review-candidate`, has `runtimeAuthority: false`, and is not in the
+  authored runtime catalog or any generated world. It must not be interpreted as admitted content.
+- The path beacon (`736 / 220 / 48` triangles), trail post (`412 / 132 / 24`), and 4 m boundary
+  wall (`692 / 176 / 12`) each have strict LOD0/1/2 reductions and base-center, identity-transform
+  pivots in metric Z-up source coordinates.
+- Each family has a primitive `COL_*` proxy, upward-facing `NAVEX_*` footprint, and stable
+  interaction or wall-end `SOCKET_*` helpers in the standard `AL_COLLISION`, `AL_NAVIGATION`, and
+  `AL_SOCKETS` collections. These are engine-neutral bake/import inputs, not navigation policy.
+- Material parameters are copied exactly from the retained Neutral Covenant Hall so the candidate
+  can be judged in the same neutral construction envelope without selecting a final texture,
+  palette, wear, decal, biome, placement, or lore direction.
+- Headless authoring, validation, review GLBs, and contact sheets are reproducible through
+  `tools/blender/author_neutral_terrain_landmark_kit.py`,
+  `tools/blender/validate_al_asset_sources.py`, `tools/blender/export_al_asset_candidate.py`, and
+  `tools/blender/render_al_asset_review_contact_sheet.py`. The semantic source receipt is pinned at
+  `f7c3f2b9ea440ba236b36463661a47f9a79600a7785126de2c831c3bc749cad6`; Blender file bytes are
+  not claimed deterministic across saves.
 
 ### Locked kingdom preview
 
