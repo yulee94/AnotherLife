@@ -10,6 +10,7 @@ namespace AL.Data.Catalogs.WorldAtlas
     {
         public const string SupportedVersion = "0.2.0";
         public const string CatalogId = "al_world_atlas_narrative_catalog";
+        public const string FileName = CatalogId + ".json";
         public const string SourcePacketId = "al_narrative_world_atlas_source_v002";
         public const string TopologyContractId = "al_world_atlas_topology_query_contract_v001";
         public const int MaximumBytes = 64 * 1024;

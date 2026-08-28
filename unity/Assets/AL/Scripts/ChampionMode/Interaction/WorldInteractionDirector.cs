@@ -8,6 +8,8 @@ namespace AL.ChampionMode.Interaction
 {
     public sealed class WorldInteractionDirector : MonoBehaviour
     {
+        public const float ConfirmationFeedbackSeconds = 2.5f;
+
         private readonly List<WorldInteractable> _targets = new List<WorldInteractable>(8);
         private readonly List<WorldInteractionCandidate> _candidates = new List<WorldInteractionCandidate>(8);
         private Transform _actor;
@@ -15,8 +17,10 @@ namespace AL.ChampionMode.Interaction
         private UnityEngine.Camera _camera;
         private WorldInteractionPromptView _prompt;
         private WorldInteractable _focused;
+        private float _feedbackVisibleUntil;
 
         public WorldInteractable Focused => _focused;
+        public Transform Actor => _actor;
         public string LastFeedback { get; private set; } = string.Empty;
         public event Action<WorldInteractionResult> Confirmed;
 
@@ -51,6 +55,12 @@ namespace AL.ChampionMode.Interaction
             }
 
             LastFeedback = result.Feedback ?? string.Empty;
+            if (!string.IsNullOrEmpty(LastFeedback))
+            {
+                _feedbackVisibleUntil = Time.unscaledTime +
+                                        ConfirmationFeedbackSeconds;
+                _prompt?.ShowFeedback(LastFeedback);
+            }
             Confirmed?.Invoke(result);
             return true;
         }
@@ -71,6 +81,13 @@ namespace AL.ChampionMode.Interaction
             if (_actor == null)
             {
                 _prompt?.Hide();
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(LastFeedback) &&
+                Time.unscaledTime < _feedbackVisibleUntil)
+            {
+                _prompt?.ShowFeedback(LastFeedback);
                 return;
             }
 

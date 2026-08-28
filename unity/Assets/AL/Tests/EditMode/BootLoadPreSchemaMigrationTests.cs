@@ -101,6 +101,60 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
+        public void VerifiedLifecycleCheckpointKeepsBootReceiptCurrentWithoutTrustingArbitraryReplacement()
+        {
+            string root = NewTempRoot();
+            try
+            {
+                object service = CreateSaveService(root);
+                Invoke(service, "Load");
+                object capturedSave = GetProperty(service, "CurrentSave");
+                Assert.NotNull(capturedSave);
+
+                WithRegisteredBootStack(
+                    (ISaveGameService)service,
+                    () =>
+                    {
+                        object receipt = CaptureBootLoadReceipt();
+
+                        Invoke(service, "PersistLifecycleCheckpoint");
+
+                        object persistedSave = GetProperty(service, "CurrentSave");
+                        Assert.That(
+                            persistedSave,
+                            Is.Not.SameAs(capturedSave),
+                            "A verified checkpoint publishes the twice-read persisted generation as a new object.");
+                        Assert.That(
+                            GetProperty(service, "LastSaveStatus").ToString(),
+                            Is.EqualTo("SavedPrimary"));
+                        Assert.That(
+                            InvokeIsCurrentBootLoadReceipt(receipt),
+                            Is.True,
+                            "A successful lifecycle checkpoint must not turn Finished Loading into a stale-evidence failure.");
+
+                        var unverifiedReplacement = new SaveGameData
+                        {
+                            SaveFormatId = SaveGameData.CurrentSaveFormatId,
+                            SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion,
+                            ProfileInitializationVersion =
+                                SaveGameData.CurrentProfileInitializationVersion,
+                            SelectedRealm = RealmId.Umbral
+                        };
+                        SetField(service, "_currentSave", unverifiedReplacement);
+
+                        Assert.That(
+                            InvokeIsCurrentBootLoadReceipt(receipt),
+                            Is.False,
+                            "A same-schema object that was not published by a verified save must remain stale.");
+                    });
+            }
+            finally
+            {
+                DeleteRoot(root);
+            }
+        }
+
+        [Test]
         public void IsCurrentSaveSchemaRejectsUnstampedPreSchemaSave()
         {
             var save = new SaveGameData
@@ -232,6 +286,60 @@ namespace AL.Tests.EditMode
                 RestoreLocator(locator, typeof(ISaveGameService), previousSave);
                 RestoreLocator(locator, markerInterface, previousMarker);
             }
+        }
+
+        private static void WithRegisteredBootStack(
+            ISaveGameService saveService,
+            Action action)
+        {
+            IDictionary locator = GetLocatorServices();
+            object previousSave = locator.Contains(typeof(ISaveGameService))
+                ? locator[typeof(ISaveGameService)]
+                : null;
+            Type markerInterface = GetRuntimeType("AL.Core.IOfflineServiceStackMarker");
+            object previousMarker = locator.Contains(markerInterface)
+                ? locator[markerInterface]
+                : null;
+
+            try
+            {
+                object marker = CreateSucceededStackMarker(saveService);
+                ServiceLocator.Register(saveService);
+                typeof(ServiceLocator)
+                    .GetMethod("Register")
+                    .MakeGenericMethod(markerInterface)
+                    .Invoke(null, new[] { marker });
+                action();
+            }
+            finally
+            {
+                RestoreLocator(locator, typeof(ISaveGameService), previousSave);
+                RestoreLocator(locator, markerInterface, previousMarker);
+            }
+        }
+
+        private static object CaptureBootLoadReceipt()
+        {
+            Type probeType = GetRuntimeType("AL.UI.BootLoadReadinessProbe");
+            MethodInfo tryCapture = probeType.GetMethod(
+                "TryCapture",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.NotNull(tryCapture);
+            object[] args = { 1, null };
+            object status = tryCapture.Invoke(null, args);
+            Assert.That(status.ToString(), Is.EqualTo("Ready"));
+            Assert.NotNull(args[1]);
+            return args[1];
+        }
+
+        private static bool InvokeIsCurrentBootLoadReceipt(object receipt)
+        {
+            Type probeType = GetRuntimeType("AL.UI.BootLoadReadinessProbe");
+            MethodInfo method = probeType.GetMethod(
+                "IsCurrent",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            Assert.NotNull(method);
+            return (bool)method.Invoke(null, new[] { receipt });
         }
 
         private static object CreateSucceededStackMarker(ISaveGameService saveService)
@@ -392,6 +500,15 @@ namespace AL.Tests.EditMode
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
             Assert.NotNull(field, $"Expected field {name}.");
             return field.GetValue(target);
+        }
+
+        private static void SetField(object target, string name, object value)
+        {
+            FieldInfo field = target.GetType().GetField(
+                name,
+                BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.NotNull(field, $"Expected field {name}.");
+            field.SetValue(target, value);
         }
 
         private static IDictionary GetLocatorServices()
