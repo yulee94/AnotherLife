@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 
-CANDIDATE_ID = "RC-20260828-001"
+CANDIDATE_ID = "RC-20260828-002"
 BASELINE_ID = "RB-20260828-001"
 CONTROL_ID = "GOV-G0-v1.0.0"
 AUTHORITY_PREFIXES = (
@@ -39,8 +39,16 @@ def read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
+def canonical_sha256(path: Path) -> str:
+    """Hash UTF-8 text with LF newlines, matching canonical Git content."""
+    canonical_text = path.read_text(encoding="utf-8")
+    return hashlib.sha256(canonical_text.encode("utf-8")).hexdigest()
+
+
 def main() -> int:
-    root = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else Path(__file__).resolve().parents[2]
+    arguments = [argument for argument in sys.argv[1:] if argument != "--print-hashes"]
+    print_hashes = "--print-hashes" in sys.argv[1:]
+    root = Path(arguments[0]).resolve() if arguments else Path(__file__).resolve().parents[2]
     roadmap = root / "unity" / "Docs" / "Roadmap"
     paths = {
         "governance": roadmap / "Gate0_Evidence_Governance_And_Stage_Gates_v1.md",
@@ -59,6 +67,28 @@ def main() -> int:
     if missing:
         print(json.dumps({"ok": False, "errors": [f"missing {path}" for path in missing]}, indent=2))
         return 1
+
+    if print_hashes:
+        frozen_names = (
+            "governance",
+            "register",
+            "dag",
+            "audit_v1",
+            "baseline",
+            "package",
+            "gate",
+            "rollback",
+        )
+        print(
+            json.dumps(
+                {
+                    str(paths[name].relative_to(root)).replace("\\", "/"): canonical_sha256(paths[name])
+                    for name in frozen_names
+                },
+                indent=2,
+            )
+        )
+        return 0
 
     texts = {name: read(path) for name, path in paths.items()}
     for name in ("governance", "register", "dag"):
@@ -101,7 +131,7 @@ def main() -> int:
         if not artifact.is_file():
             errors.append(f"hash inventory artifact missing: {relative_path}")
             continue
-        actual_hash = hashlib.sha256(artifact.read_bytes()).hexdigest()
+        actual_hash = canonical_sha256(artifact)
         if actual_hash != expected_hash:
             errors.append(f"hash mismatch {relative_path}: {actual_hash} != {expected_hash}")
 

@@ -6,7 +6,7 @@
 
 **Effective baseline date:** 2026-08-28
 
-**Roadmap candidate:** `RC-20260828-001`
+**Roadmap candidate:** `RC-20260828-002`
 
 **Parent approved baseline:** `RB-20260828-001`
 
