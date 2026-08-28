@@ -309,9 +309,10 @@ Every repeated or long-range kit chooses one explicit impostor mode:
 evidence. Animated fantasy beasts/monsters additionally require bounded skin-update
 tiers and a non-skinned crowd/far representation before mass-RvR readiness.
 
-The sibling budget authority owns final per-class counts and aggregate envelopes. This
-schema supplies exact measured fields and mandatory `budgetClassId`; it does not invent
-or duplicate those budget values.
+`PostMVP_World_Asset_Budgets_And_Readability_v1.md` owns the closed family-to-class
+assignment, per-class ceilings, aggregate envelopes, mobile-floor thresholds,
+readability gates, and exception process. This schema supplies exact measured fields and
+mandatory `budgetClassId`; it does not invent or duplicate those budget values.
 
 ## 9. Collider, navigation, occlusion, and streaming policy
 
