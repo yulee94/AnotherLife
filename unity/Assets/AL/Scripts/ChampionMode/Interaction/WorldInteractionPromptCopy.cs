@@ -9,10 +9,10 @@ namespace AL.ChampionMode.Interaction
         public const string InteractGlyph = "F";
         public const string TalkVerb = "Talk";
         public const string UseVerb = "Use";
-        public const string GuideSubject = "Realm Guide";
+        public const string GuideSubject = "Captain Valerius";
         public const string CovenantSiteSubject = "Covenant Site";
         public const string GuideObjectiveText =
-            "Meet the realm guide who interprets the Celestial Tear's response.";
+            "Speak with Captain Valerius about the Celestial Tear's response.";
         public const string CovenantObjectiveText =
             "Restore the damaged covenant site without sacrificing its keepers.";
 

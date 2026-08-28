@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using AL.ChampionMode;
 using AL.Core.Scenes;
 using AL.Data.Catalogs.WorldAtlas;
@@ -25,6 +27,27 @@ namespace AL.Tests.EditMode.World
             }
 
             _spawned.Clear();
+        }
+
+        [Test]
+        public void CanonicalSpawnLoaderUsesEstablishedEditorAndPlayerResolver()
+        {
+            string source = File.ReadAllText(Path.Combine(
+                Application.dataPath,
+                "AL/Scripts/World/FirstSessionInnerRealmSpawn.cs"));
+
+            Assert.That(
+                source,
+                Does.Contain("string path = ResolveCatalogPath("),
+                "World Atlas must retain the established editor/player path contract.");
+            Assert.That(
+                source,
+                Does.Contain("Application.streamingAssetsPath"),
+                "Player builds must resolve the packaged StreamingAssets/GameData directory.");
+            Assert.That(
+                source,
+                Does.Not.Contain("SixFamilyRuntimeCatalog.TryResolveGameDataDirectory"),
+                "World Atlas availability may not depend on unrelated gameplay catalogs.");
         }
 
         [Test]
@@ -69,6 +92,33 @@ namespace AL.Tests.EditMode.World
                 Assert.That(Vector3.Distance(new Vector3(spawn.Position.x, 0f, spawn.Position.z), new Vector3(inner.CapitalPosition.x, 0f, inner.CapitalPosition.z)), Is.LessThan(2.5f));
                 Assert.That(new Vector3(spawn.Position.x, 0f, spawn.Position.z).magnitude, Is.GreaterThan(80f), "must not spawn at world origin / warzone");
             }
+        }
+
+        [Test]
+        public void PackagedPlayerWorldAtlasUsesStreamingAssetsInsteadOfDataPath()
+        {
+            MethodInfo resolve = typeof(FirstSessionInnerRealmSpawn).GetMethod(
+                "ResolveCatalogPath",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.That(resolve, Is.Not.Null, "World-atlas player path selection must be testable.");
+
+            const string dataPath =
+                "/Applications/AnotherLife.app/Contents/Resources/Data";
+            const string streamingAssetsPath =
+                "/Applications/AnotherLife.app/Contents/Resources/Data/StreamingAssets";
+            string path = (string)resolve.Invoke(
+                null,
+                new object[] { dataPath, streamingAssetsPath, false });
+
+            Assert.That(
+                path.Replace('\\', '/'),
+                Is.EqualTo(
+                    streamingAssetsPath +
+                    "/GameData/" +
+                    WorldAtlasContract.FileName));
+            Assert.That(
+                path.Replace('\\', '/'),
+                Does.Not.StartWith(dataPath + "/AL/StreamingAssets"));
         }
 
         [Test]

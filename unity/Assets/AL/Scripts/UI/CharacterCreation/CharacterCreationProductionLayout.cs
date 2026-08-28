@@ -24,6 +24,12 @@ namespace AL.UI.CharacterCreation
         public Button Confirm;
         public Text ConfirmLabel;
         public Image Emblem;
+        public Slider SkinTone;
+        public Slider HairColor;
+        public Slider EyeColor;
+        public Image SkinSwatch;
+        public Image HairSwatch;
+        public Image EyeSwatch;
         public readonly Dictionary<ClassFamily, Image> ClassCards = new Dictionary<ClassFamily, Image>();
     }
 
@@ -57,9 +63,10 @@ namespace AL.UI.CharacterCreation
             Action<ClassFamily> onClass,
             Action onBodyBase,
             Action onArmorTint,
-            Action onBodyTint,
+            Action<int> onSkinTone,
             Action onHairStyle,
-            Action onHairColor,
+            Action<int> onHairColor,
+            Action<int> onEyeColor,
             Action onBodyPreset,
             Action onHelmet,
             Action onCape,
@@ -122,22 +129,31 @@ namespace AL.UI.CharacterCreation
                 new Vector2(48f, -268f),
                 new Vector2(400f, 20f));
 
+            screen.SkinTone = CreatePaletteSlider(
+                screen.CanvasObject.transform, font, "SkinTone", "SKIN TONE",
+                new Vector2(48f, -296f), CharacterCreationLook.BodyTints.Length,
+                onSkinTone, out screen.SkinSwatch);
+            screen.HairColor = CreatePaletteSlider(
+                screen.CanvasObject.transform, font, "HairColor", "HAIR COLOR",
+                new Vector2(48f, -352f), CharacterCreationLook.HairColors.Length,
+                onHairColor, out screen.HairSwatch);
+            screen.EyeColor = CreatePaletteSlider(
+                screen.CanvasObject.transform, font, "EyeColor", "EYE COLOR",
+                new Vector2(48f, -408f), CharacterCreationLook.EyeColors.Length,
+                onEyeColor, out screen.EyeSwatch);
+
             CreateAction(screen.CanvasObject.transform, font, "BodyBase", "BODY BASE",
-                new Vector2(48f, -296f), new Vector2(176f, PresentationChrome.MinHit), onBodyBase);
-            CreateAction(screen.CanvasObject.transform, font, "ArmorTint", "ARMOR TINT",
-                new Vector2(236f, -296f), new Vector2(176f, PresentationChrome.MinHit), onArmorTint);
-            CreateAction(screen.CanvasObject.transform, font, "BodyTint", "SKIN TONE",
-                new Vector2(424f, -296f), new Vector2(176f, PresentationChrome.MinHit), onBodyTint);
-            CreateAction(screen.CanvasObject.transform, font, "HairStyle", "HAIR",
-                new Vector2(48f, -364f), new Vector2(176f, PresentationChrome.MinHit), onHairStyle);
-            CreateAction(screen.CanvasObject.transform, font, "HairColor", "HAIR COLOR",
-                new Vector2(236f, -364f), new Vector2(176f, PresentationChrome.MinHit), onHairColor);
+                new Vector2(620f, -296f), new Vector2(208f, PresentationChrome.MinHit), onBodyBase);
+            CreateAction(screen.CanvasObject.transform, font, "HairStyle", "HAIR STYLE",
+                new Vector2(620f, -352f), new Vector2(208f, PresentationChrome.MinHit), onHairStyle);
             CreateAction(screen.CanvasObject.transform, font, "BodyPreset", "BUILD",
-                new Vector2(424f, -364f), new Vector2(176f, PresentationChrome.MinHit), onBodyPreset);
+                new Vector2(620f, -408f), new Vector2(208f, PresentationChrome.MinHit), onBodyPreset);
+            CreateAction(screen.CanvasObject.transform, font, "ArmorTint", "ARMOR TINT",
+                new Vector2(48f, -472f), new Vector2(176f, PresentationChrome.MinHit), onArmorTint);
             CreateAction(screen.CanvasObject.transform, font, "Helmet", "HELMET",
-                new Vector2(48f, -432f), new Vector2(176f, PresentationChrome.MinHit), onHelmet);
+                new Vector2(236f, -472f), new Vector2(176f, PresentationChrome.MinHit), onHelmet);
             CreateAction(screen.CanvasObject.transform, font, "Cape", "CAPE",
-                new Vector2(236f, -432f), new Vector2(176f, PresentationChrome.MinHit), onCape);
+                new Vector2(424f, -472f), new Vector2(176f, PresentationChrome.MinHit), onCape);
 
             screen.Look = PresentationChrome.CreateLabel(
                 screen.CanvasObject.transform,
@@ -150,7 +166,7 @@ namespace AL.UI.CharacterCreation
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
-                new Vector2(48f, -504f),
+                new Vector2(48f, -536f),
                 new Vector2(780f, 48f));
 
             PresentationChrome.CreateLabel(
@@ -164,13 +180,13 @@ namespace AL.UI.CharacterCreation
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
                 new Vector2(0f, 1f),
-                new Vector2(48f, -560f),
+                new Vector2(48f, -592f),
                 new Vector2(400f, 20f));
 
             screen.Username = CreateUsernameField(
                 screen.CanvasObject.transform,
                 font,
-                new Vector2(48f, -588f),
+                new Vector2(48f, -620f),
                 new Vector2(420f, PresentationChrome.MinHit));
 
             screen.Confirm = CreateAction(
@@ -178,7 +194,7 @@ namespace AL.UI.CharacterCreation
                 font,
                 ConfirmName,
                 "ENTER THE REALM",
-                new Vector2(48f, -664f),
+                new Vector2(48f, -696f),
                 new Vector2(420f, 64f),
                 onConfirm);
             screen.Confirm.GetComponent<Image>().color = PresentationChrome.MetalEdge;
@@ -230,6 +246,23 @@ namespace AL.UI.CharacterCreation
                     label.color = isSelected ? PresentationChrome.StoneVoid : PresentationChrome.Ink;
                 }
             }
+        }
+
+        public static void PaintColorControls(
+            CharacterCreationProductionScreen screen,
+            ChampionCustomizationState look)
+        {
+            if (screen == null || look == null)
+            {
+                return;
+            }
+
+            SetPaletteControl(screen.SkinTone, screen.SkinSwatch,
+                look.SkinR, look.SkinG, look.SkinB, CharacterCreationLook.BodyTints);
+            SetPaletteControl(screen.HairColor, screen.HairSwatch,
+                look.HairR, look.HairG, look.HairB, CharacterCreationLook.HairColors);
+            SetPaletteControl(screen.EyeColor, screen.EyeSwatch,
+                look.EyeR, look.EyeG, look.EyeB, CharacterCreationLook.EyeColors);
         }
 
         public static string FormatLookSummary(ChampionCustomizationState look)
@@ -508,6 +541,134 @@ namespace AL.UI.CharacterCreation
                 Vector2.zero,
                 Vector2.zero);
             return button;
+        }
+
+        private static Slider CreatePaletteSlider(
+            Transform parent,
+            Font font,
+            string name,
+            string label,
+            Vector2 anchoredPosition,
+            int optionCount,
+            Action<int> onChanged,
+            out Image swatch)
+        {
+            Image plate = PresentationChrome.CreatePlate(
+                parent,
+                name + "Control",
+                PresentationChrome.StoneInset,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                new Vector2(0f, 1f),
+                anchoredPosition,
+                new Vector2(552f, PresentationChrome.MinHit),
+                raycastTarget: false);
+            PresentationChrome.CreateLabel(
+                plate.transform,
+                "Label",
+                font,
+                label,
+                PresentationChrome.CaptionSize,
+                PresentationChrome.Ink,
+                TextAnchor.MiddleLeft,
+                Vector2.zero,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 0.5f),
+                new Vector2(14f, 0f),
+                new Vector2(126f, 0f));
+
+            var sliderObject = new GameObject(name, typeof(RectTransform), typeof(Slider));
+            sliderObject.transform.SetParent(plate.transform, false);
+            RectTransform sliderRect = sliderObject.GetComponent<RectTransform>();
+            sliderRect.anchorMin = new Vector2(0f, 0.5f);
+            sliderRect.anchorMax = new Vector2(0f, 0.5f);
+            sliderRect.pivot = new Vector2(0f, 0.5f);
+            sliderRect.anchoredPosition = new Vector2(146f, 0f);
+            sliderRect.sizeDelta = new Vector2(338f, 28f);
+
+            PresentationChrome.CreatePlate(
+                sliderObject.transform,
+                "Background",
+                PresentationChrome.MetalDim,
+                new Vector2(0f, 0.5f),
+                new Vector2(1f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(0f, 8f));
+            var fillArea = new GameObject("FillArea", typeof(RectTransform));
+            fillArea.transform.SetParent(sliderObject.transform, false);
+            RectTransform fillAreaRect = fillArea.GetComponent<RectTransform>();
+            fillAreaRect.anchorMin = new Vector2(0f, 0.5f);
+            fillAreaRect.anchorMax = new Vector2(1f, 0.5f);
+            fillAreaRect.offsetMin = new Vector2(8f, -4f);
+            fillAreaRect.offsetMax = new Vector2(-8f, 4f);
+            Image fill = PresentationChrome.CreatePlate(
+                fillArea.transform,
+                "Fill",
+                PresentationChrome.MetalEdge,
+                Vector2.zero,
+                new Vector2(0f, 1f),
+                new Vector2(0f, 0.5f),
+                Vector2.zero,
+                Vector2.zero);
+
+            var handleArea = new GameObject("HandleSlideArea", typeof(RectTransform));
+            handleArea.transform.SetParent(sliderObject.transform, false);
+            RectTransform handleAreaRect = handleArea.GetComponent<RectTransform>();
+            handleAreaRect.anchorMin = Vector2.zero;
+            handleAreaRect.anchorMax = Vector2.one;
+            handleAreaRect.offsetMin = new Vector2(8f, 0f);
+            handleAreaRect.offsetMax = new Vector2(-8f, 0f);
+            Image handle = PresentationChrome.CreatePlate(
+                handleArea.transform,
+                "Handle",
+                PresentationChrome.Ink,
+                new Vector2(0f, 0.5f),
+                new Vector2(0f, 0.5f),
+                new Vector2(0.5f, 0.5f),
+                Vector2.zero,
+                new Vector2(18f, 28f));
+
+            Slider slider = sliderObject.GetComponent<Slider>();
+            slider.minValue = 0f;
+            slider.maxValue = Mathf.Max(0, optionCount - 1);
+            slider.wholeNumbers = true;
+            slider.targetGraphic = handle;
+            slider.fillRect = fill.rectTransform;
+            slider.handleRect = handle.rectTransform;
+            slider.direction = Slider.Direction.LeftToRight;
+            if (onChanged != null)
+            {
+                slider.onValueChanged.AddListener(value => onChanged(Mathf.RoundToInt(value)));
+            }
+
+            swatch = PresentationChrome.CreatePlate(
+                plate.transform,
+                name + "Swatch",
+                Color.white,
+                new Vector2(1f, 0.5f),
+                new Vector2(1f, 0.5f),
+                new Vector2(1f, 0.5f),
+                new Vector2(-12f, 0f),
+                new Vector2(28f, 28f),
+                raycastTarget: false);
+            return slider;
+        }
+
+        private static void SetPaletteControl(
+            Slider slider,
+            Image swatch,
+            float r,
+            float g,
+            float b,
+            float[][] palette)
+        {
+            int index = CharacterCreationLook.IndexOfRgb(r, g, b, palette);
+            slider?.SetValueWithoutNotify(index);
+            if (swatch != null)
+            {
+                swatch.color = new Color(r, g, b, 1f);
+            }
         }
 
         private static InputField CreateUsernameField(Transform parent, Font font, Vector2 anchoredPosition, Vector2 sizeDelta)

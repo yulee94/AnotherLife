@@ -63,6 +63,7 @@ namespace AL.Services.Local
         public const string ManualSave = "profile.save.manual";
         public const string LifecycleSave = "profile.save.lifecycle";
         public const string DeleteSave = "profile.save.delete";
+        public const string MvpApprovalReset = "profile.save.mvp-approval-reset";
         public const string RealmSelection = "profile.realm-selection.schema1";
         public const string Nvs01Progress = "profile.nvs01.schema1";
         public const string Resource = "profile.resource";
@@ -123,6 +124,7 @@ namespace AL.Services.Local
             Extra(ProfileMutationSurfaceIds.ManualSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Extra(ProfileMutationSurfaceIds.LifecycleSave, typeof(ISaveGameService), typeof(AL.Core.Bootloader), ProfileMutationSurfaceDisposition.IndirectCaller),
             Extra(ProfileMutationSurfaceIds.DeleteSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.Dormant),
+            Extra(ProfileMutationSurfaceIds.MvpApprovalReset, typeof(ISaveGameService), typeof(MvpApprovalSlotRuntime), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.MvpLoop, typeof(ILegacyMvpLoopCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.SideQuest, typeof(ISideQuestService), typeof(SideQuestService), ProfileMutationSurfaceDisposition.Dormant),
@@ -294,10 +296,18 @@ namespace AL.Services.Local
                 return;
             }
 
+            if (saveGameService is MvpApprovalTransactionalSaveGameService approval)
+            {
+                approval.PersistLifecycleCheckpoint();
+                return;
+            }
+
             saveGameService.Save();
         }
 
         internal static bool CanInvokeDeleteSave(ISaveGameService saveGameService) =>
-            saveGameService != null && ProductionWriteActivationEnabled;
+            saveGameService != null &&
+            (ProductionWriteActivationEnabled ||
+             MvpApprovalSlotRuntime.IsDeleteAuthorized(saveGameService));
     }
 }

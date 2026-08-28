@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 
 namespace AL.Editor.World
@@ -39,6 +40,12 @@ namespace AL.Editor.World
         [MenuItem(MenuPath)]
         public static void RenderRepresentativePreviews()
         {
+            if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null)
+            {
+                throw new InvalidOperationException(
+                    "World preview rendering requires a graphics device. Run this tool without -nographics; existing review images were not overwritten.");
+            }
+
             ThrowIfAnyLoadedSceneIsDirty();
             SceneSetup[] previousSetup = EditorSceneManager.GetSceneManagerSetup();
             try

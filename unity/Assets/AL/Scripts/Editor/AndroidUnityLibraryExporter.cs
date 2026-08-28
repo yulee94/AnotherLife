@@ -534,11 +534,46 @@ namespace AL.EditorTools
             int maximumFiles,
             int maximumDirectories,
             long maximumBytes,
-            Action<string, string> inspectionHook)
+            Action<string, string> inspectionHook) => InspectExportTreeCore(
+                outputDirectory,
+                maximumFiles,
+                maximumDirectories,
+                maximumBytes,
+                Application.platform,
+                inspectionHook,
+                requireStrongPathAttestation: true);
+
+        // Test-only portability seam for deterministic artifact-content validation. It never
+        // participates in Execute or the concrete export environment: production traversal
+        // continues to require the Windows retained-handle namespace contract above.
+        internal static AndroidUnityLibraryArtifactSnapshot InspectExportTreeForTests(
+            string outputDirectory,
+            int maximumFiles,
+            int maximumDirectories,
+            long maximumBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook) => InspectExportTreeCore(
+                outputDirectory,
+                maximumFiles,
+                maximumDirectories,
+                maximumBytes,
+                host,
+                inspectionHook,
+                requireStrongPathAttestation: false);
+
+        private static AndroidUnityLibraryArtifactSnapshot InspectExportTreeCore(
+            string outputDirectory,
+            int maximumFiles,
+            int maximumDirectories,
+            long maximumBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook,
+            bool requireStrongPathAttestation)
         {
             try
             {
-                if (!SupportsStrongPathAttestation(Application.platform))
+                if (requireStrongPathAttestation &&
+                    !SupportsStrongPathAttestation(host))
                 {
                     return AndroidUnityLibraryArtifactSnapshot.NotInspected(
                         "Strong no-follow artifact namespace attestation is unavailable on this Editor host; " +
@@ -567,12 +602,12 @@ namespace AL.EditorTools
                         "Export root is not a regular non-reparse directory.");
                 }
 
-                string expectedTool = ExpectedIl2CppToolPath(Application.platform);
+                string expectedTool = ExpectedIl2CppToolPath(host);
                 if (expectedTool.Length == 0)
                 {
                     return AndroidUnityLibraryArtifactSnapshot.NotInspected(
                         "Current Unity Editor host is unsupported for IL2CPP tool validation: " +
-                        Application.platform + ".");
+                        host + ".");
                 }
 
                 var pendingDirectories = new Queue<string>();
@@ -584,7 +619,9 @@ namespace AL.EditorTools
                 while (pendingDirectories.Count > 0)
                 {
                     string directory = pendingDirectories.Dequeue();
-                    using (IDisposable directoryLease = AcquireArtifactDirectoryLease(directory))
+                    using (IDisposable directoryLease = requireStrongPathAttestation
+                               ? AcquireArtifactDirectoryLease(directory)
+                               : PortableInspectionLease.Instance)
                     {
                         foreach (string entry in Directory.EnumerateFileSystemEntries(
                                      directory,
@@ -628,12 +665,19 @@ namespace AL.EditorTools
                                     " file inspection bound.");
                             }
 
-                            AttestedArtifactFile snapshot = ReadAttestedArtifact(
-                                fullEntry,
-                                relative,
-                                maximumBytes - totalBytes,
-                                Application.platform,
-                                inspectionHook);
+                            AttestedArtifactFile snapshot = requireStrongPathAttestation
+                                ? ReadAttestedArtifact(
+                                    fullEntry,
+                                    relative,
+                                    maximumBytes - totalBytes,
+                                    host,
+                                    inspectionHook)
+                                : ReadPortableArtifactForTests(
+                                    fullEntry,
+                                    relative,
+                                    maximumBytes - totalBytes,
+                                    host,
+                                    inspectionHook);
                             if (snapshot.Length < 0 || totalBytes > maximumBytes - snapshot.Length)
                             {
                                 return AndroidUnityLibraryArtifactSnapshot.NotInspected(
@@ -682,7 +726,7 @@ namespace AL.EditorTools
                     .Select(relative => ValidateRequiredArtifact(
                         relative,
                         snapshots[relative],
-                        Application.platform))
+                        host))
                     .Where(failure => failure.Length > 0)
                     .OrderBy(value => value, StringComparer.Ordinal)
                     .ToArray();
@@ -1006,6 +1050,64 @@ namespace AL.EditorTools
             }
         }
 
+        private static AttestedArtifactFile ReadPortableArtifactForTests(
+            string fullPath,
+            string relativePath,
+            long remainingBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook)
+        {
+            FileAttributes attributes = File.GetAttributes(fullPath);
+            if ((attributes & FileAttributes.Directory) != 0 ||
+                !IsSafeArtifactAttributes(attributes))
+            {
+                throw new IOException(
+                    "Portable test inspection requires a regular non-symlink file: " +
+                    relativePath + ".");
+            }
+
+            var before = new FileInfo(fullPath);
+            long expectedLength = before.Length;
+            long expectedWriteTicks = before.LastWriteTimeUtc.Ticks;
+            using (var stream = new FileStream(
+                       fullPath,
+                       FileMode.Open,
+                       FileAccess.Read,
+                       FileShare.ReadWrite | FileShare.Delete,
+                       ArtifactReadBufferBytes,
+                       useAsync: false))
+            {
+                inspectionHook?.Invoke("after-open", relativePath);
+                StreamAttestation attestation = ReadBoundedStream(
+                    stream,
+                    remainingBytes,
+                    relativePath);
+                inspectionHook?.Invoke("after-read", relativePath);
+
+                before.Refresh();
+                if (!before.Exists ||
+                    before.Length != expectedLength ||
+                    before.LastWriteTimeUtc.Ticks != expectedWriteTicks ||
+                    attestation.Length != expectedLength)
+                {
+                    throw new IOException(
+                        "Portable test artifact identity or length drifted while read: " +
+                        relativePath + ".");
+                }
+
+                bool unixExecutable =
+                    (host == RuntimePlatform.OSXEditor ||
+                     host == RuntimePlatform.LinuxEditor) &&
+                    UnixAccess(fullPath, UnixExecutePermission) == 0;
+                return new AttestedArtifactFile(
+                    relativePath,
+                    attestation.Length,
+                    attestation.Sha256,
+                    attestation.PrefixBytes,
+                    unixExecutable);
+            }
+        }
+
         private static StreamAttestation ReadBoundedStream(
             Stream stream,
             long remainingBytes,
@@ -1085,6 +1187,16 @@ namespace AL.EditorTools
                 Length = length;
                 Sha256 = sha256 ?? string.Empty;
                 PrefixBytes = prefixBytes ?? Array.Empty<byte>();
+            }
+        }
+
+        private sealed class PortableInspectionLease : IDisposable
+        {
+            internal static readonly PortableInspectionLease Instance =
+                new PortableInspectionLease();
+
+            public void Dispose()
+            {
             }
         }
 
@@ -1380,6 +1492,14 @@ namespace AL.EditorTools
         private const uint FileAttributeDirectory = 0x00000010;
         private const uint FileAttributeReparsePoint = 0x00000400;
         private const int FileDispositionInfo = 4;
+        private const int UnixExecutePermission = 1;
+
+        [DllImport(
+            "libc",
+            EntryPoint = "access",
+            CharSet = CharSet.Ansi,
+            SetLastError = true)]
+        private static extern int UnixAccess(string path, int mode);
 
         [DllImport(
             "kernel32.dll",
