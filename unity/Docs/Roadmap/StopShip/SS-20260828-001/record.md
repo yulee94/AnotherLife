@@ -72,3 +72,17 @@ rollback records. The candidate change set contains the frozen SHA-256 inventory
 This remediation does not close the incident. A corrected independent audit and
 explicit game-owner decision on the exact candidate remain required. Gate 0 and
 dependent dispatch stay fail-closed.
+
+## Append-only independent-review event — 2026-08-28T09:38:34Z
+
+Delegated read-only reviewer `deleg_514a5344` task `0`, operating in a separate
+execution context from candidate preparation, inspected the corrected package and
+ran `python tools/roadmap/validate_gate0_candidate.py .`. The validator exited `0`
+with 44 matching authority rows, 12 fail-closed unresolved rows, and 8/8 frozen
+hashes verified. Targeted identity, status, ordering, visual-separation,
+numerical-reference, prohibited-invention, rollback, and reopen checks passed.
+
+The corrected technical audit is
+`unity/Docs/Roadmap/Gate0_Traceability_And_Authority_Audit_v2.md`. This incident
+remains open pending the game owner's explicit decision on exact candidate
+`RC-20260828-001` and the resulting approval/baseline/gate/closure records.
