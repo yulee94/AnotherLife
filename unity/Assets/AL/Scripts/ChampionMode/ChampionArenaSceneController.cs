@@ -13,8 +13,10 @@ using AL.Input;
 using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
 using AL.Data.Catalogs.WorldAtlas;
+using AL.Data.Runtime;
 using AL.RealmWar.World;
 using AL.RealmWar.Warzone;
+using AL.Services.Local;
 using AL.UI;
 using AL.UI.Presentation;
 using AL.World;
@@ -29,6 +31,9 @@ namespace AL.ChampionMode
 {
     public class ChampionArenaSceneController : MonoBehaviour
     {
+        public const float CombatHotbarBottomOffset = 28f;
+        public const float CombatHotbarHeight = 120f;
+
         private const bool ChampionCustomizationSurfaceActivationEnabled = false;
         private const int ForgeMutationButtonCapacity = 24;
         private static readonly Color ForgeReadOnlyButtonColor =
@@ -45,11 +50,16 @@ namespace AL.ChampionMode
         [SerializeField] private string _kingdomSceneName = "Kingdom";
 
         private ChampionController _playerController;
+        private InnerRealmWorldBuildResult _firstSessionWorld;
         private ChampionCustomizationController _playerCustomization;
         private AutoCombatController _autoCombatController;
         private ChampionCombat _playerCombat;
         private SkillCaster _playerSkillCaster;
         private CameraFollow _cameraFollow;
+        private WorldInteractionDirector _worldInteractionDirector;
+        private FirstWorldEntryTutorialDirector _firstWorldTutorialDirector;
+        private FirstWorldProgressSnapshot _firstWorldProgressSnapshot;
+        private bool _proofHandoffConsumed;
         private RvrBotSpawner _rvrBotSpawner;
         private BossDummyAI _boss;
         private Transform _bossTransform;
@@ -120,6 +130,7 @@ namespace AL.ChampionMode
         private readonly Text[] _skillButtonTexts = new Text[4];
         private readonly Text[] _skillCooldownTexts = new Text[4];
         private readonly Text[] _skillRoleTexts = new Text[4];
+        private readonly Button[] _skillButtons = new Button[4];
         private readonly Image[] _skillCooldownFills = new Image[4];
         private readonly Image[] _skillReadyGlows = new Image[4];
         private readonly Image[] _skillManaPips = new Image[4];
@@ -160,8 +171,11 @@ namespace AL.ChampionMode
         private RuntimePlatformQualityController _qualityController;
         private BossLootResult _lastBossLootResult;
         private Coroutine _clearPresentationRoutine;
+        private Coroutine _firstFightLoadRoutine;
+        private bool _guardianCatalogFailureReported;
         private RealmId _realmId = RealmId.None;
         private bool _guardianTrialStarted;
+        private bool _guardianTrialCleared;
         private FirstSessionInnerRealmSpawn _innerSpawn;
         private ChampionHudSession _hudSession;
 
@@ -189,26 +203,14 @@ namespace AL.ChampionMode
                 {
                     _bossTransform.gameObject.SetActive(false);
                 }
-
-                ProofOfWorthDirector.AttachIfNeeded(
-                    transform,
-                    this,
-                    _playerController != null ? _playerController.transform : null,
-                    _realmId);
             }
+
+            StartFirstWorldProgression();
 
             if (FirstSessionChampionStart.AutoStartFirstFight)
             {
-                if (!TryBindFirstFightCatalog())
-                {
-                    Debug.LogError(
-                        "AL-FIRST-FIGHT-CATALOG-MISSING: first-session direct-control fight " +
-                        "cannot start without catalog player, opponent, and special stats.");
-                    enabled = false;
-                    return;
-                }
-
-                StartCoroutine(EncounterIntroRoutine());
+                _firstFightLoadRoutine =
+                    StartCoroutine(BindFirstFightCatalogAndStartEncounter());
             }
             else if (FirstSessionChampionStart.AutoStartEncounterIntro)
             {
@@ -219,8 +221,123 @@ namespace AL.ChampionMode
                 _combatFeedText.text = FirstSessionChampionStart.LandingFeedCopy;
             }
 
-            // hotspot: ChampionArenaSceneController.cs — tutorial attach only; no HUD/combat rewrite.
-            FirstWorldEntryTutorialDirector.AttachIfNeeded(transform);
+        }
+
+        private IEnumerator BindFirstFightCatalogAndStartEncounter()
+        {
+            while (_playerSkillCaster != null &&
+                   _playerSkillCaster.LoadoutState == SkillLoadoutState.Loading)
+            {
+                yield return null;
+            }
+
+            _firstFightLoadRoutine = null;
+            if (!TryBindFirstFightCatalog())
+            {
+                Debug.LogError(
+                    "AL-FIRST-FIGHT-CATALOG-MISSING: first-session direct-control fight " +
+                    "cannot start without catalog player, opponent, and special stats.");
+                enabled = false;
+                yield break;
+            }
+
+            StartCoroutine(EncounterIntroRoutine());
+        }
+
+        private void StartFirstWorldProgression()
+        {
+            if (!FirstSessionChampionStart.ShouldRunProofOfWorth &&
+                !FirstSessionChampionStart.ShouldRunFirstWorldEntryTutorial)
+            {
+                return;
+            }
+
+            string message = string.Empty;
+            if (!ServiceLocator.TryGet(
+                    out ISaveGameService saveGameService) ||
+                !FirstWorldProgressSaveAuthority.CanCommit(saveGameService) ||
+                !FirstWorldProgressSaveAuthority.TryRead(
+                    saveGameService,
+                    out _firstWorldProgressSnapshot,
+                    out message))
+            {
+                Debug.LogError(
+                    "[AL-FIRST-WORLD-PROGRESSION-FAILED-CLOSED] " +
+                    (string.IsNullOrWhiteSpace(message)
+                        ? "Writable progress authority is unavailable."
+                        : message));
+                return;
+            }
+
+            if (_firstWorldProgressSnapshot.IsTutorialComplete)
+            {
+                AttachProofAfterDurableHandoff(_firstWorldProgressSnapshot);
+                return;
+            }
+
+            if (!FirstSessionChampionStart.ShouldRunFirstWorldEntryTutorial)
+            {
+                Debug.LogError(
+                    "[AL-FIRST-WORLD-PROGRESSION-FAILED-CLOSED] " +
+                    "Proof is gated by incomplete tutorial progress.");
+                return;
+            }
+
+            _firstWorldTutorialDirector =
+                FirstWorldEntryTutorialDirector.AttachIfNeeded(
+                    transform,
+                    saveGameService,
+                    _playerController);
+            if (_firstWorldTutorialDirector == null)
+            {
+                Debug.LogError(
+                    "[AL-FIRST-WORLD-PROGRESSION-FAILED-CLOSED] " +
+                    "Tutorial authority could not attach.");
+                return;
+            }
+
+            _firstWorldTutorialDirector.BindWorldInteractionDirector(
+                _worldInteractionDirector);
+            _firstWorldTutorialDirector.Completed +=
+                HandleFirstWorldTutorialCompleted;
+        }
+
+        private void HandleFirstWorldTutorialCompleted(
+            FirstWorldProgressSnapshot snapshot)
+        {
+            if (_firstWorldTutorialDirector != null)
+            {
+                _firstWorldTutorialDirector.Completed -=
+                    HandleFirstWorldTutorialCompleted;
+            }
+
+            _firstWorldProgressSnapshot = snapshot;
+            AttachProofAfterDurableHandoff(snapshot);
+        }
+
+        private void AttachProofAfterDurableHandoff(
+            FirstWorldProgressSnapshot snapshot)
+        {
+            if (_proofHandoffConsumed)
+            {
+                return;
+            }
+
+            if (snapshot == null || !snapshot.CanRunProof)
+            {
+                Debug.LogError(
+                    "[AL-FIRST-WORLD-HANDOFF-FAILED-CLOSED] " +
+                    "Proof requires a completed durable tutorial handoff.");
+                return;
+            }
+
+            _proofHandoffConsumed = true;
+            ProofOfWorthDirector proof = ProofOfWorthDirector.AttachIfNeeded(
+                transform,
+                this,
+                _playerController != null ? _playerController.transform : null,
+                _realmId);
+            proof?.BindWorldInteractionDirector(_worldInteractionDirector);
         }
 
         private void ApplyFirstSessionPresentationBudgets()
@@ -233,7 +350,25 @@ namespace AL.ChampionMode
         {
             FirstFightLoadout loadout;
             string diagnostic;
-            if (!FirstFightCatalog.TryResolveFromRegistered(_realmId, out loadout, out diagnostic) ||
+            if (_playerSkillCaster == null ||
+                !_playerSkillCaster.TryGetLoadoutSnapshot(
+                    out SkillLoadoutSnapshot skillSnapshot))
+            {
+                SkillLoadoutState state = _playerSkillCaster != null
+                    ? _playerSkillCaster.LoadoutState
+                    : SkillLoadoutState.Unavailable;
+                Debug.LogError(
+                    "AL-FIRST-FIGHT-SKILL-LOADOUT-" +
+                    state.ToString().ToUpperInvariant() +
+                    ": catalog first-fight bind failed closed.");
+                return false;
+            }
+
+            if (!FirstFightCatalog.TryResolveFromRegistered(
+                    _realmId,
+                    skillSnapshot,
+                    out loadout,
+                    out diagnostic) ||
                 loadout == null)
             {
                 Debug.LogError(diagnostic + ": catalog first-fight bind failed closed.");
@@ -275,8 +410,9 @@ namespace AL.ChampionMode
             return true;
         }
 
-        public bool GuardianTrialCleared =>
-            _guardianTrialStarted && _boss != null && _boss.IsDead;
+        public bool GuardianTrialCleared => _guardianTrialCleared;
+
+        public Transform GuardianTrialTarget => _bossTransform;
 
         public bool TryStartGuardianTrial()
         {
@@ -285,18 +421,39 @@ namespace AL.ChampionMode
                 return false;
             }
 
+            if (_playerSkillCaster == null ||
+                _playerSkillCaster.LoadoutState == SkillLoadoutState.Loading)
+            {
+                return false;
+            }
+
+            if (_playerSkillCaster.LoadoutState != SkillLoadoutState.Ready)
+            {
+                if (!_guardianCatalogFailureReported)
+                {
+                    _guardianCatalogFailureReported = true;
+                    Debug.LogError(
+                        "AL-FIRST-FIGHT-SKILL-LOADOUT-UNAVAILABLE: guardian trial " +
+                        "cannot start without a validated skill snapshot.");
+                }
+
+                return false;
+            }
+
+            if (!TryBindFirstFightCatalog())
+            {
+                _guardianCatalogFailureReported = true;
+                return false;
+            }
+
             if (_bossTransform != null && !_bossTransform.gameObject.activeSelf)
             {
                 _bossTransform.gameObject.SetActive(true);
             }
 
-            if (!TryBindFirstFightCatalog())
-            {
-                return false;
-            }
-
             if (!_guardianTrialStarted)
             {
+                _guardianTrialCleared = false;
                 _guardianTrialStarted = true;
                 _hudSession?.RevealCombatChrome();
                 StartCoroutine(EncounterIntroRoutine());
@@ -340,6 +497,10 @@ namespace AL.ChampionMode
         private void HandleBossLootRolled(BossLootResult result)
         {
             _lastBossLootResult = result;
+            if (_guardianTrialStarted && _boss != null && _boss.IsDead)
+            {
+                _guardianTrialCleared = true;
+            }
         }
 
         private void ApplyRuntimeQuality()
@@ -384,6 +545,24 @@ namespace AL.ChampionMode
             _playerSkillCaster = player.AddComponent<SkillCaster>();
             _playerController = player.AddComponent<ChampionController>();
             _playerController.ConfigureRealmContext(_realmId);
+            if (_firstSessionWorld != null)
+            {
+                Transform terrainTransform = _firstSessionWorld.Root.Find(
+                    FirstSessionAuthoredWorldBuilder.TerrainName);
+                TerrainCollider terrainSupport = terrainTransform != null
+                    ? terrainTransform.GetComponent<TerrainCollider>()
+                    : null;
+                if (!_playerController.TryConfigureTerrainSafety(
+                        terrainSupport,
+                        _firstSessionWorld.PlayerSpawn))
+                {
+                    Debug.LogError(
+                        "AL-FIRST-SESSION-TERRAIN-SAFETY: the champion could not bind " +
+                        "to verified TerrainCollider ground authority.");
+                    enabled = false;
+                    return;
+                }
+            }
             _playerCustomization = player.GetComponent<ChampionCustomizationController>();
             if (FirstSessionChampionStart.IsFirstSessionLanding &&
                 !FirstSessionAuthoredVisualBinder.TryBindChampion(
@@ -407,14 +586,15 @@ namespace AL.ChampionMode
                 ? _innerSpawn.CameraPosition
                 : new Vector3(0f, 7.2f, -13.4f);
             camera.transform.rotation = Quaternion.Euler(30f, 0f, 0f);
-            camera.fieldOfView = 42f;
+            camera.fieldOfView = 38f;
             camera.clearFlags = FirstSessionChampionStart.IsFirstSessionLanding
                 ? CameraClearFlags.Skybox
                 : CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.08f, 0.11f, 0.16f);
             cameraObject.AddComponent<AudioListener>();
             _cameraFollow = cameraObject.AddComponent<CameraFollow>();
-            _cameraFollow.Configure(player.transform, 8.6f, 2.65f, 25f, 0f);
+            _cameraFollow.ConfigureChampion(player.transform);
+            _cameraFollow.SnapToTarget();
 
             var boss = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             boss.name = "BossDummy";
@@ -468,8 +648,18 @@ namespace AL.ChampionMode
             }
 
             CreateWeather();
-            CreateWorldObjectiveMarkers();
+            if (ShouldCreateWorldObjectiveMarkers(
+                    FirstSessionChampionStart.IsFirstSessionLanding))
+            {
+                CreateWorldObjectiveMarkers();
+            }
+
             InstallFirstSessionInteractables();
+        }
+
+        public static bool ShouldCreateWorldObjectiveMarkers(bool firstSessionLanding)
+        {
+            return !firstSessionLanding;
         }
 
         private void ConfigureArenaLighting()
@@ -884,6 +1074,7 @@ namespace AL.ChampionMode
                 layout,
                 _innerSpawn.RealmId);
             built.Root.name = FirstSessionChampionStart.EnvironmentRootName;
+            _firstSessionWorld = built;
             return true;
         }
 
@@ -924,7 +1115,10 @@ namespace AL.ChampionMode
                 return;
             }
 
-            FirstSessionWorldInteractables.Install(_playerController.transform, _arenaCamera);
+            _worldInteractionDirector = FirstSessionWorldInteractables.Install(
+                _playerController.transform,
+                _arenaCamera,
+                _realmId);
         }
 
         private GameObject CreateInspectionShowcase(Transform player, Color realmAccent)
@@ -1030,6 +1224,9 @@ namespace AL.ChampionMode
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.sortMode = ParticleSystemSortMode.Distance;
                 renderer.sortingOrder = 2;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    "MAT_RuntimeInspectionMotes");
             }
 
             particles.Play();
@@ -1187,7 +1384,7 @@ namespace AL.ChampionMode
             CreateText(bossPanel.transform, font, "BREAK", 13, new Vector2(326f, -79f), new Vector2(50f, 18f), TextAnchor.UpperLeft, new Color(0.86f, 0.82f, 0.78f));
             CreateCombatPressureIndicator(canvasObject.transform, font);
 
-            var skillPanel = CreateHudPanel(canvasObject.transform, "CombatHotbar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 28f), new Vector2(748f, 120f), new Color(0.035f, 0.042f, 0.052f, 0.88f));
+            var skillPanel = CreateHudPanel(canvasObject.transform, "CombatHotbar", new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, CombatHotbarBottomOffset), new Vector2(748f, CombatHotbarHeight), new Color(0.035f, 0.042f, 0.052f, 0.88f));
             _skillText = CreateText(skillPanel.transform, font, "Skill loadout ready", 15, new Vector2(24f, -12f), new Vector2(360f, 22f), TextAnchor.UpperLeft, new Color(0.78f, 0.86f, 1f));
             _castChannelGlow = CreateUiImage(skillPanel.transform, "CastChannelGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(420f, -11f), new Vector2(306f, 24f), new Color(0.25f, 0.62f, 1f, 0.05f));
             _castChannelFill = CreateStatusBar(skillPanel.transform, new Vector2(424f, -15f), new Vector2(298f, 16f), new Color(0.32f, 0.66f, 1f, 0.82f));
@@ -1316,6 +1513,12 @@ namespace AL.ChampionMode
 
         private void OnDestroy()
         {
+            if (_firstWorldTutorialDirector != null)
+            {
+                _firstWorldTutorialDirector.Completed -=
+                    HandleFirstWorldTutorialCompleted;
+            }
+
             if (_boss != null)
             {
                 _boss.LootRolled -= HandleBossLootRolled;
@@ -1375,11 +1578,23 @@ namespace AL.ChampionMode
                 return;
             }
 
-            _skillText.text =
-                "Loadout: " + _playerSkillCaster.GetSkillName(0) + " / " +
-                _playerSkillCaster.GetSkillName(1) + " / " +
-                _playerSkillCaster.GetSkillName(2) + " / " +
-                _playerSkillCaster.GetSkillName(3);
+            switch (_playerSkillCaster.LoadoutState)
+            {
+                case SkillLoadoutState.Ready:
+                    _skillText.text =
+                        "Loadout: " + _playerSkillCaster.GetSkillName(0) + " / " +
+                        _playerSkillCaster.GetSkillName(1) + " / " +
+                        _playerSkillCaster.GetSkillName(2) + " / " +
+                        _playerSkillCaster.GetSkillName(3);
+                    break;
+                case SkillLoadoutState.Loading:
+                    _skillText.text = "Loadout: loading validated catalog…";
+                    break;
+                default:
+                    _skillText.text = "Loadout unavailable — casting disabled";
+                    break;
+            }
+
             RefreshSkillButtonLabels();
             RefreshControlMode();
         }
@@ -1391,7 +1606,22 @@ namespace AL.ChampionMode
                 return;
             }
 
-            if (_playerSkillCaster == null || !_playerSkillCaster.IsCasting)
+            if (_playerSkillCaster == null ||
+                _playerSkillCaster.LoadoutState != SkillLoadoutState.Ready)
+            {
+                SetFillAmount(_castChannelFill, 0f);
+                SetImageColor(_castChannelFill, new Color(0.20f, 0.24f, 0.30f, 0.16f));
+                SetImageColor(_castChannelGlow, new Color(0.18f, 0.22f, 0.28f, 0.04f));
+                bool loading = _playerSkillCaster != null &&
+                               _playerSkillCaster.LoadoutState == SkillLoadoutState.Loading;
+                _castChannelText.text = loading
+                    ? "CHANNEL LOADING"
+                    : "CHANNEL UNAVAILABLE";
+                _castChannelText.color = new Color(0.58f, 0.64f, 0.72f, 0.82f);
+                return;
+            }
+
+            if (!_playerSkillCaster.IsCasting)
             {
                 SetFillAmount(_castChannelFill, 0f);
                 SetImageColor(_castChannelFill, new Color(0.32f, 0.66f, 1f, 0.16f));
@@ -2479,6 +2709,25 @@ namespace AL.ChampionMode
             }
         }
 
+        private void ContinueFromFirstSessionResult()
+        {
+            if (_clearPanelObject != null)
+            {
+                _clearPanelObject.SetActive(false);
+            }
+
+            if (_clearBackdropImage != null)
+            {
+                _clearBackdropImage.gameObject.SetActive(false);
+            }
+
+            _hudSession?.NotifyRecap(false);
+            if (!_encounterFailed && _playerCombat != null && !_playerCombat.IsDead)
+            {
+                _playerController?.SetControlLocked(false);
+            }
+        }
+
         private void RefreshAppearanceInspectionChrome()
         {
             Color active = new Color(0.34f, 0.64f, 1f, 0.96f);
@@ -2557,6 +2806,16 @@ namespace AL.ChampionMode
 
         private string FormatSkillStatus(int slotIndex)
         {
+            if (_playerSkillCaster == null ||
+                _playerSkillCaster.LoadoutState != SkillLoadoutState.Ready)
+            {
+                string loadStateText = _playerSkillCaster != null &&
+                                       _playerSkillCaster.LoadoutState == SkillLoadoutState.Loading
+                    ? "loading"
+                    : "unavailable";
+                return $"{slotIndex + 1}. Skill: {loadStateText}";
+            }
+
             float remaining = _playerSkillCaster.GetCooldownRemaining(slotIndex);
             string state = remaining <= 0.05f ? $"ready ({_playerSkillCaster.GetManaCost(slotIndex):0} MP)" : $"{remaining:0.0}s";
             return $"{slotIndex + 1}. {_playerSkillCaster.GetSkillName(slotIndex)}: {state}";
@@ -2572,6 +2831,9 @@ namespace AL.ChampionMode
                 _playerController.RequestSkill(slotIndex);
             }, 14, new Color(0.06f, 0.09f, 0.13f, 0.96f));
             feedback = button.gameObject.AddComponent<ChampionActionButtonFeedback>();
+            _skillButtons[slotIndex] = button;
+            button.interactable = _playerSkillCaster != null &&
+                                  _playerSkillCaster.LoadoutState == SkillLoadoutState.Ready;
             feedback.Configure(button.GetComponent<RectTransform>(), button.GetComponent<Image>(), button.GetComponentInChildren<Text>(), slotColor);
             CreateHudPanel(button.transform, "SkillAccent", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 0f), new Vector2(154f, 5f), slotColor);
             _skillReadyGlows[slotIndex] = CreateUiImage(button.transform, "SkillReadyGlow", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0.5f, 0.5f), new Vector2(25f, -30f), new Vector2(42f, 42f), new Color(slotColor.r, slotColor.g, slotColor.b, 0.16f));
@@ -2631,8 +2893,15 @@ namespace AL.ChampionMode
 
         private void RefreshSkillButtonLabels()
         {
+            bool loadoutReady = _playerSkillCaster != null &&
+                                _playerSkillCaster.LoadoutState == SkillLoadoutState.Ready;
             for (int i = 0; i < _skillButtonTexts.Length; i++)
             {
+                if (_skillButtons[i] != null)
+                {
+                    _skillButtons[i].interactable = loadoutReady;
+                }
+
                 if (_skillButtonTexts[i] != null)
                 {
                     _skillButtonTexts[i].text = BuildSkillButtonLabel(i);
@@ -2640,6 +2909,19 @@ namespace AL.ChampionMode
 
                 if (_skillCooldownTexts[i] != null && _playerSkillCaster != null)
                 {
+                    if (!loadoutReady)
+                    {
+                        bool loading = _playerSkillCaster.LoadoutState ==
+                                       SkillLoadoutState.Loading;
+                        _skillCooldownTexts[i].text = loading
+                            ? "LOADING"
+                            : "UNAVAILABLE";
+                        _skillCooldownTexts[i].color =
+                            new Color(0.56f, 0.62f, 0.70f, 0.88f);
+                        SetUnavailableSkillVisual(i, loading);
+                        continue;
+                    }
+
                     float remaining = _playerSkillCaster.GetCooldownRemaining(i);
                     float manaCost = _playerSkillCaster.GetManaCost(i);
                     bool hasMana = _playerCombat == null || _playerCombat.CurrentMana + 0.01f >= manaCost;
@@ -2662,6 +2944,44 @@ namespace AL.ChampionMode
 
                     UpdateSkillReadinessVisual(i, remaining <= 0.05f && hasMana, remaining, manaCost, hasMana, isCasting);
                 }
+            }
+        }
+
+        private void SetUnavailableSkillVisual(int slotIndex, bool loading)
+        {
+            Color muted = loading
+                ? new Color(0.34f, 0.42f, 0.52f, 0.54f)
+                : new Color(0.30f, 0.32f, 0.36f, 0.58f);
+            if (_skillCooldownFills[slotIndex] != null)
+            {
+                _skillCooldownFills[slotIndex].fillAmount = 1f;
+                _skillCooldownFills[slotIndex].color =
+                    new Color(0f, 0f, 0f, loading ? 0.30f : 0.52f);
+            }
+
+            if (_skillReadyGlows[slotIndex] != null)
+            {
+                _skillReadyGlows[slotIndex].color =
+                    new Color(muted.r, muted.g, muted.b, 0.025f);
+                _skillReadyGlows[slotIndex].rectTransform.localScale =
+                    Vector3.one * 0.92f;
+            }
+
+            if (_skillManaPips[slotIndex] != null)
+            {
+                _skillManaPips[slotIndex].color = muted;
+            }
+
+            if (_skillStateRails[slotIndex] != null)
+            {
+                _skillStateRails[slotIndex].fillAmount = 0f;
+                _skillStateRails[slotIndex].color = muted;
+            }
+
+            if (_skillRoleTexts[slotIndex] != null)
+            {
+                _skillRoleTexts[slotIndex].color =
+                    new Color(0.52f, 0.57f, 0.64f, 0.70f);
             }
         }
 
@@ -3133,17 +3453,32 @@ namespace AL.ChampionMode
             _clearProgressFill = CreateUiImage(_clearPanelObject.transform, "ClearProgressFill", new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(44f, -312f), new Vector2(0f, 7f), new Color(0.62f, 1f, 0.40f, 0.94f));
 
             CreateHudButton(_clearPanelObject.transform, font, "Retry", new Vector2(154f, -330f), new Vector2(140f, 42f), RetryEncounter, 16, new Color(0.12f, 0.20f, 0.13f, 0.96f));
-            CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(310f, -330f), new Vector2(140f, 42f), () =>
+            if (FirstSessionChampionStart.ShouldRunProofOfWorth)
             {
-                _clearPanelObject.SetActive(false);
-                if (_clearBackdropImage != null)
+                CreateHudButton(
+                    _clearPanelObject.transform,
+                    font,
+                    "Continue",
+                    new Vector2(310f, -330f),
+                    new Vector2(140f, 42f),
+                    ContinueFromFirstSessionResult,
+                    16,
+                    new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            }
+            else
+            {
+                CreateHudButton(_clearPanelObject.transform, font, "Inspect", new Vector2(310f, -330f), new Vector2(140f, 42f), () =>
                 {
-                    _clearBackdropImage.gameObject.SetActive(false);
-                }
+                    _clearPanelObject.SetActive(false);
+                    if (_clearBackdropImage != null)
+                    {
+                        _clearBackdropImage.gameObject.SetActive(false);
+                    }
 
-                _hudSession?.NotifyRecap(false);
-                SetAppearanceInspection(true);
-            }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+                    _hudSession?.NotifyRecap(false);
+                    SetAppearanceInspection(true);
+                }, 16, new Color(0.10f, 0.14f, 0.19f, 0.96f));
+            }
             _clearPanelObject.SetActive(false);
         }
 

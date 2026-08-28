@@ -46,7 +46,7 @@ namespace AL.UI.Kingdom
     /// </summary>
     public static class KingdomTeachingReturnPlanner
     {
-        private const float InnerGateInset = 4f;
+        private const float InnerGateInset = 8f;
         private const float ChampionHeight = 1.1f;
 
         public static bool TryPlan(

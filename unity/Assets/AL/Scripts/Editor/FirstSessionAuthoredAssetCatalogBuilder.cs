@@ -36,6 +36,8 @@ namespace AL.Editor
         private const string GuardianTextureRoot = PacketRoot +
             "/Enemies/Covenant_Sentinel_Meshy6_v001_textures/";
         private const string PremiumEnvironmentRoot = PacketRoot + "/Environment/";
+        private const string FirstSessionTerrainCatalogPath =
+            "Assets/AL/StreamingAssets/GameData/al_first_session_terrain_catalog.json";
 
         [MenuItem("Another Life/Build/First Session Authored Asset Catalog")]
         public static void GenerateForCli()
@@ -58,6 +60,10 @@ namespace AL.Editor
             SetObject(serialized, "premiumFloorNormal", Load<Texture2D>(PremiumEnvironmentRoot + "Neutral_Covenant_Flagstone_Normal_Derived_v001.png"));
             SetObject(serialized, "premiumFloorMetallic", Load<Texture2D>(PremiumEnvironmentRoot + "Neutral_Covenant_Flagstone_MetallicSmoothness_Derived_v001.png"));
             SetObject(serialized, "premiumFloorRoughness", Load<Texture2D>(PremiumEnvironmentRoot + "Neutral_Covenant_Flagstone_Roughness_Derived_v001.png"));
+            SetObject(
+                serialized,
+                "firstSessionTerrainCatalog",
+                Load<TextAsset>(FirstSessionTerrainCatalogPath));
 
             SerializedProperty championBases = serialized.FindProperty("championBases");
             championBases.arraySize = 2;
@@ -146,6 +152,10 @@ namespace AL.Editor
             property.FindPropertyRelative("panoramicSky").objectReferenceValue =
                 Load<Texture2D>(PremiumEnvironmentRoot + folder +
                                 "_PanoramicSky_Meshy_v001.png");
+            property.FindPropertyRelative("firstSessionRealmPrefab").objectReferenceValue =
+                Load<GameObject>(
+                    "Assets/AL/Art/Generated/World/FirstSession/" + folder + "/" +
+                    folder + "_FirstSessionAuthoredRealm.prefab");
         }
 
         private static void SetChampionBase(

@@ -348,6 +348,20 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
+        public void WindowsIsolationPathsAreEvaluatedWithWindowsSemanticsOnEveryEditorHost()
+        {
+            object normalized = Isolation(
+                developerLocalLow: @"C:/Users/Developer/AppData/LocalLow",
+                launchLocalLow: @"C:/Users/Smoke/AppData/LocalLow/./",
+                persistentData: @"C:/Users/Smoke/AppData/LocalLow/DefaultCompany/AnotherLifeUnity/");
+            AssertResult(Evaluate(ValidLog(), Process(), normalized), "Passed", "None");
+
+            object escaped = Isolation(
+                persistentData: @"C:\Users\Smoke\AppData\LocalLow\..\LocalLow\DefaultCompany\AnotherLifeUnity\Nested\..\..");
+            AssertResult(Evaluate(ValidLog(), Process(), escaped), "Failed", "IsolationEvidenceInvalid");
+        }
+
+        [Test]
         public void UnobservedIdentityProfileOrFreshnessFailsIsolationGate()
         {
             AssertResult(Evaluate(ValidLog(), Process(), Isolation(identityObserved: false)), "Failed", "IsolationEvidenceInvalid");

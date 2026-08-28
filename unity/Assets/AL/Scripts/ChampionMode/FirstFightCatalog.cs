@@ -54,6 +54,47 @@ namespace AL.ChampionMode
                 return false;
             }
 
+            if (!SkillLoadoutCatalog.TryCreateSnapshot(skills, out SkillLoadoutSnapshot snapshot))
+            {
+                diagnosticCode = SpecialMissingCode;
+                return false;
+            }
+
+            return TryResolveSnapshot(
+                data,
+                selected,
+                fallbackRealm,
+                snapshot,
+                out loadout,
+                out diagnosticCode);
+        }
+
+        /// <summary>
+        /// Authoritative first-fight resolver. Callers must supply the same complete,
+        /// immutable snapshot that is already published by the live SkillCaster.
+        /// This keeps URI-backed StreamingAssets platforms off the synchronous file path.
+        /// </summary>
+        public static bool TryResolveSnapshot(
+            IGameDataService data,
+            ChampionState selected,
+            RealmId fallbackRealm,
+            SkillLoadoutSnapshot skills,
+            out FirstFightLoadout loadout,
+            out string diagnosticCode)
+        {
+            loadout = null;
+            diagnosticCode = MissingCode;
+            if (data == null)
+            {
+                return false;
+            }
+
+            if (!TryResolveSpecial(skills, out SkillLoadoutSlot special))
+            {
+                diagnosticCode = SpecialMissingCode;
+                return false;
+            }
+
             ChampionDefinition player = ResolvePlayer(data, selected, fallbackRealm);
             if (!HasCombatStats(player))
             {
@@ -76,13 +117,6 @@ namespace AL.ChampionMode
                 return false;
             }
 
-            SkillLoadoutData special = ResolveSpecial(skills);
-            if (special == null || special.power <= 0f || string.IsNullOrWhiteSpace(special.id))
-            {
-                diagnosticCode = SpecialMissingCode;
-                return false;
-            }
-
             loadout = new FirstFightLoadout
             {
                 PlayerId = player.Id,
@@ -95,12 +129,10 @@ namespace AL.ChampionMode
                 OpponentMaxHealth = opponent.BaseStats.MaxHealth,
                 OpponentMaxMana = opponent.BaseStats.MaxMana,
                 OpponentAttack = opponent.BaseStats.Attack,
-                SpecialSlot = special.slot,
-                SpecialSkillId = special.id,
-                SpecialSkillName = string.IsNullOrWhiteSpace(special.displayName)
-                    ? special.id
-                    : special.displayName,
-                SpecialPower = special.power,
+                SpecialSlot = special.Slot,
+                SpecialSkillId = special.Id,
+                SpecialSkillName = special.DisplayName,
+                SpecialPower = special.Power,
                 DiagnosticCode = ReadyCode
             };
             diagnosticCode = ReadyCode;
@@ -120,9 +152,40 @@ namespace AL.ChampionMode
                 return false;
             }
 
-            SkillLoadoutData[] skills = null;
-            SkillLoadoutCatalog.TryLoad(out skills);
-            return TryResolve(
+            if (!SkillLoadoutCatalog.TryLoadSnapshot(out SkillLoadoutSnapshot skills))
+            {
+                diagnosticCode = SpecialMissingCode;
+                return false;
+            }
+
+            return TryResolveSnapshot(
+                data,
+                SliceRunState.Champion,
+                fallbackRealm,
+                skills,
+                out loadout,
+                out diagnosticCode);
+        }
+
+        /// <summary>
+        /// Runtime-safe registered-data path. The snapshot comes from SkillCaster,
+        /// so Android/WebGL do not synchronously reopen packaged StreamingAssets.
+        /// </summary>
+        public static bool TryResolveFromRegistered(
+            RealmId fallbackRealm,
+            SkillLoadoutSnapshot skills,
+            out FirstFightLoadout loadout,
+            out string diagnosticCode)
+        {
+            loadout = null;
+            diagnosticCode = MissingCode;
+            IGameDataService data;
+            if (!ServiceLocator.TryGet(out data) || data == null)
+            {
+                return false;
+            }
+
+            return TryResolveSnapshot(
                 data,
                 SliceRunState.Champion,
                 fallbackRealm,
@@ -200,35 +263,19 @@ namespace AL.ChampionMode
             return null;
         }
 
-        private static SkillLoadoutData ResolveSpecial(SkillLoadoutData[] skills)
+        private static bool TryResolveSpecial(
+            SkillLoadoutSnapshot skills,
+            out SkillLoadoutSlot special)
         {
-            if (skills == null)
+            special = null;
+            if (skills == null ||
+                skills.Count != SkillLoadoutCatalog.RequiredSlotCount ||
+                !skills.TryGetSlot(FirstSessionChampionStart.SpecialSkillSlot, out special))
             {
-                return null;
+                return false;
             }
 
-            SkillLoadoutData fallback = null;
-            for (int i = 0; i < skills.Length; i++)
-            {
-                SkillLoadoutData skill = skills[i];
-                if (skill == null || skill.power <= 0f || string.IsNullOrWhiteSpace(skill.id))
-                {
-                    continue;
-                }
-
-                if (skill.slot == FirstSessionChampionStart.SpecialSkillSlot ||
-                    string.Equals(skill.id, FirstSessionChampionStart.SpecialSkillId))
-                {
-                    return skill;
-                }
-
-                if (fallback == null)
-                {
-                    fallback = skill;
-                }
-            }
-
-            return fallback;
+            return special.Identity == MvpSkillIdentity.RealmStrike;
         }
 
         private static IEnumerable<ChampionDefinition> Enumerate(IGameDataService data)

@@ -19,10 +19,12 @@ namespace AL.ChampionMode.Presentation
             var player = new GameObject(FirstSessionChampionStart.PlayerObjectName);
             player.tag = "Player";
             player.transform.position = position;
-            var collider = player.AddComponent<CapsuleCollider>();
-            collider.height = 2f;
-            collider.radius = 0.45f;
-            collider.center = Vector3.zero;
+            var controller = player.AddComponent<CharacterController>();
+            controller.height = 2f;
+            controller.radius = 0.45f;
+            controller.center = Vector3.zero;
+            controller.stepOffset = 0.3f;
+            controller.minMoveDistance = 0f;
             return player;
         }
 
