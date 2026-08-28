@@ -1,5 +1,7 @@
 using AL.Core;
+using AL.ChampionMode.UI;
 using AL.RealmWar.Warzone;
+using AL.World.Streaming;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,10 +24,19 @@ namespace AL.ChampionMode.Skills
         private const int MaxActiveGuardShells = 8;
         private const int MaxPooledGuardShells = 4;
         private const int MaxActiveFloatingTexts = 24;
+        private const int GroundProbeHitCapacity = 16;
+        private const int MaxGroundProbeHitCapacity = 1024;
+        private const float GroundProbeStartOffset = 0.75f;
+        private const float GroundProbeDistance = 32f;
+        private const float GroundSurfaceOffset = 0.05f;
+        private const float MinimumGroundNormalY = 0.45f;
 
         private static int _activeFloatingTexts;
         private static RuntimeWeatherController _cachedWeather;
         private static ChampionCameraFollow _cachedCameraFollow;
+        private static readonly List<Terrain> ActiveTerrains = new List<Terrain>(8);
+        private static RaycastHit[] GroundProbeHits =
+            new RaycastHit[GroundProbeHitCapacity];
 
         public static GameObject SpawnForgeBurst(Vector3 position)
         {
@@ -481,6 +492,7 @@ namespace AL.ChampionMode.Skills
             }
 
             var textObject = new GameObject("VFX_Runtime_FloatingCombatText");
+            CombatEffectOwnership.Track(textObject, false);
             textObject.transform.position = position;
             var mesh = textObject.AddComponent<TextMesh>();
             mesh.text = text;
@@ -877,18 +889,24 @@ namespace AL.ChampionMode.Skills
         private static GameObject CreateBurstObject(string name)
         {
             var effect = new GameObject(name);
-            effect.AddComponent<ParticleSystem>();
+            var particles = effect.AddComponent<ParticleSystem>();
+            var renderer = particles.GetComponent<ParticleSystemRenderer>();
+            if (renderer == null)
+            {
+                return effect;
+            }
+
+            renderer.renderMode = ParticleSystemRenderMode.Billboard;
+            AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                particles,
+                "MAT_RuntimeCombatBurst");
             return effect;
         }
 
         private static GameObject CreateGroundRingObject()
         {
             var ring = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            var collider = ring.GetComponent<Collider>();
-            if (collider != null)
-            {
-                Object.Destroy(collider);
-            }
+            RemoveRuntimeCollider(ring);
 
             return ring;
         }
@@ -896,11 +914,7 @@ namespace AL.ChampionMode.Skills
         private static GameObject CreatePrimitiveEffectObject(PrimitiveType primitiveType)
         {
             var effect = GameObject.CreatePrimitive(primitiveType);
-            var collider = effect.GetComponent<Collider>();
-            if (collider != null)
-            {
-                Object.Destroy(collider);
-            }
+            RemoveRuntimeCollider(effect);
 
             return effect;
         }
@@ -908,13 +922,30 @@ namespace AL.ChampionMode.Skills
         private static GameObject CreateTrailObject()
         {
             var trail = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            var collider = trail.GetComponent<Collider>();
-            if (collider != null)
+            RemoveRuntimeCollider(trail);
+
+            return trail;
+        }
+
+        private static void RemoveRuntimeCollider(GameObject effect)
+        {
+            Collider collider = effect != null ? effect.GetComponent<Collider>() : null;
+            if (collider == null)
+            {
+                return;
+            }
+
+            // Destroy is deferred in players. Disable first so a just-spawned visual
+            // can never enter the combat or character-controller physics query set.
+            collider.enabled = false;
+            if (Application.isPlaying)
             {
                 Object.Destroy(collider);
             }
-
-            return trail;
+            else
+            {
+                Object.DestroyImmediate(collider);
+            }
         }
 
         private static Color GetRealmColor(RealmId realmId, float alpha)
@@ -933,7 +964,213 @@ namespace AL.ChampionMode.Skills
 
         private static Vector3 Grounded(Vector3 position)
         {
-            return new Vector3(position.x, 0.05f, position.z);
+            if (!IsFinite(position))
+            {
+                return new Vector3(0f, GroundSurfaceOffset, 0f);
+            }
+
+            bool hasTerrainSupport = TrySamplePhysicalTerrain(position, out float terrainY);
+            float supportY = hasTerrainSupport ? terrainY : 0f;
+            float probeBaseY = hasTerrainSupport && position.y < terrainY
+                ? terrainY
+                : position.y;
+            Vector3 origin = new Vector3(
+                position.x,
+                probeBaseY + GroundProbeStartOffset,
+                position.z);
+            int hitCount = ProbePhysicalGround(origin, out RaycastHit[] hits);
+
+            bool foundStaticSupport = false;
+            float nearestDistance = float.PositiveInfinity;
+            float groundedY = hasTerrainSupport
+                ? terrainY + GroundSurfaceOffset
+                : GroundSurfaceOffset;
+            for (int index = 0; index < hitCount; index++)
+            {
+                RaycastHit hit = hits[index];
+                Collider collider = hit.collider;
+                if (collider == null ||
+                    !collider.enabled ||
+                    collider.isTrigger ||
+                    collider.attachedRigidbody != null ||
+                    !IsAuthorizedGroundCollider(collider, hit.point) ||
+                    hit.normal.y < MinimumGroundNormalY ||
+                    hit.distance >= nearestDistance)
+                {
+                    continue;
+                }
+
+                foundStaticSupport = true;
+                nearestDistance = hit.distance;
+                groundedY = hit.point.y + GroundSurfaceOffset;
+            }
+
+            return new Vector3(
+                position.x,
+                foundStaticSupport || hasTerrainSupport
+                    ? groundedY
+                    : GroundSurfaceOffset,
+                position.z);
+        }
+
+        private static int ProbePhysicalGround(
+            Vector3 origin,
+            out RaycastHit[] hits)
+        {
+            while (true)
+            {
+                int hitCount = Physics.RaycastNonAlloc(
+                    origin,
+                    Vector3.down,
+                    GroundProbeHits,
+                    GroundProbeDistance,
+                    Physics.DefaultRaycastLayers,
+                    QueryTriggerInteraction.Ignore);
+                if (hitCount < GroundProbeHits.Length)
+                {
+                    hits = GroundProbeHits;
+                    return hitCount;
+                }
+
+                if (GroundProbeHits.Length >= MaxGroundProbeHitCapacity)
+                {
+                    // An extreme vertical collider pile is exceptional. Preserve
+                    // correctness for caves and bridges instead of trusting Unity's
+                    // unspecified truncated NonAlloc result ordering.
+                    hits = Physics.RaycastAll(
+                        origin,
+                        Vector3.down,
+                        GroundProbeDistance,
+                        Physics.DefaultRaycastLayers,
+                        QueryTriggerInteraction.Ignore);
+                    return hits.Length;
+                }
+
+                int expandedCapacity = Mathf.Min(
+                    GroundProbeHits.Length * 2,
+                    MaxGroundProbeHitCapacity);
+                System.Array.Resize(ref GroundProbeHits, expandedCapacity);
+            }
+        }
+
+        private static bool TrySamplePhysicalTerrain(Vector3 position, out float groundY)
+        {
+            ActiveTerrains.Clear();
+            Terrain.GetActiveTerrains(ActiveTerrains);
+            groundY = float.NegativeInfinity;
+            bool found = false;
+            for (int index = 0; index < ActiveTerrains.Count; index++)
+            {
+                Terrain terrain = ActiveTerrains[index];
+                if (!IsPhysicalTerrainAuthority(terrain, position))
+                {
+                    continue;
+                }
+
+                float sampleY = terrain.SampleHeight(position) + terrain.transform.position.y;
+                if (!float.IsNaN(sampleY) &&
+                    !float.IsInfinity(sampleY) &&
+                    (!found || sampleY > groundY))
+                {
+                    found = true;
+                    groundY = sampleY;
+                }
+            }
+
+            return found;
+        }
+
+        private static bool IsAuthorizedGroundCollider(
+            Collider collider,
+            Vector3 samplePosition)
+        {
+            if (collider is TerrainCollider terrainCollider)
+            {
+                Terrain terrain = terrainCollider.GetComponent<Terrain>();
+                return IsPhysicalTerrainAuthority(terrain, samplePosition);
+            }
+
+            WorldChunkPhysicalGroundAuthority authority =
+                collider.GetComponentInParent<WorldChunkPhysicalGroundAuthority>();
+            if (authority == null ||
+                !authority.isActiveAndEnabled ||
+                authority.SourceKind == WorldChunkGroundSourceKind.Unspecified)
+            {
+                return false;
+            }
+
+            IReadOnlyList<Collider> groundColliders = authority.GroundColliders;
+            for (int index = 0; index < groundColliders.Count; index++)
+            {
+                if (groundColliders[index] == collider)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool IsPhysicalTerrainAuthority(Terrain terrain, Vector3 position)
+        {
+            if (terrain == null ||
+                !terrain.isActiveAndEnabled ||
+                terrain.terrainData == null)
+            {
+                return false;
+            }
+
+            TerrainCollider collider = terrain.GetComponent<TerrainCollider>();
+            if (collider == null ||
+                !collider.enabled ||
+                collider.isTrigger ||
+                collider.terrainData != terrain.terrainData)
+            {
+                return false;
+            }
+
+            Vector3 size = terrain.terrainData.size;
+            Vector3 origin = terrain.transform.position;
+            if (!IsFinite(size) ||
+                size.x <= 0f ||
+                size.z <= 0f)
+            {
+                return false;
+            }
+
+            if (position.x < origin.x ||
+                position.z < origin.z ||
+                position.x > origin.x + size.x ||
+                position.z > origin.z + size.z)
+            {
+                return false;
+            }
+
+            int holesResolution = terrain.terrainData.holesResolution;
+            if (holesResolution <= 0)
+            {
+                return true;
+            }
+
+            float normalizedX = Mathf.Clamp01((position.x - origin.x) / size.x);
+            float normalizedZ = Mathf.Clamp01((position.z - origin.z) / size.z);
+            int holeX = Mathf.Min(
+                Mathf.FloorToInt(normalizedX * holesResolution),
+                holesResolution - 1);
+            int holeZ = Mathf.Min(
+                Mathf.FloorToInt(normalizedZ * holesResolution),
+                holesResolution - 1);
+            return !terrain.terrainData.IsHole(holeX, holeZ);
+        }
+
+        private static bool IsFinite(Vector3 value)
+        {
+            return !float.IsNaN(value.x) &&
+                   !float.IsNaN(value.y) &&
+                   !float.IsNaN(value.z) &&
+                   !float.IsInfinity(value.x) &&
+                   !float.IsInfinity(value.y) &&
+                   !float.IsInfinity(value.z);
         }
 
         private static void SetRendererColor(Renderer renderer, Color color)
@@ -1096,8 +1333,8 @@ namespace AL.ChampionMode.Skills
     {
         private static RuntimeFeedbackHost _host;
         private static Coroutine _hitPauseRoutine;
-        private static float _restoreTimeScale = 1f;
-        private static float _restoreFixedDeltaTime = 0.02f;
+        private static System.IDisposable _hitPauseOwnership;
+        private static int _hitPauseGeneration;
 
         public static void RequestHitPause(float duration, float timeScale)
         {
@@ -1112,30 +1349,40 @@ namespace AL.ChampionMode.Skills
                 return;
             }
 
-            if (_hitPauseRoutine == null)
-            {
-                _restoreTimeScale = Time.timeScale;
-                _restoreFixedDeltaTime = Time.fixedDeltaTime;
-            }
-            else
+            if (_hitPauseRoutine != null)
             {
                 host.StopCoroutine(_hitPauseRoutine);
             }
 
-            _hitPauseRoutine = host.StartCoroutine(HitPauseRoutine(duration, timeScale));
+            _hitPauseOwnership?.Dispose();
+            _hitPauseOwnership = null;
+
+            int generation = unchecked(++_hitPauseGeneration);
+            _hitPauseRoutine = host.StartCoroutine(
+                HitPauseRoutine(host, generation, duration, timeScale));
         }
 
-        private static IEnumerator HitPauseRoutine(float duration, float timeScale)
+        private static IEnumerator HitPauseRoutine(
+            RuntimeFeedbackHost owner,
+            int generation,
+            float duration,
+            float timeScale)
         {
             float safeDuration = Mathf.Clamp(duration, 0.015f, 0.12f);
             float safeTimeScale = Mathf.Clamp(timeScale, 0.04f, 1f);
-            Time.timeScale = safeTimeScale;
-            Time.fixedDeltaTime = Mathf.Max(0.001f, _restoreFixedDeltaTime * safeTimeScale);
+            _hitPauseOwnership = ChampionTimeScaleGate.Acquire(
+                "combat-hit-pause",
+                safeTimeScale);
 
             yield return new WaitForSecondsRealtime(safeDuration);
 
-            Time.timeScale = _restoreTimeScale;
-            Time.fixedDeltaTime = _restoreFixedDeltaTime;
+            if (_host != owner || _hitPauseGeneration != generation)
+            {
+                yield break;
+            }
+
+            _hitPauseOwnership?.Dispose();
+            _hitPauseOwnership = null;
             _hitPauseRoutine = null;
         }
 
@@ -1154,6 +1401,41 @@ namespace AL.ChampionMode.Skills
 
         private sealed class RuntimeFeedbackHost : MonoBehaviour
         {
+            private void OnEnable()
+            {
+                if (_host == null)
+                {
+                    _host = this;
+                }
+            }
+
+            private void OnDisable()
+            {
+                ReleaseOwnedHitPause();
+            }
+
+            private void OnDestroy()
+            {
+                ReleaseOwnedHitPause();
+            }
+
+            private void ReleaseOwnedHitPause()
+            {
+                if (_host != this)
+                {
+                    return;
+                }
+
+                _hitPauseGeneration = unchecked(_hitPauseGeneration + 1);
+                if (_hitPauseRoutine != null)
+                {
+                    StopCoroutine(_hitPauseRoutine);
+                }
+                _hitPauseOwnership?.Dispose();
+                _hitPauseOwnership = null;
+                _hitPauseRoutine = null;
+                _host = null;
+            }
         }
     }
 
@@ -1208,6 +1490,17 @@ namespace AL.ChampionMode.Skills
             PlayTone("clear", 660f, 0.42f, 0.28f, 0.30f);
         }
 
+        public static void StopOwned(GameObject owner)
+        {
+            if (owner == null)
+            {
+                return;
+            }
+
+            Transform channel = owner.transform.Find("OwnedRuntimeCombatAudio");
+            channel?.GetComponent<AudioSource>()?.Stop();
+        }
+
         private static void PlayTone(string key, float frequency, float duration, float volume, float brightness)
         {
             var source = GetOrCreateSource();
@@ -1228,6 +1521,40 @@ namespace AL.ChampionMode.Skills
 
         private static AudioSource GetOrCreateSource()
         {
+            GameObject owner = CombatEffectOwnership.CurrentOwner;
+            if (owner != null)
+            {
+                return GetOrCreateOwnedSource(owner);
+            }
+
+            return GetOrCreateSharedSource();
+        }
+
+        private static AudioSource GetOrCreateOwnedSource(GameObject owner)
+        {
+            GetOrCreateSharedSource();
+            const string ownedChannelName = "OwnedRuntimeCombatAudio";
+            Transform existing = owner.transform.Find(ownedChannelName);
+            GameObject channel = existing != null
+                ? existing.gameObject
+                : new GameObject(ownedChannelName);
+            if (existing == null)
+            {
+                channel.transform.SetParent(owner.transform, false);
+            }
+
+            AudioSource source = channel.GetComponent<AudioSource>();
+            if (source == null)
+            {
+                source = channel.AddComponent<AudioSource>();
+                ConfigureSource(source);
+            }
+
+            return source;
+        }
+
+        private static AudioSource GetOrCreateSharedSource()
+        {
             if (_source != null)
             {
                 return _source;
@@ -1236,10 +1563,15 @@ namespace AL.ChampionMode.Skills
             var host = new GameObject("ChampionRuntimeCombatAudio");
             Object.DontDestroyOnLoad(host);
             _source = host.AddComponent<AudioSource>();
-            _source.playOnAwake = false;
-            _source.spatialBlend = 0f;
-            _source.priority = 80;
+            ConfigureSource(_source);
             return _source;
+        }
+
+        private static void ConfigureSource(AudioSource source)
+        {
+            source.playOnAwake = false;
+            source.spatialBlend = 0f;
+            source.priority = 80;
         }
 
         private static AudioClip CreateToneClip(string key, float frequency, float duration, float brightness)

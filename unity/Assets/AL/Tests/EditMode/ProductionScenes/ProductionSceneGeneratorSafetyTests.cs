@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -280,10 +281,22 @@ namespace AL.Tests.EditMode.ProductionScenes
         {
             foreach (var pair in snapshot)
             {
-                File.WriteAllBytes(pair.Key, pair.Value);
+                const int maxAttempts = 50;
+                for (int attempt = 1; ; attempt++)
+                {
+                    try
+                    {
+                        File.WriteAllBytes(pair.Key, pair.Value);
+                        break;
+                    }
+                    catch (IOException) when (attempt < maxAttempts)
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
             }
 
-            AssetDatabase.Refresh();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
         }
 
         private static int ToExitCode(Type statusType, string statusName)

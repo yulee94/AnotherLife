@@ -1193,7 +1193,12 @@ namespace AL.Tests.EditMode.Narrative
         {
             try
             {
-                return Activator.CreateInstance(type, arguments);
+                return Activator.CreateInstance(
+                    type,
+                    BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic,
+                    null,
+                    arguments,
+                    null);
             }
             catch (TargetInvocationException exception)
             {

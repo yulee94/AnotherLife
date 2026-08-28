@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Skills;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -172,7 +173,9 @@ namespace AL.ChampionMode.AI
         {
             _isAttacking = true;
             GameDebug.Log("BOSS: Telegraphing Slam Attack...");
-            Vector3 impactCenter = _player != null ? Grounded(_player.position) : Grounded(transform.position + transform.forward * 2.5f);
+            Vector3 impactCenter = _player != null
+                ? _player.position
+                : transform.position + transform.forward * 2.5f;
             float impactRadius = _enraged ? _attackRange * 1.12f : _attackRange;
             SkillEffectFactory.SpawnBossSlamTelegraph(impactCenter, transform.position, impactRadius, _telegraphDuration, _enraged);
             RuntimeCombatAudio.PlayWarning();
@@ -207,11 +210,42 @@ namespace AL.ChampionMode.AI
 
             if (_player != null && DistanceOnGround(_player.position, impactCenter) <= impactRadius)
             {
-                var combat = _player.GetComponent<AL.ChampionMode.Control.ChampionCombat>();
-                combat?.TakeDamage(_slamDamage);
-                SkillEffectFactory.SpawnFloatingCombatText(_player.position + Vector3.up * 1.65f, "-" + Mathf.CeilToInt(_slamDamage), new Color(1f, 0.32f, 0.20f), 0.28f, 0.85f);
-                SkillEffectFactory.ShakeCamera(0.24f, 0.16f);
-                SkillEffectFactory.RequestHitPause(0.055f, 0.10f);
+                var combat = _player.GetComponent<ChampionCombat>();
+                if (combat == null)
+                {
+                    Debug.LogError(
+                        "AL-CHAMPION-DAMAGE-RECEIVER-MISSING: boss slam was rejected.");
+                }
+                else
+                {
+                    ChampionDamageReceipt receipt = combat.TakeDamage(_slamDamage);
+                    if (receipt.Accepted)
+                    {
+                        SkillEffectFactory.SpawnFloatingCombatText(
+                            _player.position + Vector3.up * 1.65f,
+                            FormatIncomingDamageFeedback(receipt),
+                            receipt.WasMitigated
+                                ? new Color(0.46f, 1f, 0.82f)
+                                : new Color(1f, 0.32f, 0.20f),
+                            0.28f,
+                            0.85f);
+                        SkillEffectFactory.ShakeCamera(0.24f, 0.16f);
+                        SkillEffectFactory.RequestHitPause(0.055f, 0.10f);
+                        if (receipt.DiagnosticCode ==
+                            ChampionCombat.DefendMitigationUnavailableCode)
+                        {
+                            Debug.LogError(
+                                receipt.DiagnosticCode +
+                                ": boss slam applied full damage because defend authority was unavailable.");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError(
+                            receipt.DiagnosticCode +
+                            ": boss slam damage was rejected by champion combat.");
+                    }
+                }
             }
             else if (_player != null)
             {
@@ -220,6 +254,26 @@ namespace AL.ChampionMode.AI
 
             yield return new WaitForSeconds(_attackCooldown);
             _isAttacking = false;
+        }
+
+        public static string FormatIncomingDamageFeedback(
+            ChampionDamageReceipt receipt)
+        {
+            if (!receipt.Accepted)
+            {
+                return string.Empty;
+            }
+
+            var appliedDamage = Mathf.CeilToInt(receipt.AppliedDamage);
+            if (!receipt.WasMitigated)
+            {
+                return "-" + appliedDamage;
+            }
+
+            var mitigatedDamage = Mathf.CeilToInt(receipt.MitigatedDamage);
+            return appliedDamage > 0
+                ? "-" + appliedDamage + "  BLOCK " + mitigatedDamage
+                : "BLOCK " + mitigatedDamage;
         }
 
         public void UpdateHealth(float current, float max)
@@ -490,11 +544,6 @@ namespace AL.ChampionMode.AI
             _isTelegraphing = false;
             _telegraphStartTime = 0f;
             _activeTelegraphDuration = 0f;
-        }
-
-        private static Vector3 Grounded(Vector3 position)
-        {
-            return new Vector3(position.x, 0f, position.z);
         }
 
         private static float DistanceOnGround(Vector3 a, Vector3 b)

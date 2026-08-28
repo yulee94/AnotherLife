@@ -5,11 +5,13 @@ using System.Linq;
 using System.Reflection;
 using AL.ChampionMode;
 using AL.ChampionMode.Quests;
+using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.Data.Runtime;
 using AL.Services.Local;
+using AL.Input;
 using AL.UI.Kingdom;
 using AL.UI.QuestHud;
 using AL.UI.SharedMenu;
@@ -521,6 +523,13 @@ namespace AL.Tests.EditMode.KingdomTeaching
 
                 requested = string.Empty;
                 QuestHudAutoQuest.SetEnabled(true);
+                Assert.That(
+                    QuestHudAutoQuest.CanDriveInCurrentContext(),
+                    Is.True,
+                    $"gameplaySuppressed={GameInput.GameplaySuppressed}; " +
+                    $"blocksGameplay={ChampionHudCameraGate.BlocksGameplay}; " +
+                    $"combat={SharedMenuModeSwitchHost.DetectCombat()}; " +
+                    $"unsafe={SharedMenuModeSwitchHost.DetectUnsafe()}");
                 director.Refresh();
                 Assert.That(director.State.ProgressValue, Is.EqualTo(3));
                 Assert.That(requested, Is.EqualTo("open_construction_dock"));

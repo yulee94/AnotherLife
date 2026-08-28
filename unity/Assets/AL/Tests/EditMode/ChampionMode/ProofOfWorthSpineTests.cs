@@ -1,5 +1,9 @@
 using AL.ChampionMode;
+using AL.ChampionMode.Control;
+using AL.ChampionMode.Interaction;
 using AL.ChampionMode.Quests;
+using AL.ChampionMode.Skills;
+using AL.ChampionMode.UI;
 using AL.Core;
 using AL.Data.Runtime;
 using NUnit.Framework;
@@ -12,6 +16,7 @@ namespace AL.Tests.EditMode.ChampionMode
         [SetUp]
         public void SetUp()
         {
+            ChampionHudCameraGate.Reset();
             FirstSessionChampionStart.ResetToFirstSessionLanding();
         }
 
@@ -26,6 +31,7 @@ namespace AL.Tests.EditMode.ChampionMode
             }
 
             ProofOfWorthDirector.ResetForTests();
+            ChampionHudCameraGate.Reset();
         }
 
         [Test]
@@ -174,11 +180,48 @@ namespace AL.Tests.EditMode.ChampionMode
         }
 
         [Test]
+        public void NoDialogueTransitionRetiresPreviousConversationSession()
+        {
+            var host = new GameObject("ProofConversationRetirementHost");
+            ChampionController controller = CreateChampion(
+                host,
+                RealmId.Crownlands);
+            ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
+            director.EnsureReady(null, host.transform, RealmId.Crownlands);
+            NpcConversationView conversation =
+                Object.FindObjectOfType<NpcConversationView>();
+            Assert.That(conversation, Is.Not.Null);
+
+            conversation.Collapse();
+            Assert.That(director.ApplyForTests(ProofOfWorthCommand.AcceptOffer).Changed,
+                Is.True);
+            conversation.Collapse();
+            Assert.That(director.ApplyForTests(ProofOfWorthCommand.Investigate).Changed,
+                Is.True);
+            Assert.That(conversation.Session, Is.Not.Null);
+
+            conversation.Collapse();
+            Assert.That(director.ApplyForTests(ProofOfWorthCommand.DeployChampion).Changed,
+                Is.True);
+            Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenArena));
+
+            conversation.Collapse();
+            Assert.That(director.ApplyForTests(ProofOfWorthCommand.ArenaSuccess).Changed,
+                Is.True);
+            Assert.That(director.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenReport));
+            Assert.That(conversation.IsVisible, Is.False);
+            Assert.That(conversation.Session, Is.Null);
+        }
+
+        [Test]
         public void DirectorOffersOmenWithoutAccepting()
         {
             var host = new GameObject("ProofOfWorthHost");
             try
             {
+                ChampionController controller = CreateChampion(
+                    host,
+                    RealmId.Crownlands);
                 ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
                 director.EnsureReady(null, host.transform, RealmId.Crownlands);
                 Assert.IsTrue(director.State.IsOmenOffered);
@@ -186,7 +229,9 @@ namespace AL.Tests.EditMode.ChampionMode
                 Assert.AreEqual(ProofOfWorthIds.OmenQuestId, director.State.QuestId);
                 Assert.AreEqual(ProofOfWorthIds.OfferDialogueId, director.State.DialogueId);
 
-                ProofOfWorthTransition decline = director.ApplyForTests(ProofOfWorthCommand.DeclineOffer);
+                ProofOfWorthTransition decline = ApplyUnblocked(
+                    director,
+                    ProofOfWorthCommand.DeclineOffer);
                 Assert.AreEqual(ProofOfWorthStatus.DuplicateIgnored, decline.Status);
                 Assert.IsTrue(director.State.IsOmenOffered);
             }
@@ -202,6 +247,9 @@ namespace AL.Tests.EditMode.ChampionMode
             var host = new GameObject("ProofOfWorthHost");
             try
             {
+                ChampionController controller = CreateChampion(
+                    host,
+                    RealmId.Stonehold);
                 ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
                 director.EnsureReady(null, host.transform, RealmId.Stonehold);
                 PlayThroughDirector(director);
@@ -214,21 +262,175 @@ namespace AL.Tests.EditMode.ChampionMode
             }
         }
 
+        [Test]
+        public void ProductionProofApiExposesNoDirectWorldInteractionProgression()
+        {
+            System.Reflection.MethodInfo[] publicMethods =
+                typeof(ProofOfWorthDirector).GetMethods(
+                    System.Reflection.BindingFlags.Instance |
+                    System.Reflection.BindingFlags.Public);
+
+            Assert.IsFalse(System.Array.Exists(
+                publicMethods,
+                method =>
+                    method.Name == "TryApplyWorldInteraction" &&
+                    method.GetParameters().Length == 1 &&
+                    (method.GetParameters()[0].ParameterType == typeof(string) ||
+                     method.GetParameters()[0].ParameterType ==
+                     typeof(WorldInteractionResult))));
+        }
+
+        [Test]
+        public void MatchingWorldInteractionsAdvanceC1WhileWrongTargetIsRejected()
+        {
+            var host = new GameObject("ProofOfWorthWorldInteractionHost");
+            try
+            {
+                ChampionController controller = CreateChampion(
+                    host,
+                    RealmId.Crownlands);
+                ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
+                director.EnsureReady(null, host.transform, RealmId.Crownlands);
+                foreach (ProofOfWorthCommand command in new[]
+                {
+                    ProofOfWorthCommand.AcceptOffer,
+                    ProofOfWorthCommand.Investigate,
+                    ProofOfWorthCommand.DeployChampion,
+                    ProofOfWorthCommand.ArenaSuccess,
+                    ProofOfWorthCommand.SelectValerius,
+                    ProofOfWorthCommand.PresentTear,
+                    ProofOfWorthCommand.ConcludeReport
+                })
+                {
+                    Assert.IsTrue(ApplyUnblocked(director, command).Changed);
+                }
+
+                Assert.AreEqual(ProofOfWorthPhase.C1MeetGuide, director.State.Phase);
+                Assert.IsFalse(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.CovenantSiteCatalogId));
+                Assert.IsTrue(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.GuideCatalogId));
+                Assert.AreEqual(ProofOfWorthPhase.C1RestoreCovenant, director.State.Phase);
+                Assert.IsTrue(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.CovenantSiteCatalogId));
+                Assert.AreEqual(ProofOfWorthPhase.C1FaceGuardian, director.State.Phase);
+            }
+            finally
+            {
+                Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void GuideWorldInteractionStartsTheValeriusOmenDialogue()
+        {
+            var host = new GameObject("ProofOfWorthOmenInteractionHost");
+            try
+            {
+                ChampionController controller = CreateChampion(
+                    host,
+                    RealmId.Crownlands);
+                ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
+                director.EnsureReady(null, host.transform, RealmId.Crownlands);
+
+                Assert.IsTrue(director.State.IsOmenOffered);
+                Object.FindObjectOfType<NpcConversationView>().Collapse();
+                Assert.IsFalse(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.CovenantSiteCatalogId));
+                Assert.IsTrue(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.GuideCatalogId));
+                Assert.IsTrue(
+                    Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
+                Assert.AreEqual(ProofOfWorthPhase.OmenTalk, director.State.Phase);
+            }
+            finally
+            {
+                Object.DestroyImmediate(host);
+            }
+        }
+
+        [Test]
+        public void RepeatedGuideWorldInteractionsAdvanceTheOmenDialogueToArena()
+        {
+            var host = new GameObject("ProofOfWorthRepeatedGuideInteractionHost");
+            try
+            {
+                ChampionController controller = CreateChampion(
+                    host,
+                    RealmId.Crownlands);
+                ProofOfWorthDirector director = host.AddComponent<ProofOfWorthDirector>();
+                director.EnsureReady(null, host.transform, RealmId.Crownlands);
+
+                Object.FindObjectOfType<NpcConversationView>().Collapse();
+                Assert.IsTrue(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.GuideCatalogId));
+                Assert.IsTrue(
+                    Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
+                Assert.AreEqual(ProofOfWorthPhase.OmenTalk, director.State.Phase);
+                Assert.AreEqual(ProofOfWorthIds.StartDialogueId, director.State.DialogueId);
+
+                Object.FindObjectOfType<NpcConversationView>().Collapse();
+                Assert.IsTrue(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.GuideCatalogId));
+                Assert.IsTrue(
+                    Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
+                Assert.AreEqual(ProofOfWorthPhase.OmenTalk, director.State.Phase);
+                Assert.AreEqual(ProofOfWorthIds.GoDialogueId, director.State.DialogueId);
+
+                Object.FindObjectOfType<NpcConversationView>().Collapse();
+                Assert.IsTrue(director.ApplyWorldInteractionForTests(
+                    FirstSessionWorldInteractables.GuideCatalogId));
+                Assert.IsTrue(
+                    Object.FindObjectOfType<NpcConversationView>().SkipCurrentLine());
+                Assert.AreEqual(ProofOfWorthPhase.OmenArena, director.State.Phase);
+            }
+            finally
+            {
+                Object.DestroyImmediate(host);
+            }
+        }
+
+        private static ChampionController CreateChampion(
+            GameObject host,
+            RealmId realm)
+        {
+            host.AddComponent<CharacterController>();
+            host.AddComponent<ChampionCombat>();
+            host.AddComponent<SkillCaster>();
+            ChampionController controller = host.AddComponent<ChampionController>();
+            controller.ConfigureRealmContext(realm);
+            return controller;
+        }
+
         private static void PlayThroughDirector(ProofOfWorthDirector director)
         {
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.AcceptOffer).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.Investigate).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.DeployChampion).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.ArenaSuccess).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.SelectValerius).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.PresentTear).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.ConcludeReport).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.AcceptOffer).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.Investigate).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.DeployChampion).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.ArenaSuccess).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.SelectValerius).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.PresentTear).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.ConcludeReport).Changed);
             Assert.IsFalse(director.State.LordshipGranted);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.MeetRealmGuide).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.RestoreCovenant).Changed);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.GuardianDefeated).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.MeetRealmGuide).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.RestoreCovenant).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.GuardianDefeated).Changed);
             Assert.IsFalse(director.State.LordshipGranted);
-            Assert.IsTrue(director.ApplyForTests(ProofOfWorthCommand.AcceptMark).Changed);
+            Assert.IsTrue(ApplyUnblocked(director, ProofOfWorthCommand.AcceptMark).Changed);
+        }
+
+        private static ProofOfWorthTransition ApplyUnblocked(
+            ProofOfWorthDirector director,
+            ProofOfWorthCommand command)
+        {
+            NpcConversationView conversation =
+                Object.FindObjectOfType<NpcConversationView>();
+            if (conversation != null && conversation.IsVisible)
+            {
+                conversation.Collapse();
+            }
+
+            return director.ApplyForTests(command);
         }
 
         private static ProofOfWorthState WalkTo(ProofOfWorthPhase phase, RealmId realm)

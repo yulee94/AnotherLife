@@ -1,4 +1,3 @@
-using System.IO;
 using AL.ChampionMode;
 using AL.ChampionMode.Camera;
 using AL.ChampionMode.Control;
@@ -31,16 +30,7 @@ namespace AL.World
 
         internal static WorldAtlasSnapshot LoadCanonicalSnapshot()
         {
-            byte[] bytes = File.ReadAllBytes(Path.Combine(
-                Application.dataPath,
-                "AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json"));
-            WorldAtlasLoadResult result = WorldAtlasTopologyLoader.Validate(bytes);
-            if (!result.IsAccepted)
-            {
-                throw new System.InvalidOperationException("World atlas rejected: " + result.Status);
-            }
-
-            return result.Snapshot;
+            return FirstSessionInnerRealmSpawn.LoadCanonicalSnapshot();
         }
 
         private string ResolveWalkableRealmId()
@@ -64,9 +54,21 @@ namespace AL.World
             player.name = "Player_Champion";
             player.tag = "Player";
             player.transform.position = built.PlayerSpawn;
+            CapsuleCollider primitiveCollider = player.GetComponent<CapsuleCollider>();
+            if (primitiveCollider != null)
+            {
+                primitiveCollider.enabled = false;
+                UnityEngine.Object.Destroy(primitiveCollider);
+            }
+
             if (player.GetComponent<CharacterController>() == null)
             {
-                player.AddComponent<CharacterController>();
+                CharacterController controller = player.AddComponent<CharacterController>();
+                controller.center = Vector3.zero;
+                controller.height = 2f;
+                controller.radius = 0.45f;
+                controller.stepOffset = 0.3f;
+                controller.minMoveDistance = 0f;
             }
 
             player.AddComponent<ChampionController>();
@@ -81,7 +83,7 @@ namespace AL.World
             camera.fieldOfView = 48f;
             cameraObject.AddComponent<AudioListener>();
             CameraFollow follow = cameraObject.AddComponent<CameraFollow>();
-            follow.Configure(player.transform, 14f, 4.2f, 22f, 0f);
+            follow.ConfigureChampion(player.transform);
 
             var lightObject = new GameObject("Key Light");
             var light = lightObject.AddComponent<Light>();
