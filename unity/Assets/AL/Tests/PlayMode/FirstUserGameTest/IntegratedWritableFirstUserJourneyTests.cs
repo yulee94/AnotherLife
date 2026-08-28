@@ -314,22 +314,37 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(durableProgress.CanRunProof, Is.True,
                 "The scene handoff must be backed by the persisted tutorial receipt chain.");
 
-            proof.ChoosePrimary();
+            NpcConversationView proofConversation =
+                Object.FindObjectOfType<NpcConversationView>();
+            Assert.That(proofConversation, Is.Not.Null);
+            Assert.That(proofConversation.IsVisible, Is.True);
+            Assert.That(proofConversation.SkipCurrentLine(), Is.True);
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenTalk));
             Assert.That(proof.State.OmenAccepted, Is.True);
-            proof.ChoosePrimary();
-            proof.ChoosePrimary();
+            Assert.That(proofConversation.SkipCurrentLine(), Is.True);
+            Assert.That(proofConversation.SkipCurrentLine(), Is.True);
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenArena));
             Assert.That(
                 GameObject.Find(ProofOfWorthIds.SkyCastleMarkerId + "_TEMPORARY"),
                 Is.Not.Null);
+            NpcConversationView arenaConversation =
+                Object.FindObjectOfType<NpcConversationView>();
+            Assert.That(arenaConversation, Is.Not.Null);
+            Assert.That(arenaConversation.IsVisible, Is.True);
+            arenaConversation.Collapse();
+            Assert.That(player.BlocksGameplayEntry, Is.False,
+                "The arena result may advance only after its conversation releases gameplay ownership.");
             Assert.That(
                 proof.ApplyForTests(ProofOfWorthCommand.ArenaSuccess).Changed,
                 Is.True);
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenReport));
             proof.ChoosePrimary();
-            proof.ChoosePrimary();
-            proof.ChoosePrimary();
+            NpcConversationView reportConversation =
+                Object.FindObjectOfType<NpcConversationView>();
+            Assert.That(reportConversation, Is.Not.Null);
+            Assert.That(reportConversation.IsVisible, Is.True);
+            Assert.That(reportConversation.SkipCurrentLine(), Is.True);
+            Assert.That(reportConversation.SkipCurrentLine(), Is.True);
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.C1MeetGuide));
             Assert.That(proof.State.QuestId, Is.EqualTo(ProofOfWorthIds.MainQuestId));
             Assert.That(
@@ -351,7 +366,9 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
 
             yield return null;
             Assert.That(arena.TryStartGuardianTrial(), Is.True);
-            BossDummyAI guardian = Object.FindObjectOfType<BossDummyAI>();
+            Transform guardianTarget = arena.GuardianTrialTarget;
+            Assert.That(guardianTarget, Is.Not.Null);
+            BossDummyAI guardian = guardianTarget.GetComponent<BossDummyAI>();
             Assert.That(guardian, Is.Not.Null);
             Assert.That(guardian.gameObject.activeInHierarchy, Is.True);
             Transform authoredGuardian = guardian.transform.Find(
@@ -426,13 +443,32 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 "At least one requested live basic attack must visibly reduce guardian health.");
             Assert.That(guardian.IsDead, Is.True,
                 "The catalog guardian must be defeated by the live champion attack path.");
-            ProofOfWorthTransition guardianDefeated =
-                proof.ApplyForTests(ProofOfWorthCommand.GuardianDefeated);
-            Assert.That(guardianDefeated.Changed, Is.True);
+            Assert.That(arena.GuardianTrialCleared, Is.True,
+                "The arena must publish the exact started-and-dead guardian result.");
+            Assert.That(proof.isActiveAndEnabled, Is.True);
+            Assert.That(player.isActiveAndEnabled, Is.True);
+            Assert.That(player.BlocksGameplayEntry, Is.True,
+                "The combat recap should own ordinary gameplay while Proof consumes the authoritative clear result.");
+            deadline = Time.realtimeSinceStartup + TimeoutSeconds;
+            while (proof.State.Phase != ProofOfWorthPhase.C1AcceptMark)
+            {
+                Assert.That(Time.realtimeSinceStartup, Is.LessThan(deadline),
+                    "The active Proof owner did not consume the authoritative guardian-clear result while the combat recap owned gameplay input.");
+                yield return null;
+            }
+
             Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.C1AcceptMark));
             Assert.That(
                 GameObject.Find(ProofOfWorthIds.AcceptMarkObjectiveId + "_TEMPORARY"),
                 Is.Not.Null);
+            GameObject clearPanel = GameObject.Find("EncounterClearPanel");
+            Assert.That(clearPanel, Is.Not.Null);
+            Button continueResult = clearPanel.GetComponentsInChildren<Button>(true)
+                .Single(button => button.name == "Continue");
+            continueResult.onClick.Invoke();
+            yield return null;
+            Assert.That(player.BlocksGameplayEntry, Is.False,
+                "Continuing from the first-session result must release the recap owner before accepting the mark.");
             Assert.That(
                 proof.ApplyForTests(ProofOfWorthCommand.AcceptMark).Changed,
                 Is.True);

@@ -26,6 +26,104 @@ namespace AL.Tests.EditMode.CharacterCreation
         }
 
         [Test]
+        public void CreatorFramingFitsEnabledRendererBoundsAfterVisualReplacement()
+        {
+            GameObject preview = new GameObject("CreatorPreview");
+            GameObject visual = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject cameraObject = new GameObject("CreatorPreviewCamera");
+            try
+            {
+                preview.transform.position = new Vector3(0.85f, 0f, 3.4f);
+                visual.transform.SetParent(preview.transform, false);
+                visual.transform.localPosition = Vector3.up * 0.9f;
+                visual.transform.localScale = new Vector3(0.9f, 1.8f, 0.55f);
+                Camera camera = cameraObject.AddComponent<Camera>();
+                camera.aspect = 16f / 9f;
+                cameraObject.transform.position = new Vector3(0.85f, 1.05f, 1.05f);
+                cameraObject.transform.LookAt(preview.transform.position + Vector3.up * 0.72f);
+
+                Assert.That(
+                    CharacterCreationPreviewPresentation.TryFrame(camera, preview.transform),
+                    Is.True);
+
+                Bounds bounds = visual.GetComponent<Renderer>().bounds;
+                Vector3 min = bounds.min;
+                Vector3 max = bounds.max;
+                for (int x = 0; x < 2; x++)
+                {
+                    for (int y = 0; y < 2; y++)
+                    {
+                        for (int z = 0; z < 2; z++)
+                        {
+                            Vector3 viewport = camera.WorldToViewportPoint(new Vector3(
+                                x == 0 ? min.x : max.x,
+                                y == 0 ? min.y : max.y,
+                                z == 0 ? min.z : max.z));
+                            Assert.That(viewport.x, Is.InRange(0.12f, 0.88f));
+                            Assert.That(viewport.y, Is.InRange(0.10f, 0.90f));
+                            Assert.That(viewport.z, Is.GreaterThan(0f));
+                        }
+                    }
+                }
+
+                Assert.That(camera.fieldOfView, Is.EqualTo(30f).Within(0.01f));
+            }
+            finally
+            {
+                Object.DestroyImmediate(cameraObject);
+                Object.DestroyImmediate(preview);
+            }
+        }
+
+        [Test]
+        public void CreatorLightingIsOwnedDeterministicAndUnaffectedByOtherSceneLights()
+        {
+            GameObject unrelatedObject = new GameObject("UnrelatedSceneLight");
+            GameObject owner = new GameObject("CharacterCreationPreviewPresentationTestOwner");
+            try
+            {
+                Light unrelated = unrelatedObject.AddComponent<Light>();
+                System.Reflection.MethodInfo ensureOwned =
+                    typeof(CharacterCreationPreviewPresentation).GetMethod(
+                        "EnsureOwnedLights",
+                        System.Reflection.BindingFlags.Public |
+                        System.Reflection.BindingFlags.Static,
+                        binder: null,
+                        types: new[] { typeof(Transform) },
+                        modifiers: null);
+                Assert.That(ensureOwned, Is.Not.Null);
+
+                Light key = (Light)ensureOwned.Invoke(
+                    null,
+                    new object[] { owner.transform });
+                ensureOwned.Invoke(null, new object[] { owner.transform });
+
+                Transform keyTransform = owner.transform.Find("CreatorKeyLight");
+                Transform fillTransform = owner.transform.Find("CreatorFillLight");
+                Assert.That(keyTransform, Is.Not.Null);
+                Assert.That(fillTransform, Is.Not.Null);
+                Assert.That(key, Is.SameAs(keyTransform.GetComponent<Light>()));
+                Assert.That(owner.transform.childCount, Is.EqualTo(2));
+                AssertCreatorLight(
+                    keyTransform.GetComponent<Light>(),
+                    1.35f,
+                    new Color(1f, 0.94f, 0.86f, 1f),
+                    new Vector3(32f, 332f, 0f));
+                AssertCreatorLight(
+                    fillTransform.GetComponent<Light>(),
+                    0.45f,
+                    new Color(0.62f, 0.72f, 1f, 1f),
+                    new Vector3(18f, 35f, 0f));
+                Assert.That(unrelatedObject.GetComponent<Light>(), Is.SameAs(unrelated));
+            }
+            finally
+            {
+                Object.DestroyImmediate(unrelatedObject);
+                Object.DestroyImmediate(owner);
+            }
+        }
+
+        [Test]
         public void ProductionSurfaceUsesSharedChromeNotLegacyRuntime()
         {
             string controller = System.IO.File.ReadAllText(
@@ -190,6 +288,23 @@ namespace AL.Tests.EditMode.CharacterCreation
                 Application.dataPath,
                 reference.AssetReference.Replace("Assets/", string.Empty).Replace('/', System.IO.Path.DirectorySeparatorChar));
             Assert.IsTrue(System.IO.File.Exists(path), path);
+        }
+
+        private static void AssertCreatorLight(
+            Light light,
+            float intensity,
+            Color color,
+            Vector3 euler)
+        {
+            Assert.That(light, Is.Not.Null);
+            Assert.That(light.type, Is.EqualTo(LightType.Directional));
+            Assert.That(light.intensity, Is.EqualTo(intensity).Within(0.001f));
+            Assert.That(light.color, Is.EqualTo(color));
+            Assert.That(light.shadows, Is.EqualTo(LightShadows.None));
+            Assert.That(light.renderMode, Is.EqualTo(LightRenderMode.ForceVertex));
+            Assert.That(
+                Quaternion.Angle(light.transform.rotation, Quaternion.Euler(euler)),
+                Is.LessThan(0.1f));
         }
     }
 }

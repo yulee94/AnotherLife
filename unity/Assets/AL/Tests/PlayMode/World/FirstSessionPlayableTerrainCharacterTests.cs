@@ -11,6 +11,9 @@ using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.TestTools;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using Object = UnityEngine.Object;
 
 namespace AL.Tests.PlayMode.World
@@ -553,13 +556,24 @@ namespace AL.Tests.PlayMode.World
                 .GetComponentsInChildren<Renderer>(true)
                 .SelectMany(renderer => renderer.sharedMaterials)
                 .Where(material => material != null)
+                .Where(IsRuntimeFixtureMaterial)
                 .Distinct());
             Material generatedSkybox = RenderSettings.skybox;
             if (generatedSkybox != null && generatedSkybox != _originalSkybox &&
+                IsRuntimeFixtureMaterial(generatedSkybox) &&
                 !_fixtureMaterials.Contains(generatedSkybox))
             {
                 _fixtureMaterials.Add(generatedSkybox);
             }
+        }
+
+        private static bool IsRuntimeFixtureMaterial(Material material)
+        {
+#if UNITY_EDITOR
+            return !EditorUtility.IsPersistent(material);
+#else
+            return true;
+#endif
         }
 
         private IEnumerator DestroyCurrentFixture()

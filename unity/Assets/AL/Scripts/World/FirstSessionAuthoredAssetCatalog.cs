@@ -16,6 +16,7 @@ namespace AL.World
         [SerializeField] private Texture2D premiumRoughness;
         [SerializeField] private Texture2D premiumEmission;
         [SerializeField] private Texture2D panoramicSky;
+        [SerializeField] private GameObject firstSessionRealmPrefab;
 
         public RealmId Realm => realm;
         public GameObject LandmarkPrefab => landmarkPrefab;
@@ -26,6 +27,7 @@ namespace AL.World
         public Texture2D PremiumRoughness => premiumRoughness;
         public Texture2D PremiumEmission => premiumEmission;
         public Texture2D PanoramicSky => panoramicSky;
+        public GameObject FirstSessionRealmPrefab => firstSessionRealmPrefab;
     }
 
     [Serializable]
@@ -188,6 +190,30 @@ namespace AL.World
             return false;
         }
 
+        public bool TryResolveFirstSessionRealm(RealmId realm, out GameObject prefab)
+        {
+            for (int index = 0; index < realmVisuals.Length; index++)
+            {
+                FirstSessionRealmVisualAsset candidate = realmVisuals[index];
+                if (candidate == null || candidate.Realm != realm ||
+                    candidate.FirstSessionRealmPrefab == null)
+                {
+                    continue;
+                }
+
+                FirstSessionAuthoredRealmRoute route =
+                    candidate.FirstSessionRealmPrefab.GetComponent<FirstSessionAuthoredRealmRoute>();
+                if (route != null && route.HasCompleteRoute())
+                {
+                    prefab = candidate.FirstSessionRealmPrefab;
+                    return true;
+                }
+            }
+
+            prefab = null;
+            return false;
+        }
+
         public bool HasRequiredAssets()
         {
             if (covenantHallPrefab == null || floorMaterial == null || wallMaterial == null ||
@@ -219,7 +245,11 @@ namespace AL.World
             return TryResolveRealmVisual(RealmId.Stonehold, out _) &&
                    TryResolveRealmVisual(RealmId.Eldergrove, out _) &&
                    TryResolveRealmVisual(RealmId.Crownlands, out _) &&
-                   TryResolveRealmVisual(RealmId.Umbral, out _);
+                   TryResolveRealmVisual(RealmId.Umbral, out _) &&
+                   TryResolveFirstSessionRealm(RealmId.Stonehold, out _) &&
+                   TryResolveFirstSessionRealm(RealmId.Eldergrove, out _) &&
+                   TryResolveFirstSessionRealm(RealmId.Crownlands, out _) &&
+                   TryResolveFirstSessionRealm(RealmId.Umbral, out _);
         }
     }
 }

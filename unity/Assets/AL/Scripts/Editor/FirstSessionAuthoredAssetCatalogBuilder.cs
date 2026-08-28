@@ -152,6 +152,10 @@ namespace AL.Editor
             property.FindPropertyRelative("panoramicSky").objectReferenceValue =
                 Load<Texture2D>(PremiumEnvironmentRoot + folder +
                                 "_PanoramicSky_Meshy_v001.png");
+            property.FindPropertyRelative("firstSessionRealmPrefab").objectReferenceValue =
+                Load<GameObject>(
+                    "Assets/AL/Art/Generated/World/FirstSession/" + folder + "/" +
+                    folder + "_FirstSessionAuthoredRealm.prefab");
         }
 
         private static void SetChampionBase(

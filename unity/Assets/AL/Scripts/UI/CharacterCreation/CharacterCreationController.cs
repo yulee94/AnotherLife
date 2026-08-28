@@ -28,8 +28,10 @@ namespace AL.UI.CharacterCreation
         private readonly List<ChampionDefinition> _champions = new List<ChampionDefinition>();
         private CharacterCreationDraft _draft;
         private CharacterCreationProductionScreen _screen;
+        private GameObject _previewPresentationRoot;
         private ChampionCustomizationController _preview;
         private CharacterCreationPreviewMotion _previewMotion;
+        private Camera _previewCamera;
         private bool _committing;
         private bool _alreadyConfirmed;
 
@@ -122,25 +124,24 @@ namespace AL.UI.CharacterCreation
 
         private void BuildPreview()
         {
-            Light keyLight = FindObjectOfType<Light>();
-            if (keyLight == null)
-            {
-                var lightObject = new GameObject("CreatorKeyLight");
-                keyLight = lightObject.AddComponent<Light>();
-                keyLight.type = LightType.Directional;
-                keyLight.intensity = 1.15f;
-                keyLight.color = new Color(1f, 0.96f, 0.90f);
-                lightObject.transform.rotation = Quaternion.Euler(28f, 140f, 0f);
-            }
+            ReleasePreviewPresentation();
+            _previewPresentationRoot =
+                new GameObject("CharacterCreationPreviewPresentation");
+            _previewPresentationRoot.transform.SetParent(transform, false);
+            Light keyLight = CharacterCreationPreviewPresentation.EnsureOwnedLights(
+                _previewPresentationRoot.transform);
 
             var previewObject = new GameObject("CreatorPreview");
+            previewObject.transform.SetParent(_previewPresentationRoot.transform, false);
             previewObject.transform.position = new Vector3(0.85f, 0f, 3.4f);
             previewObject.transform.rotation = Quaternion.Euler(0f, 168f, 0f);
             _preview = previewObject.AddComponent<ChampionCustomizationController>();
             _preview.ApplyPresentation(_draft.Customization);
 
             var cameraObject = new GameObject("CreatorPreviewCamera");
+            cameraObject.transform.SetParent(_previewPresentationRoot.transform, false);
             var camera = cameraObject.AddComponent<Camera>();
+            _previewCamera = camera;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = PresentationChrome.StoneVoid;
             camera.fieldOfView = 28f;
@@ -152,6 +153,33 @@ namespace AL.UI.CharacterCreation
             cameraObject.transform.LookAt(new Vector3(0.85f, 0.72f, 3.4f));
             _previewMotion = cameraObject.AddComponent<CharacterCreationPreviewMotion>();
             _previewMotion.Configure(previewObject.transform, keyLight, camera);
+        }
+
+        private void OnDestroy()
+        {
+            ReleasePreviewPresentation();
+        }
+
+        private void ReleasePreviewPresentation()
+        {
+            GameObject ownedRoot = _previewPresentationRoot;
+            _previewPresentationRoot = null;
+            _preview = null;
+            _previewMotion = null;
+            _previewCamera = null;
+            if (ownedRoot == null)
+            {
+                return;
+            }
+
+            if (Application.isPlaying)
+            {
+                Destroy(ownedRoot);
+            }
+            else
+            {
+                DestroyImmediate(ownedRoot);
+            }
         }
 
         private void BuildUi()
@@ -222,6 +250,14 @@ namespace AL.UI.CharacterCreation
                     _draft.Realm,
                     _draft.Customization,
                     out _))
+            {
+                PresentValidation("Champion preview unavailable. Your choices are preserved.");
+            }
+
+            if (_preview != null &&
+                !CharacterCreationPreviewPresentation.TryFrame(
+                    _previewCamera,
+                    _preview.transform))
             {
                 PresentValidation("Champion preview unavailable. Your choices are preserved.");
             }

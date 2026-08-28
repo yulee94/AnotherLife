@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.EnhancedTouch;
@@ -52,8 +54,13 @@ namespace AL.Input
         public static InputAction Interact => Map["Interact"];
         public static InputAction WorldMap => Map["WorldMap"];
         public static InputAction SharedMenu => Map["SharedMenu"];
+        public static InputAction CursorMode => Map["CursorMode"];
 
         private static bool _gameplaySuppressed;
+        private static bool _cursorModeSuppressed;
+        private static readonly HashSet<long> GameplaySuppressionOwners = new HashSet<long>();
+        private static long _nextGameplaySuppressionOwner;
+        private static int _gameplaySuppressionGeneration;
 
         // ---- Lifecycle ----
 
@@ -64,6 +71,10 @@ namespace AL.Input
             _map = null;
             _enabled = false;
             _gameplaySuppressed = false;
+            _cursorModeSuppressed = false;
+            GameplaySuppressionOwners.Clear();
+            _nextGameplaySuppressionOwner = 0;
+            _gameplaySuppressionGeneration = unchecked(_gameplaySuppressionGeneration + 1);
         }
 
         public static void SetGameplaySuppressed(bool suppressed)
@@ -71,7 +82,54 @@ namespace AL.Input
             _gameplaySuppressed = suppressed;
         }
 
-        public static bool GameplaySuppressed => _gameplaySuppressed;
+        public static IDisposable AcquireGameplaySuppression(string owner)
+        {
+            long id = unchecked(++_nextGameplaySuppressionOwner);
+            GameplaySuppressionOwners.Add(id);
+            return new GameplaySuppressionOwnership(id, _gameplaySuppressionGeneration);
+        }
+
+        public static void SetCursorModeSuppressed(bool suppressed)
+        {
+            _cursorModeSuppressed = suppressed;
+        }
+
+        public static bool CursorModeSuppressed => _cursorModeSuppressed;
+
+        public static bool GameplaySuppressed =>
+            _gameplaySuppressed ||
+            GameplaySuppressionOwners.Count > 0 ||
+            _cursorModeSuppressed;
+
+        internal static bool HasNonCursorGameplaySuppression =>
+            _gameplaySuppressed || GameplaySuppressionOwners.Count > 0;
+
+        private sealed class GameplaySuppressionOwnership : IDisposable
+        {
+            private readonly long _id;
+            private readonly int _generation;
+            private bool _disposed;
+
+            public GameplaySuppressionOwnership(long id, int generation)
+            {
+                _id = id;
+                _generation = generation;
+            }
+
+            public void Dispose()
+            {
+                if (_disposed)
+                {
+                    return;
+                }
+
+                _disposed = true;
+                if (_generation == _gameplaySuppressionGeneration)
+                {
+                    GameplaySuppressionOwners.Remove(_id);
+                }
+            }
+        }
 
         public static void EnsureEnabled()
         {
@@ -103,11 +161,11 @@ namespace AL.Input
 
         // ---- Typed reads ----
 
-        public static Vector2 ReadMove() => _gameplaySuppressed ? Vector2.zero : Move.ReadValue<Vector2>();
+        public static Vector2 ReadMove() => GameplaySuppressed ? Vector2.zero : Move.ReadValue<Vector2>();
 
         public static Vector2 ReadLook()
         {
-            if (_gameplaySuppressed)
+            if (GameplaySuppressed)
             {
                 return Vector2.zero;
             }
@@ -119,22 +177,22 @@ namespace AL.Input
                 : look;
         }
 
-        public static float ReadScroll() => _gameplaySuppressed ? 0f : Scroll.ReadValue<float>();
+        public static float ReadScroll() => GameplaySuppressed ? 0f : Scroll.ReadValue<float>();
 
         public static bool CameraRecenterPressed() =>
-            !_gameplaySuppressed && CameraRecenter.WasPressedThisFrame();
+            !GameplaySuppressed && CameraRecenter.WasPressedThisFrame();
 
-        public static bool AttackPressed() => !_gameplaySuppressed && Attack.WasPressedThisFrame();
+        public static bool AttackPressed() => !GameplaySuppressed && Attack.WasPressedThisFrame();
 
-        public static bool DodgePressed() => !_gameplaySuppressed && Dodge.WasPressedThisFrame();
+        public static bool DodgePressed() => !GameplaySuppressed && Dodge.WasPressedThisFrame();
 
-        public static bool BlockHeld() => !_gameplaySuppressed && Block.IsPressed();
+        public static bool BlockHeld() => !GameplaySuppressed && Block.IsPressed();
 
-        public static bool BlockPressed() => !_gameplaySuppressed && Block.WasPressedThisFrame();
+        public static bool BlockPressed() => !GameplaySuppressed && Block.WasPressedThisFrame();
 
         public static bool SkillPressed(int index)
         {
-            if (_gameplaySuppressed)
+            if (GameplaySuppressed)
             {
                 return false;
             }
@@ -154,18 +212,20 @@ namespace AL.Input
             }
         }
 
-        public static bool SubmitPressed() => !_gameplaySuppressed && Submit.WasPressedThisFrame();
+        public static bool SubmitPressed() => !GameplaySuppressed && Submit.WasPressedThisFrame();
 
-        public static bool SubmitHeld() => !_gameplaySuppressed && Submit.IsPressed();
+        public static bool SubmitHeld() => !GameplaySuppressed && Submit.IsPressed();
 
         public static bool CancelPressed() => Cancel.WasPressedThisFrame();
 
         public static bool InteractPressed() =>
-            !_gameplaySuppressed && Interact.WasPressedThisFrame();
+            !GameplaySuppressed && Interact.WasPressedThisFrame();
 
         public static bool WorldMapPressed() => WorldMap.WasPressedThisFrame();
 
         public static bool SharedMenuPressed() => SharedMenu.WasPressedThisFrame();
+
+        public static bool CursorModePressed() => CursorMode.WasPressedThisFrame();
 
         // ---- Touch ----
 
@@ -255,6 +315,12 @@ namespace AL.Input
             worldMap.AddBinding("<Gamepad>/select");
 
             map.AddAction("SharedMenu", InputActionType.Button, "<Keyboard>/tab");
+
+            var cursorMode = map.AddAction(
+                "CursorMode",
+                InputActionType.Button,
+                "<Keyboard>/leftCtrl");
+            cursorMode.AddBinding("<Keyboard>/rightCtrl");
 
             return map;
 

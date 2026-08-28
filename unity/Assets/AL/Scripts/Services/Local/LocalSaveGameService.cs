@@ -31,6 +31,7 @@ namespace AL.Services.Local
         void Replace(string sourcePath, string destinationPath, string backupPath);
         void Delete(string path);
         IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern);
+        DateTime GetCreationTimeUtc(string path);
         bool IsReparsePoint(string path);
     }
 
@@ -211,6 +212,8 @@ namespace AL.Services.Local
                 : Enumerable.Empty<string>();
         }
 
+        public DateTime GetCreationTimeUtc(string path) => File.GetCreationTimeUtc(path);
+
         public bool IsReparsePoint(string path) =>
             (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
     }
@@ -263,6 +266,9 @@ namespace AL.Services.Local
             "al.save.schema1.kingdom-teaching.v1";
         private const string LegacyFirstWorldProgressOperationId =
             "al.save.schema1.first-world-progress.v1";
+#if UNITY_INCLUDE_TESTS
+        [ThreadStatic] internal static Action BeforeDeleteArtifactsForTests;
+#endif
 
         private static readonly ProfileWriteAuthoritySnapshot
             MigrationRequiredPrimary =
@@ -2697,6 +2703,7 @@ namespace AL.Services.Local
                 return;
             }
 
+            bool approvalResetOperation = MvpApprovalSlotRuntime.IsDeleteAuthorized(this);
             _profileDeleted = false;
             var deletionTargets = new List<string>
             {
@@ -2713,9 +2720,14 @@ namespace AL.Services.Local
             deletionTargets.AddRange(EnumerateNvs01MigrationBackupArchives());
 
             var failures = new List<string>();
+#if UNITY_INCLUDE_TESTS
+            Action beforeDeleteArtifacts = BeforeDeleteArtifactsForTests;
+            BeforeDeleteArtifactsForTests = null;
+            beforeDeleteArtifacts?.Invoke();
+#endif
             foreach (string target in deletionTargets.Distinct().ToList())
             {
-                if (!TryDelete(target))
+                if (!TryDelete(target, approvalResetOperation))
                 {
                     failures.Add(target);
                 }
@@ -6573,8 +6585,13 @@ namespace AL.Services.Local
             params string[] protectedPaths)
         {
             var quarantines = EnumerateQuarantines(sourceFileName)
-                .Select(path => new FileInfo(path))
-                .OrderByDescending(info => info.CreationTimeUtc)
+                .Select(path => new
+                {
+                    Path = path,
+                    CreationTimeUtc = _fileOperations.GetCreationTimeUtc(path)
+                })
+                .OrderByDescending(candidate => candidate.CreationTimeUtc)
+                .ThenByDescending(candidate => candidate.Path, StringComparer.Ordinal)
                 .ToList();
 
             var retained = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -6582,8 +6599,8 @@ namespace AL.Services.Local
                          Array.Empty<string>())
             {
                 if (!string.IsNullOrWhiteSpace(protectedPath) &&
-                    quarantines.Any(info => string.Equals(
-                        info.FullName,
+                    quarantines.Any(candidate => string.Equals(
+                        candidate.Path,
                         protectedPath,
                         StringComparison.OrdinalIgnoreCase)))
                 {
@@ -6591,20 +6608,20 @@ namespace AL.Services.Local
                 }
             }
 
-            foreach (FileInfo candidate in quarantines)
+            foreach (var candidate in quarantines)
             {
                 if (retained.Count >= MaxQuarantinesPerSource)
                 {
                     break;
                 }
 
-                retained.Add(candidate.FullName);
+                retained.Add(candidate.Path);
             }
 
-            foreach (FileInfo old in quarantines.Where(info =>
-                         !retained.Contains(info.FullName)))
+            foreach (var old in quarantines.Where(candidate =>
+                         !retained.Contains(candidate.Path)))
             {
-                TryDelete(old.FullName);
+                TryDelete(old.Path);
                 Debug.LogWarning(
                     "AL-SAVE-QUARANTINE-PRUNED: Pruned an old bounded quarantine artifact.");
             }
@@ -6764,8 +6781,28 @@ namespace AL.Services.Local
 
         private bool TryDelete(string path)
         {
+            return TryDelete(path, approvalResetOperation: false);
+        }
+
+        private bool TryDelete(string path, bool approvalResetOperation)
+        {
             try
             {
+                if (approvalResetOperation)
+                {
+                    bool deleted = MvpApprovalSlotRuntime.TryDeleteAuthorizedArtifact(
+                        this,
+                        path,
+                        out string failure);
+                    if (!deleted)
+                    {
+                        Debug.LogWarning(
+                            $"AL-SAVE-DELETE-FAILED: Could not safely delete approval artifact {path}: {failure}");
+                    }
+
+                    return deleted;
+                }
+
                 _fileOperations.Delete(path);
                 return _fileOperations
                     .ReadAllBytesBounded(path, 1)

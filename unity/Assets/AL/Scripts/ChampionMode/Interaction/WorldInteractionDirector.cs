@@ -20,6 +20,7 @@ namespace AL.ChampionMode.Interaction
         private float _feedbackVisibleUntil;
 
         public WorldInteractable Focused => _focused;
+        public Transform Actor => _actor;
         public string LastFeedback { get; private set; } = string.Empty;
         public event Action<WorldInteractionResult> Confirmed;
 

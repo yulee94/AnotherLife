@@ -237,9 +237,14 @@ namespace AL.ChampionMode.Control
                 .Count(obj => obj.name.StartsWith("Dummy_"));
         }
 
+        private void OnDisable()
+        {
+            CancelGameplayOperations();
+        }
+
         private void Update()
         {
-            if (_controller == null || _isDodging) return;
+            if (_controller == null) return;
 
             Vector3 frameStart = transform.position;
             bool wasGrounded = _controller.isGrounded;
@@ -273,8 +278,9 @@ namespace AL.ChampionMode.Control
                 return;
             }
 
-            if (_controlsLocked)
+            if (GameplayEntryBlocked)
             {
+                CancelGameplayOperations();
                 collisionFlags = ApplyMovement(Vector2.zero);
                 PublishMovementReceipt(
                     requestedInput,
@@ -283,6 +289,8 @@ namespace AL.ChampionMode.Control
                     collisionFlags);
                 return;
             }
+
+            if (_isDodging) return;
 
             requestedInput = ReadMoveInput();
             collisionFlags = ApplyMovement(requestedInput);
@@ -457,7 +465,7 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator PerformAttack()
         {
-            if (_controlsLocked || _realmId == RealmId.None)
+            if (GameplayEntryBlocked || _realmId == RealmId.None)
             {
                 yield break;
             }
@@ -468,12 +476,18 @@ namespace AL.ChampionMode.Control
             int editorAttackSequence = _editorBasicAttackSequence;
 #endif
             GameDebug.Log("<color=orange>[Combat] Attacking!</color>");
-            RuntimeCombatAudio.PlayBasicAttack();
+#if UNITY_EDITOR
+            if (_editorBasicAttackResolver == null)
+#endif
+            using (CombatEffectOwnership.Begin(gameObject))
+            {
+                RuntimeCombatAudio.PlayBasicAttack();
+            }
 
             // 1. Lunge Forward
             Vector3 lungeDir = transform.forward;
             float lungeTimer = 0f;
-            while (lungeTimer < 0.1f && !_controlsLocked)
+            while (lungeTimer < 0.1f && !GameplayEntryBlocked)
             {
                 MoveWithinTerrainSupport(
                     lungeDir * _attackLungeForce * Time.deltaTime * 10f);
@@ -481,7 +495,7 @@ namespace AL.ChampionMode.Control
                 yield return null;
             }
 
-            if (_controlsLocked)
+            if (GameplayEntryBlocked)
             {
                 _isAttacking = false;
                 yield break;
@@ -538,18 +552,21 @@ namespace AL.ChampionMode.Control
                     GameDebug.Log(defeated
                         ? "<color=red>[Combat] Enemy Defeated!</color>"
                         : "<color=red>[Combat] Enemy Hit!</color>");
-                    CreateHitVFX(resolution.ImpactPosition);
-                    SkillEffectFactory.SpawnFloatingCombatText(
-                        resolution.ImpactPosition + Vector3.up * 1.45f,
-                        string.IsNullOrEmpty(resolution.CombatText)
-                            ? defeated ? "KO" : "HIT"
-                            : resolution.CombatText,
-                        new Color(1f, 0.78f, 0.22f),
-                        0.26f,
-                        0.8f);
-                    SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
-                    SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
-                    RuntimeCombatAudio.PlayImpact();
+                    using (CombatEffectOwnership.Begin(gameObject))
+                    {
+                        CreateHitVFX(resolution.ImpactPosition);
+                        SkillEffectFactory.SpawnFloatingCombatText(
+                            resolution.ImpactPosition + Vector3.up * 1.45f,
+                            string.IsNullOrEmpty(resolution.CombatText)
+                                ? defeated ? "KO" : "HIT"
+                                : resolution.CombatText,
+                            new Color(1f, 0.78f, 0.22f),
+                            0.26f,
+                            0.8f);
+                        SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
+                        SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
+                        RuntimeCombatAudio.PlayImpact();
+                    }
                 }
             }
 
@@ -564,11 +581,19 @@ namespace AL.ChampionMode.Control
                     GameDebug.Log("<color=red>[Combat] Enemy Defeated!</color>");
 
                     // Visual Feedback
-                    CreateHitVFX(hitCollider.transform.position);
-                    SkillEffectFactory.SpawnFloatingCombatText(hitCollider.transform.position + Vector3.up * 1.45f, "KO", new Color(1f, 0.78f, 0.22f), 0.26f, 0.8f);
-                    SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
-                    SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
-                    RuntimeCombatAudio.PlayImpact();
+                    using (CombatEffectOwnership.Begin(gameObject))
+                    {
+                        CreateHitVFX(hitCollider.transform.position);
+                        SkillEffectFactory.SpawnFloatingCombatText(
+                            hitCollider.transform.position + Vector3.up * 1.45f,
+                            "KO",
+                            new Color(1f, 0.78f, 0.22f),
+                            0.26f,
+                            0.8f);
+                        SkillEffectFactory.ShakeCamera(0.10f, 0.10f);
+                        SkillEffectFactory.RequestHitPause(0.035f, 0.14f);
+                        RuntimeCombatAudio.PlayImpact();
+                    }
 
                     Destroy(hitCollider.gameObject);
                     CheckVictory(1);
@@ -587,7 +612,10 @@ namespace AL.ChampionMode.Control
                             boss.TakeDamage(catalogDamage);
                         }
 
-                        RuntimeCombatAudio.PlayImpact();
+                        using (CombatEffectOwnership.Begin(gameObject))
+                        {
+                            RuntimeCombatAudio.PlayImpact();
+                        }
                     }
                 }
             }
@@ -603,9 +631,20 @@ namespace AL.ChampionMode.Control
             {
                 GameDebug.Log("[Combat] Attack Missed.");
                 Vector3 whiffCenter = transform.position + transform.forward * 1.35f;
-                SkillEffectFactory.SpawnBasicAttackWhiff(whiffCenter, transform.forward, realmId);
-                SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 1.55f + transform.forward * 0.65f, "MISS", new Color(0.68f, 0.76f, 0.86f), 0.20f, 0.55f);
-                SkillEffectFactory.ShakeCamera(0.035f, 0.055f);
+                using (CombatEffectOwnership.Begin(gameObject))
+                {
+                    SkillEffectFactory.SpawnBasicAttackWhiff(
+                        whiffCenter,
+                        transform.forward,
+                        realmId);
+                    SkillEffectFactory.SpawnFloatingCombatText(
+                        transform.position + Vector3.up * 1.55f + transform.forward * 0.65f,
+                        "MISS",
+                        new Color(0.68f, 0.76f, 0.86f),
+                        0.20f,
+                        0.55f);
+                    SkillEffectFactory.ShakeCamera(0.035f, 0.055f);
+                }
             }
 
             yield return new WaitForSeconds(_attackCooldown);
@@ -668,20 +707,26 @@ namespace AL.ChampionMode.Control
 
         private IEnumerator Dodge()
         {
-            if (_controlsLocked || _realmId == RealmId.None)
+            if (GameplayEntryBlocked || _realmId == RealmId.None)
             {
                 yield break;
             }
 
             _isDodging = true;
             _skillCaster?.CancelCurrentSkill();
-            SkillEffectFactory.SpawnDodgeTrail(transform.position + Vector3.up * 0.25f, transform.forward, _realmId);
-            RuntimeCombatAudio.PlayDodge();
+            using (CombatEffectOwnership.Begin(gameObject))
+            {
+                SkillEffectFactory.SpawnDodgeTrail(
+                    transform.position + Vector3.up * 0.25f,
+                    transform.forward,
+                    _realmId);
+                RuntimeCombatAudio.PlayDodge();
+            }
             Vector3 dodgeDir = transform.forward;
             float timer = 0f;
             float duration = 0.2f;
 
-            while (timer < duration && !_controlsLocked)
+            while (timer < duration && !GameplayEntryBlocked)
             {
                 MoveWithinTerrainSupport(
                     dodgeDir * (_dodgeDistance / duration) * Time.deltaTime);
@@ -694,7 +739,7 @@ namespace AL.ChampionMode.Control
 
         public void SetExternalMoveInput(Vector2 input)
         {
-            if (_controlsLocked)
+            if (GameplayEntryBlocked)
             {
                 _externalMoveInput = Vector2.zero;
                 return;
@@ -705,10 +750,9 @@ namespace AL.ChampionMode.Control
 
         public bool RequestBasicAttack()
         {
-            if (_controlsLocked ||
+            if (GameplayEntryBlocked ||
                 _isAttacking ||
-                _realmId == RealmId.None ||
-                !isActiveAndEnabled)
+                _realmId == RealmId.None)
             {
                 return false;
             }
@@ -728,7 +772,7 @@ namespace AL.ChampionMode.Control
 
         public void RequestDodge()
         {
-            if (!_controlsLocked && !_isDodging && _realmId != RealmId.None)
+            if (!GameplayEntryBlocked && !_isDodging && _realmId != RealmId.None)
             {
                 StartCoroutine(Dodge());
             }
@@ -736,7 +780,7 @@ namespace AL.ChampionMode.Control
 
         public void RequestSkill(int index)
         {
-            if (_controlsLocked || _realmId == RealmId.None)
+            if (GameplayEntryBlocked || _realmId == RealmId.None)
             {
                 return;
             }
@@ -916,7 +960,7 @@ namespace AL.ChampionMode.Control
 
         public void SetBlocking(bool isBlocking)
         {
-            if (_controlsLocked || _realmId == RealmId.None)
+            if (GameplayEntryBlocked || _realmId == RealmId.None)
             {
                 _touchBlockHeld = false;
                 _isBlocking = false;
@@ -925,6 +969,34 @@ namespace AL.ChampionMode.Control
 
             _touchBlockHeld = isBlocking;
             _isBlocking = _touchBlockHeld || GameInput.BlockHeld();
+        }
+
+        private bool GameplayEntryBlocked =>
+            !isActiveAndEnabled ||
+            _controlsLocked ||
+            GameInput.GameplaySuppressed ||
+            ChampionHudCameraGate.BlocksGameplay;
+
+        public bool BlocksGameplayEntry => GameplayEntryBlocked;
+
+        internal bool AllowsOwnedModalCommand =>
+            isActiveAndEnabled &&
+            !_controlsLocked &&
+            !GameInput.HasNonCursorGameplaySuppression;
+
+        private void CancelGameplayOperations()
+        {
+            StopAllCoroutines();
+            _externalMoveInput = Vector2.zero;
+            _touchBlockHeld = false;
+            _isBlocking = false;
+            _isAttacking = false;
+            _isDodging = false;
+            _velocity = Vector3.zero;
+            _rotationVelocity = 0f;
+            _skillCaster?.CancelCurrentSkill();
+            CombatEffectOwnership.Retire(gameObject);
+            RuntimeCombatAudio.StopOwned(gameObject);
         }
 
         public void SetControlLocked(bool isLocked)
@@ -938,10 +1010,7 @@ namespace AL.ChampionMode.Control
 
             if (isLocked)
             {
-                StopAllCoroutines();
-                _isAttacking = false;
-                _isDodging = false;
-                _skillCaster?.CancelCurrentSkill();
+                CancelGameplayOperations();
             }
         }
 

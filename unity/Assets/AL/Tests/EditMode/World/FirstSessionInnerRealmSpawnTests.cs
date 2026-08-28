@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using AL.ChampionMode;
@@ -26,6 +27,27 @@ namespace AL.Tests.EditMode.World
             }
 
             _spawned.Clear();
+        }
+
+        [Test]
+        public void CanonicalSpawnLoaderUsesEstablishedEditorAndPlayerResolver()
+        {
+            string source = File.ReadAllText(Path.Combine(
+                Application.dataPath,
+                "AL/Scripts/World/FirstSessionInnerRealmSpawn.cs"));
+
+            Assert.That(
+                source,
+                Does.Contain("string path = ResolveCatalogPath("),
+                "World Atlas must retain the established editor/player path contract.");
+            Assert.That(
+                source,
+                Does.Contain("Application.streamingAssetsPath"),
+                "Player builds must resolve the packaged StreamingAssets/GameData directory.");
+            Assert.That(
+                source,
+                Does.Not.Contain("SixFamilyRuntimeCatalog.TryResolveGameDataDirectory"),
+                "World Atlas availability may not depend on unrelated gameplay catalogs.");
         }
 
         [Test]

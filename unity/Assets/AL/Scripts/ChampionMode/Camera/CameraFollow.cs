@@ -7,6 +7,7 @@ using AL.ChampionMode.UI;
 using AL.Input;
 using AL.Core;
 using EnhancedTouch = UnityEngine.InputSystem.EnhancedTouch.Touch;
+using IDisposable = System.IDisposable;
 
 namespace AL.ChampionMode.Camera
 {
@@ -75,7 +76,12 @@ namespace AL.ChampionMode.Camera
         private float _cinematicFovVelocity;
         private float _cinematicSmoothTime = 0.16f;
         private float _defaultFieldOfView = 42f;
+        private float _focusHeightOffset = 1f;
         private UnityEngine.Camera _camera;
+        private IDisposable _inspectionCursorOwnership;
+        private IDisposable _manualCursorOwnership;
+        private int _presentationSuspensionCount;
+        private int _presentationSuspensionGeneration;
         private readonly RaycastHit[] _obstructionHits =
             new RaycastHit[ObstructionHitCapacity];
         private readonly Collider[] _obstructionOverlaps =
@@ -181,6 +187,7 @@ namespace AL.ChampionMode.Camera
             _recenterPitchVelocity = 0f;
             _positionVelocity = Vector3.zero;
             _recoveringFromObstruction = false;
+            UpdateFocusHeightOffset();
         }
 
         public void AddShake(float strength, float duration)
@@ -188,6 +195,25 @@ namespace AL.ChampionMode.Camera
             _shakeStrength = Mathf.Max(_shakeStrength, Mathf.Max(0f, strength));
             _shakeDuration = Mathf.Max(_shakeDuration, Mathf.Max(0.01f, duration));
             _shakeTime = _shakeDuration;
+        }
+
+        public IDisposable AcquirePresentationSuspension(string owner)
+        {
+            _presentationSuspensionCount++;
+            return new PresentationSuspensionToken(
+                this,
+                _presentationSuspensionGeneration);
+        }
+
+        public void SnapToTarget()
+        {
+            if (!TryCalculateDesiredPose(out Vector3 position, out Quaternion rotation))
+            {
+                return;
+            }
+
+            transform.SetPositionAndRotation(position, rotation);
+            _positionVelocity = Vector3.zero;
         }
 
         public void SetCinematicShot(Vector3 position, Vector3 lookAt, float fieldOfView, float smoothTime)
@@ -222,6 +248,12 @@ namespace AL.ChampionMode.Camera
                 return;
             }
 
+            if (enabled)
+            {
+                _inspectionCursorOwnership ??=
+                    ChampionHudCameraGate.AcquireCursorOwnership("camera-inspection");
+            }
+
             EndMouseOrbit(restoreCursorPosition: true);
             CancelRecenter();
             _inspectionMode = enabled;
@@ -243,9 +275,9 @@ namespace AL.ChampionMode.Camera
                     _storedPitch,
                     ResolveMinimumPitch(),
                     _maxPitch);
+                _inspectionCursorOwnership?.Dispose();
+                _inspectionCursorOwnership = null;
             }
-
-            EnsureFreeCursor();
         }
 
         private void Start()
@@ -260,7 +292,17 @@ namespace AL.ChampionMode.Camera
 
         private void OnDisable()
         {
+            _presentationSuspensionCount = 0;
+            _presentationSuspensionGeneration =
+                unchecked(_presentationSuspensionGeneration + 1);
             EndMouseOrbit(restoreCursorPosition: false);
+            if (_inspectionMode)
+            {
+                SetInspectionMode(false);
+            }
+
+            _manualCursorOwnership?.Dispose();
+            _manualCursorOwnership = null;
         }
 
         private void OnApplicationFocus(bool hasFocus)
@@ -273,6 +315,14 @@ namespace AL.ChampionMode.Camera
 
         private void Update()
         {
+            if (_presentationSuspensionCount > 0)
+            {
+                return;
+            }
+
+            ApplyCursorModeToggle(GameInput.CursorModePressed());
+            ChampionHudCameraGate.ReapplyCursorState();
+
             if (_cinematicMode)
             {
                 EndMouseOrbit(restoreCursorPosition: false);
@@ -296,6 +346,28 @@ namespace AL.ChampionMode.Camera
             _distance = Mathf.Clamp(_distance, _minDistance, _maxDistance);
         }
 
+        public void ApplyCursorModeToggle(bool pressed)
+        {
+            if (!pressed)
+            {
+                return;
+            }
+
+            if (_manualCursorOwnership == null)
+            {
+                _manualCursorOwnership =
+                    ChampionHudCameraGate.AcquireCursorOwnership("camera-manual");
+                return;
+            }
+
+            _manualCursorOwnership.Dispose();
+            _manualCursorOwnership = null;
+        }
+
+        private bool ShouldIgnoreManualCameraInput() =>
+            ChampionHudCameraGate.BlocksLook ||
+            GameInput.GameplaySuppressed;
+
         private bool HandlePointerAndGamepadInput(int touchCount)
         {
             if (touchCount > 0)
@@ -304,8 +376,7 @@ namespace AL.ChampionMode.Camera
                 return false;
             }
 
-            bool inputBlocked = ChampionHudCameraGate.BlocksLook ||
-                                GameInput.GameplaySuppressed;
+            bool inputBlocked = ShouldIgnoreManualCameraInput();
             Mouse mouse = Mouse.current;
             if (_mouseOrbitActive &&
                 (inputBlocked || mouse == null || !mouse.rightButton.isPressed))
@@ -370,9 +441,7 @@ namespace AL.ChampionMode.Camera
 
         private bool HandleTouchInput(int touchCount)
         {
-            if (touchCount == 0 ||
-                ChampionHudCameraGate.BlocksLook ||
-                GameInput.GameplaySuppressed)
+            if (touchCount == 0 || ShouldIgnoreManualCameraInput())
             {
                 _lastPinchDistance = -1f;
                 return false;
@@ -523,6 +592,11 @@ namespace AL.ChampionMode.Camera
 
         private void LateUpdate()
         {
+            if (_presentationSuspensionCount > 0)
+            {
+                return;
+            }
+
             if (_cinematicMode)
             {
                 UpdateCinematicCamera();
@@ -603,7 +677,7 @@ namespace AL.ChampionMode.Camera
                 }
 
                 transform.position = finalPosition;
-                Vector3 lookDirection = pivot - finalPosition;
+                Vector3 lookDirection = ResolveOpticalFocusPoint(pivot) - finalPosition;
                 transform.rotation = lookDirection.sqrMagnitude > 0.000001f
                     ? Quaternion.LookRotation(lookDirection.normalized, Vector3.up)
                     : rotation;
@@ -752,6 +826,20 @@ namespace AL.ChampionMode.Camera
             }
 
             return _target.position + Vector3.up * _heightOffset;
+        }
+
+        private Vector3 ResolveTargetFocusPoint()
+        {
+            return _target != null
+                ? _target.position + Vector3.up * _focusHeightOffset
+                : Vector3.zero;
+        }
+
+        private Vector3 ResolveOpticalFocusPoint(Vector3 resolvedPivot)
+        {
+            return _useCharacterControllerPivot
+                ? resolvedPivot
+                : ResolveTargetFocusPoint();
         }
 
         private Vector3 ResolveObstructedPosition(
@@ -987,6 +1075,103 @@ namespace AL.ChampionMode.Camera
                 {
                     _defaultFieldOfView = _camera.fieldOfView;
                 }
+            }
+        }
+
+        private bool TryCalculateDesiredPose(
+            out Vector3 position,
+            out Quaternion rotation)
+        {
+            position = transform.position;
+            rotation = transform.rotation;
+            if (_target == null)
+            {
+                return false;
+            }
+
+            Quaternion orbit = Quaternion.Euler(_pitch, _yaw, 0f);
+            Vector3 pivot = ResolveTargetPivot();
+            position =
+                orbit * new Vector3(0f, 0f, -_distance) +
+                pivot;
+            Vector3 focus = ResolveOpticalFocusPoint(pivot);
+            Vector3 lookDirection = focus - position;
+            if (lookDirection.sqrMagnitude > 0.001f)
+            {
+                rotation = Quaternion.LookRotation(lookDirection.normalized, Vector3.up);
+            }
+
+            return true;
+        }
+
+        private void ReleasePresentationSuspension(int generation)
+        {
+            if (generation != _presentationSuspensionGeneration ||
+                _presentationSuspensionCount <= 0)
+            {
+                return;
+            }
+
+            _presentationSuspensionCount--;
+        }
+
+        private sealed class PresentationSuspensionToken : IDisposable
+        {
+            private CameraFollow _owner;
+            private readonly int _generation;
+
+            public PresentationSuspensionToken(CameraFollow owner, int generation)
+            {
+                _owner = owner;
+                _generation = generation;
+            }
+
+            public void Dispose()
+            {
+                CameraFollow owner = _owner;
+                if (owner == null)
+                {
+                    return;
+                }
+
+                _owner = null;
+                owner.ReleasePresentationSuspension(_generation);
+            }
+        }
+
+        private void UpdateFocusHeightOffset()
+        {
+            _focusHeightOffset = 1f;
+            if (_target == null)
+            {
+                return;
+            }
+
+            Renderer[] renderers = _target.GetComponentsInChildren<Renderer>(false);
+            bool hasBounds = false;
+            Bounds bounds = default;
+            for (int i = 0; i < renderers.Length; i++)
+            {
+                Renderer renderer = renderers[i];
+                if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
+                {
+                    continue;
+                }
+
+                if (!hasBounds)
+                {
+                    bounds = renderer.bounds;
+                    hasBounds = true;
+                }
+                else
+                {
+                    bounds.Encapsulate(renderer.bounds);
+                }
+            }
+
+            if (hasBounds)
+            {
+                _focusHeightOffset = bounds.center.y - _target.position.y;
             }
         }
     }

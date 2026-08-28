@@ -1,6 +1,8 @@
 using System.Collections;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Interaction;
 using AL.ChampionMode.Quests;
+using AL.ChampionMode.Skills;
 using AL.Core;
 using AL.Input;
 using NUnit.Framework;
@@ -20,7 +22,7 @@ namespace AL.Tests.PlayMode
         {
             ProofOfWorthDirector.ResetForTests();
             _previousGameplaySuppressed = GameInput.GameplaySuppressed;
-            GameInput.SetGameplaySuppressed(true);
+            GameInput.SetGameplaySuppressed(false);
             _root = new GameObject("ProofOfWorthWorldInteractionTests");
         }
 
@@ -55,7 +57,7 @@ namespace AL.Tests.PlayMode
             ProofOfWorthDirector proof = CreateAtGuide();
 
             Assert.That(
-                proof.TryApplyWorldInteraction(Receipt(
+                proof.ApplyWorldInteractionForTests(Receipt(
                     accepted: true,
                     FirstSessionWorldInteractables.GuideCatalogId,
                     WorldInteractionKind.Talk)),
@@ -68,7 +70,7 @@ namespace AL.Tests.PlayMode
                 Is.EqualTo(ProofOfWorthIds.RestoreCovenantObjectiveId));
 
             Assert.That(
-                proof.TryApplyWorldInteraction(Receipt(
+                proof.ApplyWorldInteractionForTests(Receipt(
                     accepted: true,
                     FirstSessionWorldInteractables.CovenantSiteCatalogId,
                     WorldInteractionKind.Use)),
@@ -124,7 +126,7 @@ namespace AL.Tests.PlayMode
                 ProofOfWorthPhase.C1MeetGuide);
 
             Assert.That(
-                proof.TryApplyWorldInteraction(Receipt(
+                proof.ApplyWorldInteractionForTests(Receipt(
                     accepted: true,
                     FirstSessionWorldInteractables.GuideCatalogId,
                     WorldInteractionKind.Talk)),
@@ -192,6 +194,34 @@ namespace AL.Tests.PlayMode
                 "The currently bound source must deliver its accepted receipt once.");
         }
 
+        [UnityTest]
+        public IEnumerator BoundForeignActorSourceCannotAdvanceProof()
+        {
+            var owner = new GameObject("ProofWorldInteractionOwner");
+            owner.transform.SetParent(_root.transform, false);
+            var foreignActor = new GameObject("ForeignWorldInteractionActor");
+            foreignActor.transform.SetParent(_root.transform, false);
+            var cameraObject = new GameObject("ForeignWorldInteractionCamera");
+            cameraObject.transform.SetParent(_root.transform, false);
+            UnityEngine.Camera camera =
+                cameraObject.AddComponent<UnityEngine.Camera>();
+
+            ProofOfWorthDirector proof = CreateAtGuide(owner.transform);
+            WorldInteractionDirector foreignSource = CreateEventSource(
+                "ForeignWorldInteractionSource",
+                foreignActor.transform,
+                camera);
+            proof.BindWorldInteractionDirector(foreignSource);
+            yield return null;
+
+            Assert.That(foreignSource.Focused, Is.Not.Null);
+            Assert.That(foreignSource.TryConfirmFocused(), Is.True);
+            Assert.That(
+                proof.State.Phase,
+                Is.EqualTo(ProofOfWorthPhase.C1MeetGuide),
+                "A foreign actor's accepted result must not enter the owner's Proof.");
+        }
+
         private ProofOfWorthDirector CreateAtGuide(Transform player = null)
         {
             ProofOfWorthDirector proof = CreateProof(player);
@@ -201,11 +231,31 @@ namespace AL.Tests.PlayMode
 
         private ProofOfWorthDirector CreateProof(Transform player = null)
         {
+            Transform owner = player != null ? player : _root.transform;
+            if (owner.GetComponent<CharacterController>() == null)
+            {
+                owner.gameObject.AddComponent<CharacterController>();
+            }
+            if (owner.GetComponent<ChampionCombat>() == null)
+            {
+                owner.gameObject.AddComponent<ChampionCombat>();
+            }
+            if (owner.GetComponent<SkillCaster>() == null)
+            {
+                owner.gameObject.AddComponent<SkillCaster>();
+            }
+            ChampionController controller = owner.GetComponent<ChampionController>();
+            if (controller == null)
+            {
+                controller = owner.gameObject.AddComponent<ChampionController>();
+            }
+            controller.ConfigureRealmContext(RealmId.Crownlands);
+
             ProofOfWorthDirector proof =
                 _root.AddComponent<ProofOfWorthDirector>();
             proof.EnsureReady(
                 null,
-                player != null ? player : _root.transform,
+                owner,
                 RealmId.Crownlands);
             return proof;
         }
@@ -225,6 +275,13 @@ namespace AL.Tests.PlayMode
 
             for (int index = 0; index < commands.Length; index++)
             {
+                NpcConversationView conversation =
+                    Object.FindObjectOfType<NpcConversationView>();
+                if (conversation != null && conversation.IsVisible)
+                {
+                    conversation.Collapse();
+                }
+
                 Assert.That(
                     proof.ApplyForTests(commands[index]).Changed,
                     Is.True,
@@ -279,7 +336,7 @@ namespace AL.Tests.PlayMode
             ProofOfWorthPhase expectedPhase)
         {
             ProofOfWorthState before = proof.State;
-            Assert.That(proof.TryApplyWorldInteraction(receipt), Is.False);
+            Assert.That(proof.ApplyWorldInteractionForTests(receipt), Is.False);
             Assert.That(proof.State, Is.SameAs(before));
             Assert.That(proof.State.Phase, Is.EqualTo(expectedPhase));
         }

@@ -490,9 +490,22 @@ namespace AL.Tests.PlayMode
             ProofOfWorthDirector proof = Object.FindObjectOfType<ProofOfWorthDirector>();
             Assert.That(proof, Is.Not.Null);
 
+            if (proof.State.Phase == ProofOfWorthPhase.OmenOffered)
+            {
+                Object.FindObjectOfType<NpcConversationView>()?.Collapse();
+                Assert.That(
+                    proof.ApplyForTests(ProofOfWorthCommand.AcceptOffer).Changed,
+                    Is.True,
+                    ProofOfWorthCommand.AcceptOffer.ToString());
+            }
+            else
+            {
+                Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenTalk));
+                Assert.That(proof.State.DialogueId, Is.EqualTo(ProofOfWorthIds.StartDialogueId));
+            }
+
             foreach (ProofOfWorthCommand command in new[]
             {
-                ProofOfWorthCommand.AcceptOffer,
                 ProofOfWorthCommand.Investigate,
                 ProofOfWorthCommand.DeployChampion,
                 ProofOfWorthCommand.ArenaSuccess,
@@ -504,6 +517,7 @@ namespace AL.Tests.PlayMode
                 ProofOfWorthCommand.GuardianDefeated
             })
             {
+                Object.FindObjectOfType<NpcConversationView>()?.Collapse();
                 Assert.That(proof.ApplyForTests(command).Changed, Is.True, command.ToString());
             }
 

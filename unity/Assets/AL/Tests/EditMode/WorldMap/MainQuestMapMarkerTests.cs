@@ -251,7 +251,7 @@ namespace AL.Tests.EditMode.WorldMap
                 ProofOfWorthIds.RestoreCovenantObjectiveId,
                 RealmId.Eldergrove,
                 ProofOfWorthCopy.C1RestoreCovenant);
-            WorldMapOverlay overlay = WorldMapOverlay.Ensure(_snapshot);
+            WorldMapOverlay overlay = EnsureStandaloneOverlay(_snapshot);
             _spawned.Add(overlay.gameObject);
             WorldMapSession.OpenMap();
 
@@ -267,6 +267,17 @@ namespace AL.Tests.EditMode.WorldMap
                 FindDeep(overlay.transform, "WorldMapQuestMarker_" + markers[0].MarkerId),
                 Is.Not.Null);
             Assert.That(Dump(overlay.transform), Does.Contain(ProofOfWorthCopy.C1RestoreCovenant));
+        }
+
+        private static WorldMapOverlay EnsureStandaloneOverlay(WorldAtlasSnapshot snapshot)
+        {
+            WorldMapOverlay overlay = WorldMapOverlay.Ensure(snapshot);
+            MethodInfo activate = typeof(WorldMapOverlay).GetMethod(
+                "SetPresentationAuthority",
+                BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.That(activate, Is.Not.Null);
+            activate.Invoke(overlay, new object[] { true });
+            return overlay;
         }
 
         private static GameObject FindDeep(Transform root, string name)
