@@ -5899,6 +5899,8 @@ namespace AL.Tests.EditMode
                         return null;
                     case "EnumerateFiles":
                         return EnumerateFiles((string)args[0], (string)args[1]);
+                    case "GetCreationTimeUtc":
+                        return DateTime.MinValue;
                     default:
                         throw new NotSupportedException(targetMethod.Name);
                 }

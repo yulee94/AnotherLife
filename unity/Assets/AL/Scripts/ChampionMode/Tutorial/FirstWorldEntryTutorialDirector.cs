@@ -1,18 +1,30 @@
+using System;
 using AL.ChampionMode.Tutorial;
+using AL.ChampionMode.Control;
+using AL.ChampionMode.Interaction;
+using AL.Core;
+using AL.Core.Interfaces;
+using AL.Data.Runtime;
 using AL.Input;
+using AL.Services.Local;
+using AL.UI.Presentation;
+using AL.UI.QuestHud;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace AL.ChampionMode
 {
     /// <summary>
-    /// First-session onboarding overlay. Observes GameInput; does not patch ChampionController.
+    /// First-session onboarding overlay. Observes look/action input and consumes
+    /// movement receipts from ChampionController; it does not patch the motor.
     /// </summary>
     public sealed class FirstWorldEntryTutorialDirector : MonoBehaviour
     {
         public const string OverlayRootName = "TUTORIAL_FIRST_WORLD_ENTRY_Overlay_TEMPORARY";
         public const string PromptName = "TutorialPrompt_TEMPORARY";
         public const string OfferPlateName = "OmenOfferPlate_TEMPORARY";
+        public const float PromptHeight = 92f;
+        public const float PromptHotbarClearance = 12f;
 
         private static FirstWorldEntryTutorialDirector _instance;
         private FirstWorldEntryTutorialState _state;
@@ -24,26 +36,101 @@ namespace AL.ChampionMode
         private string _lastFollowResult = string.Empty;
         private int _acceptAttempts;
         private bool _ready;
+        private ChampionController _playerController;
+        private WorldInteractionDirector _worldInteractionDirector;
+        private uint _lastMovementSequence;
+        private uint _lastBasicAttackSequence;
+        private uint _testMovementSequence;
+        private ISaveGameService _saveGameService;
+        private FirstWorldProgressSnapshot _progressSnapshot;
+        private bool _durable;
+        private bool _failedClosed;
+        private bool _ownsAutoQuestMovement;
+        private float _nextAutoQuestAdvanceAt;
+        private float _autoQuestResumeAt;
 
         public FirstWorldEntryTutorialState State => _state;
+        public FirstWorldProgressSnapshot ProgressSnapshot => _progressSnapshot;
         public string LastFollowResult => _lastFollowResult;
         public int AcceptAttempts => _acceptAttempts;
         public bool OpenedKingdom => false;
+        public event Action<FirstWorldProgressSnapshot> Completed;
 
         public static FirstWorldEntryTutorialDirector AttachIfNeeded(Transform parent)
+        {
+            ServiceLocator.TryGet(
+                out ISaveGameService saveGameService);
+            return AttachIfNeeded(parent, saveGameService, null);
+        }
+
+        public static FirstWorldEntryTutorialDirector AttachIfNeeded(
+            Transform parent,
+            ISaveGameService saveGameService)
+        {
+            return AttachIfNeeded(parent, saveGameService, null);
+        }
+
+        public static FirstWorldEntryTutorialDirector AttachIfNeeded(
+            Transform parent,
+            ChampionController playerController)
+        {
+            return AttachIfNeeded(parent, null, playerController);
+        }
+
+        public static FirstWorldEntryTutorialDirector AttachIfNeeded(
+            Transform parent,
+            ISaveGameService saveGameService,
+            ChampionController playerController)
         {
             if (!FirstSessionChampionStart.ShouldRunFirstWorldEntryTutorial)
             {
                 return null;
             }
 
+            if (saveGameService != null)
+            {
+                if (!FirstWorldProgressSaveAuthority.CanCommit(saveGameService))
+                {
+                    Debug.LogError(
+                        "[AL-FIRST-WORLD-PROGRESS-READ-ONLY] " +
+                        "Writable progress authority is unavailable.");
+                    return null;
+                }
+
+                if (!FirstWorldProgressSaveAuthority.TryRead(
+                        saveGameService,
+                        out FirstWorldProgressSnapshot progress,
+                        out string message))
+                {
+                    Debug.LogError(
+                        "[AL-FIRST-WORLD-PROGRESS-READ-FAILED] " + message);
+                    return null;
+                }
+
+                if (progress.IsTutorialComplete)
+                {
+                    return null;
+                }
+            }
+
+            if (saveGameService == null && Application.isPlaying)
+            {
+                Debug.LogError(
+                    "[AL-FIRST-WORLD-PROGRESS-READ-ONLY] " +
+                    "Tutorial progression requires a writable save authority.");
+                return null;
+            }
+
             if (_instance != null)
             {
+                _instance._saveGameService ??= saveGameService;
+                _instance.BindPlayerController(playerController);
                 _instance.EnsureReady();
                 return _instance;
             }
 
             var host = new GameObject(OverlayRootName);
+            host.SetActive(false);
             if (parent != null)
             {
                 host.transform.SetParent(parent, false);
@@ -51,29 +138,118 @@ namespace AL.ChampionMode
 
             FirstWorldEntryTutorialDirector director =
                 host.AddComponent<FirstWorldEntryTutorialDirector>();
+            director._saveGameService = saveGameService;
+            director.BindPlayerController(playerController);
             director.EnsureReady();
+            host.SetActive(true);
             return director;
         }
 
+#if UNITY_EDITOR
         public void ApplyLookForTests(float magnitude)
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             ConsiderLook(magnitude);
         }
 
-        public void ApplyMoveForTests(float magnitude, bool sprintHeld)
+        public void ApplyMoveForTests(float magnitude, bool blockHeld)
         {
-            ConsiderMove(magnitude, sprintHeld);
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
+            _testMovementSequence++;
+            ConsiderMove(
+                new ChampionMovementReceipt(
+                    _testMovementSequence,
+                    Vector2.up * magnitude,
+                    Vector3.forward * FirstWorldEntryTutorialEvidence.HorizontalDisplacementThreshold,
+                    wasGrounded: true,
+                    isGrounded: true,
+                    CollisionFlags.Below),
+                blockHeld);
+        }
+
+        public void ApplyRejectedMoveForTests(
+            float magnitude,
+            float horizontalDisplacement,
+            bool grounded)
+        {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
+            _testMovementSequence++;
+            ConsiderMove(
+                new ChampionMovementReceipt(
+                    _testMovementSequence,
+                    Vector2.up * magnitude,
+                    Vector3.forward * horizontalDisplacement,
+                    wasGrounded: grounded,
+                    isGrounded: grounded,
+                    grounded ? CollisionFlags.Below : CollisionFlags.None),
+                blockHeld: false);
         }
 
         public void ApplyInteractForTests()
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             ConsiderInteract();
         }
 
+        public void ApplyWorldInteractionForTests(WorldInteractionResult result)
+        {
+            HandleWorldInteractionConfirmed(result);
+        }
+#endif
+
+        public void BindWorldInteractionDirector(WorldInteractionDirector director)
+        {
+            if (_worldInteractionDirector == director)
+            {
+                return;
+            }
+
+            if (_worldInteractionDirector != null)
+            {
+                _worldInteractionDirector.Confirmed -=
+                    HandleWorldInteractionConfirmed;
+            }
+
+            _worldInteractionDirector = director;
+            if (_worldInteractionDirector != null)
+            {
+                _worldInteractionDirector.Confirmed +=
+                    HandleWorldInteractionConfirmed;
+            }
+        }
+
+#if UNITY_EDITOR
         public void ApplyAttackForTests()
         {
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
             ConsiderAttack();
         }
+
+        public void AdvanceAutoQuestForTests()
+        {
+            AdvanceAutoQuest();
+        }
+#endif
 
         public string FollowActiveObjective(bool targetAvailable)
         {
@@ -93,28 +269,75 @@ namespace AL.ChampionMode
             EnsureReady();
         }
 
+        private void OnDisable()
+        {
+            ReleaseAutoQuestMovement();
+        }
+
         private void OnDestroy()
         {
+            BindWorldInteractionDirector(null);
+            Completed = null;
             if (_instance == this)
             {
                 _instance = null;
             }
         }
 
+#if UNITY_EDITOR
         public static void ResetForTests()
         {
             _instance = null;
         }
+#endif
 
         public void EnsureReady()
         {
             _instance = this;
-            if (_ready)
+            if (_ready || _failedClosed)
             {
                 return;
             }
 
-            _state = FirstWorldEntryTutorialPlanner.CreateInitial();
+            _saveGameService ??=
+                ServiceLocator.TryGet(
+                    out ISaveGameService registeredSaveGameService)
+                    ? registeredSaveGameService
+                    : null;
+            if (_saveGameService != null)
+            {
+                string message = string.Empty;
+                if (!FirstWorldProgressSaveAuthority.CanCommit(
+                        _saveGameService) ||
+                    !FirstWorldProgressSaveAuthority.TryRead(
+                        _saveGameService,
+                        out _progressSnapshot,
+                        out message))
+                {
+                    FailClosed(message);
+                    return;
+                }
+
+                _durable = true;
+                _state = _progressSnapshot.Tutorial;
+                if (_state == null || _state.IsComplete)
+                {
+                    FailClosed("AL-FIRST-WORLD-TUTORIAL-NOT-ACTIONABLE");
+                    return;
+                }
+            }
+            else if (!Application.isPlaying)
+            {
+                // EditMode presentation/planner tests deliberately run without
+                // disk authority. Runtime paths never receive this fallback.
+                _state = FirstWorldEntryTutorialPlanner.CreateInitial();
+            }
+            else
+            {
+                FailClosed("AL-FIRST-WORLD-PROFILE-READ-ONLY");
+                return;
+            }
+
             BuildOverlay();
             RefreshPresentation();
             _ready = true;
@@ -122,23 +345,93 @@ namespace AL.ChampionMode
 
         private void Update()
         {
-            if (_state == null || _state.IsComplete)
+            if (_failedClosed || _state == null || _state.IsComplete)
             {
+                ReleaseAutoQuestMovement();
+                return;
+            }
+
+            if (!OwnerAllowsTutorialEvidence)
+            {
+                ReleaseAutoQuestMovement();
                 return;
             }
 
             Vector2 look = GameInput.ReadLook();
             ConsiderLook(look.magnitude);
-            Vector2 move = GameInput.ReadMove();
-            ConsiderMove(move.magnitude, GameInput.BlockHeld());
-            if (GameInput.SubmitPressed())
+
+            if (_playerController != null)
             {
-                ConsiderInteract();
+                ChampionMovementReceipt receipt =
+                    _playerController.LastMovementReceipt;
+                if (receipt.Sequence != 0 &&
+                    receipt.Sequence != _lastMovementSequence)
+                {
+                    _lastMovementSequence = receipt.Sequence;
+                    ConsiderMove(receipt, GameInput.BlockHeld());
+                }
+
+                ChampionBasicAttackReceipt attackReceipt =
+                    _playerController.LastBasicAttackReceipt;
+                if (attackReceipt.Sequence != 0 &&
+                    attackReceipt.Sequence != _lastBasicAttackSequence)
+                {
+                    _lastBasicAttackSequence = attackReceipt.Sequence;
+                    ConsiderAttack();
+                }
             }
 
-            if (GameInput.AttackPressed())
+            bool manualInput =
+                look.sqrMagnitude > 0.0001f ||
+                (_playerController != null &&
+                 _playerController.LastMovementReceipt.RequestedInput.sqrMagnitude > 0.0001f);
+            if (manualInput)
             {
-                ConsiderAttack();
+                _autoQuestResumeAt = Time.unscaledTime + 1.25f;
+            }
+
+            bool autoQuestAvailable =
+                QuestHudAutoQuest.Enabled &&
+                QuestHudAutoQuest.CanDriveInCurrentContext();
+            if (manualInput ||
+                !autoQuestAvailable ||
+                Time.unscaledTime < _autoQuestResumeAt)
+            {
+                ReleaseAutoQuestMovement();
+                return;
+            }
+
+            if (Time.unscaledTime >= _nextAutoQuestAdvanceAt)
+            {
+                AdvanceAutoQuest();
+                _nextAutoQuestAdvanceAt = Time.unscaledTime + 1.25f;
+            }
+        }
+
+        private void AdvanceAutoQuest()
+        {
+            if (_state == null || _state.IsComplete ||
+                !QuestHudAutoQuest.Enabled ||
+                !QuestHudAutoQuest.CanDriveInCurrentContext() ||
+                !OwnerAllowsTutorialEvidence)
+            {
+                return;
+            }
+
+            switch (_state.TeachingBeat)
+            {
+                case FirstWorldEntryTeachingBeat.CameraLook:
+                    break;
+                case FirstWorldEntryTeachingBeat.Move:
+                    _playerController.SetExternalMoveInput(Vector2.up);
+                    _ownsAutoQuestMovement = true;
+                    break;
+                case FirstWorldEntryTeachingBeat.Interact:
+                    _worldInteractionDirector?.TryConfirmFocused();
+                    break;
+                case FirstWorldEntryTeachingBeat.BasicAttack:
+                    _playerController.RequestBasicAttack();
+                    break;
             }
         }
 
@@ -155,31 +448,52 @@ namespace AL.ChampionMode
                 return;
             }
 
-            _state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
-                _state,
-                FirstWorldEntryTeachingBeat.Move,
-                sprintTaught: false);
-            RefreshPresentation();
+            if (_durable)
+            {
+                ApplyDurableTransition(
+                    FirstWorldTutorialProgressCommand.CameraLookAccepted,
+                    blockTaught: false);
+            }
+            else
+            {
+                _state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
+                    _state,
+                    FirstWorldEntryTeachingBeat.Move,
+                    blockTaught: false);
+                RefreshPresentation();
+            }
         }
 
-        private void ConsiderMove(float magnitude, bool sprintHeld)
+        private void ConsiderMove(
+            ChampionMovementReceipt receipt,
+            bool blockHeld)
         {
             if (_state.TeachingBeat != FirstWorldEntryTeachingBeat.Move)
             {
                 return;
             }
 
-            if (sprintHeld && FirstWorldEntryTutorialEvidence.IsMoveAccepted(magnitude))
+            if (!FirstWorldEntryTutorialEvidence.IsMoveAccepted(receipt))
+            {
+                return;
+            }
+
+            ReleaseAutoQuestMovement();
+
+            if (_durable)
+            {
+                ApplyDurableTransition(
+                    FirstWorldTutorialProgressCommand.MovementAccepted,
+                    blockHeld);
+                return;
+            }
+
+            if (blockHeld)
             {
                 _state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
                     _state,
                     FirstWorldEntryTeachingBeat.Move,
-                    sprintTaught: true);
-            }
-
-            if (!FirstWorldEntryTutorialEvidence.IsMoveAccepted(magnitude))
-            {
-                return;
+                    blockTaught: true);
             }
 
             FirstWorldEntryTutorialTransition transition = FirstWorldEntryTutorialPlanner.Apply(
@@ -199,11 +513,37 @@ namespace AL.ChampionMode
                 return;
             }
 
-            _state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
-                _state,
-                FirstWorldEntryTeachingBeat.BasicAttack,
-                sprintTaught: false);
-            RefreshPresentation();
+            if (_durable)
+            {
+                ApplyDurableTransition(
+                    FirstWorldTutorialProgressCommand.GuideInteractionAccepted,
+                    blockTaught: false);
+            }
+            else
+            {
+                _state = FirstWorldEntryTutorialPlanner.AdvanceTeaching(
+                    _state,
+                    FirstWorldEntryTeachingBeat.BasicAttack,
+                    blockTaught: false);
+                RefreshPresentation();
+            }
+        }
+
+        private void HandleWorldInteractionConfirmed(
+            WorldInteractionResult result)
+        {
+            if (!OwnerAllowsTutorialEvidence ||
+                _worldInteractionDirector == null ||
+                _playerController == null ||
+                _worldInteractionDirector.Actor != _playerController.transform ||
+                !result.Accepted ||
+                result.CatalogId != FirstSessionWorldInteractables.GuideCatalogId ||
+                result.Kind != WorldInteractionKind.Talk)
+            {
+                return;
+            }
+
+            ConsiderInteract();
         }
 
         private void ConsiderAttack()
@@ -213,14 +553,108 @@ namespace AL.ChampionMode
                 return;
             }
 
-            FirstWorldEntryTutorialTransition transition = FirstWorldEntryTutorialPlanner.Apply(
-                _state,
-                FirstWorldEntryEvidenceKind.BasicAttackConfirmed);
+            if (_durable)
+            {
+                ApplyDurableTransition(
+                    FirstWorldTutorialProgressCommand.BasicAttackAccepted,
+                    blockTaught: false);
+                return;
+            }
+
+            FirstWorldEntryTutorialTransition transition =
+                FirstWorldEntryTutorialPlanner.Apply(
+                    _state,
+                    FirstWorldEntryEvidenceKind.BasicAttackConfirmed);
             if (transition.Changed)
             {
                 _state = transition.State;
                 RefreshPresentation();
             }
+        }
+
+        private void ApplyDurableTransition(
+            FirstWorldTutorialProgressCommand command,
+            bool blockTaught)
+        {
+            if (_failedClosed || !_durable || _progressSnapshot == null)
+            {
+                FailClosed("AL-FIRST-WORLD-PROFILE-READ-ONLY");
+                return;
+            }
+
+            FirstWorldProgressCommitResult result =
+                FirstWorldProgressSaveAuthority.TryAdvanceTutorial(
+                    _saveGameService,
+                    _progressSnapshot,
+                    command,
+                    blockTaught);
+            if (result == null || !result.Accepted || result.Snapshot == null)
+            {
+                FailClosed(
+                    result?.Message ??
+                    "AL-FIRST-WORLD-PROGRESS-COMMIT-FAILED");
+                return;
+            }
+
+            _progressSnapshot = result.Snapshot;
+            _state = _progressSnapshot.Tutorial;
+            if (!_state.IsComplete)
+            {
+                RefreshPresentation();
+                return;
+            }
+
+            if (!_progressSnapshot.CanRunProof)
+            {
+                FailClosed("AL-FIRST-WORLD-HANDOFF-INVALID");
+                return;
+            }
+
+            RefreshPresentation();
+            Completed?.Invoke(_progressSnapshot);
+            gameObject.SetActive(false);
+        }
+
+        private void BindPlayerController(ChampionController playerController)
+        {
+            if (playerController == null || _playerController == playerController)
+            {
+                return;
+            }
+
+            _playerController = playerController;
+            _lastMovementSequence =
+                _playerController.LastMovementReceipt.Sequence;
+            _lastBasicAttackSequence =
+                _playerController.LastBasicAttackReceipt.Sequence;
+        }
+
+        private void ReleaseAutoQuestMovement()
+        {
+            if (!_ownsAutoQuestMovement)
+            {
+                return;
+            }
+
+            _playerController?.SetExternalMoveInput(Vector2.zero);
+            _ownsAutoQuestMovement = false;
+        }
+
+        private bool OwnerAllowsTutorialEvidence =>
+            isActiveAndEnabled &&
+            _playerController != null &&
+            _playerController.isActiveAndEnabled &&
+            !_playerController.BlocksGameplayEntry;
+
+        private void FailClosed(string message)
+        {
+            _failedClosed = true;
+            enabled = false;
+            Debug.LogError(
+                "[AL-FIRST-WORLD-PROGRESS-FAILED-CLOSED] " +
+                (string.IsNullOrWhiteSpace(message)
+                    ? "Progress authority unavailable."
+                    : message));
         }
 
         private void BuildOverlay()
@@ -231,17 +665,21 @@ namespace AL.ChampionMode
             var canvas = canvasObject.AddComponent<Canvas>();
             canvas.renderMode = RenderMode.ScreenSpaceOverlay;
             canvas.sortingOrder = 80;
-            canvasObject.AddComponent<CanvasScaler>().uiScaleMode =
-                CanvasScaler.ScaleMode.ScaleWithScreenSize;
-            canvasObject.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920f, 1080f);
+            PresentationChrome.ApplyCanvasScaler(
+                canvasObject.AddComponent<CanvasScaler>());
             canvasObject.AddComponent<GraphicRaycaster>();
 
             Image plate = CreatePlate(
                 canvasObject.transform,
                 PromptName,
                 new Vector2(0.5f, 0f),
-                new Vector2(0f, 118f),
-                new Vector2(760f, 92f),
+                new Vector2(
+                    0f,
+                    ChampionArenaSceneController.CombatHotbarBottomOffset +
+                    ChampionArenaSceneController.CombatHotbarHeight +
+                    PromptHotbarClearance +
+                    PromptHeight * 0.5f),
+                new Vector2(760f, PromptHeight),
                 new Color(0.012f, 0.016f, 0.022f, 0.88f));
             CreateAccent(plate.transform, new Color(0.86f, 0.68f, 0.32f, 0.92f));
             _titleText = CreateLabel(

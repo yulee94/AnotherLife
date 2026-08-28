@@ -34,10 +34,24 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_world_event_content_catalog.json` | `al-world-event-content.schema.json` | — |
 | `al_building_catalog.json` | `al-building.schema.json` | `BuildingArtCatalog` |
 | `al_champion_catalog.json` | `al-champion.schema.json` | `ChampionArtCatalog` |
+| `al_first_session_terrain_catalog.json` | `al-first-session-terrain.schema.json` | — |
+
+`al-world-asset-inventory.schema.json` defines the future post-MVP world-asset
+production identity, binding, provenance, standards, and readiness contract. Its
+future payload is `al_world_asset_inventory.json`, but that payload and its runtime
+loader do not exist yet. The schema does not authorize asset generation or replace
+the current MVP/Resources bindings.
 
 The character customization catalog includes body presets, hair styles, armor styles, primary/hair/skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
 The skill and weather catalog includes champion skill loadouts, realm skill VFX keys, plus detailed weather profile parameters for particles, fog, ambient light, directional light, wind, turbulence, and lightning. Skill loadouts include slot IDs, display names, cooldowns, mana costs, cast times, ranges, power values, bot damage multipliers, and VFX keys so Unity and Fable tools can balance combat from the same data without referencing UnityEngine types.
+
+The first-session terrain catalog is a replaceable MVP physical-terrain profile.
+It owns deterministic runtime heightfield, low-cost debug-grid, collision-proxy,
+placement, and navigation-socket parameters. Its `futureBakeContract` seam allows
+editor-baked height/slope/biome/splat data to replace the runtime procedural source
+without changing the capital anchor or gameplay-facing IDs. It does not approve
+final biome, terrain-material, or environment art direction.
 
 ## Canonical contracts and the six technical families
 
