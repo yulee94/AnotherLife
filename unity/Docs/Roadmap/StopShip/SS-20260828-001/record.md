@@ -60,3 +60,15 @@ matrix are retained at
 Closure of this record without all four steps is not a gate pass. Any changed
 candidate, source ruling, dependency, artifact identity, authority assignment, or
 new conflict reopens the stop-ship record and all affected evidence packets.
+
+## Append-only remediation event — 2026-08-28T09:27:12Z
+
+Candidate owner `default` / `t_a4c586ff` assigned `GOV-G0-v1.0.0`,
+`RC-20260828-001`, parent `RB-20260828-001`, and proposed baseline
+`RB-20260828-002`; normalized the three package statuses to candidate-only; and
+prepared the canonical candidate, retained-baseline, gate, approval-package, and
+rollback records. The candidate change set contains the frozen SHA-256 inventory.
+
+This remediation does not close the incident. A corrected independent audit and
+explicit game-owner decision on the exact candidate remain required. Gate 0 and
+dependent dispatch stay fail-closed.
