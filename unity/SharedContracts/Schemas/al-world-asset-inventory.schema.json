@@ -1,0 +1,1465 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-world-asset-inventory.schema.json",
+  "title": "Another Life World Asset Inventory",
+  "description": "Closed production-identity and readiness contract for world assets. The catalog is data authority only; it does not generate, load, or admit content by itself.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gameId",
+    "catalogId",
+    "family",
+    "schemaVersion",
+    "contentVersion",
+    "sourceRevision",
+    "idFormat",
+    "authority",
+    "gatePolicy",
+    "profiles",
+    "records",
+    "aliases"
+  ],
+  "properties": {
+    "gameId": { "const": "another-life" },
+    "catalogId": { "const": "al_world_asset_inventory" },
+    "family": { "const": "world_assets" },
+    "schemaVersion": { "const": 1 },
+    "contentVersion": { "$ref": "#/$defs/semanticVersion" },
+    "sourceRevision": { "$ref": "#/$defs/nonBlank" },
+    "idFormat": { "const": "lowercase_ascii_snake_case" },
+    "authority": { "$ref": "#/$defs/catalogAuthority" },
+    "gatePolicy": { "$ref": "#/$defs/gatePolicy" },
+    "profiles": { "$ref": "#/$defs/profiles" },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/assetRecord" }
+    },
+    "aliases": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/alias" }
+    }
+  },
+  "$defs": {
+    "nonBlank": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 512,
+      "pattern": "^(?!.*[\\r\\n]).*\\S.*$"
+    },
+    "stableId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*$"
+    },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "sha256OrNull": {
+      "type": ["string", "null"],
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "nullableString": {
+      "anyOf": [
+        { "$ref": "#/$defs/nonBlank" },
+        { "type": "null" }
+      ]
+    },
+    "nullableNumber": {
+      "type": ["number", "null"]
+    },
+    "nullableNonnegativeInteger": {
+      "type": ["integer", "null"],
+      "minimum": 0
+    },
+    "stringArray": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/nonBlank" }
+    },
+    "stableIdArray": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/stableId" }
+    },
+    "catalogAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogOwner", "finalCreativeOwner", "ownerDecisionRef", "status"],
+      "properties": {
+        "catalogOwner": { "$ref": "#/$defs/stableId" },
+        "finalCreativeOwner": { "const": "project_owner" },
+        "ownerDecisionRef": { "$ref": "#/$defs/nonBlank" },
+        "status": {
+          "enum": ["preparation_held", "owner_review", "approved", "retired"]
+        }
+      }
+    },
+    "gatePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["generationState", "activationState", "requiredGateIds"],
+      "properties": {
+        "generationState": {
+          "const": "held",
+          "description": "Schema v1 is preparation-only. A later owner-approved schema version is required before generation can be authorized."
+        },
+        "activationState": {
+          "const": "held",
+          "description": "Schema v1 cannot activate inventory content or replace current runtime admission."
+        },
+        "requiredGateIds": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "owner_creative",
+              "technical",
+              "provenance",
+              "performance_mobile_floor",
+              "accessibility",
+              "release"
+            ]
+          }
+        }
+      }
+    },
+    "profiles": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinateProfiles",
+        "pivotProfiles",
+        "snapGridProfiles",
+        "materialShaderProfiles",
+        "texelDensityProfiles",
+        "lodProfiles",
+        "colliderProfiles",
+        "navigationProfiles",
+        "occlusionProfiles",
+        "streamingProfiles"
+      ],
+      "properties": {
+        "coordinateProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/coordinateProfile" }
+        },
+        "pivotProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/pivotProfile" }
+        },
+        "snapGridProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/snapGridProfile" }
+        },
+        "materialShaderProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/materialShaderProfile" }
+        },
+        "texelDensityProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/texelDensityProfile" }
+        },
+        "lodProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/lodProfile" }
+        },
+        "colliderProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/colliderProfile" }
+        },
+        "navigationProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/navigationProfile" }
+        },
+        "occlusionProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/occlusionProfile" }
+        },
+        "streamingProfiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/$defs/streamingProfile" }
+        }
+      }
+    },
+    "coordinateProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "distanceUnit",
+        "unityUnitsPerMeter",
+        "sourceUpAxis",
+        "sourceForwardAxis",
+        "runtimeUpAxis",
+        "runtimeForwardAxis",
+        "chunkLocalCoordinatesRequired"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "distanceUnit": { "const": "meter" },
+        "unityUnitsPerMeter": { "const": 1 },
+        "sourceUpAxis": { "enum": ["positive_z", "positive_y"] },
+        "sourceForwardAxis": { "enum": ["negative_y", "positive_z"] },
+        "runtimeUpAxis": { "const": "positive_y" },
+        "runtimeForwardAxis": { "const": "positive_z" },
+        "chunkLocalCoordinatesRequired": { "type": "boolean" }
+      }
+    },
+    "pivotProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "origin", "verticalDatum", "forwardRule", "exceptionRequiresApproval"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "origin": {
+          "enum": [
+            "base_center",
+            "footprint_center",
+            "connection_face_center",
+            "chunk_origin",
+            "source_asset_inherited",
+            "semantic_anchor"
+          ]
+        },
+        "verticalDatum": {
+          "enum": ["finished_ground", "support_contact", "chunk_datum", "source_asset"]
+        },
+        "forwardRule": {
+          "enum": ["semantic_forward", "away_from_receiver", "chunk_axis", "source_asset_inherited"]
+        },
+        "exceptionRequiresApproval": { "const": true }
+      }
+    },
+    "snapGridProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "authoringSubgridMeters",
+        "placementCellMeters",
+        "structuralBayMeters",
+        "verticalTierMeters",
+        "rotationIncrementDegrees"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "authoringSubgridMeters": { "type": "number", "exclusiveMinimum": 0 },
+        "placementCellMeters": { "type": "number", "exclusiveMinimum": 0 },
+        "structuralBayMeters": { "type": "number", "exclusiveMinimum": 0 },
+        "verticalTierMeters": { "type": "number", "exclusiveMinimum": 0 },
+        "rotationIncrementDegrees": { "type": "number", "exclusiveMinimum": 0, "maximum": 360 }
+      }
+    },
+    "materialShaderProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "renderPipeline",
+        "allowedSurfaceTypes",
+        "blendedTransparency",
+        "sharedMaterialsRequired",
+        "runtimeReadWriteDefault",
+        "requiredMapRoles",
+        "forbiddenShaderTraits"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "renderPipeline": { "enum": ["builtin", "pipeline_portable_source"] },
+        "allowedSurfaceTypes": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": { "enum": ["opaque", "alpha_clip", "transparent"] }
+        },
+        "blendedTransparency": { "enum": ["forbidden", "exception_only", "measured_required"] },
+        "sharedMaterialsRequired": { "type": "boolean" },
+        "runtimeReadWriteDefault": { "type": "boolean" },
+        "requiredMapRoles": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": ["base_color", "normal", "packed_mask", "emission", "height", "opacity"]
+          }
+        },
+        "forbiddenShaderTraits": { "$ref": "#/$defs/stableIdArray" }
+      }
+    },
+    "texelDensityProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "targetPixelsPerMeter",
+        "tolerancePercent",
+        "sourceResolutionMax",
+        "runtimeResolutionMax",
+        "mipmapsRequired",
+        "platformCompressionRequired"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "targetPixelsPerMeter": { "type": "integer", "minimum": 1 },
+        "tolerancePercent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "sourceResolutionMax": { "type": "integer", "minimum": 1 },
+        "runtimeResolutionMax": { "type": "integer", "minimum": 1 },
+        "mipmapsRequired": { "type": "boolean" },
+        "platformCompressionRequired": { "type": "boolean" }
+      }
+    },
+    "lodProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "minimumLevels",
+        "normalPlayUsesReducedLod",
+        "initialTriangleRatioCeilings",
+        "crossFadeMustBeProfiled",
+        "protectedCuePolicy"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "minimumLevels": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "normalPlayUsesReducedLod": { "type": "boolean" },
+        "initialTriangleRatioCeilings": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 }
+        },
+        "crossFadeMustBeProfiled": { "type": "boolean" },
+        "protectedCuePolicy": { "$ref": "#/$defs/stableId" }
+      }
+    },
+    "colliderProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "allowedModes", "renderMeshColliderForbidden", "lodIndependent"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "allowedModes": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "none",
+              "primitive",
+              "compound_primitive",
+              "convex_proxy",
+              "low_complexity_static_mesh",
+              "terrain_collider",
+              "trigger_only"
+            ]
+          }
+        },
+        "renderMeshColliderForbidden": { "const": true },
+        "lodIndependent": { "const": true }
+      }
+    },
+    "navigationProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "participation",
+        "renderGeometryIsAuthority",
+        "authoredLinksRequireSockets",
+        "gameplayTraversalRequiresSeparateAuthority"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "participation": {
+          "enum": ["none", "source", "exclusions", "links", "source_and_exclusions", "source_exclusions_and_links"]
+        },
+        "renderGeometryIsAuthority": { "const": false },
+        "authoredLinksRequireSockets": { "const": true },
+        "gameplayTraversalRequiresSeparateAuthority": { "const": true }
+      }
+    },
+    "occlusionProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "mode", "requiredGroups", "cameraReachableBackingRequired"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "mode": { "enum": ["none", "static_occluder", "separate_groups", "cell_portal", "hlod_owned"] },
+        "requiredGroups": { "$ref": "#/$defs/stableIdArray" },
+        "cameraReachableBackingRequired": { "type": "boolean" }
+      }
+    },
+    "streamingProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "residency",
+        "addressablesPolicy",
+        "sourceAndPreviewExcludedFromPlayer",
+        "prefetchMetadataRequired"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "residency": { "enum": ["always_resident", "scene_owned", "chunk_owned", "on_demand", "derivative_only"] },
+        "addressablesPolicy": { "enum": ["not_used", "optional_when_measured", "required"] },
+        "sourceAndPreviewExcludedFromPlayer": { "const": true },
+        "prefetchMetadataRequired": { "type": "boolean" }
+      }
+    },
+    "ownerAuthority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["finalCreativeOwner", "accountableOwners", "ownerDecisionRef"],
+      "properties": {
+        "finalCreativeOwner": { "const": "project_owner" },
+        "accountableOwners": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "world",
+              "architecture",
+              "gameplay",
+              "narrative",
+              "technical_art",
+              "ecosystem",
+              "accessibility",
+              "runtime_engineering"
+            ]
+          }
+        },
+        "ownerDecisionRef": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "placementScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "realmIds",
+        "taxonomyStatus",
+        "biomeIds",
+        "dimensionIds",
+        "worldIds",
+        "chunkIds",
+        "replacementSocketIds"
+      ],
+      "properties": {
+        "scope": { "enum": ["realm", "shared", "neutral", "event"] },
+        "realmIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "maxItems": 4,
+          "items": { "enum": ["crownlands", "stonehold", "eldergrove", "umbral"] }
+        },
+        "taxonomyStatus": { "enum": ["unresolved", "resolved", "not_applicable"] },
+        "biomeIds": { "$ref": "#/$defs/stableIdArray" },
+        "dimensionIds": { "$ref": "#/$defs/stableIdArray" },
+        "worldIds": { "$ref": "#/$defs/stableIdArray" },
+        "chunkIds": { "$ref": "#/$defs/stableIdArray" },
+        "replacementSocketIds": { "$ref": "#/$defs/stableIdArray" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "scope": { "const": "realm" } },
+            "required": ["scope"]
+          },
+          "then": { "properties": { "realmIds": { "minItems": 1 } } }
+        },
+        {
+          "if": {
+            "properties": { "taxonomyStatus": { "enum": ["unresolved", "not_applicable"] } },
+            "required": ["taxonomyStatus"]
+          },
+          "then": { "properties": { "biomeIds": { "maxItems": 0 } } }
+        },
+        {
+          "if": {
+            "properties": { "taxonomyStatus": { "const": "resolved" } },
+            "required": ["taxonomyStatus"]
+          },
+          "then": { "properties": { "biomeIds": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "sourceArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "path", "sha256"],
+      "properties": {
+        "kind": {
+          "enum": ["source_model", "concept", "handoff", "source_manifest", "receipt", "legacy_runtime", "procedural_recipe"]
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 512,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)[A-Za-z0-9_.:/-]+$"
+        },
+        "sha256": { "$ref": "#/$defs/sha256OrNull" }
+      }
+    },
+    "sourceRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "sourcePacketId", "sourceVersion", "artifacts", "derivationRevision"],
+      "properties": {
+        "status": { "enum": ["not_started", "source_only", "candidate", "approved", "legacy_runtime_only"] },
+        "sourcePacketId": { "$ref": "#/$defs/nullableString" },
+        "sourceVersion": { "$ref": "#/$defs/nullableString" },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/sourceArtifact" }
+        },
+        "derivationRevision": { "$ref": "#/$defs/nonBlank" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "not_started" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "sourcePacketId": { "type": "null" },
+              "sourceVersion": { "type": "null" },
+              "artifacts": { "maxItems": 0 }
+            }
+          },
+          "else": {
+            "properties": {
+              "sourcePacketId": { "$ref": "#/$defs/nonBlank" },
+              "sourceVersion": { "$ref": "#/$defs/nonBlank" },
+              "artifacts": { "minItems": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "rightsRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "declaration"],
+      "properties": {
+        "state": { "enum": ["unknown", "restricted", "cleared", "rejected"] },
+        "declaration": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "creatorIdentities",
+        "authoringTools",
+        "sourceReferences",
+        "rights",
+        "aiUse",
+        "cleanupStatus",
+        "similarityReview",
+        "humanDecisionRef",
+        "openIssues"
+      ],
+      "properties": {
+        "state": { "enum": ["unknown", "incomplete", "cleared", "rejected"] },
+        "creatorIdentities": { "$ref": "#/$defs/stringArray" },
+        "authoringTools": { "$ref": "#/$defs/stringArray" },
+        "sourceReferences": { "$ref": "#/$defs/stringArray" },
+        "rights": { "$ref": "#/$defs/rightsRecord" },
+        "aiUse": { "enum": ["none", "assisted", "generated", "unknown"] },
+        "cleanupStatus": { "enum": ["not_started", "not_recorded", "in_progress", "complete", "rejected"] },
+        "similarityReview": { "enum": ["not_reviewed", "passed", "failed", "blocked"] },
+        "humanDecisionRef": { "$ref": "#/$defs/nonBlank" },
+        "openIssues": { "$ref": "#/$defs/stringArray" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "state": { "const": "cleared" } },
+            "required": ["state"]
+          },
+          "then": {
+            "properties": {
+              "creatorIdentities": { "minItems": 1 },
+              "sourceReferences": { "minItems": 1 },
+              "rights": {
+                "properties": { "state": { "const": "cleared" } }
+              },
+              "similarityReview": { "const": "passed" }
+            }
+          }
+        }
+      ]
+    },
+    "prefabReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "guid", "sha256"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "maxLength": 512,
+          "pattern": "^Assets/(?!.*(?:^|/)\\.\\.(?:/|$))(?!.*\\\\)(?:[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+\\.prefab$"
+        },
+        "guid": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    },
+    "addressableReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["key", "groupId", "labels", "assetKind"],
+      "properties": {
+        "key": {
+          "type": "string",
+          "maxLength": 192,
+          "pattern": "^al/world/(?:wa|wad)_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"
+        },
+        "groupId": { "$ref": "#/$defs/stableId" },
+        "labels": { "$ref": "#/$defs/stableIdArray" },
+        "assetKind": {
+          "enum": [
+            "prefab",
+            "scene",
+            "terrain_data",
+            "mesh",
+            "material",
+            "texture_2d",
+            "sprite",
+            "sprite_atlas",
+            "vfx_prefab",
+            "animation",
+            "audio",
+            "technical_prefab"
+          ]
+        }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "bindingState",
+        "prefab",
+        "addressable",
+        "runtimeDependencies",
+        "bindingEvidenceRefs",
+        "unboundReason"
+      ],
+      "properties": {
+        "bindingState": { "enum": ["unbound", "candidate", "verified", "admitted", "retired"] },
+        "prefab": {
+          "anyOf": [
+            { "$ref": "#/$defs/prefabReference" },
+            { "type": "null" }
+          ]
+        },
+        "addressable": {
+          "anyOf": [
+            { "$ref": "#/$defs/addressableReference" },
+            { "type": "null" }
+          ]
+        },
+        "runtimeDependencies": { "$ref": "#/$defs/stableIdArray" },
+        "bindingEvidenceRefs": { "$ref": "#/$defs/stringArray" },
+        "unboundReason": { "$ref": "#/$defs/nullableString" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "bindingState": { "const": "unbound" } },
+            "required": ["bindingState"]
+          },
+          "then": {
+            "properties": {
+              "prefab": { "type": "null" },
+              "addressable": { "type": "null" },
+              "unboundReason": { "$ref": "#/$defs/nonBlank" }
+            }
+          },
+          "else": {
+            "anyOf": [
+              { "properties": { "prefab": { "$ref": "#/$defs/prefabReference" } } },
+              { "properties": { "addressable": { "$ref": "#/$defs/addressableReference" } } }
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": { "bindingState": { "enum": ["verified", "admitted"] } },
+            "required": ["bindingState"]
+          },
+          "then": { "properties": { "bindingEvidenceRefs": { "minItems": 1 } } }
+        }
+      ]
+    },
+    "standardRefs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinateProfileId",
+        "pivotProfileId",
+        "snapGridProfileId",
+        "materialShaderProfileId",
+        "texelDensityProfileId",
+        "lodProfileId",
+        "colliderProfileId",
+        "navigationProfileId",
+        "occlusionProfileId",
+        "streamingProfileId",
+        "exceptionRefs"
+      ],
+      "properties": {
+        "coordinateProfileId": { "$ref": "#/$defs/stableId" },
+        "pivotProfileId": { "$ref": "#/$defs/stableId" },
+        "snapGridProfileId": { "$ref": "#/$defs/stableId" },
+        "materialShaderProfileId": { "$ref": "#/$defs/stableId" },
+        "texelDensityProfileId": { "$ref": "#/$defs/stableId" },
+        "lodProfileId": { "$ref": "#/$defs/stableId" },
+        "colliderProfileId": { "$ref": "#/$defs/stableId" },
+        "navigationProfileId": { "$ref": "#/$defs/stableId" },
+        "occlusionProfileId": { "$ref": "#/$defs/stableId" },
+        "streamingProfileId": { "$ref": "#/$defs/stableId" },
+        "exceptionRefs": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "dimensions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "number", "exclusiveMinimum": 0 },
+        "y": { "type": "number", "exclusiveMinimum": 0 },
+        "z": { "type": "number", "exclusiveMinimum": 0 }
+      }
+    },
+    "geometry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["representation", "dimensionsMeters", "measuredScale", "pivotVerified"],
+      "properties": {
+        "representation": { "enum": ["spatial_3d", "derivative_25d", "technical_only", "non_spatial"] },
+        "dimensionsMeters": {
+          "anyOf": [
+            { "$ref": "#/$defs/dimensions" },
+            { "type": "null" }
+          ]
+        },
+        "measuredScale": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["x", "y", "z"],
+              "properties": {
+                "x": { "const": 1 },
+                "y": { "const": 1 },
+                "z": { "const": 1 }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "pivotVerified": { "type": "boolean" }
+      }
+    },
+    "materials": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["materialSlotCount", "materialFamilyIds", "shaderIds", "surfaceTypes", "sharedOrInstanced"],
+      "properties": {
+        "materialSlotCount": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "materialFamilyIds": { "$ref": "#/$defs/stableIdArray" },
+        "shaderIds": { "$ref": "#/$defs/stableIdArray" },
+        "surfaceTypes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "enum": ["opaque", "alpha_clip", "transparent"] }
+        },
+        "sharedOrInstanced": { "enum": ["shared", "gpu_instanced", "unique_approved", "not_applicable", "unverified"] }
+      }
+    },
+    "texelDensity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "measuredPixelsPerMeter", "evidenceRefs"],
+      "properties": {
+        "status": { "enum": ["not_measured", "measured", "not_applicable", "failed"] },
+        "measuredPixelsPerMeter": { "type": ["number", "null"], "exclusiveMinimum": 0 },
+        "evidenceRefs": { "$ref": "#/$defs/stringArray" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "measured" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "measuredPixelsPerMeter": { "type": "number", "exclusiveMinimum": 0 },
+              "evidenceRefs": { "minItems": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "lodLevel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["index", "triangleCount", "screenRelativeTransitionHeight", "materialSlotCount", "castsShadows"],
+      "properties": {
+        "index": { "type": "integer", "minimum": 0, "maximum": 7 },
+        "triangleCount": { "type": "integer", "minimum": 0 },
+        "screenRelativeTransitionHeight": { "type": "number", "minimum": 0, "maximum": 1 },
+        "materialSlotCount": { "type": "integer", "minimum": 0 },
+        "castsShadows": { "type": "boolean" }
+      }
+    },
+    "lod": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "levels", "protectedCues", "notApplicableReason"],
+      "properties": {
+        "status": { "enum": ["not_verified", "verified", "not_applicable", "failed"] },
+        "levels": {
+          "type": "array",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/lodLevel" }
+        },
+        "protectedCues": { "$ref": "#/$defs/stableIdArray" },
+        "notApplicableReason": { "$ref": "#/$defs/nullableString" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "status": { "const": "verified" } },
+            "required": ["status"]
+          },
+          "then": { "properties": { "levels": { "minItems": 1 } } }
+        },
+        {
+          "if": {
+            "properties": { "status": { "const": "not_applicable" } },
+            "required": ["status"]
+          },
+          "then": {
+            "properties": {
+              "levels": { "maxItems": 0 },
+              "notApplicableReason": { "$ref": "#/$defs/nonBlank" }
+            }
+          }
+        }
+      ]
+    },
+    "impostor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "reason", "sourceAssetId"],
+      "properties": {
+        "mode": { "enum": ["not_applicable", "authored_far_mesh", "opaque_impostor", "chunk_hlod", "unresolved"] },
+        "reason": { "$ref": "#/$defs/nonBlank" },
+        "sourceAssetId": {
+          "anyOf": [
+            { "$ref": "#/$defs/assetId" },
+            { "type": "null" }
+          ]
+        }
+      }
+    },
+    "collider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["participation", "sourceObjectIds", "lodIndependent", "reason"],
+      "properties": {
+        "participation": {
+          "enum": ["none", "primitive", "compound_primitive", "convex_proxy", "static_mesh", "terrain", "trigger_only", "unverified"]
+        },
+        "sourceObjectIds": { "$ref": "#/$defs/stableIdArray" },
+        "lodIndependent": { "const": true },
+        "reason": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["participation", "sourceObjectIds", "linkSocketIds", "navmeshAreaProfileId", "reason"],
+      "properties": {
+        "participation": { "enum": ["none", "source", "exclusion", "link", "combined", "unverified"] },
+        "sourceObjectIds": { "$ref": "#/$defs/stableIdArray" },
+        "linkSocketIds": { "$ref": "#/$defs/stableIdArray" },
+        "navmeshAreaProfileId": {
+          "anyOf": [
+            { "$ref": "#/$defs/stableId" },
+            { "type": "null" }
+          ]
+        },
+        "reason": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "occlusion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["participation", "groupIds", "portalIds", "reason"],
+      "properties": {
+        "participation": { "enum": ["none", "occluder", "separate_groups", "cell_portal", "hlod_owned", "unverified"] },
+        "groupIds": { "$ref": "#/$defs/stableIdArray" },
+        "portalIds": { "$ref": "#/$defs/stableIdArray" },
+        "reason": { "$ref": "#/$defs/nonBlank" }
+      }
+    },
+    "streaming": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "residency",
+        "chunkIds",
+        "bundleId",
+        "prefetchRing",
+        "estimatedResidentBytes",
+        "measuredResidentBytes",
+        "measuredBuildSizeBytes"
+      ],
+      "properties": {
+        "residency": { "enum": ["always_resident", "packaged_current", "scene_owned", "chunk_owned", "on_demand", "derivative_only", "unassigned"] },
+        "chunkIds": { "$ref": "#/$defs/stableIdArray" },
+        "bundleId": {
+          "anyOf": [
+            { "$ref": "#/$defs/stableId" },
+            { "type": "null" }
+          ]
+        },
+        "prefetchRing": { "enum": ["interaction", "prefetch", "horizon", "not_assigned", "not_applicable"] },
+        "estimatedResidentBytes": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "measuredResidentBytes": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "measuredBuildSizeBytes": { "$ref": "#/$defs/nullableNonnegativeInteger" }
+      }
+    },
+    "modularity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["isModular", "socketIds", "gridExceptionRef"],
+      "properties": {
+        "isModular": { "type": "boolean" },
+        "socketIds": { "$ref": "#/$defs/stableIdArray" },
+        "gridExceptionRef": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "transform": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["positionMeters", "rotationDegrees"],
+      "properties": {
+        "positionMeters": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        },
+        "rotationDegrees": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": { "type": "number" }
+        }
+      }
+    },
+    "anchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "role", "transform", "pairedAnchorId", "behaviorAuthorityRef"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "role": {
+          "enum": [
+            "entrance",
+            "transition",
+            "navigation_link",
+            "interaction",
+            "camera_focus",
+            "vfx",
+            "audio",
+            "modular_end",
+            "attachment",
+            "teleport_source",
+            "teleport_destination",
+            "tool_contact",
+            "spawn_reference"
+          ]
+        },
+        "transform": { "$ref": "#/$defs/transform" },
+        "pairedAnchorId": {
+          "anyOf": [
+            { "$ref": "#/$defs/stableId" },
+            { "type": "null" }
+          ]
+        },
+        "behaviorAuthorityRef": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "vfxAnchor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["anchorIds", "effectRole", "qualityStates", "offStatePhysicalCue", "gameplayAuthorityRef"],
+      "properties": {
+        "anchorIds": { "$ref": "#/$defs/stableIdArray" },
+        "effectRole": { "$ref": "#/$defs/stableId" },
+        "qualityStates": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "enum": ["off", "low", "balanced", "high", "reduced_motion"] }
+        },
+        "offStatePhysicalCue": { "$ref": "#/$defs/nonBlank" },
+        "gameplayAuthorityRef": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "derivative25d": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAssetId",
+        "dimensionId",
+        "worldId",
+        "viewOrState",
+        "cameraProfileId",
+        "framingProfileId",
+        "independentCreativeApprovalRequired"
+      ],
+      "properties": {
+        "sourceAssetId": { "$ref": "#/$defs/assetId" },
+        "dimensionId": { "const": "dimension_kingdom_25d" },
+        "worldId": { "const": "world_kingdom_private" },
+        "viewOrState": { "$ref": "#/$defs/stableId" },
+        "cameraProfileId": { "$ref": "#/$defs/stableId" },
+        "framingProfileId": { "$ref": "#/$defs/stableId" },
+        "independentCreativeApprovalRequired": { "const": true }
+      }
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "reviewer", "decisionAtUtc", "evidenceRefs", "openIssues"],
+      "properties": {
+        "state": {
+          "enum": [
+            "not_tested",
+            "not_reviewed",
+            "not_measured",
+            "unknown",
+            "incomplete",
+            "candidate",
+            "provisional_pass",
+            "passed",
+            "approved",
+            "cleared",
+            "revise",
+            "failed",
+            "rejected",
+            "blocked",
+            "held",
+            "eligible",
+            "admitted",
+            "retired"
+          ]
+        },
+        "reviewer": { "$ref": "#/$defs/nullableString" },
+        "decisionAtUtc": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date-time",
+              "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+            },
+            { "type": "null" }
+          ]
+        },
+        "evidenceRefs": { "$ref": "#/$defs/stringArray" },
+        "openIssues": { "$ref": "#/$defs/stringArray" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "state": { "enum": ["passed", "approved", "cleared", "admitted"] } },
+            "required": ["state"]
+          },
+          "then": {
+            "properties": {
+              "reviewer": { "$ref": "#/$defs/nonBlank" },
+              "decisionAtUtc": {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^[0-9]{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[12][0-9]|3[01])T(?:[01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9](?:\\.[0-9]+)?Z$"
+              },
+              "evidenceRefs": { "minItems": 1 }
+            }
+          }
+        }
+      ]
+    },
+    "approvals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["technical", "creative", "provenance", "performance", "accessibility", "releaseGate"],
+      "properties": {
+        "technical": { "$ref": "#/$defs/approval" },
+        "creative": { "$ref": "#/$defs/approval" },
+        "provenance": { "$ref": "#/$defs/approval" },
+        "performance": { "$ref": "#/$defs/approval" },
+        "accessibility": { "$ref": "#/$defs/approval" },
+        "releaseGate": { "$ref": "#/$defs/approval" }
+      }
+    },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inventoryState", "preserveMvpBinding", "replacesAssetIds", "replacedByAssetId", "deprecationReason"],
+      "properties": {
+        "inventoryState": {
+          "enum": [
+            "logical_reserved",
+            "source_only",
+            "prototype_only",
+            "mvp_runtime_candidate",
+            "current_bound_partial",
+            "production_candidate",
+            "production_approved",
+            "deprecated"
+          ]
+        },
+        "preserveMvpBinding": { "type": "boolean" },
+        "replacesAssetIds": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/assetId" }
+        },
+        "replacedByAssetId": {
+          "anyOf": [
+            { "$ref": "#/$defs/assetId" },
+            { "type": "null" }
+          ]
+        },
+        "deprecationReason": { "$ref": "#/$defs/nullableString" }
+      }
+    },
+    "assetId": {
+      "type": "string",
+      "maxLength": 192,
+      "pattern": "^(?:wa_(?:shared|neutral|crownlands|stonehold|eldergrove|umbral|kingdom_crownlands|kingdom_stonehold|kingdom_eldergrove|kingdom_umbral|event_[a-z0-9]+(?:_[a-z0-9]+)*)_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}|wad_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3})$"
+    },
+    "familyId": {
+      "type": "string",
+      "maxLength": 192,
+      "pattern": "^waf_[a-z0-9]+(?:_[a-z0-9]+)+$"
+    },
+    "kitId": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 192,
+          "pattern": "^wak_(?:shared|neutral|crownlands|stonehold|eldergrove|umbral|kingdom_crownlands|kingdom_stonehold|kingdom_eldergrove|kingdom_umbral|event_[a-z0-9]+(?:_[a-z0-9]+)*)_[a-z0-9]+(?:_[a-z0-9]+)*_v[0-9]{3}$"
+        },
+        { "type": "null" }
+      ]
+    },
+    "assetRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assetId",
+        "familyId",
+        "kitId",
+        "assetClass",
+        "displayLabel",
+        "ownerAuthority",
+        "placementScope",
+        "source",
+        "provenance",
+        "binding",
+        "standards",
+        "geometry",
+        "materials",
+        "texelDensity",
+        "lod",
+        "impostor",
+        "collider",
+        "navigation",
+        "occlusion",
+        "streaming",
+        "modularity",
+        "anchors",
+        "vfxAnchor",
+        "derivative25d",
+        "budgetClassId",
+        "approvals",
+        "lifecycle"
+      ],
+      "properties": {
+        "assetId": { "$ref": "#/$defs/assetId" },
+        "familyId": { "$ref": "#/$defs/familyId" },
+        "kitId": { "$ref": "#/$defs/kitId" },
+        "assetClass": {
+          "enum": [
+            "terrain_surface",
+            "terrain_decal",
+            "water",
+            "vegetation",
+            "geology",
+            "traversal",
+            "architecture",
+            "interior_module",
+            "prop",
+            "interactable",
+            "harvestable",
+            "signage",
+            "banner",
+            "vfx_anchor",
+            "technical_helper",
+            "derivative_25d",
+            "fantasy_beast",
+            "monster",
+            "dragon"
+          ]
+        },
+        "displayLabel": { "$ref": "#/$defs/nonBlank" },
+        "ownerAuthority": { "$ref": "#/$defs/ownerAuthority" },
+        "placementScope": { "$ref": "#/$defs/placementScope" },
+        "source": { "$ref": "#/$defs/sourceRecord" },
+        "provenance": { "$ref": "#/$defs/provenance" },
+        "binding": { "$ref": "#/$defs/binding" },
+        "standards": { "$ref": "#/$defs/standardRefs" },
+        "geometry": { "$ref": "#/$defs/geometry" },
+        "materials": { "$ref": "#/$defs/materials" },
+        "texelDensity": { "$ref": "#/$defs/texelDensity" },
+        "lod": { "$ref": "#/$defs/lod" },
+        "impostor": { "$ref": "#/$defs/impostor" },
+        "collider": { "$ref": "#/$defs/collider" },
+        "navigation": { "$ref": "#/$defs/navigation" },
+        "occlusion": { "$ref": "#/$defs/occlusion" },
+        "streaming": { "$ref": "#/$defs/streaming" },
+        "modularity": { "$ref": "#/$defs/modularity" },
+        "anchors": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/anchor" }
+        },
+        "vfxAnchor": {
+          "anyOf": [
+            { "$ref": "#/$defs/vfxAnchor" },
+            { "type": "null" }
+          ]
+        },
+        "derivative25d": {
+          "anyOf": [
+            { "$ref": "#/$defs/derivative25d" },
+            { "type": "null" }
+          ]
+        },
+        "budgetClassId": { "$ref": "#/$defs/stableId" },
+        "approvals": { "$ref": "#/$defs/approvals" },
+        "lifecycle": { "$ref": "#/$defs/lifecycle" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "assetClass": { "const": "vfx_anchor" } },
+            "required": ["assetClass"]
+          },
+          "then": { "properties": { "vfxAnchor": { "$ref": "#/$defs/vfxAnchor" } } }
+        },
+        {
+          "if": {
+            "properties": { "assetClass": { "const": "derivative_25d" } },
+            "required": ["assetClass"]
+          },
+          "then": {
+            "properties": {
+              "derivative25d": { "$ref": "#/$defs/derivative25d" },
+              "geometry": {
+                "properties": { "representation": { "const": "derivative_25d" } }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "lifecycle": {
+                "properties": { "inventoryState": { "const": "production_approved" } },
+                "required": ["inventoryState"]
+              }
+            },
+            "required": ["lifecycle"]
+          },
+          "then": {
+            "properties": {
+              "source": {
+                "properties": {
+                  "status": { "const": "approved" },
+                  "artifacts": {
+                    "minItems": 1,
+                    "items": {
+                      "properties": {
+                        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+                      }
+                    }
+                  }
+                }
+              },
+              "provenance": { "properties": { "state": { "const": "cleared" } } },
+              "binding": { "properties": { "bindingState": { "const": "admitted" } } },
+              "geometry": {
+                "properties": { "pivotVerified": { "const": true } },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": { "representation": { "const": "spatial_3d" } },
+                      "required": ["representation"]
+                    },
+                    "then": {
+                      "properties": {
+                        "dimensionsMeters": { "$ref": "#/$defs/dimensions" },
+                        "measuredScale": { "type": "object" }
+                      }
+                    }
+                  }
+                ]
+              },
+              "materials": {
+                "properties": {
+                  "materialSlotCount": { "type": "integer", "minimum": 0 },
+                  "sharedOrInstanced": { "not": { "const": "unverified" } }
+                },
+                "allOf": [
+                  {
+                    "if": {
+                      "properties": { "materialSlotCount": { "type": "integer", "minimum": 1 } },
+                      "required": ["materialSlotCount"]
+                    },
+                    "then": {
+                      "properties": {
+                        "materialFamilyIds": { "minItems": 1 },
+                        "shaderIds": { "minItems": 1 },
+                        "surfaceTypes": { "minItems": 1 }
+                      }
+                    }
+                  }
+                ]
+              },
+              "texelDensity": {
+                "properties": { "status": { "enum": ["measured", "not_applicable"] } }
+              },
+              "lod": {
+                "properties": { "status": { "enum": ["verified", "not_applicable"] } }
+              },
+              "impostor": {
+                "properties": { "mode": { "not": { "const": "unresolved" } } }
+              },
+              "collider": {
+                "properties": { "participation": { "not": { "const": "unverified" } } }
+              },
+              "navigation": {
+                "properties": { "participation": { "not": { "const": "unverified" } } }
+              },
+              "occlusion": {
+                "properties": { "participation": { "not": { "const": "unverified" } } }
+              },
+              "streaming": {
+                "properties": {
+                  "residency": { "not": { "const": "unassigned" } },
+                  "measuredResidentBytes": { "type": "integer", "minimum": 0 },
+                  "measuredBuildSizeBytes": { "type": "integer", "minimum": 0 }
+                }
+              },
+              "budgetClassId": {
+                "not": { "pattern": "(?:unassigned|pending|reserved)" }
+              },
+              "approvals": {
+                "properties": {
+                  "technical": { "properties": { "state": { "const": "passed" } } },
+                  "creative": { "properties": { "state": { "const": "approved" } } },
+                  "provenance": { "properties": { "state": { "const": "cleared" } } },
+                  "performance": { "properties": { "state": { "const": "passed" } } },
+                  "accessibility": { "properties": { "state": { "const": "passed" } } },
+                  "releaseGate": { "properties": { "state": { "const": "admitted" } } }
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "binding": {
+                "properties": { "bindingState": { "const": "admitted" } },
+                "required": ["bindingState"]
+              }
+            },
+            "required": ["binding"]
+          },
+          "then": {
+            "properties": {
+              "source": { "properties": { "status": { "const": "approved" } } },
+              "provenance": { "properties": { "state": { "const": "cleared" } } },
+              "lifecycle": {
+                "properties": { "inventoryState": { "const": "production_approved" } }
+              },
+              "approvals": {
+                "properties": {
+                  "technical": { "properties": { "state": { "const": "passed" } } },
+                  "creative": { "properties": { "state": { "const": "approved" } } },
+                  "provenance": { "properties": { "state": { "const": "cleared" } } },
+                  "performance": { "properties": { "state": { "const": "passed" } } },
+                  "accessibility": { "properties": { "state": { "const": "passed" } } },
+                  "releaseGate": { "properties": { "state": { "const": "admitted" } } }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "alias": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "legacyId",
+        "canonicalAssetId",
+        "introducedContentVersion",
+        "retirementContentVersion",
+        "migrationRef"
+      ],
+      "properties": {
+        "legacyId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 256,
+          "pattern": "^(?!.*[\\r\\n]).*\\S.*$"
+        },
+        "canonicalAssetId": { "$ref": "#/$defs/assetId" },
+        "introducedContentVersion": { "$ref": "#/$defs/semanticVersion" },
+        "retirementContentVersion": {
+          "anyOf": [
+            { "$ref": "#/$defs/semanticVersion" },
+            { "type": "null" }
+          ]
+        },
+        "migrationRef": { "$ref": "#/$defs/nonBlank" }
+      }
+    }
+  }
+}
