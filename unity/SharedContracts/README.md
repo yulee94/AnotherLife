@@ -35,12 +35,14 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_building_catalog.json` | `al-building.schema.json` | `BuildingArtCatalog` |
 | `al_champion_catalog.json` | `al-champion.schema.json` | `ChampionArtCatalog` |
 | `al_first_session_terrain_catalog.json` | `al-first-session-terrain.schema.json` | — |
+| `al_world_asset_inventory.json` | `al-world-asset-inventory.schema.json` | — |
 
-`al-world-asset-inventory.schema.json` defines the future post-MVP world-asset
-production identity, binding, provenance, standards, and readiness contract. Its
-future payload is `al_world_asset_inventory.json`, but that payload and its runtime
-loader do not exist yet. The schema does not authorize asset generation or replace
-the current MVP/Resources bindings.
+`al-world-asset-inventory.schema.json` defines the held post-MVP world-asset logical
+family, production identity, binding, provenance, standards, budget-measurement, and
+readiness contract. `al_world_asset_inventory.json` is the authoritative preparation
+payload: it covers all 242 logical families and preserves eight existing prefab tuples,
+but it has no runtime loader and authorizes no asset generation, activation, or
+replacement of the current MVP/Resources bindings.
 
 The character customization catalog includes body presets, hair styles, armor styles, primary/hair/skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
@@ -79,15 +81,21 @@ families (realms, buildings, research, troops, champions, skills):
 
 - `validate.py` — loads every schema, asserts each compiles, validates the real
   `StreamingAssets/GameData` catalogs against their schemas, and checks that
-  `fixtures/valid/*.json` pass while `fixtures/invalid/*.json` fail.
+  `fixtures/valid/*.json` pass while `fixtures/invalid/*.json` fail. It also runs the
+  world-asset cross-record, binding, budget, gate, and byte-stability validator.
 - `generate_fixtures.py` — regenerates the fixtures (valid samples and
   one-decision-violation invalid samples).
+- `world_asset_inventory.py` — deterministically assembles or validates the held
+  authoritative inventory and its acceptance-evidence report.
+- `test_world_asset_inventory.py` — proves two independent generations are
+  byte-identical and twelve adversarial catalog mutations fail closed.
 
 Run it with:
 
 ```bash
 cd unity/SharedContracts/Tests
 uv run --with jsonschema validate.py
+python test_world_asset_inventory.py
 ```
 
 The real `al_world_event_content_catalog.json` currently fails validation on its

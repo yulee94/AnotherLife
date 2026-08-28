@@ -16,6 +16,7 @@
     "authority",
     "gatePolicy",
     "profiles",
+    "familyRecords",
     "records",
     "aliases"
   ],
@@ -30,6 +31,11 @@
     "authority": { "$ref": "#/$defs/catalogAuthority" },
     "gatePolicy": { "$ref": "#/$defs/gatePolicy" },
     "profiles": { "$ref": "#/$defs/profiles" },
+    "familyRecords": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/familyRecord" }
+    },
     "records": {
       "type": "array",
       "items": { "$ref": "#/$defs/assetRecord" }
@@ -498,6 +504,121 @@
         }
       ]
     },
+    "familyProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["state", "sourceReferences", "humanDecisionRef", "openIssues"],
+      "properties": {
+        "state": { "const": "logical_authority_only" },
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 3,
+          "items": { "$ref": "#/$defs/nonBlank" }
+        },
+        "humanDecisionRef": { "$ref": "#/$defs/nonBlank" },
+        "openIssues": { "$ref": "#/$defs/stringArray" }
+      }
+    },
+    "realmApplicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["realmId", "mode", "reason"],
+      "properties": {
+        "realmId": { "enum": ["crownlands", "stonehold", "eldergrove", "umbral"] },
+        "mode": { "enum": ["realm_variant", "shared", "excluded"] },
+        "reason": { "$ref": "#/$defs/nullableString" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "mode": { "const": "excluded" } },
+            "required": ["mode"]
+          },
+          "then": { "properties": { "reason": { "$ref": "#/$defs/nonBlank" } } },
+          "else": { "properties": { "reason": { "type": "null" } } }
+        }
+      ]
+    },
+    "familyRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "familyId",
+        "displayLabel",
+        "assetClass",
+        "purpose",
+        "requiredVariants",
+        "ownerAuthority",
+        "realmApplicability",
+        "taxonomyStatus",
+        "dependencies",
+        "schedule",
+        "biomeIds",
+        "budgetClassId",
+        "standards",
+        "provenance",
+        "approvalState",
+        "generationState",
+        "activationState"
+      ],
+      "properties": {
+        "familyId": { "$ref": "#/$defs/familyId" },
+        "displayLabel": { "$ref": "#/$defs/nonBlank" },
+        "assetClass": {
+          "enum": [
+            "terrain_surface",
+            "terrain_decal",
+            "water",
+            "vegetation",
+            "geology",
+            "traversal",
+            "architecture",
+            "interior_module",
+            "prop",
+            "interactable",
+            "harvestable",
+            "signage",
+            "banner",
+            "vfx_anchor",
+            "technical_helper",
+            "derivative_25d",
+            "fantasy_beast",
+            "monster",
+            "dragon"
+          ]
+        },
+        "purpose": { "$ref": "#/$defs/nonBlank" },
+        "requiredVariants": { "$ref": "#/$defs/nonBlank" },
+        "ownerAuthority": { "$ref": "#/$defs/ownerAuthority" },
+        "realmApplicability": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/realmApplicability" }
+        },
+        "taxonomyStatus": {
+          "enum": [
+            "current_mvp_replaceable",
+            "current_bound_partial",
+            "source_only",
+            "logical_reserved",
+            "deferred_unapproved"
+          ]
+        },
+        "dependencies": { "$ref": "#/$defs/stableIdArray" },
+        "schedule": { "enum": ["launch", "post_mvp", "later_ecosystem"] },
+        "biomeIds": {
+          "type": "array",
+          "maxItems": 0
+        },
+        "budgetClassId": { "$ref": "#/$defs/stableId" },
+        "standards": { "$ref": "#/$defs/standardRefs" },
+        "provenance": { "$ref": "#/$defs/familyProvenance" },
+        "approvalState": { "const": "preparation_held" },
+        "generationState": { "const": "held" },
+        "activationState": { "const": "held" }
+      }
+    },
     "sourceArtifact": {
       "type": "object",
       "additionalProperties": false,
@@ -950,6 +1071,94 @@
         "measuredBuildSizeBytes": { "$ref": "#/$defs/nullableNonnegativeInteger" }
       }
     },
+    "budgetArtifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256",
+        "compressedDeliveryBytes",
+        "installedBytes",
+        "residentBytes",
+        "loadIoBytes"
+      ],
+      "properties": {
+        "sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "compressedDeliveryBytes": { "type": "integer", "minimum": 0 },
+        "installedBytes": { "type": "integer", "minimum": 0 },
+        "residentBytes": { "type": "integer", "minimum": 0 },
+        "loadIoBytes": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "budgetPlacement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["realmId", "sceneId", "cellId", "ring", "visibleInstances"],
+      "properties": {
+        "realmId": { "enum": ["crownlands", "stonehold", "eldergrove", "umbral"] },
+        "sceneId": { "$ref": "#/$defs/stableId" },
+        "cellId": { "$ref": "#/$defs/stableId" },
+        "ring": { "enum": ["interaction", "prefetch", "horizon"] },
+        "visibleInstances": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "budgetMeasurements": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "measurementState",
+        "baseVariants",
+        "stateDerivatives",
+        "lod0Triangles",
+        "mobileNormalTriangles",
+        "lod0MaterialSlots",
+        "mobileDraws",
+        "textureLongEdgePixels",
+        "textureFormat",
+        "colliderPrimitives",
+        "colliderProxyTriangles",
+        "navSourceTriangles",
+        "navLinkPairs",
+        "navDataBytes",
+        "activeVfxSources",
+        "liveParticles",
+        "transparentDraws",
+        "dynamicLights",
+        "activationP95Ms",
+        "loadReadyP95Ms",
+        "artifacts",
+        "placements"
+      ],
+      "properties": {
+        "measurementState": { "enum": ["not_measured", "measured"] },
+        "baseVariants": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "stateDerivatives": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "lod0Triangles": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "mobileNormalTriangles": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "lod0MaterialSlots": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "mobileDraws": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "textureLongEdgePixels": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "textureFormat": { "$ref": "#/$defs/nullableString" },
+        "colliderPrimitives": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "colliderProxyTriangles": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "navSourceTriangles": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "navLinkPairs": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "navDataBytes": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "activeVfxSources": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "liveParticles": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "transparentDraws": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "dynamicLights": { "$ref": "#/$defs/nullableNonnegativeInteger" },
+        "activationP95Ms": { "$ref": "#/$defs/nullableNumber" },
+        "loadReadyP95Ms": { "$ref": "#/$defs/nullableNumber" },
+        "artifacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/budgetArtifact" }
+        },
+        "placements": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/budgetPlacement" }
+        }
+      }
+    },
     "modularity": {
       "type": "object",
       "additionalProperties": false,
@@ -1206,6 +1415,7 @@
         "vfxAnchor",
         "derivative25d",
         "budgetClassId",
+        "budgetMeasurements",
         "approvals",
         "lifecycle"
       ],
@@ -1270,6 +1480,7 @@
           ]
         },
         "budgetClassId": { "$ref": "#/$defs/stableId" },
+        "budgetMeasurements": { "$ref": "#/$defs/budgetMeasurements" },
         "approvals": { "$ref": "#/$defs/approvals" },
         "lifecycle": { "$ref": "#/$defs/lifecycle" }
       },
