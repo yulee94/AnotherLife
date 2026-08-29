@@ -4,8 +4,16 @@
 
 **Candidate date:** 2026-08-28
 
-**Status:** Gate 0 integration candidate; approval is authoritative only on the
-Hermes Kanban
+**Governance control:** `GOV-G0-v1.0.0`
+
+**Roadmap candidate:** `RC-20260828-002`
+
+**Parent approved baseline:** `RB-20260828-001`
+
+**Proposed promoted baseline:** `RB-20260828-002`
+
+**Status:** Gate 0 integration candidate; unapproved while
+`SS-20260828-001` is open; approval is authoritative only on the Hermes Kanban
 
 **Owning gate:** `t_1ad7a8d5`
 

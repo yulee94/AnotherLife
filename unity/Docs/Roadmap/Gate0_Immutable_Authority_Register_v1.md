@@ -4,7 +4,13 @@
 
 **Baseline date:** 2026-08-28
 
-**Status:** immutable, owner-approved planning baseline
+**Governance control:** `GOV-G0-v1.0.0`
+
+**Roadmap candidate:** `RC-20260828-002`
+
+**Parent approved baseline:** `RB-20260828-001`
+
+**Status:** immutable candidate register; not an approved roadmap baseline
 
 **Owning gate:** `t_1ad7a8d5`
 

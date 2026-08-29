@@ -2,9 +2,15 @@
 
 **Control version:** `1.0.0`
 
+**Control identity:** `GOV-G0-v1.0.0`
+
 **Effective baseline date:** 2026-08-28
 
-**Status:** approved-roadmap governance candidate
+**Roadmap candidate:** `RC-20260828-002`
+
+**Parent approved baseline:** `RB-20260828-001`
+
+**Status:** candidate-only; unapproved while `SS-20260828-001` is open
 
 **Owning gate:** `t_1ad7a8d5`
 
