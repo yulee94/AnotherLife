@@ -45,6 +45,13 @@
 /Assets/AL/StreamingAssets/GameData/al_world_atlas_narrative_catalog.json unity-json
 /Assets/AL/StreamingAssets/GameData/al_building_catalog.json              unity-json
 /Assets/AL/StreamingAssets/GameData/al_champion_catalog.json              unity-json
+/Assets/AL/StreamingAssets/GameData/al_world_asset_inventory.json         unity-json
+/Docs/AssetLibrary/PostMVP_World_Asset_Inventory_Acceptance_v1.json       unity-json
+/SharedContracts/Schemas/al-world-asset-inventory.schema.json             unity-json
+/SharedContracts/Tests/fixtures/valid/al-world-asset-inventory.valid.json unity-json
+/SharedContracts/Tests/world_asset_inventory.py                           text eol=lf
+/SharedContracts/Tests/test_world_asset_inventory.py                      text eol=lf
+/SharedContracts/Tests/validate.py                                        text eol=lf
 /Assets/AL/Scripts/Services/Local/LocalGameDataService.cs                  text eol=lf
 /Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataWalletResourceReferences.cs text eol=lf
 /Assets/AL/Scripts/Data/Catalogs/SixFamily/GameDataRealmReferences.cs      text eol=lf

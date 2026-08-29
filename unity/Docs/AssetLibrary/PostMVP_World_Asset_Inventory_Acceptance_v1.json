@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "evidenceId": "post_mvp_world_asset_inventory_acceptance_v1",
+  "inventory": {
+    "path": "unity/Assets/AL/StreamingAssets/GameData/al_world_asset_inventory.json",
+    "contentVersion": "0.1.0",
+    "sourceRevision": "sha256_17c3e057604fe198bd4b71d666afc8186bb4529df6daeb9a688bf02970682838",
+    "rawSha256": "79eb8b5fef5c9f8ed56eb1b627428007122c67c4a66956c9900909816538f828",
+    "familyRecordCount": 242,
+    "assetRecordCount": 8,
+    "aliasCount": 16
+  },
+  "sourceInputs": [
+    {
+      "path": "unity/Docs/AssetLibrary/PostMVP_World_Asset_Taxonomy_v1.md",
+      "sha256": "9908e4031e94d37ae8590291072e7b444f1e29c72b0db13d41512eb8496f0062",
+      "canonicalization": "utf8_lf"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/PostMVP_World_Asset_Budgets_And_Readability_v1.md",
+      "sha256": "c789f86821b7e44e2002f187cc3317fc375793bb3d50f533118c0c317e466273",
+      "canonicalization": "utf8_lf"
+    },
+    {
+      "path": "unity/Docs/AssetLibrary/PostMVP_World_Asset_Catalog_Binding_And_Production_Standard_v1.md",
+      "sha256": "b6b4ded9bf6553040806c5dfeddc46a95ea073ba9e360a11dac6fc50b9ee38da",
+      "canonicalization": "utf8_lf"
+    },
+    {
+      "path": "unity/SharedContracts/Schemas/al-world-asset-inventory.schema.json",
+      "sha256": "c60d88465ace5478704887763cd1ae9a4d2d7565338f312ff124abbddf377267",
+      "canonicalization": "raw"
+    },
+    {
+      "path": "unity/Assets/AL/StreamingAssets/GameData/al_building_catalog.json",
+      "sha256": "345165973c397c9c115118dd72e7d7777a3cb22a4c9bb1c61067f44df828b263",
+      "canonicalization": "raw"
+    },
+    {
+      "path": "unity/SharedContracts/Tests/world_asset_inventory.py",
+      "sha256": "030ac462fe4caf6f83683ea221852d7d0f190fa828708e796b10f0fcba1558a3",
+      "canonicalization": "raw"
+    }
+  ],
+  "familyCoverage": {
+    "required": 242,
+    "covered": 242,
+    "missing": [],
+    "assetClassCounts": {
+      "architecture": 29,
+      "banner": 5,
+      "derivative_25d": 15,
+      "dragon": 2,
+      "fantasy_beast": 4,
+      "geology": 14,
+      "harvestable": 8,
+      "interactable": 8,
+      "interior_module": 21,
+      "monster": 3,
+      "prop": 49,
+      "signage": 5,
+      "technical_helper": 19,
+      "terrain_decal": 6,
+      "terrain_surface": 10,
+      "traversal": 18,
+      "vegetation": 14,
+      "vfx_anchor": 10,
+      "water": 2
+    }
+  },
+  "realmCoverage": {
+    "cells": 968,
+    "realms": [
+      {
+        "realmId": "crownlands",
+        "realmVariant": 207,
+        "shared": 30,
+        "excluded": 5
+      },
+      {
+        "realmId": "stonehold",
+        "realmVariant": 207,
+        "shared": 30,
+        "excluded": 5
+      },
+      {
+        "realmId": "eldergrove",
+        "realmVariant": 207,
+        "shared": 30,
+        "excluded": 5
+      },
+      {
+        "realmId": "umbral",
+        "realmVariant": 207,
+        "shared": 30,
+        "excluded": 5
+      }
+    ]
+  },
+  "duplicateAndAliasReport": {
+    "duplicateCount": 0,
+    "canonicalFamilyIds": 242,
+    "canonicalAssetIds": 8,
+    "uniqueAliases": 16,
+    "aliasChains": 0,
+    "canonicalShadowingAliases": 0
+  },
+  "ownerAuthorityCoverage": {
+    "required": 250,
+    "complete": 250,
+    "finalCreativeOwner": "project_owner"
+  },
+  "bindingCoverage": {
+    "preservedCurrentBindings": 8,
+    "verifiedPrefabTuples": 8,
+    "addressableBindings": 0,
+    "unresolvedOrBrokenBindings": 0
+  },
+  "budgetRollup": {
+    "assignedFamilies": 242,
+    "classCount": 26,
+    "classCounts": {
+      "wbud_architecture_common": 24,
+      "wbud_architecture_hero": 5,
+      "wbud_decal": 6,
+      "wbud_derivative_25d_large": 5,
+      "wbud_derivative_25d_small": 10,
+      "wbud_foliage_major": 4,
+      "wbud_foliage_minor": 10,
+      "wbud_interactable": 16,
+      "wbud_interior_module": 21,
+      "wbud_prop_large": 25,
+      "wbud_prop_small": 24,
+      "wbud_reserved_deferred_zero": 1,
+      "wbud_reserved_dragon": 2,
+      "wbud_reserved_fantasy_beast_supporting": 3,
+      "wbud_reserved_monster_boss": 1,
+      "wbud_reserved_monster_common": 1,
+      "wbud_reserved_monster_elite": 1,
+      "wbud_signage_banner": 10,
+      "wbud_static_large": 9,
+      "wbud_static_small": 5,
+      "wbud_surface_layer": 9,
+      "wbud_technical_helper": 19,
+      "wbud_terrain_macro": 1,
+      "wbud_traversal_module": 18,
+      "wbud_vfx_anchor": 10,
+      "wbud_water": 2
+    },
+    "measurementState": "blocked_no_measured_runtime_costs",
+    "measuredRecordCount": 0,
+    "globalCompressedDeliveryBytes": null,
+    "globalInstalledBytes": null,
+    "globalResidentBytes": null,
+    "globalLoadIoBytes": null
+  },
+  "approvalState": {
+    "catalogStatus": "preparation_held",
+    "generationState": "held",
+    "activationState": "held",
+    "positiveFamilyStates": 0,
+    "positiveReleaseStates": 0,
+    "note": "Preparation only. MVP review and integrated roadmap approval permit catalog assembly but do not authorize asset generation, activation, or runtime migration."
+  }
+}
