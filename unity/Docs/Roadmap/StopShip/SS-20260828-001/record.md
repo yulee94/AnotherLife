@@ -107,3 +107,39 @@ The controlling technical audit is
 `unity/Docs/Roadmap/Gate0_Traceability_And_Authority_Audit_v3.md`. This incident
 remains open pending an explicit game-owner decision naming exact RC-002 and the
 resulting approval, promoted-baseline, Gate 0, and closure records.
+
+## Append-only owner-approval and closure event — 2026-08-30T22:49:17Z
+
+The game owner recorded the following exact decision on `t_a4c586ff` in an
+owner-authored comment with Kanban `created_at` value `1788129995`
+(`2026-08-30T22:46:35Z`):
+
+> OWNER DECISION (2026-08-31): APPROVE RC-20260828-002 as RB-20260828-002, including the exact integrated roadmap, authority matrix, gate ordering, and unresolved/fail-closed ledger.
+
+All four closure requirements are satisfied: `GOV-G0-v1.0.0`, exact
+`RC-20260828-002`, and retained parent `RB-20260828-001` are present; all package
+statuses remained candidate-only through review; independent audit
+`AUD-G0-RC-20260828-002-003` passed with 44/44 authority rows, 12/12 unresolved
+rows fail-closed, and 8/8 canonical hashes verified; and the exact owner decision
+is mirrored by `AP-GR-GT-00-RC-20260828-002-003-001`.
+
+The approved promotion is recorded by immutable manifest `RB-20260828-002` and
+final Gate 0 record `GR-GT-00-RC-20260828-002-003`. Prior baseline
+`RB-20260828-001`, withdrawn RC-001 history, audit history, source decisions, and
+rollback plan `RR-RC-20260828-002-001` remain retained; no rollback was executed.
+
+**Current disposition:** `CLOSED — RC-20260828-002 APPROVED AND PROMOTED AS
+RB-20260828-002`. The closure and promotion become repository-effective when the
+owner-approved follow-up PR containing these records merges with all required
+checks green. PR #634's earlier merge of candidate-only documentation did not
+constitute approval, promotion, Gate 0 passage, or implementation permission.
+
+Closure does not resolve `U-01` through `U-12`, waive a downstream gate, select a
+numerical default, or authorize any owner-reserved decision. Any authority change,
+scope addition, numerical-gate revision on its source card, material DAG/gate/
+cost/capacity/platform/region/compliance/evidence/exposure change, canonical drift,
+inaccessible evidence, incident, unauthorized change, source conflict, explicit
+owner revision, or downstream-epic conflict appends a reopen event, creates a new
+gate-record revision, reopens `t_0648ce23` and affected descendants, and fails the
+affected scope closed through `t_15f5019e` until corrected evidence, independent
+review, and authorized owner ruling are complete.
