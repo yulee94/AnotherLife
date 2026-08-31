@@ -24,7 +24,12 @@ libraries cross the Unity FFI boundary. `al_server_core` currently provides:
   social, economy, security/abuse, and observability ports, with no provider SDK
   types or implementations; and
 - a separate disposable `al_provider_adapter_stub` crate proving that adapter
-  code can depend on the core contract without the core depending on an adapter.
+  code can depend on the core contract without the core depending on an adapter;
+  and
+- a synthetic-only `al_provider_adapter_playfab_spike` crate mapping the neutral
+  placement, deployment, capacity, failure, and observation contracts to an
+  injected PlayFab MPS boundary, with no concrete credential/network transport
+  and no runtime operationalization path.
 
 The non-production `al_provider_adapter_gamelift_spike` crate applies the same
 one-way dependency rule to an Amazon GameLift Servers candidate boundary. Its
@@ -71,6 +76,8 @@ From the repository root:
 
 ```sh
 python tools/architecture/validate_mmo_contracts.py .
+python -m unittest discover -s tools/architecture -p 'test_*.py'
+python tools/architecture/validate_mmo_bakeoff_plan.py . --record evidence/microsoft_playfab/<run-id>/run-record.json
 python tools/architecture/run_gamelift_spike.py .
 cargo fmt --manifest-path server/Cargo.toml --all -- --check
 cargo clippy --manifest-path server/Cargo.toml --workspace --all-targets -- -D warnings

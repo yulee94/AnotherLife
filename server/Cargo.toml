@@ -1,6 +1,7 @@
 [workspace]
 members = [
     "al_provider_adapter_gamelift_spike",
+    "al_provider_adapter_playfab_spike",
     "al_provider_adapter_stub",
     "al_server_core",
 ]
