@@ -1,13 +1,17 @@
 using AL.ChampionMode.UI;
+using AL.Data.Catalogs.MapDisclosure;
 using AL.Data.Catalogs.WorldAtlas;
 using AL.Input;
 using AL.UI.SharedMenu;
 using AL.Services.Local;
 using AL.World;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 
 namespace AL.UI.WorldMap
@@ -28,6 +32,9 @@ namespace AL.UI.WorldMap
         private WorldMapOverlay _overlay;
         private InnerRealmMinimapOverlay _minimap;
         private bool _bound;
+        private bool _catalogLoadInFlight;
+        private bool _catalogLoadFailed;
+        private int _catalogLoadGeneration;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         private static void AfterSceneLoad()
@@ -141,11 +148,14 @@ namespace AL.UI.WorldMap
 
         private void OnEnable()
         {
+            _catalogLoadFailed = false;
             BindIfNeeded();
         }
 
         private void OnDisable()
         {
+            _catalogLoadGeneration++;
+            _catalogLoadInFlight = false;
             _overlay?.SetPresentationAuthority(false);
             RelinquishAuthority();
         }
@@ -171,6 +181,17 @@ namespace AL.UI.WorldMap
                 RegisterBoundHost();
                 return;
             }
+            if (_catalogLoadInFlight || _catalogLoadFailed)
+            {
+                return;
+            }
+
+            if (!Application.isEditor &&
+                RequiresUriCatalogLoad(Application.streamingAssetsPath))
+            {
+                StartUriCatalogLoad(ownerScene);
+                return;
+            }
 
             _overlay?.SetPresentationAuthority(false);
             try
@@ -182,13 +203,14 @@ namespace AL.UI.WorldMap
                     return;
                 }
 
-                _overlay = WorldMapOverlay.Ensure(snapshot, ownerScene);
-                _minimap = EnsureMinimapForScene(snapshot, ownerScene);
-                _bound = _overlay != null && _minimap != null &&
-                         _overlay.IsSurfaceHealthy() && _minimap.IsSurfaceHealthy();
-                if (_bound)
+                MapDisclosureCatalogSnapshot disclosure = LoadCanonicalDisclosure();
+                if (disclosure == null)
                 {
-                    RegisterBoundHost();
+                    FailBinding();
+                    return;
+                }
+                if (CompleteBinding(snapshot, disclosure, ownerScene))
+                {
                     return;
                 }
             }
@@ -197,6 +219,135 @@ namespace AL.UI.WorldMap
                 Debug.LogWarning("World-map surface binding failed: " + exception.Message);
             }
 
+            FailBinding();
+        }
+
+        private bool CompleteBinding(
+            WorldAtlasSnapshot snapshot,
+            MapDisclosureCatalogSnapshot disclosure,
+            Scene ownerScene)
+        {
+            ProgressiveMapSession.Configure(disclosure);
+            _overlay = WorldMapOverlay.Ensure(snapshot, ownerScene);
+            _minimap = EnsureMinimapForScene(snapshot, ownerScene);
+            _bound = _overlay != null && _minimap != null &&
+                     _overlay.IsSurfaceHealthy() && _minimap.IsSurfaceHealthy();
+            if (!_bound)
+            {
+                return false;
+            }
+
+            RegisterBoundHost();
+            return true;
+        }
+
+        private void StartUriCatalogLoad(Scene ownerScene)
+        {
+            _catalogLoadInFlight = true;
+            int generation = ++_catalogLoadGeneration;
+            string atlasLocation = ResolveRuntimeCatalogLocation(
+                Application.streamingAssetsPath,
+                AtlasFileName);
+            string disclosureLocation = ResolveCanonicalDisclosureLocation(
+                Application.dataPath,
+                Application.streamingAssetsPath,
+                isEditor: false);
+            StartCoroutine(LoadCatalogsFromUris(
+                ownerScene,
+                atlasLocation,
+                disclosureLocation,
+                generation));
+        }
+
+        private IEnumerator LoadCatalogsFromUris(
+            Scene ownerScene,
+            string atlasLocation,
+            string disclosureLocation,
+            int generation)
+        {
+            byte[] atlasBytes;
+            using (UnityWebRequest request = UnityWebRequest.Get(atlasLocation))
+            {
+                yield return request.SendWebRequest();
+                if (!IsCurrentCatalogLoad(generation))
+                {
+                    yield break;
+                }
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    FinishUriLoadFailure(
+                        generation,
+                        "World atlas catalog could not be read: " + request.error);
+                    yield break;
+                }
+                atlasBytes = request.downloadHandler.data;
+            }
+
+            WorldAtlasLoadResult atlasResult = WorldAtlasTopologyLoader.Validate(atlasBytes);
+            if (!atlasResult.IsAccepted)
+            {
+                FinishUriLoadFailure(
+                    generation,
+                    "World atlas catalog was rejected: " +
+                    string.Join("; ", atlasResult.Diagnostics.Select(value => value.Fingerprint)));
+                yield break;
+            }
+
+            byte[] disclosureBytes;
+            using (UnityWebRequest request = UnityWebRequest.Get(disclosureLocation))
+            {
+                yield return request.SendWebRequest();
+                if (!IsCurrentCatalogLoad(generation))
+                {
+                    yield break;
+                }
+                if (request.result != UnityWebRequest.Result.Success)
+                {
+                    FinishUriLoadFailure(
+                        generation,
+                        "Map disclosure catalog could not be read: " + request.error);
+                    yield break;
+                }
+                disclosureBytes = request.downloadHandler.data;
+            }
+
+            MapDisclosureLoadResult disclosureResult =
+                MapDisclosureCatalogLoader.Validate(disclosureBytes);
+            if (!disclosureResult.IsAccepted)
+            {
+                FinishUriLoadFailure(
+                    generation,
+                    "Map disclosure catalog was rejected: " +
+                    string.Join("; ", disclosureResult.Diagnostics.Select(value => value.Fingerprint)));
+                yield break;
+            }
+
+            if (!IsCurrentCatalogLoad(generation))
+            {
+                yield break;
+            }
+            _catalogLoadInFlight = false;
+            if (!ownerScene.IsValid() || !ownerScene.isLoaded ||
+                !CompleteBinding(atlasResult.Snapshot, disclosureResult.Snapshot, ownerScene))
+            {
+                FailBinding();
+            }
+        }
+
+        private bool IsCurrentCatalogLoad(int generation)
+        {
+            return generation == _catalogLoadGeneration && isActiveAndEnabled;
+        }
+
+        private void FinishUriLoadFailure(int generation, string message)
+        {
+            if (!IsCurrentCatalogLoad(generation))
+            {
+                return;
+            }
+            _catalogLoadInFlight = false;
+            _catalogLoadFailed = true;
+            Debug.LogWarning(message);
             FailBinding();
         }
 
@@ -405,6 +556,7 @@ namespace AL.UI.WorldMap
 
             _authoritativeHost = null;
             BoundHosts.Clear();
+            ProgressiveMapSession.ResetForTests();
             SceneManager.sceneLoaded -= OnSceneLoaded;
             SceneManager.sceneUnloaded -= OnSceneUnloaded;
         }
@@ -436,6 +588,102 @@ namespace AL.UI.WorldMap
             }
 
             return Path.Combine(gameDataDirectory, AtlasFileName);
+        }
+
+        internal static MapDisclosureCatalogSnapshot LoadCanonicalDisclosure()
+        {
+            string path = ResolveCanonicalDisclosureLocation(
+                Application.dataPath,
+                Application.streamingAssetsPath,
+                Application.isEditor);
+            if (!File.Exists(path))
+            {
+                Debug.LogWarning("Map disclosure catalog is missing: " + path);
+                return null;
+            }
+            return LoadDisclosureFromFile(path, File.ReadAllBytes);
+        }
+
+        internal static MapDisclosureCatalogSnapshot LoadDisclosureFromFile(
+            string path,
+            Func<string, byte[]> readBytes)
+        {
+            try
+            {
+                if (readBytes == null)
+                {
+                    Debug.LogWarning("Map disclosure catalog is missing: " + path);
+                    return null;
+                }
+
+                MapDisclosureLoadResult result =
+                    MapDisclosureCatalogLoader.Validate(readBytes(path));
+                if (!result.IsAccepted)
+                {
+                    Debug.LogWarning(
+                        "Map disclosure catalog was rejected: " +
+                        string.Join("; ", result.Diagnostics.Select(value => value.Fingerprint)));
+                    return null;
+                }
+                return result.Snapshot;
+            }
+            catch (Exception exception) when (
+                exception is IOException ||
+                exception is UnauthorizedAccessException)
+            {
+                Debug.LogWarning(
+                    "Map disclosure catalog could not be read: " + exception.Message);
+                return null;
+            }
+        }
+
+        internal static string ResolveCanonicalDisclosurePath(
+            string dataPath,
+            string streamingAssetsPath,
+            bool isEditor)
+        {
+            return ResolveCanonicalDisclosureLocation(
+                dataPath,
+                streamingAssetsPath,
+                isEditor);
+        }
+
+        internal static string ResolveCanonicalDisclosureLocation(
+            string dataPath,
+            string streamingAssetsPath,
+            bool isEditor)
+        {
+            if (isEditor)
+            {
+                return Path.Combine(
+                    dataPath ?? string.Empty,
+                    "AL",
+                    "StreamingAssets",
+                    "GameData",
+                    MapDisclosureContract.FileName);
+            }
+            return ResolveRuntimeCatalogLocation(
+                streamingAssetsPath,
+                MapDisclosureContract.FileName);
+        }
+
+        internal static string ResolveRuntimeCatalogLocation(
+            string streamingAssetsRoot,
+            string fileName)
+        {
+            string root = (streamingAssetsRoot ?? string.Empty).TrimEnd('/', '\\');
+            if (RequiresUriCatalogLoad(root))
+            {
+                return root + "/GameData/" + fileName;
+            }
+            return Path.Combine(root, "GameData", fileName);
+        }
+
+        internal static bool RequiresUriCatalogLoad(string location)
+        {
+            return !string.IsNullOrEmpty(location) &&
+                   (location.IndexOf("://", StringComparison.Ordinal) >= 0 ||
+                    location.StartsWith("jar:", StringComparison.OrdinalIgnoreCase));
         }
     }
 }
