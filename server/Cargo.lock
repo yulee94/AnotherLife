@@ -3,5 +3,12 @@
 version = 3
 
 [[package]]
+name = "al_provider_adapter_stub"
+version = "0.1.0"
+dependencies = [
+ "al_server_core",
+]
+
+[[package]]
 name = "al_server_core"
 version = "0.1.0"

@@ -18,7 +18,13 @@ libraries cross the Unity FFI boundary. `al_server_core` currently provides:
   that exposes two writers;
 - a deterministic integer fixed-tick microcell reference with SoA component
   arrays, bounded immutable-intent reduction, atomic next-state commit, and a
-  bounded uniform-grid radius-query index with canonical entity ordering.
+  bounded uniform-grid radius-query index with canonical entity ordering;
+- provider-neutral identity, placement, deployment, platform, capacity, retry,
+  failure, and observability contracts, plus executable persistence, simulation,
+  social, economy, security/abuse, and observability ports, with no provider SDK
+  types or implementations; and
+- a separate disposable `al_provider_adapter_stub` crate proving that adapter
+  code can depend on the core contract without the core depending on an adapter.
 
 The crate forbids unsafe Rust. The codec never casts a byte buffer to a packed
 structure and never relies on host endianness or Rust ABI layout.
@@ -58,6 +64,7 @@ adapter.
 From the repository root:
 
 ```sh
+python tools/architecture/validate_mmo_contracts.py .
 cargo fmt --manifest-path server/Cargo.toml --all -- --check
 cargo clippy --manifest-path server/Cargo.toml --workspace --all-targets -- -D warnings
 cargo test --manifest-path server/Cargo.toml --workspace --all-targets

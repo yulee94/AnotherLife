@@ -8,7 +8,9 @@
 #![deny(missing_docs)]
 #![deny(rustdoc::broken_intra_doc_links)]
 
+pub mod domain_contracts;
 pub mod handoff;
 pub mod microcell;
 pub mod ownership;
+pub mod provider_contracts;
 pub mod wire;

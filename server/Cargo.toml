@@ -1,5 +1,5 @@
 [workspace]
-members = ["al_server_core"]
+members = ["al_provider_adapter_stub", "al_server_core"]
 resolver = "2"
 
 [profile.release]
