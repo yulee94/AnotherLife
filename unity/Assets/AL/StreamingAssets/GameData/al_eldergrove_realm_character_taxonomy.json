@@ -100,7 +100,7 @@
       "createdAtUtc": null,
       "rightsState": "project_internal",
       "promptOrBriefRef": null,
-      "sha256": "453e120e50000cc46f7801e8eabff51e8b1d211257ccfef5a813b11501d61ce2",
+      "sha256": "15af1af4fbda6f6a32363b7a1658cad12257ae55fb369cf5f56887031cc2c821",
       "notes": "Merged owner-approved cross-realm Level 1-50 class/subclass progression identities and class-family source references."
     },
     {
@@ -5327,6 +5327,7 @@
       "requiredMotionKeys": [
         "attack.basic",
         "attack.chain",
+        "attack.charged",
         "attack.heavy",
         "combat.block",
         "combat.dodge",
@@ -5348,6 +5349,7 @@
         "reaction.get_up",
         "reaction.hit",
         "reaction.knockdown",
+        "skill.use",
         "traversal",
         "weapon.draw",
         "weapon.stow"

@@ -209,7 +209,7 @@ def build_catalog() -> dict:
         for kind in sorted(contract.MOTION_TEMPLATE_REQUIREMENTS)
     ]
     motions = []
-    for key in sorted(contract.CHAMPION_MOTIONS):
+    for key in sorted(contract.CHAMPION_PRODUCTION_MOTIONS):
         motions.append(
             {
                 "id": motion_id(key),

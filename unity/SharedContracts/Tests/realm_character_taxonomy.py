@@ -140,6 +140,10 @@ CHAMPION_MOTIONS = {
     "interaction",
     "emote",
 }
+CHAMPION_PRODUCTION_MOTIONS = CHAMPION_MOTIONS | {
+    "attack.charged",
+    "skill.use",
+}
 NPC_MOTIONS = CHAMPION_MOTIONS | {
     "social.talk",
     "social.gesture",
@@ -171,7 +175,7 @@ BOSS_MOTIONS = MONSTER_MOTIONS | {
     "boss.transition",
 }
 MOTION_TEMPLATE_REQUIREMENTS = {
-    "champion": CHAMPION_MOTIONS,
+    "champion": CHAMPION_PRODUCTION_MOTIONS,
     "npc": NPC_MOTIONS,
     "beast": BEAST_MOTIONS,
     "monster": MONSTER_MOTIONS,
