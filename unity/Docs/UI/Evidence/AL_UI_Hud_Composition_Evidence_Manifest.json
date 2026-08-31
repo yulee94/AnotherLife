@@ -3,6 +3,7 @@
   "systemId": "al.ui.hud.composition.evidence.v1",
   "tokenAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_ProductionDesignTokens.json",
   "compositionAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudResponsiveCompositions.json",
+  "componentAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudComponentAuthoring.json",
   "artifacts": [
     {
       "formFactor": "PhoneLandscape",

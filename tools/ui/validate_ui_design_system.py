@@ -122,6 +122,41 @@ def validate_compositions(data: dict[str, Any]) -> list[dict[str, Any]]:
     return compositions
 
 
+def validate_components(data: dict[str, Any]) -> list[dict[str, Any]]:
+    require(
+        data.get("SystemId") == "al.ui.hud.components.v1",
+        "Unexpected production HUD component system ID",
+    )
+    components = data.get("Components", [])
+    require(
+        {entry["Slot"] for entry in components} == set(range(7)) and len(components) == 7,
+        "Production HUD components must define each required slot exactly once",
+    )
+    expected_layers = {0: 1, 1: 1, 2: 2, 3: 0, 4: 0, 5: 0, 6: 0}
+    for component in components:
+        slot = int(component["Slot"])
+        require(int(component["Template"]) == slot, f"Component {slot} uses the wrong purpose template")
+        require(int(component["Layer"]) == expected_layers[slot], f"Component {slot} uses an unsafe layer")
+        require(int(component["DefaultState"]) in range(8), f"Component {slot} has an invalid state")
+        for role in ("HeaderRole", "PrimaryRole", "SecondaryRole"):
+            require(int(component[role]) in range(6), f"Component {slot} has an invalid {role}")
+        require(int(component["MaxVisibleRows"]) > 0, f"Component {slot} has no row capacity")
+        require(
+            float(component["LocalizationExpansion"]) >= 1.5,
+            f"Component {slot} lacks localization expansion allowance",
+        )
+
+        if slot in (0, 1, 2):
+            require(bool(component["ProtectFromOcclusion"]), f"Critical component {slot} is not protected")
+        if slot == 2:
+            require(not bool(component["ShowSurface"]), "Hostile telegraphs must not create an opaque plate")
+        else:
+            require(bool(component["ShowSurface"]), f"Panel component {slot} lacks a readable surface")
+        if slot in (3, 4, 5, 6):
+            require(bool(component["AggregateOverflow"]), f"Secondary component {slot} cannot aggregate")
+    return components
+
+
 def to_hex(color: dict[str, Any]) -> str:
     channels = [round(max(0.0, min(1.0, float(color[channel]))) * 255) for channel in ("r", "g", "b")]
     return "#" + "".join(f"{channel:02x}" for channel in channels)
@@ -202,10 +237,12 @@ def main() -> int:
     root = args.root.resolve()
     token_path = root / "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_ProductionDesignTokens.json"
     composition_path = root / "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudResponsiveCompositions.json"
+    component_path = root / "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudComponentAuthoring.json"
     output = args.output.resolve() if args.output else root / "unity/Docs/UI/Evidence"
 
     tokens = load_json(token_path)
     compositions = validate_compositions(load_json(composition_path))
+    components = validate_components(load_json(component_path))
     validate_tokens(tokens)
 
     manifest_entries = []
@@ -227,6 +264,7 @@ def main() -> int:
         "systemId": "al.ui.hud.composition.evidence.v1",
         "tokenAsset": token_path.relative_to(root).as_posix(),
         "compositionAsset": composition_path.relative_to(root).as_posix(),
+        "componentAsset": component_path.relative_to(root).as_posix(),
         "artifacts": manifest_entries,
     }
     manifest_path = output / "AL_UI_Hud_Composition_Evidence_Manifest.json"
@@ -234,7 +272,8 @@ def main() -> int:
         (json.dumps(manifest, indent=2) + "\n").encode("utf-8"))
     print(
         "PASS: 8 semantic states, 4 authored form factors, "
-        "7 required slots each, protected scan paths clear, 4 SVG renders"
+        f"{len(components)} reusable HUD components, 7 required slots each, "
+        "protected scan paths clear, 4 SVG renders"
     )
     return 0
 

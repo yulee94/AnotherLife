@@ -2,18 +2,22 @@
 
 **Status:** Implemented production-system candidate; objective verification required before owner creative disposition
 
-**System IDs:** `al.ui.production.v1`, `al.ui.hud.compositions.v1`
+**System IDs:** `al.ui.production.v1`, `al.ui.hud.compositions.v1`, `al.ui.hud.components.v1`
 
 **Runtime assets:**
 
 - `Assets/AL/Resources/UI/DesignSystem/AL_UI_ProductionDesignTokens.json`
 - `Assets/AL/Resources/UI/DesignSystem/AL_UI_HudResponsiveCompositions.json`
+- `Assets/AL/Resources/UI/DesignSystem/AL_UI_HudComponentAuthoring.json`
 
 **Runtime components:**
 
 - `AL.UI.DesignSystem.UiProductionDesignTokens`
 - `AL.UI.DesignSystem.HudResponsiveCompositionSet`
 - `AL.UI.DesignSystem.HudCompositionPreviewRenderer`
+- `AL.UI.DesignSystem.HudComponentAuthoringProfile`
+- `AL.UI.DesignSystem.ProductionHudRenderer`
+- `AL.UI.DesignSystem.ProductionHudHost`
 
 ## Authority boundary
 
@@ -136,6 +140,17 @@ All layouts contain exactly these reusable slots:
 
 Secondary rewards, logs, ambient notices, chat, and decoration are not protected slots. They must collapse or queue before any listed slot. Child HUD components bind content into these slots without moving the authored composition at runtime.
 
+### Reusable production component contract
+
+`HudComponentAuthoringProfile` gives each required slot a purpose-specific component template, semantic default state, typography roles, maximum visible-row count, localization-expansion allowance, surface policy, overflow policy, and one of three authored rendering layers. The runtime does not infer component purpose or relocate a slot from its content.
+
+- Player vitals and current target use critical-panel templates with stable numeric meters and compact state rows.
+- Hostile telegraphs use a transparent critical-world-cue template inside the protected scan path; they never add a blocking plate.
+- Party/support, objectives, route, and allegiance use standard information templates. Dense rows aggregate into a bounded summary instead of expanding over combat cues.
+- Every semantic state renders a label prefix, non-color frame cue, and material pattern from `UiProductionDesignTokens`.
+- `ProductionHudRenderer` creates standard, transient, critical-panel, and critical-world-cue canvases in that fixed order. Notifications and tooltips mount below the two critical layers.
+- `ProductionHudHost` exposes touch/desktop selection and accessibility preview defaults in the inspector, resolves one of the four authored compositions, rebuilds for viewport/safe-area changes, and accepts only caller-supplied content. It contains no authoritative combat, route, objective, party, or allegiance values.
+
 ## Protected central PvP scan path
 
 Every composition declares `ProtectedScanPath` as a normalized safe-area rectangle. Persistent plates must not overlap it. `HostileTelegraphs` intentionally occupies the same bounds as a transparent world-cue layer so attacks, damage direction, target motion, and the legal action field remain visible.
@@ -157,6 +172,7 @@ The ultrawide layout keeps actionable HUD information inside a centered 16:9 rea
 - Desktop uses ultrawide at aspect ratios of 2.0 or wider and 16:9 below 2.0.
 - Input mode may change focus and prompts but not the authoritative content available.
 - Physical notches, cutouts, and overscan reduce the projection area; they never move a slot into the protected scan path.
+- `ProductionHudHost` converts the pixel-space screen safe area into its parent canvas coordinates before projection, including scaled canvases.
 - Requested text scale is clamped to the authored 85–200% range.
 
 ## Runtime use
@@ -164,13 +180,15 @@ The ultrawide layout keeps actionable HUD information inside a centered 16:9 rea
 ```text
 load UiProductionDesignTokens
 load HudResponsiveCompositionSet
+load HudComponentAuthoringProfile
 resolve composition from viewport and primary input class
 project authored slots into the current safe area
 resolve accessibility presentation
-bind authoritative feature components into their fixed slot
+build the fixed production hierarchy through ProductionHudRenderer or ProductionHudHost
+bind authoritative feature content into its fixed component
 ```
 
-`HudCompositionPreviewRenderer` creates a renderable hierarchy for deterministic review and integration tests. Production HUD components may replace the preview labels and surfaces while retaining the same slot transforms, state tokens, focus treatment, and protected scan path.
+`HudCompositionPreviewRenderer` remains the deterministic composition-review plate. `ProductionHudRenderer` builds the reusable runtime hierarchy with localized wrapping, bounded row aggregation, stable meters, semantic non-color cues, and protected layer ordering while retaining the same authored slot transforms and protected scan path.
 
 ## Originality and provenance
 

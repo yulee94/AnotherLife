@@ -99,6 +99,43 @@ namespace AL.Tests.EditMode.UI
         }
 
         [Test]
+        public void ProductionHudAuthoringAssetDefinesProtectedPurposeBuiltComponents()
+        {
+            TextAsset asset = Resources.Load<TextAsset>(
+                "UI/DesignSystem/AL_UI_HudComponentAuthoring");
+            Assert.That(asset, Is.Not.Null);
+
+            HudComponentAuthoringAssetSnapshot snapshot =
+                JsonUtility.FromJson<HudComponentAuthoringAssetSnapshot>(asset.text);
+            Assert.That(snapshot, Is.Not.Null);
+            Assert.That(snapshot.SystemId, Is.EqualTo("al.ui.hud.components.v1"));
+            Assert.That(snapshot.Components, Has.Length.EqualTo(7));
+            Assert.That(
+                snapshot.Components.Select(component => component.Slot),
+                Is.EquivalentTo(System.Enum.GetValues(typeof(HudSlotId))));
+            Assert.That(snapshot.Components, Has.All.Matches<HudComponentAuthoringSnapshot>(
+                component => component.MaxVisibleRows > 0 &&
+                             component.LocalizationExpansion >= 1.5f));
+
+            HudComponentAuthoringSnapshot vitals = snapshot.Get(HudSlotId.PlayerVitals);
+            HudComponentAuthoringSnapshot target = snapshot.Get(HudSlotId.CurrentTarget);
+            HudComponentAuthoringSnapshot telegraphs = snapshot.Get(HudSlotId.HostileTelegraphs);
+            HudComponentAuthoringSnapshot party = snapshot.Get(HudSlotId.PartySupport);
+            HudComponentAuthoringSnapshot objectives = snapshot.Get(HudSlotId.Objectives);
+            Assert.That(vitals.Layer, Is.EqualTo(1));
+            Assert.That(target.Layer, Is.EqualTo(1));
+            Assert.That(vitals.ProtectFromOcclusion, Is.True);
+            Assert.That(target.ProtectFromOcclusion, Is.True);
+            Assert.That(telegraphs.Layer, Is.EqualTo(2));
+            Assert.That(telegraphs.ShowSurface, Is.False);
+            Assert.That(telegraphs.ProtectFromOcclusion, Is.True);
+            Assert.That(party.MaxVisibleRows, Is.GreaterThanOrEqualTo(3));
+            Assert.That(objectives.MaxVisibleRows, Is.GreaterThanOrEqualTo(3));
+            Assert.That(party.AggregateOverflow, Is.True);
+            Assert.That(objectives.AggregateOverflow, Is.True);
+        }
+
+        [Test]
         public void EveryRequiredFormFactorHasAnAuthoredAndDistinctComposition()
         {
             HudResponsiveCompositionSet set = HudResponsiveCompositionSet.LoadDefault();
@@ -246,6 +283,30 @@ namespace AL.Tests.EditMode.UI
             Assert.That(rect.yMax, Is.InRange(0f, 1f));
             Assert.That(rect.width, Is.GreaterThan(0f));
             Assert.That(rect.height, Is.GreaterThan(0f));
+        }
+
+        [System.Serializable]
+        private sealed class HudComponentAuthoringAssetSnapshot
+        {
+            public string SystemId;
+            public HudComponentAuthoringSnapshot[] Components;
+
+            public HudComponentAuthoringSnapshot Get(HudSlotId slot)
+            {
+                return Components.Single(component => component.Slot == slot);
+            }
+        }
+
+        [System.Serializable]
+        private sealed class HudComponentAuthoringSnapshot
+        {
+            public HudSlotId Slot;
+            public int Layer;
+            public int MaxVisibleRows;
+            public float LocalizationExpansion;
+            public bool ShowSurface;
+            public bool ProtectFromOcclusion;
+            public bool AggregateOverflow;
         }
     }
 }
