@@ -5358,6 +5358,7 @@
       "requiredMotionKeys": [
         "attack.basic",
         "attack.chain",
+        "attack.charged",
         "attack.heavy",
         "combat.block",
         "combat.dodge",
@@ -5379,6 +5380,7 @@
         "reaction.get_up",
         "reaction.hit",
         "reaction.knockdown",
+        "skill.use",
         "traversal",
         "weapon.draw",
         "weapon.stow"

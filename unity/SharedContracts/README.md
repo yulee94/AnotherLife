@@ -37,6 +37,7 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_first_session_terrain_catalog.json` | `al-first-session-terrain.schema.json` | — |
 | `al_world_asset_inventory.json` | `al-world-asset-inventory.schema.json` | — |
 | Realm task catalogs (per realm; preparation only) | `al-realm-character-taxonomy.schema.json` | — |
+| `al_four_realm_production_taxonomy.json` | `al-four-realm-production-taxonomy.schema.json` | — |
 
 `al-world-asset-inventory.schema.json` defines the held post-MVP world-asset logical
 family, production identity, binding, provenance, standards, budget-measurement, and
@@ -48,10 +49,20 @@ replacement of the current MVP/Resources bindings.
 `al-realm-character-taxonomy.schema.json` is the gated per-realm production shape
 for playable races, NPCs, Champions, fantasy beasts, monsters, modules, rigs,
 facial/secondary systems, platform budgets, motion matrices, skill traceability,
-and VFX. It has no committed runtime payload. Realm production tasks consume
+and VFX. The four committed realm payloads are preparation-only and have no runtime
+loader. Realm production tasks consume
 `unity/Docs/AssetLibrary/PostMVP_Realm_Character_Creature_Catalog_Contract_v1.md`,
 create their own realm-scoped preparation catalogs, and keep generation and
 activation held until the recorded owner and release gates pass.
+
+`al_four_realm_production_taxonomy.json` deterministically integrates those four
+held catalogs without renaming or flattening realm identity. It owns normalized
+terminology and skill aliases plus master roster, rig, motion, skill-motion,
+skill-VFX, platform, budget, provenance, sharing, duplicate, and owner-decision
+matrices. `four_realm_production_taxonomy.py --check` proves byte stability and
+fails closed on orphan skills, missing cells, unriggable concepts, undocumented
+provenance, unbudgeted mobile costs, incompatible duplicate IDs, or unmapped owner
+questions. It authorizes no generation, activation, runtime use, or release.
 
 The character customization catalog includes body presets, hair styles, armor styles, primary/hair/skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
@@ -104,6 +115,14 @@ families (realms, buildings, research, troops, champions, skills):
 - `test_realm_character_taxonomy.py` — validates one complete synthetic catalog
   and proves duplicate IDs, orphan references, missing motion, trace mismatch,
   template drift, subjectless decisions, and release-gate bypass fail closed.
+- `four_realm_production_taxonomy.py` — deterministically builds and validates the
+  integrated four-realm owner-review surface from the four held source catalogs.
+  Source fingerprints hash canonical semantic JSON, so LF/CRLF checkout policy
+  cannot change the generated taxonomy.
+- `test_four_realm_production_taxonomy.py` — proves all master matrices are exact
+  source-derived projections and adversarial motion, skill, rig, mobile-budget,
+  provenance, owner-packet, sharing, normalization, and duplicate mutations fail
+  closed.
 
 Run it with:
 
@@ -112,6 +131,8 @@ cd unity/SharedContracts/Tests
 uv run --with jsonschema validate.py
 python test_world_asset_inventory.py
 uv run --with jsonschema python -m unittest test_realm_character_taxonomy.py -v
+uv run --with jsonschema python four_realm_production_taxonomy.py --check
+uv run --with jsonschema python -m unittest test_four_realm_production_taxonomy.py -v
 ```
 
 The real `al_world_event_content_catalog.json` currently fails validation on its
