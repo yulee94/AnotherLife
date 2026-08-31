@@ -22,7 +22,10 @@ RIG_ID = "rct_shared_rig_humanoid_fixture_v001"
 CHAMPION_ID = "rct_stonehold_champion_fixture_v001"
 SKILL_ID = "rct_stonehold_skill_fixture_v001"
 ELDERGROVE_CATALOG_PATH = Path(
-    "unity/Docs/AssetLibrary/Catalogs/rct_eldergrove_catalog_production_v001.json"
+    "unity/Assets/AL/StreamingAssets/GameData/al_eldergrove_realm_character_taxonomy.json"
+)
+STONEHOLD_CATALOG_PATH = Path(
+    "unity/Assets/AL/StreamingAssets/GameData/al_stonehold_realm_character_taxonomy.json"
 )
 ELDERGROVE_CLASS_SOURCE_IDS = {
     "ClassFamily.Assassin",
@@ -463,6 +466,17 @@ class RealmCharacterTaxonomyTests(unittest.TestCase):
             catalog_path.read_text(encoding="utf-8"),
         )
         catalog = contract.load_json(catalog_path)
+        stonehold_catalog = contract.load_json(
+            self.repo_root / STONEHOLD_CATALOG_PATH
+        )
+        approved_progression_ids = {
+            skill["externalSourceId"]
+            for skill in stonehold_catalog["skills"]
+            if skill["externalSourceId"].startswith(
+                "anotherlife.class_progression."
+            )
+        }
+        self.assertEqual(96, len(approved_progression_ids))
         self.assertEqual([], list(self.schema_validator.iter_errors(catalog)))
         evidence = contract.validate_catalog(catalog)
 
@@ -473,18 +487,41 @@ class RealmCharacterTaxonomyTests(unittest.TestCase):
         self.assertEqual(0, evidence["orphanReferenceCount"])
         self.assertEqual(0, evidence["missingMotionCount"])
 
-        self.assertEqual(
-            ELDERGROVE_CLASS_SOURCE_IDS,
-            {
-                source_id
-                for family in catalog["championFamilies"]
-                for source_id in family["classSourceIds"]
-            },
+        self.assertTrue(
+            ELDERGROVE_CLASS_SOURCE_IDS.issubset(
+                {
+                    source_id
+                    for family in catalog["championFamilies"]
+                    for source_id in family["classSourceIds"]
+                }
+            )
         )
         self.assertEqual(
-            ELDERGROVE_EXTERNAL_SKILL_IDS,
+            ELDERGROVE_EXTERNAL_SKILL_IDS | approved_progression_ids,
             {skill["externalSourceId"] for skill in catalog["skills"]},
         )
+        skill_by_id = {skill["id"]: skill for skill in catalog["skills"]}
+        for family in catalog["championFamilies"]:
+            class_source = next(
+                source_id
+                for source_id in family["classSourceIds"]
+                if source_id.startswith("ClassFamily.")
+            )
+            class_slug = class_source.split(".")[-1].lower()
+            progression_skills = [
+                skill_by_id[skill_id]
+                for skill_id in family["skillIds"]
+                if skill_by_id[skill_id]["externalSourceId"].startswith(
+                    f"anotherlife.class_progression.{class_slug}."
+                )
+            ]
+            self.assertEqual(24, len(progression_skills), family["id"])
+            progression_sources = [
+                source_id
+                for source_id in family["classSourceIds"]
+                if source_id.startswith("anotherlife.")
+            ]
+            self.assertEqual(4, len(progression_sources), family["id"])
         self.assertEqual(
             {
                 "tdf_grove_strider",

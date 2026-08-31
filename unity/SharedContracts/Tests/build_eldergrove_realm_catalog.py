@@ -13,7 +13,7 @@ from typing import Any
 import realm_character_taxonomy as contract
 
 OUTPUT_REL = Path(
-    "unity/Docs/AssetLibrary/Catalogs/rct_eldergrove_catalog_production_v001.json"
+    "unity/Assets/AL/StreamingAssets/GameData/al_eldergrove_realm_character_taxonomy.json"
 )
 
 IDENTITY_DECISION = "rct_eldergrove_decision_identity_review_v001"
@@ -75,6 +75,11 @@ SOURCE_SPECS = {
         "unity/Assets/AL/StreamingAssets/GameData/skills.json",
         "runtime_catalog",
         "Observed Arcane Bolt and Verdant Nova record identities and profile references; production authority remains gated.",
+    ),
+    "approved_class_progression": (
+        "unity/Assets/AL/StreamingAssets/GameData/al_stonehold_realm_character_taxonomy.json",
+        "runtime_catalog",
+        "Merged owner-approved cross-realm Level 1-50 class/subclass progression identities and class-family source references.",
     ),
     "skill_weather": (
         "unity/Assets/AL/StreamingAssets/GameData/al_skill_weather_catalog.json",
@@ -876,6 +881,43 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
             }
         )
 
+    approved_progression_catalog = json.loads(
+        (
+            repo_root
+            / "unity/Assets/AL/StreamingAssets/GameData/al_stonehold_realm_character_taxonomy.json"
+        ).read_text(encoding="utf-8")
+    )
+    progression_source_rows = [
+        row
+        for row in approved_progression_catalog["skills"]
+        if row["externalSourceId"].startswith("anotherlife.class_progression.")
+    ]
+    if len(progression_source_rows) != 96:
+        raise ValueError(
+            "The approved cross-realm class progression must contain exactly 96 skills."
+        )
+    progression_ids_by_family: dict[str, list[str]] = defaultdict(list)
+    progression_class_sources_by_family: dict[str, list[str]] = {}
+    for family_slug in champion_specs:
+        source_family = next(
+            row
+            for row in approved_progression_catalog["championFamilies"]
+            if any(
+                source_id.startswith(f"anotherlife.class.{family_slug}.")
+                for source_id in row["classSourceIds"]
+            )
+        )
+        progression_class_sources_by_family[family_slug] = list(
+            source_family["classSourceIds"]
+        )
+    for row in progression_source_rows:
+        family_slug = row["externalSourceId"].split(".")[2]
+        progression_ids_by_family[family_slug].append(
+            row["id"].replace(
+                "rct_stonehold_skill_", "rct_eldergrove_skill_", 1
+            )
+        )
+
     generic_skill_slugs = ["realm_strike", "renewing_guard", "warmaster_breaker", "warzone_burst"]
     skill_ids = {slug: rid("skill", slug) for slug in generic_skill_slugs}
     skill_ids.update(
@@ -892,6 +934,7 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
     champion_families = []
     for slug, class_source_id in champion_specs.items():
         family_skill_ids = list(generic_skill_ids)
+        family_skill_ids.extend(progression_ids_by_family[slug])
         if slug == "mage":
             family_skill_ids.extend([skill_ids["arcane_bolt"], skill_ids["verdant_nova"]])
         refs = entity_refs(
@@ -907,10 +950,21 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
             {
                 "id": champion_ids[slug],
                 "displayName": f"Eldergrove {slug.title()} Production Family",
-                "authority": gated_authority(IDENTITY_DECISION, "classes", "first_user", "champion_convergence", "champion_anchor", "contract"),
+                "authority": gated_authority(
+                    IDENTITY_DECISION,
+                    "classes",
+                    "first_user",
+                    "champion_convergence",
+                    "champion_anchor",
+                    "approved_class_progression",
+                    "contract",
+                ),
                 **refs,
                 "playableRaceIds": [race_id],
-                "classSourceIds": [class_source_id],
+                "classSourceIds": [
+                    class_source_id,
+                    *progression_class_sources_by_family[slug],
+                ],
                 "skillIds": sorted(family_skill_ids),
                 "weaponFamilyIds": sorted(
                     module_id
@@ -982,6 +1036,35 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
 
     all_champions = sorted(champion_ids.values())
     skills = []
+    progression_skill_ids: set[str] = set()
+    for source_row in progression_source_rows:
+        family_slug = source_row["externalSourceId"].split(".")[2]
+        skill_id = source_row["id"].replace(
+            "rct_stonehold_skill_", "rct_eldergrove_skill_", 1
+        )
+        progression_skill_ids.add(skill_id)
+        authority = approved_authority("approved_class_progression")
+        authority["approvalEvidenceRefs"] = sorted(
+            {
+                *source_row["authority"]["approvalEvidenceRefs"],
+                (
+                    "unity/Assets/AL/StreamingAssets/GameData/"
+                    f"al_stonehold_realm_character_taxonomy.json#{source_row['id']}"
+                ),
+            }
+        )
+        skills.append(
+            {
+                "id": skill_id,
+                "displayName": source_row["displayName"],
+                "authority": authority,
+                "externalSourceId": source_row["externalSourceId"],
+                "sourceCatalogRef": source_row["sourceCatalogRef"],
+                "subjectIds": [champion_ids[family_slug]],
+                "timingAuthorityRef": source_row["timingAuthorityRef"],
+                "resultAuthorityRef": source_row["resultAuthorityRef"],
+            }
+        )
     champion_skill_specs = {
         "arcane_bolt": ("Arcane Bolt", "skill_arcane_bolt", [champion_ids["mage"]], "skills_observed", "unity/Assets/AL/StreamingAssets/GameData/skills.json#skill_arcane_bolt"),
         "realm_strike": ("Realm Strike", "realm_strike", all_champions, "skill_convergence", "unity/Docs/GameDataCatalog/PhaseC/Phase_C8A_Skill_Authority_Convergence.md#realm_strike"),
@@ -1086,6 +1169,7 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
 
     skill_by_id = {row["id"]: row for row in skills}
     skill_rig = {
+        **{skill_id: humanoid_rig for skill_id in progression_skill_ids},
         **{skill_ids[slug]: humanoid_rig for slug in champion_skill_specs},
         skill_ids["hollowbark_pounce"]: creature_rig_ids["flexible_quadruped"],
         skill_ids["leviathan_lunge"]: creature_rig_ids["semi_aquatic_leviathan"],
@@ -1100,7 +1184,15 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
             skill_ids["mirrorfin_scoop"],
             skill_ids["thornstag_charge"],
         }
-        phases = ["anticipation", "release", "recovery"] if is_creature_skill else contract.SKILL_PHASES
+        phases = (
+            []
+            if skill_id in progression_skill_ids
+            else (
+                ["anticipation", "release", "recovery"]
+                if is_creature_skill
+                else contract.SKILL_PHASES
+            )
+        )
         skill_slug = skill_id.removeprefix("rct_eldergrove_skill_").removesuffix("_v001")
         for phase in phases:
             record = motion_record(
@@ -1124,6 +1216,7 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
         skill_ids["thornstag_charge"]: {"telegraph", "release", "trail", "impact", "area", "environmental", "result", "cleanup"},
     }
     group_by_skill = {
+        **{skill_id: "character" for skill_id in progression_skill_ids},
         **{skill_ids[slug]: "character" for slug in champion_skill_specs},
         skill_ids["hollowbark_pounce"]: "elite",
         skill_ids["leviathan_lunge"]: "boss",
@@ -1131,6 +1224,8 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
         skill_ids["thornstag_charge"]: "elite",
     }
     for skill_id, skill in skill_by_id.items():
+        if skill_id in progression_skill_ids:
+            continue
         categories = creature_effects.get(skill_id, set(contract.VFX_CATEGORIES))
         group = group_by_skill[skill_id]
         budget_ids = [rid("budget", f"{group}_{tier}") for tier in ("mobile_floor", "mobile_high", "pc_high")]
@@ -1146,7 +1241,7 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
 
     skill_traceability = []
     for skill_id in sorted(skill_by_id):
-        is_creature_skill = skill_id in creature_effects
+        is_identity_only = skill_id in progression_skill_ids
         required_phases = set(skill_phase_ids[skill_id])
         required_effects = set(vfx_ids[skill_id])
         skill_traceability.append(
@@ -1159,7 +1254,11 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
                         "rationale": (
                             "Explicit owner-gated production phase requirement."
                             if phase in required_phases
-                            else "The visual source documents a physical creature action, not a cast or channel phase."
+                            else (
+                                "The owner-approved progression establishes identity and order, not a production motion or gameplay-timing requirement."
+                                if is_identity_only
+                                else "The visual source documents a physical creature action, not a cast or channel phase."
+                            )
                         ),
                     }
                     for phase in contract.SKILL_PHASES
@@ -1171,7 +1270,11 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
                         "rationale": (
                             "Explicit owner-gated production effect requirement."
                             if category in required_effects
-                            else "No documented source or gameplay result makes this category applicable to the physical creature action."
+                            else (
+                                "The owner-approved progression establishes identity and order, not production effect or magical-grammar authority."
+                                if is_identity_only
+                                else "No documented source or gameplay result makes this category applicable to the physical creature action."
+                            )
                         ),
                     }
                     for category in contract.VFX_CATEGORIES
@@ -1239,7 +1342,15 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
                 "magical_grammar",
             ],
             "APPROVE, REVISE, or REJECT the bounded entity roster, class/race links, modular body/equipment plan, and source-constrained visual direction without treating proposals as canon.",
-            ["realm", "customization", "champion_convergence", "ecosystem", "boss_elite", "dragon_unresolved"],
+            [
+                "realm",
+                "customization",
+                "champion_convergence",
+                "approved_class_progression",
+                "ecosystem",
+                "boss_elite",
+                "dragon_unresolved",
+            ],
         ),
         TECHNICAL_DECISION: (
             "Eldergrove Rig, Platform, and Budget Review",
