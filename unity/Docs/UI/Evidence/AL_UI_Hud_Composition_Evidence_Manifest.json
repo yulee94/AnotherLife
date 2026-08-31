@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "systemId": "al.ui.hud.composition.evidence.v1",
+  "tokenAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_ProductionDesignTokens.json",
+  "compositionAsset": "unity/Assets/AL/Resources/UI/DesignSystem/AL_UI_HudResponsiveCompositions.json",
+  "artifacts": [
+    {
+      "formFactor": "PhoneLandscape",
+      "referenceResolution": {
+        "x": 2400,
+        "y": 1080
+      },
+      "protectedScanPath": {
+        "serializedVersion": "2",
+        "x": 0.28,
+        "y": 0.18,
+        "width": 0.44,
+        "height": 0.64
+      },
+      "slotCount": 7,
+      "artifact": "AL_UI_Hud_Composition_PhoneLandscape.svg",
+      "sha256": "93f64d8f2d4094257ee17979d91f45d8162faddc6c1d1fd25a5f15d2a7f2ed9b"
+    },
+    {
+      "formFactor": "TabletLandscape",
+      "referenceResolution": {
+        "x": 2732,
+        "y": 2048
+      },
+      "protectedScanPath": {
+        "serializedVersion": "2",
+        "x": 0.26,
+        "y": 0.16,
+        "width": 0.48,
+        "height": 0.68
+      },
+      "slotCount": 7,
+      "artifact": "AL_UI_Hud_Composition_TabletLandscape.svg",
+      "sha256": "4653f76b301179b73a8ae2624a0441ff35cfadd38eb9572495ed5b5f743bae64"
+    },
+    {
+      "formFactor": "Pc16By9",
+      "referenceResolution": {
+        "x": 1920,
+        "y": 1080
+      },
+      "protectedScanPath": {
+        "serializedVersion": "2",
+        "x": 0.27,
+        "y": 0.18,
+        "width": 0.46,
+        "height": 0.64
+      },
+      "slotCount": 7,
+      "artifact": "AL_UI_Hud_Composition_Pc16By9.svg",
+      "sha256": "f92d34179a99a6ceb39a7ab46802d1a69a6b6f3fdbd606ef9b2f8433711ed76e"
+    },
+    {
+      "formFactor": "PcUltrawide",
+      "referenceResolution": {
+        "x": 3440,
+        "y": 1440
+      },
+      "protectedScanPath": {
+        "serializedVersion": "2",
+        "x": 0.34,
+        "y": 0.18,
+        "width": 0.32,
+        "height": 0.64
+      },
+      "slotCount": 7,
+      "artifact": "AL_UI_Hud_Composition_PcUltrawide.svg",
+      "sha256": "b8aa465a98c2a26e047da7ec392cd65d351701386164b05e69927b353cd86b07"
+    }
+  ]
+}

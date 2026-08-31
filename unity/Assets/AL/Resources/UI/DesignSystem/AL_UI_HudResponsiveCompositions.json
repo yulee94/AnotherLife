@@ -1,0 +1,73 @@
+{
+  "SystemId": "al.ui.hud.compositions.v1",
+  "Compositions": [
+    {
+      "FormFactor": 0,
+      "ReferenceResolution": { "x": 2400, "y": 1080 },
+      "SafeAreaPadding": { "x": 36.0, "y": 28.0, "z": 36.0, "w": 28.0 },
+      "TextScaleMinimum": 0.85,
+      "TextScaleMaximum": 2.0,
+      "ProtectedScanPath": { "serializedVersion": "2", "x": 0.28, "y": 0.18, "width": 0.44, "height": 0.64 },
+      "Slots": [
+        { "Id": 0, "NormalizedRect": { "serializedVersion": "2", "x": 0.02, "y": 0.02, "width": 0.25, "height": 0.14 }, "Priority": 95, "CollapseRank": 1, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 1, "NormalizedRect": { "serializedVersion": "2", "x": 0.34, "y": 0.85, "width": 0.32, "height": 0.12 }, "Priority": 98, "CollapseRank": 0, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 2, "NormalizedRect": { "serializedVersion": "2", "x": 0.28, "y": 0.18, "width": 0.44, "height": 0.64 }, "Priority": 100, "CollapseRank": 0, "IsWorldCueLayer": true, "TypographyRole": 4 },
+        { "Id": 3, "NormalizedRect": { "serializedVersion": "2", "x": 0.02, "y": 0.54, "width": 0.23, "height": 0.29 }, "Priority": 88, "CollapseRank": 3, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 4, "NormalizedRect": { "serializedVersion": "2", "x": 0.75, "y": 0.61, "width": 0.23, "height": 0.22 }, "Priority": 92, "CollapseRank": 2, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 5, "NormalizedRect": { "serializedVersion": "2", "x": 0.75, "y": 0.42, "width": 0.23, "height": 0.15 }, "Priority": 84, "CollapseRank": 4, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 6, "NormalizedRect": { "serializedVersion": "2", "x": 0.02, "y": 0.86, "width": 0.23, "height": 0.11 }, "Priority": 80, "CollapseRank": 5, "IsWorldCueLayer": false, "TypographyRole": 4 }
+      ]
+    },
+    {
+      "FormFactor": 1,
+      "ReferenceResolution": { "x": 2732, "y": 2048 },
+      "SafeAreaPadding": { "x": 42.0, "y": 34.0, "z": 42.0, "w": 34.0 },
+      "TextScaleMinimum": 0.85,
+      "TextScaleMaximum": 2.0,
+      "ProtectedScanPath": { "serializedVersion": "2", "x": 0.26, "y": 0.16, "width": 0.48, "height": 0.68 },
+      "Slots": [
+        { "Id": 0, "NormalizedRect": { "serializedVersion": "2", "x": 0.03, "y": 0.03, "width": 0.22, "height": 0.12 }, "Priority": 95, "CollapseRank": 1, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 1, "NormalizedRect": { "serializedVersion": "2", "x": 0.34, "y": 0.86, "width": 0.32, "height": 0.11 }, "Priority": 98, "CollapseRank": 0, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 2, "NormalizedRect": { "serializedVersion": "2", "x": 0.26, "y": 0.16, "width": 0.48, "height": 0.68 }, "Priority": 100, "CollapseRank": 0, "IsWorldCueLayer": true, "TypographyRole": 4 },
+        { "Id": 3, "NormalizedRect": { "serializedVersion": "2", "x": 0.03, "y": 0.53, "width": 0.2, "height": 0.3 }, "Priority": 88, "CollapseRank": 3, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 4, "NormalizedRect": { "serializedVersion": "2", "x": 0.77, "y": 0.6, "width": 0.2, "height": 0.23 }, "Priority": 92, "CollapseRank": 2, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 5, "NormalizedRect": { "serializedVersion": "2", "x": 0.77, "y": 0.42, "width": 0.2, "height": 0.14 }, "Priority": 84, "CollapseRank": 4, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 6, "NormalizedRect": { "serializedVersion": "2", "x": 0.03, "y": 0.86, "width": 0.2, "height": 0.1 }, "Priority": 80, "CollapseRank": 5, "IsWorldCueLayer": false, "TypographyRole": 4 }
+      ]
+    },
+    {
+      "FormFactor": 2,
+      "ReferenceResolution": { "x": 1920, "y": 1080 },
+      "SafeAreaPadding": { "x": 28.0, "y": 24.0, "z": 28.0, "w": 24.0 },
+      "TextScaleMinimum": 0.85,
+      "TextScaleMaximum": 2.0,
+      "ProtectedScanPath": { "serializedVersion": "2", "x": 0.27, "y": 0.18, "width": 0.46, "height": 0.64 },
+      "Slots": [
+        { "Id": 0, "NormalizedRect": { "serializedVersion": "2", "x": 0.02, "y": 0.03, "width": 0.24, "height": 0.13 }, "Priority": 95, "CollapseRank": 1, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 1, "NormalizedRect": { "serializedVersion": "2", "x": 0.35, "y": 0.85, "width": 0.3, "height": 0.11 }, "Priority": 98, "CollapseRank": 0, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 2, "NormalizedRect": { "serializedVersion": "2", "x": 0.27, "y": 0.18, "width": 0.46, "height": 0.64 }, "Priority": 100, "CollapseRank": 0, "IsWorldCueLayer": true, "TypographyRole": 4 },
+        { "Id": 3, "NormalizedRect": { "serializedVersion": "2", "x": 0.02, "y": 0.55, "width": 0.21, "height": 0.28 }, "Priority": 88, "CollapseRank": 3, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 4, "NormalizedRect": { "serializedVersion": "2", "x": 0.77, "y": 0.61, "width": 0.21, "height": 0.22 }, "Priority": 92, "CollapseRank": 2, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 5, "NormalizedRect": { "serializedVersion": "2", "x": 0.77, "y": 0.43, "width": 0.21, "height": 0.14 }, "Priority": 84, "CollapseRank": 4, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 6, "NormalizedRect": { "serializedVersion": "2", "x": 0.02, "y": 0.86, "width": 0.21, "height": 0.1 }, "Priority": 80, "CollapseRank": 5, "IsWorldCueLayer": false, "TypographyRole": 4 }
+      ]
+    },
+    {
+      "FormFactor": 3,
+      "ReferenceResolution": { "x": 3440, "y": 1440 },
+      "SafeAreaPadding": { "x": 44.0, "y": 28.0, "z": 44.0, "w": 28.0 },
+      "TextScaleMinimum": 0.85,
+      "TextScaleMaximum": 2.0,
+      "ProtectedScanPath": { "serializedVersion": "2", "x": 0.34, "y": 0.18, "width": 0.32, "height": 0.64 },
+      "Slots": [
+        { "Id": 0, "NormalizedRect": { "serializedVersion": "2", "x": 0.12, "y": 0.03, "width": 0.21, "height": 0.13 }, "Priority": 95, "CollapseRank": 1, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 1, "NormalizedRect": { "serializedVersion": "2", "x": 0.38, "y": 0.85, "width": 0.24, "height": 0.11 }, "Priority": 98, "CollapseRank": 0, "IsWorldCueLayer": false, "TypographyRole": 5 },
+        { "Id": 2, "NormalizedRect": { "serializedVersion": "2", "x": 0.34, "y": 0.18, "width": 0.32, "height": 0.64 }, "Priority": 100, "CollapseRank": 0, "IsWorldCueLayer": true, "TypographyRole": 4 },
+        { "Id": 3, "NormalizedRect": { "serializedVersion": "2", "x": 0.12, "y": 0.55, "width": 0.18, "height": 0.28 }, "Priority": 88, "CollapseRank": 3, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 4, "NormalizedRect": { "serializedVersion": "2", "x": 0.7, "y": 0.61, "width": 0.18, "height": 0.22 }, "Priority": 92, "CollapseRank": 2, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 5, "NormalizedRect": { "serializedVersion": "2", "x": 0.7, "y": 0.43, "width": 0.18, "height": 0.14 }, "Priority": 84, "CollapseRank": 4, "IsWorldCueLayer": false, "TypographyRole": 4 },
+        { "Id": 6, "NormalizedRect": { "serializedVersion": "2", "x": 0.12, "y": 0.86, "width": 0.18, "height": 0.1 }, "Priority": 80, "CollapseRank": 5, "IsWorldCueLayer": false, "TypographyRole": 4 }
+      ]
+    }
+  ]
+}
