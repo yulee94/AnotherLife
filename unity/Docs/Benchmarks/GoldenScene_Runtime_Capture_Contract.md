@@ -79,3 +79,48 @@ no comparator binary enters this pipeline.
    status, and `anchorConsistency` before using the evidence.
 
 The manifest is evidence metadata, not an approval or certification decision.
+
+## Command-line benchmark runner
+
+`GoldenSceneBenchmarkRunner` starts only when `--al-gs-run` is present. It validates the
+canonical catalog, resolves one exact scene/anchor/preset/seed, applies the Built-in pipeline
+quality setup, runs bounded warmup and measurement windows, invokes runtime telemetry and
+capture, maps every scorecard template row to `pass`, `fail`, or `unavailable`, then publishes
+one atomic result directory. Example Player invocation:
+
+```text
+AnotherLife.exe --al-gs-run \
+  --al-gs-scene GS-03 --al-gs-anchor boss_entry \
+  --al-gs-quality android_floor_30 --al-gs-seed 903031 \
+  --al-gs-warmup-seconds 10 --al-gs-measurement-seconds 60 \
+  --al-gs-width 1920 --al-gs-height 1080 --al-gs-video-fps 30 \
+  --al-gs-ui excluded --al-gs-output C:/captures \
+  --al-gs-run-id run-0001 --al-gs-operator automation \
+  --al-gs-certification target-platform
+```
+
+Use `--al-gs-certification development` for development evidence. Editor execution rejects
+`target-platform`; an Editor run can never certify a target platform. Each Player build embeds
+its build ID, source commit, catalog fingerprint, Unity version, build target, and required
+`Built-in Render Pipeline` identity. Runtime validation fails closed if that metadata differs
+from the packaged catalog, running Unity version, build target, or render pipeline. Player
+results also record the executable's non-empty 32-hex `Application.buildGUID`; Editor results
+use the explicit non-certifying `editor-not-applicable` marker.
+
+The runner writes into a hidden staging directory and exposes the final directory only after
+all required metadata files exist. The atomic package contains the runtime capture artifacts
+plus:
+
+```text
+runtime-identity.json
+telemetry.json
+capture-manifest.json
+scorecard.json
+scorecard.md
+benchmark-result.json
+```
+
+`benchmark-result.json` links the exact identity, raw telemetry and capability/error records,
+artifact statuses, provenance declaration, and scorecard. Unsupported video/profiler/device
+capabilities remain explicit and keep certification evidence incomplete; they are never filled
+with inferred or invented values.
