@@ -11,6 +11,7 @@ from pathlib import Path
 from jsonschema import Draft202012Validator, FormatChecker
 
 import realm_character_taxonomy as contract
+import build_eldergrove_realm_catalog as eldergrove_builder
 
 
 PROVENANCE_ID = "rct_shared_provenance_fixture_source_v001"
@@ -20,6 +21,30 @@ BUDGET_ID = "rct_shared_budget_champion_mobile_floor_v001"
 RIG_ID = "rct_shared_rig_humanoid_fixture_v001"
 CHAMPION_ID = "rct_stonehold_champion_fixture_v001"
 SKILL_ID = "rct_stonehold_skill_fixture_v001"
+ELDERGROVE_CATALOG_PATH = Path(
+    "unity/Assets/AL/StreamingAssets/GameData/al_eldergrove_realm_character_taxonomy.json"
+)
+STONEHOLD_CATALOG_PATH = Path(
+    "unity/Assets/AL/StreamingAssets/GameData/al_stonehold_realm_character_taxonomy.json"
+)
+ELDERGROVE_CLASS_SOURCE_IDS = {
+    "ClassFamily.Assassin",
+    "ClassFamily.Mage",
+    "ClassFamily.Ranger",
+    "ClassFamily.Warrior",
+}
+ELDERGROVE_EXTERNAL_SKILL_IDS = {
+    "realm_strike",
+    "renewing_guard",
+    "skill_arcane_bolt",
+    "skill_verdant_nova",
+    "tdf_boss_eldergrove_mere_root_leviathan:jaw_led_lunge",
+    "tdf_elite_eldergrove_hollowbark_stalker:sudden_low_pounce",
+    "tdf_elite_eldergrove_mirrorfin_lurker:jaw_scoop",
+    "tdf_elite_eldergrove_sunmane_thornstag:bounding_charge",
+    "warmaster_breaker",
+    "warzone_burst",
+}
 
 
 def approved_authority() -> dict:
@@ -433,6 +458,134 @@ class RealmCharacterTaxonomyTests(unittest.TestCase):
         evidence = contract.validate_catalog(catalog)
         self.assertEqual(1, evidence["skillCount"])
         self.assertEqual(0, evidence["orphanReferenceCount"])
+
+    def test_eldergrove_production_catalog_is_complete_and_held(self) -> None:
+        catalog_path = self.repo_root / ELDERGROVE_CATALOG_PATH
+        self.assertEqual(
+            eldergrove_builder.render_catalog(self.repo_root),
+            catalog_path.read_text(encoding="utf-8"),
+        )
+        catalog = contract.load_json(catalog_path)
+        stonehold_catalog = contract.load_json(
+            self.repo_root / STONEHOLD_CATALOG_PATH
+        )
+        approved_progression_ids = {
+            skill["externalSourceId"]
+            for skill in stonehold_catalog["skills"]
+            if skill["externalSourceId"].startswith(
+                "anotherlife.class_progression."
+            )
+        }
+        self.assertEqual(96, len(approved_progression_ids))
+        self.assertEqual([], list(self.schema_validator.iter_errors(catalog)))
+        evidence = contract.validate_catalog(catalog)
+
+        self.assertEqual("eldergrove", catalog["realmId"])
+        self.assertEqual("preparation_held", catalog["authority"]["status"])
+        self.assertEqual("held", catalog["gatePolicy"]["generationState"])
+        self.assertEqual("held", catalog["gatePolicy"]["activationState"])
+        self.assertEqual(0, evidence["orphanReferenceCount"])
+        self.assertEqual(0, evidence["missingMotionCount"])
+
+        self.assertTrue(
+            ELDERGROVE_CLASS_SOURCE_IDS.issubset(
+                {
+                    source_id
+                    for family in catalog["championFamilies"]
+                    for source_id in family["classSourceIds"]
+                }
+            )
+        )
+        self.assertEqual(
+            ELDERGROVE_EXTERNAL_SKILL_IDS | approved_progression_ids,
+            {skill["externalSourceId"] for skill in catalog["skills"]},
+        )
+        skill_by_id = {skill["id"]: skill for skill in catalog["skills"]}
+        for family in catalog["championFamilies"]:
+            class_source = next(
+                source_id
+                for source_id in family["classSourceIds"]
+                if source_id.startswith("ClassFamily.")
+            )
+            class_slug = class_source.split(".")[-1].lower()
+            progression_skills = [
+                skill_by_id[skill_id]
+                for skill_id in family["skillIds"]
+                if skill_by_id[skill_id]["externalSourceId"].startswith(
+                    f"anotherlife.class_progression.{class_slug}."
+                )
+            ]
+            self.assertEqual(24, len(progression_skills), family["id"])
+            progression_sources = [
+                source_id
+                for source_id in family["classSourceIds"]
+                if source_id.startswith("anotherlife.")
+            ]
+            self.assertEqual(4, len(progression_sources), family["id"])
+        self.assertEqual(
+            {
+                "tdf_grove_strider",
+                "tdf_mire_lumenback",
+                "tdf_fauna_eldergrove_thornburrow_hare",
+                "tdf_fauna_eldergrove_moonshell_cicada",
+            },
+            {beast["habitatSourceRef"].split("#")[-1] for beast in catalog["beastFamilies"]},
+        )
+        self.assertEqual(
+            {
+                "dragon_eldergrove_moonbough",
+                "tdf_boss_eldergrove_mere_root_leviathan",
+                "tdf_elite_eldergrove_hollowbark_stalker",
+                "tdf_elite_eldergrove_mirrorfin_lurker",
+                "tdf_elite_eldergrove_sunmane_thornstag",
+            },
+            {monster["habitatSourceRef"].split("#")[-1] for monster in catalog["monsterFamilies"]},
+        )
+
+        variants = {row["id"]: row for row in catalog["platformVariants"]}
+        platforms = {row["id"]: row["tier"] for row in catalog["platformProfiles"]}
+        packets = {row["id"]: row for row in catalog["decisionPackets"]}
+        decision_dimension_names = {
+            "animationPersonality": "animation_personality",
+            "magicalGrammar": "magical_grammar",
+        }
+        for section in (
+            "playableRaces",
+            "npcArchetypes",
+            "championFamilies",
+            "beastFamilies",
+            "monsterFamilies",
+        ):
+            for entity in catalog[section]:
+                self.assertTrue(entity["rigFamilyIds"], entity["id"])
+                self.assertTrue(entity["budgetProfileIds"], entity["id"])
+                self.assertEqual(
+                    {"mobile_floor", "mobile_high", "pc_high"},
+                    {
+                        platforms[variants[variant_id]["platformProfileId"]]
+                        for variant_id in entity["platformVariantIds"]
+                    },
+                    entity["id"],
+                )
+                for dimension_name, dimension in entity["creativeDecisions"].items():
+                    self.assertEqual("owner_decision_required", dimension["state"])
+                    self.assertTrue(dimension["decisionPacketIds"])
+                    packet_dimension = decision_dimension_names.get(
+                        dimension_name, dimension_name
+                    )
+                    for packet_id in dimension["decisionPacketIds"]:
+                        self.assertIn(
+                            packet_dimension,
+                            packets[packet_id]["decisionDimensions"],
+                            f"{entity['id']}.{dimension_name}",
+                        )
+
+        for section in contract.SECTIONS:
+            for row in catalog[section]:
+                if section not in {"provenance", "decisionPackets"}:
+                    self.assertTrue(row["authority"]["provenanceIds"], row["id"])
+                    if row["authority"]["status"] != "approved_fact":
+                        self.assertTrue(row["authority"]["decisionPacketIds"], row["id"])
 
     def test_duplicate_id_fails_closed(self) -> None:
         catalog = build_catalog()
