@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator, FormatChecker
 
 import realm_character_taxonomy as contract
 import build_eldergrove_realm_catalog as eldergrove_builder
+import build_umbral_realm_catalog as umbral_builder
 
 
 PROVENANCE_ID = "rct_shared_provenance_fixture_source_v001"
@@ -26,6 +27,9 @@ ELDERGROVE_CATALOG_PATH = Path(
 )
 STONEHOLD_CATALOG_PATH = Path(
     "unity/Assets/AL/StreamingAssets/GameData/al_stonehold_realm_character_taxonomy.json"
+)
+UMBRAL_CATALOG_PATH = Path(
+    "unity/Assets/AL/StreamingAssets/GameData/al_umbral_realm_character_taxonomy.json"
 )
 ELDERGROVE_CLASS_SOURCE_IDS = {
     "ClassFamily.Assassin",
@@ -586,6 +590,36 @@ class RealmCharacterTaxonomyTests(unittest.TestCase):
                     self.assertTrue(row["authority"]["provenanceIds"], row["id"])
                     if row["authority"]["status"] != "approved_fact":
                         self.assertTrue(row["authority"]["decisionPacketIds"], row["id"])
+
+    def test_umbral_production_catalog_is_complete_deterministic_and_held(self) -> None:
+        catalog_path = self.repo_root / UMBRAL_CATALOG_PATH
+        self.assertEqual(
+            umbral_builder.render_catalog(self.repo_root),
+            catalog_path.read_text(encoding="utf-8"),
+        )
+        catalog = contract.load_json(catalog_path)
+        self.assertEqual([], list(self.schema_validator.iter_errors(catalog)))
+        evidence = contract.validate_catalog(catalog)
+        self.assertEqual("umbral", catalog["realmId"])
+        self.assertEqual("preparation_held", catalog["authority"]["status"])
+        self.assertEqual("held", catalog["gatePolicy"]["generationState"])
+        self.assertEqual("held", catalog["gatePolicy"]["activationState"])
+        self.assertEqual(106, evidence["skillCount"])
+        self.assertEqual(106, evidence["traceabilityRows"])
+        self.assertEqual(0, evidence["orphanReferenceCount"])
+        self.assertEqual(0, evidence["missingMotionCount"])
+        self.assertEqual(
+            {"civilian", "service", "quest", "combat"},
+            {row["role"] for row in catalog["npcArchetypes"]},
+        )
+        self.assertEqual(
+            {"skill_shadowstep", "skill_umbral_execute"},
+            {
+                row["externalSourceId"]
+                for row in catalog["skills"]
+                if row["externalSourceId"].startswith("skill_")
+            },
+        )
 
     def test_duplicate_id_fails_closed(self) -> None:
         catalog = build_catalog()
