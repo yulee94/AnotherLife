@@ -23,6 +23,7 @@ downstream data-generation task must correct).
 import json
 import pathlib
 import sys
+from decimal import Decimal
 
 from jsonschema import Draft202012Validator, SchemaError, ValidationError
 
@@ -49,6 +50,7 @@ REAL_CATALOGS = {
     "al-world-event-content": "al_world_event_content_catalog.json",
     "al-building": "al_building_catalog.json",
     "al-champion": "al_champion_catalog.json",
+    "al-golden-scene": "al_golden_scene_catalog.json",
     "al-first-session-terrain": "al_first_session_terrain_catalog.json",
     "al-world-asset-inventory": "al_world_asset_inventory.json",
 }
@@ -66,7 +68,7 @@ EXPECTED_DEFECTS = {
 
 def load_json(path):
     with open(path, "r", encoding="utf-8") as fh:
-        return json.load(fh)
+        return json.load(fh, parse_float=Decimal)
 
 
 def first_error_message(errors):

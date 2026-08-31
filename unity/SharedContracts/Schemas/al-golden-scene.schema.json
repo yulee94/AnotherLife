@@ -1,0 +1,251 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-golden-scene.schema.json",
+  "title": "Another Life Golden Scene Benchmark Configuration",
+  "description": "Deterministic GS-01 through GS-05 scene, seed, quality preset, and camera anchor authority for reproducible player-build evidence.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "authorityStatus", "layoutFingerprint", "qualityPresets", "scenes"
+  ],
+  "properties": {
+    "version": { "const": "1.0.0" },
+    "catalogId": { "const": "al_golden_scene_catalog" },
+    "authorityStatus": { "const": "post_mvp_benchmark_configuration" },
+    "layoutFingerprint": {
+      "const": "25804b632d5ffbab372cf33b6435ca0fe5b1ac4705865115270caed42e100ef1"
+    },
+    "qualityPresets": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "prefixItems": [
+        {
+          "allOf": [
+            { "$ref": "#/$defs/qualityPreset" },
+            { "properties": { "id": { "const": "android_floor_30" } } }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/qualityPreset" },
+            { "properties": { "id": { "const": "balanced_60" } } }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/qualityPreset" },
+            { "properties": { "id": { "const": "pc_high_60" } } }
+          ]
+        }
+      ],
+      "items": false
+    },
+    "scenes": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "prefixItems": [
+        {
+          "allOf": [
+            { "$ref": "#/$defs/scene" },
+            {
+              "properties": {
+                "id": { "const": "GS-01" },
+                "defaultAnchorId": { "const": "class_reveal" },
+                "anchors": {
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "prefixItems": [
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "class_reveal" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "face_detail" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "full_body" } } }] }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/scene" },
+            {
+              "properties": {
+                "id": { "const": "GS-02" },
+                "defaultAnchorId": { "const": "distant_approach" },
+                "anchors": {
+                  "minItems": 5,
+                  "maxItems": 5,
+                  "prefixItems": [
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "distant_approach" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "threshold_reveal" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "street_level" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "landmark_view" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "elevated_vista" } } }] }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/scene" },
+            {
+              "properties": {
+                "id": { "const": "GS-03" },
+                "defaultAnchorId": { "const": "boss_entry" },
+                "anchors": {
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "prefixItems": [
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "boss_entry" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "combat_readability" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "telegraph_overview" } } }] }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/scene" },
+            {
+              "properties": {
+                "id": { "const": "GS-04" },
+                "defaultAnchorId": { "const": "hud_combat" },
+                "anchors": {
+                  "minItems": 2,
+                  "maxItems": 2,
+                  "prefixItems": [
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "hud_combat" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "map_overview" } } }] }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          ]
+        },
+        {
+          "allOf": [
+            { "$ref": "#/$defs/scene" },
+            {
+              "properties": {
+                "id": { "const": "GS-05" },
+                "defaultAnchorId": { "const": "city_overview" },
+                "anchors": {
+                  "minItems": 3,
+                  "maxItems": 3,
+                  "prefixItems": [
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "city_overview" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "building_inspector" } } }] },
+                    { "allOf": [{ "$ref": "#/$defs/anchor" }, { "properties": { "id": { "const": "placement_overview" } } }] }
+                  ],
+                  "items": false
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "items": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "stableId": { "type": "string", "pattern": "^[a-z][a-z0-9_]*$" },
+    "revision": { "type": "string", "pattern": "^[1-9][0-9]*$" },
+    "qualityPresetId": {
+      "type": "string",
+      "enum": ["android_floor_30", "balanced_60", "pc_high_60"]
+    },
+    "qualityPreset": {
+      "type": "object",
+      "required": [
+        "id", "revision", "targetFrameRate", "renderScale", "shadowDistanceMeters",
+        "lodBias", "textureMipmapLimit", "pixelLightCount", "vfxDensity"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/qualityPresetId" },
+        "revision": { "$ref": "#/$defs/revision" },
+        "targetFrameRate": { "type": "integer", "enum": [30, 60] },
+        "renderScale": { "type": "number", "minimum": 0.5, "maximum": 1.0, "multipleOf": 0.000001 },
+        "shadowDistanceMeters": { "type": "number", "minimum": 0, "maximum": 200, "multipleOf": 0.000001 },
+        "lodBias": { "type": "number", "minimum": 0.25, "maximum": 4.0, "multipleOf": 0.000001 },
+        "textureMipmapLimit": { "type": "integer", "minimum": 0, "maximum": 3 },
+        "pixelLightCount": { "type": "integer", "minimum": 0, "maximum": 8 },
+        "vfxDensity": { "type": "number", "minimum": 0.1, "maximum": 2.0, "multipleOf": 0.000001 }
+      },
+      "additionalProperties": false
+    },
+    "scene": {
+      "type": "object",
+      "required": [
+        "id", "revision", "scenarioId", "unitySceneId", "unitySceneName", "seed",
+        "defaultAnchorId", "qualityPresetIds", "anchors"
+      ],
+      "properties": {
+        "id": { "type": "string", "enum": ["GS-01", "GS-02", "GS-03", "GS-04", "GS-05"] },
+        "revision": { "$ref": "#/$defs/revision" },
+        "scenarioId": { "$ref": "#/$defs/stableId" },
+        "unitySceneId": { "$ref": "#/$defs/stableId" },
+        "unitySceneName": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "seed": { "type": "integer", "minimum": 0, "maximum": 2147483647 },
+        "defaultAnchorId": { "$ref": "#/$defs/stableId" },
+        "qualityPresetIds": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "prefixItems": [
+            { "const": "android_floor_30" },
+            { "const": "balanced_60" },
+            { "const": "pc_high_60" }
+          ],
+          "items": false
+        },
+        "anchors": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/anchor" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "vector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number", "minimum": -100000, "maximum": 100000, "multipleOf": 0.000001 }
+    },
+    "eulerVector3": {
+      "type": "array",
+      "minItems": 3,
+      "maxItems": 3,
+      "items": { "type": "number", "minimum": -360, "maximum": 360, "multipleOf": 0.000001 }
+    },
+    "anchor": {
+      "type": "object",
+      "required": [
+        "id", "position", "eulerAngles", "projection", "fieldOfViewDegrees",
+        "orthographicSize", "nearClipMeters", "farClipMeters"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "position": { "$ref": "#/$defs/vector3" },
+        "eulerAngles": { "$ref": "#/$defs/eulerVector3" },
+        "projection": { "type": "string", "enum": ["perspective", "orthographic"] },
+        "fieldOfViewDegrees": { "type": "number", "minimum": 1, "maximum": 179, "multipleOf": 0.000001 },
+        "orthographicSize": { "type": "number", "exclusiveMinimum": 0, "maximum": 10000, "multipleOf": 0.000001 },
+        "nearClipMeters": { "type": "number", "exclusiveMinimum": 0, "maximum": 10, "multipleOf": 0.000001 },
+        "farClipMeters": { "type": "number", "exclusiveMinimum": 10, "maximum": 100000, "multipleOf": 0.000001 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

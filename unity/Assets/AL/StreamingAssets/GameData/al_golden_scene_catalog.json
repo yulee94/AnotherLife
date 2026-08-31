@@ -1,0 +1,263 @@
+{
+  "version": "1.0.0",
+  "catalogId": "al_golden_scene_catalog",
+  "authorityStatus": "post_mvp_benchmark_configuration",
+  "layoutFingerprint": "25804b632d5ffbab372cf33b6435ca0fe5b1ac4705865115270caed42e100ef1",
+  "qualityPresets": [
+    {
+      "id": "android_floor_30",
+      "revision": "1",
+      "targetFrameRate": 30,
+      "renderScale": 0.85,
+      "shadowDistanceMeters": 24.0,
+      "lodBias": 0.72,
+      "textureMipmapLimit": 1,
+      "pixelLightCount": 1,
+      "vfxDensity": 0.65
+    },
+    {
+      "id": "balanced_60",
+      "revision": "1",
+      "targetFrameRate": 60,
+      "renderScale": 1.0,
+      "shadowDistanceMeters": 42.0,
+      "lodBias": 1.0,
+      "textureMipmapLimit": 0,
+      "pixelLightCount": 2,
+      "vfxDensity": 1.0
+    },
+    {
+      "id": "pc_high_60",
+      "revision": "1",
+      "targetFrameRate": 60,
+      "renderScale": 1.0,
+      "shadowDistanceMeters": 80.0,
+      "lodBias": 1.5,
+      "textureMipmapLimit": 0,
+      "pixelLightCount": 4,
+      "vfxDensity": 1.25
+    }
+  ],
+  "scenes": [
+    {
+      "id": "GS-01",
+      "revision": "1",
+      "scenarioId": "character_creator_class_reveal",
+      "unitySceneId": "al_scene_character_creation",
+      "unitySceneName": "CharacterCreation",
+      "seed": 901011,
+      "defaultAnchorId": "class_reveal",
+      "qualityPresetIds": ["android_floor_30", "balanced_60", "pc_high_60"],
+      "anchors": [
+        {
+          "id": "class_reveal",
+          "position": [0.0, 1.65, -3.8],
+          "eulerAngles": [4.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 40.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.1,
+          "farClipMeters": 100.0
+        },
+        {
+          "id": "face_detail",
+          "position": [0.0, 1.72, -1.35],
+          "eulerAngles": [1.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 32.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.05,
+          "farClipMeters": 50.0
+        },
+        {
+          "id": "full_body",
+          "position": [0.0, 1.4, -4.8],
+          "eulerAngles": [2.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 42.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.1,
+          "farClipMeters": 100.0
+        }
+      ]
+    },
+    {
+      "id": "GS-02",
+      "revision": "1",
+      "scenarioId": "first_capital_arrival",
+      "unitySceneId": "al_scene_champion_arena",
+      "unitySceneName": "ChampionArena",
+      "seed": 902021,
+      "defaultAnchorId": "distant_approach",
+      "qualityPresetIds": ["android_floor_30", "balanced_60", "pc_high_60"],
+      "anchors": [
+        {
+          "id": "distant_approach",
+          "position": [-22.0, 10.0, -36.0],
+          "eulerAngles": [12.0, 31.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 55.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 1000.0
+        },
+        {
+          "id": "threshold_reveal",
+          "position": [-8.0, 4.0, -15.0],
+          "eulerAngles": [8.0, 22.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 50.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 1000.0
+        },
+        {
+          "id": "street_level",
+          "position": [3.0, 2.0, -6.0],
+          "eulerAngles": [2.0, -15.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 48.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.2,
+          "farClipMeters": 800.0
+        },
+        {
+          "id": "landmark_view",
+          "position": [18.0, 6.0, -20.0],
+          "eulerAngles": [10.0, -32.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 46.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 1000.0
+        },
+        {
+          "id": "elevated_vista",
+          "position": [0.0, 30.0, -40.0],
+          "eulerAngles": [35.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 52.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 1500.0
+        }
+      ]
+    },
+    {
+      "id": "GS-03",
+      "revision": "1",
+      "scenarioId": "open_world_combat_major_boss",
+      "unitySceneId": "al_scene_champion_arena",
+      "unitySceneName": "ChampionArena",
+      "seed": 903031,
+      "defaultAnchorId": "boss_entry",
+      "qualityPresetIds": ["android_floor_30", "balanced_60", "pc_high_60"],
+      "anchors": [
+        {
+          "id": "boss_entry",
+          "position": [0.0, 7.0, -14.0],
+          "eulerAngles": [18.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 50.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.2,
+          "farClipMeters": 500.0
+        },
+        {
+          "id": "combat_readability",
+          "position": [-8.0, 6.0, -10.0],
+          "eulerAngles": [16.0, 32.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 52.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.2,
+          "farClipMeters": 500.0
+        },
+        {
+          "id": "telegraph_overview",
+          "position": [0.0, 18.0, -3.0],
+          "eulerAngles": [62.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 48.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 500.0
+        }
+      ]
+    },
+    {
+      "id": "GS-04",
+      "revision": "1",
+      "scenarioId": "hud_minimap_map_stress",
+      "unitySceneId": "al_scene_champion_arena",
+      "unitySceneName": "ChampionArena",
+      "seed": 904041,
+      "defaultAnchorId": "hud_combat",
+      "qualityPresetIds": ["android_floor_30", "balanced_60", "pc_high_60"],
+      "anchors": [
+        {
+          "id": "hud_combat",
+          "position": [0.0, 5.0, -10.0],
+          "eulerAngles": [14.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 50.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.2,
+          "farClipMeters": 500.0
+        },
+        {
+          "id": "map_overview",
+          "position": [0.0, 36.0, 0.0],
+          "eulerAngles": [90.0, 0.0, 0.0],
+          "projection": "orthographic",
+          "fieldOfViewDegrees": 50.0,
+          "orthographicSize": 24.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 200.0
+        }
+      ]
+    },
+    {
+      "id": "GS-05",
+      "revision": "1",
+      "scenarioId": "private_kingdom_management",
+      "unitySceneId": "al_scene_kingdom",
+      "unitySceneName": "Kingdom",
+      "seed": 905051,
+      "defaultAnchorId": "city_overview",
+      "qualityPresetIds": ["android_floor_30", "balanced_60", "pc_high_60"],
+      "anchors": [
+        {
+          "id": "city_overview",
+          "position": [0.0, 34.0, -32.0],
+          "eulerAngles": [42.0, 0.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 44.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 1000.0
+        },
+        {
+          "id": "building_inspector",
+          "position": [12.0, 18.0, -18.0],
+          "eulerAngles": [38.0, -28.0, 0.0],
+          "projection": "perspective",
+          "fieldOfViewDegrees": 40.0,
+          "orthographicSize": 1.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 800.0
+        },
+        {
+          "id": "placement_overview",
+          "position": [0.0, 45.0, 0.0],
+          "eulerAngles": [90.0, 0.0, 0.0],
+          "projection": "orthographic",
+          "fieldOfViewDegrees": 50.0,
+          "orthographicSize": 32.0,
+          "nearClipMeters": 0.3,
+          "farClipMeters": 200.0
+        }
+      ]
+    }
+  ]
+}
