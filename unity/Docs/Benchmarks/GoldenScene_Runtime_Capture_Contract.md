@@ -124,3 +124,34 @@ benchmark-result.json
 artifact statuses, provenance declaration, and scorecard. Unsupported video/profiler/device
 capabilities remain explicit and keep certification evidence incomplete; they are never filled
 with inferred or invented values.
+
+## Certifying-package validation
+
+Run the repository validator against the external evidence root after capture and before a
+package is cited in a scorecard or approval record:
+
+```text
+python tools/benchmarks/validate_golden_scene_evidence.py C:/ALBenchmarkEvidence \
+  --require-scenes GS-01,GS-02,GS-03,GS-04,GS-05 \
+  --require-repeat GS-03
+```
+
+The validator discovers result directories recursively and fails closed unless each package is
+Player-build, target-platform evidence ready for review. It checks all identity fields, the
+Built-in Render Pipeline boundary, source-manifest provenance, exact artifact linkage, byte sizes
+and SHA-256 values, still-image framing, complete raw evidence, required metric capabilities,
+and nearest-rank p50/p90/p95/p99 values reproduced from measured raw samples. A required repeat
+must retain the same build, device pseudonym, seed, anchor/camera state, quality settings, media
+framing, aggregate metric schema, and capability schema. Performance values may vary between
+repetitions; identity or schema drift may not.
+
+Large still, video, profiler, telemetry, and device evidence remains in the external evidence
+root (normally `Application.persistentDataPath/BenchmarkEvidence` or an ignored CI artifact
+directory). Do not add those generated binaries to the repository. Commit only approved small
+manifests, hashes, stable evidence URIs, and summaries when a later gate explicitly requires them.
+
+The strict validator intentionally rejects development packages that record unsupported video,
+profiler, thermal, battery, actor-density, streaming, or other mandatory capabilities. Such
+packages remain useful diagnostics but are not certifying evidence. Android-floor certification
+still requires the physical-device procedure, three valid repetitions, five-minute warmups, and
+20-minute measured soaks; short Player smoke runs do not satisfy that procedure.

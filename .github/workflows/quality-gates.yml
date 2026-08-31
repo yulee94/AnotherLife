@@ -65,6 +65,21 @@ jobs:
             $_ | Out-String | Add-Content -LiteralPath $transcript
             throw
           }
+      - name: Golden-scene evidence validator fixtures
+        shell: pwsh
+        timeout-minutes: 5
+        run: |
+          $transcript = "artifacts/golden-scene-evidence-validator.txt"
+          try {
+            & python ./tools/benchmarks/test_validate_golden_scene_evidence.py *>&1 |
+              Tee-Object -FilePath $transcript
+            if ($LASTEXITCODE -ne 0) {
+              throw "Golden-scene evidence validator fixtures exited with code $LASTEXITCODE."
+            }
+          } catch {
+            $_ | Out-String | Add-Content -LiteralPath $transcript
+            throw
+          }
       - name: Upload quality-gate evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -74,6 +89,7 @@ jobs:
           path: |
             artifacts/repository-hygiene.txt
             artifacts/quality-gate-fixtures.txt
+            artifacts/golden-scene-evidence-validator.txt
           if-no-files-found: error
           retention-days: 90
 
