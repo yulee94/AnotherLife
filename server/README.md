@@ -26,6 +26,12 @@ libraries cross the Unity FFI boundary. `al_server_core` currently provides:
 - a separate disposable `al_provider_adapter_stub` crate proving that adapter
   code can depend on the core contract without the core depending on an adapter.
 
+The non-production `al_provider_adapter_gamelift_spike` crate applies the same
+one-way dependency rule to an Amazon GameLift Servers candidate boundary. Its
+injected transport and packet runner preserve missing authenticated provider
+evidence as blocked; local tests are not provider scale, quota, residency,
+latency, cost, or availability evidence.
+
 The crate forbids unsafe Rust. The codec never casts a byte buffer to a packed
 structure and never relies on host endianness or Rust ABI layout.
 
@@ -65,6 +71,7 @@ From the repository root:
 
 ```sh
 python tools/architecture/validate_mmo_contracts.py .
+python tools/architecture/run_gamelift_spike.py .
 cargo fmt --manifest-path server/Cargo.toml --all -- --check
 cargo clippy --manifest-path server/Cargo.toml --workspace --all-targets -- -D warnings
 cargo test --manifest-path server/Cargo.toml --workspace --all-targets
