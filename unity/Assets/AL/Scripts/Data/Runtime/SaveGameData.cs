@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AL.Core;
+using AL.Data.Catalogs.MapDisclosure;
 
 namespace AL.Data.Runtime
 {
@@ -40,6 +41,9 @@ namespace AL.Data.Runtime
         // already committed lordship result). Once present, Version and the
         // complete topology are validated fail-closed.
         public FirstWorldProgressData FirstWorldProgress;
+        // Optional schema-v1 extension. Missing legacy state is admitted but
+        // remains hidden until a matching authoritative snapshot is received.
+        public MapDisclosurePersistentState MapDisclosure;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
     }
