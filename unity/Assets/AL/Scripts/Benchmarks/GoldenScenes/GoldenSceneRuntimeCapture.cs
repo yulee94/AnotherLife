@@ -997,6 +997,7 @@ namespace AL.Benchmarks.GoldenScenes
         public event Action<string> CaptureFailed;
 
         public bool IsCapturing => session != null && session.IsActive;
+        public bool AutoComplete { get; set; } = true;
         public GoldenSceneCaptureManifest LatestManifest { get; private set; }
         public string ManifestPath => session?.ManifestPath ?? string.Empty;
         public static string DefaultOutputRoot =>
@@ -1061,7 +1062,8 @@ namespace AL.Benchmarks.GoldenScenes
                 session.CaptureVideoFrame(captureCamera);
                 nextVideoFrameAt += 1d / Math.Max(1, session.MediaSettings.VideoFrameRate);
             }
-            if (elapsed >= session.MediaSettings.VideoDurationSeconds) CompleteCapture();
+            if (AutoComplete && elapsed >= session.MediaSettings.VideoDurationSeconds)
+                CompleteCapture();
         }
 
         private void OnDisable()
