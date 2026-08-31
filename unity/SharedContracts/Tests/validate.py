@@ -30,6 +30,7 @@ from decimal import Decimal
 from jsonschema import Draft202012Validator, FormatChecker, SchemaError, ValidationError
 
 import world_asset_inventory
+import test_four_realm_production_taxonomy
 import test_realm_character_taxonomy
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # unity/SharedContracts
@@ -56,6 +57,7 @@ REAL_CATALOGS = {
     "al-golden-scene": "al_golden_scene_catalog.json",
     "al-first-session-terrain": "al_first_session_terrain_catalog.json",
     "al-world-asset-inventory": "al_world_asset_inventory.json",
+    "al-four-realm-production-taxonomy": "al_four_realm_production_taxonomy.json",
 }
 
 # Known source-data defects that legitimately fail their schema today. These are
@@ -101,6 +103,7 @@ def main():
         "real": [],
         "inventory": [],
         "realmTaxonomy": [],
+        "fourRealmTaxonomy": [],
     }
 
     # 1. Compile every schema (validity of the schema itself).
@@ -195,6 +198,28 @@ def main():
             + realm_test_output.getvalue().strip()
         )
 
+    # 6. Integrated four-realm production taxonomy and acceptance audit.
+    suite = unittest.defaultTestLoader.loadTestsFromModule(
+        test_four_realm_production_taxonomy
+    )
+    integrated_test_output = io.StringIO()
+    integrated_result = unittest.TextTestRunner(
+        stream=integrated_test_output,
+        verbosity=0,
+    ).run(suite)
+    integrated_ok = integrated_result.wasSuccessful()
+    integrated_summary = (
+        f"{integrated_result.testsRun} tests, "
+        f"{len(integrated_result.failures)} failures, "
+        f"{len(integrated_result.errors)} errors"
+    )
+    reports["fourRealmTaxonomy"].append((integrated_ok, integrated_summary))
+    if not integrated_ok:
+        failures.append(
+            "integrated four-realm taxonomy fail-closed tests failed: "
+            + integrated_test_output.getvalue().strip()
+        )
+
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:
@@ -226,6 +251,13 @@ def main():
     print("\n== Realm character taxonomy cross-validation ==")
     for ok, msg in reports["realmTaxonomy"]:
         print(f"  [{'OK' if ok else 'FAIL'}] al-realm-character-taxonomy  -> {msg}")
+
+    print("\n== Integrated four-realm taxonomy cross-validation ==")
+    for ok, msg in reports["fourRealmTaxonomy"]:
+        print(
+            f"  [{'OK' if ok else 'FAIL'}] "
+            f"al-four-realm-production-taxonomy  -> {msg}"
+        )
 
     print()
     if failures:

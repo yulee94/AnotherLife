@@ -96,12 +96,12 @@
       "sourceRef": "unity/Assets/AL/StreamingAssets/GameData/al_stonehold_realm_character_taxonomy.json",
       "creator": "Another Life repository authors",
       "tool": "git-tracked source",
-      "toolVersion": "repository revision at catalog generation",
+      "toolVersion": "git commit 91c2bb4e4af37c8763253db373128a2c01da1563",
       "createdAtUtc": null,
       "rightsState": "project_internal",
       "promptOrBriefRef": null,
-      "sha256": "15af1af4fbda6f6a32363b7a1658cad12257ae55fb369cf5f56887031cc2c821",
-      "notes": "Merged owner-approved cross-realm Level 1-50 class/subclass progression identities and class-family source references."
+      "sha256": "763ff7d983b8eda78cefcad4f6e71cf4f95e67e1bfe1a81e4f0efbe4efbda40a",
+      "notes": "sourceCommit=91c2bb4e4af37c8763253db373128a2c01da1563; sourceBlobSha256=763ff7d983b8eda78cefcad4f6e71cf4f95e67e1bfe1a81e4f0efbe4efbda40a; Merged owner-approved cross-realm Level 1-50 class/subclass progression identities and class-family source references."
     },
     {
       "id": "rct_eldergrove_provenance_boss_elite_v001",
