@@ -1,0 +1,103 @@
+{
+  "SystemId": "al.ui.hud.components.v1",
+  "Components": [
+    {
+      "Slot": 0,
+      "Layer": 1,
+      "Template": 0,
+      "DefaultState": 0,
+      "HeaderRole": 4,
+      "PrimaryRole": 5,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 2,
+      "LocalizationExpansion": 1.6,
+      "ShowSurface": true,
+      "ProtectFromOcclusion": true,
+      "AggregateOverflow": false
+    },
+    {
+      "Slot": 1,
+      "Layer": 1,
+      "Template": 1,
+      "DefaultState": 7,
+      "HeaderRole": 4,
+      "PrimaryRole": 5,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 2,
+      "LocalizationExpansion": 1.6,
+      "ShowSurface": true,
+      "ProtectFromOcclusion": true,
+      "AggregateOverflow": false
+    },
+    {
+      "Slot": 2,
+      "Layer": 2,
+      "Template": 2,
+      "DefaultState": 2,
+      "HeaderRole": 4,
+      "PrimaryRole": 3,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 2,
+      "LocalizationExpansion": 2.0,
+      "ShowSurface": false,
+      "ProtectFromOcclusion": true,
+      "AggregateOverflow": false
+    },
+    {
+      "Slot": 3,
+      "Layer": 0,
+      "Template": 3,
+      "DefaultState": 1,
+      "HeaderRole": 4,
+      "PrimaryRole": 2,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 4,
+      "LocalizationExpansion": 1.8,
+      "ShowSurface": true,
+      "ProtectFromOcclusion": false,
+      "AggregateOverflow": true
+    },
+    {
+      "Slot": 4,
+      "Layer": 0,
+      "Template": 4,
+      "DefaultState": 3,
+      "HeaderRole": 4,
+      "PrimaryRole": 2,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 4,
+      "LocalizationExpansion": 1.8,
+      "ShowSurface": true,
+      "ProtectFromOcclusion": false,
+      "AggregateOverflow": true
+    },
+    {
+      "Slot": 5,
+      "Layer": 0,
+      "Template": 5,
+      "DefaultState": 0,
+      "HeaderRole": 4,
+      "PrimaryRole": 2,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 2,
+      "LocalizationExpansion": 1.8,
+      "ShowSurface": true,
+      "ProtectFromOcclusion": false,
+      "AggregateOverflow": true
+    },
+    {
+      "Slot": 6,
+      "Layer": 0,
+      "Template": 6,
+      "DefaultState": 1,
+      "HeaderRole": 4,
+      "PrimaryRole": 2,
+      "SecondaryRole": 4,
+      "MaxVisibleRows": 2,
+      "LocalizationExpansion": 1.8,
+      "ShowSurface": true,
+      "ProtectFromOcclusion": false,
+      "AggregateOverflow": true
+    }
+  ]
+}

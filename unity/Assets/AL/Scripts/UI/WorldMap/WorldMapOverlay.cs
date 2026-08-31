@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AL.ChampionMode.UI;
 using AL.Data.Catalogs.WorldAtlas;
+using AL.UI.DesignSystem;
 using AL.UI.RealmSelection;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,6 +21,11 @@ namespace AL.UI.WorldMap
         private MainQuestMapMarkerCatalog _markerCatalog;
         private GameObject _mapRoot;
         private Transform _questMarkerRoot;
+        private Transform _progressiveRoot;
+        private RectTransform _plateRect;
+        private HudResponsiveCompositionSet _compositions;
+        private Vector2Int _lastScreenSize;
+        private Rect _lastSafeArea;
         private IDisposable _cursorOwnership;
         private IDisposable _gameplaySuppressionOwnership;
         private bool _presentationAuthority;
@@ -173,6 +179,7 @@ namespace AL.UI.WorldMap
 
             WorldMapSession.Changed += Refresh;
             MainQuestMapSession.Changed += Refresh;
+            ProgressiveMapSession.Changed += Refresh;
             _sessionHooked = true;
         }
 
@@ -185,6 +192,7 @@ namespace AL.UI.WorldMap
 
             WorldMapSession.Changed -= Refresh;
             MainQuestMapSession.Changed -= Refresh;
+            ProgressiveMapSession.Changed -= Refresh;
             _sessionHooked = false;
         }
 
@@ -209,6 +217,7 @@ namespace AL.UI.WorldMap
             }
 
             RefreshQuestMarker();
+            RefreshProgressiveMap();
 
             if (mapOpen && _mapRoot.activeInHierarchy)
             {
@@ -237,6 +246,11 @@ namespace AL.UI.WorldMap
             _presentationAuthority = false;
             UnhookSession();
             HideAndRelease();
+        }
+
+        private void LateUpdate()
+        {
+            ApplyResponsiveLayout();
         }
 
         private void OnDestroy()
@@ -269,6 +283,8 @@ namespace AL.UI.WorldMap
             ClearVisualTree();
             _mapRoot = null;
             _questMarkerRoot = null;
+            _progressiveRoot = null;
+            _plateRect = null;
             EnsureEventSystem();
             Canvas canvas = CreateCanvas(transform);
             Font font = RealmSelectionIdentity.ResolvePresentationFont(22);
@@ -304,6 +320,8 @@ namespace AL.UI.WorldMap
                 new Color(0.055f, 0.06f, 0.07f, 0.97f),
                 new Vector2(0.05f, 0.06f),
                 new Vector2(0.95f, 0.94f));
+            _plateRect = plate.rectTransform;
+            ApplyResponsiveLayout(force: true);
             CreatePanel(plate.transform, "WorldMap_GoldEdge", new Color(0.78f, 0.68f, 0.42f, 0.55f), new Vector2(0f, 0f), new Vector2(1f, 0.012f));
             CreatePanel(plate.transform, "WorldMap_GoldEdgeTop", new Color(0.78f, 0.68f, 0.42f, 0.55f), new Vector2(0f, 0.988f), new Vector2(1f, 1f));
 
@@ -338,8 +356,57 @@ namespace AL.UI.WorldMap
             _questMarkerRoot = questRoot.transform;
             RefreshQuestMarker();
 
+            var progressiveRoot = new GameObject(
+                "WorldMapProgressiveItems",
+                typeof(RectTransform));
+            progressiveRoot.transform.SetParent(viewport.transform, false);
+            RectTransform progressiveRect = progressiveRoot.GetComponent<RectTransform>();
+            progressiveRect.anchorMin = Vector2.zero;
+            progressiveRect.anchorMax = Vector2.one;
+            progressiveRect.offsetMin = Vector2.zero;
+            progressiveRect.offsetMax = Vector2.zero;
+            _progressiveRoot = progressiveRoot.transform;
+            RefreshProgressiveMap();
+
             close.transform.SetAsLastSibling();
             return veil.gameObject;
+        }
+
+        private void ApplyResponsiveLayout(bool force = false)
+        {
+            if (_plateRect == null)
+            {
+                return;
+            }
+            int width = Mathf.Max(1, Screen.width);
+            int height = Mathf.Max(1, Screen.height);
+            Vector2Int screenSize = new Vector2Int(width, height);
+            Rect physicalSafeArea = Screen.safeArea;
+            if (!force && screenSize == _lastScreenSize && physicalSafeArea == _lastSafeArea)
+            {
+                return;
+            }
+
+            _compositions ??= HudResponsiveCompositionSet.LoadDefault();
+            bool touchPrimary =
+                Application.isMobilePlatform || UnityEngine.Input.touchSupported;
+            HudCompositionDefinition composition =
+                _compositions.Resolve(width, height, touchPrimary);
+            Rect safeArea = HudLayoutProjection.ApplySafeAreaPadding(
+                physicalSafeArea,
+                composition);
+            MapSurfaceLayout layout = MapInterfaceLayout.Resolve(
+                composition,
+                safeArea,
+                combatDense: false);
+            Rect target = layout.WorldMapRect;
+            _plateRect.anchorMin = new Vector2(target.xMin / width, target.yMin / height);
+            _plateRect.anchorMax = new Vector2(target.xMax / width, target.yMax / height);
+            _plateRect.offsetMin = Vector2.zero;
+            _plateRect.offsetMax = Vector2.zero;
+
+            _lastScreenSize = screenSize;
+            _lastSafeArea = physicalSafeArea;
         }
 
         private void RefreshQuestMarker()
@@ -350,6 +417,10 @@ namespace AL.UI.WorldMap
             }
 
             ClearChildren(_questMarkerRoot);
+            if (ProgressiveMapSession.IsConfigured)
+            {
+                return;
+            }
             MainQuestMapState state = MainQuestMapSession.Current;
             if (state == null || _snapshot == null || _markerCatalog == null)
             {
@@ -399,6 +470,184 @@ namespace AL.UI.WorldMap
                 new Vector2(0.96f, 0.92f),
                 TextAnchor.MiddleLeft,
                 new Color(1f, 0.88f, 0.55f, 1f));
+        }
+
+        private void RefreshProgressiveMap()
+        {
+            if (_progressiveRoot == null || !ProgressiveMapSession.IsConfigured)
+            {
+                return;
+            }
+
+            ProgressiveMapSnapshot snapshot = ProgressiveMapSession.Current;
+            var visibleSourceIds = new HashSet<string>(StringComparer.Ordinal);
+            if (snapshot != null)
+            {
+                for (int i = 0; i < snapshot.WorldMap.Items.Count; i++)
+                {
+                    MapDisplayItem item = snapshot.WorldMap.Items[i];
+                    if (item.Kind == MapDisplayItemKind.Feature)
+                    {
+                        visibleSourceIds.Add(item.SourceId);
+                    }
+                }
+            }
+            for (int i = 0; i < _presentation.Inners.Count; i++)
+            {
+                WorldMapInnerRealm inner = _presentation.Inners[i];
+                bool visible = visibleSourceIds.Contains(inner.InnerAtlasZoneId);
+                SetActive(inner.InnerAtlasZoneId, visible);
+                SetActive(inner.InnerAtlasZoneId + "_label", visible);
+                SetActive(inner.InnerWallId, visible);
+                SetSettlementActive(inner.Capital, visible);
+                SetSettlementActive(inner.OutpostA, visible);
+                SetSettlementActive(inner.OutpostB, visible);
+            }
+            bool isleVisible =
+                visibleSourceIds.Contains(WorldMapIds.AccordantIsleZoneId);
+            SetActive(WorldMapIds.AccordantIsleZoneId, isleVisible);
+            SetActive(WorldMapIds.AccordantIsleZoneId + "_label", isleVisible);
+
+            ClearChildren(_progressiveRoot);
+            if (snapshot == null)
+            {
+                return;
+            }
+
+            Font font = RealmSelectionIdentity.ResolvePresentationFont(13);
+            UiProductionDesignTokens tokens = UiProductionDesignTokens.LoadDefault();
+            for (int i = 0; i < snapshot.WorldMap.Items.Count; i++)
+            {
+                MapDisplayItem item = snapshot.WorldMap.Items[i];
+                if (item.Kind == MapDisplayItemKind.Feature &&
+                    FindDescendant(transform, item.SourceId) != null)
+                {
+                    continue;
+                }
+
+                MapItemVisualTreatment visual = MapInterfaceAccessibility.Resolve(
+                    tokens,
+                    item.Kind,
+                    ProgressiveMapSession.Accessibility);
+
+                if (item.Kind == MapDisplayItemKind.Route)
+                {
+                    CreateLine(
+                        _progressiveRoot,
+                        item.Id,
+                        ResolveRouteOrigin(item),
+                        ProjectIdentifier(item.Id),
+                        visual.Color);
+                    continue;
+                }
+
+                WorldMapUv uv = ResolveProgressiveUv(item);
+                CreateAnchored(
+                    _progressiveRoot,
+                    item.Id,
+                    visual.Color,
+                    uv.AsVector,
+                    new Vector2(18f, 18f));
+                Rect labelRect = LabelRect(uv, 0.2f, 0.045f);
+                string shape = string.IsNullOrWhiteSpace(item.NonColorShape)
+                    ? item.Kind.ToString()
+                    : item.NonColorShape;
+                CreateText(
+                    _progressiveRoot,
+                    item.Id + "_label",
+                    font,
+                    "[" + shape.ToUpperInvariant() + "] " + item.Label,
+                    Mathf.RoundToInt(11f * visual.TextScale),
+                    labelRect.min,
+                    labelRect.max,
+                    TextAnchor.MiddleCenter,
+                    visual.Color);
+            }
+        }
+
+        private void SetSettlementActive(WorldMapSettlement settlement, bool active)
+        {
+            SetActive(settlement.Id, active);
+            SetActive(settlement.Id + "_label", active);
+        }
+
+        private void SetActive(string objectName, bool active)
+        {
+            Transform found = FindDescendant(transform, objectName);
+            if (found != null)
+            {
+                found.gameObject.SetActive(active);
+            }
+        }
+
+        private static Transform FindDescendant(Transform root, string objectName)
+        {
+            if (root.name == objectName)
+            {
+                return root;
+            }
+            for (int i = 0; i < root.childCount; i++)
+            {
+                Transform found = FindDescendant(root.GetChild(i), objectName);
+                if (found != null)
+                {
+                    return found;
+                }
+            }
+            return null;
+        }
+
+        private WorldMapUv ResolveProgressiveUv(MapDisplayItem item)
+        {
+            if (item.Kind == MapDisplayItemKind.Player ||
+                item.Kind == MapDisplayItemKind.Party)
+            {
+                return new WorldMapUv(
+                    item.NormalizedPosition.x,
+                    item.NormalizedPosition.y);
+            }
+            string featureId = string.IsNullOrEmpty(item.FeatureId)
+                ? item.Id
+                : item.FeatureId;
+            WorldMapInnerRealm inner = FindInnerForId(
+                item.SourceId + "|" + featureId + "|" + item.Id);
+            WorldMapUv projected = ProjectIdentifier(
+                string.IsNullOrEmpty(item.SourceId) ? item.Id : item.SourceId);
+            if (inner != null)
+            {
+                return new WorldMapUv(
+                    Mathf.Lerp(inner.Capital.Uv.X, projected.X, 0.42f),
+                    Mathf.Lerp(inner.Capital.Uv.Y, projected.Y, 0.42f));
+            }
+            return projected;
+        }
+
+        private WorldMapUv ResolveRouteOrigin(MapDisplayItem item)
+        {
+            WorldMapInnerRealm inner = FindInnerForId(item.Id);
+            return inner == null ? ProjectIdentifier(item.Id) : inner.Capital.Uv;
+        }
+
+        private WorldMapInnerRealm FindInnerForId(string value)
+        {
+            for (int i = 0; i < _presentation.Inners.Count; i++)
+            {
+                WorldMapInnerRealm inner = _presentation.Inners[i];
+                if (!string.IsNullOrEmpty(value) &&
+                    value.IndexOf(inner.RealmId, StringComparison.Ordinal) >= 0)
+                {
+                    return inner;
+                }
+            }
+            return null;
+        }
+
+        private static WorldMapUv ProjectIdentifier(string identifier)
+        {
+            Vector2 projected = MapInterfacePlacement.ProjectIdentifier(
+                identifier,
+                MapSurfaceKind.WorldMap);
+            return new WorldMapUv(projected.x, projected.y);
         }
 
         private static void ClearChildren(Transform parent)
@@ -532,6 +781,7 @@ namespace AL.UI.WorldMap
             canvas.sortingOrder = 420;
             canvasObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
             canvasObject.GetComponent<CanvasScaler>().referenceResolution = new Vector2(1920f, 1080f);
+            canvasObject.GetComponent<CanvasScaler>().matchWidthOrHeight = 0.5f;
             canvasObject.AddComponent<GraphicRaycaster>();
             return canvas;
         }

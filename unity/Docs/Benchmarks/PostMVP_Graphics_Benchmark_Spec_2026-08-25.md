@@ -16,6 +16,9 @@ engineering hypotheses until measured and accepted
 **Sustained physical Android procedure:**
 [`PostMVP_Sustained_Physical_Android_Benchmark_Procedure.md`](PostMVP_Sustained_Physical_Android_Benchmark_Procedure.md)
 
+**Player runtime capture contract:**
+[`GoldenScene_Runtime_Capture_Contract.md`](GoldenScene_Runtime_Capture_Contract.md)
+
 ## 1. Purpose
 
 This specification turns the owner-approved post-MVP visual direction into repeatable,
