@@ -266,6 +266,7 @@ namespace AL.Data.Catalogs.MapDisclosure
         private readonly IReadOnlyDictionary<string, MapDisclosureRoute> _routesById;
         private readonly IReadOnlyDictionary<string, MapDisclosureObjective> _objectivesById;
         private readonly IReadOnlyDictionary<string, MapDisclosureAllegianceMarker> _allegiancesById;
+        private readonly IReadOnlyDictionary<string, MapDisclosureRealmGlyph> _glyphsById;
 
         internal MapDisclosureCatalogSnapshot(
             string version,
@@ -292,6 +293,7 @@ namespace AL.Data.Catalogs.MapDisclosure
             _routesById = Index(Routes, value => value.Id);
             _objectivesById = Index(Objectives, value => value.Id);
             _allegiancesById = Index(AllegianceMarkers, value => value.Id);
+            _glyphsById = Index(RealmGlyphs, value => value.Id);
         }
 
         public string Version { get; }
@@ -314,9 +316,19 @@ namespace AL.Data.Catalogs.MapDisclosure
             return _featuresById.ContainsKey(id ?? string.Empty);
         }
 
+        public bool TryGetFeature(string id, out MapDisclosureFeature value)
+        {
+            return _featuresById.TryGetValue(id ?? string.Empty, out value);
+        }
+
         public bool ContainsRoute(string id)
         {
             return _routesById.ContainsKey(id ?? string.Empty);
+        }
+
+        public bool TryGetRoute(string id, out MapDisclosureRoute value)
+        {
+            return _routesById.TryGetValue(id ?? string.Empty, out value);
         }
 
         public bool ContainsObjective(string id)
@@ -324,9 +336,26 @@ namespace AL.Data.Catalogs.MapDisclosure
             return _objectivesById.ContainsKey(id ?? string.Empty);
         }
 
+        public bool TryGetObjective(string id, out MapDisclosureObjective value)
+        {
+            return _objectivesById.TryGetValue(id ?? string.Empty, out value);
+        }
+
         public bool ContainsAllegianceMarker(string id)
         {
             return _allegiancesById.ContainsKey(id ?? string.Empty);
+        }
+
+        public bool TryGetAllegianceMarker(
+            string id,
+            out MapDisclosureAllegianceMarker value)
+        {
+            return _allegiancesById.TryGetValue(id ?? string.Empty, out value);
+        }
+
+        public bool TryGetRealmGlyph(string id, out MapDisclosureRealmGlyph value)
+        {
+            return _glyphsById.TryGetValue(id ?? string.Empty, out value);
         }
 
         private static IReadOnlyList<T> Freeze<T>(IList<T> values)
