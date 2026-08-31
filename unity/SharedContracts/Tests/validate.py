@@ -41,6 +41,7 @@ GAMEDATA_DIR = (
 
 # schema-name -> real catalog file (for the ten content catalogs)
 REAL_CATALOGS = {
+    "al-map-disclosure": "al_map_disclosure_catalog.json",
     "al-realm": "al_realm_catalog.json",
     "al-realm-gem-wishgate-content": "al_realm_gem_wishgate_content_catalog.json",
     "al-notification-content": "al_notification_content_catalog.json",
