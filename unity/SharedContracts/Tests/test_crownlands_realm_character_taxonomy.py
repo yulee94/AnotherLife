@@ -69,7 +69,7 @@ class CrownlandsRealmTaxonomyCatalogTests(unittest.TestCase):
         self.assertEqual(100, evidence["traceabilityRows"])
         self.assertEqual(0, evidence["orphanReferenceCount"])
         self.assertEqual(0, evidence["missingMotionCount"])
-        self.assertEqual(510, evidence["recordCount"])
+        self.assertEqual(512, evidence["recordCount"])
 
     def test_crownlands_roster_is_complete_and_explicitly_gated(self) -> None:
         self.assertEqual(["Crownlands Humans"], [row["displayName"] for row in self.catalog["playableRaces"]])

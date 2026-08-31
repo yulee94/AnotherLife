@@ -19,6 +19,10 @@ OUTPUT_REL = Path(
 IDENTITY_DECISION = "rct_eldergrove_decision_identity_review_v001"
 TECHNICAL_DECISION = "rct_eldergrove_decision_technical_review_v001"
 PRESENTATION_DECISION = "rct_eldergrove_decision_motion_effect_review_v001"
+APPROVED_PROGRESSION_SOURCE_COMMIT = "91c2bb4e4af37c8763253db373128a2c01da1563"
+APPROVED_PROGRESSION_SOURCE_SHA256 = (
+    "763ff7d983b8eda78cefcad4f6e71cf4f95e67e1bfe1a81e4f0efbe4efbda40a"
+)
 
 SOURCE_SPECS = {
     "contract": (
@@ -363,7 +367,16 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
     provenance = []
     for key, (source_ref, source_kind, notes) in SOURCE_SPECS.items():
         source_path = repo_root / source_ref
-        digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+        if key == "approved_class_progression":
+            digest = APPROVED_PROGRESSION_SOURCE_SHA256
+            tool_version = f"git commit {APPROVED_PROGRESSION_SOURCE_COMMIT}"
+            notes = (
+                f"sourceCommit={APPROVED_PROGRESSION_SOURCE_COMMIT}; "
+                f"sourceBlobSha256={digest}; {notes}"
+            )
+        else:
+            digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+            tool_version = "repository revision at catalog generation"
         provenance.append(
             {
                 "id": provenance_id(key),
@@ -371,7 +384,7 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
                 "sourceRef": source_ref,
                 "creator": "Another Life repository authors",
                 "tool": "git-tracked source",
-                "toolVersion": "repository revision at catalog generation",
+                "toolVersion": tool_version,
                 "createdAtUtc": None,
                 "rightsState": "project_internal",
                 "promptOrBriefRef": None,

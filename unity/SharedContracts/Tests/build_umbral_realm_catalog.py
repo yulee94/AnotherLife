@@ -262,8 +262,12 @@ def build_catalog(repo_root: Path) -> dict[str, Any]:
     catalog["provenance"] = []
     for key, (source_ref, source_kind, notes) in SOURCE_SPECS.items():
         source_path = repo_root / source_ref
-        commit = source_commit(repo_root, source_ref)
-        digest = source_blob_sha256(repo_root, commit, source_ref)
+        if key == "approved_class_progression":
+            commit = eldergrove_builder.APPROVED_PROGRESSION_SOURCE_COMMIT
+            digest = eldergrove_builder.APPROVED_PROGRESSION_SOURCE_SHA256
+        else:
+            commit = source_commit(repo_root, source_ref)
+            digest = source_blob_sha256(repo_root, commit, source_ref)
         lineage = ""
         if key == "umbral_authoring":
             authoring_map = json.loads(source_path.read_text(encoding="utf-8"))
