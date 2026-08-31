@@ -36,6 +36,7 @@ Do not make Unity-only types the source of truth for cross-tool design data. Kee
 | `al_champion_catalog.json` | `al-champion.schema.json` | `ChampionArtCatalog` |
 | `al_first_session_terrain_catalog.json` | `al-first-session-terrain.schema.json` | — |
 | `al_world_asset_inventory.json` | `al-world-asset-inventory.schema.json` | — |
+| Realm task catalogs (per realm; preparation only) | `al-realm-character-taxonomy.schema.json` | — |
 
 `al-world-asset-inventory.schema.json` defines the held post-MVP world-asset logical
 family, production identity, binding, provenance, standards, budget-measurement, and
@@ -43,6 +44,14 @@ readiness contract. `al_world_asset_inventory.json` is the authoritative prepara
 payload: it covers all 242 logical families and preserves eight existing prefab tuples,
 but it has no runtime loader and authorizes no asset generation, activation, or
 replacement of the current MVP/Resources bindings.
+
+`al-realm-character-taxonomy.schema.json` is the gated per-realm production shape
+for playable races, NPCs, Champions, fantasy beasts, monsters, modules, rigs,
+facial/secondary systems, platform budgets, motion matrices, skill traceability,
+and VFX. It has no committed runtime payload. Realm production tasks consume
+`unity/Docs/AssetLibrary/PostMVP_Realm_Character_Creature_Catalog_Contract_v1.md`,
+create their own realm-scoped preparation catalogs, and keep generation and
+activation held until the recorded owner and release gates pass.
 
 The character customization catalog includes body presets, hair styles, armor styles, primary/hair/skin/eye/accent palettes, face marks, weapon/offhand styles, realm material keys, and slot names so Unity and Fable tools can present the same customization choices.
 
@@ -82,13 +91,19 @@ families (realms, buildings, research, troops, champions, skills):
 - `validate.py` — loads every schema, asserts each compiles, validates the real
   `StreamingAssets/GameData` catalogs against their schemas, and checks that
   `fixtures/valid/*.json` pass while `fixtures/invalid/*.json` fail. It also runs the
-  world-asset cross-record, binding, budget, gate, and byte-stability validator.
+  world-asset cross-record, binding, budget, gate, and byte-stability validator plus
+  the realm character/creature fail-closed semantic tests.
 - `generate_fixtures.py` — regenerates the fixtures (valid samples and
   one-decision-violation invalid samples).
 - `world_asset_inventory.py` — deterministically assembles or validates the held
   authoritative inventory and its acceptance-evidence report.
 - `test_world_asset_inventory.py` — proves two independent generations are
   byte-identical and twelve adversarial catalog mutations fail closed.
+- `realm_character_taxonomy.py` — validates cross-record IDs, references, owner
+  gates, complete motion matrices, entity motion coverage, and skill/VFX traces.
+- `test_realm_character_taxonomy.py` — validates one complete synthetic catalog
+  and proves duplicate IDs, orphan references, missing motion, trace mismatch,
+  template drift, subjectless decisions, and release-gate bypass fail closed.
 
 Run it with:
 
@@ -96,6 +111,7 @@ Run it with:
 cd unity/SharedContracts/Tests
 uv run --with jsonschema validate.py
 python test_world_asset_inventory.py
+uv run --with jsonschema python -m unittest test_realm_character_taxonomy.py -v
 ```
 
 The real `al_world_event_content_catalog.json` currently fails validation on its

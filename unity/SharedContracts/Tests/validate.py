@@ -20,14 +20,17 @@ EXPECTED_DEFECTS do not fail the run (they are the known data defects the
 downstream data-generation task must correct).
 """
 
+import io
 import json
 import pathlib
 import sys
+import unittest
 from decimal import Decimal
 
-from jsonschema import Draft202012Validator, SchemaError, ValidationError
+from jsonschema import Draft202012Validator, FormatChecker, SchemaError, ValidationError
 
 import world_asset_inventory
+import test_realm_character_taxonomy
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent  # unity/SharedContracts
 SCHEMAS_DIR = ROOT / "Schemas"
@@ -97,6 +100,7 @@ def main():
         "invalid": [],
         "real": [],
         "inventory": [],
+        "realmTaxonomy": [],
     }
 
     # 1. Compile every schema (validity of the schema itself).
@@ -104,7 +108,7 @@ def main():
     for key, (path, schema) in sorted(schemas.items()):
         try:
             Draft202012Validator.check_schema(schema)
-            compiled[key] = Draft202012Validator(schema)
+            compiled[key] = Draft202012Validator(schema, format_checker=FormatChecker())
             reports["schemas"].append((key, True, ""))
         except SchemaError as exc:
             compiled[key] = None
@@ -172,6 +176,25 @@ def main():
         reports["inventory"].append((False, str(exc)))
         failures.append(f"world asset inventory cross-validation failed: {exc}")
 
+    # 5. Realm character/creature cross-record and fail-closed semantics.
+    suite = unittest.defaultTestLoader.loadTestsFromModule(test_realm_character_taxonomy)
+    realm_test_output = io.StringIO()
+    realm_result = unittest.TextTestRunner(
+        stream=realm_test_output,
+        verbosity=0,
+    ).run(suite)
+    realm_ok = realm_result.wasSuccessful()
+    realm_summary = (
+        f"{realm_result.testsRun} tests, "
+        f"{len(realm_result.failures)} failures, {len(realm_result.errors)} errors"
+    )
+    reports["realmTaxonomy"].append((realm_ok, realm_summary))
+    if not realm_ok:
+        failures.append(
+            "realm character taxonomy fail-closed tests failed: "
+            + realm_test_output.getvalue().strip()
+        )
+
     # ---- Report ----
     print("== Schema compilation ==")
     for key, ok, msg in reports["schemas"]:
@@ -199,6 +222,10 @@ def main():
     print("\n== World-asset inventory cross-validation ==")
     for ok, msg in reports["inventory"]:
         print(f"  [{'OK' if ok else 'FAIL'}] al-world-asset-inventory  -> {msg}")
+
+    print("\n== Realm character taxonomy cross-validation ==")
+    for ok, msg in reports["realmTaxonomy"]:
+        print(f"  [{'OK' if ok else 'FAIL'}] al-realm-character-taxonomy  -> {msg}")
 
     print()
     if failures:
