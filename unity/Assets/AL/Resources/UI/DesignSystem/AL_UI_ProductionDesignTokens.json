@@ -1,0 +1,159 @@
+{
+  "SystemId": "al.ui.production.v1",
+  "StyleName": "Ashen Reliquary",
+  "DisplayFamilyStatus": "AL Reliquary Display and AL Wayfarer Text are original commissioned-family specifications; licensed production font assets remain an owner creative-gate input.",
+  "IconGrammar": "Original solid silhouettes with one protected void, 2.25-unit optical stroke, broad negative space, square and circular micro variants, and no literal weapons, animals, comparator marks, pseudo-text, or color-only identity.",
+  "MaterialGrammar": "Low-gloss carved stone foundations, restrained brushed electrum rails, worn leather or woven-fiber inserts, smoke glass for transient overlays, and localized realm-glyph luminance only at causal focus points.",
+  "Typography": [
+    {
+      "Role": 0,
+      "Family": "AL Reliquary Display",
+      "BaseSize": 40.0,
+      "Weight": 650,
+      "LineHeight": 1.05,
+      "Tracking": 0.035,
+      "Uppercase": true
+    },
+    {
+      "Role": 1,
+      "Family": "AL Reliquary Display",
+      "BaseSize": 26.0,
+      "Weight": 600,
+      "LineHeight": 1.12,
+      "Tracking": 0.02,
+      "Uppercase": true
+    },
+    {
+      "Role": 2,
+      "Family": "AL Wayfarer Text",
+      "BaseSize": 16.0,
+      "Weight": 450,
+      "LineHeight": 1.4,
+      "Tracking": 0.0,
+      "Uppercase": false
+    },
+    {
+      "Role": 3,
+      "Family": "AL Wayfarer Text",
+      "BaseSize": 16.0,
+      "Weight": 650,
+      "LineHeight": 1.2,
+      "Tracking": 0.04,
+      "Uppercase": true
+    },
+    {
+      "Role": 4,
+      "Family": "AL Wayfarer Text",
+      "BaseSize": 13.0,
+      "Weight": 550,
+      "LineHeight": 1.25,
+      "Tracking": 0.045,
+      "Uppercase": true
+    },
+    {
+      "Role": 5,
+      "Family": "AL Wayfarer Text Tabular",
+      "BaseSize": 18.0,
+      "Weight": 650,
+      "LineHeight": 1.0,
+      "Tracking": 0.01,
+      "Uppercase": false
+    }
+  ],
+  "Spacing": [4.0, 8.0, 12.0, 16.0, 24.0, 32.0, 48.0, 64.0],
+  "ElevationLevels": [0.0, 2.0, 6.0, 12.0, 20.0],
+  "MinimumHitTarget": 56.0,
+  "SurfaceOpacity": 0.92,
+  "GlyphGlowOpacity": 0.24,
+  "CornerRadiusSmall": 3.0,
+  "CornerRadiusLarge": 8.0,
+  "CanvasColor": { "r": 0.043, "g": 0.047, "b": 0.063, "a": 1.0 },
+  "SurfaceColor": { "r": 0.082, "g": 0.086, "b": 0.106, "a": 1.0 },
+  "RaisedSurfaceColor": { "r": 0.125, "g": 0.129, "b": 0.153, "a": 1.0 },
+  "InsetSurfaceColor": { "r": 0.035, "g": 0.039, "b": 0.051, "a": 1.0 },
+  "EdgeColor": { "r": 0.722, "g": 0.663, "b": 0.533, "a": 1.0 },
+  "TextPrimaryColor": { "r": 0.941, "g": 0.922, "b": 0.867, "a": 1.0 },
+  "TextSecondaryColor": { "r": 0.725, "g": 0.706, "b": 0.663, "a": 1.0 },
+  "Motion": {
+    "FocusTransitionSeconds": 0.14,
+    "PanelTransitionSeconds": 0.24,
+    "FocusHoldSeconds": 0.42,
+    "AmbientMotionScale": 1.0,
+    "FlashOpacity": 0.28,
+    "VfxDensity": 1.0
+  },
+  "ReducedMotion": {
+    "FocusTransitionSeconds": 0.04,
+    "PanelTransitionSeconds": 0.06,
+    "FocusHoldSeconds": 0.55,
+    "AmbientMotionScale": 0.0,
+    "FlashOpacity": 0.06,
+    "VfxDensity": 0.3
+  },
+  "StateTreatments": [
+    {
+      "State": 0,
+      "Color": { "r": 0.647, "g": 0.643, "b": 0.612, "a": 1.0 },
+      "NonColorCue": 1,
+      "Pattern": 1,
+      "LabelPrefix": "—",
+      "BorderWidth": 1.0
+    },
+    {
+      "State": 1,
+      "Color": { "r": 0.416, "g": 0.714, "b": 0.706, "a": 1.0 },
+      "NonColorCue": 2,
+      "Pattern": 2,
+      "LabelPrefix": "◇",
+      "BorderWidth": 1.5
+    },
+    {
+      "State": 2,
+      "Color": { "r": 0.827, "g": 0.427, "b": 0.4, "a": 1.0 },
+      "NonColorCue": 3,
+      "Pattern": 3,
+      "LabelPrefix": "!!",
+      "BorderWidth": 2.0
+    },
+    {
+      "State": 3,
+      "Color": { "r": 0.843, "g": 0.659, "b": 0.302, "a": 1.0 },
+      "NonColorCue": 4,
+      "Pattern": 4,
+      "LabelPrefix": "△",
+      "BorderWidth": 2.0
+    },
+    {
+      "State": 4,
+      "Color": { "r": 0.494, "g": 0.678, "b": 0.478, "a": 1.0 },
+      "NonColorCue": 5,
+      "Pattern": 5,
+      "LabelPrefix": "▲",
+      "BorderWidth": 1.5
+    },
+    {
+      "State": 5,
+      "Color": { "r": 0.416, "g": 0.408, "b": 0.388, "a": 1.0 },
+      "NonColorCue": 6,
+      "Pattern": 6,
+      "LabelPrefix": "×",
+      "BorderWidth": 1.0
+    },
+    {
+      "State": 6,
+      "Color": { "r": 0.588, "g": 0.525, "b": 0.659, "a": 1.0 },
+      "NonColorCue": 7,
+      "Pattern": 7,
+      "LabelPrefix": "≈",
+      "BorderWidth": 1.5
+    },
+    {
+      "State": 7,
+      "Color": { "r": 0.851, "g": 0.788, "b": 0.592, "a": 1.0 },
+      "NonColorCue": 8,
+      "Pattern": 8,
+      "LabelPrefix": "⌜⌟",
+      "BorderWidth": 2.0
+    }
+  ]
+}
