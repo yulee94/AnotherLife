@@ -14,11 +14,14 @@ namespace AL.Platform.Android
     ///   1. lives on a GameObject named <c>AndroidBridge</c> — the exact name the JVM host targets via
     ///      <c>UnityPlayer.UnitySendMessage("AndroidBridge", "SetRouteContext", json)</c>;
     ///   2. constructs the JNI-to-JVM <see cref="AndroidUnityBridgeOutcomePlatformAdapter"/> and the
-    ///      <see cref="UnityBridgeOutcomeSender"/>, then registers the sender as the receiver's outcome
+    ///      <see cref="UnityBridgeOutcomeSender"/> and explicit
+    ///      <see cref="UnityBridgeReadySender"/>, then registers the outcome sender as the receiver's
     ///      sink, so a correlated route outcome flows back to Kotlin through
     ///      <c>com.example.anotherlife.ui.unity.UnityBridgeCallbacks.reportOutcome</c>;
-    ///   3. logs outcome-dispatch results and app foreground/background transitions;
-    ///   4. tears down receiver-first, sender-second, matching the receiver's bounded graceful-drain
+    ///   3. exposes <see cref="TryReportReady"/> for a route to call only after its own presentation
+    ///      checks, without treating route receipt as readiness;
+    ///   4. logs dispatch results and app foreground/background transitions;
+    ///   5. tears down receiver-first, senders-second, matching the receiver's bounded graceful-drain
     ///      contract.
     ///
     /// Construction happens on the main thread (Awake) because the sender and adapter each capture the
@@ -38,8 +41,13 @@ namespace AL.Platform.Android
 
         private AndroidBridge _bridge;
         private UnityBridgeOutcomeSender _outcomeSender;
-        private AndroidUnityBridgeOutcomePlatformAdapter _platformAdapter;
+        private UnityBridgeReadySender _readySender;
+        private AndroidUnityBridgeOutcomePlatformAdapter
+            _outcomePlatformAdapter;
+        private AndroidUnityBridgeReadyPlatformAdapter
+            _readyPlatformAdapter;
         private DispatchLogSink _dispatchSink;
+        private UnityBridgeReadyDispatchStatus? _lastReadyDispatchStatus;
         private bool _initialized;
         private bool _tearingDown;
 
@@ -49,6 +57,13 @@ namespace AL.Platform.Android
         /// </summary>
         public UnityBridgeOutcomeDispatchStatus? LastDispatchStatus =>
             _dispatchSink?.LastStatus;
+
+        /// <summary>
+        /// Most recent explicit ready-dispatch status, or null until route code
+        /// calls <see cref="TryReportReady"/>.
+        /// </summary>
+        public UnityBridgeReadyDispatchStatus? LastReadyDispatchStatus =>
+            _lastReadyDispatchStatus;
 
         private void Awake()
         {
@@ -73,10 +88,16 @@ namespace AL.Platform.Android
             }
 
             _dispatchSink = new DispatchLogSink();
-            _platformAdapter = new AndroidUnityBridgeOutcomePlatformAdapter();
+            _outcomePlatformAdapter =
+                new AndroidUnityBridgeOutcomePlatformAdapter();
             _outcomeSender = new UnityBridgeOutcomeSender(
-                _platformAdapter,
+                _outcomePlatformAdapter,
                 _dispatchSink);
+            _readyPlatformAdapter =
+                new AndroidUnityBridgeReadyPlatformAdapter();
+            _readySender = new UnityBridgeReadySender(
+                _readyPlatformAdapter);
+            _lastReadyDispatchStatus = null;
 
             // The receiver is created lazily on first SetRouteContext, so registering the sink now
             // (before any request) is required and cannot hit the "receiver already active" guard.
@@ -87,6 +108,46 @@ namespace AL.Platform.Android
                 "[AL-BRIDGE-RUNTIME] initialized '" + BridgeGameObjectName + "' " +
                 "(androidPlayerBuild=" +
                 AndroidUnityBridgeOutcomePlatformAdapter.IsAndroidPlayerBuild + ").");
+        }
+
+        /// <summary>
+        /// Reports readiness for one validated route request. Route code must
+        /// call this only after it can visibly present the route and own input;
+        /// bridge initialization and SetRouteContext never call it.
+        /// </summary>
+        public UnityBridgeReadyDispatchResult TryReportReady(
+            UnityRouteRequest request)
+        {
+            UnityBridgeReadyDispatchResult result;
+            if (!_initialized || _tearingDown || _readySender == null)
+            {
+                result = UnityBridgeReadyDispatchResult.Failed(
+                    UnityBridgeReadyDispatchStatus.Disposed,
+                    false,
+                    UnityBridgeProtocolErrorCode.SessionClosed);
+            }
+            else
+            {
+                result = _readySender.TryDispatch(request);
+            }
+
+            _lastReadyDispatchStatus = result.Status;
+            if (result.CallbackInvoked)
+            {
+                Debug.Log(
+                    "[AL-BRIDGE-READY] ready acknowledgement sent.");
+            }
+            else
+            {
+                var diagnostic = result.Error?.WireCode ??
+                    UnityBridgeContract.GetProtocolErrorWireValue(
+                        UnityBridgeProtocolErrorCode.SendUnavailable);
+                Debug.LogWarning(
+                    "[AL-BRIDGE-READY] dispatch " + result.Status +
+                    ": " + diagnostic + ".");
+            }
+
+            return result;
         }
 
         private void OnApplicationPause(bool paused)
@@ -129,15 +190,22 @@ namespace AL.Platform.Android
                 _bridge = null;
             }
 
-            // Sender second: disposes the exclusively owned platform adapter.
+            // Senders second: each disposes its exclusively owned platform adapter.
+            if (_readySender != null)
+            {
+                _readySender.Dispose();
+                _readySender = null;
+            }
+
             if (_outcomeSender != null)
             {
                 _outcomeSender.Dispose();
                 _outcomeSender = null;
             }
 
-            // The sender owns and disposes the adapter; this reference is only dropped, not disposed.
-            _platformAdapter = null;
+            // The senders own and dispose their adapters; these references are only dropped.
+            _readyPlatformAdapter = null;
+            _outcomePlatformAdapter = null;
             _dispatchSink = null;
             _initialized = false;
         }
