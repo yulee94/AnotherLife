@@ -682,6 +682,7 @@ namespace AL.UI.WorldMap
         public static void ConfigureAccessibility(MapAccessibilityProfile profile)
         {
             _accessibility = profile;
+            UiAccessibilityPreferences.Configure(profile.Settings);
             PruneDestroyedSubscribers();
             Changed?.Invoke();
         }
@@ -706,6 +707,7 @@ namespace AL.UI.WorldMap
             }
             _controller = null;
             _accessibility = MapAccessibilityProfile.Default;
+            UiAccessibilityPreferences.Reset();
             MinimapExpanded = false;
             CombatDense = false;
             Changed = null;
