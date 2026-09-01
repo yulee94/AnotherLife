@@ -1,0 +1,66 @@
+{
+  "catalog_id": "al_kingdom_teaching_v1",
+  "quest_id": "quest_private_kingdom_teaching",
+  "entry": {
+    "id": "teach_enter_private_kingdom",
+    "title": "Private Kingdom Stewardship",
+    "what_to_do": "Enter your private kingdom and review its resource stores and live build timer.",
+    "location": "Private Kingdom"
+  },
+  "steps": [
+    {
+      "id": "teach_resources_timers",
+      "title": "Castle Stewardship",
+      "what_to_do": "Review your resource stores and the live build timer.",
+      "location": "Resource Bar & Build Timer",
+      "interaction": "acknowledge",
+      "completion_event": "resources_timers_read",
+      "action": "continue"
+    },
+    {
+      "id": "teach_construct_town_hall",
+      "title": "Raise the Town Hall",
+      "what_to_do": "Open construction and complete the approved Town Hall build.",
+      "location": "Castle Construction",
+      "interaction": "construct_town_hall",
+      "completion_event": "town_hall_constructed",
+      "action": "continue"
+    },
+    {
+      "id": "teach_research_troops",
+      "title": "Future Commands",
+      "what_to_do": "Locate Research and Troops in the kingdom dock; both may remain locked.",
+      "location": "Kingdom Dock",
+      "interaction": "inspect_research_troops",
+      "completion_event": "research_troops_reviewed",
+      "action": "continue"
+    },
+    {
+      "id": "teach_construction_dock",
+      "title": "Construction Dock",
+      "what_to_do": "Open the construction dock. Keyboard B works only in your private kingdom.",
+      "location": "Construction Dock",
+      "interaction": "open_construction_dock",
+      "completion_event": "construction_dock_opened",
+      "action": "continue"
+    },
+    {
+      "id": "teach_inner_map",
+      "title": "Castle & Areas",
+      "what_to_do": "Preview your inner-realm Castle, Area I, and Area II.",
+      "location": "Private Kingdom Map",
+      "interaction": "open_inner_map",
+      "completion_event": "inner_map_opened",
+      "action": "continue"
+    },
+    {
+      "id": "teach_return_3d",
+      "title": "Return to Adventure",
+      "what_to_do": "Use Shared Menu to return to your inner-realm adventure.",
+      "location": "Shared Menu",
+      "interaction": "return_shared_menu",
+      "completion_event": "shared_menu_return_requested",
+      "action": "complete"
+    }
+  ]
+}

@@ -146,16 +146,64 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.AreEqual(BuildTarget.StandaloneWindows64, options.target);
             Assert.AreEqual(BuildOptions.Development, options.options);
             Assert.AreEqual(ExpectedExecutable(root), options.locationPathName);
+            Assert.That(options.extraScriptingDefines, Is.Empty,
+                "The normal Player must remain structurally unflavored.");
             CollectionAssert.AreEqual(new[]
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, options.scenes);
             Assert.That(options.scenes, Has.None.EqualTo("Assets/Test.unity"));
-            Assert.That(options.scenes, Has.None.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
+            Assert.That(options.scenes, Has.Some.EqualTo("Assets/AL/Scenes/ChampionArena.unity"));
             Assert.AreEqual("StandaloneWindows64", Prop(plan, "Target").ToString());
             Assert.AreEqual(BuildOptions.Development, (BuildOptions)Prop(plan, "Options"));
+        }
+
+        [Test]
+        public void ApprovalBuildPlanUsesDedicatedGuardedOutputSummaryAndExactDefine()
+        {
+            string root = ProjectRoot();
+            string outputDirectory = ExpectedApprovalOutputDirectory(root);
+            object plan = Static(
+                "CreateMvpApprovalPlan",
+                root,
+                outputDirectory,
+                "6000.3.22f1",
+                false,
+                false,
+                NewValidation(true, "valid"),
+                true,
+                true,
+                false,
+                false);
+
+            Assert.That(PropBool(plan, "IsValid"), Is.True, Failures(plan));
+            var options = (BuildPlayerOptions)Invoke(plan, "CreateBuildPlayerOptions");
+            Assert.That(options.locationPathName, Is.EqualTo(ExpectedApprovalExecutable(root)));
+            CollectionAssert.AreEqual(
+                new[] { "AL_MVP_APPROVAL_SLOT" },
+                options.extraScriptingDefines);
+            Assert.That(PropString(plan, "SummaryPath"), Is.EqualTo(ExpectedApprovalSummaryPath(root)));
+            CollectionAssert.AreEqual(new[]
+            {
+                "Assets/AL/Scenes/Boot.unity",
+                "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
+                "Assets/AL/Scenes/Kingdom.unity"
+            }, options.scenes);
+            Assert.That(
+                (bool)Static("IsGuardedMvpApprovalOutputDirectory", root, outputDirectory),
+                Is.True);
+            Assert.That(
+                (bool)Static("IsGuardedMvpApprovalOutputDirectory", root, ExpectedOutputDirectory(root)),
+                Is.False);
+            Assert.That(
+                (bool)Static("IsGuardedOutputDirectory", root, outputDirectory),
+                Is.False);
         }
 
         [Test]
@@ -196,7 +244,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             EnvironmentState state = ValidEnvironment();
             switch (failedGate)
             {
-                case "version": state.UnityVersion = "2022.3.61f1"; break;
+                case "version": state.UnityVersion = "6000.3.21f1"; break;
                 case "compiling": state.IsCompiling = true; break;
                 case "compile-errors": state.HasCompilationErrors = true; break;
                 case "settings": state.Validation = NewValidation(false, "settings drift"); break;
@@ -317,6 +365,8 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, AsStrings(Prop(summary, "ScenePaths")));
         }
@@ -408,7 +458,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             Assert.That(first, Does.Contain("\"totalSize\": 987654"));
             Assert.That(first, Does.Contain("2026-07-22T01:02:03.0000000Z"));
             Assert.That(first, Does.Not.Contain("Assets/Test.unity"));
-            Assert.That(first, Does.Not.Contain("ChampionArena.unity"));
+            Assert.That(first, Does.Contain("ChampionArena.unity"));
         }
 
         [Test]
@@ -445,7 +495,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             var state = new EnvironmentState
             {
                 ProjectRoot = root,
-                UnityVersion = "2022.3.62f3",
+                UnityVersion = "6000.3.22f1",
                 Validation = NewValidation(true, "valid"),
                 OutputIgnored = true,
                 SummaryIgnored = true,
@@ -478,7 +528,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                 "CreatePlan",
                 root,
                 outputDirectory,
-                "2022.3.62f3",
+                "6000.3.22f1",
                 false,
                 false,
                 NewValidation(true, "valid"),
@@ -596,8 +646,17 @@ namespace AL.Tests.EditMode.ProductionScenes
         private static string ExpectedExecutable(string root) =>
             Path.Combine(ExpectedOutputDirectory(root), "AnotherLifeUnity.exe");
 
+        private static string ExpectedApprovalOutputDirectory(string root) =>
+            Path.GetFullPath(Path.Combine(root, "Builds", "Validation", "Windows64MvpApproval"));
+
+        private static string ExpectedApprovalExecutable(string root) =>
+            Path.Combine(ExpectedApprovalOutputDirectory(root), "AnotherLifeUnity.exe");
+
         private static string ExpectedSummaryPath(string root) =>
             Path.GetFullPath(Path.Combine(root, "Logs", "ProductionPlayerBuildSummary.json"));
+
+        private static string ExpectedApprovalSummaryPath(string root) =>
+            Path.GetFullPath(Path.Combine(root, "Logs", "MvpApprovalPlayerBuildSummary.json"));
 
         public class ScriptedBuildEnvironmentProxy : DispatchProxy
         {

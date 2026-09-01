@@ -50,6 +50,8 @@ This guide consolidates the active project direction in:
 - [Product Direction](unity/Docs/Product_Direction.md)
 - [Champion Mode Visual Direction](unity/Docs/ChampionMode_VisualDirection.md)
 - [Competitive Experience Benchmark](unity/Docs/AnotherLife_Competitive_Experience_Benchmark.md)
+- [Post-MVP Graphics and UI Quality Standard](unity/Docs/PostMVP_Graphics_And_UI_Quality_Standard.md)
+- [Post-MVP Graphics Benchmark Specification](unity/Docs/Benchmarks/PostMVP_Graphics_Benchmark_Spec_2026-08-25.md)
 - [Terrestrial Design Brief](unity/Docs/Terrestrials/Terrestrial_Design_Brief.md)
 - [Terrestrial Engineering Handoff](unity/Docs/Terrestrials/Terrestrial_Engineering_Handoff.md)
 - [Customization Design](unity/Assets/AL/Art/Designs/ModularChampionCustomization.md)
@@ -703,7 +705,7 @@ Never overwrite an approved source version. Create a new version and preserve th
 
 ### Current technical baseline
 
-- Unity `2022.3.62f3`.
+- Unity `6000.3.22f1` (Unity 6.3 LTS).
 - Built-in Render Pipeline at the time of this guide.
 - Target experiences include mobile and PC.
 - iOS `15.0` is the approved minimum deployment target; compatibility claims still distinguish build-level validation from an actual iOS 15 runtime or device pass.
@@ -791,12 +793,12 @@ Unity's official guidance emphasizes profiling instead of universal asset counts
 
 Official references:
 
-- [Unity 2022.3 graphics performance fundamentals](https://docs.unity3d.com/2022.3/Documentation/Manual/OptimizingGraphicsPerformance.html)
-- [Unity 2022.3 LOD Group](https://docs.unity3d.com/2022.3/Documentation/Manual/class-LODGroup.html)
-- [Unity 2022.3 mesh compression](https://docs.unity3d.com/2022.3/Documentation/Manual/mesh-compression.html)
-- [Unity 2022.3 model importing](https://docs.unity3d.com/2022.3/Documentation/Manual/ImportingModelFiles.html)
-- [Unity 2022.3 platform texture overrides](https://docs.unity3d.com/2022.3/Documentation/Manual/class-TextureImporterOverride.html)
-- [Unity 2022.3 draw-call optimization](https://docs.unity3d.com/2022.3/Documentation/Manual/optimizing-draw-calls.html)
+- [Unity 6.3 graphics performance fundamentals](https://docs.unity3d.com/6000.3/Documentation/Manual/OptimizingGraphicsPerformance.html)
+- [Unity 6.3 LOD Group](https://docs.unity3d.com/6000.3/Documentation/Manual/class-LODGroup.html)
+- [Unity 6.3 mesh compression](https://docs.unity3d.com/6000.3/Documentation/Manual/mesh-compression.html)
+- [Unity 6.3 model importing](https://docs.unity3d.com/6000.3/Documentation/Manual/ImportingModelFiles.html)
+- [Unity 6.3 platform texture overrides](https://docs.unity3d.com/6000.3/Documentation/Manual/class-TextureImporterOverride.html)
+- [Unity 6.3 draw-call optimization](https://docs.unity3d.com/6000.3/Documentation/Manual/optimizing-draw-calls.html)
 
 ## Accessibility
 

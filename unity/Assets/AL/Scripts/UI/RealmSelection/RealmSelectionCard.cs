@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using AL.Core;
 using AL.Data.Definitions;
+using AL.RealmSelection;
 using System;
 using UnityEngine.EventSystems;
 
@@ -31,32 +32,39 @@ namespace AL.UI.RealmSelection
 
         public void Setup(RealmDefinition definition, Action<RealmId> onSelected)
         {
+            Setup(definition, onSelected, RealmCatalogRuntime.Current);
+        }
+
+        public void Setup(RealmDefinition definition, Action<RealmId> onSelected, RealmCatalogSnapshot catalog)
+        {
             _definition = definition;
             _onSelected = onSelected;
-            _realmColor = GetRealmColor(definition != null ? definition.Id : RealmId.None);
-            _pulseSeed = Mathf.Abs((definition?.RealmName ?? name).GetHashCode() % 997) * 0.01f;
+            RealmIdentityPresentation identity = RealmSelectionIdentity.Resolve(definition, catalog);
+            _realmColor = new Color(0.78f, 0.76f, 0.70f, 1f);
+            _pulseSeed = Mathf.Abs((identity.RealmName ?? name).GetHashCode() % 997) * 0.01f;
             _baseScale = transform.localScale;
 
-            ApplyRuntimePolish();
+            ApplyRuntimePolish(identity);
 
             if (_nameText != null)
             {
-                _nameText.text = definition != null ? definition.RealmName.ToUpperInvariant() : "UNKNOWN REALM";
-                _nameText.color = Color.Lerp(_realmColor, Color.white, 0.42f);
+                _nameText.text = identity.RealmName.ToUpperInvariant();
+                _nameText.color = new Color(0.94f, 0.92f, 0.86f);
                 _nameText.fontStyle = FontStyles.UpperCase;
                 _nameText.enableWordWrapping = false;
             }
 
             if (_descriptionText != null)
             {
-                _descriptionText.text = definition != null ? definition.Description : string.Empty;
-                _descriptionText.color = new Color(0.84f, 0.89f, 0.94f, 0.94f);
+                _descriptionText.text = identity.PeopleName + "\n" + identity.MarkName + " · " +
+                                        identity.SilhouetteLanguage + "\n" + identity.MaterialLanguage;
+                _descriptionText.color = new Color(0.76f, 0.76f, 0.72f, 0.94f);
                 _descriptionText.enableWordWrapping = true;
             }
 
             if (_iconImage != null)
             {
-                _iconImage.color = Color.Lerp(_realmColor, Color.white, 0.18f);
+                _iconImage.color = Color.white;
                 _iconImage.raycastTarget = false;
             }
 
@@ -65,18 +73,27 @@ namespace AL.UI.RealmSelection
                 _iconImage.sprite = definition.Icon;
             }
 
+            RealmSelectionFormationEffect formation =
+                GetComponent<RealmSelectionFormationEffect>() ??
+                gameObject.AddComponent<RealmSelectionFormationEffect>();
+            formation.Configure(
+                definition != null ? definition.Id : RealmId.None,
+                _iconImage != null ? _iconImage.sprite : definition?.Icon);
+
             BindSelectionButton();
         }
 
         public void OnPointerEnter(PointerEventData eventData)
         {
             _hovered = true;
+            GetComponent<RealmSelectionFormationEffect>()?.SetHovered(true);
         }
 
         public void OnPointerExit(PointerEventData eventData)
         {
             _hovered = false;
             _pressed = false;
+            GetComponent<RealmSelectionFormationEffect>()?.SetHovered(false);
         }
 
         public void OnPointerDown(PointerEventData eventData)
@@ -101,25 +118,25 @@ namespace AL.UI.RealmSelection
             SetImageAlpha(_sigilGlow, Mathf.Lerp(_hovered ? 0.22f : 0.12f, _hovered ? 0.42f : 0.24f, pulse));
         }
 
-        private void ApplyRuntimePolish()
+        private void ApplyRuntimePolish(RealmIdentityPresentation identity)
         {
             _backgroundImage = GetComponent<Image>() ?? gameObject.AddComponent<Image>();
-            _backgroundImage.color = new Color(0.026f, 0.034f, 0.046f, 0.96f);
+            _backgroundImage.color = new Color(0.026f, 0.028f, 0.030f, 0.96f);
             _backgroundImage.raycastTarget = true;
 
             var outline = GetComponent<Outline>() ?? gameObject.AddComponent<Outline>();
-            outline.effectColor = Color.Lerp(_realmColor, Color.white, 0.20f);
+            outline.effectColor = new Color(0.78f, 0.76f, 0.70f, 0.55f);
             outline.effectDistance = new Vector2(1.4f, -1.4f);
 
             var shadow = GetPlainShadow() ?? gameObject.AddComponent<Shadow>();
             shadow.effectColor = new Color(0f, 0f, 0f, 0.42f);
             shadow.effectDistance = new Vector2(0f, -4f);
 
-            _accentBar = EnsurePanel("RuntimeRealmAccent", _realmColor, new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(7f, 0f));
-            _topTrace = EnsurePanel("RuntimeTopTrace", new Color(1f, 0.88f, 0.62f, 0.24f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-26f, 2f));
-            _bottomTrace = EnsurePanel("RuntimeBottomTrace", new Color(_realmColor.r, _realmColor.g, _realmColor.b, 0.32f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 1f), new Vector2(-26f, 2f));
-            _sigilGlow = EnsurePanel("RuntimeSigilGlow", new Color(_realmColor.r, _realmColor.g, _realmColor.b, 0.20f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-56f, -48f), new Vector2(80f, 80f));
-            _sigilGlow.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            RealmSelectionIdentity.BuildStructuralFrame(transform, identity.FrameKind);
+            _accentBar = EnsurePanel("RuntimeRealmAccent", new Color(0.78f, 0.76f, 0.70f, 0.70f), new Vector2(0f, 0f), new Vector2(0f, 1f), new Vector2(0f, 0.5f), new Vector2(0f, 0f), new Vector2(7f, 0f));
+            _topTrace = EnsurePanel("RuntimeTopTrace", new Color(0.88f, 0.86f, 0.78f, 0.24f), new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 1f), new Vector2(0f, -1f), new Vector2(-26f, 2f));
+            _bottomTrace = EnsurePanel("RuntimeBottomTrace", new Color(0.78f, 0.76f, 0.70f, 0.32f), new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 1f), new Vector2(-26f, 2f));
+            _sigilGlow = EnsurePanel("RuntimeSigilGlow", new Color(0.86f, 0.84f, 0.76f, 0.20f), new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(0.5f, 0.5f), new Vector2(-56f, -48f), new Vector2(80f, 80f));
         }
 
         private void BindSelectionButton()
@@ -195,18 +212,6 @@ namespace AL.UI.RealmSelection
             Color color = image.color;
             color.a = Mathf.Clamp01(alpha);
             image.color = color;
-        }
-
-        private static Color GetRealmColor(RealmId id)
-        {
-            return id switch
-            {
-                RealmId.Stonehold => new Color(0.72f, 0.58f, 0.40f, 1f),
-                RealmId.Eldergrove => new Color(0.28f, 0.78f, 0.44f, 1f),
-                RealmId.Crownlands => new Color(0.34f, 0.58f, 1f, 1f),
-                RealmId.Umbral => new Color(0.68f, 0.26f, 0.92f, 1f),
-                _ => new Color(0.80f, 0.84f, 0.90f, 1f)
-            };
         }
     }
 }

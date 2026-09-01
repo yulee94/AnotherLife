@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using NUnit.Framework;
+using R = AL.Tests.EditMode.ProductionScenes.ProductionSceneTestReflection;
 
 namespace AL.Tests.EditMode.ProductionScenes
 {
@@ -40,10 +41,10 @@ namespace AL.Tests.EditMode.ProductionScenes
         public void ExpectedMarkersStayBoundToExactDescriptorIdentity()
         {
             Assert.AreEqual(
-                "[AL-SCENE-ACTIVE] id=al_scene_boot name=Boot path=Assets/AL/Scenes/Boot.unity role=production_entry version=223.1",
+                "[AL-SCENE-ACTIVE] id=al_scene_boot name=Boot path=Assets/AL/Scenes/Boot.unity role=production_entry version=" + R.SourceVersion(),
                 StaticString("ExpectedBootMarkerLine"));
             Assert.AreEqual(
-                "[AL-SCENE-ACTIVE] id=al_scene_realm_selection name=RealmSelection path=Assets/AL/Scenes/RealmSelection.unity role=onboarding_selection version=223.1",
+                "[AL-SCENE-ACTIVE] id=al_scene_realm_selection name=RealmSelection path=Assets/AL/Scenes/RealmSelection.unity role=onboarding_selection version=" + R.SourceVersion(),
                 StaticString("ExpectedRealmSelectionMarkerLine"));
         }
 
@@ -123,7 +124,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void BootMarkerFieldDriftCannotCountAsBoot()
         {
-            string drifted = StaticString("ExpectedBootMarkerLine").Replace("version=223.1", "version=stale");
+            string drifted = StaticString("ExpectedBootMarkerLine").Replace("version=" + R.SourceVersion(), "version=stale");
             object result = Evaluate(drifted, Process(), ValidIsolation());
             AssertResult(result, "Failed", "MarkerMismatch");
         }
@@ -344,6 +345,20 @@ namespace AL.Tests.EditMode.ProductionScenes
                 persistentData: @"C:\Users\Smoke\AppData\LocalLow\DefaultCompany\AnotherLifeUnity\");
 
             AssertResult(Evaluate(ValidLog(), Process(), isolation), "Passed", "None");
+        }
+
+        [Test]
+        public void WindowsIsolationPathsAreEvaluatedWithWindowsSemanticsOnEveryEditorHost()
+        {
+            object normalized = Isolation(
+                developerLocalLow: @"C:/Users/Developer/AppData/LocalLow",
+                launchLocalLow: @"C:/Users/Smoke/AppData/LocalLow/./",
+                persistentData: @"C:/Users/Smoke/AppData/LocalLow/DefaultCompany/AnotherLifeUnity/");
+            AssertResult(Evaluate(ValidLog(), Process(), normalized), "Passed", "None");
+
+            object escaped = Isolation(
+                persistentData: @"C:\Users\Smoke\AppData\LocalLow\..\LocalLow\DefaultCompany\AnotherLifeUnity\Nested\..\..");
+            AssertResult(Evaluate(ValidLog(), Process(), escaped), "Failed", "IsolationEvidenceInvalid");
         }
 
         [Test]

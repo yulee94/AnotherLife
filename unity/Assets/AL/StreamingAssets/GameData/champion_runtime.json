@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_5e063078",
+  "default_champion_id": "champion_stonehold_vanguard",
+  "records": [
+    {
+      "id": "champion_stonehold_vanguard",
+      "display_name": "Bronn Ironhide",
+      "realm_id": "stonehold",
+      "class_family_id": "warrior",
+      "subclass_id": "vanguard",
+      "weapon_style_id": "greataxe",
+      "offhand_style_id": "towershield",
+      "max_health": 1250,
+      "max_mana": 80,
+      "attack": 55,
+      "defense": 45,
+      "speed": 8,
+      "crit_rate": 5,
+      "special_power": 90,
+      "defend_mitigation": 0.5,
+      "skills": [
+        {
+          "id": "skill_iron_bulwark",
+          "display_name": "Iron Bulwark",
+          "target_type": "self",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        },
+        {
+          "id": "skill_shield_slam",
+          "display_name": "Shield Slam",
+          "target_type": "single",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        }
+      ]
+    },
+    {
+      "id": "champion_eldergrove_archmage",
+      "display_name": "Lyra Moonshadow",
+      "realm_id": "eldergrove",
+      "class_family_id": "mage",
+      "subclass_id": "archmage",
+      "weapon_style_id": "staff",
+      "offhand_style_id": "tome",
+      "max_health": 820,
+      "max_mana": 150,
+      "attack": 78,
+      "defense": 18,
+      "speed": 10,
+      "crit_rate": 8,
+      "special_power": 90,
+      "defend_mitigation": 0.5,
+      "skills": [
+        {
+          "id": "skill_arcane_bolt",
+          "display_name": "Arcane Bolt",
+          "target_type": "single",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        },
+        {
+          "id": "skill_verdant_nova",
+          "display_name": "Verdant Nova",
+          "target_type": "aoe",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        }
+      ]
+    },
+    {
+      "id": "champion_crownlands_sharpshooter",
+      "display_name": "Aurelia Dawnblade",
+      "realm_id": "crownlands",
+      "class_family_id": "ranger",
+      "subclass_id": "sharpshooter",
+      "weapon_style_id": "longbow",
+      "offhand_style_id": "quiver",
+      "max_health": 900,
+      "max_mana": 110,
+      "attack": 62,
+      "defense": 26,
+      "speed": 15,
+      "crit_rate": 20,
+      "special_power": 90,
+      "defend_mitigation": 0.5,
+      "skills": [
+        {
+          "id": "skill_piercing_shot",
+          "display_name": "Piercing Shot",
+          "target_type": "single",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        },
+        {
+          "id": "skill_hawk_eye",
+          "display_name": "Hawk Eye",
+          "target_type": "self",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        }
+      ]
+    },
+    {
+      "id": "champion_umbral_shadowblade",
+      "display_name": "Vex Nocturne",
+      "realm_id": "umbral",
+      "class_family_id": "assassin",
+      "subclass_id": "shadowblade",
+      "weapon_style_id": "twinblades",
+      "offhand_style_id": "shroud",
+      "max_health": 850,
+      "max_mana": 100,
+      "attack": 72,
+      "defense": 16,
+      "speed": 22,
+      "crit_rate": 30,
+      "special_power": 90,
+      "defend_mitigation": 0.5,
+      "skills": [
+        {
+          "id": "skill_shadowstep",
+          "display_name": "Shadowstep",
+          "target_type": "self",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        },
+        {
+          "id": "skill_umbral_execute",
+          "display_name": "Umbral Execute",
+          "target_type": "single",
+          "cooldown_seconds": 6.0,
+          "power": 1.0
+        }
+      ]
+    }
+  ]
+}

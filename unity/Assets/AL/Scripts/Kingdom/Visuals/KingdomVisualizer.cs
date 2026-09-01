@@ -16,6 +16,7 @@ namespace AL.Kingdom.Visuals
         private IRealmService _realmService;
         private IBuildingService _buildingService;
         private ITerritoryService _territoryService;
+        private PrivateKingdomCityPresenter _privateCityPresenter;
         private int _lastVisualHash;
         private bool _hasVisualHash;
 
@@ -26,6 +27,10 @@ namespace AL.Kingdom.Visuals
 
         public void RefreshVisuals()
         {
+            EnsurePrivateCityPresenter().Refresh();
+            return;
+
+#pragma warning disable CS0162
             if (_layoutEngine == null || _realmService == null || _buildingService == null)
             {
                 EnsureServices();
@@ -38,6 +43,21 @@ namespace AL.Kingdom.Visuals
             }
 
             InitializeKingdom();
+#pragma warning restore CS0162
+        }
+
+        private PrivateKingdomCityPresenter EnsurePrivateCityPresenter()
+        {
+            if (_privateCityPresenter == null)
+            {
+                _privateCityPresenter = GetComponent<PrivateKingdomCityPresenter>();
+                if (_privateCityPresenter == null)
+                {
+                    _privateCityPresenter = gameObject.AddComponent<PrivateKingdomCityPresenter>();
+                }
+            }
+
+            return _privateCityPresenter;
         }
 
         private void EnsureServices()
@@ -57,6 +77,10 @@ namespace AL.Kingdom.Visuals
 
         public void InitializeKingdom()
         {
+            EnsurePrivateCityPresenter().Refresh();
+            return;
+
+#pragma warning disable CS0162
             if (_layoutEngine == null || _realmService == null || _buildingService == null)
             {
                 EnsureServices();
@@ -78,6 +102,7 @@ namespace AL.Kingdom.Visuals
             CreateBoardAtmosphere(realmId);
             _lastVisualHash = BuildVisualHash();
             _hasVisualHash = true;
+#pragma warning restore CS0162
         }
 
         private int BuildVisualHash()
@@ -594,6 +619,11 @@ namespace AL.Kingdom.Visuals
                 renderer.renderMode = ParticleSystemRenderMode.Billboard;
                 renderer.sortMode = ParticleSystemSortMode.Distance;
                 renderer.sortingOrder = groundLayer ? -2 : 1;
+                AL.Utilities.RuntimeParticleMaterialFactory.EnsureSoftMaterial(
+                    particles,
+                    groundLayer
+                        ? "MAT_RuntimeKingdomGroundAtmosphere"
+                        : "MAT_RuntimeKingdomAtmosphere");
             }
 
             particles.Play();

@@ -524,7 +524,8 @@ namespace AL.Platform.Android
 
             public void Publish(UnityBridgeReceiverReport report)
             {
-                // Production sender registration belongs to a later #135 slice.
+                // Standalone fallback only. Production wiring registers the real sender
+                // through AndroidBridgeRuntimeHost.ConfigureOutcomeSink.
             }
         }
     }

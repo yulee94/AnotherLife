@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -14,6 +15,8 @@ using AL.Data.Runtime;
 using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using AL.RealmSelection;
+using AL.ChampionMode.Quests;
+using AL.UI.Kingdom;
 
 namespace AL.Services.Local
 {
@@ -28,6 +31,8 @@ namespace AL.Services.Local
         void Replace(string sourcePath, string destinationPath, string backupPath);
         void Delete(string path);
         IEnumerable<string> EnumerateFiles(string directoryPath, string searchPattern);
+        DateTime GetCreationTimeUtc(string path);
+        bool IsReparsePoint(string path);
     }
 
     internal sealed class SaveFileReadResult
@@ -206,6 +211,11 @@ namespace AL.Services.Local
                 ? Directory.EnumerateFiles(directoryPath, searchPattern)
                 : Enumerable.Empty<string>();
         }
+
+        public DateTime GetCreationTimeUtc(string path) => File.GetCreationTimeUtc(path);
+
+        public bool IsReparsePoint(string path) =>
+            (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
     }
 
     public sealed class LocalSaveGameService :
@@ -214,6 +224,9 @@ namespace AL.Services.Local
         ISaveOperationDispositionProvider,
         ISaveGameCandidateStore,
         ILegacyRealmSelectionCandidateStore,
+        ILegacyMvpLoopCandidateStore,
+        ILegacyKingdomTeachingCandidateStore,
+        ILegacyFirstWorldProgressCandidateStore,
         INvs01LegacyCandidateStore,
         IProfileWriteAuthorityProvider
     {
@@ -221,11 +234,16 @@ namespace AL.Services.Local
         private const string BackupFileName = "save.backup.json";
         private const string TempFileName = "save.tmp.json";
         private const string PreviousFileName = "save.previous.json";
+        private const string Nvs01MigrationBackupArchivePrefix =
+            PreviousFileName + ".migration-archive-";
+        private const string Nvs01MigrationBackupArchivePattern =
+            Nvs01MigrationBackupArchivePrefix + "*";
         private const string LegacyPreviousFileName = "save.json.previous";
         private const string StageFiveRecoveryMarkerFileName =
             "save.recovery.stage5";
         private const int MaxQuarantinesPerSource = 3;
         private const int MaxStageFiveQuarantineMarkers = 16;
+        private const int MaxNvs01MigrationBackupArchives = 1;
         private const int Sha256Base64UrlLength = 43;
         private const int TransactionIdBase64UrlLength = 22;
         private const string AuthorityLegacyMigrationCode =
@@ -242,6 +260,15 @@ namespace AL.Services.Local
             "al.save.schema1.realm-selection.v1";
         private const string LegacyNvs01OperationId =
             "al.save.schema1.nvs01.v1";
+        private const string LegacyMvpLoopOperationId =
+            "al.save.schema1.mvp-loop.v1";
+        private const string LegacyKingdomTeachingOperationId =
+            "al.save.schema1.kingdom-teaching.v1";
+        private const string LegacyFirstWorldProgressOperationId =
+            "al.save.schema1.first-world-progress.v1";
+#if UNITY_INCLUDE_TESTS
+        [ThreadStatic] internal static Action BeforeDeleteArtifactsForTests;
+#endif
 
         private static readonly ProfileWriteAuthoritySnapshot
             MigrationRequiredPrimary =
@@ -723,6 +750,16 @@ namespace AL.Services.Local
 
         public void Save()
         {
+            PersistCurrentSave(requireManualActivation: true);
+        }
+
+        internal void PersistLifecycleCheckpoint()
+        {
+            PersistCurrentSave(requireManualActivation: false);
+        }
+
+        private void PersistCurrentSave(bool requireManualActivation)
+        {
             if (!_profileWritable &&
                 LastSaveStatus == SaveOperationStatus.CommitUncertain)
             {
@@ -731,7 +768,8 @@ namespace AL.Services.Local
                 return;
             }
 
-            if (!ProfileMutationContainment.CanInvokeManualSave(this))
+            if (requireManualActivation &&
+                !ProfileMutationContainment.CanInvokeManualSave(this))
             {
                 const string containedMessage =
                     "AL-SAVE-MANUAL-WRITE-CONTAINED: Arbitrary profile persistence is disabled until the profile-bound migration train is explicitly approved and activated.";
@@ -976,6 +1014,73 @@ namespace AL.Services.Local
         }
 
         SaveCandidateCommitResult
+            ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
+                MvpLoopCommitRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyCandidateRejected("AL-MVP-LOOP-TRANSACTION-INVALID");
+            }
+
+            if (!TryEnterLegacyCandidateCoordinator(LegacyMvpLoopOperationId))
+            {
+                return LegacyCandidateRejected("AL-MVP-LOOP-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyPrimaryProfile(out SaveGameData published))
+                {
+                    return LegacyCandidateRejected("AL-MVP-LOOP-PROFILE-READ-ONLY");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits.LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-MVP-LOOP-AUTHORITY-CONFLICT");
+                    }
+
+                    MvpLoopPrepareDisposition disposition =
+                        MvpLoopSaveCodec.PrepareCandidate(
+                            candidate,
+                            request,
+                            out string prepareMessage);
+                    if (candidate.SelectedRealm != expectedRealm)
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-MVP-LOOP-AUTHORITY-CONFLICT");
+                    }
+
+                    switch (disposition)
+                    {
+                        case MvpLoopPrepareDisposition.Duplicate:
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        case MvpLoopPrepareDisposition.Prepared:
+                            return SaveCandidateMutationPreparation.Prepared();
+                        default:
+                            return SaveCandidateMutationPreparation.Rejected(
+                                string.IsNullOrWhiteSpace(prepareMessage)
+                                    ? "AL-MVP-LOOP-REQUEST-INVALID"
+                                    : prepareMessage);
+                    }
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
+        SaveCandidateCommitResult
             INvs01LegacyCandidateStore.TryCommitNvs01LegacyCandidate(
                 Nvs01MutationPlan plan,
                 Nvs01VerifiedCatalog verifiedCatalog)
@@ -1066,13 +1171,205 @@ namespace AL.Services.Local
             }
         }
 
+        SaveCandidateCommitResult
+            ILegacyKingdomTeachingCandidateStore
+                .TryCommitLegacyKingdomTeaching(
+                    KingdomTeachingCommitRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-TRANSACTION-INVALID");
+            }
+
+            KingdomTeachingCatalog teachingCatalog;
+            try
+            {
+                teachingCatalog = KingdomTeachingCatalog.LoadCanonical();
+            }
+            catch (Exception)
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-INVALID");
+            }
+
+            if (request.ExpectedProgress < 0 ||
+                request.ExpectedProgress >= teachingCatalog.Steps.Count ||
+                request.StepCount != teachingCatalog.Steps.Count ||
+                !string.Equals(
+                    request.QuestId,
+                    teachingCatalog.QuestId,
+                    StringComparison.Ordinal))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
+            }
+
+            KingdomTeachingStep expectedStep =
+                teachingCatalog.Steps[request.ExpectedProgress];
+            if (!string.Equals(
+                    request.StepId,
+                    expectedStep.Id,
+                    StringComparison.Ordinal) ||
+                !string.Equals(
+                    request.CompletionEvent,
+                    expectedStep.CompletionEvent,
+                    StringComparison.Ordinal))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-CATALOG-CONFLICT");
+            }
+
+            bool requiresTownHall = string.Equals(
+                expectedStep.Interaction,
+                "construct_town_hall",
+                StringComparison.Ordinal);
+
+            if (!TryEnterLegacyCandidateCoordinator(
+                    LegacyKingdomTeachingOperationId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-KINGDOM-TEACHING-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyPrimaryProfile(out SaveGameData published) ||
+                    published.SelectedRealm != request.ExpectedRealm ||
+                    !ProofOfWorthLordship.IsGranted(published))
+                {
+                    return LegacyCandidateRejected(
+                        "AL-KINGDOM-TEACHING-PROFILE-READ-ONLY");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits
+                                .LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId) ||
+                        !ProofOfWorthLordship.IsGranted(candidate))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-KINGDOM-TEACHING-AUTHORITY-CONFLICT");
+                    }
+
+                    KingdomTeachingPrepareDisposition disposition =
+                        KingdomTeachingSaveCodec.PrepareCandidate(
+                            candidate,
+                            request,
+                            requiresTownHall,
+                            out string prepareMessage);
+                    switch (disposition)
+                    {
+                        case KingdomTeachingPrepareDisposition.Duplicate:
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        case KingdomTeachingPrepareDisposition.Prepared:
+                            return SaveCandidateMutationPreparation.Prepared();
+                        default:
+                            return SaveCandidateMutationPreparation.Rejected(
+                                string.IsNullOrWhiteSpace(prepareMessage)
+                                    ? "AL-KINGDOM-TEACHING-REQUEST-INVALID"
+                                    : prepareMessage);
+                    }
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
+        SaveCandidateCommitResult
+            ILegacyFirstWorldProgressCandidateStore
+                .TryCommitLegacyFirstWorldProgress(
+                    FirstWorldProgressCommitRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.TransactionId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-FIRST-WORLD-TRANSACTION-INVALID");
+            }
+
+            if (!TryEnterLegacyCandidateCoordinator(
+                    LegacyFirstWorldProgressOperationId))
+            {
+                return LegacyCandidateRejected(
+                    "AL-FIRST-WORLD-TRANSACTION-BUSY");
+            }
+
+            try
+            {
+                if (!TryGetExactLegacyPrimaryProfile(
+                        out SaveGameData published) ||
+                    published.SelectedRealm == RealmId.None ||
+                    request.Expected == null ||
+                    published.SelectedRealm != request.Expected.Realm)
+                {
+                    return LegacyCandidateRejected(
+                        "AL-FIRST-WORLD-PROFILE-READ-ONLY");
+                }
+
+                RealmId expectedRealm = published.SelectedRealm;
+                return TryCommitLegacyCandidateCore(candidate =>
+                {
+                    if (candidate == null ||
+                        candidate.SelectedRealm != expectedRealm ||
+                        candidate.SaveSchemaVersion !=
+                            SaveAuthorityTechnicalLimits.LegacySaveSchemaVersion ||
+                        candidate.ProfileInitializationVersion !=
+                            SaveAuthorityTechnicalLimits
+                                .LegacyProfileInitializationVersion ||
+                        !string.IsNullOrEmpty(candidate.ProfileId))
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-FIRST-WORLD-AUTHORITY-CONFLICT");
+                    }
+
+                    FirstWorldProgressPrepareDisposition disposition =
+                        FirstWorldProgressSaveCodec.PrepareCandidate(
+                            candidate,
+                            request,
+                            out _,
+                            out string prepareMessage);
+                    if (candidate.SelectedRealm != expectedRealm)
+                    {
+                        return SaveCandidateMutationPreparation.Rejected(
+                            "AL-FIRST-WORLD-AUTHORITY-CONFLICT");
+                    }
+
+                    switch (disposition)
+                    {
+                        case FirstWorldProgressPrepareDisposition.Duplicate:
+                            return SaveCandidateMutationPreparation.Duplicate();
+                        case FirstWorldProgressPrepareDisposition.Prepared:
+                            return SaveCandidateMutationPreparation.Prepared();
+                        default:
+                            return SaveCandidateMutationPreparation.Rejected(
+                                string.IsNullOrWhiteSpace(prepareMessage)
+                                    ? "AL-FIRST-WORLD-REQUEST-INVALID"
+                                    : prepareMessage);
+                    }
+                });
+            }
+            finally
+            {
+                ExitLegacyCandidateCoordinator();
+            }
+        }
+
         SaveCandidateCommitResult ISaveGameCandidateStore.TryCommitCandidate(
             Func<SaveGameData, SaveCandidateMutationPreparation> prepareCandidate)
         {
             return new SaveCandidateCommitResult(
                 SaveCandidateCommitOutcome.ReadOnly,
                 _currentSave,
-                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only the typed realm-selection and NVS-01 adapters.");
+                "AL-SAVE-GENERIC-CANDIDATE-CONTAINED: Schema-v1 persistence accepts only approved typed adapters.");
         }
 
         private SaveCandidateCommitResult TryCommitLegacyCandidateCore(
@@ -1394,6 +1691,18 @@ namespace AL.Services.Local
                 !string.Equals(
                     operationId,
                     LegacyNvs01OperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyMvpLoopOperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyKingdomTeachingOperationId,
+                    StringComparison.Ordinal) &&
+                !string.Equals(
+                    operationId,
+                    LegacyFirstWorldProgressOperationId,
                     StringComparison.Ordinal))
             {
                 return false;
@@ -1735,6 +2044,25 @@ namespace AL.Services.Local
             SaveCandidateInventoryEntry backup = Find(inventory, SaveCandidateSourceGeneration.Backup);
             SaveCandidateInventoryEntry previous = Find(inventory, SaveCandidateSourceGeneration.Previous);
 
+            if (!TryVerifyNvs01MigrationBackupArchivesTwice(
+                    out string migrationArchiveDiagnostic))
+            {
+                _currentSave = null;
+                PublishDisposition(
+                    inventory,
+                    null,
+                    migrationArchiveDiagnostic,
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    SaveLoadStatus.RecoveryRequired,
+                    migrationArchiveDiagnostic +
+                    ": Migration backup archive evidence was malformed, ambiguous, unreadable, unbounded, reparse-backed, or hash-inconsistent; every byte was preserved read-only.",
+                    false);
+                return;
+            }
+
             if (primary.ReadResult.Disposition == SaveFileReadDisposition.IoFailure ||
                 primary.ReadResult.Disposition == SaveFileReadDisposition.ChangedDuringRead)
             {
@@ -1782,6 +2110,7 @@ namespace AL.Services.Local
                 if (ReadCanonicalPath(StageFiveRecoveryMarkerPath).Disposition !=
                         SaveFileReadDisposition.Missing ||
                     HasSaveEvidence(LegacyPreviousPath) ||
+                    HasNvs01MigrationBackupArchiveEvidence() ||
                     !quarantineInventoryReadable ||
                     quarantineEvidenceConflict ||
                     orphanedStageFiveMarkers.Count != 0 ||
@@ -1797,7 +2126,7 @@ namespace AL.Services.Local
                         false);
                     SetLoadStatus(
                         SaveLoadStatus.RecoveryRequired,
-                        "AL-SAVE-ORPHANED-RECOVERY-EVIDENCE: A legacy previous file, recovery marker, quarantine, or transaction archive survived without canonical generations; it was preserved for explicit recovery.",
+                        "AL-SAVE-ORPHANED-RECOVERY-EVIDENCE: A legacy previous file, migration archive, recovery marker, quarantine, or transaction archive survived without canonical generations; it was preserved for explicit recovery.",
                         false);
                     return;
                 }
@@ -1843,6 +2172,13 @@ namespace AL.Services.Local
                     SaveLoadStatus.LoadedForwardSchemaReadOnly,
                     "AL-SAVE-FORWARD-SCHEMA-READ-ONLY: A newer-schema generation remains authoritative and was preserved without downgrade.",
                     false);
+                return;
+            }
+
+            if (selected.Outcome ==
+                SaveSemanticCandidateOutcome.RepairableWithDataChange)
+            {
+                ActivateExactNvs01V003Migration(inventory, selected);
                 return;
             }
 
@@ -2036,10 +2372,15 @@ namespace AL.Services.Local
                 return;
             }
 
+            bool isPreSchemaMigration =
+                selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
+                IsPreSchemaMetadata(selectedSave) &&
+                HasRecoverableKingdomState(selectedSave);
+
             bool runtimeUsable =
                 selected.SourceGeneration == SaveCandidateSourceGeneration.Primary &&
-                selected.IsWritable &&
-                IsRuntimeRoundTrippable(selected);
+                ((selected.IsWritable && IsRuntimeRoundTrippable(selected)) ||
+                 isPreSchemaMigration);
             bool writable = runtimeUsable &&
                 (!HasUnresolvedAuxiliaryEvidence(inventory) ||
                  hasCommittedBackupRecoveryWitness);
@@ -2047,6 +2388,83 @@ namespace AL.Services.Local
 
             if (runtimeUsable)
             {
+                if (isPreSchemaMigration)
+                {
+                    if (TryMigratePreSchemaPrimary(
+                            selected,
+                            selectedSave,
+                            out SaveGameData migratedSave,
+                            out string migrateMessage))
+                    {
+                        _currentSave = migratedSave;
+                        _readOnlyCandidate = null;
+                        _profileWritable = true;
+                        _committedRecoveryWitnessBytes = null;
+                        _committedInvalidPrimaryWitnessBytes = null;
+                        _committedInvalidPrimaryQuarantinePath = null;
+                        _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                        _committedInvalidPrimaryRecoveryMarkerPath = null;
+                        PublishDisposition(
+                            inventory,
+                            selected,
+                            selection.ReasonCode,
+                            true,
+                            true,
+                            true);
+                        ObservePrimaryAuthority(migratedSave);
+                        SetLoadStatus(
+                            SaveLoadStatus.LoadedPrimary,
+                            migrateMessage,
+                            false);
+                        return;
+                    }
+
+                    if (TryCreateReplacementAfterUnmigratablePrimary(
+                            out SaveGameData replacementSave,
+                            out string replacementMessage))
+                    {
+                        _currentSave = replacementSave;
+                        _readOnlyCandidate = null;
+                        _profileWritable = true;
+                        _committedRecoveryWitnessBytes = null;
+                        _committedInvalidPrimaryWitnessBytes = null;
+                        _committedInvalidPrimaryQuarantinePath = null;
+                        _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                        _committedInvalidPrimaryRecoveryMarkerPath = null;
+                        PublishDisposition(
+                            inventory,
+                            null,
+                            "SAVE_SELECT_UNMIGRATABLE_PRIMARY_CREATE_NEW",
+                            true,
+                            true,
+                            true,
+                            SaveCandidateSourceGeneration.Primary);
+                        SetLoadStatus(
+                            SaveLoadStatus.CreatedNewAfterUnrecoverableCorruption,
+                            replacementMessage,
+                            false);
+                        return;
+                    }
+
+                    _currentSave = null;
+                    _readOnlyCandidate = selectedSave;
+                    _profileWritable = false;
+                    PublishDisposition(
+                        inventory,
+                        selected,
+                        selection.ReasonCode,
+                        false,
+                        false,
+                        false);
+                    SetLoadStatus(
+                        SaveLoadStatus.RecoveryFailed,
+                        string.IsNullOrWhiteSpace(replacementMessage)
+                            ? migrateMessage
+                            : replacementMessage,
+                        true);
+                    return;
+                }
+
                 _currentSave = selectedSave;
                 _readOnlyCandidate = null;
                 _committedRecoveryWitnessBytes =
@@ -2118,6 +2536,137 @@ namespace AL.Services.Local
             SetLoadStatus(status, message, false);
         }
 
+        private void ActivateExactNvs01V003Migration(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveSemanticCandidate selected)
+        {
+            SaveGameData retained = null;
+            Nvs01ProgressData migratedProgress = null;
+            Nvs01RuntimeDiagnostic migrationDiagnostic = null;
+            SaveCanonicalLedger migrationBaseline = null;
+            // Materialize the exact retained generation before rejecting
+            // unresolved auxiliary evidence so diagnostics can expose the
+            // same read-only bytes without granting runtime/write authority.
+            if (selected?.SourceGeneration !=
+                    SaveCandidateSourceGeneration.Primary ||
+                !IsExactNvs01V003MigrationCandidate(selected) ||
+                !TryDeserializeSelectedCandidate(selected, out retained) ||
+                HasUnresolvedAuxiliaryEvidence(inventory) ||
+                !Nvs01ProgressCodec.TryMigrateExactV003(
+                    retained.Nvs01Progress,
+                    out migratedProgress,
+                    out migrationDiagnostic) ||
+                !TryCaptureExactNvs01MigrationBaseline(
+                    inventory,
+                    selected,
+                    out migrationBaseline))
+            {
+                _currentSave = null;
+                _readOnlyCandidate = retained;
+                _profileWritable = false;
+                PublishDisposition(
+                    inventory,
+                    selected,
+                    "SAVE_SELECT_REPAIRABLE_PRIMARY_REJECTED",
+                    false,
+                    false,
+                    false);
+                SetLoadStatus(
+                    SaveLoadStatus.LoadedPrimaryDegraded,
+                    "AL-SAVE-NVS01-MIGRATION-REJECTED: The retained packet identity or progress was not the one exact reviewed v003 migration input; original evidence remains read-only. " +
+                    (migrationDiagnostic?.Code ?? string.Empty),
+                    false);
+                return;
+            }
+
+            SaveGameData candidate = CloneSave(retained);
+            candidate.Nvs01Progress = migratedProgress;
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                null,
+                null,
+                migrationBaseline,
+                preserveCandidateMetadata: true,
+                out SaveGameData persistedSave,
+                out SaveOperationDisposition disposition,
+                out string message);
+            LastSaveDisposition = disposition;
+
+            if (status == SaveOperationStatus.SavedPrimary &&
+                persistedSave != null)
+            {
+                _currentSave = persistedSave;
+                ObservePrimaryAuthority(persistedSave);
+                _readOnlyCandidate = null;
+                _profileWritable = true;
+                _committedRecoveryWitnessBytes = null;
+                _committedInvalidPrimaryWitnessBytes = null;
+                _committedInvalidPrimaryQuarantinePath = null;
+                _committedInvalidPrimaryRecoveryMarkerBytes = null;
+                _committedInvalidPrimaryRecoveryMarkerPath = null;
+
+                IReadOnlyList<SaveCandidateInventoryEntry> migratedInventory =
+                    BuildCandidateInventory();
+                SaveSemanticCandidate migratedPrimary = Find(
+                    migratedInventory,
+                    SaveCandidateSourceGeneration.Primary)
+                    .SemanticCandidate;
+                PublishDisposition(
+                    migratedInventory,
+                    migratedPrimary,
+                    "SAVE_SELECT_EXACT_NVS01_V003_MIGRATED",
+                    true,
+                    true,
+                    true);
+                SetLoadStatus(
+                    SaveLoadStatus.LoadedPrimary,
+                    "AL-SAVE-NVS01-V003-MIGRATED: Exact retained OMEN_1 v003 progress was atomically rebound to v004 without replaying an event or allocating an identity.",
+                    false);
+                return;
+            }
+
+            _currentSave = null;
+            _readOnlyCandidate = retained;
+            _profileWritable = false;
+            PublishDisposition(
+                inventory,
+                selected,
+                "SAVE_SELECT_REPAIRABLE_PRIMARY_MIGRATION_FAILED",
+                false,
+                false,
+                disposition?.MayHaveMutated ?? false);
+            SetLoadStatus(
+                SaveLoadStatus.RecoveryFailed,
+                "AL-SAVE-NVS01-MIGRATION-FAILED: The atomic v003-to-v004 rebind did not reach a twice-verified commit target; old generation and recovery evidence were preserved. " +
+                message,
+                status == SaveOperationStatus.CommitUncertain);
+        }
+
+        private static bool IsExactNvs01V003MigrationCandidate(
+            SaveSemanticCandidate candidate)
+        {
+            if (candidate == null ||
+                candidate.Outcome !=
+                    SaveSemanticCandidateOutcome.RepairableWithDataChange ||
+                !candidate.HasRetainedRawBytes ||
+                candidate.DisabledDomains != SaveSemanticDomain.None ||
+                candidate.NormalizedDomains != SaveSemanticDomain.None ||
+                candidate.PreservedUnknownDomains != SaveSemanticDomain.None ||
+                candidate.Diagnostics.Count != 1)
+            {
+                return false;
+            }
+
+            SaveSemanticDiagnostic diagnostic = candidate.Diagnostics[0];
+            return diagnostic != null &&
+                   diagnostic.Code ==
+                       "SAVE_NVS01_PACKET_IDENTITY_MIGRATION_REQUIRED" &&
+                   diagnostic.Path == "$.Nvs01Progress" &&
+                   diagnostic.Domain == SaveSemanticDomain.Narrative &&
+                   diagnostic.Severity ==
+                       SaveSemanticDiagnosticSeverity.Information;
+        }
+
         public bool HasSave()
         {
             if (HasSaveEvidence(SavePath) ||
@@ -2125,7 +2674,8 @@ namespace AL.Services.Local
                 HasSaveEvidence(PreviousPath) ||
                 HasSaveEvidence(LegacyPreviousPath) ||
                 HasSaveEvidence(TempPath) ||
-                HasSaveEvidence(StageFiveRecoveryMarkerPath))
+                HasSaveEvidence(StageFiveRecoveryMarkerPath) ||
+                HasNvs01MigrationBackupArchiveEvidence())
             {
                 return true;
             }
@@ -2153,6 +2703,7 @@ namespace AL.Services.Local
                 return;
             }
 
+            bool approvalResetOperation = MvpApprovalSlotRuntime.IsDeleteAuthorized(this);
             _profileDeleted = false;
             var deletionTargets = new List<string>
             {
@@ -2166,11 +2717,17 @@ namespace AL.Services.Local
 
             deletionTargets.AddRange(EnumerateQuarantines(SaveFileName));
             deletionTargets.AddRange(EnumerateQuarantines(BackupFileName));
+            deletionTargets.AddRange(EnumerateNvs01MigrationBackupArchives());
 
             var failures = new List<string>();
+#if UNITY_INCLUDE_TESTS
+            Action beforeDeleteArtifacts = BeforeDeleteArtifactsForTests;
+            BeforeDeleteArtifactsForTests = null;
+            beforeDeleteArtifacts?.Invoke();
+#endif
             foreach (string target in deletionTargets.Distinct().ToList())
             {
-                if (!TryDelete(target))
+                if (!TryDelete(target, approvalResetOperation))
                 {
                     failures.Add(target);
                 }
@@ -2246,24 +2803,154 @@ namespace AL.Services.Local
             public SaveTransactionTrace(
                 byte[] baselinePrimaryBytes,
                 SaveFileReadResult baselineBackup,
-                byte[] candidateBytes)
+                byte[] candidateBytes,
+                bool baselinePrimaryIsMigratable,
+                string migrationBackupArchivePath)
             {
                 BaselinePrimaryBytes = baselinePrimaryBytes;
                 BaselineBackup = baselineBackup;
                 CandidateBytes = candidateBytes;
+                BaselinePrimaryIsMigratable =
+                    baselinePrimaryIsMigratable;
+                MigrationBackupArchivePath =
+                    migrationBackupArchivePath ?? string.Empty;
             }
 
             public byte[] BaselinePrimaryBytes { get; }
             public SaveFileReadResult BaselineBackup { get; }
             public byte[] CandidateBytes { get; }
+            public bool BaselinePrimaryIsMigratable { get; }
+            public string MigrationBackupArchivePath { get; }
             public bool RollbackAttempted { get; set; }
             public bool RollbackBytesVerified { get; set; }
+        }
+
+        private bool TryMigratePreSchemaPrimary(
+            SaveSemanticCandidate selected,
+            SaveGameData selectedSave,
+            out SaveGameData migratedSave,
+            out string message)
+        {
+            migratedSave = null;
+            message = string.Empty;
+
+            SaveGameData candidate = CloneSave(selectedSave);
+            candidate.SaveFormatId = SaveGameData.CurrentSaveFormatId;
+            candidate.SaveSchemaVersion = SaveGameData.CurrentSaveSchemaVersion;
+            candidate.ProfileInitializationVersion =
+                SaveGameData.CurrentProfileInitializationVersion;
+            ApplyApprovedNeutralNormalization(candidate, selected);
+
+            SaveOperationStatus status = PersistCandidate(
+                candidate,
+                null,
+                null,
+                out SaveGameData persistedSave,
+                out SaveOperationDisposition disposition,
+                out string persistMessage);
+            LastSaveDisposition = disposition;
+
+            if (status != SaveOperationStatus.SavedPrimary ||
+                persistedSave == null)
+            {
+                message = persistMessage ??
+                    "AL-SAVE-PRESCHEMA-MIGRATION-FAILED: A pre-schema primary could not be stamped and durably persisted; original evidence was preserved read-only.";
+                return false;
+            }
+
+            migratedSave = persistedSave;
+            message =
+                "AL-SAVE-PRESCHEMA-MIGRATED: A legacy pre-schema primary was stamped with current save metadata and durably persisted; original evidence was preserved.";
+            return true;
+        }
+
+        private bool TryCreateReplacementAfterUnmigratablePrimary(
+            out SaveGameData createdSave,
+            out string message)
+        {
+            createdSave = null;
+            message = string.Empty;
+
+            if (HasSaveEvidence(BackupPath) ||
+                HasSaveEvidence(PreviousPath) ||
+                HasSaveEvidence(LegacyPreviousPath))
+            {
+                message =
+                    "AL-SAVE-PRESCHEMA-MIGRATION-FAILED: A pre-schema primary could not be stamped; remaining generations were preserved for explicit recovery.";
+                return false;
+            }
+
+            string quarantineError;
+            string tempQuarantineError = string.Empty;
+            if (!TryQuarantineInvalidFile(SavePath, out quarantineError) ||
+                !TryQuarantineInvalidFile(TempPath, out tempQuarantineError))
+            {
+                message =
+                    "AL-SAVE-PRESCHEMA-QUARANTINE-FAILED: Unmigratable primary could not be quarantined before replacement. " +
+                    quarantineError +
+                    " " +
+                    tempQuarantineError;
+                return false;
+            }
+
+            if (!AllCanonicalPathsMissing(includeTemp: true))
+            {
+                message =
+                    "AL-SAVE-PRESCHEMA-MIGRATION-FAILED: Unmigratable primary was preserved because replacement would not be exclusive.";
+                return false;
+            }
+
+            SaveGameData newSave = CreateDefaultSave(RealmId.None);
+            SaveGameData firstGenerationCandidate = CloneSave(newSave);
+            bool coreSucceeded = TryCreateFirstGenerationCandidate(
+                firstGenerationCandidate,
+                out SaveGameData persistedNewSave,
+                out string createMessage,
+                out bool diskChanged);
+            SaveOperationStatus reconciledStatus =
+                ReconcileFirstGenerationAttempt(
+                    firstGenerationCandidate,
+                    coreSucceeded,
+                    diskChanged,
+                    ref persistedNewSave,
+                    out _,
+                    ref createMessage);
+            if (reconciledStatus != SaveOperationStatus.SavedPrimary ||
+                persistedNewSave == null)
+            {
+                message = createMessage;
+                return false;
+            }
+
+            createdSave = persistedNewSave;
+            message =
+                "AL-SAVE-CREATED-NEW-AFTER-UNRECOVERABLE: A pre-schema primary could not be stamped and persisted, so the original bytes were quarantined and a current-schema profile was created.";
+            return true;
         }
 
         private SaveOperationStatus PersistCandidate(
             SaveGameData candidate,
             byte[] requiredRecoveryWitnessBytes,
             SaveAuthorityBaseline requiredLegacyBaseline,
+            out SaveGameData persistedSave,
+            out SaveOperationDisposition disposition,
+            out string message) =>
+            PersistCandidate(
+                candidate,
+                requiredRecoveryWitnessBytes,
+                requiredLegacyBaseline,
+                null,
+                preserveCandidateMetadata: false,
+                out persistedSave,
+                out disposition,
+                out message);
+
+        private SaveOperationStatus PersistCandidate(
+            SaveGameData candidate,
+            byte[] requiredRecoveryWitnessBytes,
+            SaveAuthorityBaseline requiredLegacyBaseline,
+            SaveCanonicalLedger requiredIdentityMigrationBaseline,
+            bool preserveCandidateMetadata,
             out SaveGameData persistedSave,
             out SaveOperationDisposition disposition,
             out string message)
@@ -2276,9 +2963,37 @@ namespace AL.Services.Local
             SaveAuthorityBaseline baseline;
             try
             {
-                baseline = new SaveAuthorityBaseline(
-                    ReadCanonicalPath(SavePath),
-                    ReadCanonicalPath(BackupPath));
+                if (requiredIdentityMigrationBaseline == null)
+                {
+                    baseline = new SaveAuthorityBaseline(
+                        ReadCanonicalPath(SavePath),
+                        ReadCanonicalPath(BackupPath));
+                }
+                else
+                {
+                    SaveCanonicalLedger migrationLedger =
+                        CaptureCanonicalLedger();
+                    if (!MatchesExactMigrationBaseline(
+                            migrationLedger,
+                            requiredIdentityMigrationBaseline))
+                    {
+                        message =
+                            "AL-SAVE-NVS01-MIGRATION-LEDGER-CHANGED: Primary, backup, temp, or previous authority changed before the migration transaction; no write was attempted.";
+                        disposition = CreateSaveDisposition(
+                            SaveOperationStatus.CommitUncertain,
+                            false,
+                            false,
+                            false,
+                            false,
+                            false,
+                            message);
+                        return SaveOperationStatus.CommitUncertain;
+                    }
+
+                    baseline = new SaveAuthorityBaseline(
+                        migrationLedger.Primary,
+                        migrationLedger.Backup);
+                }
             }
             catch (Exception ex)
             {
@@ -2344,8 +3059,12 @@ namespace AL.Services.Local
 
             try
             {
-                ApplyNeutralPersistenceDefaults(candidate);
-                candidate.LastSavedTimestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                if (!preserveCandidateMetadata)
+                {
+                    ApplyNeutralPersistenceDefaults(candidate);
+                    candidate.LastSavedTimestamp =
+                        DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+                }
                 if (!TrySerializeBounded(candidate, out string json, out message))
                 {
                     return ReconcileSaveAttempt(
@@ -2363,6 +3082,7 @@ namespace AL.Services.Local
 
                 byte[] candidateBytes = StrictUtf8.GetBytes(json);
                 bool priorPrimaryValid =
+                    requiredIdentityMigrationBaseline != null ||
                     baseline.Primary.Disposition == SaveFileReadDisposition.Read &&
                     TryDeserializeValidSaveBytes(
                         baseline.Primary.Bytes,
@@ -2371,10 +3091,19 @@ namespace AL.Services.Local
                 byte[] requiredBackupBytes = priorPrimaryValid
                     ? baseline.Primary.Bytes
                     : candidateBytes;
+                string migrationBackupArchivePath =
+                    requiredIdentityMigrationBaseline != null &&
+                    baseline.Backup.Disposition ==
+                        SaveFileReadDisposition.Read
+                        ? CreateNvs01MigrationBackupArchivePath(
+                            baseline.Backup.Bytes)
+                        : string.Empty;
                 var trace = new SaveTransactionTrace(
                     priorPrimaryValid ? baseline.Primary.Bytes : null,
                     baseline.Backup,
-                    candidateBytes);
+                    candidateBytes,
+                    requiredIdentityMigrationBaseline != null,
+                    migrationBackupArchivePath);
 
                 bool coreSucceeded = TryPersistCandidateCore(
                     json,
@@ -2383,6 +3112,7 @@ namespace AL.Services.Local
                     priorPrimaryValid,
                     requiredRecoveryWitnessBytes,
                     requiredLegacyBaseline,
+                    requiredIdentityMigrationBaseline,
                     trace,
                     out message,
                     out bool coreMayHaveMutated);
@@ -2396,6 +3126,7 @@ namespace AL.Services.Local
                     mayHaveMutated,
                     candidate,
                     trace,
+                    requiredIdentityMigrationBaseline != null,
                     ref persistedSave,
                     out disposition,
                     ref message);
@@ -2425,6 +3156,7 @@ namespace AL.Services.Local
             bool primaryValid,
             byte[] requiredRecoveryWitnessBytes,
             SaveAuthorityBaseline requiredLegacyBaseline,
+            SaveCanonicalLedger requiredIdentityMigrationBaseline,
             SaveTransactionTrace trace,
             out string message,
             out bool mayHaveMutated)
@@ -2457,27 +3189,51 @@ namespace AL.Services.Local
                     return false;
                 }
 
+                if (requiredIdentityMigrationBaseline != null &&
+                    !MatchesExactMigrationBaseline(
+                        CaptureCanonicalLedger(),
+                        requiredIdentityMigrationBaseline))
+                {
+                    message =
+                        "AL-SAVE-NVS01-MIGRATION-LEDGER-CHANGED: Complete four-generation authority changed before candidate staging; no filesystem mutation was attempted.";
+                    return false;
+                }
+
                 _fileOperations.CreateDirectory(PersistencePath);
 
-                bool previousExisted =
-                    _fileOperations.FileExists(PreviousPath);
-                if (previousExisted && !TryDelete(PreviousPath))
+                if (requiredIdentityMigrationBaseline == null)
                 {
-                    mayHaveMutated = true;
-                    message = "AL-SAVE-PREVIOUS-CLEANUP-FAILED: The stale previous generation could not be removed before candidate staging.";
-                    return false;
-                }
+                    bool previousExisted =
+                        _fileOperations.FileExists(PreviousPath);
+                    if (previousExisted && !TryDelete(PreviousPath))
+                    {
+                        mayHaveMutated = true;
+                        message = "AL-SAVE-PREVIOUS-CLEANUP-FAILED: The stale previous generation could not be removed before candidate staging.";
+                        return false;
+                    }
 
-                mayHaveMutated |= previousExisted;
-                bool tempExisted = _fileOperations.FileExists(TempPath);
-                if (tempExisted && !TryDelete(TempPath))
-                {
+                    mayHaveMutated |= previousExisted;
+                    bool tempExisted = _fileOperations.FileExists(TempPath);
+                    if (tempExisted && !TryDelete(TempPath))
+                    {
+                        mayHaveMutated |= tempExisted;
+                        message = "AL-SAVE-TEMP-CLEANUP-FAILED: Existing temporary save could not be removed before preparing a new candidate.";
+                        return false;
+                    }
+
                     mayHaveMutated |= tempExisted;
-                    message = "AL-SAVE-TEMP-CLEANUP-FAILED: Existing temporary save could not be removed before preparing a new candidate.";
+                }
+
+                if (requiredIdentityMigrationBaseline != null &&
+                    !MatchesExactMigrationBaseline(
+                        CaptureCanonicalLedger(),
+                        requiredIdentityMigrationBaseline))
+                {
+                    message =
+                        "AL-SAVE-NVS01-MIGRATION-AUXILIARY-APPEARED: Temp or previous authority appeared immediately before exclusive staging; it was preserved without mutation.";
                     return false;
                 }
 
-                mayHaveMutated |= tempExisted;
                 SaveFileWriteResult writeResult =
                     _fileOperations.WriteAllTextDurable(TempPath, json);
                 mayHaveMutated |= writeResult.DiskChanged;
@@ -2495,6 +3251,17 @@ namespace AL.Services.Local
                     !BytesEqual(stagedBytes, candidateBytes))
                 {
                     message = $"AL-SAVE-TEMP-INVALID: Temporary save validation or exact-byte verification failed; existing authority was retained. {tempValidationError}";
+                    return false;
+                }
+
+                if (requiredIdentityMigrationBaseline != null &&
+                    !MatchesExactMigrationStagedLedger(
+                        CaptureCanonicalLedger(),
+                        requiredIdentityMigrationBaseline,
+                        candidateBytes))
+                {
+                    message =
+                        "AL-SAVE-NVS01-MIGRATION-STAGED-LEDGER-CHANGED: Complete authority changed after exclusive staging; every observed generation was preserved.";
                     return false;
                 }
 
@@ -2523,7 +3290,10 @@ namespace AL.Services.Local
                 mayHaveMutated = true;
                 if (primaryValid)
                 {
-                    if (!TryInstallWithAtomicReplace(trace, out message))
+                    bool installed = requiredIdentityMigrationBaseline != null
+                        ? TryInstallWithMoveFallback(trace, out message)
+                        : TryInstallWithAtomicReplace(trace, out message);
+                    if (!installed)
                     {
                         return false;
                     }
@@ -2555,20 +3325,39 @@ namespace AL.Services.Local
                     ? baselinePrimary.Bytes
                     : candidateBytes;
                 string finalBackupError = "Backup file does not exist.";
-                if (!_fileOperations.FileExists(BackupPath) ||
-                    !TryReadValidSaveBytes(
-                        BackupPath,
-                        out byte[] finalBackupBytes,
-                        out _,
-                        out finalBackupError) ||
-                    !BytesEqual(finalBackupBytes, requiredBackupBytes))
+                SaveFileReadResult finalBackup = ReadCanonicalPath(BackupPath);
+                bool finalBackupValid =
+                    requiredIdentityMigrationBaseline != null
+                        ? MatchesExactBytes(
+                            finalBackup,
+                            requiredIdentityMigrationBaseline.Primary.Bytes)
+                        : finalBackup.Disposition ==
+                              SaveFileReadDisposition.Read &&
+                          TryDeserializeValidSaveBytes(
+                              finalBackup.Bytes,
+                              out _,
+                              out finalBackupError) &&
+                          BytesEqual(
+                              finalBackup.Bytes,
+                              requiredBackupBytes);
+                if (!finalBackupValid)
                 {
                     message = $"AL-SAVE-FINAL-BACKUP-INVALID: Backup failed exact required-generation verification. {finalBackupError}";
                     return false;
                 }
 
-                bool tempClean = TryDelete(TempPath);
-                bool previousClean = TryDelete(PreviousPath);
+                bool migrationGenerationsFinalized =
+                    requiredIdentityMigrationBaseline == null ||
+                    TryFinalizeExactNvs01MigrationGenerations(
+                        trace,
+                        candidateBytes);
+                bool tempClean = requiredIdentityMigrationBaseline != null
+                    ? migrationGenerationsFinalized
+                    : TryDelete(TempPath);
+                bool previousClean =
+                    requiredIdentityMigrationBaseline != null
+                        ? migrationGenerationsFinalized
+                        : TryDelete(PreviousPath);
                 bool recoveryMarkerArchived =
                     TryArchiveCommittedInvalidPrimaryRecoveryMarker();
                 if (!tempClean || !previousClean || !recoveryMarkerArchived)
@@ -2602,6 +3391,31 @@ namespace AL.Services.Local
             SaveTransactionTrace trace,
             ref SaveGameData persistedSave,
             out SaveOperationDisposition disposition,
+            ref string message) =>
+            ReconcileSaveAttempt(
+                baseline,
+                candidateBytes,
+                requiredBackupBytes,
+                coreSucceeded,
+                mayHaveMutated,
+                candidate,
+                trace,
+                requiredBackupIsMigratable: false,
+                ref persistedSave,
+                out disposition,
+                ref message);
+
+        private SaveOperationStatus ReconcileSaveAttempt(
+            SaveAuthorityBaseline baseline,
+            byte[] candidateBytes,
+            byte[] requiredBackupBytes,
+            bool coreSucceeded,
+            bool mayHaveMutated,
+            SaveGameData candidate,
+            SaveTransactionTrace trace,
+            bool requiredBackupIsMigratable,
+            ref SaveGameData persistedSave,
+            out SaveOperationDisposition disposition,
             ref string message)
         {
             SaveCanonicalLedger finalLedger = CaptureCanonicalLedger();
@@ -2614,9 +3428,10 @@ namespace AL.Services.Local
                     out verifiedCandidate);
             bool requiredBackupVerified =
                 requiredBackupBytes != null &&
-                IsExactValidGeneration(
+                IsExactRequiredBackupGeneration(
                     finalLedger.Backup,
                     requiredBackupBytes,
+                    requiredBackupIsMigratable,
                     out _);
             bool previousAuthorityVerified =
                 MatchesExactState(finalLedger.Primary, baseline.Primary) &&
@@ -2624,6 +3439,7 @@ namespace AL.Services.Local
             bool cleanupVerified =
                 finalLedger.Temp.Disposition == SaveFileReadDisposition.Missing &&
                 finalLedger.Previous.Disposition == SaveFileReadDisposition.Missing &&
+                IsExactNvs01MigrationBackupArchive(trace) &&
                 IsCommittedRecoveryMarkerCleanupVerified();
             bool committedQuarantineVerified =
                 IsCommittedInvalidPrimaryQuarantineIntact();
@@ -2646,6 +3462,8 @@ namespace AL.Services.Local
                 VerifyCommitTargetAgain(
                     candidateBytes,
                     requiredBackupBytes,
+                    requiredBackupIsMigratable,
+                    trace,
                     out verifiedCandidate);
 
             SaveOperationStatus status;
@@ -2774,6 +3592,222 @@ namespace AL.Services.Local
                 ReadCanonicalPath(BackupPath),
                 ReadCanonicalPath(TempPath),
                 ReadCanonicalPath(PreviousPath));
+
+        private bool TryCaptureExactNvs01MigrationBaseline(
+            IReadOnlyList<SaveCandidateInventoryEntry> inventory,
+            SaveSemanticCandidate selected,
+            out SaveCanonicalLedger baseline)
+        {
+            baseline = null;
+            if (inventory == null || selected == null ||
+                selected.SourceGeneration !=
+                    SaveCandidateSourceGeneration.Primary)
+            {
+                return false;
+            }
+
+            SaveCanonicalLedger captured = CaptureCanonicalLedger();
+            foreach (SaveCandidateInventoryEntry entry in inventory)
+            {
+                SaveFileReadResult actual;
+                switch (entry.Source)
+                {
+                    case SaveCandidateSourceGeneration.Primary:
+                        actual = captured.Primary;
+                        break;
+                    case SaveCandidateSourceGeneration.Backup:
+                        actual = captured.Backup;
+                        break;
+                    case SaveCandidateSourceGeneration.Temp:
+                        actual = captured.Temp;
+                        break;
+                    case SaveCandidateSourceGeneration.Previous:
+                        actual = captured.Previous;
+                        break;
+                    default:
+                        return false;
+                }
+
+                if (!MatchesExactInventoryEntry(actual, entry))
+                {
+                    return false;
+                }
+            }
+
+            if (captured.Temp.Disposition != SaveFileReadDisposition.Missing ||
+                captured.Previous.Disposition != SaveFileReadDisposition.Missing ||
+                !MatchesExactBytes(captured.Primary, selected.CopyRawBytes()))
+            {
+                return false;
+            }
+
+            baseline = captured;
+            return true;
+        }
+
+        private static bool MatchesExactInventoryEntry(
+            SaveFileReadResult actual,
+            SaveCandidateInventoryEntry expected)
+        {
+            if (actual == null || expected?.ReadResult == null ||
+                actual.Disposition != expected.ReadResult.Disposition ||
+                actual.ObservedByteCount !=
+                    expected.ReadResult.ObservedByteCount)
+            {
+                return false;
+            }
+
+            if (actual.Disposition == SaveFileReadDisposition.Missing)
+            {
+                return true;
+            }
+
+            return actual.Disposition == SaveFileReadDisposition.Read &&
+                   expected.SemanticCandidate != null &&
+                   expected.SemanticCandidate.HasRetainedRawBytes &&
+                   BytesEqual(
+                       actual.Bytes,
+                       expected.SemanticCandidate.CopyRawBytes());
+        }
+
+        private static bool MatchesExactMigrationBaseline(
+            SaveCanonicalLedger actual,
+            SaveCanonicalLedger expected) =>
+            actual != null &&
+            expected != null &&
+            expected.Temp.Disposition == SaveFileReadDisposition.Missing &&
+            expected.Previous.Disposition == SaveFileReadDisposition.Missing &&
+            MatchesExactState(actual.Primary, expected.Primary) &&
+            MatchesExactState(actual.Backup, expected.Backup) &&
+            MatchesExactState(actual.Temp, expected.Temp) &&
+            MatchesExactState(actual.Previous, expected.Previous);
+
+        private bool MatchesExactMigrationStagedLedger(
+            SaveCanonicalLedger actual,
+            SaveCanonicalLedger expected,
+            byte[] candidateBytes) =>
+            actual != null &&
+            expected != null &&
+            MatchesExactState(actual.Primary, expected.Primary) &&
+            MatchesExactState(actual.Backup, expected.Backup) &&
+            IsExactValidGeneration(actual.Temp, candidateBytes, out _) &&
+            actual.Previous.Disposition == SaveFileReadDisposition.Missing;
+
+        private string CreateNvs01MigrationBackupArchivePath(
+            byte[] baselineBackupBytes) =>
+            Path.Combine(
+                PersistencePath,
+                Nvs01MigrationBackupArchivePrefix +
+                ComputeSha256Base64Url(baselineBackupBytes));
+
+        private bool TryFinalizeExactNvs01MigrationGenerations(
+            SaveTransactionTrace trace,
+            byte[] candidateBytes)
+        {
+            SaveCanonicalLedger postRotation = CaptureCanonicalLedger();
+            if (!MatchesExactNvs01MigrationCanonicalTarget(
+                    postRotation,
+                    trace,
+                    candidateBytes))
+            {
+                return false;
+            }
+
+            switch (trace.BaselineBackup.Disposition)
+            {
+                case SaveFileReadDisposition.Missing:
+                    if (trace.MigrationBackupArchivePath.Length != 0 ||
+                        postRotation.Previous.Disposition !=
+                            SaveFileReadDisposition.Missing)
+                    {
+                        return false;
+                    }
+                    break;
+                case SaveFileReadDisposition.Read:
+                    if (trace.MigrationBackupArchivePath.Length == 0 ||
+                        !MatchesExactState(
+                            postRotation.Previous,
+                            trace.BaselineBackup) ||
+                        ReadCanonicalPath(
+                                trace.MigrationBackupArchivePath)
+                            .Disposition != SaveFileReadDisposition.Missing)
+                    {
+                        return false;
+                    }
+
+                    try
+                    {
+                        _fileOperations.Move(
+                            PreviousPath,
+                            trace.MigrationBackupArchivePath);
+                    }
+                    catch (Exception)
+                    {
+                        // A non-overwriting move that threw may still have
+                        // retained one complete generation; verify below.
+                    }
+                    break;
+                default:
+                    return false;
+            }
+
+            return VerifyExactNvs01MigrationCommitTarget(
+                       trace,
+                       candidateBytes) &&
+                   VerifyExactNvs01MigrationCommitTarget(
+                       trace,
+                       candidateBytes);
+        }
+
+        private bool VerifyExactNvs01MigrationCommitTarget(
+            SaveTransactionTrace trace,
+            byte[] candidateBytes)
+        {
+            SaveCanonicalLedger ledger = CaptureCanonicalLedger();
+            return MatchesExactNvs01MigrationCanonicalTarget(
+                       ledger,
+                       trace,
+                       candidateBytes) &&
+                   ledger.Previous.Disposition ==
+                       SaveFileReadDisposition.Missing &&
+                   IsExactNvs01MigrationBackupArchive(trace);
+        }
+
+        private bool MatchesExactNvs01MigrationCanonicalTarget(
+            SaveCanonicalLedger ledger,
+            SaveTransactionTrace trace,
+            byte[] candidateBytes) =>
+            ledger != null &&
+            trace != null &&
+            trace.BaselinePrimaryIsMigratable &&
+            IsExactValidGeneration(ledger.Primary, candidateBytes, out _) &&
+            MatchesExactBytes(
+                ledger.Backup,
+                trace.BaselinePrimaryBytes) &&
+            ledger.Temp.Disposition == SaveFileReadDisposition.Missing;
+
+        private bool IsExactNvs01MigrationBackupArchive(
+            SaveTransactionTrace trace)
+        {
+            if (trace == null || !trace.BaselinePrimaryIsMigratable)
+            {
+                return true;
+            }
+
+            if (trace.BaselineBackup.Disposition ==
+                SaveFileReadDisposition.Missing)
+            {
+                return trace.MigrationBackupArchivePath.Length == 0;
+            }
+
+            return trace.BaselineBackup.Disposition ==
+                       SaveFileReadDisposition.Read &&
+                   trace.MigrationBackupArchivePath.Length > 0 &&
+                   MatchesExactState(
+                       ReadCanonicalPath(
+                           trace.MigrationBackupArchivePath),
+                       trace.BaselineBackup);
+        }
 
         private bool TryBuildInvalidPrimaryRecoveryPlan(
             IReadOnlyList<SaveCandidateInventoryEntry> inventory,
@@ -3477,10 +4511,9 @@ namespace AL.Services.Local
                 return false;
             }
 
-            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+            SaveSemanticCandidate candidate = ValidateSemanticCandidate(
                 actual.Bytes,
-                source,
-                _semanticPolicy);
+                source);
             return candidate.Outcome == SaveSemanticCandidateOutcome.Invalid &&
                    candidate.HasRetainedRawBytes &&
                    candidate.OriginalRawByteCount == actual.Bytes.Length;
@@ -3500,10 +4533,9 @@ namespace AL.Services.Local
                 return false;
             }
 
-            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+            SaveSemanticCandidate candidate = ValidateSemanticCandidate(
                 actual.Bytes,
-                source,
-                _semanticPolicy);
+                source);
             return IsExplicitCurrentWritableCandidate(candidate) &&
                    TryDeserializeSelectedCandidate(candidate, out save);
         }
@@ -4170,9 +5202,40 @@ namespace AL.Services.Local
                    TryDeserializeValidSaveBytes(actual.Bytes, out save, out _);
         }
 
+        private bool IsExactTraceBaselineGeneration(
+            SaveFileReadResult actual,
+            SaveTransactionTrace trace)
+        {
+            if (trace == null || trace.BaselinePrimaryBytes == null)
+            {
+                return false;
+            }
+
+            return trace.BaselinePrimaryIsMigratable
+                ? MatchesExactBytes(actual, trace.BaselinePrimaryBytes)
+                : IsExactValidGeneration(
+                    actual,
+                    trace.BaselinePrimaryBytes,
+                    out _);
+        }
+
+        private bool IsExactRequiredBackupGeneration(
+            SaveFileReadResult actual,
+            byte[] expectedBytes,
+            bool allowMigratable,
+            out SaveGameData save)
+        {
+            save = null;
+            return allowMigratable
+                ? MatchesExactBytes(actual, expectedBytes)
+                : IsExactValidGeneration(actual, expectedBytes, out save);
+        }
+
         private bool VerifyCommitTargetAgain(
             byte[] candidateBytes,
             byte[] requiredBackupBytes,
+            bool requiredBackupIsMigratable,
+            SaveTransactionTrace trace,
             out SaveGameData persistedSave)
         {
             SaveCanonicalLedger verification = CaptureCanonicalLedger();
@@ -4181,12 +5244,14 @@ namespace AL.Services.Local
                 candidateBytes,
                 out persistedSave);
             return primaryVerified &&
-                   IsExactValidGeneration(
+                   IsExactRequiredBackupGeneration(
                        verification.Backup,
                        requiredBackupBytes,
+                       requiredBackupIsMigratable,
                        out _) &&
                    verification.Temp.Disposition == SaveFileReadDisposition.Missing &&
                    verification.Previous.Disposition == SaveFileReadDisposition.Missing &&
+                   IsExactNvs01MigrationBackupArchive(trace) &&
                    IsCommittedRecoveryMarkerCleanupVerified() &&
                    IsCommittedInvalidPrimaryQuarantineIntact();
         }
@@ -4375,32 +5440,26 @@ namespace AL.Services.Local
                 }
 
                 SaveFileReadResult priorPrimary = ReadCanonicalPath(PreviousPath);
-                if (!IsExactValidGeneration(
+                if (!IsExactTraceBaselineGeneration(
                         priorPrimary,
-                        trace.BaselinePrimaryBytes,
-                        out _))
+                        trace))
                 {
                     message = "AL-SAVE-BACKUP-ROTATION-EVIDENCE-MISSING: The exact prior-primary generation was missing or changed; the installed primary and remaining evidence were preserved.";
                     return false;
                 }
 
                 _fileOperations.Copy(PreviousPath, TempPath, false);
-                if (!TryReadValidSaveBytes(
-                        TempPath,
-                        out byte[] stagedBytes,
-                        out _,
-                        out string stagedError) ||
-                    !BytesEqual(stagedBytes, trace.BaselinePrimaryBytes))
+                SaveFileReadResult staged = ReadCanonicalPath(TempPath);
+                if (!IsExactTraceBaselineGeneration(staged, trace))
                 {
-                    message = $"AL-SAVE-BACKUP-STAGE-INVALID: The staged prior-primary copy was not the exact bounded P0 generation, so the authentic source and existing backup were preserved. {stagedError}";
+                    message = "AL-SAVE-BACKUP-STAGE-INVALID: The staged prior-primary copy was not the exact bounded P0 generation, so the authentic source and existing backup were preserved.";
                     return false;
                 }
 
                 priorPrimary = ReadCanonicalPath(PreviousPath);
-                if (!IsExactValidGeneration(
+                if (!IsExactTraceBaselineGeneration(
                         priorPrimary,
-                        trace.BaselinePrimaryBytes,
-                        out _))
+                        trace))
                 {
                     message = "AL-SAVE-BACKUP-STAGE-SOURCE-CHANGED: The authentic prior-primary source changed after staging and was preserved; backup rotation stopped.";
                     return false;
@@ -4414,7 +5473,9 @@ namespace AL.Services.Local
 
                 if (!_fileOperations.FileExists(BackupPath))
                 {
-                    return TryInstallStagedBackupWithoutExisting(out message);
+                    return TryInstallStagedBackupWithoutExisting(
+                        trace,
+                        out message);
                 }
 
                 if (useAtomicReplace)
@@ -4427,7 +5488,9 @@ namespace AL.Services.Local
                     {
                         if (CanSafelyUseBackupMoveFallback(trace))
                         {
-                            return TryRotateStagedBackupWithMoves(out message);
+                            return TryRotateStagedBackupWithMoves(
+                                trace,
+                                out message);
                         }
 
                         message = "AL-SAVE-BACKUP-REPLACE-UNSUPPORTED-UNCERTAIN: Backup replace reported unsupported after changing the canonical ledger; fallback was not attempted.";
@@ -4437,7 +5500,9 @@ namespace AL.Services.Local
                     {
                         if (CanSafelyUseBackupMoveFallback(trace))
                         {
-                            return TryRotateStagedBackupWithMoves(out message);
+                            return TryRotateStagedBackupWithMoves(
+                                trace,
+                                out message);
                         }
 
                         message = "AL-SAVE-BACKUP-REPLACE-UNSUPPORTED-UNCERTAIN: Backup replace reported unsupported after changing the canonical ledger; fallback was not attempted.";
@@ -4446,12 +5511,14 @@ namespace AL.Services.Local
                 }
                 else
                 {
-                    return TryRotateStagedBackupWithMoves(out message);
+                    return TryRotateStagedBackupWithMoves(trace, out message);
                 }
 
-                if (!TryReadValidSave(BackupPath, out _, out string backupError))
+                if (!IsExactTraceBaselineGeneration(
+                        ReadCanonicalPath(BackupPath),
+                        trace))
                 {
-                    message = $"AL-SAVE-BACKUP-INSTALL-UNCERTAIN: The rotated backup could not be verified; both it and the prior backup were preserved. {backupError}";
+                    message = "AL-SAVE-BACKUP-INSTALL-UNCERTAIN: The rotated backup could not be verified; both it and the prior backup were preserved.";
                     return false;
                 }
 
@@ -4465,14 +5532,18 @@ namespace AL.Services.Local
             }
         }
 
-        private bool TryInstallStagedBackupWithoutExisting(out string message)
+        private bool TryInstallStagedBackupWithoutExisting(
+            SaveTransactionTrace trace,
+            out string message)
         {
             try
             {
                 _fileOperations.Move(TempPath, BackupPath);
-                if (!TryReadValidSave(BackupPath, out _, out string backupError))
+                if (!IsExactTraceBaselineGeneration(
+                        ReadCanonicalPath(BackupPath),
+                        trace))
                 {
-                    message = $"AL-SAVE-BACKUP-RECREATE-INVALID: The recreated backup could not be verified; its staged bytes were preserved. {backupError}";
+                    message = "AL-SAVE-BACKUP-RECREATE-INVALID: The recreated backup could not be verified; its staged bytes were preserved.";
                     return false;
                 }
 
@@ -4486,16 +5557,20 @@ namespace AL.Services.Local
             }
         }
 
-        private bool TryRotateStagedBackupWithMoves(out string message)
+        private bool TryRotateStagedBackupWithMoves(
+            SaveTransactionTrace trace,
+            out string message)
         {
             try
             {
                 _fileOperations.Move(BackupPath, PreviousPath);
                 _fileOperations.Move(TempPath, BackupPath);
 
-                if (!TryReadValidSave(BackupPath, out _, out string backupError))
+                if (!IsExactTraceBaselineGeneration(
+                        ReadCanonicalPath(BackupPath),
+                        trace))
                 {
-                    message = $"AL-SAVE-BACKUP-FALLBACK-UNCERTAIN: The fallback-rotated backup could not be verified; both it and the prior backup were preserved. {backupError}";
+                    message = "AL-SAVE-BACKUP-FALLBACK-UNCERTAIN: The fallback-rotated backup could not be verified; both it and the prior backup were preserved.";
                     return false;
                 }
 
@@ -4516,10 +5591,7 @@ namespace AL.Services.Local
             SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
             return trace != null &&
                    trace.BaselinePrimaryBytes != null &&
-                   IsExactValidGeneration(
-                       primary,
-                       trace.BaselinePrimaryBytes,
-                       out _) &&
+                   IsExactTraceBaselineGeneration(primary, trace) &&
                    IsExactValidGeneration(
                        temp,
                        trace.CandidateBytes,
@@ -4540,10 +5612,7 @@ namespace AL.Services.Local
             SaveFileReadResult temp = ReadCanonicalPath(TempPath);
             SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
             return MatchesExactState(backup, trace.BaselineBackup) &&
-                   IsExactValidGeneration(
-                       temp,
-                       trace.BaselinePrimaryBytes,
-                       out _) &&
+                   IsExactTraceBaselineGeneration(temp, trace) &&
                    previous.Disposition == SaveFileReadDisposition.Missing;
         }
 
@@ -4555,10 +5624,7 @@ namespace AL.Services.Local
             }
 
             SaveFileReadResult previous = ReadCanonicalPath(PreviousPath);
-            if (!IsExactValidGeneration(
-                    previous,
-                    trace.BaselinePrimaryBytes,
-                    out _))
+            if (!IsExactTraceBaselineGeneration(previous, trace))
             {
                 return false;
             }
@@ -4568,10 +5634,8 @@ namespace AL.Services.Local
             {
                 _fileOperations.Copy(PreviousPath, SavePath, true);
                 SaveFileReadResult restored = ReadCanonicalPath(SavePath);
-                trace.RollbackBytesVerified = IsExactValidGeneration(
-                    restored,
-                    trace.BaselinePrimaryBytes,
-                    out _);
+                trace.RollbackBytesVerified =
+                    IsExactTraceBaselineGeneration(restored, trace);
                 return trace.RollbackBytesVerified;
             }
             catch (Exception ex)
@@ -4626,10 +5690,7 @@ namespace AL.Services.Local
             try
             {
                 SaveSemanticCandidate semanticCandidate =
-                    SaveSemanticCandidateValidator.Validate(
-                        bytes,
-                        source,
-                        _semanticPolicy);
+                    ValidateSemanticCandidate(bytes, source);
                 if (!semanticCandidate.IsWritable ||
                     (semanticCandidate.Outcome != SaveSemanticCandidateOutcome.Valid &&
                      semanticCandidate.Outcome !=
@@ -4703,6 +5764,13 @@ namespace AL.Services.Local
 
             if (!Nvs01ProgressCodec.TryValidateStoredData(
                     save.Nvs01Progress,
+                    out error))
+            {
+                return false;
+            }
+
+            if (!FirstWorldProgressSaveCodec.TryValidateStoredData(
+                    save,
                     out error))
             {
                 return false;
@@ -4889,6 +5957,32 @@ namespace AL.Services.Local
             };
         }
 
+        private SaveSemanticCandidate ValidateSemanticCandidate(
+            byte[] bytes,
+            SaveCandidateSourceGeneration source)
+        {
+            // Selection and every later ledger/recovery verification must use
+            // one topology-aware classification for the same retained bytes.
+            SaveSemanticCandidate candidate = SaveSemanticCandidateValidator.Validate(
+                bytes,
+                source,
+                _semanticPolicy);
+            if (IsExactNvs01V003MigrationCandidate(candidate) &&
+                (!TryDeserializeSelectedCandidate(
+                     candidate,
+                     out SaveGameData retained) ||
+                 !Nvs01ProgressCodec.TryMigrateExactV003(
+                     retained.Nvs01Progress,
+                     out _,
+                     out _)))
+            {
+                return SaveSemanticCandidateValidator
+                    .RejectNvs01MigrationTopology(candidate);
+            }
+
+            return candidate;
+        }
+
         private SaveCandidateInventoryEntry InspectCandidate(
             SaveCandidateSourceGeneration source,
             string path)
@@ -4897,7 +5991,7 @@ namespace AL.Services.Local
                 path,
                 _semanticPolicy.MaximumInputBytes);
             SaveSemanticCandidate candidate = readResult.Disposition == SaveFileReadDisposition.Read
-                ? SaveSemanticCandidateValidator.Validate(readResult.Bytes, source, _semanticPolicy)
+                ? ValidateSemanticCandidate(readResult.Bytes, source)
                 : null;
             var summaryReadResult = new SaveFileReadResult(
                 readResult.Disposition,
@@ -5370,6 +6464,13 @@ namespace AL.Services.Local
                     continue;
                 }
 
+                if (entry.Source == SaveCandidateSourceGeneration.Backup &&
+                    IsExactNvs01V003MigrationCandidate(
+                        entry.SemanticCandidate))
+                {
+                    continue;
+                }
+
                 if (entry.ReadResult.Disposition != SaveFileReadDisposition.Read ||
                     entry.SemanticCandidate == null ||
                     !entry.SemanticCandidate.IsWritable ||
@@ -5484,8 +6585,13 @@ namespace AL.Services.Local
             params string[] protectedPaths)
         {
             var quarantines = EnumerateQuarantines(sourceFileName)
-                .Select(path => new FileInfo(path))
-                .OrderByDescending(info => info.CreationTimeUtc)
+                .Select(path => new
+                {
+                    Path = path,
+                    CreationTimeUtc = _fileOperations.GetCreationTimeUtc(path)
+                })
+                .OrderByDescending(candidate => candidate.CreationTimeUtc)
+                .ThenByDescending(candidate => candidate.Path, StringComparer.Ordinal)
                 .ToList();
 
             var retained = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -5493,8 +6599,8 @@ namespace AL.Services.Local
                          Array.Empty<string>())
             {
                 if (!string.IsNullOrWhiteSpace(protectedPath) &&
-                    quarantines.Any(info => string.Equals(
-                        info.FullName,
+                    quarantines.Any(candidate => string.Equals(
+                        candidate.Path,
                         protectedPath,
                         StringComparison.OrdinalIgnoreCase)))
                 {
@@ -5502,20 +6608,20 @@ namespace AL.Services.Local
                 }
             }
 
-            foreach (FileInfo candidate in quarantines)
+            foreach (var candidate in quarantines)
             {
                 if (retained.Count >= MaxQuarantinesPerSource)
                 {
                     break;
                 }
 
-                retained.Add(candidate.FullName);
+                retained.Add(candidate.Path);
             }
 
-            foreach (FileInfo old in quarantines.Where(info =>
-                         !retained.Contains(info.FullName)))
+            foreach (var old in quarantines.Where(candidate =>
+                         !retained.Contains(candidate.Path)))
             {
-                TryDelete(old.FullName);
+                TryDelete(old.Path);
                 Debug.LogWarning(
                     "AL-SAVE-QUARANTINE-PRUNED: Pruned an old bounded quarantine artifact.");
             }
@@ -5523,6 +6629,133 @@ namespace AL.Services.Local
 
         private IEnumerable<string> EnumerateQuarantines(string sourceFileName) =>
             _fileOperations.EnumerateFiles(PersistencePath, $"{sourceFileName}.corrupt-*");
+
+        private IEnumerable<string> EnumerateNvs01MigrationBackupArchives() =>
+            _fileOperations.EnumerateFiles(
+                PersistencePath,
+                Nvs01MigrationBackupArchivePattern);
+
+        private bool TryVerifyNvs01MigrationBackupArchivesTwice(
+            out string diagnostic)
+        {
+            if (!TryCaptureNvs01MigrationBackupArchives(
+                    out IReadOnlyDictionary<string, byte[]> first,
+                    out diagnostic) ||
+                !TryCaptureNvs01MigrationBackupArchives(
+                    out IReadOnlyDictionary<string, byte[]> second,
+                    out diagnostic) ||
+                first.Count != second.Count)
+            {
+                return false;
+            }
+
+            foreach (var entry in first)
+            {
+                if (!second.TryGetValue(entry.Key, out byte[] bytes) ||
+                    !BytesEqual(entry.Value, bytes))
+                {
+                    diagnostic =
+                        "SAVE_NVS01_MIGRATION_ARCHIVE_CHANGED";
+                    return false;
+                }
+            }
+
+            diagnostic = string.Empty;
+            return true;
+        }
+
+        private bool TryCaptureNvs01MigrationBackupArchives(
+            out IReadOnlyDictionary<string, byte[]> archives,
+            out string diagnostic)
+        {
+            var captured = new Dictionary<string, byte[]>(
+                StringComparer.OrdinalIgnoreCase);
+            archives = new ReadOnlyDictionary<string, byte[]>(captured);
+            diagnostic =
+                "SAVE_NVS01_MIGRATION_ARCHIVE_INVENTORY_UNREADABLE";
+            try
+            {
+                string persistenceRoot = Path.GetFullPath(PersistencePath);
+                List<string> paths = EnumerateNvs01MigrationBackupArchives()
+                    .Take(MaxNvs01MigrationBackupArchives + 1)
+                    .ToList();
+                if (paths.Count > MaxNvs01MigrationBackupArchives)
+                {
+                    diagnostic =
+                        "SAVE_NVS01_MIGRATION_ARCHIVE_AMBIGUOUS";
+                    return false;
+                }
+
+                foreach (string path in paths)
+                {
+                    string fullPath = Path.GetFullPath(path);
+                    string fileName = Path.GetFileName(fullPath);
+                    if (!string.Equals(
+                            Path.GetDirectoryName(fullPath),
+                            persistenceRoot,
+                            StringComparison.OrdinalIgnoreCase) ||
+                        fileName == null ||
+                        !fileName.StartsWith(
+                            Nvs01MigrationBackupArchivePrefix,
+                            StringComparison.Ordinal) ||
+                        fileName.Length !=
+                            Nvs01MigrationBackupArchivePrefix.Length +
+                            Sha256Base64UrlLength)
+                    {
+                        diagnostic =
+                            "SAVE_NVS01_MIGRATION_ARCHIVE_NAME_INVALID";
+                        return false;
+                    }
+
+                    string declaredIdentity = fileName.Substring(
+                        Nvs01MigrationBackupArchivePrefix.Length);
+                    if (!IsBase64UrlIdentity(
+                            declaredIdentity,
+                            Sha256Base64UrlLength) ||
+                        _fileOperations.IsReparsePoint(fullPath))
+                    {
+                        diagnostic =
+                            "SAVE_NVS01_MIGRATION_ARCHIVE_UNSAFE";
+                        return false;
+                    }
+
+                    SaveFileReadResult read = ReadCanonicalPath(fullPath);
+                    if (read.Disposition != SaveFileReadDisposition.Read ||
+                        read.Bytes == null ||
+                        !string.Equals(
+                            ComputeSha256Base64Url(read.Bytes),
+                            declaredIdentity,
+                            StringComparison.Ordinal) ||
+                        captured.ContainsKey(fileName))
+                    {
+                        diagnostic =
+                            "SAVE_NVS01_MIGRATION_ARCHIVE_HASH_MISMATCH";
+                        return false;
+                    }
+
+                    captured.Add(fileName, read.Bytes.ToArray());
+                }
+
+                diagnostic = string.Empty;
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private bool HasNvs01MigrationBackupArchiveEvidence()
+        {
+            try
+            {
+                return EnumerateNvs01MigrationBackupArchives().Any();
+            }
+            catch (Exception)
+            {
+                return true;
+            }
+        }
 
         private bool HasStageFiveTransactionArchiveEvidence()
         {
@@ -5548,8 +6781,28 @@ namespace AL.Services.Local
 
         private bool TryDelete(string path)
         {
+            return TryDelete(path, approvalResetOperation: false);
+        }
+
+        private bool TryDelete(string path, bool approvalResetOperation)
+        {
             try
             {
+                if (approvalResetOperation)
+                {
+                    bool deleted = MvpApprovalSlotRuntime.TryDeleteAuthorizedArtifact(
+                        this,
+                        path,
+                        out string failure);
+                    if (!deleted)
+                    {
+                        Debug.LogWarning(
+                            $"AL-SAVE-DELETE-FAILED: Could not safely delete approval artifact {path}: {failure}");
+                    }
+
+                    return deleted;
+                }
+
                 _fileOperations.Delete(path);
                 return _fileOperations
                     .ReadAllBytesBounded(path, 1)
@@ -5665,7 +6918,10 @@ namespace AL.Services.Local
                         "sword"),
                     new SaveSemanticStableIdRule(
                         SaveSemanticStableIdKind.OffhandStyle,
-                        "shield")
+                        "shield"),
+                    new SaveSemanticStableIdRule(
+                        SaveSemanticStableIdKind.Building,
+                        MvpLoopSaveCodec.DefaultOneBuildId)
                 });
             return new SaveSemanticValidationPolicy(
                 SaveGameData.CurrentSaveFormatId,
@@ -5680,7 +6936,9 @@ namespace AL.Services.Local
                     Nvs01ProgressData.CurrentVersion,
                     Nvs01RuntimeContract.PacketVersion,
                     Nvs01RuntimeContract.PacketSha256,
-                    Nvs01RuntimeContract.QuestId));
+                    Nvs01RuntimeContract.QuestId,
+                    Nvs01ProgressCodec.MigratablePacketVersion,
+                    Nvs01ProgressCodec.MigratablePacketSha256));
         }
 
         private static int[] EnumValues(Type enumType) =>
@@ -5727,6 +6985,15 @@ namespace AL.Services.Local
 
             return JsonUtility.FromJson<SaveGameData>(JsonUtility.ToJson(save));
         }
+
+        private static bool IsPreSchemaMetadata(SaveGameData save) =>
+            save != null &&
+            (string.IsNullOrEmpty(save.SaveFormatId) ||
+             save.SaveSchemaVersion <= 0 ||
+             save.ProfileInitializationVersion <= 0);
+
+        private static bool HasRecoverableKingdomState(SaveGameData save) =>
+            save != null && save.SelectedRealm != RealmId.None;
 
         private static bool HasCurrentSaveMetadata(SaveGameData save) =>
             save != null &&

@@ -61,6 +61,33 @@ namespace AL.Development
         Recovery
     }
 
+    public enum EditorGameTestModeFocusState
+    {
+        Inactive = 0,
+        Active = 1,
+        Suspended = 2,
+        ResumePending = 3,
+        AwaitingNeutralInput = 4,
+        FailClosed = 5
+    }
+
+    public readonly struct EditorGameTestModeFocusSnapshot
+    {
+        public EditorGameTestModeFocusSnapshot(
+            string sessionId,
+            EditorGameTestModeFocusState state,
+            int epoch)
+        {
+            SessionId = sessionId ?? string.Empty;
+            State = state;
+            Epoch = epoch;
+        }
+
+        public string SessionId { get; }
+        public EditorGameTestModeFocusState State { get; }
+        public int Epoch { get; }
+    }
+
     public readonly struct EditorGameTestModeRecoveryRecord
     {
         public EditorGameTestModeRecoveryRecord(
@@ -151,6 +178,9 @@ namespace AL.Development
         private static GameObject _bannerObject;
         private static string _lastFailure = string.Empty;
         private static string _recoveryPreferenceKeyOverrideForTests = string.Empty;
+        private static EditorGameTestModeFocusState _focusState =
+            EditorGameTestModeFocusState.Inactive;
+        private static int _focusEpoch;
 
         public static bool IsArmed
         {
@@ -193,6 +223,159 @@ namespace AL.Development
                 {
                     return _lastFailure;
                 }
+            }
+        }
+
+        public static EditorGameTestModeFocusSnapshot FocusSnapshot
+        {
+            get
+            {
+                lock (Sync)
+                {
+                    return new EditorGameTestModeFocusSnapshot(
+                        _armed ? _activePlan.SessionId : string.Empty,
+                        _armed ? _focusState : EditorGameTestModeFocusState.Inactive,
+                        _armed ? _focusEpoch : 0);
+                }
+            }
+        }
+
+        public static bool TryNotifyEditorFocusChanged(
+            bool hasFocus,
+            out EditorGameTestModeFocusSnapshot snapshot,
+            out string message)
+        {
+            lock (Sync)
+            {
+                message = string.Empty;
+                if (!_armed)
+                {
+                    snapshot = new EditorGameTestModeFocusSnapshot(
+                        string.Empty,
+                        EditorGameTestModeFocusState.Inactive,
+                        0);
+                    return false;
+                }
+
+                if (_focusState == EditorGameTestModeFocusState.FailClosed)
+                {
+                    snapshot = new EditorGameTestModeFocusSnapshot(
+                        _activePlan.SessionId,
+                        _focusState,
+                        _focusEpoch);
+                    message = "The isolated focus boundary is already fail-closed.";
+                    return false;
+                }
+
+                if (!hasFocus)
+                {
+                    if (_focusState == EditorGameTestModeFocusState.Active)
+                    {
+                        if (_focusEpoch == int.MaxValue)
+                        {
+                            _focusState = EditorGameTestModeFocusState.FailClosed;
+                            snapshot = new EditorGameTestModeFocusSnapshot(
+                                _activePlan.SessionId,
+                                _focusState,
+                                _focusEpoch);
+                            message = "The isolated focus epoch was exhausted.";
+                            return false;
+                        }
+
+                        _focusEpoch++;
+                        _focusState = EditorGameTestModeFocusState.Suspended;
+                    }
+                    else if (_focusState == EditorGameTestModeFocusState.ResumePending ||
+                             _focusState ==
+                                EditorGameTestModeFocusState.AwaitingNeutralInput)
+                    {
+                        if (_focusEpoch == int.MaxValue)
+                        {
+                            _focusState = EditorGameTestModeFocusState.FailClosed;
+                            snapshot = new EditorGameTestModeFocusSnapshot(
+                                _activePlan.SessionId,
+                                _focusState,
+                                _focusEpoch);
+                            message = "The isolated focus epoch was exhausted.";
+                            return false;
+                        }
+
+                        _focusEpoch++;
+                        _focusState = EditorGameTestModeFocusState.Suspended;
+                    }
+                }
+                else if (_focusState == EditorGameTestModeFocusState.Suspended)
+                {
+                    _focusState = EditorGameTestModeFocusState.ResumePending;
+                }
+
+                snapshot = new EditorGameTestModeFocusSnapshot(
+                    _activePlan.SessionId,
+                    _focusState,
+                    _focusEpoch);
+                return true;
+            }
+        }
+
+        public static bool TryMarkFocusResumeValidated(
+            string sessionId,
+            int epoch,
+            out string message)
+        {
+            message = string.Empty;
+            if (!TryVerifyActiveRuntime(out _, out message))
+            {
+                return false;
+            }
+
+            lock (Sync)
+            {
+                if (!_armed ||
+                    _focusState != EditorGameTestModeFocusState.ResumePending ||
+                    _focusEpoch != epoch ||
+                    !string.Equals(
+                        _activePlan.SessionId,
+                        sessionId,
+                        StringComparison.Ordinal))
+                {
+                    message = "The isolated focus resume token was stale or mismatched.";
+                    return false;
+                }
+
+                _focusState = EditorGameTestModeFocusState.AwaitingNeutralInput;
+                return true;
+            }
+        }
+
+        public static bool TryCompleteFocusResume(
+            string sessionId,
+            int epoch,
+            bool allGameplayInputNeutral,
+            out string message)
+        {
+            lock (Sync)
+            {
+                message = string.Empty;
+                if (!_armed ||
+                    _focusState !=
+                        EditorGameTestModeFocusState.AwaitingNeutralInput ||
+                    _focusEpoch != epoch ||
+                    !string.Equals(
+                        _activePlan.SessionId,
+                        sessionId,
+                        StringComparison.Ordinal))
+                {
+                    message = "The isolated focus resume completion token was stale or mismatched.";
+                    return false;
+                }
+
+                if (!allGameplayInputNeutral)
+                {
+                    return true;
+                }
+
+                _focusState = EditorGameTestModeFocusState.Active;
+                return true;
             }
         }
 
@@ -990,6 +1173,8 @@ namespace AL.Development
                 _ownedSaveFactory = CreateGuardedSaveService;
                 OfflineServiceStack.SaveGameFactoryOverride = _ownedSaveFactory;
                 _lastFailure = string.Empty;
+                _focusState = EditorGameTestModeFocusState.Active;
+                _focusEpoch = 0;
                 _armed = true;
                 failure = EditorGameTestModeFailure.None;
                 message = string.Empty;
@@ -1135,6 +1320,8 @@ namespace AL.Development
                 _ownedSaveFactory = null;
                 _displacedSaveFactory = null;
                 _createdSaveService = null;
+                _focusState = EditorGameTestModeFocusState.Inactive;
+                _focusEpoch = 0;
 
                 if (_bannerObject != null)
                 {
@@ -1291,18 +1478,40 @@ namespace AL.Development
         {
             lock (Sync)
             {
-                _activePlan = new EditorGameTestModePlan(
-                    IsCanonicalSessionId(sessionId) ? sessionId : string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    string.Empty,
-                    ExpectedBootScenePath,
-                    ExpectedBootSceneGuid);
+                bool retainVerifiedRuntime =
+                    _armed && IsCanonicalSessionId(sessionId) &&
+                    string.Equals(
+                        _activePlan.SessionId,
+                        sessionId,
+                        StringComparison.Ordinal) &&
+                    _createdSaveService != null;
+                ISaveGameService retainedSaveService = retainVerifiedRuntime
+                    ? _createdSaveService
+                    : null;
+                if (!retainVerifiedRuntime)
+                {
+                    _activePlan = new EditorGameTestModePlan(
+                        IsCanonicalSessionId(sessionId) ? sessionId : string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        string.Empty,
+                        ExpectedBootScenePath,
+                        ExpectedBootSceneGuid);
+                }
+
                 _armed = true;
+                _focusState = EditorGameTestModeFocusState.FailClosed;
                 InstallThrowingFactoryNoLock(
                     string.IsNullOrWhiteSpace(diagnostic)
                         ? "Isolation could not be proven before scene Awake."
                         : diagnostic);
+                if (retainVerifiedRuntime)
+                {
+                    // The already-published exact isolated save remains the runtime proof.
+                    // Only future factory construction is replaced by the throwing guard.
+                    _createdSaveService = retainedSaveService;
+                }
+
                 EnsureBannerNoLock(blocked: true);
             }
         }
@@ -1319,6 +1528,7 @@ namespace AL.Development
                 }
 
                 sessionId = _activePlan.SessionId;
+                _focusState = EditorGameTestModeFocusState.FailClosed;
                 bool runtimeValid = TryVerifyActiveRuntime(out _, out string validationMessage);
                 diagnostic = (string.IsNullOrWhiteSpace(trigger)
                     ? "An editor lifecycle boundary"
@@ -2035,24 +2245,6 @@ namespace AL.Development
             _label = blocked
                 ? "ISOLATED TEST MODE BLOCKED • REAL SAVES NOT USED • " + diagnostic
                 : "ISOLATED GAME TEST MODE • TEMP PROFILE • NOT RELEASE EVIDENCE • " + shortSession;
-        }
-
-        private void OnApplicationFocus(bool hasFocus)
-        {
-            if (!hasFocus && !_blocked)
-            {
-                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
-                    "Editor focus loss");
-            }
-        }
-
-        private void OnApplicationPause(bool pauseStatus)
-        {
-            if (pauseStatus && !_blocked)
-            {
-                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
-                    "Application pause");
-            }
         }
 
         private void OnGUI()

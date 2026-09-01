@@ -50,7 +50,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             object report = R.StaticMethod(R.GeneratorType, "ValidateProductionScenes");
             Assert.IsTrue(R.PropBool(report, "IsValid"), R.Invoke(report, "Summarize").ToString());
             Assert.IsEmpty(R.AsStrings(R.Prop(report, "InventoryFailures")));
-            Assert.AreEqual(4, R.AsObjects(R.Prop(report, "Scenes")).Count);
+            Assert.AreEqual(5, R.AsObjects(R.Prop(report, "Scenes")).Count);
         }
 
         private static Dictionary<string, string> SemanticFingerprint()

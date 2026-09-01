@@ -1,11 +1,22 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using AL.ChampionMode;
+using AL.ChampionMode.Control;
+using AL.ChampionMode.Quests;
+using AL.Core;
+using AL.Core.Interfaces;
+using AL.Data.Runtime;
 using AL.RealmSelection;
+using AL.Services.Local;
 using AL.UI.Kingdom;
+using AL.UI.QuestHud;
 using AL.UI.RealmSelection;
+using AL.UI.SharedMenu;
+using AL.UI.WorldMap;
 using NUnit.Framework;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -58,11 +69,93 @@ namespace AL.Tests.PlayMode
         private bool _quiesceSceneControllers;
         private readonly Dictionary<string, int> _expectedActivations = new Dictionary<string, int>();
 
+        private static void CapturePresentationCamera(string outputPath)
+        {
+            Camera camera = Camera.main;
+            Assert.That(camera, Is.Not.Null, "The kingdom presentation camera must exist.");
+            const int width = 1600;
+            const int height = 900;
+            var target = new RenderTexture(width, height, 24, RenderTextureFormat.ARGB32);
+            var pixels = new Texture2D(width, height, TextureFormat.RGB24, false);
+            RenderTexture previous = RenderTexture.active;
+            RenderTexture previousTarget = camera.targetTexture;
+            try
+            {
+                camera.targetTexture = target;
+                RenderTexture.active = target;
+                camera.Render();
+                pixels.ReadPixels(new Rect(0f, 0f, width, height), 0, 0);
+                pixels.Apply();
+                File.WriteAllBytes(outputPath, pixels.EncodeToPNG());
+            }
+            finally
+            {
+                camera.targetTexture = previousTarget;
+                RenderTexture.active = previous;
+                Object.DestroyImmediate(pixels);
+                Object.DestroyImmediate(target);
+            }
+        }
+
+        private static void CapturePresentationCameraWithHud(string outputPath)
+        {
+            Camera camera = Camera.main;
+            Assert.That(camera, Is.Not.Null, "The kingdom presentation camera must exist.");
+            Canvas[] overlays = Object.FindObjectsOfType<Canvas>()
+                .Where(canvas =>
+                    canvas != null &&
+                    canvas.isActiveAndEnabled &&
+                    canvas.renderMode == RenderMode.ScreenSpaceOverlay)
+                .ToArray();
+            Camera[] originalCameras = overlays.Select(canvas => canvas.worldCamera).ToArray();
+            float[] originalPlaneDistances = overlays.Select(canvas => canvas.planeDistance).ToArray();
+            try
+            {
+                foreach (Canvas overlay in overlays)
+                {
+                    overlay.renderMode = RenderMode.ScreenSpaceCamera;
+                    overlay.worldCamera = camera;
+                    overlay.planeDistance = 1f;
+                }
+
+                Canvas.ForceUpdateCanvases();
+                CapturePresentationCamera(outputPath);
+            }
+            finally
+            {
+                for (int index = 0; index < overlays.Length; index++)
+                {
+                    overlays[index].renderMode = RenderMode.ScreenSpaceOverlay;
+                    overlays[index].worldCamera = originalCameras[index];
+                    overlays[index].planeDistance = originalPlaneDistances[index];
+                }
+
+                Canvas.ForceUpdateCanvases();
+            }
+        }
+
+        private static void CaptureHudEvidence(string outputPath)
+        {
+            string captureDirectory = Path.GetDirectoryName(outputPath);
+            if (!string.IsNullOrWhiteSpace(captureDirectory))
+            {
+                Directory.CreateDirectory(captureDirectory);
+            }
+
+            CapturePresentationCameraWithHud(outputPath);
+            Assert.That(
+                File.Exists(outputPath),
+                Is.True,
+                "The requested private-kingdom HUD capture must be written.");
+        }
+
         [SetUp]
         public void SetUp()
         {
             _expectedActivations.Clear();
             _quiesceSceneControllers = true;
+            CrossModeSession.Reset();
+            QuestHudAutoQuest.ResetForTests();
             _originalIgnoreFailingMessages = LogAssert.ignoreFailingMessages;
             // Expected reverse-ordering handoff logs one [BOOT_STACK_RUNTIME_OWNER_REJECTED] error per
             // transition; classify logs ourselves rather than letting the runner auto-fail on them.
@@ -95,6 +188,8 @@ namespace AL.Tests.PlayMode
             _logs = null;
 
             yield return UnloadIntoEmptyScene();
+            CrossModeSession.Reset();
+            QuestHudAutoQuest.ResetForTests();
             ResetStackOverrides();
             ClearServiceLocator();
             LogAssert.ignoreFailingMessages = _originalIgnoreFailingMessages;
@@ -198,6 +293,316 @@ namespace AL.Tests.PlayMode
         }
 
         [UnityTest]
+        public IEnumerator SharedMenuDrivesChampionToPrivateKingdomAndBackWithOwnerAndWriteAuthority()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Private kingdom round-trip drives editor PlayMode scene loads.");
+            yield break;
+#else
+            SaveGameData save = SeedLordshipSave(RealmId.Stonehold);
+            _quiesceSceneControllers = false;
+            var ownerIds = new List<string>();
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            AssertSingleOwner(
+                "al_scene_champion_arena",
+                SharedMenuIds.AdventureScene,
+                ChampionArenaPath,
+                ownerIds);
+            AssertInnerRealmControlIsLive();
+
+            SharedMenuModeSwitchHost adventureHost =
+                SharedMenuModeSwitchHost.EnsureForSceneName(SharedMenuIds.AdventureScene);
+            Assert.That(adventureHost, Is.Not.Null);
+            adventureHost.Open();
+            Assert.That(adventureHost.Overlay.KingdomButton.name, Is.EqualTo(SharedMenuIds.KingdomManagementModule));
+            Assert.That(adventureHost.Overlay.KingdomButton.interactable, Is.True);
+            Assert.That(adventureHost.CommitFromMenu(), Is.True);
+
+            yield return WaitForActiveScene(KingdomPath);
+            AssertExclusiveScene(KingdomPath, ChampionArenaPath);
+            AssertSingleOwner(
+                "al_scene_kingdom",
+                SharedMenuIds.KingdomScene,
+                KingdomPath,
+                ownerIds);
+            yield return null;
+            KingdomTeachingDirector teaching =
+                Object.FindObjectOfType<KingdomTeachingDirector>();
+            Assert.That(
+                teaching,
+                Is.Not.Null,
+                "The lordship-gated private kingdom must mount its teaching quest director.");
+            Assert.That(teaching.State, Is.Not.Null);
+            Assert.That(teaching.State.IsAvailable, Is.True);
+            Assert.That(teaching.State.IsComplete, Is.False);
+            Assert.That(teaching.State.ProgressValue, Is.Zero);
+            Assert.That(teaching.Hud, Is.Not.Null);
+            Assert.That(teaching.Hud.gameObject.activeInHierarchy, Is.True);
+            string privateKingdomCapture =
+                Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_CAPTURE");
+            if (!string.IsNullOrWhiteSpace(privateKingdomCapture))
+            {
+                yield return null;
+                string captureDirectory = Path.GetDirectoryName(privateKingdomCapture);
+                if (!string.IsNullOrWhiteSpace(captureDirectory))
+                {
+                    Directory.CreateDirectory(captureDirectory);
+                }
+                CapturePresentationCamera(privateKingdomCapture);
+                Assert.That(
+                    File.Exists(privateKingdomCapture),
+                    Is.True,
+                    "The requested private-kingdom evidence capture must be written.");
+            }
+            string privateKingdomHudCapture =
+                Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_HUD_CAPTURE");
+            if (!string.IsNullOrWhiteSpace(privateKingdomHudCapture))
+            {
+                CaptureHudEvidence(privateKingdomHudCapture);
+            }
+            string privateKingdomMapCapture =
+                Environment.GetEnvironmentVariable("AL_PRIVATE_KINGDOM_MAP_CAPTURE");
+            if (!string.IsNullOrWhiteSpace(privateKingdomMapCapture))
+            {
+                GameObject mapButtonObject = GameObject.Find("MAP");
+                Assert.That(mapButtonObject, Is.Not.Null, "The private-kingdom map button must exist.");
+                Button mapButton = mapButtonObject.GetComponent<Button>();
+                Assert.That(mapButton, Is.Not.Null);
+                Assert.That(mapButton.interactable, Is.True);
+                mapButton.onClick.Invoke();
+                yield return null;
+                CaptureHudEvidence(privateKingdomMapCapture);
+            }
+            Assert.That(Object.FindObjectOfType<ChampionController>(), Is.Null);
+            Assert.That(CrossModeSession.HasActiveRoundTrip, Is.True);
+            Assert.That(CrossModeSession.AdventureScene, Is.EqualTo(SharedMenuIds.AdventureScene));
+
+            SharedMenuModeSwitchHost kingdomHost =
+                SharedMenuModeSwitchHost.EnsureForSceneName(SharedMenuIds.KingdomScene);
+            Assert.That(kingdomHost, Is.Not.Null);
+            kingdomHost.Open();
+            Assert.That(kingdomHost.Overlay.KingdomButton.interactable, Is.True);
+            Assert.That(kingdomHost.CommitFromMenu(), Is.True);
+
+            yield return WaitForActiveScene(ChampionArenaPath);
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            AssertSingleOwner(
+                "al_scene_champion_arena",
+                SharedMenuIds.AdventureScene,
+                ChampionArenaPath,
+                ownerIds);
+            AssertInnerRealmControlIsLive();
+
+            SaveGameData roundTripped = (SaveGameData)InstanceField(_controllableSave, "_currentSave");
+            Assert.That(roundTripped, Is.SameAs(save), "The same inner-realm save session must survive both loads.");
+            Assert.That(roundTripped.SelectedRealm, Is.EqualTo(RealmId.Stonehold));
+            Assert.That(roundTripped.ChampionCustomization.LastResultId, Is.EqualTo(ProofOfWorthIds.StoneholdVariantId));
+            Assert.That(LoadCount(), Is.EqualTo(1), "The round-trip must not reload offline progress.");
+
+            int savesBeforePause = SaveCount();
+            InvokeOnCurrentOwner("OnApplicationPause", true);
+            Assert.That(
+                SaveCount(),
+                Is.GreaterThan(savesBeforePause),
+                "The returned ChampionArena Bootloader must retain lifecycle write authority.");
+            Assert.That(ownerIds.Distinct().Count(), Is.EqualTo(ownerIds.Count));
+
+            Assert.That(_logs.Logs.Any(line => line.Contains("[AL-SCENE-ACTIVE-MISMATCH]")), Is.False);
+            var unexpected = _logs.Errors
+                .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
+                .ToList();
+            Assert.IsEmpty(unexpected, "Unexpected severe logs:\n" + string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator LordshipQuestHudStaysManualWhenOffThenAutoQuestEntersKingdomTeaching()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Quest HUD kingdom handoff drives an editor PlayMode scene load.");
+            yield break;
+#else
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            SeedLordshipSave(RealmId.Crownlands);
+            _quiesceSceneControllers = false;
+            QuestHudAutoQuest.SetEnabled(false);
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            Assert.That(Object.FindObjectOfType<ProofOfWorthDirector>(), Is.Null);
+
+            QuestHudHost questHost = Object.FindObjectOfType<QuestHudHost>();
+            Assert.That(questHost, Is.Not.Null);
+            Assert.That(questHost.Overlay.Model, Is.Not.Null);
+            Assert.That(questHost.Overlay.Model.Surface, Is.EqualTo(QuestHudSurface.InnerRealm3D));
+            Assert.That(questHost.Overlay.Model.Action, Is.EqualTo(QuestHudAction.Continue));
+            Assert.That(questHost.Overlay.Model.CanAutoFire, Is.False);
+            Assert.That(questHost.Overlay.Model.StepId, Is.EqualTo(KingdomTeachingCatalog.EntryId));
+            Assert.That(questHost.Overlay.Model.Title, Is.EqualTo(catalog.Entry.Title));
+            Assert.That(questHost.Overlay.Model.WhatToDo, Is.EqualTo(catalog.Entry.WhatToDo));
+            Assert.That(QuestHudPlanner.CopyLooksLikeId(questHost.Overlay.Model.WhatToDo), Is.False);
+
+            yield return null;
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(ChampionArenaPath));
+
+            questHost.Overlay.ToggleAutoQuest();
+            yield return WaitForActiveScene(KingdomPath);
+            AssertExclusiveScene(KingdomPath, ChampionArenaPath);
+
+            KingdomTeachingDirector teaching =
+                Object.FindObjectOfType<KingdomTeachingDirector>();
+            Assert.That(teaching, Is.Not.Null);
+            Assert.That(teaching.State.IsAvailable, Is.True);
+            Assert.That(teaching.State.IsComplete, Is.False);
+            Assert.That(teaching.State.ProgressValue, Is.Zero);
+            Assert.That(teaching.Hud.Model, Is.Not.Null);
+            Assert.That(teaching.Hud.Model.StepId, Is.EqualTo(catalog.Steps[0].Id));
+            Assert.That(teaching.Hud.Model.CanAutoFire, Is.True);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator LiveLordshipWithAutoQuestEntersKingdomOnceAndClearsTheCompletedMarker()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Live lordship handoff drives an editor PlayMode scene load.");
+            yield break;
+#else
+            SeedCurrentSave();
+            SaveGameData save = (SaveGameData)InstanceField(_controllableSave, "_currentSave");
+            save.SelectedRealm = RealmId.Stonehold;
+            save.ChampionCustomization = new ChampionCustomizationState
+            {
+                ClassFamilyId = "warrior",
+                IdentityConfirmed = true,
+                Username = "LiveLordshipTester"
+            };
+            CompleteFirstWorldTutorial(
+                (ISaveGameService)_controllableSave);
+            FirstSessionChampionStart.ResetToFirstSessionLanding();
+            QuestHudAutoQuest.SetEnabled(false);
+            _quiesceSceneControllers = false;
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            ProofOfWorthDirector proof = Object.FindObjectOfType<ProofOfWorthDirector>();
+            Assert.That(proof, Is.Not.Null);
+
+            if (proof.State.Phase == ProofOfWorthPhase.OmenOffered)
+            {
+                Object.FindObjectOfType<NpcConversationView>()?.Collapse();
+                Assert.That(
+                    proof.ApplyForTests(ProofOfWorthCommand.AcceptOffer).Changed,
+                    Is.True,
+                    ProofOfWorthCommand.AcceptOffer.ToString());
+            }
+            else
+            {
+                Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.OmenTalk));
+                Assert.That(proof.State.DialogueId, Is.EqualTo(ProofOfWorthIds.StartDialogueId));
+            }
+
+            foreach (ProofOfWorthCommand command in new[]
+            {
+                ProofOfWorthCommand.Investigate,
+                ProofOfWorthCommand.DeployChampion,
+                ProofOfWorthCommand.ArenaSuccess,
+                ProofOfWorthCommand.SelectValerius,
+                ProofOfWorthCommand.PresentTear,
+                ProofOfWorthCommand.ConcludeReport,
+                ProofOfWorthCommand.MeetRealmGuide,
+                ProofOfWorthCommand.RestoreCovenant,
+                ProofOfWorthCommand.GuardianDefeated
+            })
+            {
+                Object.FindObjectOfType<NpcConversationView>()?.Collapse();
+                Assert.That(proof.ApplyForTests(command).Changed, Is.True, command.ToString());
+            }
+
+            Assert.That(proof.State.Phase, Is.EqualTo(ProofOfWorthPhase.C1AcceptMark));
+            Assert.That(MainQuestMapSession.Current, Is.Not.Null);
+            Assert.That(
+                MainQuestMapSession.Current.ObjectiveId,
+                Is.EqualTo(ProofOfWorthIds.AcceptMarkObjectiveId));
+
+            QuestHudAutoQuest.SetEnabled(true);
+            Assert.That(
+                proof.ApplyForTests(ProofOfWorthCommand.AcceptMark).Changed,
+                Is.True);
+
+            yield return WaitForActiveScene(KingdomPath);
+            AssertExclusiveScene(KingdomPath, ChampionArenaPath);
+            Assert.That(MainQuestMapSession.Current, Is.Null);
+            Assert.That(
+                _logs.Logs.Count(line =>
+                    line.StartsWith(
+                        "[AL-SCENE-ACTIVE] id=al_scene_kingdom",
+                        StringComparison.Ordinal)),
+                Is.EqualTo(1));
+            Assert.That(Object.FindObjectOfType<KingdomTeachingDirector>(), Is.Not.Null);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+#endif
+        }
+
+        [UnityTest]
+        public IEnumerator CompletedKingdomTeachingReturnsToTheInnerGateAndNeverLoadsWarzone()
+        {
+#if !UNITY_EDITOR
+            Assert.Ignore("Post-teaching return drives an editor PlayMode scene load.");
+            yield break;
+#else
+            KingdomTeachingCatalog catalog = KingdomTeachingCatalog.LoadCanonical();
+            SaveGameData save = SeedLordshipSave(RealmId.Eldergrove);
+            CompleteKingdomTeaching(save, catalog);
+            CrossModeSession.ArmTeachingReturn();
+            _quiesceSceneControllers = false;
+
+            yield return LoadAndSettle(ChampionArenaPath);
+            float started = Time.realtimeSinceStartup;
+            KingdomTeachingReturnDirector returnDirector = null;
+            while (returnDirector == null || !returnDirector.IsApplied)
+            {
+                if (Time.realtimeSinceStartup - started > LoadTimeoutSeconds)
+                {
+                    Assert.Fail("The post-teaching inner-gate landing was not applied.");
+                }
+
+                returnDirector = Object.FindObjectOfType<KingdomTeachingReturnDirector>();
+                yield return null;
+            }
+
+            AssertExclusiveScene(ChampionArenaPath, KingdomPath);
+            AssertInnerRealmControlIsLive();
+            ChampionController champion = Object.FindObjectOfType<ChampionController>();
+            Vector3 landingDelta =
+                champion.transform.position - returnDirector.Plan.Position;
+            landingDelta.y = 0f;
+            Assert.That(
+                landingDelta.magnitude,
+                Is.LessThan(0.01f));
+            Assert.That(
+                Vector3.Dot(champion.transform.forward, returnDirector.Plan.Forward),
+                Is.GreaterThan(0.999f));
+            Assert.That(returnDirector.Plan.MainGateId, Is.Not.Empty);
+            Assert.That(returnDirector.Plan.ShouldEnterWarzone, Is.False);
+            Assert.That(Object.FindObjectOfType<ProofOfWorthDirector>(), Is.Null);
+
+            QuestHudHost questHost = Object.FindObjectOfType<QuestHudHost>();
+            Assert.That(questHost, Is.Not.Null);
+            Assert.That(questHost.Overlay.Model.Surface, Is.EqualTo(QuestHudSurface.WarzoneGate));
+            Assert.That(questHost.Overlay.Model.CanAutoFire, Is.False);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+
+            var unexpected = _logs.Errors
+                .Where(message => !message.Contains("BOOT_STACK_RUNTIME_OWNER_REJECTED"))
+                .ToList();
+            Assert.IsEmpty(unexpected, "Unexpected severe logs:\n" + string.Join("\n", unexpected));
+#endif
+        }
+
+        [UnityTest]
         public IEnumerator BootWaitsForExplicitContinueThenReachesRealmSelectionWithFourControls()
         {
 #if !UNITY_EDITOR
@@ -267,7 +672,7 @@ namespace AL.Tests.PlayMode
                 yield return null;
             }
 
-            // Let RealmSelectionController.Start build the fallback UI and presentation camera.
+            // Let RealmSelectionController.Start build the production UI and presentation camera.
             yield return null;
             yield return null;
 
@@ -283,18 +688,26 @@ namespace AL.Tests.PlayMode
             Assert.That(controller, Is.Not.Null);
             Assert.That(controller.isActiveAndEnabled, Is.True);
 
-            GameObject fallbackCanvas = GameObject.Find("RealmSelectionCanvas");
-            Assert.That(fallbackCanvas, Is.Not.Null, "The production fallback realm UI must be active.");
-            Button[] realmButtons = fallbackCanvas.GetComponentsInChildren<Button>(true);
+            GameObject realmCanvas = GameObject.Find("RealmSelectionCanvas");
+            Assert.That(realmCanvas, Is.Not.Null, "The authored production realm UI must be active.");
+            string[] realmNames = { "Crownlands", "Stonehold", "Eldergrove", "Umbral" };
+            Button[] realmButtons = realmCanvas.GetComponentsInChildren<Button>(true)
+                .Where(button => realmNames.Contains(button.name, StringComparer.Ordinal))
+                .ToArray();
             Assert.That(realmButtons, Has.Length.EqualTo(4));
             Assert.That(
                 realmButtons.Select(button => button.name).Distinct(StringComparer.Ordinal).Count(),
                 Is.EqualTo(4),
-                "Each catalog realm must produce one distinct fallback control.");
+                "Each catalog realm must produce one distinct authored control.");
             Assert.That(
                 realmButtons.All(button => button.interactable),
                 Is.True,
                 "All four realm choices must be interactable before a selection is committed.");
+            Assert.That(
+                realmCanvas.GetComponentsInChildren<Button>(true)
+                    .Any(button => button.name == RealmSelectionCommitOverlay.ConfirmButtonName),
+                Is.True,
+                "The production realm UI must carry an explicit binding action.");
 
             Camera[] presentationCameras = Camera.allCameras
                 .Where(camera =>
@@ -405,7 +818,7 @@ namespace AL.Tests.PlayMode
             _quiesceSceneControllers = false;
             yield return LoadAndSettle(RealmSelectionPath);
 
-            // Let RealmSelectionController.Start build the fallback presentation camera.
+            // Let RealmSelectionController.Start build the production presentation camera.
             yield return null;
             yield return null;
 
@@ -486,7 +899,46 @@ namespace AL.Tests.PlayMode
             yield return null;
             yield return null;
         }
+
+        private IEnumerator WaitForActiveScene(string path)
+        {
+            float started = Time.realtimeSinceStartup;
+            while (!string.Equals(SceneManager.GetActiveScene().path, path, StringComparison.Ordinal))
+            {
+                if (Time.realtimeSinceStartup - started > LoadTimeoutSeconds)
+                {
+                    Assert.Fail($"Timed out waiting for active scene {path}.");
+                }
+
+                yield return null;
+            }
+
+            yield return null;
+            yield return null;
+            yield return null;
+        }
 #endif
+
+        private static void AssertExclusiveScene(string expectedPath, string excludedPath)
+        {
+            Assert.That(SceneManager.GetActiveScene().path, Is.EqualTo(expectedPath));
+            Assert.That(SceneManager.sceneCount, Is.EqualTo(1), "LoadSceneMode.Single must leave one world loaded.");
+            Assert.That(
+                SceneManager.GetSceneByPath(excludedPath).isLoaded,
+                Is.False,
+                excludedPath + " must be mutually exclusive with " + expectedPath);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.BootScene).isLoaded, Is.False);
+            Assert.That(SceneManager.GetSceneByName(SharedMenuIds.WarzoneScene).isLoaded, Is.False);
+        }
+
+        private static void AssertInnerRealmControlIsLive()
+        {
+            ChampionController controller = Object.FindObjectOfType<ChampionController>();
+            Assert.That(controller, Is.Not.Null, "ChampionArena must restore direct 3D champion control.");
+            Assert.That(controller.isActiveAndEnabled, Is.True);
+            Assert.That(controller.gameObject.name, Is.EqualTo(FirstSessionChampionStart.PlayerObjectName));
+            Assert.That(Object.FindObjectOfType<KingdomSceneController>(), Is.Null);
+        }
 
         private void AssertSingleOwner(string sceneId, string sceneName, string path, List<string> ownerIds)
         {
@@ -570,6 +1022,73 @@ namespace AL.Tests.PlayMode
                 .SetValue(save, 1);
             saveType.GetField("ProfileInitializationVersion", BindingFlags.Instance | BindingFlags.Public)
                 .SetValue(save, 1);
+        }
+
+        private SaveGameData SeedLordshipSave(RealmId realm)
+        {
+            SeedCurrentSave();
+            SaveGameData save = (SaveGameData)InstanceField(_controllableSave, "_currentSave");
+            save.SelectedRealm = realm;
+            save.ChampionCustomization = new ChampionCustomizationState
+            {
+                ClassFamilyId = "warrior",
+                IdentityConfirmed = true,
+                Username = "RoundTripTester"
+            };
+            Assert.That(
+                ProofOfWorthLordship.TryWriteMark(save, ProofOfWorthLordship.ResolveMarkId(realm)),
+                Is.True);
+            return save;
+        }
+
+        private static void CompleteFirstWorldTutorial(
+            ISaveGameService saveGameService)
+        {
+            Assert.That(
+                FirstWorldProgressSaveAuthority.TryRead(
+                    saveGameService,
+                    out FirstWorldProgressSnapshot snapshot,
+                    out string message),
+                Is.True,
+                message);
+
+            foreach (FirstWorldTutorialProgressCommand command in new[]
+                     {
+                         FirstWorldTutorialProgressCommand.CameraLookAccepted,
+                         FirstWorldTutorialProgressCommand.MovementAccepted,
+                         FirstWorldTutorialProgressCommand.GuideInteractionAccepted,
+                         FirstWorldTutorialProgressCommand.BasicAttackAccepted
+                     })
+            {
+                FirstWorldProgressCommitResult result =
+                    FirstWorldProgressSaveAuthority.TryAdvanceTutorial(
+                        saveGameService,
+                        snapshot,
+                        command);
+                Assert.That(result, Is.Not.Null, command.ToString());
+                Assert.That(result.Accepted, Is.True,
+                    command + ": " + result.Message);
+                Assert.That(result.Snapshot, Is.Not.Null, command.ToString());
+                snapshot = result.Snapshot;
+            }
+
+            Assert.That(snapshot.CanRunProof, Is.True);
+        }
+
+        private static void CompleteKingdomTeaching(
+            SaveGameData save,
+            KingdomTeachingCatalog catalog)
+        {
+            save.Quests = new List<QuestState>
+            {
+                new QuestState
+                {
+                    QuestId = catalog.QuestId,
+                    CurrentValue = catalog.Steps.Count,
+                    IsCompleted = true,
+                    IsClaimed = false
+                }
+            };
         }
 
         private static object GetMarker()

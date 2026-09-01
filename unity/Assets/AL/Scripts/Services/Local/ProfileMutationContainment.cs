@@ -63,6 +63,7 @@ namespace AL.Services.Local
         public const string ManualSave = "profile.save.manual";
         public const string LifecycleSave = "profile.save.lifecycle";
         public const string DeleteSave = "profile.save.delete";
+        public const string MvpApprovalReset = "profile.save.mvp-approval-reset";
         public const string RealmSelection = "profile.realm-selection.schema1";
         public const string Nvs01Progress = "profile.nvs01.schema1";
         public const string Resource = "profile.resource";
@@ -80,6 +81,7 @@ namespace AL.Services.Local
         public const string BossLoot = "profile.boss-loot";
         public const string SideQuest = "profile.side-quest.dormant";
         public const string ChampionCustomization = "profile.champion-customization";
+        public const string MvpLoop = "profile.mvp-loop.schema1";
         public const string ChampionArena = "profile.champion-arena.indirect";
         public const string DemoInitializer = "profile.demo-initializer.indirect";
         public const string KingdomNvs01 = "profile.kingdom-nvs01.indirect";
@@ -105,7 +107,7 @@ namespace AL.Services.Local
             Boot(ProfileMutationSurfaceIds.Research, typeof(IResearchService), typeof(LocalResearchService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Building, typeof(IBuildingService), typeof(LocalBuildingService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Training, typeof(ITrainingService), typeof(LocalTrainingService), ProfileMutationSurfaceDisposition.ContainedWriter),
-            Boot("boot.battle-simulator", typeof(IBattleSimulator), typeof(AL.Battle.Simulator.DeterministicBattleSimulator), ProfileMutationSurfaceDisposition.ReadOnly),
+            Boot("boot.battle-simulator", typeof(IBattleSimulator), typeof(AL.Battle.Simulator.FixedPointBattleSimulator), ProfileMutationSurfaceDisposition.ReadOnly),
             Boot(ProfileMutationSurfaceIds.WarzoneCredit, typeof(IWarzoneCreditService), typeof(LocalWarzoneCreditService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Warmaster, typeof(IWarmasterService), typeof(LocalWarmasterService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Boot(ProfileMutationSurfaceIds.Territory, typeof(ITerritoryService), typeof(AL.RealmWar.Warzone.WarzoneService), ProfileMutationSurfaceDisposition.ContainedWriter),
@@ -122,7 +124,9 @@ namespace AL.Services.Local
             Extra(ProfileMutationSurfaceIds.ManualSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.ContainedWriter),
             Extra(ProfileMutationSurfaceIds.LifecycleSave, typeof(ISaveGameService), typeof(AL.Core.Bootloader), ProfileMutationSurfaceDisposition.IndirectCaller),
             Extra(ProfileMutationSurfaceIds.DeleteSave, typeof(ISaveGameService), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.Dormant),
+            Extra(ProfileMutationSurfaceIds.MvpApprovalReset, typeof(ISaveGameService), typeof(MvpApprovalSlotRuntime), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.Nvs01Progress, typeof(ISaveGameCandidateStore), typeof(AL.Narrative.Nvs01.Nvs01SaveGameMutationCommitter), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
+            Extra(ProfileMutationSurfaceIds.MvpLoop, typeof(ILegacyMvpLoopCandidateStore), typeof(LocalSaveGameService), ProfileMutationSurfaceDisposition.NarrowLegacyOperation),
             Extra(ProfileMutationSurfaceIds.SideQuest, typeof(ISideQuestService), typeof(SideQuestService), ProfileMutationSurfaceDisposition.Dormant),
             Extra(ProfileMutationSurfaceIds.ChampionCustomization, null, typeof(AL.ChampionMode.Customization.ChampionCustomizationController), ProfileMutationSurfaceDisposition.ContainedWriter),
             Extra(ProfileMutationSurfaceIds.ChampionArena, null, typeof(AL.ChampionMode.ChampionArenaSceneController), ProfileMutationSurfaceDisposition.IndirectCaller),
@@ -245,9 +249,11 @@ namespace AL.Services.Local
     /// <summary>
     /// Hard dormant activation boundary for ordinary profile mutation. This
     /// train deliberately has no setter, configuration key, environment flag,
-    /// or authority-provider path capable of enabling production writes.
+    /// or authority-provider path capable of enabling ordinary writes.
     /// Schema-v1 realm bootstrap and NVS-01 use separate typed adapters and do
-    /// not pass through this latch.
+    /// not pass through this latch. Owner lifecycle persist (pause/quit) is the
+    /// exception: it flushes the already-loaded profile without opening
+    /// mutation, manual save, or delete.
     /// </summary>
     public static class ProfileMutationContainment
     {
@@ -275,9 +281,33 @@ namespace AL.Services.Local
             saveGameService != null && ProductionWriteActivationEnabled;
 
         internal static bool CanInvokeLifecycleSave(ISaveGameService saveGameService) =>
-            saveGameService != null && ProductionWriteActivationEnabled;
+            saveGameService != null;
+
+        internal static void InvokeLifecycleSave(ISaveGameService saveGameService)
+        {
+            if (!CanInvokeLifecycleSave(saveGameService))
+            {
+                return;
+            }
+
+            if (saveGameService is LocalSaveGameService local)
+            {
+                local.PersistLifecycleCheckpoint();
+                return;
+            }
+
+            if (saveGameService is MvpApprovalTransactionalSaveGameService approval)
+            {
+                approval.PersistLifecycleCheckpoint();
+                return;
+            }
+
+            saveGameService.Save();
+        }
 
         internal static bool CanInvokeDeleteSave(ISaveGameService saveGameService) =>
-            saveGameService != null && ProductionWriteActivationEnabled;
+            saveGameService != null &&
+            (ProductionWriteActivationEnabled ||
+             MvpApprovalSlotRuntime.IsDeleteAuthorized(saveGameService));
     }
 }

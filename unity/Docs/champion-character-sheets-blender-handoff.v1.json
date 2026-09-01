@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "handoffId": "al-champion-character-sheets-v001",
+  "status": "owner-approved-visual-source",
+  "scope": "four-realm-vanguard-character-sheets",
+  "runtimeAuthority": false,
+  "productionModelApproval": false,
+  "gitLfsRequired": true,
+  "designAuthority": [
+    "unity/Assets/AL/Art/Designs/FourRealmChampionAnchor.md",
+    "unity/Assets/AL/Art/Designs/ModularChampionCustomization.md"
+  ],
+  "assets": [
+    {
+      "id": "champion-four-realm-anchor-v001",
+      "realm": "shared",
+      "role": "realm-comparison-anchor",
+      "path": "unity/Assets/AL/Art/Champions/ConceptSheets/champion_four_realm_anchor_v001.png",
+      "width": 1633,
+      "height": 963,
+      "sha256": "a926e68f07806e1d989f1ee3d3e917a4f29f4636f6c90f24be7ac230d45f46cf"
+    },
+    {
+      "id": "champion-stonehold-vanguard-turnaround-v001",
+      "realm": "stonehold",
+      "role": "front-three-quarter-side-back-material-reference",
+      "path": "unity/Assets/AL/Art/Champions/ConceptSheets/champion_stonehold_vanguard_turnaround_v001.png",
+      "width": 1635,
+      "height": 962,
+      "sha256": "4a53de4ccb4993e92db42ea17e3b1b4cc9970df4e39de28c0bb230fe738f259c"
+    },
+    {
+      "id": "champion-eldergrove-vanguard-turnaround-v001",
+      "realm": "eldergrove",
+      "role": "front-three-quarter-side-back-material-reference",
+      "path": "unity/Assets/AL/Art/Champions/ConceptSheets/champion_eldergrove_vanguard_turnaround_v001.png",
+      "width": 1628,
+      "height": 966,
+      "sha256": "a5c9423bd6edf0362c99aed3aa68d39e277c747d6d767ec8eda62d38eb96830a"
+    },
+    {
+      "id": "champion-crownlands-vanguard-turnaround-v001",
+      "realm": "crownlands",
+      "role": "front-three-quarter-side-back-material-reference",
+      "path": "unity/Assets/AL/Art/Champions/ConceptSheets/champion_crownlands_vanguard_turnaround_v001.png",
+      "width": 1635,
+      "height": 962,
+      "sha256": "b6fd94b914d7ce90d245865808b47bc216ebde1468f6892e327ac552a506c5b4"
+    },
+    {
+      "id": "champion-umbral-vanguard-turnaround-v001",
+      "realm": "umbral",
+      "role": "front-three-quarter-side-back-material-reference",
+      "path": "unity/Assets/AL/Art/Champions/ConceptSheets/champion_umbral_vanguard_turnaround_v001.png",
+      "width": 1633,
+      "height": 963,
+      "sha256": "f3934fc6229f992eb2d2d0855f15df48bfc3877f3b08156bc4cc7ea5ea6e7637"
+    }
+  ],
+  "modelingEnvelope": {
+    "adultProportionHeads": 7.75,
+    "unityUnitsPerMeter": 1,
+    "unityForwardAxis": "+Z",
+    "pivot": "ground-center",
+    "rig": "Unity Humanoid compatible shared skeleton",
+    "triangleTargets": {
+      "high": "8000-18000",
+      "medium": "3000-6000",
+      "low": "800-1500",
+      "far": "marker-or-silhouette"
+    }
+  },
+  "excludedFromThisHandoff": [
+    "class-specific-character-sheets",
+    "final-face-identity",
+    "production-topology",
+    "uv-and-texture-authority",
+    "final-rig-and-animation",
+    "measured-mobile-performance"
+  ]
+}

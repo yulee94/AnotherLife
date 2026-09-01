@@ -4,6 +4,7 @@
 
 using AL.Core;
 using AL.UI.FirstUserIdentity;
+using AL.UI.Kingdom;
 
 namespace AL.Editor.Development.FirstUserGameTest
 {
@@ -14,10 +15,7 @@ namespace AL.Editor.Development.FirstUserGameTest
         Identity = 2,
         AppearanceAndName = 3,
         WorldTutorial = 4,
-        Omen = 5,
-        SkyCastle = 6,
-        ValeriusReturn = 7,
-        RealmReady = 8
+        Omen = 5
     }
 
     internal static class FirstUserGameTestPlaytestCopy
@@ -25,32 +23,26 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal const string NonProductionBadge =
             "ISOLATED EDITOR PLAYTEST — NOT PRODUCTION — SESSION ONLY";
         internal const string LoadingBreadcrumb =
-            "[Preparing]  ›  Origin  ›  Appearance  ›  First Steps  ›  Valerius";
+            "[Loading]  >  Identity  >  Appearance & Name  >  World Tutorial  >  OMEN";
         internal const string IdentityBreadcrumb =
-            "Preparing  ›  [Origin]  ›  Appearance  ›  First Steps  ›  Valerius";
+            "Loading  >  [Identity]  >  Appearance & Name  >  World Tutorial  >  OMEN";
         internal const string AppearanceBreadcrumb =
-            "Preparing  ›  Origin  ›  [Appearance]  ›  First Steps  ›  Valerius";
+            "Loading  >  Identity  >  [Appearance & Name]  >  World Tutorial  >  OMEN";
         internal const string TutorialBreadcrumb =
-            "Preparing  ›  Origin  ›  Appearance  ›  [First Steps]  ›  Valerius";
+            "Loading  >  Identity  >  Appearance & Name  >  [World Tutorial]  >  OMEN";
         internal const string OmenBreadcrumb =
-            "Preparing  ›  Origin  ›  Appearance  ›  First Steps  ›  [Valerius]  ›  Sky Castle  ›  Return";
-        internal const string SkyCastleBreadcrumb =
-            "Preparing  ›  Origin  ›  Appearance  ›  First Steps  ›  Valerius  ›  [Sky Castle]  ›  Return";
-        internal const string ValeriusReturnBreadcrumb =
-            "Preparing  ›  Origin  ›  Appearance  ›  First Steps  ›  Valerius  ›  Sky Castle  ›  [Return]";
-        internal const string RealmReadyBreadcrumb =
-            "Preparing  ›  Origin  ›  Appearance  ›  First Steps  ›  Valerius  ›  Sky Castle  ›  [Realm Ready]";
+            "Loading  >  Identity  >  Appearance & Name  >  World Tutorial  >  [OMEN]";
 
         internal const string AppearanceHeading =
-            "Choose your appearance and name";
-        internal const string NamePlaceholder = "Name your Champion for this playtest";
+            "Choose your appearance and playtest name";
+        internal const string NamePlaceholder = "Enter a playtest name";
         internal const string AppearancePrompt =
-            "Choose an appearance, then name your Champion.";
+            "Choose an appearance, then enter a playtest name.";
         internal const string AppearanceRequired = "Choose an appearance to continue.";
         internal const string NameRequired =
-            "Enter a short name without leading or trailing spaces.";
-        internal const string ReadyForTutorial = "Ready to enter the world.";
-        internal const string PreparingWorld = "Entering the world…";
+            "Enter a short playtest name without leading or trailing spaces.";
+        internal const string ReadyForTutorial = "Ready to enter the world tutorial.";
+        internal const string PreparingWorld = "Preparing your isolated world tutorial…";
         internal const string FriendlyBlockedStatus =
             "The isolated playtest could not continue. Review the Console, then exit safely.";
         internal const string FriendlyFailurePanel =
@@ -58,45 +50,28 @@ namespace AL.Editor.Development.FirstUserGameTest
         internal const string ExitAction = "Exit Isolated Test";
         internal const string ExitingStatus = "Closing the isolated playtest safely…";
 
-        internal const string MoveTitle = "First Steps · 1 of 2";
-        internal const string MoveObjective = "Move your Champion";
+        internal const string MoveTitle = "First Steps";
+        internal const string MoveObjective = "Move your character";
         internal const string MoveDetail =
-            "Use the movement arrows or your usual movement controls.";
-        internal const string AttackTitle = "First Steps · 2 of 2";
+            "Use movement keys, a controller, or the on-screen arrows.";
+        internal const string AttackTitle = "First Steps";
         internal const string AttackObjective = "Use Basic Attack";
         internal const string AttackDetail =
-            "Choose Basic Attack or use your usual action control.";
-        internal const string OmenTitle = "Veil Watch Dispatch";
-        internal const string OmenObjective = "Hear Valerius's report";
-        internal const string OmenOpenedStatus = "Choose your response";
-        internal const string OmenDeploymentReadyStatus =
-            "Confirm the Sky Castle deployment";
-        internal const string OmenReopenAction = "Reopen Valerius's report";
-        internal const string OmenDeclinedDetail =
-            "Valerius will wait. Reopen the report when you are ready.";
-        internal const string OmenDeploymentStatus =
-            "Mission accepted · Deployment prepared";
-        internal const string OmenDeploymentDetail =
-            "Your Champion is ready to cross into the Sky Castle.";
-        internal const string EnterSkyCastleAction = "Enter the Sky Castle";
-        internal const string EncounterStatus = "Sky Castle · Celestial disturbance";
-        internal const string EncounterDetail =
-            "Complete this journey checkpoint or retreat safely to regroup.";
-        internal const string RecoverTearAction = "Recover the Celestial Tear";
-        internal const string RetreatAction = "Retreat and regroup";
-        internal const string RecoveryStatus = "Safe return · Ready to retry";
-        internal const string RecoveryDetail =
-            "No progress was lost. Return to the Sky Castle when you are ready.";
-        internal const string ReportReadyStatus = "Celestial Tear recovered";
-        internal const string ReportReadyDetail =
-            "Bring the Celestial Tear back to Captain Valerius.";
-        internal const string ReturnToValeriusAction = "Return to Valerius";
-        internal const string RealmReadyStatus = "Realm command is ready";
-        internal const string RealmReadyDetail =
-            "The First Signal is complete. Your realm's next chapter is ready.";
-        internal const string CompleteJourneyAction = "Complete playtest";
+            "Use the action key or the on-screen Basic Attack button.";
+        internal const string OmenTitle = "A New Quest Awaits";
+        internal const string OmenObjective = "Open the quest to review it";
         internal const string OmenDetail =
-            "The Veil Watch has sent an urgent dispatch from the Sky Castle.";
+            "A new quest is available—open it to review.";
+        internal const string OmenFocusDetail =
+            "Quest details are in focus. Review them when you are ready.";
+        internal const string NoSafeTargetDetail =
+            "Quest details are not available right now.";
+        internal const string HearValeriusReportAction =
+            "Hear Valerius's report";
+        internal const string ValeriusReportOpenObjective =
+            "Valerius's report is open";
+        internal const string ValeriusReportPendingNotice =
+            "The report is open for review. Quest acceptance is intentionally unavailable in this playtest step.";
 
         private static readonly DevelopmentFirstUserIdentityDraftCopyProvider IdentityCopy =
             new DevelopmentFirstUserIdentityDraftCopyProvider();
@@ -115,12 +90,6 @@ namespace AL.Editor.Development.FirstUserGameTest
                     return TutorialBreadcrumb;
                 case FirstUserGameTestPlaytestPhase.Omen:
                     return OmenBreadcrumb;
-                case FirstUserGameTestPlaytestPhase.SkyCastle:
-                    return SkyCastleBreadcrumb;
-                case FirstUserGameTestPlaytestPhase.ValeriusReturn:
-                    return ValeriusReturnBreadcrumb;
-                case FirstUserGameTestPlaytestPhase.RealmReady:
-                    return RealmReadyBreadcrumb;
                 default:
                     return LoadingBreadcrumb;
             }
@@ -143,6 +112,52 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             description = realmLabel + "  •  " + raceLabel + "  •  " + classLabel;
             return true;
+        }
+
+        internal static bool TryBuildOmenOfferDetails(
+            Nvs01KingdomView view,
+            out string details)
+        {
+            details = string.Empty;
+            if (!IsFriendlyReadyView(view) ||
+                string.IsNullOrWhiteSpace(view.Description) ||
+                string.IsNullOrWhiteSpace(view.ObjectiveText) ||
+                string.IsNullOrWhiteSpace(view.SpeakerName) ||
+                string.IsNullOrWhiteSpace(view.SpeakerRole) ||
+                view.HasDialogue)
+            {
+                return false;
+            }
+
+            details = view.SpeakerName + " — " + view.SpeakerRole + "\n" +
+                      view.Description + "\n" + view.ObjectiveText;
+            return true;
+        }
+
+        internal static bool TryBuildValeriusReport(
+            Nvs01KingdomView view,
+            out string details)
+        {
+            details = string.Empty;
+            if (!IsFriendlyReadyView(view) ||
+                string.IsNullOrWhiteSpace(view.SpeakerName) ||
+                string.IsNullOrWhiteSpace(view.DialogueText) ||
+                !view.HasDialogue)
+            {
+                return false;
+            }
+
+            details = view.SpeakerName + "\n" + view.DialogueText + "\n\n" +
+                      ValeriusReportPendingNotice;
+            return true;
+        }
+
+        private static bool IsFriendlyReadyView(Nvs01KingdomView view)
+        {
+            return view != null &&
+                   view.Status == Nvs01KingdomViewStatus.Ready &&
+                   !view.HasDiagnostic &&
+                   string.IsNullOrEmpty(view.PlayerMessage);
         }
     }
 }

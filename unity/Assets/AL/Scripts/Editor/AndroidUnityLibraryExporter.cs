@@ -58,12 +58,33 @@ namespace AL.EditorTools
         private const string WindowsIl2CppToolPath = Il2CppToolDirectory + "il2cpp.exe";
         private const string UnixIl2CppToolPath = Il2CppToolDirectory + "il2cpp";
         private const int ArtifactReadBufferBytes = 64 * 1024;
+        internal static bool developmentExport = true;
 
         /// <summary>Unity -executeMethod entry. A rejected export intentionally exits non-zero.</summary>
         public static void ExportDevelopmentArm64Il2Cpp()
         {
-            AndroidUnityLibraryExportSummary summary = Execute(
-                new UnityAndroidUnityLibraryExportEnvironment());
+            RunExport(development: true);
+        }
+
+        /// <summary>Unity -executeMethod entry for the non-development release export.</summary>
+        public static void ExportReleaseArm64Il2Cpp()
+        {
+            RunExport(development: false);
+        }
+
+        private static void RunExport(bool development)
+        {
+            bool original = developmentExport;
+            developmentExport = development;
+            AndroidUnityLibraryExportSummary summary;
+            try
+            {
+                summary = Execute(new UnityAndroidUnityLibraryExportEnvironment());
+            }
+            finally
+            {
+                developmentExport = original;
+            }
             Debug.Log("[AL-ANDROID-UNITY-EXPORT-SUMMARY] " + summary.Summarize());
             if (!summary.Succeeded)
             {
@@ -416,14 +437,13 @@ namespace AL.EditorTools
             }
 
             ProductionSceneRecord[] records = ProductionSceneDescriptor.ShellFoundationOrdered.ToArray();
-            if (records.Length != 3 ||
+            if (records.Length != 5 ||
                 records.Any(record => record == null || !record.IsProductionScene || !record.IsInShellFoundation) ||
                 records.Any(record =>
-                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal) ||
-                    string.Equals(record.SceneId, ProductionSceneDescriptor.ChampionArenaSceneId, StringComparison.Ordinal)) ||
+                    string.Equals(record.SceneId, ProductionSceneDescriptor.TestSceneId, StringComparison.Ordinal)) ||
                 records.Select(record => record.AssetPath).Distinct(StringComparer.Ordinal).Count() != records.Length)
             {
-                failures.Add("ShellFoundation descriptor is not three unique production scenes with Test/Champion excluded.");
+                failures.Add("ShellFoundation descriptor is not five unique production scenes with Test excluded.");
             }
 
             string[] scenes = records
@@ -514,11 +534,46 @@ namespace AL.EditorTools
             int maximumFiles,
             int maximumDirectories,
             long maximumBytes,
-            Action<string, string> inspectionHook)
+            Action<string, string> inspectionHook) => InspectExportTreeCore(
+                outputDirectory,
+                maximumFiles,
+                maximumDirectories,
+                maximumBytes,
+                Application.platform,
+                inspectionHook,
+                requireStrongPathAttestation: true);
+
+        // Test-only portability seam for deterministic artifact-content validation. It never
+        // participates in Execute or the concrete export environment: production traversal
+        // continues to require the Windows retained-handle namespace contract above.
+        internal static AndroidUnityLibraryArtifactSnapshot InspectExportTreeForTests(
+            string outputDirectory,
+            int maximumFiles,
+            int maximumDirectories,
+            long maximumBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook) => InspectExportTreeCore(
+                outputDirectory,
+                maximumFiles,
+                maximumDirectories,
+                maximumBytes,
+                host,
+                inspectionHook,
+                requireStrongPathAttestation: false);
+
+        private static AndroidUnityLibraryArtifactSnapshot InspectExportTreeCore(
+            string outputDirectory,
+            int maximumFiles,
+            int maximumDirectories,
+            long maximumBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook,
+            bool requireStrongPathAttestation)
         {
             try
             {
-                if (!SupportsStrongPathAttestation(Application.platform))
+                if (requireStrongPathAttestation &&
+                    !SupportsStrongPathAttestation(host))
                 {
                     return AndroidUnityLibraryArtifactSnapshot.NotInspected(
                         "Strong no-follow artifact namespace attestation is unavailable on this Editor host; " +
@@ -547,12 +602,12 @@ namespace AL.EditorTools
                         "Export root is not a regular non-reparse directory.");
                 }
 
-                string expectedTool = ExpectedIl2CppToolPath(Application.platform);
+                string expectedTool = ExpectedIl2CppToolPath(host);
                 if (expectedTool.Length == 0)
                 {
                     return AndroidUnityLibraryArtifactSnapshot.NotInspected(
                         "Current Unity Editor host is unsupported for IL2CPP tool validation: " +
-                        Application.platform + ".");
+                        host + ".");
                 }
 
                 var pendingDirectories = new Queue<string>();
@@ -564,7 +619,9 @@ namespace AL.EditorTools
                 while (pendingDirectories.Count > 0)
                 {
                     string directory = pendingDirectories.Dequeue();
-                    using (IDisposable directoryLease = AcquireArtifactDirectoryLease(directory))
+                    using (IDisposable directoryLease = requireStrongPathAttestation
+                               ? AcquireArtifactDirectoryLease(directory)
+                               : PortableInspectionLease.Instance)
                     {
                         foreach (string entry in Directory.EnumerateFileSystemEntries(
                                      directory,
@@ -608,12 +665,19 @@ namespace AL.EditorTools
                                     " file inspection bound.");
                             }
 
-                            AttestedArtifactFile snapshot = ReadAttestedArtifact(
-                                fullEntry,
-                                relative,
-                                maximumBytes - totalBytes,
-                                Application.platform,
-                                inspectionHook);
+                            AttestedArtifactFile snapshot = requireStrongPathAttestation
+                                ? ReadAttestedArtifact(
+                                    fullEntry,
+                                    relative,
+                                    maximumBytes - totalBytes,
+                                    host,
+                                    inspectionHook)
+                                : ReadPortableArtifactForTests(
+                                    fullEntry,
+                                    relative,
+                                    maximumBytes - totalBytes,
+                                    host,
+                                    inspectionHook);
                             if (snapshot.Length < 0 || totalBytes > maximumBytes - snapshot.Length)
                             {
                                 return AndroidUnityLibraryArtifactSnapshot.NotInspected(
@@ -662,7 +726,7 @@ namespace AL.EditorTools
                     .Select(relative => ValidateRequiredArtifact(
                         relative,
                         snapshots[relative],
-                        Application.platform))
+                        host))
                     .Where(failure => failure.Length > 0)
                     .OrderBy(value => value, StringComparer.Ordinal)
                     .ToArray();
@@ -986,6 +1050,64 @@ namespace AL.EditorTools
             }
         }
 
+        private static AttestedArtifactFile ReadPortableArtifactForTests(
+            string fullPath,
+            string relativePath,
+            long remainingBytes,
+            RuntimePlatform host,
+            Action<string, string> inspectionHook)
+        {
+            FileAttributes attributes = File.GetAttributes(fullPath);
+            if ((attributes & FileAttributes.Directory) != 0 ||
+                !IsSafeArtifactAttributes(attributes))
+            {
+                throw new IOException(
+                    "Portable test inspection requires a regular non-symlink file: " +
+                    relativePath + ".");
+            }
+
+            var before = new FileInfo(fullPath);
+            long expectedLength = before.Length;
+            long expectedWriteTicks = before.LastWriteTimeUtc.Ticks;
+            using (var stream = new FileStream(
+                       fullPath,
+                       FileMode.Open,
+                       FileAccess.Read,
+                       FileShare.ReadWrite | FileShare.Delete,
+                       ArtifactReadBufferBytes,
+                       useAsync: false))
+            {
+                inspectionHook?.Invoke("after-open", relativePath);
+                StreamAttestation attestation = ReadBoundedStream(
+                    stream,
+                    remainingBytes,
+                    relativePath);
+                inspectionHook?.Invoke("after-read", relativePath);
+
+                before.Refresh();
+                if (!before.Exists ||
+                    before.Length != expectedLength ||
+                    before.LastWriteTimeUtc.Ticks != expectedWriteTicks ||
+                    attestation.Length != expectedLength)
+                {
+                    throw new IOException(
+                        "Portable test artifact identity or length drifted while read: " +
+                        relativePath + ".");
+                }
+
+                bool unixExecutable =
+                    (host == RuntimePlatform.OSXEditor ||
+                     host == RuntimePlatform.LinuxEditor) &&
+                    UnixAccess(fullPath, UnixExecutePermission) == 0;
+                return new AttestedArtifactFile(
+                    relativePath,
+                    attestation.Length,
+                    attestation.Sha256,
+                    attestation.PrefixBytes,
+                    unixExecutable);
+            }
+        }
+
         private static StreamAttestation ReadBoundedStream(
             Stream stream,
             long remainingBytes,
@@ -1065,6 +1187,16 @@ namespace AL.EditorTools
                 Length = length;
                 Sha256 = sha256 ?? string.Empty;
                 PrefixBytes = prefixBytes ?? Array.Empty<byte>();
+            }
+        }
+
+        private sealed class PortableInspectionLease : IDisposable
+        {
+            internal static readonly PortableInspectionLease Instance =
+                new PortableInspectionLease();
+
+            public void Dispose()
+            {
             }
         }
 
@@ -1360,6 +1492,14 @@ namespace AL.EditorTools
         private const uint FileAttributeDirectory = 0x00000010;
         private const uint FileAttributeReparsePoint = 0x00000400;
         private const int FileDispositionInfo = 4;
+        private const int UnixExecutePermission = 1;
+
+        [DllImport(
+            "libc",
+            EntryPoint = "access",
+            CharSet = CharSet.Ansi,
+            SetLastError = true)]
+        private static extern int UnixAccess(string path, int mode);
 
         [DllImport(
             "kernel32.dll",
@@ -1793,6 +1933,20 @@ namespace AL.EditorTools
             {
                 mismatches.Add("app-bundle");
             }
+            if (!string.Equals(
+                    expected.Il2CppCompilerConfiguration,
+                    actual.Il2CppCompilerConfiguration,
+                    StringComparison.Ordinal))
+            {
+                mismatches.Add("il2cpp-compiler-configuration");
+            }
+            if (!string.Equals(
+                    expected.ManagedStrippingLevel,
+                    actual.ManagedStrippingLevel,
+                    StringComparison.Ordinal))
+            {
+                mismatches.Add("managed-stripping-level");
+            }
             return mismatches.Count == 0
                 ? string.Empty
                 : "Post-restore build settings mismatch: " + string.Join(", ", mismatches) + ".";
@@ -2034,7 +2188,8 @@ namespace AL.EditorTools
             scenes = ScenePaths.ToArray(),
             locationPathName = OutputDirectory,
             target = BuildTarget.Android,
-            options = BuildOptions.Development | BuildOptions.AcceptExternalModificationsToPlayer
+            options = BuildOptions.AcceptExternalModificationsToPlayer |
+                (AndroidUnityLibraryExporter.developmentExport ? BuildOptions.Development : BuildOptions.None)
         };
 
         public string SummarizeFailures() => Failures.Count == 0
@@ -2049,6 +2204,8 @@ namespace AL.EditorTools
         public int MinimumApiLevel { get; }
         public bool ExportAsGoogleAndroidProject { get; }
         public bool BuildAppBundle { get; }
+        public string Il2CppCompilerConfiguration { get; }
+        public string ManagedStrippingLevel { get; }
 
         internal AndroidUnityLibraryBuildSettingsSnapshot(
             string scriptingBackend,
@@ -2056,12 +2213,33 @@ namespace AL.EditorTools
             int minimumApiLevel,
             bool exportAsGoogleAndroidProject,
             bool buildAppBundle)
+            : this(
+                scriptingBackend,
+                targetArchitectures,
+                minimumApiLevel,
+                exportAsGoogleAndroidProject,
+                buildAppBundle,
+                UnityEditor.Il2CppCompilerConfiguration.Master.ToString(),
+                UnityEditor.ManagedStrippingLevel.Minimal.ToString())
+        {
+        }
+
+        internal AndroidUnityLibraryBuildSettingsSnapshot(
+            string scriptingBackend,
+            string targetArchitectures,
+            int minimumApiLevel,
+            bool exportAsGoogleAndroidProject,
+            bool buildAppBundle,
+            string il2CppCompilerConfiguration,
+            string managedStrippingLevel)
         {
             ScriptingBackend = scriptingBackend ?? string.Empty;
             TargetArchitectures = targetArchitectures ?? string.Empty;
             MinimumApiLevel = minimumApiLevel;
             ExportAsGoogleAndroidProject = exportAsGoogleAndroidProject;
             BuildAppBundle = buildAppBundle;
+            Il2CppCompilerConfiguration = il2CppCompilerConfiguration ?? string.Empty;
+            ManagedStrippingLevel = managedStrippingLevel ?? string.Empty;
         }
     }
 
@@ -2526,7 +2704,9 @@ namespace AL.EditorTools
                 PlayerSettings.Android.targetArchitectures.ToString(),
                 (int)PlayerSettings.Android.minSdkVersion,
                 EditorUserBuildSettings.exportAsGoogleAndroidProject,
-                EditorUserBuildSettings.buildAppBundle);
+                EditorUserBuildSettings.buildAppBundle,
+                PlayerSettings.GetIl2CppCompilerConfiguration(NamedBuildTarget.Android).ToString(),
+                PlayerSettings.GetManagedStrippingLevel(NamedBuildTarget.Android).ToString());
 
         public void ApplyRequiredBuildSettings()
         {
@@ -2535,6 +2715,16 @@ namespace AL.EditorTools
                 ScriptingImplementation.IL2CPP);
             PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64;
             PlayerSettings.Android.minSdkVersion = AndroidSdkVersions.AndroidApiLevel24;
+            PlayerSettings.SetIl2CppCompilerConfiguration(
+                NamedBuildTarget.Android,
+                AndroidUnityLibraryExporter.developmentExport
+                    ? Il2CppCompilerConfiguration.Debug
+                    : Il2CppCompilerConfiguration.Release);
+            PlayerSettings.SetManagedStrippingLevel(
+                NamedBuildTarget.Android,
+                AndroidUnityLibraryExporter.developmentExport
+                    ? ManagedStrippingLevel.Minimal
+                    : ManagedStrippingLevel.Medium);
             EditorUserBuildSettings.exportAsGoogleAndroidProject = true;
             EditorUserBuildSettings.buildAppBundle = false;
         }
@@ -2544,7 +2734,11 @@ namespace AL.EditorTools
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
             if (!Enum.TryParse(snapshot.ScriptingBackend, out ScriptingImplementation backend) ||
                 !Enum.TryParse(snapshot.TargetArchitectures, out AndroidArchitecture architectures) ||
-                !Enum.IsDefined(typeof(AndroidSdkVersions), snapshot.MinimumApiLevel))
+                !Enum.IsDefined(typeof(AndroidSdkVersions), snapshot.MinimumApiLevel) ||
+                !Enum.TryParse(
+                    snapshot.Il2CppCompilerConfiguration,
+                    out Il2CppCompilerConfiguration compilerConfiguration) ||
+                !Enum.TryParse(snapshot.ManagedStrippingLevel, out ManagedStrippingLevel strippingLevel))
             {
                 throw new InvalidOperationException("Captured Android build settings cannot be restored exactly.");
             }
@@ -2560,6 +2754,12 @@ namespace AL.EditorTools
             TryRestore("minimumApiLevel", () =>
                 PlayerSettings.Android.minSdkVersion = (AndroidSdkVersions)snapshot.MinimumApiLevel,
                 failures);
+            TryRestore("il2CppCompilerConfiguration", () =>
+                PlayerSettings.SetIl2CppCompilerConfiguration(
+                    NamedBuildTarget.Android,
+                    compilerConfiguration), failures);
+            TryRestore("managedStrippingLevel", () =>
+                PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Android, strippingLevel), failures);
             TryRestore("exportAsGoogleAndroidProject", () =>
                 EditorUserBuildSettings.exportAsGoogleAndroidProject =
                     snapshot.ExportAsGoogleAndroidProject, failures);

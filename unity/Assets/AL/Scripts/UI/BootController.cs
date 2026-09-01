@@ -1,6 +1,10 @@
 using System;
 using System.Collections;
+using AL.Core;
+using AL.Core.Interfaces;
+using AL.Input;
 using AL.RealmSelection;
+using AL.Services.Local;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.SceneManagement;
@@ -19,7 +23,7 @@ namespace AL.UI
 
         [Header("Presentation")]
         [SerializeField] private bool _buildRuntimeSplash = true;
-        [SerializeField] private string _buildLabel = "PRE-ALPHA RUNTIME";
+        [SerializeField] private string _buildLabel = "TEMPORARY — launch splash";
 
         private LaunchReadinessCoordinator _readiness;
         private LaunchCinematicLifecycle _launchLifecycle;
@@ -30,7 +34,14 @@ namespace AL.UI
         private Text _statusText;
         private Text _detailText;
         private Button _continueButton;
+        private Button _startNewMvpButton;
         private Button _retryButton;
+        private bool _startNewMvpConfirmation;
+        private bool _approvalResetInProgress;
+        private string _approvalResetError = string.Empty;
+#if UNITY_INCLUDE_TESTS
+        private bool _suppressDestinationLoadForTests;
+#endif
         private int _readyFrame = -1;
         private int _focusedGeneration;
         private Button _focusedAction;
@@ -86,6 +97,8 @@ namespace AL.UI
             _readyFrame = -1;
             _focusedGeneration = 0;
             _focusedAction = null;
+            _startNewMvpConfirmation = false;
+            _approvalResetInProgress = false;
         }
 
         private void OnDestroy()
@@ -98,6 +111,11 @@ namespace AL.UI
             if (_retryButton != null)
             {
                 _retryButton.onClick.RemoveListener(OnRetryRequested);
+            }
+
+            if (_startNewMvpButton != null)
+            {
+                _startNewMvpButton.onClick.RemoveListener(OnStartNewMvpRequested);
             }
         }
 
@@ -188,17 +206,21 @@ namespace AL.UI
                     LaunchReadinessFailure.DestinationUnavailable,
                     retryAllowed: false);
             }
-            else if (Application.CanStreamedLevelBeLoaded(_realmSelectionScene))
+            else
             {
-                _readiness.TryPublishDestination(
-                    new LaunchDestinationEvidence(generation, _realmSelectionScene));
-            }
-            else if (_catalogReceipt != null)
-            {
-                _readiness.TryFail(
-                    generation,
-                    LaunchReadinessFailure.DestinationUnavailable,
-                    retryAllowed: true);
+                string destination = ResolveFirstUserDestination();
+                if (Application.CanStreamedLevelBeLoaded(destination))
+                {
+                    _readiness.TryPublishDestination(
+                        new LaunchDestinationEvidence(generation, destination));
+                }
+                else if (_catalogReceipt != null)
+                {
+                    _readiness.TryFail(
+                        generation,
+                        LaunchReadinessFailure.DestinationUnavailable,
+                        retryAllowed: true);
+                }
             }
         }
 
@@ -219,10 +241,32 @@ namespace AL.UI
 
             bool ready = snapshot.CanContinue;
             bool failed = snapshot.State == LaunchReadinessState.Failed;
+            bool approvalCanReset =
+                MvpApprovalSlotRuntime.IsApprovalFlavor &&
+                !_approvalResetInProgress &&
+                MvpApprovalSlotRuntime.CanStartNewJourney(out _);
+            bool confirmationVisible = _startNewMvpConfirmation && approvalCanReset;
             if (_continueButton != null)
             {
-                _continueButton.gameObject.SetActive(ready);
-                _continueButton.interactable = ready;
+                _continueButton.gameObject.SetActive(ready || confirmationVisible);
+                _continueButton.interactable = ready || confirmationVisible;
+                SetButtonLabel(
+                    _continueButton,
+                    confirmationVisible
+                        ? "Keep Current Journey"
+                        : MvpApprovalSlotRuntime.IsApprovalFlavor
+                            ? "Continue MVP Journey"
+                            : "Continue");
+            }
+
+            if (_startNewMvpButton != null)
+            {
+                bool showStartNew = approvalCanReset && (ready || failed || confirmationVisible);
+                _startNewMvpButton.gameObject.SetActive(showStartNew);
+                _startNewMvpButton.interactable = showStartNew;
+                SetButtonLabel(
+                    _startNewMvpButton,
+                    confirmationVisible ? "Confirm Start New" : "Start New MVP Journey");
             }
 
             if (_retryButton != null)
@@ -238,10 +282,22 @@ namespace AL.UI
 
             if (_detailText != null)
             {
-                _detailText.text = DetailFor(snapshot);
+                _detailText.text = !string.IsNullOrWhiteSpace(_approvalResetError)
+                    ? _approvalResetError
+                    : MvpApprovalSlotRuntime.IsApprovalFlavor && (ready || approvalCanReset)
+                        ? confirmationVisible
+                            ? "Confirming starts a fresh isolated approval journey. Keep Current Journey cancels without changing any save."
+                            : "This approval journey is isolated. Your normal save is not read, replaced, or deleted."
+                        : DetailFor(snapshot);
             }
 
-            if (ready)
+            if (confirmationVisible)
+            {
+                _readyFrame = Time.frameCount;
+                _submitArmed = false;
+                FocusCurrentAction(snapshot.AttemptGeneration, _startNewMvpButton);
+            }
+            else if (ready)
             {
                 _launchLifecycle.MarkAwaitingContinue(mandatoryReadinessReady: true);
                 _readyFrame = Time.frameCount;
@@ -253,6 +309,12 @@ namespace AL.UI
                 _readyFrame = Time.frameCount;
                 _submitArmed = false;
                 FocusCurrentAction(snapshot.AttemptGeneration, _retryButton);
+            }
+            else if (approvalCanReset && failed)
+            {
+                _readyFrame = Time.frameCount;
+                _submitArmed = false;
+                FocusCurrentAction(snapshot.AttemptGeneration, _startNewMvpButton);
             }
             else
             {
@@ -300,11 +362,21 @@ namespace AL.UI
         private void PollExplicitSubmit()
         {
             LaunchReadinessSnapshot snapshot = _readiness.Snapshot;
+            if (_startNewMvpConfirmation && GameInput.CancelPressed())
+            {
+                CancelStartNewConfirmation();
+                return;
+            }
+
             bool canContinue = snapshot.CanContinue;
             bool canRetry =
                 snapshot.State == LaunchReadinessState.Failed &&
                 snapshot.RetryAllowed;
-            if ((!canContinue && !canRetry) || Time.frameCount <= _readyFrame)
+            bool canStartNew =
+                _startNewMvpButton != null &&
+                _startNewMvpButton.gameObject.activeInHierarchy &&
+                _startNewMvpButton.interactable;
+            if ((!canContinue && !canRetry && !canStartNew) || Time.frameCount <= _readyFrame)
             {
                 return;
             }
@@ -319,12 +391,13 @@ namespace AL.UI
                 return;
             }
 
-            if (Input.GetKeyDown(KeyCode.Return) ||
-                Input.GetKeyDown(KeyCode.KeypadEnter) ||
-                Input.GetKeyDown(KeyCode.Space) ||
-                Input.GetButtonDown("Submit"))
+            if (GameInput.SubmitPressed())
             {
-                if (canContinue)
+                if (canStartNew && _focusedAction == _startNewMvpButton)
+                {
+                    OnStartNewMvpRequested();
+                }
+                else if (canContinue || _startNewMvpConfirmation)
                 {
                     OnContinueRequested();
                 }
@@ -337,14 +410,17 @@ namespace AL.UI
 
         private static bool AnySubmitControlHeld()
         {
-            return Input.GetKey(KeyCode.Return) ||
-                Input.GetKey(KeyCode.KeypadEnter) ||
-                Input.GetKey(KeyCode.Space) ||
-                Input.GetButton("Submit");
+            return GameInput.SubmitHeld();
         }
 
         private void OnContinueRequested()
         {
+            if (_startNewMvpConfirmation)
+            {
+                CancelStartNewConfirmation();
+                return;
+            }
+
             if (_readiness == null || Time.frameCount <= _readyFrame)
             {
                 return;
@@ -364,15 +440,97 @@ namespace AL.UI
             _submitArmed = false;
             _launchLifecycle.TryContinue(mandatoryReadinessReady: true);
             RefreshPresentation(force: true);
+#if UNITY_INCLUDE_TESTS
+            if (_suppressDestinationLoadForTests)
+            {
+                return;
+            }
+#endif
             StartCoroutine(LoadFirstUserDestination(generation));
         }
+
+        private void OnStartNewMvpRequested()
+        {
+            if (!MvpApprovalSlotRuntime.IsApprovalFlavor ||
+                _approvalResetInProgress ||
+                _readiness == null ||
+                Time.frameCount <= _readyFrame ||
+                !MvpApprovalSlotRuntime.CanStartNewJourney(out _))
+            {
+                return;
+            }
+
+            if (!_startNewMvpConfirmation)
+            {
+                _startNewMvpConfirmation = true;
+                _approvalResetError = string.Empty;
+                RefreshPresentation(force: true);
+                return;
+            }
+
+            StartNewMvpJourney();
+        }
+
+        private void CancelStartNewConfirmation()
+        {
+            _startNewMvpConfirmation = false;
+            _approvalResetError = string.Empty;
+            RefreshPresentation(force: true);
+        }
+
+        private void StartNewMvpJourney()
+        {
+            if (!_startNewMvpConfirmation || _approvalResetInProgress)
+            {
+                return;
+            }
+
+            _approvalResetInProgress = true;
+            _submitArmed = false;
+            RefreshPresentation(force: true);
+            MvpApprovalStartNewDisposition disposition =
+                MvpApprovalSlotRuntime.TryStartNewJourney(out _);
+            if (disposition == MvpApprovalStartNewDisposition.Succeeded)
+            {
+                _approvalResetInProgress = false;
+                _startNewMvpConfirmation = false;
+                _readyFrame = -1;
+                RefreshPresentation(force: true);
+                _readyFrame = -1;
+                OnContinueRequested();
+                return;
+            }
+
+            if (disposition == MvpApprovalStartNewDisposition.ReloadBootRequired)
+            {
+                if (MvpApprovalSlotRuntime.TryReloadBootAfterReset(out _))
+                {
+                    return;
+                }
+
+                _approvalResetInProgress = false;
+                _startNewMvpConfirmation = false;
+                _approvalResetError =
+                    "The isolated approval journey was cleared. Restart the game to begin fresh; your normal save was not changed.";
+                RefreshPresentation(force: true);
+                return;
+            }
+
+            _approvalResetInProgress = false;
+            _startNewMvpConfirmation = false;
+            _approvalResetError =
+                "The isolated approval journey could not be reset. Your normal save was not changed.";
+            RefreshPresentation(force: true);
+        }
+
 
         private IEnumerator LoadFirstUserDestination(int attemptGeneration)
         {
             AsyncOperation operation = null;
             try
             {
-                operation = SceneManager.LoadSceneAsync(_realmSelectionScene, LoadSceneMode.Single);
+                string destination = ResolveFirstUserDestination();
+                operation = SceneManager.LoadSceneAsync(destination, LoadSceneMode.Single);
             }
             catch (Exception exception)
             {
@@ -393,6 +551,23 @@ namespace AL.UI
             {
                 yield return null;
             }
+        }
+
+        private string ResolveFirstUserDestination()
+        {
+            ISaveGameService saveGameService = null;
+            ServiceLocator.TryGet(out saveGameService);
+            if (saveGameService?.CurrentSave != null)
+            {
+                AL.Data.Runtime.MvpLoopSaveCodec.RestoreSessionIdentity(saveGameService.CurrentSave);
+            }
+            bool gameplayLoadable =
+                Application.CanStreamedLevelBeLoaded(
+                    FirstUserBootDestinationResolver.GameplaySceneName);
+            return FirstUserBootDestinationResolver.ResolveSceneName(
+                saveGameService,
+                _realmSelectionScene,
+                gameplayLoadable);
         }
 
         private void OnRetryRequested()
@@ -517,9 +692,33 @@ namespace AL.UI
                 contentObject.transform,
                 "FinishedLoadingAction",
                 font,
-                "Continue");
+                MvpApprovalSlotRuntime.IsApprovalFlavor ? "Continue MVP Journey" : "Continue");
             _continueButton.onClick.AddListener(OnContinueRequested);
             _continueButton.gameObject.SetActive(false);
+
+            if (MvpApprovalSlotRuntime.IsApprovalFlavor)
+            {
+                _startNewMvpButton = CreateButton(
+                    contentObject.transform,
+                    "StartNewMvpJourneyAction",
+                    font,
+                    "Start New MVP Journey");
+                _startNewMvpButton.onClick.AddListener(OnStartNewMvpRequested);
+                _startNewMvpButton.gameObject.SetActive(false);
+
+                _continueButton.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnDown = _startNewMvpButton,
+                    selectOnUp = _startNewMvpButton
+                };
+                _startNewMvpButton.navigation = new Navigation
+                {
+                    mode = Navigation.Mode.Explicit,
+                    selectOnDown = _continueButton,
+                    selectOnUp = _continueButton
+                };
+            }
 
             _retryButton = CreateButton(
                 contentObject.transform,
@@ -692,6 +891,20 @@ namespace AL.UI
             textRect.offsetMax = new Vector2(-18f, -8f);
             text.color = Color.white;
             return button;
+        }
+
+        private static void SetButtonLabel(Button button, string label)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            Text text = button.GetComponentInChildren<Text>(includeInactive: true);
+            if (text != null)
+            {
+                text.text = label ?? string.Empty;
+            }
         }
     }
 }

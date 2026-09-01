@@ -4,6 +4,7 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using AL.Core.Scenes;
 using AL.Development;
+using AL.Editor.Development.FirstUserGameTest;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -166,6 +167,17 @@ namespace AL.EditorTools
             if (rawBlocker.IndexOf("Boot", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 return "The required launch scene is unavailable. Review the Console before continuing.";
+            }
+
+            if (rawBlocker.IndexOf(
+                    "authored onboarding",
+                    StringComparison.OrdinalIgnoreCase) >= 0 ||
+                rawBlocker.IndexOf(
+                    "admitted real assets",
+                    StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                return
+                    "The required real champion, enemy, kingdom structure, and neutral environment assets are not admitted yet. The user playtest remains locked.";
             }
 
             if (rawBlocker.IndexOf("session", StringComparison.OrdinalIgnoreCase) >= 0 ||
@@ -388,6 +400,13 @@ namespace AL.EditorTools
                 !string.Equals(AssetDatabase.AssetPathToGUID(boot.AssetPath), boot.AssetGuid, StringComparison.Ordinal))
             {
                 message = "The exact production Boot scene path/GUID is unavailable or has drifted.";
+                return false;
+            }
+
+            if (!FirstUserOnboardingEnvironmentRegistry.IsReadyForUserPlaytest)
+            {
+                message =
+                    "The authored onboarding module and its admitted real assets are unavailable.";
                 return false;
             }
 
@@ -659,13 +678,38 @@ namespace AL.EditorTools
 
         private static void HandleEditorFocusChanged(bool hasFocus)
         {
-            if (hasFocus || !IsSessionActive || !EditorApplication.isPlaying)
+            if (!IsSessionActive || !EditorApplication.isPlaying)
             {
                 return;
             }
 
-            SetStatus("Editor focus was lost. The isolated run is stopping instead of continuing in the background.");
-            EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary("Editor focus loss");
+            if (!EditorGameTestModeBootstrap.TryNotifyEditorFocusChanged(
+                    hasFocus,
+                    out EditorGameTestModeFocusSnapshot snapshot,
+                    out string message))
+            {
+                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
+                    string.IsNullOrEmpty(message)
+                        ? "Editor focus lifecycle mismatch"
+                        : message);
+                return;
+            }
+
+            if (!hasFocus &&
+                !FirstUserGameTestRuntimeHost.TrySynchronizeFocusSuspension(
+                    snapshot,
+                    out string suspensionMessage))
+            {
+                EditorGameTestModeBootstrap.FailClosedForLifecycleBoundary(
+                    string.IsNullOrEmpty(suspensionMessage)
+                        ? "The isolated first-user state could not be suspended synchronously"
+                        : suspensionMessage);
+                return;
+            }
+
+            SetStatus(hasFocus
+                ? "Editor focus returned. Revalidating the isolated session before input resumes…"
+                : "Playtest suspended while the Editor is out of focus. Progress and gameplay input are paused safely.");
         }
 
         private static void HandleEditorPauseStateChanged(PauseState state)

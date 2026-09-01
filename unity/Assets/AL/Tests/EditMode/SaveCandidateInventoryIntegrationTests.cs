@@ -524,7 +524,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void ExistingWritableHandleMakesPrimaryUnreadableInsteadOfTorn()
+        public void ExistingWritableHandleUsesHostSharingSemanticsWithoutReturningTornBytes()
         {
             string root = CreateRoot();
 
@@ -541,19 +541,40 @@ namespace AL.Tests.EditMode
                            FileShare.ReadWrite | FileShare.Delete))
                 {
                     object service = CreateSaveService(root);
-                    LogAssert.Expect(
-                        LogType.Error,
-                        new Regex("^AL-SAVE-PRIMARY-UNREADABLE:"));
+                    bool enforcesWindowsShareModes =
+                        Application.platform == RuntimePlatform.WindowsEditor;
+                    if (enforcesWindowsShareModes)
+                    {
+                        LogAssert.Expect(
+                            LogType.Error,
+                            new Regex("^AL-SAVE-PRIMARY-UNREADABLE:"));
+                    }
+
                     Invoke(service, "Load");
 
-                    Assert.AreEqual(
-                        "RecoveryFailed",
-                        GetProperty(service, "LastLoadStatus").ToString());
-                    Assert.Null(GetProperty(service, "CurrentSave"));
-                    Assert.False(
-                        (bool)GetProperty(
-                            GetProperty(service, "LastLoadDisposition"),
-                            "IsRuntimeUsable"));
+                    if (enforcesWindowsShareModes)
+                    {
+                        Assert.AreEqual(
+                            "RecoveryFailed",
+                            GetProperty(service, "LastLoadStatus").ToString());
+                        Assert.Null(GetProperty(service, "CurrentSave"));
+                        Assert.False(
+                            (bool)GetProperty(
+                                GetProperty(service, "LastLoadDisposition"),
+                                "IsRuntimeUsable"));
+                    }
+                    else
+                    {
+                        Assert.AreEqual(
+                            "LoadedPrimary",
+                            GetProperty(service, "LastLoadStatus").ToString());
+                        Assert.NotNull(GetProperty(service, "CurrentSave"));
+                        Assert.True(
+                            (bool)GetProperty(
+                                GetProperty(service, "LastLoadDisposition"),
+                                "IsRuntimeUsable"),
+                            "POSIX permits the second descriptor because the idle writer did not change any bytes; the bounded read must remain exact and runtime-usable.");
+                    }
                 }
 
                 AssertDirectoryUnchanged(root, originalDirectory);
@@ -565,7 +586,7 @@ namespace AL.Tests.EditMode
         }
 
         [Test]
-        public void BoundedReaderDeniesPathRenameWhileHandleIsOpen()
+        public void BoundedReaderUsesHostRenameSemanticsWithoutReturningTornBytes()
         {
             string root = CreateRoot();
 
@@ -574,6 +595,7 @@ namespace AL.Tests.EditMode
                 CreateCurrentProfile(root);
                 string primaryPath = Path.Combine(root, "save.json");
                 string renamedPath = Path.Combine(root, "renamed-save.json");
+                byte[] exactPrimary = File.ReadAllBytes(primaryPath);
                 Type operationsType = GetRuntimeType(
                     "AL.Services.Local.SystemSaveFileOperations");
                 MethodInfo openMethod = operationsType.GetMethod(
@@ -585,12 +607,30 @@ namespace AL.Tests.EditMode
                            null,
                            new object[] { primaryPath }))
                 {
-                    Assert.Throws<IOException>(() =>
-                        File.Move(primaryPath, renamedPath));
-                }
+                    if (Application.platform == RuntimePlatform.WindowsEditor)
+                    {
+                        Assert.Throws<IOException>(() =>
+                            File.Move(primaryPath, renamedPath));
+                        Assert.True(File.Exists(primaryPath));
+                        Assert.False(File.Exists(renamedPath));
+                    }
+                    else
+                    {
+                        File.Move(primaryPath, renamedPath);
+                        using (var retainedBytes = new MemoryStream())
+                        {
+                            stream.Position = 0;
+                            stream.CopyTo(retainedBytes);
+                            CollectionAssert.AreEqual(
+                                exactPrimary,
+                                retainedBytes.ToArray(),
+                                "POSIX renames the directory entry while the reader retains the same open inode; the bounded stream must still expose the exact generation.");
+                        }
 
-                Assert.True(File.Exists(primaryPath));
-                Assert.False(File.Exists(renamedPath));
+                        Assert.False(File.Exists(primaryPath));
+                        Assert.True(File.Exists(renamedPath));
+                    }
+                }
             }
             finally
             {
@@ -908,8 +948,11 @@ namespace AL.Tests.EditMode
 
         private static string LegacyCompatibleJson()
         {
+            // SelectedRealm is intentionally None so this pre-schema fixture is not
+            // auto-migrated on load; it exercises the read-only neutral-snapshot path
+            // for legacy saves that carry no recoverable kingdom state.
             return "{" +
-                   "\"SelectedRealm\":1," +
+                   "\"SelectedRealm\":0," +
                    "\"Resources\":[{\"Type\":0,\"Amount\":1000}," +
                    "{\"Type\":1,\"Amount\":1000}," +
                    "{\"Type\":2,\"Amount\":500}," +

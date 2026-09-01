@@ -51,8 +51,35 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 "Assets/AL/Scenes/Boot.unity",
                 "Assets/AL/Scenes/RealmSelection.unity",
+                "Assets/AL/Scenes/CharacterCreation.unity",
+                "Assets/AL/Scenes/ChampionArena.unity",
                 "Assets/AL/Scenes/Kingdom.unity"
             }, options.scenes);
+        }
+
+        [Test]
+        public void PlanPinsDistinctNonDevelopmentReleaseProfile()
+        {
+            FieldInfo profile = ExporterType.GetField(
+                "developmentExport",
+                BindingFlags.Static | BindingFlags.NonPublic);
+            Assert.NotNull(profile);
+            object original = profile.GetValue(null);
+            try
+            {
+                profile.SetValue(null, false);
+                string root = ProjectRoot();
+                object plan = CreatePlan(root, ExpectedOutput(root), ExpectedSummary(root));
+                var options = (BuildPlayerOptions)Invoke(plan, "CreateBuildPlayerOptions");
+
+                Assert.AreEqual(
+                    BuildOptions.AcceptExternalModificationsToPlayer,
+                    options.options);
+            }
+            finally
+            {
+                profile.SetValue(null, original);
+            }
         }
 
         [Test]
@@ -94,6 +121,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         public void CleanupRejectsPreexistingAndReracedDescendantReparseEntriesWithoutRecursion(
             bool raceAfterScan)
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-cleanup-race-" + Guid.NewGuid().ToString("N"));
@@ -136,6 +164,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void CleanupRejectsRegularFileMoveAndReplacementRaceWithoutDeletingEitherSentinel()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-cleanup-file-replacement-" + Guid.NewGuid().ToString("N"));
@@ -179,6 +208,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void CleanupRejectsRegularDirectoryMoveAndReplacementRaceWithoutDeletingEitherSentinel()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-cleanup-directory-replacement-" + Guid.NewGuid().ToString("N"));
@@ -225,6 +255,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void CleanupFailsClosedWhenNewDescendantAppearsAfterScanWithoutRecursiveFallback()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-cleanup-new-descendant-" + Guid.NewGuid().ToString("N"));
@@ -259,6 +290,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void CleanupRejectsDuplicateHardLinkIdentityWithoutDeletingEitherName()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-cleanup-hard-link-" + Guid.NewGuid().ToString("N"));
@@ -294,6 +326,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void CleanupDeletesExactRegularTreeOnlyThroughRetainedHandles()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-cleanup-handle-success-" + Guid.NewGuid().ToString("N"));
@@ -323,6 +356,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void SummaryWriteRejectsParentIdentityReplacementAfterCreation()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-summary-parent-race-" + Guid.NewGuid().ToString("N"));
@@ -360,6 +394,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [TestCase("before-commit")]
         public void SummaryWriteRevalidatesPolicyAtBothMutationCheckpoints(string raceStage)
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-summary-guard-race-" + Guid.NewGuid().ToString("N"));
@@ -475,6 +510,23 @@ namespace AL.Tests.EditMode.ProductionScenes
         }
 
         [Test]
+        public void ProductionInspectionRemainsFailClosedWithoutStrongHostAttestation()
+        {
+            if (Application.platform == RuntimePlatform.WindowsEditor)
+            {
+                Assert.That(
+                    (bool)Static("SupportsStrongPathAttestation", Application.platform),
+                    Is.True);
+                return;
+            }
+
+            object artifacts = Static("InspectExportTree", ProjectRoot());
+
+            Assert.That(PropBool(artifacts, "Inspected"), Is.False);
+            StringAssert.Contains("Windows-only", PropString(artifacts, "Summary"));
+        }
+
+        [Test]
         public void SuccessfulExecutionCleansOnlyGuardedOutputAndRestoresSettings()
         {
             EnvironmentState state = ValidEnvironment();
@@ -536,6 +588,8 @@ namespace AL.Tests.EditMode.ProductionScenes
         [TestCase("minimum-api")]
         [TestCase("export-project")]
         [TestCase("app-bundle")]
+        [TestCase("il2cpp-compiler-configuration")]
+        [TestCase("managed-stripping-level")]
         public void RestoreMustRecaptureAndMatchEveryOriginalSetting(string drift)
         {
             EnvironmentState state = ValidEnvironment();
@@ -544,7 +598,9 @@ namespace AL.Tests.EditMode.ProductionScenes
                 drift == "architectures" ? "ARM64" : "ARMv7",
                 drift == "minimum-api" ? 24 : 22,
                 drift == "export-project" || false,
-                drift != "app-bundle");
+                drift != "app-bundle",
+                drift == "il2cpp-compiler-configuration" ? "Release" : "Master",
+                drift == "managed-stripping-level" ? "Medium" : "Minimal");
 
             object summary = Execute(state);
 
@@ -639,7 +695,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             try
             {
                 CreateValidTree(temporary);
-                object bounded = Static("InspectExportTree", temporary, 2, 32, 1024L * 1024L);
+                object bounded = InspectFixture(temporary, 2, 32, 1024L * 1024L);
 
                 Assert.IsFalse(PropBool(bounded, "Inspected"));
                 StringAssert.Contains("file inspection bound", PropString(bounded, "Summary"));
@@ -662,7 +718,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             {
                 CreateValidTree(temporary);
                 WriteFixtureBytes(temporary, "unityLibrary/libs/unity-classes.jar", Array.Empty<byte>());
-                object emptyJar = Static("InspectExportTree", temporary);
+                object emptyJar = InspectFixture(temporary);
                 Assert.IsFalse(PropBool(emptyJar, "IsValid"));
                 Assert.That(
                     string.Join(" ", AsStrings(Prop(emptyJar, "InvalidArtifacts"))),
@@ -673,7 +729,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                     "unityLibrary/libs/unity-classes.jar",
                     new byte[] { 0x50, 0x4b, 0x03, 0x04, 1 });
                 WriteFixture(temporary, "unityLibrary/src/main/jniLibs/arm64-v8a/libunity.so", "not-elf");
-                object corruptSo = Static("InspectExportTree", temporary);
+                object corruptSo = InspectFixture(temporary);
                 Assert.IsFalse(PropBool(corruptSo, "IsValid"));
                 Assert.That(
                     string.Join(" ", AsStrings(Prop(corruptSo, "InvalidArtifacts"))),
@@ -706,7 +762,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                 Assert.IsFalse(
                     File.Exists(packagedLibrary),
                     "The exported Gradle stage must not require a native library compiled later by Gradle.");
-                object staged = Static("InspectExportTree", temporary);
+                object staged = InspectFixture(temporary);
                 Assert.IsTrue(PropBool(staged, "IsValid"), PropString(staged, "Summary"));
 
                 string generatedRegistration = Path.Combine(
@@ -719,7 +775,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                     "il2cppOutput",
                     "Il2CppCodeRegistration.cpp");
                 File.Delete(generatedRegistration);
-                object missingSource = Static("InspectExportTree", temporary);
+                object missingSource = InspectFixture(temporary);
                 Assert.IsFalse(PropBool(missingSource, "IsValid"));
                 Assert.That(
                     string.Join(" ", AsStrings(Prop(missingSource, "MissingArtifacts"))),
@@ -729,22 +785,16 @@ namespace AL.Tests.EditMode.ProductionScenes
                     temporary,
                     "unityLibrary/src/main/Il2CppOutputProject/Source/il2cppOutput/Il2CppCodeRegistration.cpp",
                     "// generated registration");
+                string expectedTool = ExpectedToolRelativePath();
                 string toolchain = Path.Combine(
                     temporary,
-                    "unityLibrary",
-                    "src",
-                    "main",
-                    "Il2CppOutputProject",
-                    "IL2CPP",
-                    "build",
-                    "deploy",
-                    "il2cpp.exe");
+                    expectedTool.Replace('/', Path.DirectorySeparatorChar));
                 File.Delete(toolchain);
-                object missingToolchain = Static("InspectExportTree", temporary);
+                object missingToolchain = InspectFixture(temporary);
                 Assert.IsFalse(PropBool(missingToolchain, "IsValid"));
                 Assert.That(
                     string.Join(" ", AsStrings(Prop(missingToolchain, "MissingArtifacts"))),
-                    Does.Contain("IL2CPP/build/deploy/il2cpp.exe"));
+                    Does.Contain(expectedTool));
             }
             finally
             {
@@ -761,7 +811,7 @@ namespace AL.Tests.EditMode.ProductionScenes
             try
             {
                 CreateValidTree(temporary);
-                object bounded = Static("InspectExportTree", temporary, 8192, 8192, 1L);
+                object bounded = InspectFixture(temporary, 8192, 8192, 1L);
 
                 Assert.IsFalse(PropBool(bounded, "Inspected"));
                 StringAssert.Contains("byte inspection bound", PropString(bounded, "Summary"));
@@ -854,12 +904,17 @@ namespace AL.Tests.EditMode.ProductionScenes
             try
             {
                 CreateValidTree(temporary);
+                string wrongTool = Application.platform == RuntimePlatform.WindowsEditor
+                    ? "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp"
+                    : "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe";
                 WriteFixtureBytes(
                     temporary,
-                    "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp",
-                    new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' });
+                    wrongTool,
+                    Application.platform == RuntimePlatform.WindowsEditor
+                        ? new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F' }
+                        : ValidPeHeader());
 
-                object artifacts = Static("InspectExportTree", temporary);
+                object artifacts = InspectFixture(temporary);
 
                 Assert.IsFalse(PropBool(artifacts, "IsValid"));
                 Assert.That(
@@ -875,6 +930,7 @@ namespace AL.Tests.EditMode.ProductionScenes
         [Test]
         public void InspectionKeepsEachArtifactSingleOpenAndRejectsConcurrentMutation()
         {
+            RequireWindowsKernelSemantics();
             string temporary = Path.Combine(
                 Path.GetTempPath(),
                 "al-android-export-race-" + Guid.NewGuid().ToString("N"));
@@ -921,7 +977,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                     "unityLibrary/build.gradle",
                     "apply plugin: 'com.android.library'\ndefaultConfig { minSdkVersion 24 }");
 
-                object missingGeneration = Static("InspectExportTree", temporary);
+                object missingGeneration = InspectFixture(temporary);
 
                 Assert.IsFalse(PropBool(missingGeneration, "IsValid"));
                 Assert.That(
@@ -941,8 +997,8 @@ namespace AL.Tests.EditMode.ProductionScenes
             try
             {
                 CreateValidTree(temporary);
-                object first = Static("InspectExportTree", temporary);
-                object second = Static("InspectExportTree", temporary);
+                object first = InspectFixture(temporary);
+                object second = InspectFixture(temporary);
 
                 Assert.IsTrue(PropBool(first, "IsValid"), PropString(first, "Summary"));
                 Assert.IsTrue(PropBool(first, "Inspected"));
@@ -952,7 +1008,7 @@ namespace AL.Tests.EditMode.ProductionScenes
                 Assert.IsEmpty(AsStrings(Prop(first, "MissingArtifacts")));
 
                 WriteFixture(temporary, "unityLibrary/src/main/jniLibs/armeabi-v7a/libunity.so", "wrong-abi");
-                object drifted = Static("InspectExportTree", temporary);
+                object drifted = InspectFixture(temporary);
                 Assert.IsFalse(PropBool(drifted, "IsValid"));
                 CollectionAssert.AreEqual(
                     new[] { "arm64-v8a", "armeabi-v7a" },
@@ -1063,13 +1119,31 @@ namespace AL.Tests.EditMode.ProductionScenes
             string architectures,
             int minimumApi,
             bool exportProject,
-            bool buildAppBundle) => Create(
+            bool buildAppBundle) => NewSettings(
+                backend,
+                architectures,
+                minimumApi,
+                exportProject,
+                buildAppBundle,
+                "Master",
+                "Minimal");
+
+        private static object NewSettings(
+            string backend,
+            string architectures,
+            int minimumApi,
+            bool exportProject,
+            bool buildAppBundle,
+            string il2CppCompilerConfiguration,
+            string managedStrippingLevel) => Create(
                 SettingsType,
                 backend,
                 architectures,
                 minimumApi,
                 exportProject,
-                buildAppBundle);
+                buildAppBundle,
+                il2CppCompilerConfiguration,
+                managedStrippingLevel);
 
         private static object NewReport(string result, string target, string output, int errors) => Create(
             ReportType,
@@ -1151,6 +1225,66 @@ namespace AL.Tests.EditMode.ProductionScenes
             ((IEnumerable)value).Cast<object>().Select(item => item?.ToString() ?? string.Empty).ToArray();
         private static string Failures(object plan) => string.Join(" ", AsStrings(Prop(plan, "Failures")));
 
+        private static object InspectFixture(
+            string root,
+            int maximumFiles = 8192,
+            int maximumDirectories = 8192,
+            long maximumBytes = 2L * 1024L * 1024L * 1024L,
+            Action<string, string> inspectionHook = null)
+        {
+            return Application.platform == RuntimePlatform.WindowsEditor
+                ? Static(
+                    "InspectExportTree",
+                    root,
+                    maximumFiles,
+                    maximumDirectories,
+                    maximumBytes,
+                    inspectionHook)
+                : Static(
+                    "InspectExportTreeForTests",
+                    root,
+                    maximumFiles,
+                    maximumDirectories,
+                    maximumBytes,
+                    Application.platform,
+                    inspectionHook);
+        }
+
+        private static void RequireWindowsKernelSemantics()
+        {
+            if (Application.platform != RuntimePlatform.WindowsEditor)
+            {
+                Assert.Ignore(
+                    "This test exercises retained Win32 handles, delete disposition, " +
+                    "share-mode mutation denial, or Windows filesystem identity semantics.");
+            }
+        }
+
+        private static string ExpectedToolRelativePath()
+        {
+            const string prefix =
+                "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/";
+            return prefix + (Application.platform == RuntimePlatform.WindowsEditor
+                ? "il2cpp.exe"
+                : "il2cpp");
+        }
+
+        private static byte[] ExpectedToolHeader()
+        {
+            switch (Application.platform)
+            {
+                case RuntimePlatform.WindowsEditor:
+                    return ValidPeHeader();
+                case RuntimePlatform.LinuxEditor:
+                    return new byte[] { 0x7f, (byte)'E', (byte)'L', (byte)'F', 1 };
+                case RuntimePlatform.OSXEditor:
+                    return new byte[] { 0xcf, 0xfa, 0xed, 0xfe, 1 };
+                default:
+                    Assert.Fail("Unsupported Editor host: " + Application.platform);
+                    return Array.Empty<byte>();
+            }
+        }
+
         private static string ProjectRoot() => Path.GetFullPath(Path.Combine(UnityEngine.Application.dataPath, ".."))
             .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         private static string ExpectedOutput(string root) => Path.GetFullPath(Path.Combine(root, "Builds", "AndroidExport"));
@@ -1180,6 +1314,9 @@ namespace AL.Tests.EditMode.ProductionScenes
             string existingFileName,
             IntPtr securityAttributes);
 
+        [DllImport("libc", EntryPoint = "chmod", CharSet = CharSet.Ansi, SetLastError = true)]
+        private static extern int ChangeUnixMode(string path, uint mode);
+
         private static void CreateValidTree(string root)
         {
             WriteFixture(root, "settings.gradle", "include ':launcher', ':unityLibrary'");
@@ -1202,10 +1339,20 @@ namespace AL.Tests.EditMode.ProductionScenes
             byte[] elf = { 0x7f, (byte)'E', (byte)'L', (byte)'F', 1 };
             WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libmain.so", elf);
             WriteFixtureBytes(root, "unityLibrary/src/main/jniLibs/arm64-v8a/libunity.so", elf);
-            WriteFixtureBytes(
-                root,
-                "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/build/deploy/il2cpp.exe",
-                ValidPeHeader());
+            string toolRelativePath = ExpectedToolRelativePath();
+            WriteFixtureBytes(root, toolRelativePath, ExpectedToolHeader());
+            if (Application.platform == RuntimePlatform.OSXEditor ||
+                Application.platform == RuntimePlatform.LinuxEditor)
+            {
+                string toolPath = Path.Combine(
+                    root,
+                    toolRelativePath.Replace('/', Path.DirectorySeparatorChar));
+                Assert.That(
+                    ChangeUnixMode(toolPath, 493U),
+                    Is.Zero,
+                    "Unable to make the host IL2CPP fixture executable. Native error: " +
+                    Marshal.GetLastWin32Error());
+            }
             WriteFixture(
                 root,
                 "unityLibrary/src/main/Il2CppOutputProject/IL2CPP/libil2cpp/il2cpp-api.cpp",

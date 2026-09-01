@@ -468,7 +468,7 @@ namespace AL.Core
 
             try
             {
-                saveGameService.Save();
+                ProfileMutationContainment.InvokeLifecycleSave(saveGameService);
                 if (saveGameService.LastSaveStatus != SaveOperationStatus.SavedPrimary)
                 {
                     Debug.LogError($"[BOOT_STACK_SAVE_FAILED] Bootloader save did not complete successfully: {saveGameService.LastSaveStatus} {saveGameService.LastSaveMessage}");
@@ -916,7 +916,7 @@ namespace AL.Core
             var buildingService = new LocalBuildingService(saveGame, resourceService, gameData);
             var trainingService = new LocalTrainingService(saveGame, resourceService);
 
-            var battleSim = new AL.Battle.Simulator.DeterministicBattleSimulator();
+            var battleSim = new AL.Battle.Simulator.FixedPointBattleSimulator();
             var warzoneCredits = new LocalWarzoneCreditService(saveGame);
             var warmaster = new LocalWarmasterService(saveGame, warzoneCredits);
             var territoryService = new AL.RealmWar.Warzone.WarzoneService(saveGame);
@@ -1002,7 +1002,10 @@ namespace AL.Core
     // implement the internal marker interface or the service interfaces directly; these controllable
     // doubles live in the production assembly and are driven by reflection. They are never referenced
     // by production code paths and carry no static state beyond per-instance test configuration.
-    internal sealed class ControllableSaveGameService : ISaveGameService
+    internal sealed class ControllableSaveGameService :
+        ISaveGameService,
+        ILegacyMvpLoopCandidateStore,
+        ILegacyFirstWorldProgressCandidateStore
     {
         private SaveGameData _currentSave;
 
@@ -1077,6 +1080,112 @@ namespace AL.Core
             _currentSave = null;
             LastLoadStatus = SaveLoadStatus.None;
             LastSaveStatus = SaveOperationStatus.None;
+        }
+
+        SaveCandidateCommitResult
+            ILegacyMvpLoopCandidateStore.TryCommitLegacyMvpLoop(
+                MvpLoopCommitRequest request)
+        {
+            if (!TryCloneCurrentSave(out SaveGameData candidate))
+            {
+                return RejectedCandidate("AL-MVP-LOOP-PROFILE-READ-ONLY");
+            }
+
+            MvpLoopPrepareDisposition disposition =
+                MvpLoopSaveCodec.PrepareCandidate(
+                    candidate,
+                    request,
+                    out string message);
+            switch (disposition)
+            {
+                case MvpLoopPrepareDisposition.Duplicate:
+                    return new SaveCandidateCommitResult(
+                        SaveCandidateCommitOutcome.Duplicate,
+                        _currentSave,
+                        message);
+                case MvpLoopPrepareDisposition.Prepared:
+                    return PublishCandidate(candidate, message);
+                default:
+                    return RejectedCandidate(message);
+            }
+        }
+
+        SaveCandidateCommitResult
+            ILegacyFirstWorldProgressCandidateStore
+                .TryCommitLegacyFirstWorldProgress(
+                    FirstWorldProgressCommitRequest request)
+        {
+            if (!TryCloneCurrentSave(out SaveGameData candidate))
+            {
+                return RejectedCandidate(
+                    "AL-FIRST-WORLD-PROFILE-READ-ONLY");
+            }
+
+            FirstWorldProgressPrepareDisposition disposition =
+                FirstWorldProgressSaveCodec.PrepareCandidate(
+                    candidate,
+                    request,
+                    out _,
+                    out string message);
+            switch (disposition)
+            {
+                case FirstWorldProgressPrepareDisposition.Duplicate:
+                    return new SaveCandidateCommitResult(
+                        SaveCandidateCommitOutcome.Duplicate,
+                        _currentSave,
+                        message);
+                case FirstWorldProgressPrepareDisposition.Prepared:
+                    return PublishCandidate(candidate, message);
+                default:
+                    return RejectedCandidate(message);
+            }
+        }
+
+        private bool TryCloneCurrentSave(out SaveGameData candidate)
+        {
+            candidate = null;
+            if (_currentSave == null)
+            {
+                return false;
+            }
+
+            string json = JsonUtility.ToJson(_currentSave);
+            candidate = JsonUtility.FromJson<SaveGameData>(json);
+            return candidate != null;
+        }
+
+        private SaveCandidateCommitResult PublishCandidate(
+            SaveGameData candidate,
+            string message)
+        {
+            SaveGameData previous = _currentSave;
+            _currentSave = candidate;
+            try
+            {
+                Save();
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.Committed,
+                    _currentSave,
+                    message);
+            }
+            catch (Exception exception)
+            {
+                _currentSave = previous;
+                return new SaveCandidateCommitResult(
+                    SaveCandidateCommitOutcome.PreviousPreserved,
+                    _currentSave,
+                    exception.Message);
+            }
+        }
+
+        private SaveCandidateCommitResult RejectedCandidate(string message)
+        {
+            return new SaveCandidateCommitResult(
+                SaveCandidateCommitOutcome.Rejected,
+                _currentSave,
+                string.IsNullOrWhiteSpace(message)
+                    ? "AL-TEST-SAVE-CANDIDATE-REJECTED"
+                    : message);
         }
     }
 

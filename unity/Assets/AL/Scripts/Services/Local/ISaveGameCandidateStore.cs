@@ -107,6 +107,36 @@ namespace AL.Services.Local
     }
 
     /// <summary>
+    /// Schema-v1 3D-first MVP loop mutation entry point. It carries no
+    /// caller-provided mutation callback.
+    /// </summary>
+    internal interface ILegacyMvpLoopCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitLegacyMvpLoop(MvpLoopCommitRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v1 private-kingdom teaching mutation entry point. The typed
+    /// request can advance only one ordered catalog step in SaveGameData.Quests.
+    /// </summary>
+    internal interface ILegacyKingdomTeachingCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitLegacyKingdomTeaching(
+            KingdomTeachingCommitRequest request);
+    }
+
+    /// <summary>
+    /// Schema-v1 first-world progression mutation entry point. The typed
+    /// request can advance exactly one tutorial or Proof command; arbitrary
+    /// save mutation remains unavailable to gameplay callers.
+    /// </summary>
+    internal interface ILegacyFirstWorldProgressCandidateStore
+    {
+        SaveCandidateCommitResult TryCommitLegacyFirstWorldProgress(
+            FirstWorldProgressCommitRequest request);
+    }
+
+    /// <summary>
     /// The only schema-v1 narrative mutation entry point. The complete typed
     /// NVS-01 plan and verified catalog are interpreted inside the save root;
     /// callers cannot supply an arbitrary save mutation callback.

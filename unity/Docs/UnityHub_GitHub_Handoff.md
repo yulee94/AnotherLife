@@ -47,6 +47,14 @@ Before building the Kingdom scene deeper, test:
 4. Local save file is created in `Application.persistentDataPath`.
 5. Generated design assets can be created from the editor menu.
 
+## Troubleshooting
+
+- Open this project **only** with Unity `2022.3.62f3`. Opening it with a different version (e.g.
+  `6000.5.3f1`) corrupts `Library/ShaderCache` and leaves every UI element unrendered.
+- If the realm-select or kingdom screens look empty/broken and the console spams
+  `Couldn't open include file 'HLSLSupport.cginc'`, follow
+  `unity/Docs/Shader_Cache_Corruption_Runbook.md`.
+
 ## Fable Compatibility
 
 Fable-compatible tooling can use the JSON catalogs without referencing Unity assemblies. The Fable-facing contract files are under `SharedContracts/`. This Codex agent remains responsible for project work; Unity Hub, GitHub, Fable, and Android tooling are tools only.

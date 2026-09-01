@@ -225,6 +225,34 @@ namespace AL.Tests.EditMode
             Assert.That(detail, Does.Not.Contain("Retry"));
         }
 
+        [Test]
+        public void RuntimeSplashIdentifiesTemporaryFallbackWithoutPreAlphaDebugChrome()
+        {
+            var controllerObject = new GameObject("LaunchLabelTestController");
+
+            try
+            {
+                var controller = controllerObject.AddComponent<BootController>();
+                FieldInfo buildLabel = typeof(BootController).GetField(
+                    "_buildLabel",
+                    BindingFlags.Instance | BindingFlags.NonPublic);
+
+                Assert.That(buildLabel, Is.Not.Null);
+                var label = (string)buildLabel.GetValue(controller);
+                Assert.That(label, Does.StartWith("TEMPORARY"));
+                Assert.That(label, Does.Not.Contain("PRE-ALPHA"));
+
+                string scene = System.IO.File.ReadAllText(
+                    System.IO.Path.Combine(Application.dataPath, "AL/Scenes/Boot.unity"));
+                Assert.That(scene, Does.Contain("_buildLabel: " + label));
+                Assert.That(scene, Does.Not.Contain("_buildLabel: PRE-ALPHA"));
+            }
+            finally
+            {
+                Object.DestroyImmediate(controllerObject);
+            }
+        }
+
         private static LaunchReadinessCoordinator ReadyCoordinator()
         {
             var coordinator = new LaunchReadinessCoordinator();

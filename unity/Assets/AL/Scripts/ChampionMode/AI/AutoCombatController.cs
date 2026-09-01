@@ -1,11 +1,16 @@
 using AL.ChampionMode.Control;
+using AL.ChampionMode.UI;
 using AL.Core;
+using AL.Input;
+using AL.UI.QuestHud;
 using UnityEngine;
 
 namespace AL.ChampionMode.AI
 {
     public class AutoCombatController : MonoBehaviour
     {
+        public const float ManualOverrideSeconds = 1.25f;
+
         [SerializeField] private AutoMode _mode = AutoMode.Manual;
         [SerializeField] private float _targetScanInterval = 0.5f;
         [SerializeField] private float _reactionDelay = 0.35f;
@@ -13,10 +18,14 @@ namespace AL.ChampionMode.AI
 
         private ChampionController _controller;
         private Transform _target;
+        private Transform _questTarget;
+        private bool _questTargetArmed;
         private float _nextScanTime;
         private float _nextDecisionTime;
+        private float _manualOverrideUntil;
 
         public AutoMode Mode => _mode;
+        public Transform QuestTarget => _questTarget;
 
         private void Awake()
         {
@@ -25,7 +34,55 @@ namespace AL.ChampionMode.AI
 
         private void Update()
         {
-            if (_controller == null || _mode == AutoMode.Manual)
+            if (_controller == null)
+            {
+                return;
+            }
+
+            if (GameInput.GameplaySuppressed || ChampionHudCameraGate.BlocksGameplay)
+            {
+                _controller.SetExternalMoveInput(Vector2.zero);
+                return;
+            }
+
+            if (_questTargetArmed &&
+                (!QuestHudAutoQuest.Enabled || _questTarget == null))
+            {
+                _controller.SetExternalMoveInput(Vector2.zero);
+                if (_questTarget == null)
+                {
+                    _target = null;
+                    _questTarget = null;
+                    _questTargetArmed = false;
+                }
+            }
+
+            bool questDriven = QuestHudAutoQuest.Enabled && _questTarget != null;
+            if (questDriven)
+            {
+                if (HasManualOverrideInput())
+                {
+                    NotifyManualOverrideAt(Time.unscaledTime);
+                    return;
+                }
+
+                if (!CanDriveQuestTargetAt(Time.unscaledTime))
+                {
+                    _controller.SetExternalMoveInput(Vector2.zero);
+                    return;
+                }
+
+                _target = _questTarget;
+                if (Time.time >= _nextDecisionTime)
+                {
+                    _nextDecisionTime = Time.time + _reactionDelay;
+                    TickAssistOrAuto(AutoMode.FullAuto);
+                }
+
+                return;
+            }
+
+            if (_mode == AutoMode.Manual)
             {
                 return;
             }
@@ -48,7 +105,66 @@ namespace AL.ChampionMode.AI
             }
 
             _nextDecisionTime = Time.time + _reactionDelay;
-            TickAssistOrAuto();
+            TickAssistOrAuto(_mode);
+        }
+
+        private void OnDisable()
+        {
+            _controller?.SetExternalMoveInput(Vector2.zero);
+        }
+
+        private void OnDestroy()
+        {
+            _controller?.SetExternalMoveInput(Vector2.zero);
+        }
+
+        public bool TryAssignQuestTarget(
+            ChampionArenaSceneController arena,
+            Transform target)
+        {
+            BossDummyAI boss = target == null ? null : target.GetComponent<BossDummyAI>();
+            if (arena == null ||
+                target == null ||
+                !ReferenceEquals(arena.GuardianTrialTarget, target) ||
+                target == transform ||
+                !target.gameObject.activeInHierarchy ||
+                boss == null ||
+                boss.IsDead)
+            {
+                return false;
+            }
+
+            _questTarget = target;
+            _questTargetArmed = true;
+            return true;
+        }
+
+        public void ClearQuestTarget()
+        {
+            _questTarget = null;
+            _target = null;
+            _questTargetArmed = false;
+            _controller?.SetExternalMoveInput(Vector2.zero);
+        }
+
+        public void NotifyManualOverrideAt(float unscaledTime)
+        {
+            _manualOverrideUntil = unscaledTime + ManualOverrideSeconds;
+            _controller?.SetExternalMoveInput(Vector2.zero);
+        }
+
+        public bool CanDriveQuestTargetAt(float unscaledTime)
+        {
+            if (!QuestHudAutoQuest.Enabled ||
+                _questTarget == null ||
+                !_questTarget.gameObject.activeInHierarchy ||
+                unscaledTime < _manualOverrideUntil)
+            {
+                return false;
+            }
+
+            BossDummyAI boss = _questTarget.GetComponent<BossDummyAI>();
+            return boss != null && !boss.IsDead;
         }
 
         public void SetMode(AutoMode mode)
@@ -59,16 +175,16 @@ namespace AL.ChampionMode.AI
                 _controller?.SetExternalMoveInput(Vector2.zero);
             }
 
-            Debug.Log($"Auto mode set to {_mode}");
+            GameDebug.Log($"Auto mode set to {_mode}");
         }
 
-        private void TickAssistOrAuto()
+        private void TickAssistOrAuto(AutoMode mode)
         {
             Vector3 toTarget = _target.position - transform.position;
             toTarget.y = 0f;
             float distance = toTarget.magnitude;
 
-            if (_mode == AutoMode.FullAuto && distance > _desiredRange)
+            if (mode == AutoMode.FullAuto && distance > _desiredRange)
             {
                 Vector3 localDirection = transform.InverseTransformDirection(toTarget.normalized);
                 _controller.SetExternalMoveInput(new Vector2(localDirection.x, localDirection.z));
@@ -83,7 +199,7 @@ namespace AL.ChampionMode.AI
                 _controller.RequestBasicAttack();
             }
 
-            if (_mode != AutoMode.Manual && Random.value > 0.55f)
+            if (mode != AutoMode.Manual && Random.value > 0.55f)
             {
                 _controller.RequestSkill(Random.Range(0, 4));
             }
@@ -121,11 +237,12 @@ namespace AL.ChampionMode.AI
 
         private static bool HasManualOverrideInput()
         {
-            return Mathf.Abs(Input.GetAxis("Horizontal")) > 0.1f ||
-                   Mathf.Abs(Input.GetAxis("Vertical")) > 0.1f ||
-                   Input.GetMouseButtonDown(0) ||
-                   Input.GetKeyDown(KeyCode.Space) ||
-                   Input.GetKeyDown(KeyCode.LeftShift);
+            Vector2 move = GameInput.ReadMove();
+            return Mathf.Abs(move.x) > 0.1f ||
+                   Mathf.Abs(move.y) > 0.1f ||
+                   GameInput.AttackPressed() ||
+                   GameInput.DodgePressed() ||
+                   GameInput.BlockPressed();
         }
     }
 }

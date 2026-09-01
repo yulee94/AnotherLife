@@ -28,6 +28,7 @@ namespace AL.RealmWar.Territories.Runtime
         private float _smoothedFrameTimeMilliseconds;
         private float _sampleElapsedSeconds;
         private bool _participantsDirty;
+        private UnityEngine.Camera _mainCamera;
 
         public event Action<TerritoryLoadPlan> PlanApplied;
 
@@ -270,8 +271,12 @@ namespace AL.RealmWar.Territories.Runtime
                 return _observer.position;
             }
 
-            Camera mainCamera = Camera.main;
-            return mainCamera != null ? mainCamera.transform.position : transform.position;
+            if (_mainCamera == null)
+            {
+                _mainCamera = Camera.main;
+            }
+
+            return _mainCamera != null ? _mainCamera.transform.position : transform.position;
         }
 
         private void RemoveMissingParticipants()

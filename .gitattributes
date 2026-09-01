@@ -7,3 +7,4 @@
 # blobs even when a Windows checkout enables core.autocrlf.
 /tools/game-data/generate_phase_c_realm_shadow_artifact.py text eol=lf
 /tools/game-data/migrate_byte_stable_sources.py             text eol=lf
+/tools/game-data/validate_building_champion_art_catalogs.py text eol=lf

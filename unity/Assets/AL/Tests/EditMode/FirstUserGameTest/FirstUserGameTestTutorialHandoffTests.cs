@@ -4,9 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using AL.Core;
 using AL.Editor.Development.FirstUserGameTest;
-using AL.Narrative.Nvs01;
 using AL.Narrative.Nvs01.Contracts;
 using NUnit.Framework;
 using UnityEditor;
@@ -38,7 +36,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
         }
 
         [Test]
-        public void ContractPinsExactCurrentMainIdentifiersWithoutDefiningASecondQuest()
+        public void ContractPinsExactCurrentMainIdentifiersWithoutDefiningAQuest()
         {
             Assert.That(FirstUserGameTestTutorialContract.TutorialId,
                 Is.EqualTo("TUTORIAL_FIRST_WORLD_ENTRY"));
@@ -59,8 +57,43 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                 Is.EqualTo(Nvs01CatalogContract.QuestId));
             Assert.That(FirstUserGameTestTutorialContract.OmenOfferedState,
                 Is.EqualTo("OFFERED"));
-            Assert.That(FirstUserGameTestOmenOfferContract.OfferDialogueId,
-                Is.EqualTo("DLG_OMEN_1_OFFER"));
+            Assert.That(FirstUserGameTestTutorialContract.FollowActiveObjectiveActionId,
+                Is.EqualTo("ACTION_FOLLOW_ACTIVE_OBJECTIVE"));
+        }
+
+        [Test]
+        public void FocusResumeReadDoesNotCreateMissingTutorialState()
+        {
+            var store = new FirstUserGameTestTutorialSessionStore(
+                SessionA,
+                GenerationA);
+
+            Assert.That(
+                store.TryLoadExisting(
+                    out FirstUserGameTestTutorialState missing,
+                    out string missingMessage),
+                Is.False);
+            Assert.That(missing, Is.Null);
+            Assert.That(missingMessage, Is.Not.Empty);
+            Assert.That(
+                store.TryLoadExisting(out missing, out _),
+                Is.False,
+                "A resume-time read must never recreate an erased tutorial record.");
+
+            Assert.That(
+                store.TryLoadOrCreate(
+                    out FirstUserGameTestTutorialState created,
+                    out string createMessage),
+                Is.True,
+                createMessage);
+            Assert.That(created, Is.Not.Null);
+            Assert.That(
+                store.TryLoadExisting(
+                    out FirstUserGameTestTutorialState retained,
+                    out string retainedMessage),
+                Is.True,
+                retainedMessage);
+            Assert.That(retained.ValueEquals(created), Is.True);
         }
 
         [TestCase(null, GenerationA, TestName = "Initial_NullSession_Rejects")]
@@ -286,280 +319,49 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             Assert.That(state, Is.Null);
         }
 
-        [Test]
-        public void ValeriusReportOpensExactProductionOfferWithoutAcceptingQuest()
+        [TestCase(false, FirstUserGameTestFollowOutcome.NoTarget,
+            "RESULT_ACTIVE_OBJECTIVE_NO_TARGET")]
+        [TestCase(true, FirstUserGameTestFollowOutcome.Focused,
+            "RESULT_ACTIVE_OBJECTIVE_FOCUSED")]
+        public void OfferedFollowReturnsOnlyTypedNonmutatingOutcome(
+            bool targetAvailable,
+            object expectedOutcomeValue,
+            string expectedResultId)
         {
-            Assert.That(FirstUserGameTestOmenOfferSession.TryCreate(
-                CatalogBytes(),
-                RealmId.Eldergrove,
-                out FirstUserGameTestOmenOfferSession session,
-                out string message), Is.True, message);
-
-            Assert.That(session.View.IsOpened, Is.False);
-            Assert.That(session.View.Title, Is.EqualTo("The First Signal"));
-            Assert.That(session.View.Objective,
-                Is.EqualTo("Speak with Captain Valerius."));
-            Assert.That(session.Snapshot.Revision, Is.Zero);
-            Assert.That(session.Snapshot.StateId, Is.EqualTo("OFFERED"));
-            Assert.That(session.Snapshot.CurrentDialogueNodeId, Is.Empty);
-            Assert.That(session.Snapshot.PendingChoice, Is.False);
-
-            Assert.That(session.TryOpenReport(
-                out FirstUserGameTestOmenOfferView opened,
-                out message), Is.True, message);
-            Assert.That(opened.IsOpened, Is.True);
-            Assert.That(opened.SpeakerName, Is.EqualTo("Captain Valerius"));
-            Assert.That(opened.SpeakerRole, Is.EqualTo("Veil Watch military liaison"));
-            Assert.That(opened.Dialogue,
-                Is.EqualTo("My lord, the Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?"));
-            Assert.That(opened.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.Dialogue));
-            Assert.That(opened.Choices.Select(choice => choice.Label), Is.EqualTo(new[]
-            {
-                "Tell me what happened.",
-                "Not yet."
-            }));
-            Assert.That(session.Snapshot.Revision, Is.EqualTo(1));
-            Assert.That(session.Snapshot.StateId, Is.EqualTo("OFFERED"));
-            Assert.That(session.Snapshot.CurrentDialogueNodeId,
-                Is.EqualTo("DLG_OMEN_1_OFFER"));
-            Assert.That(session.Snapshot.PendingChoice, Is.True);
-            Assert.That(session.Snapshot.PendingSemanticActionId, Is.Empty);
-            Assert.That(session.Snapshot.CommittedRealmId, Is.EqualTo("eldergrove"));
-            Assert.That(session.Snapshot.EncounterStatus, Is.EqualTo(Nvs01EncounterStatus.None));
-            Assert.That(session.Snapshot.CurrentEncounter, Is.Null);
-            Assert.That(session.Snapshot.ConsequenceIntentIds, Is.Empty);
-            Assert.That(session.Snapshot.TryGetObjectiveStatus(
-                "OBJ_OMEN_1_TALK",
-                out Nvs01ObjectiveStatus objectiveStatus), Is.True);
-            Assert.That(objectiveStatus, Is.EqualTo(Nvs01ObjectiveStatus.Active));
-
-            Assert.That(session.TryOpenReport(out FirstUserGameTestOmenOfferView duplicate,
-                out message), Is.True, message);
-            Assert.That(duplicate, Is.SameAs(opened));
-            Assert.That(session.Snapshot.Revision, Is.EqualTo(1));
-            Assert.That(session.Snapshot.StateId, Is.EqualTo("OFFERED"));
+            var expectedOutcome = (FirstUserGameTestFollowOutcome)expectedOutcomeValue;
+            FirstUserGameTestTutorialState complete =
+                StateAt(FirstUserGameTestTutorialStep.Complete);
+            FirstUserGameTestFollowResult result = FirstUserGameTestFollowPlanner.Plan(
+                complete,
+                FirstUserGameTestTutorialContract.FollowActiveObjectiveActionId,
+                targetAvailable);
+            Assert.That(result.Outcome, Is.EqualTo(expectedOutcome));
+            Assert.That(result.ResultId, Is.EqualTo(expectedResultId));
+            Assert.That(complete.ValueEquals(StateAt(FirstUserGameTestTutorialStep.Complete)),
+                Is.True);
         }
 
-        [Test]
-        public void DecliningTheReportCreatesAClearReopenPath()
+        [TestCase(FirstUserGameTestTutorialStep.Move, "ACTION_FOLLOW_ACTIVE_OBJECTIVE",
+            TestName = "FollowDuringMove_IsUnavailable")]
+        [TestCase(FirstUserGameTestTutorialStep.BasicAttack, "ACTION_FOLLOW_ACTIVE_OBJECTIVE",
+            TestName = "FollowDuringAttack_IsUnavailable")]
+        [TestCase(FirstUserGameTestTutorialStep.Complete, "WRONG_ACTION",
+            TestName = "UnknownFollowAction_IsUnavailable")]
+        public void FollowUnavailableNeverMutatesTutorial(
+            object stepValue,
+            string actionId)
         {
-            Assert.That(FirstUserGameTestOmenOfferSession.TryCreate(
-                CatalogBytes(),
-                RealmId.Crownlands,
-                out FirstUserGameTestOmenOfferSession session,
-                out string message), Is.True, message);
-            Assert.That(session.TryOpenReport(out _, out message), Is.True, message);
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.DeclineChoiceKey,
-                out FirstUserGameTestOmenOfferView declined,
-                out message), Is.True, message);
-            Assert.That(declined.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.Declined));
-            Assert.That(declined.CanReopen, Is.True);
-            Assert.That(declined.IsOpened, Is.False);
-            Assert.That(declined.Choices, Is.Empty);
-            Assert.That(session.Snapshot.StateId,
-                Is.EqualTo(FirstUserGameTestTutorialContract.OmenOfferedState));
-            Assert.That(session.Snapshot.PendingChoice, Is.False);
-            Assert.That(session.Snapshot.Revision, Is.EqualTo(2));
-
-            Assert.That(session.TryOpenReport(
-                out FirstUserGameTestOmenOfferView reopened,
-                out message), Is.True, message);
-            Assert.That(reopened.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.Dialogue));
-            Assert.That(reopened.Choices.Select(choice => choice.Key), Is.EqualTo(new[]
-            {
-                FirstUserGameTestOmenOfferContract.AcceptChoiceKey,
-                FirstUserGameTestOmenOfferContract.DeclineChoiceKey
-            }));
-            Assert.That(session.Snapshot.Revision, Is.EqualTo(3));
-        }
-
-        [Test]
-        public void AcceptedReportFlowsThroughSkyCastleToRealmReady()
-        {
-            Assert.That(FirstUserGameTestOmenOfferSession.TryCreate(
-                CatalogBytes(),
-                RealmId.Umbral,
-                out FirstUserGameTestOmenOfferSession session,
-                out string message), Is.True, message);
-            Assert.That(session.TryOpenReport(out _, out message), Is.True, message);
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.AcceptChoiceKey,
-                out FirstUserGameTestOmenOfferView accepted,
-                out message), Is.True, message);
-            Assert.That(accepted.Choices.Select(choice => choice.Key), Is.EqualTo(new[]
-            {
-                FirstUserGameTestOmenOfferContract.InvestigateChoiceKey,
-                FirstUserGameTestOmenOfferContract.AskMoreChoiceKey
-            }));
-            Assert.That(session.Snapshot.StateId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.TalkState));
-            Assert.That(session.Snapshot.CurrentDialogueNodeId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.StartDialogueId));
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.AskMoreChoiceKey,
-                out FirstUserGameTestOmenOfferView lore,
-                out message), Is.True, message);
-            Assert.That(lore.Choices.Single().Key,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.DepartChoiceKey));
-            Assert.That(session.Snapshot.CurrentDialogueNodeId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.LoreDialogueId));
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.DepartChoiceKey,
-                out FirstUserGameTestOmenOfferView departure,
-                out message), Is.True, message);
-            Assert.That(departure.Choices.Single().Key,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.DeployChoiceKey));
-            Assert.That(session.Snapshot.CurrentDialogueNodeId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.GoDialogueId));
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.DeployChoiceKey,
-                out FirstUserGameTestOmenOfferView deploymentReady,
-                out message), Is.True, message);
-            Assert.That(deploymentReady.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.DeploymentReady));
-            Assert.That(deploymentReady.CanDeploy, Is.True);
-            Assert.That(deploymentReady.PrimaryActionLabel,
-                Is.EqualTo("Deploy Champion."));
-            Assert.That(session.Snapshot.CurrentDialogueNodeId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.ArenaStartDialogueId));
-            Assert.That(session.Snapshot.PendingSemanticActionId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.RequestArenaActionId));
-
-            Assert.That(session.TryPrepareDeployment(
-                out FirstUserGameTestOmenOfferView prepared,
-                out message), Is.True, message);
-            Assert.That(prepared.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.DeploymentPrepared));
-            Assert.That(prepared.IsJourneyComplete, Is.False);
-            Assert.That(prepared.CanEnterEncounter, Is.True);
-            Assert.That(prepared.Choices, Is.Empty);
-            Assert.That(session.Snapshot.StateId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.InvestigateState));
-            Assert.That(session.Snapshot.CurrentEncounter, Is.Not.Null);
-            Assert.That(session.Snapshot.ConsequenceIntentIds, Is.Empty);
-
-            Assert.That(session.TryEnterEncounter(
-                out FirstUserGameTestOmenOfferView encounter,
-                out message), Is.True, message);
-            Assert.That(encounter.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.EncounterActive));
-            Assert.That(encounter.PrimaryActionLabel,
-                Is.EqualTo(FirstUserGameTestPlaytestCopy.RecoverTearAction));
-            Assert.That(encounter.SecondaryActionLabel,
-                Is.EqualTo(FirstUserGameTestPlaytestCopy.RetreatAction));
-
-            Assert.That(session.TryResolveEncounter(
-                NvsEncounterOutcome.Success,
-                out FirstUserGameTestOmenOfferView reportReady,
-                out message), Is.True, message);
-            Assert.That(reportReady.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.ReportReady));
-            Assert.That(reportReady.CanReturnToValerius, Is.True);
-            Assert.That(session.Snapshot.StateId,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.ReportState));
-            Assert.That(session.Snapshot.ConsequenceIntentIds,
-                Is.EqualTo(new[] { FirstUserGameTestOmenOfferContract.TearIntentId }));
-
-            Assert.That(session.TryOpenReport(
-                out FirstUserGameTestOmenOfferView report,
-                out message), Is.True, message);
-            Assert.That(report.Choices.Single().Key,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.PresentTearChoiceKey));
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.PresentTearChoiceKey,
-                out FirstUserGameTestOmenOfferView conclusion,
-                out message), Is.True, message);
-            Assert.That(conclusion.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.Dialogue));
-            Assert.That(conclusion.Choices.Single().Key,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.ContinueChoiceKey));
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.ContinueChoiceKey,
-                out FirstUserGameTestOmenOfferView realmReady,
-                out message), Is.True, message);
-            Assert.That(realmReady.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.RealmReady));
-            Assert.That(realmReady.IsJourneyComplete, Is.True);
-            Assert.That(realmReady.PrimaryActionLabel,
-                Is.EqualTo(FirstUserGameTestPlaytestCopy.CompleteJourneyAction));
-            Assert.That(session.Snapshot.ConsequenceIntentIds,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.CompletionIntentIds));
-        }
-
-        [Test]
-        public void FailedEncounterHasAuthoredRetryAndCreatesANewRequest()
-        {
-            FirstUserGameTestOmenOfferSession session = EnterSkyCastle();
-            string firstCorrelation = session.Snapshot.CurrentEncounter.CorrelationId;
-
-            Assert.That(session.TryResolveEncounter(
-                NvsEncounterOutcome.Failure,
-                out FirstUserGameTestOmenOfferView failed,
-                out string message), Is.True, message);
-            Assert.That(failed.Stage, Is.EqualTo(FirstUserGameTestOmenOfferStage.Dialogue));
-            Assert.That(failed.Choices.Single().Key,
-                Is.EqualTo(FirstUserGameTestOmenOfferContract.RetryChoiceKey));
-
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.RetryChoiceKey,
-                out FirstUserGameTestOmenOfferView retryReady,
-                out message), Is.True, message);
-            Assert.That(retryReady.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.RecoveryReady));
-            Assert.That(session.TryPrepareDeployment(out _, out message), Is.True, message);
-            Assert.That(session.Snapshot.CurrentEncounter.CorrelationId,
-                Is.Not.EqualTo(firstCorrelation));
-        }
-
-        [TestCase(NvsEncounterOutcome.Cancelled)]
-        [TestCase(NvsEncounterOutcome.Unavailable)]
-        public void InterruptedEncounterAlwaysExposesAWorkingRetry(
-            NvsEncounterOutcome outcome)
-        {
-            FirstUserGameTestOmenOfferSession session = EnterSkyCastle();
-            string firstCorrelation = session.Snapshot.CurrentEncounter.CorrelationId;
-
-            Assert.That(session.TryResolveEncounter(
-                outcome,
-                out FirstUserGameTestOmenOfferView recovery,
-                out string message), Is.True, message);
-            Assert.That(recovery.Stage,
-                Is.EqualTo(FirstUserGameTestOmenOfferStage.RecoveryReady));
-            Assert.That(recovery.PrimaryActionLabel, Is.Not.Empty);
-            Assert.That(session.TryPrepareDeployment(out _, out message), Is.True, message);
-            Assert.That(session.Snapshot.CurrentEncounter.CorrelationId,
-                Is.Not.EqualTo(firstCorrelation));
-        }
-
-        [Test]
-        public void ValeriusReportFailsClosedForInvalidRealmOrCatalog()
-        {
-            Assert.That(FirstUserGameTestOmenOfferSession.TryCreate(
-                CatalogBytes(),
-                RealmId.None,
-                out FirstUserGameTestOmenOfferSession invalidRealm,
-                out string realmMessage), Is.False);
-            Assert.That(invalidRealm, Is.Null);
-            Assert.That(realmMessage, Is.Not.Empty);
-
-            Assert.That(FirstUserGameTestOmenOfferSession.TryCreate(
-                new byte[] { 0x7b, 0x7d },
-                RealmId.Crownlands,
-                out FirstUserGameTestOmenOfferSession invalidCatalog,
-                out string catalogMessage), Is.False);
-            Assert.That(invalidCatalog, Is.Null);
-            Assert.That(catalogMessage, Is.Not.Empty);
+            var step = (FirstUserGameTestTutorialStep)stepValue;
+            FirstUserGameTestTutorialState state = StateAt(step);
+            FirstUserGameTestFollowResult result = FirstUserGameTestFollowPlanner.Plan(
+                state,
+                actionId,
+                targetAvailable: true);
+            Assert.That(result.Outcome,
+                Is.EqualTo(FirstUserGameTestFollowOutcome.Unavailable));
+            Assert.That(result.ResultId,
+                Is.EqualTo("RESULT_ACTIVE_OBJECTIVE_UNAVAILABLE"));
+            Assert.That(state.ValueEquals(StateAt(step)), Is.True);
         }
 
         [TestCase(FirstUserGameTestTutorialStep.Move, false, true,
@@ -595,61 +397,6 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                     null,
                     followUiActive: false),
                 Is.False);
-        }
-
-        [TestCase(FirstUserGameTestTutorialStep.Move,
-            (int)FirstUserGameTestOmenUiState.Preparing,
-            true, true, false, false, false,
-            (int)FirstUserGameTestButtonRole.Status,
-            (int)FirstUserGameTestTutorialFocusTarget.Move)]
-        [TestCase(FirstUserGameTestTutorialStep.BasicAttack,
-            (int)FirstUserGameTestOmenUiState.Preparing,
-            false, false, true, false, false,
-            (int)FirstUserGameTestButtonRole.Status,
-            (int)FirstUserGameTestTutorialFocusTarget.Attack)]
-        [TestCase(FirstUserGameTestTutorialStep.Complete,
-            (int)FirstUserGameTestOmenUiState.Preparing,
-            false, false, false, false, false,
-            (int)FirstUserGameTestButtonRole.Status,
-            (int)FirstUserGameTestTutorialFocusTarget.None)]
-        [TestCase(FirstUserGameTestTutorialStep.Complete,
-            (int)FirstUserGameTestOmenUiState.ReadyToOpen,
-            false, false, false, true, false,
-            (int)FirstUserGameTestButtonRole.ActiveTask,
-            (int)FirstUserGameTestTutorialFocusTarget.Report)]
-        [TestCase(FirstUserGameTestTutorialStep.Complete,
-            (int)FirstUserGameTestOmenUiState.AwaitingResponse,
-            false, false, false, false, true,
-            (int)FirstUserGameTestButtonRole.Status,
-            (int)FirstUserGameTestTutorialFocusTarget.Response)]
-        [TestCase(FirstUserGameTestTutorialStep.Complete,
-            (int)FirstUserGameTestOmenUiState.Complete,
-            false, false, false, false, true,
-            (int)FirstUserGameTestButtonRole.Completed,
-            (int)FirstUserGameTestTutorialFocusTarget.Response)]
-        public void InteractionPlanExposesOnlyControlsThatCanProduceTheirNamedResult(
-            object stepValue,
-            int omenUiStateValue,
-            bool expectedMovementEnabled,
-            bool expectedMovementEmphasized,
-            bool expectedAttackEnabled,
-            bool expectedObjectiveActionable,
-            bool expectedResponseActionable,
-            int expectedObjectiveRole,
-            int expectedFocus)
-        {
-            var step = (FirstUserGameTestTutorialStep)stepValue;
-            Assert.That(FirstUserGameTestTutorialInteractionPlan.TryCreate(
-                StateAt(step),
-                (FirstUserGameTestOmenUiState)omenUiStateValue,
-                out FirstUserGameTestTutorialInteractionPlan plan), Is.True);
-            Assert.That(plan.MovementEnabled, Is.EqualTo(expectedMovementEnabled));
-            Assert.That(plan.MovementEmphasized, Is.EqualTo(expectedMovementEmphasized));
-            Assert.That(plan.AttackEnabled, Is.EqualTo(expectedAttackEnabled));
-            Assert.That(plan.ObjectiveActionable, Is.EqualTo(expectedObjectiveActionable));
-            Assert.That(plan.ResponseActionable, Is.EqualTo(expectedResponseActionable));
-            Assert.That((int)plan.ObjectiveRole, Is.EqualTo(expectedObjectiveRole));
-            Assert.That((int)plan.FocusTarget, Is.EqualTo(expectedFocus));
         }
 
         [Test]
@@ -742,7 +489,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
         }
 
         [Test]
-        public void AssemblyAndSourceRemainEditorOnlyUnregisteredAndInMemory()
+        public void AssemblyAndSourceRemainEditorOnlyUnregisteredAndNonquest()
         {
             string implementationDirectory = Path.Combine(
                 ApplicationDataPath(),
@@ -760,27 +507,17 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             string runtime = File.ReadAllText(Path.Combine(
                 implementationDirectory,
                 "FirstUserGameTestTutorialRuntime.cs"));
-            string offer = File.ReadAllText(Path.Combine(
-                implementationDirectory,
-                "FirstUserGameTestOmenOffer.cs"));
 
             Assert.That(asmdef, Does.Contain("\"Editor\""));
             Assert.That(contracts, Does.Contain("#if !UNITY_EDITOR"));
             Assert.That(runtime, Does.Contain("#if !UNITY_EDITOR"));
-            Assert.That(offer, Does.Contain("#if !UNITY_EDITOR"));
-            Assert.That(offer, Does.Contain("SelectValerius"));
-            Assert.That(offer, Does.Contain("SelectChoice"));
-            Assert.That(offer, Does.Contain("InvokePrimaryAction"));
-            Assert.That(offer, Does.Contain("CreateInMemory"));
-            Assert.That(offer, Does.Contain("ApplyEncounterResult"));
             foreach (string forbidden in new[]
                      {
                          "QuestDefinition",
+                         "Nvs01QuestRuntime",
                          "TryAccept",
                          "TryProgress",
                          "TryComplete",
-                         "InvokePendingSemanticAction",
-                         ".Abandon(",
                          "ServiceLocator",
                          "SceneManager",
                          "PlayerPrefs",
@@ -790,7 +527,7 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                          "Addressables"
                      })
             {
-                Assert.That(contracts + runtime + offer, Does.Not.Contain(forbidden), forbidden);
+                Assert.That(contracts + runtime, Does.Not.Contain(forbidden), forbidden);
             }
 
             string[] productionReferences = Directory
@@ -819,41 +556,6 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                 GenerationA,
                 out FirstUserGameTestTutorialState state), Is.True);
             return state;
-        }
-
-        private static FirstUserGameTestOmenOfferSession EnterSkyCastle()
-        {
-            Assert.That(FirstUserGameTestOmenOfferSession.TryCreate(
-                CatalogBytes(),
-                RealmId.Crownlands,
-                out FirstUserGameTestOmenOfferSession session,
-                out string message), Is.True, message);
-            Assert.That(session.TryOpenReport(out _, out message), Is.True, message);
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.AcceptChoiceKey,
-                out _,
-                out message), Is.True, message);
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.InvestigateChoiceKey,
-                out _,
-                out message), Is.True, message);
-            Assert.That(session.TrySelectChoice(
-                FirstUserGameTestOmenOfferContract.DeployChoiceKey,
-                out _,
-                out message), Is.True, message);
-            Assert.That(session.TryPrepareDeployment(out _, out message), Is.True, message);
-            Assert.That(session.TryEnterEncounter(out _, out message), Is.True, message);
-            return session;
-        }
-
-        private static byte[] CatalogBytes()
-        {
-            return File.ReadAllBytes(Path.Combine(
-                ApplicationDataPath(),
-                "StreamingAssets",
-                Nvs01CatalogContract.StreamingAssetsRelativePath.Replace(
-                    '/',
-                    Path.DirectorySeparatorChar)));
         }
 
         private static FirstUserGameTestTutorialState StateAt(

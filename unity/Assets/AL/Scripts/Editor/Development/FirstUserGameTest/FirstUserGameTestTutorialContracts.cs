@@ -23,6 +23,14 @@ namespace AL.Editor.Development.FirstUserGameTest
             "EVENT_TUTORIAL_FIRST_WORLD_ENTRY_BASIC_ATTACK_CONFIRMED";
         internal const string TutorialCompletedEventId =
             "EVENT_TUTORIAL_FIRST_WORLD_ENTRY_COMPLETED";
+        internal const string FollowActiveObjectiveActionId =
+            "ACTION_FOLLOW_ACTIVE_OBJECTIVE";
+        internal const string ActiveObjectiveFocusedResultId =
+            "RESULT_ACTIVE_OBJECTIVE_FOCUSED";
+        internal const string ActiveObjectiveNoTargetResultId =
+            "RESULT_ACTIVE_OBJECTIVE_NO_TARGET";
+        internal const string ActiveObjectiveUnavailableResultId =
+            "RESULT_ACTIVE_OBJECTIVE_UNAVAILABLE";
         internal const string OmenQuestId = Nvs01CatalogContract.QuestId;
         internal const string OmenOfferedState = "OFFERED";
         internal const string OmenOfferedObjectiveId = "OBJ_OMEN_1_TALK";
@@ -376,6 +384,57 @@ namespace AL.Editor.Development.FirstUserGameTest
                 string.Empty,
                 string.Empty,
                 string.Empty);
+        }
+    }
+
+    internal enum FirstUserGameTestFollowOutcome
+    {
+        Invalid = 0,
+        Focused = 1,
+        NoTarget = 2,
+        Unavailable = 3
+    }
+
+    internal readonly struct FirstUserGameTestFollowResult
+    {
+        internal FirstUserGameTestFollowResult(
+            FirstUserGameTestFollowOutcome outcome,
+            string resultId)
+        {
+            Outcome = outcome;
+            ResultId = resultId ?? string.Empty;
+        }
+
+        internal FirstUserGameTestFollowOutcome Outcome { get; }
+        internal string ResultId { get; }
+    }
+
+    internal static class FirstUserGameTestFollowPlanner
+    {
+        internal static FirstUserGameTestFollowResult Plan(
+            FirstUserGameTestTutorialState state,
+            string actionId,
+            bool targetAvailable)
+        {
+            if (!FirstUserGameTestTutorialPlanner.IsValidState(state) ||
+                !state.IsOmenOffered ||
+                !string.Equals(
+                    actionId,
+                    FirstUserGameTestTutorialContract.FollowActiveObjectiveActionId,
+                    StringComparison.Ordinal))
+            {
+                return new FirstUserGameTestFollowResult(
+                    FirstUserGameTestFollowOutcome.Unavailable,
+                    FirstUserGameTestTutorialContract.ActiveObjectiveUnavailableResultId);
+            }
+
+            return targetAvailable
+                ? new FirstUserGameTestFollowResult(
+                    FirstUserGameTestFollowOutcome.Focused,
+                    FirstUserGameTestTutorialContract.ActiveObjectiveFocusedResultId)
+                : new FirstUserGameTestFollowResult(
+                    FirstUserGameTestFollowOutcome.NoTarget,
+                    FirstUserGameTestTutorialContract.ActiveObjectiveNoTargetResultId);
         }
     }
 

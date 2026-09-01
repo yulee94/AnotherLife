@@ -293,25 +293,26 @@ namespace AL.Tests.EditMode.GameDataCatalog
         }
 
         [Test]
-        public void LegacySimulatorExpressionsRemainExactMigrationEvidence()
+        public void DeterministicEngineRealmMultipliersAreExactFixedPointMigrationEvidence()
         {
             var sourcePath = Path.Combine(
                 Application.dataPath,
                 "AL",
                 "Scripts",
                 "Battle",
-                "Simulator",
-                "DeterministicBattleSimulator.cs");
+                "Computation",
+                "DeterministicBattleComputation.cs");
             var source = File.ReadAllText(sourcePath);
             var expressions = new[]
             {
-                "RealmId.Stonehold => 1f + " +
-                "(GetTotalCountStatic(troops, TroopType.Siege) > 0 ? 0.10f : 0.06f),",
-                "RealmId.Eldergrove => 1f + " +
-                "(GetTotalCountStatic(troops, TroopType.Ranged) > 0 ? 0.10f : 0.05f),",
-                "RealmId.Crownlands => 1.06f,",
-                "RealmId.Umbral => 1f + " +
-                "(isAttacker || battleType == BattleType.PvP ? 0.09f : 0.04f),"
+                "case BattleRealm.Stonehold:",
+                "return Has(army, BattleTroopArchetype.Siege, definitions) ? 1_100_000L : 1_060_000L;",
+                "case BattleRealm.Eldergrove:",
+                "return Has(army, BattleTroopArchetype.Ranged, definitions) ? 1_100_000L : 1_050_000L;",
+                "case BattleRealm.Crownlands:",
+                "return 1_060_000L;",
+                "case BattleRealm.Umbral:",
+                "return isAttacker || kind == BattleKind.Pvp ? 1_090_000L : 1_040_000L;"
             };
 
             foreach (var expression in expressions)

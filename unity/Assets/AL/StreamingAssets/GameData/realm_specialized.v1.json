@@ -1,0 +1,504 @@
+{
+  "gameId": "another-life",
+  "catalogId": "realm_specialized_v1",
+  "family": "realm_specialized",
+  "schemaVersion": 1,
+  "contentVersion": "1.0.0",
+  "sourceRevision": "t_d4892ee5",
+  "records": [
+    {
+      "id": "selection_policy",
+      "kind": "selection_policy",
+      "selection_mode": "one_realm_per_account",
+      "realm_lock_scope": "account",
+      "sub_character_policy": "same_realm_only",
+      "shared_storage_policy": "same_realm_account_storage",
+      "cross_realm_creation_policy": "reject",
+      "realm_change_policy": "not_supported_after_commit",
+      "uncommitted_profile_state": "realm_unselected",
+      "committed_profile_state": "realm_locked",
+      "narrative_warning_key": "realm.lock.warning"
+    },
+    {
+      "id": "narrative_continuity",
+      "kind": "narrative_continuity",
+      "source_packet_id": "al_narrative_four_realm_launch_source_v001",
+      "source_mode": "codex_narrative_content",
+      "account_lock_summary": "A player account commits to exactly one realm identity for the current product phase. Sub-characters inherit that realm and share same-realm account storage.",
+      "selection_warning_meaning": "The confirmation warning must communicate durable allegiance without implying a paid transfer, partial reset, or story-supported realm change exists.",
+      "uncommitted_meaning": "Before commitment, realm browsing is preview-only and must not grant resources, Realm Gems, territory, quest state, or chapter eligibility.",
+      "committed_meaning": "After commitment, the realm identity becomes the source for inner-realm presentation, sub-character filtering, realm-specific naming, and NVS eligibility checks.",
+      "handoff_status": "ready_for_codex_unity_realm_hooks"
+    },
+    {
+      "id": "realm_order",
+      "kind": "realm_order",
+      "realm_ids": [
+        "crownlands",
+        "stonehold",
+        "eldergrove",
+        "umbral"
+      ]
+    },
+    {
+      "id": "crownlands",
+      "kind": "realm",
+      "legacy_runtime_id": "Crownlands",
+      "display_name": "Crownlands",
+      "people_name": "Crownlands Humans",
+      "visual_identity": {
+        "mark_name": "Celestial Meridian",
+        "silhouette_language": "four-point meridian",
+        "material_language": "aged silver, pale stone"
+      },
+      "adjective": "Crownland",
+      "language_id": "lang_crown_speech",
+      "capital_id": "capital_crownspire",
+      "inner_realm_id": "inner_crownlands",
+      "outer_warzone_id": "warzone_crownlands",
+      "main_gate_id": "gate_crownlands_meridian",
+      "dragon_id": "dragon_crownlands_dawn_regent",
+      "realm_gem_ids": [
+        "gem_crownlands_sun",
+        "gem_crownlands_oath"
+      ],
+      "sigil": "golden crown over a storm-blue field",
+      "palette": {
+        "primary": "royal_blue",
+        "secondary": "polished_steel",
+        "accent": "royal_gold"
+      },
+      "naming_conventions": {
+        "character_titles": [
+          "Lord",
+          "Marshal",
+          "Banneret"
+        ],
+        "settlement_terms": [
+          "keep",
+          "market",
+          "road",
+          "watch"
+        ],
+        "asset_prefix": "crn"
+      },
+      "lore": {
+        "summary": "The Crownlands are a disciplined human realm of oath-bound roads, fortified markets, and banners carried into every border storm.",
+        "identity_pillars": [
+          "royal command",
+          "trade discipline",
+          "balanced arms",
+          "public oaths"
+        ],
+        "player_promise": "A Crownlands account begins as a sworn banner-holder whose authority is measured by service, order, and the defense of realm roads."
+      },
+      "continuity_hooks": {
+        "account_identity": "sworn_banner_holder",
+        "sub_character_inheritance": "all sub-characters are Crownland retainers, officers, or oathbound specialists attached to the same banner.",
+        "inner_realm_tone": "ordered roads, fortified courts, supply discipline, public vows, and border-watch command.",
+        "outer_warzone_motif": "main-gate defense, banner lines, cavalry pressure, and contested trade roads.",
+        "realm_gem_meaning": "the Sun and Oath gems represent public legitimacy and binding service."
+      },
+      "starting_hooks": {
+        "realm_selection_line_key": "realm.crownlands.selection.line",
+        "first_quest_arc_id": "quest_arc_crownlands_oathroad",
+        "starter_class_bias": [
+          "vanguard",
+          "duelist",
+          "inquisitor"
+        ]
+      },
+      "sort_order": 0
+    },
+    {
+      "id": "stonehold",
+      "kind": "realm",
+      "legacy_runtime_id": "Stonehold",
+      "display_name": "Stonehold",
+      "people_name": "Stonehold Dwarves",
+      "visual_identity": {
+        "mark_name": "Tectonic Axis",
+        "silhouette_language": "squared orthogonal mass",
+        "material_language": "basalt, dark iron, aged steel"
+      },
+      "adjective": "Stonehold",
+      "language_id": "lang_deep_rune",
+      "capital_id": "capital_anvildeep",
+      "inner_realm_id": "inner_stonehold",
+      "outer_warzone_id": "warzone_stonehold",
+      "main_gate_id": "gate_stonehold_faultline",
+      "dragon_id": "dragon_stonehold_iron_wyrm",
+      "realm_gem_ids": [
+        "gem_stonehold_forge",
+        "gem_stonehold_depth"
+      ],
+      "sigil": "black anvil beneath a copper mountain",
+      "palette": {
+        "primary": "slate_iron",
+        "secondary": "dark_stone",
+        "accent": "forge_copper"
+      },
+      "naming_conventions": {
+        "character_titles": [
+          "Thane",
+          "Forge-Lord",
+          "Shieldcaptain"
+        ],
+        "settlement_terms": [
+          "hold",
+          "forge",
+          "shaft",
+          "gate"
+        ],
+        "asset_prefix": "sth"
+      },
+      "lore": {
+        "summary": "Stonehold endures beneath mountain pressure, binding clan law, siege craft, and rune-forged memory into one unbroken realm.",
+        "identity_pillars": [
+          "clan endurance",
+          "rune craft",
+          "siege engines",
+          "mountain law"
+        ],
+        "player_promise": "A Stonehold account begins as a sworn keeper of forge and gate, expected to outlast any enemy that reaches the mountain road."
+      },
+      "continuity_hooks": {
+        "account_identity": "forge_gate_keeper",
+        "sub_character_inheritance": "all sub-characters are Stonehold clan-bound heirs, shieldkin, or oath workers from the same hold.",
+        "inner_realm_tone": "deep halls, forge rolls, clan ledgers, rune memory, and defensive preparation.",
+        "outer_warzone_motif": "faultline gates, siege engines, stone redoubts, and attrition warfare.",
+        "realm_gem_meaning": "the Forge and Depth gems represent made law and ancestral endurance."
+      },
+      "starting_hooks": {
+        "realm_selection_line_key": "realm.stonehold.selection.line",
+        "first_quest_arc_id": "quest_arc_stonehold_anvil_oath",
+        "starter_class_bias": [
+          "vanguard",
+          "warden",
+          "dreadknight"
+        ]
+      },
+      "sort_order": 1
+    },
+    {
+      "id": "eldergrove",
+      "kind": "realm",
+      "legacy_runtime_id": "Eldergrove",
+      "display_name": "Eldergrove",
+      "people_name": "Eldergrove Elves",
+      "visual_identity": {
+        "mark_name": "Living Orbit",
+        "silhouette_language": "three-arc seed void",
+        "material_language": "bark, lichen, weathered bronze"
+      },
+      "adjective": "Eldergrove",
+      "language_id": "lang_leafsong",
+      "capital_id": "capital_worldroot",
+      "inner_realm_id": "inner_eldergrove",
+      "outer_warzone_id": "warzone_eldergrove",
+      "main_gate_id": "gate_eldergrove_greenveil",
+      "dragon_id": "dragon_eldergrove_moonbough",
+      "realm_gem_ids": [
+        "gem_eldergrove_root",
+        "gem_eldergrove_moon"
+      ],
+      "sigil": "silver leaf over a living green moon",
+      "palette": {
+        "primary": "worldroot_green",
+        "secondary": "moonlit_silver",
+        "accent": "pale_gold"
+      },
+      "naming_conventions": {
+        "character_titles": [
+          "Warden",
+          "Oracle",
+          "Thorn-Singer"
+        ],
+        "settlement_terms": [
+          "grove",
+          "bough",
+          "mere",
+          "sanctum"
+        ],
+        "asset_prefix": "eld"
+      },
+      "lore": {
+        "summary": "Eldergrove is a living court of root, moonlit water, and old vows where memory grows through trees and border paths answer to wardens.",
+        "identity_pillars": [
+          "living sanctuaries",
+          "healing vows",
+          "moonlit archery",
+          "ancient memory"
+        ],
+        "player_promise": "An Eldergrove account begins as a guardian of living borders, balancing mercy, precision, and the cost of old promises."
+      },
+      "continuity_hooks": {
+        "account_identity": "living_border_guardian",
+        "sub_character_inheritance": "all sub-characters are Eldergrove wardens, oracles, hunters, or caretakers bound to the same living border.",
+        "inner_realm_tone": "root sanctuaries, moonlit councils, healing vows, hidden paths, and guarded mercy.",
+        "outer_warzone_motif": "greenveil ambushes, living defenses, archer lines, and contested sacred crossings.",
+        "realm_gem_meaning": "the Root and Moon gems represent memory that survives and judgment made in quiet light."
+      },
+      "starting_hooks": {
+        "realm_selection_line_key": "realm.eldergrove.selection.line",
+        "first_quest_arc_id": "quest_arc_eldergrove_rootwatch",
+        "starter_class_bias": [
+          "oracle",
+          "warden",
+          "spellblade"
+        ]
+      },
+      "sort_order": 2
+    },
+    {
+      "id": "umbral",
+      "kind": "realm",
+      "legacy_runtime_id": "Umbral",
+      "display_name": "Umbral",
+      "people_name": "Umbral Dark Elves",
+      "visual_identity": {
+        "mark_name": "Severed Eclipse",
+        "silhouette_language": "offset eclipse and diagonal void",
+        "material_language": "obsidian, smoked metal"
+      },
+      "adjective": "Umbral",
+      "language_id": "lang_ash_cant",
+      "capital_id": "capital_veilspire",
+      "inner_realm_id": "inner_umbral",
+      "outer_warzone_id": "warzone_umbral",
+      "main_gate_id": "gate_umbral_ashvein",
+      "dragon_id": "dragon_umbral_void_seraph",
+      "realm_gem_ids": [
+        "gem_umbral_veil",
+        "gem_umbral_ember"
+      ],
+      "sigil": "crimson eye inside an obsidian veil",
+      "palette": {
+        "primary": "obsidian_black",
+        "secondary": "shadow_violet",
+        "accent": "blood_ember"
+      },
+      "naming_conventions": {
+        "character_titles": [
+          "Shade-Lord",
+          "Veilblade",
+          "Ash Oracle"
+        ],
+        "settlement_terms": [
+          "spire",
+          "vault",
+          "veil",
+          "ashcourt"
+        ],
+        "asset_prefix": "umb"
+      },
+      "lore": {
+        "summary": "Umbral survives where ash, secrecy, and forbidden bargains meet; its nobles treat every border as a mask and every oath as a blade.",
+        "identity_pillars": [
+          "shadow courts",
+          "curse craft",
+          "assassins",
+          "forbidden archives"
+        ],
+        "player_promise": "An Umbral account begins as a claimant beneath the veil, rewarded for patience, precision, and ruthless control of hidden knowledge."
+      },
+      "continuity_hooks": {
+        "account_identity": "veiled_claimant",
+        "sub_character_inheritance": "all sub-characters are Umbral claimants, agents, archivists, or blades belonging to the same hidden court.",
+        "inner_realm_tone": "ash courts, veiled bargains, forbidden archives, rival masks, and quiet tests of control.",
+        "outer_warzone_motif": "ashvein gates, ambush routes, curse craft, intelligence denial, and precision strikes.",
+        "realm_gem_meaning": "the Veil and Ember gems represent secrecy preserved and power kept alive under ash."
+      },
+      "starting_hooks": {
+        "realm_selection_line_key": "realm.umbral.selection.line",
+        "first_quest_arc_id": "quest_arc_umbral_veilclaim",
+        "starter_class_bias": [
+          "nightblade",
+          "dreadknight",
+          "spellblade"
+        ]
+      },
+      "sort_order": 3
+    },
+    {
+      "id": "realm_lock_warning",
+      "kind": "localization_draft",
+      "key": "realm.lock.warning",
+      "text": "This account will be bound to the chosen realm. Future characters on this account must belong to the same realm."
+    },
+    {
+      "id": "realm_crownlands_selection_line",
+      "kind": "localization_draft",
+      "key": "realm.crownlands.selection.line",
+      "text": "Take the banner road, hold the oath in public, and let no border storm break Crownlands order."
+    },
+    {
+      "id": "realm_stonehold_selection_line",
+      "kind": "localization_draft",
+      "key": "realm.stonehold.selection.line",
+      "text": "Keep forge and gate, remember the deep law, and make the mountain answer in iron."
+    },
+    {
+      "id": "realm_eldergrove_selection_line",
+      "kind": "localization_draft",
+      "key": "realm.eldergrove.selection.line",
+      "text": "Guard the living border, listen where roots remember, and choose mercy only when it can survive."
+    },
+    {
+      "id": "realm_umbral_selection_line",
+      "kind": "localization_draft",
+      "key": "realm.umbral.selection.line",
+      "text": "Claim the veil, keep power beneath ash, and let every oath cut before it is seen."
+    },
+    {
+      "id": "engineering_handoff",
+      "kind": "engineering_handoff",
+      "consumer": "codex/unity-realm-hooks",
+      "parse_on_launch": true,
+      "required_validation": [
+        "catalog version is supported",
+        "realm IDs are unique and lowercase snake-case",
+        "realmOrder references exactly the four realm IDs",
+        "legacyRuntimeId mappings are unique",
+        "each realm has two realmGemIds",
+        "account realm-lock policy is one_realm_per_account",
+        "sub-character policy is same_realm_only"
+      ],
+      "non_goals_for_this_catalog": [
+        "runtime save mutation",
+        "account creation implementation",
+        "realm balance values",
+        "combat stats",
+        "ECS entity spawning"
+      ]
+    }
+  ],
+  "aliases": [
+    {
+      "legacyId": "Crownlands",
+      "canonicalId": "crownlands",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Eldergrove",
+      "canonicalId": "eldergrove",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Stonehold",
+      "canonicalId": "stonehold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "Umbral",
+      "canonicalId": "umbral",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "localization.realm.crownlands.selection.line",
+      "canonicalId": "realm_crownlands_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "localization.realm.eldergrove.selection.line",
+      "canonicalId": "realm_eldergrove_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "localization.realm.lock.warning",
+      "canonicalId": "realm_lock_warning",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "localization.realm.stonehold.selection.line",
+      "canonicalId": "realm_stonehold_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "localization.realm.umbral.selection.line",
+      "canonicalId": "realm_umbral_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.crownlands",
+      "canonicalId": "crownlands",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.crownlands.selection.line",
+      "canonicalId": "realm_crownlands_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.eldergrove",
+      "canonicalId": "eldergrove",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.eldergrove.selection.line",
+      "canonicalId": "realm_eldergrove_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.lock.warning",
+      "canonicalId": "realm_lock_warning",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.stonehold",
+      "canonicalId": "stonehold",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.stonehold.selection.line",
+      "canonicalId": "realm_stonehold_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.umbral",
+      "canonicalId": "umbral",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    },
+    {
+      "legacyId": "realm.umbral.selection.line",
+      "canonicalId": "realm_umbral_selection_line",
+      "introducedVersion": 1,
+      "retirementVersion": null,
+      "migrationIssue": "#183"
+    }
+  ]
+}

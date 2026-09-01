@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using AL.Core;
 using AL.Core.Interfaces;
 using AL.Data.Runtime;
+using AL.Services.Local;
+using AL.UI.FirstUserIdentity;
+using AL.ChampionMode.Presentation;
 using UnityEngine;
 
 namespace AL.ChampionMode.Customization
@@ -13,6 +16,10 @@ namespace AL.ChampionMode.Customization
         private Renderer[] _renderers;
         private CharacterCustomizationCatalogData _catalog;
         private bool _catalogLoadStarted;
+        private ChampionPresentationSpec _boundPresentation;
+        private bool _hasBoundPresentation;
+        private bool _useExternalPresentation;
+        private ChampionCustomizationState _externalPresentation;
 
         private static readonly string[] BodyPresets =
         {
@@ -98,16 +105,62 @@ namespace AL.ChampionMode.Customization
 
         private void Start()
         {
-            ApplySavedCustomization();
+            if (_useExternalPresentation)
+            {
+                ApplyState(_externalPresentation);
+            }
+            else if (_hasBoundPresentation)
+            {
+                ApplyBoundPresentation(_boundPresentation);
+            }
+            else
+            {
+                ApplySavedCustomization();
+            }
+
             if (_catalog == null && !_catalogLoadStarted)
             {
                 StartCoroutine(ApplySharedCatalogAsync());
             }
         }
 
+        public void BindPresentation(ChampionPresentationSpec spec)
+        {
+            if (spec == null)
+            {
+                return;
+            }
+
+            _boundPresentation = spec;
+            _hasBoundPresentation = true;
+            ApplyBoundPresentation(spec);
+        }
+
         public void ApplySavedCustomization()
         {
-            var state = GetPresentationSnapshot();
+            if (_useExternalPresentation)
+            {
+                ApplyState(_externalPresentation);
+                return;
+            }
+
+            ApplyState(GetPresentationSnapshot());
+        }
+
+        public void ApplyPresentation(ChampionCustomizationState state)
+        {
+            if (state == null)
+            {
+                return;
+            }
+
+            _useExternalPresentation = true;
+            _externalPresentation = state;
+            ApplyState(state);
+        }
+
+        private void ApplyState(ChampionCustomizationState state)
+        {
             if (state == null)
             {
                 return;
@@ -131,6 +184,29 @@ namespace AL.ChampionMode.Customization
             SetPartActive("Cape", state.CapeEnabled);
             SetPartActive("Cape_Rune", state.CapeEnabled && ShouldShowCapeRunes(state.ArmorStyleId));
             SetPartActive("Helmet", state.HelmetEnabled);
+            GetComponent<ProceduralChampionMotion>()?.Rebind();
+            GetComponent<ProceduralChampionSurfaceResponse>()?.Rebind();
+        }
+
+        public void ApplyBoundPresentation(ChampionPresentationSpec spec)
+        {
+            if (spec == null)
+            {
+                return;
+            }
+
+            ProceduralChampionModelBuilder.EnsureModel(gameObject);
+            RefreshRendererCache();
+            ApplyBodyPreset(spec.BodyPresetId);
+            ApplyHairStyle(spec.HairStyleId);
+            ApplyArmorStyle(spec.ArmorStyleId);
+            ApplyFaceMark(spec.FaceMarkId);
+            ApplyWeaponStyle(spec.WeaponStyleId);
+            ApplyOffhandStyle(spec.OffhandStyleId);
+            ApplyColors(spec.Primary, spec.Hair, spec.Skin, spec.Eye, spec.Accent);
+            SetPartActive("Cape", spec.CapeEnabled);
+            SetPartActive("Cape_Rune", spec.CapeEnabled && ShouldShowCapeRunes(spec.ArmorStyleId));
+            SetPartActive("Helmet", spec.HelmetEnabled);
             GetComponent<ProceduralChampionMotion>()?.Rebind();
             GetComponent<ProceduralChampionSurfaceResponse>()?.Rebind();
         }
@@ -770,7 +846,35 @@ namespace AL.ChampionMode.Customization
         private void SaveAndApply()
         {
             ServiceLocator.Get<ISaveGameService>().Save();
+            PersistConfirmedIdentity();
             ApplySavedCustomization();
+        }
+
+        private static void PersistConfirmedIdentity()
+        {
+            if (!ServiceLocator.TryGet(out ISaveGameService saveGameService) ||
+                saveGameService.CurrentSave == null)
+            {
+                return;
+            }
+
+            MvpLoopSnapshot snapshot = MvpLoopSaveCodec.Read(saveGameService.CurrentSave);
+            if (!snapshot.ClassFamily.HasValue ||
+                !FirstUserIdentityDerivation.IsSupportedRealm(snapshot.Realm))
+            {
+                return;
+            }
+
+            MvpLoopSaveAuthority.TryCommit(
+                saveGameService,
+                new MvpLoopCommitRequest(
+                    Guid.NewGuid().ToString("N"),
+                    snapshot.Realm,
+                    snapshot.ClassFamily.Value,
+                    true,
+                    snapshot.LastResultId,
+                    snapshot.LastBuildId,
+                    snapshot.LastBuildLevel));
         }
 
         private void TryApplySharedCatalog()
@@ -797,10 +901,14 @@ namespace AL.ChampionMode.Customization
             });
 
             _catalogLoadStarted = false;
-            if (applied)
+            if (applied && !_hasBoundPresentation)
             {
                 ApplySavedCustomization();
                 Debug.Log("[ChampionCustomizationController] Applied shared customization catalog from StreamingAssets.");
+            }
+            else if (applied && _hasBoundPresentation)
+            {
+                ApplyBoundPresentation(_boundPresentation);
             }
         }
 
@@ -886,7 +994,11 @@ namespace AL.ChampionMode.Customization
                 AccentG = source.AccentG,
                 AccentB = source.AccentB,
                 CapeEnabled = source.CapeEnabled,
-                HelmetEnabled = source.HelmetEnabled
+                HelmetEnabled = source.HelmetEnabled,
+                ClassFamilyId = source.ClassFamilyId,
+                IdentityConfirmed = source.IdentityConfirmed,
+                LastResultId = source.LastResultId,
+                Username = source.Username
             };
         }
 

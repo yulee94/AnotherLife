@@ -1,0 +1,28 @@
+{
+  "gameId": "another-life",
+  "catalogId": "al_world_asset_inventory",
+  "family": "world_assets",
+  "schemaVersion": 1,
+  "contentVersion": "0.1.0",
+  "sourceRevision": "invalid-fixture",
+  "idFormat": "lowercase_ascii_snake_case",
+  "gatePolicy": {
+    "generationState": "held",
+    "activationState": "held",
+    "requiredGateIds": []
+  },
+  "profiles": {
+    "coordinateProfiles": [],
+    "pivotProfiles": [],
+    "snapGridProfiles": [],
+    "materialShaderProfiles": [],
+    "texelDensityProfiles": [],
+    "lodProfiles": [],
+    "colliderProfiles": [],
+    "navigationProfiles": [],
+    "occlusionProfiles": [],
+    "streamingProfiles": []
+  },
+  "records": [],
+  "aliases": []
+}

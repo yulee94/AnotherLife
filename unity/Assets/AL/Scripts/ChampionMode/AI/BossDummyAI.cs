@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using AL.ChampionMode.Control;
 using AL.ChampionMode.Skills;
 using AL.Core;
 using AL.Core.Interfaces;
@@ -171,8 +172,10 @@ namespace AL.ChampionMode.AI
         private IEnumerator PerformTelegraphedAttack()
         {
             _isAttacking = true;
-            Debug.Log("BOSS: Telegraphing Slam Attack...");
-            Vector3 impactCenter = _player != null ? Grounded(_player.position) : Grounded(transform.position + transform.forward * 2.5f);
+            GameDebug.Log("BOSS: Telegraphing Slam Attack...");
+            Vector3 impactCenter = _player != null
+                ? _player.position
+                : transform.position + transform.forward * 2.5f;
             float impactRadius = _enraged ? _attackRange * 1.12f : _attackRange;
             SkillEffectFactory.SpawnBossSlamTelegraph(impactCenter, transform.position, impactRadius, _telegraphDuration, _enraged);
             RuntimeCombatAudio.PlayWarning();
@@ -201,17 +204,48 @@ namespace AL.ChampionMode.AI
             }
 
             ClearTelegraphReadout();
-            Debug.Log("BOSS: SLAM!");
+            GameDebug.Log("BOSS: SLAM!");
             SkillEffectFactory.SpawnBossSlamImpact(impactCenter, impactRadius, _realmId);
             RuntimeCombatAudio.PlayHeavySkill();
 
             if (_player != null && DistanceOnGround(_player.position, impactCenter) <= impactRadius)
             {
-                var combat = _player.GetComponent<AL.ChampionMode.Control.ChampionCombat>();
-                combat?.TakeDamage(_slamDamage);
-                SkillEffectFactory.SpawnFloatingCombatText(_player.position + Vector3.up * 1.65f, "-" + Mathf.CeilToInt(_slamDamage), new Color(1f, 0.32f, 0.20f), 0.28f, 0.85f);
-                SkillEffectFactory.ShakeCamera(0.24f, 0.16f);
-                SkillEffectFactory.RequestHitPause(0.055f, 0.10f);
+                var combat = _player.GetComponent<ChampionCombat>();
+                if (combat == null)
+                {
+                    Debug.LogError(
+                        "AL-CHAMPION-DAMAGE-RECEIVER-MISSING: boss slam was rejected.");
+                }
+                else
+                {
+                    ChampionDamageReceipt receipt = combat.TakeDamage(_slamDamage);
+                    if (receipt.Accepted)
+                    {
+                        SkillEffectFactory.SpawnFloatingCombatText(
+                            _player.position + Vector3.up * 1.65f,
+                            FormatIncomingDamageFeedback(receipt),
+                            receipt.WasMitigated
+                                ? new Color(0.46f, 1f, 0.82f)
+                                : new Color(1f, 0.32f, 0.20f),
+                            0.28f,
+                            0.85f);
+                        SkillEffectFactory.ShakeCamera(0.24f, 0.16f);
+                        SkillEffectFactory.RequestHitPause(0.055f, 0.10f);
+                        if (receipt.DiagnosticCode ==
+                            ChampionCombat.DefendMitigationUnavailableCode)
+                        {
+                            Debug.LogError(
+                                receipt.DiagnosticCode +
+                                ": boss slam applied full damage because defend authority was unavailable.");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError(
+                            receipt.DiagnosticCode +
+                            ": boss slam damage was rejected by champion combat.");
+                    }
+                }
             }
             else if (_player != null)
             {
@@ -222,27 +256,47 @@ namespace AL.ChampionMode.AI
             _isAttacking = false;
         }
 
+        public static string FormatIncomingDamageFeedback(
+            ChampionDamageReceipt receipt)
+        {
+            if (!receipt.Accepted)
+            {
+                return string.Empty;
+            }
+
+            var appliedDamage = Mathf.CeilToInt(receipt.AppliedDamage);
+            if (!receipt.WasMitigated)
+            {
+                return "-" + appliedDamage;
+            }
+
+            var mitigatedDamage = Mathf.CeilToInt(receipt.MitigatedDamage);
+            return appliedDamage > 0
+                ? "-" + appliedDamage + "  BLOCK " + mitigatedDamage
+                : "BLOCK " + mitigatedDamage;
+        }
+
         public void UpdateHealth(float current, float max)
         {
             _healthPercent = current / max;
             if (!_phase70 && _healthPercent <= 0.70f)
             {
                 _phase70 = true;
-                Debug.Log("BOSS: Phase 2. Wider telegraphs.");
+                GameDebug.Log("BOSS: Phase 2. Wider telegraphs.");
                 _attackRange += 1f;
             }
 
             if (!_phase40 && _healthPercent <= 0.40f)
             {
                 _phase40 = true;
-                Debug.Log("BOSS: Phase 3. Faster attacks.");
+                GameDebug.Log("BOSS: Phase 3. Faster attacks.");
                 _attackCooldown *= 0.75f;
             }
 
             if (!_phase15 && _healthPercent <= 0.15f)
             {
                 _phase15 = true;
-                Debug.Log("BOSS: Final phase.");
+                GameDebug.Log("BOSS: Final phase.");
                 SkillEffectFactory.SpawnCurseMark(transform.position + Vector3.up);
             }
 
@@ -270,7 +324,7 @@ namespace AL.ChampionMode.AI
             PlayHitReaction(_isBroken ? 1.08f : 1.04f);
             _visualFeedback?.PulseHit(_isBroken ? 1f : 0.72f);
             RuntimeCombatAudio.PlayImpact();
-            Debug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
+            GameDebug.Log($"BOSS: Took {finalAmount} damage. HP {_currentHealth}/{_maxHealth}. Break {_currentBreak}/{_breakBarMax}");
 
             if (_currentHealth <= 0f)
             {
@@ -288,6 +342,33 @@ namespace AL.ChampionMode.AI
 
             _realmId = normalized;
             enabled = normalized != RealmId.None;
+        }
+
+        public bool ApplyCatalogStats(string id, string displayName, float maxHealth, float slamDamage)
+        {
+            if (maxHealth <= 0f || slamDamage <= 0f)
+            {
+                return false;
+            }
+
+            if (!string.IsNullOrWhiteSpace(id))
+            {
+                _bossId = id;
+            }
+
+            if (!string.IsNullOrWhiteSpace(displayName))
+            {
+                _bossName = displayName;
+            }
+
+            _maxHealth = maxHealth;
+            _slamDamage = slamDamage;
+            if (!_isDead)
+            {
+                _currentHealth = _maxHealth;
+            }
+
+            return true;
         }
 
         private void ApplyBreakDamage(float sourceDamage)
@@ -321,7 +402,7 @@ namespace AL.ChampionMode.AI
             _isAttacking = false;
             ClearTelegraphReadout();
             _visualFeedback?.SetBroken(true);
-            Debug.Log("BOSS: BREAK! Damage window opened.");
+            GameDebug.Log("BOSS: BREAK! Damage window opened.");
             SkillEffectFactory.SpawnBossTelegraph(transform.position, 2.25f, _brokenDuration);
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "BREAK", new Color(0.40f, 1f, 0.95f), 0.38f, 1.1f);
             SkillEffectFactory.ShakeCamera(0.28f, 0.20f);
@@ -338,7 +419,7 @@ namespace AL.ChampionMode.AI
             _currentBreak = _breakBarMax;
             _isBroken = false;
             _visualFeedback?.SetBroken(false);
-            Debug.Log("BOSS: Break recovered.");
+            GameDebug.Log("BOSS: Break recovered.");
         }
 
         private void TickTimedEnrage()
@@ -359,7 +440,7 @@ namespace AL.ChampionMode.AI
             }
 
             _enraged = true;
-            Debug.Log($"BOSS: ENRAGED by {reason}!");
+            GameDebug.Log($"BOSS: ENRAGED by {reason}!");
             _attackCooldown *= 0.5f;
             _attackRange += 0.5f;
             _visualFeedback?.SetEnraged(true);
@@ -373,7 +454,7 @@ namespace AL.ChampionMode.AI
         {
             _isDead = true;
             ClearTelegraphReadout();
-            Debug.Log("BOSS: Defeated.");
+            GameDebug.Log("BOSS: Defeated.");
             _visualFeedback?.PulseDefeated();
             SkillEffectFactory.SpawnFloatingCombatText(transform.position + Vector3.up * 3.15f, "DEFEATED", new Color(0.85f, 1f, 0.62f), 0.38f, 1.25f);
             SkillEffectFactory.ShakeCamera(0.26f, 0.22f);
@@ -463,11 +544,6 @@ namespace AL.ChampionMode.AI
             _isTelegraphing = false;
             _telegraphStartTime = 0f;
             _activeTelegraphDuration = 0f;
-        }
-
-        private static Vector3 Grounded(Vector3 position)
-        {
-            return new Vector3(position.x, 0f, position.z);
         }
 
         private static float DistanceOnGround(Vector3 a, Vector3 b)

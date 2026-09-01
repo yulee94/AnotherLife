@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://another-life.local/schemas/al-world-atlas-narrative.schema.json",
+  "title": "Another Life World Atlas Narrative Catalog",
+  "description": "Schema for al_world_atlas_narrative_catalog.json. Enforces Decision 5 (lowercase realm IDs) across topology, transition zones, walls, boundaries, and zones. Zones additionally accept the neutral 'shared' realm. Topology counts (5 nodes, 4 adjacency, 12 bridges, 24 endpoints, 4 transition zones, 8 walls, 4 boundaries, 11 zones, 5 objectives) are bounded.",
+  "type": "object",
+  "required": [
+    "version", "catalogId", "game", "sourcePacketId", "idFormat",
+    "sourceAuthorities", "atlasPolicy", "abstractTopology",
+    "transitionZones", "walls", "boundaries", "zones", "objectives",
+    "draftLocalization", "engineeringHandoff"
+  ],
+  "properties": {
+    "version": { "type": "string" },
+    "catalogId": { "const": "al_world_atlas_narrative_catalog" },
+    "game": { "const": "Another Life" },
+    "sourcePacketId": { "type": "string" },
+    "idFormat": { "const": "lowercase_snake_case" },
+    "sourceAuthorities": { "type": "object" },
+    "atlasPolicy": { "type": "object" },
+    "abstractTopology": { "$ref": "#/$defs/abstractTopology" },
+    "transitionZones": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/transitionZoneRecord" }
+    },
+    "walls": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 8,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/wallRecord" }
+    },
+    "boundaries": {
+      "type": "array",
+      "minItems": 4,
+      "maxItems": 4,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/boundaryRecord" }
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/zoneRecord" }
+    },
+    "objectives": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/objectiveRecord" }
+    },
+    "draftLocalization": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/localizationEntry" }
+    },
+    "engineeringHandoff": { "type": "object" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "realmId": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral"]
+    },
+    "realmIdOrShared": {
+      "type": "string",
+      "enum": ["crownlands", "stonehold", "eldergrove", "umbral", "shared"]
+    },
+    "stableId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$"
+    },
+    "localizationEntry": {
+      "type": "object",
+      "required": ["key", "text"],
+      "properties": {
+        "key": { "type": "string" },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "abstractTopology": {
+      "type": "object",
+      "required": ["topologyId", "macroNarrativeZoneId", "nodes", "adjacency", "bridges", "endpoints", "placement"],
+      "properties": {
+        "topologyId": { "$ref": "#/$defs/stableId" },
+        "macroNarrativeZoneId": { "type": "string" },
+        "nodes": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/topologyNode" }
+        },
+        "adjacency": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "items": { "$ref": "#/$defs/adjacencyRecord" }
+        },
+        "bridges": {
+          "type": "array",
+          "minItems": 12,
+          "maxItems": 12,
+          "items": { "$ref": "#/$defs/bridgeRecord" }
+        },
+        "endpoints": {
+          "type": "array",
+          "minItems": 24,
+          "maxItems": 24,
+          "items": { "$ref": "#/$defs/endpointRecord" }
+        },
+        "placement": { "$ref": "#/$defs/placementRecord" }
+      },
+      "additionalProperties": false
+    },
+    "topologyNode": {
+      "type": "object",
+      "required": ["id", "role"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "role": { "type": "string" },
+        "realmAssignmentStatus": { "type": "string" },
+        "atlasZoneId": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "adjacencyRecord": {
+      "type": "object",
+      "required": ["id", "nodeAId", "nodeBId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "nodeAId": { "$ref": "#/$defs/stableId" },
+        "nodeBId": { "$ref": "#/$defs/stableId" }
+      },
+      "additionalProperties": false
+    },
+    "bridgeRecord": {
+      "type": "object",
+      "required": [
+        "id", "connectionType", "nodeAId", "endpointAId", "nodeBId",
+        "endpointBId", "hookStatus", "mutationAuthority"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "connectionType": { "type": "string" },
+        "nodeAId": { "$ref": "#/$defs/stableId" },
+        "endpointAId": { "$ref": "#/$defs/stableId" },
+        "nodeBId": { "$ref": "#/$defs/stableId" },
+        "endpointBId": { "$ref": "#/$defs/stableId" },
+        "hookStatus": { "type": "string" },
+        "mutationAuthority": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "endpointRecord": {
+      "type": "object",
+      "required": ["id", "bridgeId", "nodeId"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "bridgeId": { "$ref": "#/$defs/stableId" },
+        "nodeId": { "$ref": "#/$defs/stableId" }
+      },
+      "additionalProperties": false
+    },
+    "placementRecord": {
+      "type": "object",
+      "required": ["status", "assignments", "compassOrientation", "source"],
+      "properties": {
+        "status": { "type": "string" },
+        "assignments": { "type": "array" },
+        "compassOrientation": { "type": "string" },
+        "source": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "transitionZoneRecord": {
+      "type": "object",
+      "required": [
+        "id", "realmId", "mainGateId", "zoneType", "sceneReferenceStatus",
+        "traversalStatus", "mutationAuthority"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "mainGateId": { "$ref": "#/$defs/stableId" },
+        "zoneType": { "type": "string" },
+        "sceneReferenceStatus": { "type": "string" },
+        "traversalStatus": { "type": "string" },
+        "mutationAuthority": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "wallRecord": {
+      "type": "object",
+      "required": ["id", "realmId", "boundaryRole", "geometryStatus", "mutationAuthority"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "boundaryRole": { "type": "string", "enum": ["inner_wall", "outer_wall"] },
+        "geometryStatus": { "type": "string" },
+        "mutationAuthority": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "boundaryRecord": {
+      "type": "object",
+      "required": [
+        "id", "realmId", "innerRealmId", "innerAtlasZoneId", "innerWallId",
+        "transitionZoneId", "mainGateId", "outerWallId", "outerWarzoneId",
+        "outerAtlasZoneId", "orderedStages", "hookStatus", "mutationAuthority"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "realmId": { "$ref": "#/$defs/realmId" },
+        "innerRealmId": { "$ref": "#/$defs/stableId" },
+        "innerAtlasZoneId": { "$ref": "#/$defs/stableId" },
+        "innerWallId": { "$ref": "#/$defs/stableId" },
+        "transitionZoneId": { "$ref": "#/$defs/stableId" },
+        "mainGateId": { "$ref": "#/$defs/stableId" },
+        "outerWallId": { "$ref": "#/$defs/stableId" },
+        "outerWarzoneId": { "$ref": "#/$defs/stableId" },
+        "outerAtlasZoneId": { "$ref": "#/$defs/stableId" },
+        "orderedStages": {
+          "type": "array",
+          "minItems": 5,
+          "maxItems": 5,
+          "items": { "type": "string" }
+        },
+        "hookStatus": { "type": "string" },
+        "mutationAuthority": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "zoneRecord": {
+      "type": "object",
+      "required": [
+        "id", "realmId", "displayNameKey", "summaryKey", "zoneType",
+        "visibility", "sceneReferenceStatus", "relatedQuestMilestones"
+      ],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "realmId": { "$ref": "#/$defs/realmIdOrShared" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "zoneType": { "type": "string" },
+        "visibility": { "type": "string" },
+        "sceneReferenceStatus": { "type": "string" },
+        "pvpPolicy": { "type": "string" },
+        "relatedQuestMilestones": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "objectiveRecord": {
+      "type": "object",
+      "required": ["id", "displayNameKey", "summaryKey", "hookStatus", "mutationAuthority"],
+      "properties": {
+        "id": { "$ref": "#/$defs/stableId" },
+        "displayNameKey": { "type": "string" },
+        "summaryKey": { "type": "string" },
+        "requiredZoneTypes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "requiredZoneIds": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/stableId" }
+        },
+        "hookStatus": { "type": "string" },
+        "mutationAuthority": { "type": "string" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

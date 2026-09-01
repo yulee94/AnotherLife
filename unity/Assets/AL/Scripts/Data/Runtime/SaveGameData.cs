@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using AL.Core;
+using AL.Data.Catalogs.MapDisclosure;
 
 namespace AL.Data.Runtime
 {
@@ -35,8 +36,43 @@ namespace AL.Data.Runtime
         public List<OwnedEquipmentState> OwnedEquipment = new List<OwnedEquipmentState>();
         public List<AppliedBossLootRewardState> AppliedBossLootRewards = new List<AppliedBossLootRewardState>();
         public Nvs01ProgressData Nvs01Progress = new Nvs01ProgressData();
+        // Optional schema-v1 extension. A missing value is an admitted legacy
+        // save and resolves to the first tutorial step (or reconciles from an
+        // already committed lordship result). Once present, Version and the
+        // complete topology are validated fail-closed.
+        public FirstWorldProgressData FirstWorldProgress;
+        // Optional schema-v1 extension. Missing legacy state is admitted but
+        // remains hidden until a matching authoritative snapshot is received.
+        public MapDisclosurePersistentState MapDisclosure;
         public int WarzoneCredits;
         public long LastSavedTimestamp;
+    }
+
+    [Serializable]
+    public sealed class FirstWorldProgressData
+    {
+        public const int CurrentVersion = 1;
+
+        public int Version;
+        public long Revision;
+        public int TutorialStep;
+        public int TeachingBeat;
+        public int MovementConfirmationCount;
+        public int BasicAttackConfirmationCount;
+        public int CompletionEventCount;
+        public int OmenOfferCount;
+        public bool BlockTaught;
+        public bool HandoffCommitted;
+        public int ProofPhase;
+        public string ProofQuestId = string.Empty;
+        public string ProofQuestStateId = string.Empty;
+        public string ProofObjectiveId = string.Empty;
+        public string ProofDialogueId = string.Empty;
+        public string ProofLastEventId = string.Empty;
+        public string ProofChapterVariantId = string.Empty;
+        public bool ProofOmenAccepted;
+        public bool ProofAutoAccept;
+        public string LastOperationId = string.Empty;
     }
 
     [Serializable]
@@ -160,6 +196,8 @@ namespace AL.Data.Runtime
     [Serializable]
     public class ChampionCustomizationState
     {
+        // Additive nested slot. Omitted legacy saves resolve to the male base.
+        public string BodyBaseId = "male";
         public string BodyPresetId = "average";
         public string HairStyleId = "short";
         public string ArmorStyleId = "realm_basic";
@@ -183,6 +221,14 @@ namespace AL.Data.Runtime
         public float AccentB = 0.18f;
         public bool CapeEnabled = true;
         public bool HelmetEnabled;
+        // Additive schema-v1 nested slot for the 3D-first MVP loop.
+        // Omitted on pre-change saves; default empty/false and stay loadable.
+        public string ClassFamilyId = string.Empty;
+        public bool IdentityConfirmed;
+        public string LastResultId = string.Empty;
+        // Additive schema-v1 nested slot. Omitted on pre-change saves.
+        // People stay derived from SelectedRealm and are never stored here.
+        public string Username = string.Empty;
     }
 
     [Serializable]
