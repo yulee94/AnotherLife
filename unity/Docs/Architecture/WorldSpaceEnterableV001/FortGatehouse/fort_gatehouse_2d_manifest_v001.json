@@ -1,0 +1,61 @@
+{
+  "schema": "anotherlife.enterable-fort-gatehouse-2d-packet.v1",
+  "status": "owner_approved_four_construction_assets",
+  "ownerApproval": {
+    "recordedOn": "2026-09-01",
+    "scope": "all artifacts shown in the fort-gatehouse packet",
+    "authority": "approved 2D spatial and modular-construction authority for downstream 3D modeling"
+  },
+  "gatePolicy": "central slot remains physically impassable; teleport and enemy breach are separate gameplay-owned systems",
+  "assemblyPolicy": "reuse civic structural shell; fort additions remain modular during authoring and combine by wing/gallery/exterior cell at runtime",
+  "doorPolicy": "open apertures only; no door meshes, frames, hinges, colliders or interaction in this packet",
+  "new3dJobsSubmitted": 0,
+  "mechanicalValidation": {
+    "leftStairAligned": true,
+    "rightStairAligned": true,
+    "gateImpassable": true,
+    "apertureCount": 14
+  },
+  "artifacts": [
+    {
+      "id": "shared_gatehouse_layout",
+      "locator": "2d/shared_fort_gatehouse_layout_v001.json",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "33e76467bf5fb75c6694ae297e710b8d4bcdc0e185276cbae90d6f21cd90c45c",
+      "byteLength": 5628
+    },
+    {
+      "id": "shared_gatehouse_floorplans",
+      "locator": "2d/shared_fort_gatehouse_floorplans_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "7b8ec859d80e6b15a463fde98961868cd9d809adb7313eca30c122fa11073cc2",
+      "byteLength": 78654,
+      "pixelDimensions": [
+        2900,
+        1180
+      ]
+    },
+    {
+      "id": "shared_gatehouse_section",
+      "locator": "2d/shared_fort_gatehouse_section_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "f6ada9a1e962b3ab1847ddf79024cfe23b2b51d495f5be6bc1340ec6153feee7",
+      "byteLength": 61029,
+      "pixelDimensions": [
+        2400,
+        1320
+      ]
+    },
+    {
+      "id": "shared_gatehouse_additive_modules",
+      "locator": "2d/shared_fort_gatehouse_modules_v001.png",
+      "disposition": "ready_for_modular_3d_modeling",
+      "sha256": "ab75e335a05ace0ee24e8da83ef22f9034eed5e8c08226bc5d6a1c6f4e7e200e",
+      "byteLength": 52256,
+      "pixelDimensions": [
+        2400,
+        1180
+      ]
+    }
+  ]
+}
