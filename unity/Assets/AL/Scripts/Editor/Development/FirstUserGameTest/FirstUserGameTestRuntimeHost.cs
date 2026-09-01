@@ -18,6 +18,7 @@ using AL.Core.Interfaces;
 using AL.Core.SaveAuthority;
 using AL.Development;
 using AL.Editor.Development.OnboardingAuthority;
+using AL.Narrative.Nvs01.Contracts;
 using AL.UI;
 using AL.UI.FirstUserIdentity;
 using AL.UI.RealmSelection;
@@ -33,6 +34,18 @@ using UnityEngine.UI;
 
 namespace AL.Editor.Development.FirstUserGameTest
 {
+    internal enum FirstUserGameTestButtonRole
+    {
+        Secondary = 0,
+        Primary = 1,
+        Choice = 2,
+        SelectedChoice = 3,
+        Utility = 4,
+        ActiveTask = 5,
+        Completed = 6,
+        Status = 7
+    }
+
     [InitializeOnLoad]
     internal static class FirstUserGameTestEditorLauncher
     {
@@ -380,10 +393,8 @@ namespace AL.Editor.Development.FirstUserGameTest
             {
                 _tutorialPresenter?.Tick();
                 SetPlaytestPhase(
-                    _tutorialPresenter != null &&
-                    _tutorialPresenter.State != null &&
-                    _tutorialPresenter.State.IsOmenOffered
-                        ? FirstUserGameTestPlaytestPhase.Omen
+                    _tutorialPresenter != null
+                        ? _tutorialPresenter.PlaytestPhase
                         : FirstUserGameTestPlaytestPhase.WorldTutorial);
                 if (IsCancelPressed())
                 {
@@ -509,6 +520,7 @@ namespace AL.Editor.Development.FirstUserGameTest
 
             DestroyOwnedSelectionUi();
             _identityPresenter = FirstUserIdentityDraftPresenter.CreateStandalone();
+            _identityPresenter.BindExitAction(_exitButton);
             _identityCanvas = _identityPresenter.transform.parent == null
                 ? _identityPresenter.gameObject
                 : _identityPresenter.transform.parent.gameObject;
@@ -917,6 +929,15 @@ namespace AL.Editor.Development.FirstUserGameTest
                 return;
             }
 
+            if (!TryLoadOmenOfferSession(
+                    _verifiedResult.Selection.Identity.Realm,
+                    out FirstUserGameTestOmenOfferSession omenOfferSession,
+                    out string omenMessage))
+            {
+                FailClosed(omenMessage);
+                return;
+            }
+
             SetPlaytestPhase(FirstUserGameTestPlaytestPhase.WorldTutorial);
             var root = new GameObject(DestinationRootName);
 
@@ -963,6 +984,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 root.transform,
                 controller,
                 tutorialStore,
+                omenOfferSession,
                 out Button attackButton,
                 out Button moveForwardButton,
                 out FirstUserGameTestTutorialPresenter tutorialPresenter,
@@ -994,6 +1016,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             Transform parent,
             ChampionController controller,
             FirstUserGameTestTutorialSessionStore tutorialStore,
+            FirstUserGameTestOmenOfferSession omenOfferSession,
             out Button attackButton,
             out Button moveForwardButton,
             out FirstUserGameTestTutorialPresenter tutorialPresenter,
@@ -1019,21 +1042,6 @@ namespace AL.Editor.Development.FirstUserGameTest
             scaler.matchWidthOrHeight = 0.5f;
 
             Font font = BuiltInFont();
-            Text disclosure = CreateText(
-                canvasObject.transform,
-                "IsolatedDestinationDisclosure",
-                FirstUserGameTestPlaytestCopy.NonProductionBadge,
-                font,
-                20,
-                TextAnchor.MiddleCenter);
-            SetAnchoredRect(
-                disclosure.rectTransform,
-                new Vector2(0f, 1f),
-                new Vector2(1f, 1f),
-                new Vector2(0f, -10f),
-                new Vector2(-20f, 44f));
-            disclosure.color = new Color(1f, 0.72f, 0.22f, 1f);
-
             FirstUserGameTestSelection selection = _verifiedResult.Selection;
             if (!FirstUserGameTestPlaytestCopy.TryDescribeIdentity(
                     selection.Identity,
@@ -1055,29 +1063,16 @@ namespace AL.Editor.Development.FirstUserGameTest
                 summary.rectTransform,
                 new Vector2(0f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(18f, -56f),
+                new Vector2(18f, -62f),
                 new Vector2(-36f, 36f));
             summary.color = new Color(0.80f, 0.88f, 1f, 1f);
-
-            Text controls = CreateText(
-                canvasObject.transform,
-                "IsolatedDestinationControls",
-                "Move with keys, controller, or touch  •  Use Basic Attack with the action key or on-screen button",
-                font,
-                17,
-                TextAnchor.MiddleCenter);
-            SetAnchoredRect(
-                controls.rectTransform,
-                new Vector2(0f, 0f),
-                new Vector2(1f, 0f),
-                new Vector2(0f, 12f),
-                new Vector2(-20f, 34f));
 
             if (!FirstUserGameTestTutorialPresenter.TryCreate(
                     canvasObject.transform,
                     font,
                     controller,
                     tutorialStore,
+                    omenOfferSession,
                     FailClosed,
                     out tutorialPresenter,
                     out tutorialMessage))
@@ -1123,22 +1118,72 @@ namespace AL.Editor.Development.FirstUserGameTest
                 font,
                 new Vector2(-86f, 90f),
                 new Vector2(148f, 72f),
-                new Vector2(1f, 0f));
+                new Vector2(1f, 0f),
+                FirstUserGameTestButtonRole.Secondary);
             attackButton.onClick.AddListener(() => presenter.RequestPlayerBasicAttack());
-            ConfigureDestinationNavigation(
+            presenter.BindNavigationActions(
                 moveLeftButton,
                 moveRightButton,
                 moveForwardButton,
                 moveBackButton,
                 attackButton,
-                presenter.TitleAction,
-                presenter.ObjectiveAction,
-                _exitButton);
-            presenter.BindNavigationActions(
-                moveForwardButton,
-                attackButton,
                 _exitButton);
             return canvas;
+        }
+
+        private static bool TryLoadOmenOfferSession(
+            RealmId realm,
+            out FirstUserGameTestOmenOfferSession session,
+            out string message)
+        {
+            session = null;
+            message = string.Empty;
+            string path;
+            try
+            {
+                path = Path.GetFullPath(Path.Combine(
+                    Application.dataPath,
+                    "StreamingAssets",
+                    Nvs01CatalogContract.StreamingAssetsRelativePath.Replace(
+                        '/',
+                        Path.DirectorySeparatorChar)));
+            }
+            catch (Exception exception) when (
+                exception is ArgumentException ||
+                exception is NotSupportedException ||
+                exception is PathTooLongException)
+            {
+                message = "The authored Valerius report path was invalid.";
+                return false;
+            }
+
+            byte[] bytes;
+            try
+            {
+                var file = new FileInfo(path);
+                if (!file.Exists || file.Length <= 0 ||
+                    file.Length > Nvs01CatalogContract.MaximumByteLength)
+                {
+                    message = "The authored Valerius report is unavailable.";
+                    return false;
+                }
+
+                bytes = File.ReadAllBytes(path);
+            }
+            catch (Exception exception) when (
+                exception is IOException ||
+                exception is UnauthorizedAccessException ||
+                exception is NotSupportedException)
+            {
+                message = "The authored Valerius report could not be read.";
+                return false;
+            }
+
+            return FirstUserGameTestOmenOfferSession.TryCreate(
+                bytes,
+                realm,
+                out session,
+                out message);
         }
 
         private Button CreateMoveButton(
@@ -1158,7 +1203,8 @@ namespace AL.Editor.Development.FirstUserGameTest
                 font,
                 anchoredPosition,
                 new Vector2(64f, 64f),
-                Vector2.zero);
+                Vector2.zero,
+                FirstUserGameTestButtonRole.Secondary);
             button.gameObject.AddComponent<ChampionMoveButton>().Setup(controller, direction);
             button.onClick.AddListener(() =>
             {
@@ -1319,7 +1365,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 text.rectTransform,
                 new Vector2(0f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(0f, 0f),
+                new Vector2(0f, -13f),
                 new Vector2(-250f, 26f));
             text.color = new Color(1f, 0.76f, 0.30f, 1f);
             text.raycastTarget = false;
@@ -1336,7 +1382,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 _progressBreadcrumb.rectTransform,
                 new Vector2(0f, 1f),
                 new Vector2(1f, 1f),
-                new Vector2(-110f, -28f),
+                new Vector2(-110f, -36f),
                 new Vector2(-300f, 32f));
             _progressBreadcrumb.color = new Color(0.84f, 0.90f, 1f, 1f);
             _progressBreadcrumb.raycastTarget = false;
@@ -1348,7 +1394,8 @@ namespace AL.Editor.Development.FirstUserGameTest
                 BuiltInFont(),
                 new Vector2(-16f, -8f),
                 new Vector2(214f, 52f),
-                Vector2.one);
+                Vector2.one,
+                FirstUserGameTestButtonRole.Utility);
             _exitButton.onClick.AddListener(RequestExitIsolatedTest);
             SetPlaytestPhase(FirstUserGameTestPlaytestPhase.Loading);
             TrySuppressLegacyTechnicalBanner();
@@ -1493,26 +1540,6 @@ namespace AL.Editor.Development.FirstUserGameTest
             return true;
         }
 
-        private static void ConfigureDestinationNavigation(
-            Button moveLeft,
-            Button moveRight,
-            Button moveForward,
-            Button moveBack,
-            Button attack,
-            Button title,
-            Button objective,
-            Button exit)
-        {
-            SetExplicitNavigation(moveLeft, exit, moveForward, moveForward, moveBack);
-            SetExplicitNavigation(moveForward, moveLeft, moveRight, exit, moveBack);
-            SetExplicitNavigation(moveRight, moveForward, exit, exit, moveBack);
-            SetExplicitNavigation(moveBack, moveLeft, moveRight, moveForward, attack);
-            SetExplicitNavigation(attack, moveBack, exit, moveBack, exit);
-            SetExplicitNavigation(title, moveForward, exit, exit, objective);
-            SetExplicitNavigation(objective, moveForward, exit, title, attack);
-            SetExplicitNavigation(exit, attack, moveLeft, objective, moveForward);
-        }
-
         internal static void SetExplicitNavigation(
             Selectable selectable,
             Selectable left,
@@ -1608,7 +1635,8 @@ namespace AL.Editor.Development.FirstUserGameTest
             Font font,
             Vector2 anchoredPosition,
             Vector2 size,
-            Vector2 anchor)
+            Vector2 anchor,
+            FirstUserGameTestButtonRole role = FirstUserGameTestButtonRole.Secondary)
         {
             var buttonObject = new GameObject(
                 name,
@@ -1623,7 +1651,7 @@ namespace AL.Editor.Development.FirstUserGameTest
             rect.anchoredPosition = anchoredPosition;
             rect.sizeDelta = size;
             Image image = buttonObject.GetComponent<Image>();
-            image.color = new Color(0.12f, 0.22f, 0.34f, 0.96f);
+            image.color = Color.white;
             Text text = CreateText(
                 buttonObject.transform,
                 name + "Label",
@@ -1637,7 +1665,124 @@ namespace AL.Editor.Development.FirstUserGameTest
                 Vector2.one,
                 Vector2.zero,
                 Vector2.zero);
-            return buttonObject.GetComponent<Button>();
+            Button button = buttonObject.GetComponent<Button>();
+            ApplyButtonRole(button, role);
+            return button;
+        }
+
+        internal static void ApplyButtonRole(
+            Button button,
+            FirstUserGameTestButtonRole role)
+        {
+            if (button == null)
+            {
+                return;
+            }
+
+            button.transition = Selectable.Transition.ColorTint;
+            Color normal;
+            Color highlighted;
+            Color pressed;
+            Color disabled;
+            Color outlineColor;
+            Vector2 outlineDistance = new Vector2(1f, -1f);
+            Color labelColor = new Color(0.93f, 0.95f, 0.97f, 1f);
+
+            switch (role)
+            {
+                case FirstUserGameTestButtonRole.Primary:
+                    normal = new Color(0.48f, 0.33f, 0.11f, 1f);
+                    highlighted = new Color(0.66f, 0.47f, 0.16f, 1f);
+                    pressed = new Color(0.31f, 0.21f, 0.08f, 1f);
+                    disabled = new Color(0.12f, 0.12f, 0.12f, 0.82f);
+                    outlineColor = new Color(0.94f, 0.72f, 0.28f, 0.82f);
+                    outlineDistance = new Vector2(2f, -2f);
+                    labelColor = new Color(1f, 0.96f, 0.84f, 1f);
+                    break;
+                case FirstUserGameTestButtonRole.Choice:
+                    normal = new Color(0.09f, 0.13f, 0.18f, 1f);
+                    highlighted = new Color(0.16f, 0.23f, 0.30f, 1f);
+                    pressed = new Color(0.06f, 0.09f, 0.13f, 1f);
+                    disabled = new Color(0.05f, 0.07f, 0.09f, 0.78f);
+                    outlineColor = new Color(0.55f, 0.64f, 0.74f, 0.42f);
+                    break;
+                case FirstUserGameTestButtonRole.SelectedChoice:
+                    normal = new Color(0.22f, 0.22f, 0.17f, 1f);
+                    highlighted = new Color(0.31f, 0.30f, 0.20f, 1f);
+                    pressed = new Color(0.15f, 0.15f, 0.12f, 1f);
+                    disabled = new Color(0.10f, 0.10f, 0.08f, 0.82f);
+                    outlineColor = new Color(0.94f, 0.72f, 0.28f, 0.92f);
+                    outlineDistance = new Vector2(3f, -3f);
+                    labelColor = new Color(1f, 0.90f, 0.62f, 1f);
+                    break;
+                case FirstUserGameTestButtonRole.Utility:
+                    normal = new Color(0.08f, 0.10f, 0.13f, 0.96f);
+                    highlighted = new Color(0.15f, 0.18f, 0.22f, 1f);
+                    pressed = new Color(0.05f, 0.06f, 0.08f, 1f);
+                    disabled = new Color(0.04f, 0.05f, 0.06f, 0.72f);
+                    outlineColor = new Color(0.55f, 0.60f, 0.66f, 0.36f);
+                    labelColor = new Color(0.82f, 0.86f, 0.90f, 1f);
+                    break;
+                case FirstUserGameTestButtonRole.ActiveTask:
+                    normal = new Color(0.18f, 0.30f, 0.36f, 1f);
+                    highlighted = new Color(0.26f, 0.43f, 0.49f, 1f);
+                    pressed = new Color(0.12f, 0.22f, 0.27f, 1f);
+                    disabled = new Color(0.10f, 0.15f, 0.18f, 0.90f);
+                    outlineColor = new Color(0.94f, 0.72f, 0.28f, 0.92f);
+                    outlineDistance = new Vector2(3f, -3f);
+                    labelColor = new Color(1f, 0.94f, 0.78f, 1f);
+                    break;
+                case FirstUserGameTestButtonRole.Completed:
+                    normal = new Color(0.12f, 0.20f, 0.18f, 0.96f);
+                    highlighted = normal;
+                    pressed = normal;
+                    disabled = normal;
+                    outlineColor = new Color(0.58f, 0.74f, 0.66f, 0.72f);
+                    outlineDistance = new Vector2(2f, -2f);
+                    labelColor = new Color(0.78f, 0.90f, 0.82f, 1f);
+                    break;
+                case FirstUserGameTestButtonRole.Status:
+                    normal = new Color(0.08f, 0.12f, 0.15f, 0.88f);
+                    highlighted = normal;
+                    pressed = normal;
+                    disabled = normal;
+                    outlineColor = new Color(0.39f, 0.48f, 0.56f, 0.42f);
+                    labelColor = new Color(0.84f, 0.88f, 0.92f, 1f);
+                    break;
+                default:
+                    normal = new Color(0.11f, 0.19f, 0.25f, 0.98f);
+                    highlighted = new Color(0.18f, 0.29f, 0.36f, 1f);
+                    pressed = new Color(0.07f, 0.14f, 0.19f, 1f);
+                    disabled = new Color(0.06f, 0.09f, 0.11f, 0.78f);
+                    outlineColor = new Color(0.48f, 0.57f, 0.65f, 0.42f);
+                    break;
+            }
+
+            ColorBlock colors = button.colors;
+            colors.normalColor = normal;
+            colors.highlightedColor = highlighted;
+            colors.selectedColor = highlighted;
+            colors.pressedColor = pressed;
+            colors.disabledColor = disabled;
+            colors.colorMultiplier = 1f;
+            colors.fadeDuration = 0.08f;
+            button.colors = colors;
+
+            Outline outline = button.GetComponent<Outline>() ??
+                              button.gameObject.AddComponent<Outline>();
+            outline.enabled = true;
+            outline.effectColor = outlineColor;
+            outline.effectDistance = outlineDistance;
+
+            Text label = button.GetComponentInChildren<Text>(includeInactive: true);
+            if (label != null)
+            {
+                label.color = labelColor;
+                label.fontStyle = role == FirstUserGameTestButtonRole.Primary ||
+                                  role == FirstUserGameTestButtonRole.ActiveTask
+                    ? FontStyle.Bold
+                    : FontStyle.Normal;
+            }
         }
 
         internal static void SetAnchoredRect(
@@ -1658,6 +1803,10 @@ namespace AL.Editor.Development.FirstUserGameTest
     internal sealed class FirstUserGameTestCustomizationPanel : MonoBehaviour
     {
         private readonly List<Button> _choiceButtons = new List<Button>();
+        private readonly Dictionary<Button, string> _choiceIds =
+            new Dictionary<Button, string>();
+        private readonly Dictionary<Button, string> _choiceLabels =
+            new Dictionary<Button, string>();
         private Action<string, string> _confirmed;
         private Action _back;
         private string _selectedId = string.Empty;
@@ -1665,6 +1814,7 @@ namespace AL.Editor.Development.FirstUserGameTest
         private Text _status;
         private Button _confirmButton;
         private Button _backButton;
+        private bool _busy;
 
         internal string SelectedCustomizationId => _selectedId;
         internal InputField HandleInput => _handleInput;
@@ -1804,10 +1954,13 @@ namespace AL.Editor.Development.FirstUserGameTest
                     font,
                     Vector2.zero,
                     grid.cellSize,
-                    new Vector2(0.5f, 0.5f));
+                    new Vector2(0.5f, 0.5f),
+                    FirstUserGameTestButtonRole.Choice);
                 string capturedId = preset.id;
                 button.onClick.AddListener(() => Select(capturedId));
                 _choiceButtons.Add(button);
+                _choiceIds.Add(button, preset.id);
+                _choiceLabels.Add(button, preset.displayName);
             }
 
             var inputObject = new GameObject(
@@ -1823,7 +1976,7 @@ namespace AL.Editor.Development.FirstUserGameTest
                 new Vector2(0.75f, 0.34f),
                 Vector2.zero,
                 Vector2.zero);
-            inputObject.GetComponent<Image>().color = new Color(0.08f, 0.12f, 0.18f, 1f);
+            inputObject.GetComponent<Image>().color = Color.white;
             Text inputText = FirstUserGameTestRuntimeHost.CreateText(
                 inputObject.transform,
                 "DevelopmentHandleText",
@@ -1856,6 +2009,16 @@ namespace AL.Editor.Development.FirstUserGameTest
             _handleInput.placeholder = placeholder;
             _handleInput.characterLimit = FirstUserGameTestAdapter.MaximumHandleCodeUnits;
             _handleInput.onValueChanged.AddListener(_ => Refresh());
+            ColorBlock inputColors = _handleInput.colors;
+            inputColors.normalColor = new Color(0.08f, 0.12f, 0.18f, 1f);
+            inputColors.highlightedColor = new Color(0.13f, 0.19f, 0.26f, 1f);
+            inputColors.selectedColor = new Color(0.16f, 0.22f, 0.29f, 1f);
+            inputColors.pressedColor = inputColors.selectedColor;
+            inputColors.disabledColor = new Color(0.05f, 0.07f, 0.09f, 0.78f);
+            _handleInput.colors = inputColors;
+            var inputOutline = inputObject.AddComponent<Outline>();
+            inputOutline.effectColor = new Color(0.66f, 0.73f, 0.80f, 0.48f);
+            inputOutline.effectDistance = new Vector2(1f, -1f);
 
             _status = FirstUserGameTestRuntimeHost.CreateText(
                 transform,
@@ -1874,21 +2037,23 @@ namespace AL.Editor.Development.FirstUserGameTest
             _backButton = FirstUserGameTestRuntimeHost.CreateButton(
                 transform,
                 "BackToRealmAndClass",
-                "Back",
+                "Change realm or class",
                 font,
                 new Vector2(30f, 34f),
                 new Vector2(170f, 58f),
-                Vector2.zero);
+                Vector2.zero,
+                FirstUserGameTestButtonRole.Secondary);
             _backButton.onClick.AddListener(() => _back());
 
             _confirmButton = FirstUserGameTestRuntimeHost.CreateButton(
                 transform,
                 "VerifyDevelopmentHandle",
-                "Continue to World Tutorial",
+                "Enter the world",
                 font,
                 new Vector2(-30f, 34f),
                 new Vector2(300f, 58f),
-                new Vector2(1f, 0f));
+                new Vector2(1f, 0f),
+                FirstUserGameTestButtonRole.Primary);
             _confirmButton.onClick.AddListener(Confirm);
             ConfigureNavigation(exitButton);
             Refresh();
@@ -1901,14 +2066,17 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         internal void SetBusy(bool busy, string status)
         {
+            _busy = busy;
             foreach (Button button in _choiceButtons)
             {
                 button.interactable = !busy;
             }
 
             _handleInput.interactable = !busy;
+            _backButton.interactable = !busy;
             _confirmButton.interactable = !busy && CanConfirm();
             _status.text = status ?? string.Empty;
+            RefreshChoiceVisuals();
         }
 
         internal void SelectForTests(string id)
@@ -1918,6 +2086,11 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private void Select(string id)
         {
+            if (_busy)
+            {
+                return;
+            }
+
             _selectedId = id ?? string.Empty;
             Refresh();
             if (EventSystem.current != null)
@@ -1928,7 +2101,7 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private void Confirm()
         {
-            if (!CanConfirm())
+            if (_busy || !CanConfirm())
             {
                 Refresh();
                 return;
@@ -1939,13 +2112,39 @@ namespace AL.Editor.Development.FirstUserGameTest
 
         private void Refresh()
         {
-            bool canConfirm = CanConfirm();
+            bool canConfirm = !_busy && CanConfirm();
             _confirmButton.interactable = canConfirm;
+            _backButton.interactable = !_busy;
             _status.text = string.IsNullOrEmpty(_selectedId)
                 ? FirstUserGameTestPlaytestCopy.AppearanceRequired
                 : !FirstUserGameTestAdapter.IsValidDevelopmentHandle(_handleInput.text)
                     ? FirstUserGameTestPlaytestCopy.NameRequired
                     : FirstUserGameTestPlaytestCopy.ReadyForTutorial;
+            RefreshChoiceVisuals();
+        }
+
+        private void RefreshChoiceVisuals()
+        {
+            foreach (Button button in _choiceButtons)
+            {
+                bool selected = string.Equals(
+                    _choiceIds[button],
+                    _selectedId,
+                    StringComparison.Ordinal);
+                Text label = button.GetComponentInChildren<Text>(includeInactive: true);
+                if (label != null)
+                {
+                    label.text = selected
+                        ? "Selected: " + _choiceLabels[button]
+                        : _choiceLabels[button];
+                }
+
+                FirstUserGameTestRuntimeHost.ApplyButtonRole(
+                    button,
+                    selected
+                        ? FirstUserGameTestButtonRole.SelectedChoice
+                        : FirstUserGameTestButtonRole.Choice);
+            }
         }
 
         private void ConfigureNavigation(Button exitButton)
@@ -1953,16 +2152,26 @@ namespace AL.Editor.Development.FirstUserGameTest
             for (int index = 0; index < _choiceButtons.Count; index++)
             {
                 Button current = _choiceButtons[index];
-                Button previous = index > 0 ? _choiceButtons[index - 1] : _backButton;
-                Button next = index + 1 < _choiceButtons.Count
+                bool hasLeft = index % 3 != 0;
+                bool hasRight = index % 3 != 2 && index + 1 < _choiceButtons.Count;
+                Selectable left = hasLeft
+                    ? _choiceButtons[index - 1]
+                    : _backButton;
+                Selectable right = hasRight
                     ? _choiceButtons[index + 1]
                     : _confirmButton;
+                Selectable up = index >= 3
+                    ? _choiceButtons[index - 3]
+                    : exitButton;
+                Selectable down = index + 3 < _choiceButtons.Count
+                    ? _choiceButtons[index + 3]
+                    : _handleInput;
                 FirstUserGameTestRuntimeHost.SetExplicitNavigation(
                     current,
-                    previous,
-                    next,
-                    exitButton,
-                    _handleInput);
+                    left,
+                    right,
+                    up,
+                    down);
             }
 
             Selectable firstChoice = _choiceButtons.Count > 0 ? _choiceButtons[0] : _backButton;

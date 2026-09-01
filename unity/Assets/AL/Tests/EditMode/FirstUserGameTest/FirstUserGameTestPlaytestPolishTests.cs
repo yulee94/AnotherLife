@@ -54,11 +54,14 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             _ownedObjects.Clear();
         }
 
-        [TestCase((int)FirstUserGameTestPlaytestPhase.Loading, "[Loading]")]
-        [TestCase((int)FirstUserGameTestPlaytestPhase.Identity, "[Identity]")]
-        [TestCase((int)FirstUserGameTestPlaytestPhase.AppearanceAndName, "[Appearance & Name]")]
-        [TestCase((int)FirstUserGameTestPlaytestPhase.WorldTutorial, "[World Tutorial]")]
-        [TestCase((int)FirstUserGameTestPlaytestPhase.Omen, "[OMEN]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.Loading, "[Preparing]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.Identity, "[Origin]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.AppearanceAndName, "[Appearance]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.WorldTutorial, "[First Steps]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.Omen, "[Valerius]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.SkyCastle, "[Sky Castle]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.ValeriusReturn, "[Return]")]
+        [TestCase((int)FirstUserGameTestPlaytestPhase.RealmReady, "[Realm Ready]")]
         public void BreadcrumbUsesExactFriendlyOrderedPhase(
             int phaseValue,
             string activeLabel)
@@ -67,14 +70,14 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             string breadcrumb = FirstUserGameTestPlaytestCopy.Breadcrumb(phase);
 
             StringAssert.Contains(activeLabel, breadcrumb);
-            Assert.That(breadcrumb.IndexOf("Loading", StringComparison.Ordinal), Is.LessThan(
-                breadcrumb.IndexOf("Identity", StringComparison.Ordinal)));
-            Assert.That(breadcrumb.IndexOf("Identity", StringComparison.Ordinal), Is.LessThan(
-                breadcrumb.IndexOf("Appearance & Name", StringComparison.Ordinal)));
-            Assert.That(breadcrumb.IndexOf("Appearance & Name", StringComparison.Ordinal), Is.LessThan(
-                breadcrumb.IndexOf("World Tutorial", StringComparison.Ordinal)));
-            Assert.That(breadcrumb.IndexOf("World Tutorial", StringComparison.Ordinal), Is.LessThan(
-                breadcrumb.IndexOf("OMEN", StringComparison.Ordinal)));
+            Assert.That(breadcrumb.IndexOf("Preparing", StringComparison.Ordinal), Is.LessThan(
+                breadcrumb.IndexOf("Origin", StringComparison.Ordinal)));
+            Assert.That(breadcrumb.IndexOf("Origin", StringComparison.Ordinal), Is.LessThan(
+                breadcrumb.IndexOf("Appearance", StringComparison.Ordinal)));
+            Assert.That(breadcrumb.IndexOf("Appearance", StringComparison.Ordinal), Is.LessThan(
+                breadcrumb.IndexOf("First Steps", StringComparison.Ordinal)));
+            Assert.That(breadcrumb.IndexOf("First Steps", StringComparison.Ordinal), Is.LessThan(
+                breadcrumb.IndexOf("Valerius", StringComparison.Ordinal)));
             AssertFriendlyPlayerCopy(breadcrumb);
         }
 
@@ -125,11 +128,20 @@ namespace AL.Tests.EditMode.FirstUserGameTest
                 AssertFriendlyPlayerCopy(value);
             }
 
-            Assert.That(FirstUserGameTestPlaytestCopy.MoveObjective, Is.EqualTo("Move your character"));
+            Assert.That(FirstUserGameTestPlaytestCopy.MoveObjective, Is.EqualTo("Move your Champion"));
             Assert.That(FirstUserGameTestPlaytestCopy.AttackObjective, Is.EqualTo("Use Basic Attack"));
             Assert.That(
                 FirstUserGameTestPlaytestCopy.OmenDetail,
-                Is.EqualTo("A new quest is available—open it to review."));
+                Is.EqualTo("The Veil Watch has sent an urgent dispatch from the Sky Castle."));
+            Assert.That(
+                FirstUserGameTestPlaytestCopy.OmenObjective,
+                Is.EqualTo("Hear Valerius's report"));
+            Assert.That(
+                FirstUserGameTestPlaytestCopy.OmenOpenedStatus,
+                Is.EqualTo("Choose your response"));
+            Assert.That(
+                FirstUserGameTestPlaytestCopy.OmenDeploymentStatus,
+                Is.EqualTo("Mission accepted · Deployment prepared"));
         }
 
         [Test]
@@ -191,6 +203,14 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             }
 
             Button choice = panel.ChoiceButtons[0];
+            Assert.That(choice.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Selected: Friendly Shape"));
+            Assert.That(choice.GetComponent<Outline>().effectDistance,
+                Is.EqualTo(new Vector2(3f, -3f)));
+            Assert.That(panel.BackButton.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Change realm or class"));
+            Assert.That(panel.ConfirmButton.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Enter the world"));
             Assert.That(choice.navigation.mode, Is.EqualTo(Navigation.Mode.Explicit));
             Assert.That(choice.navigation.selectOnLeft, Is.EqualTo(panel.BackButton));
             Assert.That(choice.navigation.selectOnRight, Is.EqualTo(panel.ConfirmButton));
@@ -220,6 +240,12 @@ namespace AL.Tests.EditMode.FirstUserGameTest
             Assert.That(exit.navigation.selectOnRight, Is.EqualTo(choice));
             Assert.That(exit.navigation.selectOnUp, Is.EqualTo(panel.BackButton));
             Assert.That(exit.navigation.selectOnDown, Is.EqualTo(choice));
+
+            panel.SetBusy(true, FirstUserGameTestPlaytestCopy.PreparingWorld);
+            Assert.That(panel.BackButton.interactable, Is.False,
+                "Back must not remain as an enabled no-op while world entry is committed.");
+            Assert.That(panel.ConfirmButton.interactable, Is.False);
+            Assert.That(choice.interactable, Is.False);
         }
 
         [TestCase(false, false, false, false, true, "Ready to begin.",

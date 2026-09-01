@@ -1,8 +1,8 @@
 # Another Life — Visual and Model Style Guide
 
 **Status:** Active design contract
-**Version:** 1.27
-**Last updated:** 2026-07-28
+**Version:** 1.29
+**Last updated:** 2026-08-13
 **Primary owner:** Project owner / creative director
 **Applies to:** Human artists, designers, engineers, contractors, and AI-assisted tools producing visual work for Another Life
 
@@ -269,6 +269,54 @@ Use this order when composing a screen, scene, or model:
 5. **Story detail:** wear, repair, inscriptions, trophies, vegetation, and secondary ornament.
 
 If story detail weakens the primary read, remove or simplify it.
+
+### First-user journey interaction contract
+
+The first playable journey must remain understandable without prior game knowledge,
+mouse hover, or developer explanation. Apply these rules from realm selection through
+the first authored quest handoff:
+
+- Show one visually dominant primary action at a time. Choice controls may share a
+  group, but the action that advances the journey must remain distinct from choices,
+  Back, and Exit.
+- Name commands for the result the player will receive: "Continue to class," "Enter
+  the world," and "Hear Valerius's report." Avoid implementation terms such as draft,
+  verification, destination, or tutorial in action labels.
+- A selected choice must communicate selection through at least two channels, using
+  visible text plus framing or material treatment. Color alone is insufficient.
+- A control that cannot currently produce its named result must be visibly unavailable.
+  Nearby status copy must state the missing prerequisite; do not leave enabled no-op
+  buttons in the journey.
+- Guidance, headings, and completed status are not buttons. If implementation requires
+  a button-shaped compatibility surface, remove it from navigation, pointer ownership,
+  and action styling until it becomes actionable.
+- When an action completes, replace command wording with a completed or pending state.
+  Never leave a disabled command that looks broken or invites repeated input.
+- Hide task-specific controls after their task ends. Movement, combat, and dialogue
+  controls must not remain as inert visual competition for the next primary action.
+- Authored dialogue choices replace the previous choice set after selection. Declining
+  must expose an explicit way to reopen the conversation, and accepting must advance to
+  a named next action rather than an unlabelled or automatic transition.
+- When the next game scene is outside the current test boundary, end on a clear prepared
+  handoff state that names what is ready; do not imply that the encounter already ran.
+- An isolated journey checkpoint may continue an authored encounter without inventing
+  combat. It must label the checkpoint, expose success and safe retreat as distinct
+  actions, and keep all results in memory rather than claiming production progression.
+- Failure, retreat, and unavailable encounter outcomes must always lead to a visible
+  retry action. A retry replaces the resolved encounter request and must never reuse a
+  prior result or strand the player on a status-only surface.
+- Encounter success must lead visibly back to the authored quest giver, then through the
+  authored report choices to a stable realm-ready state. Show the completion result and
+  one final completion action; do not make Exit the only explanation of what happened.
+- Keyboard and controller focus must enter on the current task, move through controls in
+  their visual order, and move to the next meaningful action after completion. Hidden,
+  inactive, and presentation-only elements must not appear in the focus graph.
+- Back changes the previous choice, Exit leaves the isolated experience, and the primary
+  action advances. These meanings and their relative visual weight must remain stable on
+  every screen.
+- Keep the current task and its control instruction together. Global progress, identity
+  context, and development disclosure remain secondary and must not compete with the
+  immediate action.
 
 ### Camera-aware design
 

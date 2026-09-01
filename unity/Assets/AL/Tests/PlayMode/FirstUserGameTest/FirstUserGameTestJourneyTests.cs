@@ -16,6 +16,7 @@ using AL.ChampionMode.Skills;
 using AL.Data.Runtime;
 using AL.Development;
 using AL.Editor.Development.FirstUserGameTest;
+using AL.Narrative.Nvs01.Contracts;
 using AL.UI;
 using AL.UI.FirstUserIdentity;
 using AL.UI.RealmSelection;
@@ -399,6 +400,15 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                 Is.EqualTo(FirstUserGameTestTutorialStep.Move));
             Assert.That(tutorial.TitleAction.interactable, Is.False);
             Assert.That(tutorial.ObjectiveAction.interactable, Is.False);
+            Assert.That(tutorial.TitleAction.navigation.mode, Is.EqualTo(Navigation.Mode.None),
+                "A presentation heading must never enter the focus graph.");
+            Assert.That(tutorial.ObjectiveAction.navigation.mode, Is.EqualTo(Navigation.Mode.None),
+                "Current-task guidance must remain static until it becomes an action.");
+            Assert.That(host.DestinationMarker.AttackButton.interactable, Is.False,
+                "Basic Attack cannot look available before it can produce its named result.");
+            Assert.That(host.DestinationMarker.AttackButton.gameObject.activeSelf, Is.False,
+                "The next-step combat control stays out of the first movement task.");
+            Assert.That(host.DestinationMarker.MoveForwardButton.gameObject.activeSelf, Is.True);
             Assert.That(
                 EventSystem.current.currentSelectedGameObject,
                 Is.SameAs(host.DestinationMarker.MoveForwardButton.gameObject),
@@ -412,6 +422,14 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                     .Select(text => text.text));
             Assert.That(destinationCopy, Does.Not.Contain("average"));
             Assert.That(destinationCopy, Does.Not.Contain("Eldergrove Scout"));
+            string[] destinationObjectNames = host.DestinationMarker
+                .GetComponentsInChildren<Transform>(true)
+                .Select(item => item.name)
+                .ToArray();
+            Assert.That(destinationObjectNames, Does.Not.Contain("IsolatedDestinationDisclosure"),
+                "The persistent disclosure must not be duplicated inside the destination HUD.");
+            Assert.That(destinationObjectNames, Does.Not.Contain("IsolatedDestinationControls"),
+                "The current-task panel owns control guidance without a competing footer.");
             foreach (Button button in host.DestinationMarker.GetComponentsInChildren<Button>(true))
             {
                 AssertInteractiveTargetAtLeast48(button);
@@ -485,6 +503,11 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(tutorial.State.Step,
                 Is.EqualTo(FirstUserGameTestTutorialStep.BasicAttack));
             Assert.That(tutorial.State.MovementConfirmationCount, Is.EqualTo(1));
+            Assert.That(host.DestinationMarker.AttackButton.interactable, Is.True,
+                "Basic Attack becomes available exactly when it becomes the current task.");
+            Assert.That(host.DestinationMarker.AttackButton.gameObject.activeSelf, Is.True);
+            Assert.That(host.DestinationMarker.MoveForwardButton.gameObject.activeSelf, Is.False,
+                "Completed movement controls must yield visually to the attack task.");
             Assert.That(
                 EventSystem.current.currentSelectedGameObject,
                 Is.SameAs(host.DestinationMarker.AttackButton.gameObject),
@@ -511,7 +534,7 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             Assert.That(tutorial.ChampionInputSuppressed, Is.True,
                 "The offered UI must own the isolated raw-input boundary before it is actionable.");
             Assert.That(host.DestinationMarker.Controller.enabled, Is.False,
-                "ChampionController.Update must be disabled before a real pointer can reach follow UI.");
+                "ChampionController.Update must be disabled before a real pointer can reach the report UI.");
             Assert.That(tutorial.EvaluateChampionControllerInputForTests(followUiActive: true),
                 Is.False,
                 "The PlayMode path must exercise the same raw-input admission decision as runtime.");
@@ -524,27 +547,38 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             }
 
             float offerReadyDeadline = Time.realtimeSinceStartup + 2f;
-            while ((!tutorial.TitleAction.interactable ||
-                    !tutorial.ObjectiveAction.interactable) &&
+            while (!tutorial.ObjectiveAction.interactable &&
                    Time.realtimeSinceStartup < offerReadyDeadline)
             {
                 yield return null;
             }
 
-            Assert.That(tutorial.TitleAction.interactable, Is.True);
+            Assert.That(tutorial.TitleAction.interactable, Is.False);
             Assert.That(tutorial.ObjectiveAction.interactable, Is.True);
+            Assert.That(host.DestinationMarker.MoveForwardButton.interactable, Is.False,
+                "World movement controls must visibly yield to the Valerius report.");
+            Assert.That(host.DestinationMarker.AttackButton.interactable, Is.False,
+                "Combat controls must visibly yield to the Valerius report.");
+            Assert.That(host.DestinationMarker.MoveForwardButton.gameObject.activeSelf, Is.False);
+            Assert.That(host.DestinationMarker.AttackButton.gameObject.activeSelf, Is.False,
+                "Irrelevant arena controls must leave the visual hierarchy during the report.");
             Assert.That(host.PlaytestPhase, Is.EqualTo(FirstUserGameTestPlaytestPhase.Omen));
             Assert.That(
                 host.ProgressBreadcrumb.text,
                 Is.EqualTo(FirstUserGameTestPlaytestCopy.OmenBreadcrumb));
             Assert.That(tutorial.TryInspectChampionInputForTests(
                 out _,
-                out bool attackInProgressBeforeFollow), Is.True);
-            Assert.That(attackInProgressBeforeFollow, Is.False,
-                "The accepted tutorial attack must settle before follow controls become actionable.");
+                out bool attackInProgressBeforeReport), Is.True);
+            Assert.That(attackInProgressBeforeReport, Is.False,
+                "The accepted tutorial attack must settle before the report becomes actionable.");
             Assert.That(EventSystem.current.currentSelectedGameObject,
-                Is.SameAs(tutorial.TitleAction.gameObject),
-                "The offered objective title must receive initial semantic focus.");
+                Is.SameAs(tutorial.ObjectiveAction.gameObject),
+                "Hear Valerius's report must receive initial semantic focus.");
+            Assert.That(tutorial.SpeakerLabel.text, Does.Contain("Captain Valerius"),
+                "The dispatch source remains visible before opening so the panel does not jump context.");
+            Assert.That(tutorial.ObjectiveAction.navigation.selectOnRight,
+                Is.EqualTo(host.ExitButton),
+                "The offered report and Exit form the only active focus pair.");
             string offeredCopy = string.Join(
                 "\n",
                 tutorial.GetComponentsInChildren<Text>(true).Select(text => text.text));
@@ -562,41 +596,189 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
             }
 
             FirstUserGameTestTutorialState completedState = tutorial.State;
-            Vector3 beforeFollow = host.DestinationMarker.Controller.transform.position;
-            string combatBeforeFollow = CaptureCombatRuntimeObservation();
+            Vector3 beforeReport = host.DestinationMarker.Controller.transform.position;
+            string combatBeforeReport = CaptureCombatRuntimeObservation();
             var pointer = new PointerEventData(EventSystem.current)
             {
                 button = PointerEventData.InputButton.Left
             };
             ExecuteEvents.Execute(
-                tutorial.TitleAction.gameObject,
+                tutorial.ObjectiveAction.gameObject,
                 pointer,
                 ExecuteEvents.pointerClickHandler);
-            Assert.That(tutorial.LastFollowResult.ResultId,
-                Is.EqualTo(FirstUserGameTestTutorialContract.ActiveObjectiveFocusedResultId));
-            EventSystem.current.SetSelectedGameObject(tutorial.ObjectiveAction.gameObject);
-            ExecuteEvents.Execute(
-                tutorial.ObjectiveAction.gameObject,
-                new BaseEventData(EventSystem.current),
-                ExecuteEvents.submitHandler);
-            Assert.That(tutorial.LastFollowResult.ResultId,
-                Is.EqualTo(FirstUserGameTestTutorialContract.ActiveObjectiveFocusedResultId));
+            Assert.That(tutorial.OmenOfferView.IsOpened, Is.True);
+            Assert.That(tutorial.OmenOfferView.Title, Is.EqualTo("The First Signal"));
+            Assert.That(tutorial.OmenOfferView.SpeakerName, Is.EqualTo("Captain Valerius"));
+            Assert.That(tutorial.OmenOfferView.Dialogue,
+                Is.EqualTo("My lord, the Veil Watch has detected a strange resonance above the Sky Castle. Will you hear my report?"));
+            Assert.That(tutorial.ObjectiveAction.interactable, Is.False,
+                "The single report action must become inert after it opens.");
+            Assert.That(tutorial.ObjectiveAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.OmenOpenedStatus),
+                "The status must describe the response decision now in front of the player.");
+            Assert.That(tutorial.ObjectiveAction.navigation.mode, Is.EqualTo(Navigation.Mode.None));
+            Assert.That(tutorial.PrimaryResponseAction.gameObject.activeSelf, Is.True);
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.True);
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Tell me what happened."));
+            Assert.That(
+                tutorial.SecondaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Not yet."));
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.PrimaryResponseAction.gameObject),
+                "Focus must move to the first authored response after the report opens.");
+            yield return CaptureVisualIfRequested("valerius-response.png");
             Assert.That(tutorial.State.ValueEquals(completedState), Is.True,
-                "Pointer and submit follow actions cannot mutate tutorial or quest state.");
+                "Opening the report cannot mutate tutorial state.");
             Assert.That(host.DestinationMarker.Controller.transform.position,
-                Is.EqualTo(beforeFollow),
-                "Following the offered objective cannot move or teleport the player.");
+                Is.EqualTo(beforeReport),
+                "Opening the report cannot move or teleport the player.");
             Assert.That(tutorial.TryInspectChampionInputForTests(
                 out _,
-                out bool attackInProgressAfterFollow), Is.True);
-            Assert.That(attackInProgressAfterFollow, Is.False,
-                "Pointer/submit follow activation cannot request another basic attack.");
+                out bool attackInProgressAfterReport), Is.True);
+            Assert.That(attackInProgressAfterReport, Is.False,
+                "Opening the report cannot request another basic attack.");
             Assert.That(tutorial.State.BasicAttackConfirmationCount, Is.EqualTo(1));
-            Assert.That(CaptureCombatRuntimeObservation(), Is.EqualTo(combatBeforeFollow),
-                "Follow activation cannot change combat audio/VFX ownership or active counts.");
+            Assert.That(CaptureCombatRuntimeObservation(), Is.EqualTo(combatBeforeReport),
+                "Opening the report cannot change combat audio/VFX ownership or active counts.");
             Assert.That(save.CurrentSave.Quests.Count, Is.EqualTo(questCountBefore));
             Assert.That(JsonUtility.ToJson(save.CurrentSave.Nvs01Progress), Is.EqualTo(nvsBefore));
             AssertSingleEventSystem();
+
+            tutorial.SecondaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.CanReopen, Is.True);
+            Assert.That(tutorial.ObjectiveAction.interactable, Is.True);
+            Assert.That(
+                tutorial.ObjectiveAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.OmenReopenAction));
+            Assert.That(tutorial.PrimaryResponseAction.gameObject.activeSelf, Is.False);
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.False);
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.ObjectiveAction.gameObject));
+
+            tutorial.ObjectiveAction.onClick.Invoke();
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("I will investigate personally."));
+            Assert.That(
+                tutorial.SecondaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("What do the old records say?"));
+            tutorial.SecondaryResponseAction.onClick.Invoke();
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Then I will go."));
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.False);
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Deploy Champion."));
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.CanDeploy, Is.True);
+            Assert.That(
+                tutorial.ObjectiveAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.OmenDeploymentReadyStatus));
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.DeploymentPrepared));
+            Assert.That(tutorial.OmenOfferView.IsJourneyComplete, Is.False);
+            Assert.That(tutorial.PrimaryResponseAction.gameObject.activeSelf, Is.True);
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.False);
+            Assert.That(
+                tutorial.ObjectiveAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.OmenDeploymentStatus));
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.PrimaryResponseAction.gameObject));
+            yield return CaptureVisualIfRequested("valerius-deployment-prepared.png");
+
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            yield return null;
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.EncounterActive));
+            Assert.That(host.PlaytestPhase,
+                Is.EqualTo(FirstUserGameTestPlaytestPhase.SkyCastle));
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.RecoverTearAction));
+            Assert.That(
+                tutorial.SecondaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.RetreatAction));
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.True);
+            yield return CaptureVisualIfRequested("sky-castle-checkpoint.png");
+
+            tutorial.SecondaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.RecoveryReady));
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("I will try again."));
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.False);
+            yield return CaptureVisualIfRequested("sky-castle-recovery.png");
+
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.EncounterActive));
+            Assert.That(tutorial.TryResolveEncounterForTests(
+                NvsEncounterOutcome.Failure), Is.True);
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.Dialogue));
+            Assert.That(tutorial.Detail.text,
+                Is.EqualTo("You made it back—that matters more than one failed attempt. Regroup, and return when you are ready."));
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("I will try again."));
+
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.RecoveryReady));
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.EncounterActive));
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            yield return null;
+            Assert.That(tutorial.OmenOfferView.Stage,
+                Is.EqualTo(FirstUserGameTestOmenOfferStage.ReportReady));
+            Assert.That(host.PlaytestPhase,
+                Is.EqualTo(FirstUserGameTestPlaytestPhase.ValeriusReturn));
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.ReturnToValeriusAction));
+
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Present the Celestial Tear."));
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo("Prepare the realm."));
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            yield return null;
+            Assert.That(tutorial.OmenOfferView.IsJourneyComplete, Is.True);
+            Assert.That(host.PlaytestPhase,
+                Is.EqualTo(FirstUserGameTestPlaytestPhase.RealmReady));
+            Assert.That(
+                tutorial.ObjectiveAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.RealmReadyStatus));
+            Assert.That(
+                tutorial.PrimaryResponseAction.GetComponentInChildren<Text>().text,
+                Is.EqualTo(FirstUserGameTestPlaytestCopy.CompleteJourneyAction));
+            Assert.That(tutorial.PrimaryResponseAction.gameObject.activeSelf, Is.True);
+            Assert.That(tutorial.SecondaryResponseAction.gameObject.activeSelf, Is.False);
+            Assert.That(EventSystem.current.currentSelectedGameObject,
+                Is.SameAs(tutorial.PrimaryResponseAction.gameObject));
+            yield return CaptureVisualIfRequested("realm-command-ready.png");
+            int completionActions = 0;
+            host.ExitButton.onClick.RemoveAllListeners();
+            host.ExitButton.onClick.AddListener(() => completionActions++);
+            tutorial.PrimaryResponseAction.onClick.Invoke();
+            Assert.That(completionActions, Is.EqualTo(1),
+                "The final journey action must dispatch exactly once to the safe exit control.");
+            Assert.That(save.CurrentSave.Quests.Count, Is.EqualTo(questCountBefore));
+            Assert.That(JsonUtility.ToJson(save.CurrentSave.Nvs01Progress), Is.EqualTo(nvsBefore));
 
             int exitTransitions = 0;
             Assert.That(host.RequestExitForTests(() => exitTransitions++), Is.True);
@@ -635,6 +817,89 @@ namespace AL.Tests.PlayMode.FirstUserGameTest
                     FirstUserGameTestRuntimeHost.ChampionArenaPath
                 }),
                 "The ownership ledger must bind one exact Bootloader instance to each test-loaded scene.");
+        }
+
+        private static IEnumerator CaptureVisualIfRequested(string fileName)
+        {
+            string directory = Environment.GetEnvironmentVariable(
+                "AL_FIRST_USER_VISUAL_CAPTURE_DIR");
+            if (string.IsNullOrWhiteSpace(directory))
+            {
+                yield break;
+            }
+
+            Directory.CreateDirectory(directory);
+            string path = Path.Combine(directory, fileName);
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+
+            const int width = 1920;
+            const int height = 1080;
+            Camera captureCamera = Camera.main != null
+                ? Camera.main
+                : UnityEngine.Object.FindObjectOfType<Camera>();
+            Assert.That(captureCamera, Is.Not.Null,
+                "The visual capture needs an active arena camera.");
+
+            Canvas[] canvases = UnityEngine.Object.FindObjectsOfType<Canvas>(
+                includeInactive: false);
+            RenderMode[] originalRenderModes = canvases
+                .Select(canvas => canvas.renderMode)
+                .ToArray();
+            Camera[] originalWorldCameras = canvases
+                .Select(canvas => canvas.worldCamera)
+                .ToArray();
+            float[] originalPlaneDistances = canvases
+                .Select(canvas => canvas.planeDistance)
+                .ToArray();
+            RenderTexture originalTarget = captureCamera.targetTexture;
+            RenderTexture originalActive = RenderTexture.active;
+            RenderTexture target = RenderTexture.GetTemporary(width, height, 24);
+            Texture2D capture = new Texture2D(width, height, TextureFormat.RGB24, false);
+            try
+            {
+                for (int index = 0; index < canvases.Length; index++)
+                {
+                    if (canvases[index].renderMode != RenderMode.ScreenSpaceOverlay)
+                    {
+                        continue;
+                    }
+
+                    canvases[index].renderMode = RenderMode.ScreenSpaceCamera;
+                    canvases[index].worldCamera = captureCamera;
+                    canvases[index].planeDistance = 1f;
+                }
+
+                captureCamera.targetTexture = target;
+                captureCamera.Render();
+                RenderTexture.active = target;
+                capture.ReadPixels(new Rect(0f, 0f, width, height), 0, 0, false);
+                capture.Apply(false, false);
+                File.WriteAllBytes(path, capture.EncodeToPNG());
+            }
+            finally
+            {
+                captureCamera.targetTexture = originalTarget;
+                RenderTexture.active = originalActive;
+                for (int index = 0; index < canvases.Length; index++)
+                {
+                    canvases[index].renderMode = originalRenderModes[index];
+                    canvases[index].worldCamera = originalWorldCameras[index];
+                    canvases[index].planeDistance = originalPlaneDistances[index];
+                }
+
+                RenderTexture.ReleaseTemporary(target);
+                UnityEngine.Object.DestroyImmediate(capture);
+            }
+
+            Assert.That(File.Exists(path) && new FileInfo(path).Length > 0L, Is.True,
+                "The requested first-user visual was not captured: " + path);
+            yield return null;
         }
 
         private IEnumerator WaitForScene(string path)

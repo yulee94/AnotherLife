@@ -64,11 +64,11 @@ namespace AL.EditorTools
         internal const string ForgetAction =
             "Forget Invalid Recovery Record (Delete No Files)";
         internal const string JourneyChecklist =
-            "1. Loading\n" +
-            "2. Identity\n" +
-            "3. Appearance & Name\n" +
-            "4. World Tutorial\n" +
-            "5. OMEN";
+            "1. Prepare the isolated experience\n" +
+            "2. Choose your origin\n" +
+            "3. Choose your appearance and name\n" +
+            "4. Complete your first steps\n" +
+            "5. Hear Valerius's report";
         internal const string StartControlName = "AL.FirstUserExperience.Start";
         internal const string StopControlName = "AL.FirstUserExperience.Stop";
         internal const string CleanupControlName = "AL.FirstUserExperience.Cleanup";
