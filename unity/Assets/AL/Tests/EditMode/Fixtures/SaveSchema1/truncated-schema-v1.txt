@@ -1,0 +1,7 @@
+{
+  "SaveFormatId": "anotherlife.local-save",
+  "SaveSchemaVersion": 1,
+  "ProfileInitializationVersion": 1,
+  "SelectedRealm": 2,
+  "Resources": [
+    { "Type": 0, "Amount": 1000 },
